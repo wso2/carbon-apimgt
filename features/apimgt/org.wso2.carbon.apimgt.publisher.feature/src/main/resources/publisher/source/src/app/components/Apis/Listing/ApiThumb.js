@@ -28,10 +28,24 @@ import Slide from 'material-ui/transitions/Slide';
 import Grid from 'material-ui/Grid';
 import NotificationSystem from 'react-notification-system';
 import {resourceMethod, resourcePath, ScopeValidation} from "../../../data/ScopeValidation";
-import {LifeCycleStatus} from "../../../data/LifeCycle";
 import Utils from "../../../data/Utils";
 import Confirm from "../../Shared/Confirm";
+import {withStyles} from 'material-ui/styles';
 
+const styles = theme => ({
+    lifeCycleState: {
+        width: "1.5em",
+        height: "1.5em",
+        borderRadius: "50%",
+        marginRight: "0.5em"
+    },
+    lifeCycleState_Created: {backgroundColor: "#0000ff"},
+    lifeCycleState_Prototyped: {backgroundColor: "#42dfff"},
+    lifeCycleState_Published: {backgroundColor: "#41830A"},
+    lifeCycleState_Maintenance: {backgroundColor: "#cecece"},
+    lifeCycleState_Deprecated: {backgroundColor: "#D7C850"},
+    lifeCycleState_Retired: {backgroundColor: "#000000"},
+});
 
 class ApiThumb extends React.Component {
     constructor(props) {
@@ -48,13 +62,7 @@ class ApiThumb extends React.Component {
         };
         this.handleApiDelete = this.handleApiDelete.bind(this);
         this.handleRedirectToAPIOverview = this.handleRedirectToAPIOverview.bind(this);
-        this.confirmDialogcallback = this.confirmDialogcallback.bind(this);
-    }
-
-    componentDidMount() {
-        const lifeCycleStatus = this.props.api.lifeCycleStatus;
-        const lifeCycleStatusColor = LifeCycleStatus.filter(status => status.name === lifeCycleStatus)[0].color;
-        this.setState({lifeCycleStatusColor});
+        this.confirmDialogCallback = this.confirmDialogCallback.bind(this);
     }
 
     handleRequestClose = () => {
@@ -104,26 +112,20 @@ class ApiThumb extends React.Component {
                 isRedirect: true
             });
         } else { // Ask for confirmation to switch environment or version of the API
-            // Set details for the confirmation dialog
-            const title = `Switch to ${api.name} ${api.version}` +
-                `${isSameEnvironment ? '?' : ` in ${environmentName} Environment?`}`;
-            const message = 'We are going to switch the ' +
-                `${isSameEnvironment ? '' : `environment "${currentEnvironmentName}" to "${environmentName}"`}` +
-                `${!isSameEnvironment && !isSameVersion ? ' and ' : ''}` +
-                `${isSameVersion ? '' : `API version "${rootAPI.version}" to "${api.version}"`}`;
-            const labelCancel = 'Cancel';
-            const labelOk = 'Switch';
+            const redirectConfirmDialogDetails = ApiThumb.getRedirectConfirmDialogDetails({
+                api, rootAPI, environmentName, currentEnvironmentName, isSameEnvironment, isSameVersion
+            });
 
             this.setState({
                 overview_link: `/apis/${api.id}/overview?environment=${environmentName}`,
                 isRedirect: false,
                 showRedirectConfirmDialog: true,
-                redirectConfirmDialogDetails: {title, message, labelCancel, labelOk},
+                redirectConfirmDialogDetails,
             });
         }
     }
 
-    confirmDialogcallback(result) {
+    confirmDialogCallback(result) {
         this.setState({
             isRedirect: result,
             showRedirectConfirmDialog: false
@@ -131,7 +133,7 @@ class ApiThumb extends React.Component {
     }
 
     render() {
-        const {api, environmentOverview} = this.props;
+        const {api, environmentOverview, classes} = this.props;
         const gridItemSizes = environmentOverview ?
             {xs: 6, sm: 4, md: 3, lg: 2, xl: 2} : {xs: 6, sm: 4, md: 3, lg: 2, xl: 2};
         let heading, content;
@@ -154,13 +156,9 @@ class ApiThumb extends React.Component {
                 <Typography component="div">
                     <p>{api.context}</p>
                     <div style={{display: "flex"}}>
-                        <div style={{
-                            backgroundColor: this.state.lifeCycleStatusColor,
-                            width: "20px",
-                            height: "20px",
-                            borderRadius: "50%",
-                            marginRight: "5px"
-                        }}/>
+                        <div className={
+                            `${classes.lifeCycleState} ${classes[`lifeCycleState_${api.lifeCycleStatus}`]}`
+                        }/>
                         {api.lifeCycleStatus}
                     </div>
                 </Typography>
@@ -227,18 +225,27 @@ class ApiThumb extends React.Component {
                 </Card>
                 <Confirm
                     {...this.state.redirectConfirmDialogDetails}
-                    callback={this.confirmDialogcallback}
+                    callback={this.confirmDialogCallback}
                     open={this.state.showRedirectConfirmDialog}
                 />
             </Grid>
         );
     }
+
+    static getRedirectConfirmDialogDetails(details) {
+        const {api, rootAPI, environmentName, currentEnvironmentName, isSameEnvironment, isSameVersion} = details;
+
+        let title = `Switch to ${api.name} ${api.version}` +
+            `${isSameEnvironment ? '?' : ` in ${environmentName} Environment?`}`;
+        let message = 'We are going to switch the ' +
+            `${isSameEnvironment ? '' : `environment "${currentEnvironmentName}" to "${environmentName}"`}` +
+            `${!isSameEnvironment && !isSameVersion ? ' and ' : ''}` +
+            `${isSameVersion ? '' : `API version "${rootAPI.version}" to "${api.version}"`}`;
+        let labelCancel = 'Cancel';
+        let labelOk = 'Switch';
+
+        return {title, message, labelCancel, labelOk};
+    }
 }
 
-const SwitchEnvOrVersion = {
-    DO: 'do',
-    DO_NOT: 'do_not',
-    CONFIRM: 'confirm'
-};
-
-export default ApiThumb;
+export default withStyles(styles)(ApiThumb);
