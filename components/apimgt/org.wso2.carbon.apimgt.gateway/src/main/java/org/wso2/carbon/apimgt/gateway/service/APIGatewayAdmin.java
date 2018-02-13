@@ -320,29 +320,6 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
     }
 
     /**
-     * Obtain endpoint names in the gateway
-     *
-     * @return Array of endpoint names
-     * @throws AxisFault Thrown if an error occurred
-     */
-    public String[] getEndPointsNames() throws AxisFault {
-        EndpointAdminServiceClient endpointAdminServiceClient = getEndpointAdminServiceClient();
-        return endpointAdminServiceClient.getEndPointsNames();
-    }
-
-    /**
-     * Obtain endpoint names in the tenant
-     *
-     * @param tenantDomain Domain of the logged tenant
-     * @return Array of endpoint names
-     * @throws AxisFault Thrown if an error occurred
-     */
-    public String[] getEndPointsNamesForTenant(String tenantDomain) throws AxisFault {
-        EndpointAdminServiceClient endpointAdminServiceClient = getEndpointAdminServiceClient();
-        return endpointAdminServiceClient.getEndPointsNames(tenantDomain);
-    }
-
-    /**
      * Removes the existing endpoints of synapse config for updating them
      *
      * @param apiName Name of the API

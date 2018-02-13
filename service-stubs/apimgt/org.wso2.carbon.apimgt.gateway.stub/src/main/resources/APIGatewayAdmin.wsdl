@@ -431,32 +431,6 @@
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
-            <xs:element name="getEndPointsNames">
-                <xs:complexType>
-                    <xs:sequence/>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="getEndPointsNamesResponse">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="xs:string"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="getEndPointsNamesForTenant">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="getEndPointsNamesForTenantResponse">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="xs:string"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
             <xs:element name="removeEndpointsToUpdate">
                 <xs:complexType>
                     <xs:sequence>
@@ -863,18 +837,6 @@
     <wsdl:message name="deleteApiResponse">
         <wsdl:part name="parameters" element="ns:deleteApiResponse"/>
     </wsdl:message>
-    <wsdl:message name="getEndPointsNamesRequest">
-        <wsdl:part name="parameters" element="ns:getEndPointsNames"/>
-    </wsdl:message>
-    <wsdl:message name="getEndPointsNamesResponse">
-        <wsdl:part name="parameters" element="ns:getEndPointsNamesResponse"/>
-    </wsdl:message>
-    <wsdl:message name="getEndPointsNamesForTenantRequest">
-        <wsdl:part name="parameters" element="ns:getEndPointsNamesForTenant"/>
-    </wsdl:message>
-    <wsdl:message name="getEndPointsNamesForTenantResponse">
-        <wsdl:part name="parameters" element="ns:getEndPointsNamesForTenantResponse"/>
-    </wsdl:message>
     <wsdl:message name="deleteEndpointForTenantRequest">
         <wsdl:part name="parameters" element="ns:deleteEndpointForTenant"/>
     </wsdl:message>
@@ -1037,14 +999,6 @@
         <wsdl:operation name="deleteApi">
             <wsdl:input message="ns:deleteApiRequest" wsaw:Action="urn:deleteApi"/>
             <wsdl:output message="ns:deleteApiResponse" wsaw:Action="urn:deleteApiResponse"/>
-        </wsdl:operation>
-        <wsdl:operation name="getEndPointsNames">
-            <wsdl:input message="ns:getEndPointsNamesRequest" wsaw:Action="urn:getEndPointsNames"/>
-            <wsdl:output message="ns:getEndPointsNamesResponse" wsaw:Action="urn:getEndPointsNamesResponse"/>
-        </wsdl:operation>
-        <wsdl:operation name="getEndPointsNamesForTenant">
-            <wsdl:input message="ns:getEndPointsNamesForTenantRequest" wsaw:Action="urn:getEndPointsNamesForTenant"/>
-            <wsdl:output message="ns:getEndPointsNamesForTenantResponse" wsaw:Action="urn:getEndPointsNamesForTenantResponse"/>
         </wsdl:operation>
         <wsdl:operation name="deleteEndpointForTenant">
             <wsdl:input message="ns:deleteEndpointForTenantRequest" wsaw:Action="urn:deleteEndpointForTenant"/>
@@ -1359,24 +1313,6 @@
         </wsdl:operation>
         <wsdl:operation name="deleteApi">
             <soap:operation soapAction="urn:deleteApi" style="document"/>
-            <wsdl:input>
-                <soap:body use="literal"/>
-            </wsdl:input>
-            <wsdl:output>
-                <soap:body use="literal"/>
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="getEndPointsNames">
-            <soap:operation soapAction="urn:getEndPointsNames" style="document"/>
-            <wsdl:input>
-                <soap:body use="literal"/>
-            </wsdl:input>
-            <wsdl:output>
-                <soap:body use="literal"/>
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="getEndPointsNamesForTenant">
-            <soap:operation soapAction="urn:getEndPointsNamesForTenant" style="document"/>
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
@@ -1729,24 +1665,6 @@
                 <soap12:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="getEndPointsNames">
-            <soap12:operation soapAction="urn:getEndPointsNames" style="document"/>
-            <wsdl:input>
-                <soap12:body use="literal"/>
-            </wsdl:input>
-            <wsdl:output>
-                <soap12:body use="literal"/>
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="getEndPointsNamesForTenant">
-            <soap12:operation soapAction="urn:getEndPointsNamesForTenant" style="document"/>
-            <wsdl:input>
-                <soap12:body use="literal"/>
-            </wsdl:input>
-            <wsdl:output>
-                <soap12:body use="literal"/>
-            </wsdl:output>
-        </wsdl:operation>
         <wsdl:operation name="deleteEndpointForTenant">
             <soap12:operation soapAction="urn:deleteEndpointForTenant" style="document"/>
             <wsdl:input>
@@ -2085,24 +2003,6 @@
         </wsdl:operation>
         <wsdl:operation name="deleteApi">
             <http:operation location="deleteApi"/>
-            <wsdl:input>
-                <mime:content type="application/xml" part="parameters"/>
-            </wsdl:input>
-            <wsdl:output>
-                <mime:content type="application/xml" part="parameters"/>
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="getEndPointsNames">
-            <http:operation location="getEndPointsNames"/>
-            <wsdl:input>
-                <mime:content type="application/xml" part="parameters"/>
-            </wsdl:input>
-            <wsdl:output>
-                <mime:content type="application/xml" part="parameters"/>
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="getEndPointsNamesForTenant">
-            <http:operation location="getEndPointsNamesForTenant"/>
             <wsdl:input>
                 <mime:content type="application/xml" part="parameters"/>
             </wsdl:input>
