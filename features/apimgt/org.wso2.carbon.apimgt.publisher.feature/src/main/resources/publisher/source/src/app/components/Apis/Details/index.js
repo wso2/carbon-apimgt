@@ -45,6 +45,7 @@ export default class Details extends Component {
      */
     render() {
         let redirect_url = "/apis/" + this.props.match.params.api_uuid + "/overview";
+        const environmentOverview = Utils.isAutoLoginEnabled();
         return (
             <Grid container spacing={0}>
                 <Grid item xs={2}>
@@ -54,11 +55,8 @@ export default class Details extends Component {
                     <Switch>
                         <Redirect exact from="/apis/:api_uuid" to={redirect_url}/>
                         <Route path="/apis/:api_uuid/overview" component={Overview}/>
-                        {Utils.isAutoLoginEnabled() ?
-                            <Route path="/apis/:api_uuid/environment view" component={EnvironmentOverview}/>
-                            :
-                            null
-                        }
+                        {environmentOverview ?
+                            <Route path="/apis/:api_uuid/environment view" component={EnvironmentOverview}/> : null}
                         <Route path="/apis/:api_uuid/lifecycle" component={LifeCycle}/>
                         <Route path="/apis/:api_uuid/resources" component={Resources}/>
                         <Route path="/apis/:api_uuid/permission" component={PermissionFormWrapper}/>

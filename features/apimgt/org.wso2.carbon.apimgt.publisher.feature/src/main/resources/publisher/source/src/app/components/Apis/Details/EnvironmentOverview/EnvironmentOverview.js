@@ -78,7 +78,7 @@ class EnvironmentOverview extends Component {
                 <Grid item xs={12}>
                     <Paper>
                         <Typography type="display1" gutterBottom>
-                            {api.name} - Multi Environment Overview
+                            {api.name} {api.version} - Multi Environment Overview
                         </Typography>
                     </Paper>
                 </Grid>

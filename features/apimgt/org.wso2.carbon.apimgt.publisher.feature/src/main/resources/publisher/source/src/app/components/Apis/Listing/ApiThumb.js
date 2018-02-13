@@ -92,11 +92,11 @@ class ApiThumb extends React.Component {
     }
 
     handleRedirectToAPIOverview() {
-        const {api, environmentName, rootAPIVersion} = this.props;
+        const {api, environmentName, rootAPI} = this.props;
         const currentEnvironmentName = Utils.getCurrentEnvironment().label;
         // If environment name or version is not defined then consider as same environment or version.
         const isSameEnvironment = !environmentName || environmentName === currentEnvironmentName;
-        const isSameVersion = !rootAPIVersion || rootAPIVersion.version === api.version;
+        const isSameVersion = !rootAPI || rootAPI.version === api.version;
 
         if (isSameEnvironment && isSameVersion) {
             this.setState({
@@ -110,7 +110,7 @@ class ApiThumb extends React.Component {
             const message = 'We are going to switch the ' +
                 `${isSameEnvironment ? '' : `environment "${currentEnvironmentName}" to "${environmentName}"`}` +
                 `${!isSameEnvironment && !isSameVersion ? ' and ' : ''}` +
-                `${isSameVersion ? '' : `API version "${rootAPIVersion.version}" to "${api.version}"`}`;
+                `${isSameVersion ? '' : `API version "${rootAPI.version}" to "${api.version}"`}`;
             const labelCancel = 'Cancel';
             const labelOk = 'Switch';
 
@@ -132,6 +132,8 @@ class ApiThumb extends React.Component {
 
     render() {
         const {api, environmentOverview} = this.props;
+        const gridItemSizes = environmentOverview ?
+            {xs: 6, sm: 4, md: 3, lg: 2, xl: 2} : {xs: 6, sm: 4, md: 3, lg: 2, xl: 2};
         let heading, content;
 
         if (!this.state.active) { // Controls the delete state, We set the state to inactive on delete success call
@@ -175,7 +177,7 @@ class ApiThumb extends React.Component {
         }
 
         return (
-            <Grid item xs={6} sm={4} md={3} lg={2} xl={2}>
+            <Grid item {...gridItemSizes}>
                 <Card>
                     <CardMedia image="/publisher/public/app/images/api/api-default.png">
                         <img src="/publisher/public/app/images/api/api-default.png" style={{width: "100%"}}/>

@@ -27,6 +27,20 @@ import API from "../../../../data/api";
 import Loading from "../../../Base/Loading/Loading";
 import {LifeCycleStatus} from "../../../../data/LifeCycle";
 import AuthManager from "../../../../data/AuthManager";
+import {withStyles} from 'material-ui/styles';
+
+const styles = theme => ({
+    header: {
+        borderTop: `1px solid ${theme.palette.divider}`
+    },
+    lifeCycleMenu: {
+        marginTop: '1.5em',
+        marginBottom: '2em'
+    },
+    messageLabel: {
+        fontSize: '1.5em'
+    }
+});
 
 class EnvironmentPanel extends Component {
     constructor(props) {
@@ -88,49 +102,52 @@ class EnvironmentPanel extends Component {
     }
 
     render() {
-        const {environment} = this.props;
+        const {environment, rootAPI, classes} = this.props;
         const {apis, isAuthorize, notFound} = this.state;
 
         if (isAuthorize) {
             return (
                 <ExpansionPanel defaultExpanded>
                     <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-                        <Typography> {`${environment.label} Environment`} </Typography>
+                        <Typography variant="title" gutterBottom> {`${environment.label} Environment`} </Typography>
                     </ExpansionPanelSummary>
-                    <ExpansionPanelDetails>
+                    <ExpansionPanelDetails className={classes.header}>
                         <Grid container>
                             <Grid item xs={12}>
-                                <Grid container direction={"row-reverse"}>
-                                    <Grid item lg={2} md={3} sm={4} xs={12}>
+                                <Grid container>
+                                    <Grid item lg={2} md={3} sm={4} xs={12} className={classes.lifeCycleMenu}>
                                         <LifecycleMenu
                                             lifecycleStatus={this.state.lifecycleStatus}
                                             lifecycleStatuses={this.state.lifecycleStatuses}
                                             handleLifecycleStateChange={this.handleLifecycleStateChange}
                                         />
                                     </Grid>
-                                    {
-                                        (apis && apis.length === 0) ?
-                                            <Grid item lg={10} md={9} sm={8} xs={12}>
-                                                <div>No APIs found...</div>
-                                            </Grid>
-                                            :
-                                            null
-                                    }
                                 </Grid>
 
                             </Grid>
                             <Grid item xs={12}>
                                 {
                                     (!apis) ? <Loading/> :
-                                        <Grid container>
-                                            {this.state.apis.map((api, i) => {
-                                                return <ApiThumb key={api.id} listType={this.state.listType}
-                                                                 api={api}
-                                                                 environmentName={environment.label}
-                                                                 rootAPIVersion={api}
-                                                                 environmentOverview/>
-                                            })}
-                                        </Grid>
+                                        (apis.length === 0) ?
+                                            <Grid container justify={'center'} alignItems={'center'}>
+                                                <Grid item>
+                                                    <Typography variant="display1" gutterBottom
+                                                                className={classes.messageLabel}>
+                                                        No APIs found...
+                                                    </Typography>
+                                                </Grid>
+
+                                            </Grid>
+                                            :
+                                            <Grid container>
+                                                {this.state.apis.map((api, i) => {
+                                                    return <ApiThumb key={api.id} listType={this.state.listType}
+                                                                     api={api}
+                                                                     environmentName={environment.label}
+                                                                     rootAPI={rootAPI}
+                                                                     environmentOverview/>
+                                                })}
+                                            </Grid>
                                 }
                             </Grid>
                         </Grid>
@@ -143,4 +160,4 @@ class EnvironmentPanel extends Component {
     }
 }
 
-export default EnvironmentPanel;
+export default withStyles(styles)(EnvironmentPanel);
