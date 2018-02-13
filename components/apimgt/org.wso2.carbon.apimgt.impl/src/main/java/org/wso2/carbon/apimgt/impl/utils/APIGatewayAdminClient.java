@@ -9,6 +9,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.gateway.stub.APIGatewayAdminStub;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.EndpointAdminException;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -265,7 +266,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
      * @param tenantDomain Domain of the logged tenant
      * @throws AxisFault Thrown if an error occurred
      */
-    public void addEndpoint(API api, APITemplateBuilder builder, String tenantDomain) throws AxisFault {
+    public void addEndpoint(API api, APITemplateBuilder builder, String tenantDomain) throws EndpointAdminException {
         try {
             ArrayList<String> arrayList = getEndpointType(api);
             for (String type : arrayList) {
@@ -274,7 +275,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
             }
         } catch (Exception e) {
             log.error("Error while adding endpoint to the gateway", e);
-            throw new AxisFault("Error while generating Endpoint file in Gateway " + e.getMessage(), e);
+            throw new EndpointAdminException("Error while generating Endpoint file in Gateway " + e.getMessage(), e);
         }
     }
 
@@ -285,7 +286,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
      * @param tenantDomain Domain of the logged tenant
      * @throws AxisFault Thrown if an error occurred
      */
-    public void deleteEndpoint(API api, String tenantDomain) throws AxisFault {
+    public void deleteEndpoint(API api, String tenantDomain) throws EndpointAdminException {
         try {
             String endpointName = api.getId().getApiName() + "--v" + api.getId().getVersion();
             ArrayList<String> arrayList = getEndpointType(api);
@@ -302,7 +303,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
             }
         } catch (Exception e) {
             log.error("Error while deleting endpoint from the gateway", e);
-            throw new AxisFault("Error while deleting Endpoint from the gateway. " + e.getMessage(), e);
+            throw new EndpointAdminException("Error while deleting Endpoint from the gateway. " + e.getMessage(), e);
         }
     }
 
@@ -314,7 +315,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
      * @param tenantDomain Domain of the logged tenant
      * @throws AxisFault Thrown if an error occurred
      */
-    public void saveEndpoint(API api, APITemplateBuilder builder, String tenantDomain) throws AxisFault {
+    public void saveEndpoint(API api, APITemplateBuilder builder, String tenantDomain) throws EndpointAdminException {
         try {
             apiGatewayAdminStub.removeEndpointsToUpdate(api.getId().getApiName(), api.getId().getVersion(),
                     tenantDomain);
@@ -326,7 +327,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
             }
         } catch (Exception e) {
             log.error("Error while updating endpoint file in the gateway", e);
-            throw new AxisFault("Error updating Endpoint file" + e.getMessage(), e);
+            throw new EndpointAdminException("Error updating Endpoint file" + e.getMessage(), e);
         }
     }
 
@@ -339,7 +340,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
      * @throws AxisFault Thrown if an error occurred
      */
     private void checkForTenantWhenAdding(APIGatewayAdminStub stub, String epContext, String tenantDomain)
-            throws AxisFault {
+            throws EndpointAdminException {
         try {
             if (tenantDomain != null && !("").equals(tenantDomain)
                     && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -349,7 +350,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
             }
         } catch (Exception e) {
             log.error("Error while adding endpoint to the gateway", e);
-            throw new AxisFault("Error while generating endpoint file in gateway" + e.getMessage(), e);
+            throw new EndpointAdminException("Error while generating endpoint file in gateway" + e.getMessage(), e);
         }
     }
 

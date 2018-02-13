@@ -221,6 +221,9 @@ public class APIGatewayManager {
                  */
                 log.error("Error occurred deploying sequences on " + environmentName, ex);
                 failedEnvironmentsMap.put(environmentName, ex.getMessage());
+            } catch (EndpointAdminException ex) {
+                log.error("Error occurred when endpoint add/update operation" + environmentName, ex);
+                failedEnvironmentsMap.put(environmentName, ex.getMessage());
             }
         }
         return failedEnvironmentsMap;
@@ -283,7 +286,10 @@ public class APIGatewayManager {
                     log.error("Error occurred when removing from gateway " + environmentName,
                               axisFault);
                     failedEnvironmentsMap.put(environmentName, axisFault.getMessage());
-                } 
+                } catch (EndpointAdminException ex) {
+                    log.error("Error occurred when deleting endpoint from gateway" + environmentName, ex);
+                    failedEnvironmentsMap.put(environmentName, ex.getMessage());
+                }
             }
 
         }
