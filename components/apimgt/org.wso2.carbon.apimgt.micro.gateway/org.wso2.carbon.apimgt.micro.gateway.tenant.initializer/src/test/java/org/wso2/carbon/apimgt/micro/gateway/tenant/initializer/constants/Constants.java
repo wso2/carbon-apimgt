@@ -22,7 +22,6 @@ package org.wso2.carbon.apimgt.micro.gateway.tenant.initializer.constants;
  */
 public class Constants {
     public static final String CARBON_HOME = "carbon.home";
-    public static final String CARBON_CONFIGS_PATH = "/repository/conf";
     public static final String KEY_VALIDATOR_USERNAME = "APIKeyValidator.Username";
     public static final String KEY_VALIDATOR_PASSWORD = "APIKeyValidator.Password";
     public static final String DEFAULT_KEY_VALIDATOR_PASSWORD = "pwd123";

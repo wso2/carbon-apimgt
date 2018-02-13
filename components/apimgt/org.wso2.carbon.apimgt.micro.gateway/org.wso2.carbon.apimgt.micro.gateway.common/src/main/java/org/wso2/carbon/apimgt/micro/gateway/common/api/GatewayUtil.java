@@ -88,11 +88,11 @@ public class GatewayUtil {
             String apiLifeCycleConfig = CommonUtil.getLifecycleConfiguration(API_LIFECYCLE, configUserRegistry);
             Document doc = convertStringToDocument(apiLifeCycleConfig);
             //Replace default API executor
-            int n = 0;
+            int executionElementNo = 0;
             if (doc != null) {
-                n = doc.getElementsByTagName(EXECUTION_TAG).getLength();
+                executionElementNo = doc.getElementsByTagName(EXECUTION_TAG).getLength();
             }
-            for (int i = 0; i < n; i++) {
+            for (int i = 0; i < executionElementNo; i++) {
                 Element element = (Element) doc.getElementsByTagName(EXECUTION_TAG).item(i);
                 if (RE_PUBLISH_ATTRIBUTE.equals(element.getAttribute(FOR_EVENT)) ||
                         PUBLISH_ATTRIBUTE.equals(element.getAttribute(FOR_EVENT))) {
@@ -100,11 +100,11 @@ public class GatewayUtil {
                 }
             }
             //Add new execution for 'Published' state
-            n = 0;
+            executionElementNo = 0;
             if (doc != null) {
-                n = doc.getElementsByTagName(STATE).getLength();
+                executionElementNo = doc.getElementsByTagName(STATE).getLength();
             }
-            for (int i = 0; i < n; i++) {
+            for (int i = 0; i < executionElementNo; i++) {
                 Element element = (Element) doc.getElementsByTagName(STATE).item(i);
                 Element dataElement;
                 Element newElement;
@@ -124,7 +124,7 @@ public class GatewayUtil {
         } catch (XMLStreamException | RegistryException | UserStoreException | TransformerException | SAXException |
                 ParserConfigurationException | IOException e) {
             throw new OnPremiseGatewayException("An error occurred while overriding default API execution class of " +
-                    "tenant domain: " + tenantDomain + ".");
+                    "tenant domain: " + tenantDomain + ".", e);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
@@ -138,8 +138,7 @@ public class GatewayUtil {
      */
     private static String convertDocumentToString(Document doc) throws TransformerException {
         TransformerFactory tf = TransformerFactory.newInstance();
-        Transformer transformer;
-        transformer = tf.newTransformer();
+        Transformer transformer = tf.newTransformer();
         StringWriter writer = new StringWriter();
         transformer.transform(new DOMSource(doc), new StreamResult(writer));
         return writer.getBuffer().toString();

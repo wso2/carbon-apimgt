@@ -33,7 +33,6 @@ import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 
-import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.handlers.RequestContext;
 
@@ -48,7 +47,7 @@ import java.util.Map;
  */
 public class APIExecutionHandler extends APIExecutor {
 
-    Log log = LogFactory.getLog(APIExecutor.class);
+    Log log = LogFactory.getLog(APIExecutionHandler.class);
 
     /**
      * This method is called when the execution class is initialized.
@@ -70,7 +69,6 @@ public class APIExecutionHandler extends APIExecutor {
      * @return Returns whether the execution was successful or not.
      */
     public boolean execute(RequestContext context, String currentState, String targetState) {
-        APIExecutor apiExecutor = new APIExecutor();
         try {
             if (log.isDebugEnabled()) {
                 log.debug("Executing custom API executor for capturing API publish/re-publish events.");
@@ -89,7 +87,7 @@ public class APIExecutionHandler extends APIExecutor {
             onPremiseGatewayDao.addAPIPublishEvent(domain, apiId.toString());
 
             if (log.isDebugEnabled()) {
-                log.debug("Successfully captured API publish/re-publish event.");
+                log.debug("Successfully captured publish/re-publish event of API: " + apiId);
             }
         } catch (RegistryException e) {
             log.error("Failed to get the generic artifact while executing APIExecutor. ", e);
@@ -98,7 +96,7 @@ public class APIExecutionHandler extends APIExecutor {
         } catch (OnPremiseGatewayException e) {
             log.error("Failed to record Publish/Re-publish event.", e);
         }
-        return apiExecutor.execute(context, currentState, targetState);
+        return super.execute(context, currentState, targetState);
     }
 }
 

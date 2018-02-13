@@ -80,7 +80,7 @@ public class ServerStartupListener implements ServerStartupObserver {
         APIManagerConfiguration config = ServiceDataHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
         String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
-        String password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
+        char [] password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD).toCharArray();
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
         String email = MultitenantUtils.getTenantAwareUsername(username);
         try {
@@ -94,7 +94,7 @@ public class ServerStartupListener implements ServerStartupObserver {
         if (CommonUtil.isDomainNameAvailable(tenantDomain)) {
             tenantInfoBean.setActive(true);
             tenantInfoBean.setAdmin(email);
-            tenantInfoBean.setAdminPassword(password);
+            tenantInfoBean.setAdminPassword(password.toString());
             tenantInfoBean.setFirstname(TenantInitializationConstants.DEFAULT_FIRST_NAME);
             tenantInfoBean.setLastname(TenantInitializationConstants.DEFAULT_LAST_NAME);
             tenantInfoBean.setTenantDomain(tenantDomain);
@@ -109,6 +109,10 @@ public class ServerStartupListener implements ServerStartupObserver {
                 tenantMgtAdminService.activateTenant(tenantDomain);
             } finally {
                 PrivilegedCarbonContext.endTenantFlow();
+            }
+            // Overwriting the char array to clean up password
+            for (int i = 0; i < password.length; i++) {
+                password[i] = 0;
             }
             log.info("Successfully initialized tenant with tenant domain: " + tenantDomain);
         } else {

@@ -27,7 +27,8 @@ import org.wso2.carbon.apimgt.micro.gateway.common.internal.ServiceReferenceHold
  */
 public class GatewayListenerNotifier {
 
-    private GatewayListenerNotifier(){}
+    private GatewayListenerNotifier() {
+    }
 
     private static final Log log = LogFactory.getLog(GatewayListenerNotifier.class);
 

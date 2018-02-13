@@ -26,7 +26,9 @@ public class TestBase {
 
     @Before
     public void setCarbonHome() throws Exception {
-        File file = new File("src/test/resources/carbon-home");
+        String filePath = "src" + File.separator + "test" + File.separator + "resources" +
+                File.separator + "carbon-home";
+        File file = new File(filePath);
         if (file.exists()) {
             System.setProperty("carbon.home", file.getAbsolutePath());
         } else {

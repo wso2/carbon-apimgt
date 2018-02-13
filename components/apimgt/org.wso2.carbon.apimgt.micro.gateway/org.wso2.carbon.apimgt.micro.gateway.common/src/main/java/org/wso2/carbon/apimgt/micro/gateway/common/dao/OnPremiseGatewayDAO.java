@@ -60,8 +60,10 @@ public class OnPremiseGatewayDAO {
         }
         Connection conn = null;
         PreparedStatement ps = null;
+        boolean isAutoCommitEnabled = false;
         try {
             conn = APIMgtDBUtil.getConnection();
+            isAutoCommitEnabled = conn.getAutoCommit();
             conn.setAutoCommit(false);
             ps = conn.prepareStatement(insertIntoAPIPublishEvents);
             ps.setString(1, tenantDomain);
@@ -74,6 +76,12 @@ public class OnPremiseGatewayDAO {
                     "Failed to insert publish/re-publish event of the API " + apiId + " of the tenant domain " +
                             tenantDomain, e);
         } finally {
+            try {
+                conn.setAutoCommit(isAutoCommitEnabled);
+            } catch (SQLException e) {
+                log.warn("Failed to reset auto commit state of database connection to the previous state." +
+                                tenantDomain, e);
+            }
             APIMgtDBUtil.closeAllConnections(ps, conn, null);
         }
     }

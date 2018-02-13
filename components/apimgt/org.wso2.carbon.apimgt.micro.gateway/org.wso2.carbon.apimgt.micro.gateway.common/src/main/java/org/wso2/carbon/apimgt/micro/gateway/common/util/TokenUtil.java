@@ -55,6 +55,7 @@ import java.util.Map;
 public class TokenUtil {
 
     private static final Log log = LogFactory.getLog(TokenUtil.class);
+    private static final String AUTHORIZATION_BASIC = "Basic";
 
     /**
      * This method generated a Basic Auth header (base64 encoded) for the given two strings
@@ -67,7 +68,8 @@ public class TokenUtil {
         String credentials = key + ":" + secret;
         byte[] encodedCredentials = Base64.encodeBase64(
                 credentials.getBytes(Charset.forName(OnPremiseGatewayConstants.DEFAULT_CHARSET)));
-        return "Basic " + new String(encodedCredentials, Charset.forName(OnPremiseGatewayConstants.DEFAULT_CHARSET));
+        return AUTHORIZATION_BASIC + " " +
+                new String(encodedCredentials, Charset.forName(OnPremiseGatewayConstants.DEFAULT_CHARSET));
     }
 
     /**

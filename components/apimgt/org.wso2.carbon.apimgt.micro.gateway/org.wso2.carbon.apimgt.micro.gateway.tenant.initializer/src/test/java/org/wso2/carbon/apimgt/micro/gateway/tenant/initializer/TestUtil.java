@@ -32,7 +32,9 @@ public class TestUtil {
 
     private void setCarbonHome() throws Exception {
         if (StringUtils.isEmpty(System.getProperty(Constants.CARBON_HOME))) {
-            File file = new File("src/test/resources/carbon-home");
+            String filePath = "src" + File.separator + "test" + File.separator + "resources" +
+                    File.separator + "carbon-home";
+            File file = new File(filePath);
             if (file.exists()) {
                 System.setProperty(Constants.CARBON_HOME, file.getAbsolutePath());
             } else {

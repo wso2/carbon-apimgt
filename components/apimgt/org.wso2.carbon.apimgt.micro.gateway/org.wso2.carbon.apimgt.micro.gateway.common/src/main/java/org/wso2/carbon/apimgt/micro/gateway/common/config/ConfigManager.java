@@ -68,23 +68,19 @@ public class ConfigManager {
      */
     private void init() throws OnPremiseGatewayException {
         configProperties = new Properties();
-        InputStream inputStream = null;
-        try {
+        String filePath = CarbonUtils.getCarbonConfigDirPath() + File.separator +
+                OnPremiseGatewayConstants.CONFIG_FILE_NAME;
+        try (InputStream inputStream = new FileInputStream(filePath)) {
             if (log.isDebugEnabled()) {
                 log.debug("Reading On Premise Gateway configuration file from : "
                         + CarbonUtils.getCarbonConfigDirPath() + File.separator +
                         OnPremiseGatewayConstants.CONFIG_FILE_NAME);
             }
-            inputStream = new FileInputStream(CarbonUtils.getCarbonConfigDirPath() + File.separator +
-                    OnPremiseGatewayConstants.CONFIG_FILE_NAME);
             configProperties.load(inputStream);
-
         } catch (IOException ex) {
             String errorMessage = "Error occurred while reading the config file : "
                     + OnPremiseGatewayConstants.CONFIG_FILE_NAME;
             throw new OnPremiseGatewayException(errorMessage, ex);
-        } finally {
-            IOUtils.closeQuietly(inputStream);
         }
     }
 
