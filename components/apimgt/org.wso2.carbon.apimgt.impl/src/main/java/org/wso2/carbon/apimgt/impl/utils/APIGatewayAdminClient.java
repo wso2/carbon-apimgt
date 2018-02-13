@@ -19,7 +19,6 @@ import org.apache.axiom.om.OMElement;
 import java.io.StringWriter;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
 
@@ -294,10 +293,11 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
                 String endpointType = type.replace("_endpoints", "");
                 if (tenantDomain != null && !("").equals(tenantDomain)
                         && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                    apiGatewayAdminStub.deleteEndpointForTenant(endpointName + "_API" + endpointType + "Endpoint",
-                            tenantDomain);
+                    apiGatewayAdminStub.deleteEndpointForTenant(endpointName + "_API" + endpointType +
+                                    "Endpoint", tenantDomain);
                 } else {
-                    apiGatewayAdminStub.deleteEndpoint(endpointName + "_API" + endpointType + "Endpoint");
+                    apiGatewayAdminStub.deleteEndpoint(endpointName + "_API" + endpointType +
+                            "Endpoint");
                 }
             }
         } catch (Exception e) {
@@ -316,39 +316,14 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
      */
     public void saveEndpoint(API api, APITemplateBuilder builder, String tenantDomain) throws AxisFault {
         try {
-            ArrayList<Integer> arrayList = new ArrayList<>();
-            String[] endpointNames;
-            if (tenantDomain != null && !("").equals(tenantDomain)
-                    && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                endpointNames = apiGatewayAdminStub.getEndPointsNamesForTenant(tenantDomain);
-            } else {
-                endpointNames = apiGatewayAdminStub.getEndPointsNames();
-            }
-            Arrays.sort(endpointNames); //Sorting required for Binary Search
-            arrayList.add(Arrays.binarySearch(endpointNames, api.getId().getApiName() + "--v" +
-                    api.getId().getVersion() + "_API" + APIConstants.GATEWAY_ENV_TYPE_PRODUCTION + "Endpoint"));
-            arrayList.add(Arrays.binarySearch(endpointNames, api.getId().getApiName() + "--v" +
-                    api.getId().getVersion() + "_API" + APIConstants.GATEWAY_ENV_TYPE_SANDBOX + "Endpoint"));
-
-            for (int index : arrayList) {
-                if (index >= 0) { //If not found, don't delete
-                    if (tenantDomain != null && !("").equals(tenantDomain)
-                            && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                        apiGatewayAdminStub.deleteEndpointForTenant(endpointNames[index], tenantDomain);
-                    } else {
-                        apiGatewayAdminStub.deleteEndpoint(endpointNames[index]);
-                    }
-                } //No else as there should always be a file to delete
-            }
+            apiGatewayAdminStub.removeEndpointsToUpdate(api.getId().getApiName(), api.getId().getVersion(),
+                    tenantDomain);
 
             ArrayList<String> arrayListToAdd = getEndpointType(api);
             for (String type : arrayListToAdd) {
                 String endpointConfigContext = builder.getConfigStringForEndpointTemplate(type);
                 checkForTenantWhenAdding(apiGatewayAdminStub, endpointConfigContext, tenantDomain);
             }
-        } catch (RemoteException e) {
-            log.error("Error while invoking remote method", e);
-            throw new AxisFault("Error invoking remote method" + e.getMessage(), e);
         } catch (Exception e) {
             log.error("Error while updating endpoint file in the gateway", e);
             throw new AxisFault("Error updating Endpoint file" + e.getMessage(), e);

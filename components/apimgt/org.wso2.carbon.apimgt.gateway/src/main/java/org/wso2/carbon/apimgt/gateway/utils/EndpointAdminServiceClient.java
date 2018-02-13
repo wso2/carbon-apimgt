@@ -21,7 +21,12 @@ package org.wso2.carbon.apimgt.gateway.utils;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.endpoint.stub.types.EndpointAdminStub;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class EndpointAdminServiceClient {
 
@@ -129,5 +134,51 @@ public class EndpointAdminServiceClient {
             throw new AxisFault("Error while obtaining the endpoint names from tenant space"
                     + e.getMessage(), e);
         }
+    }
+
+    /**
+     * Removes the existing endpoints of synapse config for updating them
+     *
+     * @param apiName Name of the API
+     * @param apiVersion Version of the API
+     * @param tenantDomain Domain of the logged tenant
+     * @return True if endpoints are successfully removed for updating
+     * @throws AxisFault Thrown if an error occurred
+     */
+    public boolean removeEndpointsToUpdate(String apiName, String apiVersion, String tenantDomain) throws AxisFault {
+        try {
+            ArrayList<Integer> arrayList = new ArrayList<>();
+            String[] endpointNames;
+            if (tenantDomain != null && !("").equals(tenantDomain)
+                    && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                endpointNames = endpointAdminStub.getEndPointsNamesForTenant(tenantDomain);
+            } else {
+                endpointNames = endpointAdminStub.getEndPointsNames();
+            }
+            Arrays.sort(endpointNames); //Sorting required for Binary Search
+            arrayList.add(Arrays.binarySearch(endpointNames, apiName + "--v" +
+                    apiVersion + "_API" + APIConstants.GATEWAY_ENV_TYPE_PRODUCTION + "Endpoint"));
+            arrayList.add(Arrays.binarySearch(endpointNames, apiName + "--v" +
+                    apiVersion + "_API" + APIConstants.GATEWAY_ENV_TYPE_SANDBOX + "Endpoint"));
+
+            for (int index : arrayList) {
+                if (index >= 0) { //If not found, don't delete
+                    if (tenantDomain != null && !("").equals(tenantDomain)
+                            && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                        endpointAdminStub.deleteEndpointForTenant(endpointNames[index], tenantDomain);
+                    } else {
+                        endpointAdminStub.deleteEndpoint(endpointNames[index]);
+                    }
+                } //No else as there should always be a file to delete
+
+                if (index == arrayList.size() - 1) {
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            log.error("Error while removing endpoint/s for updating endpoint/s", e);
+            throw new AxisFault("Error while removing endpoint/s for updating endpoint/s" + e.getMessage(), e);
+        }
+        return false;
     }
 }

@@ -343,6 +343,20 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
     }
 
     /**
+     * Removes the existing endpoints of synapse config for updating them
+     *
+     * @param apiName Name of the API
+     * @param apiVersion Version of the API
+     * @param tenantDomain Domain of the logged tenant
+     * @return True if endpoints are successfully removed for updating
+     * @throws AxisFault Thrown if an error occurred
+     */
+    public boolean removeEndpointsToUpdate(String apiName, String apiVersion, String tenantDomain) throws AxisFault {
+        EndpointAdminServiceClient endpointAdminServiceClient = getEndpointAdminServiceClient();
+        return endpointAdminServiceClient.removeEndpointsToUpdate(apiName, apiVersion, tenantDomain);
+    }
+
+    /**
      * Returns an instance of EndpointAdminServiceClient
      *
      * @return An instance of EndpointAdminServiceClient
