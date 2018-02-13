@@ -37,7 +37,8 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -77,7 +78,7 @@ public class ApplicationImportExportManager {
     public void validateOwner(String userId, String groupId) throws APIManagementException {
         Subscriber subscriber = apiConsumer.getSubscriber(userId);
         try {
-            if (subscriber == null) {
+            if (subscriber == null && !APIUtil.isPermissionCheckDisabled()) {
                 APIUtil.checkPermission(userId, APIConstants.Permissions.API_SUBSCRIBE);
                 apiConsumer.addSubscriber(userId, groupId);
             }
@@ -109,12 +110,12 @@ public class ApplicationImportExportManager {
      * @param appDetails details of the imported application
      * @param userId     username of the subscriber
      * @param appId      application Id
-     * @return true, if all the subscriptions are imported successfully
+     * @return a list of APIIdentifiers of the skipped subscriptions
      * @throws APIManagementException if an error occurs while importing and adding subscriptions
      */
-    public Set<APIIdentifier> importSubscriptions(Application appDetails, String userId, int appId)
+    public List<APIIdentifier> importSubscriptions(Application appDetails, String userId, int appId)
             throws APIManagementException, UserStoreException {
-        Set<APIIdentifier> skippedAPIs = new HashSet<>();
+        List<APIIdentifier> skippedAPIList = new ArrayList<>();
         Set<SubscribedAPI> subscribedAPIs = appDetails.getSubscribedAPIs();
         for (SubscribedAPI subscribedAPI : subscribedAPIs) {
             APIIdentifier apiIdentifier = subscribedAPI.getApiId();
@@ -152,19 +153,19 @@ public class ApplicationImportExportManager {
                         } else {
                             log.error("Failed to import Subscription as API " + name + "-" + version +
                                     " may not have been published");
-                            skippedAPIs.add(api.getId());
+                            skippedAPIList.add(subscribedAPI.getApiId());
                         }
                     }
                 } else {
-                    log.error("Failed to import Subscription API " + name + "-" + version + " is not available");
-                    skippedAPIs.add(subscribedAPI.getApiId());
+                    log.error("Failed to import Subscription as API " + name + "-" + version + " is not available");
+                    skippedAPIList.add(subscribedAPI.getApiId());
                 }
             } else {
                 log.error("Failed to import Subscription as Tenant domain: " + tenantDomain + " is not available");
-                skippedAPIs.add(subscribedAPI.getApiId());
+                skippedAPIList.add(subscribedAPI.getApiId());
             }
         }
-        return skippedAPIs;
+        return skippedAPIList;
     }
 
     /**

@@ -1977,9 +1977,9 @@ paths:
         207:
           description: |
             Multi Status.
-            Partially successful response with updated object information as entity in the body.
+            Partially successful response with skipped APIs information object as entity in the body.
           schema:
-            $ref: '#/definitions/Error'
+            $ref: '#/definitions/APIInfoList'
         400:
           description: |
             Bad Request.
@@ -2790,6 +2790,41 @@ definitions:
       groupId:
         type: string
         example: ""
+
+#-----------------------------------------------------
+# The API Info List resource
+#-----------------------------------------------------
+  APIInfoList:
+    title: API Info List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of API Info objects returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/APIInfo'
+
+#-----------------------------------------------------
+# The API Info resource
+#-----------------------------------------------------
+  APIInfo:
+    title: API info object with basic API details
+    properties:
+      name:
+        type: string
+        description: The name of the API.
+        example: PizzaShackAPI
+      version:
+        type: string
+        description: The version of the API
+        example: 1.0.0
+      provider:
+        type: string
+        description: The provider of the API
+        example: admin
 #-----------------------------------------------------
 # END-OF-FILE
 #-----------------------------------------------------

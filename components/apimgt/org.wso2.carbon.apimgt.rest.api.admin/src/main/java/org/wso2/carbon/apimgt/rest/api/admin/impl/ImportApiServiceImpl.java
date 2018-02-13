@@ -27,10 +27,11 @@ import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.rest.api.admin.ImportApiService;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.APIInfoListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.utils.FileBasedApplicationImportExportManager;
+import org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.APIInfoMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -39,9 +40,11 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.File;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import javax.ws.rs.core.Response;
 
@@ -84,7 +87,7 @@ public class ImportApiServiceImpl extends ImportApiService {
             }
             importExportManager.validateOwner(ownerId, applicationDetails.getGroupId());
             int appId = consumer.addApplication(applicationDetails, ownerId);
-            Set<APIIdentifier> skippedAPIs = null;
+            List<APIIdentifier> skippedAPIs = new ArrayList<>();
             if (skipSubscriptions == null || !skipSubscriptions) {
                 skippedAPIs = importExportManager
                         .importSubscriptions(applicationDetails, username, appId);
@@ -92,17 +95,21 @@ public class ImportApiServiceImpl extends ImportApiService {
             Application importedApplication = consumer.getApplicationById(appId);
             ApplicationInfoDTO importedApplicationDTO = ApplicationMappingUtil
                     .fromApplicationToInfoDTO(importedApplication);
+            APIInfoListDTO skippedAPIListDTO = APIInfoMappingUtil
+                    .fromAPIInfoListToDTO(skippedAPIs);
             URI location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/" +
                     importedApplicationDTO.getApplicationId());
-            if (skippedAPIs != null && !skippedAPIs.isEmpty()) {
+            if (skippedAPIs.isEmpty()) {
                 return Response.created(location).entity(importedApplicationDTO).build();
             } else {
-                return Response.created(location).status(207)
-                        .entity(importedApplicationDTO).build();
+                return Response.created(location).status(207).entity(skippedAPIListDTO).build();
             }
         } catch (APIManagementException | URISyntaxException | UserStoreException e) {
             RestApiUtil
                     .handleInternalServerError("Error while importing Application", e, log);
+        } catch (UnsupportedEncodingException e) {
+            String errorMessage = "Error while Decoding apiId";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }

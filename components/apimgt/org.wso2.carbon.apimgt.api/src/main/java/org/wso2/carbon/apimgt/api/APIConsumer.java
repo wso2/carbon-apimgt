@@ -618,6 +618,7 @@ public interface APIConsumer extends APIManager {
 	Set<Scope> getScopesByScopeKeys(String scopeKeys, int tenantId) throws APIManagementException;
 
     /**
+     * Returns the groupId of a specific Application when the Id is provided
      *
      * @param appId applicationId
      * @return groupId of the application

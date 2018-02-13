@@ -1991,7 +1991,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK.\nSuccessful response with the updated object as entity in the body.\n",
+            "description": "OK.\nSuccessful response with the updated object information as entity in the body.\n",
             "schema": {
               "$ref": "#/definitions/ApplicationInfo"
             },
@@ -2002,10 +2002,10 @@
               }
             }
           },
-          "206": {
-            "description": "Partial Content.\nThe server has fulfilled the partial request for the resource.\n",
+          "207": {
+            "description": "Multi Status.\nPartially successful response with skipped APIs information object as entity in the body.\n",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/APIInfoList"
             }
           },
           "400": {
@@ -2835,6 +2835,42 @@
         "groupId": {
           "type": "string",
           "example": ""
+        }
+      }
+    },
+    "APIInfoList": {
+      "title": "API Info List",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "description": "Number of API Info objects returned.\n",
+          "example": 1
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/APIInfo"
+          }
+        }
+      }
+    },
+    "APIInfo": {
+      "title": "API info object with basic API details",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the API.",
+          "example": "PizzaShackAPI"
+        },
+        "version": {
+          "type": "string",
+          "description": "The version of the API",
+          "example": "1.0.0"
+        },
+        "provider": {
+          "type": "string",
+          "description": "The provider of the API",
+          "example": "admin"
         }
       }
     }

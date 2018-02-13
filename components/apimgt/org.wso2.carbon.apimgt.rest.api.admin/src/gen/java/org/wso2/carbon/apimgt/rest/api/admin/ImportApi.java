@@ -9,6 +9,7 @@ import io.swagger.annotations.ApiParam;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationInfoDTO;
 import java.io.File;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.APIInfoListDTO;
 
 import java.util.List;
 
@@ -35,7 +36,7 @@ public class ImportApi  {
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nSuccessful response with the updated object information as entity in the body.\n"),
         
-        @io.swagger.annotations.ApiResponse(code = 207, message = "Multi Status.\nPartially successful response with updated object information as entity in the body.\n"),
+        @io.swagger.annotations.ApiResponse(code = 207, message = "Multi Status.\nPartially successful response with skipped APIs information object as entity in the body.\n"),
         
         @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nInvalid request or validation error\n"),
         
