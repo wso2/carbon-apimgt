@@ -11,6 +11,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.ws.rs.core.Response;
 
@@ -45,6 +46,13 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         // if no username provided user associated with access token will be used
         if (user == null || user.isEmpty()) {
             user = RestApiUtil.getLoggedInUsername();
+        }
+
+        if (!MultitenantUtils.getTenantDomain(user).equals
+                (RestApiUtil.getLoggedInUserTenantDomain())) {
+            String errorMsg = "User " + user + " is not available for the current tenant domain";
+            log.error(errorMsg);
+            return Response.status(Response.Status.FORBIDDEN).entity(errorMsg).build();
         }
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
