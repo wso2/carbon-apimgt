@@ -68,6 +68,11 @@ public class UserNameMapperImpl implements UserNameMapper {
         //If mapping is not in database then add it to db and cache both.
         //then return name.
         if (pseudoName != null && pseudoName.equalsIgnoreCase(APIMgtConstants.ADMIN_STRING)) {
+            //APIPublisher Implementation checking roles of logged in user as follows.
+            //               roles = new HashSet<>(getIdentityProvider().getRoleIdsOfUser(userId));
+            //Default auth implementation does not support role retrieval and it gives error due to that.
+            //To avoid that there is special admin check which we need to remove. Once we are done with that
+            //we can remove this admin skip logic
             return pseudoName;
         } else {
             try {
@@ -92,6 +97,11 @@ public class UserNameMapperImpl implements UserNameMapper {
         //Else check mapping in database and load it to local map.
         //then return name.
         if (userID != null && userID.equalsIgnoreCase(APIMgtConstants.ADMIN_STRING)) {
+            //APIPublisher Implementation checking roles of logged in user as follows.
+            // Line 1326 : roles = new HashSet<>(getIdentityProvider().getRoleIdsOfUser(userId));
+            //Default auth implementation does not support role retrieval and it gives error due to that.
+            //To avoid that there is special admin check which we need to remove. Once we are done with that
+            //we can remove this admin skip logic
             return userID;
         } else {
             try {
