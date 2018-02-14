@@ -18,13 +18,11 @@
 
 import React, {Component} from 'react'
 import {Link} from 'react-router-dom'
-import {Col, Popconfirm, Row, Form, Select, Dropdown, Tag, Menu, Badge, message} from 'antd';
-
-const FormItem = Form.Item;
+import {Form, message} from 'antd';
 import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import Api from '../../../data/api'
-import {ScopeValidation, resourceMethod, resourcePath} from '../../../data/ScopeValidation'
+import {resourceMethod, resourcePath, ScopeValidation} from '../../../data/ScopeValidation'
 import ApiPermissionValidation from '../../../data/ApiPermissionValidation'
 
 import Dialog, {DialogActions, DialogContent, DialogContentText, DialogTitle} from 'material-ui/Dialog';
@@ -35,9 +33,11 @@ import Button from 'material-ui/Button';
 import Card, {CardActions, CardContent, CardMedia} from 'material-ui/Card';
 import Table, {TableBody, TableCell, TableRow} from 'material-ui/Table';
 import blueGrey from 'material-ui/colors/blueGrey';
-import {Delete, Edit, CreateNewFolder, Description}from 'material-ui-icons';
+import {CreateNewFolder, Delete, Description, Edit} from 'material-ui-icons';
 import Slide from "material-ui/transitions/Slide";
 import Utils from "../../../data/Utils";
+
+const FormItem = Form.Item;
 
 class Overview extends Component {
     constructor(props) {
@@ -75,11 +75,11 @@ class Overview extends Component {
     }
 
     handleRequestClose() {
-        this.setState({ openMenu: false });
+        this.setState({openMenu: false});
     };
 
     handleRequestOpen() {
-        this.setState({ openMenu: true });
+        this.setState({openMenu: true});
     };
 
     handleApiDelete(e) {
@@ -147,7 +147,7 @@ class Overview extends Component {
             return <Loading/>
         }
         return (
-            <Grid item>
+            <Grid container>
                 <Grid item xs={12}>
                     <Paper>
                         <Typography type="display2" gutterBottom>
@@ -157,7 +157,7 @@ class Overview extends Component {
                         <ScopeValidation resourceMethod={resourceMethod.PUT} resourcePath={resourcePath.SINGLE_API}>
                             <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
                                 <Button aria-owns="simple-menu" aria-haspopup="true">
-                                    <Edit /> Edit
+                                    <Edit/> Edit
                                 </Button>
                             </ApiPermissionValidation>
                         </ScopeValidation>
@@ -167,38 +167,38 @@ class Overview extends Component {
                             <ApiPermissionValidation
                                 checkingPermissionType={ApiPermissionValidation.permissionType.DELETE}
                                 userPermissions={this.state.api.userPermissionsForApi}>
-                                    <Button onClick={this.handleRequestOpen} color="accent" aria-owns="simple-menu"
-                                            aria-haspopup="true">
-                                        <Delete /> Delete
-                                    </Button>
+                                <Button onClick={this.handleRequestOpen} color="accent" aria-owns="simple-menu"
+                                        aria-haspopup="true">
+                                    <Delete/> Delete
+                                </Button>
                             </ApiPermissionValidation>
                         </ScopeValidation>
-                                <Dialog open={this.state.openMenu} transition={Slide}>
-                                    <DialogTitle>
-                                        {"Confirm"}
-                                    </DialogTitle>
-                                    <DialogContent>
-                                        <DialogContentText>
-                                            Are you sure you want to delete the API ({api.name} - {api.version})?
-                                        </DialogContentText>
-                                    </DialogContent>
-                                    <DialogActions>
-                                        <Button dense color="primary" onClick={this.handleApiDelete}>
-                                            Delete
-                                        </Button>
-                                        <Button dense color="primary" onClick={this.handleRequestClose}>
-                                            Cancel
-                                        </Button>
-                                    </DialogActions>
-                                </Dialog>
+                        <Dialog open={this.state.openMenu} transition={Slide}>
+                            <DialogTitle>
+                                {"Confirm"}
+                            </DialogTitle>
+                            <DialogContent>
+                                <DialogContentText>
+                                    Are you sure you want to delete the API ({api.name} - {api.version})?
+                                </DialogContentText>
+                            </DialogContent>
+                            <DialogActions>
+                                <Button dense color="primary" onClick={this.handleApiDelete}>
+                                    Delete
+                                </Button>
+                                <Button dense color="primary" onClick={this.handleRequestClose}>
+                                    Cancel
+                                </Button>
+                            </DialogActions>
+                        </Dialog>
                         {/* allowing to create new version based on scopes */}
                         <ScopeValidation resourcePath={resourcePath.API_COPY} resourceMethod={resourceMethod.POST}>
                             <Button aria-owns="simple-menu" aria-haspopup="true">
-                                <CreateNewFolder /> Create New Version
+                                <CreateNewFolder/> Create New Version
                             </Button>
                         </ScopeValidation>
                         <Button aria-owns="simple-menu" aria-haspopup="true">
-                            <Description /> View Swagger
+                            <Description/> View Swagger
                         </Button>
                     </Paper>
                 </Grid>
@@ -223,6 +223,16 @@ class Overview extends Component {
                                     View in store
                                 </a>
                             </Button>
+
+                            {Utils.isAutoLoginEnabled() ?
+                                <Link to={`/apis/${this.api_uuid}/environment view`}>
+                                    <Button dense color="primary">
+                                        Multi-Environment Overview
+                                    </Button>
+                                </Link>
+                                :
+                                null
+                            }
                         </CardActions>
                     </Card>
                 </Grid>
