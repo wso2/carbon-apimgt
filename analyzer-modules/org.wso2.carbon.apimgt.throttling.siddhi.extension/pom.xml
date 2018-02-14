@@ -20,7 +20,7 @@
     <parent>
         <artifactId>org.wso2.carbon.apimgt.analyzer</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>7.0.100-SNAPSHOT</version>
+        <version>7.0.100</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
