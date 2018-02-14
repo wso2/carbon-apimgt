@@ -70,7 +70,7 @@ class NavBar extends Component {
             {name: "subscriptions", icon: <Subscriptions/>},
             {name: "security", icon: <VerifiedUser/>},
         ];
-        if (Utils.isAutoLoginEnabled()) {
+        if (Utils.isMultiEnvironmentOverviewEnabled()) {
             tabs.splice(1, 0, {name: "environment view", icon: <Description/>});
         }
 

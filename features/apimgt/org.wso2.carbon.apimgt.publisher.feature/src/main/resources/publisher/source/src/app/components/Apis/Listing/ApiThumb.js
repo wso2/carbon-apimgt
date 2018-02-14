@@ -29,7 +29,7 @@ import Grid from 'material-ui/Grid';
 import NotificationSystem from 'react-notification-system';
 import {resourceMethod, resourcePath, ScopeValidation} from "../../../data/ScopeValidation";
 import Utils from "../../../data/Utils";
-import Confirm from "../../Shared/Confirm";
+import ConfirmDialog from "../../Shared/ConfirmDialog";
 import {withStyles} from 'material-ui/styles';
 
 const styles = theme => ({
@@ -54,26 +54,28 @@ class ApiThumb extends React.Component {
             active: true,
             loading: false,
             open: false,
-            openUserMenu: false,
             overview_link: '',
             isRedirect: false,
-            showRedirectConfirmDialog: false,
+            openDeleteConfirmDialog: false,
+            openRedirectConfirmDialog: false,
             redirectConfirmDialogDetails: {},
         };
+
         this.handleApiDelete = this.handleApiDelete.bind(this);
         this.handleRedirectToAPIOverview = this.handleRedirectToAPIOverview.bind(this);
-        this.confirmDialogCallback = this.confirmDialogCallback.bind(this);
+        this.deleteConfirmDialogCallback = this.deleteConfirmDialogCallback.bind(this);
+        this.redirectConfirmDialogCallback = this.redirectConfirmDialogCallback.bind(this);
     }
 
     handleRequestClose = () => {
-        this.setState({openUserMenu: false});
+        this.setState({openDeleteConfirmDialog: false});
     };
 
-    handleRequestOpen = () => {
-        this.setState({openUserMenu: true});
+    openDeleteConfirmDialog = () => {
+        this.setState({openDeleteConfirmDialog: true});
     };
 
-    handleApiDelete(e) {
+    handleApiDelete() {
         this.setState({loading: true});
         const api = new API();
         const api_uuid = this.props.api.id;
@@ -87,7 +89,7 @@ class ApiThumb extends React.Component {
                         message: 'Something went wrong while deleting the ' + name + ' API!', position: 'tc',
                         level: 'error'
                     });
-                    this.setState({open: false, openUserMenu: false});
+                    this.setState({open: false, openDeleteConfirmDialog: false});
                     return;
                 }
                 this.refs.notificationSystem.addNotification({
@@ -119,16 +121,23 @@ class ApiThumb extends React.Component {
             this.setState({
                 overview_link: `/apis/${api.id}/overview?environment=${environmentName}`,
                 isRedirect: false,
-                showRedirectConfirmDialog: true,
+                openRedirectConfirmDialog: true,
                 redirectConfirmDialogDetails,
             });
         }
     }
 
-    confirmDialogCallback(result) {
+    deleteConfirmDialogCallback(result) {
+        this.setState({
+            openDeleteConfirmDialog: false
+        });
+        if(result) this.handleApiDelete();
+    }
+
+    redirectConfirmDialogCallback(result) {
         this.setState({
             isRedirect: result,
-            showRedirectConfirmDialog: false
+            openRedirectConfirmDialog: false
         });
     }
 
@@ -194,39 +203,28 @@ class ApiThumb extends React.Component {
                         {/*Do not render for environment overview page*/}
                         {!environmentOverview ?
                             <div>
+                                <NotificationSystem ref="notificationSystem"/>
                                 <ScopeValidation resourcePath={resourcePath.SINGLE_API}
                                                  resourceMethod={resourceMethod.DELETE}>
-                                    <Button dense color="primary" onClick={this.handleRequestOpen}>Delete</Button>
+                                    <Button dense color="primary" onClick={this.openDeleteConfirmDialog}>Delete</Button>
                                 </ScopeValidation>
-                                <Dialog open={this.state.openUserMenu} transition={Slide}
-                                        onRequestClose={this.handleRequestClose}>
-                                    <DialogTitle>
-                                        {"Confirm"}
-                                    </DialogTitle>
-                                    <DialogContent>
-                                        <DialogContentText>
-                                            Are you sure you want to delete the API ({api.name} - {api.version})?
-                                        </DialogContentText>
-                                    </DialogContent>
-                                    <DialogActions>
-                                        <Button dense color="primary" onClick={this.handleApiDelete}>
-                                            <NotificationSystem ref="notificationSystem"/>Delete
-                                        </Button>
-                                        <Button dense color="primary" onClick={this.handleRequestClose}>
-                                            Cancel
-                                        </Button>
-                                    </DialogActions>
-                                </Dialog>
+                                <ConfirmDialog
+                                    title={`Delete API "${api.name} - ${api.version}"?`}
+                                    message={"Are you sure you want to delete the API?"}
+                                    labelOk={"Delete"}
+                                    callback={this.deleteConfirmDialogCallback}
+                                    open={this.state.openDeleteConfirmDialog}
+                                />
                             </div>
                             :
                             <div/>
                         }
                     </CardActions>
                 </Card>
-                <Confirm
+                <ConfirmDialog
                     {...this.state.redirectConfirmDialogDetails}
-                    callback={this.confirmDialogCallback}
-                    open={this.state.showRedirectConfirmDialog}
+                    callback={this.redirectConfirmDialogCallback}
+                    open={this.state.openRedirectConfirmDialog}
                 />
             </Grid>
         );

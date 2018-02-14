@@ -2,7 +2,7 @@ import React from 'react'
 import Dialog, {DialogActions, DialogContent, DialogContentText, DialogTitle,} from 'material-ui/Dialog';
 import Button from 'material-ui/Button';
 
-class Confirm extends React.Component {
+class ConfirmDialog extends React.Component {
     constructor(props) {
         super(props);
     }
@@ -43,4 +43,4 @@ const Action = {
     CANCEL: 'cancel'
 };
 
-export default Confirm;
+export default ConfirmDialog;

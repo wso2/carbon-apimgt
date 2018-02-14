@@ -224,7 +224,7 @@ class Overview extends Component {
                                 </a>
                             </Button>
 
-                            {Utils.isAutoLoginEnabled() ?
+                            {Utils.isMultiEnvironmentOverviewEnabled() ?
                                 <Link to={`/apis/${this.api_uuid}/environment view`}>
                                     <Button dense color="primary">
                                         Multi-Environment Overview
