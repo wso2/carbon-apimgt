@@ -45,7 +45,7 @@ export default class Details extends Component {
      */
     render() {
         let redirect_url = "/apis/" + this.props.match.params.api_uuid + "/overview";
-        const environmentOverview = Utils.isAutoLoginEnabled();
+        const environmentOverview = Utils.isMultiEnvironmentOverviewEnabled();
         return (
             <Grid container spacing={0}>
                 <Grid item xs={2}>

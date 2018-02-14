@@ -26,6 +26,8 @@ import API from "../../../../data/api";
 import Loading from "../../../Base/Loading/Loading";
 import AuthManager from "../../../../data/AuthManager";
 import {withStyles} from 'material-ui/styles';
+import Utils from "../../../../data/Utils";
+import EnvironmentPanelMessage from "./EnvironmentPanelMessage";
 
 const styles = theme => ({
     header: {
@@ -35,9 +37,6 @@ const styles = theme => ({
         marginTop: '1.5em',
         marginBottom: '2em'
     },
-    messageLabel: {
-        fontSize: '1.5em'
-    }
 });
 
 class EnvironmentPanel extends Component {
@@ -82,28 +81,25 @@ class EnvironmentPanel extends Component {
     render() {
         const {environment, rootAPI, classes} = this.props;
         const {apis, isAuthorize, notFound} = this.state;
+        const isFeatureEnabled = Utils.isMultiEnvironmentOverviewEnabled(environment.label);
 
-        if (isAuthorize) {
-            return (
-                <ExpansionPanel defaultExpanded>
-                    <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-                        <Typography variant="title" gutterBottom> {`${environment.label} Environment`} </Typography>
-                    </ExpansionPanelSummary>
-                    <ExpansionPanelDetails className={classes.header}>
-                        <Grid container>
-                            <Grid item xs={12}>
-                                {
-                                    (!apis) ? <Loading/> :
-                                        (apis.length === 0) ?
-                                            <Grid container justify={'center'} alignItems={'center'}>
-                                                <Grid item>
-                                                    <Typography variant="display1" gutterBottom
-                                                                className={classes.messageLabel}>
-                                                        No APIs found...
-                                                    </Typography>
-                                                </Grid>
-                                            </Grid>
-                                            :
+        return (
+            <ExpansionPanel defaultExpanded>
+                <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
+                    <Typography variant="title" gutterBottom> {`${environment.label} Environment`} </Typography>
+                </ExpansionPanelSummary>
+
+                <ExpansionPanelDetails className={classes.header}>
+                    <Grid container>
+                        <Grid item xs={12}>
+                            {
+                                (!isFeatureEnabled) ?
+                                    <EnvironmentPanelMessage
+                                        message="Multi-Environment Overview Feature is not enabled in this environment."/> :
+                                    (!isAuthorize) ?
+                                        <EnvironmentPanelMessage message="You are not login to this environment."/> :
+                                        (!apis) ? <Loading/> : (apis.length === 0) ?
+                                            <EnvironmentPanelMessage message="No APIs Found..."/> :
                                             <Grid container>
                                                 {this.state.apis.map((api, i) => {
                                                     return <ApiThumb key={api.id} listType={this.state.listType}
@@ -113,15 +109,12 @@ class EnvironmentPanel extends Component {
                                                                      environmentOverview/>
                                                 })}
                                             </Grid>
-                                }
-                            </Grid>
+                            }
                         </Grid>
-                    </ExpansionPanelDetails>
-                </ExpansionPanel>
-            );
-        } else {
-            return null;
-        }
+                    </Grid>
+                </ExpansionPanelDetails>
+            </ExpansionPanel>
+        );
     }
 }
 

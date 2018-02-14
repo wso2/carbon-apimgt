@@ -186,16 +186,16 @@ class Utils {
         }
 
         const data = JSON.stringify(autoLoginInfo);
-        localStorage.setItem(Utils.CONST.AUTO_LOGIN_ENABLED_INFO, data);
+        localStorage.setItem(Utils.CONST.MULTI_ENVIRONMENT_OVERVIEW_ENABLED, data);
     }
 
     /**
-     * Get whether auto login is enabled in current environment or not
+     * Get whether Multi-Environment Overview feature is enabled in the specified environment or not
+     * @param environmentName - Name of the environment
      * @return {Boolean|undefined} auto login enabled
      */
-    static isAutoLoginEnabled() {
-        const environmentName = Utils.getCurrentEnvironment().label;
-        const autoLoginInfo = JSON.parse(localStorage.getItem(Utils.CONST.AUTO_LOGIN_ENABLED_INFO));
+    static isMultiEnvironmentOverviewEnabled(environmentName = Utils.getCurrentEnvironment().label) {
+        const autoLoginInfo = JSON.parse(localStorage.getItem(Utils.CONST.MULTI_ENVIRONMENT_OVERVIEW_ENABLED));
         return autoLoginInfo[environmentName];
     }
 
@@ -212,7 +212,7 @@ class Utils {
 Utils.CONST = {
     LOCAL_STORAGE_ENVIRONMENT: 'environment_publisher',
     DCR_APP_INFO: '/login/login',
-    AUTO_LOGIN_ENABLED_INFO: 'auto_login',
+    MULTI_ENVIRONMENT_OVERVIEW_ENABLED: 'multi_env_overview',
     LOGOUT: '/login/logout',
     LOGIN_TOKEN_PATH: '/login/token',
     SWAGGER_YAML: '/api/am/publisher/v1.0/apis/swagger.yaml',
