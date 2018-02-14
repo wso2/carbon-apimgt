@@ -32,6 +32,8 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
  * pseudo name. Also to get logged in user's pseudo name(pseudo name used within APIM domain) using provided
  * user id.
  */
+
+
 public class UserNameMapperImpl implements UserNameMapper {
     private static final Logger log = LoggerFactory.getLogger(UserNameMapperImpl.class);
     private UserMappingDAO userMappingDAO;
@@ -59,19 +61,19 @@ public class UserNameMapperImpl implements UserNameMapper {
      */
     @Override
     public String getLoggedInUserIDFromPseudoName(String pseudoName) throws APIManagementException {
-        //TODO implement method
+        //TODO implement caching layer
         //If pseudo name in map then get from that
         //Else check mapping in database and load it to local map.
         //If mapping is not in database then add it to db and cache both.
         //then return name.
+        //Change username to constant and refer from single
         if (pseudoName != null && pseudoName.equalsIgnoreCase("admin")) {
             return pseudoName;
         } else {
             try {
-                String userID = getUserMappingDAO().getUserIDByPseudoName(pseudoName);
-                return userID;
+                return getUserMappingDAO().getUserIDByPseudoName(pseudoName);
             } catch (APIMgtDAOException e) {
-                throw new APIManagementException("Error while user getting user details for user : " + pseudoName);
+                throw new APIManagementException("Error while user getting user details for user : " + pseudoName, e);
             }
         }
     }
@@ -85,7 +87,7 @@ public class UserNameMapperImpl implements UserNameMapper {
      */
     @Override
     public String getLoggedInPseudoNameFromUserID(String userID) throws APIManagementException {
-        //TODO implement method
+        //TODO implement caching layer
         //If userName in map then get from that
         //Else check mapping in database and load it to local map.
         //then return name.
@@ -93,12 +95,10 @@ public class UserNameMapperImpl implements UserNameMapper {
             return userID;
         } else {
             try {
-                String pseudoName = getUserMappingDAO().getPseudoNameByUserID(userID);
-                return pseudoName;
-                //return APIManagerFactory.getInstance().getIdentityProvider().getIdOfUser(userName);
+                return getUserMappingDAO().getPseudoNameByUserID(userID);
             } catch (APIMgtDAOException e) {
                 //Should not log real user identity due to any reason.
-                throw new APIManagementException("Error while user getting user details for user : XXX");
+                throw new APIManagementException("Error while user getting user details for user : XXX", e);
             }
         }
     }
