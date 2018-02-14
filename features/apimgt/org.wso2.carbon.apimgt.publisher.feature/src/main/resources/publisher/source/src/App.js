@@ -100,9 +100,7 @@ class Protected extends Component {
         this.handleEnvironmentQueryParam();
         // Note: AuthManager.getUser() method is a passive check, which simply check the user availability in browser storage,
         // Not actively check validity of access token from backend
-        const {environment} = this.state;
-        let user = environment ? AuthManager.getUser(environment) : AuthManager.getUser();
-        if (user) {
+        if (AuthManager.getUser(this.environmentName)) {
             return (
                 <BaseLayout>
                     <Switch>
