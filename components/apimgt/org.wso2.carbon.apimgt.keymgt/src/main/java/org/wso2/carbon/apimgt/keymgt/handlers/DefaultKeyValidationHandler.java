@@ -178,7 +178,7 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                         isValid = true;
                     } else {
                         if (log.isDebugEnabled()) {
-                            log.debug("Scope validation failed form "+ validator);
+                            log.debug("Scope validation failed from "+ validator);
                         }
                         apiKeyValidationInfoDTO.setAuthorized(false);
                         apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.INVALID_SCOPE);
