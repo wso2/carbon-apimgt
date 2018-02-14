@@ -1375,7 +1375,6 @@
         <imp.pkg.version.axiom>[1.2.11.wso2v10, 1.3.0)</imp.pkg.version.axiom>
         <axiom.osgi.version.range>[1.2.11, 1.3.0)</axiom.osgi.version.range>
 
-
         <!-- Servlet API -->
         <exp.pkg.version.javax.servlet>2.6.0</exp.pkg.version.javax.servlet>
         <imp.pkg.version.javax.servlet>[2.6.0, 3.0.0)</imp.pkg.version.javax.servlet>
