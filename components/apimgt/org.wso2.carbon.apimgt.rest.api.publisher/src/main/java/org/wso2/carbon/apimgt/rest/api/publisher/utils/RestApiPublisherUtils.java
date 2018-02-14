@@ -198,10 +198,7 @@ public class RestApiPublisherUtils {
                         return "Invalid user roles found in accessControlRole list";
                     }
                 }
-                return isMatched ?
-                        "" :
-                        "The publisher does not contain at-least one role from the publisher "
-                                + "accessControl list entered";
+                return isMatched ? "" : "This user does not have at least one role specified in API access control.";
             } else {
                 return "Invalid user roles found";
             }
