@@ -24,6 +24,7 @@ package org.wso2.carbon.apimgt.gateway.threatprotection.utils;
 public class ThreatProtectorConstants {
 
     public static final String CONTENT_TYPE = "synapse.internal.rest.contentType";
+    public static final String SOAP_CONTENT_TYPE = "ContentType";
     public static final String HTTP_REQUEST_METHOD = "HTTP_METHOD_OBJECT";
     public static final String HTTP_METHOD = "HTTP_METHOD";
     public static final String API_CONTEXT = "REST_API_CONTEXT";

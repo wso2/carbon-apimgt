@@ -86,7 +86,7 @@ public class JsonSchemaValidator extends AbstractMediator {
                 }
             } catch (APIMThreatAnalyzerException e) {
                 validRequest = false;
-                String message = "Request is failed due to JSON schema validation failure: ";
+                String message = "Request is failed due to a JSON schema validation failure: ";
                 logger.error(message, e);
                 GatewayUtils.handleThreat(messageContext, ThreatProtectorConstants.HTTP_SC_CODE,
                         message + e.getMessage());

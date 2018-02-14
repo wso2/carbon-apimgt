@@ -80,9 +80,13 @@ public class XMLSchemaValidator extends AbstractMediator {
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
         requestMethod = axis2MC.getProperty(ThreatProtectorConstants.HTTP_REQUEST_METHOD).toString();
-        contentType = axis2MC.getProperty(ThreatProtectorConstants.CONTENT_TYPE).toString();
+        Object contentTypeObject = axis2MC.getProperty(ThreatProtectorConstants.CONTENT_TYPE);
+        if (contentTypeObject != null) {
+            contentType = contentTypeObject.toString();
+        } else {
+            contentType = axis2MC.getProperty(ThreatProtectorConstants.SOAP_CONTENT_TYPE).toString();
+        }
         apiContext = messageContext.getProperty(ThreatProtectorConstants.API_CONTEXT).toString();
-
         if (!APIConstants.SupportedHTTPVerbs.GET.name().equalsIgnoreCase(requestMethod) &&
                 (ThreatProtectorConstants.APPLICATION_XML.equals(contentType) ||
                         ThreatProtectorConstants.TEXT_XML.equals(contentType))) {
