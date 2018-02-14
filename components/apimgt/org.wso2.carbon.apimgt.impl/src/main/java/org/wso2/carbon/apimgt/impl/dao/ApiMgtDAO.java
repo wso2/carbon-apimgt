@@ -7908,12 +7908,12 @@ public class ApiMgtDAO {
             resultSet = ps.executeQuery();
             Map<String, String> scopes = new HashMap<String, String>();
             while (resultSet.next()) {
-                if(scopes.containsKey(resultSet.getString(1))) {
+                if (scopes.containsKey(resultSet.getString(1))) {
                     // Role for the scope exists. Append the new role.
                     String roles = scopes.get(resultSet.getString(1));
                     roles += ","+resultSet.getString(2);
                     scopes.put(resultSet.getString(1), roles);
-                } else{
+                } else {
                     scopes.put(resultSet.getString(1), resultSet.getString(2));
                 }
             }
