@@ -1338,6 +1338,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         try {
             //TODO: Need to validate users roles against results returned
             if (!"admin".equals(user)) {
+                //Whenever call identity provider should convert pseudo name to actual name
                 String userId = getIdentityProvider().getIdOfUser(user);
                 roles = new HashSet<>(getIdentityProvider().getRoleIdsOfUser(userId));
             }
