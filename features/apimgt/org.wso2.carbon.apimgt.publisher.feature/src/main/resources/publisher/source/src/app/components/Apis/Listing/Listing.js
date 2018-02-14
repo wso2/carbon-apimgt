@@ -34,12 +34,16 @@ import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
 import SampleAPI from './SampleAPI';
 import NotificationSystem from 'react-notification-system';
-import Add from 'material-ui-icons/AddCircle';
-import Icon from 'material-ui/Icon';
-import Divider from 'material-ui/Divider'
+import ArrowDropDownCircle from 'material-ui-icons/ArrowDropDownCircle';
 import IconButton from 'material-ui/IconButton';
 import List from 'material-ui-icons/List';
 import GridIcon from 'material-ui-icons/GridOn';
+import { MenuItem, MenuList } from 'material-ui/Menu';
+import Grow from 'material-ui/transitions/Grow';
+import Paper from 'material-ui/Paper';
+import { Manager, Target, Popper } from 'react-popper';
+import ClickAwayListener from 'material-ui/utils/ClickAwayListener';
+import classNames from 'classnames';
 
 import {ScopeValidation ,resourceMethod, resourcePath} from "../../../data/ScopeValidation";
 const styles = theme => ({
@@ -57,13 +61,22 @@ const styles = theme => ({
     },
     buttonLeft: {
         alignSelf: 'flex-start',
+        display: 'flex',
     },
     buttonRight: {
         alignSelf: 'flex-end',
+        display: 'flex',
     },
     title: {
         display: 'inline-block',
         marginRight: 50
+    },
+    addButton: {
+        display: 'inline-block',
+        marginBottom: 20,
+    },
+    popperClose: {
+        pointerEvents: 'none',
     }
 });
 const menu = (
@@ -80,7 +93,7 @@ const ButtonGroup = Button.Group;
 class Listing extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {listType: 'grid', apis: null};
+        this.state = {listType: 'grid', apis: null, newMenuOpen: false };
         this.handleApiDelete = this.handleApiDelete.bind(this);
         this.updateApi = this.updateApi.bind(this);
     }
@@ -149,7 +162,12 @@ class Listing extends React.Component {
             }
         );
     }
-
+    handleClickNew = () => {
+        this.setState({newMenuOpen:true});
+    }
+    handleCloseNew = () => {
+        this.setState({newMenuOpen:false});
+    }
     render() {
         const classes = this.props.classes;
         const {apis} = this.state;
@@ -194,10 +212,46 @@ class Listing extends React.Component {
                                     APIs
                                 </Typography>
                             </div>
-                            <Button className={classes.button} variant="raised" color="secondary">
-                                Create
-                                <Add className={classes.rightIcon} />
-                            </Button>
+                            <Manager className={classes.addButton}>
+                                <Target>
+                                    <Button
+                                        aria-owns={this.state.newMenuOpen ? 'menu-list' : null}
+                                        aria-haspopup="true"
+                                        onClick={this.handleClickNew}
+                                        variant="raised" color="secondary"
+                                    >
+                                        Create
+                                        <ArrowDropDownCircle className={classes.rightIcon} />
+                                    </Button>
+                                </Target>
+                                <Popper
+                                    placement="bottom-start"
+                                    eventsEnabled={this.state.newMenuOpen}
+                                    className={classNames({ [classes.popperClose]: !this.state.newMenuOpen })}
+                                >
+                                    <ClickAwayListener onClickAway={this.handleCloseNew}>
+                                        <Grow in={this.state.newMenuOpen} id="menu-list" style={{ transformOrigin: '0 0 0' }}>
+                                            <Paper>
+                                                <MenuList role="menu">
+                                                    <Link to="/api/create/rest">
+                                                        <MenuItem onClick={this.handleClose}>Rest</MenuItem>
+                                                    </Link>
+                                                    <Link to="/api/create/swagger">
+                                                        <MenuItem onClick={this.handleClose}>Rest - Swagger</MenuItem>
+                                                    </Link>
+                                                    <Link to="/api/create/wsdl">
+                                                        <MenuItem onClick={this.handleClose}>SOAP - WSDL</MenuItem>
+                                                    </Link>
+                                                    <Link to="/api/create/rest">
+                                                        <MenuItem onClick={this.handleClose}>WebSocket</MenuItem>
+                                                    </Link>
+                                                </MenuList>
+                                            </Paper>
+                                        </Grow>
+                                    </ClickAwayListener>
+                                </Popper>
+                            </Manager>
+
                         </div>
                         <div className={classes.buttonRight}>
                             <IconButton className={classes.button} aria-label="Delete" onClick={() => this.setListType('list')}>

@@ -122,7 +122,7 @@ const styles = theme => ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '0 8px',
+        padding: '8px 8px',
     },
     content: {
         width: '100%',
@@ -166,6 +166,9 @@ const styles = theme => ({
         marginLeft: 30,
         marginRight: 5
     },
+    brand: {
+        textDecoration: 'none',
+    }
 });
 
 class Layout extends React.Component {
@@ -230,9 +233,11 @@ class Layout extends React.Component {
                             >
                                 <MenuIcon />
                             </IconButton>
-                            <Typography variant="title" color="inherit" noWrap>
-                                WSO2 API PUBLISHER
-                            </Typography>
+                            <Link to="/" className={classes.brand} color="inherit">
+                                <Typography variant="title"  noWrap color="inherit">
+                                    WSO2 API PUBLISHER
+                                </Typography>
+                            </Link>
                             <Input
                                 placeholder="Search Apis"
                                 className={classes.input}
