@@ -125,6 +125,9 @@ public class APIMgtConstants {
 
     public static final String DATE_TIME_FORMAT = "yyyy-MM-dd hh:mm:ss";
 
+    //TODO this property need tpo remove once auth related fixes done
+    public static final String ADMIN_STRING = "admin";
+
     /**
      * Application statuses.
      */
