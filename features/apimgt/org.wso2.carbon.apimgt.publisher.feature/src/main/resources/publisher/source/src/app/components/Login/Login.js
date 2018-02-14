@@ -64,6 +64,7 @@ class Login extends Component {
     }
 
     componentDidMount() {
+        let idToken = this.handleRedirectionFromIDP();
         //Get Environments and SSO data
         ConfigManager.getConfigs().environments.then(response => {
             const environments = response.data.environments;
@@ -81,7 +82,8 @@ class Login extends Component {
             this.setLoginStatusOfEnvironments(environments);
 
             //Fetch DCR App data and handle SSO login if redirected from IDP
-            this.fetch_DCRAppInfo(environments, this.handleRedirectionFromIDP);
+            this.fetch_DCRAppInfo(environments, idToken);
+            idToken = null; // Discard ID Token
         });
     }
 
@@ -92,7 +94,7 @@ class Login extends Component {
         this.setState({loginStatusEnvironments});
     }
 
-    fetch_DCRAppInfo(environments, handleRedirectionFromIDP) {
+    fetch_DCRAppInfo(environments, idToken) {
         //Array of promises
         let promised_ssoData = environments.map(
             environment => Utils.getPromised_DCRAppInfo(environment)
@@ -101,12 +103,13 @@ class Login extends Component {
         Promise.all(promised_ssoData).then(responses => {
             const authConfigs = responses.map(response => response.data.members);
             this.setState({authConfigs});
-            handleRedirectionFromIDP(environments, authConfigs);
+            // If idToken is not null or redirected from IDP
+            if(idToken) this.authManager.handleAutoLoginEnvironments(idToken, environments, authConfigs);
             Utils.setAutoLoginEnabledInfo(environments, authConfigs);
         });
     }
 
-    handleRedirectionFromIDP(environments, authConfigs) {
+    handleRedirectionFromIDP() {
         let queryString = this.props.location.search;
         queryString = queryString.replace(/^\?/, '');
         /* With QS version up we can directly use {ignoreQueryPrefix: true} option */
@@ -115,19 +118,24 @@ class Login extends Component {
             this.setState({referrer: params.referrer});
         }
         if (params.user_name) {
-            this.setState({isLogin: true});
+            const environmentName = Utils.getCurrentEnvironment().label;
             const validityPeriod = params.validity_period; // In seconds
             const WSO2_AM_TOKEN_1 = params.partial_token;
-            const user = new User(Utils.getEnvironment().label, params.user_name);
-            user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, "/publisher");
-            user.scopes = params.scopes.split(" ");
-            AuthManager.setUser(user);
-            this.authManager.handleAutoLoginEnvironments(
-                params.id_token,
-                environments,
-                authConfigs
-            );
+
+            if (WSO2_AM_TOKEN_1) {
+                const user = new User(environmentName, params.user_name);
+                user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, "/publisher");
+                user.scopes = params.scopes.split(" ");
+                AuthManager.setUser(user);
+                this.setState({isLogin: true});
+                console.log(`Successfully login to : ${environmentName}`);
+            } else {
+                this.setState({isLogin: false});
+                console.error(`Login failed in : ${environmentName}`);
+            }
         }
+        // return id token if exists
+        return params.id_token;
     }
 
     handleSubmit = (e) => {
