@@ -105,38 +105,6 @@ public class EndpointAdminServiceClient {
     }
 
     /**
-     * Obtain endpoint names from the gateway
-     *
-     * @return Array of endpoint names
-     * @throws AxisFault Thrown if an error occurred
-     */
-    public String[] getEndPointsNames() throws AxisFault {
-        try {
-            return endpointAdminStub.getEndPointsNames();
-        } catch (Exception e) {
-            log.error("Error getting endpoint names from the gateway", e);
-            throw new AxisFault("Error while obtaining the endpoint names" + e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Obtain endpoint names of the tenant
-     *
-     * @param tenantDomain Domain of the logged tenant
-     * @return Array of endpoint names
-     * @throws AxisFault Thrown if an error occurred
-     */
-    public String[] getEndPointsNames(String tenantDomain) throws AxisFault {
-        try {
-            return endpointAdminStub.getEndPointsNamesForTenant(tenantDomain);
-        } catch (Exception e) {
-            log.error("Error getting endpoint names from the gateway", e);
-            throw new AxisFault("Error while obtaining the endpoint names from tenant space"
-                    + e.getMessage(), e);
-        }
-    }
-
-    /**
      * Removes the existing endpoints of synapse config for updating them
      *
      * @param apiName Name of the API
