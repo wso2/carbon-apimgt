@@ -361,7 +361,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
      * @return ArrayList containing defined endpoint types
      * @throws ParseException Thrown if an error occurred
      */
-    private ArrayList<String> getEndpointType(API api) throws ParseException {
+    public ArrayList<String> getEndpointType(API api) throws ParseException {
         ArrayList<String> arrayList = new ArrayList<>();
         if (APIUtil.isProductionEndpointsExists(api) && !APIUtil.isSandboxEndpointsExists(api)) {
             arrayList.add(APIConstants.API_DATA_PRODUCTION_ENDPOINTS);
