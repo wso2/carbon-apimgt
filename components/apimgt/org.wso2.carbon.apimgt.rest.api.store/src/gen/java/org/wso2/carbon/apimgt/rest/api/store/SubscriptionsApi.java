@@ -17,7 +17,6 @@ import java.io.InputStream;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
-import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.*;
 
@@ -68,8 +67,7 @@ public class SubscriptionsApi  {
         
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type.\nThe entity of the request was in a not supported format.\n") })
 
-    public Response subscriptionsMultiplePost(@ApiParam(value = "Subscription objects that should to be added\n" ,required=true ) @NotNull List<SubscriptionDTO>
-body,
+    public Response subscriptionsMultiplePost(@ApiParam(value = "Subscription objects that should to be added\n" ,required=true ) List<SubscriptionDTO> body,
     @ApiParam(value = "Media type of the entity in the body. Default is application/json.\n" ,required=true , defaultValue="application/json")@HeaderParam("Content-Type") String contentType)
     {
     return delegate.subscriptionsMultiplePost(body,contentType);
@@ -91,8 +89,7 @@ body,
         
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type.\nThe entity of the request was in a not supported format.\n") })
 
-    public Response subscriptionsPost(@ApiParam(value = "Subscription object that should to be added\n" ,required=true ) @NotNull SubscriptionDTO
-body,
+    public Response subscriptionsPost(@ApiParam(value = "Subscription object that should to be added\n" ,required=true ) SubscriptionDTO body,
     @ApiParam(value = "Media type of the entity in the body. Default is application/json.\n" ,required=true , defaultValue="application/json")@HeaderParam("Content-Type") String contentType)
     {
     return delegate.subscriptionsPost(body,contentType);

@@ -19,12 +19,17 @@
 package org.wso2.carbon.apimgt.rest.api.store.utils.mappings;
 
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.TierPermission;
+import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.TierDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.TierListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.TierPermissionInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -112,6 +117,7 @@ public class TierMappingUtil {
         dto.setUnitTime(tier.getUnitTime());
         dto.setStopOnQuotaReach(tier.isStopOnQuotaReached());
         dto.setTierLevel(TierDTO.TierLevelEnum.valueOf(tierLevel));
+        dto = setTierPermissions(dto, tier);
         if (tier.getTierPlan() != null) {
             dto.setTierPlan(TierDTO.TierPlanEnum.valueOf(tier.getTierPlan()));
         }
@@ -123,6 +129,33 @@ public class TierMappingUtil {
             dto.setAttributes(additionalProperties);
         }
         return dto;
+    }
+
+    /**
+     * Fills the tier information on TierDTO
+     *
+     * @param tierDto
+     * @param tier
+     * @return TierDTO with permission info
+     */
+    public static TierDTO setTierPermissions(TierDTO tierDto, Tier tier) {
+
+        TierPermissionInfoDTO tierPermission = new TierPermissionInfoDTO();
+
+        // If no permission found for the tier, the default permission will be applied
+        if (tier.getTierPermission() == null || tier.getTierPermission().getPermissionType() == null) {
+            tierPermission.setType(TierPermissionInfoDTO.TypeEnum.valueOf("allow"));
+            List roles = new ArrayList<String>();
+            roles.add("Internal/everyone");
+            tierPermission.setRoles(roles);
+        } else {
+            String permissionType = tier.getTierPermission().getPermissionType();
+            tierPermission.setType(TierPermissionInfoDTO.TypeEnum.valueOf(permissionType));
+            tierPermission.setRoles(Arrays.asList(tier.getTierPermission().getRoles()));
+        }
+        tierDto.setTierPermissions(tierPermission);
+
+        return tierDto;
     }
 
 }

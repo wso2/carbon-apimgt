@@ -303,6 +303,8 @@ public final class APIUtil {
             api.setLastUpdated(registry.get(artifactPath).getLastModified());
             //set uuid
             api.setUUID(artifact.getId());
+            //setting api ID for scope retrieval
+            api.getId().setApplicationId(Integer.toString(apiId));
             // set url
             api.setStatus(getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));

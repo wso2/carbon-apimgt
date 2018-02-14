@@ -19,7 +19,6 @@ import java.io.InputStream;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
-import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.*;
 
@@ -120,8 +119,7 @@ public class ApplicationsApi  {
 
     public Response applicationsApplicationIdKeysKeyTypePut(@ApiParam(value = "Application Identifier consisting of the UUID of the Application.\n",required=true ) @PathParam("applicationId")  String applicationId,
     @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox).\n",required=true, allowableValues="{values=[PRODUCTION, SANDBOX]}" ) @PathParam("keyType")  String keyType,
-    @ApiParam(value = "Grant types/Callback URL update request object\n" ,required=true ) @NotNull ApplicationKeyDTO
-body)
+    @ApiParam(value = "Grant types/Callback URL update request object\n" ,required=true ) ApplicationKeyDTO body)
     {
     return delegate.applicationsApplicationIdKeysKeyTypePut(applicationId,keyType,body);
     }
@@ -145,8 +143,7 @@ body)
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
 
     public Response applicationsApplicationIdPut(@ApiParam(value = "Application Identifier consisting of the UUID of the Application.\n",required=true ) @PathParam("applicationId")  String applicationId,
-    @ApiParam(value = "Application object that needs to be updated\n" ,required=true ) @NotNull ApplicationDTO
-body,
+    @ApiParam(value = "Application object that needs to be updated\n" ,required=true ) ApplicationDTO body,
     @ApiParam(value = "Media type of the entity in the body. Default is application/json.\n" ,required=true , defaultValue="application/json")@HeaderParam("Content-Type") String contentType,
     @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future).\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
@@ -173,8 +170,7 @@ body,
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met (Will be supported in future).\n") })
 
     public Response applicationsGenerateKeysPost(@ApiParam(value = "Application Identifier consisting of the UUID of the Application.\n",required=true) @QueryParam("applicationId")  String applicationId,
-    @ApiParam(value = "Application object the keys of which are to be generated\n" ,required=true ) @NotNull ApplicationKeyGenerateRequestDTO
-body,
+    @ApiParam(value = "Application object the keys of which are to be generated\n" ,required=true ) ApplicationKeyGenerateRequestDTO body,
     @ApiParam(value = "Media type of the entity in the body. Default is application/json.\n" ,required=true , defaultValue="application/json")@HeaderParam("Content-Type") String contentType,
     @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future).\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
@@ -228,8 +224,7 @@ body,
         
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type.\nThe entity of the request was in a not supported format.\n") })
 
-    public Response applicationsPost(@ApiParam(value = "Application object that is to be created.\n" ,required=true ) @NotNull ApplicationDTO
-body,
+    public Response applicationsPost(@ApiParam(value = "Application object that is to be created.\n" ,required=true ) ApplicationDTO body,
     @ApiParam(value = "Media type of the entity in the body. Default is application/json.\n" ,required=true , defaultValue="application/json")@HeaderParam("Content-Type") String contentType)
     {
     return delegate.applicationsPost(body,contentType);

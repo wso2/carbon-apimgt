@@ -508,7 +508,14 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to get the tiers
      */
     Set<String> getDeniedTiers()throws APIManagementException;
-    
+
+    /**
+     * Returns a list of TierPermissions
+     *
+     * @return Set<TierPermission>
+     */
+    Set<TierPermission> getTierPermissions() throws APIManagementException;
+
     /**
      * Check whether given Tier is denied for the user
      * @param tierName

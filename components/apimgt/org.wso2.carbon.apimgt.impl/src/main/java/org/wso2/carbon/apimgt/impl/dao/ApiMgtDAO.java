@@ -7608,6 +7608,69 @@ public class ApiMgtDAO {
         return scopes;
     }
 
+    /**
+     * Returns all the scopes assigned for given apis
+     *
+     * @param apiIdsString list of api ids separated by commas
+     * @return Map<String, Set<Scope>> set of scopes for each apiId
+     * @throws APIManagementException
+     */
+    public Map<String, Set<Scope>> getScopesForAPIS(String apiIdsString) throws APIManagementException {
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        Map<String, Set<Scope>> apiScopeSet = new HashMap<String, Set<Scope>>();
+        try {
+            conn = APIMgtDBUtil.getConnection();
+
+            String sqlQuery = "SELECT "
+                    + "B.API_ID,A.SCOPE_ID, A.SCOPE_KEY, A.NAME, A.DESCRIPTION, A.ROLES "
+                    + "FROM IDN_OAUTH2_SCOPE AS A "
+                    + "INNER JOIN AM_API_SCOPES AS B "
+                    + "ON A.SCOPE_ID = B.SCOPE_ID WHERE B.API_ID IN ( $paramList )";
+
+            if (conn.getMetaData().getDriverName().contains("Oracle")) {
+                sqlQuery = "SELECT "
+                        + "B.API_ID, A.SCOPE_ID, A.SCOPE_KEY, A.NAME, A.DESCRIPTION, A.ROLES "
+                        + "FROM IDN_OAUTH2_SCOPE A "
+                        + "INNER JOIN AM_API_SCOPES B "
+                        + "ON A.SCOPE_ID = B.SCOPE_ID WHERE B.API_ID IN ( $paramList )";
+            }
+
+            // apids are retrieved from the db so no need to protect for sql injection
+            sqlQuery = sqlQuery.replace("$paramList", apiIdsString);
+            ps = conn.prepareStatement(sqlQuery);
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+
+                String apiId = resultSet.getString(1);
+                Scope scope = new Scope();
+                scope.setId(resultSet.getInt(2));
+                scope.setKey(resultSet.getString(3));
+                scope.setName(resultSet.getString(4));
+                scope.setDescription(resultSet.getString(5));
+                scope.setRoles(resultSet.getString(6));
+
+                Set<Scope> scopeList = apiScopeSet.get(apiId);
+
+                if (scopeList == null) {
+                    scopeList = new LinkedHashSet<Scope>();
+                    scopeList.add(scope);
+                    apiScopeSet.put(apiId, scopeList);
+                } else {
+                    scopeList.add(scope);
+                    apiScopeSet.put(apiId, scopeList);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve api scopes ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return apiScopeSet;
+    }
+
+
     public Set<Scope> getScopesBySubscribedAPIs(List<APIIdentifier> identifiers) throws APIManagementException {
         Connection conn = null;
         ResultSet resultSet = null;

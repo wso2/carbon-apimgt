@@ -21,8 +21,10 @@ package org.wso2.carbon.apimgt.rest.api.store.impl;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.TierPermission;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.TiersApiService;
@@ -38,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * This is the service implementation class for Store tier related operations
@@ -80,6 +83,24 @@ public class TiersApiServiceImpl extends TiersApiService {
             if (TierDTO.TierLevelEnum.api.toString().equals(tierLevel)) {
                 Map<String, Tier> apiTierMap = APIUtil.getTiers(APIConstants.TIER_API_TYPE, requestedTenantDomain);
                 if (apiTierMap != null) {
+
+                    String username = RestApiUtil.getLoggedInUsername();
+                    APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
+
+                    Set<TierPermission> TierPermissions = apiConsumer.getTierPermissions();
+                    for (TierPermission tierPermission : TierPermissions) {
+                        Tier tier = apiTierMap.get(tierPermission.getTierName());
+                        tier.setTierPermission(tierPermission);
+                        apiTierMap.put(tierPermission.getTierName(), tier);
+                    }
+
+                    // Removing denied Tiers
+                    Set<String> deniedTiers = apiConsumer.getDeniedTiers();
+
+                    for (String tierName : deniedTiers) {
+                        apiTierMap.remove(tierName);
+                    }
+
                     tierList.addAll(apiTierMap.values());
                 }
             } else if (TierDTO.TierLevelEnum.application.toString().equals(tierLevel)) {
