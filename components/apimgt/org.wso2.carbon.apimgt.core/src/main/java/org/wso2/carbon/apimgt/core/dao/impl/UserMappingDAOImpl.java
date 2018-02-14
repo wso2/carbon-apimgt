@@ -79,9 +79,7 @@ public class UserMappingDAOImpl implements UserMappingDAO {
                 }
             }
             if (pseudoName == null) {
-                //handle concurrency by adding constraint in database level to check user name.
                 pseudoName = addUserMapping(userID);
-                //if add failed in db level add it again.
             }
         } catch (SQLException e) {
             throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + " getting name mappings", e);

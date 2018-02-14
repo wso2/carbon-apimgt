@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.core.dao.UserMappingDAO;
 import org.wso2.carbon.apimgt.core.dao.impl.UserMappingDAOImpl;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 /**
  * This class is having implementation of UserNameMapping interface.
@@ -66,8 +67,7 @@ public class UserNameMapperImpl implements UserNameMapper {
         //Else check mapping in database and load it to local map.
         //If mapping is not in database then add it to db and cache both.
         //then return name.
-        //Change username to constant and refer from single
-        if (pseudoName != null && pseudoName.equalsIgnoreCase("admin")) {
+        if (pseudoName != null && pseudoName.equalsIgnoreCase(APIMgtConstants.ADMIN_STRING)) {
             return pseudoName;
         } else {
             try {
@@ -91,7 +91,7 @@ public class UserNameMapperImpl implements UserNameMapper {
         //If userName in map then get from that
         //Else check mapping in database and load it to local map.
         //then return name.
-        if (userID != null && userID.equalsIgnoreCase("admin")) {
+        if (userID != null && userID.equalsIgnoreCase(APIMgtConstants.ADMIN_STRING)) {
             return userID;
         } else {
             try {
