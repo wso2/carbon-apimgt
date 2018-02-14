@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.TierPermission;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.TiersApiService;
@@ -83,13 +84,21 @@ public class TiersApiServiceImpl extends TiersApiService {
                 Map<String, Tier> apiTierMap = APIUtil.getTiers(APIConstants.TIER_API_TYPE, requestedTenantDomain);
                 if (apiTierMap != null) {
 
-                    // Removing denied Tiers
                     String username = RestApiUtil.getLoggedInUsername();
                     APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
+
+                    Set<TierPermission> TierPermissions = apiConsumer.getTierPermissions();
+                    for (TierPermission tierPermission : TierPermissions) {
+                        Tier tier = apiTierMap.get(tierPermission.getTierName());
+                        tier.setTierPermission(tierPermission);
+                        apiTierMap.put(tierPermission.getTierName(), tier);
+                    }
+
+                    // Removing denied Tiers
                     Set<String> deniedTiers = apiConsumer.getDeniedTiers();
 
-                    for (String key : deniedTiers) {
-                        apiTierMap.remove(key);
+                    for (String tierName : deniedTiers) {
+                        apiTierMap.remove(tierName);
                     }
 
                     tierList.addAll(apiTierMap.values());

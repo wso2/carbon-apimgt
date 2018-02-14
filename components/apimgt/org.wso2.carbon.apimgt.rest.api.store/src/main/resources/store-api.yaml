@@ -2350,7 +2350,8 @@ definitions:
           even if the request count exceeded within a unit time
         type: boolean
         example: true
-
+      TierPermissions:
+          $ref: '#/definitions/TierPermissionInfo'
 #-----------------------------------------------------
 # The Subscription List resource
 #-----------------------------------------------------
@@ -2613,7 +2614,7 @@ definitions:
         example: ["am_application_scope","default"]
 
 #-----------------------------------------------------
-# The Scope Info resource
+# Scope Info resource
 #-----------------------------------------------------
   ScopeInfo:
     title: API Scope info object with scope details
@@ -2629,6 +2630,24 @@ definitions:
         items:
           type: string
         description: Allowed roles for the scope
+        example: ["manager","developer"]
+
+#-----------------------------------------------------
+# Tier Permission Info resource
+#-----------------------------------------------------
+  TierPermissionInfo:
+    title: Tier Permission info object with tier permission details
+    properties:
+      type:
+        type: string
+        enum:
+              - allow
+              - deny
+      roles:
+        type: array
+        items:
+          type: string
+        description: roles for this permission
         example: ["manager","developer"]
 
   ApplicationScope :
