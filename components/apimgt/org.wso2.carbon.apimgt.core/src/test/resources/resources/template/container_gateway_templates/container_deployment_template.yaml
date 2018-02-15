@@ -1,0 +1,48 @@
+# Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: perapigw-1234-deployemnt
+  namespace: default
+  labels: # should have the auto-generated label as the value
+    gateway: perapigw-1234
+    tier: prod
+spec:
+  replicas: 2
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels: # should have the auto-generated label as the value
+        gateway: perapigw-1234
+    spec:
+      containers:
+      -
+        name: perapigw-1234-container
+        image: wso2apim-gateway:v3.0.0
+        env:
+        -
+          name: apiCoreUrl
+          value: https://localhost:9443
+        -
+          name: messageBrokerHost
+          value: https://localhost:5672
+        ports:
+        -
+          containerPort: 9090
+          protocol: "TCP"
+        -
+          containerPort: 9092
+          protocol: "TCP"

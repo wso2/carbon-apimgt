@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+* Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 * WSO2 Inc. licenses this file to you under the Apache License,
 * Version 2.0 (the "License"); you may not use this file except
@@ -22,6 +22,7 @@ import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.extensions.Deployment;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
+import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 
 import io.fabric8.kubernetes.client.KubernetesClientException;
@@ -65,14 +66,26 @@ public class KubernetesGatewayImpl extends ContainerBasedGatewayGenerator {
      */
     @Override
     void initImpl(Map<String, String> implParameters) throws ContainerBasedGatewayException {
+        try {
+            setValues(implParameters);
+            setClient(new DefaultOpenShiftClient(buildConfig()));
+        } catch (KubernetesClientException e) {
+            String msg = "Error occurred while creating Default Openshift Client";
+            throw new ContainerBasedGatewayException(msg, e,
+                    ExceptionCodes.ERROR_INITIALIZING_DEDICATED_CONTAINER_BASED_GATEWAY);
+        }
+    }
+
+    /**
+     * Set values for Openshift client
+     */
+    void setValues(Map<String, String> implParameters) {
         masterURL = implParameters.get(ContainerBasedGatewayConstants.MASTER_URL);
         saTokenFileName = implParameters.get(ContainerBasedGatewayConstants.SA_TOKEN_FILE_NAME);
         namespace = implParameters.get(ContainerBasedGatewayConstants.NAMESPACE);
         apiCoreUrl = implParameters.get(ContainerBasedGatewayConstants.API_CORE_URL);
         brokerHost = implParameters.get(ContainerBasedGatewayConstants.BROKER_HOST);
         cmsType = implParameters.get(ContainerBasedGatewayConstants.CMS_TYPE);
-
-        configureClient();
     }
 
     /**
@@ -131,34 +144,40 @@ public class KubernetesGatewayImpl extends ContainerBasedGatewayGenerator {
         // Create gateway ingress resource
         createIngressResource(builder.generateTemplate(templateValues,
                 ContainerBasedGatewayConstants.GATEWAY_INGRESS_TEMPLATE), ingressName);
-        // todo : need to update the labels as well with the access URLs
-        // todo : after configuring load balancer type for K8 and openshift service
     }
 
     /**
-     * Configure Openshift client
+     * Build configurations for Openshift client
      *
      * @throws ContainerBasedGatewayException if failed to configure Openshift client
      */
-    private void configureClient() throws ContainerBasedGatewayException {
+    private Config buildConfig() throws ContainerBasedGatewayException {
 
         System.setProperty(TRY_KUBE_CONFIG, "false");
         System.setProperty(TRY_SERVICE_ACCOUNT, "true");
+        ConfigBuilder configBuilder;
 
-        ConfigBuilder configBuilder = new ConfigBuilder().withMasterUrl(masterURL);
+        if (masterURL != null) {
+            configBuilder = new ConfigBuilder().withMasterUrl(masterURL);
+        } else {
+            throw new ContainerBasedGatewayException("Kubernetes Master URL is not provided!", ExceptionCodes
+                    .ERROR_INITIALIZING_DEDICATED_CONTAINER_BASED_GATEWAY);
+        }
 
         if (!StringUtils.isEmpty(saTokenFileName)) {
             configBuilder.withOauthToken(resolveToken("encrypted" + saTokenFileName));
         }
 
-        try {
-            client = new DefaultOpenShiftClient(configBuilder.build());
-        } catch (KubernetesClientException e) {
-            String msg = "Error occurred while creating Default Openshift Client";
-            throw new ContainerBasedGatewayException(msg, e,
-                    ExceptionCodes.ERROR_INITIALIZING_DEDICATED_CONTAINER_BASED_GATEWAY);
-        }
+        return configBuilder.build();
+    }
 
+    /**
+     * Set Default Openshift client
+     *
+     * @param openShiftClient Openshift client
+     */
+    void setClient(OpenShiftClient openShiftClient) {
+        this.client = openShiftClient;
     }
 
     /**
@@ -175,7 +194,7 @@ public class KubernetesGatewayImpl extends ContainerBasedGatewayGenerator {
         try (InputStream inputStream = IOUtils.toInputStream(template)) {
 
             resources = client.load(inputStream).get();
-            if (resources.get(0) == null) {
+            if (resources == null || resources.isEmpty()) {
                 throw new ContainerBasedGatewayException("No resources loaded from the definition provided : ",
                         ExceptionCodes.NO_RESOURCE_LOADED_FROM_DEFINITION);
             }
@@ -213,7 +232,6 @@ public class KubernetesGatewayImpl extends ContainerBasedGatewayGenerator {
                     log.info("There exist a service with the same name in " + cmsType + ". Service name : "
                             + serviceName);
                 }
-                //todo : return gateway Https and https URLs form here as an array.
             } else {
                 throw new ContainerBasedGatewayException("Loaded Resource is not a Service in " + cmsType + "! " +
                         resource, ExceptionCodes.LOADED_RESOURCE_DEFINITION_IS_NOT_VALID);
@@ -288,7 +306,6 @@ public class KubernetesGatewayImpl extends ContainerBasedGatewayGenerator {
                     log.info("There exist an ingress with the same name in " + cmsType + ". Ingress name : "
                             + ingressName);
                 }
-                //todo : return gateway Https and https URLs form here as an array.
             } else {
                 throw new ContainerBasedGatewayException("Loaded Resource is not a Service in " + cmsType + "! " +
                         resource, ExceptionCodes.LOADED_RESOURCE_DEFINITION_IS_NOT_VALID);

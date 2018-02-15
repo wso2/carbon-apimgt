@@ -26,7 +26,7 @@ public final class ContainerBasedGatewayConstants {
 
     public static final String PER_API_GATEWAY_PREFIX = "perapigw-";
     public static final String CMS_SERVICE_SUFFIX = "-service";
-    public static final String CMS_DEPLOYMENT_SUFFIX = "-deployemnt";
+    public static final String CMS_DEPLOYMENT_SUFFIX = "-deployment";
     public static final String CMS_INGRESS_SUFFIX = "-ingress";
     public static final String CMS_CONTAINER_SUFFIX = "-container";
     public static final String GATEWAY_SERVICE_TEMPLATE = "container_service_template.yaml";

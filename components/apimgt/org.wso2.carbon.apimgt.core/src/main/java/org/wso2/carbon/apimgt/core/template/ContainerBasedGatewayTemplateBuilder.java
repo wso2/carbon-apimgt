@@ -65,12 +65,12 @@ public class ContainerBasedGatewayTemplateBuilder {
      * @return Velocity engine for service template
      */
     private VelocityEngine initVelocityEngine() {
-        VelocityEngine velocityengine = new VelocityEngine();
-        velocityengine.setProperty(RuntimeConstants.RESOURCE_LOADER, CLASS_PATH);
-        velocityengine.setProperty(CLASS_PATH_RESOURCE_LOADER, ClasspathResourceLoader.class.getName());
-        velocityengine.setProperty(VelocityEngine.RUNTIME_LOG_LOGSYSTEM, new CommonsLogLogChute());
-        velocityengine.init();
-        return velocityengine;
+        VelocityEngine velocityEngine = new VelocityEngine();
+        velocityEngine.setProperty(RuntimeConstants.RESOURCE_LOADER, CLASS_PATH);
+        velocityEngine.setProperty(CLASS_PATH_RESOURCE_LOADER, ClasspathResourceLoader.class.getName());
+        velocityEngine.setProperty(VelocityEngine.RUNTIME_LOG_LOGSYSTEM, new CommonsLogLogChute());
+        velocityEngine.init();
+        return velocityEngine;
     }
 
     /**
