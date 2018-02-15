@@ -1869,7 +1869,7 @@ paths:
       x-wso2-request: |
         GET https://localhost:9443/api/am/store/v0.11/export/applications?appName=sampleApp&appOwner=admin
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\n Connection: keep-alive\n  Content-Disposition: attachment; filename=\"exported-applications.zip\"\n  Content-Type: application/zip"
+      x-wso2-response: "HTTP/1.1 200 OK\n Connection: keep-alive\n  Content-Disposition: attachment; filename=\"exported-application.zip\"\n  Content-Type: application/zip"
       summary: Export an Application
       description: |
         This operation can be used to export the details of a particular Application as a zip file.
@@ -1932,10 +1932,10 @@ paths:
       x-wso2-request: |
         POST https://localhost:9443/api/am/store/v0.11/import/applications
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 201 Created\nLocation: https://localhost:9443/api/am/admin/v0.11/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524\nContent-Type: application/json\n\n{\n   \"groupId\": null,\n   \"callbackUrl\": \"http://my.server.com/callback\",\n   \"owner\": \"admin\",\n   \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\",\n   \"status\": \"APPROVED\",\n   \"name\": \"sampleapp\" \n}"
+      x-wso2-response: "HTTP/1.1 201 Created\nLocation: https://localhost:9443/api/am/admin/v0.11/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524\nContent-Type: application/json\n\n{\n   \"groupId\": \"\",\n   \"callbackUrl\": \"http://my.server.com/callback\",\n   \"owner\": \"admin\",\n   \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\",\n   \"status\": \"APPROVED\",\n   \"name\": \"sampleapp\" \n}"
       summary: Import an Application
       description: |
-        This operation can be used to import an existing Application.
+        This operation can be used to import an Application.
       parameters:
         - name: file
           in: formData
