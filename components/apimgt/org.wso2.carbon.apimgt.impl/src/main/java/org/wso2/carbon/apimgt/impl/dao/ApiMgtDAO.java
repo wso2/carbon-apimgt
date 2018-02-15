@@ -4768,7 +4768,6 @@ public class ApiMgtDAO {
                     String groupIDArray[] = groupingId.split(",");
                     sqlQuery += whereClauseWithMultiGroupId;
                     prepStmt = fillQueryParams(connection, sqlQuery, groupIDArray, 3);
-                    prepStmt = connection.prepareStatement(sqlQuery);
                     prepStmt.setString(1, applicationName);
                     prepStmt.setString(2, keyType);
                     int paramIndex = groupIDArray.length + 2;
@@ -5827,6 +5826,12 @@ public class ApiMgtDAO {
                 application.setUUID(rs.getString("UUID"));
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
+
+                if (multiGroupAppSharingEnabled) {
+                    if (application.getGroupId().isEmpty()) {
+                        application.setGroupId(getGroupId(application.getId()));
+                    }
+                }
 
                 Timestamp createdTime = rs.getTimestamp("CREATED_TIME");
                 application.setCreatedTime(createdTime == null ? null : String.valueOf(createdTime.getTime()));

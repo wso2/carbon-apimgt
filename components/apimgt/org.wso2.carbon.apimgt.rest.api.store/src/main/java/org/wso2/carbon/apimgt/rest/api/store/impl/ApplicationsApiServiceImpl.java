@@ -189,7 +189,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getApplicationByUUID(applicationId);
             if (application != null) {
-                if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                if (RestAPIStoreUtils.isUserOwnerOfApplication(application)) {
                     String[] accessAllowDomainsArray = body.getAccessAllowDomains().toArray(new String[1]);
                     JSONObject jsonParamObj = new JSONObject();
                     jsonParamObj.put(ApplicationConstants.OAUTH_CLIENT_USERNAME, username);
@@ -311,7 +311,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getApplicationByUUID(applicationId);
             if (application != null) {
-                if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                if (RestAPIStoreUtils.isUserOwnerOfApplication(application)) {
                     String grantTypes = StringUtils.join(body.getSupportedGrantTypes(), ',');
                     JsonObject jsonParams = new JsonObject();
                     jsonParams.addProperty(APIConstants.JSON_GRANT_TYPES, grantTypes);
@@ -360,7 +360,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application oldApplication = apiConsumer.getApplicationByUUID(applicationId);
             if (oldApplication != null) {
-                if (RestAPIStoreUtils.isUserAccessAllowedForApplication(oldApplication)) {
+                if (RestAPIStoreUtils.isUserOwnerOfApplication(oldApplication)) {
                     //we do not honor the subscriber coming from the request body as we can't change the subscriber of the application
                     Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
                     //groupId of the request body is not honored for now.
@@ -411,7 +411,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getApplicationByUUID(applicationId);
             if (application != null) {
-                if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                if (RestAPIStoreUtils.isUserOwnerOfApplication(application)) {
                     apiConsumer.removeApplication(application);
                     return Response.ok().build();
                 } else {
