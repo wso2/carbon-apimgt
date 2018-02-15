@@ -269,6 +269,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
     public void addEndpoint(API api, APITemplateBuilder builder, String tenantDomain) throws EndpointAdminException {
         try {
             ArrayList<String> arrayList = getEndpointType(api);
+            log.debug("Adding endpoint to gateway");
             for (String type : arrayList) {
                 String endpointConfigContext = builder.getConfigStringForEndpointTemplate(type);
                 checkForTenantWhenAdding(apiGatewayAdminStub, endpointConfigContext, tenantDomain);
@@ -290,6 +291,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
         try {
             String endpointName = api.getId().getApiName() + "--v" + api.getId().getVersion();
             ArrayList<String> arrayList = getEndpointType(api);
+            log.debug("Deleting endpoint from gateway");
             for (String type : arrayList) {
                 String endpointType = type.replace("_endpoints", "");
                 if (tenantDomain != null && !("").equals(tenantDomain)
@@ -317,9 +319,11 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
      */
     public void saveEndpoint(API api, APITemplateBuilder builder, String tenantDomain) throws EndpointAdminException {
         try {
+            log.debug("Removing endpoints from gateway to update");
             apiGatewayAdminStub.removeEndpointsToUpdate(api.getId().getApiName(), api.getId().getVersion(),
                     tenantDomain);
 
+            log.debug("Adding updated endpoints to gateway");
             ArrayList<String> arrayListToAdd = getEndpointType(api);
             for (String type : arrayListToAdd) {
                 String endpointConfigContext = builder.getConfigStringForEndpointTemplate(type);

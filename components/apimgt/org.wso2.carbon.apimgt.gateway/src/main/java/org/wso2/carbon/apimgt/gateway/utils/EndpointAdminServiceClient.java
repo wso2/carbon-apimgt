@@ -149,4 +149,8 @@ public class EndpointAdminServiceClient {
         }
         return false;
     }
+
+    protected void setEndpointAdminStub(EndpointAdminStub endpointAdminStub) {
+        this.endpointAdminStub = endpointAdminStub;
+    }
 }
