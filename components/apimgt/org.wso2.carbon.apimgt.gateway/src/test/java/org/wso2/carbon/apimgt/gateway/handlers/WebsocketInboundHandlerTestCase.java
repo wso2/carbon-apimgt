@@ -279,15 +279,6 @@ public class WebsocketInboundHandlerTestCase {
             protected String getRemoteIP(ChannelHandlerContext ctx) {
                 return "192.168.0.100";
             }
-
-            @Override
-            protected Application getApplicationById(APIKeyValidationInfoDTO infoDTO) throws APIManagementException {
-                Application application = Mockito.mock(Application.class);
-                Subscriber subscriber = Mockito.mock(Subscriber.class);
-                Mockito.when(application.getSubscriber()).thenReturn(subscriber);
-                Mockito.when(subscriber.getName()).thenReturn("Ishara");
-                return application;
-            }
         };
         ChannelHandlerContext channelHandlerContext = Mockito.mock(ChannelHandlerContext.class);
         WebSocketFrame webSocketFrame = Mockito.mock(WebSocketFrame.class);
