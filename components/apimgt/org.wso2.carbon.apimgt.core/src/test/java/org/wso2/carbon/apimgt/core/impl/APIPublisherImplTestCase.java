@@ -3140,6 +3140,32 @@ public class APIPublisherImplTestCase {
         Mockito.verify(apiDAO, Mockito.times(1)).updateAPI(apiBuilder.getId(), apiBuilder.build());
     }
 
+    @Test(description = "Test label update when api has own gateway", expectedExceptions = APIManagementException.class)
+    public void testUpdateApiForLabelsWhenAPIHasOwnGateway() throws APIManagementException {
+
+        Set<String> labels = new HashSet<>();
+        labels.add("default");
+        API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().id(UUID.randomUUID().toString())
+                .endpoint(Collections.emptyMap()).hasOwnGateway(true).labels(labels);
+        apiBuilder.apiPermission("");
+        apiBuilder.permissionMap(null);
+        apiBuilder.policies(Collections.emptySet());
+        apiBuilder.apiPolicy(null);
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        Mockito.when(apiDAO.getAPI(apiBuilder.getId())).thenReturn(apiBuilder.build());
+        GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
+        APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
+        APIGateway gateway = Mockito.mock(APIGateway.class);
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api,
+                APIMgtConstants.DEFAULT_API_POLICY)).thenReturn(new APIPolicy(APIMgtConstants.DEFAULT_API_POLICY));
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator,
+                gateway, policyDAO);
+        Mockito.when(apiDAO.getApiSwaggerDefinition(apiBuilder.getId())).thenReturn(SampleTestObjectCreator
+                .apiDefinition);
+        apiPublisher.updateAPI(apiBuilder);
+    }
+
     @Test(description = "Test add api with production endpoint")
     public void testUpdateApiEndpointOfUriTemplate() throws APIManagementException {
         /**

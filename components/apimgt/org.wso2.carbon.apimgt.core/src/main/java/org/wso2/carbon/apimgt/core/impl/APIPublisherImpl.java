@@ -593,7 +593,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     }
                     Map<String, Endpoint> apiEndpointMap = apiBuilder.getEndpoint();
                     validateEndpoints(apiEndpointMap, true);
-                    validateLabels(apiBuilder.getLabels(), apiBuilder.hasOwnGateway());
+                    validateLabels(apiBuilder.getLabels(), originalAPI.hasOwnGateway());
                     createUriTemplateList(apiBuilder, true);
                     validateApiPolicy(apiBuilder.getApiPolicy());
                     validateSubscriptionPolicies(apiBuilder);

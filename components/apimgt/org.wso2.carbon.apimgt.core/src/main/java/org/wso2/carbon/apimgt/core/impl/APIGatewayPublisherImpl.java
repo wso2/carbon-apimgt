@@ -81,7 +81,6 @@ public class APIGatewayPublisherImpl implements APIGateway {
         if (log.isDebugEnabled()) {
             log.debug("API : " + api.getName() + " created event has been successfully published to broker");
         }
-        //Do not create the Container Based gateway based on hasOwnGateway value as this is in created state.
     }
 
     /**
