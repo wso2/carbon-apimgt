@@ -19,18 +19,27 @@
 import React from 'react'
 import API from '../../../data/api'
 
-import Card, {CardActions, CardContent, CardMedia} from 'material-ui/Card';
 import {Redirect, Switch} from 'react-router-dom'
 import Typography from 'material-ui/Typography';
 import Button from 'material-ui/Button';
-import Dialog, {DialogActions, DialogContent, DialogContentText, DialogTitle,} from 'material-ui/Dialog';
-import Slide from 'material-ui/transitions/Slide';
 import Grid from 'material-ui/Grid';
 import NotificationSystem from 'react-notification-system';
 import {resourceMethod, resourcePath, ScopeValidation} from "../../../data/ScopeValidation";
 import Utils from "../../../data/Utils";
 import ConfirmDialog from "../../Shared/ConfirmDialog";
 import {withStyles} from 'material-ui/styles';
+import * as icons from 'material-ui-icons';
+import Delete from 'material-ui-icons/Delete';
+import MoreHoriz from 'material-ui-icons/MoreHoriz';
+
+import { MenuItem, MenuList } from 'material-ui/Menu';
+import Grow from 'material-ui/transitions/Grow';
+import { Manager, Target, Popper } from 'react-popper';
+import ClickAwayListener from 'material-ui/utils/ClickAwayListener';
+import classNames from 'classnames';
+import Paper from 'material-ui/Paper'
+import NavBar from '../Details/NavBar'
+
 
 const styles = theme => ({
     lifeCycleState: {
@@ -45,6 +54,78 @@ const styles = theme => ({
     lifeCycleState_Maintenance: {backgroundColor: "#cecece"},
     lifeCycleState_Deprecated: {backgroundColor: "#D7C850"},
     lifeCycleState_Retired: {backgroundColor: "#000000"},
+    lifeCycleDisplay: {
+        width: 95,
+        height: 30,
+        marginTop: -15,
+        marginLeft: 10,
+        backgroundColor: '#4cb050dd',
+        color: '#fff',
+        textAlign: 'center',
+        lineHeight: '30px',
+        position: 'absolute',
+    },
+    thumbContent: {
+        width: 250,
+        backgroundColor: '#fff',
+        padding: 10
+    },
+    thumbLeft: {
+        alignSelf: 'flex-start',
+        flex: 1
+    },
+    thumbRight: {
+        alignSelf: 'flex-end',
+    },
+    thumbInfo: {
+        display: 'flex',
+    },
+    thumbHeader: {
+        width: 250,
+        whiteSpace: 'nowrap',
+        overflow : 'hidden',
+        textOverflow : 'ellipsis',
+        cursor: 'pointer'
+    },
+    svgImage: {
+        cursor: 'pointer'
+    },
+    descriptionOverlay: {
+        content:'',
+        width:'100%',
+        height:'100%' ,
+        position:'absolute',
+        left:0,
+        top:0,
+        background:'linear-gradient(transparent 25px, white)',
+    },
+    descriptionWrapper: {
+        position: 'relative',
+        height: 50,
+        overflow: 'hidden'
+    },
+    thumbDelete: {
+        cursor: 'pointer',
+        backgroundColor: '#ffffff9a',
+        display: 'inline-block',
+        position: 'absolute',
+        top: 20,
+        left: 224,
+    },
+    thumbWrapper: {
+        position: 'relative',
+        paddingTop: 20,
+    },
+    deleteIcon: {
+        fill: 'red'
+    },
+    moreButton: {
+        position: 'absolute',
+        zIndex: 100,
+        marginTop: -25,
+        left: 170,
+
+    }
 });
 
 class ApiThumb extends React.Component {
@@ -59,6 +140,7 @@ class ApiThumb extends React.Component {
             openDeleteConfirmDialog: false,
             openRedirectConfirmDialog: false,
             redirectConfirmDialogDetails: {},
+            openMoreMenu: false,
         };
 
         this.handleApiDelete = this.handleApiDelete.bind(this);
@@ -101,7 +183,7 @@ class ApiThumb extends React.Component {
         );
     }
 
-    handleRedirectToAPIOverview() {
+    handleRedirectToAPIOverview = (page) => {
         const {api, environmentName, rootAPI} = this.props;
         const currentEnvironmentName = Utils.getCurrentEnvironment().label;
         // If environment name or version is not defined then consider as same environment or version.
@@ -141,11 +223,18 @@ class ApiThumb extends React.Component {
         });
     }
 
+    handleClickMoreMenu = () => {
+        this.setState({ openMoreMenu: true });
+    };
+
+    handleCloseMoreMenu = () => {
+        this.setState({ openMoreMenu: false });
+    };
+
     render() {
         const {api, environmentOverview, classes} = this.props;
         const gridItemSizes = environmentOverview ?
             {xs: 6, sm: 4, md: 3, lg: 2, xl: 2} : {xs: 6, sm: 4, md: 3, lg: 2, xl: 2};
-        let heading, content;
 
         if (!this.state.active) { // Controls the delete state, We set the state to inactive on delete success call
             return null;
@@ -159,68 +248,153 @@ class ApiThumb extends React.Component {
             );
         }
 
-        if (environmentOverview) { // API Thumb for "environment overview" page
-            heading = api.version;
-            content = (
-                <Typography component="div">
-                    <p>{api.context}</p>
-                    <div style={{display: "flex"}}>
-                        <div className={
-                            `${classes.lifeCycleState} ${classes[`lifeCycleState_${api.lifeCycleStatus}`]}`
-                        }/>
-                        {api.lifeCycleStatus}
-                    </div>
-                </Typography>
-            );
-        } else { // Standard API Thumb view for "API listing" page
-            heading = api.name;
-            content = (
-                <Typography component="div">
-                    <p>{api.version}</p>
-                    <p>{api.context}</p>
-                    <p className="description">{api.description}</p>
-                </Typography>
-            );
+
+        const colorPairs = [
+            {prime: 0x8f6bcaff, sub:0x4fc2f8ff },
+            {prime: 0xf47f16ff, sub:0xcddc39ff },
+            {prime: 0xf44236ff, sub:0xfec107ff },
+            {prime: 0x2196f3ff, sub:0xaeea00ff },
+            {prime: 0xff9700ff, sub:0xffeb3cff },
+            {prime: 0xff9700ff, sub:0xfe5722ff },
+        ];
+        const thumbnailBox = {
+            width: 250,
+            height: 200
+        };
+
+        const thumbnailBoxChild = {
+            width: 50,
+            height: 50
+        };
+        //Get a random color pair
+        let allChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_&!#$";
+        let str = api.name;
+        let iconIndex = 0;
+        let colorIndex = str.length;
+        for(let i=0; i< str.length; i++){
+            iconIndex += allChars.indexOf(str[i]);
         }
+        while(colorIndex > 5 ){
+            colorIndex  -= 6;
+        }
+        //let colorIndex = Math.floor(Math.random() * Math.floor(colorPairs.length)); //Get a random color combination
+        let colorPair = colorPairs[colorIndex];
+        //let iconIndex = Math.floor(Math.random() * Math.floor(Object.keys(icons).length)); // Get a random icon index
+        let tmpIndex = 0;
+        let icon = null;
 
+
+        for( let i in icons){
+            if(icons.hasOwnProperty(i)){
+                tmpIndex++;
+                if(tmpIndex === iconIndex ){
+                    icon = icons[i];
+                }
+            }
+        }
+        let rects = [];
+        for( let i=0; i <= 4; i++ ){
+            for( let j=0; j <= 4; j++ ) {
+
+                rects.push(<rect
+                    {...thumbnailBoxChild}
+                    fill={"#" + (colorPair.sub - 0x00000025 * i - j*0x00000015).toString(16)}
+                    x={200 - i * 54}
+                    y={54*j}
+                />)
+            }
+        }
+        const Icon = icon;
         return (
-            <Grid item {...gridItemSizes}>
-                <Card>
-                    <CardMedia image="/publisher/public/app/images/api/api-default.png">
-                        <img src="/publisher/public/app/images/api/api-default.png" style={{width: "100%"}}/>
-                    </CardMedia>
-                    <CardContent>
-                        <Typography type="headline" component="h2">
-                            {heading}
-                        </Typography>
-                        {content}
-                    </CardContent>
-                    <CardActions>
-                        <Button onClick={this.handleRedirectToAPIOverview} dense color="primary">
-                            More...
-                        </Button>
+            <Grid item {...gridItemSizes} className={classes.thumbWrapper}>
+                {api &&  <div
+                    className={
+                        `${classes.lifeCycleDisplay} ${classes[`lifeCycleState_${api.lifeCycleStatus}`]}`
+                    }
+                    >{api.lifeCycleStatus}</div> }
+                {/*Do not render for environment overview page*/}
+                {!environmentOverview &&
+                    <ScopeValidation resourcePath={resourcePath.SINGLE_API}
+                                     resourceMethod={resourceMethod.DELETE}>
+                        <a className={classes.thumbDelete} onClick={this.openDeleteConfirmDialog}>
+                            <Delete className={classes.deleteIcon} />
+                        </a>
+                    </ScopeValidation>
+                }
+                <svg width="250" height="190" onClick={this.handleRedirectToAPIOverview} className={classes.svgImage}>
+                    <rect
+                        {...thumbnailBox}
+                        fill={"#" + colorPair.prime.toString(16)}
+                    />
+                    {rects}
+                    <Icon />
+                </svg>
 
-                        {/*Do not render for environment overview page*/}
-                        {!environmentOverview ?
-                            <div>
-                                <NotificationSystem ref="notificationSystem"/>
-                                <ScopeValidation resourcePath={resourcePath.SINGLE_API}
-                                                 resourceMethod={resourceMethod.DELETE}>
-                                    <Button dense color="primary" onClick={this.openDeleteConfirmDialog}>Delete</Button>
-                                </ScopeValidation>
-                                <ConfirmDialog
-                                    title={`Delete API "${api.name} - ${api.version}"?`}
-                                    message={"Are you sure you want to delete the API?"}
-                                    labelOk={"Delete"}
-                                    callback={this.deleteConfirmDialogCallback}
-                                    open={this.state.openDeleteConfirmDialog}
-                                />
-                            </div>
-                            :
-                            <div/>
-                        }
-                    </CardActions>
-                </Card>
+                <Manager className={classes.moreButton}>
+                    <Target>
+                        <Button
+                            aria-owns={this.state.openMoreMenu ? 'menu-list' : null}
+                            aria-haspopup="true"
+                            onClick={this.handleClickMoreMenu}
+                            variant="raised" size="small" color="default"
+                        >
+                            <MoreHoriz />
+                        </Button>
+                    </Target>
+                    <Popper
+                        placement="bottom-start"
+                        eventsEnabled={this.state.openMoreMenu}
+                        className={classNames({ [classes.popperClose]: !this.state.openMoreMenu })}
+                    >
+                        <ClickAwayListener onClickAway={this.handleCloseMoreMenu}>
+                            <Grow in={this.state.openMoreMenu} id="menu-list" style={{ transformOrigin: '0 0 0' }}>
+                                <Paper>
+                                    <MenuList role="menu">
+                                        <MenuItem onClick={this.handleRedirectToAPIOverview}>Profile</MenuItem>
+                                        <MenuItem onClick={this.handleRedirectToAPIOverview}>My account</MenuItem>
+                                        <MenuItem onClick={this.handleRedirectToAPIOverview}>Logout</MenuItem>
+                                    </MenuList>
+                                </Paper>
+                            </Grow>
+                        </ClickAwayListener>
+                    </Popper>
+                </Manager>
+                <div className={classes.thumbContent}>
+                    <Typography className={classes.thumbHeader} variant="display1" gutterBottom
+                                onClick={this.handleRedirectToAPIOverview}>
+                        {environmentOverview ? <span>{api.version}</span> : <span>{api.name}</span> }
+                    </Typography>
+                    <div className={classes.thumbInfo}>
+                        <div className={classes.thumbLeft}>
+                            <Typography variant="display1">
+                                {environmentOverview ? <span>{api.name}</span> : <span>{api.version}</span> }
+                            </Typography>
+                            <Typography variant="caption" gutterBottom align="left">
+                                {environmentOverview ? <span>Name</span> : <span>Version</span> }
+                            </Typography>
+                        </div>
+                        <div className={classes.thumbRight}>
+                            <Typography variant="display1" align="right">{api.context}</Typography>
+                            <Typography variant="caption" gutterBottom align="right">
+                                Context
+                            </Typography>
+                        </div>
+                    </div>
+                    <div className={classes.descriptionWrapper}>
+                        {api.description}
+                        <div className={classes.descriptionOverlay} />
+                        </div>
+
+                </div>
+                <NotificationSystem ref="notificationSystem"/>
+
+                <ConfirmDialog
+                    title={`Delete API "${api.name} - ${api.version}"?`}
+                    message={"Are you sure you want to delete the API?"}
+                    labelOk={"Delete"}
+                    callback={this.deleteConfirmDialogCallback}
+                    open={this.state.openDeleteConfirmDialog}
+                />
                 <ConfirmDialog
                     {...this.state.redirectConfirmDialogDetails}
                     callback={this.redirectConfirmDialogCallback}
