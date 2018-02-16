@@ -57,8 +57,9 @@ public class CompositeApisApiServiceImpl extends CompositeApisApiService {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
-            if (!RestApiUtil.getConsumer(username).isCompositeAPIExist(apiId)) {
-                String errorMessage = "Cannot retrieve dedicated Gateway. API not Found : " + apiId;
+
+            if (!apiStore.isCompositeAPIExist(apiId)) {
+                String errorMessage = "API not found : " + apiId;
                 APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
                         ExceptionCodes.API_NOT_FOUND);
                 HashMap<String, String> paramList = new HashMap<String, String>();
@@ -79,15 +80,20 @@ public class CompositeApisApiServiceImpl extends CompositeApisApiService {
                         .toDedicatedGatewayDTO(dedicatedGateway);
                 return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint
                         + "\"").entity(dedicatedGatewayDTO).build();
+
             } else {
-                String msg = "Dedicated Gateway not found for Composite API : " + apiId;
-                log.error(msg);
-                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
-                log.error(msg);
+                String msg = "Dedicated Gateway not found for " + apiId;
+                APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(msg,
+                        ExceptionCodes.DEDICATED_GATEWAY_DETAILS_NOT_FOUND);
+                HashMap<String, String> paramList = new HashMap<String, String>();
+                paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                log.error(msg, e);
                 return Response.status(Response.Status.NOT_FOUND).entity(errorDTO).build();
             }
+
         } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving API : " + apiId;
+            String errorMessage = "Error while retrieving dedicated gateway of the API : " + apiId;
             HashMap<String, String> paramList = new HashMap<String, String>();
             paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
@@ -115,6 +121,18 @@ public class CompositeApisApiServiceImpl extends CompositeApisApiService {
 
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
+
+            if (!apiStore.isCompositeAPIExist(apiId)) {
+                String errorMessage = "API not found : " + apiId;
+                APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
+                        ExceptionCodes.API_NOT_FOUND);
+                HashMap<String, String> paramList = new HashMap<String, String>();
+                paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                log.error(errorMessage, e);
+                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+            }
+
             String existingFingerprint = compositeApisApiIdGetFingerprint(apiId, null, null, request);
             if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
                     .contains(existingFingerprint)) {
@@ -130,7 +148,7 @@ public class CompositeApisApiServiceImpl extends CompositeApisApiService {
                     .entity(DedicatedGatewayMappingUtil.toDedicatedGatewayDTO(updatedDedicatedGateway)).build();
 
         } catch (APIManagementException e) {
-            String errorMessage = "Error while updating dedicatedGateway of the Composite API : " + apiId;
+            String errorMessage = "Error while updating dedicated gateway of the composite API : " + apiId;
             HashMap<String, String> paramList = new HashMap<String, String>();
             paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);

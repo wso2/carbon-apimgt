@@ -30,7 +30,11 @@ public class DedicatedGatewayMappingUtil {
 
         DedicatedGateway dedicatedGateway = new DedicatedGateway();
         dedicatedGateway.setApiId(apiId);
-        dedicatedGateway.setEnabled(dedicatedGatewayDTO.getIsEnabled());
+        if (dedicatedGatewayDTO.getIsEnabled() != null) {
+            dedicatedGateway.setEnabled(dedicatedGatewayDTO.getIsEnabled());
+        } else {
+            dedicatedGateway.setEnabled(false);
+        }
         return dedicatedGateway;
 
     }

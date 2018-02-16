@@ -160,7 +160,7 @@ public class MappingUtil {
             List<String> policyIdList = new ArrayList<>(api.getThreatProtectionPolicies());
 
             List<API_threatProtectionPolicies_listDTO> listDTOS = new ArrayList<>();
-            for(String policyId: policyIdList) {
+            for (String policyId : policyIdList) {
                 API_threatProtectionPolicies_listDTO threatProtectionPoliciesListDTO =
                         new API_threatProtectionPolicies_listDTO();
                 threatProtectionPoliciesListDTO.setPolicyId(policyId);
@@ -238,7 +238,7 @@ public class MappingUtil {
             uriTemplateList.put(uriTemplateBuilder.getTemplateId(), uriTemplateBuilder.build());
         }
         Set<Policy> subscriptionPolicies = new HashSet<>();
-        apidto.getPolicies().forEach(v-> subscriptionPolicies.add(new SubscriptionPolicy(v)));
+        apidto.getPolicies().forEach(v -> subscriptionPolicies.add(new SubscriptionPolicy(v)));
         API.APIBuilder apiBuilder = new API.APIBuilder(apidto.getProvider(), apidto.getName(), apidto.getVersion()).
                 id(apidto.getId()).
                 context(apidto.getContext()).
@@ -281,7 +281,7 @@ public class MappingUtil {
             List<API_threatProtectionPolicies_listDTO> threatProtectionPolicies_listDTO = threatProtectionPoliciesDTO.getList();
 
             Set<String> policyIdSet = new HashSet<>();
-            for (API_threatProtectionPolicies_listDTO listDTO: threatProtectionPolicies_listDTO) {
+            for (API_threatProtectionPolicies_listDTO listDTO : threatProtectionPolicies_listDTO) {
                 policyIdSet.add(listDTO.getPolicyId());
             }
             apiBuilder.threatProtectionPolicies(policyIdSet);
@@ -293,7 +293,7 @@ public class MappingUtil {
             JsonProcessingException {
         Map<String, Endpoint> endpointMap = new HashMap<>();
         for (API_endpointDTO endpointDTO : endpoint) {
-            if (!StringUtils.isEmpty(endpointDTO.getKey())){
+            if (!StringUtils.isEmpty(endpointDTO.getKey())) {
                 endpointMap.put(endpointDTO.getType(), new Endpoint.Builder().id(endpointDTO.getKey())
                         .applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).build());
             }
@@ -491,7 +491,7 @@ public class MappingUtil {
         } else {
             endPointBuilder.id(UUID.randomUUID().toString());
         }
-        if (endPointDTO.getMaxTps() != null){
+        if (endPointDTO.getMaxTps() != null) {
             endPointBuilder.maxTps(endPointDTO.getMaxTps());
         }
         endPointBuilder.security(mapper.writeValueAsString(endPointDTO.getEndpointSecurity()));
@@ -587,13 +587,16 @@ public class MappingUtil {
      */
     public static int mapSecuritySchemeListToInt(List<String> securityScheme) {
         int securitySchemeValue = 0;
-        for(String scheme : securityScheme) {
+        for (String scheme : securityScheme) {
             switch (scheme) {
-                case "Oauth" : securitySchemeValue = securitySchemeValue | 1;
+                case "Oauth":
+                    securitySchemeValue = securitySchemeValue | 1;
                     break;
-                case "apikey" : securitySchemeValue = securitySchemeValue | 2;
+                case "apikey":
+                    securitySchemeValue = securitySchemeValue | 2;
                     break;
-                default:break;
+                default:
+                    break;
             }
         }
 
@@ -625,9 +628,9 @@ public class MappingUtil {
      */
     public static ScopeListDTO toScopeListDto(Map<String, String> scopeMap) {
         ScopeListDTO scopeListDTO = new ScopeListDTO();
-        scopeMap.forEach((name, description) ->{
+        scopeMap.forEach((name, description) -> {
             scopeListDTO.addListItem(new ScopeList_listDTO().name(name).description(description));
-        } );
+        });
         scopeListDTO.setCount(scopeMap.size());
         return scopeListDTO;
     }
@@ -642,7 +645,7 @@ public class MappingUtil {
         scope.setName(body.getName());
         scope.setDescription(body.getDescription());
         Scope_bindingsDTO scopeBindingsDTO = body.getBindings();
-        if (scopeBindingsDTO != null){
+        if (scopeBindingsDTO != null) {
             scope.setBindings(scopeBindingsDTO.getValues());
         }
         return scope;
@@ -660,14 +663,15 @@ public class MappingUtil {
         scopeDTO.setDescription(scope.getDescription());
         Scope_bindingsDTO scopeBindingsDTO = new Scope_bindingsDTO();
         scopeBindingsDTO.setType(scopeBindingType);
-        if (scope.getBindings() != null){
+        if (scope.getBindings() != null) {
             scopeBindingsDTO.setValues(scope.getBindings());
-        }else{
+        } else {
             scopeBindingsDTO.setValues(Collections.emptyList());
         }
         scopeDTO.setBindings(scopeBindingsDTO);
         return scopeDTO;
     }
+
     public static ThreatProtectionPolicyDTO toThreatProtectionPolicyDTO(ThreatProtectionPolicy policy) {
         ThreatProtectionPolicyDTO dto = new ThreatProtectionPolicyDTO();
         dto.setUuid(policy.getUuid());
@@ -701,7 +705,11 @@ public class MappingUtil {
 
         DedicatedGateway dedicatedGateway = new DedicatedGateway();
         dedicatedGateway.setApiId(apiId);
-        dedicatedGateway.setEnabled(dedicatedGatewayDTO.getIsEnabled());
+        if (dedicatedGatewayDTO.getIsEnabled() != null) {
+            dedicatedGateway.setEnabled(dedicatedGatewayDTO.getIsEnabled());
+        } else {
+            dedicatedGateway.setEnabled(false);
+        }
         return dedicatedGateway;
 
     }

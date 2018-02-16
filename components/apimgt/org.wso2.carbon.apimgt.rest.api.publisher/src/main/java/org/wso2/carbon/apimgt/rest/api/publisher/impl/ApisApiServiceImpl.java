@@ -120,8 +120,12 @@ public class ApisApiServiceImpl extends ApisApiService {
 
                 } else {
                     String msg = "Dedicated Gateway not found for " + apiId;
+                    APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(msg,
+                            ExceptionCodes.DEDICATED_GATEWAY_DETAILS_NOT_FOUND);
+                    HashMap<String, String> paramList = new HashMap<String, String>();
+                    paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+                    ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
                     APIUtils.logDebug(msg, log);
-                    ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
                     return Response.status(Response.Status.NOT_FOUND).entity(errorDTO).build();
                 }
 
@@ -344,7 +348,6 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             if (fileInputStream != null && inlineContent != null) {
                 String msg = "Only one of 'file' and 'inlineContent' should be specified";
-                log.error(msg);
                 ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
                 log.error(msg);
                 return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
@@ -354,7 +357,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             DocumentInfo documentation = apiProvider.getDocumentationSummary(documentId);
             if (documentation == null) {
                 String msg = "Documentation not found " + documentId;
-                log.error(msg);
                 ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
                 log.error(msg);
                 return Response.status(Response.Status.NOT_FOUND).entity(errorDTO).build();
@@ -363,7 +365,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             if (fileInputStream != null) {
                 if (!documentation.getSourceType().equals(DocumentInfo.SourceType.FILE)) {
                     String msg = "Source type of document " + documentId + " is not FILE";
-                    log.error(msg);
                     ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
                     log.error(msg);
                     return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
