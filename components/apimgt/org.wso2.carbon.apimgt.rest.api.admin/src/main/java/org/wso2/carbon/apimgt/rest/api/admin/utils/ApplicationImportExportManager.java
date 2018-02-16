@@ -65,6 +65,7 @@ public class ApplicationImportExportManager {
         application = apiConsumer.getApplicationById(appId);
         if (application != null) {
             application.setGroupId(groupId);
+            application.setOwner(application.getSubscriber().getName());
         }
         return application;
     }
@@ -72,7 +73,8 @@ public class ApplicationImportExportManager {
     /**
      * Check whether a provided userId corresponds to a valid consumer of the store and subscribe if valid
      *
-     * @param userId username of the Owner
+     * @param userId  username of the Owner
+     * @param groupId the groupId to which the target subscriber belongs to
      * @throws APIManagementException if an error occurs while checking the validity of user
      */
     public void validateOwner(String userId, String groupId) throws APIManagementException {
@@ -146,15 +148,14 @@ public class ApplicationImportExportManager {
                     //tier of the imported subscription
                     Tier tier = subscribedAPI.getTier();
                     //checking whether the target tier is available
-                    if (isTierAvailable(tier, api)) {
+                    if (isTierAvailable(tier, api) && api.getStatus() != null && api.getStatus()
+                            .equals(APIStatus.PUBLISHED)) {
                         apiId.setTier(tier.getName());
-                        if (api.getStatus() != null && api.getStatus().equals(APIStatus.PUBLISHED)) {
-                            apiConsumer.addSubscription(apiId, userId, appId);
-                        } else {
-                            log.error("Failed to import Subscription as API " + name + "-" + version +
-                                    " may not have been published");
-                            skippedAPIList.add(subscribedAPI.getApiId());
-                        }
+                        apiConsumer.addSubscription(apiId, userId, appId);
+                    } else {
+                        log.error("Failed to import Subscription as API " + name + "-" + version +
+                                " as one or more tiers may be unavailable or the API may not have been published ");
+                        skippedAPIList.add(subscribedAPI.getApiId());
                     }
                 } else {
                     log.error("Failed to import Subscription as API " + name + "-" + version + " is not available");

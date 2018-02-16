@@ -75,7 +75,7 @@ public class ImportApiServiceImpl extends ImportApiService {
             if (!StringUtils.isBlank(appOwner)) {
                 ownerId = appOwner;
             } else if (preserveOwner != null && preserveOwner) {
-                ownerId = applicationDetails.getSubscriber().getName();
+                ownerId = applicationDetails.getOwner();
             } else {
                 ownerId = username;
             }
@@ -93,15 +93,15 @@ public class ImportApiServiceImpl extends ImportApiService {
                         .importSubscriptions(applicationDetails, username, appId);
             }
             Application importedApplication = consumer.getApplicationById(appId);
+            importedApplication.setOwner(ownerId);
             ApplicationInfoDTO importedApplicationDTO = ApplicationMappingUtil
                     .fromApplicationToInfoDTO(importedApplication);
-            APIInfoListDTO skippedAPIListDTO = APIInfoMappingUtil
-                    .fromAPIInfoListToDTO(skippedAPIs);
             URI location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/" +
                     importedApplicationDTO.getApplicationId());
             if (skippedAPIs.isEmpty()) {
                 return Response.created(location).entity(importedApplicationDTO).build();
             } else {
+                APIInfoListDTO skippedAPIListDTO = APIInfoMappingUtil.fromAPIInfoListToDTO(skippedAPIs);
                 return Response.created(location).status(207).entity(skippedAPIListDTO).build();
             }
         } catch (APIManagementException | URISyntaxException | UserStoreException e) {
