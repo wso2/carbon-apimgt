@@ -29,7 +29,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
@@ -332,8 +331,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
         String useragent = headers.get(HttpHeaders.USER_AGENT);
 
         try {
-            Application app = getApplicationById(infoDTO);
-            String appOwner = app.getSubscriber().getName();
+            String appOwner = infoDTO.getSubscriber();
             String keyType = infoDTO.getType();
             String correlationID = UUID.randomUUID().toString();
 
@@ -348,7 +346,6 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             requestPublisherDTO.setConsumerKey(infoDTO.getConsumerKey());
             //context will always be empty as this method will call only for WebSocketFrame and url is null
             requestPublisherDTO.setContext("");
-//            requestPublisherDTO.setContext(getContextFromUrl(uri));
             requestPublisherDTO.setContinuedOnThrottleOut(isThrottledOut);
             requestPublisherDTO.setHostName(DataPublisherUtil.getHostAddress());
             requestPublisherDTO.setMethod("-");
@@ -367,9 +364,5 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             // flow should not break if event publishing failed
             log.error("Cannot publish event. " + e.getMessage(), e);
         }
-    }
-
-    protected Application getApplicationById(APIKeyValidationInfoDTO infoDTO) throws APIManagementException {
-        return ApiMgtDAO.getInstance().getApplicationById(Integer.parseInt(infoDTO.getApplicationId()));
     }
 }
