@@ -1,7 +1,5 @@
-package org.wso2.carbon.apimgt.core.template;
-
 /*
-* Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+* Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 * WSO2 Inc. licenses this file to you under the Apache License,
 * Version 2.0 (the "License"); you may not use this file except
@@ -19,13 +17,14 @@ package org.wso2.carbon.apimgt.core.template;
 *
 */
 
+package org.wso2.carbon.apimgt.core.template;
+
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.log.CommonsLogLogChute;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
-import org.wso2.carbon.apimgt.core.exception.ContainerBasedGatewayException;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ContainerBasedGatewayConstants;
 
@@ -79,10 +78,8 @@ public class ContainerBasedGatewayTemplateBuilder {
      * @param templateValues Template values
      * @param template       Template
      * @return template as a String
-     * @throws ContainerBasedGatewayException if failed to generate the template
      */
-    public String generateTemplate(Map<String, String> templateValues, String template)
-            throws ContainerBasedGatewayException {
+    public String generateTemplate(Map<String, String> templateValues, String template) {
 
         StringWriter writer = new StringWriter();
         VelocityEngine velocityengine = initVelocityEngine();

@@ -307,7 +307,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
         } catch (APIMgtDAOException e) {
             throw new APIManagementException("Error occurred while updating dedicatedGateway details of API with id "
-                    + apiId, e, e.getErrorHandler());
+                    + apiId, e, ExceptionCodes.ERROR_WHILE_UPDATING_DEDICATED_CONTAINER_BASED_GATEWAY);
         }
     }
 
@@ -321,7 +321,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             dedicatedGateway = getApiDAO().getDedicatedGateway(apiId);
         } catch (APIMgtDAOException e) {
             throw new APIManagementException("Error occurred while retrieving dedicated Gateway details of API with id "
-                    + apiId, e, e.getErrorHandler());
+                    + apiId, e, ExceptionCodes.ERROR_WHILE_RETRIEVING_DEDICATED_CONTAINER_BASED_GATEWAY);
         }
         return dedicatedGateway;
     }

@@ -598,7 +598,6 @@ public class ApiFileDAOImpl implements ApiDAO {
     public void updateDedicatedGateway(DedicatedGateway dedicatedGateway, String apiId, Set<String> label)
             throws APIMgtDAOException {
         throw new UnsupportedOperationException();
-
     }
 
     /**

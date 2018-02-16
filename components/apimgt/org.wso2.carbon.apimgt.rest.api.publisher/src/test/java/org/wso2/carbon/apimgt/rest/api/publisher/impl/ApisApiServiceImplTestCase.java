@@ -2107,7 +2107,7 @@ public class ApisApiServiceImplTestCase {
                 getRequest());
         assertEquals(200, response.getStatus());
     }
-    
+
     @Test
     public void testApisApiIdDedicatedGatewayPutForException() throws Exception {
         printTestMethodName();

@@ -1649,14 +1649,12 @@ public class ApiDAOImpl implements ApiDAO {
             } catch (SQLException e) {
                 String msg = "Couldn't update dedicated Gateway details of API : " + apiId;
                 connection.rollback();
-                log.error(msg, e);
-                throw new APIMgtDAOException(msg, ExceptionCodes.APIM_DAO_EXCEPTION);
+                throw new APIMgtDAOException(msg, e);
             } finally {
                 connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException e) {
-            throw new APIMgtDAOException("Error Executing query for updating Container Based Gateway",
-                    ExceptionCodes.APIM_DAO_EXCEPTION);
+            throw new APIMgtDAOException("Error Executing query for updating Container Based Gateway", e);
         }
     }
 
@@ -1686,13 +1684,11 @@ public class ApiDAOImpl implements ApiDAO {
                 }
             } catch (SQLException e) {
                 String errorMessage = "Error while retrieving dedicated gateway details of API : " + apiId;
-                log.error(errorMessage, e);
-                throw new APIMgtDAOException(errorMessage, ExceptionCodes.APIM_DAO_EXCEPTION);
+                throw new APIMgtDAOException(errorMessage, e);
             }
         } catch (SQLException e) {
             String message = "Error while creating database connection/prepared-statement";
-            log.error(message, e);
-            throw new APIMgtDAOException(message, ExceptionCodes.APIM_DAO_EXCEPTION);
+            throw new APIMgtDAOException(message, e);
         }
     }
 

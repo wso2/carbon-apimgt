@@ -1848,7 +1848,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
         } catch (APIMgtDAOException e) {
             throw new APIManagementException("Error occurred while updating dedicatedGateway details of API with id "
-                    + apiId, e, e.getErrorHandler());
+                    + apiId, e, ExceptionCodes.ERROR_WHILE_UPDATING_DEDICATED_CONTAINER_BASED_GATEWAY);
         }
     }
 
@@ -1863,7 +1863,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             dedicatedGateway = getApiDAO().getDedicatedGateway(apiId);
         } catch (APIMgtDAOException e) {
             throw new APIManagementException("Error occurred while retrieving dedicated Gateway details of API with id "
-                    + apiId, e, e.getErrorHandler());
+                    + apiId, e, ExceptionCodes.ERROR_WHILE_RETRIEVING_DEDICATED_CONTAINER_BASED_GATEWAY);
         }
         return dedicatedGateway;
     }

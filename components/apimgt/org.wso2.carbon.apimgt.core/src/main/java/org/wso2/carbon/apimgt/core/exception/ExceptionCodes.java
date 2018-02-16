@@ -238,10 +238,12 @@ public enum ExceptionCodes implements ErrorHandler {
     DEDICATED_CONTAINER_GATEWAY_CREATION_FAILED(900995, "Error while creating dedicated container based gateway", 500,
             "Error while creating dedicated container based gateway"),
     ERROR_WHILE_UPDATING_DEDICATED_CONTAINER_BASED_GATEWAY(900996, "Error while updating dedicated container based" +
-            " gateway", 500, "The api is not in Published or Prototyped or Deprecated status"),
-    INVALID_DEDICATED_CONTAINER_BASED_GATEWAY_LABEL(900997, "Invalid gateway label is provided", 400,
+            " gateway", 500, "Error while updating dedicated container based gateway"),
+    ERROR_WHILE_RETRIEVING_DEDICATED_CONTAINER_BASED_GATEWAY(900997, "Error while retrieving dedicated container " +
+            "based gateway", 500, "Error while retrieving dedicated container based gateway"),
+    INVALID_DEDICATED_CONTAINER_BASED_GATEWAY_LABEL(900998, "Invalid gateway label is provided", 400,
             "Invalid gateway label is provided"),
-    DEDICATED_GATEWAY_DETAILS_NOT_FOUND(900998, "Dedicated gateway details not found for the API", 404, "Dedicated " +
+    DEDICATED_GATEWAY_DETAILS_NOT_FOUND(900999, "Dedicated gateway details not found for the API", 404, "Dedicated " +
             "gateway details not found for the API");
 
     private final long errorCode;
