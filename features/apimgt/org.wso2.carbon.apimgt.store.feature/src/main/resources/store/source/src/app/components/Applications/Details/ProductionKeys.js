@@ -14,6 +14,7 @@ import Input, {InputLabel, InputAdornment} from 'material-ui/Input';
 import {FormControl, FormHelperText} from 'material-ui/Form';
 import Visibility from 'material-ui-icons/Visibility';
 import VisibilityOff from 'material-ui-icons/VisibilityOff';
+import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 
 // Styles for Grid and Paper elements
 const styles = theme => ({
@@ -90,10 +91,23 @@ class ProductionKeys extends React.Component {
         let promised_app = Application.get(this.appId);
         promised_app.then(application => {
             application.getKeys().then(() => this.setState({application: application}))
-        });
+        }).catch(
+            error => {
+                if (process.env.NODE_ENV !== "production") {
+                    console.log(error);
+                }
+                let status = error.status;
+                if (status === 404) {
+                    this.setState({notFound: true});
+                }
+            }
+        );
     }
 
     render() {
+        if (this.state.notFound) {
+            return <ResourceNotFound/>
+        }
         if (!this.state.application) {
             return <Loading/>
         }

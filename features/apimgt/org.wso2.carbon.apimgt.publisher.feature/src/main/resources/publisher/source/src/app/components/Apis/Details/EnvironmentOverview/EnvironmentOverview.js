@@ -25,6 +25,9 @@ import ResourceNotFound from "../../../Base/Errors/ResourceNotFound";
 import Loading from "../../../Base/Loading/Loading";
 import EnvironmentPanel from "./EnvironmentPanel";
 import ConfigManager from "../../../../data/ConfigManager";
+import Utils from "../../../../data/Utils";
+import {Link} from "react-router-dom";
+import Button from 'material-ui/Button';
 
 class EnvironmentOverview extends Component {
     constructor(props) {
@@ -67,9 +70,9 @@ class EnvironmentOverview extends Component {
         const api = this.state.api;
 
         if (this.state.notFound) {
-            return <ResourceNotFound/>
+            return <ResourceNotFound message={this.props.resourceNotFountMessage}/>
         }
-        if (!this.state.api) {
+        if (!api) {
             return <Loading/>
         }
 

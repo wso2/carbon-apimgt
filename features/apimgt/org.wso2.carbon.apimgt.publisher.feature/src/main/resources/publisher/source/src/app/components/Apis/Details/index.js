@@ -17,7 +17,7 @@
  */
 
 import React, {Component} from 'react'
-import {Redirect, Route, Switch} from 'react-router-dom'
+import {Link, Redirect, Route, Switch} from 'react-router-dom'
 
 import Overview from './Overview'
 import LifeCycle from './LifeCycle/LifeCycle'
@@ -33,19 +33,50 @@ import NavBar from './NavBar'
 import Grid from 'material-ui/Grid';
 import EnvironmentOverview from "./EnvironmentOverview/EnvironmentOverview";
 import Utils from "../../../data/Utils";
+import ConfigManager from "../../../data/ConfigManager";
+import Button from 'material-ui/Button';
 
 /**
  * Base component for API specific Details page, This component will be mount for any request coming for /apis/:api_uuid
  */
 export default class Details extends Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            resourceNotFountMessage: {multi_environments: false}
+        };
+    }
+
+    componentDidMount() {
+        ConfigManager.getConfigs().environments.then(response => {
+            const multi_environments = response.data.environments.length > 1;
+            const more = multi_environments ?
+                <Link to="/apis"><Button variant="raised" color="secondary">Go Home</Button></Link>
+                :
+                "";
+            this.setState({
+                resourceNotFountMessage: {more, multi_environments}
+            });
+        });
+    }
+
     /**
      * Renders Grid container layout with NavBar place static in LHS, Components which coming as children for Details page
      * should wrap it's content with <Grid item > element
      * @returns {Component}
      */
     render() {
-        let redirect_url = "/apis/" + this.props.match.params.api_uuid + "/overview";
+        const api_uuid = this.props.match.params.api_uuid;
+        let redirect_url = `/apis/${api_uuid}/overview`;
         const environmentOverview = Utils.isMultiEnvironmentOverviewEnabled();
+        let {resourceNotFountMessage} = this.state;
+
+        if (resourceNotFountMessage.multi_environments) {
+            resourceNotFountMessage.title = `API is Not Found in the "${Utils.getCurrentEnvironment().label}" Environment`;
+            resourceNotFountMessage.body = `Can't find the API with the id "${api_uuid}"`;
+        }
+
         return (
             <Grid container spacing={0}>
                 <Grid item xs={2}>
@@ -54,17 +85,37 @@ export default class Details extends Component {
                 <Grid item xs={10}>
                     <Switch>
                         <Redirect exact from="/apis/:api_uuid" to={redirect_url}/>
-                        <Route path="/apis/:api_uuid/overview" component={Overview}/>
+                        <Route path="/apis/:api_uuid/overview"
+                               render={(props) => <Overview
+                                   resourceNotFountMessage={resourceNotFountMessage} {...props}/>}/>
                         {environmentOverview ?
-                            <Route path="/apis/:api_uuid/environment view" component={EnvironmentOverview}/> : null}
-                        <Route path="/apis/:api_uuid/lifecycle" component={LifeCycle}/>
-                        <Route path="/apis/:api_uuid/resources" component={Resources}/>
-                        <Route path="/apis/:api_uuid/permission" component={PermissionFormWrapper}/>
-                        <Route path="/apis/:api_uuid/documents" component={Documents}/>
-                        <Route path="/apis/:api_uuid/endpoints" component={Endpoints}/>
-                        <Route path="/apis/:api_uuid/subscriptions" component={Subscriptions}/>
-                        <Route path="/apis/:api_uuid/security" component={Security}/>
-                        <Route path="/apis/:api_uuid/scopes" component={Scopes}/>
+                            <Route path="/apis/:api_uuid/environment view"
+                                   render={(props) => <EnvironmentOverview
+                                       resourceNotFountMessage={resourceNotFountMessage} {...props}/>}/> : null}
+                        <Route path="/apis/:api_uuid/lifecycle"
+                               render={(props) => <LifeCycle
+                                   resourceNotFountMessage={resourceNotFountMessage} {...props}/>}/>
+                        <Route path="/apis/:api_uuid/resources"
+                               render={(props) => <Resources
+                                   resourceNotFountMessage={resourceNotFountMessage} {...props}/>}/>
+                        <Route path="/apis/:api_uuid/permission"
+                               render={(props) => <PermissionFormWrapper
+                                   resourceNotFountMessage={resourceNotFountMessage} {...props}/>}/>
+                        <Route path="/apis/:api_uuid/documents"
+                               render={(props) => <Documents
+                                   resourceNotFountMessage={resourceNotFountMessage} {...props}/>}/>
+                        <Route path="/apis/:api_uuid/endpoints"
+                               render={(props) => <Endpoints
+                                   resourceNotFountMessage={resourceNotFountMessage} {...props}/>}/>
+                        <Route path="/apis/:api_uuid/subscriptions"
+                               render={(props) => <Subscriptions
+                                   resourceNotFountMessage={resourceNotFountMessage} {...props}/>}/>
+                        <Route path="/apis/:api_uuid/security"
+                               render={(props) => <Security
+                                   resourceNotFountMessage={resourceNotFountMessage} {...props}/>}/>
+                        <Route path="/apis/:api_uuid/scopes"
+                               render={(props) => <Scopes
+                                   resourceNotFountMessage={resourceNotFountMessage} {...props}/>}/>
                         <Route component={PageNotFound}/>
                     </Switch>
                 </Grid>

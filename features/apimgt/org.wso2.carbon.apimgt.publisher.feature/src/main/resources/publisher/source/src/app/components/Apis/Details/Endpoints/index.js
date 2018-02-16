@@ -6,6 +6,7 @@ import Api from '../../../../data/api'
 import Loading from '../../../Base/Loading/Loading'
 import ApiPermissionValidation from '../../../../data/ApiPermissionValidation'
 import {ScopeValidation, resourceMethod, resourcePath} from '../../../../data/ScopeValidation'
+import ResourceNotFound from "../../../Base/Errors/ResourceNotFound";
 
 
 class Endpoint extends Component {
@@ -16,7 +17,8 @@ class Endpoint extends Component {
             endpoints: {},
             productionEndpoint: {},
             sandboxEndpoint: {},
-            dropDownItems : {}
+            dropDownItems : {},
+            notFound: false,
         };
         this.api_uuid = props.match.params.api_uuid;
         this.endpoint_type = props.endpoint_type;
@@ -197,7 +199,12 @@ class Endpoint extends Component {
 
     render() {
 
-        if (!this.state.api) {
+        const api = this.state.api;
+
+        if (this.state.notFound) {
+            return <ResourceNotFound message={this.props.resourceNotFountMessage}/>
+        }
+        if (!api) {
             return <Loading/>
         }
 
