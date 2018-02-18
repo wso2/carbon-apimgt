@@ -27,16 +27,58 @@ import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import {Link} from 'react-router-dom'
 import {Col, Menu, message, Row, Table} from 'antd';
 
-import Paper from 'material-ui/Paper';
 import Grid from 'material-ui/Grid';
 import Typography from 'material-ui/Typography';
 import Button from 'material-ui/Button';
-import GridIcon from 'material-ui-icons/GridOn';
-import ListIcon from 'material-ui-icons/List';
+import PropTypes from 'prop-types';
+import { withStyles } from 'material-ui/styles';
 import SampleAPI from './SampleAPI';
 import NotificationSystem from 'react-notification-system';
-import {ScopeValidation ,resourceMethod, resourcePath} from "../../../data/ScopeValidation";
+import ArrowDropDownCircle from 'material-ui-icons/ArrowDropDownCircle';
+import IconButton from 'material-ui/IconButton';
+import List from 'material-ui-icons/List';
+import GridIcon from 'material-ui-icons/GridOn';
+import { MenuItem, MenuList } from 'material-ui/Menu';
+import Grow from 'material-ui/transitions/Grow';
+import Paper from 'material-ui/Paper';
+import { Manager, Target, Popper } from 'react-popper';
+import ClickAwayListener from 'material-ui/utils/ClickAwayListener';
+import classNames from 'classnames';
 
+import {ScopeValidation ,resourceMethod, resourcePath} from "../../../data/ScopeValidation";
+const styles = theme => ({
+    rightIcon: {
+        marginLeft: theme.spacing.unit
+    },
+    button: {
+        margin: theme.spacing.unit,
+        marginBottom: 20
+    },
+    titleBar: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        borderBottom: 'solid 2px #ddd'
+    },
+    buttonLeft: {
+        alignSelf: 'flex-start',
+        display: 'flex',
+    },
+    buttonRight: {
+        alignSelf: 'flex-end',
+        display: 'flex',
+    },
+    title: {
+        display: 'inline-block',
+        marginRight: 50
+    },
+    addButton: {
+        display: 'inline-block',
+        marginBottom: 20,
+    },
+    popperClose: {
+        pointerEvents: 'none',
+    }
+});
 const menu = (
     <Menu>
         <Link to="/api/create/swagger">
@@ -51,7 +93,7 @@ const ButtonGroup = Button.Group;
 class Listing extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {listType: 'grid', apis: null};
+        this.state = {listType: 'grid', apis: null, newMenuOpen: false };
         this.handleApiDelete = this.handleApiDelete.bind(this);
         this.updateApi = this.updateApi.bind(this);
     }
@@ -120,8 +162,14 @@ class Listing extends React.Component {
             }
         );
     }
-
+    handleClickNew = () => {
+        this.setState({newMenuOpen:true});
+    }
+    handleCloseNew = () => {
+        this.setState({newMenuOpen:false});
+    }
     render() {
+        const classes = this.props.classes;
         const {apis} = this.state;
         if (this.state.notFound) {
             return <ResourceNotFound/>
@@ -157,31 +205,65 @@ class Listing extends React.Component {
         } else {
             return (
                 <Grid container spacing={0} justify="center">
-                    <Grid item xs={12}>
-                        <Paper>
-                            <Typography className="page-title" type="display2" gutterBottom>
-                                All Apis
-                                <div style={{
-                                    alignSelf: "flex-end", fontSize: "11px", margin: "auto", width: "200px",
-                                    display: "block", float: "right"
-                                }}>
-                                    <Button style={{padding: "0px", margin: "0px"}} color="primary" aria-label="add"
-                                            onClick={() => this.setListType('list')}
+                    <Grid item xs={12} className={classes.titleBar}>
+                        <div className={classes.buttonLeft}>
+                            <div className={classes.title}>
+                                <Typography variant="display2" gutterBottom>
+                                    APIs
+                                </Typography>
+                            </div>
+                            <Manager className={classes.addButton}>
+                                <Target>
+                                    <Button
+                                        aria-owns={this.state.newMenuOpen ? 'menu-list' : null}
+                                        aria-haspopup="true"
+                                        onClick={this.handleClickNew}
+                                        variant="raised" color="secondary"
                                     >
-                                        <ListIcon style={{width: "30px", height: "30px"}}/>
+                                        Create
+                                        <ArrowDropDownCircle className={classes.rightIcon} />
                                     </Button>
-                                    <Button color="accent" aria-label="edit"
-                                            onClick={() => this.setListType('grid')}
-                                    >
-                                        <GridIcon style={{width: "30px", height: "30px"}}/>
-                                    </Button>
-                                </div>
-                            </Typography>
-                            <Typography type="caption" gutterBottom align="left"
-                                        style={{fontWeight: "300", padding: "10px 0 10px 30px", margin: "0px"}}>
-                                Listing all apis
-                            </Typography>
-                        </Paper>
+                                </Target>
+                                <Popper
+                                    placement="bottom-start"
+                                    eventsEnabled={this.state.newMenuOpen}
+                                    className={classNames({ [classes.popperClose]: !this.state.newMenuOpen })}
+                                >
+                                    <ClickAwayListener onClickAway={this.handleCloseNew}>
+                                        <Grow in={this.state.newMenuOpen} id="menu-list" style={{ transformOrigin: '0 0 0' }}>
+                                            <Paper>
+                                                <MenuList role="menu">
+                                                    <Link to="/api/create/rest">
+                                                        <MenuItem onClick={this.handleClose}>Rest</MenuItem>
+                                                    </Link>
+                                                    <Link to="/api/create/swagger">
+                                                        <MenuItem onClick={this.handleClose}>Rest - Swagger</MenuItem>
+                                                    </Link>
+                                                    <Link to="/api/create/wsdl">
+                                                        <MenuItem onClick={this.handleClose}>SOAP - WSDL</MenuItem>
+                                                    </Link>
+                                                    <Link to="/api/create/rest">
+                                                        <MenuItem onClick={this.handleClose}>WebSocket</MenuItem>
+                                                    </Link>
+                                                </MenuList>
+                                            </Paper>
+                                        </Grow>
+                                    </ClickAwayListener>
+                                </Popper>
+                            </Manager>
+
+                        </div>
+                        <div className={classes.buttonRight}>
+                            <IconButton className={classes.button} aria-label="Delete" onClick={() => this.setListType('list')}>
+                                <List />
+                            </IconButton>
+                            <IconButton className={classes.button} aria-label="Delete" onClick={() => this.setListType('grid')}>
+                                <GridIcon />
+                            </IconButton>
+                        </div>
+                    </Grid>
+                    <Grid item ex={12}>
+
                     </Grid>
                     <Grid item xs={12}>
                         {this.state.listType === "list" ?
@@ -206,4 +288,10 @@ class Listing extends React.Component {
     }
 }
 
-export default Listing
+
+Listing.propTypes = {
+    classes: PropTypes.object.isRequired,
+    theme: PropTypes.object.isRequired,
+};
+
+export default withStyles(styles, { withTheme: true })(Listing);

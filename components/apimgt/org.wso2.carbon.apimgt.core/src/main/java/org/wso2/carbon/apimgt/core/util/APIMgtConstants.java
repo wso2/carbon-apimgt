@@ -127,6 +127,9 @@ public class APIMgtConstants {
     public static final String RESOURCES = "resources";
     public static final String TEMPLATES = "template";
 
+    //TODO this property need tpo remove once auth related fixes done
+    public static final String ADMIN_STRING = "admin";
+
     /**
      * Application statuses.
      */

@@ -59,10 +59,12 @@ class Login extends Component {
             authConfigs: [],
             redirectToIS: false
         };
-        this.fetch_DCRappInfo = this.fetch_DCRappInfo.bind(this);
+        this.fetch_DCRAppInfo = this.fetch_DCRAppInfo.bind(this);
+        this.handleRedirectionFromIDP = this.handleRedirectionFromIDP.bind(this);
     }
 
     componentDidMount() {
+        let idToken = this.handleRedirectionFromIDP();
         //Get Environments and SSO data
         ConfigManager.getConfigs().environments.then(response => {
             const environments = response.data.environments;
@@ -79,31 +81,10 @@ class Login extends Component {
             // Set authentication status of environments
             this.setLoginStatusOfEnvironments(environments);
 
-            //Fetch SSO data and render
-            this.fetch_DCRappInfo(environments);
+            //Fetch DCR App data and handle SSO login if redirected from IDP
+            this.fetch_DCRAppInfo(environments, idToken);
+            idToken = null; // Discard ID Token
         });
-
-        let queryString = this.props.location.search;
-        queryString = queryString.replace(/^\?/, '');
-        /* With QS version up we can directly use {ignoreQueryPrefix: true} option */
-        let params = qs.parse(queryString);
-        if (params.referrer) {
-            this.setState({referrer: params.referrer});
-        }
-        if (params.user_name) {
-            this.setState({isLogin: true});
-            const validityPeriod = params.validity_period; // In seconds
-            const WSO2_AM_TOKEN_1 = params.partial_token;
-            const user = new User(Utils.getEnvironment().label, params.user_name);
-            user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, "/publisher");
-            user.scopes = params.scopes.split(" ");
-            AuthManager.setUser(user);
-            this.authManager.handleAutoLoginEnvironments(
-                params.id_token,
-                this.state.environments,
-                this.state.authConfigs
-            );
-        }
     }
 
     setLoginStatusOfEnvironments(environments) {
@@ -113,17 +94,48 @@ class Login extends Component {
         this.setState({loginStatusEnvironments});
     }
 
-    fetch_DCRappInfo(environments) {
+    fetch_DCRAppInfo(environments, idToken) {
         //Array of promises
         let promised_ssoData = environments.map(
             environment => Utils.getPromised_DCRAppInfo(environment)
         );
 
         Promise.all(promised_ssoData).then(responses => {
-            this.setState({
-                authConfigs: responses.map(response => response.data.members)
-            });
+            const authConfigs = responses.map(response => response.data.members);
+            this.setState({authConfigs});
+            // If idToken is not null or redirected from IDP
+            if(idToken) this.authManager.handleAutoLoginEnvironments(idToken, environments, authConfigs);
+            Utils.setAutoLoginEnabledInfo(environments, authConfigs);
         });
+    }
+
+    handleRedirectionFromIDP() {
+        let queryString = this.props.location.search;
+        queryString = queryString.replace(/^\?/, '');
+        /* With QS version up we can directly use {ignoreQueryPrefix: true} option */
+        let params = qs.parse(queryString);
+        if (params.referrer) {
+            this.setState({referrer: params.referrer});
+        }
+        if (params.user_name) {
+            const environmentName = Utils.getCurrentEnvironment().label;
+            const validityPeriod = params.validity_period; // In seconds
+            const WSO2_AM_TOKEN_1 = params.partial_token;
+
+            if (WSO2_AM_TOKEN_1) {
+                const user = new User(environmentName, params.user_name);
+                user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, "/publisher");
+                user.scopes = params.scopes.split(" ");
+                AuthManager.setUser(user);
+                this.setState({isLogin: true});
+                console.log(`Successfully login to : ${environmentName}`);
+            } else {
+                this.setState({isLogin: false});
+                console.error(`Login failed in : ${environmentName}`);
+            }
+        }
+        // return id token if exists
+        return params.id_token;
     }
 
     handleSubmit = (e) => {

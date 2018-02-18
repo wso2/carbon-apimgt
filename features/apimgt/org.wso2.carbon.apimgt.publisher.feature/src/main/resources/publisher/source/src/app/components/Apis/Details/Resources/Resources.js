@@ -17,16 +17,57 @@
  */
 
 import React from 'react'
-import {  Icon, Checkbox, Button, Card, Tag, Form } from 'antd';
-import { Row, Col } from 'antd';
+import Button from 'material-ui/Button';
+import Card, { CardActions, CardContent } from 'material-ui/Card';
+import Grid from 'material-ui/Grid';
+import Typography from 'material-ui/Typography';
 import Api from '../../../../data/api'
 import Resource from './Resource'
 import Loading from '../../../Base/Loading/Loading'
 import ApiPermissionValidation from '../../../../data/ApiPermissionValidation'
 import Select from 'material-ui/Select';
 import {MenuItem} from 'material-ui/Menu';
-const CheckboxGroup = Checkbox.Group;
-import Input, {InputLabel} from 'material-ui/Input';
+import {InputLabel}  from 'material-ui/Input';
+import TextField from 'material-ui/TextField';
+import { FormGroup, FormControlLabel, FormControl } from 'material-ui/Form';
+import Checkbox from 'material-ui/Checkbox';
+import { withStyles } from 'material-ui/styles';
+import PropTypes from 'prop-types';
+import Divider from 'material-ui/Divider';
+import { LinearProgress } from 'material-ui/Progress';
+import Chip from 'material-ui/Chip';
+import List, {
+    ListItem,
+    ListItemText,
+    ListItemSecondaryAction
+} from 'material-ui/List';
+import Delete from 'material-ui-icons/Delete';
+
+const styles = theme => ({
+    root: {
+        flexGrow: 1,
+        marginTop: 10,
+    },
+    container: {
+        display: 'flex',
+        flexWrap: 'wrap',
+    },
+    textField: {
+        marginLeft: theme.spacing.unit,
+        marginRight: theme.spacing.unit,
+        width: 400,
+    },
+    mainTitle: {
+        paddingLeft: 20
+    },
+    scopes: {
+        width: 400
+    },
+    divider: {
+        marginTop: 20,
+        marginBottom: 20
+    }
+});
 
 class Resources extends React.Component{
     constructor(props){
@@ -36,7 +77,9 @@ class Resources extends React.Component{
             tmpResourceName: '',
             paths:{},
             swagger:{},
-            scopes:[]
+            scopes:[],
+            pathDeleteList: [],
+            allChecked: false,
         };
         this.api = new Api();
         this.api_uuid = props.match.params.api_uuid;
@@ -44,9 +87,34 @@ class Resources extends React.Component{
         this.onChange = this.onChange.bind(this);
         this.onChangeInput = this.onChangeInput.bind(this);
         this.updatePath = this.updatePath.bind(this);
+        this.addRemoveToDeleteList = this.addRemoveToDeleteList.bind(this);
         this.updateResources = this.updateResources.bind(this);
         this.handleScopeChange = this.handleScopeChange.bind(this);
+        this.handleCheckAll = this.handleCheckAll.bind(this);
+        this.deleteSelected = this.deleteSelected.bind(this);
+        this.childResources = [];
 
+    }
+    handleChange = name => event => {
+        let tmpMethods = this.state.tmpMethods;
+        let index = tmpMethods.indexOf(name);
+
+        if(event.target.checked){
+            // add to tmpMethods
+            if( index === -1 ) {
+                tmpMethods.push(name);
+            }
+        } else {
+            // remove from tmpMethods if exists
+            if( index > -1 ){
+                tmpMethods.splice(index, 1);
+            }
+        }
+        this.setState({tmpMethods:tmpMethods});
+
+    };
+    onChange(checkedValues) {
+        this.setState({tmpMethods:checkedValues});
     }
     handleScopeChange(e) {
         this.setState({scopes: e.target.value});
@@ -132,18 +200,15 @@ class Resources extends React.Component{
             }
         });
     }
-
-    onChange(checkedValues) {
-        this.setState({tmpMethods:checkedValues});
-    }
-    onChangeInput(e) {
-        let value = e.target.value;
+    onChangeInput = name => event => {
+        let value = event.target.value;
         if(value.indexOf("/") === -1 ){
             value = "/" + value;
         }
-        this.setState({tmpResourceName:value});
+        this.setState({[name]: value});
     }
     addResources(){
+        let allMehtods = ["get","put","post","delete","patch","head"];
         const defaultGet =  {
             description:'description',
             produces:'application/xml,application/json',
@@ -201,33 +266,62 @@ class Resources extends React.Component{
             },
             parameters: []
         };
-
         let pathValue = {};
-
-        this.state.tmpMethods.map( (method ) => {
+        let existingPathVale = {};
+        let tmpPaths = this.state.paths;
+        if(Object.keys(tmpPaths).length >0 ){
+            if(this.state.tmpResourceName in tmpPaths){
+                existingPathVale = tmpPaths[this.state.tmpResourceName];
+            }
+        }
+        allMehtods.map( (method ) => {
             switch (method) {
-                case "GET" :
-                    pathValue["GET"] = defaultGet;
+                case "get" :
+                    if("get" in existingPathVale){
+                        pathValue["get"] = existingPathVale["get"];
+                    } else if(this.state.tmpMethods.indexOf("get") !== -1){
+                        pathValue["get"] = defaultGet;
+                    }
                     break;
-                case "POST" :
-                    pathValue["POST"] = defaultPost;
+                case "post" :
+                    if("post" in existingPathVale){
+                        pathValue["post"] = existingPathVale["post"];
+                    } if(this.state.tmpMethods.indexOf("post") !== -1){
+                        pathValue["post"] = defaultPost;
+                    }
                     break;
-                case "PUT" :
-                    pathValue["PUT"] = defaultPost;
+                case "put" :
+                    if("put" in existingPathVale){
+                        pathValue["put"] = existingPathVale["put"];
+                    } if(this.state.tmpMethods.indexOf("put") !== -1){
+                        pathValue["put"] = defaultPost;
+                    }
                     break;
-                case "PATCH" :
-                    pathValue["PATCH"] = defaultPost;
+                case "patch" :
+                    if("patch" in existingPathVale){
+                        pathValue["patch"] = existingPathVale["patch"];
+                    } if(this.state.tmpMethods.indexOf("patch") !== -1){
+                        pathValue["patch"] = defaultPost;
+                    }
                     break;
-                case "DELETE" :
-                    pathValue["DELETE"] = defaultDelete;
+                case "delete" :
+                    if("delete" in existingPathVale){
+                        pathValue["delete"] = existingPathVale["delete"];
+                    } if(this.state.tmpMethods.indexOf("delete") !== -1){
+                        pathValue["delete"] = defaultDelete;
+                    }
                     break;
-                case "HEAD" :
-                    pathValue["HEAD"] = defaultHead;
+                case "head" :
+                    if("head" in existingPathVale){
+                        pathValue["head"] = existingPathVale["head"];
+                    } if(this.state.tmpMethods.indexOf("head") !== -1){
+                        pathValue["head"] = defaultHead;
+                    }
                     break;
             }
         });
 
-        let tmpPaths = this.state.paths;
+
         tmpPaths[this.state.tmpResourceName] = pathValue;
         this.setState({paths:tmpPaths});
     }
@@ -260,6 +354,92 @@ class Resources extends React.Component{
             }
         });
     }
+    addRemoveToDeleteList(path,method){
+        let pathDeleteList =  this.state.pathDeleteList;
+
+        let deleteRef = {path: path, method: method};
+        let itemAlreadyExisted = false;
+        for(let i = 0; i < pathDeleteList.length; i++ ){
+            if( pathDeleteList[i].path === path && pathDeleteList[i].method === method){
+                pathDeleteList.splice(i,1);
+                itemAlreadyExisted = true;
+            }
+        }
+
+        if( !itemAlreadyExisted ){
+            pathDeleteList.push(deleteRef);
+        }
+        this.setState({pathDeleteList: pathDeleteList});
+    }
+    handleCheckAll = event => {
+        let paths = this.state.paths;
+        let pathDeleteList = [];
+        if (event.target.checked){
+            for(let i=0; i < this.childResources.length; i++){
+                if(this.childResources[i]){
+                    this.childResources[i].toggleDeleteCheck(true);
+                }
+            }
+            //We iterate all the paths and add each method and path to the pathDeleteList Object
+            for(let path in paths) {
+                if(paths.hasOwnProperty(path)){
+                    if(Object.keys(path) && Object.keys(path).length > 0 ){
+                        let pathValue = paths[path];
+                        for(let method in pathValue ){
+                            if(pathValue.hasOwnProperty(method)){
+                                pathDeleteList.push({path: path,method: method});
+                            }
+                        }
+                    } else {
+                        console.debug("Error with path object");
+                    }
+                }
+            }
+            this.setState({allChecked:true});
+            this.setState({pathDeleteList});
+        } else {
+            for(let i=0; i < this.childResources.length; i++){
+                if(this.childResources[i]) {
+                    this.childResources[i].toggleDeleteCheck(false);
+                }
+            }
+            this.setState({allChecked:false});
+            this.setState({pathDeleteList: []});
+        }
+    };
+    deleteSelected = () => {
+        let tmpPaths = this.state.paths;
+        let pathDeleteList = this.state.pathDeleteList;
+        for(let i = 0; i < pathDeleteList.length; i++){
+            delete tmpPaths[pathDeleteList[i].path][pathDeleteList[i].method];
+            let indexesToDelete = [];
+            for(let j=0; j < this.childResources.length; j++){
+                if(this.childResources[j] ) {
+                    if(
+                        this.childResources[j].props["path"] === pathDeleteList[i]["path"] &&
+                        this.childResources[j].props["method"] === pathDeleteList[i]["method"]
+                    ) {
+                        indexesToDelete.push(j);
+                    }
+                }
+            }
+            for( let j=0; j < indexesToDelete.length; j++){
+                this.childResources.splice(j, 1);   //Remove react child from reference array
+            }
+        }
+        for(let i = 0; i < pathDeleteList.length; i++) {
+            pathDeleteList.splice(i, 1); //Remove the item from waiting to be deleted list
+        }
+
+
+        this.setState({pathDeleteList: pathDeleteList});
+        this.setState({path: tmpPaths});
+        for(let i=0; i < this.childResources.length; i++){
+            if(this.childResources[i]) {
+                this.childResources[i].toggleDeleteCheck(false);
+            }
+        }
+    }
     render(){
         if (!this.state.api) {
             return <Loading/>
@@ -267,77 +447,140 @@ class Resources extends React.Component{
         const selectBefore = (
             <span>/SwaggerPetstore/1.0.0</span>
         );
-        const plainOptions = ['GET','POST','PUT','DELETE','PATCH','HEAD','OPTIONS'];
+        const plainOptions = ['get','post','put','delete','patch','head','options'];
         let paths = this.state.paths;
+        const { classes } = this.props;
         return (
-            <div>
-                <h2>Resources</h2>
-                <Card title="Add Resource For Path" style={{ width: "100%",marginBottom:20 }}>
-                    <Row type="flex" justify="start">
-                        <Col span={4}>URL Pattern</Col>
-                        <Col span={20}>
-                            <Input onChange={this.onChangeInput}  defaultValue="" />
-                            <div style={{marginTop:20}}>
-                                <CheckboxGroup options={plainOptions}  onChange={this.onChange} />
-                            </div>
-                            <div style={{marginTop:20}}>
-                                <Button type="primary"  onClick={this.addResources}>Add Resources to Path</Button>
-                            </div>
-                        </Col>
-                    </Row>
-                </Card>
-                {this.state.apiScopes ? <Card title="Assign Global Scopes for API" style={{ width: "100%",marginBottom:20 }}>
-                    <Row type="flex" justify="start">
-                        <Col span={20}>
-                            <Select
-                                margin="none"
-                                multiple
-                                value={this.state.scopes}
-                                onChange={this.handleScopeChange}
-                                MenuProps={{
-                                    PaperProps: {
-                                        style: {
-                                            width: 200,
-                                        },
-                                    },
-                                }}>
-                                {this.state.apiScopes.list.map(tempScope => (
-                                    <MenuItem
-                                        key={tempScope.name}
-                                        value={tempScope.name}
-                                        style={{
-                                            fontWeight: this.state.scopes.indexOf(tempScope.name) !== -1 ? '500' : '400',
-                                        }}
-                                    >
-                                        {tempScope.name}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </Col>
-                    </Row>
-                </Card>: null}
-                {
-                    Object.keys(paths).map(
-                        (key) => {
-                            let path = paths[key];
-                            let that = this;
-                            return (
-                                Object.keys(path).map( (innerKey) => {
-                                    return <Resource path={key} method={innerKey} methodData={path[innerKey]} updatePath={that.updatePath} apiScopes={this.state.apiScopes}/>
-                                })
-                            );
+
+            <div className={classes.root}>
+                <Typography type="display1" align="left" className={classes.mainTitle}>
+                    Resources
+                </Typography>
+                <Grid container spacing={8}>
+                    <Grid item md={12} lg={12}>
+                        <Card >
+                            <CardContent>
+                                <Typography type="headline" component="h2">
+                                    Add New Resource
+                                </Typography>
+                                <TextField
+                                    id="tmpResourceName"
+                                    label="URL Pattern"
+                                    className={classes.textField}
+                                    value={this.state.tmpResourceName}
+                                    onChange={this.onChangeInput('tmpResourceName')}
+                                    margin="normal"
+                                />
+                                <div style={{marginTop:20, display: 'flex', flexDirection: 'row'}}>
+                                    { plainOptions.map( (option, index) =>  (
+                                        <FormGroup key={index} row>
+
+                                            <FormControlLabel
+                                                control={
+                                                    <Checkbox
+                                                        checked={ this.state.tmpMethods.indexOf(option) > -1}
+                                                        onChange={this.handleChange(option)}
+                                                        value={option}
+                                                    />
+                                                }
+                                                label={option.toUpperCase()}
+                                            />
+                                        </FormGroup>
+                                    ))}
+                                </div>
+                                <Button raised className={classes.button}
+                                        onClick={this.addResources}>Add Resources to Path</Button>
+
+                            {this.state.apiScopes ? <div>
+                                <Divider className={classes.divider} />
+                                <FormControl className={classes.formControl}>
+                                    <InputLabel htmlFor="select-multiple">Assign Global Scopes for API</InputLabel>
+                                        <Select
+                                            margin="none"
+                                            multiple
+                                            value={this.state.scopes}
+                                            onChange={this.handleScopeChange}
+                                            className={classes.scopes}>
+                                            {this.state.apiScopes.list.map(tempScope => (
+                                                <MenuItem
+                                                    key={tempScope.name}
+                                                    value={tempScope.name}
+                                                    style={{
+                                                        fontWeight: this.state.scopes.indexOf(tempScope.name) !== -1 ? '500' : '400',
+                                                        width: 400
+                                                    }}
+                                                >
+                                                    {tempScope.name}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                </FormControl>
+                            </div>: null}
+                            </CardContent>
+                        </Card>
+
+                        <List>
+                            {this.state.paths &&
+                            <ListItem >
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={this.state.allChecked}
+                                            onChange={this.handleCheckAll}
+                                            value=""
+                                        />
+                                    }
+                                    label="Check All"
+                                />
+                                { Object.keys(this.state.pathDeleteList).length !== 0 &&
+                                <ListItemSecondaryAction>
+
+                                    <Button className={classes.button} raised color="secondary"
+                                            onClick={this.deleteSelected}>
+                                        Delete Selected
+                                    </Button>
+
+                                </ListItemSecondaryAction> }
+
+                            </ListItem>
+                            }
+                        {
+                            Object.keys(paths).map(
+                                (key) => {
+                                    let path = paths[key];
+                                    let that = this;
+                                    return (
+                                        Object.keys(path).map( (innerKey) => {
+                                            return <Resource path={key} method={innerKey} methodData={path[innerKey]}
+                                                             updatePath={that.updatePath}
+                                                             apiScopes={this.state.apiScopes}
+                                                             addRemoveToDeleteList={that.addRemoveToDeleteList}
+                                                             onRef={ ref => this.childResources.push(ref) }
+                                            />
+                                        })
+                                    );
 
 
+                                }
+                            )
                         }
-                    )
-                }
-                <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
-                    <input type="button" onClick={this.updateResources} value="Save"/>
-                </ApiPermissionValidation>
+                        </List>
+                        <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
+                            <Button raised color="primary"
+                                    onClick={this.updateResources}
+                                    className={classes.button}>
+                                Save
+                            </Button>
+                        </ApiPermissionValidation>
+                    </Grid>
+                </Grid>
 
             </div>
         )
     }
 }
+Resources.propTypes = {
+    classes: PropTypes.object.isRequired,
+};
 
-export default Resources
+export default withStyles(styles)(Resources);

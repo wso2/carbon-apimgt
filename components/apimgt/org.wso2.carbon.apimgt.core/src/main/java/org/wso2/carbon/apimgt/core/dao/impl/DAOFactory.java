@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.dao.SystemApplicationDao;
 import org.wso2.carbon.apimgt.core.dao.TagDAO;
 import org.wso2.carbon.apimgt.core.dao.ThreatProtectionDAO;
+import org.wso2.carbon.apimgt.core.dao.UserMappingDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
@@ -380,4 +381,9 @@ public class DAOFactory {
         ApiDAOImpl.initApiTypes();
         LabelDAOImpl.initDefaultLabels();
     }
+
+    public static UserMappingDAO getUserMappingDAO() {
+        return new UserMappingDAOImpl();
+    }
+
 }

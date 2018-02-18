@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.api.Analyzer;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
+import org.wso2.carbon.apimgt.core.api.UserNameMapper;
 import org.wso2.carbon.apimgt.core.configuration.models.ContainerBasedGatewayConfiguration;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
@@ -61,7 +62,8 @@ public class APIManagerFactory {
     private APIGateway apiGateway;
     private APILifecycleManager apiLifecycleManager;
     private ContainerBasedGatewayGenerator containerBasedGatewayGenerator;
-
+    private UserNameMapper userNameMapper;
+    
     private static final int MAX_PROVIDERS = 50;
     private static final int MAX_CONSUMERS = 500;
     private static final int MAX_ANALYZERS = 50;
@@ -365,5 +367,17 @@ public class APIManagerFactory {
             }
         }
         return containerBasedGatewayGenerator;
+    }
+
+    /**
+     * Get User Name Mapper Implementation object
+     *
+     * @return UserNameMapper implementation object
+     */
+    public UserNameMapper getUserNameMapper() {
+        if (userNameMapper == null) {
+            userNameMapper = new UserNameMapperImpl();
+        }
+        return userNameMapper;
     }
 }

@@ -29,6 +29,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
+import org.wso2.carbon.apimgt.core.api.UserNameMapper;
 import org.wso2.carbon.apimgt.core.auth.DCRMServiceStub;
 import org.wso2.carbon.apimgt.core.auth.DCRMServiceStubFactory;
 import org.wso2.carbon.apimgt.core.auth.OAuth2ServiceStubs;
@@ -66,6 +67,7 @@ public class DefaultIdentityProviderImpl implements IdentityProvider {
     private static final Logger log = LoggerFactory.getLogger(DefaultIdentityProviderImpl.class);
 
     private SCIMServiceStub scimServiceStub;
+    private UserNameMapper userNameMapper;
     private static final String FILTER_PREFIX_USER = "userName Eq ";
     private static final String FILTER_PREFIX_ROLE = "displayName Eq ";
     private static final String HOME_EMAIL = "home";
@@ -78,18 +80,26 @@ public class DefaultIdentityProviderImpl implements IdentityProvider {
     DefaultIdentityProviderImpl() throws APIManagementException {
         this(SCIMServiceStubFactory.getSCIMServiceStub(), DCRMServiceStubFactory.getDCRMServiceStub(),
                 OAuth2ServiceStubsFactory.getOAuth2ServiceStubs(), ScopeRegistrationServiceStubFactory
-                        .getScopeRegistrationServiceStub());
+                        .getScopeRegistrationServiceStub(), APIManagerFactory.getInstance().getUserNameMapper());
     }
 
     DefaultIdentityProviderImpl(SCIMServiceStub scimServiceStub, DCRMServiceStub dcrmServiceStub,
                                 OAuth2ServiceStubs oAuth2ServiceStubs, ScopeRegistrationServiceStub
-                                        scopeRegistrationServiceStub) throws
+                                        scopeRegistrationServiceStub, UserNameMapper userNameMapper) throws
             APIManagementException {
+        this.userNameMapper = userNameMapper;
         this.scimServiceStub = scimServiceStub;
     }
 
     @Override
     public String getIdOfUser(String userName) throws IdentityProviderException {
+        //Retrieve User ID before call identity provider(as that was external call).
+        //should not user id outside this domain and should not log that id.
+        try {
+            userName = userNameMapper.getLoggedInUserIDFromPseudoName(userName);
+        } catch (APIManagementException e) {
+            throw new IdentityProviderException(e.getMessage(), ExceptionCodes.USER_MAPPING_RETRIEVAL_FAILED);
+        }
         Response userResponse = scimServiceStub.searchUsers(FILTER_PREFIX_USER + userName);
         String userId;
         if (userResponse == null) {
