@@ -39,7 +39,7 @@ import java.util.Set;
 public class APIGatewayPublisherImplTestCase {
 
     @Test
-    public void testUpdateDedicatedGatewayForRemovingContainers() throws ContainerBasedGatewayException {
+    public void testCreateContainerGateway() throws ContainerBasedGatewayException {
 
         APIGatewayPublisherImpl apiGatewayPublisher = new APIGatewayPublisherImpl();
         APIManagerFactory apiManagerFactory = Mockito.mock(APIManagerFactory.class);
@@ -49,59 +49,8 @@ public class APIGatewayPublisherImplTestCase {
         ContainerBasedGatewayGenerator containerBasedGatewayGenerator = Mockito
                 .mock(ContainerBasedGatewayGenerator.class);
         Mockito.when(apiManagerFactory.getContainerBasedGatewayGenerator()).thenReturn(containerBasedGatewayGenerator);
-        API api = SampleTestObjectCreator.createDefaultAPI().lifeCycleStatus(APIStatus.PUBLISHED.getStatus()).build();
-        apiGatewayPublisher.updateDedicatedGateway(api, "label", false);
-        Mockito.verify(containerBasedGatewayGenerator, Mockito.times(1)).removeContainerBasedGateway("label");
-    }
-
-    @Test
-    public void testUpdateDedicatedGatewayForCreatingContainers() throws ContainerBasedGatewayException {
-
-        APIGatewayPublisherImpl apiGatewayPublisher = new APIGatewayPublisherImpl();
-        APIManagerFactory apiManagerFactory = Mockito.mock(APIManagerFactory.class);
-        PowerMockito.mockStatic(APIManagerFactory.class);
-        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(apiManagerFactory);
-
-        ContainerBasedGatewayGenerator containerBasedGatewayGenerator = Mockito
-                .mock(ContainerBasedGatewayGenerator.class);
-        Mockito.when(apiManagerFactory.getContainerBasedGatewayGenerator()).thenReturn(containerBasedGatewayGenerator);
-        API api = SampleTestObjectCreator.createDefaultAPI().lifeCycleStatus(APIStatus.PROTOTYPED.getStatus()).build();
-        apiGatewayPublisher.updateDedicatedGateway(api, "label", true);
+        apiGatewayPublisher.createContainerBasedGateway("label");
         Mockito.verify(containerBasedGatewayGenerator, Mockito.times(1)).createContainerGateway("label");
-    }
-
-
-    @Test
-    public void testUpdateDedicatedGatewayForCreatingContainersInDeprecatedState()
-            throws ContainerBasedGatewayException {
-
-        APIGatewayPublisherImpl apiGatewayPublisher = new APIGatewayPublisherImpl();
-        APIManagerFactory apiManagerFactory = Mockito.mock(APIManagerFactory.class);
-        PowerMockito.mockStatic(APIManagerFactory.class);
-        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(apiManagerFactory);
-
-        ContainerBasedGatewayGenerator containerBasedGatewayGenerator = Mockito
-                .mock(ContainerBasedGatewayGenerator.class);
-        Mockito.when(apiManagerFactory.getContainerBasedGatewayGenerator()).thenReturn(containerBasedGatewayGenerator);
-        API api = SampleTestObjectCreator.createDefaultAPI().lifeCycleStatus(APIStatus.DEPRECATED.getStatus()).build();
-        apiGatewayPublisher.updateDedicatedGateway(api, "label", true);
-        Mockito.verify(containerBasedGatewayGenerator, Mockito.times(1)).createContainerGateway("label");
-    }
-
-    @Test(expected = ContainerBasedGatewayException.class)
-    public void testUpdateDedicatedGatewayWhenAPIInCreatedState()
-            throws ContainerBasedGatewayException {
-
-        APIGatewayPublisherImpl apiGatewayPublisher = new APIGatewayPublisherImpl();
-        APIManagerFactory apiManagerFactory = Mockito.mock(APIManagerFactory.class);
-        PowerMockito.mockStatic(APIManagerFactory.class);
-        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(apiManagerFactory);
-
-        ContainerBasedGatewayGenerator containerBasedGatewayGenerator = Mockito
-                .mock(ContainerBasedGatewayGenerator.class);
-        Mockito.when(apiManagerFactory.getContainerBasedGatewayGenerator()).thenReturn(containerBasedGatewayGenerator);
-        API api = SampleTestObjectCreator.createDefaultAPI().build();
-        apiGatewayPublisher.updateDedicatedGateway(api, "label", true);
     }
 
     @Test

@@ -137,18 +137,18 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     /**
      * Constructor.
      *
-     * @param username   Logged in user's username
-     * @param idp Identity Provider Object
-     * @param keyManager Key Manager Object
-     * @param apiDAO  API Data Access Object
-     * @param applicationDAO  Application Data Access Object
-     * @param apiSubscriptionDAO   API Subscription Data Access Object
-     * @param policyDAO Policy Data Access Object
-     * @param tagDAO Tag Data Access Object
-     * @param labelDAO Label Data Access Object
-     * @param workflowDAO WorkFlow Data Access Object
+     * @param username               Logged in user's username
+     * @param idp                    Identity Provider Object
+     * @param keyManager             Key Manager Object
+     * @param apiDAO                 API Data Access Object
+     * @param applicationDAO         Application Data Access Object
+     * @param apiSubscriptionDAO     API Subscription Data Access Object
+     * @param policyDAO              Policy Data Access Object
+     * @param tagDAO                 Tag Data Access Object
+     * @param labelDAO               Label Data Access Object
+     * @param workflowDAO            WorkFlow Data Access Object
      * @param gatewaySourceGenerator GatewaySourceGenerator object
-     * @param apiGateway APIGateway object
+     * @param apiGateway             APIGateway object
      */
     public APIStoreImpl(String username, IdentityProvider idp, KeyManager keyManager, ApiDAO apiDAO,
                         ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO,
@@ -670,7 +670,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 workflow.setCreatedTime(LocalDateTime.now());
                 workflow.setExternalWorkflowReference(UUID.randomUUID().toString());
                 workflow.setSubscriber(getUsername());
-                
+
                 String workflowDescription = "API [ " + subscription.getApi().getName() + " - "
                         + subscription.getApi().getVersion() + " ] subscription deletion request from subscriber - "
                         + getUsername() + "  for the application - " + subscription.getApplication().getName() + "";
@@ -768,7 +768,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
      *
      * @param apiId UUID of the api
      * @throws APIMgtResourceNotFoundException if API does not exist
-     * @throws APIMgtDAOException if error occurred while accessing data layer
+     * @throws APIMgtDAOException              if error occurred while accessing data layer
      */
     private void failIfApiNotExists(String apiId) throws APIMgtResourceNotFoundException, APIMgtDAOException {
         if (!getApiDAO().isAPIExists(apiId)) {
@@ -891,7 +891,6 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         log.error(errorMsg);
         throw new APICommentException(errorMsg, ExceptionCodes.COMMENT_LENGTH_EXCEEDED);
     }
-
 
 
     @Override
@@ -1201,7 +1200,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             throw new APIManagementException(errorMsg, e, e.getErrorHandler());
         } catch (IOException e) {
             String errorMsg = "Error occurred while reading gateway configuration the API - " +
-                                    apiBuilder.getName();
+                    apiBuilder.getName();
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
@@ -1602,7 +1601,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
             // this means there are pending subscriptions. It also implies that there cannot be pending application
             // approvals (cannot subscribe to a pending application)
-            for (Iterator iterator = pendingSubscriptions.iterator(); iterator.hasNext();) {
+            for (Iterator iterator = pendingSubscriptions.iterator(); iterator.hasNext(); ) {
                 Subscription pendingSubscription = (Subscription) iterator.next();
 
                 // delete pending tasks for subscripton creation if any
@@ -1809,7 +1808,6 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
      */
     @Override
     public void updateDedicatedGateway(DedicatedGateway dedicatedGateway, String apiId) throws APIManagementException {
-        APIGateway gateway = getApiGateway();
         API api = getAPIbyUUID(apiId);
         try {
 
@@ -1817,7 +1815,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             String autoGenLabelName = ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + apiId;
             Set<String> labelSet = new HashSet<>();
 
-            if (dedicatedGateway.isEnabled() && !api.hasOwnGateway()) {
+            if (dedicatedGateway.isEnabled()) {
 
                 Label label = getLabelDAO().getLabelByName(autoGenLabelName);
 
@@ -1835,12 +1833,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 }
 
                 labelSet.add(autoGenLabelName);
-                // create or remove dedicated Gateway
-                gateway.updateDedicatedGateway(api, autoGenLabelName, dedicatedGateway.isEnabled());
                 getApiDAO().updateDedicatedGateway(dedicatedGateway, apiId, labelSet);
             } else {
                 if (api.hasOwnGateway()) {
-                    gateway.updateDedicatedGateway(api, autoGenLabelName, dedicatedGateway.isEnabled());
                     labelSet.add(APIMgtConstants.DEFAULT_LABEL_NAME);
                     getApiDAO().updateDedicatedGateway(dedicatedGateway, apiId, labelSet);
                 }

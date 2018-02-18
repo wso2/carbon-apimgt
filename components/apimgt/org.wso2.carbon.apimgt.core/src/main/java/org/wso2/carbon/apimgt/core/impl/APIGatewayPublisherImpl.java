@@ -27,7 +27,6 @@ import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.APISummary;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.BlockConditions;
@@ -470,34 +469,6 @@ public class APIGatewayPublisherImpl implements APIGateway {
         ContainerBasedGatewayGenerator containerBasedGatewayGenerator =
                 apiManagerFactory.getContainerBasedGatewayGenerator();
         containerBasedGatewayGenerator.removeContainerBasedGateway(label);
-    }
-
-    /**
-     * @see APIGateway#updateDedicatedGateway(API, String, boolean)
-     */
-    @Override
-    public void updateDedicatedGateway(API api, String labelName, boolean isDedicatedGatewayEnabled)
-            throws ContainerBasedGatewayException {
-
-        // If API is a published,prototyped or a deprecated
-        if (api.getLifeCycleStatus().equalsIgnoreCase(APIStatus.PUBLISHED.getStatus()) ||
-                api.getLifeCycleStatus().equalsIgnoreCase(APIStatus.PROTOTYPED.getStatus()) ||
-                api.getLifeCycleStatus().equalsIgnoreCase(APIStatus.DEPRECATED.getStatus())) {
-
-            if (isDedicatedGatewayEnabled) {
-                // label is created beforehand.
-                createContainerBasedGateway(labelName);
-            } else {
-                //label is deleted beforehand.
-                removeContainerBasedGateway(labelName);
-            }
-        } else {
-            String msg = String.format("The api [api id] %s is not in %s or %s or %s status.", api.getId(),
-                    APIStatus.PUBLISHED.getStatus(), APIStatus.PROTOTYPED.getStatus(),
-                    APIStatus.DEPRECATED.getStatus());
-            throw new ContainerBasedGatewayException(msg,
-                    ExceptionCodes.ERROR_WHILE_UPDATING_DEDICATED_CONTAINER_BASED_GATEWAY);
-        }
     }
 
     /**

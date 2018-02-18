@@ -68,6 +68,7 @@ import org.wso2.carbon.apimgt.core.executors.NotificationExecutor;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIResource;
+import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.DedicatedGateway;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
@@ -268,15 +269,15 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      */
     @Override
     public void updateDedicatedGateway(DedicatedGateway dedicatedGateway, String apiId) throws APIManagementException {
-        APIGateway gateway = getApiGateway();
         API api = getAPIbyUUID(apiId);
         try {
 
+            validateChangingDedicatedGateway(api);
             // label generation for the API
             String autoGenLabelName = ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + apiId;
             Set<String> labelSet = new HashSet<>();
 
-            if (dedicatedGateway.isEnabled() && !api.hasOwnGateway()) {
+            if (dedicatedGateway.isEnabled()) {
 
                 Label label = getLabelDAO().getLabelByName(autoGenLabelName);
 
@@ -294,12 +295,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 }
 
                 labelSet.add(autoGenLabelName);
-                // create or remove dedicated Gateway
-                gateway.updateDedicatedGateway(api, autoGenLabelName, dedicatedGateway.isEnabled());
                 getApiDAO().updateDedicatedGateway(dedicatedGateway, apiId, labelSet);
             } else {
                 if (api.hasOwnGateway()) {
-                    gateway.updateDedicatedGateway(api, autoGenLabelName, dedicatedGateway.isEnabled());
                     labelSet.add(APIMgtConstants.DEFAULT_LABEL_NAME);
                     getApiDAO().updateDedicatedGateway(dedicatedGateway, apiId, labelSet);
                 }
@@ -308,6 +306,25 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         } catch (APIMgtDAOException e) {
             throw new APIManagementException("Error occurred while updating dedicatedGateway details of API with id "
                     + apiId, e, ExceptionCodes.ERROR_WHILE_UPDATING_DEDICATED_CONTAINER_BASED_GATEWAY);
+        }
+    }
+
+    /**
+     * Validates changing dedicated gateway
+     *
+     * @param api API
+     * @throws APIManagementException if API is not in created, prototyped or maintenance mode
+     */
+    private void validateChangingDedicatedGateway(API api) throws APIManagementException {
+
+        if (api.getLifeCycleStatus().equalsIgnoreCase(APIStatus.PUBLISHED.getStatus()) ||
+                api.getLifeCycleStatus().equalsIgnoreCase(APIStatus.DEPRECATED.getStatus()) ||
+                api.getLifeCycleStatus().equalsIgnoreCase(APIStatus.RETIRED.getStatus())) {
+            String msg = String.format("The api [api id] %s is not in %s or %s or %s status. Hence dedicated gateway" +
+                            " mode cannot be updated.", api.getId(), APIStatus.CREATED.getStatus(),
+                    APIStatus.PROTOTYPED.getStatus(), APIStatus.MAINTENANCE.getStatus());
+            throw new APIManagementException(msg, ExceptionCodes
+                    .ERROR_WHILE_UPDATING_DEDICATED_CONTAINER_BASED_GATEWAY);
         }
     }
 

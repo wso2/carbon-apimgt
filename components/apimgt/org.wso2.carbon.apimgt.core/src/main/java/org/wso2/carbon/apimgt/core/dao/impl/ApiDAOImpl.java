@@ -684,7 +684,7 @@ public class ApiDAOImpl implements ApiDAO {
         statement.setString(6, api.getDescription());
         statement.setString(7, api.getVisibility().toString());
         statement.setBoolean(8, api.isResponseCachingEnabled());
-        statement.setBoolean(9, false);
+        statement.setBoolean(9, api.hasOwnGateway());
         statement.setInt(10, api.getCacheTimeout());
         statement.setString(11, apiPrimaryKey);
 

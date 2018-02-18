@@ -3499,7 +3499,6 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Update dedicated gateway")
     public void testUpdateDedicatedGateway() throws APIManagementException {
-        APIGateway apiGateway = Mockito.mock(APIGateway.class);
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
@@ -3515,21 +3514,18 @@ public class APIPublisherImplTestCase {
 
         String autoGenLabelName = ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + uuid;
         Mockito.when(labelDAO.getLabelByName(autoGenLabelName)).thenReturn(null);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, labelDAO, gatewaySourceGenerator,
-                apiGateway);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, labelDAO, gatewaySourceGenerator);
         DedicatedGateway dedicatedGateway = new DedicatedGateway();
         dedicatedGateway.setEnabled(true);
         apiPublisher.updateDedicatedGateway(dedicatedGateway, uuid);
         Set<String> labelSet = new HashSet<>();
         labelSet.add(autoGenLabelName);
         Mockito.verify(apiDAO, Mockito.times(1)).updateDedicatedGateway(dedicatedGateway, uuid, labelSet);
-        Mockito.verify(apiGateway, Mockito.times(1)).updateDedicatedGateway(api, autoGenLabelName,
-                dedicatedGateway.isEnabled());
+        Mockito.verify(labelDAO, Mockito.times(1)).addLabels(Mockito.anyList());
     }
 
     @Test(description = "Update dedicated gateway when label is not null and present in the system")
     public void testUpdateDedicatedGatewayWhenLabelIsNotNull() throws APIManagementException {
-        APIGateway apiGateway = Mockito.mock(APIGateway.class);
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
@@ -3547,21 +3543,18 @@ public class APIPublisherImplTestCase {
         Label label = new Label.Builder().id(UUID.randomUUID().toString()).
                 name(autoGenLabelName).accessUrls(null).build();
         Mockito.when(labelDAO.getLabelByName(autoGenLabelName)).thenReturn(label);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, labelDAO, gatewaySourceGenerator,
-                apiGateway);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, labelDAO, gatewaySourceGenerator);
         DedicatedGateway dedicatedGateway = new DedicatedGateway();
         dedicatedGateway.setEnabled(true);
         apiPublisher.updateDedicatedGateway(dedicatedGateway, uuid);
         Set<String> labelSet = new HashSet<>();
         labelSet.add(autoGenLabelName);
         Mockito.verify(apiDAO, Mockito.times(1)).updateDedicatedGateway(dedicatedGateway, uuid, labelSet);
-        Mockito.verify(apiGateway, Mockito.times(1)).updateDedicatedGateway(api, autoGenLabelName,
-                dedicatedGateway.isEnabled());
+        Mockito.verify(labelDAO, Mockito.times(0)).addLabels(Mockito.anyList());
     }
 
     @Test(description = "Update dedicated gateway when dedicated gateway is disabled")
     public void testUpdateDedicatedGatewayWhenDedicatedGatewayIsDisabled() throws APIManagementException {
-        APIGateway apiGateway = Mockito.mock(APIGateway.class);
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
@@ -3577,22 +3570,18 @@ public class APIPublisherImplTestCase {
 
         String autoGenLabelName = ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + uuid;
 
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, labelDAO, gatewaySourceGenerator,
-                apiGateway);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, labelDAO, gatewaySourceGenerator);
         DedicatedGateway dedicatedGateway = new DedicatedGateway();
         dedicatedGateway.setEnabled(false);
         apiPublisher.updateDedicatedGateway(dedicatedGateway, uuid);
         Set<String> labelSet = new HashSet<>();
         labelSet.add(autoGenLabelName);
         Mockito.verify(apiDAO, Mockito.times(0)).updateDedicatedGateway(dedicatedGateway, uuid, labelSet);
-        Mockito.verify(apiGateway, Mockito.times(0)).updateDedicatedGateway(api, autoGenLabelName,
-                dedicatedGateway.isEnabled());
     }
 
     @Test(description = "Update dedicated gateway when dedicated gateway is disabled and api has own gateway")
     public void testUpdateDedicatedGatewayWhenDedicatedGatewayIsDisabledAndAPIHasOwnGateway() throws
             APIManagementException {
-        APIGateway apiGateway = Mockito.mock(APIGateway.class);
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
@@ -3606,54 +3595,17 @@ public class APIPublisherImplTestCase {
         Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.ADMIN_ROLE_ID)).thenReturn(ADMIN_ROLE);
         Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
 
-        String autoGenLabelName = ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + uuid;
-
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, labelDAO, gatewaySourceGenerator,
-                apiGateway);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, labelDAO, gatewaySourceGenerator);
         DedicatedGateway dedicatedGateway = new DedicatedGateway();
         dedicatedGateway.setEnabled(false);
         apiPublisher.updateDedicatedGateway(dedicatedGateway, uuid);
         Set<String> labelSet = new HashSet<>();
         labelSet.add(APIMgtConstants.DEFAULT_LABEL_NAME);
         Mockito.verify(apiDAO, Mockito.times(1)).updateDedicatedGateway(dedicatedGateway, uuid, labelSet);
-        Mockito.verify(apiGateway, Mockito.times(1)).updateDedicatedGateway(api, autoGenLabelName,
-                dedicatedGateway.isEnabled());
-    }
-
-    @Test(description = "Update dedicated gateway when dedicated gateway is disabled and api has own gateway")
-    public void testUpdateDedicatedGatewayWhenDedicatedGatewayIsEnabledAndAPIHasOwnGateway() throws
-            APIManagementException {
-        APIGateway apiGateway = Mockito.mock(APIGateway.class);
-        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
-        LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
-        IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
-
-        API api = SampleTestObjectCreator.createDefaultAPI().hasOwnGateway(true).build();
-        String uuid = api.getId();
-        Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
-        Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.DEVELOPER_ROLE_ID))
-                .thenReturn(DEVELOPER_ROLE);
-        Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.ADMIN_ROLE_ID)).thenReturn(ADMIN_ROLE);
-        Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
-
-        String autoGenLabelName = ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + uuid;
-
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, labelDAO, gatewaySourceGenerator,
-                apiGateway);
-        DedicatedGateway dedicatedGateway = new DedicatedGateway();
-        dedicatedGateway.setEnabled(true);
-        apiPublisher.updateDedicatedGateway(dedicatedGateway, uuid);
-        Set<String> labelSet = new HashSet<>();
-        labelSet.add(APIMgtConstants.DEFAULT_LABEL_NAME);
-        Mockito.verify(apiDAO, Mockito.times(1)).updateDedicatedGateway(dedicatedGateway, uuid, labelSet);
-        Mockito.verify(apiGateway, Mockito.times(1)).updateDedicatedGateway(api, autoGenLabelName,
-                dedicatedGateway.isEnabled());
     }
 
     @Test(description = "Update dedicated gateway for exception", expectedExceptions = APIManagementException.class)
     public void testUpdateDedicatedGatewayForException() throws APIManagementException {
-        APIGateway apiGateway = Mockito.mock(APIGateway.class);
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
@@ -3669,14 +3621,73 @@ public class APIPublisherImplTestCase {
 
         String autoGenLabelName = ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + uuid;
         Mockito.when(labelDAO.getLabelByName(autoGenLabelName)).thenReturn(null);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, labelDAO, gatewaySourceGenerator,
-                apiGateway);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, labelDAO, gatewaySourceGenerator);
         DedicatedGateway dedicatedGateway = new DedicatedGateway();
         dedicatedGateway.setEnabled(true);
         Set<String> labelSet = new HashSet<>();
         labelSet.add(autoGenLabelName);
         Mockito.doThrow(APIMgtDAOException.class).when(apiDAO).updateDedicatedGateway(dedicatedGateway, uuid, labelSet);
         apiPublisher.updateDedicatedGateway(dedicatedGateway, uuid);
+    }
+
+    @Test(description = "Update dedicated gateway when API is in Published state", expectedExceptions
+            = APIManagementException.class)
+    public void testUpdateDedicatedGatewayWhenAPIIsInPublishedState() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
+        LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
+        IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
+
+        API api = SampleTestObjectCreator.createDefaultAPI().lifeCycleStatus(APIStatus.PUBLISHED.getStatus()).build();
+        String uuid = api.getId();
+        Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
+        Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.DEVELOPER_ROLE_ID))
+                .thenReturn(DEVELOPER_ROLE);
+        Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.ADMIN_ROLE_ID)).thenReturn(ADMIN_ROLE);
+        Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
+
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, labelDAO, gatewaySourceGenerator);
+        apiPublisher.updateDedicatedGateway(new DedicatedGateway(), uuid);
+    }
+
+    @Test(description = "Update dedicated gateway when API is in Deprecated state", expectedExceptions
+            = APIManagementException.class)
+    public void testUpdateDedicatedGatewayWhenAPIIsInDeprecatedState() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
+        LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
+        IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
+
+        API api = SampleTestObjectCreator.createDefaultAPI().lifeCycleStatus(APIStatus.DEPRECATED.getStatus()).build();
+        String uuid = api.getId();
+        Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
+        Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.DEVELOPER_ROLE_ID))
+                .thenReturn(DEVELOPER_ROLE);
+        Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.ADMIN_ROLE_ID)).thenReturn(ADMIN_ROLE);
+        Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
+
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, labelDAO, gatewaySourceGenerator);
+        apiPublisher.updateDedicatedGateway(new DedicatedGateway(), uuid);
+    }
+
+    @Test(description = "Update dedicated gateway when API is in Retired state", expectedExceptions
+            = APIManagementException.class)
+    public void testUpdateDedicatedGatewayWhenAPIIsInRetiredState() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
+        LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
+        IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
+
+        API api = SampleTestObjectCreator.createDefaultAPI().lifeCycleStatus(APIStatus.RETIRED.getStatus()).build();
+        String uuid = api.getId();
+        Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
+        Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.DEVELOPER_ROLE_ID))
+                .thenReturn(DEVELOPER_ROLE);
+        Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.ADMIN_ROLE_ID)).thenReturn(ADMIN_ROLE);
+        Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
+
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, labelDAO, gatewaySourceGenerator);
+        apiPublisher.updateDedicatedGateway(new DedicatedGateway(), uuid);
     }
 
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, KeyManager keyManager) {
@@ -3917,9 +3928,9 @@ public class APIPublisherImplTestCase {
     }
 
     private APIPublisherImpl getApiPublisherImpl(IdentityProvider identityProvider, ApiDAO apiDAO, LabelDAO labelDAO,
-                                                 GatewaySourceGenerator gatewaySourceGenerator, APIGateway gateway) {
+                                                 GatewaySourceGenerator gatewaySourceGenerator) {
         return new APIPublisherImpl(USER, identityProvider, null, apiDAO, null,
-                null, null, null, labelDAO, null, null, null, gatewaySourceGenerator, gateway);
+                null, null, null, labelDAO, null, null, null, gatewaySourceGenerator, null);
     }
 
 

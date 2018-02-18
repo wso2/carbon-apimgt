@@ -247,13 +247,4 @@ public interface APIGateway {
      */
     void removeContainerBasedGateway(String label) throws ContainerBasedGatewayException;
 
-    /**
-     * Create or Remove the dedicated Gateway in Container Management System
-     *
-     * @param api       API object
-     * @param labelName labelName of the API
-     * @throws ContainerBasedGatewayException If there is a failure in notifying update the container based gateway
-     */
-    void updateDedicatedGateway(API api, String labelName, boolean isDedicatedGatewayEnabled)
-            throws ContainerBasedGatewayException;
 }
