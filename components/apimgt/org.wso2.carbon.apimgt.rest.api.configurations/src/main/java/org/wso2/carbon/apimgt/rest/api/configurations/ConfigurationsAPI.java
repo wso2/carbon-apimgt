@@ -20,6 +20,8 @@ package org.wso2.carbon.apimgt.rest.api.configurations;
 
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.rest.api.configurations.models.APIMUIConfigurations;
+import org.wso2.carbon.apimgt.rest.api.configurations.models.Feature;
+import org.wso2.carbon.apimgt.rest.api.configurations.utils.bean.AvailableFeatures;
 import org.wso2.carbon.apimgt.rest.api.configurations.utils.bean.EnvironmentConfigBean;
 import org.wso2.msf4j.Microservice;
 
@@ -28,6 +30,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.List;
 
 /**
  * This class provides configurations information for UI
@@ -44,8 +47,8 @@ public class ConfigurationsAPI implements Microservice {
      * Get environment configurations from deployment.yaml and returns the list of environments
      *
      * @return Response List of environments: {"environments":[
-     *     {"host":"localhost:9292","loginTokenPath":"/login/token","label":"Development"},
-     *     {"host":"localhost:9293","loginTokenPath":"/login/token","label":"Production"}
+     * {"host":"localhost:9292","loginTokenPath":"/login/token","label":"Development"},
+     * {"host":"localhost:9293","loginTokenPath":"/login/token","label":"Production"}
      * ]}
      */
     @GET
@@ -58,5 +61,23 @@ public class ConfigurationsAPI implements Microservice {
         environmentConfigBean.setEnvironments(apimUIConfigurations.getEnvironments());
 
         return Response.ok(environmentConfigBean, MediaType.APPLICATION_JSON).build();
+    }
+
+    /**
+     * Get available features defined in the API for UI
+     *
+     * @return Response List of available features: {"availableFeatures":[{"name":"private jet mode",
+     * "isEnabled":false}]}
+     */
+    @GET
+    @Path("/avilable-features")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response availableFeatures() {
+
+        List<Feature> features = ConfigurationService.getInstance().getAvailableFeatures();
+        AvailableFeatures availableFeatures = new AvailableFeatures();
+        availableFeatures.setAvailableFeatures(features);
+
+        return Response.ok(availableFeatures, MediaType.APPLICATION_JSON).build();
     }
 }
