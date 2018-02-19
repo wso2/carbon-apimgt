@@ -1,0 +1,57 @@
+package org.wso2.carbon.apimgt.micro.gateway.api.synchronizer.dto;
+
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
+
+@ApiModel(description = "")
+public class FileInfoDTO  {
+  
+  
+  
+  private String relativePath = null;
+  
+  
+  private String mediaType = null;
+
+  
+  /**
+   * relative location of the file (excluding the base context and host of the Publisher API)
+   **/
+  @ApiModelProperty(value = "relative location of the file (excluding the base context and host of the Publisher API)")
+  @JsonProperty("relativePath")
+  public String getRelativePath() {
+    return relativePath;
+  }
+  public void setRelativePath(String relativePath) {
+    this.relativePath = relativePath;
+  }
+
+  
+  /**
+   * media-type of the file
+   **/
+  @ApiModelProperty(value = "media-type of the file")
+  @JsonProperty("mediaType")
+  public String getMediaType() {
+    return mediaType;
+  }
+  public void setMediaType(String mediaType) {
+    this.mediaType = mediaType;
+  }
+
+  
+
+  @Override
+  public String toString()  {
+    StringBuilder sb = new StringBuilder();
+    sb.append("class FileInfoDTO {\n");
+    
+    sb.append("  relativePath: ").append(relativePath).append("\n");
+    sb.append("  mediaType: ").append(mediaType).append("\n");
+    sb.append("}\n");
+    return sb.toString();
+  }
+}
