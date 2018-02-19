@@ -44,6 +44,8 @@ import Paper from 'material-ui/Paper';
 import { Manager, Target, Popper } from 'react-popper';
 import ClickAwayListener from 'material-ui/utils/ClickAwayListener';
 import classNames from 'classnames';
+import AddNewMenu from './AddNewMenu'
+
 
 import {ScopeValidation ,resourceMethod, resourcePath} from "../../../data/ScopeValidation";
 const styles = theme => ({
@@ -74,6 +76,7 @@ const styles = theme => ({
     addButton: {
         display: 'inline-block',
         marginBottom: 20,
+        zIndex: 1,
     },
     popperClose: {
         pointerEvents: 'none',
@@ -212,7 +215,8 @@ class Listing extends React.Component {
                                     APIs
                                 </Typography>
                             </div>
-                            <Manager className={classes.addButton}>
+                            <AddNewMenu />
+                            {/*<Manager className={classes.addButton}>
                                 <Target>
                                     <Button
                                         aria-owns={this.state.newMenuOpen ? 'menu-list' : null}
@@ -250,7 +254,7 @@ class Listing extends React.Component {
                                         </Grow>
                                     </ClickAwayListener>
                                 </Popper>
-                            </Manager>
+                            </Manager>*/}
 
                         </div>
                         <div className={classes.buttonRight}>

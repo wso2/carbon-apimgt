@@ -21,24 +21,16 @@ import API from '../../../data/api'
 
 import {Redirect, Switch} from 'react-router-dom'
 import Typography from 'material-ui/Typography';
-import Button from 'material-ui/Button';
 import Grid from 'material-ui/Grid';
 import NotificationSystem from 'react-notification-system';
 import {resourceMethod, resourcePath, ScopeValidation} from "../../../data/ScopeValidation";
 import Utils from "../../../data/Utils";
 import ConfirmDialog from "../../Shared/ConfirmDialog";
 import {withStyles} from 'material-ui/styles';
-import * as icons from 'material-ui-icons';
 import Delete from 'material-ui-icons/Delete';
-import MoreHoriz from 'material-ui-icons/MoreHoriz';
-
-import { MenuItem, MenuList } from 'material-ui/Menu';
-import Grow from 'material-ui/transitions/Grow';
 import { Manager, Target, Popper } from 'react-popper';
-import ClickAwayListener from 'material-ui/utils/ClickAwayListener';
-import classNames from 'classnames';
-import Paper from 'material-ui/Paper'
-import NavBar from '../Details/NavBar'
+import MoreMenu from './MoreMenu'
+import ImageGenerator from './ImageGenerator'
 
 
 const styles = theme => ({
@@ -48,23 +40,22 @@ const styles = theme => ({
         borderRadius: "50%",
         marginRight: "0.5em"
     },
+    lifeCycleDisplay: {
+        width: 95,
+        height: 30,
+        marginTop: -15,
+        marginLeft: 10,
+        color: '#fff',
+        textAlign: 'center',
+        lineHeight: '30px',
+        position: 'absolute',
+    },
     lifeCycleState_Created: {backgroundColor: "#0000ff"},
     lifeCycleState_Prototyped: {backgroundColor: "#42dfff"},
     lifeCycleState_Published: {backgroundColor: "#41830A"},
     lifeCycleState_Maintenance: {backgroundColor: "#cecece"},
     lifeCycleState_Deprecated: {backgroundColor: "#D7C850"},
     lifeCycleState_Retired: {backgroundColor: "#000000"},
-    lifeCycleDisplay: {
-        width: 95,
-        height: 30,
-        marginTop: -15,
-        marginLeft: 10,
-        backgroundColor: '#4cb050dd',
-        color: '#fff',
-        textAlign: 'center',
-        lineHeight: '30px',
-        position: 'absolute',
-    },
     thumbContent: {
         width: 250,
         backgroundColor: '#fff',
@@ -85,10 +76,18 @@ const styles = theme => ({
         whiteSpace: 'nowrap',
         overflow : 'hidden',
         textOverflow : 'ellipsis',
-        cursor: 'pointer'
+        cursor: 'pointer',
+        margin: 0,
     },
-    svgImage: {
-        cursor: 'pointer'
+    contextBox: {
+        width: 140,
+        whiteSpace: 'nowrap',
+        overflow : 'hidden',
+        textOverflow : 'ellipsis',
+        cursor: 'pointer',
+        margin: 0,
+        display: 'inline-block',
+        lineHeight: '1em',
     },
     descriptionOverlay: {
         content:'',
@@ -118,13 +117,6 @@ const styles = theme => ({
     },
     deleteIcon: {
         fill: 'red'
-    },
-    moreButton: {
-        position: 'absolute',
-        zIndex: 100,
-        marginTop: -25,
-        left: 170,
-
     }
 });
 
@@ -183,7 +175,7 @@ class ApiThumb extends React.Component {
         );
     }
 
-    handleRedirectToAPIOverview = (page) => {
+    handleRedirectToAPIOverview () {
         const {api, environmentName, rootAPI} = this.props;
         const currentEnvironmentName = Utils.getCurrentEnvironment().label;
         // If environment name or version is not defined then consider as same environment or version.
@@ -222,15 +214,6 @@ class ApiThumb extends React.Component {
             openRedirectConfirmDialog: false
         });
     }
-
-    handleClickMoreMenu = () => {
-        this.setState({ openMoreMenu: true });
-    };
-
-    handleCloseMoreMenu = () => {
-        this.setState({ openMoreMenu: false });
-    };
-
     render() {
         const {api, environmentOverview, classes} = this.props;
         const gridItemSizes = environmentOverview ?
@@ -249,62 +232,6 @@ class ApiThumb extends React.Component {
         }
 
 
-        const colorPairs = [
-            {prime: 0x8f6bcaff, sub:0x4fc2f8ff },
-            {prime: 0xf47f16ff, sub:0xcddc39ff },
-            {prime: 0xf44236ff, sub:0xfec107ff },
-            {prime: 0x2196f3ff, sub:0xaeea00ff },
-            {prime: 0xff9700ff, sub:0xffeb3cff },
-            {prime: 0xff9700ff, sub:0xfe5722ff },
-        ];
-        const thumbnailBox = {
-            width: 250,
-            height: 200
-        };
-
-        const thumbnailBoxChild = {
-            width: 50,
-            height: 50
-        };
-        //Get a random color pair
-        let allChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_&!#$";
-        let str = api.name;
-        let iconIndex = 0;
-        let colorIndex = str.length;
-        for(let i=0; i< str.length; i++){
-            iconIndex += allChars.indexOf(str[i]);
-        }
-        while(colorIndex > 5 ){
-            colorIndex  -= 6;
-        }
-        //let colorIndex = Math.floor(Math.random() * Math.floor(colorPairs.length)); //Get a random color combination
-        let colorPair = colorPairs[colorIndex];
-        //let iconIndex = Math.floor(Math.random() * Math.floor(Object.keys(icons).length)); // Get a random icon index
-        let tmpIndex = 0;
-        let icon = null;
-
-
-        for( let i in icons){
-            if(icons.hasOwnProperty(i)){
-                tmpIndex++;
-                if(tmpIndex === iconIndex ){
-                    icon = icons[i];
-                }
-            }
-        }
-        let rects = [];
-        for( let i=0; i <= 4; i++ ){
-            for( let j=0; j <= 4; j++ ) {
-
-                rects.push(<rect
-                    {...thumbnailBoxChild}
-                    fill={"#" + (colorPair.sub - 0x00000025 * i - j*0x00000015).toString(16)}
-                    x={200 - i * 54}
-                    y={54*j}
-                />)
-            }
-        }
-        const Icon = icon;
         return (
             <Grid item {...gridItemSizes} className={classes.thumbWrapper}>
                 {api &&  <div
@@ -321,52 +248,20 @@ class ApiThumb extends React.Component {
                         </a>
                     </ScopeValidation>
                 }
-                <svg width="250" height="190" onClick={this.handleRedirectToAPIOverview} className={classes.svgImage}>
-                    <rect
-                        {...thumbnailBox}
-                        fill={"#" + colorPair.prime.toString(16)}
-                    />
-                    {rects}
-                    <Icon />
-                </svg>
+                <ImageGenerator handleRedirectToAPIOverview={this.handleRedirectToAPIOverview} apiName={api.name} />
+                <MoreMenu api_uuid={api.id} />
 
-                <Manager className={classes.moreButton}>
-                    <Target>
-                        <Button
-                            aria-owns={this.state.openMoreMenu ? 'menu-list' : null}
-                            aria-haspopup="true"
-                            onClick={this.handleClickMoreMenu}
-                            variant="raised" size="small" color="default"
-                        >
-                            <MoreHoriz />
-                        </Button>
-                    </Target>
-                    <Popper
-                        placement="bottom-start"
-                        eventsEnabled={this.state.openMoreMenu}
-                        className={classNames({ [classes.popperClose]: !this.state.openMoreMenu })}
-                    >
-                        <ClickAwayListener onClickAway={this.handleCloseMoreMenu}>
-                            <Grow in={this.state.openMoreMenu} id="menu-list" style={{ transformOrigin: '0 0 0' }}>
-                                <Paper>
-                                    <MenuList role="menu">
-                                        <MenuItem onClick={this.handleRedirectToAPIOverview}>Profile</MenuItem>
-                                        <MenuItem onClick={this.handleRedirectToAPIOverview}>My account</MenuItem>
-                                        <MenuItem onClick={this.handleRedirectToAPIOverview}>Logout</MenuItem>
-                                    </MenuList>
-                                </Paper>
-                            </Grow>
-                        </ClickAwayListener>
-                    </Popper>
-                </Manager>
                 <div className={classes.thumbContent}>
                     <Typography className={classes.thumbHeader} variant="display1" gutterBottom
-                                onClick={this.handleRedirectToAPIOverview}>
+                                onClick={this.handleRedirectToAPIOverview} title={api.name}>
                         {environmentOverview ? <span>{api.version}</span> : <span>{api.name}</span> }
+                    </Typography>
+                    <Typography variant="caption" gutterBottom align="left">
+                        By: {api.provider}
                     </Typography>
                     <div className={classes.thumbInfo}>
                         <div className={classes.thumbLeft}>
-                            <Typography variant="display1">
+                            <Typography variant="subheading">
                                 {environmentOverview ? <span>{api.name}</span> : <span>{api.version}</span> }
                             </Typography>
                             <Typography variant="caption" gutterBottom align="left">
@@ -374,7 +269,7 @@ class ApiThumb extends React.Component {
                             </Typography>
                         </div>
                         <div className={classes.thumbRight}>
-                            <Typography variant="display1" align="right">{api.context}</Typography>
+                            <Typography variant="subheading" align="right" className={classes.contextBox}>{api.context}</Typography>
                             <Typography variant="caption" gutterBottom align="right">
                                 Context
                             </Typography>
