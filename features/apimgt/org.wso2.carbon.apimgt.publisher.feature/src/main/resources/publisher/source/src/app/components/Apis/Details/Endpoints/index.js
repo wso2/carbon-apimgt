@@ -1,11 +1,11 @@
 import React, {Component} from 'react'
-import {Card, Button, message} from 'antd'
+import {Button, Card, message} from 'antd'
 
 import GenericEndpointInputs from './GenericEndpointInputs'
 import Api from '../../../../data/api'
 import Loading from '../../../Base/Loading/Loading'
 import ApiPermissionValidation from '../../../../data/ApiPermissionValidation'
-import {ScopeValidation, resourceMethod, resourcePath} from '../../../../data/ScopeValidation'
+import {resourceMethod, resourcePath, ScopeValidation} from '../../../../data/ScopeValidation'
 import ResourceNotFound from "../../../Base/Errors/ResourceNotFound";
 
 
@@ -17,7 +17,7 @@ class Endpoint extends Component {
             endpoints: {},
             productionEndpoint: {},
             sandboxEndpoint: {},
-            dropDownItems : {},
+            dropDownItems: {},
             notFound: false,
         };
         this.api_uuid = props.match.params.api_uuid;
@@ -25,7 +25,7 @@ class Endpoint extends Component {
         this.handleProductionInputs = this.handleProductionInputs.bind(this);
         this.handleSandboxInputs = this.handleSandboxInputs.bind(this);
         this.updateEndpoints = this.updateEndpoints.bind(this);
-        this.dropdownItems =  null;
+        this.dropdownItems = null;
     }
 
     componentDidMount() {
@@ -137,7 +137,7 @@ class Endpoint extends Component {
 
     getURLType(serviceUrl) {
         // remove last : character
-        return new URL(serviceUrl).protocol.replace(/\:$/, '');;
+        return new URL(serviceUrl).protocol.replace(/\:$/, '');
     }
 
     updateEndpoints(e) {
@@ -150,7 +150,7 @@ class Endpoint extends Component {
 
         if (prod.url === undefined) {
             prodJSON.key = prod;
-        } else if(prod.url != null) {
+        } else if (prod.url != null) {
             let inline = {};
             inline.endpointConfig = JSON.stringify({serviceUrl: prod.url});
             inline.endpointSecurity = {enabled: false};
@@ -161,7 +161,7 @@ class Endpoint extends Component {
 
         if (sandbox.url === undefined) {
             sandboxJSON.key = sandbox;
-        } else if (sandbox.url != null ) {
+        } else if (sandbox.url != null) {
             let inline = {};
             inline.endpointConfig = JSON.stringify({serviceUrl: sandbox.url});
             inline.endpointSecurity = {enabled: false};
@@ -195,8 +195,6 @@ class Endpoint extends Component {
         );
     }
 
-
-
     render() {
 
         const api = this.state.api;
@@ -226,10 +224,11 @@ class Endpoint extends Component {
                 </Card>
                 {/* Allowing create endpoints based on scopes */}
                 <ScopeValidation resourcePath={resourcePath.ENDPOINTS} resourceMethod={resourceMethod.POST}>
-                  <ApiPermissionValidation userPermissions={JSON.parse(this.state.api).userPermissionsForApi}>
-                      <Button style={{margin: "5px"}} type="primary" onClick={() => this.updateEndpoints()}>Save</Button>
-                  </ApiPermissionValidation>
-              </ScopeValidation>
+                    <ApiPermissionValidation userPermissions={JSON.parse(this.state.api).userPermissionsForApi}>
+                        <Button style={{margin: "5px"}} type="primary"
+                                onClick={() => this.updateEndpoints()}>Save</Button>
+                    </ApiPermissionValidation>
+                </ScopeValidation>
             </div>
         );
     }
