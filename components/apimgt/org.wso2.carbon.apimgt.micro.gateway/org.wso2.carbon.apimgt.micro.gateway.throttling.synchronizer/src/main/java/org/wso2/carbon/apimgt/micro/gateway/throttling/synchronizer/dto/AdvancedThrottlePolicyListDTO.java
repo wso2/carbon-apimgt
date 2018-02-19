@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -28,15 +28,11 @@ import java.util.List;
 
 @ApiModel(description = "")
 public class AdvancedThrottlePolicyListDTO  {
-  
-  
-  
+
   private Integer count = null;
-  
-  
+
   private List<AdvancedThrottlePolicyInfoDTO> list = new ArrayList<AdvancedThrottlePolicyInfoDTO>();
 
-  
   /**
    * Number of Advanced throttle policies returned.\n
    **/
@@ -60,8 +56,6 @@ public class AdvancedThrottlePolicyListDTO  {
   public void setList(List<AdvancedThrottlePolicyInfoDTO> list) {
     this.list = list;
   }
-
-  
 
   @Override
   public String toString()  {

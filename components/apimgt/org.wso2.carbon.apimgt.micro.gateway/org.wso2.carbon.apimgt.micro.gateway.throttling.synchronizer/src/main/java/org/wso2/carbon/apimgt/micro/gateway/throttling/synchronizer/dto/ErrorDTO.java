@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -26,27 +26,21 @@ import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-
 @ApiModel(description = "")
 public class ErrorDTO  {
-  
-  
+
   @NotNull
   private Long code = null;
   
   @NotNull
   private String message = null;
-  
-  
+
   private String description = null;
-  
-  
+
   private String moreInfo = null;
-  
-  
+
   private List<ErrorListItemDTO> error = new ArrayList<ErrorListItemDTO>();
 
-  
   /**
    **/
   @ApiModelProperty(required = true, value = "")
@@ -58,7 +52,6 @@ public class ErrorDTO  {
     this.code = code;
   }
 
-  
   /**
    * Error message.
    **/
@@ -71,7 +64,6 @@ public class ErrorDTO  {
     this.message = message;
   }
 
-  
   /**
    * A detail description about the error message.\n
    **/
@@ -84,7 +76,6 @@ public class ErrorDTO  {
     this.description = description;
   }
 
-  
   /**
    * Preferably an url with more details about the error.\n
    **/
@@ -97,7 +88,6 @@ public class ErrorDTO  {
     this.moreInfo = moreInfo;
   }
 
-  
   /**
    * If there are more than one error list them out.\nFor example, list out validation errors by each field.\n
    **/
@@ -109,8 +99,6 @@ public class ErrorDTO  {
   public void setError(List<ErrorListItemDTO> error) {
     this.error = error;
   }
-
-  
 
   @Override
   public String toString()  {

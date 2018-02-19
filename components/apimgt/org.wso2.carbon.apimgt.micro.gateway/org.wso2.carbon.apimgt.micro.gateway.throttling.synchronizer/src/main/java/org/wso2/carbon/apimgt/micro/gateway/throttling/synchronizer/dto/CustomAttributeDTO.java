@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -25,18 +25,15 @@ import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.NotNull;
 
-
 @ApiModel(description = "")
 public class CustomAttributeDTO  {
-  
-  
+
   @NotNull
   private String name = null;
   
   @NotNull
   private String value = null;
 
-  
   /**
    **/
   @ApiModelProperty(required = true, value = "")
@@ -48,7 +45,6 @@ public class CustomAttributeDTO  {
     this.name = name;
   }
 
-  
   /**
    **/
   @ApiModelProperty(required = true, value = "")
@@ -59,8 +55,6 @@ public class CustomAttributeDTO  {
   public void setValue(String value) {
     this.value = value;
   }
-
-  
 
   @Override
   public String toString()  {

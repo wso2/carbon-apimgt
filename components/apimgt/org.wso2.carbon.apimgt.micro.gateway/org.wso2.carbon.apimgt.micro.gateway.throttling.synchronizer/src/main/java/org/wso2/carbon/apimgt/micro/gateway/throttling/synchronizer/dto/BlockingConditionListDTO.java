@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -28,15 +28,11 @@ import java.util.List;
 
 @ApiModel(description = "")
 public class BlockingConditionListDTO  {
-  
-  
-  
+
   private Integer count = null;
-  
   
   private List<BlockingConditionDTO> list = new ArrayList<BlockingConditionDTO>();
 
-  
   /**
    * Number of Blocking Conditions returned.\n
    **/
@@ -49,7 +45,6 @@ public class BlockingConditionListDTO  {
     this.count = count;
   }
 
-  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -60,8 +55,6 @@ public class BlockingConditionListDTO  {
   public void setList(List<BlockingConditionDTO> list) {
     this.list = list;
   }
-
-  
 
   @Override
   public String toString()  {

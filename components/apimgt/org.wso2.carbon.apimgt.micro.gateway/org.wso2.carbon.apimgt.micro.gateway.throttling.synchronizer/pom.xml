@@ -23,7 +23,7 @@
     <parent>
         <artifactId>org.wso2.carbon.apimgt.micro.gateway</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>6.2.101-SNAPSHOT</version>
+        <version>6.2.102-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -204,9 +204,5 @@
             </plugin>
         </plugins>
     </build>
-
-    <properties>
-        <orbit.httpmime.version>4.3.1.wso2v2</orbit.httpmime.version>
-    </properties>
 
 </project>

@@ -143,8 +143,8 @@ public class MicroGatewayRestAPI {
                 log.warn("Unauthorized access for API publish/re-publish event publishing service. "
                         + authDTO.getMessage());
                 JsonObject responseObj = new JsonObject();
-                responseObj.addProperty("message", authDTO.getMessage());
-                responseObj.addProperty("description", authDTO.getDescription());
+                responseObj.addProperty(UploadServiceConstants.MESSAGE, authDTO.getMessage());
+                responseObj.addProperty(UploadServiceConstants.DESCRIPTION, authDTO.getDescription());
                 return Response.status(authDTO.getResponseStatus())
                         .entity(responseObj.toString())
                         .build();

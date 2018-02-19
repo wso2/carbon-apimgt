@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -25,24 +25,19 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(description = "")
 public class IPConditionDTO extends ThrottleConditionDTO {
-  
-  
+
   public enum IpConditionTypeEnum {
      IPRange,  IPSpecific, 
   };
   
   private IpConditionTypeEnum ipConditionType = null;
-  
-  
+
   private String specificIP = null;
-  
-  
+
   private String startingIP = null;
-  
-  
+
   private String endingIP = null;
 
-  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -54,7 +49,6 @@ public class IPConditionDTO extends ThrottleConditionDTO {
     this.ipConditionType = ipConditionType;
   }
 
-  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -66,7 +60,6 @@ public class IPConditionDTO extends ThrottleConditionDTO {
     this.specificIP = specificIP;
   }
 
-  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -78,7 +71,6 @@ public class IPConditionDTO extends ThrottleConditionDTO {
     this.startingIP = startingIP;
   }
 
-  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -89,8 +81,6 @@ public class IPConditionDTO extends ThrottleConditionDTO {
   public void setEndingIP(String endingIP) {
     this.endingIP = endingIP;
   }
-
-  
 
   @Override
   public String toString()  {

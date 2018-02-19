@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -24,7 +24,6 @@ import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.NotNull;
 
-
 /**
  * Blocking Conditions
  **/
@@ -32,9 +31,7 @@ import javax.validation.constraints.NotNull;
 
 @ApiModel(description = "Blocking Conditions")
 public class BlockingConditionDTO  {
-  
-  
-  
+
   private String conditionId = null;
   
   @NotNull
@@ -43,7 +40,6 @@ public class BlockingConditionDTO  {
   @NotNull
   private String conditionValue = null;
 
-  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -54,7 +50,6 @@ public class BlockingConditionDTO  {
   public void setConditionId(String conditionId) {
     this.conditionId = conditionId;
   }
-
   
   /**
    **/
@@ -67,7 +62,6 @@ public class BlockingConditionDTO  {
     this.conditionType = conditionType;
   }
 
-  
   /**
    **/
   @ApiModelProperty(required = true, value = "")
@@ -78,8 +72,6 @@ public class BlockingConditionDTO  {
   public void setConditionValue(String conditionValue) {
     this.conditionValue = conditionValue;
   }
-
-  
 
   @Override
   public String toString()  {

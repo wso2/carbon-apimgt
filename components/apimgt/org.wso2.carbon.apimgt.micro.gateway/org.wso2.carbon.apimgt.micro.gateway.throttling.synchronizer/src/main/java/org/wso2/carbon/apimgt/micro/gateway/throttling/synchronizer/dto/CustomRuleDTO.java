@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -25,15 +25,11 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(description = "")
 public class CustomRuleDTO extends ThrottlePolicyDTO {
-  
-  
-  
+
   private String siddhiQuery = null;
-  
-  
+
   private String keyTemplate = null;
 
-  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -56,8 +52,6 @@ public class CustomRuleDTO extends ThrottlePolicyDTO {
   public void setKeyTemplate(String keyTemplate) {
     this.keyTemplate = keyTemplate;
   }
-
-  
 
   @Override
   public String toString()  {

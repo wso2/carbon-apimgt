@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -40,18 +40,15 @@ import javax.validation.constraints.NotNull;
 })
 @ApiModel(description = "Throttling Conditions")
 public class ThrottleConditionDTO  {
-  
-  
+
   public enum TypeEnum {
      HeaderCondition,  IPCondition,  JWTClaimsCondition,  QueryParameterCondition, 
   };
   @NotNull
   private TypeEnum type = null;
-  
-  
+
   private Boolean invertCondition = false;
 
-  
   /**
    **/
   @ApiModelProperty(required = true, value = "")
@@ -63,7 +60,6 @@ public class ThrottleConditionDTO  {
     this.type = type;
   }
 
-  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -75,7 +71,6 @@ public class ThrottleConditionDTO  {
     this.invertCondition = invertCondition;
   }
 
-  
 
   @Override
   public String toString()  {

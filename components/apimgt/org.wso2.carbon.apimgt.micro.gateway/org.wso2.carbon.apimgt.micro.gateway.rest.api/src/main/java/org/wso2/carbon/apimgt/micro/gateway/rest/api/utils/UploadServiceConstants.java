@@ -28,6 +28,10 @@ public final class UploadServiceConstants {
 
     public static final String FILE_NAME_HEADER = "FileName";
 
+    public static final String MESSAGE = "message";
+
+    public static final String DESCRIPTION = "description";
+
     //length of the name of the temporary directory
     public static final int TEMP_FILENAME_LENGTH = 5;
 

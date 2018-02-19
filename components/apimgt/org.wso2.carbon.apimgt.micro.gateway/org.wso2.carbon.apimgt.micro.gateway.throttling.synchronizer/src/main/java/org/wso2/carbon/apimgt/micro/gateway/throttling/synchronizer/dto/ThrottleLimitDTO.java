@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -35,8 +35,7 @@ import javax.validation.constraints.NotNull;
 })
 @ApiModel(description = "")
 public class ThrottleLimitDTO  {
-  
-  
+
   public enum TypeEnum {
      RequestCountLimit,  BandwidthLimit, 
   };
@@ -48,7 +47,6 @@ public class ThrottleLimitDTO  {
   
   @NotNull
   private Integer unitTime = null;
-
   
   /**
    **/
@@ -61,7 +59,6 @@ public class ThrottleLimitDTO  {
     this.type = type;
   }
 
-  
   /**
    **/
   @ApiModelProperty(required = true, value = "")
@@ -73,7 +70,6 @@ public class ThrottleLimitDTO  {
     this.timeUnit = timeUnit;
   }
 
-  
   /**
    **/
   @ApiModelProperty(required = true, value = "")
@@ -85,13 +81,10 @@ public class ThrottleLimitDTO  {
     this.unitTime = unitTime;
   }
 
-  
-
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
     sb.append("class ThrottleLimitDTO {\n");
-    
     sb.append("  type: ").append(type).append("\n");
     sb.append("  timeUnit: ").append(timeUnit).append("\n");
     sb.append("  unitTime: ").append(unitTime).append("\n");

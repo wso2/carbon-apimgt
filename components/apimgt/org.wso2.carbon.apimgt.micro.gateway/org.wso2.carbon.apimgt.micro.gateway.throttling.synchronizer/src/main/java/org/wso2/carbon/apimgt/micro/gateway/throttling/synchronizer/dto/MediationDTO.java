@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -25,12 +25,9 @@ import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.NotNull;
 
-
 @ApiModel(description = "")
 public class MediationDTO  {
-  
-  
-  
+
   private String id = null;
   
   @NotNull
@@ -45,7 +42,6 @@ public class MediationDTO  {
   @NotNull
   private String config = null;
 
-  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -57,7 +53,6 @@ public class MediationDTO  {
     this.id = id;
   }
 
-  
   /**
    **/
   @ApiModelProperty(required = true, value = "")
@@ -69,7 +64,6 @@ public class MediationDTO  {
     this.name = name;
   }
 
-  
   /**
    **/
   @ApiModelProperty(required = true, value = "")
@@ -81,7 +75,6 @@ public class MediationDTO  {
     this.type = type;
   }
 
-  
   /**
    **/
   @ApiModelProperty(required = true, value = "")
@@ -93,13 +86,11 @@ public class MediationDTO  {
     this.config = config;
   }
 
-  
 
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
     sb.append("class MediationDTO {\n");
-    
     sb.append("  id: ").append(id).append("\n");
     sb.append("  name: ").append(name).append("\n");
     sb.append("  type: ").append(type).append("\n");

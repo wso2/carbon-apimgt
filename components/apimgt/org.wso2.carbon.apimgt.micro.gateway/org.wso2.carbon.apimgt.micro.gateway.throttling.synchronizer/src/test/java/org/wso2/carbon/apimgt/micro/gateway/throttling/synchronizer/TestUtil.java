@@ -25,17 +25,20 @@ import java.io.File;
  * Test util
  */
 public class TestUtil {
+
+    private final String carbonHome = "carbon.home";
+
     public void setupCarbonHome() throws Exception {
         this.setCarbonHome();
     }
 
     private void setCarbonHome() throws Exception {
-        if (StringUtils.isEmpty(System.getProperty("carbon.home"))) {
+        if (StringUtils.isEmpty(System.getProperty(carbonHome))) {
             String filePath =
                     "src" + File.separator + "test" + File.separator + "resources" + File.separator + "carbon-home";
             File file = new File(filePath);
             if (file.exists()) {
-                System.setProperty("carbon.home", file.getAbsolutePath());
+                System.setProperty(carbonHome, file.getAbsolutePath());
             } else {
                 throw new Exception("Error while setting carbon home.");
             }

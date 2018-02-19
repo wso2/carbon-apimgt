@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -28,23 +28,17 @@ import javax.validation.constraints.NotNull;
 
 @ApiModel(description = "")
 public class ThrottlePolicyDTO  {
-  
-  
-  
+
   private String policyId = null;
   
   @NotNull
   private String policyName = null;
-  
-  
+
   private String displayName = null;
   
-  
   private String description = null;
-  
-  
-  private Boolean isDeployed = false;
 
+  private Boolean isDeployed = false;
   
   /**
    **/
@@ -57,7 +51,6 @@ public class ThrottlePolicyDTO  {
     this.policyId = policyId;
   }
 
-  
   /**
    **/
   @ApiModelProperty(required = true, value = "")
@@ -69,7 +62,6 @@ public class ThrottlePolicyDTO  {
     this.policyName = policyName;
   }
 
-  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -80,7 +72,6 @@ public class ThrottlePolicyDTO  {
   public void setDisplayName(String displayName) {
     this.displayName = displayName;
   }
-
   
   /**
    **/
@@ -93,7 +84,6 @@ public class ThrottlePolicyDTO  {
     this.description = description;
   }
 
-  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -105,13 +95,10 @@ public class ThrottlePolicyDTO  {
     this.isDeployed = isDeployed;
   }
 
-  
-
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
     sb.append("class ThrottlePolicyDTO {\n");
-    
     sb.append("  policyId: ").append(policyId).append("\n");
     sb.append("  policyName: ").append(policyName).append("\n");
     sb.append("  displayName: ").append(displayName).append("\n");

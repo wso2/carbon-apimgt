@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -25,15 +25,11 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(description = "")
 public class HeaderConditionDTO extends ThrottleConditionDTO {
-  
-  
-  
+
   private String headerName = null;
-  
-  
+
   private String headerValue = null;
 
-  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -45,7 +41,6 @@ public class HeaderConditionDTO extends ThrottleConditionDTO {
     this.headerName = headerName;
   }
 
-  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -56,8 +51,6 @@ public class HeaderConditionDTO extends ThrottleConditionDTO {
   public void setHeaderValue(String headerValue) {
     this.headerValue = headerValue;
   }
-
-  
 
   @Override
   public String toString()  {

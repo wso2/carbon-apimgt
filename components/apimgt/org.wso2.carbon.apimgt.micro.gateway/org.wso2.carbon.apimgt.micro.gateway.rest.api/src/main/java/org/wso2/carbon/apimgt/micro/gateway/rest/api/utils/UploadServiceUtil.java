@@ -28,8 +28,8 @@ public final class UploadServiceUtil {
 
     public static Response getJsonResponse(Response.Status status, String msg, String description) {
         JsonObject responseObj = new JsonObject();
-        responseObj.addProperty("message", msg);
-        responseObj.addProperty("description", description);
+        responseObj.addProperty(UploadServiceConstants.MESSAGE, msg);
+        responseObj.addProperty(UploadServiceConstants.DESCRIPTION, description);
         return Response.status(status)
                 .entity(responseObj.toString())
                 .build();

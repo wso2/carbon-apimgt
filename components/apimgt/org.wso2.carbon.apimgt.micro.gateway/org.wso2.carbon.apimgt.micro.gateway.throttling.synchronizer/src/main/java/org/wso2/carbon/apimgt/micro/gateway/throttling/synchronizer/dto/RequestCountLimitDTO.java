@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -25,12 +25,9 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(description = "")
 public class RequestCountLimitDTO extends ThrottleLimitDTO {
-  
-  
-  
+
   private Long requestCount = 0l;
 
-  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -41,8 +38,6 @@ public class RequestCountLimitDTO extends ThrottleLimitDTO {
   public void setRequestCount(Long requestCount) {
     this.requestCount = requestCount;
   }
-
-  
 
   @Override
   public String toString()  {

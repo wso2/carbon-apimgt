@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -28,27 +28,19 @@ import java.util.List;
 
 @ApiModel(description = "")
 public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO {
-  
-  
-  
+
   private ThrottleLimitDTO defaultLimit = null;
-  
-  
+
   private Integer rateLimitCount = null;
-  
-  
+
   private String rateLimitTimeUnit = null;
-  
-  
+
   private List<CustomAttributeDTO> customAttributes = new ArrayList<CustomAttributeDTO>();
-  
-  
+
   private Boolean stopOnQuotaReach = false;
-  
   
   private String billingPlan = null;
 
-  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -60,7 +52,6 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO {
     this.defaultLimit = defaultLimit;
   }
 
-  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -72,7 +63,6 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO {
     this.rateLimitCount = rateLimitCount;
   }
 
-  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -84,7 +74,6 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO {
     this.rateLimitTimeUnit = rateLimitTimeUnit;
   }
 
-  
   /**
    * Custom attributes added to the Subscription Throttle policy\n
    **/
@@ -97,7 +86,6 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO {
     this.customAttributes = customAttributes;
   }
 
-  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -109,7 +97,6 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO {
     this.stopOnQuotaReach = stopOnQuotaReach;
   }
 
-  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -120,8 +107,6 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO {
   public void setBillingPlan(String billingPlan) {
     this.billingPlan = billingPlan;
   }
-
-  
 
   @Override
   public String toString()  {

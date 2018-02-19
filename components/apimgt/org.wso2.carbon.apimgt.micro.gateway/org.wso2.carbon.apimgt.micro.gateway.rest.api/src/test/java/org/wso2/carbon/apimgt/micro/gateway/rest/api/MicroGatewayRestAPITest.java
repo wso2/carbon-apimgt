@@ -106,7 +106,7 @@ public class MicroGatewayRestAPITest {
         Assert.assertEquals(201, response.getStatus());
     }
 
-        @Test
+    @Test
     public void getUpdatedApis_UnauthorizedUser() throws Exception {
         AuthDTO authDTO = Mockito.mock(AuthDTO.class);
         PowerMockito.mockStatic(AuthenticatorUtil.class);

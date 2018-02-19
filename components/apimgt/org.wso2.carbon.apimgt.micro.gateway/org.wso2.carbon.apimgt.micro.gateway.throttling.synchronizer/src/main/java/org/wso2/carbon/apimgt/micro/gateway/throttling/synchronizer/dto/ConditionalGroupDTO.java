@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -29,9 +29,7 @@ import java.util.List;
 
 @ApiModel(description = "")
 public class ConditionalGroupDTO  {
-  
-  
-  
+
   private String description = null;
   
   @NotNull
@@ -40,7 +38,6 @@ public class ConditionalGroupDTO  {
   @NotNull
   private ThrottleLimitDTO limit = null;
 
-  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -52,7 +49,6 @@ public class ConditionalGroupDTO  {
     this.description = description;
   }
 
-  
   /**
    **/
   @ApiModelProperty(required = true, value = "")
@@ -64,7 +60,6 @@ public class ConditionalGroupDTO  {
     this.conditions = conditions;
   }
 
-  
   /**
    **/
   @ApiModelProperty(required = true, value = "")
@@ -75,8 +70,6 @@ public class ConditionalGroupDTO  {
   public void setLimit(ThrottleLimitDTO limit) {
     this.limit = limit;
   }
-
-  
 
   @Override
   public String toString()  {
