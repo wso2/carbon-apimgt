@@ -469,7 +469,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Get Label by ID")
     public void testGetLabelByID() throws APIManagementException {
         LabelDAO labelDAO = mock(LabelDAO.class);
-        Label label = SampleTestObjectCreator.createLabel(LABEL_NAME).build();
+        Label label = SampleTestObjectCreator.createLabel(LABEL_NAME, SampleTestObjectCreator.LABEL_TYPE_STORE).build();
         AbstractAPIManager apiManager = getApiPublisherImpl(labelDAO);
         when(labelDAO.getLabelByID(label.getId())).thenReturn(label);
         apiManager.getLabelByID(label.getId());

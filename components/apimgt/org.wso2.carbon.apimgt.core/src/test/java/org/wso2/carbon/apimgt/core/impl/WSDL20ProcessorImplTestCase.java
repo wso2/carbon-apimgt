@@ -49,7 +49,8 @@ public class WSDL20ProcessorImplTestCase {
 
         //validate the content after updating endpoints using an API and Label
         API api = SampleTestObjectCreator.createDefaultAPI().build();
-        Label label = SampleTestObjectCreator.createLabel(SAMPLE_LABEL_NAME).build();
+        Label label = SampleTestObjectCreator.createLabel(SAMPLE_LABEL_NAME, SampleTestObjectCreator
+                .LABEL_TYPE_STORE).build();
         byte[] updatedWSDLWithEndpoint = wsdl20Processor.getUpdatedWSDL(api, label);
         //validate the content of wsdl20Processor's WSDL Info content after updating its endpoints
         assertDefaultSingleWSDLContent(wsdl20Processor.getWsdlInfo(), UPDATED_ENDPOINT_API_LABEL,
@@ -70,21 +71,22 @@ public class WSDL20ProcessorImplTestCase {
         wsdl20Processor.initPath(extractedLocation);
         Assert.assertTrue(wsdl20Processor.canProcess());
         assertDefaultArchivedWSDLContent(wsdl20Processor.getWsdlInfo(),
-                new String[] { ORIGINAL_ENDPOINT_MY_SERVICE, ORIGINAL_ENDPOINT_PURCHASE_ORDER }, null);
+                new String[]{ORIGINAL_ENDPOINT_MY_SERVICE, ORIGINAL_ENDPOINT_PURCHASE_ORDER}, null);
 
         API api = SampleTestObjectCreator.createDefaultAPI().build();
-        Label label = SampleTestObjectCreator.createLabel(SAMPLE_LABEL_NAME).build();
+        Label label = SampleTestObjectCreator.createLabel(SAMPLE_LABEL_NAME, SampleTestObjectCreator
+                .LABEL_TYPE_STORE).build();
         String updatedPath = wsdl20Processor.getUpdatedWSDLPath(api, label);
 
         WSDL20ProcessorImpl wsdl20Processor2 = new WSDL20ProcessorImpl();
         wsdl20Processor2.initPath(updatedPath);
         Assert.assertTrue(wsdl20Processor2.canProcess());
-        assertDefaultArchivedWSDLContent(wsdl20Processor2.getWsdlInfo(), new String[] { UPDATED_ENDPOINT_API_LABEL },
-                new String[] { ORIGINAL_ENDPOINT_MY_SERVICE, ORIGINAL_ENDPOINT_PURCHASE_ORDER });
+        assertDefaultArchivedWSDLContent(wsdl20Processor2.getWsdlInfo(), new String[]{UPDATED_ENDPOINT_API_LABEL},
+                new String[]{ORIGINAL_ENDPOINT_MY_SERVICE, ORIGINAL_ENDPOINT_PURCHASE_ORDER});
     }
 
     private void assertDefaultSingleWSDLContent(WSDLInfo wsdlInfo, String endpointURIToAssertContains,
-            String endpointURIToAssertNotContains) throws Exception {
+                                                String endpointURIToAssertNotContains) throws Exception {
         //Assert wsdlInfo fields
         Assert.assertEquals(wsdlInfo.getVersion(), WSDL_VERSION_20);
         Assert.assertEquals(wsdlInfo.getEndpoints().size(), 1);
@@ -97,7 +99,7 @@ public class WSDL20ProcessorImplTestCase {
     }
 
     private void assertDefaultArchivedWSDLContent(WSDLInfo wsdlInfo, String[] endpointURIsToAssertContains,
-            String[] endpointURIsToAssertNotContains) throws Exception {
+                                                  String[] endpointURIsToAssertNotContains) throws Exception {
         //Assert wsdlInfo fields
         Assert.assertEquals(wsdlInfo.getVersion(), WSDL_VERSION_20);
         Assert.assertEquals(wsdlInfo.getEndpoints().size(), 2);

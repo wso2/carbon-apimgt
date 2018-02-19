@@ -217,7 +217,7 @@ public class PostgresSQLStatements implements ApiDAOVendorSpecificStatements {
         //get the corresponding implementation based on the attribute to be searched
         String query = searchMap.get(searchAttribute).
                 getStoreAttributeSearchQuery(roleListBuilder, searchQuery, offset, limit);
-        query = "Select * from ( " + query + " ) " + getStoreAPIsByLabelJoinQuery(labels) + " OFFSET ? LIMIT ?";
+        query = "Select * from ( " + query + " ) A " + getStoreAPIsByLabelJoinQuery(labels);
 
         try {
             int queryIndex = 1;

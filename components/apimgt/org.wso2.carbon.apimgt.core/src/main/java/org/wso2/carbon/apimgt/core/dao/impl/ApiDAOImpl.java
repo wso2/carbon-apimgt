@@ -33,14 +33,12 @@ import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
 import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
-import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.models.ResourceCategory;
 import org.wso2.carbon.apimgt.core.models.Subscription;
@@ -67,6 +65,7 @@ import java.sql.Types;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -389,10 +388,10 @@ public class ApiDAOImpl implements ApiDAO {
         //published/prototyped APIs with restricted visibility where APIs are restricted based on roles of the user
         String labelQuery = null;
         if (labels.isEmpty()) {
-            labelQuery =   "SELECT LABEL_ID FROM  AM_LABELS WHERE TYPE_NAME='STORE'";
+            labelQuery = "SELECT LABEL_ID FROM  AM_LABELS WHERE TYPE_NAME='STORE'";
         } else {
-            labelQuery =   "SELECT LABEL_ID FROM  AM_LABELS WHERE NAME IN ( " +
-                    DAOUtil.getParameterString(labels.size())  + ") AND TYPE_NAME='STORE'";
+            labelQuery = "SELECT LABEL_ID FROM  AM_LABELS WHERE NAME IN ( " +
+                    DAOUtil.getParameterString(labels.size()) + ") AND TYPE_NAME='STORE'";
         }
         final String query = "Select UUID, PROVIDER, NAME, CONTEXT, VERSION, DESCRIPTION, CURRENT_LC_STATUS, " +
                 "LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS, SECURITY_SCHEME  FROM (" + API_SUMMARY_SELECT + " WHERE " +
@@ -480,7 +479,6 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
 
-
     /**
      * @see ApiDAO#searchAPIsByAttributeInStore(List roles, List labels, Map attributeMap, int offset, int limit)
      */
@@ -546,12 +544,16 @@ public class ApiDAOImpl implements ApiDAO {
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     public List<API> searchAPIsByStoreLabel(Set<String> roles, String user, String searchString,
                                             int offset, int limit, List<String> labels) throws APIMgtDAOException {
-        //Since full text search is TBD, currently returns API's by status
-        List<String> statuses = new ArrayList<>();
-        statuses.add(APIStatus.PUBLISHED.getStatus());
-        statuses.add(APIStatus.PROTOTYPED.getStatus());
-        List<API> apiResults = getAPIsByStatus(roles, statuses, labels);
-        return apiResults;
+        final String query = sqlStatements.getApiSearchQuery(roles.size());
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            sqlStatements.setApiSearchStatement(statement, roles, user, searchString,
+                    ApiType.STANDARD, offset, limit, labels);
+
+            return constructAPISummaryList(connection, statement);
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "searching APIs", e);
+        }
     }
 
     /**
@@ -783,7 +785,7 @@ public class ApiDAOImpl implements ApiDAO {
      */
     private void addCompositeAPIRelatedInformation(Connection connection, PreparedStatement statement,
                                                    final CompositeAPI api)
-            throws SQLException , org.wso2.carbon.apimgt.core.exception.APIMgtDAOException {
+            throws SQLException, org.wso2.carbon.apimgt.core.exception.APIMgtDAOException {
         String apiPrimaryKey = api.getId();
         statement.setString(1, api.getProvider());
         statement.setString(2, api.getName());
@@ -1436,7 +1438,7 @@ public class ApiDAOImpl implements ApiDAO {
             String errorMessage = "getting all comments for API " + apiId;
             throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + errorMessage, e);
         }
-        return  commentList;
+        return commentList;
     }
 
     @Override
@@ -1467,7 +1469,7 @@ public class ApiDAOImpl implements ApiDAO {
                 connection.rollback();
                 String errorMessage = "adding rating for API: " + apiId;
                 throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + errorMessage, e);
-            }  finally {
+            } finally {
                 connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException e) {
@@ -1646,7 +1648,8 @@ public class ApiDAOImpl implements ApiDAO {
                     }
                 } else {
                     throw new APIMgtDAOException("Couldn't Find Endpoint Config for Endpoint: " + endpointId,
-                            ExceptionCodes.ENDPOINT_CONFIG_NOT_FOUND);                }
+                            ExceptionCodes.ENDPOINT_CONFIG_NOT_FOUND);
+                }
             }
         } catch (SQLException | IOException e) {
             String msg = "getting Endpoints Gateway Config for Endpoint: " + endpointId;
@@ -2086,7 +2089,7 @@ public class ApiDAOImpl implements ApiDAO {
                         isResponseCachingEnabled(rs.getBoolean("IS_RESPONSE_CACHED")).
                         cacheTimeout(rs.getInt("CACHE_TIMEOUT")).
                         tags(getTags(connection, apiPrimaryKey)).
-                        labels(getLabelNames(connection, apiPrimaryKey)).
+                        labels(getLabelIdsForAPI(connection, apiPrimaryKey)).
                         wsdlUri(ApiResourceDAO.
                                 getTextValueForCategory(connection, apiPrimaryKey,
                                         ResourceCategory.WSDL_TEXT)).
@@ -2361,16 +2364,17 @@ public class ApiDAOImpl implements ApiDAO {
 
     /**
      * Associate a list of threat protection policy ids with an API
+     *
      * @param connection SQL Connection
-     * @param apiId ApiId of the API
-     * @param policies Set of threat protection policies
+     * @param apiId      ApiId of the API
+     * @param policies   Set of threat protection policies
      * @throws SQLException If failed to associate policies
      */
     private void addThreatProtectionPolicies(Connection connection, String apiId, Set<String> policies)
             throws SQLException {
         final String query = "INSERT INTO AM_THREAT_PROTECTION_MAPPING (API_ID, POLICY_ID) VALUES(?,?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            for (String policy: policies) {
+            for (String policy : policies) {
                 statement.setString(1, apiId);
                 statement.setString(2, policy);
                 statement.addBatch();
@@ -2391,9 +2395,9 @@ public class ApiDAOImpl implements ApiDAO {
     /**
      * Adding API permission to database
      *
-     * @param connection connection to database
+     * @param connection    connection to database
      * @param permissionMap permission map
-     * @param apiId id of the API
+     * @param apiId         id of the API
      * @throws SQLException if error occurred when adding API permission to database
      */
     private void addAPIPermission(Connection connection, Map permissionMap, String apiId) throws SQLException {
@@ -2426,9 +2430,9 @@ public class ApiDAOImpl implements ApiDAO {
     /**
      * Update API permission
      *
-     * @param connection connection to database
+     * @param connection    connection to database
      * @param permissionMap updated permission map
-     * @param apiId id of API to be updated permission
+     * @param apiId         id of API to be updated permission
      * @throws SQLException if error occurred when updating api permission
      */
     private void updateApiPermission(Connection connection, Map permissionMap, String apiId) throws SQLException {
@@ -2468,8 +2472,9 @@ public class ApiDAOImpl implements ApiDAO {
 
     /**
      * Delete threat protection policies from an API
+     *
      * @param connection SQL Connection
-     * @param apiId ApiId of the API
+     * @param apiId      ApiId of the API
      * @throws SQLException If failed to delete policies
      */
     private void deleteThreatProtectionPolicies(Connection connection, String apiId) throws SQLException {
@@ -2585,6 +2590,7 @@ public class ApiDAOImpl implements ApiDAO {
             }
         }
     }
+
     private void addApiPolicy(Connection connection, String apiPolicy, String apiID)
             throws SQLException {
         final String query =
@@ -2829,8 +2835,9 @@ public class ApiDAOImpl implements ApiDAO {
         final String query = "SELECT DISTINCT UUID, PROVIDER, A.NAME, CONTEXT, VERSION, DESCRIPTION, CURRENT_LC_STATUS,"
                 + " LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS, SECURITY_SCHEME FROM AM_API A INNER JOIN " +
                 " AM_API_LABEL_MAPPING M ON A.UUID"
-                + " = M.API_ID INNER JOIN AM_LABELS L ON L.LABEL_ID = M.LABEL_ID WHERE L.NAME IN (" + DAOUtil
-                .getParameterString(gatewayLabels.size()) + ") AND A.CURRENT_LC_STATUS=?";
+                + " = M.API_ID INNER JOIN AM_LABELS L ON L.LABEL_ID = M.LABEL_ID  WHERE L.TYPE_NAME='GATEWAY' " +
+                "AND L.NAME" + " " + "IN" + " " + "(" + DAOUtil.getParameterString(gatewayLabels.size()) + ") AND A" +
+                ".CURRENT_LC_STATUS=?";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -3027,7 +3034,7 @@ public class ApiDAOImpl implements ApiDAO {
      * This returns the json string containing the role permissions for a given API
      *
      * @param connection - DB connection
-     * @param apiId - apiId of the API
+     * @param apiId      - apiId of the API
      * @return permission string
      * @throws SQLException - if error occurred while getting permissionMap of API from DB
      */
@@ -3052,7 +3059,7 @@ public class ApiDAOImpl implements ApiDAO {
      * This constructs and returns the API permissions map from the DB
      *
      * @param connection - DB connection
-     * @param apiId - apiId of the API
+     * @param apiId      - apiId of the API
      * @return permission map for the API
      * @throws SQLException - if error occurred while getting permissionMap of API from DB
      */
@@ -3220,18 +3227,34 @@ public class ApiDAOImpl implements ApiDAO {
 
     private void addLabelMapping(Connection connection, String apiID, java.util.List<String> labels)
             throws SQLException, org.wso2.carbon.apimgt.core.exception.APIMgtDAOException {
-        if (labels != null && !labels.isEmpty()) {
-            final String query = "INSERT INTO AM_API_LABEL_MAPPING (API_ID, LABEL_ID) VALUES (?,?)";
+        final String query = "INSERT INTO AM_API_LABEL_MAPPING (API_ID, LABEL_ID) VALUES (?,?)";
 
+        if (labels != null && !labels.isEmpty()) {
             try (PreparedStatement statement = connection.prepareStatement(query)) {
                 for (String labelID : labels) {
                     statement.setString(1, apiID);
-                    statement.setString(2, new LabelDAOImpl().getLabelByID(labelID).getId());
+                    statement.setString(2, labelID);
                     statement.addBatch();
                 }
                 statement.executeBatch();
             }
+        } else {
+            try (PreparedStatement statement2 = connection.prepareStatement(query)) {
+                String defaultGatewayLabel = new LabelDAOImpl().getLabelIdByNameAndType(APIMgtConstants
+                        .DEFAULT_LABEL_NAME, APIMgtConstants.LABEL_TYPE_GATEWAY);
+                String defaultStoreLabel = new LabelDAOImpl().getLabelIdByNameAndType(APIMgtConstants
+                        .DEFAULT_LABEL_NAME, APIMgtConstants.LABEL_TYPE_STORE);
+                statement2.setString(1, apiID);
+                statement2.setString(2, defaultGatewayLabel);
+                statement2.addBatch();
+                statement2.setString(1, apiID);
+                statement2.setString(2, defaultStoreLabel);
+                statement2.addBatch();
+                statement2.executeBatch();
+            }
+
         }
+
     }
 
     private void deleteLabelsMapping(Connection connection, String apiID) throws SQLException {
@@ -3242,8 +3265,8 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-   private java.util.List<String> getLabelIdsForAPI(Connection connection, String apiID) throws SQLException {
-        java.util.List<String> labelIDs = new java.util.ArrayList<>();
+    private List<String> getLabelIdsForAPI(Connection connection, String apiID) throws SQLException {
+        List<String> labelIDs = new ArrayList<>();
 
         final String query = "SELECT LABEL_ID FROM AM_API_LABEL_MAPPING WHERE API_ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -3257,11 +3280,11 @@ public class ApiDAOImpl implements ApiDAO {
                 }
             }
         }
-
+        Collections.sort(labelIDs);
         return labelIDs;
     }
 
-      private Set<String> getTransports(Connection connection, String apiID) throws SQLException {
+    private Set<String> getTransports(Connection connection, String apiID) throws SQLException {
         Set<String> transports = new HashSet<>();
 
         final String query = "SELECT TRANSPORT FROM AM_API_TRANSPORTS WHERE API_ID = ?";
@@ -3281,8 +3304,9 @@ public class ApiDAOImpl implements ApiDAO {
 
     /**
      * Get a list threat protection policy ids associated with an API
+     *
      * @param connection SQL Connection
-     * @param apiId ApiId of the API
+     * @param apiId      ApiId of the API
      * @return Set of threat protection policy ids
      * @throws SQLException If failed to retrieve the set of ids
      */
@@ -3364,7 +3388,7 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-    private List<String> getLabelNames(Connection connection, String apiID) throws SQLException, APIMgtDAOException {
+   /* private List<String> getLabelNames(Connection connection, String apiID) throws SQLException, APIMgtDAOException {
         List<String> labelNames = new ArrayList<>();
         final String query = "SELECT LABEL_ID FROM AM_API_LABEL_MAPPING WHERE API_ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -3384,5 +3408,5 @@ public class ApiDAOImpl implements ApiDAO {
             }
         }
         return labelNames;
-    }
+    }*/
 }

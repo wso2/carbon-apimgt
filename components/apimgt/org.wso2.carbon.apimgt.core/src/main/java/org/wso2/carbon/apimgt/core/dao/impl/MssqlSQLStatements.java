@@ -212,8 +212,7 @@ public class MssqlSQLStatements implements ApiDAOVendorSpecificStatements {
         //get the corresponding implementation based on the attribute to be searched
         String query = searchMap.get(searchAttribute).
                 getStoreAttributeSearchQuery(roleListBuilder, searchQuery, offset, limit);
-        query = "Select * from ( " + query + " ) " + getStoreAPIsByLabelJoinQuery(labels) + " ORDER BY NAME OFFSET ? " +
-                "ROWS FETCH NEXT ? ROWS ONLY";
+        query = "Select * from ( " + query + " )  A" + getStoreAPIsByLabelJoinQuery(labels);
 
         try {
             int queryIndex = 1;

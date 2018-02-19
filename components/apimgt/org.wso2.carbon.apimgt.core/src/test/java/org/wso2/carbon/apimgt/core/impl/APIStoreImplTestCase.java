@@ -300,7 +300,7 @@ public class APIStoreImplTestCase {
     public void testGetAPIWSDL() throws APIManagementException, IOException {
         final String labelName = "SampleLabel";
 
-        Label label = SampleTestObjectCreator.createLabel(labelName).build();
+        Label label = SampleTestObjectCreator.createLabel(labelName, SampleTestObjectCreator.LABEL_TYPE_STORE).build();
         List<String> labels = new ArrayList<>();
         labels.add(label.getName());
         API api = SampleTestObjectCreator.createDefaultAPI().labels(labels).build();
@@ -321,7 +321,7 @@ public class APIStoreImplTestCase {
     public void testGetAPIWSDLArchive() throws APIManagementException, IOException {
         final String labelName = "SampleLabel";
 
-        Label label = SampleTestObjectCreator.createLabel(labelName).build();
+        Label label = SampleTestObjectCreator.createLabel(labelName, SampleTestObjectCreator.LABEL_TYPE_STORE).build();
         List<String> labels = new ArrayList<>();
         labels.add(label.getName());
         API api = SampleTestObjectCreator.createDefaultAPI().labels(labels).build();
@@ -844,7 +844,7 @@ public class APIStoreImplTestCase {
         APIStore apiStore = getApiStoreImpl(labelDAO);
         List<Label> labelList = new ArrayList<>();
         List<String> labelNames = new ArrayList<>();
-        Label label = SampleTestObjectCreator.createLabel("Public").build();
+        Label label = SampleTestObjectCreator.createLabel("Public", SampleTestObjectCreator.LABEL_TYPE_STORE).build();
         labelList.add(label);
         labelNames.add(label.getName());
         Mockito.when(labelDAO.getLabelsByName(labelNames)).thenReturn(labelList);

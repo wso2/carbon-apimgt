@@ -164,7 +164,7 @@ public class APIMgtAdminServiceImplTestCase {
     public void testDeleteLabel() throws APIManagementException {
         LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
         APIMgtAdminServiceImpl adminService = getAPIMgtAdminServiceImpl(labelDAO);
-        Label label = SampleTestObjectCreator.createLabel("Public").build();
+        Label label = SampleTestObjectCreator.createLabel("Public", SampleTestObjectCreator.LABEL_TYPE_STORE).build();
         String labelId = label.getId();
         adminService.deleteLabel(labelId);
         Mockito.verify(labelDAO, Mockito.times(1)).deleteLabel(labelId);
@@ -174,7 +174,7 @@ public class APIMgtAdminServiceImplTestCase {
     public void testDeleteLabelException() throws APIManagementException {
         LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
         APIMgtAdminServiceImpl adminService = getAPIMgtAdminServiceImpl(labelDAO);
-        Label label = SampleTestObjectCreator.createLabel("Public").build();
+        Label label = SampleTestObjectCreator.createLabel("Public", SampleTestObjectCreator.LABEL_TYPE_STORE).build();
         String labelId = label.getId();
         Mockito.doThrow(new APIMgtDAOException("Error occurred while deleting label [labelId] " + labelId))
                 .when(labelDAO).deleteLabel(labelId);
@@ -186,8 +186,10 @@ public class APIMgtAdminServiceImplTestCase {
     public void testRegisterGatewayLabels() throws APIManagementException {
         LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
         List<Label> labels = new ArrayList<>();
-        Label label1 = SampleTestObjectCreator.createLabel("testLabel1").build();
-        Label label2 = SampleTestObjectCreator.createLabel("testLabel2").build();
+        Label label1 = SampleTestObjectCreator.createLabel("testLabel1", SampleTestObjectCreator.LABEL_TYPE_STORE)
+                .build();
+        Label label2 = SampleTestObjectCreator.createLabel("testLabel2", SampleTestObjectCreator.LABEL_TYPE_STORE)
+                .build();
         labels.add(label1);
         List<String> labelNames = new ArrayList<>();
         labelNames.add(label1.getName());
@@ -204,7 +206,8 @@ public class APIMgtAdminServiceImplTestCase {
     public void testRegisterGatewayLabelsException() throws APIManagementException {
         LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
         List<Label> labels = new ArrayList<>();
-        Label label = SampleTestObjectCreator.createLabel("testLabel1").build();
+        Label label = SampleTestObjectCreator.createLabel("testLabel1", SampleTestObjectCreator.LABEL_TYPE_STORE)
+                .build();
         labels.add(label);
         APIMgtAdminServiceImpl adminService = getAPIMgtAdminServiceImpl(labelDAO);
         Mockito.doThrow(new APIMgtDAOException("Error occurred while adding label information")).when(labelDAO)
@@ -216,7 +219,8 @@ public class APIMgtAdminServiceImplTestCase {
     public void testRegisterGatewayLabelsWhenOverwriteLabelsNull() throws APIManagementException {
         LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
         List<Label> labels = new ArrayList<>();
-        Label label1 = SampleTestObjectCreator.createLabel("testLabel1").build();
+        Label label1 = SampleTestObjectCreator.createLabel("testLabel1", SampleTestObjectCreator.LABEL_TYPE_STORE)
+                .build();
         labels.add(label1);
         APIMgtAdminServiceImpl adminService = getAPIMgtAdminServiceImpl(labelDAO);
         adminService.registerGatewayLabels(labels, null);
@@ -227,7 +231,8 @@ public class APIMgtAdminServiceImplTestCase {
     public void testRegisterGatewayLabelsWhenOverwriteLabelsTrue() throws APIManagementException {
         LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
         List<Label> labels = new ArrayList<>();
-        Label label1 = SampleTestObjectCreator.createLabel("testLabel1").build();
+        Label label1 = SampleTestObjectCreator.createLabel("testLabel1", SampleTestObjectCreator.LABEL_TYPE_STORE)
+                .build();
         labels.add(label1);
         List<String> labelNames = new ArrayList<>();
         labelNames.add(label1.getName());

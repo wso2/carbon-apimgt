@@ -36,7 +36,7 @@ class OracleSubcontextSearchImpl implements StoreApiAttributeSearch {
                                                StringBuilder searchQuery, int offset, int limit) {
 
         //for subcontext search, need to check AM_API_OPERATION_MAPPING table
-        String subcontextSearchQuery = "SELECT * FROM (SELECT A.*, rownum rnum FROM (" + API_SUMMARY_SELECT_STORE +
+        String subcontextSearchQuery = "SELECT * FROM (SELECT A.* FROM (" + API_SUMMARY_SELECT_STORE +
                 " WHERE CURRENT_LC_STATUS  IN ('" +
                 APIStatus.PUBLISHED.getStatus() + "','" +
                 APIStatus.PROTOTYPED.getStatus() + "') AND " +
@@ -52,7 +52,7 @@ class OracleSubcontextSearchImpl implements StoreApiAttributeSearch {
                 roleListBuilder.toString() + ")) AND " +
                 "UUID IN (SELECT API_ID FROM AM_API_OPERATION_MAPPING WHERE " +
                 searchQuery.toString() + ") " +
-                " ORDER BY NAME) A WHERE rownum <= ?) WHERE rnum >= ?";
+                " ORDER BY NAME) A)";
 
         return subcontextSearchQuery;
     }
