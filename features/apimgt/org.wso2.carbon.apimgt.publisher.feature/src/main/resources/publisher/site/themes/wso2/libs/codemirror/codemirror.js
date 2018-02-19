@@ -3400,7 +3400,7 @@ function updateScrollbars(cm, measure) {
   }
 }
 
-// Re-synchronize the fake scrollbars with the actual size of the
+// Re-synchronizer the fake scrollbars with the actual size of the
 // content.
 function updateScrollbarsInner(cm, measure) {
   var d = cm.display
