@@ -949,11 +949,11 @@ public class APIConsumerImplTest {
         Mockito.when(apiMgtDAO.getPendingSubscriptionsByApplicationId(1111)).thenReturn(pendingSubscriptions);
         Mockito.when(apiMgtDAO.getRegistrationApprovalState(1111, APIConstants.API_KEY_TYPE_PRODUCTION)).
                 thenReturn("CREATED");
-        apiConsumer.removeApplication(application);
+        apiConsumer.removeApplication(application, apiConsumer.username);
 
         Mockito.when(apiMgtDAO.getRegistrationApprovalState(1111, APIConstants.API_KEY_TYPE_SANDBOX)).
                 thenReturn("CREATED");
-        apiConsumer.removeApplication(application);
+        apiConsumer.removeApplication(application, apiConsumer.username);
         Mockito.verify(apiMgtDAO, Mockito.times(2)).getPendingSubscriptionsByApplicationId(1111);
     }
 

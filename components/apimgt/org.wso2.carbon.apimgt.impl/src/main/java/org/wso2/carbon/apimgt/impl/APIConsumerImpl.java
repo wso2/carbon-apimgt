@@ -2639,10 +2639,11 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * Function to remove an Application from the API Store
      *
      * @param application - The Application Object that represents the Application
+     * @param username
      * @throws APIManagementException
      */
     @Override
-    public void removeApplication(Application application) throws APIManagementException {
+    public void removeApplication(Application application, String username) throws APIManagementException {
         String uuid = application.getUUID();
         if (application.getId() == 0 && !StringUtils.isEmpty(uuid)) {
             application = apiMgtDAO.getApplicationByUUID(uuid);
@@ -2655,14 +2656,14 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         boolean isUserAppOwner;
         if (isCaseInsensitiveComparisons) {
-            isUserAppOwner = application.getSubscriber().getName().equalsIgnoreCase(this.username);
+            isUserAppOwner = application.getSubscriber().getName().equalsIgnoreCase(username);
         } else {
-            isUserAppOwner = application.getSubscriber().getName().equals(this.username);
+            isUserAppOwner = application.getSubscriber().getName().equals(username);
         }
 
         if (!isUserAppOwner) {
             throw new APIManagementException("user: " + application.getSubscriber().getName() + ", " +
-                    "attempted to remove application owned by: " + this.username);
+                    "attempted to remove application owned by: " + username);
         }
 
         try {

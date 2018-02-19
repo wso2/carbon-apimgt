@@ -412,7 +412,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             Application application = apiConsumer.getApplicationByUUID(applicationId);
             if (application != null) {
                 if (RestAPIStoreUtils.isUserOwnerOfApplication(application)) {
-                    apiConsumer.removeApplication(application);
+                    apiConsumer.removeApplication(application, username);
                     return Response.ok().build();
                 } else {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);

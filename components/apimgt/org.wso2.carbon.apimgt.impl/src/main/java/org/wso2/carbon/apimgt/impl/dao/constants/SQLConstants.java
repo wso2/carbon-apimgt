@@ -2638,6 +2638,9 @@ public class SQLConstants {
     public static final String GET_GROUP_ID_SQL =
             "SELECT GROUP_ID  FROM AM_APPLICATION_GROUP_MAPPING WHERE APPLICATION_ID = ?";
 
+    public static final String GET_DEPRECATED_GROUP_ID_SQL =
+            "SELECT GROUP_ID  FROM AM_APPLICATION WHERE APPLICATION_ID = ?";
+
     /** Throttle related constants**/
 
     public static class ThrottleSQLConstants{

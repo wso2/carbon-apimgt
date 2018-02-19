@@ -327,9 +327,10 @@ public interface APIConsumer extends APIManager {
     /**
      * Function to remove an Application from the API Store
      * @param application - The Application Object that represents the Application
+     * @param username
      * @throws APIManagementException
      */
-    void removeApplication(Application application) throws APIManagementException;
+    void removeApplication(Application application, String username) throws APIManagementException;
 
     /** get the status of the Application creation process given the application Id
      *
