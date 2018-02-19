@@ -25,7 +25,7 @@ import API from '../../../data/api.js'
 import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import {Link} from 'react-router-dom'
-import {Col, Menu, message, Row, Table} from 'antd';
+import {Col, Menu, Row, Table} from 'antd';
 
 import Grid from 'material-ui/Grid';
 import Typography from 'material-ui/Typography';
@@ -34,16 +34,10 @@ import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
 import SampleAPI from './SampleAPI';
 import NotificationSystem from 'react-notification-system';
-import ArrowDropDownCircle from 'material-ui-icons/ArrowDropDownCircle';
 import IconButton from 'material-ui/IconButton';
 import List from 'material-ui-icons/List';
 import GridIcon from 'material-ui-icons/GridOn';
-import { MenuItem, MenuList } from 'material-ui/Menu';
-import Grow from 'material-ui/transitions/Grow';
-import Paper from 'material-ui/Paper';
-import { Manager, Target, Popper } from 'react-popper';
-import ClickAwayListener from 'material-ui/utils/ClickAwayListener';
-import classNames from 'classnames';
+import { Manager, Target } from 'react-popper';
 import AddNewMenu from './AddNewMenu'
 
 

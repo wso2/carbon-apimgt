@@ -2,18 +2,19 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import Button from 'material-ui/Button';
-import { MenuItem, MenuList } from 'material-ui/Menu';
 import Grow from 'material-ui/transitions/Grow';
 import Paper from 'material-ui/Paper';
 import { withStyles } from 'material-ui/styles';
 import { Manager, Target, Popper } from 'react-popper';
 import ClickAwayListener from 'material-ui/utils/ClickAwayListener';
 import ArrowDropDownCircle from 'material-ui-icons/ArrowDropDownCircle';
+import List, {ListItem, ListItemText} from 'material-ui/List';
+import {Link} from 'react-router-dom'
 
 const styles = theme => ({
     root: {
         display: 'flex',
-        zIndex: 1,
+        zIndex: 1203,
     },
     popperClose: {
         pointerEvents: 'none',
@@ -62,11 +63,36 @@ class AddNewMenu extends React.Component {
                         <ClickAwayListener onClickAway={this.handleClose}>
                             <Grow in={open} id="menu-list" style={{ transformOrigin: '0 0 0' }}>
                                 <Paper>
-                                    <MenuList role="menu">
-                                        <MenuItem onClick={this.handleClose}>Profile</MenuItem>
-                                        <MenuItem onClick={this.handleClose}>My account</MenuItem>
-                                        <MenuItem onClick={this.handleClose}>Logout</MenuItem>
-                                    </MenuList>
+                                    <List>
+                                        <ListItem>
+                                            <Link to="/api/create/rest">
+                                                <ListItemText primary="Design a New REST API"
+                                                    secondary="Design and prototype a new REST API"
+                                                />
+                                            </Link>
+                                        </ListItem>
+                                        <ListItem>
+                                            <Link to="/api/create/swagger">
+                                                <ListItemText primary="I Have an Existing REST API"
+                                                    secondary="Use an existing REST endpoint or Swagger definition"
+                                                />
+                                            </Link>
+                                        </ListItem>
+                                        <ListItem>
+                                            <Link to="/api/create/wsdl">
+                                                <ListItemText primary="I Have a SOAP Endpoint"
+                                                    secondary="Use an existing SOAP or Import the WSDL"
+                                                />
+                                            </Link>
+                                        </ListItem>
+                                        <ListItem>
+                                            <Link to="/api/create/rest">
+                                                <ListItemText primary="Design New Websocket API"
+                                                    secondary="Design and prototype a new WebSocket API"
+                                                />
+                                            </Link>
+                                        </ListItem>
+                                    </List>
                                 </Paper>
                             </Grow>
                         </ClickAwayListener>
