@@ -39,11 +39,14 @@ import javax.ws.rs.core.Response;
 public class ExportApiServiceImpl extends ExportApiService {
 
     private static final Log log = LogFactory.getLog(ExportApiServiceImpl.class);
+    private static final String APPLICATION_EXPORT_DIR_PREFIX = "exported-app-archives-";
+    private static final String DEFAULT_APPLICATION_EXPORT_DIR = "exported-application";
 
     /**
      * Export an existing Application
      *
-     * @param appName Search query
+     * @param appName  Search query
+     * @param appOwner Owner of the Application
      * @return Zip file containing exported Application
      */
     @Override
@@ -52,9 +55,8 @@ public class ExportApiServiceImpl extends ExportApiService {
         String exportedFilePath;
         Application applicationDetails = null;
         File exportedApplicationArchiveFile = null;
-        String exportedAppDirName = "exported-application";
         String pathToExportDir = System.getProperty(RestApiConstants.JAVA_IO_TMPDIR) + File.separator +
-                "exported-app-archives-" +
+                APPLICATION_EXPORT_DIR_PREFIX +
                 UUID.randomUUID().toString(); //creates a directory in default temporary-file directory
         String username = RestApiUtil.getLoggedInUsername();
         String exportedFileName = null;
@@ -79,9 +81,10 @@ public class ExportApiServiceImpl extends ExportApiService {
                 log.error(errorMsg);
                 return Response.status(Response.Status.FORBIDDEN).entity(errorMsg).build();
             }
-            exportedFilePath = importExportManager.exportApplication(applicationDetails, exportedAppDirName);
+            exportedFilePath = importExportManager.exportApplication(applicationDetails,
+                    DEFAULT_APPLICATION_EXPORT_DIR);
             String zippedFilePath = importExportManager.createArchiveFromExportedAppArtifacts(exportedFilePath,
-                    pathToExportDir, exportedAppDirName);
+                    pathToExportDir, DEFAULT_APPLICATION_EXPORT_DIR);
             exportedApplicationArchiveFile = new File(zippedFilePath);
             exportedFileName = exportedApplicationArchiveFile.getName();
         } catch (APIManagementException e) {

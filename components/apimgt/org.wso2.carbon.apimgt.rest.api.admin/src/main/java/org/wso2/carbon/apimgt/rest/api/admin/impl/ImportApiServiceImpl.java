@@ -50,12 +50,16 @@ import javax.ws.rs.core.Response;
 
 public class ImportApiServiceImpl extends ImportApiService {
     private static final Log log = LogFactory.getLog(ImportApiServiceImpl.class);
+    private static final String APPLICATION_IMPORT_DIR_PREFIX = "imported-app-archive-";
 
     /**
      * Import an Application which has been exported to a zip file
      *
-     * @param fileInputStream content stream of the zip file which contains exported Application
-     * @param fileDetail      meta information of the zip file
+     * @param appOwner          target owner of the application
+     * @param preserveOwner     if true, preserve the original owner of the application
+     * @param skipSubscriptions if true, skip subscriptions of the application
+     * @param fileInputStream   content stream of the zip file which contains exported Application
+     * @param fileDetail        meta information of the zip file
      * @return imported Application
      */
     @Override
@@ -65,7 +69,7 @@ public class ImportApiServiceImpl extends ImportApiService {
         String ownerId;
         String username = RestApiUtil.getLoggedInUsername();
         String tempDirPath = System.getProperty(RestApiConstants.JAVA_IO_TMPDIR) + File.separator +
-                "imported-app-archive-" +
+                APPLICATION_IMPORT_DIR_PREFIX +
                 UUID.randomUUID().toString();
         try {
             consumer = RestApiUtil.getConsumer(username);
