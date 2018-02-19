@@ -237,6 +237,7 @@ public interface ApiDAO {
      * @param attributeMap Map containing the attributes to be searched
      * @param offset The starting point of the search results.
      * @param limit Number of search results that will be returned.
+     * @param labels Id's of the labels
      * @return {@code List<API>} matching results
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */

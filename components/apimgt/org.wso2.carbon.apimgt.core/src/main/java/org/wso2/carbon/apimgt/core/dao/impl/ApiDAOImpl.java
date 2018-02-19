@@ -438,7 +438,6 @@ public class ApiDAOImpl implements ApiDAO {
             return constructAPISummaryList(connection, statement);
         } catch (SQLException e) {
             String errorMessage = "Error while retrieving API list in store.";
-            log.error(errorMessage, e);
             throw new APIMgtDAOException(errorMessage, e);
         }
     }

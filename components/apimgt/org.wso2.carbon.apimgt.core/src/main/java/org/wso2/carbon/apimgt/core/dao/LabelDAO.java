@@ -85,6 +85,7 @@ public interface LabelDAO {
      * Update the label
      *
      * @param updatedLabel Updated Label
+     * @return Label updated Label
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     Label updateLabel(Label updatedLabel) throws APIMgtDAOException;

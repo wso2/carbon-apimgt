@@ -81,7 +81,8 @@ public interface APIStore extends APIManager {
      * @param query searchType
      * @param limit limit
      * @param offset offset
-     * @return {@code List<API>}
+     * @param labelIds ids of the labels
+     * @return {@code List<API>} matching results
      * @throws APIManagementException   If failed to search apis.
      */
     List<API> searchAPIsByStoreLabels(String query, int offset, int limit, List<String> labelIds) throws
