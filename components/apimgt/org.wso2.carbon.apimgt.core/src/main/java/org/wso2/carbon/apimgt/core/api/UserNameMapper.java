@@ -26,6 +26,22 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
  * This interface is having methods to exchange pseudo name with user name.
  */
 public interface UserNameMapper {
+
+    /**
+     * This method will return logged in user-id(whatever unique is to identify user) using provided
+     * pseudo name.
+     *
+     * @param pseudoName pseudo name of the user.
+     * @return user id of matching user in the system.
+     */
     String getLoggedInUserIDFromPseudoName(String pseudoName) throws APIManagementException;
-    String getLoggedInPseudoNameFromUserID(String userName) throws APIManagementException;
+
+    /**
+     * This method will return logged in user's pseudo name(pseudo name used within APIM domain) using provided
+     * user id.
+     *
+     * @param userID user identifier of the user who need pseudo name.
+     * @return pseudo name of the matching user.
+     */
+    String getLoggedInPseudoNameFromUserID(String userID) throws APIManagementException;
 }

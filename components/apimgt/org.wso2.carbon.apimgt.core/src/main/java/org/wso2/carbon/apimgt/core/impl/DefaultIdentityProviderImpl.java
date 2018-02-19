@@ -98,7 +98,7 @@ public class DefaultIdentityProviderImpl implements IdentityProvider {
         try {
             userName = userNameMapper.getLoggedInUserIDFromPseudoName(userName);
         } catch (APIManagementException e) {
-            throw new IdentityProviderException(e.getMessage(), ExceptionCodes.RESOURCE_RETRIEVAL_FAILED);
+            throw new IdentityProviderException(e.getMessage(), ExceptionCodes.USER_MAPPING_RETRIEVAL_FAILED);
         }
         Response userResponse = scimServiceStub.searchUsers(FILTER_PREFIX_USER + userName);
         String userId;
