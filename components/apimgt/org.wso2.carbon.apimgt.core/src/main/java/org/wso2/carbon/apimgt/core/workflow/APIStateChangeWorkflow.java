@@ -154,7 +154,8 @@ public class APIStateChangeWorkflow extends Workflow {
                 //assuming that there is no transition from (MAINTENANCE to  PROTOTYPED), (DEPRECATED to CREATED),
                 // (CREATED to DEPRECATED)
                 if ((currentState.equalsIgnoreCase(APIStatus.CREATED.getStatus()) ||
-                        currentState.equalsIgnoreCase(APIStatus.MAINTENANCE.getStatus())) &&
+                        currentState.equalsIgnoreCase(APIStatus.MAINTENANCE.getStatus()) ||
+                        currentState.equalsIgnoreCase(APIStatus.PROTOTYPED.getStatus())) &&
                         (targetState.equalsIgnoreCase(APIStatus.PUBLISHED.getStatus()) ||
                                 targetState.equalsIgnoreCase(APIStatus.PROTOTYPED.getStatus()) ||
                                 targetState.equalsIgnoreCase(APIStatus.DEPRECATED.getStatus()))) {
@@ -179,7 +180,8 @@ public class APIStateChangeWorkflow extends Workflow {
                         currentState.equalsIgnoreCase(APIStatus.PROTOTYPED.getStatus()) ||
                         currentState.equalsIgnoreCase(APIStatus.DEPRECATED.getStatus())) &&
                         (targetState.equalsIgnoreCase(APIStatus.CREATED.getStatus()) ||
-                                targetState.equalsIgnoreCase(APIStatus.MAINTENANCE.getStatus())) ||
+                                targetState.equalsIgnoreCase(APIStatus.MAINTENANCE.getStatus()) ||
+                                targetState.equalsIgnoreCase(APIStatus.PROTOTYPED.getStatus())) ||
                         targetState.equalsIgnoreCase(APIStatus.RETIRED.getStatus())) {
 
                     // remove gateway

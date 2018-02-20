@@ -70,7 +70,7 @@ public class ConfigurationsAPI implements Microservice {
      * "isEnabled":false}]}
      */
     @GET
-    @Path("/avilable-features")
+    @Path("/available-features")
     @Produces(MediaType.APPLICATION_JSON)
     public Response availableFeatures() {
 

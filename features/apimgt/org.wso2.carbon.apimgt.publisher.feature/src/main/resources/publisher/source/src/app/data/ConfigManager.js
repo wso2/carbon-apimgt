@@ -45,7 +45,8 @@ class ConfigManager {
      */
     static getConfigs() {
         return {
-            'environments': ConfigManager._getPromisedConfigs(ConfigRequestPaths.ENVIRONMENT_CONFIG_PATH)
+            'environments': ConfigManager._getPromisedConfigs(ConfigRequestPaths.ENVIRONMENT_CONFIG_PATH),
+            'availableFeatures': ConfigManager._getPromisedConfigs(ConfigRequestPaths.AVAILABLE_FEATURE_LIST_PATH)
         };
     }
 }
@@ -55,7 +56,8 @@ class ConfigManager {
  * @type {{ENVIRONMENT_CONFIG_PATH: string}}
  */
 const ConfigRequestPaths = {
-    ENVIRONMENT_CONFIG_PATH: "/configService/environments"
+    ENVIRONMENT_CONFIG_PATH: "/configService/environments",
+    AVAILABLE_FEATURE_LIST_PATH: "/configService/available-features"
 };
 
 /**

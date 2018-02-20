@@ -876,6 +876,41 @@ class API {
         return promisedDelete;
     }
 
+    /**
+     * Update HasOwnGateway property of an API
+     * @param apiId APIId
+     * @param body  body which contains update details
+     */
+    updateHasOwnGateway(api_id, body) {
+        const promised_updateDedicatedGateway = this.client.then(
+            (client) => {
+                let payload = {
+                    apiId: api_id,
+                    body: body,
+                    "Content-Type": "application/json"
+                };
+                return client.apis["DedicatedGateway (Individual)"].put_apis__apiId__dedicated_gateway(
+                    payload, this._requestMetaData());
+            }
+        );
+        return promised_updateDedicatedGateway;
+    }
+
+    /**
+     * Get the HasOwnGateway property of an API
+     * @param id {string} UUID of the api
+     * @param callback {function} Callback function which needs to be executed in the success call
+     */
+    getHasOwnGateway(id) {
+        const promised_getDedicatedGateway = this.client.then(
+            (client) => {
+                return client.apis["DedicatedGateway (Individual)"].get_apis__apiId__dedicated_gateway(
+                    {apiId: id}, this._requestMetaData());
+            }
+        );
+        return promised_getDedicatedGateway;
+    }
+
     /***
      * Get inline-endpoint definitions(both prodution and sandbox due to : https://github.com/wso2/product-apim/issues/2590)
      * giving the API parameter(name,version & endpoint url)

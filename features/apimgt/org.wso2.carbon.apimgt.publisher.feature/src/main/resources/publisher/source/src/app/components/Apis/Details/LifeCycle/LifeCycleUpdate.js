@@ -41,6 +41,7 @@ export default class LifeCycleUpdate extends Component {
     }
     componentDidMount(){
         const {lcState} = this.props;
+        const {privateJetModeEnabled} = this.props;
         const checkList = [];
         let index = 0;
         for (let item of lcState.checkItemBeanList) {
@@ -60,26 +61,94 @@ export default class LifeCycleUpdate extends Component {
             this.setState({checkList});
         }
     }
+
+    updateLCStateOfAPI(apiUUID, newState){
+
+        let promisedUpdate;
+        const lifecycleChecklist = this.state.checkList.map(item => item.value + ":" + item.checked);
+         if (lifecycleChecklist.length > 0) {
+             promisedUpdate = this.api.updateLcState(apiUUID, newState, lifecycleChecklist);
+         } else {
+             promisedUpdate = this.api.updateLcState(apiUUID, newState);
+         }
+         promisedUpdate.then(response => { /*TODO: Handle IO erros ~tmkb*/
+             this.props.handleUpdate(true);
+             Alert.info("Lifecycle state updated successfully");
+             /*TODO: add i18n ~tmkb*/
+         }).catch(
+             error_response => {
+                 console.log(error_response);
+                 Alert.error(JSON.stringify(error_response));
+         });
+    }
+
     updateLifeCycleState(event) {
         event.preventDefault();
-        let promisedUpdate;
-        const newState = event.currentTarget.getAttribute("data-value");
+        let newState = event.currentTarget.getAttribute("data-value");
         const apiUUID = this.props.api.id;
-        const lifecycleChecklist = this.state.checkList.map(item => item.value + ":" + item.checked);
-        if (lifecycleChecklist.length > 0) {
-            promisedUpdate = this.api.updateLcState(apiUUID, newState, lifecycleChecklist);
+        const {privateJetModeEnabled} = this.props;
+
+        if(privateJetModeEnabled) {
+            if(newState == "Published In Private Jet Mode") {
+                newState = "Published";
+                let body = {"isEnabled":"true"};
+                let promisedUpdateDedicatedGW = this.api.updateHasOwnGateway(apiUUID, body);
+
+                promisedUpdateDedicatedGW.then(response => {
+                    Alert.info("Dedicate Gateway status updated successfully");
+                    this.updateLCStateOfAPI(apiUUID, newState);
+                }).catch(
+                error_response => {
+                    console.log(error_response);
+                    Alert.error(JSON.stringify(error_response));
+                });
+
+             } else if(newState == "Deprecated" || newState == "Retired") {
+                this.updateLCStateOfAPI(apiUUID, newState);
+
+             } else {
+                    let promisedUpdate;
+                    const lifecycleChecklist = this.state.checkList.map(item => item.value + ":" + item.checked);
+                    if (lifecycleChecklist.length > 0) {
+                        promisedUpdate = this.api.updateLcState(apiUUID, newState, lifecycleChecklist);
+                    } else {
+                        promisedUpdate = this.api.updateLcState(apiUUID, newState);
+                    }
+                    promisedUpdate.then(response => {
+                        Alert.info("Lifecycle state updated successfully");
+
+                        let promised_hasOwnGatewayForAPI = this.api.getHasOwnGateway(apiUUID);
+                        let that=this;
+                        promised_hasOwnGatewayForAPI.then(function(result) {
+
+                          let hasOwnGatewayForAPI = result.body.isEnabled;
+                          if (hasOwnGatewayForAPI) {
+                              let body = {"isEnabled":"false"};
+                              let promisedUpdateDedicatedGW = that.api.updateHasOwnGateway(apiUUID, body);
+
+                              promisedUpdateDedicatedGW.then(response => {
+                                that.props.handleUpdate(true);
+                                Alert.info("Dedicate Gateway status updated successfully");
+                              }).catch(
+                                error_response => {
+                                  console.log(error_response);
+                                  Alert.error(JSON.stringify(error_response));
+                              });
+                          }
+                          that.props.handleUpdate(true);
+                        }, function(err) {
+                          console.log(err);
+                        });
+
+                    }).catch(
+                        error_response => {
+                         console.log(error_response);
+                         Alert.error(JSON.stringify(error_response));
+                    });
+             }
         } else {
-            promisedUpdate = this.api.updateLcState(apiUUID, newState);
+            this.updateLCStateOfAPI(apiUUID, newState);
         }
-        promisedUpdate.then(response => { /*TODO: Handle IO erros ~tmkb*/
-            this.props.handleUpdate(true);
-            Alert.info("Lifecycle state updated successfully");
-            /*TODO: add i18n ~tmkb*/
-        }).catch(
-            error_response => {
-                console.log(error_response);
-                Alert.error(JSON.stringify(error_response));
-            });
     }
 
     handleChange = index => (event, checked) => {
