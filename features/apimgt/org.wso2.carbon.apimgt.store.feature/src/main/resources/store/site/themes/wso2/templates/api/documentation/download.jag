@@ -1,15 +1,40 @@
 <%
 include("/jagg/jagg.jag");
 var store = jagg.module("manager").getAPIStoreObj();
-var tenantDomain=request.getParameter("tenant");
-var resourceUrl = request.getParameter("resourceUrl");
+var ENVIRONMENT_NAME = "environmentName";
+var ENVIRONMENT_TYPE = "environmentType";
+var API_NAME = "apiName";
+var API_VERSION = "apiVersion";
 
-var object = store.getDocument(tenantDomain,resourceUrl);
-if(object == null){
-    response.status = 500;
-   }else{
-   response.contentType = "application/force-download";
-   response.addHeader("Content-Disposition","attachment; filename = \""+object.name+"\"");
-   print(object.Data);
+var tenantDomain = request.getParameter("tenant");
+var resourceUrl = request.getParameter("resourceUrl");
+var environmentName = request.getParameter(ENVIRONMENT_NAME);
+var environmentType = request.getParameter(ENVIRONMENT_TYPE);
+if (environmentType != null && environmentName != null) {
+    var apiName = request.getParameter(API_NAME);
+    var apiVersion = request.getParameter(API_VERSION);
+    if (jagg.getUser()) {
+        var username = jagg.getUser().username;
     }
+    var HashMap = Packages.java.util.HashMap;
+    var apiAttributesMap = new HashMap();
+    apiAttributesMap.put(API_NAME, apiName);
+    apiAttributesMap.put(API_VERSION, apiVersion);
+    var environmentDetails = new HashMap();
+    environmentDetails.put(ENVIRONMENT_NAME, environmentName);
+    environmentDetails.put(ENVIRONMENT_TYPE, environmentType);
+
+    var apiConsumer = new Packages.org.wso2.carbon.apimgt.impl.APIConsumerImpl();
+    var document = apiConsumer.getWSDLDocument(username, tenantDomain, resourceUrl, environmentDetails, apiAttributesMap);
+    var object = JSON.parse(document);
+} else {
+    var object = store.getDocument(tenantDomain, resourceUrl);
+}
+if (object == null) {
+    response.status = 500;
+} else {
+    response.contentType = "application/force-download";
+    response.addHeader("Content-Disposition", "attachment; filename = \"" + object.name + "\"");
+    print(object.Data);
+}
 %>

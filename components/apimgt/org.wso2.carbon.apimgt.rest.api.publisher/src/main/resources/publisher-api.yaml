@@ -172,7 +172,7 @@ paths:
             $ref: '#/definitions/Error'
 
 #-----------------------------------------------------
-# Create a new API
+# Create a new API -API (Individual)
 #-----------------------------------------------------
     post:
       x-scope: apim:api_create
@@ -193,8 +193,9 @@ paths:
           schema:
             $ref: '#/definitions/API'
         - $ref: '#/parameters/Content-Type'
+        - $ref: '#/parameters/Authorization'
       tags:
-        - API (Collection)
+        - API (Individual)
       responses:
         201:
           description: |
@@ -212,6 +213,10 @@ paths:
               description: |
                 The content type of the body.
               type: string
+            Authorization:
+              description: |
+                The brearer token.
+              type: string 
             ETag:
               description: |
                 Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
@@ -746,6 +751,9 @@ paths:
           description: |
             Not Found.
             API to copy does not exist.
+        401:
+          description: |
+            Unauthenticated request.
           schema:
             $ref: '#/definitions/Error'
 
@@ -2767,6 +2775,15 @@ parameters:
     required: true
     type : string
 
+# The HTTP Authorization header
+  Authorization:
+    name: Authorization
+    in: header
+    description: |
+      Holds the bearer token for apis that require authentication.
+    required: true
+    type : string
+
 # The HTTP If-None-Match header
 # Used to avoid retrieving data that are already cached
   If-None-Match:
@@ -2963,6 +2980,7 @@ definitions:
         example: false
       type:
         type: string
+        description: The transport to be set. Accepted values are HTTP, WS
         enum:
           - HTTP
           - WS
@@ -3006,6 +3024,7 @@ definitions:
         example: "/apis/01234567-0123-0123-0123-012345678901/thumbnail"
       visibility:
         type: string
+        description: The visibility level of the API. Accepts one of the following. PUBLIC, PRIVATE, RESTRICTED OR CONTROLLED.
         enum:
           - PUBLIC
           - PRIVATE
@@ -3026,6 +3045,7 @@ definitions:
           type:
             type: string
             example: basic
+            description: Accepts one of the following, basic or digest.
             enum:
               - basic
               - digest
@@ -3047,6 +3067,7 @@ definitions:
         example: []
       subscriptionAvailability:
         type: string
+        description: The subscription availability. Accepts one of the following. current_tenant, all_tenants or specific_tenants.
         enum:
           - current_tenant
           - all_tenants
@@ -3056,7 +3077,7 @@ definitions:
         type: array
         items:
           type: string
-        example: []
+        example: ["tenant1", "tenant2"]
       additionalProperties:
         type: object
         description : Map of custom properties of API

@@ -10,7 +10,11 @@
     var apiAdditionalProperties = parse(api.additionalProperties);
     var urlPrefix = jagg.getTenantURLPrefix();%>
 <div class="row">
-		  <div class="col-md-12 col-lg-9">
+<%if (api.wsdl && api.wsdl != ""){%>
+		  <div class="col-md-12 col-lg-12">
+		  <%} else {%>
+          <div class="col-md-12 col-lg-9">
+          <%}%>
 	<%if (!api.isAdvertiseOnly) {%>
 
 	    <% 
@@ -39,6 +43,7 @@
     	    var environments = JSON.parse(api.serverURL);
     	    for(var environmentType in environments){
     	        var environmentsPerType = environments[environmentType];
+                %><%
                 if(environmentType == "production"){
                     %>
                     <h4><%=i18n.localize("Production Endpoints")%></h4>
@@ -51,10 +56,14 @@
                     for( var environmentName in environmentsPerType){
                         var environmenturls = environmentsPerType[environmentName];
                         // @todo: param_string
-                %> 
-    	            <h5 class="add-margin-top-2x"><%=environmentName%> <%=i18n.localize("URLs")%>:</h5>
-
-    	        <%
+                        if (api.wsdl && api.wsdl != "") {
+                %>  <div style="display: flex;">
+                        <div class="col-md-12 col-lg-9">
+    	                    <h5 class="add-margin-top-2x"><%=environmentName%> <%=i18n.localize("URLs")%>:</h5>
+                    <div style="padding-right: 20px; border-right: 1px solid #ddd">
+    	        <% } else {%>
+    	                <h5 class="add-margin-top-2x"><%=environmentName%> <%=i18n.localize("URLs")%>:</h5>
+    	        <%}
                 // since we are using context versioning, we remove the api.version from the URL.
                 // The reason is that the context will have the version now
     	        for (var urltype in environmenturls ) {
@@ -103,15 +112,18 @@
 	    	            <%}
     	            }
                     }
+                        if (api.wsdl && api.wsdl != "") { %>
+                            </div>
+                            </div>
+                            <div class="col-md-12 col-lg-3" style="position:relative">
+                                 <a title="<%=i18n.localize("Download WSDL")%>" class="btn btn-default" style="color:#1a78d8; top:50%; position:absolute" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/api/documentation/download.jag?tenant=" + tenantDomain + "&apiName=" + api.name + "&apiVersion=" + api.version + "&environmentName=" + environmentName + "&environmentType=" + environmentType + "&resourceUrl=" + api.wsdl))%>" target="_blank"><i class="fw fw-download"></i>&nbsp;&nbsp;<%=i18n.localize("Download WSDL")%></a>
+                            </div>
+                        </div>
+                        <% }
                     }
                     }
                     }%>
     <%}%>
-    <% if(api.wsdl && api.wsdl != ""){ %>     
-    <p>
-        <a title="<%=i18n.localize("Download WSDL")%>" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/api/documentation/download.jag?tenant=" + tenantDomain + "&resourceUrl=" + api.wsdl))%>" target="_blank"><h4><%=i18n.localize("Download WSDL")%></h4></a>
-    </p>
-    <% } %>
     <% if(api.wadl && api.wadl != ""){ %>
         <h4 class="add-margin-top-5x"><%=i18n.localize("WADL")%>:</h4>
     <p>
@@ -185,6 +197,7 @@
                 </div>
            </div>
         <% } %>
+     <div class="col-md-12 col-lg-9">
     <!-- End Additional Properties Section -->
     <h4 class="add-margin-top-5x"><%=i18n.localize("Share")%></h4>
     <ul class="nav nav-pills">
@@ -208,6 +221,7 @@
             <a class="social_links" id="digg" href="#" target="_blank" title="digg"><img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/diggit.png"))%>" alt="Digg" /></a>
             <div class="clearfix">
         </div>
+    </div>
     </div>
     </div>
 </div>

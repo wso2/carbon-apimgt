@@ -35,7 +35,6 @@ import org.w3c.dom.Element;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import javax.wsdl.Definition;
@@ -58,7 +57,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Iterator;
@@ -169,6 +167,23 @@ public class APIMWSDLReader {
         } catch (Exception e) {
             String msg = "Error occurs when change the address URL of the WSDL";
             throw new APIManagementException(msg, e);
+        }
+    }
+
+    /**
+     * Gets WSDL definition as a byte array given the WSDL definition
+     * @param wsdlDefinition generated WSDL definition
+     * @return converted WSDL definition as byte array
+     * @throws APIManagementException
+     */
+    public byte[] getWSDL(Definition wsdlDefinition) throws APIManagementException {
+        try {
+            WSDLWriter writer = getWsdlFactoryInstance().newWSDLWriter();
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            writer.writeWSDL(wsdlDefinition, byteArrayOutputStream);
+            return byteArrayOutputStream.toByteArray();
+        } catch (Exception e) {
+            throw new APIManagementException("Error occurs when change the address URL of the WSDL", e);
         }
     }
 
@@ -569,6 +584,46 @@ public class APIMWSDLReader {
 		}
 	}
 
+    /**
+     * Clear the actual service Endpoint and use Gateway Endpoint instead of the
+     * actual Endpoint for the given environment type.
+     *
+     * @param definition      {@link Definition} - WSDL4j wsdl definition
+     * @param api             API object
+     * @param environmentName gateway environment name
+     * @param environmentType gateway environment type
+     * @throws APIManagementException when error occurred getting WSDL address location
+     */
+    public void setServiceDefinition(Definition definition, API api, String environmentName, String environmentType)
+            throws APIManagementException {
+        Map serviceMap = definition.getAllServices();
+        URL addressURI;
+        try {
+            for (Object entry : serviceMap.entrySet()) {
+                Map.Entry svcEntry = (Map.Entry) entry;
+                Service svc = (Service) svcEntry.getValue();
+                Map portMap = svc.getPorts();
+                for (Object o : portMap.entrySet()) {
+                    Map.Entry portEntry = (Map.Entry) o;
+                    Port port = (Port) portEntry.getValue();
+
+                    List<ExtensibilityElement> extensibilityElementList = port.getExtensibilityElements();
+                    for (ExtensibilityElement extensibilityElement : extensibilityElementList) {
+                        addressURI = new URL(getAddressUrl(extensibilityElement));
+                        if (log.isDebugEnabled()) {
+                            log.debug("Address URI for the port:" + port.getName() + " is " + addressURI.toString());
+                        }
+                        String endpointTransport = determineURLTransport(addressURI.getProtocol(), api.getTransports());
+                        setAddressUrl(extensibilityElement, endpointTransport, api.getContext(), environmentName,
+                                environmentType);
+                    }
+                }
+            }
+        } catch (MalformedURLException e) {
+            throw new APIManagementException("Error occurred while getting the wsdl address location", e);
+        }
+    }
+
 	/**
 	 * Get the addressURl from the Extensibility element
 	 * @param exElement - {@link ExtensibilityElement}
@@ -608,6 +663,49 @@ public class APIMWSDLReader {
 			throw new APIManagementException(msg);
 		}
 	}
+
+    /**
+     * Set the addressURl from the Extensibility element for the given environment type
+     *
+     * @param exElement       {@link ExtensibilityElement}
+     * @param transports      transports allowed for the address url
+     * @param context         API context
+     * @param environmentName gateway environment name
+     * @param environmentType gateway environment type
+     * @throws APIManagementException when unsupported WSDL as a input
+     */
+    private void setAddressUrl(ExtensibilityElement exElement, String transports, String context,
+            String environmentName, String environmentType) throws APIManagementException {
+        if (exElement instanceof SOAP12AddressImpl) {
+            ((SOAP12AddressImpl) exElement)
+                    .setLocationURI(APIUtil.getGatewayEndpoint(transports, environmentName, environmentType) + context);
+            if (log.isDebugEnabled()) {
+                log.debug("Gateway endpoint for environment:" + environmentName + " is: "
+                        + ((SOAP12AddressImpl) exElement).getLocationURI());
+            }
+        } else if (exElement instanceof SOAPAddressImpl) {
+            ((SOAPAddressImpl) exElement)
+                    .setLocationURI(APIUtil.getGatewayEndpoint(transports, environmentName, environmentType) + context);
+            if (log.isDebugEnabled()) {
+                log.debug("Gateway endpoint for environment:" + environmentName + " is: "
+                        + ((SOAPAddressImpl) exElement).getLocationURI());
+            }
+        } else if (exElement instanceof HTTPAddressImpl) {
+            ((HTTPAddressImpl) exElement)
+                    .setLocationURI(APIUtil.getGatewayEndpoint(transports, environmentName, environmentType) + context);
+            if (log.isDebugEnabled()) {
+                log.debug("Gateway endpoint for environment:" + environmentName + " is: "
+                        + ((HTTPAddressImpl) exElement).getLocationURI());
+            }
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("WSDL address element type is not supported for WSDL element type: " + exElement
+                        .getElementType().toString());
+            }
+            throw new APIManagementException("WSDL address element type is not supported for WSDL element type:" +
+                    exElement.getElementType().toString());
+        }
+    }
 
 	private void setAddressUrl(EndpointElement endpoint,URI uri) throws APIManagementException {
         endpoint.setAddress(uri);

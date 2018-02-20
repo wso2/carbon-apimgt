@@ -52,6 +52,7 @@
         ssoRelyingParty.setProperty("signRequests", String(site.ssoConfiguration.signRequests));
         ssoRelyingParty.setProperty("nameIdPolicy", site.ssoConfiguration.nameIdPolicy);
         ssoRelyingParty.setProperty("assertionEncryptionEnabled", site.ssoConfiguration.assertionEncryptionEnabled);
+        ssoRelyingParty.setProperty("loginUserNameAttribute", site.ssoConfiguration.loginUserNameAttribute);
     }
 
     var isAsssertionEncryptionEnabled  = site.ssoConfiguration.assertionEncryptionEnabled;
