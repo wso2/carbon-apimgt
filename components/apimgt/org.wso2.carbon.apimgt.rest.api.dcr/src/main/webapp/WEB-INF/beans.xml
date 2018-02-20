@@ -10,7 +10,7 @@
 	  <property name="environment">
 	    <bean class="org.springframework.web.context.support.StandardServletEnvironment" />
 	  </property> 
-	</bean> 
+    </bean> 
     <bean class="org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer"/>
     <jaxrs:server id="RegistrationService" address="/register">
         <jaxrs:serviceBeans>
