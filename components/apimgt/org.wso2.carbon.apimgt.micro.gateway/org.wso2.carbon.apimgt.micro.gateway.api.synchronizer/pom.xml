@@ -110,7 +110,6 @@
         <dependency>
             <groupId>slf4j.wso2</groupId>
             <artifactId>slf4j</artifactId>
-            <version>1.5.10.wso2v1</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
