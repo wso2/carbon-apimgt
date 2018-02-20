@@ -42,6 +42,7 @@ import List, {
     ListItemSecondaryAction
 } from 'material-ui/List';
 import Delete from 'material-ui-icons/Delete';
+import ResourceNotFound from "../../../Base/Errors/ResourceNotFound";
 
 const styles = theme => ({
     root: {
@@ -80,6 +81,7 @@ class Resources extends React.Component{
             scopes:[],
             pathDeleteList: [],
             allChecked: false,
+            notFound: false,
         };
         this.api = new Api();
         this.api_uuid = props.match.params.api_uuid;
@@ -440,8 +442,13 @@ class Resources extends React.Component{
             }
         }
     }
+
     render(){
-        if (!this.state.api) {
+        const api = this.state.api;
+        if (this.state.notFound) {
+            return <ResourceNotFound message={this.props.resourceNotFountMessage}/>
+        }
+        if (!api) {
             return <Loading/>
         }
         const selectBefore = (
@@ -450,6 +457,7 @@ class Resources extends React.Component{
         const plainOptions = ['get','post','put','delete','patch','head','options'];
         let paths = this.state.paths;
         const { classes } = this.props;
+
         return (
 
             <div className={classes.root}>

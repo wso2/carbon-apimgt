@@ -22,16 +22,19 @@ import LifeCycleUpdate from './LifeCycleUpdate'
 import Loading from "../../../Base/Loading/Loading"
 import LifeCycleHistory from "./LifeCycleHistory"
 
-import Card, {  CardContent } from 'material-ui/Card';
+import Card, {CardContent} from 'material-ui/Card';
 import Typography from 'material-ui/Typography';
 import Grid from 'material-ui/Grid';
 import Paper from 'material-ui/Paper';
+import ResourceNotFound from "../../../Base/Errors/ResourceNotFound";
 
 class LifeCycle extends Component {
     constructor(props) {
         super(props);
         this.api = new Api();
-        this.state = {};
+        this.state = {
+            notFound: false,
+        };
         this.api_uuid = props.match.params.api_uuid;
         this.updateData = this.updateData.bind(this);
     }
@@ -50,53 +53,66 @@ class LifeCycle extends Component {
             .then(response => {
                 let [api, tiers, lcState, lcHistory, labels] = response.map(data => data.obj);
                 this.setState({api: api, policies: tiers, lcState: lcState, lcHistory: lcHistory, labels: labels});
-            });
+            }).catch(
+            error => {
+                if (process.env.NODE_ENV !== "production") {
+                    console.log(error);
+                }
+                let status = error.status;
+                if (status === 404) {
+                    this.setState({notFound: true});
+                }
+            }
+        );
     }
 
     render() {
-        if (this.state.api) {
-            return (
-                    <Grid item>
-                        <Grid item xs={12}>
-                            <Paper>
-                                <Typography type="display2">
-                                    {this.state.api.name} - <span>Change Lifecycle</span>
-                                </Typography>
-                                <Typography type="caption" gutterBottom align="left">
-                                    Manage API lifecycle from cradle to grave: create, publish,
-                                    block, deprecate, and retire
-                                </Typography>
-
-                            </Paper>
-                        </Grid>
-                        <Grid item xs={12}>
-                            <Typography type="headline" className="title-gap">
-                                Change Lifecycle
-                            </Typography>
-                            <Card>
-                                <CardContent>
-                                    <LifeCycleUpdate handleUpdate={this.updateData} lcState={this.state.lcState}
-                                                     api={this.state.api}/>
-                                </CardContent>
-                            </Card>
-                            {this.state.lcHistory.length > 1 &&
-                                <div>
-                                    <Typography type="headline" className="title-gap">
-                                        History
-                                    </Typography>
-                                    <Card>
-                                        <CardContent>
-                                            <LifeCycleHistory
-                                                lcHistory={this.state.lcHistory}/>
-                                        </CardContent>
-                                    </Card>
-                                </div> }
-                        </Grid>
-                    </Grid>
-            );
-        } else {
+        const api = this.state.api;
+        if (this.state.notFound) {
+            return <ResourceNotFound message={this.props.resourceNotFountMessage}/>
+        }
+        if (!api) {
             return <Loading/>
         }
+        return (
+            <Grid item>
+                <Grid item xs={12}>
+                    <Paper>
+                        <Typography type="display2">
+                            {api.name} - <span>Change Lifecycle</span>
+                        </Typography>
+                        <Typography type="caption" gutterBottom align="left">
+                            Manage API lifecycle from cradle to grave: create, publish,
+                            block, deprecate, and retire
+                        </Typography>
+
+                    </Paper>
+                </Grid>
+                <Grid item xs={12}>
+                    <Typography type="headline" className="title-gap">
+                        Change Lifecycle
+                    </Typography>
+                    <Card>
+                        <CardContent>
+                            <LifeCycleUpdate handleUpdate={this.updateData} lcState={this.state.lcState}
+                                             api={api}/>
+                        </CardContent>
+                    </Card>
+                    {this.state.lcHistory.length > 1 &&
+                    <div>
+                        <Typography type="headline" className="title-gap">
+                            History
+                        </Typography>
+                        <Card>
+                            <CardContent>
+                                <LifeCycleHistory
+                                    lcHistory={this.state.lcHistory}/>
+                            </CardContent>
+                        </Card>
+                    </div>}
+                </Grid>
+            </Grid>
+        );
     }
 }
 

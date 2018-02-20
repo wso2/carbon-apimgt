@@ -89,7 +89,7 @@ class Utils {
 
     /**
      * Get the current environment from local-storage
-     * @returns {Object}
+     * @returns {Object} environment: {label, host, loginTokenPath}
      */
     static getCurrentEnvironment() {
         if (Utils._environment) {
@@ -175,7 +175,7 @@ class Utils {
      * @param {Array} environments - Array of Environment objects
      * @param {Array} configs - Array of Auth Config objects
      */
-    static setAutoLoginEnabledInfo(environments, configs) {
+    static setMultiEnvironmentOverviewEnabledInfo(environments, configs) {
         let autoLoginInfo = {};
         if (!Array.isArray(environments) || !Array.isArray(configs)) {
             console.error("Error while storing auto login configs in local-storage");

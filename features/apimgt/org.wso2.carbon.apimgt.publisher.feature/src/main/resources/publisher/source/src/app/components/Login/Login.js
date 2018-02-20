@@ -105,7 +105,7 @@ class Login extends Component {
             this.setState({authConfigs});
             // If idToken is not null or redirected from IDP
             if(idToken) this.authManager.handleAutoLoginEnvironments(idToken, environments, authConfigs);
-            Utils.setAutoLoginEnabledInfo(environments, authConfigs);
+            Utils.setMultiEnvironmentOverviewEnabledInfo(environments, authConfigs);
         });
     }
 

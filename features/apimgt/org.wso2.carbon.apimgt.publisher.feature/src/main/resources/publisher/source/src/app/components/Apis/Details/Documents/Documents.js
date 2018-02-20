@@ -24,6 +24,7 @@ import NewDocDiv from './NewDocDiv';
 import Loading from '../../../Base/Loading/Loading'
 import ApiPermissionValidation from '../../../../data/ApiPermissionValidation'
 import {ScopeValidation, resourcePath, resourceMethod} from '../../../../data/ScopeValidation'
+import ResourceNotFound from "../../../Base/Errors/ResourceNotFound";
 
 /*
  Documents tab related React components.
@@ -52,7 +53,8 @@ class Documents extends Component {
             docFile: null,
             addingNewDoc: false,
             documentsList: null,
-            updatingDoc: false
+            updatingDoc: false,
+            notFound: false,
         };
         this.initialDocSourceType = null;
         this.addNewDocBtnListener = this.addNewDocBtnListener.bind(this);
@@ -396,9 +398,15 @@ class Documents extends Component {
     }
 
     render() {
-        if (!this.state.api) {
+        const api = this.state.api;
+
+        if (this.state.notFound) {
+            return <ResourceNotFound message={this.props.resourceNotFountMessage}/>
+        }
+        if (!api) {
             return <Loading/>
         }
+
         return (
             <div>
               {/* Allowing adding doc to an API based on scopes */}

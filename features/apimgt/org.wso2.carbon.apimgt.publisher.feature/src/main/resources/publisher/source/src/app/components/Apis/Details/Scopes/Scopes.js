@@ -26,6 +26,7 @@ import TagsInput from 'react-tagsinput'
 import {Row, Col} from 'antd';
 import 'react-tagsinput/react-tagsinput.css'
 import {message} from "antd/lib/index";
+import ResourceNotFound from "../../../Base/Errors/ResourceNotFound";
 class Scopes extends React.Component {
     constructor(props) {
         super(props);
@@ -34,7 +35,8 @@ class Scopes extends React.Component {
         this.state = {
             apiScopes: null,
             apiScope: {},
-            roles: []
+            roles: [],
+            notFound: false,
         };
         this.deleteScope = this.deleteScope.bind(this);
         this.updateScope = this.updateScope.bind(this);
@@ -123,13 +125,16 @@ class Scopes extends React.Component {
     }
 
     render() {
+        const {apiScopes, apiScope, roles} = this.state;
 
-        let api_scopes = this.state.apiScopes;
+        if (this.state.notFound) {
+            return <ResourceNotFound message={this.props.resourceNotFountMessage}/>
+        }
 
-        if (!api_scopes) {
+        if (!apiScopes) {
             return <Loading/>
         }
-        const {apiScope, roles} = this.state;
+
         return (
             <div>
                 <Card title="Add Scope" style={{width: "100%", marginBottom: 20}}>
@@ -167,9 +172,9 @@ class Scopes extends React.Component {
 
                 </Card>
                 {
-                    Object.keys(api_scopes).map(
+                    Object.keys(apiScopes).map(
                         (key) => {
-                            let scope = api_scopes[key];
+                            let scope = apiScopes[key];
                             return (<Scope name={scope.name} description={scope.description} api_uuid={this.api_uuid}
                                            deleteScope={this.deleteScope} key={key} updateScope={this.updateScope}/>);
                         }

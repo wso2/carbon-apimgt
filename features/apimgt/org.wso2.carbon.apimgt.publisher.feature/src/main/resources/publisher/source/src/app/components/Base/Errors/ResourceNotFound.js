@@ -17,18 +17,24 @@
  */
 
 import React, {Component} from 'react'
+import Typography from 'material-ui/Typography';
 
 const ResourceNotFound = (props) => {
+    const {response} = props;
+    const message = props.message || {};
+
     return (
         <div>
             <div className="message message-danger">
-                <h4><i className="icon fw fw-error"/>404 Resource Not Found!</h4>
-                <p>
-                    Can't find the resource you are looking for
-                    <span style={{color: 'green'}}> {props.response ? props.response.statusText : ""} </span>
-                </p>
+                <Typography variant="title" gutterBottom>
+                    {message.title || "404 Resource Not Found!"}
+                </Typography>
+                <Typography variant="subheading" gutterBottom>
+                    {message.body || "Can't find the resource you are looking for"}
+                    <span style={{color: 'green'}}> {response ? response.statusText : ""} </span>
+                </Typography>
+                {message.more}
             </div>
-
         </div>
     );
 };

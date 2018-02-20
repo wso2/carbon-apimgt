@@ -302,12 +302,13 @@ class ApiThumb extends React.Component {
     static getRedirectConfirmDialogDetails(details) {
         const {api, rootAPI, environmentName, currentEnvironmentName, isSameEnvironment, isSameVersion} = details;
 
-        let title = `Switch to ${api.name} ${api.version}` +
-            `${isSameEnvironment ? '?' : ` in ${environmentName} Environment?`}`;
-        let message = 'We are going to switch the ' +
-            `${isSameEnvironment ? '' : `environment "${currentEnvironmentName}" to "${environmentName}"`}` +
-            `${!isSameEnvironment && !isSameVersion ? ' and ' : ''}` +
-            `${isSameVersion ? '' : `API version "${rootAPI.version}" to "${api.version}"`}`;
+        let title = `Switching API ${isSameEnvironment ? 'Versions' : 'Environments'}`;
+        let messageCommon = `Are you sure you want to switch the "${api.name}" API`;
+        let message = `${messageCommon} ${isSameEnvironment ? 
+            `version from “${rootAPI.version}” to “${api.version}”?` : 
+            `from version “${rootAPI.version}” in the ${currentEnvironmentName} environment to “${api.version}” in the ${environmentName} environment?`
+        }`;
+
         let labelCancel = 'Cancel';
         let labelOk = 'Switch';
 

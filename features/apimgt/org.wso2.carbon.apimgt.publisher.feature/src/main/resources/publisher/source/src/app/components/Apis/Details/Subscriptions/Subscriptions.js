@@ -3,13 +3,15 @@ import {Table} from 'antd';
 import API from '../../../../data/api'
 import Loading from '../../../Base/Loading/Loading'
 import ApiPermissionValidation from '../../../../data/ApiPermissionValidation'
+import ResourceNotFound from "../../../Base/Errors/ResourceNotFound";
 
 class Subscriptions extends Component {
     constructor(props)   {
         super(props);
         this.api_uuid = props.match.params.api_uuid;
         this.state = {
-            subscriptions: null
+            subscriptions: null,
+            notFound: false,
         };
         this.updateProductionSubscription = this.updateProductionSubscription.bind(this);
     }
@@ -99,10 +101,15 @@ class Subscriptions extends Component {
 
 
     render()    {
-        if (!this.state.api) {
+        const {api, subscriptions} = this.state;
+
+        if (this.state.notFound) {
+            return <ResourceNotFound message={this.props.resourceNotFountMessage}/>
+        }
+        if (!api) {
             return <Loading/>
         }
-        const {subscriptions} = this.state;
+
         const columns = [{
             title: 'Application',
             render: (a,b,c) => <div>{a.applicationInfo.name}</div>
