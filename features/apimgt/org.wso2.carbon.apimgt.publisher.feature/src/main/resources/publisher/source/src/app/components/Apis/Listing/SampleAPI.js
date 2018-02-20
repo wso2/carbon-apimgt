@@ -109,7 +109,6 @@ class SampleAPI extends Component {
             api.policies = ["Bronze", "Unlimited", "Gold"];
             api.securityScheme = ["Oauth"];
 
-            console.info("Adding policies to the api", api.policies);
             let promised_update = this.sampleApi.update(api);
             return promised_update.then(response => {
                 Alert.info('Policies updated successfully!');
