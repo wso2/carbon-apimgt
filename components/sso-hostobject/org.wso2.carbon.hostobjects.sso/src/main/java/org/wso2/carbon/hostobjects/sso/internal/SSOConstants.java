@@ -46,7 +46,6 @@ public class SSOConstants {
     public static final String LOGIN_USERNAME_ATTRIBUTE = "loginUserNameAttribute";
     public static final String SAML_NAME_ATTRIBUTE = "Name";
 
-
     public SSOConstants() {
     }
 }
