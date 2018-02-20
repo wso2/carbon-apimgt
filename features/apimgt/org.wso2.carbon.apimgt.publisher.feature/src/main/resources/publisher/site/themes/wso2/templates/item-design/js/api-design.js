@@ -1601,13 +1601,13 @@ var disableForm = function() {
 var getSoapToRestPathMap = function () {
     if($('#rest-paths').val()) {
         var pathObj = JSON.parse($('#rest-paths').val());
-        api_doc.paths = pathObj;
+        swagger2_api_doc.paths = pathObj;
         if($('#definitions').val()) {
             var definitions = JSON.parse($('#definitions').val());
-            api_doc.definitions = definitions;
+            swagger2_api_doc.definitions = definitions;
         }
         var designer = new APIDesigner();
-        designer.load_api_document(api_doc);
+        designer.load_api_document(swagger2_api_doc);
         $("#wsdl-content").hide();
         $(".resource_create").hide();
         $('#resource_details').show();
