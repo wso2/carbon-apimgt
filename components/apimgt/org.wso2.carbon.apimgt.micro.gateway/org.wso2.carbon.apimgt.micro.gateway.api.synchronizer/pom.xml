@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>org.wso2.carbon.apimgt.micro.gateway</artifactId>
-        <version>6.2.104-SNAPSHOT</version>
+        <version>6.2.106-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -67,7 +67,6 @@
         <dependency>
             <groupId>org.apache.httpcomponents.wso2</groupId>
             <artifactId>httpcore</artifactId>
-            <version>${httpcore.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -239,9 +238,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <properties>
-        <httpcore.version>4.3.3.wso2v1</httpcore.version>
-    </properties>
-
 </project>

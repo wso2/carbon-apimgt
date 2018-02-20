@@ -92,6 +92,8 @@ public final class APIConstants {
 
     public static final String APPLICATION_JSON_MEDIA_TYPE = "application/json";
 
+    public static final String APPLICATION_WSDL_MEDIA_TYPE = "application/wsdl";
+
     public static final String API_TENANT_CONF = "tenant-conf.json";
 
     public static final String API_TENANT_CONF_LOCATION = API_APPLICATION_DATA_LOCATION + "/" + API_TENANT_CONF;
@@ -1363,4 +1365,6 @@ public final class APIConstants {
     public static final String STORE_VIEW_ROLES = "store_view_roles";
     public static final String PUBLIC_STORE_VISIBILITY = "public";
     public static final String RESTRICTED_STORE_VISIBILITY = "restricted";
+
+    public static final String CREATED_DATE = "createdDate";
 }
