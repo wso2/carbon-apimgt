@@ -3189,6 +3189,11 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
+    public String getGroupId(int appId) throws APIManagementException {
+        return apiMgtDAO.getGroupId(appId);
+    }
+
+    @Override
     public String[] getGroupIds(String response) throws APIManagementException {
         String groupingExtractorClass = APIUtil.getGroupingExtractorImplementation();
         if (groupingExtractorClass != null) {
