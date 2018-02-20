@@ -507,6 +507,7 @@ public class Util {
                                 if (log.isDebugEnabled()) {
                                     log.debug("Name of authenticated user from SAML response : " + username);
                                 }
+                                return username;
                             }
                         }
                     }
@@ -521,6 +522,7 @@ public class Util {
                 if (log.isDebugEnabled()) {
                     log.debug("Name of authenticated user from SAML response : " + username);
                 }
+                return username;
             }
         }
         return username;
