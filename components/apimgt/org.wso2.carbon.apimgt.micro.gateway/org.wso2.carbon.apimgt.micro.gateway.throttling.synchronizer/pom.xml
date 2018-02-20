@@ -56,7 +56,6 @@
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.micro.gateway.common</artifactId>
-            <version>${carbon.apimgt.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>jboss</groupId>
@@ -90,7 +89,6 @@
         <dependency>
             <groupId>org.wso2.carbon.commons</groupId>
             <artifactId>org.wso2.carbon.tenant.common</artifactId>
-            <version>${carbon.commons.imp.pkg.version}</version>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
