@@ -29,6 +29,7 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -38,9 +39,10 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 import java.util.HashMap;
 import java.util.Map;
+import javax.wsdl.Definition;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ServiceReferenceHolder.class})
+@PrepareForTest({ServiceReferenceHolder.class, APIUtil.class})
 
 public class APIMWSDLReaderTest {
     private static ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
@@ -105,6 +107,39 @@ public class APIMWSDLReaderTest {
                 element.toString().contains("address = \"http://yoursite.com/MyService\""));
         Assert.assertTrue("Endpoints does not include GW endpoint",
                 element.toString().contains("https://localhost:8243/abc"));
+    }
+
+    @Test
+    public void testGetWSDL() throws Exception {
+        doMockStatics();
+        APIMWSDLReader wsdlReader = new APIMWSDLReader("");
+        byte[] content = IOUtils.toByteArray(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("wsdls/stockQuote.wsdl"));
+        Definition definition = wsdlReader.getWSDLDefinitionFromByteContent(content);
+        Assert.assertNotNull(new String(wsdlReader.getWSDL(definition)));
+    }
+
+    @Test
+    public void testSetServiceDefinition() throws Exception {
+        doMockStatics();
+        PowerMockito.mockStatic(APIUtil.class);
+        API api = getAPIForTesting();
+        String environmentName = "Production and Sandbox";
+        String environmentType = "hybrid";
+        PowerMockito.when(APIUtil.getGatewayEndpoint(api.getTransports(), environmentName, environmentType))
+                .thenReturn("http://localhost:8280");
+
+        APIMWSDLReader wsdlReader = new APIMWSDLReader("");
+        byte[] content = IOUtils.toByteArray(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("wsdls/stockQuote.wsdl"));
+        Definition definition = wsdlReader.getWSDLDefinitionFromByteContent(content);
+        try {
+            wsdlReader.setServiceDefinition(definition, api, environmentName, environmentType);
+            wsdlReader.getWSDL(definition);
+            Assert.assertNotNull(definition.getServices());
+        } catch (APIManagementException e) {
+            Assert.fail("Unexpected exception occurred while updating service endpoint address");
+        }
     }
 
     public static void doMockStatics() {
