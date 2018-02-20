@@ -507,22 +507,20 @@ public class Util {
                                 if (log.isDebugEnabled()) {
                                     log.debug("Name of authenticated user from SAML response : " + username);
                                 }
-                                return username;
                             }
                         }
                     }
                 }
             }
-        }
-
-        Subject subject = assertion.getSubject();
-        if (subject != null) {
-            if (subject.getNameID() != null) {
-                username = subject.getNameID().getValue();
-                if (log.isDebugEnabled()) {
-                    log.debug("Name of authenticated user from SAML response : " + username);
+        } else {
+            Subject subject = assertion.getSubject();
+            if (subject != null) {
+                if (subject.getNameID() != null) {
+                    username = subject.getNameID().getValue();
+                    if (log.isDebugEnabled()) {
+                        log.debug("Name of authenticated user from SAML response : " + username);
+                    }
                 }
-                return username;
             }
         }
         return username;
