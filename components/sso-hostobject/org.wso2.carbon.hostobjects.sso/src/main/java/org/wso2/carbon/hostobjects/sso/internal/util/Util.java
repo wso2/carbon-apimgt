@@ -27,9 +27,12 @@ import org.apache.xerces.util.SecurityManager;
 import org.opensaml.Configuration;
 import org.opensaml.DefaultBootstrap;
 import org.opensaml.saml2.core.Assertion;
+import org.opensaml.saml2.core.Attribute;
+import org.opensaml.saml2.core.AttributeStatement;
 import org.opensaml.saml2.core.EncryptedAssertion;
 import org.opensaml.saml2.core.NameID;
 import org.opensaml.saml2.core.NameIDPolicy;
+import org.opensaml.saml2.core.Subject;
 import org.opensaml.saml2.core.impl.NameIDBuilder;
 import org.opensaml.saml2.core.impl.NameIDPolicyBuilder;
 import org.opensaml.saml2.encryption.Decrypter;
@@ -78,6 +81,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
+import java.util.List;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -334,7 +338,7 @@ public class Util {
     }
 
     public static Assertion getDecryptedAssertion(EncryptedAssertion encryptedAssertion, String keyStoreName,
-            String keyStorePassword, String alias, int tenantId, String tenantDomain) throws Exception {
+                                                  String keyStorePassword, String alias, int tenantId, String tenantDomain) throws Exception {
 
         try {
             KeyStore keyStore = null;
@@ -476,5 +480,49 @@ public class Util {
         dbf.setAttribute(Constants.XERCES_PROPERTY_PREFIX + Constants.SECURITY_MANAGER_PROPERTY, securityManager);
 
         return dbf;
+    }
+
+    /**
+     * Get the username from the SAML2 Assertion
+     *
+     * @param assertion SAML2 assertion
+     * @return username
+     */
+    public static String getUsernameFromAssertion(Assertion assertion, String usernameAttribute) {
+        String username = null;
+        if (usernameAttribute != null) {
+            // There can be multiple AttributeStatements in Assertion
+            List<AttributeStatement> attributeStatements = assertion.getAttributeStatements();
+            if (attributeStatements != null) {
+                for (AttributeStatement attributeStatement : attributeStatements) {
+                    // There can be multiple Attributes in an attributeStatement
+                    List<Attribute> attributes = attributeStatement.getAttributes();
+                    if (attributes != null) {
+                        for (Attribute attribute : attributes) {
+                            String attributeName = attribute.getDOM().getAttribute(SSOConstants.SAML_NAME_ATTRIBUTE);
+                            if (attributeName.equals(usernameAttribute)) {
+                                List<XMLObject> attributeValues = attribute.getAttributeValues();
+                                // There can be multiple attribute values in an attribute, but get the first one
+                                username = attributeValues.get(0).getDOM().getTextContent();
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Name of authenticated user from SAML response : " + username);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            Subject subject = assertion.getSubject();
+            if (subject != null) {
+                if (subject.getNameID() != null) {
+                    username = subject.getNameID().getValue();
+                    if (log.isDebugEnabled()) {
+                        log.debug("Name of authenticated user from SAML response : " + username);
+                    }
+                }
+            }
+        }
+        return username;
     }
 }
