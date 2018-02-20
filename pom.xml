@@ -525,6 +525,11 @@
                 <artifactId>org.wso2.carbon.apimgt.hostobjects.oidc</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.micro.gateway.common</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
@@ -1323,6 +1328,11 @@
                 <groupId>slf4j.wso2</groupId>
                 <artifactId>slf4j</artifactId>
                 <version>${slf4j.wso2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.commons</groupId>
+                <artifactId>org.wso2.carbon.tenant.common</artifactId>
+                <version>${carbon.commons.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

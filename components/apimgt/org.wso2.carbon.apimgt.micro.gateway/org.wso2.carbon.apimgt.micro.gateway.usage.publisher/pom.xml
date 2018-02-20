@@ -37,7 +37,6 @@
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
-            <version>${carbon.apimgt.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -60,7 +59,6 @@
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.usage.publisher</artifactId>
-            <version>${carbon.apimgt.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.org.apache.httpcomponents</groupId>
@@ -80,7 +78,6 @@
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.micro.gateway.common</artifactId>
-            <version>${carbon.apimgt.version}</version>
         </dependency>
         <dependency>
             <groupId>com.googlecode.json-simple.wso2</groupId>

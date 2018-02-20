@@ -80,7 +80,6 @@
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.micro.gateway.common</artifactId>
-            <version>${carbon.apimgt.version}</version>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
