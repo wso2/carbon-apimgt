@@ -1413,6 +1413,18 @@
 
         <orbit.version.json>3.0.0.wso2v1</orbit.version.json>
 
+        <!-- orbit httpmime versions-->
+        <orbit.httpmime.version>4.3.1.wso2v2</orbit.httpmime.version>
+
+        <!-- lmax disruptor versions-->
+        <lmax.disruptor.version.range>[2.10.0,3.4)</lmax.disruptor.version.range>
+
+        <!-- xml api version-->
+        <xml.apis.version>1.4.01</xml.apis.version>
+
+        <!-- databridge agent version range-->
+        <databridge.agent.range>[5.1,6)</databridge.agent.range>
+
         <javax.xml.soap.imp.pkg.version>[1.0.0, 1.1.0)</javax.xml.soap.imp.pkg.version>
         <javax.xml.stream.imp.pkg.version>[1.0.1, 1.1.0)</javax.xml.stream.imp.pkg.version>
 
@@ -1427,14 +1439,16 @@
         <wss4j.version>1.5.11.wso2v11</wss4j.version>
         <commons-logging.version>1.1.1</commons-logging.version>
         <commons-io.version>2.4.0.wso2v1</commons-io.version>
+        <commons-httpclient.version>3.1</commons-httpclient.version>
         <google.code.gson.version>2.7</google.code.gson.version>
         <httpcomponents.version>4.3.6</httpcomponents.version>
         <commons-codec.version>1.4.0.wso2v1</commons-codec.version>
         <com.nimbusds.wso2.version>2.26.1.wso2v2</com.nimbusds.wso2.version>
         <org.apache.velocity.version>1.7</org.apache.velocity.version>
         <org.slf4j.version>1.5.10</org.slf4j.version>
+        <slf4j.wso2.version>1.5.10.wso2v1</slf4j.wso2.version>
         <jackson.version>1.9.12</jackson.version>
-        <spring-web.version>4.1.6.RELEASE</spring-web.version>
+        <spring-web.version>4.3.14.RELEASE</spring-web.version>
         <hibernate-validator.version>5.2.0.Final</hibernate-validator.version>
         <swagger-jaxrs.version>1.5.10</swagger-jaxrs.version>
         <junit.version>4.12</junit.version>
@@ -1452,7 +1466,7 @@
         <carbon.throttle.module.version>4.2.1</carbon.throttle.module.version>
 
         <!-- apache cxf version -->
-        <cxf.version>3.1.7</cxf.version>
+        <cxf.version>3.2.2</cxf.version>
 
         <carbon.metrics.version>1.1.0</carbon.metrics.version>
         <!-- apache pdfbox version -->
