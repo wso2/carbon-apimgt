@@ -92,6 +92,11 @@
                     <version>2.2</version>
                 </plugin>
                 <plugin>
+                    <groupId>io.swagger</groupId>
+                    <artifactId>swagger-codegen-maven-plugin</artifactId>
+                    <version>${io.swagger.codegen.version}</version>
+                </plugin>
+                <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>${jacoco.version}</version>
@@ -1472,6 +1477,7 @@
         <reflection.version>0.9.11</reflection.version>
         <woodstox-core.version>5.0.0</woodstox-core.version>
         <apache.commons.version>2.4.2</apache.commons.version>
+        <io.swagger.codegen.version>2.3.1</io.swagger.codegen.version>
     </properties>
 </project>
 
