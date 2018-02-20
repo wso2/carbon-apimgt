@@ -155,25 +155,27 @@ public class SampleTestObjectCreator {
     public static final String DEVELOPER_ROLE_ID = "cfdce56e-8434-498e-b6dc-85a6f2d8f035";
 
     public static final String ACCESS_URL = "https://test.";
+    public static final String LABEL_TYPE_GATEWAY = "GATEWAY";
+    public static final String LABEL_TYPE_STORE = "STORE";
     public static final String ORIGINAL_ENDPOINT_WEATHER = "http://www.webservicex.net/WeatherForecast.asmx";
     public static final String ORIGINAL_ENDPOINT_STOCK_QUOTE = "http://www.webservicex.net/stockquote.asmx";
     public static final String BUSINESS_PLAN_FREE = "FREE";
 
-    public static  APIPolicy unlimitedApiPolicy = new APIPolicy(UUID.randomUUID().toString(), UNLIMITED_TIER);
-    public static  APIPolicy goldApiPolicy = new APIPolicy(UUID.randomUUID().toString(), GOLD_TIER);
-    public static  APIPolicy silverApiPolicy = new APIPolicy(UUID.randomUUID().toString(), SILVER_TIER);
-    public static  APIPolicy bronzeApiPolicy = new APIPolicy(UUID.randomUUID().toString(), BRONZE_TIER);
-    public static  SubscriptionPolicy unlimitedSubscriptionPolicy =
+    public static APIPolicy unlimitedApiPolicy = new APIPolicy(UUID.randomUUID().toString(), UNLIMITED_TIER);
+    public static APIPolicy goldApiPolicy = new APIPolicy(UUID.randomUUID().toString(), GOLD_TIER);
+    public static APIPolicy silverApiPolicy = new APIPolicy(UUID.randomUUID().toString(), SILVER_TIER);
+    public static APIPolicy bronzeApiPolicy = new APIPolicy(UUID.randomUUID().toString(), BRONZE_TIER);
+    public static SubscriptionPolicy unlimitedSubscriptionPolicy =
             new SubscriptionPolicy(UUID.randomUUID().toString(), UNLIMITED_TIER);
-    public static  SubscriptionPolicy goldSubscriptionPolicy =
+    public static SubscriptionPolicy goldSubscriptionPolicy =
             new SubscriptionPolicy(UUID.randomUUID().toString(), GOLD_TIER);
-    public static  SubscriptionPolicy silverSubscriptionPolicy =
+    public static SubscriptionPolicy silverSubscriptionPolicy =
             new SubscriptionPolicy(UUID.randomUUID().toString(), SILVER_TIER);
-    public static  SubscriptionPolicy bronzeSubscriptionPolicy =
+    public static SubscriptionPolicy bronzeSubscriptionPolicy =
             new SubscriptionPolicy(UUID.randomUUID().toString(), BRONZE_TIER);
-    public static  ApplicationPolicy fiftyPerMinApplicationPolicy =
+    public static ApplicationPolicy fiftyPerMinApplicationPolicy =
             new ApplicationPolicy(UUID.randomUUID().toString(), FIFTY_PER_MIN_TIER);
-    public static  ApplicationPolicy twentyPerMinApplicationPolicy =
+    public static ApplicationPolicy twentyPerMinApplicationPolicy =
             new ApplicationPolicy(UUID.randomUUID().toString(), TWENTY_PER_MIN_TIER);
     public static String apiDefinition;
     public static InputStream inputStream;
@@ -210,6 +212,8 @@ public class SampleTestObjectCreator {
                 + "[\"READ\",\"UPDATE\"]},{\"groupId\" : \"admin\", \"permission\" : [\"READ\",\"UPDATE\"," +
                 "\"DELETE\", \"MANAGE_SUBSCRIPTION\"]}]";
 
+        List<String> defaultLabels = getDefaultLabels();
+
         API.APIBuilder apiBuilder = new API.APIBuilder(ADMIN, "WeatherAPI", API_VERSION).
                 id(UUID.randomUUID().toString()).
                 context("weather").
@@ -223,6 +227,7 @@ public class SampleTestObjectCreator {
                 apiPolicy(unlimitedApiPolicy).
                 transport(transport).
                 tags(tags).
+                labels(defaultLabels).
                 policies(policies).
                 visibility(API.Visibility.PUBLIC).
                 visibleRoles(new HashSet<>()).
@@ -319,6 +324,8 @@ public class SampleTestObjectCreator {
         permissionMap.put(DEVELOPER_ROLE_ID, 6);
         permissionMap.put(ADMIN_ROLE_ID, 15);
 
+        List<String> defaultLabels = getDefaultLabels();
+
         API.APIBuilder apiBuilder = new API.APIBuilder(ADMIN, "restaurantAPI", "0.9").
                 id(UUID.randomUUID().toString()).
                 context("weather").
@@ -331,6 +338,7 @@ public class SampleTestObjectCreator {
                 apiPolicy(goldApiPolicy).
                 transport(transport).
                 tags(tags).
+                labels(defaultLabels).
                 policies(policies).
                 visibility(API.Visibility.RESTRICTED).
                 visibleRoles(new HashSet<>(Arrays.asList(CUSTOMER_ROLE, MANAGER_ROLE, EMPLOYEE_ROLE))).
@@ -383,6 +391,9 @@ public class SampleTestObjectCreator {
         permissionMap.put(DEVELOPER_ROLE_ID, 6);
         permissionMap.put(ADMIN_ROLE_ID, 15);
 
+        List<String> defaultLabels = getDefaultLabels();
+
+
         API.APIBuilder apiBuilder = new API.APIBuilder(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
                 API_VERSION).
                 id(UUID.randomUUID().toString()).
@@ -396,6 +407,7 @@ public class SampleTestObjectCreator {
                 apiPolicy(goldApiPolicy).
                 transport(transport).
                 tags(tags).
+                labels(defaultLabels).
                 policies(policies).
                 visibility(API.Visibility.RESTRICTED).
                 visibleRoles(new HashSet<>(Arrays.asList(CUSTOMER_ROLE, MANAGER_ROLE, EMPLOYEE_ROLE))).
@@ -944,6 +956,7 @@ public class SampleTestObjectCreator {
         subscriptionPolicy.setStopOnQuotaReach(true);
         return subscriptionPolicy;
     }
+
     public static SubscriptionPolicy createSubscriptionPolicyWithBandwithLimit() {
         SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy("SubPolicyBandwith");
         subscriptionPolicy.setUuid(UUID.randomUUID().toString());
@@ -954,7 +967,7 @@ public class SampleTestObjectCreator {
         defaultQuotaPolicy.setType(PolicyConstants.BANDWIDTH_TYPE);
         BandwidthLimit bandwidthLimit = new BandwidthLimit(TIME_UNIT_SECONDS, 1, 1000, "KB");
         defaultQuotaPolicy.setLimit(bandwidthLimit);
-        subscriptionPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);        
+        subscriptionPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
         subscriptionPolicy.setBillingPlan(BUSINESS_PLAN_FREE);
         subscriptionPolicy.setRateLimitCount(100);
         subscriptionPolicy.setRateLimitTimeUnit("s");
@@ -1046,13 +1059,14 @@ public class SampleTestObjectCreator {
         return uriTemplateMap;
     }
 
-    public static Label.Builder createLabel(String name) {
+    public static Label.Builder createLabel(String name, String type) {
 
         List<String> accessUrls = new ArrayList<>();
         accessUrls.add(ACCESS_URL + name);
         return new Label.Builder().
                 id(UUID.randomUUID().toString()).
                 name(name).
+                type(type).
                 accessUrls(accessUrls);
     }
 
@@ -1252,6 +1266,7 @@ public class SampleTestObjectCreator {
         twentyPerMinApplicationPolicy.setDefaultQuotaPolicy(quotaPolicy);
         policyDAO.addApplicationPolicy(twentyPerMinApplicationPolicy);
     }
+
     public static String createDefaultSiddhiAppforAppPolicy() {
         ApplicationPolicy policy = createDefaultApplicationPolicy();
         RequestCountLimit limit = (RequestCountLimit) createDefaultApplicationPolicy().getDefaultQuotaPolicy()
@@ -1454,6 +1469,7 @@ public class SampleTestObjectCreator {
 
     /**
      * Creates a new {@link ThreatProtectionPolicy} for testing purposes
+     *
      * @return {@link ThreatProtectionPolicy}
      */
     public static ThreatProtectionPolicy createUniqueThreatProtectionPolicy() {
@@ -1466,5 +1482,23 @@ public class SampleTestObjectCreator {
         policy.setPolicy(policyString);
 
         return policy;
+    }
+
+    private static List<String> getDefaultLabels() {
+
+        List<String> defaultLabels = new ArrayList<>();
+
+        try {
+            String defaultGatewayLabel = DAOFactory.getLabelDAO().getLabelIdByNameAndType(APIMgtConstants
+                    .DEFAULT_LABEL_NAME, APIMgtConstants.LABEL_TYPE_GATEWAY);
+            String  defaultStoreLabel = DAOFactory.getLabelDAO().getLabelIdByNameAndType(APIMgtConstants
+                    .DEFAULT_LABEL_NAME, APIMgtConstants.LABEL_TYPE_STORE);
+            defaultLabels.add(defaultStoreLabel);
+            defaultLabels.add(defaultGatewayLabel);
+        } catch (APIMgtDAOException e) {
+            log.error("Could not retrieve default labels");
+        }
+        Collections.sort(defaultLabels);
+        return defaultLabels;
     }
 }

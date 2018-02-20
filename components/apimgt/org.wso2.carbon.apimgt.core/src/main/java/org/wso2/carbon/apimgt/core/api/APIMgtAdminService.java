@@ -279,6 +279,38 @@ public interface APIMgtAdminService {
     void registerGatewayLabels(List<Label> labels, String overwriteLabels) throws APIManagementException;
 
     /**
+     * Returns all the available labels
+     *
+     * @throws APIManagementException If failed to register labels.
+     */
+    List<Label> getLabels() throws APIManagementException;
+
+    /**
+     * Returns matched label
+     *
+     * @param labelID The {@link String} ID of the label
+     * @return {@link Label} Label
+     * @throws APIManagementException if error occurs while accessing data layer
+     */
+    Label getLabelByID(String labelID) throws APIManagementException;
+
+    /**
+     * Add labels if not exist
+     *
+     * @param label The {@code List<Label>} label to be added
+     * @throws APIManagementException if error occurs while trying to add labels
+     */
+    Label addLabel(Label label) throws APIManagementException;
+
+    /**
+     * Update the label
+     *
+     * @param updatedLabel Updated Label
+     * @throws APIManagementException if error occurs while accessing data layer
+     */
+    Label updateLabel(Label updatedLabel) throws APIManagementException;   
+
+ /**
      * Retrieve API's gateway configuration
      *
      * @param apiId     UUID of the API

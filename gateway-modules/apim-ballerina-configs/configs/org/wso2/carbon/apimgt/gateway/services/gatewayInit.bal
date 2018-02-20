@@ -21,6 +21,8 @@ function initGateway () (boolean) {
 
     try {
         //Register gateway in API Core
+        //Test to get the gateway Label. Can uncomment when required.
+       // string label = gatewayUtil:getSystemProperty("label");
         gatewayUtil:registerGateway();
         //Retrieve APIs from API Core and deploy
         gatewayUtil:loadAPIs();

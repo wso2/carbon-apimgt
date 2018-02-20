@@ -2,7 +2,7 @@
     <h1><a name="Label (Collection)"></a>Label (Collection)</h1>
 
             <hr/>
-            <h3 class="operation-heading"><a name="labelInfoGet"></a>Get label information based on the label name <br><small>GET https://apis.wso2.com/api/am/store/v1.0/label-info</small></h3>
+            <h3 class="operation-heading"><a name="labelsGet"></a>Get label information based on the label name <br><small>GET https://apis.wso2.com/api/am/store/v1.0/labels</small></h3>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to retrieve the information of the labels
@@ -11,15 +11,15 @@
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
                 <p>Not required</p>
 
-            <div class="pointer" data-toggle="collapse" data-target="#request-labelInfoGet">
+            <div class="pointer" data-toggle="collapse" data-target="#request-labelsGet">
                 <h4 class="section-heading">
                     Request
                 </h4>
             </div>
 
-                <code class="bash">GET https://apis.wso2.com/api/am/store/v1.0/label-info</code>
+                <code class="bash">GET https://apis.wso2.com/api/am/store/v1.0/labels</code>
 
-            <div class="pointer" data-toggle="collapse" data-target="#response-labelInfoGet">
+            <div class="pointer" data-toggle="collapse" data-target="#response-labelsGet">
                 <h4 class="section-heading">
                     Response
                 </h4>
@@ -56,14 +56,14 @@
                             
                         </td>
                         <td class="param-name">
-                            <p>labels</p>
+                            <p>labelType</p>
                             <p class="param-required">
-                                required
                                 
+                                optional
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Defines comma separated list of labels
+                            <p class="param-description marked">type of the label.
 </p>
                         </td>
                         <td>

@@ -49,7 +49,8 @@ public class WSDL11ProcessorImplTestCase {
 
         //validate the content after updating endpoints using an API and Label
         API api = SampleTestObjectCreator.createDefaultAPI().build();
-        Label label = SampleTestObjectCreator.createLabel(SAMPLE_LABEL_NAME).build();
+        Label label = SampleTestObjectCreator.createLabel(SAMPLE_LABEL_NAME, SampleTestObjectCreator
+                .LABEL_TYPE_STORE).build();
         byte[] updatedWSDLWithEndpoint = wsdl11Processor.getUpdatedWSDL(api, label);
         //validate the content of wsdl11Processor's WSDL Info content after updating its endpoints
         assertDefaultSingleWSDLContent(wsdl11Processor.getWsdlInfo(), UPDATED_ENDPOINT_API_LABEL,
@@ -70,23 +71,24 @@ public class WSDL11ProcessorImplTestCase {
         wsdl11Processor.initPath(extractedLocation);
         Assert.assertTrue(wsdl11Processor.canProcess());
         assertDefaultArchivedWSDLContent(wsdl11Processor.getWsdlInfo(),
-                new String[] { SampleTestObjectCreator.ORIGINAL_ENDPOINT_WEATHER,
-                        SampleTestObjectCreator.ORIGINAL_ENDPOINT_STOCK_QUOTE }, null);
+                new String[]{SampleTestObjectCreator.ORIGINAL_ENDPOINT_WEATHER,
+                        SampleTestObjectCreator.ORIGINAL_ENDPOINT_STOCK_QUOTE}, null);
 
         API api = SampleTestObjectCreator.createDefaultAPI().build();
-        Label label = SampleTestObjectCreator.createLabel(SAMPLE_LABEL_NAME).build();
+        Label label = SampleTestObjectCreator.createLabel(SAMPLE_LABEL_NAME, SampleTestObjectCreator
+                .LABEL_TYPE_STORE).build();
         String updatedPath = wsdl11Processor.getUpdatedWSDLPath(api, label);
 
         WSDL11ProcessorImpl wsdl11Processor2 = new WSDL11ProcessorImpl();
         wsdl11Processor2.initPath(updatedPath);
         Assert.assertTrue(wsdl11Processor2.canProcess());
-        assertDefaultArchivedWSDLContent(wsdl11Processor2.getWsdlInfo(), new String[] { UPDATED_ENDPOINT_API_LABEL },
-                new String[] { SampleTestObjectCreator.ORIGINAL_ENDPOINT_STOCK_QUOTE,
-                        SampleTestObjectCreator.ORIGINAL_ENDPOINT_WEATHER });
+        assertDefaultArchivedWSDLContent(wsdl11Processor2.getWsdlInfo(), new String[]{UPDATED_ENDPOINT_API_LABEL},
+                new String[]{SampleTestObjectCreator.ORIGINAL_ENDPOINT_STOCK_QUOTE,
+                        SampleTestObjectCreator.ORIGINAL_ENDPOINT_WEATHER});
     }
 
     private void assertDefaultSingleWSDLContent(WSDLInfo wsdlInfo, String endpointURIToAssertContains,
-            String endpointURIToAssertNotContains) throws Exception {
+                                                String endpointURIToAssertNotContains) throws Exception {
         //Assert wsdlInfo fields
         Assert.assertEquals(wsdlInfo.getVersion(), WSDL_VERSION_11);
         Assert.assertEquals(wsdlInfo.getEndpoints().size(), 4);
@@ -102,7 +104,7 @@ public class WSDL11ProcessorImplTestCase {
     }
 
     private void assertDefaultArchivedWSDLContent(WSDLInfo wsdlInfo, String[] endpointURIsToAssertContains,
-            String[] endpointURIsToAssertNotContains) throws Exception {
+                                                  String[] endpointURIsToAssertNotContains) throws Exception {
         //Assert wsdlInfo fields
         Assert.assertEquals(wsdlInfo.getVersion(), WSDL_VERSION_11);
         Assert.assertEquals(wsdlInfo.getEndpoints().size(), 8);

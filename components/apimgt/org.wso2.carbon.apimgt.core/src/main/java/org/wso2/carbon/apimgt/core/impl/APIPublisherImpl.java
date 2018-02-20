@@ -285,8 +285,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         apiBuilder.createdBy(getUsername());
         apiBuilder.updatedBy(getUsername());
         if (apiBuilder.getLabels().isEmpty()) {
-            Set<String> labelSet = new HashSet<>();
-            labelSet.add(APIMgtConstants.DEFAULT_LABEL_NAME);
+            List<String> labelSet = new ArrayList<>();
+            labelSet.add(getLabelIdByNameAndType(APIMgtConstants.DEFAULT_LABEL_NAME, APIMgtConstants
+                    .LABEL_TYPE_GATEWAY));
+            labelSet.add(getLabelIdByNameAndType(APIMgtConstants.DEFAULT_LABEL_NAME, APIMgtConstants
+                    .LABEL_TYPE_STORE));
             apiBuilder.labels(labelSet);
         }
         Map<String, Endpoint> apiEndpointMap = apiBuilder.getEndpoint();
@@ -1981,6 +1984,28 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             String msg = "Error occurred while retrieving labels";
             log.error(msg, e);
             throw new LabelException(msg, ExceptionCodes.LABEL_EXCEPTION);
+        }
+    }
+
+    @Override
+    public List<Label> getLabelsByType (String type) throws LabelException {
+        try {
+            return getLabelDAO().getLabelsByType(type);
+        } catch (APIMgtDAOException e) {
+            String msg = "Error occurred while retrieving labels";
+            log.error(msg, e);
+            throw new LabelException(msg, ExceptionCodes.LABEL_EXCEPTION);
+        }
+    }
+
+    @Override
+    public String getLabelIdByNameAndType (String name, String type) throws APIManagementException {
+        try {
+            return getLabelDAO().getLabelIdByNameAndType(name, type);
+        } catch (APIMgtDAOException e) {
+            String msg = "Error occurred while retrieving labels";
+            log.error(msg, e);
+            throw new APIManagementException(msg, ExceptionCodes.LABEL_EXCEPTION);
         }
     }
 

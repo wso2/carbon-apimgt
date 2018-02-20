@@ -466,14 +466,14 @@ public class AbstractAPIManagerTestCase {
         verify(apiDAO, times(0)).getDocumentInlineContent(DOC_ID);
     }
 
-    @Test(description = "Get Label by name")
-    public void testGetLabelByName() throws APIManagementException {
+    @Test(description = "Get Label by ID")
+    public void testGetLabelByID() throws APIManagementException {
         LabelDAO labelDAO = mock(LabelDAO.class);
-        Label label = SampleTestObjectCreator.createLabel(LABEL_NAME).build();
+        Label label = SampleTestObjectCreator.createLabel(LABEL_NAME, SampleTestObjectCreator.LABEL_TYPE_STORE).build();
         AbstractAPIManager apiManager = getApiPublisherImpl(labelDAO);
-        when(labelDAO.getLabelByName(LABEL_NAME)).thenReturn(label);
-        apiManager.getLabelByName(LABEL_NAME);
-        verify(labelDAO, times(1)).getLabelByName(LABEL_NAME);
+        when(labelDAO.getLabelByID(label.getId())).thenReturn(label);
+        apiManager.getLabelByID(label.getId());
+        verify(labelDAO, times(1)).getLabelByID(label.getId());
     }
 
     private APIStoreImpl getAPIStoreImpl(ApiDAO apiDAO) {
