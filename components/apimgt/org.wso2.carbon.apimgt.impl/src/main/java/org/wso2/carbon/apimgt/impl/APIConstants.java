@@ -1363,4 +1363,6 @@ public final class APIConstants {
     public static final String STORE_VIEW_ROLES = "store_view_roles";
     public static final String PUBLIC_STORE_VISIBILITY = "public";
     public static final String RESTRICTED_STORE_VISIBILITY = "restricted";
+
+    public static final String CREATED_DATE = "createdDate";
 }

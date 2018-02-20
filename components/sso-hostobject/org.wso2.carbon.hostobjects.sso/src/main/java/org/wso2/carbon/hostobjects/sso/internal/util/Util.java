@@ -26,10 +26,7 @@ import org.apache.xerces.impl.Constants;
 import org.apache.xerces.util.SecurityManager;
 import org.opensaml.Configuration;
 import org.opensaml.DefaultBootstrap;
-import org.opensaml.saml2.core.Assertion;
-import org.opensaml.saml2.core.EncryptedAssertion;
-import org.opensaml.saml2.core.NameID;
-import org.opensaml.saml2.core.NameIDPolicy;
+import org.opensaml.saml2.core.*;
 import org.opensaml.saml2.core.impl.NameIDBuilder;
 import org.opensaml.saml2.core.impl.NameIDPolicyBuilder;
 import org.opensaml.saml2.encryption.Decrypter;
@@ -78,6 +75,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
+import java.util.List;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -476,5 +474,37 @@ public class Util {
         dbf.setAttribute(Constants.XERCES_PROPERTY_PREFIX + Constants.SECURITY_MANAGER_PROPERTY, securityManager);
 
         return dbf;
+    }
+
+    /**
+     * Get the username from the SAML2 Assertion
+     *
+     * @param assertion SAML2 assertion
+     * @return username
+     */
+    public static String getUsernameFromAssertion(Assertion assertion, String usernameAttribute) {
+        if (usernameAttribute != null) {
+            // There can be multiple AttributeStatements in Assertion
+            List<AttributeStatement> attributeStatements = assertion.getAttributeStatements();
+            if (attributeStatements != null) {
+                for (AttributeStatement attributeStatement : attributeStatements) {
+                    // There can be multiple Attributes in a
+                    // attributeStatement
+                    List<Attribute> attributes = attributeStatement.getAttributes();
+                    if (attributes != null) {
+                        for (Attribute attribute : attributes) {
+                            String attributeName = attribute.getDOM().getAttribute(SSOConstants.SAML_NAME_ATTRIBUTE);
+                            if (attributeName.equals(usernameAttribute)) {
+                                List<XMLObject> attributeValues = attribute.getAttributeValues();
+                                // There can be multiple attribute values in
+                                // a attribute, but get the first one
+                                return attributeValues.get(0).getDOM().getTextContent();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return assertion.getSubject().getNameID().getValue();
     }
 }

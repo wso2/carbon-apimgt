@@ -630,15 +630,8 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                                 relyingPartyObject.getSSOProperty(SSOConstants.IDP_ALIAS),
                                 MultitenantConstants.SUPER_TENANT_ID, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
 
-                        Subject subject = assertion.getSubject();
-                        if (subject != null) {
-                            if (subject.getNameID() != null) {
-                                username = subject.getNameID().getValue();
-                                if (log.isDebugEnabled()) {
-                                    log.debug("Name of authenticated user from SAML response " + username);
-                                }
-                            }
-                        }
+                        username = Util.getUsernameFromAssertion(assertion, relyingPartyObject.getSSOProperty
+                                                                (SSOConstants.LOGIN_USERNAME_ATTRIBUTE));
 
                     } catch (Exception e) {
                         if (log.isDebugEnabled()) {
@@ -655,15 +648,8 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
 
                 // extract the username
                 if (assertions != null && assertions.size() == 1) {
-                    Subject subject = assertions.get(0).getSubject();
-                    if (subject != null) {
-                        if (subject.getNameID() != null) {
-                            username = subject.getNameID().getValue();
-                            if (log.isDebugEnabled()) {
-                                log.debug("Name of authenticated user from SAML response " + username);
-                            }
-                        }
-                    }
+                    username = Util.getUsernameFromAssertion(assertions.get(0),
+                                            relyingPartyObject.getSSOProperty(SSOConstants.LOGIN_USERNAME_ATTRIBUTE));
                 } else {
                     log.error("SAML Response contains invalid number of assertions.");
                 }
@@ -937,12 +923,8 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                     sessionIndex = authnStatement.getSessionIndex();
                 }
             }
-            Subject subject = assertion.getSubject();
-            if (subject != null) {
-                if (subject.getNameID() != null) {
-                    username = subject.getNameID().getValue();
-                }
-            }
+            username = Util.getUsernameFromAssertion(assertion, relyingPartyObject.getSSOProperty(SSOConstants
+                                       .LOGIN_USERNAME_ATTRIBUTE));
 
         }
         if (sessionIndex == null) {
