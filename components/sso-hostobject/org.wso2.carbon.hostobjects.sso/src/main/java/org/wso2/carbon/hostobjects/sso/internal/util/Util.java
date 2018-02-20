@@ -26,12 +26,7 @@ import org.apache.xerces.impl.Constants;
 import org.apache.xerces.util.SecurityManager;
 import org.opensaml.Configuration;
 import org.opensaml.DefaultBootstrap;
-import org.opensaml.saml2.core.Assertion;
-import org.opensaml.saml2.core.Attribute;
-import org.opensaml.saml2.core.AttributeStatement;
-import org.opensaml.saml2.core.EncryptedAssertion;
-import org.opensaml.saml2.core.NameID;
-import org.opensaml.saml2.core.NameIDPolicy;
+import org.opensaml.saml2.core.*;
 import org.opensaml.saml2.core.impl.NameIDBuilder;
 import org.opensaml.saml2.core.impl.NameIDPolicyBuilder;
 import org.opensaml.saml2.encryption.Decrypter;
@@ -488,6 +483,7 @@ public class Util {
      * @return username
      */
     public static String getUsernameFromAssertion(Assertion assertion, String usernameAttribute) {
+        String username = null;
         if (usernameAttribute != null) {
             // There can be multiple AttributeStatements in Assertion
             List<AttributeStatement> attributeStatements = assertion.getAttributeStatements();
@@ -501,13 +497,26 @@ public class Util {
                             if (attributeName.equals(usernameAttribute)) {
                                 List<XMLObject> attributeValues = attribute.getAttributeValues();
                                 // There can be multiple attribute values in an attribute, but get the first one
-                                return attributeValues.get(0).getDOM().getTextContent();
+                                username = attributeValues.get(0).getDOM().getTextContent();
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Name of authenticated user from SAML response : " + username);
+                                }
                             }
                         }
                     }
                 }
             }
         }
-        return assertion.getSubject().getNameID().getValue();
+
+        Subject subject = assertion.getSubject();
+        if (subject != null) {
+            if (subject.getNameID() != null) {
+                username = subject.getNameID().getValue();
+                if (log.isDebugEnabled()) {
+                    log.debug("Name of authenticated user from SAML response : " + username);
+                }
+            }
+        }
+        return username;
     }
 }
