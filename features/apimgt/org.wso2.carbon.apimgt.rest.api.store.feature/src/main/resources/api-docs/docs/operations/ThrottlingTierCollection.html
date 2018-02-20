@@ -2,8 +2,8 @@
     <h1><a name="Throttling Tier (Collection)"></a>Throttling Tier (Collection)</h1>
 
             <hr/>
-            <h3 class="operation-heading"><a name="tiersTierLevelGet"></a>Get available tiers
- <br><small>GET https://apis.wso2.com/api/am/store/v0.11/tiers/{tierLevel}</small></h3>
+            <h4 class="operation-heading"><a name="tiersTierLevelGet"></a>Get available tiers
+</h4> <code>GET https://apis.wso2.com/api/am/store/v0.11/tiers/{tierLevel}</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to retrieve all the tiers available for the provided tier level. Tier level should be specified as a path parameter and should be one of &#x60;api&#x60; and &#x60;application&#x60;.
@@ -86,6 +86,10 @@ Content-Type: application/json
 
             <h4 class="section-heading">Sample CURL</h4>
                 <div class="pre"><code class="bash">curl &quot;https://localhost:9443/api/am/store/v0.11/tiers/api&quot;</code></div>
+
+            <h4 class="section-heading">Sample CURL - for tenant</h4>
+            <div class="pre"><code class="bash">curl -k -H &quot;X-WSO2-Tenant:test.com&quot; https://localhost:9443/api/am/store/v0.11/tiers/api</code></div>
+         
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
