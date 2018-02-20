@@ -232,7 +232,6 @@
                     <excludes>
                         <exclude>*</exclude>
                     </excludes>
-                    <excludes>org/wso2/carbon/apimgt/onpremise/gateway/api/synchronizer/dto/*</excludes>
                 </configuration>
             </plugin>
         </plugins>
