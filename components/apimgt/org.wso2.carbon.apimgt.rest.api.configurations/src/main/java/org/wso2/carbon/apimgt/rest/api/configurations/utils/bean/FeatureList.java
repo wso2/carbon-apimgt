@@ -24,15 +24,25 @@ import java.util.List;
 /**
  * Bean class for retrieving available feature list
  */
-public class AvailableFeatures {
+public class FeatureList {
 
-    private List<Feature> availableFeatures = new ArrayList<>();
+    private List<Feature> list = new ArrayList<>();
+    private int count;
 
-    public List<Feature> getAvailableFeatures() {
-        return availableFeatures;
+    public List<Feature> getList() {
+        return list;
     }
 
-    public void setAvailableFeatures(List<Feature> features) {
-        this.availableFeatures = features;
+    public void setList(List<Feature> list) {
+        this.list = list;
     }
+
+    public int getCount() {
+        return count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
+    }
+
 }

@@ -46,7 +46,7 @@ class ConfigManager {
     static getConfigs() {
         return {
             'environments': ConfigManager._getPromisedConfigs(ConfigRequestPaths.ENVIRONMENT_CONFIG_PATH),
-            'availableFeatures': ConfigManager._getPromisedConfigs(ConfigRequestPaths.AVAILABLE_FEATURE_LIST_PATH)
+            'features': ConfigManager._getPromisedConfigs(ConfigRequestPaths.FEATURE_LIST_PATH)
         };
     }
 }
@@ -57,7 +57,7 @@ class ConfigManager {
  */
 const ConfigRequestPaths = {
     ENVIRONMENT_CONFIG_PATH: "/configService/environments",
-    AVAILABLE_FEATURE_LIST_PATH: "/configService/available-features"
+    FEATURE_LIST_PATH: "/configService/features"
 };
 
 /**

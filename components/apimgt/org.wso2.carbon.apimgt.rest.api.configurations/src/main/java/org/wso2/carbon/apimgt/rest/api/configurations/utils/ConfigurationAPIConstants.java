@@ -21,7 +21,8 @@ package org.wso2.carbon.apimgt.rest.api.configurations.utils;
  */
 public class ConfigurationAPIConstants {
 
-    public static final String PRIVATE_JET_MODE = "private jet mode";
+    public static final String PRIVATE_JET_MODE_NAME = "Private Jet Mode";
+    public static final String PRIVATE_JET_MODE_ID = "privateJetMode";
     public static final String ENABLED = "enabled";
     public static final String CONTAINER_BASED_GATEWAY_NAMESPACE = "wso2.carbon.apimgt.container.based.gateway";
 

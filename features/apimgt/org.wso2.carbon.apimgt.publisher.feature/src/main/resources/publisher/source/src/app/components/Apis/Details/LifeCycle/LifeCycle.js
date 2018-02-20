@@ -47,13 +47,13 @@ class LifeCycle extends Component {
         let promised_lcState = this.api.getLcState(this.api_uuid);
         let privateJetModeEnabled = false;
 
-        ConfigManager.getConfigs().availableFeatures.then(response => {
+        ConfigManager.getConfigs().features.then(response => {
 
-            const features = response.data.availableFeatures;
-            const PRIVATE_JET_MODE = "private jet mode";
+            const features = response.data.list;
+            const PRIVATE_JET_MODE = "privateJetMode";
 
             for (let feature of features) {
-                if(feature.name == PRIVATE_JET_MODE){
+                if(feature.id == PRIVATE_JET_MODE){
                     privateJetModeEnabled = feature.isEnabled;
                     break;
                 }

@@ -23,10 +23,20 @@ public class Feature {
 
     private String name;
     private boolean isEnabled;
+    private String id;
 
-    public Feature(String name, boolean isEnabled) {
+    public Feature(String id, String name, boolean isEnabled) {
+        this.id = id;
         this.name = name;
         this.isEnabled = isEnabled;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public boolean isEnabled() {

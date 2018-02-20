@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.rest.api.configurations;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.rest.api.configurations.models.APIMUIConfigurations;
 import org.wso2.carbon.apimgt.rest.api.configurations.models.Feature;
-import org.wso2.carbon.apimgt.rest.api.configurations.utils.bean.AvailableFeatures;
+import org.wso2.carbon.apimgt.rest.api.configurations.utils.bean.FeatureList;
 import org.wso2.carbon.apimgt.rest.api.configurations.utils.bean.EnvironmentConfigBean;
 import org.wso2.msf4j.Microservice;
 
@@ -66,18 +66,18 @@ public class ConfigurationsAPI implements Microservice {
     /**
      * Get available features defined in the API for UI
      *
-     * @return Response List of available features: {"availableFeatures":[{"name":"private jet mode",
-     * "isEnabled":false}]}
+     * @return Response List of available features: {"list":[{"name":"Private Jet Mode","isEnabled":true,"id":
+     * "privateJetMode"}],"count":1}
      */
     @GET
-    @Path("/available-features")
+    @Path("/features")
     @Produces(MediaType.APPLICATION_JSON)
     public Response availableFeatures() {
 
         List<Feature> features = ConfigurationService.getInstance().getAvailableFeatures();
-        AvailableFeatures availableFeatures = new AvailableFeatures();
-        availableFeatures.setAvailableFeatures(features);
-
-        return Response.ok(availableFeatures, MediaType.APPLICATION_JSON).build();
+        FeatureList featureList = new FeatureList();
+        featureList.setList(features);
+        featureList.setCount(features.size());
+        return Response.ok(featureList, MediaType.APPLICATION_JSON).build();
     }
 }
