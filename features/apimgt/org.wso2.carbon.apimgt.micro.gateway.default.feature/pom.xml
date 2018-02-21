@@ -87,7 +87,7 @@
                                     <directory>resources</directory>
                                     <includes>
                                         <include>p2.inf</include>
-                                        <includes>conf/on-premise-gateway.properties</includes>
+                                        <include>conf/on-premise-gateway.properties</include>
                                     </includes>
                                 </resource>
                                 <resource>
