@@ -134,8 +134,8 @@ public class TierMappingUtil {
     /**
      * Fills the tier information on TierDTO
      *
-     * @param tierDto
-     * @param tier
+     * @param tierDto Object Containing tier DTOs
+     * @param tier Tier object
      * @return TierDTO with permission info
      */
     public static TierDTO setTierPermissions(TierDTO tierDto, Tier tier) {

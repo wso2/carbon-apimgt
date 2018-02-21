@@ -7697,25 +7697,17 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public Map<String, Set<Scope>> getScopesForAPIS(String apiIdsString) throws APIManagementException {
-        Connection conn = null;
+
         ResultSet resultSet = null;
         PreparedStatement ps = null;
         Map<String, Set<Scope>> apiScopeSet = new HashMap<String, Set<Scope>>();
-        try {
-            conn = APIMgtDBUtil.getConnection();
 
-            String sqlQuery = "SELECT "
-                    + "B.API_ID,A.SCOPE_ID, A.NAME, A.DESCRIPTION "
-                    + "FROM IDN_OAUTH2_SCOPE AS A "
-                    + "INNER JOIN AM_API_SCOPES AS B "
-                    + "ON A.SCOPE_ID = B.SCOPE_ID WHERE B.API_ID IN ( $paramList )";
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+
+            String sqlQuery = SQLConstants.GET_SCOPES_FOR_API_LIST;
 
             if (conn.getMetaData().getDriverName().contains("Oracle")) {
-                sqlQuery = "SELECT "
-                        + "B.API_ID, A.SCOPE_ID, A.NAME, A.DESCRIPTION "
-                        + "FROM IDN_OAUTH2_SCOPE A "
-                        + "INNER JOIN AM_API_SCOPES B "
-                        + "ON A.SCOPE_ID = B.SCOPE_ID WHERE B.API_ID IN ( $paramList )";
+                sqlQuery = SQLConstants.GET_SCOPES_FOR_API_LIST_ORACLE;
             }
 
             // apids are retrieved from the db so no need to protect for sql injection
@@ -7743,8 +7735,6 @@ public class ApiMgtDAO {
             }
         } catch (SQLException e) {
             handleException("Failed to retrieve api scopes ", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
         return apiScopeSet;
     }
