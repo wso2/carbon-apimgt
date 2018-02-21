@@ -56,8 +56,8 @@ class ConfigManager {
  * @type {{ENVIRONMENT_CONFIG_PATH: string}}
  */
 const ConfigRequestPaths = {
-    ENVIRONMENT_CONFIG_PATH: "/configService/environments",
-    FEATURE_LIST_PATH: "/configService/features"
+    ENVIRONMENT_CONFIG_PATH: "/api/am/config/v1.0/environments",
+    FEATURE_LIST_PATH: "/api/am/config/v1.0/features"
 };
 
 /**

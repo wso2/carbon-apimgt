@@ -174,7 +174,8 @@ public class RESTAPISecurityInterceptor implements Interceptor {
                         (swagger)).setMediaType(MediaType.APPLICATION_JSON).send();
                 return false;
             }
-        } else if (requestURI.contains("/editor") || requestURI.contains("keyserver") || requestURI.contains("core")) {
+        } else if (requestURI.contains("/editor") || requestURI.contains("keyserver") || requestURI.contains("core") ||
+                requestURI.contains("config")) {
             return true;
         } else if (requestURI.contains("/admin")) {
             if (requestURI.contains("swagger.json")) {

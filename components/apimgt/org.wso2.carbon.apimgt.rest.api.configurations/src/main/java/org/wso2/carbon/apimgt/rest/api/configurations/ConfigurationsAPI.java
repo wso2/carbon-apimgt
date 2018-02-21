@@ -21,7 +21,6 @@ package org.wso2.carbon.apimgt.rest.api.configurations;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.rest.api.configurations.models.APIMUIConfigurations;
 import org.wso2.carbon.apimgt.rest.api.configurations.models.Feature;
-import org.wso2.carbon.apimgt.rest.api.configurations.utils.bean.FeatureList;
 import org.wso2.carbon.apimgt.rest.api.configurations.utils.bean.EnvironmentConfigBean;
 import org.wso2.msf4j.Microservice;
 
@@ -30,7 +29,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.List;
+import java.util.Map;
 
 /**
  * This class provides configurations information for UI
@@ -40,7 +39,7 @@ import java.util.List;
         service = Microservice.class,
         immediate = true
 )
-@Path("/configService")
+@Path("/api/am/config/v1.0")
 public class ConfigurationsAPI implements Microservice {
 
     /**
@@ -74,10 +73,7 @@ public class ConfigurationsAPI implements Microservice {
     @Produces(MediaType.APPLICATION_JSON)
     public Response availableFeatures() {
 
-        List<Feature> features = ConfigurationService.getInstance().getAvailableFeatures();
-        FeatureList featureList = new FeatureList();
-        featureList.setList(features);
-        featureList.setCount(features.size());
-        return Response.ok(featureList, MediaType.APPLICATION_JSON).build();
+        Map<String, Feature> featureMap = ConfigurationService.getInstance().getAvailableFeatures();
+        return Response.ok(featureMap, MediaType.APPLICATION_JSON).build();
     }
 }

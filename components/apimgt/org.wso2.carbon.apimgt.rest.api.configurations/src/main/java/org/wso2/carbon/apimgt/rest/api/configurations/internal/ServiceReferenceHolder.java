@@ -26,8 +26,7 @@ import org.wso2.carbon.apimgt.rest.api.configurations.utils.ConfigurationAPICons
 import org.wso2.carbon.config.ConfigurationException;
 import org.wso2.carbon.config.provider.ConfigProvider;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -75,13 +74,13 @@ public class ServiceReferenceHolder {
      *
      * @return featureList List of features
      */
-    public List<Feature> getAvailableFeatures() {
+    public Map<String, Feature> getAvailableFeatures() {
 
-        List<Feature> featureList = new ArrayList<>();
-        featureList.add(getFeature(ConfigurationAPIConstants.CONTAINER_BASED_GATEWAY_NAMESPACE,
-                ConfigurationAPIConstants.PRIVATE_JET_MODE_ID, ConfigurationAPIConstants.PRIVATE_JET_MODE_NAME));
+        Map<String, Feature> featureMap = new HashMap<>();
+        featureMap.put(ConfigurationAPIConstants.PRIVATE_JET_MODE_ID, getFeature(ConfigurationAPIConstants
+                .CONTAINER_BASED_GATEWAY_NAMESPACE, ConfigurationAPIConstants.PRIVATE_JET_MODE_NAME));
 
-        return featureList;
+        return featureMap;
     }
 
     /**
@@ -91,7 +90,7 @@ public class ServiceReferenceHolder {
      * @param featureName Name of the feature
      * @return feature returns the feature details
      */
-    private Feature getFeature(String namespace, String featureId, String featureName) {
+    private Feature getFeature(String namespace, String featureName) {
 
         Feature feature;
         try {
@@ -101,7 +100,7 @@ public class ServiceReferenceHolder {
                 if (configs != null) {
                     enabled = (Boolean) configs.get(ConfigurationAPIConstants.ENABLED);
                 }
-                feature = new Feature(featureId, featureName, enabled);
+                feature = new Feature(featureName, enabled);
                 return feature;
             } else {
                 log.error("Configuration provider is null");
@@ -110,7 +109,7 @@ public class ServiceReferenceHolder {
             log.error("Error getting configuration for namespace " + namespace, e);
         }
 
-        feature = new Feature(featureId, featureName, false);
+        feature = new Feature(featureName, false);
         log.info("Setting default configurations for [feature] " + featureName + " and [namespace] " + namespace);
         return feature;
     }

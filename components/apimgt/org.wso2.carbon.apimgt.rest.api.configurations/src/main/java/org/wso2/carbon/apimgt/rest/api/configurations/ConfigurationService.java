@@ -20,7 +20,7 @@ import org.wso2.carbon.apimgt.rest.api.configurations.internal.ServiceReferenceH
 import org.wso2.carbon.apimgt.rest.api.configurations.models.APIMUIConfigurations;
 import org.wso2.carbon.apimgt.rest.api.configurations.models.Feature;
 
-import java.util.List;
+import java.util.Map;
 
 /**
  * Service class for get configurations
@@ -28,7 +28,7 @@ import java.util.List;
 public class ConfigurationService {
     private static ConfigurationService instance = new ConfigurationService();
     private APIMUIConfigurations apimUIConfigurations;
-    private List<Feature> availableFeatures;
+    private Map<String, Feature> availableFeatures;
 
     private ConfigurationService() {
         apimUIConfigurations = ServiceReferenceHolder.getInstance().getApimUIConfigurations();
@@ -43,7 +43,7 @@ public class ConfigurationService {
         return apimUIConfigurations;
     }
 
-    public List<Feature> getAvailableFeatures() {
+    public Map<String, Feature> getAvailableFeatures() {
         return availableFeatures;
     }
 }

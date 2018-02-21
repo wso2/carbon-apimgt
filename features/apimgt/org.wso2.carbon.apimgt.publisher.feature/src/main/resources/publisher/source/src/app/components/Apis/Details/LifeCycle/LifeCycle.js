@@ -49,15 +49,7 @@ class LifeCycle extends Component {
 
         ConfigManager.getConfigs().features.then(response => {
 
-            const features = response.data.list;
-            const PRIVATE_JET_MODE = "privateJetMode";
-
-            for (let feature of features) {
-                if(feature.id == PRIVATE_JET_MODE){
-                    privateJetModeEnabled = feature.isEnabled;
-                    break;
-                }
-            }
+            privateJetModeEnabled = response.data.privateJetMode.isEnabled;
 
             if (privateJetModeEnabled) {
 

@@ -86,7 +86,7 @@ public class ServiceReferenceHolderTestCase {
         Map configs = new HashMap<>();
         configs.put(ConfigurationAPIConstants.ENABLED, true);
         Mockito.when(configProvider.getConfigurationObject(Mockito.anyString())).thenReturn(configs);
-        List<Feature> featureList = instance.getAvailableFeatures();
+        Map<String, Feature> featureList = instance.getAvailableFeatures();
         Assert.assertNotNull(featureList);
     }
 
@@ -95,7 +95,7 @@ public class ServiceReferenceHolderTestCase {
 
         ServiceReferenceHolder instance = ServiceReferenceHolder.getInstance();
         instance.setConfigProvider(null);
-        List<Feature> featureList = instance.getAvailableFeatures();
+        Map<String, Feature> featureList = instance.getAvailableFeatures();
         Assert.assertNotNull(featureList);
     }
 
@@ -107,7 +107,7 @@ public class ServiceReferenceHolderTestCase {
         instance.setConfigProvider(configProvider);
         Mockito.when(configProvider.getConfigurationObject(Mockito.anyString()))
                 .thenThrow(ConfigurationException.class);
-        List<Feature> featureList = instance.getAvailableFeatures();
+        Map<String, Feature> featureList = instance.getAvailableFeatures();
         Assert.assertNotNull(featureList);
     }
 }
