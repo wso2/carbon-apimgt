@@ -273,7 +273,7 @@ class Overview extends Component {
                                 </TableRow>
                                 <TableRow>
                                     <TableCell>Published
-                                        Environments</TableCell><TableCell>{api.labels}</TableCell>
+                                        Environments</TableCell><TableCell>{api.labels.map(label => label + ", ")}</TableCell>
                                 </TableRow>
                                 <TableRow>
                                     <TableCell>Policies</TableCell>

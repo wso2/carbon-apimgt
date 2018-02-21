@@ -286,7 +286,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     List<Label> labelList = new ArrayList<>();
                     List<String> accessUrls = new ArrayList<>();
                     accessUrls.add(APIMgtConstants.HTTPS + APIMgtConstants.WEB_PROTOCOL_SUFFIX + autoGenLabelName);
-                    Label autoGenLabel = new Label.Builder().id(UUID.randomUUID().toString()).
+                    Label autoGenLabel = new Label.Builder().id(autoGenLabelName).
                             name(autoGenLabelName).accessUrls(accessUrls).type(APIMgtConstants.LABEL_TYPE_GATEWAY)
                             .build();
                     labelList.add(autoGenLabel);
@@ -295,10 +295,15 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 }
 
                 labelSet.add(autoGenLabelName);
+                labelSet.add(getLabelIdByNameAndType(APIMgtConstants.DEFAULT_LABEL_NAME, APIMgtConstants
+                        .LABEL_TYPE_STORE));
                 getApiDAO().updateDedicatedGateway(dedicatedGateway, apiId, labelSet);
             } else {
                 if (api.hasOwnGateway()) {
-                    labelSet.add(APIMgtConstants.DEFAULT_LABEL_NAME);
+                    labelSet.add(getLabelIdByNameAndType(APIMgtConstants.DEFAULT_LABEL_NAME, APIMgtConstants
+                            .LABEL_TYPE_GATEWAY));
+                    labelSet.add(getLabelIdByNameAndType(APIMgtConstants.DEFAULT_LABEL_NAME, APIMgtConstants
+                            .LABEL_TYPE_STORE));
                     getApiDAO().updateDedicatedGateway(dedicatedGateway, apiId, labelSet);
                 }
             }
@@ -993,9 +998,13 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         String.valueOf(originalAPI.hasOwnGateway()));
 
                 if (originalAPI.hasOwnGateway()) {
-                    // then we have only one label
-                    workflow.setAttribute(WorkflowConstants.ATTRIBUTE_API_AUTOGEN_LABEL,
-                            originalAPI.getLabels().toArray()[0].toString());
+                    List<String> gwLabels = originalAPI.getLabels();
+                    for (String label: gwLabels) {
+                        if (label.contains(ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX)) {
+                            workflow.setAttribute(WorkflowConstants.ATTRIBUTE_API_AUTOGEN_LABEL, label);
+                            break;
+                        }
+                    }
                 }
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_HAS_OWN_GATEWAY,
                         String.valueOf(originalAPI.hasOwnGateway()));

@@ -3545,13 +3545,12 @@ public class APIPublisherImplTestCase {
 
         String autoGenLabelName = ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + uuid;
         Mockito.when(labelDAO.getLabelByName(autoGenLabelName)).thenReturn(null);
+        Mockito.when(labelDAO.getLabelIdByNameAndType(Mockito.anyString(), Mockito.anyString())).thenReturn(UUID
+                .randomUUID().toString());
         APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, labelDAO, gatewaySourceGenerator);
         DedicatedGateway dedicatedGateway = new DedicatedGateway();
         dedicatedGateway.setEnabled(true);
         apiPublisher.updateDedicatedGateway(dedicatedGateway, uuid);
-        List<String> labelSet = new ArrayList<>();
-        labelSet.add(autoGenLabelName);
-        Mockito.verify(apiDAO, Mockito.times(1)).updateDedicatedGateway(dedicatedGateway, uuid, labelSet);
         Mockito.verify(labelDAO, Mockito.times(1)).addLabels(Mockito.anyList());
     }
 
@@ -3574,13 +3573,12 @@ public class APIPublisherImplTestCase {
         Label label = new Label.Builder().id(UUID.randomUUID().toString()).
                 name(autoGenLabelName).accessUrls(null).build();
         Mockito.when(labelDAO.getLabelByName(autoGenLabelName)).thenReturn(label);
+        Mockito.when(labelDAO.getLabelIdByNameAndType(Mockito.anyString(), Mockito.anyString())).thenReturn(UUID
+                .randomUUID().toString());
         APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, labelDAO, gatewaySourceGenerator);
         DedicatedGateway dedicatedGateway = new DedicatedGateway();
         dedicatedGateway.setEnabled(true);
         apiPublisher.updateDedicatedGateway(dedicatedGateway, uuid);
-        List<String> labelSet = new ArrayList<>();
-        labelSet.add(autoGenLabelName);
-        Mockito.verify(apiDAO, Mockito.times(1)).updateDedicatedGateway(dedicatedGateway, uuid, labelSet);
         Mockito.verify(labelDAO, Mockito.times(0)).addLabels(Mockito.anyList());
     }
 
@@ -3630,9 +3628,8 @@ public class APIPublisherImplTestCase {
         DedicatedGateway dedicatedGateway = new DedicatedGateway();
         dedicatedGateway.setEnabled(false);
         apiPublisher.updateDedicatedGateway(dedicatedGateway, uuid);
-        List<String> labelSet = new ArrayList<>();
-        labelSet.add(APIMgtConstants.DEFAULT_LABEL_NAME);
-        Mockito.verify(apiDAO, Mockito.times(1)).updateDedicatedGateway(dedicatedGateway, uuid, labelSet);
+        Mockito.verify(apiDAO, Mockito.times(1)).updateDedicatedGateway(Mockito.any(), Mockito.anyString(),
+                Mockito.anyList());
     }
 
     @Test(description = "Update dedicated gateway for exception", expectedExceptions = APIManagementException.class)
@@ -3657,7 +3654,8 @@ public class APIPublisherImplTestCase {
         dedicatedGateway.setEnabled(true);
         List<String> labelSet = new ArrayList<>();
         labelSet.add(autoGenLabelName);
-        Mockito.doThrow(APIMgtDAOException.class).when(apiDAO).updateDedicatedGateway(dedicatedGateway, uuid, labelSet);
+        Mockito.doThrow(APIMgtDAOException.class).when(apiDAO).updateDedicatedGateway(Mockito.any(),
+                Mockito.anyString(), Mockito.anyList());
         apiPublisher.updateDedicatedGateway(dedicatedGateway, uuid);
     }
 
