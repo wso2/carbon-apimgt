@@ -71,6 +71,8 @@ public class APIMgtConstants {
 
     public static final String DEFAULT_LABEL_NAME = "Default";
     public static final String DEFAULT_LABEL_ACCESS_URL = "https://localhost:9092";
+    public static final String LABEL_TYPE_GATEWAY = "GATEWAY";
+    public static final String LABEL_TYPE_STORE = "STORE";
 
     //workflow executor default executors
     public static final String WF_DEFAULT_APPCREATION_EXEC =

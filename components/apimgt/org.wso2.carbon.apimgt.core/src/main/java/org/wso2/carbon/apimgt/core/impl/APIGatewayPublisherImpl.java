@@ -48,7 +48,6 @@ import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.util.BrokerUtil;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * This is responsible for handling API gateway related operations
@@ -126,7 +125,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
         if (api.hasOwnGateway()) {
             // Delete the Gateway - check how we can assume that we complete the deletion
             try {
-                Set<String> labels = api.getLabels();
+                List<String> labels = api.getLabels();
                 if (labels != null && !labels.isEmpty()) {
                     removeContainerBasedGateway(labels.toArray()[0].toString());
                 } else {

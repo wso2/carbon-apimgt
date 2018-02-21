@@ -249,7 +249,7 @@ public class MappingUtil {
                 policies(subscriptionPolicies).
                 apiPermission(apidto.getPermission()).
                 tags(new HashSet<>(apidto.getTags())).
-                labels(new HashSet<>(apidto.getLabels())).
+                labels(new ArrayList<>(apidto.getLabels())).
                 transport(new HashSet<>(apidto.getTransport())).
                 isResponseCachingEnabled(Boolean.valueOf(apidto.getResponseCaching())).
                 businessInformation(businessInformation).

@@ -44,7 +44,7 @@ public class CompositeAPIMappingUtil {
                 version(apidto.getVersion()).
                 context(apidto.getContext()).
                 description(apidto.getDescription()).
-                labels(new HashSet<>(apidto.getLabels())).
+                labels(new ArrayList<>(apidto.getLabels())).
                 hasOwnGateway(apidto.getHasOwnGateway()).
                 transport(new HashSet<>(apidto.getTransport())).
                 apiDefinition(apidto.getApiDefinition()).

@@ -94,6 +94,7 @@ public abstract class ApisApiService {
   ,Request request) throws NotFoundException;
     public abstract Response apisGet(Integer limit
  ,Integer offset
+ ,String labels
  ,String query
  ,String ifNoneMatch
   ,Request request) throws NotFoundException;

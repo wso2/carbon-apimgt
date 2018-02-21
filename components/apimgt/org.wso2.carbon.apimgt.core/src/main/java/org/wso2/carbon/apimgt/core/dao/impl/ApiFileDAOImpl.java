@@ -592,10 +592,10 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     /**
-     * @see ApiFileDAOImpl#updateDedicatedGateway(DedicatedGateway, String, Set)
+     * @see ApiFileDAOImpl#updateDedicatedGateway(DedicatedGateway, String, List)
      */
     @Override
-    public void updateDedicatedGateway(DedicatedGateway dedicatedGateway, String apiId, Set<String> label)
+    public void updateDedicatedGateway(DedicatedGateway dedicatedGateway, String apiId, List<String> labels)
             throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
@@ -657,11 +657,9 @@ public class ApiFileDAOImpl implements ApiDAO {
         throw new UnsupportedOperationException();
     }
 
-    /**
-     * @see ApiDAO#getAPIsByStatus(Set, List)
-     */
+
     @Override
-    public List<API> getAPIsByStatus(Set<String> roles, List<String> statuses)
+    public List<API> getAPIsByStatus(Set<String> roles, List<String> statuses, List<String> labels)
             throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
@@ -672,6 +670,12 @@ public class ApiFileDAOImpl implements ApiDAO {
     @Override
     public List<API> searchAPIs(Set<String> roles, String user, String searchString,
                                 int offset, int limit) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<API> searchAPIsByStoreLabel(Set<String> roles, String user, String searchString, int offset, int limit,
+                                            List<String> labels) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 
@@ -691,10 +695,12 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     /**
-     * @see ApiDAO#searchAPIsByAttributeInStore(List roles, Map attributeMap, int offset, int limit)
+     * @see ApiDAO#searchAPIsByAttributeInStore(List roles, List labels, Map attributeMap, int offset, int limit)
      */
     @Override
-    public List<API> searchAPIsByAttributeInStore(List<String> roles, Map<String, String> attributeMap, int offset,
+    public List<API> searchAPIsByAttributeInStore(List<String> roles, List<String> labels, Map<String, String>
+            attributeMap, int
+            offset,
                                                   int limit) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }

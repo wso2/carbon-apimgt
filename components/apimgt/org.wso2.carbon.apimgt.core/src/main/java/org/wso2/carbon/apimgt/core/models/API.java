@@ -165,7 +165,7 @@ public final class API {
         return tags;
     }
 
-    public Set<String> getLabels() {
+    public List<String> getLabels() {
         return labels;
     }
 
@@ -333,7 +333,7 @@ public final class API {
     private final Set<String> transport;
     private final Set<String> tags;
     private final boolean hasOwnGateway;
-    private final Set<String> labels;
+    private final List<String> labels;
     private final Set<Policy> policies;
     private final Visibility visibility;
     private final Set<String> visibleRoles;
@@ -489,8 +489,8 @@ public final class API {
         public Set<String> getTags() {
             return tags;
         }
-
-        public Set<String> getLabels() {
+        
+        public List<String> getLabels() {
             return labels;
         }
 
@@ -547,7 +547,7 @@ public final class API {
         private Set<String> transport = Collections.emptySet();
         private Set<String> tags = Collections.emptySet();
         private boolean hasOwnGateway = false;
-        private Set<String> labels = Collections.emptySet();
+        private List<String> labels =  new ArrayList<String>();
         private Set<Policy> policies = Collections.emptySet();
         private Visibility visibility = Visibility.PUBLIC;
         private Set<String> visibleRoles = Collections.emptySet();
@@ -843,10 +843,11 @@ public final class API {
          * @param labels the {@code labels} to set
          * @return a reference to this APIBuilder
          */
-        public APIBuilder labels(Set<String> labels) {
+        public APIBuilder labels(List<String> labels) {
             this.labels = labels;
             return this;
         }
+
         /**
          * Sets the {@code policies} and returns a reference to this APIBuilder so that the methods can be chained
          * together.

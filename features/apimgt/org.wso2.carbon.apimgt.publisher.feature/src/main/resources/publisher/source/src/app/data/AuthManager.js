@@ -36,19 +36,19 @@ class AuthManager {
     /**
      * Refresh the access token and set new access token to the intercepted request
      * @param {Request} request
-     * @param {String} environmentName
+     * @param {Object} environment
      */
-    static refreshTokenOnExpire(request, environmentName) {
+    static refreshTokenOnExpire(request, environment) {
         const refreshPeriod = 60;
-        const user = AuthManager.getUser();
+        const user = AuthManager.getUser(environment.label);
         let timeToExpire = Utils.timeDifference(user.getExpiryTime());
         if (timeToExpire >= refreshPeriod) {
             return request;
         }
-        let loginPromise = AuthManager.refresh();
+        let loginPromise = AuthManager.refresh(environment);
         loginPromise.then(response => {
-            const user = AuthManager.loginUserMapper(response, environmentName);
-            AuthManager.setUser(user);
+            const user = AuthManager.loginUserMapper(response, environment.label);
+            AuthManager.setUser(user, environment.label);
         });
         loginPromise.catch(
             function (error) {
@@ -248,15 +248,20 @@ class AuthManager {
         }
     }
 
-    static refresh() {
-        const authHeader = "Bearer " + AuthManager.getUser().getRefreshPartialToken();
+    /**
+     * Call Token API with refresh token grant type
+     * @param {Object} environment - Name of the environment
+     * @return {AxiosPromise}
+     */
+    static refresh(environment) {
+        const authHeader = "Bearer " + AuthManager.getUser(environment.label).getRefreshPartialToken();
         let params = {
             grant_type: 'refresh_token',
             validity_period: -1,
             scopes: AuthManager.CONST.USER_SCOPES
         };
         let referrer = (document.referrer.indexOf("https") !== -1) ? document.referrer : null;
-        let url = '/login/token' + Utils.CONST.CONTEXT_PATH;
+        let url = environment.loginTokenPath + Utils.CONST.CONTEXT_PATH;
         /* TODO: Fetch this from configs ~tmkb*/
         let headers = {
             'Authorization': authHeader,

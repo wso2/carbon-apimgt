@@ -31,8 +31,8 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.util.BrokerUtil;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({APIManagerFactory.class, BrokerUtil.class})
@@ -65,7 +65,7 @@ public class APIGatewayPublisherImplTestCase {
         ContainerBasedGatewayGenerator containerBasedGatewayGenerator = Mockito
                 .mock(ContainerBasedGatewayGenerator.class);
         Mockito.when(apiManagerFactory.getContainerBasedGatewayGenerator()).thenReturn(containerBasedGatewayGenerator);
-        Set<String> labels = new HashSet<>();
+        List<String> labels = new ArrayList<>();
         labels.add("label");
         API api = SampleTestObjectCreator.createDefaultAPI().lifeCycleStatus(APIStatus.PUBLISHED.getStatus())
                 .hasOwnGateway(true).labels(labels).build();
@@ -85,7 +85,7 @@ public class APIGatewayPublisherImplTestCase {
         ContainerBasedGatewayGenerator containerBasedGatewayGenerator = Mockito
                 .mock(ContainerBasedGatewayGenerator.class);
         Mockito.when(apiManagerFactory.getContainerBasedGatewayGenerator()).thenReturn(containerBasedGatewayGenerator);
-        Set<String> labels = new HashSet<>();
+        List<String> labels = new ArrayList<>();
         labels.add("label");
         API api = SampleTestObjectCreator.createDefaultAPI().lifeCycleStatus(APIStatus.PUBLISHED.getStatus())
                 .hasOwnGateway(false).labels(labels).build();
@@ -123,7 +123,7 @@ public class APIGatewayPublisherImplTestCase {
         ContainerBasedGatewayGenerator containerBasedGatewayGenerator = Mockito
                 .mock(ContainerBasedGatewayGenerator.class);
         Mockito.when(apiManagerFactory.getContainerBasedGatewayGenerator()).thenReturn(containerBasedGatewayGenerator);
-        Set<String> labels = new HashSet<>();
+        List<String> labels = new ArrayList<>();
         API api = SampleTestObjectCreator.createDefaultAPI().lifeCycleStatus(APIStatus.PUBLISHED.getStatus())
                 .hasOwnGateway(true).labels(labels).build();
         apiGatewayPublisher.deleteAPI(api);
@@ -141,7 +141,7 @@ public class APIGatewayPublisherImplTestCase {
 
         Mockito.when(apiManagerFactory.getContainerBasedGatewayGenerator())
                 .thenThrow(ContainerBasedGatewayException.class);
-        Set<String> labels = new HashSet<>();
+        List<String> labels = new ArrayList<>();
         labels.add("label");
         API api = SampleTestObjectCreator.createDefaultAPI().lifeCycleStatus(APIStatus.PUBLISHED.getStatus())
                 .hasOwnGateway(true).labels(labels).build();

@@ -275,7 +275,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             validateChangingDedicatedGateway(api);
             // label generation for the API
             String autoGenLabelName = ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + apiId;
-            Set<String> labelSet = new HashSet<>();
+            List<String> labelSet = new ArrayList<>();
 
             if (dedicatedGateway.isEnabled()) {
 
@@ -287,8 +287,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     List<String> accessUrls = new ArrayList<>();
                     accessUrls.add(APIMgtConstants.HTTPS + APIMgtConstants.WEB_PROTOCOL_SUFFIX + autoGenLabelName);
                     Label autoGenLabel = new Label.Builder().id(UUID.randomUUID().toString()).
-                            name(autoGenLabelName).
-                            accessUrls(accessUrls).build();
+                            name(autoGenLabelName).accessUrls(accessUrls).type(APIMgtConstants.LABEL_TYPE_GATEWAY)
+                            .build();
                     labelList.add(autoGenLabel);
                     //Add to the db
                     getLabelDAO().addLabels(labelList);
@@ -368,8 +368,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         apiBuilder.updatedBy(getUsername());
 
         if (apiBuilder.getLabels().isEmpty()) {
-            Set<String> labelSet = new HashSet<>();
-            labelSet.add(APIMgtConstants.DEFAULT_LABEL_NAME);
+            List<String> labelSet = new ArrayList<>();
+            labelSet.add(getLabelIdByNameAndType(APIMgtConstants.DEFAULT_LABEL_NAME, APIMgtConstants
+                    .LABEL_TYPE_GATEWAY));
+            labelSet.add(getLabelIdByNameAndType(APIMgtConstants.DEFAULT_LABEL_NAME, APIMgtConstants
+                    .LABEL_TYPE_STORE));
             apiBuilder.labels(labelSet);
         }
         Map<String, Endpoint> apiEndpointMap = apiBuilder.getEndpoint();
@@ -710,7 +713,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
     }
 
-    private void validateLabels(Set<String> labels, boolean hasOwnGateway) throws APIManagementException {
+    private void validateLabels(List<String> labels, boolean hasOwnGateway) throws APIManagementException {
 
         if (hasOwnGateway && labels != null && !labels.isEmpty() && !labels.contains(
                 ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX)) {
@@ -2087,6 +2090,28 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             String msg = "Error occurred while retrieving labels";
             log.error(msg, e);
             throw new LabelException(msg, ExceptionCodes.LABEL_EXCEPTION);
+        }
+    }
+
+    @Override
+    public List<Label> getLabelsByType(String type) throws LabelException {
+        try {
+            return getLabelDAO().getLabelsByType(type);
+        } catch (APIMgtDAOException e) {
+            String msg = "Error occurred while retrieving labels";
+            log.error(msg, e);
+            throw new LabelException(msg, ExceptionCodes.LABEL_EXCEPTION);
+        }
+    }
+
+    @Override
+    public String getLabelIdByNameAndType(String name, String type) throws APIManagementException {
+        try {
+            return getLabelDAO().getLabelIdByNameAndType(name, type);
+        } catch (APIMgtDAOException e) {
+            String msg = "Error occurred while retrieving labels";
+            log.error(msg, e);
+            throw new APIManagementException(msg, ExceptionCodes.LABEL_EXCEPTION);
         }
     }
 

@@ -50,7 +50,7 @@ public class FileApi {
     private Set<String> transport;
     private Set<String> tags;
     private boolean hasOwnGateway;
-    private Set<String> labels;
+    private List<String> labels;
     private Set<String> policies;
     private API.Visibility visibility;
     private Set<String> visibleRoles;
@@ -261,11 +261,11 @@ public class FileApi {
         this.threatProtectionPolicies = api.getThreatProtectionPolicies();
     }
 
-    public Set<String> getLabels() {
+    public List<String> getLabels() {
         return labels;
     }
 
-    public void setLabels(Set<String> labels) {
+    public void setLabels(List<String> labels) {
         this.labels = labels;
     }
 
@@ -422,7 +422,6 @@ public class FileApi {
     }
 
     public void setUserSpecificApiPermissions(List<String> userSpecificApiPermissions) {
-
         this.userSpecificApiPermissions = userSpecificApiPermissions;
     }
 

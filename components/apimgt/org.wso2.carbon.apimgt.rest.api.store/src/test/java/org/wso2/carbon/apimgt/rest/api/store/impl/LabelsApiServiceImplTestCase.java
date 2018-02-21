@@ -36,19 +36,20 @@ import org.wso2.msf4j.Request;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(RestApiUtil.class)
-public class LabelInfoApiServiceImplTestCase {
+public class LabelsApiServiceImplTestCase {
 
     private static final String USER = "admin";
     private static final String contentType = "application/json";
 
     @Test
-    public void testLabelInfoGet() throws APIManagementException, NotFoundException {
+    public void testLabelsGet() throws APIManagementException, NotFoundException {
         TestUtil.printTestMethodName();
 
-        LabelInfoApiServiceImpl labelInfoApiService = new LabelInfoApiServiceImpl();
+        LabelsApiServiceImpl labelsApiService = new LabelsApiServiceImpl();
         APIStore apiStore = Mockito.mock(APIStoreImpl.class);
 
         PowerMockito.mockStatic(RestApiUtil.class);
@@ -58,10 +59,16 @@ public class LabelInfoApiServiceImplTestCase {
 
         List<String> labelNames = new ArrayList<>();
         List<Label> labelList = new ArrayList<>();
+        Label label = new Label.Builder().id(UUID.randomUUID().toString()).
+                name("store1").
+                type("STORE").
+                accessUrls(new ArrayList<>()).build();
+        labelList.add(label);
 
-        Mockito.when(apiStore.getLabelInfo(labelNames, USER)).thenReturn(labelList);
 
-        Response response = labelInfoApiService.labelInfoGet("label1", null, null,
+        Mockito.when(apiStore.getAllLabels()).thenReturn(labelList);
+
+        Response response = labelsApiService.labelsGet("STORE", null, null, null,
                 request);
 
         Assert.assertEquals(200, response.getStatus());
@@ -71,7 +78,7 @@ public class LabelInfoApiServiceImplTestCase {
     public void testLabelInfoGetWithNull() throws APIManagementException, NotFoundException {
         TestUtil.printTestMethodName();
 
-        LabelInfoApiServiceImpl labelInfoApiService = new LabelInfoApiServiceImpl();
+        LabelsApiServiceImpl labelsApiService = new LabelsApiServiceImpl();
         APIStore apiStore = Mockito.mock(APIStoreImpl.class);
 
         PowerMockito.mockStatic(RestApiUtil.class);
@@ -82,11 +89,11 @@ public class LabelInfoApiServiceImplTestCase {
         List<String> labelNames = new ArrayList<>();
         List<Label> labelList = new ArrayList<>();
 
-        Mockito.when(apiStore.getLabelInfo(labelNames, USER)).thenReturn(labelList);
+        Mockito.when(apiStore.getAllLabels()).thenReturn(labelList);
 
-        Response response = labelInfoApiService.labelInfoGet(null, null, null,
+        Response response = labelsApiService.labelsGet(null, null, null, null,
                 request);
 
-        Assert.assertEquals(400, response.getStatus());
+        Assert.assertEquals(200, response.getStatus());
     }
 }

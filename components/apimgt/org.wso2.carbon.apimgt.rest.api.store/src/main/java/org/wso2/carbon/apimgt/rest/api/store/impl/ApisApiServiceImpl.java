@@ -3,6 +3,8 @@ package org.wso2.carbon.apimgt.rest.api.store.impl;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -880,20 +882,27 @@ public class ApisApiServiceImpl extends ApisApiService {
      *
      * @param limit       maximum number of APIs returns
      * @param offset      starting index
+     * @param labels      Labels of the store for which the apis need to be retrieved
      * @param query       search condition
      * @param ifNoneMatch If-None-Match header value
      * @param request     msf4j request object
      * @return matched APIs for the given search condition
      */
+
     @Override
-    public Response apisGet(Integer limit, Integer offset, String query, String ifNoneMatch, Request request)
-            throws NotFoundException {
+    public Response apisGet(Integer limit, Integer offset, String labels, String query, String
+            ifNoneMatch, Request request) throws NotFoundException {
+
         List<API> apisResult = null;
         APIListDTO apiListDTO = null;
         try {
             String username = RestApiUtil.getLoggedInUsername(request);
             APIStore apiStore = RestApiUtil.getConsumer(username);
-            apisResult = apiStore.searchAPIs(query, offset, limit);
+            List<String> labelList = new ArrayList<>();
+            if (labels != null){
+                labelList = Arrays.asList(labels.split(","));
+            }
+            apisResult = apiStore.searchAPIsByStoreLabels(query, offset, limit, labelList);
             // convert API
             apiListDTO = APIMappingUtil.toAPIListDTO(apisResult);
         } catch (APIManagementException e) {

@@ -421,9 +421,9 @@ class Permission extends Component {
         const api = this.state.api;
 
         if (this.state.notFound) {
-            return <ResourceNotFound/>
+            return <ResourceNotFound message={this.props.resourceNotFountMessage}/>
         }
-        if (!this.state.api) {
+        if (!api) {
             return <Loading/>
         }
 
@@ -553,7 +553,7 @@ class PermissionFormWrapper extends React.Component {
         super(props);
         this.state = {
             api: null,
-            notFound: false
+            notFound: false,
         };
         // this.api_uuid = this.props.match.params.api_uuid;
     }
@@ -561,7 +561,7 @@ class PermissionFormWrapper extends React.Component {
 
     render = () => {
         const {match} = this.props;
-        return <PermissionFormGenerated match={match} history={this.props.history}/>
+        return <PermissionFormGenerated match={match} history={this.props.history} resourceNotFountMessage={this.props.resourceNotFountMessage}/>
     }
 }
 

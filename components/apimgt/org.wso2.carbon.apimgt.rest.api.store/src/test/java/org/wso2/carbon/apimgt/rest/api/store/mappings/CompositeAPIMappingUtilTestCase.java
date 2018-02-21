@@ -38,7 +38,7 @@ public class CompositeAPIMappingUtilTestCase {
 
     @Test
     public void testToCompositeAPIDTOAndViceVersa() {
-        Set<String> labels = new HashSet<>();
+        List<String> labels = new ArrayList<>();
         labels.add("label1");
         //Test compositeAPI to CompositeAPIDTO
         CompositeAPI compositeAPI = SampleTestObjectCreator.createCompositeAPIModelBuilder().labels(labels).build();

@@ -100,7 +100,7 @@ export default class Application extends Resource {
                 {
                     keyType: key_type, /* TODO: need to support dynamic key types ~tmkb*/
                     grantTypesToBeSupported: ["password", "client_credentials"], /* TODO: need to give UI checkboxes to get these information ~tmkb*/
-                    callbackUrl: ""
+                    callbackUrl: "https://wso2.am.com"
                 };
             let payload = {applicationId: this.id, body: request_content};
             return client.apis["Application (Individual)"].post_applications__applicationId__generate_keys(payload);

@@ -5,12 +5,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
  * LabelDTO
  */
 public class LabelDTO   {
+  @JsonProperty("labelUUID")
+  private String labelUUID = null;
+
   @JsonProperty("name")
   private String name = null;
 
@@ -20,8 +25,26 @@ public class LabelDTO   {
   @JsonProperty("type")
   private String type = null;
 
-  @JsonProperty("accessUrl")
-  private String accessUrl = null;
+  @JsonProperty("accessUrls")
+  private List<String> accessUrls = new ArrayList<String>();
+
+  public LabelDTO labelUUID(String labelUUID) {
+    this.labelUUID = labelUUID;
+    return this;
+  }
+
+   /**
+   * Get labelUUID
+   * @return labelUUID
+  **/
+  @ApiModelProperty(value = "")
+  public String getLabelUUID() {
+    return labelUUID;
+  }
+
+  public void setLabelUUID(String labelUUID) {
+    this.labelUUID = labelUUID;
+  }
 
   public LabelDTO name(String name) {
     this.name = name;
@@ -65,10 +88,10 @@ public class LabelDTO   {
   }
 
    /**
-   * Get type
+   * the  type of the label example: \"Gateway\" 
    * @return type
   **/
-  @ApiModelProperty(example = "GATEWAY", required = true, value = "")
+  @ApiModelProperty(required = true, value = "the  type of the label example: \"Gateway\" ")
   public String getType() {
     return type;
   }
@@ -77,22 +100,27 @@ public class LabelDTO   {
     this.type = type;
   }
 
-  public LabelDTO accessUrl(String accessUrl) {
-    this.accessUrl = accessUrl;
+  public LabelDTO accessUrls(List<String> accessUrls) {
+    this.accessUrls = accessUrls;
+    return this;
+  }
+
+  public LabelDTO addAccessUrlsItem(String accessUrlsItem) {
+    this.accessUrls.add(accessUrlsItem);
     return this;
   }
 
    /**
-   * Get accessUrl
-   * @return accessUrl
+   * Get accessUrls
+   * @return accessUrls
   **/
-  @ApiModelProperty(example = "https://gateway.wso2.com", value = "")
-  public String getAccessUrl() {
-    return accessUrl;
+  @ApiModelProperty(value = "")
+  public List<String> getAccessUrls() {
+    return accessUrls;
   }
 
-  public void setAccessUrl(String accessUrl) {
-    this.accessUrl = accessUrl;
+  public void setAccessUrls(List<String> accessUrls) {
+    this.accessUrls = accessUrls;
   }
 
 
@@ -105,15 +133,16 @@ public class LabelDTO   {
       return false;
     }
     LabelDTO label = (LabelDTO) o;
-    return Objects.equals(this.name, label.name) &&
+    return Objects.equals(this.labelUUID, label.labelUUID) &&
+        Objects.equals(this.name, label.name) &&
         Objects.equals(this.description, label.description) &&
         Objects.equals(this.type, label.type) &&
-        Objects.equals(this.accessUrl, label.accessUrl);
+        Objects.equals(this.accessUrls, label.accessUrls);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, description, type, accessUrl);
+    return Objects.hash(labelUUID, name, description, type, accessUrls);
   }
 
   @Override
@@ -121,10 +150,11 @@ public class LabelDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class LabelDTO {\n");
     
+    sb.append("    labelUUID: ").append(toIndentedString(labelUUID)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
-    sb.append("    accessUrl: ").append(toIndentedString(accessUrl)).append("\n");
+    sb.append("    accessUrls: ").append(toIndentedString(accessUrls)).append("\n");
     sb.append("}");
     return sb.toString();
   }

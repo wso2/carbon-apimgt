@@ -35,7 +35,7 @@ class OracleTagSearchImpl implements StoreApiAttributeSearch {
                                                StringBuilder searchQuery, int offset, int limit) {
 
         //for tag search, need to check AM_API_TAG_MAPPING and AM_TAGS tables
-        String tagSearchQuery = "SELECT * FROM (SELECT A.*, rownum rnum FROM (" + API_SUMMARY_SELECT_STORE +
+        String tagSearchQuery = "SELECT * FROM (SELECT A.* FROM (" + API_SUMMARY_SELECT_STORE +
                 " WHERE CURRENT_LC_STATUS  IN ('" +
                 APIStatus.PUBLISHED.getStatus() + "','" +
                 APIStatus.PROTOTYPED.getStatus() + "') AND " +
@@ -51,7 +51,7 @@ class OracleTagSearchImpl implements StoreApiAttributeSearch {
                 roleListBuilder.toString() + ")) AND " +
                 "UUID IN (SELECT API_ID FROM AM_API_TAG_MAPPING WHERE TAG_ID IN " +
                 "(SELECT TAG_ID FROM AM_TAGS WHERE " + searchQuery.toString() + ")) " +
-                " ORDER BY NAME) A WHERE rownum <= ?) WHERE rnum >= ?";
+                " ORDER BY NAME) A)";
 
         return tagSearchQuery;
     }

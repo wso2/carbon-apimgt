@@ -163,7 +163,7 @@ public interface ApiDAO {
      * @return API list
      * @throws APIMgtDAOException if failed to fetch APIs from database
      */
-    List<API> getAPIsByStatus(Set<String> roles, List<String> statuses) throws APIMgtDAOException;
+    List<API> getAPIsByStatus(Set<String> roles, List<String> statuses, List<String> labels) throws APIMgtDAOException;
 
     /**
      * Retrieves summary of paginated data of all available APIs that match the given search criteria. This will use
@@ -179,6 +179,24 @@ public interface ApiDAO {
      *
      */
     List<API> searchAPIs(Set<String> roles, String user, String searchString, int offset, int limit)
+            throws APIMgtDAOException;
+
+    /**
+     * Retrieves summary of paginated data of all available APIs that match the given search criteria. This will use
+     * the full text search for API table
+     *
+     * @param roles     List of the roles of the user.
+     * @param user      Current user.
+     * @param searchString The search string provided
+     * @param offset  The starting point of the formatApiSearch results.
+     * @param limit   Number of formatApiSearch results that will be returned.
+     * @param labels   List of labels the store started with
+     * @return {@code List<API>} matching results
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     *
+     */
+    List<API> searchAPIsByStoreLabel(Set<String> roles, String user, String searchString, int offset, int limit,
+                                     List<String> labels)
             throws APIMgtDAOException;
 
     /**
@@ -220,10 +238,11 @@ public interface ApiDAO {
      * @param attributeMap Map containing the attributes to be searched
      * @param offset The starting point of the search results.
      * @param limit Number of search results that will be returned.
+     * @param labels Id's of the labels
      * @return {@code List<API>} matching results
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    List<API> searchAPIsByAttributeInStore(List<String> roles, Map<String, String> attributeMap,
+    List<API> searchAPIsByAttributeInStore(List<String> roles, List<String> labels, Map<String, String> attributeMap,
                                            int offset, int limit) throws APIMgtDAOException;
 
     /**
@@ -865,10 +884,10 @@ public interface ApiDAO {
      * Update Container based Gateway detail of API
      * @param dedicatedGateway updated DedicatedGateway Object
      * @param apiId UUID of the API
-     * @param label auto-generated label of the API in a HashSet
+     * @param labels auto-generated label of the API in a HashSet
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    void updateDedicatedGateway(DedicatedGateway dedicatedGateway, String apiId, Set<String> label)
+    void updateDedicatedGateway(DedicatedGateway dedicatedGateway, String apiId, List<String> labels)
             throws APIMgtDAOException;
 
     /**

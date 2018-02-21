@@ -116,7 +116,6 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -189,8 +188,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     @Override
     public API getAPIbyUUID(String uuid) throws APIManagementException {
         API api = super.getAPIbyUUID(uuid);
-        if (APIStatus.CREATED.getStatus().equals(api.getLifeCycleStatus()) || APIStatus.MAINTENANCE.getStatus()
-                .equals(api.getLifeCycleStatus()) || APIStatus.RETIRED.getStatus().equals(api.getLifeCycleStatus())) {
+        if (api != null && (APIStatus.CREATED.getStatus().equals(api.getLifeCycleStatus()) || APIStatus.MAINTENANCE
+                .getStatus()
+                .equals(api.getLifeCycleStatus()) || APIStatus.RETIRED.getStatus().equals(api.getLifeCycleStatus()))) {
             //API_NOT_FOUND is as the ExceptionCode as we don't need to expose the availability to this API via Store.
             throw new APIManagementException(
                     "Attempt to access an API which is in a restricted state: " + api.getLifeCycleStatus()
@@ -1412,7 +1412,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
      * {@inheritDoc}
      */
     @Override
-    public List<API> searchAPIs(String query, int offset, int limit) throws APIManagementException {
+    public List<API> searchAPIsByStoreLabels(String query, int offset, int limit, List<String> labels) throws
+            APIManagementException {
 
         List<API> apiResults = null;
 
@@ -1438,16 +1439,17 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 }
 
                 if (isFullTextSearch) {
-                    apiResults = getApiDAO().searchAPIs(roles, user, query, offset, limit);
+                    apiResults = getApiDAO().searchAPIsByStoreLabel(roles, user, query, offset, limit, labels);
                 } else {
-                    apiResults = getApiDAO().searchAPIsByAttributeInStore(new ArrayList<>(roles),
-                            attributeMap, offset, limit);
+                    apiResults = getApiDAO().searchAPIsByAttributeInStore(new ArrayList<>(roles), labels,
+                            attributeMap,
+                            offset, limit);
                 }
             } else {
                 List<String> statuses = new ArrayList<>();
                 statuses.add(APIStatus.PUBLISHED.getStatus());
                 statuses.add(APIStatus.PROTOTYPED.getStatus());
-                apiResults = getApiDAO().getAPIsByStatus(roles, statuses);
+                apiResults = getApiDAO().getAPIsByStatus(roles, statuses, labels);
             }
 
         } catch (APIMgtDAOException e) {
@@ -1802,6 +1804,26 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         return eventObservers;
     }
 
+    @Override
+    public List<Label> getAllLabels() throws LabelException {
+
+        try {
+            return getLabelDAO().getLabels();
+        } catch (APIMgtDAOException e) {
+            String msg = "Error occurred while retrieving labels";
+            throw new LabelException(msg, ExceptionCodes.LABEL_EXCEPTION);
+        }
+    }
+
+    @Override
+    public List<Label> getLabelsByType (String type) throws LabelException {
+        try {
+            return getLabelDAO().getLabelsByType(type);
+        } catch (APIMgtDAOException e) {
+            String msg = "Error occurred while retrieving labels";
+            throw new LabelException(msg, ExceptionCodes.LABEL_EXCEPTION);
+        }
+    }
 
     /**
      * @see APIStoreImpl#updateDedicatedGateway(DedicatedGateway, String)
@@ -1813,7 +1835,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
             // label generation for the API
             String autoGenLabelName = ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + apiId;
-            Set<String> labelSet = new HashSet<>();
+            List<String> labelSet = new ArrayList<>();
 
             if (dedicatedGateway.isEnabled()) {
 
@@ -1825,8 +1847,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                     List<String> accessUrls = new ArrayList<>();
                     accessUrls.add(APIMgtConstants.HTTPS + APIMgtConstants.WEB_PROTOCOL_SUFFIX + autoGenLabelName);
                     Label autoGenLabel = new Label.Builder().id(UUID.randomUUID().toString()).
-                            name(autoGenLabelName).
-                            accessUrls(accessUrls).build();
+                            name(autoGenLabelName).accessUrls(accessUrls).type(APIMgtConstants.LABEL_TYPE_GATEWAY)
+                            .build();
                     labelList.add(autoGenLabel);
                     //Add to the db
                     getLabelDAO().addLabels(labelList);

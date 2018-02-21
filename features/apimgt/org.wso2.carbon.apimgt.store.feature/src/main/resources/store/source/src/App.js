@@ -41,22 +41,22 @@ class Protected extends Component {
         super(props);
         this.state = {
             showLeftMenu: false,
-            environments: [],
         };
-        this.environmentName = "";
+        this.environments = [];
         message.config({top: '48px'}); // .custom-header height + some offset
         /* TODO: need to fix the header to avoid conflicting with messages ~tmkb*/
     }
 
     componentDidMount() {
         ConfigManager.getConfigs().environments.then(response => {
-            const environments = response.data.environments;
-            this.setState({environments});
+            this.environments = response.data.environments;
+            this.handleEnvironmentQueryParam();
         });
     }
 
     /**
      * Change the environment with "environment" query parameter
+     * @return {String} environment name in the query param
      */
     handleEnvironmentQueryParam() {
         let queryString = this.props.location.search;
@@ -65,27 +65,26 @@ class Protected extends Component {
         let queryParams = qs.parse(queryString);
         const environmentName = queryParams.environment;
 
-        if (!environmentName || this.environmentName === environmentName) {
+        if (!environmentName || Utils.getEnvironment() === environmentName) {
             // no environment query param or the same environment
-            return;
+            return environmentName;
         }
 
-        let environmentId = Utils.getEnvironmentID(this.state.environments, environmentName);
+        let environmentId = Utils.getEnvironmentID(this.environments, environmentName);
         if (environmentId === -1) {
-            console.error("Invalid environment name in environment query parameter.");
-            return;
+            return environmentName;
         }
 
-        let environment = this.state.environments[environmentId];
+        let environment = this.environments[environmentId];
         Utils.setEnvironment(environment);
-        this.environmentName = environmentName;
+        return environmentName;
     }
 
     render() {
-        this.handleEnvironmentQueryParam();
+        const environmentName = this.handleEnvironmentQueryParam();
         // Note: AuthManager.getUser() method is a passive check, which simply check the user availability in browser storage,
         // Not actively check validity of access token from backend
-        if (AuthManager.getUser()) {
+        if (AuthManager.getUser(environmentName)) {
             return (
                 <Base>
                     <Switch>

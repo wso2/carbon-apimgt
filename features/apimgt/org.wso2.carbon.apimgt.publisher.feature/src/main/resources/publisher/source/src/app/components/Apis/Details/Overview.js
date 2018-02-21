@@ -141,9 +141,9 @@ class Overview extends Component {
         let redirect_url = "/apis/" + this.props.match.params.api_uuid + "/overview";
         const api = this.state.api;
         if (this.state.notFound) {
-            return <ResourceNotFound/>
+            return <ResourceNotFound message={this.props.resourceNotFountMessage}/>
         }
-        if (!this.state.api) {
+        if (!api) {
             return <Loading/>
         }
         return (

@@ -16,6 +16,10 @@ import org.wso2.carbon.apimgt.rest.api.publisher.utils.MappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
 import org.wso2.msf4j.Request;
 
+import java.util.HashMap;
+import java.util.List;
+import javax.ws.rs.core.Response;
+
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date =
         "2016-11-01T13:47:43.416+05:30")
 public class LabelsApiServiceImpl extends LabelsApiService {
@@ -25,6 +29,8 @@ public class LabelsApiServiceImpl extends LabelsApiService {
     /**
      * Get all the labels.
      *
+     * @param labelType       the type of the labels to be fetched
+     * @param accept          Accept header value
      * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
      * @param request         ms4j request object
@@ -32,13 +38,19 @@ public class LabelsApiServiceImpl extends LabelsApiService {
      * @throws NotFoundException If failed to get the label values
      */
     @Override
-    public Response labelsGet(String ifNoneMatch, String ifModifiedSince, Request request)
-            throws NotFoundException {
+    public Response labelsGet(String labelType, String accept, String ifNoneMatch, String ifModifiedSince, Request
+            request) throws
+            NotFoundException {
 
         String username = RestApiUtil.getLoggedInUsername(request);
 
         try {
-            List<Label> labels = RestAPIPublisherUtil.getApiPublisher(username).getAllLabels();
+            List<Label> labels;
+            if(labelType == null) {
+                labels = RestAPIPublisherUtil.getApiPublisher(username).getAllLabels();
+            } else{
+                labels = RestAPIPublisherUtil.getApiPublisher(username).getLabelsByType(labelType);
+            }
             LabelListDTO labelListDTO = MappingUtil.toLabelListDTO(labels);
             return Response.ok().entity(labelListDTO).build();
         } catch (APIManagementException e) {

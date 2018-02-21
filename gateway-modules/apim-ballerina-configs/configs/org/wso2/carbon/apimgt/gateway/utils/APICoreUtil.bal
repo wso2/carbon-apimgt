@@ -268,18 +268,12 @@ function updateService (dto:APIDTO api, string config) {
 
 
 function buildPayload () (json) {
-    json label1 = {};
-    label1.name = "Default";
-    json label1AccessURLs = ["https://localhost:9092"];
-    label1.accessUrls = label1AccessURLs;
+    json label = {};
+    string labelName = system:getEnv("GWlabel");
+    label.name = labelName;
 
-    //json label2 = {};
-    //label2.name = "Public";
-    //json label2AccessURLs = ["https://local.pubfdsafe"];
-    //label2.accessUrls = label2AccessURLs;
-
-    //json labelList = [label1, label2];
-    json labelList = [label1];
+    json labelList = [label];
+    //json labelList = [label1];
     json labelInfo = {};
     labelInfo.labelList = labelList;
     labelInfo.overwriteLabels = false;

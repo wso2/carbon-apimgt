@@ -35,7 +35,7 @@ class OracleGenericSearchImpl implements StoreApiAttributeSearch {
                                                StringBuilder searchQuery, int offset, int limit) {
 
         //for any other attribute search, need to check AM_API table
-        String genericSearchQuery = "SELECT * FROM (SELECT A.*, rownum rnum FROM (" + API_SUMMARY_SELECT_STORE +
+        String genericSearchQuery = "SELECT * FROM (SELECT * FROM (" + API_SUMMARY_SELECT_STORE +
                 "WHERE CURRENT_LC_STATUS  IN ('" +
                 APIStatus.PUBLISHED.getStatus() + "','" +
                 APIStatus.PROTOTYPED.getStatus() + "') AND " +
@@ -49,7 +49,7 @@ class OracleGenericSearchImpl implements StoreApiAttributeSearch {
                 "UUID IN (SELECT API_ID FROM AM_API_VISIBLE_ROLES WHERE ROLE IN (" +
                 roleListBuilder.toString() + ")) AND " +
                 searchQuery.toString() +
-                " ORDER BY NAME) A WHERE rownum <= ?) WHERE rnum >= ?";
+                " ORDER BY NAME)) ";
 
         return genericSearchQuery;
     }
