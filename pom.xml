@@ -525,6 +525,7 @@
                 <artifactId>org.wso2.carbon.apimgt.hostobjects.oidc</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
+
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.micro.gateway.common</artifactId>
@@ -535,6 +536,27 @@
                 <artifactId>org.wso2.carbon.apimgt.micro.gateway.usage.publisher</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.micro.gateway.rest.api</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.micro.gateway.api.synchronizer</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.micro.gateway.tenant.initializer</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.micro.gateway.throttling.synchronizer</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.samples.calculator</artifactId>
@@ -580,22 +602,6 @@
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.throttling.siddhi.extension</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.micro.gateway.common</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.micro.gateway.usage.publisher</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.micro.gateway.rest.api</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
 
