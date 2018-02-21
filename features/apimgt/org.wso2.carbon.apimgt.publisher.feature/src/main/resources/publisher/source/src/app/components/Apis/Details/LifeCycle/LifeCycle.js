@@ -68,7 +68,7 @@ class LifeCycle extends Component {
                     const PUBLISHED = "Published";
 
                     for (let transition of transitions) {
-                        if(transition.targetState == PUBLISHED && api.state != PUBLISHED) {
+                        if(transition.targetState == PUBLISHED && lcState.state != PUBLISHED) {
                           const publish_in_private_jet_mode = {
                             event: "Publish In Private Jet Mode",
                             targetState: "Published In Private Jet Mode"
