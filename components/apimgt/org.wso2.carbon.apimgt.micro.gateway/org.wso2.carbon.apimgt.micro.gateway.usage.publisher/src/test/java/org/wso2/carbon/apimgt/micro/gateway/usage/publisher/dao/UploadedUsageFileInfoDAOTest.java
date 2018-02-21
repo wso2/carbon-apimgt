@@ -84,7 +84,7 @@ public class UploadedUsageFileInfoDAOTest {
     @Test
     public void persistFileUpload() throws Exception {
         Connection connection = APIMgtDBUtil.getConnection();
-        String deleteFilesQuery = "DELETE FROM AM_USAGE_UPLOAD_SERVICE_UPLOADED_FILES";
+        String deleteFilesQuery = "DELETE FROM AM_USAGE_UPLOADED_FILES";
         Statement st = connection.createStatement();
         st.executeUpdate(deleteFilesQuery);
 
@@ -93,7 +93,7 @@ public class UploadedUsageFileInfoDAOTest {
                 "api-usage-data.dat.1517296920006.gz", 1213232);
         InputStream anyInputStream = new ByteArrayInputStream("test data".getBytes());
         UploadedUsageFileInfoDAO.persistFileUpload(uploadedFileInfoDTO, anyInputStream);
-        String getUploadedFilesQuery = "SELECT * FROM AM_USAGE_UPLOAD_SERVICE_UPLOADED_FILES WHERE TENANT_DOMAIN = (?)";
+        String getUploadedFilesQuery = "SELECT * FROM AM_USAGE_UPLOADED_FILES WHERE TENANT_DOMAIN = (?)";
         PreparedStatement getResultsStmt = connection.prepareStatement(getUploadedFilesQuery);
         getResultsStmt.setString(1, tenantDomain);
         ResultSet resultSet = getResultsStmt.executeQuery();
@@ -108,7 +108,7 @@ public class UploadedUsageFileInfoDAOTest {
     @Test
     public void getNextFilesToProcess() throws Exception {
         Connection connection = APIMgtDBUtil.getConnection();
-        String insertFilesQuery = "INSERT INTO AM_USAGE_UPLOAD_SERVICE_UPLOADED_FILES " +
+        String insertFilesQuery = "INSERT INTO AM_USAGE_UPLOADED_FILES " +
                 "(TENANT_DOMAIN,FILE_NAME,FILE_TIMESTAMP) VALUES(?,?,?);";
         PreparedStatement statement = connection.prepareStatement(insertFilesQuery);
         statement.setString(1, tenantDomain);
@@ -121,7 +121,7 @@ public class UploadedUsageFileInfoDAOTest {
         for (UploadedFileInfoDTO fileInfoDTO: uploadedFileInfoList) {
             Assert.assertEquals(fileInfoDTO.getTenantDomain(), tenantDomain);
         }
-        String deleteFilesQuery = "DELETE FROM AM_USAGE_UPLOAD_SERVICE_UPLOADED_FILES";
+        String deleteFilesQuery = "DELETE FROM AM_USAGE_UPLOADED_FILES";
         Statement st = connection.createStatement();
         st.executeUpdate(deleteFilesQuery);
         connection.close();
@@ -131,7 +131,7 @@ public class UploadedUsageFileInfoDAOTest {
     public void getFileContent() throws Exception {
         Connection connection = APIMgtDBUtil.getConnection();
         InputStream anyInputStream = new ByteArrayInputStream("test data".getBytes());
-        String insertFilesQuery = "INSERT INTO AM_USAGE_UPLOAD_SERVICE_UPLOADED_FILES " +
+        String insertFilesQuery = "INSERT INTO AM_USAGE_UPLOADED_FILES " +
                 "(TENANT_DOMAIN,FILE_NAME,FILE_TIMESTAMP,FILE_CONTENT) VALUES(?,?,?,?);";
         PreparedStatement statement = connection.prepareStatement(insertFilesQuery);
         Timestamp timeStamp = new Timestamp(System.currentTimeMillis());
@@ -146,7 +146,7 @@ public class UploadedUsageFileInfoDAOTest {
         InputStream returnedInputStream = UploadedUsageFileInfoDAO.getFileContent(uploadedFileInfoDTO);
         Assert.assertNotNull(returnedInputStream);
 
-        String deleteFilesQuery = "DELETE FROM AM_USAGE_UPLOAD_SERVICE_UPLOADED_FILES";
+        String deleteFilesQuery = "DELETE FROM AM_USAGE_UPLOADED_FILES";
         Statement st = connection.createStatement();
         st.executeUpdate(deleteFilesQuery);
         connection.close();
@@ -156,7 +156,7 @@ public class UploadedUsageFileInfoDAOTest {
     @Test
     public void updateCompletion() throws Exception {
         Connection connection = APIMgtDBUtil.getConnection();
-        String insertQuery = "INSERT INTO AM_USAGE_UPLOAD_SERVICE_UPLOADED_FILES " +
+        String insertQuery = "INSERT INTO AM_USAGE_UPLOADED_FILES " +
                 "(TENANT_DOMAIN,FILE_NAME,FILE_TIMESTAMP) VALUES(?,?,?);";
         PreparedStatement st = connection.prepareStatement(insertQuery);
         st.setString(1, "ccc2222");
@@ -169,7 +169,7 @@ public class UploadedUsageFileInfoDAOTest {
                 "api-usage-data.dat.1517296920006.gz", 1213232);
         UploadedUsageFileInfoDAO.updateCompletion(uploadedFileInfoDTO);
 
-        String getUploadedFilesQuery = "SELECT * FROM AM_USAGE_UPLOAD_SERVICE_UPLOADED_FILES WHERE TENANT_DOMAIN = (?)";
+        String getUploadedFilesQuery = "SELECT * FROM AM_USAGE_UPLOADED_FILES WHERE TENANT_DOMAIN = (?)";
         PreparedStatement getResultsStmt = connection.prepareStatement(getUploadedFilesQuery);
         getResultsStmt.setString(1, "ccc2222");
         ResultSet resultSet = getResultsStmt.executeQuery();
@@ -177,7 +177,7 @@ public class UploadedUsageFileInfoDAOTest {
             Assert.assertEquals(resultSet.getString("FILE_PROCESSED"), "2");
         }
 
-        String deleteFilesQuery = "DELETE FROM AM_USAGE_UPLOAD_SERVICE_UPLOADED_FILES";
+        String deleteFilesQuery = "DELETE FROM AM_USAGE_UPLOADED_FILES";
         Statement stmt = connection.createStatement();
         stmt.executeUpdate(deleteFilesQuery);
         connection.close();
@@ -186,7 +186,7 @@ public class UploadedUsageFileInfoDAOTest {
     @Test
     public void deleteProcessedOldFiles() throws Exception {
         Connection connection = APIMgtDBUtil.getConnection();
-        String insertQuery = "INSERT INTO AM_USAGE_UPLOAD_SERVICE_UPLOADED_FILES " +
+        String insertQuery = "INSERT INTO AM_USAGE_UPLOADED_FILES " +
                 "(TENANT_DOMAIN,FILE_NAME,FILE_TIMESTAMP,FILE_PROCESSED) VALUES(?,?,?,?);";
         PreparedStatement st = connection.prepareStatement(insertQuery);
         st.setString(1, tenantDomain);
@@ -197,7 +197,7 @@ public class UploadedUsageFileInfoDAOTest {
         PowerMockito.mockStatic(MicroAPIUsageConstants.class);
         UploadedUsageFileInfoDAO.deleteProcessedOldFiles(new Timestamp(System.currentTimeMillis()));
 
-        String deleteFilesQuery = "DELETE FROM AM_USAGE_UPLOAD_SERVICE_UPLOADED_FILES";
+        String deleteFilesQuery = "DELETE FROM AM_USAGE_UPLOADED_FILES";
         Statement stmt = connection.createStatement();
         stmt.executeUpdate(deleteFilesQuery);
         connection.close();
