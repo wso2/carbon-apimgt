@@ -3,6 +3,7 @@ package org.wso2.carbon.apimgt.rest.api.store.dto;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.wso2.carbon.apimgt.rest.api.store.dto.TierPermissionInfoDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -46,6 +47,9 @@ public class TierDTO  {
   
   @NotNull
   private Boolean stopOnQuotaReach = null;
+  
+  
+  private TierPermissionInfoDTO tierPermissions = null;
 
   private String lastUpdatedTime = null;
 
@@ -175,6 +179,18 @@ public class TierDTO  {
   }
 
   
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("tierPermissions")
+  public TierPermissionInfoDTO getTierPermissions() {
+    return tierPermissions;
+  }
+  public void setTierPermissions(TierPermissionInfoDTO tierPermissions) {
+    this.tierPermissions = tierPermissions;
+  }
+
+  
 
   @Override
   public String toString()  {
@@ -189,6 +205,7 @@ public class TierDTO  {
     sb.append("  unitTime: ").append(unitTime).append("\n");
     sb.append("  tierPlan: ").append(tierPlan).append("\n");
     sb.append("  stopOnQuotaReach: ").append(stopOnQuotaReach).append("\n");
+    sb.append("  tierPermissions: ").append(tierPermissions).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

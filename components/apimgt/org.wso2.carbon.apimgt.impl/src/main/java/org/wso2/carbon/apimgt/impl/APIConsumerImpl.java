@@ -54,6 +54,7 @@ import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.TierPermission;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidator;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
@@ -3125,6 +3126,27 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             log.error("cannot retrieve user role list for tenant" + tenantDomain, e);
         }
         return deniedTiers;
+    }
+
+    @Override
+    public Set<TierPermission> getTierPermissions() throws APIManagementException {
+
+        Set<TierPermission> tierPermissions = new HashSet<TierPermission>();
+        if (tenantId != 0) {
+            Set<TierPermissionDTO> tierPermissionDtos;
+            if (APIUtil.isAdvanceThrottlingEnabled()) {
+                tierPermissionDtos = apiMgtDAO.getThrottleTierPermissions(tenantId);
+            } else {
+                tierPermissionDtos = apiMgtDAO.getTierPermissions(tenantId);
+            }
+            for (TierPermissionDTO tierDto : tierPermissionDtos) {
+                TierPermission tierPermission = new TierPermission(tierDto.getTierName());
+                tierPermission.setRoles(tierDto.getRoles());
+                tierPermission.setPermissionType(tierDto.getPermissionType());
+                tierPermissions.add(tierPermission);
+            }
+        }
+        return tierPermissions;
     }
 
     /**
