@@ -7689,6 +7689,55 @@ public class ApiMgtDAO {
         return scopes;
     }
 
+    /**
+     * Returns all the scopes assigned for given apis
+     *
+     * @param apiIdsString list of api ids separated by commas
+     * @return Map<String, Set<Scope>> set of scopes for each apiId
+     * @throws APIManagementException
+     */
+    public Map<String, Set<Scope>> getScopesForAPIS(String apiIdsString) throws APIManagementException {
+
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        Map<String, Set<Scope>> apiScopeSet = new HashMap<String, Set<Scope>>();
+
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+
+            String sqlQuery = SQLConstants.GET_SCOPES_FOR_API_LIST;
+
+            if (conn.getMetaData().getDriverName().contains("Oracle")) {
+                sqlQuery = SQLConstants.GET_SCOPES_FOR_API_LIST_ORACLE;
+            }
+
+            // apids are retrieved from the db so no need to protect for sql injection
+            sqlQuery = sqlQuery.replace("$paramList", apiIdsString);
+            ps = conn.prepareStatement(sqlQuery);
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+
+                String apiId = resultSet.getString(1);
+                Scope scope = new Scope();
+                scope.setId(resultSet.getInt(2));
+                scope.setName(resultSet.getString(3));
+                scope.setDescription(resultSet.getString(4));
+
+                Set<Scope> scopeList = apiScopeSet.get(apiId);
+
+                if (scopeList == null) {
+                    scopeList = new LinkedHashSet<Scope>();
+                    scopeList.add(scope);
+                    apiScopeSet.put(apiId, scopeList);
+                } else {
+                    scopeList.add(scope);
+                    apiScopeSet.put(apiId, scopeList);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve api scopes ", e);
+        }
+        return apiScopeSet;
+    }
 
 
     public Set<Scope> getScopesBySubscribedAPIs(List<APIIdentifier> identifiers) throws APIManagementException {

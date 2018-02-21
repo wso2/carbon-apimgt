@@ -39,6 +39,7 @@ public class Tier implements Serializable, Comparable<Tier>{
     private String tierPlan;
     // The default value would be "true" since the default behavior is to stop when the quota is reached
     private boolean stopOnQuotaReached = true;
+    private TierPermission tierPermission;
 
     public Tier(String name) {
         this.name = name;
@@ -125,6 +126,14 @@ public class Tier implements Serializable, Comparable<Tier>{
 
     public void setStopOnQuotaReached(boolean stopOnQuotaReached) {
         this.stopOnQuotaReached = stopOnQuotaReached;
+    }
+
+    public TierPermission getTierPermission() {
+        return tierPermission;
+    }
+
+    public void setTierPermission(TierPermission tierPermission) {
+        this.tierPermission = tierPermission;
     }
 
     @Override

@@ -2133,6 +2133,18 @@ public class SQLConstants {
             "   AND IOS.SCOPE_ID = ISB.SCOPE_ID " +
             "   AND SCOPE.SCOPE_ID = IOS.SCOPE_ID";
 
+    public static final String GET_SCOPES_FOR_API_LIST = "SELECT "
+            + "B.API_ID,A.SCOPE_ID, A.NAME, A.DESCRIPTION "
+            + "FROM IDN_OAUTH2_SCOPE AS A "
+            + "INNER JOIN AM_API_SCOPES AS B "
+            + "ON A.SCOPE_ID = B.SCOPE_ID WHERE B.API_ID IN ( $paramList )";
+
+    public static final String GET_SCOPES_FOR_API_LIST_ORACLE = "SELECT "
+            + "B.API_ID, A.SCOPE_ID, A.NAME, A.DESCRIPTION "
+            + "FROM IDN_OAUTH2_SCOPE A "
+            + "INNER JOIN AM_API_SCOPES B "
+            + "ON A.SCOPE_ID = B.SCOPE_ID WHERE B.API_ID IN ( $paramList )";
+
     public static final String GET_USERS_FROM_OAUTH_TOKEN_SQL =
             "SELECT " +
             "   DISTINCT AMS.USER_ID, " +
