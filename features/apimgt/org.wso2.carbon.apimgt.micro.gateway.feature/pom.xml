@@ -74,6 +74,7 @@
                                     <directory>resources</directory>
                                     <includes>
                                         <include>p2.inf</include>
+                                        <include>conf/gateway-config-tool.properties</include>
                                     </includes>
                                 </resource>
                             </resources>
