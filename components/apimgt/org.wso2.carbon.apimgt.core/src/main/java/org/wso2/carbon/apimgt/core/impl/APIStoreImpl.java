@@ -1816,7 +1816,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     }
 
     @Override
-    public List<Label> getLabelsByType (String type) throws LabelException {
+    public List<Label> getLabelsByType(String type) throws LabelException {
         try {
             return getLabelDAO().getLabelsByType(type);
         } catch (APIMgtDAOException e) {
@@ -1838,11 +1838,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             List<String> labelSet = new ArrayList<>();
 
             if (dedicatedGateway.isEnabled()) {
-
                 Label label = getLabelDAO().getLabelByName(autoGenLabelName);
-
                 if (label == null) {
-                    // create a label
+                    // A new label is created with auto generated label name value for per api gateway
                     List<Label> labelList = new ArrayList<>();
                     List<String> accessUrls = new ArrayList<>();
                     accessUrls.add(APIMgtConstants.HTTPS + APIMgtConstants.WEB_PROTOCOL_SUFFIX + autoGenLabelName);
@@ -1850,8 +1848,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                             name(autoGenLabelName).accessUrls(accessUrls).type(APIMgtConstants.LABEL_TYPE_GATEWAY)
                             .build();
                     labelList.add(autoGenLabel);
-                    //Add to the db
                     getLabelDAO().addLabels(labelList);
+                    log.debug("New label: {} added.", autoGenLabelName);
                 }
 
                 labelSet.add(autoGenLabelName);

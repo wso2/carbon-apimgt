@@ -280,9 +280,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             if (dedicatedGateway.isEnabled()) {
 
                 Label label = getLabelDAO().getLabelByName(autoGenLabelName);
-
                 if (label == null) {
-                    // create a label
+                    // A new label is created with auto generated label name value for per api gateway
                     List<Label> labelList = new ArrayList<>();
                     List<String> accessUrls = new ArrayList<>();
                     accessUrls.add(APIMgtConstants.HTTPS + APIMgtConstants.WEB_PROTOCOL_SUFFIX + autoGenLabelName);
@@ -290,8 +289,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                             name(autoGenLabelName).accessUrls(accessUrls).type(APIMgtConstants.LABEL_TYPE_GATEWAY)
                             .build();
                     labelList.add(autoGenLabel);
-                    //Add to the db
                     getLabelDAO().addLabels(labelList);
+                    log.debug("New label: {} added.", autoGenLabelName);
                 }
 
                 labelSet.add(autoGenLabelName);

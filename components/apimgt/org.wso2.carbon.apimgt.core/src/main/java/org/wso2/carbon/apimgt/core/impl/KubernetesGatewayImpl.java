@@ -86,6 +86,8 @@ public class KubernetesGatewayImpl extends ContainerBasedGatewayGenerator {
         apiCoreUrl = implParameters.get(ContainerBasedGatewayConstants.API_CORE_URL);
         brokerHost = implParameters.get(ContainerBasedGatewayConstants.BROKER_HOST);
         cmsType = implParameters.get(ContainerBasedGatewayConstants.CMS_TYPE);
+        log.debug("master url: {} saTokenFileName: {} namespace: {} apiCoreUrl: {} brokerHost: {} cmsType: {}",
+                masterURL, saTokenFileName, namespace, apiCoreUrl, brokerHost, cmsType);
     }
 
     /**
@@ -222,11 +224,10 @@ public class KubernetesGatewayImpl extends ContainerBasedGatewayGenerator {
             if (resource instanceof Service) {
                 // check whether there are existing service already
                 if (client.services().inNamespace(namespace).withName(serviceName).get() == null) {
+                    log.debug("Deploying in CMS type: {} and the Service resource definition: {} ", cmsType,
+                            serviceTemplate);
                     Service service = (Service) resource;
                     Service result = client.services().inNamespace(namespace).create(service);
-                    if (log.isDebugEnabled()) {
-                        log.debug("CMS Type: " + cmsType + ". The Service Definition : " + serviceTemplate);
-                    }
                     log.info("Created Service : " + result.getMetadata().getName() + " in " + cmsType);
                 } else {
                     log.info("There exist a service with the same name in " + cmsType + ". Service name : "
@@ -259,11 +260,10 @@ public class KubernetesGatewayImpl extends ContainerBasedGatewayGenerator {
             if (resource instanceof Deployment) {
                 // check whether there are existing service already
                 if (client.extensions().deployments().inNamespace(namespace).withName(deploymentName).get() == null) {
+                    log.debug("Deploying in CMS type: {} and the Deployment resource definition: {} ", cmsType,
+                            deploymentTemplate);
                     Deployment deployment = (Deployment) resource;
                     Deployment result = client.extensions().deployments().inNamespace(namespace).create(deployment);
-                    if (log.isDebugEnabled()) {
-                        log.debug("CMS Type: " + cmsType + ". The Deployment Definition : " + deploymentTemplate);
-                    }
                     log.info("Created Deployment : " + result.getMetadata().getName() + " in " + cmsType);
                 } else {
                     log.info("There exist a deployment with the same name in " + cmsType + ". Deployment name : "
@@ -296,11 +296,10 @@ public class KubernetesGatewayImpl extends ContainerBasedGatewayGenerator {
             if (resource instanceof Ingress) {
                 // check whether there are existing service already
                 if (client.extensions().ingresses().inNamespace(namespace).withName(ingressName).get() == null) {
+                    log.debug("Deploying in CMS type: {} and the Ingress resource definition: {} ", cmsType,
+                            ingressTemplate);
                     Ingress ingress = (Ingress) resource;
                     Ingress result = client.extensions().ingresses().inNamespace(namespace).create(ingress);
-                    if (log.isDebugEnabled()) {
-                        log.debug("CMS Type: " + cmsType + ". The Ingress Definition : " + ingressTemplate);
-                    }
                     log.info("Created Ingress : " + result.getMetadata().getName() + " in " + cmsType);
                 } else {
                     log.info("There exist an ingress with the same name in " + cmsType + ". Ingress name : "
