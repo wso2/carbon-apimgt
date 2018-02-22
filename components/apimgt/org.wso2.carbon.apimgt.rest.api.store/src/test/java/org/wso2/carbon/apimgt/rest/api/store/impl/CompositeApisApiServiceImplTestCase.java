@@ -27,13 +27,16 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.impl.APIStoreImpl;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
+import org.wso2.carbon.apimgt.core.models.DedicatedGateway;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.common.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.rest.api.store.dto.CompositeAPIDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.DedicatedGatewayDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.CompositeAPIMappingUtil;
 import org.wso2.msf4j.Request;
 import org.wso2.msf4j.formparam.FileInfo;
@@ -297,4 +300,131 @@ public class CompositeApisApiServiceImplTestCase {
 
         Assert.assertEquals(201, response.getStatus());
     }
+
+    @Test
+    public void testCompositeApisApiIdDedicatedGatewayGetForInvalidAPI() throws Exception {
+        TestUtil.printTestMethodName();
+        String apiID = UUID.randomUUID().toString();
+        CompositeApisApiServiceImpl compositeApisApiService = new CompositeApisApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+        Request request = TestUtil.getRequest();
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        Mockito.when(apiStore.isCompositeAPIExist(apiID)).thenReturn(Boolean.FALSE);
+        Response response = compositeApisApiService.compositeApisApiIdDedicatedGatewayGet(apiID, null, null, request);
+        Assert.assertEquals(ExceptionCodes.API_NOT_FOUND.getHttpStatusCode(), response.getStatus());
+    }
+
+    @Test
+    public void testCompositeApisApiIdDedicatedGatewayGet() throws Exception {
+        TestUtil.printTestMethodName();
+        String apiID = UUID.randomUUID().toString();
+        CompositeApisApiServiceImpl compositeApisApiService = new CompositeApisApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+        Request request = TestUtil.getRequest();
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        Mockito.when(apiStore.isCompositeAPIExist(apiID)).thenReturn(Boolean.TRUE);
+        DedicatedGateway dedicatedGateway = new DedicatedGateway();
+        dedicatedGateway.setEnabled(true);
+        Mockito.when(apiStore.getDedicatedGateway(apiID)).thenReturn(dedicatedGateway);
+        Response response = compositeApisApiService.compositeApisApiIdDedicatedGatewayGet(apiID, null, null, request);
+        Assert.assertEquals(200, response.getStatus());
+    }
+
+    @Test
+    public void testCompositeApisApiIdDedicatedGatewayGetForNull() throws Exception {
+        TestUtil.printTestMethodName();
+        String apiID = UUID.randomUUID().toString();
+        CompositeApisApiServiceImpl compositeApisApiService = new CompositeApisApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+        Request request = TestUtil.getRequest();
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        Mockito.when(apiStore.isCompositeAPIExist(apiID)).thenReturn(Boolean.TRUE);
+        Mockito.when(apiStore.getDedicatedGateway(apiID)).thenReturn(null);
+        Response response = compositeApisApiService.compositeApisApiIdDedicatedGatewayGet(apiID, null, null, request);
+        Assert.assertEquals(404, response.getStatus());
+    }
+
+    @Test
+    public void testCompositeApisApiIdDedicatedGatewayGetForException() throws Exception {
+        TestUtil.printTestMethodName();
+        String apiID = UUID.randomUUID().toString();
+        CompositeApisApiServiceImpl compositeApisApiService = new CompositeApisApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+        Request request = TestUtil.getRequest();
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        Mockito.when(apiStore.isCompositeAPIExist(apiID)).thenReturn(Boolean.TRUE);
+        Mockito.when(apiStore.getDedicatedGateway(apiID)).thenThrow(new APIManagementException
+                ("Dedicated gateway details not found for the API",
+                        ExceptionCodes.DEDICATED_GATEWAY_DETAILS_NOT_FOUND));
+        Response response = compositeApisApiService.compositeApisApiIdDedicatedGatewayGet(apiID, null, null, request);
+        Assert.assertEquals(ExceptionCodes.DEDICATED_GATEWAY_DETAILS_NOT_FOUND.getHttpStatusCode(),
+                response.getStatus());
+    }
+
+    @Test
+    public void testCompositeApisApiIdDedicatedGatewayPutForInvalidAPI() throws Exception {
+        TestUtil.printTestMethodName();
+        String apiID = UUID.randomUUID().toString();
+        CompositeApisApiServiceImpl compositeApisApiService = new CompositeApisApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+        Request request = TestUtil.getRequest();
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        Mockito.when(apiStore.isCompositeAPIExist(apiID)).thenReturn(Boolean.FALSE);
+        Response response = compositeApisApiService.compositeApisApiIdDedicatedGatewayPut(apiID,
+                new DedicatedGatewayDTO(), null, null, request);
+        Assert.assertEquals(ExceptionCodes.API_NOT_FOUND.getHttpStatusCode(), response.getStatus());
+    }
+
+    @Test
+    public void testCompositeApisApiIdDedicatedGatewayPut() throws Exception {
+        TestUtil.printTestMethodName();
+        String apiID = UUID.randomUUID().toString();
+        CompositeApisApiServiceImpl compositeApisApiService = new CompositeApisApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+        Request request = TestUtil.getRequest();
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        Mockito.when(apiStore.isCompositeAPIExist(apiID)).thenReturn(Boolean.TRUE);
+        Mockito.doNothing().when(apiStore).updateDedicatedGateway(Mockito.any(), Mockito.anyString());
+        DedicatedGateway dedicatedGateway = new DedicatedGateway();
+        dedicatedGateway.setEnabled(true);
+        Mockito.when(apiStore.getDedicatedGateway(apiID)).thenReturn(dedicatedGateway);
+        DedicatedGatewayDTO dedicatedGatewayDTO = new DedicatedGatewayDTO();
+        dedicatedGatewayDTO.setIsEnabled(true);
+        Response response = compositeApisApiService.compositeApisApiIdDedicatedGatewayPut(apiID,
+                dedicatedGatewayDTO, null, null, request);
+        Assert.assertEquals(200, response.getStatus());
+    }
+
+    @Test
+    public void testCompositeApisApiIdDedicatedGatewayPutForException() throws Exception {
+        TestUtil.printTestMethodName();
+        String apiID = UUID.randomUUID().toString();
+        CompositeApisApiServiceImpl compositeApisApiService = new CompositeApisApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+        Request request = TestUtil.getRequest();
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        Mockito.when(apiStore.isCompositeAPIExist(apiID)).thenReturn(Boolean.TRUE);
+        Mockito.doThrow(new APIManagementException("Error while creating dedicated container based gateway",
+                ExceptionCodes.DEDICATED_CONTAINER_GATEWAY_CREATION_FAILED)).when(apiStore)
+                .updateDedicatedGateway(Mockito.any(), Mockito.anyString());
+        Response response = compositeApisApiService.compositeApisApiIdDedicatedGatewayPut(apiID,
+                new DedicatedGatewayDTO(), null, null, request);
+        Assert.assertEquals(ExceptionCodes.DEDICATED_CONTAINER_GATEWAY_CREATION_FAILED.getHttpStatusCode(),
+                response.getStatus());
+    }
+
 }

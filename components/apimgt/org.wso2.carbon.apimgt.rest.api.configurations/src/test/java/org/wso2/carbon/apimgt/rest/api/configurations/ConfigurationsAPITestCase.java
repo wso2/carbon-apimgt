@@ -54,7 +54,6 @@ public class ConfigurationsAPITestCase {
                 return null;
             }
 
-            @Override
             public <T> T getConfigurationObject(String s, Class<T> aClass) throws ConfigurationException {
                 return null;
             }
@@ -124,5 +123,13 @@ public class ConfigurationsAPITestCase {
 
         sampleEnvironments = Arrays.asList(environmentConfigurations);
         return sampleEnvironments;
+    }
+
+    @Test
+    public void testAvailableFeatures() {
+
+        ConfigurationsAPI configurationsAPI = new ConfigurationsAPI();
+        Response response = configurationsAPI.availableFeatures();
+        Assert.assertEquals(response.getStatus(), 200);
     }
 }

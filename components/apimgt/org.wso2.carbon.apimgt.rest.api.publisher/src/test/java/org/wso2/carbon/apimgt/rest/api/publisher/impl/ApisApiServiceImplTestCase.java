@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtWSDLException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.impl.APIPublisherImpl;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.DedicatedGateway;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Scope;
@@ -51,6 +52,7 @@ import org.wso2.carbon.apimgt.rest.api.common.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.publisher.common.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDefinitionValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.DedicatedGatewayDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.MappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
@@ -114,7 +116,7 @@ public class ApisApiServiceImplTestCase {
                 thenReturn(apiPublisher);
         String api1Id = UUID.randomUUID().toString();
         Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.API_NOT_FOUND))
-                                                                               .when(apiPublisher).deleteAPI(api1Id);
+                .when(apiPublisher).deleteAPI(api1Id);
         Response response = apisApiService.apisApiIdDelete(api1Id, null, null, getRequest());
         assertEquals(response.getStatus(), 404);
         assertTrue(response.getEntity().toString().contains("API not found"));
@@ -133,11 +135,11 @@ public class ApisApiServiceImplTestCase {
         String documentId = UUID.randomUUID().toString();
         DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo().build();
         DocumentContent documentContent = DocumentContent.newDocumentContent().inlineContent(inlineContent)
-                                            .documentInfo(documentInfo).build();
+                .documentInfo(documentInfo).build();
         Mockito.doReturn(documentContent).doThrow(new IllegalArgumentException()).when(apiPublisher).
-                                                        getDocumentationContent(documentId);
+                getDocumentationContent(documentId);
         Response response = apisApiService.
-                            apisApiIdDocumentsDocumentIdContentGet(api1Id, documentId, null, null, getRequest());
+                apisApiIdDocumentsDocumentIdContentGet(api1Id, documentId, null, null, getRequest());
         assertEquals(response.getStatus(), 200);
         assertEquals(inlineContent, response.getEntity().toString());
     }
@@ -154,10 +156,10 @@ public class ApisApiServiceImplTestCase {
         String api1Id = UUID.randomUUID().toString();
         String documentId = UUID.randomUUID().toString();
         DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo()
-                                    .sourceType(DocumentInfo.SourceType.FILE).fileName(fileName).build();
+                .sourceType(DocumentInfo.SourceType.FILE).fileName(fileName).build();
         DocumentContent documentContent = DocumentContent.newDocumentContent().documentInfo(documentInfo).build();
         Mockito.doReturn(documentContent).doThrow(new IllegalArgumentException()).when(apiPublisher).
-                                            getDocumentationContent(documentId);
+                getDocumentationContent(documentId);
         Response response = apisApiService.
                 apisApiIdDocumentsDocumentIdContentGet(api1Id, documentId, null, null, getRequest());
         assertEquals(response.getStatus(), 200);
@@ -203,11 +205,11 @@ public class ApisApiServiceImplTestCase {
                 uploadDocumentationFile(documentId, fis, "application/pdf");
         Response response = apisApiService.
                 apisApiIdDocumentsDocumentIdContentPost(api1Id, documentId,
-                                                        fis, null, inlineContent, null, null, getRequest());
+                        fis, null, inlineContent, null, null, getRequest());
         fis.close();
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("Only one of 'file' and 'inlineContent' " +
-                                                            "should be specified"));
+                "should be specified"));
     }
 
 
@@ -250,7 +252,7 @@ public class ApisApiServiceImplTestCase {
         String api1Id = UUID.randomUUID().toString();
         String documentId = UUID.randomUUID().toString();
         DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo().fileName(fileName)
-                                                            .sourceType(DocumentInfo.SourceType.FILE).build();
+                .sourceType(DocumentInfo.SourceType.FILE).build();
         Mockito.doReturn(documentInfo).doThrow(new IllegalArgumentException()).when(apiPublisher).
                 getDocumentationSummary(documentId);
         Mockito.doNothing().doThrow(new IllegalArgumentException()).when(apiPublisher).
@@ -331,7 +333,7 @@ public class ApisApiServiceImplTestCase {
         String api1Id = UUID.randomUUID().toString();
         String documentId = UUID.randomUUID().toString();
         DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo()
-                                            .sourceType(DocumentInfo.SourceType.FILE).build();
+                .sourceType(DocumentInfo.SourceType.FILE).build();
         Mockito.doReturn(documentInfo).doThrow(new IllegalArgumentException()).when(apiPublisher).
                 getDocumentationSummary(documentId);
         Mockito.doNothing().doThrow(new IllegalArgumentException()).when(apiPublisher).
@@ -381,7 +383,7 @@ public class ApisApiServiceImplTestCase {
         String api1Id = UUID.randomUUID().toString();
         String documentId = UUID.randomUUID().toString();
         Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.DOCUMENT_CONTENT_NOT_FOUND))
-                                                            .when(apiPublisher).getDocumentationSummary(documentId);
+                .when(apiPublisher).getDocumentationSummary(documentId);
         Response response = apisApiService.
                 apisApiIdDocumentsDocumentIdContentPost(api1Id, documentId,
                         null, null, null, null, null, getRequest());
@@ -401,7 +403,7 @@ public class ApisApiServiceImplTestCase {
         String apiId = UUID.randomUUID().toString();
         Mockito.doNothing().doThrow(new IllegalArgumentException()).when(apiPublisher).removeDocumentation(documentId);
         Response response = apisApiService.apisApiIdDocumentsDocumentIdDelete(apiId,
-                                                                                documentId, null, null, getRequest());
+                documentId, null, null, getRequest());
         assertEquals(response.getStatus(), 200);
     }
 
@@ -418,7 +420,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.DOCUMENT_NOT_FOUND))
                 .when(apiPublisher).removeDocumentation(documentId);
         Response response = apisApiService.apisApiIdDocumentsDocumentIdDelete(apiId, documentId,
-                                                                                null, null, getRequest());
+                null, null, getRequest());
         assertEquals(response.getStatus(), 404);
         assertTrue(response.getEntity().toString().contains("Document not found"));
     }
@@ -435,7 +437,7 @@ public class ApisApiServiceImplTestCase {
         String apiId = UUID.randomUUID().toString();
         DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo().build();
         Mockito.doReturn(documentInfo).doThrow(new IllegalArgumentException())
-                                                    .when(apiPublisher).getDocumentationSummary(documentId);
+                .when(apiPublisher).getDocumentationSummary(documentId);
         Response response = apisApiService.apisApiIdDocumentsDocumentIdGet(apiId, documentId,
                 null, null, getRequest());
         assertEquals(response.getStatus(), 200);
@@ -504,7 +506,7 @@ public class ApisApiServiceImplTestCase {
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
         APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
         DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo().otherType("")
-                                                                    .type(DocumentInfo.DocType.OTHER).build();
+                .type(DocumentInfo.DocType.OTHER).build();
         DocumentDTO documentDTO = MappingUtil.toDocumentDTO(documentInfo);
         PowerMockito.mockStatic(RestAPIPublisherUtil.class);
         PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
@@ -547,7 +549,7 @@ public class ApisApiServiceImplTestCase {
         APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
         DocumentInfo documentInfo1 = SampleTestObjectCreator.createDefaultDocumentationInfo().build();
         DocumentInfo documentInfo2 = SampleTestObjectCreator.createDefaultDocumentationInfo().id(documentInfo1.getId())
-                                        .summary("My new summary").build();
+                .summary("My new summary").build();
         DocumentDTO documentDTO = MappingUtil.toDocumentDTO(documentInfo2);
         PowerMockito.mockStatic(RestAPIPublisherUtil.class);
         PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
@@ -637,7 +639,7 @@ public class ApisApiServiceImplTestCase {
                 thenReturn(apiPublisher);
         String apiId = UUID.randomUUID().toString();
         DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo()
-                                    .type(DocumentInfo.DocType.OTHER).otherType("").build();
+                .type(DocumentInfo.DocType.OTHER).otherType("").build();
         DocumentDTO documentDTO = MappingUtil.toDocumentDTO(documentInfo);
         Response response = apisApiService.apisApiIdDocumentsPost(apiId, documentDTO,
                 null, null, getRequest());
@@ -730,7 +732,7 @@ public class ApisApiServiceImplTestCase {
                 thenReturn(apiPublisher);
         String apiId = UUID.randomUUID().toString();
         Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.GATEWAY_EXCEPTION))
-                                .when(apiPublisher).getApiGatewayConfig(apiId);
+                .when(apiPublisher).getApiGatewayConfig(apiId);
         Response response = apisApiService.apisApiIdGatewayConfigGet(apiId, null,
                 null, getRequest());
         assertEquals(response.getStatus(), 500);
@@ -1007,8 +1009,8 @@ public class ApisApiServiceImplTestCase {
     @Test
     public void testApisApiIdSwaggerPut() throws Exception {
         printTestMethodName();
-        String swagger = IOUtils.toString(new FileInputStream("src"+File.separator+"test"+File
-                .separator+"resources"+File.separator+"swaggerWithAuthorization.yaml"));
+        String swagger = IOUtils.toString(new FileInputStream("src" + File.separator + "test" + File
+                .separator + "resources" + File.separator + "swaggerWithAuthorization.yaml"));
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
         APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
         PowerMockito.mockStatic(RestAPIPublisherUtil.class);
@@ -1149,7 +1151,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doNothing().doThrow(new IllegalArgumentException())
                 .when(apiPublisher).updateCheckListItem(apiId, action, lifecycleChecklistMap);
         Response response = apisApiService.apisChangeLifecyclePost(action, apiId, checklist,
-                            null, null, getRequest());
+                null, null, getRequest());
         assertEquals(response.getStatus(), 200);
         assertTrue(response.getEntity().toString().contains("APPROVED"));
     }
@@ -1281,7 +1283,7 @@ public class ApisApiServiceImplTestCase {
                 thenReturn(apiPublisher);
         Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.API_TYPE_INVALID))
                 .when(apiPublisher).searchAPIs(10, 0, "");
-        Response response = apisApiService.apisGet(10, 0, "",null, getRequest());
+        Response response = apisApiService.apisGet(10, 0, "", null, getRequest());
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("API Type specified is invalid"));
     }
@@ -1423,7 +1425,7 @@ public class ApisApiServiceImplTestCase {
         PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
                 thenReturn(apiPublisher);
         Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.API_TYPE_INVALID))
-                            .when(apiPublisher).addApiFromDefinition(fis);
+                .when(apiPublisher).addApiFromDefinition(fis);
         Response response = apisApiService.
                 apisImportDefinitionPost(null, fis, null, null, null, null, null, null, getRequest());
         fis.close();
@@ -1603,7 +1605,7 @@ public class ApisApiServiceImplTestCase {
         fis.close();
         assertEquals(response.getStatus(), 200);
         assertTrue(response.getEntity() instanceof APIDefinitionValidationResponseDTO);
-        assertTrue(((APIDefinitionValidationResponseDTO)response.getEntity()).getIsValid());
+        assertTrue(((APIDefinitionValidationResponseDTO) response.getEntity()).getIsValid());
     }
 
     @Test
@@ -1834,13 +1836,14 @@ public class ApisApiServiceImplTestCase {
         PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
                 thenReturn(apiPublisher);
         String apiId = UUID.randomUUID().toString();
-        Map<String,String> scopes = new HashMap<>();
-        scopes.put("apim:api_read","read apis");
+        Map<String, String> scopes = new HashMap<>();
+        scopes.put("apim:api_read", "read apis");
         Mockito.when(apiPublisher.getScopesForApi(apiId)).thenReturn(scopes);
         Response response = apisApiService.apisApiIdScopesGet(apiId, null, getRequest());
         assertEquals(response.getStatus(), 200);
         assertTrue(response.getEntity().toString().contains("apim:api_read"));
     }
+
     @Test
     public void testApisApiIdScopesGetException() throws Exception {
         printTestMethodName();
@@ -1868,10 +1871,11 @@ public class ApisApiServiceImplTestCase {
         PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
                 thenReturn(apiPublisher);
         String apiId = UUID.randomUUID().toString();
-        Mockito.doNothing().when(apiPublisher).deleteScopeFromApi(apiId,"apim:api_view");
+        Mockito.doNothing().when(apiPublisher).deleteScopeFromApi(apiId, "apim:api_view");
         Response response = apisApiService.apisApiIdScopesNameDelete(apiId, "apim:api_view", null, null, getRequest());
         assertEquals(response.getStatus(), 200);
     }
+
     @Test
     public void testApisApiIdScopesNameDeleteException() throws Exception {
         printTestMethodName();
@@ -1882,7 +1886,7 @@ public class ApisApiServiceImplTestCase {
                 thenReturn(apiPublisher);
         String apiId = UUID.randomUUID().toString();
         Mockito.doThrow(new APIManagementException("Scope couldn't found by name: apim:api_view", ExceptionCodes
-                .SCOPE_NOT_FOUND)).when(apiPublisher).deleteScopeFromApi(apiId,"apim:api_view");
+                .SCOPE_NOT_FOUND)).when(apiPublisher).deleteScopeFromApi(apiId, "apim:api_view");
         Response response = apisApiService.apisApiIdScopesNameDelete(apiId, "apim:api_view", null, null, getRequest());
         assertEquals(response.getStatus(), 404);
         assertTrue(response.getEntity().toString().contains("Scope not found"));
@@ -1897,8 +1901,8 @@ public class ApisApiServiceImplTestCase {
         PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
                 thenReturn(apiPublisher);
         String apiId = UUID.randomUUID().toString();
-        Mockito.when(apiPublisher.getScopeInformationOfApi(apiId,"apim:api_view")).thenReturn(new Scope
-                ("apim:api_view","api create"));
+        Mockito.when(apiPublisher.getScopeInformationOfApi(apiId, "apim:api_view")).thenReturn(new Scope
+                ("apim:api_view", "api create"));
         Response response = apisApiService.apisApiIdScopesNameGet(apiId, "apim:api_view", null, null, getRequest());
         assertEquals(response.getStatus(), 200);
         assertTrue(response.getEntity().toString().contains("apim:api_view"));
@@ -1931,12 +1935,13 @@ public class ApisApiServiceImplTestCase {
         PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
                 thenReturn(apiPublisher);
         String apiId = UUID.randomUUID().toString();
-        Scope scope = new Scope("apim:api_view","api view");
+        Scope scope = new Scope("apim:api_view", "api view");
         Mockito.doNothing().when(apiPublisher).updateScopeOfTheApi(apiId, scope);
         Response response = apisApiService.apisApiIdScopesNamePut(apiId, scope.getName(), MappingUtil.scopeDto(scope,
                 "roles"), null, null, getRequest());
         assertEquals(response.getStatus(), 200);
     }
+
     @Test
     public void testApisApiIdScopesNamePutException() throws Exception {
         printTestMethodName();
@@ -1946,14 +1951,15 @@ public class ApisApiServiceImplTestCase {
         PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
                 thenReturn(apiPublisher);
         String apiId = UUID.randomUUID().toString();
-        Scope scope = new Scope("apim:api_view","api view");
+        Scope scope = new Scope("apim:api_view", "api view");
         Mockito.doThrow(new APIManagementException("Scope couldn't found by name: apim:api_view", ExceptionCodes
-                .SCOPE_NOT_FOUND)).when(apiPublisher).updateScopeOfTheApi(apiId,scope);
+                .SCOPE_NOT_FOUND)).when(apiPublisher).updateScopeOfTheApi(apiId, scope);
         Response response = apisApiService.apisApiIdScopesNamePut(apiId, "apim:api_view", MappingUtil.scopeDto(scope,
                 "role"), null, null, getRequest());
         assertEquals(response.getStatus(), 404);
         assertTrue(response.getEntity().toString().contains("Scope not found"));
     }
+
     @Test
     public void testApisApiIdScopesPost() throws Exception {
         printTestMethodName();
@@ -1963,12 +1969,13 @@ public class ApisApiServiceImplTestCase {
         PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
                 thenReturn(apiPublisher);
         String apiId = UUID.randomUUID().toString();
-        Scope scope = new Scope("api_view","api view");
+        Scope scope = new Scope("api_view", "api view");
         Mockito.doNothing().when(apiPublisher).addScopeToTheApi(apiId, scope);
         Response response = apisApiService.apisApiIdScopesPost(apiId, MappingUtil.scopeDto(scope, "role"), null,
                 null, getRequest());
         assertEquals(response.getStatus(), 201);
     }
+
     @Test
     public void testApisApiIdScopesPostWithInvalidscopebindingType() throws Exception {
         printTestMethodName();
@@ -1978,12 +1985,13 @@ public class ApisApiServiceImplTestCase {
         PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
                 thenReturn(apiPublisher);
         String apiId = UUID.randomUUID().toString();
-        Scope scope = new Scope("api_view","api view");
+        Scope scope = new Scope("api_view", "api view");
         Mockito.doNothing().when(apiPublisher).addScopeToTheApi(apiId, scope);
         Response response = apisApiService.apisApiIdScopesPost(apiId, MappingUtil.scopeDto(scope, "permission"), null,
                 null, getRequest());
         assertEquals(response.getStatus(), 412);
     }
+
     @Test
     public void testApisApiIdScopesNamePOSTException() throws Exception {
         printTestMethodName();
@@ -1993,7 +2001,7 @@ public class ApisApiServiceImplTestCase {
         PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
                 thenReturn(apiPublisher);
         String apiId = UUID.randomUUID().toString();
-        Scope scope = new Scope("api_view","api view");
+        Scope scope = new Scope("api_view", "api view");
         Mockito.doThrow(new APIManagementException("Scope already registered", ExceptionCodes
                 .SCOPE_ALREADY_REGISTERED)).when(apiPublisher).addScopeToTheApi(apiId, scope);
         Response response = apisApiService.apisApiIdScopesPost(apiId, MappingUtil.scopeDto(scope, "role"), null,
@@ -2001,6 +2009,125 @@ public class ApisApiServiceImplTestCase {
         assertEquals(response.getStatus(), 409);
         assertTrue(response.getEntity().toString().contains("Scope already exist"));
     }
+
+    @Test
+    public void testApisApiIdDedicatedGatewayGetForInvalidAPI() throws Exception {
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        Mockito.doReturn(false).when(apiPublisher).isAPIExists(apiId);
+        Response response = apisApiService.apisApiIdDedicatedGatewayGet(apiId, null, null, getRequest());
+        assertEquals(ExceptionCodes.API_NOT_FOUND.getHttpStatusCode(), response.getStatus());
+        assertTrue(response.getEntity().toString().contains(ExceptionCodes.API_NOT_FOUND.getErrorMessage()));
+    }
+
+    @Test
+    public void testApisApiIdDedicatedGatewayGet() throws Exception {
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        Mockito.doReturn(true).when(apiPublisher).isAPIExists(apiId);
+        DedicatedGateway dedicatedGateway = new DedicatedGateway();
+        dedicatedGateway.setEnabled(true);
+        Mockito.doReturn(dedicatedGateway).when(apiPublisher).getDedicatedGateway(apiId);
+        Response response = apisApiService.apisApiIdDedicatedGatewayGet(apiId, null, null, getRequest());
+        assertEquals(200, response.getStatus());
+    }
+
+    @Test
+    public void testApisApiIdDedicatedGatewayGetForNull() throws Exception {
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        Mockito.doReturn(true).when(apiPublisher).isAPIExists(apiId);
+        Mockito.doReturn(null).when(apiPublisher).getDedicatedGateway(apiId);
+        Response response = apisApiService.apisApiIdDedicatedGatewayGet(apiId, null, null, getRequest());
+        assertEquals(404, response.getStatus());
+        assertTrue(response.getEntity().toString().contains(ExceptionCodes.DEDICATED_GATEWAY_DETAILS_NOT_FOUND
+                .getErrorMessage()));
+    }
+
+    @Test
+    public void testApisApiIdDedicatedGatewayGetForException() throws Exception {
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        Mockito.doReturn(true).when(apiPublisher).isAPIExists(apiId);
+        Mockito.doThrow(new APIManagementException("Dedicated gateway details not found for the API",
+                ExceptionCodes.DEDICATED_GATEWAY_DETAILS_NOT_FOUND)).when(apiPublisher).getDedicatedGateway(apiId);
+        Response response = apisApiService.apisApiIdDedicatedGatewayGet(apiId, null, null, getRequest());
+        assertEquals(ExceptionCodes.DEDICATED_GATEWAY_DETAILS_NOT_FOUND.getHttpStatusCode(), response.getStatus());
+        assertTrue(response.getEntity().toString().contains(ExceptionCodes.DEDICATED_GATEWAY_DETAILS_NOT_FOUND
+                .getErrorMessage()));
+    }
+
+    @Test
+    public void testApisApiIdDedicatedGatewayPutForInvalidAPI() throws Exception {
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        Mockito.doReturn(false).when(apiPublisher).isAPIExists(apiId);
+        Response response = apisApiService.apisApiIdDedicatedGatewayPut(apiId, new DedicatedGatewayDTO(), null, null,
+                getRequest());
+        assertEquals(ExceptionCodes.API_NOT_FOUND.getHttpStatusCode(), response.getStatus());
+        assertTrue(response.getEntity().toString().contains(ExceptionCodes.API_NOT_FOUND.getErrorMessage()));
+    }
+
+    @Test
+    public void testApisApiIdDedicatedGatewayPut() throws Exception {
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        Mockito.doReturn(true).when(apiPublisher).isAPIExists(apiId);
+        DedicatedGateway dedicatedGateway = new DedicatedGateway();
+        dedicatedGateway.setEnabled(true);
+        Mockito.doNothing().when(apiPublisher).updateDedicatedGateway(Mockito.any(), Mockito.anyString());
+        Mockito.doReturn(dedicatedGateway).when(apiPublisher).getDedicatedGateway(apiId);
+        DedicatedGatewayDTO dedicatedGatewayDTO = new DedicatedGatewayDTO();
+        dedicatedGatewayDTO.setIsEnabled(true);
+        Response response = apisApiService.apisApiIdDedicatedGatewayPut(apiId, dedicatedGatewayDTO, null, null,
+                getRequest());
+        assertEquals(200, response.getStatus());
+    }
+
+    @Test
+    public void testApisApiIdDedicatedGatewayPutForException() throws Exception {
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        Mockito.doReturn(true).when(apiPublisher).isAPIExists(apiId);
+        Mockito.doThrow(new APIManagementException("Error while creating dedicated container based gateway",
+                ExceptionCodes.DEDICATED_CONTAINER_GATEWAY_CREATION_FAILED)).when(apiPublisher)
+                .updateDedicatedGateway(Mockito.any(), Mockito.anyString());
+        Response response = apisApiService.apisApiIdDedicatedGatewayPut(apiId, new DedicatedGatewayDTO(), null, null,
+                getRequest());
+        assertEquals(ExceptionCodes.DEDICATED_CONTAINER_GATEWAY_CREATION_FAILED.getHttpStatusCode(),
+                response.getStatus());
+        assertTrue(response.getEntity().toString().contains(ExceptionCodes
+                .DEDICATED_CONTAINER_GATEWAY_CREATION_FAILED.getErrorMessage()));
+    }
+
     private Matcher<API.APIBuilder> getAPIBuilderMatcher(API.APIBuilder apiBuilder) {
         return new BaseMatcher<API.APIBuilder>() {
             @Override
@@ -2031,7 +2158,7 @@ public class ApisApiServiceImplTestCase {
         return request;
     }
 
-    private static void printTestMethodName () {
+    private static void printTestMethodName() {
         log.info("------------------ Test method: " + Thread.currentThread().getStackTrace()[2].getMethodName() +
                 " ------------------");
     }

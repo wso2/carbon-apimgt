@@ -11,6 +11,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
+import org.wso2.carbon.apimgt.core.models.DedicatedGateway;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -20,8 +21,10 @@ import org.wso2.carbon.apimgt.rest.api.store.CompositeApisApiService;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.dto.CompositeAPIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.CompositeAPIListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.DedicatedGatewayDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.FileInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.CompositeAPIMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.store.mappings.DedicatedGatewayMappingUtil;
 import org.wso2.msf4j.Request;
 import org.wso2.msf4j.formparam.FileInfo;
 
@@ -36,6 +39,123 @@ import javax.ws.rs.core.Response;
  */
 public class CompositeApisApiServiceImpl extends CompositeApisApiService {
     private static final Logger log = LoggerFactory.getLogger(ApisApiServiceImpl.class);
+
+    /**
+     * Retrieve Dedicated Gateway of an API
+     *
+     * @param apiId             UUID of API
+     * @param ifNoneMatch       ifNoneMatch header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @param request           msf4j request object
+     * @return 200 OK if the operation was successful
+     * @throws NotFoundException when the particular resource does not exist
+     */
+    @Override
+    public Response compositeApisApiIdDedicatedGatewayGet(String apiId, String ifNoneMatch, String ifModifiedSince,
+           Request request) throws NotFoundException {
+
+        String username = RestApiUtil.getLoggedInUsername(request);
+        try {
+            APIStore apiStore = RestApiUtil.getConsumer(username);
+
+            if (!apiStore.isCompositeAPIExist(apiId)) {
+                String errorMessage = "API not found : " + apiId;
+                APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
+                        ExceptionCodes.API_NOT_FOUND);
+                HashMap<String, String> paramList = new HashMap<String, String>();
+                paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+            }
+
+            String existingFingerprint = compositeApisApiIdGetFingerprint(apiId, ifNoneMatch, ifModifiedSince, request);
+            if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
+                    .contains(existingFingerprint)) {
+                return Response.notModified().build();
+            }
+
+            DedicatedGateway dedicatedGateway  = apiStore.getDedicatedGateway(apiId);
+            if (dedicatedGateway != null) {
+                DedicatedGatewayDTO dedicatedGatewayDTO = DedicatedGatewayMappingUtil
+                        .toDedicatedGatewayDTO(dedicatedGateway);
+                return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint
+                        + "\"").entity(dedicatedGatewayDTO).build();
+
+            } else {
+                String msg = "Dedicated Gateway not found for " + apiId;
+                APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(msg,
+                        ExceptionCodes.DEDICATED_GATEWAY_DETAILS_NOT_FOUND);
+                HashMap<String, String> paramList = new HashMap<String, String>();
+                paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                log.error(msg, e);
+                return Response.status(Response.Status.NOT_FOUND).entity(errorDTO).build();
+            }
+
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving dedicated gateway of the API : " + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
+
+    /**
+     * Add or update Dedicated Gateway of an API
+     *
+     * @param apiId             UUID of API
+     * @param body              DedicatedGatewayDTO
+     * @param ifMatch           If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @param request           msf4j request object
+     * @return 200 OK if the operation was successful
+     * @throws NotFoundException when the particular resource does not exist
+     */
+    @Override
+    public Response compositeApisApiIdDedicatedGatewayPut(String apiId, DedicatedGatewayDTO body, String ifMatch,
+            String ifUnmodifiedSince, Request request) throws NotFoundException {
+
+        String username = RestApiUtil.getLoggedInUsername(request);
+
+        try {
+            APIStore apiStore = RestApiUtil.getConsumer(username);
+
+            if (!apiStore.isCompositeAPIExist(apiId)) {
+                String errorMessage = "API not found : " + apiId;
+                APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
+                        ExceptionCodes.API_NOT_FOUND);
+                HashMap<String, String> paramList = new HashMap<String, String>();
+                paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                log.error(errorMessage, e);
+                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+            }
+
+            String existingFingerprint = compositeApisApiIdGetFingerprint(apiId, null, null, request);
+            if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
+                    .contains(existingFingerprint)) {
+                return Response.status(Response.Status.PRECONDITION_FAILED).build();
+            }
+            DedicatedGateway dedicatedGateway = DedicatedGatewayMappingUtil.fromDTOtoDedicatedGateway(body, apiId);
+            apiStore.updateDedicatedGateway(dedicatedGateway, apiId);
+
+            DedicatedGateway updatedDedicatedGateway = apiStore.getDedicatedGateway(apiId);
+            String newFingerprint = compositeApisApiIdGetFingerprint(apiId, null, null, request);
+
+            return Response.ok().header(HttpHeaders.ETAG, "\"" + newFingerprint + "\"")
+                    .entity(DedicatedGatewayMappingUtil.toDedicatedGatewayDTO(updatedDedicatedGateway)).build();
+
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while updating dedicated gateway of the composite API : " + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
 
     /**
      * Deletes a particular API

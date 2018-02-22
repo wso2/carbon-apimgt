@@ -90,7 +90,9 @@ public class LabelDAOImpl implements LabelDAO {
 
                 if (!urlMap.isEmpty()) {
                     for (Map.Entry<String, List<String>> entry : urlMap.entrySet()) {
-                        insertAccessUrlMappings(entry.getKey(), entry.getValue());
+                        if (entry.getValue() != null) {
+                            insertAccessUrlMappings(entry.getKey(), entry.getValue());
+                        }
                     }
                 }
             } catch (SQLException e) {

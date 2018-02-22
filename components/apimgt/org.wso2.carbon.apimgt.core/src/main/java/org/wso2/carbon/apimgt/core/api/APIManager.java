@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.DedicatedGateway;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Label;
@@ -306,4 +307,23 @@ public interface APIManager {
      * @throws APIMgtDAOException If an error occurs while accessing data layer
      */
     boolean isWSDLExists(String apiId) throws APIMgtDAOException;
+
+    /**
+     * Update DedicatedGateway of API
+     *
+     * @param dedicatedGateway updated DedicatedGatewayObject
+     * @param apiId UUID of the API related to the Container based Gateway
+     * @throws APIManagementException If a core level exception occurs
+     */
+    void updateDedicatedGateway(DedicatedGateway dedicatedGateway, String apiId) throws APIManagementException;
+
+    /**
+     * Get Dedicated Gateway of API
+     *
+     * @param apiId of the API related to the Container Based Gateway
+     * @return Dedicated Gateway Object
+     * @throws APIManagementException if API Manager core level exception occurred
+     *
+     */
+    DedicatedGateway getDedicatedGateway(String apiId) throws APIManagementException;
 }

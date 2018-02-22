@@ -150,6 +150,30 @@
             <artifactId>XmlSchema</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.wso2.orbit.com.squareup.okio</groupId>
+            <artifactId>okio</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.squareup.okhttp</groupId>
+            <artifactId>okhttp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.squareup.okhttp</groupId>
+            <artifactId>logging-interceptor</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.squareup.okhttp</groupId>
+            <artifactId>okhttp-ws</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.dnsjava</groupId>
+            <artifactId>dnsjava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.wso2.orbit.io.swagger</groupId>
             <artifactId>swagger-codegen</artifactId>
         </dependency>
@@ -413,6 +437,10 @@
                                 <bundle>
                                     <symbolicName>wsdl4j</symbolicName>
                                     <version>${wsdl4j.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>json</symbolicName>
+                                    <version>20160212.0.0</version>
                                 </bundle>
                                 <bundle>
                                     <symbolicName>woden</symbolicName>

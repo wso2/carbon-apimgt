@@ -45,7 +45,8 @@ class ConfigManager {
      */
     static getConfigs() {
         return {
-            'environments': ConfigManager._getPromisedConfigs(ConfigRequestPaths.ENVIRONMENT_CONFIG_PATH)
+            'environments': ConfigManager._getPromisedConfigs(ConfigRequestPaths.ENVIRONMENT_CONFIG_PATH),
+            'features': ConfigManager._getPromisedConfigs(ConfigRequestPaths.FEATURE_LIST_PATH)
         };
     }
 }
@@ -55,7 +56,8 @@ class ConfigManager {
  * @type {Object}
  */
 const ConfigRequestPaths = {
-    ENVIRONMENT_CONFIG_PATH: "/configService/environments"
+    ENVIRONMENT_CONFIG_PATH: "/api/am/config/v1.0/environments",
+    FEATURE_LIST_PATH: "/api/am/config/v1.0/features"
 };
 
 /**

@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.core.dao.impl.DataSource;
 import org.wso2.carbon.apimgt.core.dao.impl.DataSourceImpl;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.impl.BrokerImpl;
+import org.wso2.carbon.apimgt.core.impl.ContainerBasedGatewayConfigBuilder;
 import org.wso2.carbon.apimgt.core.impl.FileEncryptionUtility;
 import org.wso2.carbon.apimgt.core.impl.ServiceDiscoveryConfigBuilder;
 import org.wso2.carbon.apimgt.core.util.BrokerUtil;
@@ -81,6 +82,7 @@ public class BundleActivator {
             }
             WorkflowExtensionsConfigBuilder.build(configProvider);
             ServiceDiscoveryConfigBuilder.build(configProvider);
+            ContainerBasedGatewayConfigBuilder.build(configProvider);
             BrokerManager.start();
             Broker broker = new BrokerImpl();
             BrokerUtil.initialize(broker);

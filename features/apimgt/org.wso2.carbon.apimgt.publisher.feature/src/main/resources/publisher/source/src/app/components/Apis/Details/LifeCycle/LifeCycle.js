@@ -18,6 +18,7 @@
 
 import React, {Component} from 'react'
 import Api from '../../../../data/api'
+import ConfigManager from '../../../../data/ConfigManager'
 import LifeCycleUpdate from './LifeCycleUpdate'
 import Loading from "../../../Base/Loading/Loading"
 import LifeCycleHistory from "./LifeCycleHistory"
@@ -47,12 +48,40 @@ class LifeCycle extends Component {
         let promised_api = this.api.get(this.api_uuid);
         let promised_tiers = this.api.policies('api');
         let promised_lcState = this.api.getLcState(this.api_uuid);
+        let privateJetModeEnabled = false;
+
+        ConfigManager.getConfigs().features.then(response => {
+            privateJetModeEnabled = response.data.privateJetMode.isEnabled;
+        });
+
         let promised_lcHistory = this.api.getLcHistory(this.api_uuid);
         let promised_labels = this.api.labels();
         Promise.all([promised_api, promised_tiers, promised_lcState, promised_lcHistory, promised_labels])
             .then(response => {
                 let [api, tiers, lcState, lcHistory, labels] = response.map(data => data.obj);
-                this.setState({api: api, policies: tiers, lcState: lcState, lcHistory: lcHistory, labels: labels});
+
+            if (privateJetModeEnabled) {
+
+                if(!api.hasOwnGateway) {
+
+                    let transitions = lcState.availableTransitionBeanList;
+                    const PUBLISHED = "Published";
+
+                    for (let transition of transitions) {
+                        if(transition.targetState == PUBLISHED && lcState.state != PUBLISHED) {
+                          const publish_in_private_jet_mode = {
+                            event: "Publish In Private Jet Mode",
+                            targetState: "Published In Private Jet Mode"
+                          };
+                          lcState.availableTransitionBeanList.push(publish_in_private_jet_mode);
+                        }
+                    }
+                }
+            }
+
+            this.setState({api: api, policies: tiers, lcState: lcState, lcHistory: lcHistory, labels: labels,
+                            privateJetModeEnabled: privateJetModeEnabled});
+
             }).catch(
             error => {
                 if (process.env.NODE_ENV !== "production") {
@@ -95,7 +124,7 @@ class LifeCycle extends Component {
                     <Card>
                         <CardContent>
                             <LifeCycleUpdate handleUpdate={this.updateData} lcState={this.state.lcState}
-                                             api={api}/>
+                                             api={api} privateJetModeEnabled={this.state.privateJetModeEnabled}/>
                         </CardContent>
                     </Card>
                     {this.state.lcHistory.length > 1 &&

@@ -24,8 +24,14 @@ import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.rest.api.configurations.models.APIMUIConfigurations;
+import org.wso2.carbon.apimgt.rest.api.configurations.models.Feature;
+import org.wso2.carbon.apimgt.rest.api.configurations.utils.ConfigurationAPIConstants;
 import org.wso2.carbon.config.ConfigurationException;
 import org.wso2.carbon.config.provider.ConfigProvider;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ServiceReferenceHolderTestCase {
     @Test
@@ -61,7 +67,6 @@ public class ServiceReferenceHolderTestCase {
                 throw new ConfigurationException("Error while creating configuration instance");
             }
 
-            @Override
             public <T> T getConfigurationObject(String s, Class<T> aClass) throws ConfigurationException {
                 return null;
             }
@@ -69,5 +74,40 @@ public class ServiceReferenceHolderTestCase {
         instance.setConfigProvider(configProvider);
         apimUIConfigurations = instance.getApimUIConfigurations();
         Assert.assertNotNull(apimUIConfigurations);
+    }
+
+    @Test
+    public void testGetAvailableFeatures() throws ConfigurationException {
+
+        ////Happy Path
+        ServiceReferenceHolder instance = ServiceReferenceHolder.getInstance();
+        ConfigProvider configProvider = Mockito.mock(ConfigProvider.class);
+        instance.setConfigProvider(configProvider);
+        Map configs = new HashMap<>();
+        configs.put(ConfigurationAPIConstants.ENABLED, true);
+        Mockito.when(configProvider.getConfigurationObject(Mockito.anyString())).thenReturn(configs);
+        Map<String, Feature> featureList = instance.getAvailableFeatures();
+        Assert.assertNotNull(featureList);
+    }
+
+    @Test
+    public void testGetAvailableFeaturesWhenConfigProviderIsNull() throws ConfigurationException {
+
+        ServiceReferenceHolder instance = ServiceReferenceHolder.getInstance();
+        instance.setConfigProvider(null);
+        Map<String, Feature> featureList = instance.getAvailableFeatures();
+        Assert.assertNotNull(featureList);
+    }
+
+    @Test
+    public void testGetAvailableFeaturesForException() throws ConfigurationException {
+
+        ServiceReferenceHolder instance = ServiceReferenceHolder.getInstance();
+        ConfigProvider configProvider = Mockito.mock(ConfigProvider.class);
+        instance.setConfigProvider(configProvider);
+        Mockito.when(configProvider.getConfigurationObject(Mockito.anyString()))
+                .thenThrow(ConfigurationException.class);
+        Map<String, Feature> featureList = instance.getAvailableFeatures();
+        Assert.assertNotNull(featureList);
     }
 }

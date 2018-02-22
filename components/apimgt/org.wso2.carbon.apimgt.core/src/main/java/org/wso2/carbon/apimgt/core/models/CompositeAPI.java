@@ -53,6 +53,7 @@ public class CompositeAPI {
     private final String copiedFromApiId;
     private final String apiDefinition;
     private final HashMap permissionMap;
+    private final boolean hasOwnGateway;
     private final String apiPermission;
     private final String workflowStatus;
     private final Set<String> threatProtectionPolicies;
@@ -76,6 +77,7 @@ public class CompositeAPI {
         copiedFromApiId = builder.copiedFromApiId;
         apiDefinition = builder.apiDefinition;
         permissionMap = builder.permissionMap;
+        hasOwnGateway = builder.hasOwnGateway;
         apiPermission = builder.apiPermission;
         workflowStatus = builder.workflowStatus;
         threatProtectionPolicies = builder.threatProtectionPolicies;
@@ -166,6 +168,10 @@ public class CompositeAPI {
         return threatProtectionPolicies;
     }
 
+    public boolean hasOwnGateway() {
+        return hasOwnGateway;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -195,14 +201,15 @@ public class CompositeAPI {
                 Objects.equals(permissionMap, that.permissionMap) &&
                 Objects.equals(apiPermission, that.apiPermission) &&
                 Objects.equals(workflowStatus, that.workflowStatus) &&
-                Objects.equals(threatProtectionPolicies, that.threatProtectionPolicies);
+                Objects.equals(threatProtectionPolicies, that.threatProtectionPolicies) &&
+                Objects.equals(hasOwnGateway, that.hasOwnGateway);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id, provider, name, version, context, description, gatewayConfig, transport, labels,
                 applicationId, createdTime, createdBy, updatedBy, lastUpdatedTime, uriTemplates, copiedFromApiId,
-                apiDefinition, permissionMap, apiPermission, workflowStatus, threatProtectionPolicies);
+                apiDefinition, permissionMap, apiPermission, workflowStatus, threatProtectionPolicies, hasOwnGateway);
     }
 
     /**
@@ -227,6 +234,7 @@ public class CompositeAPI {
         private String copiedFromApiId;
         private String apiDefinition;
         private HashMap permissionMap;
+        private boolean hasOwnGateway;
         private String apiPermission;
         private String workflowStatus;
         private Set<String> threatProtectionPolicies;
@@ -244,6 +252,7 @@ public class CompositeAPI {
             this.gatewayConfig = copy.gatewayConfig;
             this.transport = copy.transport;
             this.labels = copy.labels;
+            this.hasOwnGateway = copy.hasOwnGateway;
             this.applicationId = copy.applicationId;
             this.createdTime = copy.createdTime;
             this.createdBy = copy.createdBy;
@@ -499,6 +508,17 @@ public class CompositeAPI {
         }
 
         /**
+         * Sets the {@code hasOwnGateway} and returns a reference to Builder so that methods can be chained together.
+         *
+         * @param hasOwnGateway the {@code hasOwnGateway} to set
+         * @return a reference to this Builder
+        */
+       public Builder hasOwnGateway(boolean hasOwnGateway) {
+            this.hasOwnGateway = hasOwnGateway;
+            return this;
+        }
+
+        /**
          * Returns a {@code CompositeAPI} built from the parameters previously set.
          *
          * @return a {@code CompositeAPI} built with parameters of this {@code CompositeAPI.Builder}
@@ -589,6 +609,10 @@ public class CompositeAPI {
 
         public Set<String> getThreatProtectionPolicies() {
             return threatProtectionPolicies;
+        }
+
+        public boolean getHasOwnGateway() {
+            return hasOwnGateway;
         }
     }
 }

@@ -58,6 +58,7 @@ import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
+import org.wso2.carbon.apimgt.core.models.DedicatedGateway;
 import org.wso2.carbon.apimgt.core.models.Event;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.Rating;
@@ -75,6 +76,7 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants.ApplicationStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.SubscriptionStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
+import org.wso2.carbon.apimgt.core.util.ContainerBasedGatewayConstants;
 import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationResponse;
 import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationWorkflow;
 import org.wso2.carbon.apimgt.core.workflow.ApplicationUpdateWorkflow;
@@ -133,7 +135,6 @@ public class APIStoreImplTestCase {
                 return null;
             }
 
-            @Override
             public <T> T getConfigurationObject(String s, Class<T> aClass) throws ConfigurationException {
                 return null;
             }
@@ -1625,6 +1626,130 @@ public class APIStoreImplTestCase {
         apiStore.selfSignUp(user);
     }
 
+    @Test(description = "Get dedicated gateway")
+    public void testGetDedicatedGateway() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        DedicatedGateway dedicatedGateway = new DedicatedGateway();
+        dedicatedGateway.setEnabled(true);
+        APIStoreImpl apiStore = getApiStoreImpl(apiDAO);
+        Mockito.when(apiDAO.getDedicatedGateway(Mockito.anyString())).thenReturn(dedicatedGateway);
+        DedicatedGateway result = apiStore.getDedicatedGateway(Mockito.anyString());
+        Assert.assertTrue(result.isEnabled());
+    }
+
+    @Test(description = "Get dedicated gateway exception scenario", expectedExceptions = APIManagementException.class)
+    public void testGetDedicatedGatewayForException() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        DedicatedGateway dedicatedGateway = new DedicatedGateway();
+        dedicatedGateway.setEnabled(true);
+        APIStoreImpl apiStore = getApiStoreImpl(apiDAO);
+        Mockito.when(apiDAO.getDedicatedGateway(Mockito.anyString())).thenThrow(APIMgtDAOException.class);
+        apiStore.getDedicatedGateway(Mockito.anyString());
+    }
+
+    @Test(description = "Update dedicated gateway")
+    public void testUpdateDedicatedGateway() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
+
+        API api = SampleTestObjectCreator.createDefaultAPI().lifeCycleStatus(APIStatus.PUBLISHED.getStatus()).build();
+        String uuid = api.getId();
+        Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
+
+        String autoGenLabelName = ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + uuid;
+        Mockito.when(labelDAO.getLabelByName(autoGenLabelName)).thenReturn(null);
+        APIStoreImpl apiStore = getApiStoreImpl(apiDAO, labelDAO);
+        DedicatedGateway dedicatedGateway = new DedicatedGateway();
+        dedicatedGateway.setEnabled(true);
+        apiStore.updateDedicatedGateway(dedicatedGateway, uuid);
+        List<String> labelSet = new ArrayList<>();
+        labelSet.add(autoGenLabelName);
+        Mockito.verify(apiDAO, Mockito.times(1)).updateDedicatedGateway(dedicatedGateway, uuid, labelSet);
+        Mockito.verify(labelDAO, Mockito.times(1)).addLabels(Mockito.anyList());
+    }
+
+    @Test(description = "Update dedicated gateway when label is not null and present in the system")
+    public void testUpdateDedicatedGatewayWhenLabelIsNotNull() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
+
+        API api = SampleTestObjectCreator.createDefaultAPI().lifeCycleStatus(APIStatus.PUBLISHED.getStatus()).build();
+        String uuid = api.getId();
+        Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
+
+        String autoGenLabelName = ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + uuid;
+        Label label = new Label.Builder().id(java.util.UUID.randomUUID().toString()).
+                name(autoGenLabelName).accessUrls(null).build();
+        Mockito.when(labelDAO.getLabelByName(autoGenLabelName)).thenReturn(label);
+        APIStoreImpl apiStore = getApiStoreImpl(apiDAO, labelDAO);
+        DedicatedGateway dedicatedGateway = new DedicatedGateway();
+        dedicatedGateway.setEnabled(true);
+        apiStore.updateDedicatedGateway(dedicatedGateway, uuid);
+        List<String> labelSet = new ArrayList<>();
+        labelSet.add(autoGenLabelName);
+        Mockito.verify(apiDAO, Mockito.times(1)).updateDedicatedGateway(dedicatedGateway, uuid, labelSet);
+        Mockito.verify(labelDAO, Mockito.times(0)).addLabels(Mockito.anyList());
+    }
+
+    @Test(description = "Update dedicated gateway when dedicated gateway is disabled")
+    public void testUpdateDedicatedGatewayWhenDedicatedGatewayIsDisabled() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
+
+        API api = SampleTestObjectCreator.createDefaultAPI().lifeCycleStatus(APIStatus.PUBLISHED.getStatus()).build();
+        String uuid = api.getId();
+        Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
+        String autoGenLabelName = ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + uuid;
+
+        APIStoreImpl apiStore = getApiStoreImpl(apiDAO, labelDAO);
+        DedicatedGateway dedicatedGateway = new DedicatedGateway();
+        dedicatedGateway.setEnabled(false);
+        apiStore.updateDedicatedGateway(dedicatedGateway, uuid);
+        List<String> labelSet = new ArrayList<>();
+        labelSet.add(autoGenLabelName);
+        Mockito.verify(apiDAO, Mockito.times(0)).updateDedicatedGateway(dedicatedGateway, uuid, labelSet);
+    }
+
+    @Test(description = "Update dedicated gateway when dedicated gateway is disabled and api has own gateway")
+    public void testUpdateDedicatedGatewayWhenDedicatedGatewayIsDisabledAndAPIHasOwnGateway() throws
+            APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
+
+        API api = SampleTestObjectCreator.createDefaultAPI().hasOwnGateway(true).lifeCycleStatus(APIStatus.
+                PUBLISHED.getStatus()).build();
+        String uuid = api.getId();
+        Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
+
+        APIStoreImpl apiStore = getApiStoreImpl(apiDAO, labelDAO);
+        DedicatedGateway dedicatedGateway = new DedicatedGateway();
+        dedicatedGateway.setEnabled(false);
+        apiStore.updateDedicatedGateway(dedicatedGateway, uuid);
+        List<String> labelSet = new ArrayList<>();
+        labelSet.add(APIMgtConstants.DEFAULT_LABEL_NAME);
+        Mockito.verify(apiDAO, Mockito.times(1)).updateDedicatedGateway(dedicatedGateway, uuid, labelSet);
+    }
+
+    @Test(description = "Update dedicated gateway for exception", expectedExceptions = APIManagementException.class)
+    public void testUpdateDedicatedGatewayForException() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
+
+        API api = SampleTestObjectCreator.createDefaultAPI().lifeCycleStatus(APIStatus.PUBLISHED.getStatus()).build();
+        String uuid = api.getId();
+        Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
+        String autoGenLabelName = ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + uuid;
+
+        Mockito.when(labelDAO.getLabelByName(autoGenLabelName)).thenReturn(null);
+        APIStoreImpl apiStore = getApiStoreImpl(apiDAO, labelDAO);
+        DedicatedGateway dedicatedGateway = new DedicatedGateway();
+        dedicatedGateway.setEnabled(true);
+        List<String> labelSet = new ArrayList<>();
+        labelSet.add(autoGenLabelName);
+        Mockito.doThrow(APIMgtDAOException.class).when(apiDAO).updateDedicatedGateway(dedicatedGateway, uuid, labelSet);
+        apiStore.updateDedicatedGateway(dedicatedGateway, uuid);
+    }
+
     private APIStoreImpl getApiStoreImpl(ApiDAO apiDAO) {
         return new APIStoreImpl(USER_NAME, null, null, apiDAO, null, null, null, null, null, null, null, null);
     }
@@ -1732,4 +1857,5 @@ public class APIStoreImplTestCase {
         return new APIStoreImpl(USER_NAME, null, null, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO,
                 null, null, workflowDAO, null, apiGateway);
     }
+
 }

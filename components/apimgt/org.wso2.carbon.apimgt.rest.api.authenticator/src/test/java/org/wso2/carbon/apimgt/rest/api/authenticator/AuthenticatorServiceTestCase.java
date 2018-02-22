@@ -59,7 +59,7 @@ public class AuthenticatorServiceTestCase {
 
         //// Expected data object to be passed to the front-end
         JsonObject oAuthData = new JsonObject();
-        String scopes = "apim:self-signup apim:subscribe openid";
+        String scopes = "apim:self-signup apim:dedicated_gateway apim:subscribe openid";
         oAuthData.addProperty(KeyManagerConstants.OAUTH_CLIENT_ID, oAuthApplicationInfo.getClientId());
         oAuthData.addProperty(KeyManagerConstants.OAUTH_CALLBACK_URIS, oAuthApplicationInfo.getCallBackURL());
         oAuthData.addProperty(KeyManagerConstants.TOKEN_SCOPES, scopes);
@@ -106,7 +106,7 @@ public class AuthenticatorServiceTestCase {
         JsonObject oAuthData = new JsonObject();
         String scopes = "apim:api_view apim:api_create apim:api_update apim:api_delete apim:apidef_update "
                 + "apim:api_publish apim:subscription_view apim:subscription_block openid "
-                + "apim:external_services_discover";
+                + "apim:external_services_discover apim:dedicated_gateway";
         oAuthData.addProperty(KeyManagerConstants.OAUTH_CLIENT_ID, oAuthApplicationInfo.getClientId());
         oAuthData.addProperty(KeyManagerConstants.OAUTH_CALLBACK_URIS, oAuthApplicationInfo.getCallBackURL());
         oAuthData.addProperty(KeyManagerConstants.TOKEN_SCOPES, scopes);

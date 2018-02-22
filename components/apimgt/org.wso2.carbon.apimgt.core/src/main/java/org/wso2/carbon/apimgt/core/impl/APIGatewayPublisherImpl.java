@@ -22,6 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIGateway;
 import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
+import org.wso2.carbon.apimgt.core.exception.ContainerBasedGatewayException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -77,9 +79,11 @@ public class APIGatewayPublisherImpl implements APIGateway {
         if (log.isDebugEnabled()) {
             log.debug("API : " + api.getName() + " created event has been successfully published to broker");
         }
-
     }
 
+    /**
+     * @see APIGateway#addCompositeAPI(CompositeAPI api)
+     */
     @Override
     public void addCompositeAPI(CompositeAPI api) throws GatewayException {
 
@@ -93,7 +97,6 @@ public class APIGatewayPublisherImpl implements APIGateway {
         apiSummary.setThreatProtectionPolicies(api.getThreatProtectionPolicies());
         gatewayDTO.setApiSummary(apiSummary);
         publishToPublisherTopic(gatewayDTO);
-
     }
 
     @Override
@@ -118,6 +121,20 @@ public class APIGatewayPublisherImpl implements APIGateway {
         publishToPublisherTopic(apiDeleteEvent);
         if (log.isDebugEnabled()) {
             log.debug("API : " + api.getName() + " deleted event has been successfully published to broker");
+        }
+        if (api.hasOwnGateway()) {
+            // Delete the Gateway - check how we can assume that we complete the deletion
+            try {
+                List<String> labels = api.getLabels();
+                if (labels != null && !labels.isEmpty()) {
+                    removeContainerBasedGateway(labels.toArray()[0].toString());
+                } else {
+                    log.error("Could not delete container based gateways as labels could not find in the API.");
+                }
+            } catch (ContainerBasedGatewayException e) {
+                String msg = "Error while removing the container based gateway";
+                throw new GatewayException(msg, e, ExceptionCodes.CONTAINER_GATEWAY_REMOVAL_FAILED);
+            }
         }
     }
 
@@ -429,6 +446,31 @@ public class APIGatewayPublisherImpl implements APIGateway {
     }
 
     /**
+     * @see APIGateway#createContainerBasedGateway(String)
+     */
+    @Override
+    public void createContainerBasedGateway(String label) throws ContainerBasedGatewayException {
+
+        APIManagerFactory apiManagerFactory = APIManagerFactory.getInstance();
+        ContainerBasedGatewayGenerator containerBasedGatewayGenerator =
+                apiManagerFactory.getContainerBasedGatewayGenerator();
+        containerBasedGatewayGenerator.createContainerGateway(label);
+
+    }
+
+    /**
+     * @see APIGateway#removeContainerBasedGateway(String)
+     */
+    @Override
+    public void removeContainerBasedGateway(String label) throws ContainerBasedGatewayException {
+
+        APIManagerFactory apiManagerFactory = APIManagerFactory.getInstance();
+        ContainerBasedGatewayGenerator containerBasedGatewayGenerator =
+                apiManagerFactory.getContainerBasedGatewayGenerator();
+        containerBasedGatewayGenerator.removeContainerBasedGateway(label);
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -463,6 +505,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
 
     /**
      * Publish an event to threatprotection topic
+     *
      * @param gatewayDTO {@link GatewayEvent}
      * @throws GatewayException if failed to publish to the topic
      */

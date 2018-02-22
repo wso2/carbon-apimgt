@@ -20,6 +20,7 @@ import org.wso2.carbon.apimgt.core.impl.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.impl.WSDLProcessFactory;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.DedicatedGateway;
 import org.wso2.carbon.apimgt.core.models.APIResource;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
@@ -29,6 +30,7 @@ import org.wso2.carbon.apimgt.core.models.WSDLInfo;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.ThreatProtectionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
 import org.wso2.carbon.apimgt.core.workflow.GeneralWorkflowResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -40,6 +42,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.StringUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDefinitionValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.DedicatedGatewayDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_operationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
@@ -74,6 +77,121 @@ import javax.ws.rs.core.Response;
         "2016-11-01T13:47:43.416+05:30")
 public class ApisApiServiceImpl extends ApisApiService {
     private static final Logger log = LoggerFactory.getLogger(ApisApiServiceImpl.class);
+
+    /**
+     * Retrive Dedicated Gateway of an API
+     *
+     * @param apiId             UUID of API
+     * @param ifNoneMatch           If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @param request           msf4j request object
+     * @return 200 OK if the opration was successful
+     * @throws NotFoundException when the particular resource does not exist
+     */
+    @Override
+    public Response apisApiIdDedicatedGatewayGet(String apiId, String ifNoneMatch, String ifModifiedSince,
+                                                  Request request) throws NotFoundException {
+            String username = RestApiUtil.getLoggedInUsername(request);
+            try {
+                APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+
+                if (!apiPublisher.isAPIExists(apiId)) {
+                    String errorMessage = "API not found : " + apiId;
+                    APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
+                            ExceptionCodes.API_NOT_FOUND);
+                    HashMap<String, String> paramList = new HashMap<String, String>();
+                    paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+                    ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                    log.error(errorMessage, e);
+                    return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+                }
+
+                String existingFingerprint = apisApiIdGetFingerprint(apiId, null, null, request);
+                if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
+                        .contains(existingFingerprint)) {
+                    return Response.notModified().build();
+                }
+
+                DedicatedGateway dedicatedGateway  = apiPublisher.getDedicatedGateway(apiId);
+                if (dedicatedGateway != null) {
+                    DedicatedGatewayDTO dedicatedGatewayDTO = MappingUtil.toDedicatedGatewayDTO(dedicatedGateway);
+                    return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint
+                            + "\"").entity(dedicatedGatewayDTO).build();
+
+                } else {
+                    String msg = "Dedicated Gateway not found for " + apiId;
+                    APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(msg,
+                            ExceptionCodes.DEDICATED_GATEWAY_DETAILS_NOT_FOUND);
+                    HashMap<String, String> paramList = new HashMap<String, String>();
+                    paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+                    ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                    APIUtils.logDebug(msg, log);
+                    return Response.status(Response.Status.NOT_FOUND).entity(errorDTO).build();
+                }
+
+            } catch (APIManagementException e) {
+                String errorMessage = "Error while retrieving dedicated gateway of the API : " + apiId;
+                HashMap<String, String> paramList = new HashMap<String, String>();
+                paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                log.error(errorMessage, e);
+                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+            }
+    }
+
+    /**
+     * Add or update Dedicated Gateway of an API
+     *
+     * @param apiId             UUID of API
+     * @param body              DedicatedGatewayDTO
+     * @param ifMatch           If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @param request           msf4j request object
+     * @return 200 OK if the operation was successful
+     * @throws NotFoundException when the particular resource does not exist
+     */
+    @Override
+    public Response apisApiIdDedicatedGatewayPut(String apiId, DedicatedGatewayDTO body, String ifMatch,
+                                                  String ifUnmodifiedSince, Request request) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername(request);
+
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+
+            if (!apiPublisher.isAPIExists(apiId)) {
+                String errorMessage = "API not found : " + apiId;
+                APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
+                        ExceptionCodes.API_NOT_FOUND);
+                HashMap<String, String> paramList = new HashMap<String, String>();
+                paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                log.error(errorMessage, e);
+                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+            }
+
+            String existingFingerprint = apisApiIdGetFingerprint(apiId, null, null, request);
+            if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
+                    .contains(existingFingerprint)) {
+                return Response.status(Response.Status.PRECONDITION_FAILED).build();
+            }
+            DedicatedGateway dedicatedGateway = MappingUtil.fromDTOtoDedicatedGateway(body, apiId);
+            apiPublisher.updateDedicatedGateway(dedicatedGateway, apiId);
+
+            DedicatedGateway updatedDedicatedGateway = apiPublisher.getDedicatedGateway(apiId);
+            String newFingerprint = apisApiIdGetFingerprint(apiId, null, null, request);
+
+            return Response.ok().header(HttpHeaders.ETAG, "\"" + newFingerprint + "\"")
+                    .entity(MappingUtil.toDedicatedGatewayDTO(updatedDedicatedGateway)).build();
+
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while updating dedicated gateway of the API : " + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
 
     /**
      * Deletes a particular API
@@ -230,7 +348,6 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             if (fileInputStream != null && inlineContent != null) {
                 String msg = "Only one of 'file' and 'inlineContent' should be specified";
-                log.error(msg);
                 ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
                 log.error(msg);
                 return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
@@ -240,7 +357,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             DocumentInfo documentation = apiProvider.getDocumentationSummary(documentId);
             if (documentation == null) {
                 String msg = "Documentation not found " + documentId;
-                log.error(msg);
                 ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
                 log.error(msg);
                 return Response.status(Response.Status.NOT_FOUND).entity(errorDTO).build();
@@ -249,7 +365,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             if (fileInputStream != null) {
                 if (!documentation.getSourceType().equals(DocumentInfo.SourceType.FILE)) {
                     String msg = "Source type of document " + documentId + " is not FILE";
-                    log.error(msg);
                     ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
                     log.error(msg);
                     return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();

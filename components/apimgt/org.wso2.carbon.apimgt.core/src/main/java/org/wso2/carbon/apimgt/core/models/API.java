@@ -62,6 +62,7 @@ public final class API {
         isDefaultVersion = builder.isDefaultVersion;
         transport = builder.transport;
         tags = builder.tags;
+        hasOwnGateway = builder.hasOwnGateway;
         labels = builder.labels;
         policies = builder.policies;
         visibility = builder.visibility;
@@ -166,6 +167,10 @@ public final class API {
 
     public List<String> getLabels() {
         return labels;
+    }
+
+    public boolean hasOwnGateway() {
+        return hasOwnGateway;
     }
 
     public Set<Policy> getPolicies() {
@@ -275,6 +280,7 @@ public final class API {
                 Objects.equals(wsdlUri, api.wsdlUri) &&
                 Objects.equals(transport, api.transport) &&
                 Objects.equals(tags, api.tags) &&
+                Objects.equals(hasOwnGateway, api.hasOwnGateway) &&
                 Objects.equals(labels, api.labels) &&
                 visibility == api.visibility &&
                 Objects.equals(visibleRoles, api.visibleRoles) &&
@@ -326,6 +332,7 @@ public final class API {
     private final boolean isDefaultVersion;
     private final Set<String> transport;
     private final Set<String> tags;
+    private final boolean hasOwnGateway;
     private final List<String> labels;
     private final Set<Policy> policies;
     private final Visibility visibility;
@@ -380,6 +387,7 @@ public final class API {
             isDefaultVersion = api.isDefaultVersion();
             transport = api.getTransport();
             tags = api.getTags();
+            hasOwnGateway = api.hasOwnGateway();
             labels = api.getLabels();
             policies = new HashSet<>();
             api.getPolicies().forEach(v -> policies.add(new SubscriptionPolicy(v)));
@@ -481,10 +489,13 @@ public final class API {
         public Set<String> getTags() {
             return tags;
         }
-
-
+        
         public List<String> getLabels() {
             return labels;
+        }
+
+        public boolean hasOwnGateway() {
+            return hasOwnGateway;
         }
 
         public Set<Policy> getPolicies() {
@@ -535,6 +546,7 @@ public final class API {
         private Policy apiPolicy;
         private Set<String> transport = Collections.emptySet();
         private Set<String> tags = Collections.emptySet();
+        private boolean hasOwnGateway = false;
         private List<String> labels =  new ArrayList<String>();
         private Set<Policy> policies = Collections.emptySet();
         private Visibility visibility = Visibility.PUBLIC;
@@ -578,6 +590,7 @@ public final class API {
             this.isDefaultVersion = copy.isDefaultVersion;
             this.transport = copy.transport;
             this.tags = copy.tags;
+            this.hasOwnGateway = copy.hasOwnGateway;
             this.labels = copy.labels;
             this.policies = copy.policies;
             this.visibility = copy.visibility;
@@ -1020,6 +1033,18 @@ public final class API {
 
         public APIBuilder threatProtectionPolicies(Set<String> threatProtectionPolicies) {
             this.threatProtectionPolicies = threatProtectionPolicies;
+            return this;
+        }
+
+        /**
+         * Sets the {@code hasOwnGateway} and returns a reference to this APIBuilder so that the methods
+         * can be chained together.
+         *
+         * @param hasOwnGateway the {@code hasOwnGateway} to set
+         * @return a reference to this APIBuilder
+         */
+        public APIBuilder hasOwnGateway(boolean hasOwnGateway) {
+            this.hasOwnGateway = hasOwnGateway;
             return this;
         }
 

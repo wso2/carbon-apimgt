@@ -54,7 +54,7 @@ class ConfigManager {
  * @type {{ConstPath: StringPath}} ConfigRequestPaths: Configuration requesting url paths
  */
 const ConfigRequestPaths = {
-    ENVIRONMENT_CONFIG_PATH: "/configService/environments"
+    ENVIRONMENT_CONFIG_PATH: "/api/am/config/v1.0/environments"
 };
 
 /**
