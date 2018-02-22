@@ -90,13 +90,24 @@ public class RESTAPISecurityInterceptor implements Interceptor {
 
         //CORS for Environments - Add allowed Methods and Headers when 'OPTIONS' method is called.
         if (request.getHttpMethod().equalsIgnoreCase(APIConstants.HTTP_OPTIONS)) {
-            //TODO: [rnk] Get defined http methods for the resource path for 'Access-Control-Allow-Methods'
-            response.setHeader(RestApiConstants.ACCESS_CONTROL_ALLOW_METHODS_HEADER,
-                    "POST, GET, OPTIONS, PUT, DELETE, HEAD")
-                    .setHeader(RestApiConstants.ACCESS_CONTROL_ALLOW_HEADERS_HEADER,
-                            RestApiConstants.ACCESS_CONTROL_ALLOW_HEADERS_LIST)
-                    .setStatus(javax.ws.rs.core.Response.Status.OK.getStatusCode()).send();
-            return false;
+            try {
+                String definedHttpMethods =
+                        RestApiUtil.getDefinedMethodHeadersInSwaggerContent(request, serviceMethodInfo);
+                if (definedHttpMethods != null) {
+                    response.setHeader(RestApiConstants.ACCESS_CONTROL_ALLOW_METHODS_HEADER, definedHttpMethods)
+                            .setHeader(RestApiConstants.ACCESS_CONTROL_ALLOW_HEADERS_HEADER,
+                                    RestApiConstants.ACCESS_CONTROL_ALLOW_HEADERS_LIST)
+                            .setStatus(javax.ws.rs.core.Response.Status.OK.getStatusCode()).send();
+                    return false;
+                }
+            } catch (APIManagementException e) {
+                String msg = "Couldn't find declared HTTP methods in swagger.yaml";
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+                log.error(msg, e);
+                response.setStatus(javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())
+                        .setEntity(errorDTO).send();
+                return false;
+            }
         }
 
         /* TODO: Following string contains check is done to avoid checking security headers in non API requests.
@@ -112,7 +123,7 @@ public class RESTAPISecurityInterceptor implements Interceptor {
         String yamlContent = null;
         String protocol = (String) request.getProperty(PROTOCOL);
         Swagger swagger = null;
-        if (requestURI.contains("/publisher")) {
+        if (requestURI.contains("/api/am/publisher")) {
             if (requestURI.contains("swagger.yaml")) {
                 try {
                     yamlContent = RestApiUtil.getPublisherRestAPIResource();
@@ -127,7 +138,7 @@ public class RESTAPISecurityInterceptor implements Interceptor {
                 }
                 return false;
             }
-        } else if (requestURI.contains("/store")) {
+        } else if (requestURI.contains("/api/am/store")) {
             if (requestURI.contains("swagger.json")) {
                 try {
                     yamlContent = RestApiUtil.getStoreRestAPIResource();
@@ -159,7 +170,7 @@ public class RESTAPISecurityInterceptor implements Interceptor {
                 }
                 return false;
             }
-        } else if (requestURI.contains("/analytics")) {
+        } else if (requestURI.contains("/api/am/analytics")) {
             if (requestURI.contains("swagger.json")) {
                 try {
                     yamlContent = RestApiUtil.getAnalyticsRestAPIResource();
@@ -175,9 +186,9 @@ public class RESTAPISecurityInterceptor implements Interceptor {
                 return false;
             }
         } else if (requestURI.contains("/editor") || requestURI.contains("keyserver") || requestURI.contains("core") ||
-                requestURI.contains("config")) {
+                requestURI.contains("/api/am/config")) {
             return true;
-        } else if (requestURI.contains("/admin")) {
+        } else if (requestURI.contains("/api/am/admin")) {
             if (requestURI.contains("swagger.json")) {
                 try {
                     yamlContent = RestApiUtil.getAdminRestAPIResource();
