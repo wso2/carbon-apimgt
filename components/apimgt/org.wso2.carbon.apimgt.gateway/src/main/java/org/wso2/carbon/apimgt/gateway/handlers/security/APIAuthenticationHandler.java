@@ -156,16 +156,6 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 initializeAuthenticator();
             }
             if (isAuthenticate(messageContext)) {
-                if (log.isDebugEnabled()) {
-                    // We do the calculations only if the debug logs are enabled. Otherwise this would be an overhead
-                    // to all the gateway calls that is happening.
-                    endTime = System.nanoTime();
-                    difference = (endTime - startTime) / 1000000;
-                    String messageDetails = logMessageDetails(messageContext);
-
-                    log.debug("Authenticated API, authentication response relieved: " + messageDetails +
-                            ", elapsedTimeInMilliseconds=" + difference / 1000000);
-                }
                 setAPIParametersToMessageContext(messageContext);
                 return true;
             }
