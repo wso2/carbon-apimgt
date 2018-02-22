@@ -84,6 +84,8 @@ class Login extends Component {
             //Fetch DCR App data and handle SSO login if redirected from IDP
             this.fetch_DCRAppInfo(environments, idToken);
             idToken = null; // Discard ID Token
+        }).catch(error => {
+            console.error('Error while receiving environment configurations : ', error);
         });
     }
 
@@ -106,6 +108,8 @@ class Login extends Component {
             // If idToken is not null or redirected from IDP
             if(idToken) this.authManager.handleAutoLoginEnvironments(idToken, environments, authConfigs);
             Utils.setMultiEnvironmentOverviewEnabledInfo(environments, authConfigs);
+        }).catch(error => {
+            console.error('Error while creating/receiving DCR Application info : ', error);
         });
     }
 

@@ -56,6 +56,8 @@ class Protected extends Component {
         ConfigManager.getConfigs().environments.then(response => {
             this.environments = response.data.environments;
             this.handleEnvironmentQueryParam();
+        }).catch(error => {
+            console.error('Error while receiving environment configurations : ', error);
         });
     }
 

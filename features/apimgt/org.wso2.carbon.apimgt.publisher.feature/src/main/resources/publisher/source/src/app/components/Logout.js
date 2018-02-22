@@ -54,6 +54,8 @@ class Logout extends Component {
                     this.setState({logoutFail: error});
                 }
             );
+        }).catch(error => {
+            console.error('Error while receiving environment configurations : ', error);
         });
     }
 
