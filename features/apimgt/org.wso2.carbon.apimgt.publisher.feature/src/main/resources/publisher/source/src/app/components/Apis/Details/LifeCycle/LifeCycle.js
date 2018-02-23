@@ -104,44 +104,26 @@ class LifeCycle extends Component {
             return <Loading/>
         }
         return (
-            <Grid item>
+            <Grid container>
                 <Grid item xs={12}>
-                    <Paper>
-                        <Typography type="display2">
-                            {api.name} - <span>Change Lifecycle</span>
-                        </Typography>
-                        <Typography type="caption" gutterBottom align="left">
-                            Manage API lifecycle from cradle to grave: create, publish,
-                            block, deprecate, and retire
-                        </Typography>
+                    <LifeCycleUpdate handleUpdate={this.updateData} lcState={this.state.lcState}
+                                     api={api} privateJetModeEnabled={this.state.privateJetModeEnabled}/>
 
-                    </Paper>
                 </Grid>
                 <Grid item xs={12}>
-                    <Typography type="headline" className="title-gap">
-                        Change Lifecycle
-                    </Typography>
-                    <Card>
-                        <CardContent>
-                            <LifeCycleUpdate handleUpdate={this.updateData} lcState={this.state.lcState}
-                                             api={api} privateJetModeEnabled={this.state.privateJetModeEnabled}/>
-                        </CardContent>
-                    </Card>
                     {this.state.lcHistory.length > 1 &&
                     <div>
-                        <Typography type="headline" className="title-gap">
+                        <Typography variant="headline" gutterBottom>
                             History
                         </Typography>
-                        <Card>
-                            <CardContent>
+                        <Paper>
                                 <LifeCycleHistory
                                     lcHistory={this.state.lcHistory}/>
-                            </CardContent>
-                        </Card>
+                        </Paper>
                     </div>}
                 </Grid>
             </Grid>
-        );
+            );
     }
 }
 
