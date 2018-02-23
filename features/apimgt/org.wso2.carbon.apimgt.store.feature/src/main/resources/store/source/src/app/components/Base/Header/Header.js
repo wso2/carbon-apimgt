@@ -73,6 +73,8 @@ class Header extends React.Component {
             this.setState({
                 environments: response.data.environments
             });
+        }).catch(error => {
+            console.error('Error while receiving environment configurations : ', error);
         });
     }
 

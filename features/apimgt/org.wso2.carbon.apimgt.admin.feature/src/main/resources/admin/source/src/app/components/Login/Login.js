@@ -72,6 +72,8 @@ class Login extends Component {
 
             // Set authentication status of environments
             this.setLoginStatusOfEnvironments(environments);
+        }).catch(error => {
+            console.error('Error while receiving environment configurations : ', error);
         });
     }
 

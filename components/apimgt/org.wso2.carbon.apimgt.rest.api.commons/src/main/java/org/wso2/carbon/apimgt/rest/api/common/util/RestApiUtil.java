@@ -15,6 +15,9 @@
 */
 package org.wso2.carbon.apimgt.rest.api.common.util;
 
+import io.swagger.models.Path;
+import io.swagger.models.Swagger;
+import io.swagger.parser.SwaggerParser;
 import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
@@ -34,12 +37,14 @@ import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.exception.APIMgtSecurityException;
 import org.wso2.carbon.apimgt.rest.api.common.exception.BadRequestException;
 import org.wso2.msf4j.Request;
+import org.wso2.msf4j.ServiceMethodInfo;
 import org.wso2.transport.http.netty.config.ListenerConfiguration;
 import org.wso2.transport.http.netty.config.TransportsConfiguration;
 import org.wso2.transport.http.netty.config.YAMLTransportConfigurationBuilder;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -49,8 +54,10 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 
 /**
@@ -66,8 +73,24 @@ public class RestApiUtil {
     private static String storeRestAPIDefinition;
     private static String adminRestAPIDefinition;
     private static String analyticsRestApiDefinition;
+    private static Map<String, Swagger> swaggerRestAPIDefinitions = new HashMap<>();
     private static APIMConfigurations apimConfigurations = APIMConfigurationService.getInstance()
             .getApimConfigurations();
+
+    static {
+        try {
+            swaggerRestAPIDefinitions.put(RestApiConstants.APPType.PUBLISHER, new SwaggerParser()
+                    .parse(getPublisherRestAPIResource()));
+            swaggerRestAPIDefinitions.put(RestApiConstants.APPType.STORE, new SwaggerParser()
+                    .parse(getStoreRestAPIResource()));
+            swaggerRestAPIDefinitions.put(RestApiConstants.APPType.ANALYTICS, new SwaggerParser()
+                    .parse(getAnalyticsRestAPIResource()));
+            swaggerRestAPIDefinitions.put(RestApiConstants.APPType.ADMIN, new SwaggerParser()
+                    .parse(getAdminRestAPIResource()));
+        } catch (APIManagementException e) {
+            log.error("Error while parsing the swagger definition to " + Swagger.class.getName(), e);
+        }
+    }
 
     /**
      * Get the current logged in user's username
@@ -524,6 +547,58 @@ public class RestApiUtil {
      */
     public static ZoneId getRequestTimeZone(String timestamp) {
         return ZonedDateTime.parse(timestamp).getZone();
+    }
+
+    /**
+     * Get defined HTTP methods in the swagger definition as a comma separated string
+     *
+     * @param request           Request
+     * @param serviceMethodInfo Method information for the request
+     * @return Http Methods as a comma separated string
+     * @throws APIManagementException if failed to get defined http methods
+     */
+    public static String getDefinedMethodHeadersInSwaggerContent(
+            Request request, ServiceMethodInfo serviceMethodInfo) throws APIManagementException {
+        String requestURI = request.getUri().toLowerCase(Locale.ENGLISH);
+        Swagger swagger = null;
+        Method resourceMethod;
+
+        if (requestURI.contains("/api/am/publisher")) {
+            swagger = swaggerRestAPIDefinitions.get(RestApiConstants.APPType.PUBLISHER);
+        } else if (requestURI.contains("/api/am/store")) {
+            swagger = swaggerRestAPIDefinitions.get(RestApiConstants.APPType.STORE);
+        } else if (requestURI.contains("/api/am/analytics")) {
+            swagger = swaggerRestAPIDefinitions.get(RestApiConstants.APPType.ANALYTICS);
+        } else if (requestURI.contains("/api/am/admin")) {
+            swagger = swaggerRestAPIDefinitions.get(RestApiConstants.APPType.ADMIN);
+        } else {
+            return null;
+        }
+
+        if (swagger == null) {
+            throw new APIManagementException("Error while parsing the swagger definition",
+                    ExceptionCodes.SWAGGER_URL_MALFORMED);
+        }
+
+        resourceMethod = serviceMethodInfo.getMethod();
+        if (resourceMethod == null) {
+            throw new APIManagementException("Could not read required properties from HTTP Request.",
+                    ExceptionCodes.SWAGGER_URL_MALFORMED);
+        }
+
+        String apiPath = resourceMethod.getDeclaringClass().getAnnotation(javax.ws.rs.ApplicationPath.class).value();
+        javax.ws.rs.Path apiPathAnnotation = resourceMethod.getAnnotation(javax.ws.rs.Path.class);
+        if (apiPathAnnotation != null) {
+            apiPath += apiPathAnnotation.value();
+        }
+        Path swaggerAPIPath = swagger.getPath(apiPath);
+        if (swaggerAPIPath == null) {
+            throw new APIManagementException("Could not read API path from the swagger definition",
+                    ExceptionCodes.SWAGGER_URL_MALFORMED);
+        }
+
+        return swaggerAPIPath.getOperationMap().keySet().stream().map(Enum::toString)
+                .collect(Collectors.joining(", "));
     }
 
 }

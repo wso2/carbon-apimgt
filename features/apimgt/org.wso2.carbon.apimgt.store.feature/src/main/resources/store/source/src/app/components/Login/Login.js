@@ -82,6 +82,8 @@ class Login extends Component {
 
             //Fetch SSO data and render
             this.fetch_DCRappInfo(environments);
+        }).catch(error => {
+            console.error('Error while receiving environment configurations : ', error);
         });
 
         let queryString = this.props.location.search;

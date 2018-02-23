@@ -58,6 +58,8 @@ export default class Details extends Component {
             this.setState({
                 resourceNotFountMessage: {more, multi_environments}
             });
+        }).catch(error => {
+            console.error('Error while receiving environment configurations : ', error);
         });
     }
 
