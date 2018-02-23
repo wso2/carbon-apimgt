@@ -111,6 +111,8 @@ public class SQLConstantOracle extends SQLConstants{
                     "    (APPLICATION_ID IN ( SELECT APPLICATION_ID FROM AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?)) " +
                     "           OR " +
                     "    (LOWER (SUB.USER_ID) = LOWER(?))" +
+                    "           OR  " +
+                    "    (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?))" +
                     " )" +
                     " And " +
                     "    NAME like ?" +
@@ -145,6 +147,8 @@ public class SQLConstantOracle extends SQLConstants{
                     " IN ($params) AND TENANT = ? ))" +
                     "           OR " +
                     "    (SUB.USER_ID = ? )" +
+                    "           OR " +
+                    "    (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?))" +
                     " )" +
                     " And " +
                     "    NAME like ?"+

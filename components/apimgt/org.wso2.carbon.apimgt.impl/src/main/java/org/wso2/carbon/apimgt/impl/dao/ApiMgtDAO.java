@@ -3982,10 +3982,13 @@ public class ApiMgtDAO {
                 + "OR ((APP.GROUP_ID='' OR APP.GROUP_ID IS NULL) AND LOWER(SUB.USER_ID) = LOWER(?)))";
 
         String whereClauseWithMultiGroupId = " AND  ( (APP.APPLICATION_ID IN (SELECT APPLICATION_ID  FROM " +
-                "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?))  OR  ( SUB.USER_ID = ? ))";
+                "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?))  OR  ( SUB.USER_ID = ? ) " +
+                "OR (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?)))";
 
         String whereClauseWithMultiGroupIdCaseInsensitive = " AND  ( (APP.APPLICATION_ID IN  (SELECT APPLICATION_ID " +
-                "FROM AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?)) OR (LOWER(SUB.USER_ID) = LOWER(?) ))";
+                "FROM AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?)) " +
+                "OR (LOWER(SUB.USER_ID) = LOWER(?))" +
+                "OR (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?)))";
 
 
         String whereClause = " AND SUB.USER_ID = ? ";
@@ -4009,6 +4012,7 @@ public class ApiMgtDAO {
                     int paramIndex = noOfParams + 1;
                     preparedStatement.setString(++paramIndex, tenantDomain);
                     preparedStatement.setString(++paramIndex, subscriber.getName());
+                    preparedStatement.setString(++paramIndex, tenantDomain + '/' + groupId);
                 } else {
                     if (forceCaseInsensitiveComparisons) {
                         sqlQuery += whereClauseWithGroupIdCaseInsensitive;
@@ -4327,6 +4331,7 @@ public class ApiMgtDAO {
                     prepStmt = fillQueryParams(connection, sqlQuery, grpIdArray, 1);
                     prepStmt.setString(++noOfParams, tenantDomain);
                     prepStmt.setString(++noOfParams, subscriber.getName());
+                    prepStmt.setString(++noOfParams, tenantDomain + '/' + groupingId);
                     prepStmt.setString(++noOfParams, "%" + search + "%");
                     prepStmt.setInt(++noOfParams, start);
                     prepStmt.setInt(++noOfParams, offset);
@@ -4361,7 +4366,20 @@ public class ApiMgtDAO {
 
                 if(multiGroupAppSharingEnabled) {
                     application.setOwner(rs.getString("CREATED_BY"));
-                    application.setGroupId(getGroupId(application.getId()));
+                    String applicationGroupId = application.getGroupId();
+                    if (applicationGroupId.isEmpty()) { // No migrated App groupId
+                        application.setGroupId(getGroupId(application.getId()));
+                    } else {
+                        // Migrated data exists where Group ID for this App has been stored in AM_APPLICATION table
+                        // in the format 'tenant/groupId', so extract groupId value and store it in the App object
+                        String[] split = applicationGroupId.split("/");
+                        if (split.length == 2) {
+                            application.setGroupId(split[1]);
+                        } else {
+                            log.error("Migrated Group ID: " + applicationGroupId +
+                                    "does not follow the expected format 'tenant/groupId'");
+                        }
+                    }
                 }
                 Set<APIKey> keys = getApplicationKeys(subscriber.getName(), application.getId());
                 Map<String, OAuthApplicationInfo> keyMap = getOAuthApplications(application.getId());
@@ -4401,7 +4419,8 @@ public class ApiMgtDAO {
             if (multiGroupAppSharingEnabled) {
                 whereClauseWithGroupId = " AND ( (APP.APPLICATION_ID IN (SELECT APPLICATION_ID  FROM " +
                         "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?)) " +
-                        "OR (LOWER(SUB.USER_ID) = LOWER(?)))";
+                        "OR (LOWER(SUB.USER_ID) = LOWER(?))" +
+                        "OR (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?)))";
             } else {
                 whereClauseWithGroupId = "   AND " + "     (GROUP_ID= ? " + "      OR "
                         + "     ((GROUP_ID='' OR GROUP_ID IS NULL) AND LOWER(SUB.USER_ID) = LOWER(?))) ";
@@ -4410,7 +4429,8 @@ public class ApiMgtDAO {
             if (multiGroupAppSharingEnabled) {
                 whereClauseWithGroupId = " AND ( (APP.APPLICATION_ID IN (SELECT APPLICATION_ID " +
                         "FROM AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?))  " +
-                        "OR  ( SUB.USER_ID = ? )) ";
+                        "OR  ( SUB.USER_ID = ? )" +
+                        "OR (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?))) ";
             } else {
                 whereClauseWithGroupId = "   AND " + "     (GROUP_ID= ? " + "      OR "
                         + "     ((GROUP_ID='' OR GROUP_ID IS NULL) AND SUB.USER_ID=?))";
@@ -4452,6 +4472,7 @@ public class ApiMgtDAO {
                     prepStmt = fillQueryParams(connection, blockingFilerSql, groupIDArray, 1);
                     prepStmt.setString(++paramIndex, tenantDomain);
                     prepStmt.setString(++paramIndex, subscriber.getName());
+                    prepStmt.setString(++paramIndex, tenantDomain + '/' + groupingId);
                 } else {
                     prepStmt = connection.prepareStatement(blockingFilerSql);
                     prepStmt.setString(1, groupingId);
@@ -4486,7 +4507,20 @@ public class ApiMgtDAO {
                     application.addKey(key);
                 }
                 if (multiGroupAppSharingEnabled) {
-                    application.setGroupId(getGroupId(application.getId()));
+                    String applicationGroupId = application.getGroupId();
+                    if (applicationGroupId.isEmpty()) { // No migrated App groupId
+                        application.setGroupId(getGroupId(application.getId()));
+                    } else {
+                        // Migrated data exists where Group ID for this App has been stored in AM_APPLICATION table
+                        // in the format 'tenant/groupId', so extract groupId value and store it in the App object
+                        String[] split = applicationGroupId.split("/");
+                        if (split.length == 2) {
+                            application.setGroupId(split[1]);
+                        } else {
+                            log.error("Migrated Group ID: " + applicationGroupId +
+                                    "does not follow the expected format 'tenant/groupId'");
+                        }
+                    }
                     application.setOwner(rs.getString("CREATED_BY"));
                 }
                 applicationsList.add(application);
@@ -4768,7 +4802,6 @@ public class ApiMgtDAO {
                     String groupIDArray[] = groupingId.split(",");
                     sqlQuery += whereClauseWithMultiGroupId;
                     prepStmt = fillQueryParams(connection, sqlQuery, groupIDArray, 3);
-                    prepStmt = connection.prepareStatement(sqlQuery);
                     prepStmt.setString(1, applicationName);
                     prepStmt.setString(2, keyType);
                     int paramIndex = groupIDArray.length + 2;
@@ -5687,7 +5720,8 @@ public class ApiMgtDAO {
                     + " AND SUB.USER_ID = ?)) AND " + "APP.NAME = ? AND SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID";
 
             String whereClauseWithMultiGroupId = "  WHERE  ((APP.APPLICATION_ID IN (SELECT APPLICATION_ID  FROM " +
-                    "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?))  OR   SUB.USER_ID = ? ) " +
+                    "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?))  OR   SUB.USER_ID = ? " +
+                    "OR (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?))) " +
                     "AND APP.NAME = ? AND SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID";
 
             if (groupId != null && !"null".equals(groupId) && !groupId.isEmpty()) {
@@ -5701,6 +5735,7 @@ public class ApiMgtDAO {
                     prepStmt = fillQueryParams(connection, query, groupIds, 1);
                     prepStmt.setString(++parameterIndex, tenantDomain);
                     prepStmt.setString(++parameterIndex, userId);
+                    prepStmt.setString(++parameterIndex, tenantDomain + '/' + groupId);
                     prepStmt.setString(++parameterIndex, applicationName);
                 } else {
                     query += whereClauseWithGroupId;
@@ -5738,7 +5773,20 @@ public class ApiMgtDAO {
                 application.setGroupId(rs.getString("GROUP_ID"));
 
                 if (multiGroupAppSharingEnabled) {
-                    application.setGroupId(getGroupId(application.getId()));
+                    String applicationGroupId = application.getGroupId();
+                    if (applicationGroupId.isEmpty()) { // No migrated App groupId
+                        application.setGroupId(getGroupId(application.getId()));
+                    } else {
+                        // Migrated data exists where Group ID for this App has been stored in AM_APPLICATION table
+                        // in the format 'tenant/groupId', so extract groupId value and store it in the App object
+                        String[] split = applicationGroupId.split("/");
+                        if (split.length == 2) {
+                            application.setGroupId(split[1]);
+                        } else {
+                            log.error("Migrated Group ID: " + applicationGroupId +
+                                    "does not follow the expected format 'tenant/groupId'");
+                        }
+                    }
                 }
             }
         } catch (SQLException e) {
@@ -5827,6 +5875,12 @@ public class ApiMgtDAO {
                 application.setUUID(rs.getString("UUID"));
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
+
+                if (multiGroupAppSharingEnabled) {
+                    if (application.getGroupId().isEmpty()) {
+                        application.setGroupId(getGroupId(application.getId()));
+                    }
+                }
 
                 Timestamp createdTime = rs.getTimestamp("CREATED_TIME");
                 application.setCreatedTime(createdTime == null ? null : String.valueOf(createdTime.getTime()));
@@ -11430,12 +11484,18 @@ public class ApiMgtDAO {
 
         boolean updateSuccessful = false;
 
+        PreparedStatement removeMigratedGroupIdsStatement = null;
         PreparedStatement deleteStatement = null;
         PreparedStatement insertStatement = null;
         String deleteQuery = SQLConstants.REMOVE_GROUP_ID_MAPPING_SQL;
         String insertQuery = SQLConstants.ADD_GROUP_ID_MAPPING_SQL;
 
         try {
+            // Remove migrated Group ID information so that it can be replaced by updated Group ID's that are now
+            // being saved. This is done to ensure that there is no conflicting migrated Group ID data remaining
+            removeMigratedGroupIdsStatement = conn.prepareStatement(SQLConstants.REMOVE_MIGRATED_GROUP_ID_SQL);
+            removeMigratedGroupIdsStatement.setInt(1, applicationId);
+            removeMigratedGroupIdsStatement.executeUpdate();
 
             deleteStatement = conn.prepareStatement(deleteQuery);
             deleteStatement.setInt(1, applicationId);
@@ -11459,6 +11519,7 @@ public class ApiMgtDAO {
             updateSuccessful = false;
             handleException("Failed to update GroupId mappings ", e);
         } finally {
+            APIMgtDBUtil.closeAllConnections(removeMigratedGroupIdsStatement, null, null);
             APIMgtDBUtil.closeAllConnections(deleteStatement, null, null);
             APIMgtDBUtil.closeAllConnections(insertStatement, null, null);
         }

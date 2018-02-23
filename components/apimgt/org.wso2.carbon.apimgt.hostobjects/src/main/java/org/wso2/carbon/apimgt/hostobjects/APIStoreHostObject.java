@@ -3339,7 +3339,7 @@ public class APIStoreHostObject extends ScriptableObject {
             Application app = apiConsumer.getApplicationsByName(username, name, groupingId);
 
             if (app != null) {
-                apiConsumer.removeApplication(app);
+                apiConsumer.removeApplication(app, username);
             } else {
                 handleException("Application " + name + " doesn't exists");
             }
