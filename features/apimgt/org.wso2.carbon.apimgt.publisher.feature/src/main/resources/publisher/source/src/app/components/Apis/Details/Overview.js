@@ -18,26 +18,48 @@
 
 import React, {Component} from 'react'
 import {Link} from 'react-router-dom'
-import {Form, message} from 'antd';
 import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import Api from '../../../data/api'
-import {resourceMethod, resourcePath, ScopeValidation} from '../../../data/ScopeValidation'
-import ApiPermissionValidation from '../../../data/ApiPermissionValidation'
 
-import Dialog, {DialogActions, DialogContent, DialogContentText, DialogTitle} from 'material-ui/Dialog';
-import Paper from 'material-ui/Paper';
 import Grid from 'material-ui/Grid';
 import Typography from 'material-ui/Typography';
-import Button from 'material-ui/Button';
-import Card, {CardActions, CardContent, CardMedia} from 'material-ui/Card';
-import Table, {TableBody, TableCell, TableRow} from 'material-ui/Table';
-import blueGrey from 'material-ui/colors/blueGrey';
-import {CreateNewFolder, Delete, Description, Edit} from 'material-ui-icons';
-import Slide from "material-ui/transitions/Slide";
-import Utils from "../../../data/Utils";
 
-const FormItem = Form.Item;
+import ImageGenerator from "../Listing/ImageGenerator"
+import {withStyles} from 'material-ui/styles';
+import PropTypes from 'prop-types';
+import Chip from 'material-ui/Chip';
+import OpenInNew from 'material-ui-icons/OpenInNew'
+
+
+const styles = theme => ({
+    imageSideContent: {
+        display: 'inline-block',
+        paddingLeft: 20,
+    },
+    imageWrapper: {
+        display: 'flex',
+        flexAlign: 'top',
+    },
+    headline: {
+        marginTop: 20
+    },
+    titleCase: {
+        textTransform: 'capitalize',
+    },
+    chip: {
+        marginLeft: 0,
+        cursor: 'pointer',
+    },
+    openNewIcon: {
+        display: 'inline-block',
+        marginLeft: 20,
+    },
+    endpointsWrapper: {
+        display: 'flex',
+        justifyContent: 'flex-start',
+    }
+});
 
 class Overview extends Component {
     constructor(props) {
@@ -49,9 +71,6 @@ class Overview extends Component {
         };
         this.api_uuid = this.props.match.params.api_uuid;
         this.downloadWSDL = this.downloadWSDL.bind(this);
-        this.handleApiDelete = this.handleApiDelete.bind(this);
-        this.handleRequestClose = this.handleRequestClose.bind(this);
-        this.handleRequestOpen = this.handleRequestOpen.bind(this);
     }
 
     componentDidMount() {
@@ -70,34 +89,6 @@ class Overview extends Component {
                 if (status === 404) {
                     this.setState({notFound: true});
                 }
-            }
-        );
-    }
-
-    handleRequestClose() {
-        this.setState({openMenu: false});
-    };
-
-    handleRequestOpen() {
-        this.setState({openMenu: true});
-    };
-
-    handleApiDelete(e) {
-        this.setState({loading: true});
-        const api = new Api();
-        let promised_delete = api.deleteAPI(this.api_uuid);
-        promised_delete.then(
-            response => {
-                if (response.status !== 200) {
-                    console.log(response);
-                    message.error("Something went wrong while deleting the API!");
-                    this.setState({loading: false});
-                    return;
-                }
-                let redirect_url = "/apis/";
-                this.props.history.push(redirect_url);
-                message.success("API " + this.state.api.name + " was deleted successfully!");
-                this.setState({active: false, loading: false});
             }
         );
     }
@@ -138,7 +129,6 @@ class Overview extends Component {
     }
 
     render() {
-        let redirect_url = "/apis/" + this.props.match.params.api_uuid + "/overview";
         const api = this.state.api;
         if (this.state.notFound) {
             return <ResourceNotFound message={this.props.resourceNotFountMessage}/>
@@ -146,158 +136,256 @@ class Overview extends Component {
         if (!api) {
             return <Loading/>
         }
+        const { classes } = this.props;
+
         return (
             <Grid container>
-                <Grid item xs={12}>
-                    <Paper>
-                        <Typography type="display2" gutterBottom>
-                            {api.name} - <span>Overview</span>
+                <Grid item xs={12} className={classes.imageWrapper}>
+                    <ImageGenerator apiName={api.name} />
+                    <div className={classes.imageSideContent}>
+                        <Typography variant="headline" >
+                            {api.version} {api.isDefaultVersion ? <span>( Default )</span> : <span></span>}
+                            {/* TODO We need to show the default verison and a link to it here if this
+                            is not the default version*/}
                         </Typography>
-                        {/* allowing edit based on scopes */}
-                        <ScopeValidation resourceMethod={resourceMethod.PUT} resourcePath={resourcePath.SINGLE_API}>
-                            <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
-                                <Button aria-owns="simple-menu" aria-haspopup="true">
-                                    <Edit/> Edit
-                                </Button>
-                            </ApiPermissionValidation>
-                        </ScopeValidation>
-                        {/* allowing delet based on scopes */}
-                        <ScopeValidation resourceMethod={resourceMethod.DELETE}
-                                         resourcePath={resourcePath.SINGLE_API}>
-                            <ApiPermissionValidation
-                                checkingPermissionType={ApiPermissionValidation.permissionType.DELETE}
-                                userPermissions={this.state.api.userPermissionsForApi}>
-                                <Button onClick={this.handleRequestOpen} color="accent" aria-owns="simple-menu"
-                                        aria-haspopup="true">
-                                    <Delete/> Delete
-                                </Button>
-                            </ApiPermissionValidation>
-                        </ScopeValidation>
-                        <Dialog open={this.state.openMenu} transition={Slide}>
-                            <DialogTitle>
-                                {"Confirm"}
-                            </DialogTitle>
-                            <DialogContent>
-                                <DialogContentText>
-                                    Are you sure you want to delete the API ({api.name} - {api.version})?
-                                </DialogContentText>
-                            </DialogContent>
-                            <DialogActions>
-                                <Button dense color="primary" onClick={this.handleApiDelete}>
-                                    Delete
-                                </Button>
-                                <Button dense color="primary" onClick={this.handleRequestClose}>
-                                    Cancel
-                                </Button>
-                            </DialogActions>
-                        </Dialog>
-                        {/* allowing to create new version based on scopes */}
-                        <ScopeValidation resourcePath={resourcePath.API_COPY} resourceMethod={resourceMethod.POST}>
-                            <Button aria-owns="simple-menu" aria-haspopup="true">
-                                <CreateNewFolder/> Create New Version
-                            </Button>
-                        </ScopeValidation>
-                        <Button aria-owns="simple-menu" aria-haspopup="true">
-                            <Description/> View Swagger
-                        </Button>
-                    </Paper>
+                        <Typography variant="caption" gutterBottom align="left">
+                            Version
+                        </Typography>
+                        {/* Context */}
+                        <Typography variant="headline" className={classes.headline} >
+                            {api.context}
+                        </Typography>
+                        <Typography variant="caption" gutterBottom align="left">
+                            Context
+                        </Typography>
+                        {/*Visibility */}
+                        <Typography variant="headline" className={classes.headline}>
+                            {api.lifeCycleStatus}
+                        </Typography>
+                        <Typography variant="caption" gutterBottom align="left">
+                            Lifecycle Status
+                        </Typography>
+                    </div>
                 </Grid>
                 <Grid item xs={12}>
-                    <Card>
-                        <CardMedia
-                            src=""
-                            style={{backgroundColor: blueGrey[50]}}
-                            title="Contemplative Reptile">
-                            <img alt="API thumb" width="10%"
-                                 src="/publisher/public/app/images/api/api-default.png"/>
-                        </CardMedia>
-                        <CardContent>
-
-                        </CardContent>
-                        <CardActions>
-                            {api.lifeCycleStatus}
-
-                            <Button dense color="primary">
-                                <a href={`/store/apis/${this.api_uuid}/overview?environment=${Utils.getCurrentEnvironment().label}`}
-                                   target="_blank" title="Store">
-                                    View in store
+                    <Typography variant="subheading" align="left">
+                        Created by {api.provider} : {api.createdTime}
+                    </Typography>
+                    <Typography variant="caption" gutterBottom align="left">
+                        Last update : {api.lastUpdatedTime}
+                    </Typography>
+                    {/* Endpoints*/}
+                    {
+                        api.endpoint.map(ep => <div key={ep.inline.id}>
+                            <div className={classes.endpointsWrapper + " "  + classes.headline}>
+                                <Link to={"/apis/" + api.id + "/endpoints" } title="Edit endpoint">
+                                    <Typography variant="subheading" align="left" >
+                                        {JSON.parse(ep.inline.endpointConfig).serviceUrl}
+                                    </Typography>
+                                </Link>
+                                <a href={JSON.parse(ep.inline.endpointConfig).serviceUrl} target="_blank"
+                                   className={classes.openNewIcon}><OpenInNew /></a>
+                            </div>
+                            <Typography variant="caption" gutterBottom align="left">
+                                <span className={classes.titleCase}>{ep.type}</span> Endpoint
+                            </Typography>
+                        </div>)
+                    }
+                    {
+                        api.wsdlUri && (<div >
+                            <div className={classes.endpointsWrapper + " "  + classes.headline}>
+                                <a onClick={this.downloadWSDL}>
+                                    <Typography variant="subheading" align="left" >
+                                        {api.wsdlUri }
+                                    </Typography>
                                 </a>
-                            </Button>
-
-                            {Utils.isMultiEnvironmentOverviewEnabled() ?
-                                <Link to={`/apis/${this.api_uuid}/environment view`}>
-                                    <Button dense color="primary">
-                                        Multi-Environment Overview
-                                    </Button>
+                            </div>
+                            <Typography variant="caption" gutterBottom align="left">
+                                WSDL
+                            </Typography>
+                        </div>
+                        )
+                    }
+                    <Grid container>
+                        <Grid item xs={12} sm={6} md={4} lg={3}>
+                            {api.policies && api.policies.length ?
+                                <Link to={"/apis/" + api.id + "/policies" }>
+                                    <Typography variant="subheading" align="left" className={classes.headline}>
+                                        {api.policies.map(policy => policy + ", ")}
+                                    </Typography>
                                 </Link>
                                 :
-                                null
+                                <Link to={"/apis/" + api.id + "/policies" }>
+                                    <Typography variant="subheading" align="left" className={classes.headline}>
+                                        &lt; NOT SET FOR THIS API &gt;
+                                    </Typography>
+                                </Link>
                             }
-                        </CardActions>
-                    </Card>
-                </Grid>
-                <Grid item xs={12}>
-                    <Paper>
-                        <Table>
-                            <TableBody>
+                            <Typography variant="caption" gutterBottom align="left">
+                                Throttling Policies
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={12} sm={6} md={4} lg={3}>
 
-                                <TableRow>
-                                    <TableCell
-                                        style={{width: "100px"}}>Visibility</TableCell><TableCell>{api.visibility}</TableCell>
-                                </TableRow>
+                            {api.securityScheme && api.securityScheme.length ?
+                                <Link to={"/apis/" + api.id + "/securityScheme" }>
+                                    <Typography variant="subheading" align="left" className={classes.headline}>
+                                        {api.securityScheme.map(policy => policy + ", ")}
+                                    </Typography>
+                                </Link>
+                                :
+                                <Link to={"/apis/" + api.id + "/securityScheme" }>
+                                    <Typography variant="subheading" align="left" className={classes.headline}>
+                                        &lt; NOT SET FOR THIS API &gt;
+                                    </Typography>
+                                </Link>
+                            }
+                            <Typography variant="caption" gutterBottom align="left">
+                                Security Scheme
+                            </Typography>
 
-                                <TableRow>
-                                    <TableCell>Version</TableCell><TableCell>{api.version}</TableCell>
-                                </TableRow>
+                        </Grid>
+                        <Grid item xs={12} sm={6} md={4} lg={3}>
+                            {api.tags && api.tags.length ?
+                                <div className={classes.headline}>
+                                    {api.tags.map(tag => <Link to={"/apis/" + api.id + "/tags" }>
+                                        <Chip label={tag} className={classes.chip} />
+                                    </Link>)}
+                                </div>
+                                :
+                                <Link to={"/apis/" + api.id + "/tags" }>
+                                    <Typography variant="subheading" align="left" className={classes.headline}>
+                                        &lt; NOT SET FOR THIS API &gt;
+                                    </Typography>
+                                </Link>
+                            }
+                            <Typography variant="caption" gutterBottom align="left">
+                                Tags
+                            </Typography>
 
-                                <TableRow>
-                                    <TableCell>Context</TableCell><TableCell>{api.context}</TableCell>
-                                </TableRow>
-                                {
-                                    api.endpoint.map(ep => <TableRow key={ep.inline.id}>
-                                        <TableCell>{ep.type}</TableCell>
-                                        <TableCell>{ep.inline ? ep.inline.endpointConfig.serviceUrl : ''}</TableCell>
-                                    </TableRow>)
-                                }
-                                <TableRow>
-                                    <TableCell>Date Created</TableCell><TableCell>{api.createdTime}</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                    <TableCell>Date Last
-                                        Updated</TableCell><TableCell>{api.lastUpdatedTime}</TableCell>
-                                </TableRow>
+                        </Grid>
+                        <Grid item xs={12} sm={6} md={4} lg={3}>
 
-                                <TableRow>
-                                    <TableCell>Default API
-                                        Version</TableCell><TableCell>{api.isDefaultVersion}</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                    <TableCell>Published
-                                        Environments</TableCell><TableCell>{api.labels.map(label => label + ", ")}</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                    <TableCell>Policies</TableCell>
-                                    <TableCell>
-                                        {api.policies.map(policy => policy + ", ")}
-                                    </TableCell>
-                                </TableRow>
-                                <TableRow>
-                                    <TableCell>WSDL URLs</TableCell>
-                                    <TableCell>
-                                        {
-                                            api.wsdlUri && (
-                                                <a onClick={this.downloadWSDL}>Download</a>
-                                            )
-                                        }
-                                    </TableCell>
-                                </TableRow>
-                            </TableBody>
-                        </Table>
-                    </Paper>
-                </Grid>
+                            {api.threatProtectionPolicies && api.threatProtectionPolicies.length ?
+                                <Link to={"/apis/" + api.id + "/security" }>
+                                    <Typography variant="subheading" align="left" className={classes.headline}>
+                                        {api.threatProtectionPolicies.map(policy => policy + ", ")}
+                                    </Typography>
+                                </Link>
+                                :
+                                <Link to={"/apis/" + api.id + "/security" }>
+                                    <Typography variant="subheading" align="left" className={classes.headline}>
+                                        &lt; NOT SET FOR THIS API &gt;
+                                    </Typography>
+                                </Link>
+                            }
+                            <Typography variant="caption" gutterBottom align="left">
+                                Threat Protection Policies
+                            </Typography>
+
+                        </Grid>
+                        <Grid item xs={12} sm={6} md={4} lg={3}>
+
+                            {api.transport && api.transport.length ?
+                                <Link to={"/apis/" + api.id + "/transport" }>
+                                    <Typography variant="subheading" align="left" className={classes.headline}>
+                                        {api.transport.map(trans => trans + ", ")}
+                                    </Typography>
+                                </Link>
+                                :
+                                <Link to={"/apis/" + api.id + "/transport" }>
+                                    <Typography variant="subheading" align="left" className={classes.headline}>
+                                        &lt; NOT SET FOR THIS API &gt;
+                                    </Typography>
+                                </Link>
+                            }
+                            <Typography variant="caption" gutterBottom align="left">
+                                Transport
+                            </Typography>
+
+                        </Grid>
+                        <Grid item xs={12} sm={6} md={4} lg={3}>
+
+                            {api.userPermissionsForApi && api.userPermissionsForApi.length ?
+                                <Link to={"/apis/" + api.id + "/userPermissions" }>
+                                    <Typography variant="subheading" align="left" className={classes.headline}>
+                                        {api.userPermissionsForApi.map(permission => permission + ", ")}
+                                    </Typography>
+                                </Link>
+                                :
+                                <Link to={"/apis/" + api.id + "/userPermissions" }>
+                                    <Typography variant="subheading" align="left" className={classes.headline}>
+                                        &lt; NOT SET FOR THIS API &gt;
+                                    </Typography>
+                                </Link>
+                            }
+                            <Typography variant="caption" gutterBottom align="left">
+                                User Permissions
+                            </Typography>
+
+                        </Grid>
+                            {(api.visibility === "PUBLIC") ?
+                                <Grid item xs={12} sm={6} md={4} lg={3}>
+                                    <Link to={"/apis/" + api.id + "/visibility" }>
+                                        <Typography variant="subheading" align="left" className={classes.headline}>
+                                            PUBLIC
+                                        </Typography>
+                                    </Link>
+                                    <Typography variant="caption" gutterBottom align="left">
+                                        Visibility ( You can restrict visibility by role or tenant )
+                                    </Typography>
+                                </Grid>
+                                :
+                                <Grid item xs={12} sm={6} md={4} lg={3}>
+                                    {api.visibleRoles && api.visibleRoles.length ?
+                                        <Link to={"/apis/" + api.id + "/visibility" }>
+                                            <Typography variant="subheading" align="left" className={classes.headline}>
+                                                {api.visibleRoles.map(role => role + ", ")}
+                                            </Typography>
+                                        </Link>
+                                        :
+                                        <Link to={"/apis/" + api.id + "/visibility" }>
+                                            <Typography variant="subheading" align="left" className={classes.headline}>
+                                                &lt; NOT SET FOR THIS API &gt;
+                                            </Typography>
+                                        </Link>
+                                    }
+                                    <Typography variant="caption" gutterBottom align="left">
+                                        Visible Roles
+                                    </Typography>
+                                </Grid>
+
+                            }
+
+                            {(api.visibility !== "PUBLIC") &&
+                                <Grid item xs={12} sm={6} md={4} lg={3}>
+                                    {api.visibleTenants && api.visibleTenants.length ?
+                                        <Link to={"/apis/" + api.id + "/visibility" }>
+                                            <Typography variant="subheading" align="left" className={classes.headline}>
+                                                {api.visibleTenants.map(tenant => tenant + ", ")}
+                                            </Typography>
+                                        </Link>
+                                        :
+                                        <Link to={"/apis/" + api.id + "/visibility" }>
+                                            <Typography variant="subheading" align="left" className={classes.headline}>
+                                                &lt; NOT SET FOR THIS API &gt;
+                                            </Typography>
+                                        </Link>
+                                    }
+                                    <Typography variant="caption" gutterBottom align="left">
+                                        Visible Tenant
+                                    </Typography>
+                                </Grid>
+                            }
+                        </Grid>
+                    </Grid>
+
             </Grid>
         );
     }
 }
+Overview.propTypes = {
+    classes: PropTypes.object.isRequired,
+};
 
-export default Overview
+export default withStyles(styles)(Overview);

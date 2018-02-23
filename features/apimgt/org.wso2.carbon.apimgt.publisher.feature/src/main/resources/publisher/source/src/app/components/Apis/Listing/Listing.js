@@ -53,7 +53,10 @@ const styles = theme => ({
     titleBar: {
         display: 'flex',
         justifyContent: 'space-between',
-        borderBottom: 'solid 2px #ddd'
+        borderBottomWidth: '1px',
+        borderBottomStyle: 'solid',
+        borderColor: theme.palette.text.secondary,
+        marginBottom: 20,
     },
     buttonLeft: {
         alignSelf: 'flex-start',
@@ -210,46 +213,6 @@ class Listing extends React.Component {
                                 </Typography>
                             </div>
                             <AddNewMenu />
-                            {/*<Manager className={classes.addButton}>
-                                <Target>
-                                    <Button
-                                        aria-owns={this.state.newMenuOpen ? 'menu-list' : null}
-                                        aria-haspopup="true"
-                                        onClick={this.handleClickNew}
-                                        variant="raised" color="secondary"
-                                    >
-                                        Create
-                                        <ArrowDropDownCircle className={classes.rightIcon} />
-                                    </Button>
-                                </Target>
-                                <Popper
-                                    placement="bottom-start"
-                                    eventsEnabled={this.state.newMenuOpen}
-                                    className={classNames({ [classes.popperClose]: !this.state.newMenuOpen })}
-                                >
-                                    <ClickAwayListener onClickAway={this.handleCloseNew}>
-                                        <Grow in={this.state.newMenuOpen} id="menu-list" style={{ transformOrigin: '0 0 0' }}>
-                                            <Paper>
-                                                <MenuList role="menu">
-                                                    <Link to="/api/create/rest">
-                                                        <MenuItem onClick={this.handleClose}>Rest</MenuItem>
-                                                    </Link>
-                                                    <Link to="/api/create/swagger">
-                                                        <MenuItem onClick={this.handleClose}>Rest - Swagger</MenuItem>
-                                                    </Link>
-                                                    <Link to="/api/create/wsdl">
-                                                        <MenuItem onClick={this.handleClose}>SOAP - WSDL</MenuItem>
-                                                    </Link>
-                                                    <Link to="/api/create/rest">
-                                                        <MenuItem onClick={this.handleClose}>WebSocket</MenuItem>
-                                                    </Link>
-                                                </MenuList>
-                                            </Paper>
-                                        </Grow>
-                                    </ClickAwayListener>
-                                </Popper>
-                            </Manager>*/}
-
                         </div>
                         <div className={classes.buttonRight}>
                             <IconButton className={classes.button} aria-label="Delete" onClick={() => this.setListType('list')}>
@@ -260,9 +223,7 @@ class Listing extends React.Component {
                             </IconButton>
                         </div>
                     </Grid>
-                    <Grid item ex={12}>
 
-                    </Grid>
                     <Grid item xs={12}>
                         {this.state.listType === "list" ?
                             <Row type="flex" justify="start">

@@ -66,7 +66,6 @@ const styles = theme => ({
         height: '100%',
         marginTop: 0,
         zIndex: 1,
-        overflow: 'hidden',
     },
     appFrame: {
         position: 'relative',
@@ -168,6 +167,7 @@ const styles = theme => ({
     },
     brand: {
         textDecoration: 'none',
+        color: theme.palette.text.primary,
     }
 });
 
