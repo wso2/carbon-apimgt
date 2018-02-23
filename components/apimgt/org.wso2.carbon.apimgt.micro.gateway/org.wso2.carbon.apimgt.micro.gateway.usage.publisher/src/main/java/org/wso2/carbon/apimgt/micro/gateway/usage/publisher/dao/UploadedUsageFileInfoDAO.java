@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.micro.gateway.usage.publisher.dao;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
-import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.util.MicroAPIUsageConstants;
+import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.util.MicroGatewayAPIUsageConstants;
 import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.util.UsagePublisherException;
 import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.dto.UploadedFileInfoDTO;
 
@@ -59,7 +59,7 @@ public class UploadedUsageFileInfoDAO {
             connection = APIMgtDBUtil.getConnection();
             autoCommitStatus = connection.getAutoCommit();
             connection.setAutoCommit(false);
-            statement = connection.prepareStatement(MicroAPIUsageConstants.INSERT_UPLOADED_FILE_INFO_QUERY);
+            statement = connection.prepareStatement(MicroGatewayAPIUsageConstants.INSERT_UPLOADED_FILE_INFO_QUERY);
             statement.setString(1, dto.getTenantDomain());
             statement.setString(2, dto.getFileName());
             statement.setTimestamp(3, new Timestamp(dto.getTimeStamp()));
@@ -108,13 +108,13 @@ public class UploadedUsageFileInfoDAO {
             connection.setAutoCommit(false);
             if ((connection.getMetaData().getDriverName()).contains("Oracle")) {
                 selectStatement = connection
-                        .prepareStatement(MicroAPIUsageConstants.GET_NEXT_FILES_TO_PROCESS_QUERY_ORACLE);
+                        .prepareStatement(MicroGatewayAPIUsageConstants.GET_NEXT_FILES_TO_PROCESS_QUERY_ORACLE);
             } else if (connection.getMetaData().getDatabaseProductName().contains("Microsoft")) {
                 selectStatement = connection
-                        .prepareStatement(MicroAPIUsageConstants.GET_NEXT_FILES_TO_PROCESS_QUERY_MSSQL);
+                        .prepareStatement(MicroGatewayAPIUsageConstants.GET_NEXT_FILES_TO_PROCESS_QUERY_MSSQL);
             } else {
                 selectStatement = connection
-                        .prepareStatement(MicroAPIUsageConstants.GET_NEXT_FILES_TO_PROCESS_QUERY_DEFAULT);
+                        .prepareStatement(MicroGatewayAPIUsageConstants.GET_NEXT_FILES_TO_PROCESS_QUERY_DEFAULT);
             }
             selectStatement.setInt(1, limit);
             resultSet = selectStatement.executeQuery();
@@ -123,7 +123,7 @@ public class UploadedUsageFileInfoDAO {
                 String fileName = resultSet.getString("FILE_NAME");
                 long timeStamp = resultSet.getTimestamp("FILE_TIMESTAMP").getTime();
                 updateStatement = connection
-                        .prepareStatement(MicroAPIUsageConstants.UPDATE_FILE_PROCESSING_STARTED_STATUS);
+                        .prepareStatement(MicroGatewayAPIUsageConstants.UPDATE_FILE_PROCESSING_STARTED_STATUS);
                 updateStatement.setString(1, tenantDomain);
                 updateStatement.setString(2, fileName);
                 updateStatement.executeUpdate();
@@ -167,7 +167,7 @@ public class UploadedUsageFileInfoDAO {
         PreparedStatement statement = null;
         try {
             connection = APIMgtDBUtil.getConnection();
-            statement = connection.prepareStatement(MicroAPIUsageConstants.UPDATE_COMPETITION_QUERY);
+            statement = connection.prepareStatement(MicroGatewayAPIUsageConstants.UPDATE_COMPETITION_QUERY);
             statement.setString(1, dto.getTenantDomain());
             statement.setString(2, dto.getFileName());
             statement.executeUpdate();
@@ -196,7 +196,7 @@ public class UploadedUsageFileInfoDAO {
         InputStream fileContentInputStream = null;
         try {
             connection = APIMgtDBUtil.getConnection();
-            statement = connection.prepareStatement(MicroAPIUsageConstants.GET_UPLOADED_FILE_CONTENT_QUERY);
+            statement = connection.prepareStatement(MicroGatewayAPIUsageConstants.GET_UPLOADED_FILE_CONTENT_QUERY);
             statement.setString(1, dto.getTenantDomain());
             statement.setString(2, dto.getFileName());
             resultSet = statement.executeQuery();
@@ -237,7 +237,7 @@ public class UploadedUsageFileInfoDAO {
             connection = APIMgtDBUtil.getConnection();
             autoCommitStatus = connection.getAutoCommit();
             connection.setAutoCommit(false);
-            delStatement = connection.prepareStatement(MicroAPIUsageConstants.DELETE_OLD_UPLOAD_COMPLETED_FILES);
+            delStatement = connection.prepareStatement(MicroGatewayAPIUsageConstants.DELETE_OLD_UPLOAD_COMPLETED_FILES);
             delStatement.setTimestamp(1, new Timestamp(lastKeptDate.getTime()));
             delStatement.executeUpdate();
             connection.commit();

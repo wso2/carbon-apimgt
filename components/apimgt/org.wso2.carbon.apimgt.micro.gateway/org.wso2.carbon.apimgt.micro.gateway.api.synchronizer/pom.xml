@@ -188,7 +188,7 @@
                         </Import-Package>
                         <Export-Package>
                             !org.wso2.carbon.apimgt.micro.gateway.api.synchronizer.internal,
-                            org.wso2.carbon.apimgt.micro.gateway.api.synchronizer.*
+                            org.wso2.carbon.apimgt.micro.gateway.api.synchronizer.*;version="${project.version}"
                         </Export-Package>
                     </instructions>
                 </configuration>

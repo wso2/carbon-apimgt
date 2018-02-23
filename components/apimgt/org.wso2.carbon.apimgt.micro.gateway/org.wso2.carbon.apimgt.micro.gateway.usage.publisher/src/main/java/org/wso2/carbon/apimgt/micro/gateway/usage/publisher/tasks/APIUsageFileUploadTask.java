@@ -30,7 +30,7 @@ import org.apache.http.impl.client.HttpClients;
 
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.util.MicroAPIUsageConstants;
+import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.util.MicroGatewayAPIUsageConstants;
 import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.util.UsageFileWriter;
 import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.util.UsagePublisherException;
 import org.wso2.carbon.apimgt.micro.gateway.common.config.ConfigManager;
@@ -78,11 +78,11 @@ public class APIUsageFileUploadTask implements Task {
 
         //[CARBON_HOME]/api-usage-data/
         Path usageFileDirectory = Paths.get(CarbonUtils.getCarbonHome(),
-                MicroAPIUsageConstants.API_USAGE_OUTPUT_DIRECTORY);
+                MicroGatewayAPIUsageConstants.API_USAGE_OUTPUT_DIRECTORY);
 
         //Rotate current file
         Path activeFilePath = Paths.get(usageFileDirectory.toString(),
-                MicroAPIUsageConstants.API_USAGE_OUTPUT_FILE_NAME);
+                MicroGatewayAPIUsageConstants.API_USAGE_OUTPUT_FILE_NAME);
         try {
             if (Files.size(activeFilePath) > 0) {       //Don't rotate if the current file is empty
                 if (log.isDebugEnabled()) {
@@ -101,13 +101,13 @@ public class APIUsageFileUploadTask implements Task {
             for (File file : listOfFiles) {
                 String fileName = file.getName();
                 //Only get the files which have been rotated
-                if (fileName.endsWith(MicroAPIUsageConstants.GZIP_EXTENSION)) {
+                if (fileName.endsWith(MicroGatewayAPIUsageConstants.GZIP_EXTENSION)) {
                     try {
                         boolean uploadStatus = uploadCompressedFile(file.toPath(), fileName);
                         if (uploadStatus) {
                             //Rename the file to mark as uploaded
                             Path renamedPath = Paths.get(file.getAbsolutePath()
-                                    + MicroAPIUsageConstants.UPLOADED_FILE_SUFFIX);
+                                    + MicroGatewayAPIUsageConstants.UPLOADED_FILE_SUFFIX);
                             Files.move(file.toPath(), renamedPath);
                         } else {
                             log.error("Usage file Upload failed. It will be retried in the next task run.");
@@ -132,15 +132,15 @@ public class APIUsageFileUploadTask implements Task {
         String response;
 
         try {
-            String uploadServiceUrl = configManager.getProperty(MicroAPIUsageConstants.USAGE_UPLOAD_SERVICE_URL);
+            String uploadServiceUrl = configManager.getProperty(MicroGatewayAPIUsageConstants.USAGE_UPLOAD_SERVICE_URL);
             uploadServiceUrl = (uploadServiceUrl != null && !uploadServiceUrl.isEmpty()) ? uploadServiceUrl :
-                    MicroAPIUsageConstants.DEFAULT_UPLOAD_SERVICE_URL;
+                    MicroGatewayAPIUsageConstants.DEFAULT_UPLOAD_SERVICE_URL;
             HttpPost httppost = new HttpPost(uploadServiceUrl);
 
             HttpEntity reqEntity = MultipartEntityBuilder.create()
                     .addBinaryBody("file", compressedFilePath.toFile())
                     .build();
-            httppost.setHeader(MicroAPIUsageConstants.FILE_NAME_HEADER, fileName);
+            httppost.setHeader(MicroGatewayAPIUsageConstants.FILE_NAME_HEADER, fileName);
 
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                     getAPIManagerConfigurationService().getAPIManagerConfiguration();
@@ -149,13 +149,13 @@ public class APIUsageFileUploadTask implements Task {
 
             String authHeaderValue = "Basic " +
                     Base64.encodeBase64String((username + ":" + password).getBytes("UTF-8"));
-            httppost.setHeader(MicroAPIUsageConstants.AUTHORIZATION_HEADER, authHeaderValue);
-            httppost.setHeader(MicroAPIUsageConstants.ACCEPT_HEADER,
-                    MicroAPIUsageConstants.ACCEPT_HEADER_APPLICATION_JSON);
+            httppost.setHeader(MicroGatewayAPIUsageConstants.AUTHORIZATION_HEADER, authHeaderValue);
+            httppost.setHeader(MicroGatewayAPIUsageConstants.ACCEPT_HEADER,
+                    MicroGatewayAPIUsageConstants.ACCEPT_HEADER_APPLICATION_JSON);
             httppost.setEntity(reqEntity);
 
             response = HttpRequestUtil.executeHTTPMethodWithRetry(httpclient, httppost,
-                    MicroAPIUsageConstants.MAX_RETRY_COUNT);
+                    MicroGatewayAPIUsageConstants.MAX_RETRY_COUNT);
             log.info("API Usage file : " + compressedFilePath.getFileName() + " uploaded successfully. " +
                     "Server Response : " + response);
             return true;

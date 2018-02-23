@@ -20,7 +20,7 @@ package org.wso2.carbon.apimgt.micro.gateway.usage.publisher.tasks;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.util.MicroAPIUsageConstants;
+import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.util.MicroGatewayAPIUsageConstants;
 import org.wso2.carbon.ntask.core.Task;
 import org.wso2.carbon.utils.CarbonUtils;
 
@@ -59,14 +59,14 @@ public class APIUsageFileCleanupTask implements Task {
                     dateFormat.format(lastKeptDate));
             //[CARBON_HOME]/api-usage-data/
             String usageFileDirectoryPath = CarbonUtils.getCarbonHome() + File.separator +
-                    MicroAPIUsageConstants.API_USAGE_OUTPUT_DIRECTORY;
+                    MicroGatewayAPIUsageConstants.API_USAGE_OUTPUT_DIRECTORY;
 
             File usageFileDirectory = new File(usageFileDirectoryPath);
             if (usageFileDirectory.exists()) {
                 File[] listOfFiles = usageFileDirectory.listFiles();
                 if (listOfFiles != null) {
                     for (File file : listOfFiles) {
-                        if (file.getName().endsWith(MicroAPIUsageConstants.UPLOADED_FILE_SUFFIX)
+                        if (file.getName().endsWith(MicroGatewayAPIUsageConstants.UPLOADED_FILE_SUFFIX)
                                 && (new Date(file.lastModified()).before(lastKeptDate))) {
                             boolean deleted = file.delete();
                             if (!deleted) {
