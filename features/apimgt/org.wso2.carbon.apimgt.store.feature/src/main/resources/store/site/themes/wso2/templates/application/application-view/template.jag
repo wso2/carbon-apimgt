@@ -59,6 +59,15 @@ for(var i=0;i < outputs.tiers.length; i++){
        </div>
   </div>
 <%}%>
+  <%
+    var applicationUtils = Packages.org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
+    var result = applicationUtils.retrieveApplication(application.name, user.username, session.get("groupId"));
+
+    var isOwner = true;
+    if (!result.getSubscriber().getName().equalsIgnoreCase(user.username)) {
+  %>
+    <style>#appEditButton{display:none}</style>
+  <%}%>
   <div class="form-group">
     <label class="col-sm-3 control-label"><%=i18n.localize("Description")%></label>
     <div class="col-sm-9">

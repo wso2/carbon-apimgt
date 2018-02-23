@@ -56,7 +56,7 @@
 	                            </a>
 	                        </li>                        
 	                        <li>
-	                            <a title="<%=i18n.localize("Edit")%>" href="<%= jagg.urlTenanted("/site/pages/application-edit.jag?name="+encode.forHtml(request.getParameter("name"))) %>">
+	                            <a id="appEditButton" title="<%=i18n.localize("Edit")%>" href="<%= jagg.urlTenanted("/site/pages/application-edit.jag?name="+encode.forHtml(request.getParameter("name"))) %>">
 	                                <span class="icon fw-stack">
 	                                    <i class="fw fw-edit fw-stack-1x"></i>
 	                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
