@@ -70,11 +70,11 @@
             <artifactId>woden</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.orbit.org.apache.pdfbox</groupId>
+            <groupId>org.apache.pdfbox</groupId>
             <artifactId>pdfbox</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.orbit.org.apache.pdfbox</groupId>
+            <groupId>org.apache.pdfbox</groupId>
             <artifactId>fontbox</artifactId>
         </dependency>
         <dependency>
@@ -157,8 +157,9 @@
                                 <importBundleDef>org.wso2.orbit.io.swagger:swagger-codegen:${swagger.codegen.version}</importBundleDef>
                                 <importBundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.hostobjects.sso</importBundleDef>
                                 <importBundleDef>org.wso2.carbon.mediation:org.wso2.carbon.rest.api.stub:${carbon.mediation.version}</importBundleDef>
-                                <importBundleDef>org.wso2.orbit.org.apache.pdfbox:pdfbox:${orbit.version.pdfbox}</importBundleDef>
-                                <importBundleDef>org.wso2.orbit.org.apache.pdfbox:fontbox:${orbit.version.pdfbox}</importBundleDef>
+                                <importBundleDef>org.apache.pdfbox:pdfbox:${pdfbox.version}</importBundleDef>
+                                <importBundleDef>org.apache.pdfbox:fontbox:${pdfbox.version}</importBundleDef>
+                                <importBundleDef>org.apache.pdfbox:jempbox:${pdfbox.version}</importBundleDef>
                                 <importBundleDef>com.github.dblock.waffle.wso2:waffle-jna:${waffle-jna.version}</importBundleDef>
                                 <importBundleDef>org.wso2.carbon.commons:org.wso2.carbon.ganalytics.publisher:${carbon.commons.version}</importBundleDef>
                             </importBundles>
