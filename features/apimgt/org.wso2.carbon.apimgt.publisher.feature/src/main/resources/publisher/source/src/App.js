@@ -30,6 +30,27 @@ import 'antd/dist/antd.css'
 import './App.css'
 import Utils from "./app/data/Utils";
 import ConfigManager from "./app/data/ConfigManager";
+import {MuiThemeProvider, createMuiTheme} from 'material-ui/styles';
+import MaterialDesignCustomTheme from './app/components/Shared/CustomTheme'
+const themes = [];
+let darkTheme = createMuiTheme({
+    palette: {
+        type: 'dark', // Switching the dark mode on is a single property value change.
+    },
+});
+let lightTheme = createMuiTheme({
+    palette: {
+        type: 'light', // Switching the dark mode on is a single property value change.
+    },
+});
+darkTheme.palette.background.active = 'rgba(27, 94, 32, 1)';
+darkTheme.palette.background.appBar = 'rgba(63, 81, 181, 1)';
+lightTheme.palette.background.active = 'rgba(165, 214, 167, 1)';
+lightTheme.palette.background.appBar = 'rgba(33, 150, 243, 1)';
+lightTheme.palette.background.contentFrame = 'rgba(227, 242, 253, 1)';
+themes.push(darkTheme);
+themes.push(lightTheme);
+themes.push(createMuiTheme(MaterialDesignCustomTheme));
 
 
 const Apis = () => import(/* webpackChunkName: "apis" */ './app/components/Apis/Apis');
@@ -48,6 +69,7 @@ class Protected extends Component {
         super(props);
         this.state = {
             showLeftMenu: false,
+            themeIndex: 0,
         };
         this.environments = [];
     }
@@ -59,14 +81,20 @@ class Protected extends Component {
         });
     }
 
+
+    componentWillMount() {
+        let storedThemeIndex = localStorage.getItem("themeIndex");
+        if (storedThemeIndex) {
+            this.setState({themeIndex: parseInt(storedThemeIndex)})
+        }
+    }
     /**
-     * Change the visibility state of left side navigation menu bar
-     * @param {boolean} status : Whether or not to show or hide left side navigation menu
+     * Change the theme index incrementally
      */
-    setLeftMenu(status) {
-        this.setState({
-            showLeftMenu: status
-        });
+    setTheme() {
+        this.setState({theme: themes[this.state.themeIndex % 3]});
+        this.state.themeIndex++;
+        localStorage.setItem("themeIndex", this.state.themeIndex);
     }
 
     /**
@@ -102,15 +130,17 @@ class Protected extends Component {
 
         if (AuthManager.getUser(environmentName)) {
             return (
-                <BaseLayout>
-                    <Switch>
-                        <Redirect exact from="/" to="/apis"/>
-                        <Route path={"/apis"} component={getAsyncComponent(Apis)}/>
-                        <Route path={"/endpoints"} component={getAsyncComponent(Endpoints)}/>
-                        <Route path={"/api/create"} component={getAsyncComponent(ApiCreate)}/>
-                        <Route component={PageNotFound}/>
-                    </Switch>
-                </BaseLayout>
+                <MuiThemeProvider theme={themes[this.state.themeIndex % 3]}>
+                    <BaseLayout setTheme={() => this.setTheme()}>
+                        <Switch>
+                            <Redirect exact from="/" to="/apis"/>
+                            <Route path={"/apis"} component={getAsyncComponent(Apis)}/>
+                            <Route path={"/endpoints"} component={getAsyncComponent(Endpoints)}/>
+                            <Route path={"/api/create"} component={getAsyncComponent(ApiCreate)}/>
+                            <Route component={PageNotFound}/>
+                        </Switch>
+                    </BaseLayout>
+                </MuiThemeProvider>
             );
         }
 

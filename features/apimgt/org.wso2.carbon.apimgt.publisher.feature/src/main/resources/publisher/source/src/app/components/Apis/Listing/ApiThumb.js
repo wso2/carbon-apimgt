@@ -58,7 +58,7 @@ const styles = theme => ({
     lifeCycleState_Retired: {backgroundColor: "#000000"},
     thumbContent: {
         width: 250,
-        backgroundColor: '#fff',
+        backgroundColor: theme.palette.background.paper,
         padding: 10
     },
     thumbLeft: {
@@ -96,9 +96,10 @@ const styles = theme => ({
         position:'absolute',
         left:0,
         top:0,
-        background:'linear-gradient(transparent 25px, white)',
+        background:'linear-gradient(transparent 25px, theme.palette.background.paper)',
     },
     descriptionWrapper: {
+        color: theme.palette.text.secondary,
         position: 'relative',
         height: 50,
         overflow: 'hidden'

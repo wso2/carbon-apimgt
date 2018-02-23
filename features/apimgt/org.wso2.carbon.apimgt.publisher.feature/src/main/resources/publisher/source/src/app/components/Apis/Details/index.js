@@ -69,6 +69,7 @@ export default class Details extends Component {
     render() {
         const api_uuid = this.props.match.params.api_uuid;
         let redirect_url = `/apis/${api_uuid}/overview`;
+
         const environmentOverview = Utils.isMultiEnvironmentOverviewEnabled();
         let {resourceNotFountMessage} = this.state;
 
@@ -79,10 +80,10 @@ export default class Details extends Component {
 
         return (
             <Grid container spacing={0}>
-                <Grid item xs={2}>
-                    <NavBar/>
+                <Grid item xs={12}>
+                    <NavBar api_uuid={this.props.match.params.api_uuid}/>
                 </Grid>
-                <Grid item xs={10}>
+                <Grid item xs={12}>
                     <Switch>
                         <Redirect exact from="/apis/:api_uuid" to={redirect_url}/>
                         <Route path="/apis/:api_uuid/overview"
