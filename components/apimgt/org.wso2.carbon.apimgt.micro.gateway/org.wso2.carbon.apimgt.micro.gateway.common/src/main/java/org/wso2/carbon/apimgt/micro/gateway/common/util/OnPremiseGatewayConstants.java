@@ -42,7 +42,7 @@ public class OnPremiseGatewayConstants {
     public static final String ACCEPT_HEADER = "Accept";
     public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String AUTHORIZATION_BEARER = "Bearer ";
-
+    public static final String AUTHORIZATION_BASIC = "Basic ";
 
     public static final String TOKEN_SCOPE = "scope";
     public static final String TOKEN_GRANT_TYPE_KEY = "grant_type";
@@ -56,6 +56,8 @@ public class OnPremiseGatewayConstants {
     public static final String DEFAULT_DCR_GRANT_TYPE = "password refresh_token";
 
     public static final String EMPTY_STRING = "";
+    public static final String USERNAME_SEPARATOR = "@";
+    public static final String UNIQUE_IDENTIFIER_HOLDER = "$token";
 
     public static final int DEFAULT_RETRY_COUNT = 3;
 
