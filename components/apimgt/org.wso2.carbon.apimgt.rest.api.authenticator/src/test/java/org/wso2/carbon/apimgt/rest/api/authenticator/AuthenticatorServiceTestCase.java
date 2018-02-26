@@ -118,6 +118,7 @@ public class AuthenticatorServiceTestCase {
 
         KeyManager keyManager = Mockito.mock(KeyManager.class);
         MultiEnvironmentOverview multiEnvironmentOverview = new MultiEnvironmentOverview();
+        multiEnvironmentOverview.setEnabled(true);
         AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao,
                 multiEnvironmentOverview);
 
@@ -202,6 +203,12 @@ public class AuthenticatorServiceTestCase {
         } catch (APIManagementException e) {
             Assert.assertEquals(e.getMessage(), "Error while receiving tokens for OAuth application : store");
         }
+
+        // Happy Path - 200 - Refresh grant type
+        Mockito.when(keyManager.getNewAccessToken(Mockito.any())).thenReturn(tokenInfo);
+        AccessTokenInfo tokenInfoResponseForRefreshGrant = authenticatorService.getTokens("store", "refresh_token",
+                null, null, null, 0, null, null, null);
+        Assert.assertEquals(tokenInfoResponseForPasswordGrant, tokenInfo);
 
         // Happy Path - 200 - JWT grant type
         // Multi-Environment Overview configuration
