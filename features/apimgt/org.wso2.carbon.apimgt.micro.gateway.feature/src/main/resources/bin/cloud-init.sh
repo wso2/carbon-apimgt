@@ -23,10 +23,10 @@
 # ----------------------------------------------------------------------------
 
 # You can set the following values directly in the script of enter them interactively while the script is executed
-clear
-ORG_KEY=""
-EMAIL=""
-PASSWORD=""
+ORG_KEY="${WSO2_CLOUD_ORG_KEY}"
+EMAIL="${WSO2_CLOUD_EMAIL}"
+PASSWORD="${WSO2_CLOUD_PASSWORD}"
+AUTOSTART="${WSO2_CLOUD_AUTOSTART:-"false"}"
 
 # if JAVA_HOME is not set we're not happy
 if [ -z "$JAVA_HOME" ]; then
@@ -116,7 +116,7 @@ if [ -z "$ORG_KEY" ] || [ -z "$EMAIL" ] || [ -z "$PASSWORD" ]; then
 echo "Your credentials will be required for accessing the services in API Cloud which are required for the functionality of the On Premise Gateway."
 fi
 
-cp $CARBON_HOME/resources/wso2-cloud/cloud-on-premise-gateway.properties $CARBON_HOME/repository/conf/on-premise-gateway.properties
+cp $CARBON_HOME/resources/cloud-on-premise-gateway.properties $CARBON_HOME/repository/conf/on-premise-gateway.properties
 
 if [ -z "$ORG_KEY" ]; then
     echo "Please enter your Organization Key used in WSO2 API Cloud"
@@ -141,8 +141,12 @@ ${JAVACMD} -Dcarbon.home="$CARBON_HOME" -jar ${CARBON_HOME}/lib/org.wso2.onpremi
 OUT=$?
 if [ $OUT -eq 0 ];then
   echo "Your On Premise Gateway has been configured successfully."
-  echo "You can start WSO2 On Premise API Gateway by going to the ${CARBON_HOME}/bin directory using the command-line,"
-  echo "and then executing wso2server.sh (for Linux.) or wso2server.bat (for Windows)"
+  if [ "$AUTOSTART" = "true" ]; then
+    ${CARBON_HOME}/bin/wso2server.sh
+  else
+    echo "You can start WSO2 On Premise API Gateway by going to the ${CARBON_HOME}/bin directory using the command-line,"
+    echo "and then executing wso2server.sh (for Linux.) or wso2server.bat (for Windows)"
+  fi
 else
    echo "Something went wrong while configuring the On Premise Gateway. Please check your credentials and re-try. If the problem persists please contact: cloud@wso2.com."
 fi
