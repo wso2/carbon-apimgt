@@ -34,6 +34,7 @@ import org.wso2.carbon.tenant.mgt.services.TenantMgtAdminService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.util.Arrays;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -83,23 +84,15 @@ public class ServerStartupListener implements ServerStartupObserver {
         char [] password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD).toCharArray();
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
         if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            String email = MultitenantUtils.getTenantAwareUsername(username);
-            try {
-                CommonUtil.validateEmail(email);
-            } catch (Exception e) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Invalid email is provided: " + email);
-                }
-                email = TenantInitializationConstants.DEFAULT_EMAIL;
-            }
+            String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(username);
             if (CommonUtil.isDomainNameAvailable(tenantDomain)) {
                 tenantInfoBean.setActive(true);
-                tenantInfoBean.setAdmin(email);
+                tenantInfoBean.setAdmin(tenantAwareUsername);
                 tenantInfoBean.setAdminPassword(password.toString());
                 tenantInfoBean.setFirstname(TenantInitializationConstants.DEFAULT_FIRST_NAME);
                 tenantInfoBean.setLastname(TenantInitializationConstants.DEFAULT_LAST_NAME);
                 tenantInfoBean.setTenantDomain(tenantDomain);
-                tenantInfoBean.setEmail(email);
+                tenantInfoBean.setEmail(TenantInitializationConstants.DEFAULT_EMAIL);
                 try {
                     PrivilegedCarbonContext.startTenantFlow();
                     PrivilegedCarbonContext.getThreadLocalCarbonContext()
@@ -112,9 +105,7 @@ public class ServerStartupListener implements ServerStartupObserver {
                     PrivilegedCarbonContext.endTenantFlow();
                 }
                 // Overwriting the char array to clean up password
-                for (int i = 0; i < password.length; i++) {
-                    password[i] = 0;
-                }
+                Arrays.fill(password, '0');
                 log.info("Successfully initialized tenant with tenant domain: " + tenantDomain);
             } else {
                 log.info("Tenant with tenant domain " + tenantDomain + " already exists.");
