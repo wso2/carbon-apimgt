@@ -280,7 +280,7 @@ public class AuthenticatorServiceTestCase {
             AuthResponseBean errorResponseBean = new AuthResponseBean();
             authenticatorService.setAccessTokenData(errorResponseBean, invalidAccessTokenInfo);
         } catch (KeyManagementException e) {
-            Assert.assertEquals(e.getMessage(), "JWT Parsing failed. Invalid JWT.");
+            Assert.assertEquals(900986, e.getErrorHandler().getErrorCode());
         }
     }
 }

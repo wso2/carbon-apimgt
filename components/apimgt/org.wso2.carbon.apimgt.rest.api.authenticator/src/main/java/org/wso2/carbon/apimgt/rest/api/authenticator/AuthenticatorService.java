@@ -381,7 +381,7 @@ public class AuthenticatorService {
             return username;
         } else {
             log.error("JWT Parsing failed. Invalid JWT: " + jwt);
-            throw new KeyManagementException("JWT Parsing failed. Invalid JWT.");
+            throw new KeyManagementException("JWT Parsing failed. Invalid JWT.", ExceptionCodes.JWT_PARSING_FAILED);
         }
     }
 
