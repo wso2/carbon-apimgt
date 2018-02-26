@@ -525,6 +525,7 @@
                 <artifactId>org.wso2.carbon.apimgt.hostobjects.oidc</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
+
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.micro.gateway.common</artifactId>
@@ -535,6 +536,27 @@
                 <artifactId>org.wso2.carbon.apimgt.micro.gateway.usage.publisher</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.micro.gateway.rest.api</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.micro.gateway.api.synchronizer</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.micro.gateway.tenant.initializer</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.micro.gateway.throttling.synchronizer</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.samples.calculator</artifactId>
@@ -1401,6 +1423,7 @@
 
         <!-- Carbon platform version comes here-->
         <carbon.platform.package.import.version.range>[4.4.0, 4.6.0)</carbon.platform.package.import.version.range>
+        <carbon.ntask.import.version.range>[4.6.0, 4.7.0)</carbon.ntask.import.version.range>
 
         <!-- Wsdl4j version comes here-->
         <wsdl4j.version.range>[1.6.3.wso2v3, 1.7.0)</wsdl4j.version.range>
