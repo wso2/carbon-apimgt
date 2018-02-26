@@ -43,8 +43,6 @@ import org.wso2.carbon.apimgt.micro.gateway.api.synchronizer.dto.APIMaxTpsDTO;
 import org.wso2.carbon.apimgt.micro.gateway.api.synchronizer.exceptions.APISynchronizationException;
 import org.wso2.carbon.apimgt.micro.gateway.api.synchronizer.internal.ServiceDataHolder;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.governance.lcm.util.CommonUtil;
-import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
