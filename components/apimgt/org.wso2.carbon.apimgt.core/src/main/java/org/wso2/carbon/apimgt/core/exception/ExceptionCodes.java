@@ -208,6 +208,7 @@ public enum ExceptionCodes implements ErrorHandler {
     INTERNAL_ERROR(900967, "General Error", 500, "Server Error Occurred"),
     POLICY_LEVEL_NOT_SUPPORTED(900968, "Throttle Policy level invalid", 400, "Specified Throttle policy level is not "
             + "valid"),
+    JWT_PARSING_FAILED(900986, "Key Management Error", 500, "Error while parsing JWT. Invalid Jwt."),
 
 
     //Throttle related codes
