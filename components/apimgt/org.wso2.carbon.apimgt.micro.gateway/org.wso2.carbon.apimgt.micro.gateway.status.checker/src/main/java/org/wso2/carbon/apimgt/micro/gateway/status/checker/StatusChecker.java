@@ -28,11 +28,11 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.onpremise.gateway.common.exception.OnPremiseGatewayException;
-import org.wso2.carbon.apimgt.onpremise.gateway.common.util.HttpRequestUtil;
-import org.wso2.carbon.apimgt.onpremise.gateway.common.util.OnPremiseGatewayConstants;
-import org.wso2.onpremise.gateway.status.checker.dto.OnPremGatewayPingDTO;
-import org.wso2.onpremise.gateway.status.checker.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.micro.gateway.common.exception.OnPremiseGatewayException;
+import org.wso2.carbon.apimgt.micro.gateway.common.util.HttpRequestUtil;
+import org.wso2.carbon.apimgt.micro.gateway.common.util.OnPremiseGatewayConstants;
+import org.wso2.carbon.apimgt.micro.gateway.status.checker.dto.MicroGatewayPingDTO;
+import org.wso2.carbon.apimgt.micro.gateway.status.checker.internal.ServiceReferenceHolder;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -72,7 +72,7 @@ public class StatusChecker implements Runnable {
     }
 
     /**
-     * Ping the API Cloud endpoint to update the status of On-Prem Gateway
+     * Ping the API Cloud endpoint to update the status of Micro Gateway
      *
      * @param username
      * @param password
@@ -92,7 +92,7 @@ public class StatusChecker implements Runnable {
                 }
             }
         } catch (OnPremiseGatewayException | UnsupportedEncodingException e) {
-            log.error("Error occurred while calling On-Prem Gateway pinging service", e);
+            log.error("Error occurred while calling Micro Gateway pinging service", e);
         } finally {
             if (client != null) {
                 try {
@@ -105,7 +105,7 @@ public class StatusChecker implements Runnable {
     }
 
     /**
-     * Get the details to be sent to Cloud status update endpoint as a String
+     * Get the details to be sent to status update endpoint as a String
      *
      * @param tenantDomain
      * @param token
@@ -115,12 +115,12 @@ public class StatusChecker implements Runnable {
     protected String getPingingPayload(String tenantDomain, String token) throws
             IOException {
         //Create object
-        OnPremGatewayPingDTO onPremGatewayPingDTO = new OnPremGatewayPingDTO();
-        onPremGatewayPingDTO.setTenantDomain(tenantDomain);
-        onPremGatewayPingDTO.setToken(token);
+        MicroGatewayPingDTO microGatewayPingDTO = new MicroGatewayPingDTO();
+        microGatewayPingDTO.setTenantDomain(tenantDomain);
+        microGatewayPingDTO.setToken(token);
         //Convert to JSON string
         ObjectMapper mapper = new ObjectMapper();
-        String details = mapper.writeValueAsString(onPremGatewayPingDTO);
+        String details = mapper.writeValueAsString(microGatewayPingDTO);
         return details;
     }
 

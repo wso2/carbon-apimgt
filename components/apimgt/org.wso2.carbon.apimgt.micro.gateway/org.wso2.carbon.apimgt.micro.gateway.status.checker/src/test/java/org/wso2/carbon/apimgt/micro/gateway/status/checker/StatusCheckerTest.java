@@ -15,9 +15,10 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.onpremise.gateway.common.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.onpremise.gateway.common.util.HttpRequestUtil;
-import org.wso2.onpremise.gateway.status.checker.util.StatusCheckerConstants;
+import org.wso2.carbon.apimgt.micro.gateway.common.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.micro.gateway.common.util.HttpRequestUtil;
+import org.wso2.carbon.apimgt.micro.gateway.common.util.OnPremiseGatewayConstants;
+import org.wso2.carbon.apimgt.micro.gateway.status.checker.util.StatusCheckerConstants;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,11 +63,11 @@ public class StatusCheckerTest {
     @Test
     public void run() throws Exception {
         Map<String, String> configMap = new HashMap<>();
-        String username = USERNAME + "@" + TENANT_DOMAIN;
+        String username = USERNAME + OnPremiseGatewayConstants.USERNAME_SEPARATOR + TENANT_DOMAIN;
         configMap.put(APIConstants.API_KEY_VALIDATOR_USERNAME, username);
         configMap.put(APIConstants.API_KEY_VALIDATOR_PASSWORD, PASSWORD);
         mockAPIMConfiguration(configMap);
-        String[] usernameParts = username.split("@");
+        String[] usernameParts = username.split(OnPremiseGatewayConstants.USERNAME_SEPARATOR);
         String tenantDomain = usernameParts[2];
         Assert.assertEquals("tenant", tenantDomain);
         List<String> lines = new ArrayList<>();
@@ -81,7 +82,7 @@ public class StatusCheckerTest {
         String authHeaderValue = statusChecker.getAuthHeader(USERNAME, PASSWORD);
         HttpPost httpPost = statusChecker.createPostRequest(PING_URL, PAYLOAD_STR, authHeaderValue);
         Assert.assertEquals("POST", httpPost.getMethod());
-        Assert.assertEquals("application/json", httpPost.getFirstHeader("Content-Type").getValue());
+        Assert.assertEquals(OnPremiseGatewayConstants.CONTENT_TYPE_APPLICATION_JSON, httpPost.getFirstHeader(OnPremiseGatewayConstants.CONTENT_TYPE_HEADER).getValue());
     }
 
     private void mockAPIMConfiguration(Map<String, String> configMap) {

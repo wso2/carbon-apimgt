@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -29,7 +29,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
@@ -43,12 +42,19 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 /**
- * This class is used to replace configurations in api-manager.xml
+ * This is used to replace configurations in api-manager.xml
  */
 public class XmlConfigurator {
 
     private static final Log log = LogFactory.getLog(XmlConfigurator.class);
 
+    /**
+     * Configure Gateway properties in the api-manager.xml
+     *
+     * @param carbonHome String
+     * @param gatewayProperties Properties
+     * @param fileMap Map<String, Map<String, String>>
+     */
     public void configure(String carbonHome, Properties gatewayProperties, Map<String, Map<String, String>> fileMap) {
 
         for (Map.Entry<String, Map<String, String>> entry : fileMap.entrySet()) {
@@ -67,6 +73,14 @@ public class XmlConfigurator {
         }
     }
 
+    /**
+     * Replace values in given Document
+     *
+     * @param doc Document
+     * @param xpathMap Map<String, String>
+     * @param configProperties Properties
+     * @throws XPathExpressionException
+     */
     private void replaceValues(Document doc, Map<String, String> xpathMap, Properties configProperties)
             throws XPathExpressionException {
         XPath xpath = XPathFactory.newInstance().newXPath();

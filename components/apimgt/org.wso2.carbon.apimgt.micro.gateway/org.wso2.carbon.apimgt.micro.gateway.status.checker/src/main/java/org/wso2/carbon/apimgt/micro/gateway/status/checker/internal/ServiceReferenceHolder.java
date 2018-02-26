@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.micro.gateway.status.checker.internal;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 
 /**
- * ServiceReferenceHolder for Status Check service
+ * ServiceReferenceHolder for Status Checking service
  */
 public class ServiceReferenceHolder {
 
@@ -33,14 +33,28 @@ public class ServiceReferenceHolder {
 
     }
 
+    /**
+     * Get singleton instance of ServiceReferenceHolder
+     * @return instance
+     */
     public static ServiceReferenceHolder getInstance() {
         return instance;
     }
 
+    /**
+     * Get APIManagerConfigurationService
+     *
+     * @return amConfigurationService
+     */
     public APIManagerConfigurationService getAPIManagerConfigurationService() {
         return amConfigurationService;
     }
 
+    /**
+     * Assign APIManagerConfigurationService
+     *
+     * @param amConfigurationService APIManagerConfigurationService
+     */
     public void setAPIManagerConfigurationService(APIManagerConfigurationService amConfigurationService) {
         this.amConfigurationService = amConfigurationService;
     }

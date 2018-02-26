@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -28,10 +28,10 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.wso2.carbon.apimgt.onpremise.gateway.common.exception.OnPremiseGatewayException;
-import org.wso2.carbon.apimgt.onpremise.gateway.common.util.HttpRequestUtil;
-import org.wso2.carbon.apimgt.onpremise.gateway.common.util.OnPremiseGatewayConstants;
-import org.wso2.onpremise.gateway.configurator.dto.OnPremGatewayInitializationDTO;
+import org.wso2.carbon.apimgt.micro.gateway.common.exception.OnPremiseGatewayException;
+import org.wso2.carbon.apimgt.micro.gateway.common.util.HttpRequestUtil;
+import org.wso2.carbon.apimgt.micro.gateway.common.util.OnPremiseGatewayConstants;
+import org.wso2.carbon.apimgt.micro.gateway.configurator.dto.MicroGatewayInitializationDTO;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -51,7 +51,7 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * Configurator class for On-Prem Gateway Configuration specific to WSO2 API Cloud
+ * Configurator class for Micro Gateway Configuration specific to WSO2 API Cloud
  */
 public class Configurator {
 
@@ -59,9 +59,9 @@ public class Configurator {
     private static final String AUTHORIZATION_HEADER = "Authorization";
 
     /**
-     * Main method to handle On-Prem Gateway Configuration
+     * Main method to handle Micro Gateway Configuration
      *
-     * @param args
+     * @param args String[]
      */
     public static void main(String[] args) {
         String carbonHome = System.getProperty(ConfigConstants.CARBON_HOME);
@@ -88,13 +88,13 @@ public class Configurator {
         Properties gatewayProperties = getGatewayProperties(gatewayConfigPath, args);
         String configToolPropertyFilePath = carbonConfigDirPath + File.separator +
                                                     ConfigConstants.CONFIG_TOOL_CONFIG_FILE_NAME;
-        //api-manager.xml
+        //Configure api-manager.xml
         Properties configToolProperties = readPropertiesFromFile(configToolPropertyFilePath);
         setAPIMConfigurations(configToolProperties, carbonHome, gatewayProperties);
-        //registry.xml
+        //Configure registry.xml
         RegistryXmlConfigurator registryXmlConfigurator = new RegistryXmlConfigurator();
         registryXmlConfigurator.configure(carbonConfigDirPath, gatewayProperties);
-        //log4j.properties
+        //Configure log4j.properties
         Log4JConfigurator log4JConfigurator = new Log4JConfigurator();
         log4JConfigurator.configure(carbonConfigDirPath);
         writeConfiguredLock(carbonHome);
@@ -110,9 +110,9 @@ public class Configurator {
     /**
      * Configure api-manager.xml with given properties
      *
-     * @param configToolProperties
-     * @param carbonHome
-     * @param gatewayProperties
+     * @param configToolProperties Properties
+     * @param carbonHome String
+     * @param gatewayProperties Properties
      */
     protected static void setAPIMConfigurations(Properties configToolProperties, String carbonHome,
                                                 Properties gatewayProperties) {
@@ -136,11 +136,12 @@ public class Configurator {
     }
 
     /**
-     * Initialize the On-Prem Gateway in Cloud
+     * Initialize the Micro Gateway in Cloud
      *
-     * @param initApiUrl
-     * @param carbonConfigDirPath
-     * @param args
+     * @param initApiUrl String
+     * @param carbonConfigDirPath String
+     * @param args String[]
+     * @throws OnPremiseGatewayException
      * @throws IOException
      */
     private static void initializeOnPremGateway(String initApiUrl, String carbonConfigDirPath, String[] args)
@@ -149,7 +150,7 @@ public class Configurator {
         Map<String, String> deviceDetails = getDeviceDetails();
         String carbonFilePath = carbonConfigDirPath + File.separator + ConfigConstants.GATEWAY_CARBON_FILE_NAME;
         int port = getGatewayPort(carbonFilePath);
-        deviceDetails.put("port", Integer.toString(port));
+        deviceDetails.put(ConfigConstants.PORT, Integer.toString(port));
         String payload = getInitializationPayload(deviceDetails, args);
         String authHeader = createAuthHeader(args);
         String token = callInitializationAPI(initApiUrl, authHeader, payload);
@@ -159,10 +160,10 @@ public class Configurator {
     }
 
     /**
-     * Update the default On-Prem Gateway configs with Cloud specific configs
+     * Update the default Micro Gateway configs with Cloud specific configs
      *
-     * @param cloudConfigsPath
-     * @param gatewayConfigPath
+     * @param cloudConfigsPath String
+     * @param gatewayConfigPath String
      */
     protected static void updateGatewayConfigDetails(String cloudConfigsPath, String gatewayConfigPath) {
         File gatewayConfigFile = new File(gatewayConfigPath);
@@ -179,17 +180,17 @@ public class Configurator {
     }
 
     /**
-     * Update the On-Prem Gateway property file with the unique identifier
+     * Update the Micro Gateway property file with the unique identifier
      *
-     * @param gatewayConfigPath
-     * @param token
+     * @param gatewayConfigPath String
+     * @param token String
      */
     protected static void updateOnPremGatewayUniqueId(String gatewayConfigPath, String token) {
         File gatewayConfigFile = new File(gatewayConfigPath);
         try {
             String gatewayConfigContent = FileUtils.readFileToString(gatewayConfigFile,
                                                                      OnPremiseGatewayConstants.DEFAULT_CHARSET);
-            gatewayConfigContent = gatewayConfigContent.replace(ConfigConstants.UNIQUE_IDENTIFIER_HOLDER, token);
+            gatewayConfigContent = gatewayConfigContent.replace(OnPremiseGatewayConstants.UNIQUE_IDENTIFIER_HOLDER, token);
             FileUtils.writeStringToFile(gatewayConfigFile, gatewayConfigContent,
                                         OnPremiseGatewayConstants.DEFAULT_CHARSET);
         } catch (IOException e) {
@@ -215,12 +216,13 @@ public class Configurator {
     }
 
     /**
-     * Call On-Prem Gateway initialization API and get a unique identifier
+     * Call Micro Gateway initialization API and get a unique identifier
      *
-     * @param initApiUrl
-     * @param authHeaderValue
-     * @param payload
-     * @return
+     * @param initApiUrl String
+     * @param authHeaderValue String
+     * @param payload String
+     * @return token String
+     * @throws OnPremiseGatewayException
      * @throws IOException
      */
     private static String callInitializationAPI(String initApiUrl, String authHeaderValue, String payload) throws
@@ -238,32 +240,32 @@ public class Configurator {
     }
 
     /**
-     * Get a JSON String with the details required to initialize On-Prem Gateway
+     * Get a JSON String with the details required to initialize Micro Gateway
      *
-     * @param deviceDetails
-     * @param args
-     * @return
+     * @param deviceDetails Map<String, String>
+     * @param args String[]
+     * @return details String
      * @throws IOException
      */
     protected static String getInitializationPayload(Map<String, String> deviceDetails,
                                                      String[] args) throws IOException {
         //Create object
-        OnPremGatewayInitializationDTO onPremGatewayInitializationDTO = new OnPremGatewayInitializationDTO();
+        MicroGatewayInitializationDTO microGatewayInitializationDTO = new MicroGatewayInitializationDTO();
         //Order of args - email, tenantDomain, password
-        onPremGatewayInitializationDTO.setTenantDomain(args[1]);
-        onPremGatewayInitializationDTO.setMacAddress(deviceDetails.get("macAddress"));
-        onPremGatewayInitializationDTO.setPort(deviceDetails.get("port"));
-        onPremGatewayInitializationDTO.setHostName(deviceDetails.get("hostname"));
+        microGatewayInitializationDTO.setTenantDomain(args[1]);
+        microGatewayInitializationDTO.setMacAddress(deviceDetails.get(ConfigConstants.MAC_ADDRESS));
+        microGatewayInitializationDTO.setPort(deviceDetails.get(ConfigConstants.PORT));
+        microGatewayInitializationDTO.setHostName(deviceDetails.get(ConfigConstants.HOST_NAME));
         //Convert to JSON string
         ObjectMapper mapper = new ObjectMapper();
-        String details = mapper.writeValueAsString(onPremGatewayInitializationDTO);
+        String details = mapper.writeValueAsString(microGatewayInitializationDTO);
         return details;
     }
 
     /**
      * Write configuration lock after the configuration is complete
      *
-     * @param carbonHome
+     * @param carbonHome String
      */
     protected static void writeConfiguredLock(String carbonHome) {
         String filePath = carbonHome + File.separator + ConfigConstants.CONFIGURE_LOCK_FILE_NAME;
@@ -308,8 +310,8 @@ public class Configurator {
     /**
      * Read the Properties from a given property file
      *
-     * @param filePath
-     * @return
+     * @param filePath String
+     * @return properties
      */
     protected static Properties readPropertiesFromFile(String filePath) {
         InputStream inputStream = null;
@@ -335,9 +337,9 @@ public class Configurator {
     /**
      * Retrieve Gateway properties from file and add missing properties
      *
-     * @param configFilePath
-     * @param args
-     * @return
+     * @param configFilePath String
+     * @param args String[]
+     * @return Properties
      */
     protected static Properties getGatewayProperties(String configFilePath, String[] args) {
         Properties gatewayProperties = readPropertiesFromFile(configFilePath);
@@ -363,7 +365,7 @@ public class Configurator {
                 gatewayProperties.put(ConfigConstants.FILE_DATA_PUBLISHER_CLASS,
                                       ConfigConstants.DEFAULT_FILE_DATA_PUBLISHER_CLASS);
             }
-            //In a public cloud setup we use StratosPublicCloudSetup as false to create tenants without a domain
+            //In a public cloud setup use StratosPublicCloudSetup as false to create tenants without a domain
             gatewayProperties.put(ConfigConstants.STRATOS_PUBLIC_CLOUD_SETUP, "false");
         }
         return gatewayProperties;
@@ -372,7 +374,7 @@ public class Configurator {
     /**
      * Retrieve host name, mac address of the device
      *
-     * @return
+     * @return details Map<String, String>
      */
     protected static Map<String, String> getDeviceDetails() {
         InetAddress ip;
@@ -382,14 +384,14 @@ public class Configurator {
         try {
             ip = InetAddress.getLocalHost();
             hostName = ip.getHostName();
-            Enumeration<NetworkInterface> n = NetworkInterface.getNetworkInterfaces();
-            while (n.hasMoreElements()) {
-                NetworkInterface e = n.nextElement();
-                Enumeration<InetAddress> a = e.getInetAddresses();
-                for (; a.hasMoreElements(); ) {
-                    InetAddress addr = a.nextElement();
-                    if (!addr.isLoopbackAddress() && !addr.isLinkLocalAddress() && addr.isSiteLocalAddress()) {
-                        ip = addr;
+            Enumeration<NetworkInterface> networkInterfaceEnumeration = NetworkInterface.getNetworkInterfaces();
+            while (networkInterfaceEnumeration.hasMoreElements()) {
+                NetworkInterface networkInterface = networkInterfaceEnumeration.nextElement();
+                Enumeration<InetAddress> enumeration = networkInterface.getInetAddresses();
+                for (; enumeration.hasMoreElements(); ) {
+                    InetAddress address = enumeration.nextElement();
+                    if (!address.isLoopbackAddress() && !address.isLinkLocalAddress() && address.isSiteLocalAddress()) {
+                        ip = address;
                     }
                 }
             }
@@ -398,6 +400,7 @@ public class Configurator {
                 byte[] mac = network.getHardwareAddress();
                 StringBuilder sb = new StringBuilder();
                 for (int i = 0; i < mac.length; i++) {
+                    //Construct mac address
                     sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? ConfigConstants.DELIMITER : ""));
                 }
                 macAddress = sb.toString();
@@ -406,23 +409,24 @@ public class Configurator {
             log.error("Error while retrieving mac address", e);
             Runtime.getRuntime().exit(1);
         }
-        details.put("hostname", hostName);
-        details.put("macAddress", macAddress);
+        details.put(ConfigConstants.HOST_NAME, hostName);
+        details.put(ConfigConstants.MAC_ADDRESS, macAddress);
         return details;
     }
 
     /**
      * Retrieve Gateway port based on the configured port offset
      *
-     * @param carbonFilePath
-     * @return
+     * @param carbonFilePath String
+     * @return port int
      */
     protected static int getGatewayPort(String carbonFilePath) {
         int port = 0;
         try {
             File file = new File(carbonFilePath);
             String carbonXMLContent = FileUtils.readFileToString(file);
-            String offsetStr = StringUtils.substringBetween(carbonXMLContent, "<Offset>", "</Offset>");
+            String offsetStr = StringUtils.substringBetween(carbonXMLContent, ConfigConstants.START_OFFSET_TAG,
+                                                            ConfigConstants.END_OFFSET_TAG);
             port = ConfigConstants.GATEWAY_DEFAULT_PORT + Integer.parseInt(offsetStr);
         } catch (IOException e) {
             log.error("Error occurred while reading the carbon XML.", e);

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><APIManager>
+<?xml version="1.0" encoding="UTF-8"?><APIManager>
     <!-- JNDI name of the data source to be used by the API publisher, API store and API
          key manager. This data source should be defined in the master-datasources.xml file
          in conf/datasources directory. -->
@@ -88,7 +88,7 @@
                 <Description>This is a hybrid gateway that handles both production and sandbox token traffic.</Description>
                 <!-- Server URL of the API gateway -->
                 <ServerURL>https://localhost:${mgt.transport.https.port}${carbon.context}services/</ServerURL>
-		        <!-- Admin username for the API gateway. -->
+                <!-- Admin username for the API gateway. -->
                 <Username>${admin.username}</Username>
                 <!-- Admin password for the API gateway.-->
                 <Password>${admin.password}</Password>
@@ -99,16 +99,25 @@
     </APIGateway>
 
     <CacheConfigurations>
-	    <!-- Enable/Disable token caching at the Gateway-->
+        <!-- Enable/Disable token caching at the Gateway-->
         <EnableGatewayTokenCache>true</EnableGatewayTokenCache>
-	    <!-- Enable/Disable API resource caching at the Gateway-->
+        <!-- Enable/Disable API resource caching at the Gateway-->
         <EnableGatewayResourceCache>true</EnableGatewayResourceCache>
         <!-- Enable/Disable API key validation information caching at key-management server -->
         <EnableKeyManagerTokenCache>false</EnableKeyManagerTokenCache>
         <!-- This parameter specifies whether Recently Added APIs will be loaded from the cache or not.
              If there are multiple API modification during a short time period, better to disable cache. -->
         <EnableRecentlyAddedAPICache>false</EnableRecentlyAddedAPICache>
-	    <!-- JWT claims Cache expiry in seconds -->
+        <!-- This parameter specifies whether scopes are taken from cache or not. If you are modifying application
+        subscriptions frequently, modifying the user roles frequently or updating the subscribed APIs frequently, it
+        is better to turn-off this cache-->
+        <EnableScopeCache>true</EnableScopeCache>
+        <!-- This indicates whether the role cache need to enabled in the publisher. If this is disabled, there will
+        be a call to key manager to all the calls to API publisher APIs. It is highly recommended to enable this
+        cache. However, if the system is in a state, where the role addition and deletion happens seamlessly, the
+        cache will be in in-valid state.-->
+        <EnablePublisherRoleCache>true</EnablePublisherRoleCache>
+        <!-- JWT claims Cache expiry in seconds -->
         <!--JWTClaimCacheExpiry>900</JWTClaimCacheExpiry-->
         <!-- Expiry time for the apim key mgt validation info cache -->
         <!--TokenCacheExpiry>900</TokenCacheExpiry-->
@@ -156,7 +165,7 @@
         <SkipEventReceiverConnection>false</SkipEventReceiverConnection>
 
         <!-- API Usage Data Publisher. -->
-        <PublisherClass>org.wso2.carbon.apimgt.onpremise.gateway.usage.publisher.APIMgtUsageFileDataPublisher</PublisherClass>
+        <PublisherClass>org.wso2.carbon.apimgt.micro.gateway.usage.publisher.APIMgtUsageFileDataPublisher</PublisherClass>
 
         <!-- If below property set to true,then the response message size will be calculated and publish
              with each successful API invocation event. -->
@@ -188,7 +197,7 @@
                 <Name>org.wso2.apimgt.statistics.execution.time</Name>
                 <Version>1.0.0</Version>
             </ExecutionTime>
-	    <AlertTypes>
+            <AlertTypes>
                 <Name>org.wso2.analytics.apim.alertStakeholderInfo</Name>
                 <Version>1.0.0</Version>
             </AlertTypes>
@@ -228,7 +237,7 @@
             <MaxIdle>100</MaxIdle>
             <InitIdleCapacity>50</InitIdleCapacity>
         </ConnectionPool-->
-        <!-- Specifies the implementation to be used for KeyValidationHandler. Steps for validating a token can be controlled by plugging in a 
+        <!-- Specifies the implementation to be used for KeyValidationHandler. Steps for validating a token can be controlled by plugging in a
              custom KeyValidation Handler -->
         <KeyValidationHandlerClassName>org.wso2.carbon.apimgt.keymgt.handlers.DefaultKeyValidationHandler</KeyValidationHandlerClassName>
     </APIKeyValidator>
@@ -249,6 +258,8 @@
     <OAuthConfigurations>
         <!-- Remove OAuth headers from outgoing message. -->
         <!--RemoveOAuthHeadersFromOutMessage>true</RemoveOAuthHeadersFromOutMessage-->
+        <!--Authorization header-->
+        <!--AuthorizationHeader>Authorization</AuthorizationHeader-->
         <!-- Scope used for marking Application Tokens. If a token is generated with this scope, they will be treated as Application Access Tokens -->
         <ApplicationTokenScope>am_application_scope</ApplicationTokenScope>
         <!-- All  scopes under the ScopeWhitelist element are not validating against roles that has assigned to it.
@@ -280,6 +291,7 @@
 
     <!-- API Store Related Configurations -->
     <APIStore>
+        <EnableMultipleGroupId>false</EnableMultipleGroupId>
         <!--GroupingExtractor>org.wso2.carbon.apimgt.impl.DefaultGroupIDExtractorImpl</GroupingExtractor-->
         <!--This property is used to indicate how we do user name comparision for token generation https://wso2.org/jira/browse/APIMANAGER-2225-->
         <CompareCaseInsensitively>true</CompareCaseInsensitively>
@@ -325,12 +337,14 @@
         <!--EnableAPIDocVisibilityLevels>true</EnableAPIDocVisibilityLevels-->
         <!-- Uncomment this to limit the number of APIs in api the API Publisher -->
         <!--APIsPerPage>30</APIsPerPage-->
+        <!-- This property need to be enabled to enable the publisher access control support -->
+        <EnableAccessControl>true</EnableAccessControl>
     </APIPublisher>
 
     <!-- Status observers can be registered against the API Publisher to listen for
          API status update events. Each observer must implement the APIStatusObserver
          interface. Multiple observers can be engaged if necessary and in such situations
-         they will be notified in the order they are defined here. 
+         they will be notified in the order they are defined here.
          This configuration is unused from API Manager version 1.10.0 -->
     <!--StatusObservers>
         <Observer>org.wso2.carbon.apimgt.impl.observers.SimpleLoggingObserver</Observer>
@@ -397,7 +411,7 @@
              It is false by default and if you set it to true then make sure that the Access-Control-Allow-Origin header does not contain the wildcard (*) -->
         <Access-Control-Allow-Credentials>false</Access-Control-Allow-Credentials>
     </CORSConfiguration>
-    
+
     <!-- This property is there to configure velocity log output into existing Log4j carbon Logger.
          You can enable this and set preferable Logger name. -->
     <!-- VelocityLogger>VELOCITY</VelocityLogger -->
@@ -619,12 +633,12 @@
             </JMSTaskManager>
         </JMSConnectionDetails>
         <JMSEventPublisherParameters>
-                <java.naming.factory.initial>org.wso2.andes.jndi.PropertiesFileInitialContextFactory</java.naming.factory.initial>
-                <java.naming.provider.url>repository/conf/jndi.properties</java.naming.provider.url>
-                <transport.jms.DestinationType>topic</transport.jms.DestinationType>
-                <transport.jms.Destination>throttleData</transport.jms.Destination>
-                <transport.jms.ConcurrentPublishers>allow</transport.jms.ConcurrentPublishers>
-                <transport.jms.ConnectionFactoryJNDIName>TopicConnectionFactory</transport.jms.ConnectionFactoryJNDIName>
+            <java.naming.factory.initial>org.wso2.andes.jndi.PropertiesFileInitialContextFactory</java.naming.factory.initial>
+            <java.naming.provider.url>repository/conf/jndi.properties</java.naming.provider.url>
+            <transport.jms.DestinationType>topic</transport.jms.DestinationType>
+            <transport.jms.Destination>throttleData</transport.jms.Destination>
+            <transport.jms.ConcurrentPublishers>allow</transport.jms.ConcurrentPublishers>
+            <transport.jms.ConnectionFactoryJNDIName>TopicConnectionFactory</transport.jms.ConnectionFactoryJNDIName>
         </JMSEventPublisherParameters>
         <!--DefaultLimits>
             <SubscriptionTierLimits>
@@ -649,13 +663,13 @@
         <EnableJWTClaimConditions>true</EnableJWTClaimConditions>
         <EnableQueryParamConditions>true</EnableQueryParamConditions>
     </ThrottlingConfigurations>
-    
+
     <WorkflowConfigurations>
         <Enabled>false</Enabled>
-    	<ServerUrl>https://localhost:9445/bpmn</ServerUrl>   		
-    	<ServerUser>${admin.username}</ServerUser>
-    	<ServerPassword>${admin.password}</ServerPassword>
-    	<WorkflowCallbackAPI>https://localhost:${mgt.transport.https.port}/api/am/publisher/v0.11/workflows/update-workflow-status</WorkflowCallbackAPI>
+        <ServerUrl>https://localhost:9445/bpmn</ServerUrl>
+        <ServerUser>${admin.username}</ServerUser>
+        <ServerPassword>${admin.password}</ServerPassword>
+        <WorkflowCallbackAPI>https://localhost:${mgt.transport.https.port}/api/am/publisher/v0.11/workflows/update-workflow-status</WorkflowCallbackAPI>
         <TokenEndPoint>https://localhost:${https.nio.port}/token</TokenEndPoint>
         <DCREndPoint>https://localhost:${mgt.transport.https.port}/client-registration/v0.11/register</DCREndPoint>
         <DCREndPointUser>${admin.username}</DCREndPointUser>
@@ -669,8 +683,8 @@
             <ModelPackage>org.wso2.client.model.</ModelPackage>
             <ApiPackage>org.wso2.client.api.</ApiPackage>
             <!-- Configure supported languages/Frameworks as comma separated values,
-             Supported Languages/Frameworks : android, java, scala, csharp, cpp, dart, flash, go, groovy, javascript, jmeter,
-             nodejs, perl, php, python, ruby, swift, clojure, aspNet5, asyncScala, spring, csharpDotNet2, haskell-->
+             Supported Languages/Frameworks : android, java, scala, csharp, dart, flash, groovy, javascript, jmeter,
+             nodejs, perl, php, python, ruby, swift, clojure, asyncScala, csharpDotNet2-->
             <SupportedLanguages>java,android</SupportedLanguages>
         </ClientGeneration>
     </SwaggerCodegen>

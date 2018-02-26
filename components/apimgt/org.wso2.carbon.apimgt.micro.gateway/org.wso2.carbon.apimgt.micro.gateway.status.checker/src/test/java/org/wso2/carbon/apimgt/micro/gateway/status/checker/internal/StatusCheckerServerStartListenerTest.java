@@ -7,8 +7,9 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.wso2.onpremise.gateway.status.checker.StatusChecker;
-import org.wso2.onpremise.gateway.status.checker.util.StatusCheckerConstants;
+import org.wso2.carbon.apimgt.micro.gateway.common.util.OnPremiseGatewayConstants;
+import org.wso2.carbon.apimgt.micro.gateway.status.checker.StatusChecker;
+import org.wso2.carbon.apimgt.micro.gateway.status.checker.util.StatusCheckerConstants;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -25,7 +26,8 @@ public class StatusCheckerServerStartListenerTest {
     public void isTokenSet() {
         StatusCheckerServerStartListener statusCheckerServerStartListener = new StatusCheckerServerStartListener();
         Assert.assertEquals(true, statusCheckerServerStartListener.isTokenSet(TOKEN));
-        Assert.assertEquals(false, statusCheckerServerStartListener.isTokenSet(StatusCheckerConstants.TOKEN_HOLDER));
+        Assert.assertEquals(false, statusCheckerServerStartListener
+                                           .isTokenSet(OnPremiseGatewayConstants.UNIQUE_IDENTIFIER_HOLDER));
     }
 
     @Test(expected = Exception.class)

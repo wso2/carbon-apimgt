@@ -24,7 +24,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.core.ServerStartupHandler;
 
 /**
- * @scr.component name="org.wso2.onpremise.gateway.status.checker" immediate="true"
+ * @scr.component name="org.wso2.carbon.apimgt.micro.gateway.status.checker" immediate="true"
  * @scr.reference name="api.manager.config.service"
  * interface="org.wso2.carbon.apimgt.impl.APIManagerConfigurationService" cardinality="1..1"
  * policy="dynamic" bind="setAPIManagerConfigurationService" unbind="unsetAPIManagerConfigurationService"

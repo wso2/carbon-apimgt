@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -29,20 +29,23 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 
 /**
- * This class is used to replace configurations in stratos.xml
+ * This class is used to replace configurations in log4j.properties
  */
 public class Log4JConfigurator {
 
     private static final Log log = LogFactory.getLog(Log4JConfigurator.class);
     private static final String LOG4J_PROPERTIES = "log4j.properties";
 
+    /**
+     * Configure Log4j properties file
+     *
+     * @param configDirPath String
+     */
     public void configure(String configDirPath) {
         String log4jFilePath = configDirPath + File.separator + LOG4J_PROPERTIES;
-
         FileOutputStream fileOutputStream = null;
         OutputStreamWriter outputStreamWriter = null;
         BufferedWriter bufferedWriter = null;
-
         try {
             fileOutputStream = new FileOutputStream(new File(log4jFilePath), true);
             outputStreamWriter = new OutputStreamWriter(fileOutputStream, StandardCharsets.UTF_8);

@@ -20,7 +20,7 @@ package org.wso2.carbon.apimgt.micro.gateway.configurator;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.wso2.carbon.apimgt.onpremise.gateway.common.util.OnPremiseGatewayConstants;
+import org.wso2.carbon.apimgt.micro.gateway.common.util.OnPremiseGatewayConstants;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -73,7 +73,7 @@ public class ConfiguratorTest {
         Map<String, String> deviceDetails = Configurator.getDeviceDetails();
         String carbonFilePath = carbonConfigDirPath + File.separator + ConfigConstants.GATEWAY_CARBON_FILE_NAME;
         int port = Configurator.getGatewayPort(carbonFilePath);
-        deviceDetails.put("port", Integer.toString(port));
+        deviceDetails.put(ConfigConstants.PORT, Integer.toString(port));
         String payload = Configurator.getInitializationPayload(deviceDetails, args);
         String authHeader = Configurator.createAuthHeader(args);
         //Set initialization endpoint
@@ -93,8 +93,7 @@ public class ConfiguratorTest {
         log4JConfigurator.configure(carbonConfigDirPath);
         Configurator.writeConfiguredLock(carbonHome);
         //Cleaning the log4j.properties file
-        PrintWriter writer = new PrintWriter(carbonHome + File.separator + "repository" + File.separator + "conf" +
-                                                     File.separator + "log4j.properties");
+        PrintWriter writer = new PrintWriter(carbonHome + File.separator + ConfigConstants.REPOSITORY_DIR + File.separator + ConfigConstants.CONF_DIR + File.separator + "log4j.properties");
         writer.print("\n");
         writer.close();
     }

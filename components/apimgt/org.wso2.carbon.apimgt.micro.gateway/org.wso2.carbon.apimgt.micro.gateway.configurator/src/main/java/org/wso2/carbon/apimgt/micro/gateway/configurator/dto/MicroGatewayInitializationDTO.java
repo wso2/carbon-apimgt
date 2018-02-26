@@ -30,7 +30,7 @@ public class MicroGatewayInitializationDTO {
     /**
      * Retrieve tenant domain
      *
-     * @return
+     * @return String
      */
     public String getTenantDomain() {
         return tenantDomain;
@@ -39,7 +39,7 @@ public class MicroGatewayInitializationDTO {
     /**
      * Assign tennat domain
      *
-     * @param tenantDomain
+     * @param tenantDomain String
      */
     public void setTenantDomain(String tenantDomain) {
         this.tenantDomain = tenantDomain;
@@ -48,7 +48,7 @@ public class MicroGatewayInitializationDTO {
     /**
      * Retireve mac address
      *
-     * @return
+     * @return String
      */
     public String getMacAddress() {
         return macAddress;
@@ -57,7 +57,7 @@ public class MicroGatewayInitializationDTO {
     /**
      * Assign mac address
      *
-     * @param macAddress
+     * @param macAddress String
      */
     public void setMacAddress(String macAddress) {
         this.macAddress = macAddress;
@@ -66,7 +66,7 @@ public class MicroGatewayInitializationDTO {
     /**
      * Retrieve port
      *
-     * @return
+     * @return String
      */
     public String getPort() {
         return port;
@@ -84,7 +84,7 @@ public class MicroGatewayInitializationDTO {
     /**
      * Retrieve host name
      *
-     * @return
+     * @return String
      */
     public String getHostName() {
         return hostName;
@@ -93,7 +93,7 @@ public class MicroGatewayInitializationDTO {
     /**
      * Assign host name
      *
-     * @param hostName
+     * @param hostName String
      */
     public void setHostName(String hostName) {
         this.hostName = hostName;

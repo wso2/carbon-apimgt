@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-<!--
+<?xml version="1.0" encoding="UTF-8"?><!--
   ~ Copyright 2005-2011 WSO2, Inc. (http://wso2.com)
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -353,26 +352,19 @@
 
 
 
-
-
-
-
-
-
-
 <tasks>
-        <task class="org.wso2.carbon.apimgt.onpremise.gateway.usage.publisher.tasks.APIUsageFileUploadTask" name="APIUsageFileUploadTask">
+        <task class="org.wso2.carbon.apimgt.micro.gateway.usage.publisher.tasks.APIUsageFileUploadTask" name="APIUsageFileUploadTask">
             <trigger cron="0 0 0/1 1/1 * ? *"/>
         </task>
-        <task class="org.wso2.carbon.apimgt.onpremise.gateway.usage.publisher.tasks.APIUsageFileCleanupTask" name="APIUsageFileCleanupTask">
+        <task class="org.wso2.carbon.apimgt.micro.gateway.usage.publisher.tasks.APIUsageFileCleanupTask" name="APIUsageFileCleanupTask">
             <trigger cron="0 0 1 1/1 * ? *"/>
             <property key="fileRetentionDays" value="35"/>
         </task>
-        <task class="org.wso2.carbon.apimgt.onpremise.gateway.throttling.tasks.ThrottlingSyncTask" name="ThrottlingSyncTask">
-            <trigger cron="0 0/15 * 1/1 * ? *"/>
+        <task class="org.wso2.carbon.apimgt.micro.gateway.throttling.synchronizer.tasks.ThrottlingSyncTask" name="ThrottlingSyncTask">
+            <trigger cron="0 0 0/1 1/1 * ? *"/>
         </task>
-        <task class="org.wso2.carbon.apimgt.onpremise.gateway.api.synchronizer.tasks.APISynchronizationTask" name="APISynchronizationTask">
-            <trigger cron="0 */10 * ? * *"/>
+        <task class="org.wso2.carbon.apimgt.micro.gateway.api.synchronizer.tasks.APISynchronizationTask" name="APISynchronizationTask">
+            <trigger cron="0 */30 * ? * *"/>
         </task>
     </tasks>
 </wso2registry>

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -20,12 +20,12 @@ package org.wso2.carbon.apimgt.micro.gateway.status.checker.internal;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.onpremise.gateway.common.config.ConfigManager;
-import org.wso2.carbon.apimgt.onpremise.gateway.common.exception.OnPremiseGatewayException;
-import org.wso2.carbon.apimgt.onpremise.gateway.common.util.OnPremiseGatewayConstants;
+import org.wso2.carbon.apimgt.micro.gateway.common.config.ConfigManager;
+import org.wso2.carbon.apimgt.micro.gateway.common.exception.OnPremiseGatewayException;
+import org.wso2.carbon.apimgt.micro.gateway.common.util.OnPremiseGatewayConstants;
 import org.wso2.carbon.core.ServerStartupHandler;
-import org.wso2.onpremise.gateway.status.checker.StatusChecker;
-import org.wso2.onpremise.gateway.status.checker.util.StatusCheckerConstants;
+import org.wso2.carbon.apimgt.micro.gateway.status.checker.StatusChecker;
+import org.wso2.carbon.apimgt.micro.gateway.status.checker.util.StatusCheckerConstants;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -71,7 +71,7 @@ public class StatusCheckerServerStartListener implements ServerStartupHandler {
             log.info("StatusCheckerServerStartListener started");
         } else {
             //Else print an error log
-            log.error("You have not configured the On-Prem Gateway properly. Please contact cloud@wso2.com, if the " +
+            log.error("You have not configured the Micro Gateway properly. Please contact cloud@wso2.com, if the " +
                               "issue persists");
         }
     }
@@ -84,7 +84,7 @@ public class StatusCheckerServerStartListener implements ServerStartupHandler {
      */
     public boolean isTokenSet(String token) {
         boolean isSet = false;
-        if (StringUtils.isNotBlank(token) && !(StatusCheckerConstants.TOKEN_HOLDER.equals(token))) {
+        if (StringUtils.isNotBlank(token) && !(OnPremiseGatewayConstants.UNIQUE_IDENTIFIER_HOLDER.equals(token))) {
             isSet = true;
         }
         return isSet;

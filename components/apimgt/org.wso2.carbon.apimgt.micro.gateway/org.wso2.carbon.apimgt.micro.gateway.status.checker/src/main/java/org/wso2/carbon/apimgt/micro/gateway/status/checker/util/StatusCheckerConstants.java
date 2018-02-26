@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -25,6 +25,5 @@ public class StatusCheckerConstants {
     public static final String PING_URL_HOLDER = "$ping.url";
     public static final String UNIQUE_IDENTIFIER = "unique.identifier";
     public static final String VALUE_SEPARATOR = "=";
-    public static final String TOKEN_HOLDER = "$token";
     public static final int PING_INTERVAL = 5;
 }
