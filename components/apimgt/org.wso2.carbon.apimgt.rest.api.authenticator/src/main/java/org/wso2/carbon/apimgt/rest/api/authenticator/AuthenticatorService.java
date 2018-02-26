@@ -24,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIDefinition;
+import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
 import org.wso2.carbon.apimgt.core.configuration.APIMConfigurationService;
 import org.wso2.carbon.apimgt.core.configuration.models.MultiEnvironmentOverview;
@@ -64,15 +65,18 @@ public class AuthenticatorService {
 
     private KeyManager keyManager;
     private SystemApplicationDao systemApplicationDao;
+    private MultiEnvironmentOverview multiEnvironmentOverviewConfigs;
 
     /**
      * Constructor.
      *
      * @param keyManager KeyManager object
      */
-    public AuthenticatorService(KeyManager keyManager, SystemApplicationDao systemApplicationDao) {
+    public AuthenticatorService(KeyManager keyManager, SystemApplicationDao systemApplicationDao,
+                                MultiEnvironmentOverview multiEnvironmentOverviewConfigs) {
         this.keyManager = keyManager;
         this.systemApplicationDao = systemApplicationDao;
+        this.multiEnvironmentOverviewConfigs = multiEnvironmentOverviewConfigs;
     }
 
     /**
@@ -85,14 +89,13 @@ public class AuthenticatorService {
     public JsonObject getAuthenticationConfigurations(String appName)
             throws APIManagementException {
         JsonObject oAuthData = new JsonObject();
-        // Authentication details for Multi-Environment Overview
-        MultiEnvironmentOverview envOverviewConfigs = APIMConfigurationService.getInstance()
-                .getEnvironmentConfigurations().getMultiEnvironmentOverview();
-        boolean isMultiEnvironmentOverviewEnabled = envOverviewConfigs.isEnabled();
+        boolean isMultiEnvironmentOverviewEnabled = multiEnvironmentOverviewConfigs.isEnabled();
+
         List<String> grantTypes = new ArrayList<>();
         grantTypes.add(KeyManagerConstants.PASSWORD_GRANT_TYPE);
         grantTypes.add(KeyManagerConstants.AUTHORIZATION_CODE_GRANT_TYPE);
         grantTypes.add(KeyManagerConstants.REFRESH_GRANT_TYPE);
+
         if (isMultiEnvironmentOverviewEnabled) {
             grantTypes.add(KeyManagerConstants.JWT_GRANT_TYPE);
         }
@@ -147,15 +150,12 @@ public class AuthenticatorService {
      */
     public AccessTokenInfo getTokens(String appName, String grantType,
                                      String userName, String password, String refreshToken,
-                                     long validityPeriod, String authorizationCode, String assertion)
+                                     long validityPeriod, String authorizationCode, String assertion,
+                                     IdentityProvider identityProvider)
             throws APIManagementException {
         AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
         AccessTokenRequest accessTokenRequest = new AccessTokenRequest();
-
-        // Authentication details for Multi-Environment Overview
-        MultiEnvironmentOverview envOverviewConfigs = APIMConfigurationService.getInstance()
-                .getEnvironmentConfigurations().getMultiEnvironmentOverview();
-        boolean isMultiEnvironmentOverviewEnabled = envOverviewConfigs.isEnabled();
+        boolean isMultiEnvironmentOverviewEnabled = multiEnvironmentOverviewConfigs.isEnabled();
 
         // Get scopes of the application
         String scopes = getApplicationScopes(appName);
@@ -214,7 +214,7 @@ public class AuthenticatorService {
 
                 String usernameFromJWT = getUsernameFromJWT(accessTokenInfo.getIdToken());
                 try {
-                    APIManagerFactory.getInstance().getIdentityProvider().getIdOfUser(usernameFromJWT);
+                    identityProvider.getIdOfUser(usernameFromJWT);
                 } catch (IdentityProviderException e) {
                     String errorMsg = "User " + usernameFromJWT + " dose not exists in this environment.";
                     throw new APIManagementException(errorMsg, e, ExceptionCodes.USER_NOT_AUTHENTICATED);

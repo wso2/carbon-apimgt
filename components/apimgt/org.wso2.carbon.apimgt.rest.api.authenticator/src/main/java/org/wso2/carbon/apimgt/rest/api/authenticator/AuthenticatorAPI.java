@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
 import org.wso2.carbon.apimgt.core.configuration.APIMConfigurationService;
+import org.wso2.carbon.apimgt.core.configuration.models.MultiEnvironmentOverview;
 import org.wso2.carbon.apimgt.core.dao.SystemApplicationDao;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
@@ -89,7 +90,10 @@ public class AuthenticatorAPI implements Microservice {
         try {
             KeyManager keyManager = APIManagerFactory.getInstance().getKeyManager();
             SystemApplicationDao systemApplicationDao = DAOFactory.getSystemApplicationDao();
-            AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao);
+            MultiEnvironmentOverview envOverviewConfigs = APIMConfigurationService.getInstance()
+                    .getEnvironmentConfigurations().getMultiEnvironmentOverview();
+            AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao,
+                    envOverviewConfigs);
             AuthResponseBean authResponseBean = new AuthResponseBean();
             String appContext = AuthenticatorConstants.URL_PATH_SEPERATOR + appName;
             String logoutContext = AuthenticatorConstants.LOGOUT_SERVICE_CONTEXT +
@@ -116,7 +120,8 @@ public class AuthenticatorAPI implements Microservice {
                 }
             }
             AccessTokenInfo accessTokenInfo = authenticatorService.getTokens(appContext.substring(1),
-                    grantType, userName, password, refToken, Long.parseLong(validityPeriod), null, assertion);
+                    grantType, userName, password, refToken, Long.parseLong(validityPeriod), null,
+                    assertion, APIManagerFactory.getInstance().getIdentityProvider());
             authenticatorService.setAccessTokenData(authResponseBean, accessTokenInfo);
             String accessToken = accessTokenInfo.getAccessToken();
             String refreshToken = accessTokenInfo.getRefreshToken();
@@ -210,7 +215,10 @@ public class AuthenticatorAPI implements Microservice {
             try {
                 KeyManager keyManager = APIManagerFactory.getInstance().getKeyManager();
                 SystemApplicationDao systemApplicationDao = DAOFactory.getSystemApplicationDao();
-                AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao);
+                MultiEnvironmentOverview envOverviewConfigs = APIMConfigurationService.getInstance()
+                        .getEnvironmentConfigurations().getMultiEnvironmentOverview();
+                AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao,
+                        envOverviewConfigs);
                 authenticatorService.revokeAccessToken(appContext.substring(1), accessToken);
                 // Lets invalidate all the cookies saved.
                 NewCookie logoutContextCookie = AuthUtil
@@ -253,7 +261,10 @@ public class AuthenticatorAPI implements Microservice {
         try {
             KeyManager keyManager = APIManagerFactory.getInstance().getKeyManager();
             SystemApplicationDao systemApplicationDao = DAOFactory.getSystemApplicationDao();
-            AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao);
+            MultiEnvironmentOverview envOverviewConfigs = APIMConfigurationService.getInstance()
+                    .getEnvironmentConfigurations().getMultiEnvironmentOverview();
+            AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao,
+                    envOverviewConfigs);
             JsonObject oAuthData = authenticatorService.getAuthenticationConfigurations(appName);
             if (oAuthData.size() == 0) {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -271,8 +282,8 @@ public class AuthenticatorAPI implements Microservice {
     /**
      * This is the API which IDP redirects the user after authentication.
      *
-     * @param request Request to call /callback api
-     * @param appName Name of the application (publisher/store/admin)
+     * @param request           Request to call /callback api
+     * @param appName           Name of the application (publisher/store/admin)
      * @param authorizationCode Authorization-Code
      * @return Response - Response with redirect URL
      */
@@ -299,9 +310,12 @@ public class AuthenticatorAPI implements Microservice {
         try {
             KeyManager keyManager = APIManagerFactory.getInstance().getKeyManager();
             SystemApplicationDao systemApplicationDao = DAOFactory.getSystemApplicationDao();
-            AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao);
+            MultiEnvironmentOverview envOverviewConfigs = APIMConfigurationService.getInstance()
+                    .getEnvironmentConfigurations().getMultiEnvironmentOverview();
+            AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao,
+                    envOverviewConfigs);
             AccessTokenInfo accessTokenInfo = authenticatorService.getTokens(appName, grantType,
-                    null, null, null, 0, authorizationCode, null);
+                    null, null, null, 0, authorizationCode, null, null);
             if (StringUtils.isEmpty(accessTokenInfo.toString())) {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                         .entity("Access token generation failed!").build();
