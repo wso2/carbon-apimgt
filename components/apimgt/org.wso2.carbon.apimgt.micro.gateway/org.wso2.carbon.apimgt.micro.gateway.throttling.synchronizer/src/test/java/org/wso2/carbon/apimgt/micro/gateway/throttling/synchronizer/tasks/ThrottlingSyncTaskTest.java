@@ -83,7 +83,7 @@ public class ThrottlingSyncTaskTest {
                 .getClientSecret();
 
         AccessTokenDTO accessTknDTO = Mockito.mock(AccessTokenDTO.class);
-        PowerMockito.when(TokenUtil.generateAccessToken(any(String.class), any(String.class), any(String.class)))
+        PowerMockito.when(TokenUtil.generateAccessToken(any(String.class), any(char[].class), any(String.class)))
                 .thenReturn(accessTknDTO);
         Mockito.doReturn("ssfhhh-jenfho-wfembj").when(accessTknDTO)
                 .getAccessToken();
