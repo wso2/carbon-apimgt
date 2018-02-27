@@ -145,10 +145,10 @@ public class APIUsageFileUploadTask implements Task {
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                     getAPIManagerConfigurationService().getAPIManagerConfiguration();
             String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
-            String password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
+            char[] password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD).toCharArray();
 
-            String authHeaderValue = "Basic " +
-                    Base64.encodeBase64String((username + ":" + password).getBytes("UTF-8"));
+            String authHeaderValue = "Basic " + Base64.encodeBase64String(
+                    (username + ":" + String.valueOf(password)).getBytes("UTF-8")).trim();
             httppost.setHeader(MicroGatewayAPIUsageConstants.AUTHORIZATION_HEADER, authHeaderValue);
             httppost.setHeader(MicroGatewayAPIUsageConstants.ACCEPT_HEADER,
                     MicroGatewayAPIUsageConstants.ACCEPT_HEADER_APPLICATION_JSON);

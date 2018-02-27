@@ -683,16 +683,33 @@ public class APIConsumerImplTest {
         Mockito.when(ApplicationUtils.populateTokenRequest(Mockito.anyString(), (AccessTokenRequest) Mockito
                 .anyObject()))
                 .thenReturn(tokenRequest);
-        assertNotNull(apiConsumer.renewAccessToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(), UUID
-                .randomUUID().toString(), "3600", args, "{}"));
+        apiConsumer.username = "subscriber";
+        String oldAccessToken = UUID.randomUUID().toString();
+        String clientId = UUID.randomUUID().toString();
+        String applicationId = "1";
+
+        Map<String, String> consumerKeyTokenTypeMap = new HashMap<>();
+        consumerKeyTokenTypeMap.put("application_id", applicationId);
+        consumerKeyTokenTypeMap.put("token_type", "PRODUCTION");
+
+        Application application = Mockito.mock(Application.class);
+        Subscriber subscriber = Mockito.mock(Subscriber.class);
+        Mockito.when(application.getSubscriber()).thenReturn(subscriber);
+        Mockito.when(subscriber.getName()).thenReturn("subscriber");
+
+        apiConsumer.apiMgtDAO = apiMgtDAO;
+        Mockito.when(apiMgtDAO.getApplicationIdAndTokenTypeByConsumerKey(clientId)).thenReturn(consumerKeyTokenTypeMap);
+        Mockito.when(apiMgtDAO.getApplicationById(Integer.parseInt(applicationId))).thenReturn(application);
+        assertNotNull(apiConsumer.renewAccessToken(oldAccessToken, clientId, UUID.randomUUID().toString(),
+                "3600", args, "{}"));
 
         // Error path
         Mockito.when(ApplicationUtils.populateTokenRequest(Mockito.anyString(), (AccessTokenRequest) Mockito
                 .anyObject()))
                 .thenThrow(APIManagementException.class);
         try {
-            apiConsumer.renewAccessToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(), UUID.randomUUID()
-                    .toString(), "3600", args, "{}");
+            apiConsumer.renewAccessToken(oldAccessToken, clientId, UUID.randomUUID().toString(),
+                    "3600", args, "{}");
             assertTrue(false);
         } catch (APIManagementException e) {
             assertTrue(true);
@@ -792,7 +809,6 @@ public class APIConsumerImplTest {
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
         apiConsumer.apiMgtDAO = apiMgtDAO;
         Application application = Mockito.mock(Application.class);
-        Mockito.when(application.getName()).thenReturn("application");
         PowerMockito.when(APIUtil.isApplicationExist("userID", "app", "1")).
                 thenReturn(false);
         Mockito.when(apiMgtDAO.addApplication(application, "userID")).thenReturn(1);
@@ -933,11 +949,11 @@ public class APIConsumerImplTest {
         Mockito.when(apiMgtDAO.getPendingSubscriptionsByApplicationId(1111)).thenReturn(pendingSubscriptions);
         Mockito.when(apiMgtDAO.getRegistrationApprovalState(1111, APIConstants.API_KEY_TYPE_PRODUCTION)).
                 thenReturn("CREATED");
-        apiConsumer.removeApplication(application);
+        apiConsumer.removeApplication(application, apiConsumer.username);
 
         Mockito.when(apiMgtDAO.getRegistrationApprovalState(1111, APIConstants.API_KEY_TYPE_SANDBOX)).
                 thenReturn("CREATED");
-        apiConsumer.removeApplication(application);
+        apiConsumer.removeApplication(application, apiConsumer.username);
         Mockito.verify(apiMgtDAO, Mockito.times(2)).getPendingSubscriptionsByApplicationId(1111);
     }
 
@@ -957,6 +973,24 @@ public class APIConsumerImplTest {
         String clientName = "sample client";
         updatedAppInfo.setClientName(clientName);
         Mockito.when(keyManager.updateApplication((OAuthAppRequest) Mockito.any())).thenReturn(updatedAppInfo);
+
+        System.setProperty(CARBON_HOME, "");
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        APIManagerConfigurationService apiManagerConfigurationService = Mockito.
+                mock(APIManagerConfigurationService.class);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.KEYMANAGER_SERVERURL)).
+                thenReturn("http://localhost");
+
+        Application application = Mockito.mock(Application.class);
+        Subscriber subscriber = Mockito.mock(Subscriber.class);
+        Mockito.when(ApplicationUtils
+                .retrieveApplication("app1", "1", null))
+                .thenReturn(application);
+        Mockito.when(application.getSubscriber()).thenReturn(subscriber);
+        Mockito.when(subscriber.getName()).thenReturn("1");
+
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         apiConsumer.tenantDomain = SAMPLE_TENANT_DOMAIN_1;
         Assert.assertEquals(apiConsumer
@@ -1122,6 +1156,15 @@ public class APIConsumerImplTest {
         }
         Mockito.when(userStoreManager.getRoleListOfUser(Mockito.anyString())).thenThrow(UserStoreException.class).
                 thenReturn(new String[] { "role1", "role2" });
+
+        Application application = Mockito.mock(Application.class);
+        Subscriber subscriber = Mockito.mock(Subscriber.class);
+        Mockito.when(subscriber.getName()).thenReturn("1");
+        Mockito.when(application.getSubscriber()).thenReturn(subscriber);
+        Mockito.when(ApplicationUtils
+                .retrieveApplication(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(application);
+
         try {
             apiConsumer
                     .requestApprovalForApplicationRegistration("1", "app1", "access", "identity.com/auth", null, "3600",
@@ -1135,7 +1178,7 @@ public class APIConsumerImplTest {
         OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
         OAuthAppRequest oAuthAppRequest = new OAuthAppRequest();
         oAuthAppRequest.setOAuthApplicationInfo(oAuthApplicationInfo);
-        Application application = new Application("app1", new Subscriber("1"));
+        application = new Application("app1", new Subscriber("1"));
         BDDMockito.when(ApplicationUtils
                 .createOauthAppRequest(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString(), Mockito.anyString())).thenReturn(oAuthAppRequest);
@@ -1149,7 +1192,7 @@ public class APIConsumerImplTest {
         Assert.assertEquals(result.get("keyState"), "APPROVED");
 
         result = apiConsumer
-                .requestApprovalForApplicationRegistration("3", "app1", APIConstants.API_KEY_TYPE_SANDBOX, "", null,
+                .requestApprovalForApplicationRegistration("1", "app1", APIConstants.API_KEY_TYPE_SANDBOX, "", null,
                         "3600", "api_view", "2", null);
         Assert.assertEquals(result.size(), 8);
         Assert.assertEquals(result.get("keyState"), "APPROVED");
@@ -1159,7 +1202,7 @@ public class APIConsumerImplTest {
     @Test
     public void testUpdateApplication() throws APIManagementException {
         Application newApplication = new Application("app1", new Subscriber("sub1"));
-        Application oldApplication = new Application(1);
+        Application oldApplication = new Application("app", new Subscriber("sub1"));
         oldApplication.setStatus(APIConstants.ApplicationStatus.APPLICATION_CREATED);
         Mockito.when(apiMgtDAO.getApplicationById(Mockito.anyInt())).thenReturn(oldApplication);
         Mockito.when(apiMgtDAO.getApplicationByUUID(Mockito.anyString())).thenReturn(oldApplication);

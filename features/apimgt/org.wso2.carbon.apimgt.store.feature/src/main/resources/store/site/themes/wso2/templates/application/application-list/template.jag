@@ -1,4 +1,7 @@
 <% jagg.template("application/application-list", function(inputs, outputs, jagg) { %>
+<script>
+var loggedInUser = '<%=jagg.getUser().username%>';
+</script>
 <div class="page-header" id="Message">
     <h2><%=i18n.localize("Applications")%></h2>
 </div>
@@ -38,6 +41,7 @@
       <span class="hidden-xs"><%=i18n.localize("View")%></span>
   </a>
   {{#if isActive}}
+  {{#if isOwner}}
   <a title="Edit" href="<%=jagg.urlTenanted("/site/pages/application-edit.jag?name={{ name }}")%>" class="btn  btn-sm padding-reduce-on-grid-view">
       <span class="fw-stack">
           <i class="fw fw-ring fw-stack-2x"></i>
@@ -46,6 +50,8 @@
       <span class="hidden-xs"><%=i18n.localize("Edit")%></span>
   </a>
   {{/if}}
+  {{/if}}
+  {{#if isOwner}}
   <a title="Delete" href="#" data-id="{{ name }}" data-count="{{ apiCount }}" class="btn btn-sm padding-reduce-on-grid-view deleteApp">
       <span class="fw-stack">
           <i class="fw fw-ring fw-stack-2x"></i>
@@ -53,6 +59,7 @@
       </span>
       <span class="hidden-xs"><%=i18n.localize("Delete")%></span>
   </a>
+  {{/if}}
 </script>
 
 <script id="application-name" type="text/x-handlebars-template">

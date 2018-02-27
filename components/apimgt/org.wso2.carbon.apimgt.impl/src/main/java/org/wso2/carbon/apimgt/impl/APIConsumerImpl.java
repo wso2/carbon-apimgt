@@ -2541,6 +2541,23 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (existingApp != null && APIConstants.ApplicationStatus.APPLICATION_CREATED.equals(existingApp.getStatus())) {
             throw new APIManagementException("Cannot update the application while it is INACTIVE");
         }
+
+        boolean isCaseInsensitiveComparisons = Boolean.parseBoolean(getAPIManagerConfiguration().
+                getFirstProperty(APIConstants.API_STORE_FORCE_CI_COMPARISIONS));
+
+        boolean isUserAppOwner;
+        if (isCaseInsensitiveComparisons) {
+            isUserAppOwner = application.getSubscriber().getName().
+                    equalsIgnoreCase(existingApp.getSubscriber().getName());
+        } else {
+            isUserAppOwner = application.getSubscriber().getName().equals(existingApp.getSubscriber().getName());
+        }
+
+        if (!isUserAppOwner) {
+            throw new APIManagementException("user: " + application.getSubscriber().getName() + ", " +
+                    "attempted to update application owned by: " + existingApp.getSubscriber().getName());
+        }
+
         //validate callback url
         if(!APIUtil.isValidURL(application.getCallbackUrl())){
             log.warn("Invalid Call Back URL "+ application.getCallbackUrl());
@@ -2622,16 +2639,32 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * Function to remove an Application from the API Store
      *
      * @param application - The Application Object that represents the Application
+     * @param username
      * @throws APIManagementException
      */
     @Override
-    public void removeApplication(Application application) throws APIManagementException {
+    public void removeApplication(Application application, String username) throws APIManagementException {
         String uuid = application.getUUID();
         if (application.getId() == 0 && !StringUtils.isEmpty(uuid)) {
             application = apiMgtDAO.getApplicationByUUID(uuid);
         }
         boolean isTenantFlowStarted = false;
         int applicationId = application.getId();
+
+        boolean isCaseInsensitiveComparisons = Boolean.parseBoolean(getAPIManagerConfiguration().
+                getFirstProperty(APIConstants.API_STORE_FORCE_CI_COMPARISIONS));
+
+        boolean isUserAppOwner;
+        if (isCaseInsensitiveComparisons) {
+            isUserAppOwner = application.getSubscriber().getName().equalsIgnoreCase(username);
+        } else {
+            isUserAppOwner = application.getSubscriber().getName().equals(username);
+        }
+
+        if (!isUserAppOwner) {
+            throw new APIManagementException("user: " + application.getSubscriber().getName() + ", " +
+                    "attempted to remove application owned by: " + username);
+        }
 
         try {
             String workflowExtRef;
@@ -2821,6 +2854,21 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
             // get APIM application by Application Name and userId.
             Application application = ApplicationUtils.retrieveApplication(applicationName, userId, groupingId);
+
+            boolean isCaseInsensitiveComparisons = Boolean.parseBoolean(getAPIManagerConfiguration().
+                    getFirstProperty(APIConstants.API_STORE_FORCE_CI_COMPARISIONS));
+
+            boolean isUserAppOwner;
+            if (isCaseInsensitiveComparisons) {
+                isUserAppOwner = application.getSubscriber().getName().equalsIgnoreCase(userId);
+            } else {
+                isUserAppOwner = application.getSubscriber().getName().equals(userId);
+            }
+
+            if (!isUserAppOwner) {
+                throw new APIManagementException("user: " + application.getSubscriber().getName() + ", " +
+                        "attempted to generate tokens for application owned by: " + userId);
+            }
 
             // if its a PRODUCTION application.
             if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(tokenType)) {
@@ -3304,6 +3352,26 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                 tenantFlowStarted = true;
             }
+
+            Application application = ApplicationUtils.retrieveApplication(applicationName, userId, groupingId);
+
+            final String subscriberName = application.getSubscriber().getName();
+
+            boolean isCaseInsensitiveComparisons = Boolean.parseBoolean(getAPIManagerConfiguration().
+                    getFirstProperty(APIConstants.API_STORE_FORCE_CI_COMPARISIONS));
+
+            boolean isUserAppOwner;
+            if (isCaseInsensitiveComparisons) {
+                isUserAppOwner = subscriberName.equalsIgnoreCase(userId);
+            } else {
+                isUserAppOwner = subscriberName.equals(userId);
+            }
+
+            if (!isUserAppOwner) {
+                throw new APIManagementException("user: " + userId + ", attempted to update OAuth application " +
+                        "owned by: " + subscriberName);
+            }
+
             //Create OauthAppRequest object by passing json String.
             OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, null, callbackUrl,
                     tokenScope, jsonString);

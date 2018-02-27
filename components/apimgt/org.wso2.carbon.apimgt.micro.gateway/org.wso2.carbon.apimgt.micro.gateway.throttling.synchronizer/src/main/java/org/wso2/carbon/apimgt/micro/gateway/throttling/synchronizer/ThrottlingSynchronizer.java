@@ -447,12 +447,18 @@ public class ThrottlingSynchronizer implements OnPremiseGatewayInitListener {
         PrivilegedCarbonContext.startTenantFlow();
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(username);
-        ConfigurationContext context = ServiceReferenceHolder.getInstance()
-                .getConfigContextService().getServerConfigContext();
-        TenantAxisUtils.getTenantAxisConfiguration(tenantDomain, context);
-        if (log.isDebugEnabled()) {
-            log.debug("Tenant was loaded into Carbon Context. Tenant : " + tenantDomain
-                    + ", Username : " + username);
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            ConfigurationContext context = ServiceReferenceHolder.getInstance()
+                    .getConfigContextService().getServerConfigContext();
+            TenantAxisUtils.getTenantAxisConfiguration(tenantDomain, context);
+            if (log.isDebugEnabled()) {
+                log.debug("Tenant was loaded into Carbon Context. Tenant : " + tenantDomain
+                        + ", Username : " + username);
+            }
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Skipping loading super tenant space since execution is currently in super tenant flow.");
+            }
         }
     }
 

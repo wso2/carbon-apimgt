@@ -841,7 +841,7 @@
                 </span>
 	    </a></td>
         </tr>
-        <tr><td colspan="4" class="resource_body" style="display:none" data-path="$.paths.['{{ path }}'].{{@key}}"></td></tr>
+        <tr><td colspan="4" class="resource_body" style="display:none" data-path="$.paths.{{ path }}.{{@key}}"></td></tr>
     {{/each}}
 {{/each}}
 </table>

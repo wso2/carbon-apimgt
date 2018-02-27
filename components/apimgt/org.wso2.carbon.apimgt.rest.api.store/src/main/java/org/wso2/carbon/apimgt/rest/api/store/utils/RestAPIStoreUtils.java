@@ -122,6 +122,28 @@ public class RestAPIStoreUtils {
     }
 
     /**
+     * check whether current logged in user is the owner of the application
+     *
+     * @param application Application object
+     * @return true if current logged in consumer is the owner of the specified application
+     */
+    public static boolean isUserOwnerOfApplication(Application application) {
+        String username = RestApiUtil.getLoggedInUsername();
+
+        if (application.getSubscriber().getName().equals(username)) {
+            return true;
+        } else if (application.getSubscriber().getName().toLowerCase().equals(username.toLowerCase())) {
+            APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
+                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+            String comparisonConfig = configuration
+                    .getFirstProperty(APIConstants.API_STORE_FORCE_CI_COMPARISIONS);
+            return (StringUtils.isNotEmpty(comparisonConfig) && Boolean.valueOf(comparisonConfig));
+        }
+
+        return false;
+    }
+
+    /**
      * check whether current logged in user has access to the specified subscription
      *
      * @param subscribedAPI SubscribedAPI object
