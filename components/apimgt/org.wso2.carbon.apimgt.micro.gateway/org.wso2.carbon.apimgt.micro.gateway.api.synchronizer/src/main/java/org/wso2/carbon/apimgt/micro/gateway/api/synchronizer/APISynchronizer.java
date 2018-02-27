@@ -322,7 +322,7 @@ public class APISynchronizer implements OnPremiseGatewayInitListener {
             CloseableHttpClient httpClient = HttpClients.createDefault();
 
             HttpGet httpGet = new HttpGet(updatedAPIViewUrl);
-            String authHeaderValue = TokenUtil.getBasicAuthHeaderValue(username, password.toString());
+            String authHeaderValue = TokenUtil.getBasicAuthHeaderValue(username, String.valueOf(password));
             httpGet.addHeader(OnPremiseGatewayConstants.AUTHORIZATION_HEADER, authHeaderValue);
             String response = HttpRequestUtil.executeHTTPMethodWithRetry(httpClient, httpGet,
                     OnPremiseGatewayConstants.DEFAULT_RETRY_COUNT);
