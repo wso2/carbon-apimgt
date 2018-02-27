@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.micro.gateway.status.checker.internal.ServiceRefer
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 
 /**
  * Status Checker which pings to update Gateway status
@@ -152,6 +153,8 @@ public class StatusChecker implements Runnable {
     protected String getAuthHeader(String username, char[] password) throws UnsupportedEncodingException {
         String authHeaderValue = OnPremiseGatewayConstants.AUTHORIZATION_BASIC + Base64.encodeBase64String(
                 (username + ":" + String.valueOf(password)).getBytes(OnPremiseGatewayConstants.DEFAULT_CHARSET));
+        //Clean up password array
+        Arrays.fill(password, '0');
         return authHeaderValue;
     }
 
