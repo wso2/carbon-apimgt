@@ -216,7 +216,7 @@ public class AuthenticatorService {
                 try {
                     identityProvider.getIdOfUser(usernameFromJWT);
                 } catch (IdentityProviderException e) {
-                    String errorMsg = "User " + usernameFromJWT + " dose not exists in this environment.";
+                    String errorMsg = "User " + usernameFromJWT + " does not exists in this environment.";
                     throw new APIManagementException(errorMsg, e, ExceptionCodes.USER_NOT_AUTHENTICATED);
                 }
             }

@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.authenticator.utils;
 
-import org.wso2.carbon.apimgt.core.configuration.APIMConfigurationService;
+import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.rest.api.authenticator.constants.AuthenticatorConstants;
@@ -115,16 +115,14 @@ public class AuthUtil {
     public static String extractTokenFromHeaders(Request request, String cookieHeader, String environmentName) {
         String authHeader = request.getHeader(AuthenticatorConstants.AUTHORIZATION_HTTP_HEADER);
         String token = "";
-        if (authHeader != null) {
+        if (authHeader != null && authHeader.toLowerCase(Locale.US).startsWith(AuthenticatorConstants.BEARER_PREFIX)) {
             authHeader = authHeader.trim();
-            if (authHeader.toLowerCase(Locale.US).startsWith(AuthenticatorConstants.BEARER_PREFIX)) {
-                // Split the auth header to get the access token.
-                String[] authHeaderParts = authHeader.split(" ");
-                if (authHeaderParts.length == 2) {
-                    token = authHeaderParts[1];
-                } else if (authHeaderParts.length < 2) {
-                    return null;
-                }
+            // Split the auth header to get the access token.
+            String[] authHeaderParts = authHeader.split(" ");
+            if (authHeaderParts.length == 2) {
+                token = authHeaderParts[1];
+            } else if (authHeaderParts.length < 2) {
+                return null;
             }
         } else {
             return null;
@@ -161,7 +159,7 @@ public class AuthUtil {
                                           boolean isHttpOnly, String expiresIn, String environmentName) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(value).append(COOKIE_PATH_SEPARATOR).append(path).append(COOKIE_VALUE_SEPARATOR);
-        if (expiresIn != null && !expiresIn.isEmpty()) {
+        if (!StringUtils.isEmpty(expiresIn)) {
             stringBuilder.append(expiresIn).append(COOKIE_VALUE_SEPARATOR);
         }
         if (isHttpOnly) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -230,7 +230,7 @@ public class AuthenticatorServiceTestCase {
                     "urn:ietf:params:oauth:grant-type:jwt-bearer", null, null, null, 0, null, "xxx-assertion-xxx", identityProvider);
             Assert.assertEquals(tokenInfoResponseForInvalidJWTGrant, tokenInfo);
         } catch (APIManagementException e) {
-            Assert.assertEquals(e.getMessage(), "User John dose not exists in this environment.");
+            Assert.assertEquals(e.getMessage(), "User John does not exists in this environment.");
         }
     }
 
