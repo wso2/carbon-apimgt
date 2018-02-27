@@ -87,8 +87,9 @@ import javax.xml.transform.stream.StreamResult;
  * Class for synchronizing APIs upon initial server startup
  */
 public class APISynchronizer implements OnPremiseGatewayInitListener {
-    private final Log log = LogFactory.getLog(APISynchronizer.class);
-    private String apiPublisherUrl = APISynchronizationConstants.EMPTY_STRING;
+    private static final Log log = LogFactory.getLog(APISynchronizer.class);
+    private String apiViewUrl = APISynchronizationConstants.EMPTY_STRING;
+    private String mediationPolicyUrl = APISynchronizationConstants.EMPTY_STRING;
 
     @Override
     public void completedInitialization() {
@@ -104,18 +105,37 @@ public class APISynchronizer implements OnPremiseGatewayInitListener {
      */
     private void initializeOnPremiseGatewayProperties() throws APISynchronizationException {
         try {
-            apiPublisherUrl =
-                    ConfigManager.getConfigManager()
-                            .getProperty(APISynchronizationConstants.API_PUBLISHER_URL_PROPERTY);
+            String apiPublisherUrl = ConfigManager.getConfigManager()
+                    .getProperty(APISynchronizationConstants.API_PUBLISHER_URL_PROPERTY);
+            String apiVersion = ConfigManager.getConfigManager()
+                    .getProperty(APISynchronizationConstants.API_VERSION_PROPERTY);
+            if (apiVersion == null) {
+                apiVersion = APISynchronizationConstants.API_DEFAULT_VERSION;
+                if (log.isDebugEnabled()) {
+                    log.debug("Using default API version: " + apiVersion);
+                }
+            } else if (APISynchronizationConstants.CLOUD_API.equals(apiVersion)) {
+                apiVersion = APISynchronizationConstants.EMPTY_STRING;
+                if (log.isDebugEnabled()) {
+                    log.debug("Cloud API doesn't have a version. Therefore, removing the version.");
+                }
+            }
             if (apiPublisherUrl == null) {
                 apiPublisherUrl = APISynchronizationConstants.DEFAULT_API_PUBLISHER_URL;
                 if (log.isDebugEnabled()) {
                     log.debug("Using default API publisher URL." + apiPublisherUrl);
                 }
             }
+            //Remove '//' which is created in cloud case.
+            apiViewUrl = apiPublisherUrl + APISynchronizationConstants.API_VIEW_PATH
+                    .replace(APISynchronizationConstants.API_VERSION_PARAM, apiVersion)
+                    .replace("//", APISynchronizationConstants.URL_PATH_SEPARATOR);
+            mediationPolicyUrl = apiPublisherUrl + APISynchronizationConstants.API_VIEW_GLOBAL_MEDIATION_POLICY_PATH
+                    .replace(APISynchronizationConstants.API_VERSION_PARAM, apiVersion)
+                    .replace("//", APISynchronizationConstants.URL_PATH_SEPARATOR);
         } catch (OnPremiseGatewayException e) {
-            throw new APISynchronizationException("An error occurred while retrieving on-premise gateway" +
-                    " configuration.", e);
+            throw new APISynchronizationException(
+                    "An error occurred while retrieving micro gateway configuration.", e);
         }
     }
 
@@ -211,8 +231,7 @@ public class APISynchronizer implements OnPremiseGatewayInitListener {
         List<APIDTO> apiDTOList = new ArrayList<>();
         for (APIInfoDTO apiInfoObj : apiInfoList) {
             String id = apiInfoObj.getId();
-            String detailedAPIViewUrl = apiPublisherUrl + APISynchronizationConstants.API_VIEW_PATH +
-                    "/" + id;
+            String detailedAPIViewUrl = apiViewUrl + APISynchronizationConstants.URL_PATH_SEPARATOR + id;
             try {
                 APIDTO apiDTO = getAPI(id, detailedAPIViewUrl, accessTokenDTO);
                 apiDTOList.add(apiDTO);
@@ -275,7 +294,6 @@ public class APISynchronizer implements OnPremiseGatewayInitListener {
 
         CloseableHttpClient httpClient = HttpClients.createDefault();
 
-        String apiViewUrl = apiPublisherUrl + APISynchronizationConstants.API_VIEW_PATH;
         HttpGet httpGet = new HttpGet(apiViewUrl);
         String authHeaderValue = OnPremiseGatewayConstants.AUTHORIZATION_BEARER + accessTokenDTO.getAccessToken();
         httpGet.addHeader(OnPremiseGatewayConstants.AUTHORIZATION_HEADER, authHeaderValue);
@@ -352,8 +370,7 @@ public class APISynchronizer implements OnPremiseGatewayInitListener {
         List<APIDTO> apiDtoList = new ArrayList<>();
         for (Object updatedApiId : updatedApiIds) {
             String id = updatedApiId.toString();
-            String detailedAPIViewUrl = apiPublisherUrl + APISynchronizationConstants.API_VIEW_PATH +
-                    "/" + id;
+            String detailedAPIViewUrl = apiViewUrl + APISynchronizationConstants.URL_PATH_SEPARATOR + id;
             try {
                 APIDTO apiDTO = getAPI(id, detailedAPIViewUrl, accessTokenDTO);
                 apiDtoList.add(apiDTO);
@@ -375,7 +392,7 @@ public class APISynchronizer implements OnPremiseGatewayInitListener {
         List<SequenceDTO> sequences = api.getSequences();
         if (sequences.size() > 0) {
             String apiId = api.getId();
-            String mediationPolicyViewUrl = apiPublisherUrl + APISynchronizationConstants.API_VIEW_PATH + "/"
+            String mediationPolicyViewUrl = apiViewUrl + APISynchronizationConstants.URL_PATH_SEPARATOR
                     + apiId + APISynchronizationConstants.API_VIEW_MEDIATION_POLICY_PATH;
 
             Map<String, String> policies = new HashMap<>();
@@ -448,9 +465,6 @@ public class APISynchronizer implements OnPremiseGatewayInitListener {
         }
         Map<String, String> globalMediationSeq = new HashMap<>();
         try {
-            String mediationPolicyUrl = apiPublisherUrl +
-                    APISynchronizationConstants.API_VIEW_GLOBAL_MEDIATION_POLICY_PATH;
-
             CloseableHttpClient httpClient = HttpClients.createDefault();
             HttpGet httpGet = new HttpGet(mediationPolicyUrl);
             String authHeaderValue = OnPremiseGatewayConstants.AUTHORIZATION_BEARER +
@@ -490,8 +504,9 @@ public class APISynchronizer implements OnPremiseGatewayInitListener {
      */
     private void deploySequence(APIDTO api, String apiId, String seqId, AccessTokenDTO accessTokenDTO)
             throws APISynchronizationException {
-        String uri = apiPublisherUrl + APISynchronizationConstants.API_VIEW_PATH + "/" + apiId +
-                APISynchronizationConstants.API_VIEW_MEDIATION_POLICY_PATH + "/" + seqId;
+        String uri = apiViewUrl + APISynchronizationConstants.URL_PATH_SEPARATOR + apiId
+                + APISynchronizationConstants.API_VIEW_MEDIATION_POLICY_PATH
+                + APISynchronizationConstants.URL_PATH_SEPARATOR + seqId;
         try {
             CloseableHttpClient httpClient = HttpClients.createDefault();
             HttpGet httpGet = new HttpGet(uri);

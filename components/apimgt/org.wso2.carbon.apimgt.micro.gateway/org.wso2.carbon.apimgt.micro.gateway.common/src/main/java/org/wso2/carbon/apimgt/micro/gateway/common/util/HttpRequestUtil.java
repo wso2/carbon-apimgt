@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.micro.gateway.common.util;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
@@ -26,6 +27,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.util.EntityUtils;
+import org.wso2.carbon.apimgt.micro.gateway.common.config.ConfigManager;
 import org.wso2.carbon.apimgt.micro.gateway.common.exception.OnPremiseGatewayException;
 
 import java.io.IOException;
@@ -59,8 +61,8 @@ public class HttpRequestUtil {
      * @return response. it will return an empty string if response body is null
      * @throws OnPremiseGatewayException throws {@link OnPremiseGatewayException}
      */
-    public static String executeHTTPMethodWithRetry(HttpClient httpClient, HttpRequestBase httpMethod,
-                                                    int retryCount) throws OnPremiseGatewayException {
+    public static String executeHTTPMethodWithRetry(HttpClient httpClient, HttpRequestBase httpMethod, int retryCount)
+            throws OnPremiseGatewayException {
 
         String result = OnPremiseGatewayConstants.EMPTY_STRING;
         HttpResponse response;
@@ -68,13 +70,23 @@ public class HttpRequestUtil {
         String methodName = httpMethod.getMethod();
         String uri = getURI(httpMethod);
 
+        //Add an unique identifier as a custom header for distinguishing requests from different micro gateways.
+        String token = ConfigManager.getConfigManager()
+                .getProperty(OnPremiseGatewayConstants.API_REQUEST_UNIQUE_IDENTIFIER);
+        if (StringUtils.isNotBlank(token) && !(OnPremiseGatewayConstants.API_REQUEST_UNIQUE_IDENTIFIER_HOLDER
+                .equals(token))) {
+            if (log.isDebugEnabled()) {
+                log.debug("Adding unique identifier as an header to the http " + methodName + " request.");
+            }
+            httpMethod.addHeader(OnPremiseGatewayConstants.APT_REQUEST_TOKEN_HEADER, token);
+        }
         do {
             try {
                 executionCount++;
                 response = httpClient.execute(httpMethod);
                 if (log.isDebugEnabled()) {
-                    log.debug("HTTP response code for the " + methodName + " request to URL: " + uri + " is " +
-                            response);
+                    log.debug(
+                            "HTTP response code for the " + methodName + " request to URL: " + uri + " is " + response);
                 }
                 result = handleResponse(response, methodName, true, executionCount, retryCount, uri);
                 if (!OnPremiseGatewayConstants.EMPTY_STRING.equals(result)) {
@@ -105,6 +117,16 @@ public class HttpRequestUtil {
         String uri = getURI(httpMethod);
         String methodName = httpMethod.getMethod();
 
+        //Add an unique identifier as an custom header for distinguishing requests from different micro gateways.
+        String token = ConfigManager.getConfigManager()
+                .getProperty(OnPremiseGatewayConstants.API_REQUEST_UNIQUE_IDENTIFIER);
+        if (StringUtils.isNotBlank(token) && !(OnPremiseGatewayConstants.API_REQUEST_UNIQUE_IDENTIFIER_HOLDER
+                .equals(token))) {
+            if (log.isDebugEnabled()) {
+                log.debug("Adding unique identifier as an header to the http " + methodName + " request.");
+            }
+            httpMethod.addHeader(OnPremiseGatewayConstants.APT_REQUEST_TOKEN_HEADER, token);
+        }
         try {
             response = httpClient.execute(httpMethod);
             if (log.isDebugEnabled()) {
