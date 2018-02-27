@@ -108,7 +108,7 @@ public class WorkflowsApiServiceImplTestCase {
         WorkflowRequestDTO workflowRequestDTO = new WorkflowRequestDTO();
         workflowRequestDTO.setDescription("Test Desc");
         workflowRequestDTO.setStatus(WorkflowRequestDTO.StatusEnum.APPROVED);
-        Workflow workflow = new APIStateChangeWorkflow(null, null, null, null, null);
+        Workflow workflow = new APIStateChangeWorkflow(null, null, null, null, null, null);
         workflow.setStatus(WorkflowStatus.APPROVED);
         Mockito.doReturn(workflow).doThrow(new IllegalArgumentException())
                 .when(adminService).retrieveWorkflow(workflowRefId);

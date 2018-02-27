@@ -27,7 +27,7 @@ public class DedicatedGatewayMappingUtil {
     /**
      * This method maps the the DedicatedGateway object to DedicatedGatewayDTO
      *
-     * @param dedicatedGateway  DedicatedGateway object
+     * @param dedicatedGateway DedicatedGateway object
      * @return Dedicated Gateway Object
      */
     public static DedicatedGatewayDTO toDedicatedGatewayDTO(DedicatedGateway dedicatedGateway) {
@@ -41,13 +41,16 @@ public class DedicatedGatewayMappingUtil {
      * This method maps the the DedicatedGatewayDTO object to DedicatedGateway Object
      *
      * @param dedicatedGatewayDTO contains data of DedicatedGateway
-     * @param apiId UUID of the API
+     * @param apiId               UUID of the API
+     * @param username            Username
      * @return Dedicated Gateway Object
      */
-    public static DedicatedGateway fromDTOtoDedicatedGateway(DedicatedGatewayDTO dedicatedGatewayDTO, String apiId) {
+    public static DedicatedGateway fromDTOtoDedicatedGateway(DedicatedGatewayDTO dedicatedGatewayDTO, String apiId,
+                                                             String username) {
 
         DedicatedGateway dedicatedGateway = new DedicatedGateway();
         dedicatedGateway.setApiId(apiId);
+        dedicatedGateway.setUpdatedBy(username);
         if (dedicatedGatewayDTO.getIsEnabled() != null) {
             dedicatedGateway.setEnabled(dedicatedGatewayDTO.getIsEnabled());
         } else {

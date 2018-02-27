@@ -360,7 +360,7 @@ public class APIManagerFactory {
                 Map<String, String> implParameters = containerBasedGatewayConfiguration.getImplParameters();
                 containerBasedGatewayGenerator = (ContainerBasedGatewayGenerator) Class.forName(implClassName)
                         .newInstance();
-                containerBasedGatewayGenerator.init(implParameters);
+                containerBasedGatewayGenerator.initImpl(implParameters);
             } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
                 throw new ContainerBasedGatewayException("Error occurred while initializing container based gateway " +
                         "generator", e, ExceptionCodes.ERROR_INITIALIZING_DEDICATED_CONTAINER_BASED_GATEWAY);

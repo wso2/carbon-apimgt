@@ -91,7 +91,7 @@ public class WorkflowExecutorFactory {
         } else if (WorkflowConstants.WF_TYPE_AM_API_STATE.equals(workflowType)) {
             workflow = new APIStateChangeWorkflow(DAOFactory.getApiDAO(), DAOFactory.getAPISubscriptionDAO(),
                     DAOFactory.getWorkflowDAO(), APIManagerFactory.getInstance().geApiLifecycleManager(),
-                    APIManagerFactory.getInstance().getApiGateway());
+                    APIManagerFactory.getInstance().getApiGateway(), DAOFactory.getLabelDAO());
             workflow.setWorkflowType(workflowType);
         } else if (WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE.equals(workflowType)) {
             workflow = new ApplicationUpdateWorkflow(DAOFactory.getApplicationDAO(), DAOFactory.getWorkflowDAO(),

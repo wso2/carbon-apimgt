@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.core.impl;
 
 import org.wso2.carbon.apimgt.core.exception.ContainerBasedGatewayException;
+import org.wso2.carbon.apimgt.core.models.API;
 
 import java.util.Map;
 
@@ -26,16 +27,6 @@ import java.util.Map;
  * Abstract class to manage the auto-created gateways in the container Management system
  */
 public abstract class ContainerBasedGatewayGenerator {
-
-    /**
-     * Initializing implementation parameters
-     *
-     * @param implParameters implementation parameters
-     * @throws ContainerBasedGatewayException if an error occurs while setting the implParameters
-     */
-    public void init(Map<String, String> implParameters) throws ContainerBasedGatewayException {
-        initImpl(implParameters);
-    }
 
     /**
      * Initialization method for the implementation class
@@ -49,17 +40,18 @@ public abstract class ContainerBasedGatewayGenerator {
      * Remove the existing gateway and Broker from Container Management System
      *
      * @param label auto-generated label of gateway
+     * @param api   API
      * @throws ContainerBasedGatewayException If there is a failure to update API in gateway
      */
-    public abstract void removeContainerBasedGateway(String label) throws ContainerBasedGatewayException;
-
+    public abstract void removeContainerBasedGateway(String label, API api) throws ContainerBasedGatewayException;
 
     /**
      * Startup a new Gateway in Container Management System
      *
      * @param label Auto-generated label of the API
+     * @param api   API
      * @throws ContainerBasedGatewayException
      */
-    public abstract void createContainerGateway(String label) throws ContainerBasedGatewayException;
+    public abstract void createContainerGateway(String label, API api) throws ContainerBasedGatewayException;
 
 }

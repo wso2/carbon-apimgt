@@ -2099,7 +2099,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doReturn(true).when(apiPublisher).isAPIExists(apiId);
         DedicatedGateway dedicatedGateway = new DedicatedGateway();
         dedicatedGateway.setEnabled(true);
-        Mockito.doNothing().when(apiPublisher).updateDedicatedGateway(Mockito.any(), Mockito.anyString());
+        Mockito.doNothing().when(apiPublisher).updateDedicatedGateway(Mockito.any());
         Mockito.doReturn(dedicatedGateway).when(apiPublisher).getDedicatedGateway(apiId);
         DedicatedGatewayDTO dedicatedGatewayDTO = new DedicatedGatewayDTO();
         dedicatedGatewayDTO.setIsEnabled(true);
@@ -2119,7 +2119,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doReturn(true).when(apiPublisher).isAPIExists(apiId);
         Mockito.doThrow(new APIManagementException("Error while creating dedicated container based gateway",
                 ExceptionCodes.DEDICATED_CONTAINER_GATEWAY_CREATION_FAILED)).when(apiPublisher)
-                .updateDedicatedGateway(Mockito.any(), Mockito.anyString());
+                .updateDedicatedGateway(Mockito.any());
         Response response = apisApiService.apisApiIdDedicatedGatewayPut(apiId, new DedicatedGatewayDTO(), null, null,
                 getRequest());
         assertEquals(ExceptionCodes.DEDICATED_CONTAINER_GATEWAY_CREATION_FAILED.getHttpStatusCode(),

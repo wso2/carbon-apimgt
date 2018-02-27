@@ -235,16 +235,18 @@ public interface APIGateway {
      * Startup a new Gateway in Container Management System
      *
      * @param label Auto-generated label of the API
+     * @param api   API
      * @throws ContainerBasedGatewayException If there is a failure in creating the container based gateway
      */
-    void createContainerBasedGateway(String label) throws ContainerBasedGatewayException;
+    void createContainerBasedGateway(String label, API api) throws ContainerBasedGatewayException;
 
     /**
      * Remove existing Gateway from the container Management System
      *
      * @param label auto-generated label of the original API
+     * @param api   API
      * @throws ContainerBasedGatewayException If there is a failure in removing the container based gateway
      */
-    void removeContainerBasedGateway(String label) throws ContainerBasedGatewayException;
+    void removeContainerBasedGateway(String label, API api) throws ContainerBasedGatewayException;
 
 }

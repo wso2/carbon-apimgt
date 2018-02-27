@@ -99,13 +99,25 @@ const styles = theme => ({
 
         if(privateJetModeEnabled) {
             if(newState == "Published In Private Jet Mode") {
-                newState = "Published";
-                let body = {"isEnabled":"true"};
-                let promisedUpdateDedicatedGW = this.api.updateHasOwnGateway(apiUUID, body);
+                let promised_hasOwnGatewayForAPI = this.api.getHasOwnGateway(apiUUID);
 
-                promisedUpdateDedicatedGW.then(response => {
-                    Alert.info("Dedicate Gateway status updated successfully");
-                    this.updateLCStateOfAPI(apiUUID, newState);
+                promised_hasOwnGatewayForAPI.then(getResponse => {
+                    let hasOwnGatewayForAPI = getResponse.body.isEnabled;
+
+                    if(!hasOwnGatewayForAPI) {
+                        newState = "Published";
+                        let body = {"isEnabled":"true"};
+                        let promisedUpdateDedicatedGW = this.api.updateHasOwnGateway(apiUUID, body);
+
+                        promisedUpdateDedicatedGW.then(response => {
+                            Alert.info("Dedicated Gateway status updated successfully");
+                            this.updateLCStateOfAPI(apiUUID, newState);
+                        }).catch(
+                        error_response => {
+                            console.log(error_response);
+                            Alert.error(JSON.stringify(error_response));
+                        });
+                    }
                 }).catch(
                 error_response => {
                     console.log(error_response);
@@ -137,7 +149,7 @@ const styles = theme => ({
 
                               promisedUpdateDedicatedGW.then(response => {
                                 that.props.handleUpdate(true);
-                                Alert.info("Dedicate Gateway status updated successfully");
+                                Alert.info("Dedicated Gateway status updated successfully");
                               }).catch(
                                 error_response => {
                                   console.log(error_response);

@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.core.models.BusinessInformation;
 import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
+import org.wso2.carbon.apimgt.core.models.DedicatedGateway;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Function;
@@ -1137,6 +1138,14 @@ public class SampleTestObjectCreator {
         rating.setCreatedTime(LocalDateTime.now());
         rating.setLastUpdatedTime(LocalDateTime.now());
         return rating;
+    }
+
+    public static DedicatedGateway createDedicatedGateway(String apiId, boolean enabled, String updatedBy) {
+        DedicatedGateway dedicatedGateway = new DedicatedGateway();
+        dedicatedGateway.setEnabled(enabled);
+        dedicatedGateway.setApiId(apiId);
+        dedicatedGateway.setUpdatedBy(updatedBy);
+        return  dedicatedGateway;
     }
 
     public static API.APIBuilder createDefaultAPIWithApiLevelEndpoint() {

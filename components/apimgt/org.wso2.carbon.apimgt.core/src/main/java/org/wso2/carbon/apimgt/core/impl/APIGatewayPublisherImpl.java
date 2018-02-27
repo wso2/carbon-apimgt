@@ -127,7 +127,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
             try {
                 List<String> labels = api.getLabels();
                 if (labels != null && !labels.isEmpty()) {
-                    removeContainerBasedGateway(labels.toArray()[0].toString());
+                    removeContainerBasedGateway(labels.toArray()[0].toString(), api);
                 } else {
                     log.error("Could not delete container based gateways as labels could not find in the API.");
                 }
@@ -446,28 +446,27 @@ public class APIGatewayPublisherImpl implements APIGateway {
     }
 
     /**
-     * @see APIGateway#createContainerBasedGateway(String)
+     * @see APIGateway#createContainerBasedGateway(String, API)
      */
     @Override
-    public void createContainerBasedGateway(String label) throws ContainerBasedGatewayException {
+    public void createContainerBasedGateway(String label, API api) throws ContainerBasedGatewayException {
 
         APIManagerFactory apiManagerFactory = APIManagerFactory.getInstance();
         ContainerBasedGatewayGenerator containerBasedGatewayGenerator =
                 apiManagerFactory.getContainerBasedGatewayGenerator();
-        containerBasedGatewayGenerator.createContainerGateway(label);
-
+        containerBasedGatewayGenerator.createContainerGateway(label, api);
     }
 
     /**
-     * @see APIGateway#removeContainerBasedGateway(String)
+     * @see APIGateway#removeContainerBasedGateway(String, API)
      */
     @Override
-    public void removeContainerBasedGateway(String label) throws ContainerBasedGatewayException {
+    public void removeContainerBasedGateway(String label, API api) throws ContainerBasedGatewayException {
 
         APIManagerFactory apiManagerFactory = APIManagerFactory.getInstance();
         ContainerBasedGatewayGenerator containerBasedGatewayGenerator =
                 apiManagerFactory.getContainerBasedGatewayGenerator();
-        containerBasedGatewayGenerator.removeContainerBasedGateway(label);
+        containerBasedGatewayGenerator.removeContainerBasedGateway(label, api);
     }
 
     /**

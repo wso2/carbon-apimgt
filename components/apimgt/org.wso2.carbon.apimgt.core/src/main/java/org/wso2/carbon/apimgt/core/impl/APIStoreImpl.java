@@ -1826,15 +1826,16 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     }
 
     /**
-     * @see APIStoreImpl#updateDedicatedGateway(DedicatedGateway, String)
+     * @see APIStoreImpl#updateDedicatedGateway(DedicatedGateway)
      */
     @Override
-    public void updateDedicatedGateway(DedicatedGateway dedicatedGateway, String apiId) throws APIManagementException {
+    public void updateDedicatedGateway(DedicatedGateway dedicatedGateway) throws APIManagementException {
+        String apiId = dedicatedGateway.getApiId();
         API api = getAPIbyUUID(apiId);
         try {
 
             // label generation for the API
-            String autoGenLabelName = ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + apiId;
+            String autoGenLabelName = ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX + apiId;
             List<String> labelSet = new ArrayList<>();
 
             if (dedicatedGateway.isEnabled()) {
@@ -1853,11 +1854,11 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 }
 
                 labelSet.add(autoGenLabelName);
-                getApiDAO().updateDedicatedGateway(dedicatedGateway, apiId, labelSet);
+                getApiDAO().updateDedicatedGateway(dedicatedGateway, labelSet);
             } else {
                 if (api.hasOwnGateway()) {
                     labelSet.add(APIMgtConstants.DEFAULT_LABEL_NAME);
-                    getApiDAO().updateDedicatedGateway(dedicatedGateway, apiId, labelSet);
+                    getApiDAO().updateDedicatedGateway(dedicatedGateway, labelSet);
                 }
             }
 
@@ -1868,7 +1869,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     }
 
     /**
-     * @see APIStoreImpl#updateDedicatedGateway(DedicatedGateway, String)
+     * @see APIStoreImpl#getDedicatedGateway(String)
      */
     @Override
     public DedicatedGateway getDedicatedGateway(String apiId) throws APIManagementException {

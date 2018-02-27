@@ -312,10 +312,9 @@ public interface APIManager {
      * Update DedicatedGateway of API
      *
      * @param dedicatedGateway updated DedicatedGatewayObject
-     * @param apiId UUID of the API related to the Container based Gateway
      * @throws APIManagementException If a core level exception occurs
      */
-    void updateDedicatedGateway(DedicatedGateway dedicatedGateway, String apiId) throws APIManagementException;
+    void updateDedicatedGateway(DedicatedGateway dedicatedGateway) throws APIManagementException;
 
     /**
      * Get Dedicated Gateway of API
