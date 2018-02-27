@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.rest.api.authenticator.constants;
 
 /**
  * This class holds the constants for the authenticator module for uuf apps .
- *
  */
 public class AuthenticatorConstants {
 
@@ -55,4 +54,11 @@ public class AuthenticatorConstants {
     public static final String LOGOUT_SERVICE_CONTEXT = "/login/logout";
     public static final String LOGIN_SERVICE_CONTEXT = "/login/token";
     public static final String HTTPS_PROTOCOL = "https";
+
+    public static class Context {
+        public static final String APP_CONTEXT = "APP_CONTEXT";
+        public static final String LOGOUT_CONTEXT = "LOGOUT_CONTEXT";
+        public static final String LOGIN_CONTEXT = "LOGIN_CONTEXT";
+        public static final String REST_API_CONTEXT = "REST_API_CONTEXT";
+    }
 }

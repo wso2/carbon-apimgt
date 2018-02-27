@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.rest.api.authenticator.constants.AuthenticatorCons
 import org.wso2.carbon.apimgt.rest.api.authenticator.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.authenticator.utils.AuthUtil;
 import org.wso2.carbon.apimgt.rest.api.authenticator.utils.bean.AuthResponseBean;
+import org.wso2.carbon.apimgt.rest.api.common.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 
 import java.nio.charset.StandardCharsets;
@@ -54,11 +55,12 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.ws.rs.core.NewCookie;
 
 /**
  * This class is used to mock the authenticator apis.
  */
-public class AuthenticatorServiceUtils {
+public class AuthenticatorService {
 
     private static final Logger log = LoggerFactory.getLogger(AuthenticatorAPI.class);
 
@@ -71,8 +73,8 @@ public class AuthenticatorServiceUtils {
      *
      * @param keyManager KeyManager object
      */
-    public AuthenticatorServiceUtils(KeyManager keyManager, SystemApplicationDao systemApplicationDao,
-                                     APIMConfigurationService apimConfigurationService) {
+    public AuthenticatorService(KeyManager keyManager, SystemApplicationDao systemApplicationDao,
+                                APIMConfigurationService apimConfigurationService) {
         this.keyManager = keyManager;
         this.systemApplicationDao = systemApplicationDao;
         this.apimConfigurationService = apimConfigurationService;
@@ -247,25 +249,80 @@ public class AuthenticatorServiceUtils {
     /**
      * This method sets access token data.
      *
-     * @param responseBean    Contains access token data
      * @param accessTokenInfo Information of the access token
      * @return AuthResponseBean - An object with access token data
      * @throws KeyManagementException When parsing JWT fails
      */
-    public AuthResponseBean setAccessTokenData(AuthResponseBean responseBean, AccessTokenInfo accessTokenInfo)
+    public AuthResponseBean getResponseBeanFromTokenInfo(AccessTokenInfo accessTokenInfo)
             throws KeyManagementException {
-        responseBean.setTokenValid(true);
+        String authUser = null;
         if (accessTokenInfo.getIdToken() != null) {
-            responseBean.setAuthUser(getUsernameFromJWT(accessTokenInfo.getIdToken()));
+            authUser = getUsernameFromJWT(accessTokenInfo.getIdToken());
         }
-        if (responseBean.getAuthUser() == null) {
-            responseBean.setAuthUser("admin");
+        if (authUser == null) {
+            authUser = "admin";
         }
+
+        AuthResponseBean responseBean = new AuthResponseBean();
+        responseBean.setTokenValid(true);
+        responseBean.setAuthUser(authUser);
         responseBean.setScopes(accessTokenInfo.getScopes());
         responseBean.setType(AuthenticatorConstants.BEARER_PREFIX);
         responseBean.setValidityPeriod(accessTokenInfo.getValidityPeriod());
         responseBean.setIdToken(accessTokenInfo.getIdToken());
+
         return responseBean;
+    }
+
+    /**
+     * @param cookies
+     * @param authResponseBean
+     * @param accessToken
+     * @param contextPaths
+     */
+    public void setupAccessTokenParts(Map<String, NewCookie> cookies, AuthResponseBean authResponseBean,
+                                      String accessToken, Map<String, String> contextPaths) {
+        String accessTokenPart1 = accessToken.substring(0, accessToken.length() / 2);
+        String accessTokenPart2 = accessToken.substring(accessToken.length() / 2);
+
+        // First part of the access token is set in payload
+        authResponseBean.setPartialToken(accessTokenPart1);
+
+        // Second part of the access token is set in cookies
+        String environmentName = apimConfigurationService.getEnvironmentConfigurations().getEnvironmentLabel();
+        NewCookie restAPIContextCookie = AuthUtil.cookieBuilder(APIConstants.AccessTokenConstants.AM_TOKEN_MSF4J,
+                accessTokenPart2, contextPaths.get(AuthenticatorConstants.Context.REST_API_CONTEXT), true, true,
+                "", environmentName);
+        // Cookie should be set to the log out context in order to revoke the token when log out happens.
+        NewCookie logoutContextCookie = AuthUtil.cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_2, accessTokenPart2,
+                contextPaths.get(AuthenticatorConstants.Context.LOGOUT_CONTEXT), true, true,
+                "", environmentName);
+
+        cookies.put(AuthenticatorConstants.Context.REST_API_CONTEXT, restAPIContextCookie);
+        cookies.put(AuthenticatorConstants.Context.LOGOUT_CONTEXT, logoutContextCookie);
+    }
+
+    public void setupRefreshTokenParts(Map<String, NewCookie> cookies, String refreshToken,
+                                       Map<String, String> contextPaths) {
+        String refreshTokenPart1 = refreshToken.substring(0, refreshToken.length() / 2);
+        String refreshTokenPart2 = refreshToken.substring(refreshToken.length() / 2);
+                /* Note:
+                Two parts of the Refresh Token should be stored in two cookies where JS accessible cookie
+                is stored with `/{appName}` (i:e /publisher) path, because JS will trigger a token refresh call
+                anywhere under `/publisher` context.Other part of the Refresh token cookie should set with the
+                path directive as `/login/token/{appName}` (i:e /login/token/publisher) because the token request call
+                will be send to `/login/token/{appName}` endpoint originated from `/{appName}`
+                * */
+        String environmentName = apimConfigurationService.getEnvironmentConfigurations().getEnvironmentLabel();
+        NewCookie refreshTokenCookie = AuthUtil.cookieBuilder(AuthenticatorConstants.REFRESH_TOKEN_1, refreshTokenPart1,
+                contextPaths.get(AuthenticatorConstants.Context.APP_CONTEXT), true, false,
+                        "", environmentName);
+        NewCookie refreshTokenHttpOnlyCookie = AuthUtil.cookieBuilder(AuthenticatorConstants.REFRESH_TOKEN_2,
+                refreshTokenPart2, contextPaths.get(AuthenticatorConstants.Context.LOGIN_CONTEXT), true, true,
+                        "", environmentName);
+
+        cookies.put(AuthenticatorConstants.Context.APP_CONTEXT, refreshTokenCookie);
+        cookies.put(AuthenticatorConstants.Context.LOGIN_CONTEXT, refreshTokenHttpOnlyCookie);
     }
 
     /**

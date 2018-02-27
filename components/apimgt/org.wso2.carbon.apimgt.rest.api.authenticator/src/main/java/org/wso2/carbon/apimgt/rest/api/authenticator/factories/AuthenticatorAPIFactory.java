@@ -25,25 +25,28 @@ import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.rest.api.authenticator.AuthenticatorAPIService;
-import org.wso2.carbon.apimgt.rest.api.authenticator.AuthenticatorServiceUtils;
+import org.wso2.carbon.apimgt.rest.api.authenticator.AuthenticatorService;
 
 public class AuthenticatorAPIFactory {
-    private static AuthenticatorAPIService service;
+    private static AuthenticatorAPIFactory instance = new AuthenticatorAPIFactory();
+    private AuthenticatorService service;
 
     private AuthenticatorAPIFactory() {
 
     }
 
-    public static AuthenticatorAPIService getService() throws APIMgtDAOException, KeyManagementException {
+    public static AuthenticatorAPIFactory getInstance() {
+        return instance;
+    }
+
+    public synchronized AuthenticatorService getService() throws APIMgtDAOException, KeyManagementException {
         if (service == null) {
             KeyManager keyManager = APIManagerFactory.getInstance().getKeyManager();
             SystemApplicationDao systemApplicationDao = DAOFactory.getSystemApplicationDao();
             APIMConfigurationService apimConfigurationService = APIMConfigurationService.getInstance();
 
-            AuthenticatorServiceUtils authenticatorServiceUtils = new AuthenticatorServiceUtils(keyManager,
+            service = new AuthenticatorService(keyManager,
                     systemApplicationDao, apimConfigurationService);
-            service = new AuthenticatorAPIService();
         }
         return service;
     }
