@@ -209,9 +209,9 @@ public class Configurator {
     protected static String createAuthHeader(String[] args) throws IOException {
         //Order of args - email, tenantDomain, password
         String username = args[0] + OnPremiseGatewayConstants.USERNAME_SEPARATOR + args[1];
-        String password = args[2];
+        char[] password = args[2].toCharArray();
         String authHeaderValue = OnPremiseGatewayConstants.AUTHORIZATION_BASIC + Base64.encodeBase64String(
-                (username + ":" + password).getBytes(OnPremiseGatewayConstants.DEFAULT_CHARSET));
+                (username + ":" + String.valueOf(password)).getBytes(OnPremiseGatewayConstants.DEFAULT_CHARSET));
         return authHeaderValue;
     }
 
@@ -347,8 +347,8 @@ public class Configurator {
         gatewayProperties.put(ConfigConstants.EMAIL, email);
         String tenantDomain = args[1];
         gatewayProperties.put(ConfigConstants.TENANT_DOMAIN, tenantDomain);
-        String password = args[2];
-        gatewayProperties.put(ConfigConstants.PASSWORD, password);
+        char[] password = args[2].toCharArray();
+        gatewayProperties.put(ConfigConstants.PASSWORD, String.valueOf(password));
         gatewayProperties.put(ConfigConstants.USERNAME,
                               email + OnPremiseGatewayConstants.USERNAME_SEPARATOR + tenantDomain);
         //Following are default values for some of the configs, which will be set for a public cloud setup. These can be

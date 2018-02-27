@@ -73,7 +73,7 @@ public class StatusCheckerTest {
         PowerMockito.when(HttpRequestUtil.executeHTTPMethodWithRetry(any(HttpClient.class), any(HttpGet.class),
                                                                      any(Integer.class))).thenReturn(successMessage);
         StatusChecker statusChecker = new StatusChecker(TOKEN, PING_URL);
-        statusChecker.callPingAPIEndpoint(USERNAME, PASSWORD, PAYLOAD_STR, PING_URL);
+        statusChecker.callPingAPIEndpoint(USERNAME, PASSWORD.toCharArray(), PAYLOAD_STR, PING_URL);
     }
 
     @Test
@@ -95,7 +95,7 @@ public class StatusCheckerTest {
     @Test
     public void createPostRequest() throws Exception {
         StatusChecker statusChecker = new StatusChecker(TOKEN, PING_URL);
-        String authHeaderValue = statusChecker.getAuthHeader(USERNAME, PASSWORD);
+        String authHeaderValue = statusChecker.getAuthHeader(USERNAME, PASSWORD.toCharArray());
         HttpPost httpPost = statusChecker.createPostRequest(PING_URL, PAYLOAD_STR, authHeaderValue);
         Assert.assertEquals("POST", httpPost.getMethod());
         Assert.assertEquals(OnPremiseGatewayConstants.CONTENT_TYPE_APPLICATION_JSON, httpPost.getFirstHeader(OnPremiseGatewayConstants.CONTENT_TYPE_HEADER).getValue());

@@ -59,7 +59,7 @@ public class StatusChecker implements Runnable {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                                                                .getAPIManagerConfiguration();
         String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
-        String password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
+        char[] password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD).toCharArray();
         //Retrieve tenant domain
         String[] usernameParts = username.split(OnPremiseGatewayConstants.USERNAME_SEPARATOR);
         String tenantDomain = usernameParts[2];
@@ -79,7 +79,7 @@ public class StatusChecker implements Runnable {
      * @param payload
      * @param pingAPIUrl
      */
-    protected void callPingAPIEndpoint(String username, String password, String payload, String pingAPIUrl) {
+    protected void callPingAPIEndpoint(String username, char[] password, String payload, String pingAPIUrl) {
         CloseableHttpClient client = HttpClients.createDefault();
         try {
             String authHeaderValue = getAuthHeader(username, password);
@@ -149,9 +149,9 @@ public class StatusChecker implements Runnable {
      * @param password
      * @return
      */
-    protected String getAuthHeader(String username, String password) throws UnsupportedEncodingException {
+    protected String getAuthHeader(String username, char[] password) throws UnsupportedEncodingException {
         String authHeaderValue = OnPremiseGatewayConstants.AUTHORIZATION_BASIC + Base64.encodeBase64String(
-                (username + ":" + password).getBytes(OnPremiseGatewayConstants.DEFAULT_CHARSET));
+                (username + ":" + String.valueOf(password)).getBytes(OnPremiseGatewayConstants.DEFAULT_CHARSET));
         return authHeaderValue;
     }
 
