@@ -68,7 +68,7 @@ public class UsageFileWriter {
         }
         //Create Directory in Carbon-Home to keep the files
         Path directoryPath = Paths.get(CarbonUtils.getCarbonHome(),
-                MicroAPIUsageConstants.API_USAGE_OUTPUT_DIRECTORY);
+                MicroGatewayAPIUsageConstants.API_USAGE_OUTPUT_DIRECTORY);
         if (!Files.exists(directoryPath)) {
             try {
                 Files.createDirectories(directoryPath);
@@ -78,7 +78,7 @@ public class UsageFileWriter {
             }
         }
 
-        filePath = Paths.get(directoryPath.toString(), MicroAPIUsageConstants.API_USAGE_OUTPUT_FILE_NAME);
+        filePath = Paths.get(directoryPath.toString(), MicroGatewayAPIUsageConstants.API_USAGE_OUTPUT_FILE_NAME);
         try {
             fileOutputStream = new FileOutputStream(filePath.toFile(), true);
             outputStreamWriter = new OutputStreamWriter(fileOutputStream, StandardCharsets.UTF_8);
@@ -150,7 +150,7 @@ public class UsageFileWriter {
 
             //api-usage-data.dat.1511772769858.gz
             Path rotatedPath = Paths.get(fileToRotate + "." + System.currentTimeMillis()
-                    + MicroAPIUsageConstants.GZIP_EXTENSION);
+                    + MicroGatewayAPIUsageConstants.GZIP_EXTENSION);
             GZIPUtils.compressFile(currentPath.toString(), rotatedPath.toString());
             Files.delete(currentPath);
 

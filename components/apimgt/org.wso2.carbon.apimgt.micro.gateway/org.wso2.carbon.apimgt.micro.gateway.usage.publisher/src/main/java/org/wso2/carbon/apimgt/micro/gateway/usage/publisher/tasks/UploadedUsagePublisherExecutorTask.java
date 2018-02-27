@@ -26,7 +26,7 @@ import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.util.UsagePublisherU
 import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.UploadedUsagePublisher;
 import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.dao.UploadedUsageFileInfoDAO;
 import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.dto.UploadedFileInfoDTO;
-import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.util.MicroAPIUsageConstants;
+import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.util.MicroGatewayAPIUsageConstants;
 import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.util.UsagePublisherThreadFactory;
 
 import java.util.List;
@@ -67,17 +67,17 @@ public class UploadedUsagePublisherExecutorTask extends TimerTask {
      */
     private static int getWorkerThreadCount() {
 
-        int threadCount = MicroAPIUsageConstants.DEFAULT_WORKER_THREAD_COUNT;
+        int threadCount = MicroGatewayAPIUsageConstants.DEFAULT_WORKER_THREAD_COUNT;
         String workerThreadCountSystemPropertyValue = System
-                .getProperty(MicroAPIUsageConstants.WORKER_THREAD_COUNT_PROPERTY);
+                .getProperty(MicroGatewayAPIUsageConstants.WORKER_THREAD_COUNT_PROPERTY);
         if (StringUtils.isNotBlank(workerThreadCountSystemPropertyValue)) {
             try {
                 threadCount = Integer.parseInt(workerThreadCountSystemPropertyValue);
             } catch (NumberFormatException e) {
                 log.error("Error while parsing the system property: "
-                        + MicroAPIUsageConstants.UPLOADED_USAGE_PUBLISH_FREQUENCY_PROPERTY
+                        + MicroGatewayAPIUsageConstants.WORKER_THREAD_COUNT_PROPERTY
                         + " to integer. Using default usage publish worker thread count: "
-                        + MicroAPIUsageConstants.DEFAULT_WORKER_THREAD_COUNT, e);
+                        + MicroGatewayAPIUsageConstants.DEFAULT_WORKER_THREAD_COUNT, e);
             }
         }
         return threadCount;

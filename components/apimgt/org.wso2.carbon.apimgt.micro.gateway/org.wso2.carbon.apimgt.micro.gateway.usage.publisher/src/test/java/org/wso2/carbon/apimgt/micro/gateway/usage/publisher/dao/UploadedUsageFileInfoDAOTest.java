@@ -35,7 +35,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.TestUtil;
-import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.util.MicroAPIUsageConstants;
+import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.util.MicroGatewayAPIUsageConstants;
 import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.constants.Constants;
 import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.dto.UploadedFileInfoDTO;
 
@@ -59,7 +59,7 @@ import javax.xml.stream.XMLStreamException;
  * UploadedUsageFileInfoDAOTest Class
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({MicroAPIUsageConstants.class})
+@PrepareForTest({MicroGatewayAPIUsageConstants.class})
 public class UploadedUsageFileInfoDAOTest {
     private static final Log log = LogFactory.getLog(UploadedUsageFileInfoDAOTest.class);
     private final String tenantDomain = "ccc2222";
@@ -88,7 +88,7 @@ public class UploadedUsageFileInfoDAOTest {
         Statement st = connection.createStatement();
         st.executeUpdate(deleteFilesQuery);
 
-        PowerMockito.mockStatic(MicroAPIUsageConstants.class);
+        PowerMockito.mockStatic(MicroGatewayAPIUsageConstants.class);
         UploadedFileInfoDTO uploadedFileInfoDTO = new UploadedFileInfoDTO(tenantDomain,
                 "api-usage-data.dat.1517296920006.gz", 1213232);
         InputStream anyInputStream = new ByteArrayInputStream("test data".getBytes());
@@ -164,7 +164,7 @@ public class UploadedUsageFileInfoDAOTest {
         st.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
         st.executeUpdate();
 
-        PowerMockito.mockStatic(MicroAPIUsageConstants.class);
+        PowerMockito.mockStatic(MicroGatewayAPIUsageConstants.class);
         UploadedFileInfoDTO uploadedFileInfoDTO = new UploadedFileInfoDTO("ccc2222",
                 "api-usage-data.dat.1517296920006.gz", 1213232);
         UploadedUsageFileInfoDAO.updateCompletion(uploadedFileInfoDTO);
@@ -194,7 +194,7 @@ public class UploadedUsageFileInfoDAOTest {
         st.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
         st.setInt(4, 1);
         st.executeUpdate();
-        PowerMockito.mockStatic(MicroAPIUsageConstants.class);
+        PowerMockito.mockStatic(MicroGatewayAPIUsageConstants.class);
         UploadedUsageFileInfoDAO.deleteProcessedOldFiles(new Timestamp(System.currentTimeMillis()));
 
         String deleteFilesQuery = "DELETE FROM AM_USAGE_UPLOADED_FILES";

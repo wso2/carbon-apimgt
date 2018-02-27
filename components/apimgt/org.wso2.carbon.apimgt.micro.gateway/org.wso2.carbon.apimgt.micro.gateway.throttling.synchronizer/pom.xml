@@ -21,7 +21,7 @@
     <parent>
         <artifactId>org.wso2.carbon.apimgt.micro.gateway</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>6.2.115-SNAPSHOT</version>
+        <version>6.2.117-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -131,7 +131,7 @@
                         </Private-Package>
                         <Export-Package>
                             !org.wso2.carbon.apimgt.micro.gateway.throttling.synchronizer.internal,
-                            org.wso2.carbon.apimgt.micro.gateway.throttling.synchronizer.*"
+                            org.wso2.carbon.apimgt.micro.gateway.throttling.synchronizer.*;version="${project.version}"
                         </Export-Package>
                         <Import-Package>
                             org.osgi.framework.*,
