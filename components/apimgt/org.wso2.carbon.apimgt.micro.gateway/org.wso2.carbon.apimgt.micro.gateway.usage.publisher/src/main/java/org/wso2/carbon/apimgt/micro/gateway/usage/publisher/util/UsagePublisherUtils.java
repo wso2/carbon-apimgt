@@ -57,7 +57,7 @@ public class UsagePublisherUtils {
             synchronized (UploadedUsagePublisher.class) {
                 if (streamDefinitions == null || streamDefinitions.size() < 6) {
                     String streamDirectoryPath = CarbonUtils.getCarbonConfigDirPath() + File.separator
-                            + MicroAPIUsageConstants.STREAM_DEFINITIONS_DIRECTORY;
+                            + MicroGatewayAPIUsageConstants.STREAM_DEFINITIONS_DIRECTORY;
                     Collection<File> files = FileUtils.listFiles(new File(streamDirectoryPath), null, false);
                     if (!(files.size() < 6)) {
                         streamDefinitions = new HashMap<>();
@@ -140,7 +140,7 @@ public class UsagePublisherUtils {
         }
 
         if (jsonArray != null) {
-            String[] strings = str.split(MicroAPIUsageConstants.OBJECT_SEPARATOR);
+            String[] strings = str.split(MicroGatewayAPIUsageConstants.OBJECT_SEPARATOR);
             Object[] objects = new Object[strings.length];
             for (int i = 0; i < strings.length; i++) {
                 JSONObject obj = (JSONObject) jsonArray.get(i);
@@ -175,7 +175,7 @@ public class UsagePublisherUtils {
         String storageLocation = System.getProperty("APIUsageFileLocation");
         return ((storageLocation != null && !storageLocation.isEmpty())
                 ? storageLocation : CarbonUtils.getCarbonHome())
-                + File.separator + MicroAPIUsageConstants.API_USAGE_OUTPUT_DIRECTORY + File.separator
+                + File.separator + MicroGatewayAPIUsageConstants.API_USAGE_OUTPUT_DIRECTORY + File.separator
                 + tenantDomain + File.separator + tempDirName;
     }
 }

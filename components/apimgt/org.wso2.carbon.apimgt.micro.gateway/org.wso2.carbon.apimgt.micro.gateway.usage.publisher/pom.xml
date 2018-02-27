@@ -137,8 +137,8 @@
                             org.wso2.carbon.apimgt.micro.gateway.usage.publisher.internal
                         </Private-Package>
                         <Export-Package>
+                            !org.wso2.carbon.apimgt.micro.gateway.usage.publisher.internal,
                             org.wso2.carbon.apimgt.micro.gateway.usage.publisher.*;version="${project.version}"
-                            !org.wso2.carbon.apimgt.micro.gateway.usage.publisher.internal
                         </Export-Package>
                         <Import-Package>
                             org.osgi.framework.*,
