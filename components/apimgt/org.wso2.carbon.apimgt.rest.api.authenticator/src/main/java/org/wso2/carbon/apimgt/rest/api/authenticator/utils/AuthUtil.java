@@ -18,12 +18,11 @@
 
 package org.wso2.carbon.apimgt.rest.api.authenticator.utils;
 
-import org.wso2.carbon.apimgt.core.configuration.APIMConfigurationService;
+import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.rest.api.authenticator.constants.AuthenticatorConstants;
 import org.wso2.carbon.apimgt.rest.api.authenticator.dto.ErrorDTO;
-import org.wso2.carbon.messaging.Headers;
 import org.wso2.msf4j.Request;
 
 import java.util.Arrays;
@@ -39,8 +38,8 @@ import javax.ws.rs.core.NewCookie;
  */
 public class AuthUtil {
 
-    public static final String COOKIE_PATH_SEPERATOR = "; path=";
-    public static final String COOKIE_VALUE_SEPERATOR = "; ";
+    public static final String COOKIE_PATH_SEPARATOR = "; path=";
+    public static final String COOKIE_VALUE_SEPARATOR = "; ";
 
     /**
      * This method authenticate the user.
@@ -113,27 +112,22 @@ public class AuthUtil {
      * @param request msf4j request to get the headers
      * @return refresh token present in the cookie and authorization header..
      */
-    public static String extractTokenFromHeaders(Request request, String cookieHeader) {
+    public static String extractTokenFromHeaders(Request request, String cookieHeader, String environmentName) {
         String authHeader = request.getHeader(AuthenticatorConstants.AUTHORIZATION_HTTP_HEADER);
         String token = "";
-        if (authHeader != null) {
+        if (authHeader != null && authHeader.toLowerCase(Locale.US).startsWith(AuthenticatorConstants.BEARER_PREFIX)) {
             authHeader = authHeader.trim();
-            if (authHeader.toLowerCase(Locale.US).startsWith(AuthenticatorConstants.BEARER_PREFIX)) {
-                // Split the auth header to get the access token.
-                String[] authHeaderParts = authHeader.split(" ");
-                if (authHeaderParts.length == 2) {
-                    token = authHeaderParts[1];
-                } else if (authHeaderParts.length < 2) {
-                    return null;
-                }
+            // Split the auth header to get the access token.
+            String[] authHeaderParts = authHeader.split(" ");
+            if (authHeaderParts.length == 2) {
+                token = authHeaderParts[1];
+            } else if (authHeaderParts.length < 2) {
+                return null;
             }
         } else {
             return null;
         }
 
-        //Append unique environment name in deployment.yaml
-        String environmentName = APIMConfigurationService.getInstance()
-                .getEnvironmentConfigurations().getEnvironmentLabel();
         String cookie = request.getHeader(AuthenticatorConstants.COOKIE_HEADER);
         if (cookie != null) {
             cookie = cookie.trim();
@@ -162,23 +156,19 @@ public class AuthUtil {
      * @return Cookie object.
      */
     public static NewCookie cookieBuilder(String name, String value, String path, boolean isSecure,
-                                          boolean isHttpOnly, String expiresIn) {
+                                          boolean isHttpOnly, String expiresIn, String environmentName) {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(value).append(COOKIE_PATH_SEPERATOR).append(path).append(COOKIE_VALUE_SEPERATOR);
+        stringBuilder.append(value).append(COOKIE_PATH_SEPARATOR).append(path).append(COOKIE_VALUE_SEPARATOR);
+        if (!StringUtils.isEmpty(expiresIn)) {
+            stringBuilder.append(expiresIn).append(COOKIE_VALUE_SEPARATOR);
+        }
         if (isHttpOnly) {
-            stringBuilder.append(AuthenticatorConstants.HTTP_ONLY_COOKIE).append(COOKIE_VALUE_SEPERATOR);
+            stringBuilder.append(AuthenticatorConstants.HTTP_ONLY_COOKIE).append(COOKIE_VALUE_SEPARATOR);
         }
         if (isSecure) {
-            stringBuilder.append(AuthenticatorConstants.SECURE_COOKIE);
-        }
-        if (expiresIn != null && !expiresIn.isEmpty()) {
-            stringBuilder.append(COOKIE_VALUE_SEPERATOR).append(expiresIn);
+            stringBuilder.append(AuthenticatorConstants.SECURE_COOKIE).append(COOKIE_VALUE_SEPARATOR);
         }
 
-        //Append unique environment name in deployment.yaml
-        String environmentName = APIMConfigurationService.getInstance()
-                .getEnvironmentConfigurations().getEnvironmentLabel();
         return new NewCookie(name + "_" + environmentName, stringBuilder.toString());
     }
-
 }

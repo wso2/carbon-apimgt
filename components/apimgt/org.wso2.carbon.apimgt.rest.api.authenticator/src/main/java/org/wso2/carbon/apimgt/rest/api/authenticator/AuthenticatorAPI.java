@@ -25,6 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
 import org.wso2.carbon.apimgt.core.configuration.APIMConfigurationService;
+import org.wso2.carbon.apimgt.core.configuration.models.EnvironmentConfigurations;
+import org.wso2.carbon.apimgt.core.configuration.models.MultiEnvironmentOverview;
 import org.wso2.carbon.apimgt.core.dao.SystemApplicationDao;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
@@ -89,7 +91,11 @@ public class AuthenticatorAPI implements Microservice {
         try {
             KeyManager keyManager = APIManagerFactory.getInstance().getKeyManager();
             SystemApplicationDao systemApplicationDao = DAOFactory.getSystemApplicationDao();
-            AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao);
+            EnvironmentConfigurations environmentConfigurations = APIMConfigurationService.getInstance()
+                    .getEnvironmentConfigurations();
+            MultiEnvironmentOverview envOverviewConfigs = environmentConfigurations.getMultiEnvironmentOverview();
+            AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao,
+                    envOverviewConfigs);
             AuthResponseBean authResponseBean = new AuthResponseBean();
             String appContext = AuthenticatorConstants.URL_PATH_SEPERATOR + appName;
             String logoutContext = AuthenticatorConstants.LOGOUT_SERVICE_CONTEXT +
@@ -106,8 +112,10 @@ public class AuthenticatorAPI implements Microservice {
             }
             String refToken = null;
             if (AuthenticatorConstants.REFRESH_GRANT.equals(grantType)) {
+                String environmentName = APIMConfigurationService.getInstance()
+                        .getEnvironmentConfigurations().getEnvironmentLabel();
                 refToken = AuthUtil
-                        .extractTokenFromHeaders(request, AuthenticatorConstants.REFRESH_TOKEN_2);
+                        .extractTokenFromHeaders(request, AuthenticatorConstants.REFRESH_TOKEN_2, environmentName);
                 if (refToken == null) {
                     ErrorDTO errorDTO = new ErrorDTO();
                     errorDTO.setCode(ExceptionCodes.INVALID_AUTHORIZATION_HEADER.getErrorCode());
@@ -116,7 +124,8 @@ public class AuthenticatorAPI implements Microservice {
                 }
             }
             AccessTokenInfo accessTokenInfo = authenticatorService.getTokens(appContext.substring(1),
-                    grantType, userName, password, refToken, Long.parseLong(validityPeriod), null, assertion);
+                    grantType, userName, password, refToken, Long.parseLong(validityPeriod), null,
+                    assertion, APIManagerFactory.getInstance().getIdentityProvider());
             authenticatorService.setAccessTokenData(authResponseBean, accessTokenInfo);
             String accessToken = accessTokenInfo.getAccessToken();
             String refreshToken = accessTokenInfo.getRefreshToken();
@@ -132,10 +141,10 @@ public class AuthenticatorAPI implements Microservice {
 
             NewCookie logoutContextCookie = AuthUtil
                     .cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_2, accessTokenPart2, logoutContext,
-                            true, true, "");
+                            true, true, "", environmentConfigurations.getEnvironmentLabel());
             NewCookie restAPIContextCookie = AuthUtil
                     .cookieBuilder(APIConstants.AccessTokenConstants.AM_TOKEN_MSF4J, accessTokenPart2, restAPIContext, true, true,
-                            "");
+                            "", environmentConfigurations.getEnvironmentLabel());
             NewCookie refreshTokenCookie, refreshTokenHttpOnlyCookie;
             // Refresh token is not set to cookie if remember me is not set.
             if (refreshToken != null && (AuthenticatorConstants.REFRESH_GRANT.equals(grantType) || (
@@ -151,10 +160,10 @@ public class AuthenticatorAPI implements Microservice {
                 * */
                 refreshTokenCookie = AuthUtil
                         .cookieBuilder(AuthenticatorConstants.REFRESH_TOKEN_1, refTokenPart1, appContext, true, false,
-                                "");
+                                "", environmentConfigurations.getEnvironmentLabel());
                 refreshTokenHttpOnlyCookie = AuthUtil
                         .cookieBuilder(AuthenticatorConstants.REFRESH_TOKEN_2, refTokenPart2, loginContext, true, true,
-                                "");
+                                "", environmentConfigurations.getEnvironmentLabel());
                 return Response.ok(authResponseBean, MediaType.APPLICATION_JSON)
                         .cookie(logoutContextCookie, restAPIContextCookie,
                                 refreshTokenCookie, refreshTokenHttpOnlyCookie).header(AuthenticatorConstants.
@@ -198,33 +207,42 @@ public class AuthenticatorAPI implements Microservice {
         String logoutContext =
                 AuthenticatorConstants.LOGOUT_SERVICE_CONTEXT + AuthenticatorConstants.URL_PATH_SEPERATOR + appName;
         String restAPIContext;
+
         if (appContext.contains(AuthenticatorConstants.EDITOR_APPLICATION)) {
             restAPIContext = AuthenticatorConstants.REST_CONTEXT + AuthenticatorConstants.URL_PATH_SEPERATOR
                     + AuthenticatorConstants.PUBLISHER_APPLICATION;
         } else {
             restAPIContext = AuthenticatorConstants.REST_CONTEXT + appContext;
         }
+
+        EnvironmentConfigurations environmentConfigurations = APIMConfigurationService.getInstance()
+                .getEnvironmentConfigurations();
+        String environmentName = environmentConfigurations.getEnvironmentLabel();
         String accessToken = AuthUtil
-                .extractTokenFromHeaders(request, AuthenticatorConstants.ACCESS_TOKEN_2);
+                .extractTokenFromHeaders(request, AuthenticatorConstants.ACCESS_TOKEN_2, environmentName);
+
         if (accessToken != null) {
             try {
                 KeyManager keyManager = APIManagerFactory.getInstance().getKeyManager();
                 SystemApplicationDao systemApplicationDao = DAOFactory.getSystemApplicationDao();
-                AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao);
+
+                MultiEnvironmentOverview envOverviewConfigs = environmentConfigurations.getMultiEnvironmentOverview();
+                AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao,
+                        envOverviewConfigs);
                 authenticatorService.revokeAccessToken(appContext.substring(1), accessToken);
                 // Lets invalidate all the cookies saved.
                 NewCookie logoutContextCookie = AuthUtil
                         .cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_2, "", logoutContext, true, true,
-                                AuthenticatorConstants.COOKIE_EXPIRE_TIME);
+                                AuthenticatorConstants.COOKIE_EXPIRE_TIME, environmentName);
                 NewCookie restContextCookie = AuthUtil
                         .cookieBuilder(APIConstants.AccessTokenConstants.AM_TOKEN_MSF4J, "", restAPIContext, true, true,
-                                AuthenticatorConstants.COOKIE_EXPIRE_TIME);
+                                AuthenticatorConstants.COOKIE_EXPIRE_TIME, environmentName);
                 NewCookie refreshTokenCookie = AuthUtil
                         .cookieBuilder(AuthenticatorConstants.REFRESH_TOKEN_1, "", appContext, true, false,
-                                AuthenticatorConstants.COOKIE_EXPIRE_TIME);
+                                AuthenticatorConstants.COOKIE_EXPIRE_TIME, environmentName);
                 NewCookie refreshTokenHttpOnlyCookie = AuthUtil
                         .cookieBuilder(AuthenticatorConstants.REFRESH_TOKEN_2, "", appContext, true, true,
-                                AuthenticatorConstants.COOKIE_EXPIRE_TIME);
+                                AuthenticatorConstants.COOKIE_EXPIRE_TIME, environmentName);
                 return Response.ok().cookie(logoutContextCookie, restContextCookie, refreshTokenCookie,
                         refreshTokenHttpOnlyCookie).build();
             } catch (APIManagementException e) {
@@ -253,7 +271,10 @@ public class AuthenticatorAPI implements Microservice {
         try {
             KeyManager keyManager = APIManagerFactory.getInstance().getKeyManager();
             SystemApplicationDao systemApplicationDao = DAOFactory.getSystemApplicationDao();
-            AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao);
+            MultiEnvironmentOverview envOverviewConfigs = APIMConfigurationService.getInstance()
+                    .getEnvironmentConfigurations().getMultiEnvironmentOverview();
+            AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao,
+                    envOverviewConfigs);
             JsonObject oAuthData = authenticatorService.getAuthenticationConfigurations(appName);
             if (oAuthData.size() == 0) {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -271,8 +292,8 @@ public class AuthenticatorAPI implements Microservice {
     /**
      * This is the API which IDP redirects the user after authentication.
      *
-     * @param request Request to call /callback api
-     * @param appName Name of the application (publisher/store/admin)
+     * @param request           Request to call /callback api
+     * @param appName           Name of the application (publisher/store/admin)
      * @param authorizationCode Authorization-Code
      * @return Response - Response with redirect URL
      */
@@ -299,9 +320,13 @@ public class AuthenticatorAPI implements Microservice {
         try {
             KeyManager keyManager = APIManagerFactory.getInstance().getKeyManager();
             SystemApplicationDao systemApplicationDao = DAOFactory.getSystemApplicationDao();
-            AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao);
+            EnvironmentConfigurations environmentConfigurations = APIMConfigurationService.getInstance()
+                    .getEnvironmentConfigurations();
+            MultiEnvironmentOverview envOverviewConfigs = environmentConfigurations.getMultiEnvironmentOverview();
+            AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao,
+                    envOverviewConfigs);
             AccessTokenInfo accessTokenInfo = authenticatorService.getTokens(appName, grantType,
-                    null, null, null, 0, authorizationCode, null);
+                    null, null, null, 0, authorizationCode, null, null);
             if (StringUtils.isEmpty(accessTokenInfo.toString())) {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                         .entity("Access token generation failed!").build();
@@ -318,13 +343,14 @@ public class AuthenticatorAPI implements Microservice {
                 authResponseBean.setPartialToken(accessTokenPart1);
                 NewCookie logoutContextCookie = AuthUtil
                         .cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_2, accessTokenPart2, logoutContext,
-                                true, true, "");
+                                true, true, "", environmentConfigurations.getEnvironmentLabel());
                 NewCookie restAPIContextCookie = AuthUtil
                         .cookieBuilder(APIConstants.AccessTokenConstants.AM_TOKEN_MSF4J, accessTokenPart2, restAPIContext,
-                                true, true, "");
+                                true, true, "", environmentConfigurations.getEnvironmentLabel());
                 String authUser = authResponseBean.getAuthUser();
                 NewCookie authUserCookie = AuthUtil
-                        .cookieBuilder(AuthenticatorConstants.AUTH_USER, authUser, appContext, true, false, "");
+                        .cookieBuilder(AuthenticatorConstants.AUTH_USER, authUser, appContext, true, false,
+                                "", environmentConfigurations.getEnvironmentLabel());
                 if (log.isDebugEnabled()) {
                     log.debug("Set cookies for " + appName + " application.");
                 }

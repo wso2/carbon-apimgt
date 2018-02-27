@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -22,17 +22,14 @@ import com.google.gson.JsonObject;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
 import org.wso2.carbon.apimgt.core.configuration.APIMConfigurationService;
-import org.wso2.carbon.apimgt.core.configuration.models.EnvironmentConfigurations;
 import org.wso2.carbon.apimgt.core.configuration.models.MultiEnvironmentOverview;
 import org.wso2.carbon.apimgt.core.dao.SystemApplicationDao;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.IdentityProviderException;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
@@ -44,8 +41,6 @@ import org.wso2.carbon.apimgt.rest.api.authenticator.utils.bean.AuthResponseBean
 /**
  * Test class for AuthenticatorService.
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(APIMConfigurationService.class)
 public class AuthenticatorServiceTestCase {
     @Test
     public void testGetAuthenticationConfigurations() throws Exception {
@@ -68,9 +63,10 @@ public class AuthenticatorServiceTestCase {
                 .getAPIMAppConfiguration().isSsoEnabled());
         oAuthData.addProperty(AuthenticatorConstants.MULTI_ENVIRONMENT_OVERVIEW_ENABLED, APIMConfigurationService.getInstance()
                 .getEnvironmentConfigurations().getMultiEnvironmentOverview().isEnabled());
-
+        MultiEnvironmentOverview multiEnvironmentOverview = new MultiEnvironmentOverview();
         KeyManager keyManager = Mockito.mock(KeyManager.class);
-        AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao);
+        AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao,
+                multiEnvironmentOverview);
 
         //// Get data object to be passed to the front-end
         Mockito.when(keyManager.createApplication(Mockito.any())).thenReturn(oAuthApplicationInfo);
@@ -115,7 +111,10 @@ public class AuthenticatorServiceTestCase {
                 ServiceReferenceHolder.getInstance().getAPIMAppConfiguration().isSsoEnabled());
 
         KeyManager keyManager = Mockito.mock(KeyManager.class);
-        AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao);
+        MultiEnvironmentOverview multiEnvironmentOverview = new MultiEnvironmentOverview();
+        multiEnvironmentOverview.setEnabled(true);
+        AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao,
+                multiEnvironmentOverview);
 
         //// Get data object to be passed to the front-end
         Mockito.when(keyManager.createApplication(Mockito.any())).thenReturn(oAuthApplicationInfo);
@@ -158,14 +157,16 @@ public class AuthenticatorServiceTestCase {
         KeyManager keyManager = Mockito.mock(KeyManager.class);
         SystemApplicationDao systemApplicationDao = Mockito.mock(SystemApplicationDao.class);
         Mockito.when(systemApplicationDao.isConsumerKeyExistForApplication("store")).thenReturn(false);
-        AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao);
+        MultiEnvironmentOverview multiEnvironmentOverview = new MultiEnvironmentOverview();
+        AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao,
+                multiEnvironmentOverview);
         Mockito.when(keyManager.createApplication(Mockito.any())).thenReturn(oAuthApplicationInfo);
 
         //// Actual response - When authorization code is not null
         Mockito.when(keyManager.getNewAccessToken(Mockito.any())).thenReturn(tokenInfo);
         AccessTokenInfo tokenInfoResponseForValidAuthCode = authenticatorService.getTokens("store",
                 "authorization_code", null, null, null, 0,
-                "xxx-auth-code-xxx", null);
+                "xxx-auth-code-xxx", null, null);
         Assert.assertEquals(tokenInfoResponseForValidAuthCode, tokenInfo);
 
         // Error Path - 500 - Authorization code grant type
@@ -175,7 +176,7 @@ public class AuthenticatorServiceTestCase {
         AccessTokenInfo tokenInfoResponseForInvalidAuthCode = new AccessTokenInfo();
         try {
             tokenInfoResponseForInvalidAuthCode = authenticatorService.getTokens("store",
-                    "authorization_code", null, null, null, 0, null, null);
+                    "authorization_code", null, null, null, 0, null, null, null);
         } catch (APIManagementException e) {
             Assert.assertEquals(e.getMessage(), "No Authorization Code available.");
             Assert.assertEquals(tokenInfoResponseForInvalidAuthCode, emptyTokenInfo);
@@ -184,36 +185,53 @@ public class AuthenticatorServiceTestCase {
         // Happy Path - 200 - Password grant type
         Mockito.when(keyManager.getNewAccessToken(Mockito.any())).thenReturn(tokenInfo);
         AccessTokenInfo tokenInfoResponseForPasswordGrant = authenticatorService.getTokens("store", "password",
-                "admin", "admin", null, 0, null, null);
+                "admin", "admin", null, 0, null, null, null);
         Assert.assertEquals(tokenInfoResponseForPasswordGrant, tokenInfo);
 
         // Error Path - When token generation fails and throws APIManagementException
-        Mockito.when(keyManager.getNewAccessToken(Mockito.any())).thenThrow(KeyManagementException.class);
+        Mockito.when(keyManager.getNewAccessToken(Mockito.any())).thenThrow(KeyManagementException.class)
+                .thenReturn(tokenInfo);
         try {
             authenticatorService.getTokens("store", "password",
-                    "admin", "admin", null, 0, null, null);
+                    "admin", "admin", null, 0, null, null, null);
         } catch (APIManagementException e) {
             Assert.assertEquals(e.getMessage(), "Error while receiving tokens for OAuth application : store");
         }
 
+        // Happy Path - 200 - Refresh grant type
+        Mockito.when(keyManager.getNewAccessToken(Mockito.any())).thenReturn(tokenInfo);
+        AccessTokenInfo tokenInfoResponseForRefreshGrant = authenticatorService.getTokens("store", "refresh_token",
+                null, null, null, 0, null, null, null);
+        Assert.assertEquals(tokenInfoResponseForPasswordGrant, tokenInfo);
+
         // Happy Path - 200 - JWT grant type
         // Multi-Environment Overview configuration
-        MultiEnvironmentOverview multiEnvironmentOverview = new MultiEnvironmentOverview();
         multiEnvironmentOverview.setEnabled(true);
-
-        // APIMConfigurations
-        EnvironmentConfigurations environmentConfigurations = new EnvironmentConfigurations();
-        environmentConfigurations.setMultiEnvironmentOverview(multiEnvironmentOverview);
-
-        APIMConfigurationService apimConfigurationService = Mockito.mock(APIMConfigurationService.class);
-        Mockito.when(apimConfigurationService.getEnvironmentConfigurations()).thenReturn(environmentConfigurations);
-        PowerMockito.mockStatic(APIMConfigurationService.class);
-        PowerMockito.when(APIMConfigurationService.getInstance()).thenReturn(apimConfigurationService);
-
+        IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
+        String userFromIdentityProvider = "admin-user";
+        Mockito.when(identityProvider.getIdOfUser(Mockito.anyString())).thenThrow(IdentityProviderException.class);
+        Mockito.doReturn("xxx-admin-user-id-xxx").when(identityProvider).getIdOfUser(userFromIdentityProvider);
+        // A valid jwt with user "admin-user"
+        String idTokenWith_adminUser = "xxx+header+xxx.eyJzdWIiOiJhZG1pbi11c2VyIn0.xxx+signature+xxx";
+        tokenInfo.setIdToken(idTokenWith_adminUser);
         Mockito.when(keyManager.getNewAccessToken(Mockito.any())).thenReturn(tokenInfo);
-        AccessTokenInfo tokenInfoResponseForJWTGrant = authenticatorService.getTokens("store",
-                "urn:ietf:params:oauth:grant-type:jwt-bearer", null, null, null, 0, null, "xxx-assertion-xxx");
-        Assert.assertEquals(tokenInfoResponseForJWTGrant, tokenInfo);
+
+        AccessTokenInfo tokenInfoResponseForValidJWTGrant = authenticatorService.getTokens("store",
+                "urn:ietf:params:oauth:grant-type:jwt-bearer", null, null, null, 0, null, "xxx-assertion-xxx", identityProvider);
+        Assert.assertEquals(tokenInfoResponseForValidJWTGrant, tokenInfo);
+
+        // Error Path - When invalid user in JWT Token
+        // A valid jwt with user "John"
+        String idTokenWith_johnUser = "xxx+header+xxx.eyJzdWIiOiJKb2huIn0.xxx+signature+xxx";
+        tokenInfo.setIdToken(idTokenWith_johnUser);
+        Mockito.when(keyManager.getNewAccessToken(Mockito.any())).thenReturn(tokenInfo);
+        try {
+            AccessTokenInfo tokenInfoResponseForInvalidJWTGrant = authenticatorService.getTokens("store",
+                    "urn:ietf:params:oauth:grant-type:jwt-bearer", null, null, null, 0, null, "xxx-assertion-xxx", identityProvider);
+            Assert.assertEquals(tokenInfoResponseForInvalidJWTGrant, tokenInfo);
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(), "User John does not exists in this environment.");
+        }
     }
 
     @Test
@@ -242,7 +260,9 @@ public class AuthenticatorServiceTestCase {
         KeyManager keyManager = Mockito.mock(KeyManager.class);
         SystemApplicationDao systemApplicationDao = Mockito.mock(SystemApplicationDao.class);
         Mockito.when(systemApplicationDao.isConsumerKeyExistForApplication("store")).thenReturn(false);
-        AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao);
+        MultiEnvironmentOverview multiEnvironmentOverview = new MultiEnvironmentOverview();
+        AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao,
+                multiEnvironmentOverview);
 
         //// Actual response
         AuthResponseBean authResponseBean = new AuthResponseBean();
