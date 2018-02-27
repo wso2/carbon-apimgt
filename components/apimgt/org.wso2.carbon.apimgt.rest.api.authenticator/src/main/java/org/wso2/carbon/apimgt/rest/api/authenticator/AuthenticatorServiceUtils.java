@@ -35,7 +35,6 @@ import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.IdentityProviderException;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
 import org.wso2.carbon.apimgt.core.impl.APIDefinitionFromSwagger20;
-import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
@@ -59,24 +58,24 @@ import java.util.Map;
 /**
  * This class is used to mock the authenticator apis.
  */
-public class AuthenticatorService {
+public class AuthenticatorServiceUtils {
 
     private static final Logger log = LoggerFactory.getLogger(AuthenticatorAPI.class);
 
     private KeyManager keyManager;
     private SystemApplicationDao systemApplicationDao;
-    private MultiEnvironmentOverview multiEnvironmentOverviewConfigs;
+    private APIMConfigurationService apimConfigurationService;
 
     /**
      * Constructor.
      *
      * @param keyManager KeyManager object
      */
-    public AuthenticatorService(KeyManager keyManager, SystemApplicationDao systemApplicationDao,
-                                MultiEnvironmentOverview multiEnvironmentOverviewConfigs) {
+    public AuthenticatorServiceUtils(KeyManager keyManager, SystemApplicationDao systemApplicationDao,
+                                     APIMConfigurationService apimConfigurationService) {
         this.keyManager = keyManager;
         this.systemApplicationDao = systemApplicationDao;
-        this.multiEnvironmentOverviewConfigs = multiEnvironmentOverviewConfigs;
+        this.apimConfigurationService = apimConfigurationService;
     }
 
     /**
@@ -89,6 +88,8 @@ public class AuthenticatorService {
     public JsonObject getAuthenticationConfigurations(String appName)
             throws APIManagementException {
         JsonObject oAuthData = new JsonObject();
+        MultiEnvironmentOverview multiEnvironmentOverviewConfigs = apimConfigurationService
+                .getEnvironmentConfigurations().getMultiEnvironmentOverview();
         boolean isMultiEnvironmentOverviewEnabled = multiEnvironmentOverviewConfigs.isEnabled();
 
         List<String> grantTypes = new ArrayList<>();
@@ -155,6 +156,8 @@ public class AuthenticatorService {
             throws APIManagementException {
         AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
         AccessTokenRequest accessTokenRequest = new AccessTokenRequest();
+        MultiEnvironmentOverview multiEnvironmentOverviewConfigs = apimConfigurationService
+                .getEnvironmentConfigurations().getMultiEnvironmentOverview();
         boolean isMultiEnvironmentOverviewEnabled = multiEnvironmentOverviewConfigs.isEnabled();
 
         // Get scopes of the application

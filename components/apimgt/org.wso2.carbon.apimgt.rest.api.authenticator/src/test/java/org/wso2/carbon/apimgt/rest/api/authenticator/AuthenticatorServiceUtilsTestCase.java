@@ -26,6 +26,7 @@ import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
 import org.wso2.carbon.apimgt.core.configuration.APIMConfigurationService;
+import org.wso2.carbon.apimgt.core.configuration.models.EnvironmentConfigurations;
 import org.wso2.carbon.apimgt.core.configuration.models.MultiEnvironmentOverview;
 import org.wso2.carbon.apimgt.core.dao.SystemApplicationDao;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
@@ -41,13 +42,18 @@ import org.wso2.carbon.apimgt.rest.api.authenticator.utils.bean.AuthResponseBean
 /**
  * Test class for AuthenticatorService.
  */
-public class AuthenticatorServiceTestCase {
+public class AuthenticatorServiceUtilsTestCase {
     @Test
     public void testGetAuthenticationConfigurations() throws Exception {
         // Happy Path - 200
         //// Mocked response object from DCR api
         SystemApplicationDao systemApplicationDao = Mockito.mock(SystemApplicationDao.class);
         Mockito.when(systemApplicationDao.isConsumerKeyExistForApplication("store")).thenReturn(false);
+
+        APIMConfigurationService apimConfigurationService = Mockito.mock(APIMConfigurationService.class);
+        EnvironmentConfigurations environmentConfigurations = new EnvironmentConfigurations();
+        Mockito.when(apimConfigurationService.getEnvironmentConfigurations()).thenReturn(environmentConfigurations);
+
         OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
         oAuthApplicationInfo.setClientId("xxx-client-id-xxx");
         oAuthApplicationInfo.setCallBackURL("https://localhost/9292/login/callback/store");
@@ -64,25 +70,26 @@ public class AuthenticatorServiceTestCase {
         oAuthData.addProperty(AuthenticatorConstants.MULTI_ENVIRONMENT_OVERVIEW_ENABLED, APIMConfigurationService.getInstance()
                 .getEnvironmentConfigurations().getMultiEnvironmentOverview().isEnabled());
         MultiEnvironmentOverview multiEnvironmentOverview = new MultiEnvironmentOverview();
+        environmentConfigurations.setMultiEnvironmentOverview(multiEnvironmentOverview);
         KeyManager keyManager = Mockito.mock(KeyManager.class);
-        AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao,
-                multiEnvironmentOverview);
+        AuthenticatorServiceUtils authenticatorServiceUtils = new AuthenticatorServiceUtils(keyManager, systemApplicationDao,
+                apimConfigurationService);
 
         //// Get data object to be passed to the front-end
         Mockito.when(keyManager.createApplication(Mockito.any())).thenReturn(oAuthApplicationInfo);
-        JsonObject responseOAuthDataObj = authenticatorService.getAuthenticationConfigurations("store");
+        JsonObject responseOAuthDataObj = authenticatorServiceUtils.getAuthenticationConfigurations("store");
         Assert.assertEquals(responseOAuthDataObj, oAuthData);
 
         // Error Path - 500 - When OAuthApplicationInfo is null
         JsonObject emptyOAuthDataObj = new JsonObject();
         Mockito.when(keyManager.createApplication(Mockito.any())).thenReturn(null);
-        JsonObject responseEmptyOAuthDataObj = authenticatorService.getAuthenticationConfigurations("store");
+        JsonObject responseEmptyOAuthDataObj = authenticatorServiceUtils.getAuthenticationConfigurations("store");
         Assert.assertEquals(responseEmptyOAuthDataObj, emptyOAuthDataObj);
 
         // Error Path - When DCR application creation fails and throws an APIManagementException
         Mockito.when(keyManager.createApplication(Mockito.any())).thenThrow(KeyManagementException.class);
         try {
-            authenticatorService.getAuthenticationConfigurations("store");
+            authenticatorServiceUtils.getAuthenticationConfigurations("store");
         } catch (APIManagementException e) {
             Assert.assertEquals(e.getMessage(), "Error while creating the keys for OAuth application : store");
         }
@@ -94,6 +101,11 @@ public class AuthenticatorServiceTestCase {
         //// Mocked response object from DCR api
         SystemApplicationDao systemApplicationDao = Mockito.mock(SystemApplicationDao.class);
         Mockito.when(systemApplicationDao.isConsumerKeyExistForApplication("store")).thenReturn(false);
+
+        APIMConfigurationService apimConfigurationService = Mockito.mock(APIMConfigurationService.class);
+        EnvironmentConfigurations environmentConfigurations = new EnvironmentConfigurations();
+        Mockito.when(apimConfigurationService.getEnvironmentConfigurations()).thenReturn(environmentConfigurations);
+
         OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
         oAuthApplicationInfo.setClientId("xxx-client-id-xxx");
         oAuthApplicationInfo.setCallBackURL("https://localhost:9292/login/callback/publisher");
@@ -112,13 +124,14 @@ public class AuthenticatorServiceTestCase {
 
         KeyManager keyManager = Mockito.mock(KeyManager.class);
         MultiEnvironmentOverview multiEnvironmentOverview = new MultiEnvironmentOverview();
+        environmentConfigurations.setMultiEnvironmentOverview(multiEnvironmentOverview);
         multiEnvironmentOverview.setEnabled(true);
-        AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao,
-                multiEnvironmentOverview);
+        AuthenticatorServiceUtils authenticatorServiceUtils = new AuthenticatorServiceUtils(keyManager, systemApplicationDao,
+                apimConfigurationService);
 
         //// Get data object to be passed to the front-end
         Mockito.when(keyManager.createApplication(Mockito.any())).thenReturn(oAuthApplicationInfo);
-        JsonObject responseOAuthDataObj = authenticatorService.getAuthenticationConfigurations("publisher");
+        JsonObject responseOAuthDataObj = authenticatorServiceUtils.getAuthenticationConfigurations("publisher");
         String[] scopesActual = responseOAuthDataObj.get(KeyManagerConstants.TOKEN_SCOPES).toString().split(" ");
         String[] scopesExpected = oAuthData.get(KeyManagerConstants.TOKEN_SCOPES).toString().split(" ");
         Assert.assertEquals(scopesActual.length, scopesExpected.length);
@@ -126,13 +139,13 @@ public class AuthenticatorServiceTestCase {
         // Error Path - 500 - When OAuthApplicationInfo is null
         JsonObject emptyOAuthDataObj = new JsonObject();
         Mockito.when(keyManager.createApplication(Mockito.any())).thenReturn(null);
-        JsonObject responseEmptyOAuthDataObj = authenticatorService.getAuthenticationConfigurations("publisher");
+        JsonObject responseEmptyOAuthDataObj = authenticatorServiceUtils.getAuthenticationConfigurations("publisher");
         Assert.assertEquals(responseEmptyOAuthDataObj, emptyOAuthDataObj);
 
         // Error Path - When DCR application creation fails and throws an APIManagementException
         Mockito.when(keyManager.createApplication(Mockito.any())).thenThrow(KeyManagementException.class);
         try {
-            authenticatorService.getAuthenticationConfigurations("publisher");
+            authenticatorServiceUtils.getAuthenticationConfigurations("publisher");
         } catch (APIManagementException e) {
             Assert.assertEquals(e.getMessage(), "Error while creating the keys for OAuth application : publisher");
         }
@@ -141,6 +154,10 @@ public class AuthenticatorServiceTestCase {
     @Test
     public void testGetTokens() throws Exception {
         // Happy Path - 200 - Authorization code grant type
+        APIMConfigurationService apimConfigurationService = Mockito.mock(APIMConfigurationService.class);
+        EnvironmentConfigurations environmentConfigurations = new EnvironmentConfigurations();
+        Mockito.when(apimConfigurationService.getEnvironmentConfigurations()).thenReturn(environmentConfigurations);
+
         //// Mocked response from DCR endpoint
         OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
         oAuthApplicationInfo.setClientId("xxx-client-id-xxx");
@@ -158,13 +175,14 @@ public class AuthenticatorServiceTestCase {
         SystemApplicationDao systemApplicationDao = Mockito.mock(SystemApplicationDao.class);
         Mockito.when(systemApplicationDao.isConsumerKeyExistForApplication("store")).thenReturn(false);
         MultiEnvironmentOverview multiEnvironmentOverview = new MultiEnvironmentOverview();
-        AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao,
-                multiEnvironmentOverview);
+        environmentConfigurations.setMultiEnvironmentOverview(multiEnvironmentOverview);
+        AuthenticatorServiceUtils authenticatorServiceUtils = new AuthenticatorServiceUtils(keyManager, systemApplicationDao,
+                apimConfigurationService);
         Mockito.when(keyManager.createApplication(Mockito.any())).thenReturn(oAuthApplicationInfo);
 
         //// Actual response - When authorization code is not null
         Mockito.when(keyManager.getNewAccessToken(Mockito.any())).thenReturn(tokenInfo);
-        AccessTokenInfo tokenInfoResponseForValidAuthCode = authenticatorService.getTokens("store",
+        AccessTokenInfo tokenInfoResponseForValidAuthCode = authenticatorServiceUtils.getTokens("store",
                 "authorization_code", null, null, null, 0,
                 "xxx-auth-code-xxx", null, null);
         Assert.assertEquals(tokenInfoResponseForValidAuthCode, tokenInfo);
@@ -175,7 +193,7 @@ public class AuthenticatorServiceTestCase {
         Mockito.when(keyManager.getNewAccessToken(Mockito.any())).thenReturn(emptyTokenInfo);
         AccessTokenInfo tokenInfoResponseForInvalidAuthCode = new AccessTokenInfo();
         try {
-            tokenInfoResponseForInvalidAuthCode = authenticatorService.getTokens("store",
+            tokenInfoResponseForInvalidAuthCode = authenticatorServiceUtils.getTokens("store",
                     "authorization_code", null, null, null, 0, null, null, null);
         } catch (APIManagementException e) {
             Assert.assertEquals(e.getMessage(), "No Authorization Code available.");
@@ -184,7 +202,7 @@ public class AuthenticatorServiceTestCase {
 
         // Happy Path - 200 - Password grant type
         Mockito.when(keyManager.getNewAccessToken(Mockito.any())).thenReturn(tokenInfo);
-        AccessTokenInfo tokenInfoResponseForPasswordGrant = authenticatorService.getTokens("store", "password",
+        AccessTokenInfo tokenInfoResponseForPasswordGrant = authenticatorServiceUtils.getTokens("store", "password",
                 "admin", "admin", null, 0, null, null, null);
         Assert.assertEquals(tokenInfoResponseForPasswordGrant, tokenInfo);
 
@@ -192,7 +210,7 @@ public class AuthenticatorServiceTestCase {
         Mockito.when(keyManager.getNewAccessToken(Mockito.any())).thenThrow(KeyManagementException.class)
                 .thenReturn(tokenInfo);
         try {
-            authenticatorService.getTokens("store", "password",
+            authenticatorServiceUtils.getTokens("store", "password",
                     "admin", "admin", null, 0, null, null, null);
         } catch (APIManagementException e) {
             Assert.assertEquals(e.getMessage(), "Error while receiving tokens for OAuth application : store");
@@ -200,7 +218,7 @@ public class AuthenticatorServiceTestCase {
 
         // Happy Path - 200 - Refresh grant type
         Mockito.when(keyManager.getNewAccessToken(Mockito.any())).thenReturn(tokenInfo);
-        AccessTokenInfo tokenInfoResponseForRefreshGrant = authenticatorService.getTokens("store", "refresh_token",
+        AccessTokenInfo tokenInfoResponseForRefreshGrant = authenticatorServiceUtils.getTokens("store", "refresh_token",
                 null, null, null, 0, null, null, null);
         Assert.assertEquals(tokenInfoResponseForPasswordGrant, tokenInfo);
 
@@ -216,7 +234,7 @@ public class AuthenticatorServiceTestCase {
         tokenInfo.setIdToken(idTokenWith_adminUser);
         Mockito.when(keyManager.getNewAccessToken(Mockito.any())).thenReturn(tokenInfo);
 
-        AccessTokenInfo tokenInfoResponseForValidJWTGrant = authenticatorService.getTokens("store",
+        AccessTokenInfo tokenInfoResponseForValidJWTGrant = authenticatorServiceUtils.getTokens("store",
                 "urn:ietf:params:oauth:grant-type:jwt-bearer", null, null, null, 0, null, "xxx-assertion-xxx", identityProvider);
         Assert.assertEquals(tokenInfoResponseForValidJWTGrant, tokenInfo);
 
@@ -226,7 +244,7 @@ public class AuthenticatorServiceTestCase {
         tokenInfo.setIdToken(idTokenWith_johnUser);
         Mockito.when(keyManager.getNewAccessToken(Mockito.any())).thenReturn(tokenInfo);
         try {
-            AccessTokenInfo tokenInfoResponseForInvalidJWTGrant = authenticatorService.getTokens("store",
+            AccessTokenInfo tokenInfoResponseForInvalidJWTGrant = authenticatorServiceUtils.getTokens("store",
                     "urn:ietf:params:oauth:grant-type:jwt-bearer", null, null, null, 0, null, "xxx-assertion-xxx", identityProvider);
             Assert.assertEquals(tokenInfoResponseForInvalidJWTGrant, tokenInfo);
         } catch (APIManagementException e) {
@@ -241,6 +259,10 @@ public class AuthenticatorServiceTestCase {
     @Test
     public void testSetAccessTokenData() throws Exception {
         // Happy Path
+        APIMConfigurationService apimConfigurationService = Mockito.mock(APIMConfigurationService.class);
+        EnvironmentConfigurations environmentConfigurations = new EnvironmentConfigurations();
+        Mockito.when(apimConfigurationService.getEnvironmentConfigurations()).thenReturn(environmentConfigurations);
+
         //// AccessTokenInfo object
         AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
         accessTokenInfo.setIdToken
@@ -261,12 +283,13 @@ public class AuthenticatorServiceTestCase {
         SystemApplicationDao systemApplicationDao = Mockito.mock(SystemApplicationDao.class);
         Mockito.when(systemApplicationDao.isConsumerKeyExistForApplication("store")).thenReturn(false);
         MultiEnvironmentOverview multiEnvironmentOverview = new MultiEnvironmentOverview();
-        AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao,
-                multiEnvironmentOverview);
+        environmentConfigurations.setMultiEnvironmentOverview(multiEnvironmentOverview);
+        AuthenticatorServiceUtils authenticatorServiceUtils = new AuthenticatorServiceUtils(keyManager, systemApplicationDao,
+                apimConfigurationService);
 
         //// Actual response
         AuthResponseBean authResponseBean = new AuthResponseBean();
-        authResponseBean = authenticatorService.setAccessTokenData(authResponseBean, accessTokenInfo);
+        authResponseBean = authenticatorServiceUtils.setAccessTokenData(authResponseBean, accessTokenInfo);
         Assert.assertTrue(EqualsBuilder.reflectionEquals(expectedAuthResponseBean, authResponseBean));
 
         // Happy Path - When id token is null
@@ -286,7 +309,7 @@ public class AuthenticatorServiceTestCase {
 
         //// Actual response when id token is null
         AuthResponseBean responseBean = new AuthResponseBean();
-        authenticatorService.setAccessTokenData(responseBean, invalidTokenInfo);
+        authenticatorServiceUtils.setAccessTokenData(responseBean, invalidTokenInfo);
         Assert.assertTrue(EqualsBuilder.reflectionEquals(expectedResponseBean, responseBean));
 
         // Error Path - When parsing JWT fails and throws KeyManagementException
@@ -298,7 +321,7 @@ public class AuthenticatorServiceTestCase {
 
         try {
             AuthResponseBean errorResponseBean = new AuthResponseBean();
-            authenticatorService.setAccessTokenData(errorResponseBean, invalidAccessTokenInfo);
+            authenticatorServiceUtils.setAccessTokenData(errorResponseBean, invalidAccessTokenInfo);
         } catch (KeyManagementException e) {
             Assert.assertEquals(e.getMessage(), "JWT Parsing failed. Invalid JWT.");
         }

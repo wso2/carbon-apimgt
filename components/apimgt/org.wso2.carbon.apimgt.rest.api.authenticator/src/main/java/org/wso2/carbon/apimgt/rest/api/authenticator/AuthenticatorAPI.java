@@ -74,6 +74,7 @@ import javax.ws.rs.core.Response;
 public class AuthenticatorAPI implements Microservice {
 
     private static final Logger log = LoggerFactory.getLogger(AuthenticatorAPI.class);
+    private AuthenticatorAPIService authenticatorAPIService = new AuthenticatorAPIService();
 
     /**
      * This method authenticate the user for store app.
@@ -94,8 +95,8 @@ public class AuthenticatorAPI implements Microservice {
             EnvironmentConfigurations environmentConfigurations = APIMConfigurationService.getInstance()
                     .getEnvironmentConfigurations();
             MultiEnvironmentOverview envOverviewConfigs = environmentConfigurations.getMultiEnvironmentOverview();
-            AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao,
-                    envOverviewConfigs);
+            AuthenticatorServiceUtils authenticatorServiceUtils = new AuthenticatorServiceUtils(keyManager, systemApplicationDao,
+                    null);
             AuthResponseBean authResponseBean = new AuthResponseBean();
             String appContext = AuthenticatorConstants.URL_PATH_SEPERATOR + appName;
             String logoutContext = AuthenticatorConstants.LOGOUT_SERVICE_CONTEXT +
@@ -123,10 +124,10 @@ public class AuthenticatorAPI implements Microservice {
                     return Response.status(Response.Status.UNAUTHORIZED).entity(errorDTO).build();
                 }
             }
-            AccessTokenInfo accessTokenInfo = authenticatorService.getTokens(appContext.substring(1),
+            AccessTokenInfo accessTokenInfo = authenticatorServiceUtils.getTokens(appContext.substring(1),
                     grantType, userName, password, refToken, Long.parseLong(validityPeriod), null,
                     assertion, APIManagerFactory.getInstance().getIdentityProvider());
-            authenticatorService.setAccessTokenData(authResponseBean, accessTokenInfo);
+            authenticatorServiceUtils.setAccessTokenData(authResponseBean, accessTokenInfo);
             String accessToken = accessTokenInfo.getAccessToken();
             String refreshToken = accessTokenInfo.getRefreshToken();
 
@@ -227,9 +228,9 @@ public class AuthenticatorAPI implements Microservice {
                 SystemApplicationDao systemApplicationDao = DAOFactory.getSystemApplicationDao();
 
                 MultiEnvironmentOverview envOverviewConfigs = environmentConfigurations.getMultiEnvironmentOverview();
-                AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao,
-                        envOverviewConfigs);
-                authenticatorService.revokeAccessToken(appContext.substring(1), accessToken);
+                AuthenticatorServiceUtils authenticatorServiceUtils = new AuthenticatorServiceUtils(keyManager, systemApplicationDao,
+                        null);
+                authenticatorServiceUtils.revokeAccessToken(appContext.substring(1), accessToken);
                 // Lets invalidate all the cookies saved.
                 NewCookie logoutContextCookie = AuthUtil
                         .cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_2, "", logoutContext, true, true,
@@ -273,9 +274,9 @@ public class AuthenticatorAPI implements Microservice {
             SystemApplicationDao systemApplicationDao = DAOFactory.getSystemApplicationDao();
             MultiEnvironmentOverview envOverviewConfigs = APIMConfigurationService.getInstance()
                     .getEnvironmentConfigurations().getMultiEnvironmentOverview();
-            AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao,
-                    envOverviewConfigs);
-            JsonObject oAuthData = authenticatorService.getAuthenticationConfigurations(appName);
+            AuthenticatorServiceUtils authenticatorServiceUtils = new AuthenticatorServiceUtils(keyManager, systemApplicationDao,
+                    null);
+            JsonObject oAuthData = authenticatorServiceUtils.getAuthenticationConfigurations(appName);
             if (oAuthData.size() == 0) {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                         .entity("Error while creating the OAuth application!").build();
@@ -323,15 +324,15 @@ public class AuthenticatorAPI implements Microservice {
             EnvironmentConfigurations environmentConfigurations = APIMConfigurationService.getInstance()
                     .getEnvironmentConfigurations();
             MultiEnvironmentOverview envOverviewConfigs = environmentConfigurations.getMultiEnvironmentOverview();
-            AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao,
-                    envOverviewConfigs);
-            AccessTokenInfo accessTokenInfo = authenticatorService.getTokens(appName, grantType,
+            AuthenticatorServiceUtils authenticatorServiceUtils = new AuthenticatorServiceUtils(keyManager, systemApplicationDao,
+                    null);
+            AccessTokenInfo accessTokenInfo = authenticatorServiceUtils.getTokens(appName, grantType,
                     null, null, null, 0, authorizationCode, null, null);
             if (StringUtils.isEmpty(accessTokenInfo.toString())) {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                         .entity("Access token generation failed!").build();
             } else {
-                authenticatorService.setAccessTokenData(authResponseBean, accessTokenInfo);
+                authenticatorServiceUtils.setAccessTokenData(authResponseBean, accessTokenInfo);
                 String accessToken = accessTokenInfo.getAccessToken();
                 if (log.isDebugEnabled()) {
                     log.debug("Received access token for " + appName + " application.");
