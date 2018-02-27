@@ -97,8 +97,8 @@ public class ThrottlingSynchronizer implements OnPremiseGatewayInitListener {
                 OAuthApplicationInfoDTO responseDto = TokenUtil.registerClient();
                 String combinedScopes = ThrottlingConstants.TOKEN_TIER_VIEW_SCOPE + " "
                         + ThrottlingConstants.BLOCKING_CONDITION_VIEW_SCOPE;
-                accessTokenDTO = TokenUtil
-                        .generateAccessToken(responseDto.getClientId(), responseDto.getClientSecret(), combinedScopes);
+                accessTokenDTO = TokenUtil.generateAccessToken(responseDto.getClientId(),
+                        responseDto.getClientSecret().toCharArray(), combinedScopes);
             } catch (OnPremiseGatewayException e) {
                 log.error("Error occurred while creating policies. Unable to generate Access Token.", e);
                 return;
