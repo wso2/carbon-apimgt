@@ -1,5 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?><!--
-  ~ Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
   ~
   ~  WSO2 Inc. licenses this file to you under the Apache License,
   ~  Version 2.0 (the "License"); you may not use this file except
@@ -14,9 +15,11 @@
   ~ KIND, either express or implied.  See the License for the
   ~ specific language governing permissions and limitations
   ~ under the License.
-  --><!--
+  -->
+<!--
     This is the configuration file for Stratos specific constants.
---><stratosConfig xmlns="http://wso2.com/cloud/stratos">
+-->
+<stratosConfig xmlns="http://wso2.com/cloud/stratos">
 
     <!--DisableTenantManagementEmails is set to true by default. 
     No Tenant Management mails will be sent, and the tenants will be
