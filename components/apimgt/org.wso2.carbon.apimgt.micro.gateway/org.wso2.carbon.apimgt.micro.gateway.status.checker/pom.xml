@@ -126,18 +126,16 @@
                             org.wso2.carbon.apimgt.micro.gateway.status.checker.internal
                         </Private-Package>
                         <Import-Package>
-                            javax.net.ssl.*,
                             org.wso2.carbon.core; version="${carbon.kernel.package.import.version.range}",
                             org.apache.commons.logging.*; version="${commons.logging.imp.pkg.version}",
-                            org.apache.commons.io.*,
-                            org.apache.commons.lang.*,
-                            org.osgi.service.component.*,
-                            org.osgi.framework.*,
-                            com.fasterxml.jackson.*,
-                            org.apache.commons.codec.binary.*,
-                            org.wso2.carbon.apimgt.impl.*;version="${carbon.apimgt.imp.pkg.version}",
-                            org.wso2.carbon.apimgt.micro.gateway.common.*;version="${project.version}",
-                            org.apache.http.*
+                            org.apache.commons.lang; version="${org.apache.commons.lang.version}",
+                            org.osgi.service.component; version="${org.osgi.service.version}",
+                            org.osgi.framework; version="${org.osgi.framework.version}",
+                            com.fasterxml.jackson.databind; version="${com.fasterxml.jackson.databind.version}",
+                            org.apache.commons.codec.binary; version="${org.apache.commons.codec.binary.version}",
+                            org.wso2.carbon.apimgt.impl.*; version="${carbon.apimgt.imp.pkg.version}",
+                            org.wso2.carbon.apimgt.micro.gateway.common.*; version="${project.version}",
+                            org.apache.http.*; version="${org.apache.version}"
                         </Import-Package>
                     </instructions>
                 </configuration>
@@ -169,5 +167,14 @@
             </plugin>
         </plugins>
     </build>
+
+    <properties>
+        <org.apache.commons.lang.version>[2.6,3)</org.apache.commons.lang.version>
+        <org.osgi.service.version>[1.2,2)</org.osgi.service.version>
+        <org.osgi.framework.version>[1.7,2)</org.osgi.framework.version>
+        <com.fasterxml.jackson.databind.version>[2.9,3)</com.fasterxml.jackson.databind.version>
+        <org.apache.commons.codec.binary.version>[1.4,2)</org.apache.commons.codec.binary.version>
+        <org.apache.version>[4.3,5)</org.apache.version>
+    </properties>
 
 </project>
