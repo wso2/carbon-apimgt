@@ -931,7 +931,8 @@ public class APIStoreHostObject extends ScriptableObject {
         }
         inputSearchQuery = inputSearchQuery.trim();
         // sub context and doc content doesn't support AND search
-        if (inputSearchQuery != null && inputSearchQuery.contains(" ")) {
+        if (inputSearchQuery != null && inputSearchQuery.contains(" ") && !inputSearchQuery
+                .contains(APIConstants.TAG_SEARCH_TYPE_PREFIX4)) {
             if (inputSearchQuery.split(" ").length > 1) {
                 String[] searchCriterias = inputSearchQuery.split(" ");
                 for (int i = 0; i < searchCriterias.length; i++) {

@@ -1217,6 +1217,7 @@ public final class APIConstants {
     public static final String TAG_SEARCH_TYPE_PREFIX = "tags";
     public static final String TAG_SEARCH_TYPE_PREFIX2 = "tags=";
     public static final String TAG_SEARCH_TYPE_PREFIX3 = "tag";
+    public static final String TAG_SEARCH_TYPE_PREFIX4 = "tag:";
     public static final String NAME_TYPE_PREFIX = "name";
     private static final String PROVIDER_SEARCH_TYPE_PREFIX = "provider";
     private static final String VERSION_SEARCH_TYPE_PREFIX = "version";
