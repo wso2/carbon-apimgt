@@ -23,7 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.dao.UploadedUsageFileInfoDAO;
 import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.dto.UploadedFileInfoDTO;
-import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.util.MicroAPIUsageConstants;
+import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.util.MicroGatewayAPIUsageConstants;
 import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.util.UsagePublisherException;
 import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.util.UsagePublisherUtils;
 
@@ -80,17 +80,17 @@ public class UploadedUsagePublisher implements Runnable {
             bufferedReader = new BufferedReader(inputStreamReader);
             String readLine;
             while ((readLine = bufferedReader.readLine()) != null) {
-                String[] elements = readLine.split(MicroAPIUsageConstants.EVENT_SEPARATOR);
+                String[] elements = readLine.split(MicroGatewayAPIUsageConstants.EVENT_SEPARATOR);
                 //StreamID
-                String streamId = elements[0].split(MicroAPIUsageConstants.KEY_VALUE_SEPARATOR)[1];
+                String streamId = elements[0].split(MicroGatewayAPIUsageConstants.KEY_VALUE_SEPARATOR)[1];
                 //Timestamp
-                String timeStamp = elements[1].split(MicroAPIUsageConstants.KEY_VALUE_SEPARATOR)[1];
+                String timeStamp = elements[1].split(MicroGatewayAPIUsageConstants.KEY_VALUE_SEPARATOR)[1];
                 //MetaData
-                String metaData = elements[2].split(MicroAPIUsageConstants.KEY_VALUE_SEPARATOR)[1];
+                String metaData = elements[2].split(MicroGatewayAPIUsageConstants.KEY_VALUE_SEPARATOR)[1];
                 //correlationData
-                String correlationData = elements[3].split(MicroAPIUsageConstants.KEY_VALUE_SEPARATOR)[1];
+                String correlationData = elements[3].split(MicroGatewayAPIUsageConstants.KEY_VALUE_SEPARATOR)[1];
                 //PayloadData
-                String payloadData = elements[4].split(MicroAPIUsageConstants.KEY_VALUE_SEPARATOR)[1];
+                String payloadData = elements[4].split(MicroGatewayAPIUsageConstants.KEY_VALUE_SEPARATOR)[1];
                 try {
                     dataPublisher.tryPublish(streamId, Long.parseLong(timeStamp),
                             (Object[]) UsagePublisherUtils.createMetaData(metaData),

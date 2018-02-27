@@ -37,8 +37,9 @@ public class MicroGatewayCommonUtil {
     public static String getRandomString(int length) {
         SecureRandom rnd = new SecureRandom();
         StringBuilder sb = new StringBuilder(length);
-        for (int i = 0; i < length; i++)
+        for (int i = 0; i < length; i++) {
             sb.append(ALPHA_NUMERIC_CHARS.charAt(rnd.nextInt(ALPHA_NUMERIC_CHARS.length())));
+        }
         return sb.toString();
     }
 
