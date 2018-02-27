@@ -24,7 +24,7 @@
 
     <link rel="icon" href="../../themes/wso2/images/favicon.png" type="image/x-icon"/>
     <link href="../../themes/wso2/libs/bootstrap_3.3.5/css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/custom-common.css" rel="stylesheet">
+    <link href="../../themes/wso2/css/policy-pages-custom.css" rel="stylesheet">
 </head>
 
 <body>
@@ -60,61 +60,61 @@
                 <!-- Customizable content. Due to this nature, i18n is not implemented for this section -->
                 <div id="cookiePolicy" class="padding-double">
                     <h4><a href="https://wso2.com/api-management/"><strong>About WSO2 API Manager</strong></a></h4>
-                    <p>WSO2 API Manager (referred hereafter as &ldquo;APIM 2.2&rdquo;) is an open source enterprise-class solution that supports API publishing, lifecycle management, application development, access control, rate limiting and analytics in one cleanly integrated system.</p>
+                    <p>WSO2 API Manager (referred hereafter as &ldquo;API-M 2.2&rdquo;) is an open source enterprise-class solution that supports API publishing, lifecycle management, application development, access control, rate limiting and analytics in one cleanly integrated system.</p>
                     <div class="margin-bottom-double"></div>
                     <h2 id="cookie-policy"><strong>Cookie Policy</strong></h2>
-                    <p>APIM 2.2 uses cookies so that it can provide you with the best user experience, and identify you for security purposes. Disabling cookies will most probably make it unable to access some of the services.</p>
-                    <div class="margin-bottom-double"></div>
-                    <h2 id="how-apim-2.2-process-cookies">How does APIM 2.2 process cookies &quest;</h2>
-                    <p>APIM 2.2 stores and retrieves information on your browser using cookies. This information is used to provide better experience. Some cookies serve as the primary purpose of allowing login to the system, maintain session and keeping track of activities you do within the login session.</p>
-                    <p>Primary purpose of some cookies used in APIM 2.2 are to personally identify you. However the cookie lifetime will end once your session ends when you log-out or on session expiry.</p>
-                    <p>Some cookies are simply used to give you a more personalised web experience, and these cannot be used to personally identify you or your activities.</p>
-                    <p>This Cookie Policy is part of the APIM 2.2 Privacy Policy.</p>
+                    <p>API-M 2.2 uses cookies to provide you with the best user experience, and to securely identify you. You might not be able to access some of the services if you disable cookies.</p>
                     <div class="margin-bottom-double"></div>
                     <h2 id="what-is-a-cookie">What is a cookie &quest;</h2>
                     <p>A browser cookie is a small piece of data that is stored on your device to help websites and mobile apps remember things about you. Other technologies, including Web storage and identifiers associated with your device, may be used for similar purposes. In this policy, we use the term &ldquo;cookies&rdquo; to discuss all of these technologies.</p>
                     <div class="margin-bottom-double"></div>
-                    <h2 id="what-apim-2.2-use-cookies-for">What does APIM 2.2 use cookies for &quest;</h2>
-                    <p>Cookies are used for two purposes in APIM 2.2</p>
+                    <h2 id="how-apim-2.2-process-cookies">How does API-M 2.2 process cookies &quest;</h2>
+                    <p>API-M 2.2 uses cookies to store and retrieve information on your browser. This information is used to provide a better user experience. Some cookies have the primary purpose of allowing logging in to the system, maintaining sessions, and keeping track of activities you do within the login session.</p>
+                    <p>Some cookies used in API-M 2.2 are used to identify you personally. However, the cookie lifetime will end when you log-out ending your session or when your session expires.</p>
+                    <p>Some cookies are simply used to give you a more personalised web experience, and these cannot be used to identify you or your activities personally.</p>
+                    <p>This Cookie Policy is part of the API-M 2.2 Privacy Policy.</p>
+                    <div class="margin-bottom-double"></div>
+                    <h2 id="what-apim-2.2-use-cookies-for">What does API-M 2.2 use cookies for &quest;</h2>
+                    <p>Cookies are used for two purposes in API-M 2.2</p>
                     <ol>
-                        <li>For security purposes.</li>
-                        <li>To provide better user experience.</li>
+                        <li>Security.</li>
+                        <li>Providing a  better user experience.</li>
                     </ol>
                     <div class="margin-bottom"></div>
-                    <h3 id="apim-2.2-uses-cookies-for-the-following-purposes">APIM 2.2 uses cookies for the following purposes.</h3>
+                    <h3 id="apim-2.2-uses-cookies-for-the-following-purposes">API-M 2.2 uses cookies for the following purposes.</h3>
                     <h4>Preferences</h4>
-                    <p>APIM 2.2 uses these cookies to remember your settings and preferences and to pre-fill the form fields to make your interactions with the site easier for you.</p>
+                    <p>API-M 2.2 uses cookies to remember your settings and preferences and to auto-fill the fields to make your interactions with the site easier.</p>
                     <ul>
-                        <li>These cannot be used to personally identify you.</li>
+                        <li>These cannot be used to identify you personally.</li>
                     </ul>
                     <h4>Security</h4>
-                    <p>APIM 2.2 uses selected cookies to identify and prevent security risks.</p>
-                    <p>For example, APIM 2.2 may use these cookies to store your session information to prevent others from changing your password without your username and password.</p>
-                    <p>APIM 2.2 uses session cookie to maintain your active session.</p>
-                    <p>APIM 2.2 may use temporary cookie when performing multi-factor authentication and federated authentication.</p>
-                    <p>APIM 2.2 may use permanent cookies to detect that you have previously used the same device to log-in. This is to to calculate the &ldquo;risk level&rdquo; associated with your current login attempt. This is primarily to protect you and your account from possible attack.</p>
+                    <p>API-M 2.2 uses selected cookies to identify and prevent security risks.</p>
+                    <p>For example, API-M 2.2 may use cookies to store your session information to prevent others from changing your password without your username and password.</p>
+                    <p>API-M 2.2 uses session cookie to maintain your active session.</p>
+                    <p>API-M 2.2 may use a temporary cookie when performing multi-factor authentication and federated authentication.</p>
+                    <p>API-M 2.2 may use permanent cookies to detect the devices you have logged in previously. This is to to calculate the <strong>risk level</strong> associated with your current login attempt. Using these cookies protects you and your account from possible attacks.</p>
                     <h4>Performance</h4>
-                    <p>APIM 2.2 may use cookies to allow &ldquo;Remember Me&rdquo; functionalities.</p>
+                    <p>API-M 2.2 may use cookies to allow &ldquo;Remember Me&rdquo; functionalities.</p>
                     <div class="margin-bottom"></div>
                     <h3 id="analytics">Analytics</h3>
-                    <p>APIM 2.2 as a product does not use cookies for analytical purposes.</p>
+                    <p>API-M 2.2 as a product does not use cookies for analytical purposes.</p>
                     <div class="margin-bottom"></div>
                     <h3 id="third-party-cookies">Third party cookies</h3>
-                    <p>Using APIM 2.2 may cause some third-party cookie being set to your browser. APIM 2.2 has no control over the operation of any of them. The third-party cookies which maybe set include,</p>
+                    <p>Using API-M 2.2 may cause some third-party cookie being set to your browser. API-M 2.2 has no control over the operation of these cookies. The third-party cookies which maybe set include,</p>
                     <ul>
-                        <li>Any of the social login sites, when APIM 2.2 configured to use “Social” or “Federated” login, and you opt to do login with your &ldquo;Social Account&rdquo;</li>
-                        <li>Any third party Federated login</li>
+                        <li>Any of the social login sites, when API-M 2.2 is configured to use &ldquo;Social&rdquo; or &ldquo;Federated&rdquo; login, and you opt to do login with your &ldquo;Social Account&rdquo;</li>
+                        <li>Any third party federated login</li>
                     </ul>
-                    <p>We strongly advise you to refer the respective cookie policy carefully for such sites, as APIM has no knowledge or use on these cookies.</p>
+                    <p>We strongly advise you to refer the respective cookie policies of such sites carefully as API-M has no knowledge or use on these cookies.</p>
                     <div class="margin-bottom-double"></div>
-                    <h2 id="what-type-of-cookies-apim-2.2-use">What type of cookies does APIM 2.2 use &quest;</h2>
-                    <p>APIM 2.2 use persistent cookies and session cookies. A persistent cookie helps APIM 2.2 recognize you as an existing user, so it's easier to return to WSO2 or interact with APIM 2.2 without signing in again. After you sign in, a persistent cookie stays in your browser and will be read by APIM 2.2 when you return to APIM 2.2.</p>
-                    <p>A session cookie is a cookie that is erased when the user closes the Web browser. The session cookie is stored in temporary memory and is not retained after the browser is closed. Session cookies do not collect information from the users computer.</p>
+                    <h2 id="what-type-of-cookies-apim-2.2-use">What type of cookies does API-M 2.2 use &quest;</h2>
+                    <p>API-M 2.2 uses persistent cookies and session cookies. A persistent cookie helps API-M 2.2 to recognize you as an existing user, so you can easily return to WSO2 or interact with API-M 2.2 without signing in again. After you sign in, a persistent cookie stays in your browser and will be read by API-M 2.2 when you return.</p>
+                    <p>A session cookie is erased when the user closes the Web browser. It is stored in temporarily and is not retained after the browser is closed. Session cookies do not collect information from the user’s computer.</p>
                     <div class="margin-bottom-double"></div>
                     <h2 id="how-do-i-control-my-cookies">How do I control my cookies &quest;</h2>
-                    <p>Most browsers allow you to control cookies through their settings preferences. However, if you limit the ability of websites to set cookies, you may worsen your overall user experience, since it will no longer be personalized to you. It may also stop you from saving customized settings like login information.</p>
-                    <p>Most likely disabling cookies will make you unable to use Authentication and Authorization functionalities offered by APIM 2.2.</p>
-                    <p>If you have any questions or concerns regarding the use of cookies, please contact the organization running this APIM 2.2 instance - Data Protection Officer.</p>
+                    <p>Most browsers allow you to control cookies through settings. However, if you limit the ability of websites to set cookies, you may worsen your overall user experience, since it will no longer be personalized to you. It may also stop you from saving customized
+                      settings like login information. Disabling cookies might make you unable to use Authentication and Authorization functionalities offered by API-M 2.2.</p>
+                    <p>If you have any questions or concerns regarding the use of cookies, please contact the Data Protection Officer of the organization running this API-M 2.2 instance.</p>
                     <div class="margin-bottom-double"></div>
                     <h2 id="what-are-the-cookies-used">What are the cookies used &quest;</h2>
                     <table class="table table-bordered">
@@ -157,7 +157,7 @@
                                 <p>workflowCookie</p>
                             </td>
                             <td>
-                                <p>Used for authentication purposes when invoking an admin service at the Business Process Server.</p>
+                                <p>Used for authentication purposes when invoking an admin service in the Business Process Server.</p>
                             </td>
                             <td>
                                 <p>Session</p>
@@ -179,7 +179,7 @@
                                 <p>i18next</p>
                             </td>
                             <td>
-                                <p>Used to track the language we should serve you.</p>
+                                <p>Used to track the language API-M 2.2 is served to you.</p>
                             </td>
                             <td>
                                 <p>Session</p>
@@ -189,7 +189,8 @@
                     </table>
                     <div class="margin-bottom-double"></div>
                     <h2 id="disclaimer">Disclaimer.</h2>
-                    <p>This cookie policy is only for illustrative purpose of the product APIM 2.2. The content in the policy is technically correct at the time of the product shipment. The organization which runs this APIM 2.2 instance has full authority and responsibility of the effective Cookie Policy.</p>
+                    <p>This cookie policy is only for illustrative purposes of the API-M 2.2 product. The content in this policy is technically correct at the time of product shipment.
+                      The organization which runs this API-M 2.2 instance has the full authority and responsibility of the effective Cookie Policy.</p>
                 </div>
                 <!-- /Costomizable content -->
                 <div class="clearfix"></div>

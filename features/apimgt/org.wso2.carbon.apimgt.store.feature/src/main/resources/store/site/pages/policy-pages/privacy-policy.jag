@@ -24,7 +24,7 @@
 
     <link rel="icon" href="../../themes/wso2/images/favicon.png" type="image/x-icon"/>
     <link href="../../themes/wso2/libs/bootstrap_3.3.5/css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/custom-common.css" rel="stylesheet">
+    <link href="../../themes/wso2/css/policy-pages-custom.css" rel="stylesheet">
 </head>
 
 <body>
@@ -63,7 +63,7 @@
                     <div class="margin-bottom-double"></div>
                     <h2 id="privacy-policy"><strong>Privacy Policy</strong></h2>
                     <p>This section explains how API-M 2.2 captures your personal information, purpose of capturing, and the retention of your personal information.</p>
-                    <p>Please note that this policy is for reference only, and is applicable for the software as a product. WSO2 Inc., or its developers have no access to the information held within API-M 2.2. Please refer “Disclaimers” for more information.</p>
+                    <p>Please note that this policy is for reference only, and is applicable for the software as a product. WSO2 Inc., or its developers have no access to the information held within API-M 2.2. Please refer &ldquo;Disclaimer&rdquo; for more information.</p>
                     <div class="margin-bottom-double"></div>
                     <h2 id="what-are-the-personal-information">What are the personal information &quest;</h2>
                     <p>API-M 2.2 considers anything related to you as your personal information. This includes, but is not limited to,</p>
