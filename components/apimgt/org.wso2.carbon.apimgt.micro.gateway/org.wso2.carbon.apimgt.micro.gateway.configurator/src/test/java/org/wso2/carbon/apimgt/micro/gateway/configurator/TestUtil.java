@@ -35,7 +35,7 @@ public class TestUtil {
                     "src" + File.separator + "test" + File.separator + "resources" + File.separator + "carbon-home";
             File file = new File(filePath);
             if (file.exists()) {
-                System.setProperty("carbon.home", file.getAbsolutePath());
+                System.setProperty(ConfigConstants.CARBON_HOME, file.getAbsolutePath());
             } else {
                 throw new Exception("Error while setting carbon home.");
             }
