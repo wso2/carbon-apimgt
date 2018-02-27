@@ -3771,6 +3771,44 @@ public class APIProviderImplTest {
         }
     }
 
+    @Test
+    public void testGetSequenceFile() throws Exception {
+        APIIdentifier apiIdentifier = new APIIdentifier("admin", "API1", "1.0");
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, null,null);
+        mockSequences(APIConstants.API_CUSTOM_FAULTSEQUENCE_LOCATION, APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT,
+                apiIdentifier);
+
+        String sequenceContent = apiProvider.getSequenceFile(apiIdentifier, "fault", "custom-fault-seq");
+        Assert.assertNotNull(sequenceContent);
+
+        //org.wso2.carbon.registry.api.RegistryException
+        ServiceReferenceHolder sh = PowerMockito.mock(ServiceReferenceHolder.class);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(sh);
+        RegistryService registryService = Mockito.mock(RegistryService.class);
+        PowerMockito.when(sh.getRegistryService()).thenReturn(registryService);
+        UserRegistry registry = Mockito.mock(UserRegistry.class);
+        PowerMockito.when(registryService.getGovernanceSystemRegistry(Matchers.anyInt())).thenReturn(registry);
+        Mockito.when(registry.resourceExists(APIUtil.getSequencePath(apiIdentifier,
+                APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT))).thenThrow(
+                org.wso2.carbon.registry.api.RegistryException.class);
+        String msg = "Error while processing the " + APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT +" sequences of " +
+                apiIdentifier + " in the registry";
+        try {
+            apiProvider.getSequenceFile(apiIdentifier, "fault", "custom-fault-seq");
+        } catch(APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains(msg));
+        }
+        //Registry Exception
+        PowerMockito.when(registryService.getGovernanceSystemRegistry(Matchers.anyInt())).thenThrow(
+                RegistryException.class);
+        String msg1 =  "Error while retrieving registry for tenant -1";
+        try {
+            apiProvider.getSequenceFile(apiIdentifier, "fault", "custom-fault-seq");
+        } catch(APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains(msg1));
+        }
+    }
+
     private void mockSequences(String seqLoc, String apiSeqLoc, APIIdentifier apiId) throws Exception {
         ServiceReferenceHolder sh = PowerMockito.mock(ServiceReferenceHolder.class);
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(sh);

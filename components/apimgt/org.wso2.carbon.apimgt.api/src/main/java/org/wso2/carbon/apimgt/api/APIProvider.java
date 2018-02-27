@@ -865,4 +865,14 @@ public interface APIProvider extends APIManager {
      */
     List<CertificateMetadataDTO> getCertificates(String userName) throws APIManagementException;
 
+    /**
+     * Method to get the selected mediation sequence as a String.
+     * @param apiIdentifier : The API identifier
+     * @param type : The type of the selected mediation policy (IN, OUT, FAULT)
+     * @param name : Name of the selected mediation policy.
+     * @return : The content of the mediation policy as a string.
+     * @throws APIManagementException
+     */
+    String getSequenceFile(APIIdentifier apiIdentifier, String type, String name) throws APIManagementException;
+
 }

@@ -182,6 +182,9 @@ jagg.module("api", {
     },
     isConfigured:function () {
         return jagg.require(jagg.getModulesDir() + "api/add.jag").isConfigured.apply(this, arguments);
+    },
+    getSequenceFile:function() {
+        return jagg.require(jagg.getModulesDir() + "api/add.jag").getSequenceFile.apply(this, arguments);
     }
 });
 %>

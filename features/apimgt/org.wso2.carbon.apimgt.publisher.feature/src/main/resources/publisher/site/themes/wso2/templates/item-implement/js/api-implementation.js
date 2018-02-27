@@ -675,6 +675,45 @@ function loadFaultSequences() {
               }, "json");
 }
 
+$(".btn-sequenceDownload").click(function (e) {
+    var name;
+    var selectedFlow = $(this).attr("data-id");
+    var url;
+
+    if (selectedFlow === "in") {
+        name = $("#inSequence").val();
+    } else if (selectedFlow === "out") {
+        name = $("#outSequence").val();
+    } else {
+        name = $("#faultSequence").val();
+    }
+
+    if (name === "none") {
+        jagg.message({content: i18n.t("You must select a mediation policy to download"), type: "error"});
+        return;
+    }
+
+    jagg.post("/site/blocks/item-add/ajax/add.jag", {
+        action : "getSequenceFile" , provider:apiProvider, apiName:apiName, apiVersion:apiVersion, seqType: selectedFlow, seqName:name
+    }, function (result) {
+        var resultJson = JSON.parse(result);
+        var fileName;
+        if (!resultJson.error) {
+            var file = new Blob([resultJson.sequence], {type: "text/xml"});
+            url = window.URL.createObjectURL(file);
+            fileName = name + ".xml";
+            var a = document.createElement('a');
+            a.setAttribute('href', url);
+            a.setAttribute('download', fileName);
+            a.setAttribute('target', '_blank');
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        } else {
+            jagg.message({content: i18n.t("Error while retrieving the selected mediation policy"), type: "error"});
+        }
+    });
+});
 
 $("#toggleSequence").change(function(e){
     if($(this).is(":checked")){

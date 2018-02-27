@@ -29,6 +29,7 @@ import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.util.JavaUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -139,7 +140,9 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -5383,5 +5386,181 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             criteria = criteria + "&" + searchQuery;
         }
         return criteria;
+    }
+
+    /**
+     * Method to get the user specified mediation sequence.
+     *
+     * @param apiIdentifier : The identifier of the api.
+     * @param type : Mediation type. {in, out, fault}
+     * @param name : The name of the sequence that needed.
+     * @return : The content of the mediation sequence.
+     */
+    public String getSequenceFile(APIIdentifier apiIdentifier, String type, String name) throws APIManagementException {
+
+        Resource requiredSequence;
+        InputStream sequenceStream;
+        String sequenceText = "";
+
+        try {
+            if (apiIdentifier != null && type != null && name != null) {
+                requiredSequence = getDefaultSequence(type, name);
+                if (log.isDebugEnabled()) {
+                    log.debug("Get the default sequences.");
+                }
+                if (requiredSequence == null) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Get the custom sequences.");
+                    }
+                    requiredSequence = getCustomSequence(apiIdentifier, type, name);
+                }
+
+                //Convert the content stream to a string.
+                if (requiredSequence != null) {
+                    sequenceStream = requiredSequence.getContentStream();
+                    StringWriter stringWriter = new StringWriter();
+                    IOUtils.copy(sequenceStream, stringWriter);
+                    sequenceText = stringWriter.toString();
+                } else {
+                    log.error("No sequence for the name " + name + "is found!");
+                }
+            } else {
+                log.error("Invalid arguments.");
+            }
+        }  catch (APIManagementException e) {
+            log.error(e.getMessage());
+            throw new APIManagementException(e);
+        } catch (RegistryException e) {
+            log.error(e.getMessage());
+            throw new APIManagementException(e);
+        } catch (IOException e) {
+            log.error(e.getMessage());
+            throw new APIManagementException(e);
+        }
+        return sequenceText;
+    }
+
+    /**
+     * Get the mediation sequence which matches the given type and name from the custom sequences.
+     * @param type : The sequence type.
+     * @param name : The name of the sequence.
+     * @return : The mediation sequence which matches the given parameters. Returns null if no matching sequence is
+     * found.
+     */
+    private Resource getDefaultSequence(String type, String name) throws APIManagementException {
+        String defaultSequenceFileLocation = "";
+
+        try {
+            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
+                    .getGovernanceSystemRegistry(tenantId);
+
+            if ("fault".equals(type)) {
+                defaultSequenceFileLocation = APIConstants.API_CUSTOM_FAULTSEQUENCE_LOCATION;
+            } else if ("out".equals(type)) {
+                defaultSequenceFileLocation = APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION;
+            } else {
+                defaultSequenceFileLocation = APIConstants.API_CUSTOM_INSEQUENCE_LOCATION;
+            }
+            if (registry.resourceExists(defaultSequenceFileLocation)) {
+                org.wso2.carbon.registry.api.Collection defaultSeqCollection =
+                        (org.wso2.carbon.registry.api.Collection) registry.get(defaultSequenceFileLocation);
+                if (defaultSeqCollection !=null) {
+                    String[] faultSeqChildPaths = defaultSeqCollection.getChildren();
+                    for (String defaultSeqChildPath : faultSeqChildPaths) {
+                        Resource defaultSequence = registry.get(defaultSeqChildPath);
+                        try {
+                            OMElement seqElment = APIUtil.buildOMElement(defaultSequence.getContentStream());
+                            if (name.equals(seqElment.getAttributeValue(new QName("name")))) {
+                                return defaultSequence;
+                            }
+                        } catch (OMException e) {
+                            log.error("Error occurred when reading the sequence '" + defaultSeqChildPath +
+                                    "' from the registry.", e);
+                        }
+                    }
+                }
+            }
+        }  catch (RegistryException e) {
+            throw new APIManagementException("Error while retrieving registry for tenant " + tenantId, e);
+        } catch (org.wso2.carbon.registry.api.RegistryException e) {
+            throw new APIManagementException("Error while processing the " + defaultSequenceFileLocation +
+                    " in the registry", e);
+        } catch (Exception e) {
+            throw new APIManagementException(e.getMessage(), e);
+        }
+        return null;
+    }
+
+    /**
+     * Get the resource which matches the user selected resource type and the name from the custom uploaded sequences.
+     * @param identifier : The API Identifier.
+     * @param type : The sequence type.
+     * @return : Resource object which matches the parameters. If no resource found, return null.
+     */
+    private Resource getCustomSequence(APIIdentifier identifier, String type, String name) throws
+            APIManagementException {
+        Resource customSequence = null;
+        boolean isTenantFlowStarted = false;
+        try {
+            String tenantDomain = null;
+            if (identifier.getProviderName().contains("-AT-")) {
+                String provider = identifier.getProviderName().replace("-AT-", "@");
+                tenantDomain = MultitenantUtils.getTenantDomain(provider);
+            }
+            PrivilegedCarbonContext.startTenantFlow();
+            isTenantFlowStarted = true;
+            if (!StringUtils.isEmpty(tenantDomain)) {
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            } else {
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain
+                        (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+            }
+            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
+                    .getGovernanceSystemRegistry(tenantId);
+
+            String customSeqFileLocation = "";
+            if ("fault".equals(type)) {
+                customSeqFileLocation = APIUtil.getSequencePath(identifier,
+                        APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
+            } else if ("out".equals(type)) {
+                customSeqFileLocation = APIUtil.getSequencePath(identifier,
+                        APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
+            } else {
+                customSeqFileLocation = APIUtil.getSequencePath(identifier,
+                        APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
+            }
+
+            if(registry.resourceExists(customSeqFileLocation))    {
+                org.wso2.carbon.registry.api.Collection customSeqCollection =
+                        (org.wso2.carbon.registry.api.Collection) registry.get(customSeqFileLocation);
+                if (customSeqCollection != null) {
+                    String[] faultSeqChildPaths = customSeqCollection.getChildren();
+                    for (String customSeqChildPath : faultSeqChildPaths) {
+                        customSequence = registry.get(customSeqChildPath);
+                        try {
+                            OMElement seqElment = APIUtil.buildOMElement(customSequence.getContentStream());
+                            if (name.equals(seqElment.getAttributeValue(new QName("name")))) {
+                                return customSequence;
+                            }
+                        } catch (OMException e) {
+                            log.error("Error occurred when reading the sequence '" + customSeqChildPath
+                                    + "' from the registry.", e);
+                        }
+                    }
+                }
+            }
+        } catch (RegistryException e) {
+            throw new APIManagementException("Error while retrieving registry for tenant " + tenantId, e);
+        } catch (org.wso2.carbon.registry.api.RegistryException e) {
+            throw new APIManagementException("Error while processing the " + type + " sequences of " + identifier +
+                    " in the registry", e);
+        } catch (Exception e) {
+            throw new APIManagementException(e.getMessage(), e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+        return null;
     }
 }
