@@ -177,14 +177,14 @@ public class APISynchronizerTest {
 
     public void generateAccessToken() throws Exception {
         AccessTokenDTO accessTknDTO = Mockito.mock(AccessTokenDTO.class);
-        PowerMockito.when(TokenUtil.generateAccessToken(any(String.class), any(String.class), any(String.class)))
+        PowerMockito.when(TokenUtil.generateAccessToken(any(String.class), any(char[].class), any(String.class)))
                 .thenReturn(accessTknDTO);
         Mockito.doReturn(Constants.ACCESS_TOKEN).when(accessTknDTO).getAccessToken();
     }
 
     public void generateAccessToken_ThrowsException() throws Exception {
         AccessTokenDTO accessTknDTO = Mockito.mock(AccessTokenDTO.class);
-        PowerMockito.when(TokenUtil.generateAccessToken(any(String.class), any(String.class), any(String.class)))
+        PowerMockito.when(TokenUtil.generateAccessToken(any(String.class), any(char[].class), any(String.class)))
                 .thenThrow(OnPremiseGatewayException.class);
         Mockito.doReturn(Constants.ACCESS_TOKEN).when(accessTknDTO).getAccessToken();
     }

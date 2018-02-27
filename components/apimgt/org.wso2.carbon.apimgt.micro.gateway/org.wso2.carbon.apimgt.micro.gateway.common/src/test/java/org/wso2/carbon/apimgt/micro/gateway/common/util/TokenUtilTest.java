@@ -63,7 +63,7 @@ public class TokenUtilTest extends TestBase {
 
     @Test
     public void getBasicAuthHeaderValue() throws Exception {
-        String headerValue = TokenUtil.getBasicAuthHeaderValue(KEY, VALUE);
+        String headerValue = TokenUtil.getBasicAuthHeaderValue(KEY, VALUE.toCharArray());
         Assert.assertNotNull(headerValue);
         String encodedString = headerValue.split("Basic ")[1];
         byte[] decodedBytes = Base64.decodeBase64(encodedString);
@@ -89,7 +89,7 @@ public class TokenUtilTest extends TestBase {
         configMap.put(APIConstants.API_KEY_VALIDATOR_PASSWORD, "Password");
         mockAPIMConfiguration(configMap);
         mockTokenGenCall();
-        AccessTokenDTO tokenDTO = TokenUtil.generateAccessToken("ClientId", "ClientSecret", "Scope");
+        AccessTokenDTO tokenDTO = TokenUtil.generateAccessToken("ClientId", "ClientSecret".toCharArray(), "Scope");
         Assert.assertNotNull(tokenDTO);
     }
 

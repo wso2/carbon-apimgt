@@ -40,9 +40,9 @@ import org.wso2.carbon.apimgt.micro.gateway.common.dto.AccessTokenDTO;
 import org.wso2.carbon.apimgt.micro.gateway.common.dto.OAuthApplicationInfoDTO;
 import org.wso2.carbon.apimgt.micro.gateway.common.util.HttpRequestUtil;
 import org.wso2.carbon.apimgt.micro.gateway.common.util.TokenUtil;
-import org.wso2.carbon.apimgt.micro.gateway.throttling.synchronizer.util.mapping.throttling.AdvancedThrottlePolicyMappingUtil;
 import org.wso2.carbon.apimgt.micro.gateway.throttling.synchronizer.dto.AdvancedThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.micro.gateway.throttling.synchronizer.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.micro.gateway.throttling.synchronizer.util.mapping.throttling.AdvancedThrottlePolicyMappingUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
@@ -81,7 +81,7 @@ public class ThrottlingSynchronizerTest {
                 .getClientSecret();
 
         AccessTokenDTO accessTknDTO = Mockito.mock(AccessTokenDTO.class);
-        PowerMockito.when(TokenUtil.generateAccessToken(any(String.class), any(String.class), any(String.class)))
+        PowerMockito.when(TokenUtil.generateAccessToken(any(String.class), any(char[].class), any(String.class)))
                 .thenReturn(accessTknDTO);
         Mockito.doReturn("ssfhhh-jenfho-wfembj").when(accessTknDTO)
                 .getAccessToken();

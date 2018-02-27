@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.micro.gateway.common.GatewayListenerNotifier;
+import org.wso2.carbon.apimgt.micro.gateway.common.util.MicroGatewayCommonUtil;
 import org.wso2.carbon.apimgt.micro.gateway.tenant.initializer.internal.ServiceDataHolder;
 import org.wso2.carbon.apimgt.micro.gateway.tenant.initializer.utils.TenantInitializationConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -34,7 +35,6 @@ import org.wso2.carbon.tenant.mgt.services.TenantMgtAdminService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.util.Arrays;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -81,7 +81,7 @@ public class ServerStartupListener implements ServerStartupObserver {
         APIManagerConfiguration config = ServiceDataHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
         String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
-        char [] password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD).toCharArray();
+        char[] password = MicroGatewayCommonUtil.getRandomString(20).toCharArray();
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
         if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(username);
@@ -104,8 +104,7 @@ public class ServerStartupListener implements ServerStartupObserver {
                 } finally {
                     PrivilegedCarbonContext.endTenantFlow();
                 }
-                // Overwriting the char array to clean up password
-                Arrays.fill(password, '0');
+                MicroGatewayCommonUtil.cleanPasswordCharArray(password);
                 log.info("Successfully initialized tenant with tenant domain: " + tenantDomain);
             } else {
                 log.info("Tenant with tenant domain " + tenantDomain + " already exists.");

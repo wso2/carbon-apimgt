@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.micro.gateway.usage.publisher.tasks;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,13 +35,14 @@ import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.util.UsagePublisherE
 import org.wso2.carbon.apimgt.micro.gateway.common.config.ConfigManager;
 import org.wso2.carbon.apimgt.micro.gateway.common.exception.OnPremiseGatewayException;
 import org.wso2.carbon.apimgt.micro.gateway.common.util.HttpRequestUtil;
+import org.wso2.carbon.apimgt.micro.gateway.common.util.MicroGatewayCommonUtil;
+import org.wso2.carbon.apimgt.micro.gateway.common.util.TokenUtil;
 import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.internal.ServiceReferenceHolder;
 import org.wso2.carbon.ntask.core.Task;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -147,8 +147,8 @@ public class APIUsageFileUploadTask implements Task {
             String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
             char[] password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD).toCharArray();
 
-            String authHeaderValue = "Basic " + Base64.encodeBase64String(
-                    (username + ":" + String.valueOf(password)).getBytes("UTF-8")).trim();
+            String authHeaderValue = TokenUtil.getBasicAuthHeaderValue(username, password);
+            MicroGatewayCommonUtil.cleanPasswordCharArray(password);
             httppost.setHeader(MicroAPIUsageConstants.AUTHORIZATION_HEADER, authHeaderValue);
             httppost.setHeader(MicroAPIUsageConstants.ACCEPT_HEADER,
                     MicroAPIUsageConstants.ACCEPT_HEADER_APPLICATION_JSON);
@@ -159,7 +159,7 @@ public class APIUsageFileUploadTask implements Task {
             log.info("API Usage file : " + compressedFilePath.getFileName() + " uploaded successfully. " +
                     "Server Response : " + response);
             return true;
-        } catch (OnPremiseGatewayException | UnsupportedEncodingException e) {
+        } catch (OnPremiseGatewayException e) {
             log.error("Error occurred while uploading API Usage file.", e);
         } finally {
             IOUtils.closeQuietly(httpclient);
