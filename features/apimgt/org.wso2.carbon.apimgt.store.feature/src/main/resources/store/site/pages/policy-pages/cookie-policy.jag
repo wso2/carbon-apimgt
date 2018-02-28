@@ -35,7 +35,7 @@
     <div class="container-fluid">
         <div class="pull-left brand float-remove-xs text-center-xs">
             <a href="#">
-                <img class="img-responsive brand-spacer" src="../../themes/wso2/images/wso2.svg" alt="wso2" title="wso2">
+                <img class="img-responsive brand-spacer" src="../../themes/wso2/libs/theme-wso2_1.0/images/logo-inverse.svg" alt="wso2" title="wso2">
                 <h1><em>API Manager</em></h1>
             </a>
         </div>
@@ -49,9 +49,9 @@
     </div>
     <div class="col-xs-12 col-sm-7 col-md-7 col-lg-7">
         <!-- content -->
-        <div class="container col-xs-12 col-sm-12 col-md-12 col-lg-12 col-centered wr-content wr-login col-centered padding-bottom-100">
+        <div class="container col-xs-12 col-sm-12 col-md-12 col-lg-12 col-centered wr-login col-centered padding-bottom-100">
             <div>
-                <h2 class="wr-title uppercase blue-bg padding-double white boarder-bottom-blue margin-none">
+                <h2 class="wr-title uppercase gray-bg padding-double white boarder-bottom-black margin-none">
                     WSO2 API Manager - Cookie Policy
                 </h2>
             </div>
