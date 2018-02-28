@@ -19,7 +19,7 @@
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
         </dependency>
-    </dependencies>
+        </dependencies>
 
     <build>
         <plugins>

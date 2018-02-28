@@ -347,7 +347,7 @@
             <property key="bar" value="BarVal" />
         </task>
     </tasks-->
-    
+
 <tasks>
         <task class="org.wso2.carbon.apimgt.micro.gateway.usage.publisher.tasks.APIUsageFileUploadTask" name="APIUsageFileUploadTask">
             <trigger cron="0 0 0/1 1/1 * ? *"/>

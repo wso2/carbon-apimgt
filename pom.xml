@@ -1124,7 +1124,6 @@
                 <artifactId>reflections</artifactId>
                 <version>${reflection.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-validator</artifactId>
@@ -1314,7 +1313,7 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
-                <version>${slf4j.test.version}</version>
+                <version>${slf4j.api.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -1393,7 +1392,7 @@
         <analytics.shared.version>1.0.1</analytics.shared.version>
         <carbon.analytics.common.version>5.1.7</carbon.analytics.common.version>
         <!-- Carbon kernel version -->
-        <carbon.kernel.version>4.4.22</carbon.kernel.version>
+        <carbon.kernel.version>4.4.23</carbon.kernel.version>
         <carbon.kernel.package.import.version.range>[4.4.0, 5.0.0)</carbon.kernel.package.import.version.range>
 
         <carbon.commons.version>4.6.16</carbon.commons.version>
@@ -1401,14 +1400,14 @@
         <carbon.mediation.version>4.6.58</carbon.mediation.version>
 
         <!-- Carbon Identity versions -->
-        <carbon.identity.version>5.10.122</carbon.identity.version>
+        <carbon.identity.version>5.11.78</carbon.identity.version>
         <carbon.identity-captcha.version>4.5.2</carbon.identity-captcha.version>
-        <carbon.identity-inbound-auth-oauth.version>5.5.180</carbon.identity-inbound-auth-oauth.version>
+        <carbon.identity-inbound-auth-oauth.version>5.6.36</carbon.identity-inbound-auth-oauth.version>
         <carbon.identity-user-ws.version>5.1.8</carbon.identity-user-ws.version>
-        <carbon.identity-inbound-auth-saml2.version>5.2.3</carbon.identity-inbound-auth-saml2.version>
+        <carbon.identity-inbound-auth-saml2.version>5.4.3</carbon.identity-inbound-auth-saml2.version>
         <carbon.identity-inbound-auth-openid.version>5.2.5</carbon.identity-inbound-auth-openid.version>
-        <carbon.identity-local-auth-basicauth.version>5.3.6</carbon.identity-local-auth-basicauth.version>
-        <carbon.identity-outbound-auth-samlsso.version>5.1.8</carbon.identity-outbound-auth-samlsso.version>
+        <carbon.identity-local-auth-basicauth.version>5.3.7</carbon.identity-local-auth-basicauth.version>
+        <carbon.identity-outbound-auth-samlsso.version>5.1.10</carbon.identity-outbound-auth-samlsso.version>
 
         <carbon.governance.version>4.7.18</carbon.governance.version>
         <carbon.deployment.version>4.7.10</carbon.deployment.version>
@@ -1507,7 +1506,8 @@
         <commons-codec.version>1.4.0.wso2v1</commons-codec.version>
         <com.nimbusds.wso2.version>2.26.1.wso2v2</com.nimbusds.wso2.version>
         <org.apache.velocity.version>1.7</org.apache.velocity.version>
-        <org.slf4j.version>1.5.10</org.slf4j.version>
+        <org.slf4j.version>1.7.0</org.slf4j.version>
+        <slf4j.api.version>1.6.1</slf4j.api.version>
         <slf4j.wso2.version>1.5.10.wso2v1</slf4j.wso2.version>
         <jackson.version>1.9.12</jackson.version>
         <spring-web.version>4.3.14.RELEASE</spring-web.version>
