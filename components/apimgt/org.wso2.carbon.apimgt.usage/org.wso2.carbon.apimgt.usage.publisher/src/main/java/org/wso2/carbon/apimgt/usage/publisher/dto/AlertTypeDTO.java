@@ -23,10 +23,9 @@ public class AlertTypeDTO extends PublisherDTO {
 
     private String userName;
     private String alertTypes;
-
     private boolean isSubscriber;
-
     private boolean isPublisher;
+    private boolean isAdmin;
     private String emails;
 
     public String getUserName() {
@@ -69,4 +68,11 @@ public class AlertTypeDTO extends PublisherDTO {
         this.isPublisher = isPublisher;
     }
 
+    public boolean isAdmin() {
+        return isAdmin;
+    }
+
+    public void setAdmin(boolean isAdmin) {
+        this.isAdmin = isAdmin;
+    }
 }
