@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ContainerBasedGatewayException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.template.ContainerBasedGatewayTemplateBuilder;
 import org.wso2.carbon.apimgt.core.util.ContainerBasedGatewayConstants;
 
@@ -53,12 +54,15 @@ public class KubernetesGatewayImpl extends ContainerBasedGatewayGenerator {
     private static final Logger log = LoggerFactory.getLogger(KubernetesGatewayImpl.class);
     private static final String TRY_KUBE_CONFIG = "kubernetes.auth.tryKubeConfig";
     private static final String TRY_SERVICE_ACCOUNT = "kubernetes.auth.tryServiceAccount";
+    private static final String DASH = "-";
+    private static final String FORWARD_SLASH = "/";
     private String cmsType;
     private String masterURL;
     private String namespace;
     private String apiCoreUrl;
     private String brokerHost;
     private String saTokenFileName;
+    private String gatewayHostname;
     private OpenShiftClient client;
 
     /**
@@ -86,15 +90,17 @@ public class KubernetesGatewayImpl extends ContainerBasedGatewayGenerator {
         apiCoreUrl = implParameters.get(ContainerBasedGatewayConstants.API_CORE_URL);
         brokerHost = implParameters.get(ContainerBasedGatewayConstants.BROKER_HOST);
         cmsType = implParameters.get(ContainerBasedGatewayConstants.CMS_TYPE);
-        log.debug("master url: {} saTokenFileName: {} namespace: {} apiCoreUrl: {} brokerHost: {} cmsType: {}",
-                masterURL, saTokenFileName, namespace, apiCoreUrl, brokerHost, cmsType);
+        gatewayHostname = implParameters.get(ContainerBasedGatewayConstants.GATEWAY_HOSTNAME);
+        log.debug("master url: {} saTokenFileName: {} namespace: {} apiCoreUrl: {} brokerHost: {} cmsType: {} " +
+                        "gatewayHostname: {}", masterURL, saTokenFileName, namespace, apiCoreUrl, brokerHost,
+                cmsType, gatewayHostname);
     }
 
     /**
-     * @see ContainerBasedGatewayGenerator#removeContainerBasedGateway(String)
+     * @see ContainerBasedGatewayGenerator#removeContainerBasedGateway(String, API) (String)
      */
     @Override
-    public void removeContainerBasedGateway(String label) throws ContainerBasedGatewayException {
+    public void removeContainerBasedGateway(String label, API api) throws ContainerBasedGatewayException {
 
         try {
             client.services().inNamespace(namespace).withLabel(ContainerBasedGatewayConstants.GATEWAY, label).delete();
@@ -113,10 +119,10 @@ public class KubernetesGatewayImpl extends ContainerBasedGatewayGenerator {
     }
 
     /**
-     * @see ContainerBasedGatewayGenerator#createContainerGateway(String)
+     * @see ContainerBasedGatewayGenerator#createContainerGateway(String, API)
      */
     @Override
-    public void createContainerGateway(String label) throws ContainerBasedGatewayException {
+    public void createContainerGateway(String label, API api) throws ContainerBasedGatewayException {
 
         Map<String, String> templateValues = new HashMap<>();
         String serviceName = label + ContainerBasedGatewayConstants.CMS_SERVICE_SUFFIX;
@@ -132,6 +138,8 @@ public class KubernetesGatewayImpl extends ContainerBasedGatewayGenerator {
                 + ContainerBasedGatewayConstants.CMS_CONTAINER_SUFFIX);
         templateValues.put(ContainerBasedGatewayConstants.API_CORE_URL, apiCoreUrl);
         templateValues.put(ContainerBasedGatewayConstants.BROKER_HOST, brokerHost);
+        templateValues.put(ContainerBasedGatewayConstants.GATEWAY_HOSTNAME, generateSubDomain(api) + "."
+                + gatewayHostname);
 
         ContainerBasedGatewayTemplateBuilder builder = new ContainerBasedGatewayTemplateBuilder();
 
@@ -146,6 +154,32 @@ public class KubernetesGatewayImpl extends ContainerBasedGatewayGenerator {
         // Create gateway ingress resource
         createIngressResource(builder.generateTemplate(templateValues,
                 ContainerBasedGatewayConstants.GATEWAY_INGRESS_TEMPLATE), ingressName);
+    }
+
+    /**
+     * Generate a sub domain for the Ingress based on the API's context
+     *
+     * @param api API
+     * @return subDomain
+     */
+    private String generateSubDomain(API api) {
+
+        String context = api.getContext();
+        String[] contextValues = context.split(FORWARD_SLASH);
+
+        StringBuffer stringBuffer = new StringBuffer();
+        for (String contextValue : contextValues) {
+            if (!contextValue.isEmpty()) {
+                stringBuffer.append(contextValue + DASH);
+            }
+        }
+
+        String subDomain = stringBuffer.toString();
+        if (subDomain.endsWith(DASH)) {
+            subDomain = subDomain.substring(0, subDomain.length() - 1);
+        }
+        log.debug("Sub domain: {} generated for the api: {}", subDomain, api.getName());
+        return subDomain;
     }
 
     /**
@@ -228,7 +262,8 @@ public class KubernetesGatewayImpl extends ContainerBasedGatewayGenerator {
                             serviceTemplate);
                     Service service = (Service) resource;
                     Service result = client.services().inNamespace(namespace).create(service);
-                    log.info("Created Service : " + result.getMetadata().getName() + " in " + cmsType);
+                    log.info("Created Service : " + result.getMetadata().getName() + " in Namespace : "
+                            + result.getMetadata().getNamespace() + " in " + cmsType);
                 } else {
                     log.info("There exist a service with the same name in " + cmsType + ". Service name : "
                             + serviceName);
@@ -264,7 +299,8 @@ public class KubernetesGatewayImpl extends ContainerBasedGatewayGenerator {
                             deploymentTemplate);
                     Deployment deployment = (Deployment) resource;
                     Deployment result = client.extensions().deployments().inNamespace(namespace).create(deployment);
-                    log.info("Created Deployment : " + result.getMetadata().getName() + " in " + cmsType);
+                    log.info("Created Deployment : " + result.getMetadata().getName() + " in Namespace : "
+                            + result.getMetadata().getNamespace() + " in " + cmsType);
                 } else {
                     log.info("There exist a deployment with the same name in " + cmsType + ". Deployment name : "
                             + deploymentName);
@@ -300,7 +336,8 @@ public class KubernetesGatewayImpl extends ContainerBasedGatewayGenerator {
                             ingressTemplate);
                     Ingress ingress = (Ingress) resource;
                     Ingress result = client.extensions().ingresses().inNamespace(namespace).create(ingress);
-                    log.info("Created Ingress : " + result.getMetadata().getName() + " in " + cmsType);
+                    log.info("Created Ingress : " + result.getMetadata().getName() + " in Namespace : "
+                            + result.getMetadata().getNamespace() + " in " + cmsType);
                 } else {
                     log.info("There exist an ingress with the same name in " + cmsType + ". Ingress name : "
                             + ingressName);

@@ -138,8 +138,9 @@ public class CompositeApisApiServiceImpl extends CompositeApisApiService {
                     .contains(existingFingerprint)) {
                 return Response.status(Response.Status.PRECONDITION_FAILED).build();
             }
-            DedicatedGateway dedicatedGateway = DedicatedGatewayMappingUtil.fromDTOtoDedicatedGateway(body, apiId);
-            apiStore.updateDedicatedGateway(dedicatedGateway, apiId);
+            DedicatedGateway dedicatedGateway = DedicatedGatewayMappingUtil.fromDTOtoDedicatedGateway(body, apiId,
+                    username);
+            apiStore.updateDedicatedGateway(dedicatedGateway);
 
             DedicatedGateway updatedDedicatedGateway = apiStore.getDedicatedGateway(apiId);
             String newFingerprint = compositeApisApiIdGetFingerprint(apiId, null, null, request);

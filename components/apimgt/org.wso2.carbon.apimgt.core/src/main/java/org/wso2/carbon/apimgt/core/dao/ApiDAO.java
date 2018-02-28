@@ -883,11 +883,10 @@ public interface ApiDAO {
     /**
      * Update Container based Gateway detail of API
      * @param dedicatedGateway updated DedicatedGateway Object
-     * @param apiId UUID of the API
      * @param labels auto-generated label of the API in a HashSet
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    void updateDedicatedGateway(DedicatedGateway dedicatedGateway, String apiId, List<String> labels)
+    void updateDedicatedGateway(DedicatedGateway dedicatedGateway, List<String> labels)
             throws APIMgtDAOException;
 
     /**

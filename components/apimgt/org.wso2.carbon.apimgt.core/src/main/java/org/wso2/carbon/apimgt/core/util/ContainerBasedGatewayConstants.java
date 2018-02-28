@@ -25,7 +25,7 @@ package org.wso2.carbon.apimgt.core.util;
  */
 public final class ContainerBasedGatewayConstants {
 
-    public static final String PER_API_GATEWAY_PREFIX = "perapigw-";
+    public static final String PRIVATE_JET_API_PREFIX = "private-jet-api-";
     public static final String CMS_SERVICE_SUFFIX = "-service";
     public static final String CMS_DEPLOYMENT_SUFFIX = "-deployment";
     public static final String CMS_INGRESS_SUFFIX = "-ingress";

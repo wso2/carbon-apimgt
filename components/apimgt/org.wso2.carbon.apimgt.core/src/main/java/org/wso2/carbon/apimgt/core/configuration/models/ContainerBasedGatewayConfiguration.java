@@ -48,6 +48,7 @@ public class ContainerBasedGatewayConfiguration {
         implParameters.put(ContainerBasedGatewayConstants.BROKER_HOST, "https://localhost:5672");
         implParameters.put(ContainerBasedGatewayConstants.CMS_TYPE, ContainerBasedGatewayConstants.KUBERNETES);
         implParameters.put(ContainerBasedGatewayConstants.SA_TOKEN_FILE_NAME, "");
+        implParameters.put(ContainerBasedGatewayConstants.GATEWAY_HOSTNAME, "wso2.com");
     }
 
     public boolean isContainerBasedGatewayEnabled() {

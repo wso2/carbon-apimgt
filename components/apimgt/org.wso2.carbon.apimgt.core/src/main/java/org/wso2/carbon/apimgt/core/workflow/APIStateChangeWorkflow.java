@@ -28,13 +28,16 @@ import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.exception.ContainerBasedGatewayException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
+import org.wso2.carbon.apimgt.core.models.DedicatedGateway;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
@@ -63,6 +66,7 @@ public class APIStateChangeWorkflow extends Workflow {
     private String apiVersion;
     private String invoker;
     private ApiDAO apiDAO;
+    private LabelDAO labelDAO;
     private APISubscriptionDAO apiSubscriptionDAO;
     private APILifecycleManager apiLifecycleManager;
     private APIGateway apiGateway;
@@ -70,9 +74,10 @@ public class APIStateChangeWorkflow extends Workflow {
     private APIMConfigurations apimConfigurations;
 
     public APIStateChangeWorkflow(ApiDAO apiDAO, APISubscriptionDAO apiSubscriptionDAO, WorkflowDAO workflowDAO,
-                                  APILifecycleManager apiLifecycleManager, APIGateway apiGateway) {
+                                  APILifecycleManager apiLifecycleManager, APIGateway apiGateway, LabelDAO labelDAO) {
         super(workflowDAO, Category.PUBLISHER, apiGateway);
         this.apiDAO = apiDAO;
+        this.labelDAO = labelDAO;
         this.apiLifecycleManager = apiLifecycleManager;
         this.apiSubscriptionDAO = apiSubscriptionDAO;
         this.apiGateway = apiGateway;
@@ -101,6 +106,7 @@ public class APIStateChangeWorkflow extends Workflow {
     public void setApiName(String apiName) {
         this.apiName = apiName;
     }
+
     public boolean isHasOwnGateway() {
         return hasOwnGateway;
     }
@@ -160,12 +166,27 @@ public class APIStateChangeWorkflow extends Workflow {
                                 targetState.equalsIgnoreCase(APIStatus.PROTOTYPED.getStatus()) ||
                                 targetState.equalsIgnoreCase(APIStatus.DEPRECATED.getStatus()))) {
 
-                    // No need to auto-generate the label again As hasOwnGateway is true.
-                    //create the gateway
-                    apiGateway.createContainerBasedGateway(label);
+                    try {
+                        // No need to auto-generate the label again As hasOwnGateway is true.
+                        //create the gateway
+                        API api = apiDAO.getAPI(getWorkflowReference());
+                        apiGateway.createContainerBasedGateway(label, api);
+                    } catch (ContainerBasedGatewayException e) {
+                        // Revert already added labels
+                        DedicatedGateway dedicatedGateway = new DedicatedGateway();
+                        dedicatedGateway.setEnabled(false);
+                        dedicatedGateway.setApiId(getWorkflowReference());
+                        dedicatedGateway.setUpdatedBy(invoker);
+                        List<String> labels = new ArrayList<>();
+                        labels.add(labelDAO.getLabelIdByNameAndType(APIMgtConstants.DEFAULT_LABEL_NAME, APIMgtConstants
+                                .LABEL_TYPE_GATEWAY));
+                        labels.add(labelDAO.getLabelIdByNameAndType(APIMgtConstants.DEFAULT_LABEL_NAME, APIMgtConstants
+                                .LABEL_TYPE_STORE));
+                        apiDAO.updateDedicatedGateway(dedicatedGateway, labels);
+                        throw new APIManagementException("Error while updating lifecycle state in Private Jet Mode", e,
+                                ExceptionCodes.DEDICATED_CONTAINER_GATEWAY_CREATION_FAILED);
+                    }
 
-                    //If false
-                    // No need to handle as this is not an APi Update.
                 }
             }
 
@@ -185,7 +206,8 @@ public class APIStateChangeWorkflow extends Workflow {
                         targetState.equalsIgnoreCase(APIStatus.RETIRED.getStatus())) {
 
                     // remove gateway
-                    apiGateway.removeContainerBasedGateway(label);
+                    API api = apiDAO.getAPI(getWorkflowReference());
+                    apiGateway.removeContainerBasedGateway(label, api);
                 }
             }
 
@@ -242,7 +264,7 @@ public class APIStateChangeWorkflow extends Workflow {
                     if (oldAPI != null) {
                         API.APIBuilder previousAPI = new API.APIBuilder(oldAPI);
                         previousAPI.setLifecycleStateInfo(apiLifecycleManager.getLifecycleDataForState(
-                                previousAPI.getLifecycleInstanceId(), previousAPI.getLifeCycleStatus())
+                                        previousAPI.getLifecycleInstanceId(), previousAPI.getLifeCycleStatus())
                         );
                         if (APIUtils.validateTargetState(previousAPI.getLifecycleState(),
                                 APIStatus.DEPRECATED.getStatus())) {

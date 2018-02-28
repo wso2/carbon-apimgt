@@ -699,12 +699,15 @@ public class MappingUtil {
      *
      * @param dedicatedGatewayDTO contains data of DedicatedGateway
      * @param apiId UUID of the API
+     * @param username username
      * @return Dedicated Gateway Object
      */
-    public static DedicatedGateway fromDTOtoDedicatedGateway(DedicatedGatewayDTO dedicatedGatewayDTO, String apiId) {
+    public static DedicatedGateway fromDTOtoDedicatedGateway(DedicatedGatewayDTO dedicatedGatewayDTO, String apiId,
+                                                             String username) {
 
         DedicatedGateway dedicatedGateway = new DedicatedGateway();
         dedicatedGateway.setApiId(apiId);
+        dedicatedGateway.setUpdatedBy(username);
         if (dedicatedGatewayDTO.getIsEnabled() != null) {
             dedicatedGateway.setEnabled(dedicatedGatewayDTO.getIsEnabled());
         } else {

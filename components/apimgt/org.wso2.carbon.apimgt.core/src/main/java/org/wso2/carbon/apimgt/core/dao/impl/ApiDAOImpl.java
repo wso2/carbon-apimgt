@@ -1660,16 +1660,17 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
-     * @see ApiDAO#updateDedicatedGateway(DedicatedGateway, String, List)
+     * @see ApiDAO#updateDedicatedGateway(DedicatedGateway, List)
      */
     @Override
-    public void updateDedicatedGateway(DedicatedGateway dedicatedGateway, String apiId, List<String> labels)
+    public void updateDedicatedGateway(DedicatedGateway dedicatedGateway, List<String> labels)
             throws APIMgtDAOException {
 
         // labels will come in 2 ways.
         // 1. auto-generated label - Update from dedicateGateway false to true
         // 2. default label - Update from dedicatedGateway true to false
 
+        String apiId = dedicatedGateway.getApiId();
         final String query = "UPDATE AM_API SET HAS_OWN_GATEWAY = ?, LAST_UPDATED_TIME = ?, UPDATED_BY = ? " +
                 "WHERE UUID = ?";
         try (Connection connection = DAOUtil.getConnection();
@@ -1681,7 +1682,7 @@ public class ApiDAOImpl implements ApiDAO {
                 statement.setString(3, dedicatedGateway.getUpdatedBy());
                 statement.setString(4, apiId);
 
-                // if the labels are null or perAPI-GW
+                // if the labels are not null or not empty
                 if (labels != null && !labels.isEmpty()) {
                     deleteLabelsMapping(connection, apiId);
                     addLabelMapping(connection, apiId, labels);

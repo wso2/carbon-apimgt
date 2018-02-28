@@ -174,8 +174,8 @@ public class ApisApiServiceImpl extends ApisApiService {
                     .contains(existingFingerprint)) {
                 return Response.status(Response.Status.PRECONDITION_FAILED).build();
             }
-            DedicatedGateway dedicatedGateway = MappingUtil.fromDTOtoDedicatedGateway(body, apiId);
-            apiPublisher.updateDedicatedGateway(dedicatedGateway, apiId);
+            DedicatedGateway dedicatedGateway = MappingUtil.fromDTOtoDedicatedGateway(body, apiId, username);
+            apiPublisher.updateDedicatedGateway(dedicatedGateway);
 
             DedicatedGateway updatedDedicatedGateway = apiPublisher.getDedicatedGateway(apiId);
             String newFingerprint = apisApiIdGetFingerprint(apiId, null, null, request);

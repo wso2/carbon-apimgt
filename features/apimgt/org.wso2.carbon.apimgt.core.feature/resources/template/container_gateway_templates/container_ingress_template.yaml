@@ -26,9 +26,9 @@ metadata:
 spec:
   tls:
   - hosts:
-    - ${gatewayLabel}
+    - ${gatewayHostname}
   rules:
-  - host: ${gatewayLabel}
+  - host: ${gatewayHostname}
     http:
       paths:
       - path: /

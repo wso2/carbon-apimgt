@@ -396,7 +396,7 @@ public class CompositeApisApiServiceImplTestCase {
         PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
         Mockito.when(apiStore.isCompositeAPIExist(apiID)).thenReturn(Boolean.TRUE);
-        Mockito.doNothing().when(apiStore).updateDedicatedGateway(Mockito.any(), Mockito.anyString());
+        Mockito.doNothing().when(apiStore).updateDedicatedGateway(Mockito.any());
         DedicatedGateway dedicatedGateway = new DedicatedGateway();
         dedicatedGateway.setEnabled(true);
         Mockito.when(apiStore.getDedicatedGateway(apiID)).thenReturn(dedicatedGateway);
@@ -420,7 +420,7 @@ public class CompositeApisApiServiceImplTestCase {
         Mockito.when(apiStore.isCompositeAPIExist(apiID)).thenReturn(Boolean.TRUE);
         Mockito.doThrow(new APIManagementException("Error while creating dedicated container based gateway",
                 ExceptionCodes.DEDICATED_CONTAINER_GATEWAY_CREATION_FAILED)).when(apiStore)
-                .updateDedicatedGateway(Mockito.any(), Mockito.anyString());
+                .updateDedicatedGateway(Mockito.any());
         Response response = compositeApisApiService.compositeApisApiIdDedicatedGatewayPut(apiID,
                 new DedicatedGatewayDTO(), null, null, request);
         Assert.assertEquals(ExceptionCodes.DEDICATED_CONTAINER_GATEWAY_CREATION_FAILED.getHttpStatusCode(),

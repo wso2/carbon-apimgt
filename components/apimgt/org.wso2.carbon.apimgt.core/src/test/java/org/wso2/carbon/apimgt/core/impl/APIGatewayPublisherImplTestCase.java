@@ -49,8 +49,9 @@ public class APIGatewayPublisherImplTestCase {
         ContainerBasedGatewayGenerator containerBasedGatewayGenerator = Mockito
                 .mock(ContainerBasedGatewayGenerator.class);
         Mockito.when(apiManagerFactory.getContainerBasedGatewayGenerator()).thenReturn(containerBasedGatewayGenerator);
-        apiGatewayPublisher.createContainerBasedGateway("label");
-        Mockito.verify(containerBasedGatewayGenerator, Mockito.times(1)).createContainerGateway("label");
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        apiGatewayPublisher.createContainerBasedGateway("label", api);
+        Mockito.verify(containerBasedGatewayGenerator, Mockito.times(1)).createContainerGateway("label", api);
     }
 
     @Test
@@ -70,7 +71,7 @@ public class APIGatewayPublisherImplTestCase {
         API api = SampleTestObjectCreator.createDefaultAPI().lifeCycleStatus(APIStatus.PUBLISHED.getStatus())
                 .hasOwnGateway(true).labels(labels).build();
         apiGatewayPublisher.deleteAPI(api);
-        Mockito.verify(containerBasedGatewayGenerator, Mockito.times(1)).removeContainerBasedGateway("label");
+        Mockito.verify(containerBasedGatewayGenerator, Mockito.times(1)).removeContainerBasedGateway("label", api);
     }
 
     @Test
@@ -90,7 +91,7 @@ public class APIGatewayPublisherImplTestCase {
         API api = SampleTestObjectCreator.createDefaultAPI().lifeCycleStatus(APIStatus.PUBLISHED.getStatus())
                 .hasOwnGateway(false).labels(labels).build();
         apiGatewayPublisher.deleteAPI(api);
-        Mockito.verify(containerBasedGatewayGenerator, Mockito.times(0)).removeContainerBasedGateway("label");
+        Mockito.verify(containerBasedGatewayGenerator, Mockito.times(0)).removeContainerBasedGateway("label", api);
     }
 
     @Test
@@ -108,7 +109,7 @@ public class APIGatewayPublisherImplTestCase {
         API api = SampleTestObjectCreator.createDefaultAPI().lifeCycleStatus(APIStatus.PUBLISHED.getStatus())
                 .hasOwnGateway(true).labels(null).build();
         apiGatewayPublisher.deleteAPI(api);
-        Mockito.verify(containerBasedGatewayGenerator, Mockito.times(0)).removeContainerBasedGateway("label");
+        Mockito.verify(containerBasedGatewayGenerator, Mockito.times(0)).removeContainerBasedGateway("label", api);
     }
 
     @Test
@@ -127,7 +128,7 @@ public class APIGatewayPublisherImplTestCase {
         API api = SampleTestObjectCreator.createDefaultAPI().lifeCycleStatus(APIStatus.PUBLISHED.getStatus())
                 .hasOwnGateway(true).labels(labels).build();
         apiGatewayPublisher.deleteAPI(api);
-        Mockito.verify(containerBasedGatewayGenerator, Mockito.times(0)).removeContainerBasedGateway("label");
+        Mockito.verify(containerBasedGatewayGenerator, Mockito.times(0)).removeContainerBasedGateway("label", api);
     }
 
     @Test(expected = GatewayException.class)
