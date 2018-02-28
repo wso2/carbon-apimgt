@@ -256,6 +256,7 @@ public final class APIConstants {
     public static final String API_OVERVIEW_OUTSEQUENCE = "overview_outSequence";
     public static final String API_OVERVIEW_FAULTSEQUENCE = "overview_faultSequence";
     public static final String API_OVERVIEW_AUTHORIZATION_HEADER = "overview_authorizationHeader";
+    public static final String AUTHORIZATION_HEADER_BASIC = "Basic";
 
     public static final String API_OVERVIEW_RESPONSE_CACHING = "overview_responseCaching";
     public static final String API_OVERVIEW_CACHE_TIMEOUT = "overview_cacheTimeout";
@@ -497,6 +498,7 @@ public final class APIConstants {
 
     public static final String TOKEN_URL = "TokenURL";
     public static final String REVOKE_URL = "RevokeURL";
+    public static final String SERVICES_URL_RELATIVE_PATH = "services";
 
     public static final String PORT_OFFSET_SYSTEM_VAR = "portOffset";
     public static final String PORT_OFFSET_CONFIG = "Ports.Offset";
