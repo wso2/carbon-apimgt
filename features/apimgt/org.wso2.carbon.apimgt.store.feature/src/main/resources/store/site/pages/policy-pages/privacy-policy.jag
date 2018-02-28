@@ -181,7 +181,7 @@
     </div>
 </footer>
 
-<script src="../../themes/wso2/libs/jquery_1.11.0/jquery-1.11.0.js"></script>
+<script src="../../themes/wso2/libs/jquery_1.11.0/jquery-1.11.3.min.js"></script>
 <script src="../../themes/wso2/libs/bootstrap_3.3.5/js/bootstrap.min.js"></script>
 <script type="text/javascript">
     var ToC = "<nav role='navigation' class='table-of-contents'>" + "<h4>On this page:</h4>" + "<ul>";

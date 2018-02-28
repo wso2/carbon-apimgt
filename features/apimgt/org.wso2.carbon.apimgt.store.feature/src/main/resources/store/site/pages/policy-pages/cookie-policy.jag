@@ -81,7 +81,7 @@
                         <li>Providing a  better user experience.</li>
                     </ol>
                     <div class="margin-bottom"></div>
-                    <h3 id="apim-2.2-uses-cookies-for-the-following-purposes">API-M 2.2 uses cookies for the following purposes.</h3>
+                    <h3 id="apim-2.2-uses-cookies-for-the-following-purposes">API-M 2.2 uses cookies for the following purposes</h3>
                     <h4>Preferences</h4>
                     <p>API-M 2.2 uses cookies to remember your settings and preferences and to auto-fill the fields to make your interactions with the site easier.</p>
                     <ul>
@@ -188,7 +188,7 @@
                         </tbody>
                     </table>
                     <div class="margin-bottom-double"></div>
-                    <h2 id="disclaimer">Disclaimer.</h2>
+                    <h2 id="disclaimer">Disclaimer</h2>
                     <p>This cookie policy is only for illustrative purposes of the API-M 2.2 product. The content in this policy is technically correct at the time of product shipment.
                       The organization which runs this API-M 2.2 instance has the full authority and responsibility of the effective Cookie Policy.</p>
                 </div>
@@ -213,7 +213,7 @@
     </div>
 </footer>
 
-<script src="../../themes/wso2/libs/jquery_1.11.0/jquery-1.11.0.js"></script>
+<script src="../../themes/wso2/libs/jquery_1.11.0/jquery-1.11.3.min.js"></script>
 <script src="../../themes/wso2/libs/bootstrap_3.3.5/js/bootstrap.min.js"></script>
 <script type="text/javascript">
     var ToC = "<nav role='navigation' class='table-of-contents'>" + "<h4>On this page:</h4>" + "<ul>";
