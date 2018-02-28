@@ -29,8 +29,17 @@ import Typography from 'material-ui/Typography';
 import Grid from 'material-ui/Grid'
 import { FormGroup, FormControlLabel } from 'material-ui/Form';
 import Checkbox from 'material-ui/Checkbox';
+import LifeCycleImage from './LifeCycleImage';
+import PropTypes from 'prop-types';
+import { withStyles } from 'material-ui/styles';
 
-export default class LifeCycleUpdate extends Component {
+const styles = theme => ({
+    buttonsWrapper: {
+        marginTop: 40
+    },
+});
+
+ class LifeCycleUpdate extends Component {
     constructor() {
         super();
         this.updateLifeCycleState = this.updateLifeCycleState.bind(this);
@@ -160,12 +169,13 @@ export default class LifeCycleUpdate extends Component {
     render() {
         const {api,lcState} = this.props;
         const is_workflow_pending = api.workflowStatus.toLowerCase() === "pending";
+        const { classes } = this.props;
         return (
                 <Grid container>
                 {
                     is_workflow_pending ?
                         (
-                            <Grid item xs={3}>
+                            <Grid item xs={12}>
                                     <Typography type="headline" component="h2">
                                         Pending lifecycle state change.
                                     </Typography>
@@ -176,21 +186,13 @@ export default class LifeCycleUpdate extends Component {
 
                         ) :
                         (
-                            <Grid item xs={6}>
-                                <div className="lifecycle-box">
-                                    <Typography type="headline" component="h2" className="lifecycle-box-state">
-                                        {api.lifeCycleStatus}
-                                    </Typography>
-                                    <Typography type="body1" className="lifecycle-box-state-tip">
-                                        Current State
-                                    </Typography>
-                                </div>
-
+                            <Grid item xs={12}>
+                                <LifeCycleImage  lifeCycleStatus={api.lifeCycleStatus} />
                             </Grid>
 
                         )
                 }
-                    <Grid item xs={9}>
+                    <Grid item xs={12}>
                 {
                     !is_workflow_pending &&
                     <FormGroup row>
@@ -210,7 +212,7 @@ export default class LifeCycleUpdate extends Component {
                 }
                         <ScopeValidation resourcePath={resourcePath.API_CHANGE_LC} resourceMethod={resourceMethod.POST}>
                         <ApiPermissionValidation userPermissions={api.userPermissionsForApi}>
-                            <div>
+                            <div className={classes.buttonsWrapper}>
                                 {
                                     is_workflow_pending ?
                                         (
@@ -237,3 +239,9 @@ export default class LifeCycleUpdate extends Component {
         );
     }
 }
+
+LifeCycleUpdate.propTypes = {
+    classes: PropTypes.object.isRequired,
+};
+
+export default withStyles(styles)(LifeCycleUpdate);
