@@ -49,6 +49,10 @@ import org.wso2.carbon.apimgt.rest.api.authenticator.utils.bean.AuthResponseBean
 import org.wso2.carbon.apimgt.rest.api.common.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -230,6 +234,11 @@ public class AuthenticatorService {
             log.error(errorMsg, e, ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);
             throw new APIManagementException(errorMsg, e, ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);
         }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Received access token for " + appName + " application.");
+        }
+
         return accessTokenInfo;
     }
 
@@ -275,13 +284,15 @@ public class AuthenticatorService {
     }
 
     /**
-     * @param cookies
-     * @param authResponseBean
-     * @param accessToken
-     * @param contextPaths
+     * Setup cookies and authentication response with dividing access token
+     *
+     * @param cookies          A map of cookies to be populated
+     * @param authResponseBean Authentication response bean to be populated
+     * @param accessToken      Access Token
+     * @param contextPaths     Map of context paths
      */
     public void setupAccessTokenParts(Map<String, NewCookie> cookies, AuthResponseBean authResponseBean,
-                                      String accessToken, Map<String, String> contextPaths) {
+                                      String accessToken, Map<String, String> contextPaths, boolean isSsoEnabled) {
         String accessTokenPart1 = accessToken.substring(0, accessToken.length() / 2);
         String accessTokenPart2 = accessToken.substring(accessToken.length() / 2);
 
@@ -300,8 +311,23 @@ public class AuthenticatorService {
 
         cookies.put(AuthenticatorConstants.Context.REST_API_CONTEXT, restAPIContextCookie);
         cookies.put(AuthenticatorConstants.Context.LOGOUT_CONTEXT, logoutContextCookie);
+
+        if (isSsoEnabled) {
+            String authUser = authResponseBean.getAuthUser();
+            NewCookie authUserCookie = AuthUtil.cookieBuilder(AuthenticatorConstants.AUTH_USER, authUser,
+                    contextPaths.get(AuthenticatorConstants.Context.APP_CONTEXT), true, false,
+                    "", environmentName);
+            cookies.put(AuthenticatorConstants.AUTH_USER, authUserCookie);
+        }
     }
 
+    /**
+     * Setup cookies and authentication response with dividing refresh token
+     *
+     * @param cookies      A map of cookies to be populated
+     * @param refreshToken Refresh Token
+     * @param contextPaths Map of context paths
+     */
     public void setupRefreshTokenParts(Map<String, NewCookie> cookies, String refreshToken,
                                        Map<String, String> contextPaths) {
         String refreshTokenPart1 = refreshToken.substring(0, refreshToken.length() / 2);
@@ -316,13 +342,57 @@ public class AuthenticatorService {
         String environmentName = apimConfigurationService.getEnvironmentConfigurations().getEnvironmentLabel();
         NewCookie refreshTokenCookie = AuthUtil.cookieBuilder(AuthenticatorConstants.REFRESH_TOKEN_1, refreshTokenPart1,
                 contextPaths.get(AuthenticatorConstants.Context.APP_CONTEXT), true, false,
-                        "", environmentName);
+                "", environmentName);
         NewCookie refreshTokenHttpOnlyCookie = AuthUtil.cookieBuilder(AuthenticatorConstants.REFRESH_TOKEN_2,
                 refreshTokenPart2, contextPaths.get(AuthenticatorConstants.Context.LOGIN_CONTEXT), true, true,
-                        "", environmentName);
+                "", environmentName);
 
         cookies.put(AuthenticatorConstants.Context.APP_CONTEXT, refreshTokenCookie);
         cookies.put(AuthenticatorConstants.Context.LOGIN_CONTEXT, refreshTokenHttpOnlyCookie);
+    }
+
+    /**
+     * Get the URI for the redirection to the UI Service
+     *
+     * @param appName Name of the Application
+     * @param authResponseBean Authentication response bean
+     * @return URI of the UI Service
+     */
+    public URI getUIServiceRedirectionURI(String appName, AuthResponseBean authResponseBean) throws URISyntaxException, UnsupportedEncodingException {
+        String uiServiceUrl;
+        //The first host in the list "allowedHosts" is the host of UI-Service
+        String uiServiceHost = apimConfigurationService.getEnvironmentConfigurations()
+                .getAllowedHosts().get(0);
+
+        if (StringUtils.isEmpty(uiServiceHost)) {
+            if (log.isDebugEnabled()) {
+                log.debug("The first string in the list " +
+                        "'wso2.carbon.apimgt:environmentConfigurations:allowedHosts' configuration is empty.");
+                log.debug("Read UI Service from 'wso2.carbon.apimgt.application:apimBaseUrl' configuration.");
+            }
+            uiServiceUrl = ServiceReferenceHolder.getInstance().getAPIMAppConfiguration().getApimBaseUrl();
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("The first string in the list " +
+                        "'wso2.carbon.apimgt:environmentConfigurations:allowedHosts' configuration" +
+                        " is not empty. value: " + uiServiceHost);
+            }
+            uiServiceUrl = AuthenticatorConstants.HTTPS_PROTOCOL + AuthenticatorConstants.PROTOCOL_SEPERATOR +
+                    uiServiceHost + AuthenticatorConstants.URL_PATH_SEPERATOR;
+            log.info("UI Service: {}", uiServiceUrl);
+        }
+
+        if (authResponseBean == null) {
+            return new URI(uiServiceUrl + appName);
+        }
+
+        String authResponseBeanData = authResponseBean.getAuthUser() + "&id_token="
+                + authResponseBean.getIdToken() + "&partial_token=" + authResponseBean.getPartialToken()
+                + "&scopes=" + authResponseBean.getScopes() + "&validity_period="
+                + authResponseBean.getValidityPeriod();
+        return new URI(uiServiceUrl + appName + "/login?user_name="
+                + URLEncoder.encode(authResponseBeanData, "UTF-8")
+                .replaceAll("\\+", "%20").replaceAll("%26", "&").replaceAll("%3D", "="));
     }
 
     /**
