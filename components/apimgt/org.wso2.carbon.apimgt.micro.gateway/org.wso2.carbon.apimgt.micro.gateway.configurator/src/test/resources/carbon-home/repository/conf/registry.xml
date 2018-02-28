@@ -12,8 +12,7 @@
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
-  -->
-<wso2registry>
+  --><wso2registry>
     <!-- 
     For details on configuring different config & governance registries see;
     http://wso2.org/library/tutorials/2010/04/sharing-registry-space-across-multiple-product-instances
@@ -348,10 +347,6 @@
             <property key="bar" value="BarVal" />
         </task>
     </tasks-->
-
-
-
-
 
 <tasks>
         <task class="org.wso2.carbon.apimgt.micro.gateway.usage.publisher.tasks.APIUsageFileUploadTask" name="APIUsageFileUploadTask">

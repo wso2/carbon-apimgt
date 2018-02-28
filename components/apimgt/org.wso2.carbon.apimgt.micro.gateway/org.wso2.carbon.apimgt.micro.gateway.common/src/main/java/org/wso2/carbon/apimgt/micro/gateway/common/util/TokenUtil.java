@@ -108,10 +108,33 @@ public class TokenUtil {
     public static OAuthApplicationInfoDTO registerClient(OAuthApplicationRequestDTO applicationRequestDTO,
                                                          String username, char[] password)
             throws OnPremiseGatewayException {
+
+        String restApiVersion = ConfigManager.getConfigManager()
+                .getProperty(OnPremiseGatewayConstants.API_VERSION_PROPERTY);
+        if (restApiVersion == null) {
+            restApiVersion = OnPremiseGatewayConstants.API_DEFAULT_VERSION;
+            if (log.isDebugEnabled()) {
+                log.debug("Using default API version: " + restApiVersion);
+            }
+        } else if (OnPremiseGatewayConstants.CLOUD_API.equals(restApiVersion)) {
+            restApiVersion = OnPremiseGatewayConstants.EMPTY_STRING;
+            if (log.isDebugEnabled()) {
+                log.debug("Cloud API doesn't have an version. Therefore, removing the version");
+            }
+        }
+        String apiPublisherUrl = ConfigManager.getConfigManager()
+                .getProperty(OnPremiseGatewayConstants.API_PUBLISHER_URL_PROPERTY_KEY);
+        if (apiPublisherUrl == null) {
+            apiPublisherUrl = OnPremiseGatewayConstants.DEFAULT_API_PUBLISHER_URL;
+            if (log.isDebugEnabled()) {
+                log.debug("Using default API publisher URL: " + apiPublisherUrl);
+            }
+        }
+        String clientRegistrationUrl =
+                apiPublisherUrl + OnPremiseGatewayConstants.DYNAMIC_CLIENT_REGISTRATION_URL_SUFFIX
+                        .replace(OnPremiseGatewayConstants.API_VERSION_PARAM, restApiVersion).replace("//",
+                                OnPremiseGatewayConstants.URL_PATH_SEPARATOR); //remove "//" created in cloud case.
         CloseableHttpClient httpClient = HttpClients.createDefault();
-        String clientRegistrationUrl = ConfigManager.getConfigManager()
-                .getProperty(OnPremiseGatewayConstants.API_PUBLISHER_URL_PROPERTY_KEY) +
-                OnPremiseGatewayConstants.DYNAMIC_CLIENT_REGISTRATION_URL_SUFFIX;
         String authHeader = getBasicAuthHeaderValue(username, password);
         HttpPost httpPost = new HttpPost(clientRegistrationUrl);
         httpPost.addHeader(OnPremiseGatewayConstants.AUTHORIZATION_HEADER, authHeader);

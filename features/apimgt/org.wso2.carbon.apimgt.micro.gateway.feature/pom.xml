@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.2.118-SNAPSHOT</version>
+        <version>6.2.119-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -54,6 +54,10 @@
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.micro.gateway.throttling.synchronizer</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.micro.gateway.status.checker</artifactId>
         </dependency>
     </dependencies>
     <build>
@@ -110,6 +114,7 @@
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.micro.gateway.api.synchronizer:${carbon.apimgt.version}</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.micro.gateway.tenant.initializer:${carbon.apimgt.version}</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.micro.gateway.throttling.synchronizer:${carbon.apimgt.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.micro.gateway.status.checker:${carbon.apimgt.version}</bundleDef>
                             </bundles>
                         </configuration>
                     </execution>
