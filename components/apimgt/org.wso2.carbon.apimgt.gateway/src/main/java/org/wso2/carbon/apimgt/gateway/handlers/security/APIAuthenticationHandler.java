@@ -167,15 +167,22 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 endTime = System.nanoTime();
                 difference = (endTime - startTime) / 1000000;
                 String messageDetails = logMessageDetails(messageContext);
-                log.debug("Call to API gateway : " + messageDetails + ", elapsedTimeInMilliseconds=" +
+                log.debug("Call to Key Manager : " + messageDetails + ", elapsedTimeInMilliseconds=" +
                         difference / 1000000);
             }
-            // We do not need to log authentication failures as errors since these are not product errors.
-            log.warn("API authentication failure due to " +
-                    APISecurityConstants.getAuthenticationFailureMessage(e.getErrorCode()));
 
-            if (log.isDebugEnabled()) {
-                log.debug("API authentication failed with error " + e.getErrorCode(), e);
+            String errorMessage = APISecurityConstants.getAuthenticationFailureMessage(e.getErrorCode());
+
+            if (APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE.equals(errorMessage)) {
+                log.error("API authentication failure due to "
+                        + APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
+            } else {
+                // We do not need to log known authentication failures as errors since these are not product errors.
+                log.warn("API authentication failure due to " + errorMessage);
+
+                if (log.isDebugEnabled()) {
+                    log.debug("API authentication failed with error " + e.getErrorCode(), e);
+                }
             }
 
             handleAuthFailure(messageContext, e);

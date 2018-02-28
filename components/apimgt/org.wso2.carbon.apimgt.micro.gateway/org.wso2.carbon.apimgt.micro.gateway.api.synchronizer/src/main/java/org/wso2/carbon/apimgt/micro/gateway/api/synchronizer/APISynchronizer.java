@@ -52,6 +52,7 @@ import org.wso2.carbon.apimgt.micro.gateway.common.dto.AccessTokenDTO;
 import org.wso2.carbon.apimgt.micro.gateway.common.dto.OAuthApplicationInfoDTO;
 import org.wso2.carbon.apimgt.micro.gateway.common.exception.OnPremiseGatewayException;
 import org.wso2.carbon.apimgt.micro.gateway.common.util.HttpRequestUtil;
+import org.wso2.carbon.apimgt.micro.gateway.common.util.MicroGatewayCommonUtil;
 import org.wso2.carbon.apimgt.micro.gateway.common.util.OnPremiseGatewayConstants;
 import org.wso2.carbon.apimgt.micro.gateway.common.util.TokenUtil;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -182,7 +183,7 @@ public class APISynchronizer implements OnPremiseGatewayInitListener {
             }
 
             return TokenUtil.generateAccessToken(oAuthDto.getClientId(),
-                    oAuthDto.getClientSecret(), combinedScopes);
+                    oAuthDto.getClientSecret().toCharArray(), combinedScopes);
         } catch (OnPremiseGatewayException e) {
             throw new APISynchronizationException("Failed to generate an access token.", e);
         }
@@ -322,7 +323,8 @@ public class APISynchronizer implements OnPremiseGatewayInitListener {
             CloseableHttpClient httpClient = HttpClients.createDefault();
 
             HttpGet httpGet = new HttpGet(updatedAPIViewUrl);
-            String authHeaderValue = TokenUtil.getBasicAuthHeaderValue(username, String.valueOf(password));
+            String authHeaderValue = TokenUtil.getBasicAuthHeaderValue(username, password);
+            MicroGatewayCommonUtil.cleanPasswordCharArray(password);
             httpGet.addHeader(OnPremiseGatewayConstants.AUTHORIZATION_HEADER, authHeaderValue);
             String response = HttpRequestUtil.executeHTTPMethodWithRetry(httpClient, httpGet,
                     OnPremiseGatewayConstants.DEFAULT_RETRY_COUNT);
