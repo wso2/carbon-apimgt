@@ -18,18 +18,30 @@
 
 package org.wso2.carbon.apimgt.micro.gateway.configurator;
 
+import org.apache.xalan.transformer.TransformerIdentityImpl;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.micro.gateway.common.util.OnPremiseGatewayConstants;
 
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.Map;
 import java.util.Properties;
 
+import static org.mockito.Matchers.any;
+
 /**
  * Configurator TestCase
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({TransformerIdentityImpl.class, TransformerFactory.class})
 public class ConfiguratorTest {
 
     private Properties gatewayProperties;
@@ -88,6 +100,12 @@ public class ConfiguratorTest {
         String carbonHome = System.getProperty(ConfigConstants.CARBON_HOME);
         setAPIMConfigurations();
         RegistryXmlConfigurator registryXmlConfigurator = new RegistryXmlConfigurator();
+        TransformerIdentityImpl transformerIdentity = PowerMockito.mock(TransformerIdentityImpl.class);
+        TransformerFactory transformerFactory = PowerMockito.mock(TransformerFactory.class);
+        PowerMockito.mockStatic(TransformerFactory.class);
+        PowerMockito.when(TransformerFactory.newInstance()).thenReturn(transformerFactory);
+        PowerMockito.when(transformerFactory.newTransformer()).thenReturn(transformerIdentity);
+        PowerMockito.doNothing().when(transformerIdentity).transform(any(DOMSource.class), any(StreamResult.class));
         registryXmlConfigurator.configure(carbonConfigDirPath, gatewayProperties);
         Log4JConfigurator log4JConfigurator = new Log4JConfigurator();
         log4JConfigurator.configure(carbonConfigDirPath);
