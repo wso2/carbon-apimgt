@@ -60,7 +60,7 @@ class Message extends React.Component {
                         <IconButton
                             key="close"
                             aria-label="Close"
-                            color="inherit"
+                            color="default"
                             className={classes.close}
                             onClick={handleClose}
                         >

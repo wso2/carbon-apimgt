@@ -20,18 +20,78 @@
 import React, {Component} from 'react'
 import Table, {TableBody, TableCell, TableRow} from 'material-ui/Table';
 import Radio, {RadioGroup} from 'material-ui/Radio';
-import Switch from 'material-ui/Switch';
 import Button from 'material-ui/Button';
-import Paper from 'material-ui/Paper';
-import Grid from 'material-ui/Grid';
 import Typography from 'material-ui/Typography';
 import NotificationSystem from 'react-notification-system';
-import {FormControlLabel} from 'material-ui/Form';
 import TextField from 'material-ui/TextField';
+import {Link} from 'react-router-dom'
+import PropTypes from 'prop-types';
+import { withStyles } from 'material-ui/styles';
+import { FormGroup, FormControlLabel, FormControl, FormHelperText, FormLabel } from 'material-ui/Form';
+import Switch from 'material-ui/Switch';
+import Grid from 'material-ui/Grid';
+import ArrowBack from 'material-ui-icons/ArrowBack';
+
 
 import API from '../../../data/api'
 
-export default class EndpointCreate extends Component {
+const styles = theme => ({
+    titleBar: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        borderBottomWidth: '1px',
+        borderBottomStyle: 'solid',
+        borderColor: theme.palette.text.secondary,
+        marginBottom: 20,
+    },
+    buttonLeft: {
+        alignSelf: 'flex-start',
+        display: 'flex',
+    },
+    buttonRight: {
+        alignSelf: 'flex-end',
+        display: 'flex',
+    },
+    title: {
+        display: 'inline-block',
+        marginRight: 50
+    },
+    buttonBack: {
+        marginRight: 20,
+    },
+    filterWrapper: {
+        display: 'flex',
+    },
+    formControl: {
+        marginTop: 21,
+    },
+    textField: {
+        marginLeft: 20,
+    },
+    group: {
+        display: 'flex'
+    },
+    legend: {
+        marginBottom: 0,
+        borderBottomStyle: 'none',
+        marginTop: 20,
+        fontSize: 12,
+    },
+    inputText: {
+        marginTop: 20,
+    },
+    secured: {
+        marginTop: 40,
+    },
+    button: {
+        marginRight: 20,
+    },
+    buttonsWrapper: {
+        marginTop: 40
+    }
+});
+
+class EndpointCreate extends Component {
 
     constructor(props) {
         super(props);
@@ -97,102 +157,151 @@ export default class EndpointCreate extends Component {
     }
 
     render() {
+        const { classes } = this.props;
         return (
-            <Grid container justify="center" spacing={0}>
-                <Grid item xs={10}>
-                    <Paper>
-                        <Grid item>
-                            <Typography type="headline" component="h4">
+            <Grid container spacing={0} justify="left">
+                <Grid item xs={12} className={classes.titleBar}>
+                    <div className={classes.buttonLeft}>
+                        <Link to={"/endpoints/"}>
+                            <Button  variant="raised" size="small" className={classes.buttonBack}
+                                     color="default">
+                                <ArrowBack />
+                            </Button>
+                        </Link>
+                        <div className={classes.title}>
+                            <Typography variant="display2">
                                 Add new Global Endpoint
                             </Typography>
-                        </Grid>
-                        <Grid>
-                            <Table><TableBody>
-                                <TableRow style={{marginBottom: "10px"}} type="flex">
-                                    <TableCell span={4}>Name</TableCell>
-                                    <TableCell span={8}>
-                                        <TextField name="name" onChange={this.handleInputs}
-                                                   placeholder="Endpoint Name"/>
-                                    </TableCell>
-                                </TableRow>
-                                <TableRow style={{marginBottom: "10px"}} type="flex">
-                                    <TableCell span={4}>Type</TableCell>
-                                    <TableCell span={8}>
-                                        <RadioGroup value={this.state.endpointType}
-                                                    onChange={e => {
-                                                        e.target["name"] = "endpointType";
-                                                        this.handleInputs(e)
-                                                    }}>
-                                            <FormControlLabel value={"http"} control={<Radio/>} label="HTTP"/>
-                                            <FormControlLabel value={"https"} control={<Radio/>} label="HTTPS"/>
-                                        </RadioGroup>
-                                    </TableCell>
-                                </TableRow>
-                                <TableRow style={{marginBottom: "10px"}} type="flex">
-                                    <TableCell span={4}>Max TPS</TableCell>
-                                    <TableCell span={8}>
-                                        <TextField type="number" onChange={e => {
-                                            e.target["name"] = "maxTPS";
-                                            this.handleInputs(e)
-                                        }}/>
-                                    </TableCell>
-                                </TableRow>
-                                <TableRow style={{marginBottom: "10px"}} type="flex">
-                                    <TableCell span={4}>Service URL</TableCell>
-                                    <TableCell span={8}>
-                                        <TextField name="serviceUrl" onChange={this.handleInputs}
-                                                   style={{width: '100%'}}/>
-                                    </TableCell>
-                                </TableRow>
-                                <TableRow>
-                                    <TableCell span={4}>Secured</TableCell>
-                                    <TableCell span={8}>
-                                        <Switch
-                                            checked={this.state.secured}
-                                            onChange={this.handleChange('secured')}
-                                        />
-                                    </TableCell>
-                                </TableRow>
-                                {this.state.secured && (
-                                    <TableRow style={{marginBottom: "10px"}}>
-                                        <TableRow style={{marginBottom: "10px"}}>
-                                            <TableCell span={4}>Type</TableCell>
-                                            <TableCell span={8}>
-                                                <RadioGroup value={this.state.securityType}
-                                                            onChange={e => {
-                                                                e.target["name"] = "securityType";
-                                                                this.handleInputs(e)
-                                                            }}>
-                                                    <FormControlLabel value={"basic"} control={<Radio/>}
-                                                                      label="Basic"/>
-                                                    <FormControlLabel value={"digest"} control={<Radio/>}
-                                                                      label="Digest"/>
-                                                </RadioGroup>
-                                            </TableCell>
-                                        </TableRow>
-                                        <TableRow style={{marginBottom: "10px"}}>
-                                            <TableCell span={4}>Username</TableCell>
-                                            <TableCell span={8}>
-                                                <TextField name="username" onChange={this.handleInputs}
-                                                           placeholder="Username"/>
-                                            </TableCell>
-                                        </TableRow>
-                                        <TableRow style={{marginBottom: "10px"}}>
-                                            <TableCell span={4}>Password</TableCell>
-                                            <TableCell span={8}>
-                                                <TextField name="password" onChange={this.handleInputs}
-                                                           placeholder="Password"/>
-                                            </TableCell>
-                                        </TableRow>
-                                    </TableRow>
-                                )}</TableBody></Table>
-                            <Button type="primary" onClick={this.handleSubmit}>
-                                <NotificationSystem ref="notificationSystem"/>
-                                Create</Button>
-                        </Grid>
-                    </Paper>
+                        </div>
+                    </div>
                 </Grid>
+                <Grid item xs={12} lg={6} xl={4}>
+                    <form className={classes.container} noValidate autoComplete="off">
+                        <TextField
+                            label="Endpoint Name"
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                            helperText="Enter a name to identify the endpoint. You will be able to pick this endpoint
+                                        when creating/editing APIs "
+                            fullWidth
+                            name="name"
+                            onChange={this.handleInputs}
+                            placeholder="Endpoint Name"
+                            autoFocus={true}
+                        />
+                        <FormLabel component="legend" className={classes.legend}>Endpoint Type</FormLabel>
+                        <RadioGroup
+                                row
+                                aria-label="type"
+                                className={classes.group}
+                                value={this.state.endpointType}
+                                onChange={e => {
+                                    e.target["name"] = "endpointType";
+                                    this.handleInputs(e)
+                                }}
+                            >
+                                <FormControlLabel value={"http"} control={<Radio color="primary"/>} label="HTTP"/>
+                                <FormControlLabel value={"https"} control={<Radio color="primary"/>} label="HTTPS"/>
+                            </RadioGroup>
+                            <TextField
+                                className={classes.inputText}
+                                label="Max TPS"
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                helperText="Max Transactions per second"
+                                fullWidth
+                                name="name"
+                                onChange={e => {
+                                    e.target["name"] = "maxTPS";
+                                    this.handleInputs(e)
+                                }}
+                                placeholder="100"
+                            />
+                            <TextField
+                                className={classes.inputText}
+                                name="serviceUrl"
+                                       label="Service URL"
+                                       InputLabelProps={{
+                                           shrink: true,
+                                       }}
+                                       helperText="Provide Service URL"
+                                       onChange={this.handleInputs}
+                                        placeholder="https://forecast-v3.weather.gov"
+                                        fullWidth />
+                            <FormControlLabel
+                                className={classes.inputText}
+                                control={
+                                    <Switch
+                                        checked={this.state.secured}
+                                        onChange={this.handleChange('secured')}
+                                        value="secured"
+                                        color="primary"
+                                    />
+                                }
+                                label="Secured"
+                            />
+                            {this.state.secured && <div className={classes.secured}>
+                                Type
+                                <RadioGroup row
+                                            value={this.state.securityType}
+                                            onChange={e => {
+                                                e.target["name"] = "securityType";
+                                                this.handleInputs(e)
+                                            }}>
+                                    <FormControlLabel value={"basic"} control={<Radio/>}
+                                                      label="Basic"/>
+                                    <FormControlLabel value={"digest"} control={<Radio/>}
+                                                      label="Digest"/>
+                                </RadioGroup>
+
+                                <TextField
+                                    className={classes.inputText}
+                                    label="Username"
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    helperText="Enter the Username"
+                                    fullWidth
+                                    margin="normal"
+                                    name="username"
+                                    onChange={this.handleInputs}
+                                    placeholder="Username"/>
+
+                                <TextField
+                                    className={classes.inputText}
+                                    label="Password"
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    helperText="Enter the Password"
+                                    fullWidth
+                                    name="password"
+                                    onChange={this.handleInputs}
+                                    placeholder="Password"/>
+                            </div>}
+                            <div className={classes.buttonsWrapper}>
+                                <Button variant="raised" color="primary" className={classes.button} onClick={this.handleSubmit}>
+                                    Create
+                                </Button>
+                                <Link to={"/endpoints/"}>
+                                    <Button variant="raised" className={classes.button}>
+                                        Cancel
+                                    </Button>
+                                </Link>
+                            </div>
+                        <NotificationSystem ref="notificationSystem"/>
+                    </form>
+                </Grid>
+
             </Grid>
-        );
+        )
     }
 }
+
+EndpointCreate.propTypes = {
+    classes: PropTypes.object.isRequired,
+};
+
+export default withStyles(styles)(EndpointCreate);
