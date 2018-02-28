@@ -246,7 +246,7 @@ class Login extends Component {
                     <Snackbar
                         anchorOrigin={{vertical: 'top', horizontal: 'center'}}
                         open={this.state.messageOpen}
-                        onRequestClose={this.handleRequestClose}
+                        onClose={this.handleRequestClose}
                         SnackbarContentProps={{
                             'aria-describedby': 'message-id',
                         }}
@@ -339,7 +339,7 @@ class Login extends Component {
                                                 {/*Buttons*/}
                                                 <Button
                                                     type="submit"
-                                                    raised color="primary"
+                                                    variant="raised" color="primary"
                                                     className="login-form-submit"
                                                     disabled={!isSsoUpdated}
                                                 >

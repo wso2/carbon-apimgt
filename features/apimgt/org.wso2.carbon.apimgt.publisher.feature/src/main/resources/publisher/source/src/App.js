@@ -46,8 +46,9 @@ let lightTheme = createMuiTheme({
 darkTheme.palette.background.active = 'rgba(27, 94, 32, 1)';
 darkTheme.palette.background.appBar = 'rgba(63, 81, 181, 1)';
 lightTheme.palette.background.active = 'rgba(165, 214, 167, 1)';
-lightTheme.palette.background.appBar = 'rgba(33, 150, 243, 1)';
+lightTheme.palette.background.appBar = 'rgb(59, 120, 231,1)';
 lightTheme.palette.background.contentFrame = 'rgba(227, 242, 253, 1)';
+lightTheme.palette.text.brand = 'rgba(255,255,255,1)';
 themes.push(darkTheme);
 themes.push(lightTheme);
 themes.push(createMuiTheme(MaterialDesignCustomTheme));

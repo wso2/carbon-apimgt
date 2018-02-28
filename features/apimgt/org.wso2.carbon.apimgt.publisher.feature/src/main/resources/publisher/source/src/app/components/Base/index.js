@@ -33,7 +33,7 @@ import ChevronLeftIcon from 'material-ui-icons/ChevronLeft';
 import ChevronRightIcon from 'material-ui-icons/ChevronRight';
 import { Link, Redirect } from 'react-router-dom';
 import InboxIcon from 'material-ui-icons/Inbox';
-import DraftsIcon from 'material-ui-icons/Drafts';
+import Games from 'material-ui-icons/Games';
 import EnvironmentMenu from "./Header/EnvironmentMenu";
 import Utils from "../../data/Utils";
 import Card, { CardActions, CardContent } from 'material-ui/Card';
@@ -167,7 +167,7 @@ const styles = theme => ({
     },
     brand: {
         textDecoration: 'none',
-        color: theme.palette.text.primary,
+        color: theme.palette.text.brand,
     }
 });
 
@@ -235,8 +235,8 @@ class Layout extends React.Component {
                             >
                                 <MenuIcon />
                             </IconButton>
-                            <Link to="/" className={classes.brand} color="inherit">
-                                <Typography variant="title"  noWrap color="inherit">
+                            <Link to="/"  >
+                                <Typography variant="title"  noWrap className={classes.brand}>
                                     WSO2 API PUBLISHER
                                 </Typography>
                             </Link>
@@ -281,7 +281,7 @@ class Layout extends React.Component {
                                              environmentLabel={Utils.getCurrentEnvironment().label}
                                              handleEnvironmentChange={this.handleEnvironmentChange}/>
                             {/* User menu */}
-                            <IconButton color="inherit"
+                            <IconButton color="default"
                                 className={classes.button} aria-label="Change theme" onClick={() => this.props.setTheme()}>
                                 <LightbulbOutline />
                             </IconButton>
@@ -347,7 +347,7 @@ class Layout extends React.Component {
                         <div className={classes.drawerInner}>
                             <div className={classes.drawerHeader}>
                                 <Link to="/" className={classes.brandNameWrapper}>
-                                    <IconButton className={classes.menuButton} color="contrast" aria-label="Menu">
+                                    <IconButton className={classes.menuButton} color="default" aria-label="Menu">
                                         <img className={classes.siteLogo} src="/publisher/public/app/images/logo.svg"
                                              alt="wso2-logo"/>
                                     </IconButton>
@@ -372,7 +372,7 @@ class Layout extends React.Component {
                                 <Link to="/endpoints">
                                     <ListItem button>
                                         <ListItemIcon>
-                                            <DraftsIcon />
+                                            <Games />
                                         </ListItemIcon>
                                         <ListItemText primary="Endpoints" />
                                     </ListItem>

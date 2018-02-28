@@ -136,7 +136,7 @@ class Header extends React.Component {
                 {this.state.searchVisible ?
                     <Toolbar>
 
-                        <IconButton aria-label="Search" color="contrast">
+                        <IconButton aria-label="Search" color="default">
                             <CloseIcon onClick={this.toggleSearch}/>
                         </IconButton>
                         <TextField
@@ -148,7 +148,7 @@ class Header extends React.Component {
                             color = "contrast"
                             inputRef={focusUsernameInputField}
                         />
-                        <IconButton aria-label="Search Info" color="contrast">
+                        <IconButton aria-label="Search Info" color="default">
                             <InfoLightBulb onClick={this.handleClickTips}/>
                         </IconButton>
                         <Menu
@@ -170,7 +170,7 @@ class Header extends React.Component {
                     :
                     <Toolbar>
                         {this.state.showLeftMenu ?
-                            <IconButton color="contrast" aria-label="Menu">
+                            <IconButton color="default" aria-label="Menu">
                                 <MenuIcon color="contrast" onClick={this.props.toggleDrawer}/>
                             </IconButton> : <span></span> }
                         <Typography type="title" color="inherit" style={{flex: 1}}>
@@ -184,7 +184,7 @@ class Header extends React.Component {
                         </Typography>
                         { user ?
                             <div style={{display:"flex"}}>
-                                <IconButton aria-label="Search" onClick={this.toggleSearch} color="contrast">
+                                <IconButton aria-label="Search" onClick={this.toggleSearch} color="default">
                                     <SearchIcon />
                                 </IconButton>
                                 {/* API add menu */}

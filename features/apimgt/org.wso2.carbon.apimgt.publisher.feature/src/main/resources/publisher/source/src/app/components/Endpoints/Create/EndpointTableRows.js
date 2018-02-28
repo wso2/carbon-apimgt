@@ -25,7 +25,18 @@ import Dialog, {DialogActions, DialogContent, DialogContentText, DialogTitle} fr
 import Button from 'material-ui/Button';
 import Delete from 'material-ui-icons/Delete';
 import Slide from "material-ui/transitions/Slide";
+import IconButton from 'material-ui/IconButton';
+import PropTypes from 'prop-types';
+import { withStyles } from 'material-ui/styles';
 
+const styles = theme => ({
+    button: {
+        margin: theme.spacing.unit,
+    },
+    input: {
+        display: 'none',
+    },
+});
 
 class EndpointTableRows extends React.Component {
     constructor(props) {
@@ -44,6 +55,7 @@ class EndpointTableRows extends React.Component {
     };
 
     render() {
+        const { classes } = this.props;
         const {name, type, maxTps, endpointConfig, id} = this.props.endpoint;
         return (
             <TableRow hover>
@@ -51,13 +63,13 @@ class EndpointTableRows extends React.Component {
                     <Link to={"/endpoints/" + id}>{name}</Link></TableCell>
                 <TableCell>{type}</TableCell>
                 <TableCell>{JSON.parse(endpointConfig).serviceUrl}</TableCell>
-                <TableCell numeric>{maxTps}</TableCell>
+                <TableCell>{maxTps}</TableCell>
                 <TableCell>
                     <div>
                         <ScopeValidation resourceMethod={resourceMethod.PUT} resourcePath={resourcePath.SINGLE_API}>
-                            <Button aria-owns="simple-menu" aria-haspopup="true" onClick={this.handleRequestOpen}>
-                                <Delete/> Delete
-                            </Button>
+                            <IconButton aria-label="Delete" onClick={this.handleRequestOpen}>
+                                <Delete/>
+                            </IconButton>
                         </ScopeValidation>
                         <Dialog open={this.state.openMenu} transition={Slide}>
                             <DialogTitle>
@@ -82,5 +94,8 @@ class EndpointTableRows extends React.Component {
         );
     }
 }
+EndpointTableRows.propTypes = {
+    classes: PropTypes.object.isRequired,
+};
 
-export default EndpointTableRows;
+export default withStyles(styles)(EndpointTableRows);

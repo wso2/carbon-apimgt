@@ -94,7 +94,7 @@ class AddPolicy extends Component {
             <div>
                 <AppBar position="static" >
                     <Toolbar style={{minHeight:'30px'}}>
-                        <IconButton color="contrast" aria-label="Menu">
+                        <IconButton color="default" aria-label="Menu">
                             <MenuIcon />
                         </IconButton>
                         <Link to={"/apis/" + this.props.match.params.api_uuid + "/security"}>

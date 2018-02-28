@@ -218,7 +218,7 @@ class ApiThumb extends React.Component {
     render() {
         const {api, environmentOverview, classes} = this.props;
         const gridItemSizes = environmentOverview ?
-            {xs: 6, sm: 4, md: 3, lg: 2, xl: 2} : {xs: 6, sm: 4, md: 3, lg: 2, xl: 2};
+            {xs: 6, sm: 4, md: 3, lg: 2, xl: 2} : {xs: 12, sm: 6, md: 4, lg: 3, xl: 2};
 
         if (!this.state.active) { // Controls the delete state, We set the state to inactive on delete success call
             return null;

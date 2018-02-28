@@ -233,7 +233,7 @@ class Listing extends React.Component {
                                     <NotificationSystem ref="notificationSystem"/>
                                 </Col>
                             </Row>
-                            : <Grid container spacing={0}>
+                            : <Grid container spacing={8}>
                                 {this.state.apis.list.map((api, i) => {
                                     return <ApiThumb key={api.id} listType={this.state.listType} api={api}
                                                      updateApi={this.updateApi}/>

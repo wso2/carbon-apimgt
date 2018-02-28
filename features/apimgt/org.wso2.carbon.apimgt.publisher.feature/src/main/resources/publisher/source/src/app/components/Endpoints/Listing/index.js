@@ -18,20 +18,59 @@
 'use strict';
 
 import React, {Component} from 'react'
-import {Link} from 'react-router-dom'
-import Menu, {MenuItem} from 'material-ui/Menu';
 import Grid from 'material-ui/Grid';
-import Button from 'material-ui/Button';
-import AddIcon from 'material-ui-icons/Add';
 import Table, {TableBody, TableCell, TableRow, TableHead} from 'material-ui/Table';
 
 import API from '../../../data/api'
-import {ScopeValidation, resourceMethod, resourcePath} from '../../../data/ScopeValidation';
 import NotificationSystem from 'react-notification-system';
-import Paper from 'material-ui/Paper';
 import EndpointTableRows from "../Create/EndpointTableRows";
+import Typography from 'material-ui/Typography';
+import { Manager, Target } from 'react-popper';
+import AddNewMenu from './AddNewMenu'
+import PropTypes from 'prop-types';
+import { withStyles } from 'material-ui/styles';
 
-export default class EndpointsListing extends Component {
+const styles = theme => ({
+    root: {
+        width: '100%',
+        marginTop: theme.spacing.unit * 3,
+        overflowX: 'auto',
+    },
+    table: {
+        minWidth: 700,
+    },
+    titleBar: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        borderBottomWidth: '1px',
+        borderBottomStyle: 'solid',
+        borderColor: theme.palette.text.secondary,
+        marginBottom: 20,
+    },
+    buttonLeft: {
+        alignSelf: 'flex-start',
+        display: 'flex',
+    },
+    buttonRight: {
+        alignSelf: 'flex-end',
+        display: 'flex',
+    },
+    title: {
+        display: 'inline-block',
+        marginRight: 50
+    },
+    addButton: {
+        display: 'inline-block',
+        marginBottom: 20,
+        zIndex: 1,
+    },
+    popperClose: {
+        pointerEvents: 'none',
+    }
+});
+
+
+class EndpointsListing extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -101,62 +140,48 @@ export default class EndpointsListing extends Component {
 
     render() {
         const {anchorEl} = this.state;
-
+        const { classes } = this.props;
         return (
-            <div>
-                <span>
-                <h3>Global Endpoints</h3>
-                </span>
-                <NotificationSystem ref="notificationSystem"/>
-                <Grid container>
-                    <Grid item xs>
-                        <Paper>
-                            <Table>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>Name</TableCell>
-                                        <TableCell>Type</TableCell>
-                                        <TableCell>Service URL</TableCell>
-                                        <TableCell>Max TPS</TableCell>
-                                        <TableCell>Action</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {this.state.endpoints && this.state.endpoints.map(endpoint => {
-                                        return <EndpointTableRows endpoint={endpoint} key={endpoint.id}
-                                                                  handleEndpointDelete={this.handleEndpointDelete}
-                                        />
-                                    })}
-                                </TableBody>
-                            </Table>
-                        </Paper>
-                    </Grid>
-                </Grid>
-                <div className="api-add-links">
-                    <Grid container justify="flex-end" alignItems="center">
-                        <Grid item xs={1}>
-                            <Menu open={this.state.openAddMenu}
-                                  onClose={this.handleRequestCloseAddMenu} id="simple-menu"
-                                  anchorEl={anchorEl}>
-                                <MenuItem onClick={this.handleRequestCloseAddMenu}>
-                                    <Link to="/endpoints/create">Create new Endpoint</Link>
-                                </MenuItem>
-                                <MenuItem onClick={this.handleRequestCloseAddMenu}>
-                                    <ScopeValidation resourcePath={resourcePath.SERVICE_DISCOVERY}
-                                                     resourceMethod={resourceMethod.GET}>
-                                        <Link to="/endpoints/discover">Discover Endpoints</Link>
-                                    </ScopeValidation>
-                                </MenuItem>
-                            </Menu>
-                            <Button aria-owns={anchorEl ? 'simple-menu' : null}
-                                    aria-haspopup="true" fab color="accent"
-                                    aria-label="add" onClick={this.handleRequestOpenAddMenu}>
-                                <AddIcon/>
-                            </Button>
-                        </Grid>
-                    </Grid>
+        <Grid container spacing={0} justify="center">
+            <Grid item xs={12} className={classes.titleBar}>
+                <div className={classes.buttonLeft}>
+                    <div className={classes.title}>
+                        <Typography variant="display2" gutterBottom>
+                            Global Endpoints
+                        </Typography>
+                    </div>
+                    <AddNewMenu />
+                    <NotificationSystem ref="notificationSystem"/>
                 </div>
-            </div>
-        );
+            </Grid>
+
+            <Grid item xs={12}>
+
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>Name</TableCell>
+                            <TableCell>Type</TableCell>
+                            <TableCell>Service URL</TableCell>
+                            <TableCell>Max TPS</TableCell>
+                            <TableCell>Action</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {this.state.endpoints && this.state.endpoints.map(endpoint => {
+                            return <EndpointTableRows endpoint={endpoint} key={endpoint.id}
+                                                      handleEndpointDelete={this.handleEndpointDelete}
+                            />
+                        })}
+                    </TableBody>
+                </Table>
+            </Grid>
+        </Grid>
+        )
     }
 }
+EndpointsListing.propTypes = {
+    classes: PropTypes.object.isRequired,
+};
+
+export default withStyles(styles)(EndpointsListing);
