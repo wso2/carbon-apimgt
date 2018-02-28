@@ -97,14 +97,14 @@ const styles = theme => ({
         const apiUUID = this.props.api.id;
         const {privateJetModeEnabled} = this.props;
 
-        if(privateJetModeEnabled) {
+        if (privateJetModeEnabled) {
             if(newState == "Published In Private Jet Mode") {
                 let promised_hasOwnGatewayForAPI = this.api.getHasOwnGateway(apiUUID);
 
                 promised_hasOwnGatewayForAPI.then(getResponse => {
                     let hasOwnGatewayForAPI = getResponse.body.isEnabled;
 
-                    if(!hasOwnGatewayForAPI) {
+                    if (!hasOwnGatewayForAPI) {
                         newState = "Published";
                         let body = {"isEnabled":"true"};
                         let promisedUpdateDedicatedGW = this.api.updateHasOwnGateway(apiUUID, body);

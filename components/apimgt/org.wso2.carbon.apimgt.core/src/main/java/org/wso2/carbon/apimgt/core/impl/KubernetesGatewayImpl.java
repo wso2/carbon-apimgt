@@ -156,6 +156,12 @@ public class KubernetesGatewayImpl extends ContainerBasedGatewayGenerator {
                 ContainerBasedGatewayConstants.GATEWAY_INGRESS_TEMPLATE), ingressName);
     }
 
+    /**
+     * Generate a sub domain for the Ingress based on the API's context
+     *
+     * @param api API
+     * @return subDomain
+     */
     private String generateSubDomain(API api) {
 
         String context = api.getContext();
