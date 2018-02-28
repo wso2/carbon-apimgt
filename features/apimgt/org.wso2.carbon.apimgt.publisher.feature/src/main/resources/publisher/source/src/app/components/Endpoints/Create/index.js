@@ -285,9 +285,11 @@ class EndpointCreate extends Component {
                                 <Button variant="raised" color="primary" className={classes.button} onClick={this.handleSubmit}>
                                     Create
                                 </Button>
-                                <Button variant="raised" className={classes.button}>
-                                    Default
-                                </Button>
+                                <Link to={"/endpoints/"}>
+                                    <Button variant="raised" className={classes.button}>
+                                        Cancel
+                                    </Button>
+                                </Link>
                             </div>
                         <NotificationSystem ref="notificationSystem"/>
                     </form>
