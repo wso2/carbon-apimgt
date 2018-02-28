@@ -6659,11 +6659,13 @@ public final class APIUtil {
                 searchValue = criteria.split(":")[1];
                 if (!APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchKey) &&
                         !APIConstants.TAG_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchKey)) {
-                    if (!searchValue.endsWith("*")) {
-                        searchValue = searchValue + "*";
-                    }
-                    if (!searchValue.startsWith("*")) {
-                        searchValue = "*" + searchValue;
+                    if (!(searchValue.endsWith("\"") && searchValue.startsWith("\""))) {
+                        if (!searchValue.endsWith("*")) {
+                            searchValue = searchValue + "*";
+                        }
+                        if (!searchValue.startsWith("*")) {
+                            searchValue = "*" + searchValue;
+                        }
                     }
                 }
 
@@ -6671,11 +6673,13 @@ public final class APIUtil {
                 throw new APIManagementException("Search term is missing. Try again with valid search query.");
             }
         } else {
-            if (!searchValue.endsWith("*")) {
-                searchValue = searchValue + "*";
-            }
-            if (!searchValue.startsWith("*")) {
-                searchValue = "*" + searchValue;
+            if (!(searchValue.endsWith("\"") && searchValue.startsWith("\""))) {
+                if (!searchValue.endsWith("*")) {
+                    searchValue = searchValue + "*";
+                }
+                if (!searchValue.startsWith("*")) {
+                    searchValue = "*" + searchValue;
+                }
             }
         }
         if (APIConstants.API_PROVIDER.equalsIgnoreCase(searchKey)) {
