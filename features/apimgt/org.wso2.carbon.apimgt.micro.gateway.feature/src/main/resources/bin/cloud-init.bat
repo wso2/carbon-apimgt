@@ -69,11 +69,19 @@ set /p ORG_KEY= Please enter your Organization Key used in WSO2 API Cloud:
 set /p EMAIL= Please enter your email used for login to WSO2 API Cloud:
 set /p PASSWORD= Please enter your password for %EMAIL%:
 
+rem set the classes
+rem loop through the libs and add them to the class path
+cd "%CARBON_HOME%"
+call ant -buildfile "%CARBON_HOME%\bin\build.xml" -q
+set CARBON_CLASSPATH=.\conf
+FOR %%c in ("%CARBON_HOME%\lib\*.jar") DO set CARBON_CLASSPATH=!CARBON_CLASSPATH!;".\lib\%%~nc%%~xc"
+FOR %%C in ("%CARBON_HOME%\repository\lib\*.jar") DO set CARBON_CLASSPATH=!CARBON_CLASSPATH!;".\repository\lib\%%~nC%%~xC"
+
 rem ----- Execute The Requested Command ---------------------------------------
 echo Using CARBON_HOME:   %CARBON_HOME%
 echo Using JAVA_HOME:    %JAVA_HOME%
 set _RUNJAVA="%JAVA_HOME%\bin\java"
 
-%_RUNJAVA% %JAVA_OPTS% -Dcarbon.home="%CARBON_HOME%" -jar %CARBON_HOME%\lib\org.wso2.onpremise.gateway.configurator-1.0.0.jar %EMAIL% %ORG_KEY% %PASSWORD%
+%_RUNJAVA% %JAVA_OPTS% -Dcarbon.home="%CARBON_HOME%" -cp "%CARBON_CLASSPATH%" org.wso2.carbon.apimgt.micro.gateway.configurator.Configurator %EMAIL% %ORG_KEY% %PASSWORD%
 endlocal
 :end

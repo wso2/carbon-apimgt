@@ -30,7 +30,9 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.micro.gateway.common.exception.OnPremiseGatewayException;
 import org.wso2.carbon.apimgt.micro.gateway.common.util.HttpRequestUtil;
+import org.wso2.carbon.apimgt.micro.gateway.common.util.MicroGatewayCommonUtil;
 import org.wso2.carbon.apimgt.micro.gateway.common.util.OnPremiseGatewayConstants;
+import org.wso2.carbon.apimgt.micro.gateway.common.util.TokenUtil;
 import org.wso2.carbon.apimgt.micro.gateway.status.checker.dto.MicroGatewayPingDTO;
 import org.wso2.carbon.apimgt.micro.gateway.status.checker.internal.ServiceReferenceHolder;
 
@@ -67,6 +69,7 @@ public class StatusChecker implements Runnable {
         try {
             String payload = getPingingPayload(tenantDomain, this.token);
             callPingAPIEndpoint(username, password, payload, this.pingURL);
+            MicroGatewayCommonUtil.cleanPasswordCharArray(password);
         } catch (IOException e) {
             log.error("Error occurred while calling ping API. ", e);
         }
@@ -83,7 +86,7 @@ public class StatusChecker implements Runnable {
     protected void callPingAPIEndpoint(String username, char[] password, String payload, String pingAPIUrl) {
         CloseableHttpClient client = HttpClients.createDefault();
         try {
-            String authHeaderValue = getAuthHeader(username, password);
+            String authHeaderValue = TokenUtil.getBasicAuthHeaderValue(username, password);
             HttpPost httpPost = createPostRequest(pingAPIUrl, payload, authHeaderValue);
             String response = HttpRequestUtil.executeHTTPMethodWithRetry(client, httpPost,
                                                                          OnPremiseGatewayConstants.DEFAULT_RETRY_COUNT);
@@ -141,21 +144,6 @@ public class StatusChecker implements Runnable {
         httpPost.setHeader(OnPremiseGatewayConstants.CONTENT_TYPE_HEADER,
                            OnPremiseGatewayConstants.CONTENT_TYPE_APPLICATION_JSON);
         return httpPost;
-    }
-
-    /**
-     * Get authentication header
-     *
-     * @param username
-     * @param password
-     * @return
-     */
-    protected String getAuthHeader(String username, char[] password) throws UnsupportedEncodingException {
-        String authHeaderValue = OnPremiseGatewayConstants.AUTHORIZATION_BASIC + Base64.encodeBase64String(
-                (username + ":" + String.valueOf(password)).getBytes(OnPremiseGatewayConstants.DEFAULT_CHARSET));
-        //Clean up password array
-        Arrays.fill(password, '0');
-        return authHeaderValue;
     }
 
 }

@@ -116,7 +116,7 @@ if [ -z "$ORG_KEY" ] || [ -z "$EMAIL" ] || [ -z "$PASSWORD" ]; then
 echo "Your credentials will be required for accessing the services in API Cloud which are required for the functionality of the On Premise Gateway."
 fi
 
-cp $CARBON_HOME/resources/cloud-on-premise-gateway.properties $CARBON_HOME/repository/conf/on-premise-gateway.properties
+cp $CARBON_HOME/resources/wso2-cloud/cloud-on-premise-gateway.properties $CARBON_HOME/repository/conf/on-premise-gateway.properties
 
 if [ -z "$ORG_KEY" ]; then
     echo "Please enter your Organization Key used in WSO2 API Cloud"
@@ -136,8 +136,27 @@ if [ -z "$PASSWORD" ]; then
     echo
 fi
 
+# update classpath
+CARBON_CLASSPATH=""
+for f in "$CARBON_HOME"/lib/org.wso2.carbon.apimgt.micro.gateway.configurator*.jar
+do
+  CARBON_CLASSPATH=$CARBON_CLASSPATH:$f
+done
+for h in "$CARBON_HOME"/repository/components/plugins/*.jar
+do
+  CARBON_CLASSPATH=$CARBON_CLASSPATH:$h
+done
+CARBON_CLASSPATH=$CARBON_CLASSPATH:$CLASSPATH
 
-${JAVACMD} -Dcarbon.home="$CARBON_HOME" -jar ${CARBON_HOME}/lib/org.wso2.onpremise.gateway.configurator-1.0.0.jar ${EMAIL}  ${ORG_KEY} ${PASSWORD}
+ # For Cygwin, switch paths to Windows format before running java
+ if $cygwin; then
+   JAVA_HOME=`cygpath --absolute --windows "$JAVA_HOME"`
+   CARBON_HOME=`cygpath --absolute --windows "$CARBON_HOME"`
+   CLASSPATH=`cygpath --path --windows "$CLASSPATH"`
+   JAVA_ENDORSED_DIRS=`cygpath --path --windows "$JAVA_ENDORSED_DIRS"`
+ fi
+
+${JAVACMD} -Dcarbon.home="$CARBON_HOME" -classpath "$CARBON_CLASSPATH" org.wso2.carbon.apimgt.micro.gateway.configurator.Configurator ${EMAIL}  ${ORG_KEY} ${PASSWORD}
 OUT=$?
 if [ $OUT -eq 0 ];then
   echo "Your On Premise Gateway has been configured successfully."
@@ -150,4 +169,3 @@ if [ $OUT -eq 0 ];then
 else
    echo "Something went wrong while configuring the On Premise Gateway. Please check your credentials and re-try. If the problem persists please contact: cloud@wso2.com."
 fi
-

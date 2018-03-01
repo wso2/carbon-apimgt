@@ -80,8 +80,8 @@ public class Configurator {
         String carbonConfigDirPath = carbonHome + File.separator + ConfigConstants.REPOSITORY_DIR + File.separator
                                              + ConfigConstants.CONF_DIR;
         //Update Gateway properties file with API cloud related configs
-        String cloudConfigsPath = carbonHome + File.separator + ConfigConstants.RESOURCES_DIR + File.separator +
-                                          ConfigConstants.CLOUD_CONFIG_FILE_NAME;
+        String cloudConfigsPath = carbonHome + File.separator + ConfigConstants.RESOURCES_DIR  + File.separator
+                + ConfigConstants.CLOUD_CONFIG_DIR + File.separator + ConfigConstants.CLOUD_CONFIG_FILE_NAME;
         String gatewayConfigPath = carbonConfigDirPath + File.separator + OnPremiseGatewayConstants.CONFIG_FILE_NAME;
         updateGatewayConfigDetails(cloudConfigsPath, gatewayConfigPath);
         //Read Gateway properties
@@ -211,7 +211,7 @@ public class Configurator {
         String username = args[0] + OnPremiseGatewayConstants.USERNAME_SEPARATOR + args[1];
         char[] password = args[2].toCharArray();
         String authHeaderValue = OnPremiseGatewayConstants.AUTHORIZATION_BASIC + Base64.encodeBase64String(
-                (username + ":" + String.valueOf(password)).getBytes(OnPremiseGatewayConstants.DEFAULT_CHARSET));
+                (username + ":" + String.valueOf(password)).getBytes(OnPremiseGatewayConstants.DEFAULT_CHARSET)).trim();
         return authHeaderValue;
     }
 

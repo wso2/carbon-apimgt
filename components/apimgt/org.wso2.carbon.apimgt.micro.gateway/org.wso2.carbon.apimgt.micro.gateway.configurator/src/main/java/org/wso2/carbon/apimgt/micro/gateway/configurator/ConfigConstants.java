@@ -26,6 +26,7 @@ public class ConfigConstants {
     public static final String CARBON_HOME = "carbon.home";
     public static final String REPOSITORY_DIR = "repository";
     public static final String CONF_DIR = "conf";
+    public static final String CLOUD_CONFIG_DIR = "wso2-cloud";
     public static final String RESOURCES_DIR = "resources";
 
     public static final String EMAIL = "email";

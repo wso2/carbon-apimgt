@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.micro.gateway.common.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.micro.gateway.common.util.HttpRequestUtil;
 import org.wso2.carbon.apimgt.micro.gateway.common.util.OnPremiseGatewayConstants;
+import org.wso2.carbon.apimgt.micro.gateway.common.util.TokenUtil;
 import org.wso2.carbon.apimgt.micro.gateway.status.checker.util.StatusCheckerConstants;
 
 import java.util.ArrayList;
@@ -95,10 +96,11 @@ public class StatusCheckerTest {
     @Test
     public void createPostRequest() throws Exception {
         StatusChecker statusChecker = new StatusChecker(TOKEN, PING_URL);
-        String authHeaderValue = statusChecker.getAuthHeader(USERNAME, PASSWORD.toCharArray());
+        String authHeaderValue = TokenUtil.getBasicAuthHeaderValue(USERNAME, PASSWORD.toCharArray());
         HttpPost httpPost = statusChecker.createPostRequest(PING_URL, PAYLOAD_STR, authHeaderValue);
         Assert.assertEquals("POST", httpPost.getMethod());
-        Assert.assertEquals(OnPremiseGatewayConstants.CONTENT_TYPE_APPLICATION_JSON, httpPost.getFirstHeader(OnPremiseGatewayConstants.CONTENT_TYPE_HEADER).getValue());
+        Assert.assertEquals(OnPremiseGatewayConstants.CONTENT_TYPE_APPLICATION_JSON,
+                httpPost.getFirstHeader(OnPremiseGatewayConstants.CONTENT_TYPE_HEADER).getValue());
     }
 
     private void mockAPIMConfiguration(Map<String, String> configMap) {
