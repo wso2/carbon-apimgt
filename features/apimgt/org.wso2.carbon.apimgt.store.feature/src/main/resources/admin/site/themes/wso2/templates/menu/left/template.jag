@@ -1,7 +1,7 @@
 <% jagg.template("menu/left", function(inputs, outputs, jagg) { %>
 <%  var site = require("/site/conf/site.json");
   var ssoEnabled = site.ssoConfiguration.enabled;
-  var isLogAnalizerEnabled = site.enableLogAnalizer;
+  var isLogAnalyzerEnabled = site.enableLogAnalyzer;
   var reqUrl = request.getRequestURI();
   var listUrl=jagg.url("/site/pages/index.jag");
   var listMappedUrl=jagg.url("/site/pages/index.jag");
@@ -166,7 +166,7 @@
             <%}%>
           </ul>
         </li>
-        <%if(isLogAnalizerEnabled){%>
+        <%if(isLogAnalyzerEnabled){%>
         <li class="nav-header">
           <a href="#"><i class="fw fw-blank-document fw-2x" style="font-size:22px;"></i><%=i18n.localize("Log Analyzer")%><i class="fw fw-down fw-stack-1x toggle-icon-down toggle-caret remove-float"></i></a>
           <ul class="nav nav-pills secondary-nav collapse">
