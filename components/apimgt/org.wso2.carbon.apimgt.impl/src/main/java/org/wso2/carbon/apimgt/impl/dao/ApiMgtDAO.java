@@ -4363,9 +4363,9 @@ public class ApiMgtDAO {
                 application.setGroupId(rs.getString("GROUP_ID"));
                 application.setUUID(rs.getString("UUID"));
                 application.setIsBlackListed(rs.getBoolean("ENABLED"));
+                application.setOwner(rs.getString("CREATED_BY"));
 
                 if(multiGroupAppSharingEnabled) {
-                    application.setOwner(rs.getString("CREATED_BY"));
                     setGroupIdInApplication(application);
                 }
                 Set<APIKey> keys = getApplicationKeys(subscriber.getName(), application.getId());
@@ -4482,6 +4482,7 @@ public class ApiMgtDAO {
                 application.setGroupId(rs.getString("GROUP_ID"));
                 application.setUUID(rs.getString("UUID"));
                 application.setIsBlackListed(rs.getBoolean("ENABLED"));
+                application.setOwner(rs.getString("CREATED_BY"));
 
                 Set<APIKey> keys = getApplicationKeys(subscriber.getName(), application.getId());
                 Map<String, OAuthApplicationInfo> keyMap = getOAuthApplications(application.getId());
@@ -4495,7 +4496,6 @@ public class ApiMgtDAO {
                 }
                 if (multiGroupAppSharingEnabled) {
                     setGroupIdInApplication(application);
-                    application.setOwner(rs.getString("CREATED_BY"));
                 }
                 applicationsList.add(application);
             }
@@ -5745,6 +5745,7 @@ public class ApiMgtDAO {
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 application.setUUID(rs.getString("UUID"));
                 application.setGroupId(rs.getString("GROUP_ID"));
+                application.setOwner(rs.getString("CREATED_BY"));
 
                 if (multiGroupAppSharingEnabled) {
                     setGroupIdInApplication(application);
