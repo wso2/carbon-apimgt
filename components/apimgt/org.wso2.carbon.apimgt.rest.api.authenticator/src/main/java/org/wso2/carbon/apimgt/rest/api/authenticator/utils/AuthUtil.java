@@ -41,6 +41,8 @@ public class AuthUtil {
     public static final String COOKIE_PATH_SEPARATOR = "; path=";
     public static final String COOKIE_VALUE_SEPARATOR = "; ";
 
+    private static final Map<String, Map<String, String>> contextPaths = new HashMap<>();
+
     /**
      * This method authenticate the user.
      */
@@ -180,9 +182,13 @@ public class AuthUtil {
      * @return Map of context paths
      */
     public static Map<String, String> getContextPaths(Request request, String appName) {
-        Map<String, String> contextPaths = new HashMap<>();
-        String appContext = AuthenticatorConstants.URL_PATH_SEPERATOR + appName;
+        Map<String, String> contextPaths = AuthUtil.contextPaths.get(appName);
+        if (contextPaths != null) {
+            return contextPaths;
+        }
+        contextPaths = new HashMap<>();
 
+        String appContext = AuthenticatorConstants.URL_PATH_SEPERATOR + appName;
         contextPaths.put(AuthenticatorConstants.Context.APP_CONTEXT, appContext);
         contextPaths.put(AuthenticatorConstants.Context.LOGOUT_CONTEXT,
                 AuthenticatorConstants.LOGOUT_SERVICE_CONTEXT + AuthenticatorConstants.URL_PATH_SEPERATOR + appName);
@@ -199,6 +205,7 @@ public class AuthUtil {
         }
         contextPaths.put(AuthenticatorConstants.Context.REST_API_CONTEXT, restAPIContext);
 
+        AuthUtil.contextPaths.put(appName, contextPaths);
         return contextPaths;
     }
 }
