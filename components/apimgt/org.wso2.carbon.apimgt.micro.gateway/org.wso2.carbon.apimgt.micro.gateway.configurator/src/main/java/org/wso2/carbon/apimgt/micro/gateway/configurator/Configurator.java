@@ -31,6 +31,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.wso2.carbon.apimgt.micro.gateway.common.exception.OnPremiseGatewayException;
 import org.wso2.carbon.apimgt.micro.gateway.common.util.HttpRequestUtil;
 import org.wso2.carbon.apimgt.micro.gateway.common.util.OnPremiseGatewayConstants;
+import org.wso2.carbon.apimgt.micro.gateway.common.util.TokenUtil;
 import org.wso2.carbon.apimgt.micro.gateway.configurator.dto.MicroGatewayInitializationDTO;
 
 import java.io.BufferedWriter;
@@ -210,9 +211,7 @@ public class Configurator {
         //Order of args - email, tenantDomain, password
         String username = args[0] + OnPremiseGatewayConstants.USERNAME_SEPARATOR + args[1];
         char[] password = args[2].toCharArray();
-        String authHeaderValue = OnPremiseGatewayConstants.AUTHORIZATION_BASIC + Base64.encodeBase64String(
-                (username + ":" + String.valueOf(password)).getBytes(OnPremiseGatewayConstants.DEFAULT_CHARSET)).trim();
-        return authHeaderValue;
+        return TokenUtil.getBasicAuthHeaderValue(username, password);
     }
 
     /**
