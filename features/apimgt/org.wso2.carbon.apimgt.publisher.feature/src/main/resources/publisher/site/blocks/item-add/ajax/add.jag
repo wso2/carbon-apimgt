@@ -395,14 +395,14 @@ if(jagg.isCSRFTokenValid())
                 }
             }
             print(obj);
-        } else if (action === "getSequenceFile") {
+        } else if (action === "getSequenceFileContent") {
             var apiProvider =request.getParameter("provider");
             var apiName = request.getParameter("apiName");
             var apiVersion = request.getParameter("apiVersion");
             var seqType = request.getParameter("seqType");
             var seqName = request.getParameter("seqName");
             mod = jagg.module("api");
-            result = mod.getSequenceFile(apiProvider, apiName, apiVersion, seqType, seqName);
+            result = mod.getSequenceFileContent(apiProvider, apiName, apiVersion, seqType, seqName);
 
             if (result.error) {
                 obj = {

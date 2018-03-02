@@ -827,7 +827,16 @@ var uploadSequenceFile = function (api) {
     }
 };
 
-var getSequenceFile = function (apiProviderName, apiName, apiVersion, seqType, seqName) {
+/**
+ * Get the content of the selected sequence file.
+ *
+ * @providerName : The api provider name
+ * @apiName      : Name of the api.
+ * @apiVersion   : The version of the api.
+ * @seqType      : The sequence type {in, out, fault}
+ * @seqName      : Name of the sequence.
+ * */
+var getSequenceFileContent = function (apiProviderName, apiName, apiVersion, seqType, seqName) {
     try {
         var username = user.username;
         var apiProvider = org.wso2.carbon.apimgt.impl.APIManagerFactory.getInstance().getAPIProvider(username);
@@ -835,7 +844,7 @@ var getSequenceFile = function (apiProviderName, apiName, apiVersion, seqType, s
             org.wso2.carbon.apimgt.impl.utils.APIUtil.replaceEmailDomain(apiProviderName);
         var apiIdentifierObj = APIIdentifier(emailDomainReplacedProviderName, apiName, apiVersion);
 
-        var sequence = apiProvider.getSequenceFile(apiIdentifierObj, seqType, seqName);
+        var sequence = apiProvider.getSequenceFileContent(apiIdentifierObj, seqType, seqName);
 
         return {
             error: false,

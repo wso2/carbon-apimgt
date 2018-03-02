@@ -3778,10 +3778,9 @@ public class APIProviderImplTest {
         mockSequences(APIConstants.API_CUSTOM_FAULTSEQUENCE_LOCATION, APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT,
                 apiIdentifier);
 
-        String sequenceContent = apiProvider.getSequenceFile(apiIdentifier, "fault", "custom-fault-seq");
+        String sequenceContent = apiProvider.getSequenceFileContent(apiIdentifier, "fault", "custom-fault-seq");
         Assert.assertNotNull(sequenceContent);
 
-        //org.wso2.carbon.registry.api.RegistryException
         ServiceReferenceHolder sh = PowerMockito.mock(ServiceReferenceHolder.class);
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(sh);
         RegistryService registryService = Mockito.mock(RegistryService.class);
@@ -3794,7 +3793,7 @@ public class APIProviderImplTest {
         String msg = "Error while processing the " + APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT +" sequences of " +
                 apiIdentifier + " in the registry";
         try {
-            apiProvider.getSequenceFile(apiIdentifier, "fault", "custom-fault-seq");
+            apiProvider.getSequenceFileContent(apiIdentifier, "fault", "custom-fault-seq");
         } catch(APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains(msg));
         }
@@ -3803,7 +3802,7 @@ public class APIProviderImplTest {
                 RegistryException.class);
         String msg1 =  "Error while retrieving registry for tenant -1";
         try {
-            apiProvider.getSequenceFile(apiIdentifier, "fault", "custom-fault-seq");
+            apiProvider.getSequenceFileContent(apiIdentifier, "fault", "custom-fault-seq");
         } catch(APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains(msg1));
         }

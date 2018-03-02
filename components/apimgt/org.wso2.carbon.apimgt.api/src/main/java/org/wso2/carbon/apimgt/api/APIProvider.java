@@ -873,6 +873,6 @@ public interface APIProvider extends APIManager {
      * @return : The content of the mediation policy as a string.
      * @throws APIManagementException
      */
-    String getSequenceFile(APIIdentifier apiIdentifier, String type, String name) throws APIManagementException;
+    String getSequenceFileContent(APIIdentifier apiIdentifier, String type, String name) throws APIManagementException;
 
 }

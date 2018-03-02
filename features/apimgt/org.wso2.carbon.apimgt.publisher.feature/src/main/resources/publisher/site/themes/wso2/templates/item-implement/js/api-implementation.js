@@ -694,7 +694,7 @@ $(".btn-sequenceDownload").click(function (e) {
     }
 
     jagg.post("/site/blocks/item-add/ajax/add.jag", {
-        action : "getSequenceFile" , provider:apiProvider, apiName:apiName, apiVersion:apiVersion, seqType: selectedFlow, seqName:name
+        action : "getSequenceFileContent" , provider:apiProvider, apiName:apiName, apiVersion:apiVersion, seqType: selectedFlow, seqName:name
     }, function (result) {
         var resultJson = JSON.parse(result);
         var fileName;
