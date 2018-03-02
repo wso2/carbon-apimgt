@@ -4363,23 +4363,10 @@ public class ApiMgtDAO {
                 application.setGroupId(rs.getString("GROUP_ID"));
                 application.setUUID(rs.getString("UUID"));
                 application.setIsBlackListed(rs.getBoolean("ENABLED"));
+                application.setOwner(rs.getString("CREATED_BY"));
 
                 if(multiGroupAppSharingEnabled) {
-                    application.setOwner(rs.getString("CREATED_BY"));
-                    String applicationGroupId = application.getGroupId();
-                    if (applicationGroupId.isEmpty()) { // No migrated App groupId
-                        application.setGroupId(getGroupId(application.getId()));
-                    } else {
-                        // Migrated data exists where Group ID for this App has been stored in AM_APPLICATION table
-                        // in the format 'tenant/groupId', so extract groupId value and store it in the App object
-                        String[] split = applicationGroupId.split("/");
-                        if (split.length == 2) {
-                            application.setGroupId(split[1]);
-                        } else {
-                            log.error("Migrated Group ID: " + applicationGroupId +
-                                    "does not follow the expected format 'tenant/groupId'");
-                        }
-                    }
+                    setGroupIdInApplication(application);
                 }
                 Set<APIKey> keys = getApplicationKeys(subscriber.getName(), application.getId());
                 Map<String, OAuthApplicationInfo> keyMap = getOAuthApplications(application.getId());
@@ -4495,6 +4482,7 @@ public class ApiMgtDAO {
                 application.setGroupId(rs.getString("GROUP_ID"));
                 application.setUUID(rs.getString("UUID"));
                 application.setIsBlackListed(rs.getBoolean("ENABLED"));
+                application.setOwner(rs.getString("CREATED_BY"));
 
                 Set<APIKey> keys = getApplicationKeys(subscriber.getName(), application.getId());
                 Map<String, OAuthApplicationInfo> keyMap = getOAuthApplications(application.getId());
@@ -4507,21 +4495,7 @@ public class ApiMgtDAO {
                     application.addKey(key);
                 }
                 if (multiGroupAppSharingEnabled) {
-                    String applicationGroupId = application.getGroupId();
-                    if (applicationGroupId.isEmpty()) { // No migrated App groupId
-                        application.setGroupId(getGroupId(application.getId()));
-                    } else {
-                        // Migrated data exists where Group ID for this App has been stored in AM_APPLICATION table
-                        // in the format 'tenant/groupId', so extract groupId value and store it in the App object
-                        String[] split = applicationGroupId.split("/");
-                        if (split.length == 2) {
-                            application.setGroupId(split[1]);
-                        } else {
-                            log.error("Migrated Group ID: " + applicationGroupId +
-                                    "does not follow the expected format 'tenant/groupId'");
-                        }
-                    }
-                    application.setOwner(rs.getString("CREATED_BY"));
+                    setGroupIdInApplication(application);
                 }
                 applicationsList.add(application);
             }
@@ -5771,22 +5745,10 @@ public class ApiMgtDAO {
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 application.setUUID(rs.getString("UUID"));
                 application.setGroupId(rs.getString("GROUP_ID"));
+                application.setOwner(rs.getString("CREATED_BY"));
 
                 if (multiGroupAppSharingEnabled) {
-                    String applicationGroupId = application.getGroupId();
-                    if (applicationGroupId.isEmpty()) { // No migrated App groupId
-                        application.setGroupId(getGroupId(application.getId()));
-                    } else {
-                        // Migrated data exists where Group ID for this App has been stored in AM_APPLICATION table
-                        // in the format 'tenant/groupId', so extract groupId value and store it in the App object
-                        String[] split = applicationGroupId.split("/");
-                        if (split.length == 2) {
-                            application.setGroupId(split[1]);
-                        } else {
-                            log.error("Migrated Group ID: " + applicationGroupId +
-                                    "does not follow the expected format 'tenant/groupId'");
-                        }
-                    }
+                    setGroupIdInApplication(application);
                 }
             }
         } catch (SQLException e) {
@@ -5795,6 +5757,23 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
         return application;
+    }
+
+    private void setGroupIdInApplication(Application application) throws APIManagementException {
+        String applicationGroupId = application.getGroupId();
+        if (applicationGroupId.isEmpty()) { // No migrated App groupId
+            application.setGroupId(getGroupId(application.getId()));
+        } else {
+            // Migrated data exists where Group ID for this App has been stored in AM_APPLICATION table
+            // in the format 'tenant/groupId', so extract groupId value and store it in the App object
+            String[] split = applicationGroupId.split("/");
+            if (split.length == 2) {
+                application.setGroupId(split[1]);
+            } else {
+                log.error("Migrated Group ID: " + applicationGroupId +
+                        "does not follow the expected format 'tenant/groupId'");
+            }
+        }
     }
 
     public Application getApplicationById(int applicationId) throws APIManagementException {
