@@ -18,21 +18,41 @@
 package org.wso2.carbon.apimgt.micro.gateway.usage.publisher.internal;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.micro.gateway.common.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.micro.gateway.common.util.HttpRequestUtil;
 import org.wso2.carbon.ntask.core.service.TaskService;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.utils.CarbonUtils;
 
 /**
  * APIUsagePublisherComponent test class
- *
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({CarbonUtils.class, APIManagerConfiguration.class, ServiceReferenceHolder.class,
+        APIManagerConfigurationService.class, HttpRequestUtil.class, RealmService.class})
 public class APIUsagePublisherComponentTest {
+    public static final String CARBON_HOME = "carbon.home";
+    public static final String CARBON_CONFIGS_PATH = "/repository/conf";
+    public static final String CARBON_TENANT_CONFIGS_PATH = "/repository/tenants";
 
     @Test
     public void activate() throws Exception {
+
+        String carbonConfigPath = System.getProperty(CARBON_HOME) + CARBON_CONFIGS_PATH;
+        String tenantDirPath = System.getProperty(CARBON_HOME) + CARBON_TENANT_CONFIGS_PATH;
+        PowerMockito.mockStatic(CarbonUtils.class);
+        PowerMockito.when(CarbonUtils.getCarbonTenantsDirPath()).thenReturn(tenantDirPath);
+        PowerMockito.when(CarbonUtils.getCarbonConfigDirPath()).thenReturn(carbonConfigPath);
+
         APIUsagePublisherComponent serviceComponent = new APIUsagePublisherComponent();
         ComponentContext componentContext = Mockito.mock(ComponentContext.class);
         BundleContext bundleContext = Mockito.mock(BundleContext.class);
