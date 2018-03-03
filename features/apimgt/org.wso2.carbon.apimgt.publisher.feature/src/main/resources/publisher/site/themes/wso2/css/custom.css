@@ -182,3 +182,16 @@ input.ep-field{
 .nav-pills.pages > li:last-child{
     margin-bottom: 30px;
 }
+
+/* Styles for sequence download button. */
+.btn-sequenceDownload:hover {
+    color: white; !important;
+    background-color: #5b5b5b !important;
+}
+
+.btn-sequenceDownload {
+    border: none;
+    color: white;
+    background-color: #888888;
+}
+/*---------------------------------------*/

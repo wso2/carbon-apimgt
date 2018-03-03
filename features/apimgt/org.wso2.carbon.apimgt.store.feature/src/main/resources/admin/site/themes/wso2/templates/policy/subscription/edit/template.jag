@@ -112,6 +112,7 @@
 				            </div>
 				        </div>
 
+                    <div style=<%= policyName == "Unlimited"?"display:none":"" %>>
                         <div class="page-header">
 				            <h2><br></h2>
 				            <p class="lead"><%=i18n.localize("Quota Limits")%></p>
@@ -220,7 +221,7 @@
                                 </select>
                             </div>
                         </div>
-
+                        </div>
 						<div class="page-header">
 				            <h2><br></h2>
 				            <p class="lead"><%=i18n.localize("Custom Attributes")%></p>

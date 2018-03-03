@@ -395,6 +395,26 @@ if(jagg.isCSRFTokenValid())
                 }
             }
             print(obj);
+        } else if (action === "getSequenceFileContent") {
+            var apiProvider =request.getParameter("provider");
+            var apiName = request.getParameter("apiName");
+            var apiVersion = request.getParameter("apiVersion");
+            var seqType = request.getParameter("seqType");
+            var seqName = request.getParameter("seqName");
+            mod = jagg.module("api");
+            result = mod.getSequenceFileContent(apiProvider, apiName, apiVersion, seqType, seqName);
+
+            if (result.error) {
+                obj = {
+                    error: true
+                }
+            } else {
+                obj = {
+                    error: false,
+                    sequence:result.sequence
+                }
+            }
+            print(obj);
         } else {
             print({
                       error:true,

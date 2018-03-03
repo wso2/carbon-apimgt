@@ -182,5 +182,7 @@
     "retired": "RETIRED",
     "roles": "Visible to Roles",
     "tenants": "Visible to Tenants",
-    "to": "to"
+    "to": "to",
+    "You must select a mediation policy to download": "You must select a mediation policy to download.",
+    "Error while retrieving the selected mediation policy": "Error while retrieving the selected mediation policy."
 }

@@ -26,9 +26,7 @@
     for(j = 0; j < subscriptionPolicyArray.length; j++) {
         var subscriptionPolicy = subscriptionPolicyArray[j];
         var policyName = subscriptionPolicy.getPolicyName();
-        if(policyName == "Unlimited") {
-            continue;
-        }
+
         var defaultQuotaPolicy = subscriptionPolicy.getDefaultQuotaPolicy().getType();
         if (defaultQuotaPolicy == "requestCount"){
             var quota = subscriptionPolicy.getDefaultQuotaPolicy().getLimit().getRequestCount();
