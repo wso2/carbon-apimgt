@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>forum-feature</artifactId>
-        <version>6.2.120</version>
+        <version>6.2.121-SNAPSHOT</version>
 	<relativePath>../pom.xml</relativePath>
     </parent>
 
