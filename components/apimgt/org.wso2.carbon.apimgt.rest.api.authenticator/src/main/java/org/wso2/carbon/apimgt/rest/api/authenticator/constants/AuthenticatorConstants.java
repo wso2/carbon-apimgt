@@ -38,6 +38,7 @@ public class AuthenticatorConstants {
     public static final String COOKIE_EXPIRE_TIME = "Expires=Thu, 01-Jan-1970 00:00:01 GMT";
     public static final String REST_CONTEXT = "/api/am";
     public static final String AUTH_USER = "LOGGED_IN_USER";
+    public static final String ADMIN_USER = "admin";
     public static final String CONSUMER_KEY = "CONSUMER_KEY";
     public static final String CONSUMER_SECRET = "CONSUMER_SECRET";
     public static final String SSO_ENABLED = "is_sso_enabled";
@@ -49,8 +50,8 @@ public class AuthenticatorConstants {
     public static final String ADMIN_APPLICATION = "admin";
     public static final String EDITOR_APPLICATION = "editor";
     public static final String AUTHORIZATION_CODE_CALLBACK_URL = "login/callback/";
-    public static final String URL_PATH_SEPERATOR = "/";
-    public static final String PROTOCOL_SEPERATOR = "://";
+    public static final String URL_PATH_SEPARATOR = "/";
+    public static final String PROTOCOL_SEPARATOR = "://";
     public static final String LOGOUT_SERVICE_CONTEXT = "/login/logout";
     public static final String LOGIN_SERVICE_CONTEXT = "/login/token";
     public static final String HTTPS_PROTOCOL = "https";

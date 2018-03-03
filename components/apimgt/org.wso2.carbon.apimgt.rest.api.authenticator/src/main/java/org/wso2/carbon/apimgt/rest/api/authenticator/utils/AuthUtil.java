@@ -188,17 +188,17 @@ public class AuthUtil {
         }
         contextPaths = new HashMap<>();
 
-        String appContext = AuthenticatorConstants.URL_PATH_SEPERATOR + appName;
+        String appContext = AuthenticatorConstants.URL_PATH_SEPARATOR + appName;
         contextPaths.put(AuthenticatorConstants.Context.APP_CONTEXT, appContext);
         contextPaths.put(AuthenticatorConstants.Context.LOGOUT_CONTEXT,
-                AuthenticatorConstants.LOGOUT_SERVICE_CONTEXT + AuthenticatorConstants.URL_PATH_SEPERATOR + appName);
+                AuthenticatorConstants.LOGOUT_SERVICE_CONTEXT + AuthenticatorConstants.URL_PATH_SEPARATOR + appName);
         contextPaths.put(AuthenticatorConstants.Context.LOGIN_CONTEXT,
-                AuthenticatorConstants.LOGIN_SERVICE_CONTEXT + AuthenticatorConstants.URL_PATH_SEPERATOR + appName);
+                AuthenticatorConstants.LOGIN_SERVICE_CONTEXT + AuthenticatorConstants.URL_PATH_SEPARATOR + appName);
 
         String restAPIContext;
         if (appContext.contains(AuthenticatorConstants.EDITOR_APPLICATION) ||
                 request.getUri().contains(AuthenticatorConstants.PUBLISHER_APPLICATION)) {
-            restAPIContext = AuthenticatorConstants.REST_CONTEXT + AuthenticatorConstants.URL_PATH_SEPERATOR +
+            restAPIContext = AuthenticatorConstants.REST_CONTEXT + AuthenticatorConstants.URL_PATH_SEPARATOR +
                     AuthenticatorConstants.PUBLISHER_APPLICATION;
         } else {
             restAPIContext = AuthenticatorConstants.REST_CONTEXT + appContext;

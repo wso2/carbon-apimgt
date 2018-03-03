@@ -73,9 +73,11 @@ public class AuthenticatorService {
     private APIMConfigurationService apimConfigurationService;
 
     /**
-     * Constructor.
+     * Constructor
      *
      * @param keyManager KeyManager object
+     * @param systemApplicationDao systemApplicationDao object
+     * @param apimConfigurationService apimConfigurationService object
      */
     public AuthenticatorService(KeyManager keyManager, SystemApplicationDao systemApplicationDao,
                                 APIMConfigurationService apimConfigurationService) {
@@ -269,7 +271,7 @@ public class AuthenticatorService {
             authUser = getUsernameFromJWT(accessTokenInfo.getIdToken());
         }
         if (authUser == null) {
-            authUser = "admin";
+            authUser = AuthenticatorConstants.ADMIN_USER;
         }
 
         AuthResponseBean responseBean = new AuthResponseBean();
@@ -377,8 +379,8 @@ public class AuthenticatorService {
                         "'wso2.carbon.apimgt:environmentConfigurations:allowedHosts' configuration" +
                         " is not empty. value: " + uiServiceHost);
             }
-            uiServiceUrl = AuthenticatorConstants.HTTPS_PROTOCOL + AuthenticatorConstants.PROTOCOL_SEPERATOR +
-                    uiServiceHost + AuthenticatorConstants.URL_PATH_SEPERATOR;
+            uiServiceUrl = AuthenticatorConstants.HTTPS_PROTOCOL + AuthenticatorConstants.PROTOCOL_SEPARATOR +
+                    uiServiceHost + AuthenticatorConstants.URL_PATH_SEPARATOR;
             log.info("UI Service: {}", uiServiceUrl);
         }
 
