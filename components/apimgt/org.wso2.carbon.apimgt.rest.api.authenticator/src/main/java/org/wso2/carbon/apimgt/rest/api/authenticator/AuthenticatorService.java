@@ -75,8 +75,8 @@ public class AuthenticatorService {
     /**
      * Constructor
      *
-     * @param keyManager KeyManager object
-     * @param systemApplicationDao systemApplicationDao object
+     * @param keyManager               KeyManager object
+     * @param systemApplicationDao     systemApplicationDao object
      * @param apimConfigurationService apimConfigurationService object
      */
     public AuthenticatorService(KeyManager keyManager, SystemApplicationDao systemApplicationDao,
@@ -113,16 +113,13 @@ public class AuthenticatorService {
 
         // Get scopes of the application
         String scopes = getApplicationScopes(appName);
-        if (log.isDebugEnabled()) {
-            log.debug("Set scopes for " + appName + " application using swagger definition.");
-        }
+        log.debug("Set scopes for {} application using swagger definition.", appName);
+
         OAuthApplicationInfo oAuthApplicationInfo;
         try {
             oAuthApplicationInfo = createDCRApplication(appName, callBackURL, grantTypes);
             if (oAuthApplicationInfo != null) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Created DCR Application successfully for " + appName + ".");
-                }
+                log.debug("Created DCR Application successfully for {}.", appName);
                 String oAuthApplicationClientId = oAuthApplicationInfo.getClientId();
                 String oAuthApplicationCallBackURL = oAuthApplicationInfo.getCallBackURL();
                 oAuthData.addProperty(KeyManagerConstants.OAUTH_CLIENT_ID, oAuthApplicationClientId);
@@ -170,14 +167,10 @@ public class AuthenticatorService {
 
         // Get scopes of the application
         String scopes = getApplicationScopes(appName);
-        if (log.isDebugEnabled()) {
-            log.debug("Set scopes for " + appName + " application using swagger definition.");
-        }
+        log.debug("Set scopes for {} application using swagger definition.", appName);
         // TODO: Get Consumer Key & Secret without creating a new app, from the IS side
         Map<String, String> consumerKeySecretMap = getConsumerKeySecret(appName);
-        if (log.isDebugEnabled()) {
-            log.debug("Received consumer key & secret for " + appName + " application.");
-        }
+        log.debug("Received consumer key & secret for {} application.", appName);
         try {
             if (KeyManagerConstants.AUTHORIZATION_CODE_GRANT_TYPE.equals(grantType)) {
                 // Access token for authorization code grant type
@@ -237,10 +230,7 @@ public class AuthenticatorService {
             throw new APIManagementException(errorMsg, e, ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);
         }
 
-        if (log.isDebugEnabled()) {
-            log.debug("Received access token for " + appName + " application.");
-        }
-
+        log.debug("Received access token for {} application.", appName);
         return accessTokenInfo;
     }
 
@@ -356,7 +346,7 @@ public class AuthenticatorService {
     /**
      * Get the URI for the redirection to the UI Service
      *
-     * @param appName Name of the Application
+     * @param appName          Name of the Application
      * @param authResponseBean Authentication response bean
      * @return URI of the UI Service
      */
@@ -367,22 +357,12 @@ public class AuthenticatorService {
                 .getAllowedHosts().get(0);
 
         if (StringUtils.isEmpty(uiServiceHost)) {
-            if (log.isDebugEnabled()) {
-                log.debug("The first string in the list " +
-                        "'wso2.carbon.apimgt:environmentConfigurations:allowedHosts' configuration is empty.");
-                log.debug("Read UI Service from 'wso2.carbon.apimgt.application:apimBaseUrl' configuration.");
-            }
             uiServiceUrl = ServiceReferenceHolder.getInstance().getAPIMAppConfiguration().getApimBaseUrl();
         } else {
-            if (log.isDebugEnabled()) {
-                log.debug("The first string in the list " +
-                        "'wso2.carbon.apimgt:environmentConfigurations:allowedHosts' configuration" +
-                        " is not empty. value: " + uiServiceHost);
-            }
             uiServiceUrl = AuthenticatorConstants.HTTPS_PROTOCOL + AuthenticatorConstants.PROTOCOL_SEPARATOR +
                     uiServiceHost + AuthenticatorConstants.URL_PATH_SEPARATOR;
-            log.info("UI Service: {}", uiServiceUrl);
         }
+        log.debug("Read UI Service url from configurations. value: {}", uiServiceUrl);
 
         if (authResponseBean == null) {
             return new URI(uiServiceUrl + appName);

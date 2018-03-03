@@ -191,9 +191,9 @@ public class AuthUtil {
         String appContext = AuthenticatorConstants.URL_PATH_SEPARATOR + appName;
         contextPaths.put(AuthenticatorConstants.Context.APP_CONTEXT, appContext);
         contextPaths.put(AuthenticatorConstants.Context.LOGOUT_CONTEXT,
-                AuthenticatorConstants.LOGOUT_SERVICE_CONTEXT + AuthenticatorConstants.URL_PATH_SEPARATOR + appName);
+                AuthenticatorConstants.LOGOUT_SERVICE_CONTEXT + appContext);
         contextPaths.put(AuthenticatorConstants.Context.LOGIN_CONTEXT,
-                AuthenticatorConstants.LOGIN_SERVICE_CONTEXT + AuthenticatorConstants.URL_PATH_SEPARATOR + appName);
+                AuthenticatorConstants.LOGIN_SERVICE_CONTEXT + appContext);
 
         String restAPIContext;
         if (appContext.contains(AuthenticatorConstants.EDITOR_APPLICATION) ||

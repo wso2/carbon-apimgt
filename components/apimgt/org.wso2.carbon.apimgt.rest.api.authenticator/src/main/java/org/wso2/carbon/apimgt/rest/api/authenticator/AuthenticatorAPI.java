@@ -254,10 +254,7 @@ public class AuthenticatorAPI implements Microservice {
             authenticatorService.setupAccessTokenParts(cookies, authResponseBean, accessTokenInfo.getAccessToken(),
                     contextPaths, true);
 
-            if (log.isDebugEnabled()) {
-                log.debug("Set cookies for " + appName + " application.");
-            }
-
+            log.debug("Set cookies for {} application.", appName);
             if (AuthenticatorConstants.PUBLISHER_APPLICATION.equals(appName) || AuthenticatorConstants.STORE_APPLICATION.equals(appName)) {
                 URI targetURIForRedirection = authenticatorService.getUIServiceRedirectionURI(appName, authResponseBean);
                 return Response.status(Response.Status.FOUND)
