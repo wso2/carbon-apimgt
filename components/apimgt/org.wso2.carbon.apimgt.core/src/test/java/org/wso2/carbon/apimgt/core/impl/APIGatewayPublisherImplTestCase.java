@@ -19,53 +19,81 @@
 package org.wso2.carbon.apimgt.core.impl;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.testng.Assert;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
+import org.wso2.carbon.apimgt.core.api.Broker;
+import org.wso2.carbon.apimgt.core.configuration.models.ContainerBasedGatewayConfiguration;
 import org.wso2.carbon.apimgt.core.exception.ContainerBasedGatewayException;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.util.BrokerUtil;
+import org.wso2.carbon.config.ConfigurationException;
+import org.wso2.carbon.config.provider.ConfigProvider;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({APIManagerFactory.class, BrokerUtil.class})
 public class APIGatewayPublisherImplTestCase {
 
     @Test
-    public void testCreateContainerGateway() throws ContainerBasedGatewayException {
+    public void testCreateContainerGateway() throws ContainerBasedGatewayException, ConfigurationException {
 
         APIGatewayPublisherImpl apiGatewayPublisher = new APIGatewayPublisherImpl();
-        APIManagerFactory apiManagerFactory = Mockito.mock(APIManagerFactory.class);
-        PowerMockito.mockStatic(APIManagerFactory.class);
-        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(apiManagerFactory);
 
         ContainerBasedGatewayGenerator containerBasedGatewayGenerator = Mockito
                 .mock(ContainerBasedGatewayGenerator.class);
-        Mockito.when(apiManagerFactory.getContainerBasedGatewayGenerator()).thenReturn(containerBasedGatewayGenerator);
+        apiGatewayPublisher.setContainerBasedGatewayGenerator(containerBasedGatewayGenerator);
+
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         apiGatewayPublisher.createContainerBasedGateway("label", api);
         Mockito.verify(containerBasedGatewayGenerator, Mockito.times(1)).createContainerGateway("label", api);
     }
 
     @Test
+    public void testGetContainerBasedGatewayGenerator() throws ContainerBasedGatewayException, ConfigurationException {
+
+        APIGatewayPublisherImpl apiGatewayPublisher = new APIGatewayPublisherImpl();
+
+        ConfigProvider configProvider = Mockito.mock(ConfigProvider.class);
+        ContainerBasedGatewayConfiguration containerBasedGatewayConfig = new ContainerBasedGatewayConfiguration();
+        Mockito.when(configProvider.getConfigurationObject(ContainerBasedGatewayConfiguration.class))
+                .thenReturn(containerBasedGatewayConfig);
+        ContainerBasedGatewayConfigBuilder.build(configProvider);
+
+        ContainerBasedGatewayGenerator containerBasedGatewayGenerator =
+                apiGatewayPublisher.getContainerBasedGatewayGenerator();
+        Assert.assertNotNull(containerBasedGatewayGenerator);
+    }
+
+    @Test(expected = ContainerBasedGatewayException.class)
+    public void testGetContainerBasedGatewayGeneratorForException() throws ContainerBasedGatewayException,
+            ConfigurationException {
+
+        APIGatewayPublisherImpl apiGatewayPublisher = new APIGatewayPublisherImpl();
+
+        ConfigProvider configProvider = Mockito.mock(ConfigProvider.class);
+        ContainerBasedGatewayConfiguration containerBasedGatewayConfig = new ContainerBasedGatewayConfiguration();
+        containerBasedGatewayConfig.setImplClass("org.wso2.invalid.class.name");
+        Mockito.when(configProvider.getConfigurationObject(ContainerBasedGatewayConfiguration.class))
+                .thenReturn(containerBasedGatewayConfig);
+        ContainerBasedGatewayConfigBuilder.build(configProvider);
+
+        ContainerBasedGatewayGenerator containerBasedGatewayGenerator =
+                apiGatewayPublisher.getContainerBasedGatewayGenerator();
+        Assert.assertNotNull(containerBasedGatewayGenerator);
+    }
+
+    @Test
     public void testDeleteAPIWhenAPIHasOwnGateway() throws GatewayException, ContainerBasedGatewayException {
 
         APIGatewayPublisherImpl apiGatewayPublisher = new APIGatewayPublisherImpl();
-        APIManagerFactory apiManagerFactory = Mockito.mock(APIManagerFactory.class);
-        PowerMockito.mockStatic(APIManagerFactory.class);
-        PowerMockito.mockStatic(BrokerUtil.class);
-        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(apiManagerFactory);
-
+        Broker broker = Mockito.mock(BrokerImpl.class, Mockito.RETURNS_DEEP_STUBS);
+        BrokerUtil.initialize(broker);
         ContainerBasedGatewayGenerator containerBasedGatewayGenerator = Mockito
                 .mock(ContainerBasedGatewayGenerator.class);
-        Mockito.when(apiManagerFactory.getContainerBasedGatewayGenerator()).thenReturn(containerBasedGatewayGenerator);
+        apiGatewayPublisher.setContainerBasedGatewayGenerator(containerBasedGatewayGenerator);
         List<String> labels = new ArrayList<>();
         labels.add("label");
         API api = SampleTestObjectCreator.createDefaultAPI().lifeCycleStatus(APIStatus.PUBLISHED.getStatus())
@@ -78,14 +106,12 @@ public class APIGatewayPublisherImplTestCase {
     public void testDeleteAPIWhenAPIDoesNotHaveOwnGateway() throws GatewayException, ContainerBasedGatewayException {
 
         APIGatewayPublisherImpl apiGatewayPublisher = new APIGatewayPublisherImpl();
-        APIManagerFactory apiManagerFactory = Mockito.mock(APIManagerFactory.class);
-        PowerMockito.mockStatic(APIManagerFactory.class);
-        PowerMockito.mockStatic(BrokerUtil.class);
-        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(apiManagerFactory);
+        Broker broker = Mockito.mock(BrokerImpl.class, Mockito.RETURNS_DEEP_STUBS);
+        BrokerUtil.initialize(broker);
 
         ContainerBasedGatewayGenerator containerBasedGatewayGenerator = Mockito
                 .mock(ContainerBasedGatewayGenerator.class);
-        Mockito.when(apiManagerFactory.getContainerBasedGatewayGenerator()).thenReturn(containerBasedGatewayGenerator);
+        apiGatewayPublisher.setContainerBasedGatewayGenerator(containerBasedGatewayGenerator);
         List<String> labels = new ArrayList<>();
         labels.add("label");
         API api = SampleTestObjectCreator.createDefaultAPI().lifeCycleStatus(APIStatus.PUBLISHED.getStatus())
@@ -98,14 +124,12 @@ public class APIGatewayPublisherImplTestCase {
     public void testDeleteAPIWhenLabelsAreNull() throws GatewayException, ContainerBasedGatewayException {
 
         APIGatewayPublisherImpl apiGatewayPublisher = new APIGatewayPublisherImpl();
-        APIManagerFactory apiManagerFactory = Mockito.mock(APIManagerFactory.class);
-        PowerMockito.mockStatic(APIManagerFactory.class);
-        PowerMockito.mockStatic(BrokerUtil.class);
-        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(apiManagerFactory);
+        Broker broker = Mockito.mock(BrokerImpl.class, Mockito.RETURNS_DEEP_STUBS);
+        BrokerUtil.initialize(broker);
 
         ContainerBasedGatewayGenerator containerBasedGatewayGenerator = Mockito
                 .mock(ContainerBasedGatewayGenerator.class);
-        Mockito.when(apiManagerFactory.getContainerBasedGatewayGenerator()).thenReturn(containerBasedGatewayGenerator);
+        apiGatewayPublisher.setContainerBasedGatewayGenerator(containerBasedGatewayGenerator);
         API api = SampleTestObjectCreator.createDefaultAPI().lifeCycleStatus(APIStatus.PUBLISHED.getStatus())
                 .hasOwnGateway(true).labels(null).build();
         apiGatewayPublisher.deleteAPI(api);
@@ -116,14 +140,12 @@ public class APIGatewayPublisherImplTestCase {
     public void testDeleteAPIWhenLabelAreEmpty() throws GatewayException, ContainerBasedGatewayException {
 
         APIGatewayPublisherImpl apiGatewayPublisher = new APIGatewayPublisherImpl();
-        APIManagerFactory apiManagerFactory = Mockito.mock(APIManagerFactory.class);
-        PowerMockito.mockStatic(APIManagerFactory.class);
-        PowerMockito.mockStatic(BrokerUtil.class);
-        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(apiManagerFactory);
+        Broker broker = Mockito.mock(BrokerImpl.class, Mockito.RETURNS_DEEP_STUBS);
+        BrokerUtil.initialize(broker);
 
         ContainerBasedGatewayGenerator containerBasedGatewayGenerator = Mockito
                 .mock(ContainerBasedGatewayGenerator.class);
-        Mockito.when(apiManagerFactory.getContainerBasedGatewayGenerator()).thenReturn(containerBasedGatewayGenerator);
+        apiGatewayPublisher.setContainerBasedGatewayGenerator(containerBasedGatewayGenerator);
         List<String> labels = new ArrayList<>();
         API api = SampleTestObjectCreator.createDefaultAPI().lifeCycleStatus(APIStatus.PUBLISHED.getStatus())
                 .hasOwnGateway(true).labels(labels).build();
@@ -135,13 +157,14 @@ public class APIGatewayPublisherImplTestCase {
     public void testDeleteAPIForException() throws GatewayException, ContainerBasedGatewayException {
 
         APIGatewayPublisherImpl apiGatewayPublisher = new APIGatewayPublisherImpl();
-        APIManagerFactory apiManagerFactory = Mockito.mock(APIManagerFactory.class);
-        PowerMockito.mockStatic(APIManagerFactory.class);
-        PowerMockito.mockStatic(BrokerUtil.class);
-        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(apiManagerFactory);
+        Broker broker = Mockito.mock(BrokerImpl.class, Mockito.RETURNS_DEEP_STUBS);
+        BrokerUtil.initialize(broker);
 
-        Mockito.when(apiManagerFactory.getContainerBasedGatewayGenerator())
-                .thenThrow(ContainerBasedGatewayException.class);
+        ContainerBasedGatewayGenerator containerBasedGatewayGenerator = Mockito
+                .mock(ContainerBasedGatewayGenerator.class);
+        apiGatewayPublisher.setContainerBasedGatewayGenerator(containerBasedGatewayGenerator);
+        Mockito.doThrow(ContainerBasedGatewayException.class).when(containerBasedGatewayGenerator)
+                .removeContainerBasedGateway(Mockito.any(), Mockito.any());
         List<String> labels = new ArrayList<>();
         labels.add("label");
         API api = SampleTestObjectCreator.createDefaultAPI().lifeCycleStatus(APIStatus.PUBLISHED.getStatus())

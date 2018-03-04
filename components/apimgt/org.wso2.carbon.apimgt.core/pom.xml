@@ -249,6 +249,9 @@
             <artifactId>okhttp</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.wso2.orbit.com.squareup.okhttp</groupId>
+            <artifactId>logging-interceptor</artifactId></dependency>
+        <dependency>
             <groupId>org.wso2.orbit.io.fabric8</groupId>
             <artifactId>kubernetes-client</artifactId>
         </dependency>
