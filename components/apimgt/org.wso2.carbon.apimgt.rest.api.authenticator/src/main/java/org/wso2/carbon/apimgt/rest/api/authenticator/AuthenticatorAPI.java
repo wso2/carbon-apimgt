@@ -104,7 +104,7 @@ public class AuthenticatorAPI implements Microservice {
                 }
             }
 
-            Map<String, String> contextPaths = AuthUtil.getContextPaths(request, appName);
+            Map<String, String> contextPaths = AuthUtil.getContextPaths(appName);
             AccessTokenInfo accessTokenInfo = authenticatorService.getTokens(appName, grantType, userName, password,
                     refreshToken, Long.parseLong(validityPeriod), null, assertion, identityProvider);
             authResponseBean = authenticatorService.getResponseBeanFromTokenInfo(accessTokenInfo);
@@ -158,7 +158,7 @@ public class AuthenticatorAPI implements Microservice {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/logout/{appName}")
     public Response logout(@Context Request request, @PathParam("appName") String appName) {
-        Map<String, String> contextPaths = AuthUtil.getContextPaths(request, appName);
+        Map<String, String> contextPaths = AuthUtil.getContextPaths(appName);
 
         String environmentName = APIMConfigurationService.getInstance()
                 .getEnvironmentConfigurations().getEnvironmentLabel();
@@ -247,7 +247,7 @@ public class AuthenticatorAPI implements Microservice {
             AuthResponseBean authResponseBean;
             Map<String, NewCookie> cookies = new HashMap<>();
 
-            Map<String, String> contextPaths = AuthUtil.getContextPaths(request, appName);
+            Map<String, String> contextPaths = AuthUtil.getContextPaths(appName);
             AccessTokenInfo accessTokenInfo = authenticatorService.getTokens(appName, grantType,
                     null, null, null, 0, authorizationCode, null, null);
             authResponseBean = authenticatorService.getResponseBeanFromTokenInfo(accessTokenInfo);

@@ -371,13 +371,17 @@ public class AuthenticatorService {
             return new URI(uiServiceUrl + appName);
         }
 
-        String authResponseBeanData = authResponseBean.getAuthUser() + "&id_token="
-                + authResponseBean.getIdToken() + "&partial_token=" + authResponseBean.getPartialToken()
-                + "&scopes=" + authResponseBean.getScopes() + "&validity_period="
-                + authResponseBean.getValidityPeriod();
-        return new URI(uiServiceUrl + appName + "/login?user_name="
-                + URLEncoder.encode(authResponseBeanData, "UTF-8")
-                .replaceAll("\\+", "%20").replaceAll("%26", "&").replaceAll("%3D", "="));
+        String authResponseBeanData = new StringBuilder()
+                .append("user_name=").append(authResponseBean.getAuthUser())
+                .append("&id_token=").append(authResponseBean.getIdToken())
+                .append("&partial_token=").append(authResponseBean.getPartialToken())
+                .append("&scopes=").append(authResponseBean.getScopes())
+                .append("&validity_period=").append(authResponseBean.getValidityPeriod()).toString();
+        String Uri = new StringBuilder(uiServiceUrl).append(appName).append("/login?")
+                .append(URLEncoder.encode(authResponseBeanData, "UTF-8")
+                        .replaceAll("\\+", "%20").replaceAll("%26", "&")
+                        .replaceAll("%3D", "=")).toString();
+        return new URI(Uri);
     }
 
     /**

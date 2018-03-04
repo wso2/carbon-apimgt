@@ -177,11 +177,10 @@ public class AuthUtil {
     /**
      * Get context paths for the application
      *
-     * @param request Request
      * @param appName Name of the Application
      * @return Map of context paths
      */
-    public static Map<String, String> getContextPaths(Request request, String appName) {
+    public static Map<String, String> getContextPaths(String appName) {
         Map<String, String> contextPaths = AuthUtil.contextPaths.get(appName);
         if (contextPaths != null) {
             return contextPaths;

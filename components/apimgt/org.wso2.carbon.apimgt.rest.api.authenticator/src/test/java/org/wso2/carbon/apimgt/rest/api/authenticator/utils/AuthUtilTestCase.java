@@ -21,7 +21,9 @@ package org.wso2.carbon.apimgt.rest.api.authenticator.utils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.rest.api.authenticator.constants.AuthenticatorConstants;
+import org.wso2.carbon.apimgt.rest.api.authenticator.dto.ErrorDTO;
 import org.wso2.msf4j.Request;
 
 import java.util.HashMap;
@@ -47,6 +49,12 @@ public class AuthUtilTestCase {
         // Error Path
         Mockito.when(request.getHeader(AuthenticatorConstants.AUTHORIZATION_HTTP_HEADER))
                 .thenReturn("bearer-xxx-partial-token-1-xxx");
+        token = AuthUtil.extractTokenFromHeaders(request, "WSO2_AM_TOKEN_2", "Production");
+        Assert.assertNull(token);
+
+        // Error Path
+        Mockito.when(request.getHeader(AuthenticatorConstants.AUTHORIZATION_HTTP_HEADER))
+                .thenReturn("xxx-partial-token-1-xxx");
         token = AuthUtil.extractTokenFromHeaders(request, "WSO2_AM_TOKEN_2", "Production");
         Assert.assertNull(token);
 
@@ -86,13 +94,9 @@ public class AuthUtilTestCase {
     @Test
     public void testGetContextPaths() {
         // Happy Path
-        //// Mocked request object from the client
-        Request request = Mockito.mock(Request.class);
-        Mockito.when(request.getUri()).thenReturn("/login/token/publisher");
-
         //// expect the same map object when call the method again
-        Map<String, String> expectedContextPaths = AuthUtil.getContextPaths(request, "publisher");
-        Map<String, String> actualContextPaths = AuthUtil.getContextPaths(request, "publisher");
+        Map<String, String> expectedContextPaths = AuthUtil.getContextPaths("publisher");
+        Map<String, String> actualContextPaths = AuthUtil.getContextPaths("publisher");
         Assert.assertSame(expectedContextPaths, actualContextPaths);
 
         //// expect for publisher app
@@ -104,13 +108,49 @@ public class AuthUtilTestCase {
         Assert.assertEquals(expectedContextPaths, actualContextPaths);
 
         //// expect for editor app
-        actualContextPaths = AuthUtil.getContextPaths(request, "editor");
+        actualContextPaths = AuthUtil.getContextPaths("editor");
         expectedContextPaths = new HashMap<>();
-        expectedContextPaths.put("APP_CONTEXT", "/publisher");
-        expectedContextPaths.put("LOGOUT_CONTEXT", "/login/logout/publisher");
-        expectedContextPaths.put("LOGIN_CONTEXT", "/login/token/publisher");
+        expectedContextPaths.put("APP_CONTEXT", "/editor");
+        expectedContextPaths.put("LOGOUT_CONTEXT", "/login/logout/editor");
+        expectedContextPaths.put("LOGIN_CONTEXT", "/login/token/editor");
         expectedContextPaths.put("REST_API_CONTEXT", "/api/am/publisher");
         Assert.assertEquals(expectedContextPaths, actualContextPaths);
+    }
+
+    @Test
+    public void testGetErrorDTO(){
+        ErrorHandler errorHandler = new ErrorHandler() {
+            @Override
+            public long getErrorCode() {
+                return 1234567890L;
+            }
+
+            @Override
+            public String getErrorMessage() {
+                return "xxx-error-message-xxx";
+            }
+
+            @Override
+            public String getErrorDescription() {
+                return "xxx-error-description-xxx";
+            }
+        };
+        HashMap<String, String> paramList = new HashMap<>();
+        paramList.put("param_1", "xxx-param_1-xxx");
+        paramList.put("param_2", "xxx-param_2-xxx");
+
+        //// expected error dto
+        ErrorDTO expectedErrorDTO = new ErrorDTO();
+        expectedErrorDTO.setCode(1234567890L);
+        expectedErrorDTO.setMessage("xxx-error-message-xxx");
+        expectedErrorDTO.setDescription("xxx-error-description-xxx");
+        expectedErrorDTO.setMoreInfo(paramList);
+
+        ErrorDTO actualErrorDTO = AuthUtil.getErrorDTO(errorHandler, paramList);
+        Assert.assertEquals(expectedErrorDTO.getCode(), actualErrorDTO.getCode());
+        Assert.assertEquals(expectedErrorDTO.getMessage(), actualErrorDTO.getMessage());
+        Assert.assertEquals(expectedErrorDTO.getDescription(), actualErrorDTO.getDescription());
+        Assert.assertEquals(expectedErrorDTO.getMoreInfo(), actualErrorDTO.getMoreInfo());
     }
 
     @Test

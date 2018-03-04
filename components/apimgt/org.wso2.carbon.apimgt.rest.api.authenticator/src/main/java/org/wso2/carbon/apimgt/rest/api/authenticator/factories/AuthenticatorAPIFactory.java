@@ -32,15 +32,12 @@ public class AuthenticatorAPIFactory {
     private static AuthenticatorAPIFactory instance = new AuthenticatorAPIFactory();
     private AuthenticatorService service;
 
-    /**
-     * Private constructor
-     */
     private AuthenticatorAPIFactory() {
-
     }
 
     /**
      * Get an instance of AuthenticatorAPIFactory
+     *
      * @return instance of AuthenticatorAPIFactory
      */
     public static AuthenticatorAPIFactory getInstance() {
@@ -49,8 +46,9 @@ public class AuthenticatorAPIFactory {
 
     /**
      * Get an instance of AuthenticatorService
+     *
      * @return AuthenticatorService
-     * @throws APIMgtDAOException if failed to initialize SystemApplicationDao
+     * @throws APIMgtDAOException     if failed to initialize SystemApplicationDao
      * @throws KeyManagementException if failed to initialize KeyManager
      */
     public synchronized AuthenticatorService getService() throws APIMgtDAOException, KeyManagementException {
