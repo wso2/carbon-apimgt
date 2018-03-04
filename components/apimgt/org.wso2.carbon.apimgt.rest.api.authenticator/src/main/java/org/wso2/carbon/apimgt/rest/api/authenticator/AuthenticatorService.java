@@ -41,9 +41,9 @@ import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
+import org.wso2.carbon.apimgt.rest.api.authenticator.configuration.APIMAppConfigurationService;
 import org.wso2.carbon.apimgt.rest.api.authenticator.configuration.models.APIMAppConfigurations;
 import org.wso2.carbon.apimgt.rest.api.authenticator.constants.AuthenticatorConstants;
-import org.wso2.carbon.apimgt.rest.api.authenticator.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.authenticator.utils.AuthUtil;
 import org.wso2.carbon.apimgt.rest.api.authenticator.utils.bean.AuthResponseBean;
 import org.wso2.carbon.apimgt.rest.api.common.APIConstants;
@@ -71,6 +71,7 @@ public class AuthenticatorService {
     private KeyManager keyManager;
     private SystemApplicationDao systemApplicationDao;
     private APIMConfigurationService apimConfigurationService;
+    private APIMAppConfigurationService apimAppConfigurationService;
 
     /**
      * Constructor
@@ -80,10 +81,12 @@ public class AuthenticatorService {
      * @param apimConfigurationService apimConfigurationService object
      */
     public AuthenticatorService(KeyManager keyManager, SystemApplicationDao systemApplicationDao,
-                                APIMConfigurationService apimConfigurationService) {
+                                APIMConfigurationService apimConfigurationService,
+                                APIMAppConfigurationService apimAppConfigurationService) {
         this.keyManager = keyManager;
         this.systemApplicationDao = systemApplicationDao;
         this.apimConfigurationService = apimConfigurationService;
+        this.apimAppConfigurationService = apimAppConfigurationService;
     }
 
     /**
@@ -108,7 +111,7 @@ public class AuthenticatorService {
         if (isMultiEnvironmentOverviewEnabled) {
             grantTypes.add(KeyManagerConstants.JWT_GRANT_TYPE);
         }
-        APIMAppConfigurations appConfigs = ServiceReferenceHolder.getInstance().getAPIMAppConfiguration();
+        APIMAppConfigurations appConfigs = apimAppConfigurationService.getApimAppConfigurations();
         String callBackURL = appConfigs.getApimBaseUrl() + AuthenticatorConstants.AUTHORIZATION_CODE_CALLBACK_URL + appName;
 
         // Get scopes of the application
@@ -174,8 +177,7 @@ public class AuthenticatorService {
         try {
             if (KeyManagerConstants.AUTHORIZATION_CODE_GRANT_TYPE.equals(grantType)) {
                 // Access token for authorization code grant type
-                APIMAppConfigurations appConfigs = ServiceReferenceHolder.getInstance()
-                        .getAPIMAppConfiguration();
+                APIMAppConfigurations appConfigs = apimAppConfigurationService.getApimAppConfigurations();
                 String callBackURL = appConfigs.getApimBaseUrl() + AuthenticatorConstants.AUTHORIZATION_CODE_CALLBACK_URL + appName;
 
                 if (authorizationCode != null) {
@@ -350,14 +352,15 @@ public class AuthenticatorService {
      * @param authResponseBean Authentication response bean
      * @return URI of the UI Service
      */
-    public URI getUIServiceRedirectionURI(String appName, AuthResponseBean authResponseBean) throws URISyntaxException, UnsupportedEncodingException {
+    public URI getUIServiceRedirectionURI(String appName, AuthResponseBean authResponseBean)
+            throws URISyntaxException,UnsupportedEncodingException {
         String uiServiceUrl;
         //The first host in the list "allowedHosts" is the host of UI-Service
         String uiServiceHost = apimConfigurationService.getEnvironmentConfigurations()
                 .getAllowedHosts().get(0);
 
         if (StringUtils.isEmpty(uiServiceHost)) {
-            uiServiceUrl = ServiceReferenceHolder.getInstance().getAPIMAppConfiguration().getApimBaseUrl();
+            uiServiceUrl = apimAppConfigurationService.getApimAppConfigurations().getApimBaseUrl();
         } else {
             uiServiceUrl = AuthenticatorConstants.HTTPS_PROTOCOL + AuthenticatorConstants.PROTOCOL_SEPARATOR +
                     uiServiceHost + AuthenticatorConstants.URL_PATH_SEPARATOR;
@@ -497,6 +500,10 @@ public class AuthenticatorService {
         }
     }
 
+    protected KeyManager getKeyManager() {
+        return keyManager;
+    }
+
     /**
      * Represents Payload of JWT.
      */
@@ -526,9 +533,5 @@ public class AuthenticatorService {
         public String[] getAud() {
             return aud;
         }
-    }
-
-    protected KeyManager getKeyManager() {
-        return keyManager;
     }
 }

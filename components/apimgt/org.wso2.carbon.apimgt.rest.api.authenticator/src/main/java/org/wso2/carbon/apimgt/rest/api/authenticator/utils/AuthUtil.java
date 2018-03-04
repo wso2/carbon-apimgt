@@ -196,8 +196,7 @@ public class AuthUtil {
                 AuthenticatorConstants.LOGIN_SERVICE_CONTEXT + appContext);
 
         String restAPIContext;
-        if (appContext.contains(AuthenticatorConstants.EDITOR_APPLICATION) ||
-                request.getUri().contains(AuthenticatorConstants.PUBLISHER_APPLICATION)) {
+        if (appContext.contains(AuthenticatorConstants.EDITOR_APPLICATION)) {
             restAPIContext = AuthenticatorConstants.REST_CONTEXT + AuthenticatorConstants.URL_PATH_SEPARATOR +
                     AuthenticatorConstants.PUBLISHER_APPLICATION;
         } else {

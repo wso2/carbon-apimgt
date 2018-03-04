@@ -24,6 +24,8 @@ import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.rest.api.authenticator.constants.AuthenticatorConstants;
 import org.wso2.msf4j.Request;
 
+import java.util.HashMap;
+import java.util.Map;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.NewCookie;
 
@@ -78,7 +80,37 @@ public class AuthUtilTestCase {
                 "xxx-Access-Token-2-xxx; path=/logout/publisher; ");
         actualCookie = AuthUtil.cookieBuilder("WSO2_AM_TOKEN_2", "xxx-Access-Token-2-xxx",
                 "/logout/publisher", false, false, null, "Development");
+        Assert.assertEquals(expectedCookie, actualCookie);
+    }
 
+    @Test
+    public void testGetContextPaths() {
+        // Happy Path
+        //// Mocked request object from the client
+        Request request = Mockito.mock(Request.class);
+        Mockito.when(request.getUri()).thenReturn("/login/token/publisher");
+
+        //// expect the same map object when call the method again
+        Map<String, String> expectedContextPaths = AuthUtil.getContextPaths(request, "publisher");
+        Map<String, String> actualContextPaths = AuthUtil.getContextPaths(request, "publisher");
+        Assert.assertSame(expectedContextPaths, actualContextPaths);
+
+        //// expect for publisher app
+        expectedContextPaths = new HashMap<>();
+        expectedContextPaths.put("APP_CONTEXT", "/publisher");
+        expectedContextPaths.put("LOGOUT_CONTEXT", "/login/logout/publisher");
+        expectedContextPaths.put("LOGIN_CONTEXT", "/login/token/publisher");
+        expectedContextPaths.put("REST_API_CONTEXT", "/api/am/publisher");
+        Assert.assertEquals(expectedContextPaths, actualContextPaths);
+
+        //// expect for editor app
+        actualContextPaths = AuthUtil.getContextPaths(request, "editor");
+        expectedContextPaths = new HashMap<>();
+        expectedContextPaths.put("APP_CONTEXT", "/publisher");
+        expectedContextPaths.put("LOGOUT_CONTEXT", "/login/logout/publisher");
+        expectedContextPaths.put("LOGIN_CONTEXT", "/login/token/publisher");
+        expectedContextPaths.put("REST_API_CONTEXT", "/api/am/publisher");
+        Assert.assertEquals(expectedContextPaths, actualContextPaths);
     }
 
     @Test

@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.rest.api.authenticator.AuthenticatorService;
+import org.wso2.carbon.apimgt.rest.api.authenticator.configuration.APIMAppConfigurationService;
 
 public class AuthenticatorAPIFactory {
     private static AuthenticatorAPIFactory instance = new AuthenticatorAPIFactory();
@@ -57,9 +58,10 @@ public class AuthenticatorAPIFactory {
             KeyManager keyManager = APIManagerFactory.getInstance().getKeyManager();
             SystemApplicationDao systemApplicationDao = DAOFactory.getSystemApplicationDao();
             APIMConfigurationService apimConfigurationService = APIMConfigurationService.getInstance();
+            APIMAppConfigurationService apimAppConfigurationService = APIMAppConfigurationService.getInstance();
 
             service = new AuthenticatorService(keyManager,
-                    systemApplicationDao, apimConfigurationService);
+                    systemApplicationDao, apimConfigurationService, apimAppConfigurationService);
         }
         return service;
     }
