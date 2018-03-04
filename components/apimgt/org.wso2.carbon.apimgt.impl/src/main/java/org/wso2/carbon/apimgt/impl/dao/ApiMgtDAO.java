@@ -4393,6 +4393,30 @@ public class ApiMgtDAO {
 
     public Application[] getApplications(Subscriber subscriber, String groupingId) throws APIManagementException {
 
+        Application[] applications = getLightWeightApplications(subscriber, groupingId);
+
+        for (Application application : applications) {
+
+            Set<APIKey> keys = getApplicationKeys(subscriber.getName(), application.getId());
+            Map<String, OAuthApplicationInfo> keyMap = getOAuthApplications(application.getId());
+
+            for (Map.Entry<String, OAuthApplicationInfo> entry : keyMap.entrySet()) {
+                application.addOAuthApp(entry.getKey(), entry.getValue());
+            }
+
+            for (APIKey key : keys) {
+                application.addKey(key);
+            }
+        }
+        return applications;
+    }
+
+
+
+
+    public Application[] getLightWeightApplications(Subscriber subscriber, String groupingId) throws
+            APIManagementException {
+
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
@@ -4441,10 +4465,11 @@ public class ApiMgtDAO {
             String blockingFilerSql = null;
             if (connection.getMetaData().getDriverName().contains("MS SQL") ||
                     connection.getMetaData().getDriverName().contains("Microsoft")) {
-                sqlQuery = sqlQuery.replaceAll("NAME", "cast(NAME as varchar(100)) collate SQL_Latin1_General_CP1_CI_AS "
-                        + "as NAME");
-                blockingFilerSql = " select distinct x.*,bl.ENABLED from ( " + sqlQuery + " )x left join AM_BLOCK_CONDITIONS bl "
-                        + "on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x.name)";
+                sqlQuery = sqlQuery.replaceAll("NAME", "cast(NAME as varchar(100)) collate " +
+                        "SQL_Latin1_General_CP1_CI_AS as NAME");
+                blockingFilerSql = " select distinct x.*,bl.ENABLED from ( " + sqlQuery + " )x left join " +
+                        "AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x" +
+                        ".name)";
             } else {
                 blockingFilerSql = " select distinct x.*,bl.ENABLED from ( " + sqlQuery
                         + " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = "
@@ -4483,17 +4508,6 @@ public class ApiMgtDAO {
                 application.setUUID(rs.getString("UUID"));
                 application.setIsBlackListed(rs.getBoolean("ENABLED"));
                 application.setOwner(rs.getString("CREATED_BY"));
-
-                Set<APIKey> keys = getApplicationKeys(subscriber.getName(), application.getId());
-                Map<String, OAuthApplicationInfo> keyMap = getOAuthApplications(application.getId());
-
-                for (Map.Entry<String, OAuthApplicationInfo> entry : keyMap.entrySet()) {
-                    application.addOAuthApp(entry.getKey(), entry.getValue());
-                }
-
-                for (APIKey key : keys) {
-                    application.addKey(key);
-                }
                 if (multiGroupAppSharingEnabled) {
                     setGroupIdInApplication(application);
                 }
@@ -4512,6 +4526,7 @@ public class ApiMgtDAO {
         }
         return applications;
     }
+
 
     /**
      * Returns all the consumerkeys of application which are subscribed for the given api
