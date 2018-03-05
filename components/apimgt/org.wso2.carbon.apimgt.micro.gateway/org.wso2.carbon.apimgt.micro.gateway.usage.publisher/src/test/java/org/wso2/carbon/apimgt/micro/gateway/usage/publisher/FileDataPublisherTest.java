@@ -17,6 +17,7 @@
 
 package org.wso2.carbon.apimgt.micro.gateway.usage.publisher;
 
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,6 +42,9 @@ import java.io.PrintWriter;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({AgentHolder.class, CarbonUtils.class, FileDataPublisher.class})
 public class FileDataPublisherTest {
+    public static final String CARBON_HOME = "carbon.home";
+    public static final String CARBON_CONFIGS_PATH = "/repository/conf";
+
     @Before
     public void setUp() throws Exception {
         TestUtil util = new TestUtil();
@@ -58,20 +62,16 @@ public class FileDataPublisherTest {
         Mockito.when(dataEndpointAgent.getAgentConfiguration()).thenReturn(agentConfig);
         Mockito.when(agentConfig.getQueueSize()).thenReturn(32768);
         String carbonHome = System.getProperty(Constants.CARBON_HOME);
+        String carbonConfigPath = System.getProperty(CARBON_HOME) + CARBON_CONFIGS_PATH;
         PowerMockito.mockStatic(CarbonUtils.class);
         PowerMockito.when(CarbonUtils.getCarbonHome()).thenReturn(carbonHome);
-
+        PowerMockito.when(CarbonUtils.getCarbonConfigDirPath()).thenReturn(carbonConfigPath);
         DataBridgeRequestPublisherDTO dataBridgeRequestPublisherDTO =
                 new DataBridgeRequestPublisherDTO(new RequestPublisherDTO());
         FileDataPublisher fileDataPublisher = new FileDataPublisher();
         fileDataPublisher.tryPublish("org.wso2.apimgt.statistics.request:1.0.0", 12324343,
                 (Object[]) dataBridgeRequestPublisherDTO.createMetaData(), null,
                 (Object[]) dataBridgeRequestPublisherDTO.createPayload());
-        //Cleaning the file
-        PrintWriter writer = new PrintWriter(
-                carbonHome + File.separator + "api-usage-data" + File.separator + "api-usage-data.dat");
-        writer.print("");
-        writer.close();
     }
 
     @Test
@@ -89,5 +89,16 @@ public class FileDataPublisherTest {
         Mockito.when(agentConfig.getQueueSize()).thenReturn(32768);
         FileDataPublisher fileDataPublisher = new FileDataPublisher();
         fileDataPublisher.shutdown();
+    }
+
+    @AfterClass
+    public static void cleanUp() throws Exception {
+        //Cleaning the file
+        String carbonHome = System.getProperty(Constants.CARBON_HOME);
+        PrintWriter writer = new PrintWriter(
+                carbonHome + File.separator + "api-usage-data" + File.separator + "api-usage-data.dat");
+        Thread.sleep(3000);
+        writer.print("");
+        writer.close();
     }
 }

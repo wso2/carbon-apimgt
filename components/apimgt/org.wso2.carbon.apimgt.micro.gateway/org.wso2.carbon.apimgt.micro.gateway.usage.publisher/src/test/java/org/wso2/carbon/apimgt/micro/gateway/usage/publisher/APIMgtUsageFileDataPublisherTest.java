@@ -17,6 +17,7 @@
 
 package org.wso2.carbon.apimgt.micro.gateway.usage.publisher;
 
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,6 +38,9 @@ import org.wso2.carbon.databridge.agent.AgentHolder;
 import org.wso2.carbon.databridge.agent.DataEndpointAgent;
 import org.wso2.carbon.databridge.agent.conf.AgentConfiguration;
 import org.wso2.carbon.utils.CarbonUtils;
+
+import java.io.File;
+import java.io.PrintWriter;
 
 /**
  * APIMgtUsageFileDataPublisherTest
@@ -162,5 +166,16 @@ public class APIMgtUsageFileDataPublisherTest {
         APIMgtUsageFileDataPublisher apiMgtUsageFileDataPublisher = new APIMgtUsageFileDataPublisher();
         apiMgtUsageFileDataPublisher.init();
         apiMgtUsageFileDataPublisher.publishEvent(alertTypeDTO);
+    }
+
+    @AfterClass
+    public static void cleanUp() throws Exception {
+        //Cleaning the file
+        String carbonHome = System.getProperty(Constants.CARBON_HOME);
+        PrintWriter writer = new PrintWriter(
+                carbonHome + File.separator + "api-usage-data" + File.separator + "api-usage-data.dat");
+        Thread.sleep(3000);
+        writer.print("");
+        writer.close();
     }
 }
