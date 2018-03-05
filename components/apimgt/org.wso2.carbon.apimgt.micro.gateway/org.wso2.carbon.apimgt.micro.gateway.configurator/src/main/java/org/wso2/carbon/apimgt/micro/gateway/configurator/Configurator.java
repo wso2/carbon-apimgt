@@ -81,7 +81,7 @@ public class Configurator {
         String carbonConfigDirPath = carbonHome + File.separator + ConfigConstants.REPOSITORY_DIR + File.separator
                                              + ConfigConstants.CONF_DIR;
         //Update Gateway properties file with API cloud related configs
-        String cloudConfigsPath = carbonHome + File.separator + ConfigConstants.RESOURCES_DIR  + File.separator
+        String cloudConfigsPath = carbonHome + File.separator + ConfigConstants.RESOURCES_DIR + File.separator
                 + ConfigConstants.CLOUD_CONFIG_DIR + File.separator + ConfigConstants.CLOUD_CONFIG_FILE_NAME;
         String gatewayConfigPath = carbonConfigDirPath + File.separator + OnPremiseGatewayConstants.CONFIG_FILE_NAME;
         updateGatewayConfigDetails(cloudConfigsPath, gatewayConfigPath);
