@@ -1390,7 +1390,7 @@
         <carbon.apimgt.imp.pkg.version>[6.0.0, 7.0.0)</carbon.apimgt.imp.pkg.version>
 
         <analytics.shared.version>1.0.1</analytics.shared.version>
-        <carbon.analytics.common.version>5.1.7</carbon.analytics.common.version>
+        <carbon.analytics.common.version>5.1.31</carbon.analytics.common.version>
         <!-- Carbon kernel version -->
         <carbon.kernel.version>4.4.23</carbon.kernel.version>
         <carbon.kernel.package.import.version.range>[4.4.0, 5.0.0)</carbon.kernel.package.import.version.range>
@@ -1414,7 +1414,7 @@
         <carbon.multitenancy.version>4.6.0</carbon.multitenancy.version>
         <wso2-uri-templates.version>1.6.5</wso2-uri-templates.version>
         <apimserver.version>1.10.0</apimserver.version>
-        <siddhi.version>3.1.2</siddhi.version>
+        <siddhi.version>3.2.0</siddhi.version>
 
         <carbon.registry.imp.pkg.version>[1.0.1, 2.0.0)</carbon.registry.imp.pkg.version>
         <carbon.commons.imp.pkg.version>[4.5.0, 4.6.0)</carbon.commons.imp.pkg.version>
@@ -1534,7 +1534,7 @@
         <!-- apache pdfbox version -->
         <pdfbox.version>1.8.13</pdfbox.version>
 
-        <event.processor.stub.version>2.1.6</event.processor.stub.version>
+        <event.processor.stub.version>2.1.19</event.processor.stub.version>
         <swagger.codegen.version>2.2.3.wso2v1</swagger.codegen.version>
         <swagger.parser.version>1.0.32.wso2v1</swagger.parser.version>
         <swagger.core.version>1.5.16</swagger.core.version>
