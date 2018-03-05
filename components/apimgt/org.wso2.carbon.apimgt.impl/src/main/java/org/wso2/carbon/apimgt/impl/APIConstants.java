@@ -770,7 +770,7 @@ public final class APIConstants {
     public static final String CLAIMS_APIM_CACHE = "claimsLocalCache";
     public static final String APP_SUBSCRIPTION_SCOPE_CACHE = "appSubscriptionScopeCache";
     public static final String APP_SUBSCRIPTION_FILTERED_SCOPE_CACHE = "appSubscriptionFilteredScopeCache";
-    public static final String API_PUBLISHER_USER_ROLE_CACHE = "appPublisherUserRoleCache";
+    public static final String API_USER_ROLE_CACHE = "appPublisherUserRoleCache";
     public static final String API_PUBLISHER_ADMIN_PERMISSION_CACHE = "apimAdminPermissionCache";
 
     //URI Authentication Schemes
