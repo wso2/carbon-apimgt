@@ -153,11 +153,8 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             appMgtService.createApplication(serviceProvider, tenantDomain, userName);
             ServiceProvider serviceProviderCreated = appMgtService.getApplicationExcludingFileBasedSPs(applicationName, tenantDomain);
             serviceProviderCreated.setSaasApp(oauthApplicationInfo.getIsSaasApplication());
-            appMgtService.updateApplication(serviceProviderCreated, tenantDomain, userName);
 
-            ServiceProvider createdServiceProvider = appMgtService.getApplicationExcludingFileBasedSPs(applicationName, tenantDomain);
-
-            if (createdServiceProvider == null) {
+            if (serviceProviderCreated == null) {
                 throw new APIKeyMgtException("Couldn't create Service Provider Application " + applicationName);
             }
 
@@ -239,17 +236,17 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 
             inboundAuthenticationRequestConfigs[0] = inboundAuthenticationRequestConfig;
             inboundAuthenticationConfig.setInboundAuthenticationRequestConfigs(inboundAuthenticationRequestConfigs);
-            createdServiceProvider.setInboundAuthenticationConfig(inboundAuthenticationConfig);
+            serviceProviderCreated.setInboundAuthenticationConfig(inboundAuthenticationConfig);
 
             // Update the Service Provider app to add OAuthApp as an Inbound Authentication Config
-            appMgtService.updateApplication(createdServiceProvider,tenantDomain,userName);
+            appMgtService.updateApplication(serviceProviderCreated,tenantDomain,userName);
 
 
             OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
             oAuthApplicationInfo.setClientId(createdApp.getOauthConsumerKey());
             oAuthApplicationInfo.setCallBackURL(createdApp.getCallbackUrl());
             oAuthApplicationInfo.setClientSecret(createdApp.getOauthConsumerSecret());
-            oAuthApplicationInfo.setIsSaasApplication(createdServiceProvider.isSaasApp());
+            oAuthApplicationInfo.setIsSaasApplication(serviceProviderCreated.isSaasApp());
 
             oAuthApplicationInfo.addParameter(ApplicationConstants.
                     OAUTH_REDIRECT_URIS, createdApp.getCallbackUrl());
