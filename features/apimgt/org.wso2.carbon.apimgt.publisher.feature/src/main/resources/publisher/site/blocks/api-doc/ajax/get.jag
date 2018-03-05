@@ -75,7 +75,7 @@ var log = new Log();
 
                 var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
                 var apiUtil = new APIUtil();
-                var swaggerPath = apiUtil.getSwagger20DefinitionFilePath(apiNameVal, apiVersionVal, providerVal);
+                var swaggerPath = apiUtil.getOpenAPIDefinitionFilePath(apiNameVal, apiVersionVal, providerVal);
                 var registry = carbon.server.osgiService('org.wso2.carbon.registry.core.service.RegistryService').
                 getGovernanceUserRegistry("wso2.anonymous.user", tenantID);
                 url = swaggerPath + "swagger.json";
