@@ -174,7 +174,6 @@ public class APIMgtUsageFileDataPublisherTest {
         String carbonHome = System.getProperty(Constants.CARBON_HOME);
         PrintWriter writer = new PrintWriter(
                 carbonHome + File.separator + "api-usage-data" + File.separator + "api-usage-data.dat");
-        Thread.sleep(3000);
         writer.print("");
         writer.close();
     }
