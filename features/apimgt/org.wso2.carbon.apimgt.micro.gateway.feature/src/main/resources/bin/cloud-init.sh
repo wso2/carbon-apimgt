@@ -30,7 +30,7 @@ AUTOSTART="${WSO2_CLOUD_AUTOSTART:-"false"}"
 
 # if JAVA_HOME is not set we're not happy
 if [ -z "$JAVA_HOME" ]; then
-  echo "You must set the JAVA_HOME variable before running chpasswd."
+  echo "You must set the JAVA_HOME variable before running the init script."
   exit 1
 fi
 
@@ -116,7 +116,7 @@ if [ -z "$ORG_KEY" ] || [ -z "$EMAIL" ] || [ -z "$PASSWORD" ]; then
 echo "Your credentials will be required for accessing the services in API Cloud which are required for the functionality of the On Premise Gateway."
 fi
 
-cp $CARBON_HOME/resources/cloud-on-premise-gateway.properties $CARBON_HOME/repository/conf/on-premise-gateway.properties
+cp $CARBON_HOME/resources/wso2-cloud/cloud-on-premise-gateway.properties $CARBON_HOME/repository/conf/on-premise-gateway.properties
 
 if [ -z "$ORG_KEY" ]; then
     echo "Please enter your Organization Key used in WSO2 API Cloud"
@@ -131,13 +131,50 @@ if [ -z "$EMAIL" ]; then
 fi
 
 if [ -z "$PASSWORD" ]; then
-    echo "Please enter your password for ${EMAIL}: "
-    read -s PASSWORD
-    echo
+    # always read from the tty even when redirected:
+    exec < /dev/tty || exit # || exit needed for bash
+
+    # save current tty settings:
+    tty_settings=$(stty -g) || exit
+
+    # schedule restore of the settings on exit of that subshell
+    # or on receiving SIGINT or SIGTERM:
+    trap 'stty "$tty_settings"' EXIT INT TERM
+
+    # disable terminal local echo
+    stty -echo || exit
+
+    # prompt on tty
+    printf "Please enter your password for ${EMAIL}: " > /dev/tty
+
+    # read password as one line, record exit status
+    IFS= read -r PASSWORD; ret=$?
+
+    # display a newline to visually acknowledge the entered password
+    echo > /dev/tty
 fi
 
+# update classpath
+CARBON_CLASSPATH=""
+for f in "$CARBON_HOME"/lib/org.wso2.carbon.apimgt.micro.gateway.configurator*.jar
+do
+  CARBON_CLASSPATH=$CARBON_CLASSPATH:$f
+done
+for h in "$CARBON_HOME"/repository/components/plugins/*.jar
+do
+  CARBON_CLASSPATH=$CARBON_CLASSPATH:$h
+done
+CARBON_CLASSPATH=$CARBON_CLASSPATH:$CLASSPATH
 
-${JAVACMD} -Dcarbon.home="$CARBON_HOME" -jar ${CARBON_HOME}/lib/org.wso2.onpremise.gateway.configurator-1.0.0.jar ${EMAIL}  ${ORG_KEY} ${PASSWORD}
+ # For Cygwin, switch paths to Windows format before running java
+ if $cygwin; then
+   JAVA_HOME=`cygpath --absolute --windows "$JAVA_HOME"`
+   CARBON_HOME=`cygpath --absolute --windows "$CARBON_HOME"`
+   CLASSPATH=`cygpath --path --windows "$CLASSPATH"`
+   JAVA_ENDORSED_DIRS=`cygpath --path --windows "$JAVA_ENDORSED_DIRS"`
+ fi
+
+${JAVACMD} -Dcarbon.home="$CARBON_HOME" -classpath "$CARBON_CLASSPATH" org.wso2.carbon.apimgt.micro.gateway.configurator.Configurator ${EMAIL}  ${ORG_KEY} ${PASSWORD}
 OUT=$?
 if [ $OUT -eq 0 ];then
   echo "Your On Premise Gateway has been configured successfully."
@@ -145,9 +182,11 @@ if [ $OUT -eq 0 ];then
     ${CARBON_HOME}/bin/wso2server.sh
   else
     echo "You can start WSO2 On Premise API Gateway by going to the ${CARBON_HOME}/bin directory using the command-line,"
-    echo "and then executing wso2server.sh (for Linux.) or wso2server.bat (for Windows)"
+    echo "and then executing wso2server.sh"
+    exit 0
   fi
 else
-   echo "Something went wrong while configuring the On Premise Gateway. Please check your credentials and re-try. If the problem persists please contact: cloud@wso2.com."
+   echo "Something went wrong while configuring the On Premise Gateway. Please check your credentials and re-try."
+   echo "If the problem persists please contact: cloud@wso2.com."
+   exit 1
 fi
-
