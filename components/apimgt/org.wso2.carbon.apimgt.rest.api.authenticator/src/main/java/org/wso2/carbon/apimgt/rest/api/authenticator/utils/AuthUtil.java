@@ -41,6 +41,8 @@ public class AuthUtil {
     public static final String COOKIE_PATH_SEPARATOR = "; path=";
     public static final String COOKIE_VALUE_SEPARATOR = "; ";
 
+    private static final Map<String, Map<String, String>> contextPaths = new HashMap<>();
+
     /**
      * This method authenticate the user.
      */
@@ -170,5 +172,38 @@ public class AuthUtil {
         }
 
         return new NewCookie(name + "_" + environmentName, stringBuilder.toString());
+    }
+
+    /**
+     * Get context paths for the application
+     *
+     * @param appName Name of the Application
+     * @return Map of context paths
+     */
+    public static Map<String, String> getContextPaths(String appName) {
+        Map<String, String> contextPaths = AuthUtil.contextPaths.get(appName);
+        if (contextPaths != null) {
+            return contextPaths;
+        }
+        contextPaths = new HashMap<>();
+
+        String appContext = AuthenticatorConstants.URL_PATH_SEPARATOR + appName;
+        contextPaths.put(AuthenticatorConstants.Context.APP_CONTEXT, appContext);
+        contextPaths.put(AuthenticatorConstants.Context.LOGOUT_CONTEXT,
+                AuthenticatorConstants.LOGOUT_SERVICE_CONTEXT + appContext);
+        contextPaths.put(AuthenticatorConstants.Context.LOGIN_CONTEXT,
+                AuthenticatorConstants.LOGIN_SERVICE_CONTEXT + appContext);
+
+        String restAPIContext;
+        if (appContext.contains(AuthenticatorConstants.EDITOR_APPLICATION)) {
+            restAPIContext = AuthenticatorConstants.REST_CONTEXT + AuthenticatorConstants.URL_PATH_SEPARATOR +
+                    AuthenticatorConstants.PUBLISHER_APPLICATION;
+        } else {
+            restAPIContext = AuthenticatorConstants.REST_CONTEXT + appContext;
+        }
+        contextPaths.put(AuthenticatorConstants.Context.REST_API_CONTEXT, restAPIContext);
+
+        AuthUtil.contextPaths.put(appName, contextPaths);
+        return contextPaths;
     }
 }

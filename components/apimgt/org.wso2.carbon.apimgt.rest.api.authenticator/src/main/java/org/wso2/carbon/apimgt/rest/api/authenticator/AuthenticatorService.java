@@ -35,26 +35,31 @@ import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.IdentityProviderException;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
 import org.wso2.carbon.apimgt.core.impl.APIDefinitionFromSwagger20;
-import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
+import org.wso2.carbon.apimgt.rest.api.authenticator.configuration.APIMAppConfigurationService;
 import org.wso2.carbon.apimgt.rest.api.authenticator.configuration.models.APIMAppConfigurations;
 import org.wso2.carbon.apimgt.rest.api.authenticator.constants.AuthenticatorConstants;
-import org.wso2.carbon.apimgt.rest.api.authenticator.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.authenticator.utils.AuthUtil;
 import org.wso2.carbon.apimgt.rest.api.authenticator.utils.bean.AuthResponseBean;
+import org.wso2.carbon.apimgt.rest.api.common.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.ws.rs.core.NewCookie;
 
 /**
  * This class is used to mock the authenticator apis.
@@ -65,18 +70,23 @@ public class AuthenticatorService {
 
     private KeyManager keyManager;
     private SystemApplicationDao systemApplicationDao;
-    private MultiEnvironmentOverview multiEnvironmentOverviewConfigs;
+    private APIMConfigurationService apimConfigurationService;
+    private APIMAppConfigurationService apimAppConfigurationService;
 
     /**
-     * Constructor.
+     * Constructor
      *
-     * @param keyManager KeyManager object
+     * @param keyManager               KeyManager object
+     * @param systemApplicationDao     systemApplicationDao object
+     * @param apimConfigurationService apimConfigurationService object
      */
     public AuthenticatorService(KeyManager keyManager, SystemApplicationDao systemApplicationDao,
-                                MultiEnvironmentOverview multiEnvironmentOverviewConfigs) {
+                                APIMConfigurationService apimConfigurationService,
+                                APIMAppConfigurationService apimAppConfigurationService) {
         this.keyManager = keyManager;
         this.systemApplicationDao = systemApplicationDao;
-        this.multiEnvironmentOverviewConfigs = multiEnvironmentOverviewConfigs;
+        this.apimConfigurationService = apimConfigurationService;
+        this.apimAppConfigurationService = apimAppConfigurationService;
     }
 
     /**
@@ -89,6 +99,8 @@ public class AuthenticatorService {
     public JsonObject getAuthenticationConfigurations(String appName)
             throws APIManagementException {
         JsonObject oAuthData = new JsonObject();
+        MultiEnvironmentOverview multiEnvironmentOverviewConfigs = apimConfigurationService
+                .getEnvironmentConfigurations().getMultiEnvironmentOverview();
         boolean isMultiEnvironmentOverviewEnabled = multiEnvironmentOverviewConfigs.isEnabled();
 
         List<String> grantTypes = new ArrayList<>();
@@ -99,21 +111,18 @@ public class AuthenticatorService {
         if (isMultiEnvironmentOverviewEnabled) {
             grantTypes.add(KeyManagerConstants.JWT_GRANT_TYPE);
         }
-        APIMAppConfigurations appConfigs = ServiceReferenceHolder.getInstance().getAPIMAppConfiguration();
+        APIMAppConfigurations appConfigs = apimAppConfigurationService.getApimAppConfigurations();
         String callBackURL = appConfigs.getApimBaseUrl() + AuthenticatorConstants.AUTHORIZATION_CODE_CALLBACK_URL + appName;
 
         // Get scopes of the application
         String scopes = getApplicationScopes(appName);
-        if (log.isDebugEnabled()) {
-            log.debug("Set scopes for " + appName + " application using swagger definition.");
-        }
+        log.debug("Set scopes for {} application using swagger definition.", appName);
+
         OAuthApplicationInfo oAuthApplicationInfo;
         try {
             oAuthApplicationInfo = createDCRApplication(appName, callBackURL, grantTypes);
             if (oAuthApplicationInfo != null) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Created DCR Application successfully for " + appName + ".");
-                }
+                log.debug("Created DCR Application successfully for {}.", appName);
                 String oAuthApplicationClientId = oAuthApplicationInfo.getClientId();
                 String oAuthApplicationCallBackURL = oAuthApplicationInfo.getCallBackURL();
                 oAuthData.addProperty(KeyManagerConstants.OAUTH_CLIENT_ID, oAuthApplicationClientId);
@@ -155,23 +164,20 @@ public class AuthenticatorService {
             throws APIManagementException {
         AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
         AccessTokenRequest accessTokenRequest = new AccessTokenRequest();
+        MultiEnvironmentOverview multiEnvironmentOverviewConfigs = apimConfigurationService
+                .getEnvironmentConfigurations().getMultiEnvironmentOverview();
         boolean isMultiEnvironmentOverviewEnabled = multiEnvironmentOverviewConfigs.isEnabled();
 
         // Get scopes of the application
         String scopes = getApplicationScopes(appName);
-        if (log.isDebugEnabled()) {
-            log.debug("Set scopes for " + appName + " application using swagger definition.");
-        }
+        log.debug("Set scopes for {} application using swagger definition.", appName);
         // TODO: Get Consumer Key & Secret without creating a new app, from the IS side
         Map<String, String> consumerKeySecretMap = getConsumerKeySecret(appName);
-        if (log.isDebugEnabled()) {
-            log.debug("Received consumer key & secret for " + appName + " application.");
-        }
+        log.debug("Received consumer key & secret for {} application.", appName);
         try {
             if (KeyManagerConstants.AUTHORIZATION_CODE_GRANT_TYPE.equals(grantType)) {
                 // Access token for authorization code grant type
-                APIMAppConfigurations appConfigs = ServiceReferenceHolder.getInstance()
-                        .getAPIMAppConfiguration();
+                APIMAppConfigurations appConfigs = apimAppConfigurationService.getApimAppConfigurations();
                 String callBackURL = appConfigs.getApimBaseUrl() + AuthenticatorConstants.AUTHORIZATION_CODE_CALLBACK_URL + appName;
 
                 if (authorizationCode != null) {
@@ -225,6 +231,8 @@ public class AuthenticatorService {
             log.error(errorMsg, e, ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);
             throw new APIManagementException(errorMsg, e, ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);
         }
+
+        log.debug("Received access token for {} application.", appName);
         return accessTokenInfo;
     }
 
@@ -244,25 +252,136 @@ public class AuthenticatorService {
     /**
      * This method sets access token data.
      *
-     * @param responseBean    Contains access token data
      * @param accessTokenInfo Information of the access token
      * @return AuthResponseBean - An object with access token data
      * @throws KeyManagementException When parsing JWT fails
      */
-    public AuthResponseBean setAccessTokenData(AuthResponseBean responseBean, AccessTokenInfo accessTokenInfo)
+    public AuthResponseBean getResponseBeanFromTokenInfo(AccessTokenInfo accessTokenInfo)
             throws KeyManagementException {
-        responseBean.setTokenValid(true);
+        String authUser = null;
         if (accessTokenInfo.getIdToken() != null) {
-            responseBean.setAuthUser(getUsernameFromJWT(accessTokenInfo.getIdToken()));
+            authUser = getUsernameFromJWT(accessTokenInfo.getIdToken());
         }
-        if (responseBean.getAuthUser() == null) {
-            responseBean.setAuthUser("admin");
+        if (authUser == null) {
+            authUser = AuthenticatorConstants.ADMIN_USER;
         }
+
+        AuthResponseBean responseBean = new AuthResponseBean();
+        responseBean.setTokenValid(true);
+        responseBean.setAuthUser(authUser);
         responseBean.setScopes(accessTokenInfo.getScopes());
         responseBean.setType(AuthenticatorConstants.BEARER_PREFIX);
         responseBean.setValidityPeriod(accessTokenInfo.getValidityPeriod());
         responseBean.setIdToken(accessTokenInfo.getIdToken());
+
         return responseBean;
+    }
+
+    /**
+     * Setup cookies and authentication response with dividing access token
+     *
+     * @param cookies          A map of cookies to be populated
+     * @param authResponseBean Authentication response bean to be populated
+     * @param accessToken      Access Token
+     * @param contextPaths     Map of context paths
+     */
+    public void setupAccessTokenParts(Map<String, NewCookie> cookies, AuthResponseBean authResponseBean,
+                                      String accessToken, Map<String, String> contextPaths, boolean isSsoEnabled) {
+        String accessTokenPart1 = accessToken.substring(0, accessToken.length() / 2);
+        String accessTokenPart2 = accessToken.substring(accessToken.length() / 2);
+
+        // First part of the access token is set in payload
+        authResponseBean.setPartialToken(accessTokenPart1);
+
+        // Second part of the access token is set in cookies
+        String environmentName = apimConfigurationService.getEnvironmentConfigurations().getEnvironmentLabel();
+        NewCookie restAPIContextCookie = AuthUtil.cookieBuilder(APIConstants.AccessTokenConstants.AM_TOKEN_MSF4J,
+                accessTokenPart2, contextPaths.get(AuthenticatorConstants.Context.REST_API_CONTEXT), true, true,
+                "", environmentName);
+        // Cookie should be set to the log out context in order to revoke the token when log out happens.
+        NewCookie logoutContextCookie = AuthUtil.cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_2, accessTokenPart2,
+                contextPaths.get(AuthenticatorConstants.Context.LOGOUT_CONTEXT), true, true,
+                "", environmentName);
+
+        cookies.put(AuthenticatorConstants.Context.REST_API_CONTEXT, restAPIContextCookie);
+        cookies.put(AuthenticatorConstants.Context.LOGOUT_CONTEXT, logoutContextCookie);
+
+        if (isSsoEnabled) {
+            String authUser = authResponseBean.getAuthUser();
+            NewCookie authUserCookie = AuthUtil.cookieBuilder(AuthenticatorConstants.AUTH_USER, authUser,
+                    contextPaths.get(AuthenticatorConstants.Context.APP_CONTEXT), true, false,
+                    "", environmentName);
+            cookies.put(AuthenticatorConstants.AUTH_USER, authUserCookie);
+        }
+    }
+
+    /**
+     * Setup cookies and authentication response with dividing refresh token
+     *
+     * @param cookies      A map of cookies to be populated
+     * @param refreshToken Refresh Token
+     * @param contextPaths Map of context paths
+     */
+    public void setupRefreshTokenParts(Map<String, NewCookie> cookies, String refreshToken,
+                                       Map<String, String> contextPaths) {
+        String refreshTokenPart1 = refreshToken.substring(0, refreshToken.length() / 2);
+        String refreshTokenPart2 = refreshToken.substring(refreshToken.length() / 2);
+                /* Note:
+                Two parts of the Refresh Token should be stored in two cookies where JS accessible cookie
+                is stored with `/{appName}` (i:e /publisher) path, because JS will trigger a token refresh call
+                anywhere under `/publisher` context.Other part of the Refresh token cookie should set with the
+                path directive as `/login/token/{appName}` (i:e /login/token/publisher) because the token request call
+                will be send to `/login/token/{appName}` endpoint originated from `/{appName}`
+                * */
+        String environmentName = apimConfigurationService.getEnvironmentConfigurations().getEnvironmentLabel();
+        NewCookie refreshTokenCookie = AuthUtil.cookieBuilder(AuthenticatorConstants.REFRESH_TOKEN_1, refreshTokenPart1,
+                contextPaths.get(AuthenticatorConstants.Context.APP_CONTEXT), true, false,
+                "", environmentName);
+        NewCookie refreshTokenHttpOnlyCookie = AuthUtil.cookieBuilder(AuthenticatorConstants.REFRESH_TOKEN_2,
+                refreshTokenPart2, contextPaths.get(AuthenticatorConstants.Context.LOGIN_CONTEXT), true, true,
+                "", environmentName);
+
+        cookies.put(AuthenticatorConstants.Context.APP_CONTEXT, refreshTokenCookie);
+        cookies.put(AuthenticatorConstants.Context.LOGIN_CONTEXT, refreshTokenHttpOnlyCookie);
+    }
+
+    /**
+     * Get the URI for the redirection to the UI Service
+     *
+     * @param appName          Name of the Application
+     * @param authResponseBean Authentication response bean
+     * @return URI of the UI Service
+     */
+    public URI getUIServiceRedirectionURI(String appName, AuthResponseBean authResponseBean)
+            throws URISyntaxException,UnsupportedEncodingException {
+        String uiServiceUrl;
+        //The first host in the list "allowedHosts" is the host of UI-Service
+        String uiServiceHost = apimConfigurationService.getEnvironmentConfigurations()
+                .getAllowedHosts().get(0);
+
+        if (StringUtils.isEmpty(uiServiceHost)) {
+            uiServiceUrl = apimAppConfigurationService.getApimAppConfigurations().getApimBaseUrl();
+        } else {
+            uiServiceUrl = AuthenticatorConstants.HTTPS_PROTOCOL + AuthenticatorConstants.PROTOCOL_SEPARATOR +
+                    uiServiceHost + AuthenticatorConstants.URL_PATH_SEPARATOR;
+        }
+        log.debug("Read UI Service url from configurations. value: {}", uiServiceUrl);
+
+        if (authResponseBean == null) {
+            return new URI(uiServiceUrl + appName);
+        }
+
+        String authResponseBeanData = new StringBuilder()
+                .append("user_name=").append(authResponseBean.getAuthUser())
+                .append("&id_token=").append(authResponseBean.getIdToken())
+                .append("&partial_token=").append(authResponseBean.getPartialToken())
+                .append("&scopes=").append(authResponseBean.getScopes())
+                .append("&validity_period=").append(authResponseBean.getValidityPeriod()).toString();
+        String Uri = new StringBuilder(uiServiceUrl).append(appName).append("/login?")
+                .append(URLEncoder.encode(authResponseBeanData, "UTF-8")
+                        .replaceAll("\\+", "%20").replaceAll("%26", "&")
+                        .replaceAll("%3D", "=")).toString();
+        return new URI(Uri);
     }
 
     /**
@@ -385,6 +504,10 @@ public class AuthenticatorService {
         }
     }
 
+    protected KeyManager getKeyManager() {
+        return keyManager;
+    }
+
     /**
      * Represents Payload of JWT.
      */
@@ -414,9 +537,5 @@ public class AuthenticatorService {
         public String[] getAud() {
             return aud;
         }
-    }
-
-    protected KeyManager getKeyManager() {
-        return keyManager;
     }
 }

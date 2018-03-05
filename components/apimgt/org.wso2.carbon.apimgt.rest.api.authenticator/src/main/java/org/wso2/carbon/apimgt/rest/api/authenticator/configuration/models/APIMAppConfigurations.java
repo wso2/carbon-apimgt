@@ -27,9 +27,9 @@ import org.wso2.carbon.config.annotation.Element;
 @Configuration(namespace = "wso2.carbon.apimgt.application", description = "APIM Store/Publisher Configuration Parameters")
 public class APIMAppConfigurations {
     @Element(description = "APIM Base URL")
-    private String apimBaseUrl = "https://localhost:9292/";
+    private String apimBaseUrl = "https://localhost:9443/";
     @Element(description = "Authorization Endpoint")
-    private String authorizationEndpoint = "https://localhost:9443/oauth2/authorize";
+    private String authorizationEndpoint = "https://localhost:9080/oauth2/authorize";
     @Element(description = "SSO Enabled or not")
     private boolean ssoEnabled = false;
 
