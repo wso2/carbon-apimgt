@@ -15,10 +15,10 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: perapigw-1234-ingress
-  namespace: default
+  name: ${ingressName}
+  namespace: ${namespace}
   labels:
-    gateway: perapigw-1234
+    gateway: ${gatewayLabel}
     tier: prod
   annotations:
     kubernetes.io/ingress.class: "nginx"
@@ -26,12 +26,12 @@ metadata:
 spec:
   tls:
   - hosts:
-    - perapigw-1234
+    - ${gatewayHostname}
   rules:
-  - host: perapigw-1234
+  - host: ${gatewayHostname}
     http:
       paths:
       - path: /
         backend:
-          serviceName: perapigw-1234-service
+          serviceName: ${serviceName}
           servicePort: 9092

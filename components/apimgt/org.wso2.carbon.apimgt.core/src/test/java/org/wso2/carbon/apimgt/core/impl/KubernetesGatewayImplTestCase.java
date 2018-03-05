@@ -27,67 +27,34 @@ import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.ScalableResource;
 import io.fabric8.kubernetes.client.dsl.base.BaseOperation;
 import io.fabric8.openshift.client.OpenShiftClient;
-import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.exception.ContainerBasedGatewayException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.util.ContainerBasedGatewayConstants;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({FileEncryptionUtility.class, IOUtils.class})
 public class KubernetesGatewayImplTestCase {
 
-    private String namespace = "default";
-    private static final String TEMPLATE_BASE_PATH = "resources/template/container_gateway_templates/";
-    private static final String SERVICE_TEMPLATE_NAME = "container_service_template.yaml";
-    private static final String DEPLOYMENT_TEMPLATE_NAME = "container_deployment_template.yaml";
-    private static final String INGRESS_TEMPLATE_NAME = "container_ingress_template.yaml";
+    private static final String NAMESPACE = "default";
+    private static final String LABEL_SUFFIX = "1234";
 
     @Test
     public void testInitImplForGivenToken() throws Exception {
 
-        FileEncryptionUtility fileEncryptionUtility = Mockito.mock(FileEncryptionUtility.class);
-        PowerMockito.mockStatic(FileEncryptionUtility.class);
-        PowerMockito.when(FileEncryptionUtility.getInstance()).thenReturn(fileEncryptionUtility);
-        Mockito.when(fileEncryptionUtility.readFromEncryptedFile(Mockito.anyString())).thenReturn("Token");
-
-        KubernetesGatewayImpl kubernetesGateway = new KubernetesGatewayImpl();
         try {
-            kubernetesGateway.initImpl(createImplParametersMap());
-            Assert.fail("Exception is not thrown when initializing the Openshift client");
-        } catch (ContainerBasedGatewayException e) {
-            Assert.assertEquals(e.getErrorHandler(), ExceptionCodes
-                    .ERROR_INITIALIZING_DEDICATED_CONTAINER_BASED_GATEWAY);
-        }
-    }
-
-    @Test
-    public void testInitImplForException() throws Exception {
-
-        FileEncryptionUtility fileEncryptionUtility = Mockito.mock(FileEncryptionUtility.class);
-        PowerMockito.mockStatic(FileEncryptionUtility.class);
-        PowerMockito.when(FileEncryptionUtility.getInstance()).thenReturn(fileEncryptionUtility);
-        Mockito.when(fileEncryptionUtility.readFromEncryptedFile(Mockito.anyString()))
-                .thenThrow(ContainerBasedGatewayException.class);
-
-        KubernetesGatewayImpl kubernetesGateway = new KubernetesGatewayImpl();
-        try {
-            kubernetesGateway.initImpl(createImplParametersMap());
+            KubernetesGatewayImpl kubernetesGateway = new KubernetesGatewayImpl();
+            Map<String, String> implParameters = new HashMap<>();
+            implParameters.put(ContainerBasedGatewayConstants.MASTER_URL, "https://localhost:8443/");
+            implParameters.put(ContainerBasedGatewayConstants.SA_TOKEN_FILE_NAME, "kubsatoken");
+            kubernetesGateway.initImpl(implParameters);
             Assert.fail("Exception is not thrown when initializing the Openshift client");
         } catch (ContainerBasedGatewayException e) {
             Assert.assertEquals(e.getErrorHandler(), ExceptionCodes
@@ -98,24 +65,9 @@ public class KubernetesGatewayImplTestCase {
     @Test
     public void testInitImplWhenMasterURLIsMissing() throws Exception {
 
-        KubernetesGatewayImpl kubernetesGateway = new KubernetesGatewayImpl();
-        Map<String, String> implParameters = new HashMap<>();
         try {
-            kubernetesGateway.initImpl(implParameters);
-            Assert.fail("Exception is not thrown when initializing the Openshift client");
-        } catch (ContainerBasedGatewayException e) {
-            Assert.assertEquals(e.getErrorHandler(), ExceptionCodes
-                    .ERROR_INITIALIZING_DEDICATED_CONTAINER_BASED_GATEWAY);
-        }
-    }
-
-    @Test
-    public void testInitImplWhenTokenIsMissing() throws Exception {
-
-        KubernetesGatewayImpl kubernetesGateway = new KubernetesGatewayImpl();
-        Map<String, String> implParameters = new HashMap<>();
-        implParameters.put(ContainerBasedGatewayConstants.MASTER_URL, "https://localhost:8443/");
-        try {
+            KubernetesGatewayImpl kubernetesGateway = new KubernetesGatewayImpl();
+            Map<String, String> implParameters = new HashMap<>();
             kubernetesGateway.initImpl(implParameters);
             Assert.fail("Exception is not thrown when initializing the Openshift client");
         } catch (ContainerBasedGatewayException e) {
@@ -132,15 +84,14 @@ public class KubernetesGatewayImplTestCase {
 
         NonNamespaceOperation nonNamespaceOperation = Mockito.mock(NonNamespaceOperation.class);
         BaseOperation baseOperation = Mockito.mock(BaseOperation.class);
-        Mockito.when(openShiftClient.services().inNamespace(namespace)).thenReturn(nonNamespaceOperation);
+        Mockito.when(openShiftClient.services().inNamespace(NAMESPACE)).thenReturn(nonNamespaceOperation);
         Mockito.when(nonNamespaceOperation.withLabel(Mockito.anyString(), Mockito.anyString()))
                 .thenReturn(baseOperation);
         Mockito.when(baseOperation.delete()).thenReturn(true);
 
-        Mockito.when(openShiftClient.extensions().deployments().inNamespace(namespace))
+        Mockito.when(openShiftClient.extensions().deployments().inNamespace(NAMESPACE))
                 .thenReturn(nonNamespaceOperation);
-        Mockito.when(openShiftClient.extensions().ingresses().inNamespace(namespace))
-                .thenReturn(nonNamespaceOperation);
+        Mockito.when(openShiftClient.extensions().ingresses().inNamespace(NAMESPACE)).thenReturn(nonNamespaceOperation);
 
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         kubernetesGateway.removeContainerBasedGateway("label", api);
@@ -155,7 +106,7 @@ public class KubernetesGatewayImplTestCase {
         KubernetesGatewayImpl kubernetesGateway = new KubernetesGatewayImpl();
         kubernetesGateway.setClient(openShiftClient);
         kubernetesGateway.setValues(createImplParametersMap());
-        Mockito.when(openShiftClient.services().inNamespace(namespace)).thenThrow(KubernetesClientException.class);
+        Mockito.when(openShiftClient.services().inNamespace(NAMESPACE)).thenThrow(KubernetesClientException.class);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         kubernetesGateway.removeContainerBasedGateway("label", api);
     }
@@ -165,34 +116,23 @@ public class KubernetesGatewayImplTestCase {
 
         OpenShiftClient openShiftClient = Mockito.mock(OpenShiftClient.class, Mockito.RETURNS_DEEP_STUBS);
         KubernetesGatewayImpl kubernetesGateway = getKubernetesGatewayImpl(openShiftClient);
-        String labelSuffix = "1234";
 
-        String serviceTemplate = IOUtils.toString(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(TEMPLATE_BASE_PATH + SERVICE_TEMPLATE_NAME));
-        String deploymentTemplate = IOUtils.toString(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(TEMPLATE_BASE_PATH + DEPLOYMENT_TEMPLATE_NAME));
-        String ingressTemplate = IOUtils.toString(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(TEMPLATE_BASE_PATH + INGRESS_TEMPLATE_NAME));
-        PowerMockito.mockStatic(IOUtils.class);
+        Mockito.when(openShiftClient.load(Mockito.any()).get()).thenReturn(getServiceResources(),
+                getDeploymentResources(), getIngressResources());
 
-        InputStream inputStreamService = Mockito.mock(InputStream.class);
-        loadServiceResource(openShiftClient, serviceTemplate, inputStreamService);
-        createService(openShiftClient, labelSuffix);
+        NonNamespaceOperation nonNamespaceOperation = Mockito.mock(NonNamespaceOperation.class);
+        ScalableResource scalableResource = Mockito.mock(ScalableResource.class);
+        Mockito.when(scalableResource.get()).thenReturn(null);
 
-        InputStream inputStreamDeployment = Mockito.mock(InputStream.class);
-        loadDeploymentResource(openShiftClient, deploymentTemplate, inputStreamDeployment);
-        createDeployment(openShiftClient, labelSuffix);
+        Service service = createService(openShiftClient, nonNamespaceOperation);
+        Deployment deployment = createDeployment(openShiftClient, nonNamespaceOperation, scalableResource);
+        Ingress ingress = createIngress(openShiftClient, nonNamespaceOperation, scalableResource);
 
-        InputStream inputStreamIngress = Mockito.mock(InputStream.class);
-        loadIngressResource(openShiftClient, ingressTemplate, inputStreamIngress);
-        createIngress(openShiftClient, labelSuffix);
+        Mockito.when(nonNamespaceOperation.create(Mockito.any())).thenReturn(service, deployment, ingress);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
-
-        kubernetesGateway.createContainerGateway(ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX + labelSuffix,
+        kubernetesGateway.createContainerGateway(ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX + LABEL_SUFFIX,
                 api);
-        Mockito.verify(openShiftClient, Mockito.times(2)).load(inputStreamService);
-        Mockito.verify(openShiftClient, Mockito.times(2)).load(inputStreamDeployment);
-        Mockito.verify(openShiftClient, Mockito.times(2)).load(inputStreamIngress);
+        Mockito.verify(openShiftClient, Mockito.times(4)).load(Mockito.any());
         Mockito.verify(openShiftClient, Mockito.times(3)).services();
         Mockito.verify(openShiftClient, Mockito.times(6)).extensions();
     }
@@ -202,20 +142,13 @@ public class KubernetesGatewayImplTestCase {
 
         OpenShiftClient openShiftClient = Mockito.mock(OpenShiftClient.class, Mockito.RETURNS_DEEP_STUBS);
         KubernetesGatewayImpl kubernetesGateway = getKubernetesGatewayImpl(openShiftClient);
-        String labelSuffix = "1234";
 
-        String serviceTemplate = IOUtils.toString(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(TEMPLATE_BASE_PATH + SERVICE_TEMPLATE_NAME));
-
-        PowerMockito.mockStatic(IOUtils.class);
-        InputStream inputStreamService = Mockito.mock(InputStream.class);
-        PowerMockito.when(IOUtils.toInputStream(serviceTemplate)).thenReturn(inputStreamService);
         List<HasMetadata> serviceResources = new ArrayList<>();
-        Mockito.when(openShiftClient.load(inputStreamService).get()).thenReturn(serviceResources);
+        Mockito.when(openShiftClient.load(Mockito.any()).get()).thenReturn(serviceResources);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         try {
             kubernetesGateway.createContainerGateway(ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX
-                    + labelSuffix, api);
+                    + LABEL_SUFFIX, api);
         } catch (ContainerBasedGatewayException e) {
             Assert.assertEquals(e.getErrorHandler(), ExceptionCodes.NO_RESOURCE_LOADED_FROM_DEFINITION);
         }
@@ -226,42 +159,14 @@ public class KubernetesGatewayImplTestCase {
 
         OpenShiftClient openShiftClient = Mockito.mock(OpenShiftClient.class, Mockito.RETURNS_DEEP_STUBS);
         KubernetesGatewayImpl kubernetesGateway = getKubernetesGatewayImpl(openShiftClient);
-        String labelSuffix = "1234";
 
-        String serviceTemplate = IOUtils.toString(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(TEMPLATE_BASE_PATH + SERVICE_TEMPLATE_NAME));
-
-        PowerMockito.mockStatic(IOUtils.class);
-        InputStream inputStreamService = Mockito.mock(InputStream.class);
-        PowerMockito.when(IOUtils.toInputStream(serviceTemplate)).thenReturn(inputStreamService);
-        Mockito.when(openShiftClient.load(inputStreamService).get()).thenReturn(null);
+        Mockito.when(openShiftClient.load(Mockito.any()).get()).thenReturn(null);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         try {
             kubernetesGateway.createContainerGateway(ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX
-                    + labelSuffix, api);
+                    + LABEL_SUFFIX, api);
         } catch (ContainerBasedGatewayException e) {
             Assert.assertEquals(e.getErrorHandler(), ExceptionCodes.NO_RESOURCE_LOADED_FROM_DEFINITION);
-        }
-    }
-
-    @Test
-    public void testGetResourcesFromTemplateForIOException() throws Exception {
-
-        OpenShiftClient openShiftClient = Mockito.mock(OpenShiftClient.class, Mockito.RETURNS_DEEP_STUBS);
-        KubernetesGatewayImpl kubernetesGateway = getKubernetesGatewayImpl(openShiftClient);
-        String labelSuffix = "1234";
-
-        String serviceTemplate = IOUtils.toString(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(TEMPLATE_BASE_PATH + SERVICE_TEMPLATE_NAME));
-
-        PowerMockito.mockStatic(IOUtils.class);
-        PowerMockito.when(IOUtils.toInputStream(serviceTemplate)).thenThrow(IOException.class);
-        API api = SampleTestObjectCreator.createDefaultAPI().build();
-        try {
-            kubernetesGateway.createContainerGateway(ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX
-                    + labelSuffix, api);
-        } catch (ContainerBasedGatewayException e) {
-            Assert.assertEquals(e.getErrorHandler(), ExceptionCodes.TEMPLATE_LOAD_EXCEPTION);
         }
     }
 
@@ -270,22 +175,15 @@ public class KubernetesGatewayImplTestCase {
 
         OpenShiftClient openShiftClient = Mockito.mock(OpenShiftClient.class, Mockito.RETURNS_DEEP_STUBS);
         KubernetesGatewayImpl kubernetesGateway = getKubernetesGatewayImpl(openShiftClient);
-        String labelSuffix = "1234";
 
-        String serviceTemplate = IOUtils.toString(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(TEMPLATE_BASE_PATH + SERVICE_TEMPLATE_NAME));
-
-        PowerMockito.mockStatic(IOUtils.class);
-        InputStream inputStreamService = Mockito.mock(InputStream.class);
-        PowerMockito.when(IOUtils.toInputStream(serviceTemplate)).thenReturn(inputStreamService);
         HasMetadata invalidMetadata = Mockito.mock(Deployment.class);
         List<HasMetadata> serviceResources = new ArrayList<>();
         serviceResources.add(invalidMetadata);
-        Mockito.when(openShiftClient.load(inputStreamService).get()).thenReturn(serviceResources);
+        Mockito.when(openShiftClient.load(Mockito.any()).get()).thenReturn(serviceResources);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         try {
             kubernetesGateway.createContainerGateway(ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX
-                    + labelSuffix, api);
+                    + LABEL_SUFFIX, api);
         } catch (ContainerBasedGatewayException e) {
             Assert.assertEquals(e.getErrorHandler(), ExceptionCodes.LOADED_RESOURCE_DEFINITION_IS_NOT_VALID);
         }
@@ -296,60 +194,42 @@ public class KubernetesGatewayImplTestCase {
 
         OpenShiftClient openShiftClient = Mockito.mock(OpenShiftClient.class, Mockito.RETURNS_DEEP_STUBS);
         KubernetesGatewayImpl kubernetesGateway = getKubernetesGatewayImpl(openShiftClient);
-        String labelSuffix = "1234";
 
-        String serviceTemplate = IOUtils.toString(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(TEMPLATE_BASE_PATH + SERVICE_TEMPLATE_NAME));
-        String deploymentTemplate = IOUtils.toString(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(TEMPLATE_BASE_PATH + DEPLOYMENT_TEMPLATE_NAME));
-        String ingressTemplate = IOUtils.toString(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(TEMPLATE_BASE_PATH + INGRESS_TEMPLATE_NAME));
-        PowerMockito.mockStatic(IOUtils.class);
+        Mockito.when(openShiftClient.load(Mockito.any()).get()).thenReturn(getServiceResources(),
+                getDeploymentResources(), getIngressResources());
 
-        InputStream inputStreamService = Mockito.mock(InputStream.class);
-        loadServiceResource(openShiftClient, serviceTemplate, inputStreamService);
+        NonNamespaceOperation nonNamespaceOperation = Mockito.mock(NonNamespaceOperation.class);
+        ScalableResource scalableResource = Mockito.mock(ScalableResource.class);
 
-        NonNamespaceOperation nonNamespaceOperationService = Mockito.mock(NonNamespaceOperation.class);
-        BaseOperation baseOperationService = Mockito.mock(BaseOperation.class);
-        String serviceName = ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX + labelSuffix
+        BaseOperation baseOperation = Mockito.mock(BaseOperation.class);
+        String serviceName = ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX + LABEL_SUFFIX
                 + ContainerBasedGatewayConstants.CMS_SERVICE_SUFFIX;
-        Mockito.when(openShiftClient.services().inNamespace(namespace)).thenReturn(nonNamespaceOperationService);
-        Mockito.when(nonNamespaceOperationService.withName(serviceName)).thenReturn(baseOperationService);
-        Service service = new Service();
-        Mockito.when(baseOperationService.get()).thenReturn(service);
+        Mockito.when(openShiftClient.services().inNamespace(NAMESPACE)).thenReturn(nonNamespaceOperation);
+        Mockito.when(nonNamespaceOperation.withName(serviceName)).thenReturn(baseOperation);
+        Service service = Mockito.mock(Service.class, Mockito.RETURNS_DEEP_STUBS);
+        Mockito.when(baseOperation.get()).thenReturn(service);
 
-        InputStream inputStreamDeployment = Mockito.mock(InputStream.class);
-        loadDeploymentResource(openShiftClient, deploymentTemplate, inputStreamDeployment);
-
-        NonNamespaceOperation nonNamespaceOperationDeployment = Mockito.mock(NonNamespaceOperation.class);
-        ScalableResource scalableResourceDeployment = Mockito.mock(ScalableResource.class);
-        String deploymentName = ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX + labelSuffix
+        String deploymentName = ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX + LABEL_SUFFIX
                 + ContainerBasedGatewayConstants.CMS_DEPLOYMENT_SUFFIX;
-        Mockito.when(openShiftClient.extensions().deployments().inNamespace(Mockito.anyString()))
-                .thenReturn(nonNamespaceOperationDeployment);
-        Mockito.when(nonNamespaceOperationDeployment.withName(deploymentName)).thenReturn(scalableResourceDeployment);
-        Deployment deployment = new Deployment();
-        Mockito.when(scalableResourceDeployment.get()).thenReturn(deployment);
+        Mockito.when(openShiftClient.extensions().deployments().inNamespace(NAMESPACE))
+                .thenReturn(nonNamespaceOperation);
+        Mockito.when(nonNamespaceOperation.withName(deploymentName)).thenReturn(scalableResource);
+        Deployment deployment = Mockito.mock(Deployment.class, Mockito.RETURNS_DEEP_STUBS);
 
-        InputStream inputStreamIngress = Mockito.mock(InputStream.class);
-        loadIngressResource(openShiftClient, ingressTemplate, inputStreamIngress);
-
-        NonNamespaceOperation nonNamespaceOperationIngress = Mockito.mock(NonNamespaceOperation.class);
-        ScalableResource scalableResourceIngress = Mockito.mock(ScalableResource.class);
-        String ingressName = ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX + labelSuffix
+        String ingressName = ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX + LABEL_SUFFIX
                 + ContainerBasedGatewayConstants.CMS_INGRESS_SUFFIX;
-        Mockito.when(openShiftClient.extensions().ingresses().inNamespace(namespace))
-                .thenReturn(nonNamespaceOperationIngress);
-        Mockito.when(nonNamespaceOperationIngress.withName(ingressName)).thenReturn(scalableResourceIngress);
-        Ingress ingress = new Ingress();
-        Mockito.when(scalableResourceIngress.get()).thenReturn(ingress);
-        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        Mockito.when(openShiftClient.extensions().ingresses().inNamespace(NAMESPACE))
+                .thenReturn(nonNamespaceOperation);
+        Mockito.when(nonNamespaceOperation.withName(ingressName)).thenReturn(scalableResource);
+        Ingress ingress = Mockito.mock(Ingress.class, Mockito.RETURNS_DEEP_STUBS);
 
-        kubernetesGateway.createContainerGateway(ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX + labelSuffix,
+        Mockito.when(scalableResource.get()).thenReturn(deployment, ingress);
+
+        API api = SampleTestObjectCreator.createDefaultAPI().context("/test/context/").build();
+
+        kubernetesGateway.createContainerGateway(ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX + LABEL_SUFFIX,
                 api);
-        Mockito.verify(openShiftClient, Mockito.times(2)).load(inputStreamService);
-        Mockito.verify(openShiftClient, Mockito.times(2)).load(inputStreamDeployment);
-        Mockito.verify(openShiftClient, Mockito.times(2)).load(inputStreamIngress);
+        Mockito.verify(openShiftClient, Mockito.times(4)).load(Mockito.any());
         Mockito.verify(openShiftClient, Mockito.times(2)).services();
         Mockito.verify(openShiftClient, Mockito.times(4)).extensions();
     }
@@ -359,27 +239,21 @@ public class KubernetesGatewayImplTestCase {
 
         OpenShiftClient openShiftClient = Mockito.mock(OpenShiftClient.class, Mockito.RETURNS_DEEP_STUBS);
         KubernetesGatewayImpl kubernetesGateway = getKubernetesGatewayImpl(openShiftClient);
-        String labelSuffix = "1234";
 
-        String serviceTemplate = IOUtils.toString(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(TEMPLATE_BASE_PATH + SERVICE_TEMPLATE_NAME));
-        PowerMockito.mockStatic(IOUtils.class);
-
-        InputStream inputStreamService = Mockito.mock(InputStream.class);
-        loadServiceResource(openShiftClient, serviceTemplate, inputStreamService);
+        Mockito.when(openShiftClient.load(Mockito.any()).get()).thenReturn(getServiceResources());
 
         NonNamespaceOperation nonNamespaceOperationService = Mockito.mock(NonNamespaceOperation.class);
         BaseOperation baseOperationService = Mockito.mock(BaseOperation.class);
-        String serviceName = ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX + labelSuffix
+        String serviceName = ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX + LABEL_SUFFIX
                 + ContainerBasedGatewayConstants.CMS_SERVICE_SUFFIX;
-        Mockito.when(openShiftClient.services().inNamespace(namespace)).thenReturn(nonNamespaceOperationService);
+        Mockito.when(openShiftClient.services().inNamespace(NAMESPACE)).thenReturn(nonNamespaceOperationService);
         Mockito.when(nonNamespaceOperationService.withName(serviceName)).thenReturn(baseOperationService);
         Mockito.when(baseOperationService.get()).thenThrow(KubernetesClientException.class);
-        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        API api = SampleTestObjectCreator.createDefaultAPI().context("").build();
 
         try {
             kubernetesGateway.createContainerGateway(ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX
-                    + labelSuffix, api);
+                    + LABEL_SUFFIX, api);
         } catch (ContainerBasedGatewayException e) {
             Assert.assertEquals(e.getErrorHandler(), ExceptionCodes.DEDICATED_CONTAINER_GATEWAY_CREATION_FAILED);
         }
@@ -390,29 +264,25 @@ public class KubernetesGatewayImplTestCase {
 
         OpenShiftClient openShiftClient = Mockito.mock(OpenShiftClient.class, Mockito.RETURNS_DEEP_STUBS);
         KubernetesGatewayImpl kubernetesGateway = getKubernetesGatewayImpl(openShiftClient);
-        String labelSuffix = "1234";
 
-        String serviceTemplate = IOUtils.toString(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(TEMPLATE_BASE_PATH + SERVICE_TEMPLATE_NAME));
-        String deploymentTemplate = IOUtils.toString(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(TEMPLATE_BASE_PATH + DEPLOYMENT_TEMPLATE_NAME));
-        PowerMockito.mockStatic(IOUtils.class);
-
-        InputStream inputStreamService = Mockito.mock(InputStream.class);
-        loadServiceResource(openShiftClient, serviceTemplate, inputStreamService);
-        createService(openShiftClient, labelSuffix);
-
-        InputStream inputStreamDeployment = Mockito.mock(InputStream.class);
-        PowerMockito.when(IOUtils.toInputStream(deploymentTemplate)).thenReturn(inputStreamDeployment);
         HasMetadata invalidMetadata = Mockito.mock(Service.class);
         List<HasMetadata> deploymentResources = new ArrayList<>();
         deploymentResources.add(invalidMetadata);
-        Mockito.when(openShiftClient.load(inputStreamDeployment).get()).thenReturn(deploymentResources);
+
+        Mockito.when(openShiftClient.load(Mockito.any()).get()).thenReturn(getServiceResources(), deploymentResources);
+
+        NonNamespaceOperation nonNamespaceOperation = Mockito.mock(NonNamespaceOperation.class);
+        ScalableResource scalableResource = Mockito.mock(ScalableResource.class);
+        Mockito.when(scalableResource.get()).thenReturn(null);
+
+        Service service = createService(openShiftClient, nonNamespaceOperation);
+        Mockito.when(nonNamespaceOperation.create(Mockito.any())).thenReturn(service);
+
         API api = SampleTestObjectCreator.createDefaultAPI().build();
 
         try {
             kubernetesGateway.createContainerGateway(ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX
-                    + labelSuffix, api);
+                    + LABEL_SUFFIX, api);
         } catch (ContainerBasedGatewayException e) {
             Assert.assertEquals(e.getErrorHandler(), ExceptionCodes.LOADED_RESOURCE_DEFINITION_IS_NOT_VALID);
         }
@@ -423,34 +293,28 @@ public class KubernetesGatewayImplTestCase {
 
         OpenShiftClient openShiftClient = Mockito.mock(OpenShiftClient.class, Mockito.RETURNS_DEEP_STUBS);
         KubernetesGatewayImpl kubernetesGateway = getKubernetesGatewayImpl(openShiftClient);
-        String labelSuffix = "1234";
 
-        String serviceTemplate = IOUtils.toString(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(TEMPLATE_BASE_PATH + SERVICE_TEMPLATE_NAME));
-        String deploymentTemplate = IOUtils.toString(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(TEMPLATE_BASE_PATH + DEPLOYMENT_TEMPLATE_NAME));
-        PowerMockito.mockStatic(IOUtils.class);
+        Mockito.when(openShiftClient.load(Mockito.any()).get()).thenReturn(getServiceResources(),
+                getDeploymentResources());
 
-        InputStream inputStreamService = Mockito.mock(InputStream.class);
-        loadServiceResource(openShiftClient, serviceTemplate, inputStreamService);
-        createService(openShiftClient, labelSuffix);
+        NonNamespaceOperation nonNamespaceOperation = Mockito.mock(NonNamespaceOperation.class);
+        ScalableResource scalableResource = Mockito.mock(ScalableResource.class);
 
-        InputStream inputStreamDeployment = Mockito.mock(InputStream.class);
-        loadDeploymentResource(openShiftClient, deploymentTemplate, inputStreamDeployment);
+        Service service = createService(openShiftClient, nonNamespaceOperation);
+        Mockito.when(nonNamespaceOperation.create(Mockito.any())).thenReturn(service);
 
-        NonNamespaceOperation nonNamespaceOperationDeployment = Mockito.mock(NonNamespaceOperation.class);
-        ScalableResource scalableResourceDeployment = Mockito.mock(ScalableResource.class);
-        String deploymentName = ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX + labelSuffix
+        String deploymentName = ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX + LABEL_SUFFIX
                 + ContainerBasedGatewayConstants.CMS_DEPLOYMENT_SUFFIX;
-        Mockito.when(openShiftClient.extensions().deployments().inNamespace(Mockito.anyString()))
-                .thenReturn(nonNamespaceOperationDeployment);
-        Mockito.when(nonNamespaceOperationDeployment.withName(deploymentName)).thenReturn(scalableResourceDeployment);
-        Mockito.when(scalableResourceDeployment.get()).thenThrow(KubernetesClientException.class);
+        Mockito.when(openShiftClient.extensions().deployments().inNamespace(NAMESPACE))
+                .thenReturn(nonNamespaceOperation);
+        Mockito.when(nonNamespaceOperation.withName(deploymentName)).thenReturn(scalableResource);
+        Mockito.when(scalableResource.get()).thenThrow(KubernetesClientException.class);
+
         API api = SampleTestObjectCreator.createDefaultAPI().build();
 
         try {
             kubernetesGateway.createContainerGateway(ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX
-                    + labelSuffix, api);
+                    + LABEL_SUFFIX, api);
         } catch (ContainerBasedGatewayException e) {
             Assert.assertEquals(e.getErrorHandler(), ExceptionCodes.DEDICATED_CONTAINER_GATEWAY_CREATION_FAILED);
         }
@@ -461,35 +325,26 @@ public class KubernetesGatewayImplTestCase {
 
         OpenShiftClient openShiftClient = Mockito.mock(OpenShiftClient.class, Mockito.RETURNS_DEEP_STUBS);
         KubernetesGatewayImpl kubernetesGateway = getKubernetesGatewayImpl(openShiftClient);
-        String labelSuffix = "1234";
 
-        String serviceTemplate = IOUtils.toString(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(TEMPLATE_BASE_PATH + SERVICE_TEMPLATE_NAME));
-        String deploymentTemplate = IOUtils.toString(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(TEMPLATE_BASE_PATH + DEPLOYMENT_TEMPLATE_NAME));
-        String ingressTemplate = IOUtils.toString(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(TEMPLATE_BASE_PATH + INGRESS_TEMPLATE_NAME));
-        PowerMockito.mockStatic(IOUtils.class);
+        NonNamespaceOperation nonNamespaceOperation = Mockito.mock(NonNamespaceOperation.class);
+        ScalableResource scalableResource = Mockito.mock(ScalableResource.class);
+        Mockito.when(scalableResource.get()).thenReturn(null);
 
-        InputStream inputStreamService = Mockito.mock(InputStream.class);
-        loadServiceResource(openShiftClient, serviceTemplate, inputStreamService);
-        createService(openShiftClient, labelSuffix);
-
-        InputStream inputStreamDeployment = Mockito.mock(InputStream.class);
-        loadDeploymentResource(openShiftClient, deploymentTemplate, inputStreamDeployment);
-        createDeployment(openShiftClient, labelSuffix);
-
-        InputStream inputStreamIngress = Mockito.mock(InputStream.class);
-        PowerMockito.when(IOUtils.toInputStream(ingressTemplate)).thenReturn(inputStreamIngress);
         HasMetadata invalidMetadata = Mockito.mock(Deployment.class);
         List<HasMetadata> ingressResources = new ArrayList<>();
         ingressResources.add(invalidMetadata);
-        Mockito.when(openShiftClient.load(inputStreamIngress).get()).thenReturn(ingressResources);
-        API api = SampleTestObjectCreator.createDefaultAPI().build();
 
+        Mockito.when(openShiftClient.load(Mockito.any()).get()).thenReturn(getServiceResources(),
+                getDeploymentResources(), ingressResources);
+
+        Service service = createService(openShiftClient, nonNamespaceOperation);
+        Deployment deployment = createDeployment(openShiftClient, nonNamespaceOperation, scalableResource);
+        Mockito.when(nonNamespaceOperation.create(Mockito.any())).thenReturn(service, deployment);
+
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
         try {
             kubernetesGateway.createContainerGateway(ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX
-                    + labelSuffix, api);
+                    + LABEL_SUFFIX, api);
         } catch (ContainerBasedGatewayException e) {
             Assert.assertEquals(e.getErrorHandler(), ExceptionCodes.LOADED_RESOURCE_DEFINITION_IS_NOT_VALID);
         }
@@ -500,40 +355,30 @@ public class KubernetesGatewayImplTestCase {
 
         OpenShiftClient openShiftClient = Mockito.mock(OpenShiftClient.class, Mockito.RETURNS_DEEP_STUBS);
         KubernetesGatewayImpl kubernetesGateway = getKubernetesGatewayImpl(openShiftClient);
-        String labelSuffix = "1234";
 
-        String serviceTemplate = IOUtils.toString(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(TEMPLATE_BASE_PATH + SERVICE_TEMPLATE_NAME));
-        String deploymentTemplate = IOUtils.toString(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(TEMPLATE_BASE_PATH + DEPLOYMENT_TEMPLATE_NAME));
-        String ingressTemplate = IOUtils.toString(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(TEMPLATE_BASE_PATH + INGRESS_TEMPLATE_NAME));
-        PowerMockito.mockStatic(IOUtils.class);
+        Mockito.when(openShiftClient.load(Mockito.any()).get()).thenReturn(getServiceResources(),
+                getDeploymentResources(), getIngressResources());
 
-        InputStream inputStreamService = Mockito.mock(InputStream.class);
-        loadServiceResource(openShiftClient, serviceTemplate, inputStreamService);
-        createService(openShiftClient, labelSuffix);
+        NonNamespaceOperation nonNamespaceOperation = Mockito.mock(NonNamespaceOperation.class);
+        ScalableResource scalableResource = Mockito.mock(ScalableResource.class);
+        Mockito.when(scalableResource.get()).thenReturn(null);
 
-        InputStream inputStreamDeployment = Mockito.mock(InputStream.class);
-        loadDeploymentResource(openShiftClient, deploymentTemplate, inputStreamDeployment);
-        createDeployment(openShiftClient, labelSuffix);
+        Service service = createService(openShiftClient, nonNamespaceOperation);
+        Deployment deployment = createDeployment(openShiftClient, nonNamespaceOperation, scalableResource);
+        Mockito.when(nonNamespaceOperation.create(Mockito.any())).thenReturn(service, deployment);
 
-        InputStream inputStreamIngress = Mockito.mock(InputStream.class);
-        loadIngressResource(openShiftClient, ingressTemplate, inputStreamIngress);
-
-        NonNamespaceOperation nonNamespaceOperationIngress = Mockito.mock(NonNamespaceOperation.class);
         ScalableResource scalableResourceIngress = Mockito.mock(ScalableResource.class);
-        String ingressName = ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX + labelSuffix
+        String ingressName = ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX + LABEL_SUFFIX
                 + ContainerBasedGatewayConstants.CMS_INGRESS_SUFFIX;
-        Mockito.when(openShiftClient.extensions().ingresses().inNamespace(namespace))
-                .thenReturn(nonNamespaceOperationIngress);
-        Mockito.when(nonNamespaceOperationIngress.withName(ingressName)).thenReturn(scalableResourceIngress);
+        Mockito.when(openShiftClient.extensions().ingresses().inNamespace(NAMESPACE))
+                .thenReturn(nonNamespaceOperation);
+        Mockito.when(nonNamespaceOperation.withName(ingressName)).thenReturn(scalableResourceIngress);
         Mockito.when(scalableResourceIngress.get()).thenThrow(KubernetesClientException.class);
-        API api = SampleTestObjectCreator.createDefaultAPI().build();
 
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
         try {
             kubernetesGateway.createContainerGateway(ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX
-                    + labelSuffix, api);
+                    + LABEL_SUFFIX, api);
         } catch (ContainerBasedGatewayException e) {
             Assert.assertEquals(e.getErrorHandler(), ExceptionCodes.DEDICATED_CONTAINER_GATEWAY_CREATION_FAILED);
         }
@@ -555,105 +400,94 @@ public class KubernetesGatewayImplTestCase {
     /**
      * Create Ingress resource
      *
-     * @param openShiftClient Openshift client
-     * @param labelSuffix     label suffix
+     * @param openShiftClient       Openshift client
+     * @param nonNamespaceOperation NonNamespaceOperation instance
+     * @param scalableResource      ScalableResource instance
      */
-    private void createIngress(OpenShiftClient openShiftClient, String labelSuffix) {
-        NonNamespaceOperation nonNamespaceOperationIngress = Mockito.mock(NonNamespaceOperation.class);
-        ScalableResource scalableResourceIngress = Mockito.mock(ScalableResource.class);
-        String ingressName = ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX + labelSuffix
+    private Ingress createIngress(OpenShiftClient openShiftClient, NonNamespaceOperation nonNamespaceOperation,
+                                  ScalableResource scalableResource) {
+        String ingressName = ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX + LABEL_SUFFIX
                 + ContainerBasedGatewayConstants.CMS_INGRESS_SUFFIX;
-        Mockito.when(openShiftClient.extensions().ingresses().inNamespace(namespace))
-                .thenReturn(nonNamespaceOperationIngress);
-        Mockito.when(nonNamespaceOperationIngress.withName(ingressName)).thenReturn(scalableResourceIngress);
-        Mockito.when(scalableResourceIngress.get()).thenReturn(null);
+        Mockito.when(openShiftClient.extensions().ingresses().inNamespace(NAMESPACE))
+                .thenReturn(nonNamespaceOperation);
+        Mockito.when(nonNamespaceOperation.withName(ingressName)).thenReturn(scalableResource);
         Ingress ingress = Mockito.mock(Ingress.class, Mockito.RETURNS_DEEP_STUBS);
-        Mockito.when(nonNamespaceOperationIngress.create(Mockito.any())).thenReturn(ingress);
+        return ingress;
     }
 
     /**
      * Create Deployment resource
      *
-     * @param openShiftClient Openshift client
-     * @param labelSuffix     label suffix
+     * @param openShiftClient       Openshift client
+     * @param nonNamespaceOperation NonNamespaceOperation instance
+     * @param scalableResource      ScalableResource instance
      */
-    private void createDeployment(OpenShiftClient openShiftClient, String labelSuffix) {
-        NonNamespaceOperation nonNamespaceOperationDeployment = Mockito.mock(NonNamespaceOperation.class);
-        ScalableResource scalableResourceDeployment = Mockito.mock(ScalableResource.class);
-        String deploymentName = ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX + labelSuffix
+    private Deployment createDeployment(OpenShiftClient openShiftClient, NonNamespaceOperation nonNamespaceOperation,
+                                        ScalableResource scalableResource) {
+        String deploymentName = ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX + LABEL_SUFFIX
                 + ContainerBasedGatewayConstants.CMS_DEPLOYMENT_SUFFIX;
-        Mockito.when(openShiftClient.extensions().deployments().inNamespace(Mockito.anyString()))
-                .thenReturn(nonNamespaceOperationDeployment);
-        Mockito.when(nonNamespaceOperationDeployment.withName(deploymentName)).thenReturn(scalableResourceDeployment);
-        Mockito.when(scalableResourceDeployment.get()).thenReturn(null);
+        Mockito.when(openShiftClient.extensions().deployments().inNamespace(NAMESPACE))
+                .thenReturn(nonNamespaceOperation);
+        Mockito.when(nonNamespaceOperation.withName(deploymentName)).thenReturn(scalableResource);
         Deployment deployment = Mockito.mock(Deployment.class, Mockito.RETURNS_DEEP_STUBS);
-        Mockito.when(nonNamespaceOperationDeployment.create(Mockito.any())).thenReturn(deployment);
+        return deployment;
     }
 
     /**
      * Create Service resource
      *
-     * @param openShiftClient Openshift client
-     * @param labelSuffix     label suffix
+     * @param openShiftClient       Openshift client
+     * @param nonNamespaceOperation NonNamespaceOperation instance
      */
-    private void createService(OpenShiftClient openShiftClient, String labelSuffix) {
-        NonNamespaceOperation nonNamespaceOperationService = Mockito.mock(NonNamespaceOperation.class);
-        BaseOperation baseOperationService = Mockito.mock(BaseOperation.class);
-        String serviceName = ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX + labelSuffix
+    private Service createService(OpenShiftClient openShiftClient, NonNamespaceOperation nonNamespaceOperation) {
+        BaseOperation baseOperation = Mockito.mock(BaseOperation.class);
+        String serviceName = ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX + LABEL_SUFFIX
                 + ContainerBasedGatewayConstants.CMS_SERVICE_SUFFIX;
-        Mockito.when(openShiftClient.services().inNamespace(namespace)).thenReturn(nonNamespaceOperationService);
-        Mockito.when(nonNamespaceOperationService.withName(serviceName)).thenReturn(baseOperationService);
-        Mockito.when(baseOperationService.get()).thenReturn(null);
+        Mockito.when(openShiftClient.services().inNamespace(NAMESPACE)).thenReturn(nonNamespaceOperation);
+        Mockito.when(nonNamespaceOperation.withName(serviceName)).thenReturn(baseOperation);
+        Mockito.when(baseOperation.get()).thenReturn(null);
         Service service = Mockito.mock(Service.class, Mockito.RETURNS_DEEP_STUBS);
-        Mockito.when(nonNamespaceOperationService.create(Mockito.any())).thenReturn(service);
+        return service;
     }
 
     /**
-     * load Ingress resource definition from the template
+     * Get ingress resources
      *
-     * @param openShiftClient    Openshift client
-     * @param ingressTemplate    template value
-     * @param inputStreamIngress input stream
+     * @return List<HasMetadata> list of ingress resources
      */
-    private void loadIngressResource(OpenShiftClient openShiftClient, String ingressTemplate, InputStream
-            inputStreamIngress) {
-        PowerMockito.when(IOUtils.toInputStream(ingressTemplate)).thenReturn(inputStreamIngress);
+    private List<HasMetadata> getIngressResources() {
         HasMetadata ingressMetadata = Mockito.mock(Ingress.class);
         List<HasMetadata> ingressResources = new ArrayList<>();
         ingressResources.add(ingressMetadata);
-        Mockito.when(openShiftClient.load(inputStreamIngress).get()).thenReturn(ingressResources);
+
+        return ingressResources;
     }
 
     /**
-     * load Service resource definition from the template
+     * Get service resources
      *
-     * @param openShiftClient    Openshift client
-     * @param serviceTemplate    template value
-     * @param inputStreamService input stream
+     * @return List<HasMetadata> list of service resources
      */
-    private void loadServiceResource(OpenShiftClient openShiftClient, String serviceTemplate, InputStream
-            inputStreamService) {
-        PowerMockito.when(IOUtils.toInputStream(serviceTemplate)).thenReturn(inputStreamService);
+    private List<HasMetadata> getServiceResources() {
+
         HasMetadata serviceMetadata = Mockito.mock(Service.class);
         List<HasMetadata> serviceResources = new ArrayList<>();
         serviceResources.add(serviceMetadata);
-        Mockito.when(openShiftClient.load(inputStreamService).get()).thenReturn(serviceResources);
+
+        return serviceResources;
     }
 
     /**
-     * load Deployment resource definition from the template
+     * Get deployment resources
      *
-     * @param openShiftClient       Openshift client
-     * @param deploymentTemplate    template value
-     * @param inputStreamDeployment input stream
+     * @return List<HasMetadata> list of deployment resources
      */
-    private void loadDeploymentResource(OpenShiftClient openShiftClient, String deploymentTemplate, InputStream
-            inputStreamDeployment) {
-        PowerMockito.when(IOUtils.toInputStream(deploymentTemplate)).thenReturn(inputStreamDeployment);
+    private List<HasMetadata> getDeploymentResources() {
         HasMetadata deploymentMetadata = Mockito.mock(Deployment.class);
         List<HasMetadata> deploymentResources = new ArrayList<>();
         deploymentResources.add(deploymentMetadata);
-        Mockito.when(openShiftClient.load(inputStreamDeployment).get()).thenReturn(deploymentResources);
+
+        return deploymentResources;
     }
 
     /**
@@ -668,7 +502,6 @@ public class KubernetesGatewayImplTestCase {
         implParameters.put(ContainerBasedGatewayConstants.API_CORE_URL, "https://localhost:9443");
         implParameters.put(ContainerBasedGatewayConstants.BROKER_HOST, "https://localhost:5672");
         implParameters.put(ContainerBasedGatewayConstants.CMS_TYPE, ContainerBasedGatewayConstants.KUBERNETES);
-        implParameters.put(ContainerBasedGatewayConstants.SA_TOKEN_FILE_NAME, "token_file");
         return implParameters;
     }
 }

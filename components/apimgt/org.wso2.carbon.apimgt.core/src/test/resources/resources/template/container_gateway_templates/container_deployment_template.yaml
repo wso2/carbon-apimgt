@@ -15,10 +15,10 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: perapigw-1234-deployemnt
-  namespace: default
+  name: ${deploymentName}
+  namespace: ${namespace}
   labels: # should have the auto-generated label as the value
-    gateway: perapigw-1234
+    gateway: ${gatewayLabel}
     tier: prod
 spec:
   replicas: 2
@@ -27,19 +27,19 @@ spec:
   template:
     metadata:
       labels: # should have the auto-generated label as the value
-        gateway: perapigw-1234
+        gateway: ${gatewayLabel}
     spec:
       containers:
       -
-        name: perapigw-1234-container
+        name: ${containerName}
         image: wso2apim-gateway:v3.0.0
         env:
         -
           name: apiCoreUrl
-          value: https://localhost:9443
+          value: ${apiCoreURL}
         -
           name: messageBrokerHost
-          value: https://localhost:5672
+          value: ${brokerHost}
         ports:
         -
           containerPort: 9090

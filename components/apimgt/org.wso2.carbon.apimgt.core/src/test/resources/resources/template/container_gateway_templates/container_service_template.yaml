@@ -15,10 +15,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: perapigw-1234-service
-  namespace: default
+  name: ${serviceName}
+  namespace: ${namespace}
   labels:
-    gateway: perapigw-1234  # should have the auto-generated label as the value
+    gateway: ${gatewayLabel}  # should have the auto-generated label as the value
     tier: prod
 spec:
   ports:
@@ -32,4 +32,4 @@ spec:
 
   # label keys and values that must match in order to receive traffic for this service
   selector:
-    gateway: perapigw-1234
+    gateway: ${gatewayLabel}

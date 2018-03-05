@@ -31,11 +31,9 @@ import org.wso2.carbon.apimgt.core.api.Analyzer;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
 import org.wso2.carbon.apimgt.core.api.UserNameMapper;
-import org.wso2.carbon.apimgt.core.configuration.models.ContainerBasedGatewayConfiguration;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
-import org.wso2.carbon.apimgt.core.exception.ContainerBasedGatewayException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.IdentityProviderException;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
@@ -61,7 +59,6 @@ public class APIManagerFactory {
     private KeyManager keyManager;
     private APIGateway apiGateway;
     private APILifecycleManager apiLifecycleManager;
-    private ContainerBasedGatewayGenerator containerBasedGatewayGenerator;
     private UserNameMapper userNameMapper;
     
     private static final int MAX_PROVIDERS = 50;
@@ -342,31 +339,6 @@ public class APIManagerFactory {
             apiLifecycleManager = new APILifeCycleManagerImpl();
         }
         return apiLifecycleManager;
-    }
-
-    /**
-     * Get Container Based Gateway Generator
-     *
-     * @return containerBasedGatewayGenerator
-     * @throws ContainerBasedGatewayException if error occurred while initializing container based gateway generator
-     */
-    public ContainerBasedGatewayGenerator getContainerBasedGatewayGenerator() throws ContainerBasedGatewayException {
-        if (containerBasedGatewayGenerator == null) {
-            try {
-                ContainerBasedGatewayConfiguration containerBasedGatewayConfiguration =
-                        ContainerBasedGatewayConfigBuilder.getContainerBasedGatewayConfiguration();
-
-                String implClassName = containerBasedGatewayConfiguration.getImplClass();
-                Map<String, String> implParameters = containerBasedGatewayConfiguration.getImplParameters();
-                containerBasedGatewayGenerator = (ContainerBasedGatewayGenerator) Class.forName(implClassName)
-                        .newInstance();
-                containerBasedGatewayGenerator.initImpl(implParameters);
-            } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-                throw new ContainerBasedGatewayException("Error occurred while initializing container based gateway " +
-                        "generator", e, ExceptionCodes.ERROR_INITIALIZING_DEDICATED_CONTAINER_BASED_GATEWAY);
-            }
-        }
-        return containerBasedGatewayGenerator;
     }
 
     /**

@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIGateway;
 import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
+import org.wso2.carbon.apimgt.core.configuration.models.ContainerBasedGatewayConfiguration;
 import org.wso2.carbon.apimgt.core.exception.ContainerBasedGatewayException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
@@ -48,6 +49,7 @@ import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.util.BrokerUtil;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * This is responsible for handling API gateway related operations
@@ -59,6 +61,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
     private String storeTopic;
     private String throttleTopic;
     private String threatProtectionTopic;
+    private ContainerBasedGatewayGenerator containerBasedGatewayGenerator;
 
     public APIGatewayPublisherImpl() {
         config = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
@@ -451,9 +454,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
     @Override
     public void createContainerBasedGateway(String label, API api) throws ContainerBasedGatewayException {
 
-        APIManagerFactory apiManagerFactory = APIManagerFactory.getInstance();
-        ContainerBasedGatewayGenerator containerBasedGatewayGenerator =
-                apiManagerFactory.getContainerBasedGatewayGenerator();
+        ContainerBasedGatewayGenerator containerBasedGatewayGenerator = getContainerBasedGatewayGenerator();
         containerBasedGatewayGenerator.createContainerGateway(label, api);
     }
 
@@ -463,9 +464,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
     @Override
     public void removeContainerBasedGateway(String label, API api) throws ContainerBasedGatewayException {
 
-        APIManagerFactory apiManagerFactory = APIManagerFactory.getInstance();
-        ContainerBasedGatewayGenerator containerBasedGatewayGenerator =
-                apiManagerFactory.getContainerBasedGatewayGenerator();
+        ContainerBasedGatewayGenerator containerBasedGatewayGenerator = getContainerBasedGatewayGenerator();
         containerBasedGatewayGenerator.removeContainerBasedGateway(label, api);
     }
 
@@ -535,6 +534,38 @@ public class APIGatewayPublisherImpl implements APIGateway {
         apiSummary.setSecurityScheme(api.getSecurityScheme());
         apiSummary.setThreatProtectionPolicies(api.getThreatProtectionPolicies());
         return apiSummary;
+    }
+
+    /**
+     * Get Container Based Gateway Generator
+     *
+     * @return containerBasedGatewayGenerator
+     * @throws ContainerBasedGatewayException if error occurred while initializing container based gateway generator
+     */
+    public ContainerBasedGatewayGenerator getContainerBasedGatewayGenerator() throws ContainerBasedGatewayException {
+        if (containerBasedGatewayGenerator == null) {
+            try {
+                ContainerBasedGatewayConfiguration containerBasedGatewayConfiguration =
+                        ContainerBasedGatewayConfigBuilder.getContainerBasedGatewayConfiguration();
+
+                String implClassName = containerBasedGatewayConfiguration.getImplClass();
+                Map<String, String> implParameters = containerBasedGatewayConfiguration.getImplParameters();
+                containerBasedGatewayGenerator = (ContainerBasedGatewayGenerator) Class.forName(implClassName)
+                        .newInstance();
+                containerBasedGatewayGenerator.initImpl(implParameters);
+            } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+                throw new ContainerBasedGatewayException("Error occurred while initializing container based gateway " +
+                        "generator", e, ExceptionCodes.ERROR_INITIALIZING_DEDICATED_CONTAINER_BASED_GATEWAY);
+            }
+        }
+        return containerBasedGatewayGenerator;
+    }
+
+    /**
+     * Set Container Based Gateway Generator
+     */
+    public void setContainerBasedGatewayGenerator(ContainerBasedGatewayGenerator containerBasedGatewayGenerator) {
+        this.containerBasedGatewayGenerator = containerBasedGatewayGenerator;
     }
 
 }
