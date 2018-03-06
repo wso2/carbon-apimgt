@@ -33,7 +33,6 @@ import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 import java.lang.reflect.Field;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Objects;
@@ -216,10 +215,9 @@ public class TestUtil {
      */
     public String getIpAddressOfContainer() throws URISyntaxException {
         String ip = "localhost";
-        String dockerHost = System.getenv("DOCKER_HOST");
+        String dockerHost = System.getenv("DATABASE_HOST");
         if (!StringUtils.isEmpty(dockerHost)) {
-            URI uri = new URI(dockerHost);
-            ip = uri.getHost();
+            return dockerHost;
         }
         return ip;
     }

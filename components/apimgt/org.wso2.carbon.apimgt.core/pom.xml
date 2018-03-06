@@ -431,9 +431,6 @@
                                             <MYSQL_DATABASE>testamdb</MYSQL_DATABASE>
                                             <MYSQL_ROOT_PASSWORD>root</MYSQL_ROOT_PASSWORD>
                                         </env>
-                                        <ports>
-                                            <port>${apim-mysql.port}:3306</port>
-                                        </ports>
                                         <wait>
                                             <tcp>
                                                 <ports>
@@ -470,7 +467,8 @@
                         <configuration>
                             <environmentVariables>
                                 <DATABASE_TYPE>mysql</DATABASE_TYPE>
-                                <PORT>${apim-mysql.port}</PORT>
+                                <PORT>3306</PORT>
+                                <DATABASE_HOST>${docker.container.apim-mysql.ip}</DATABASE_HOST>
                             </environmentVariables>
                             <suiteXmlFiles>
                                 <suiteXmlFile>src/test/resources/testngDAO.xml</suiteXmlFile>
@@ -597,9 +595,6 @@
                                             <SA_PASSWORD>wso2apim123#</SA_PASSWORD>
                                             <MSSQL_DB>testamdb</MSSQL_DB>
                                         </env>
-                                        <ports>
-                                            <port>${apim-mssql.port}:1433</port>
-                                        </ports>
                                         <wait>
                                             <log>MSSQL SERVER SUCCESSFULLY STARTED</log>
                                             <time>60000</time>
@@ -632,7 +627,8 @@
                         <configuration>
                             <environmentVariables>
                                 <DATABASE_TYPE>mssql</DATABASE_TYPE>
-                                <PORT>${apim-mssql.port}</PORT>
+                                <PORT>1433</PORT>
+                                <DATABASE_HOST>${docker.container.apim-mssql.ip}</DATABASE_HOST>
                             </environmentVariables>
                             <suiteXmlFiles>
                                 <suiteXmlFile>src/test/resources/testngDAO.xml</suiteXmlFile>
@@ -711,9 +707,6 @@
                                             <POSTGRES_USER>root</POSTGRES_USER>
                                             <POSTGRES_DB>testamdb</POSTGRES_DB>
                                         </env>
-                                        <ports>
-                                            <port>${apim-postgres.port}:5432</port>
-                                        </ports>
                                         <wait>
                                             <tcp>
                                                 <ports>
@@ -750,7 +743,8 @@
                         <configuration>
                             <environmentVariables>
                                 <DATABASE_TYPE>postgres</DATABASE_TYPE>
-                                <PORT>${apim-postgres.port}</PORT>
+                                <PORT>5432</PORT>
+                                <DATABASE_HOST>${docker.container.apim-postgres.ip}</DATABASE_HOST>
                             </environmentVariables>
                             <suiteXmlFiles>
                                 <suiteXmlFile>src/test/resources/testngDAO.xml</suiteXmlFile>
@@ -794,9 +788,6 @@
                                         <env>
                                             <DB_NAME>testamdb</DB_NAME>
                                         </env>
-                                        <ports>
-                                            <port>${apim-oracle.port}:1521</port>
-                                        </ports>
                                         <wait>
                                             <log>DATABASE IS READY TO USE!</log>
                                             <time>400000</time>
@@ -830,7 +821,8 @@
                         <configuration>
                             <environmentVariables>
                                 <DATABASE_TYPE>oracle</DATABASE_TYPE>
-                                <PORT>${apim-oracle.port}</PORT>
+                                <PORT>1521</PORT>
+                                <DATABASE_HOST>${docker.container.apim-oracle.ip}</DATABASE_HOST>
                             </environmentVariables>
                             <argLine>-Duser.timezone=GMT</argLine>
                             <suiteXmlFiles>
