@@ -6,4 +6,4 @@ script: mvn clean install -q -B -V | grep -v DEBUG
 
 cache:
   directories:
-  - $HOME/.m2
+  - $HOME/.m2_1
