@@ -139,10 +139,6 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import javax.cache.Cache;
-import javax.cache.Caching;
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -167,6 +163,10 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.cache.Cache;
+import javax.cache.Caching;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.isAllowDisplayAPIsWithMultipleStatus;
 
@@ -631,56 +631,52 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     @Override
     public void addAPI(API api) throws APIManagementException {
+        validateApiInfo(api);
+        createAPI(api);
+
+        if (log.isDebugEnabled()) {
+            log.debug("API details successfully added to the registry. API Name: " + api.getId().getApiName()
+                    + ", API Version : " + api.getId().getVersion() + ", API context : " + api.getContext());
+        }
+
+        int tenantId;
+        String tenantDomain = MultitenantUtils
+                .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         try {
-            validateApiInfo(api);
-            createAPI(api);
+            tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+        } catch (UserStoreException e) {
+            throw new APIManagementException(
+                    "Error in retrieving Tenant Information while adding api :" + api.getId().getApiName(), e);
+        }
+        apiMgtDAO.addAPI(api, tenantId);
 
-            if (log.isDebugEnabled()) {
-                log.debug("API details successfully added to the registry. API Name: " + api.getId().getApiName()
-                        + ", API Version : " + api.getId().getVersion() + ", API context : " + api.getContext());
+        JSONObject apiLogObject = new JSONObject();
+        apiLogObject.put(APIConstants.AuditLogConstants.NAME, api.getId().getApiName());
+        apiLogObject.put(APIConstants.AuditLogConstants.CONTEXT, api.getContext());
+        apiLogObject.put(APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
+        apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, api.getId().getProviderName());
+
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
+                APIConstants.AuditLogConstants.CREATED, this.username);
+
+        if (log.isDebugEnabled()) {
+            log.debug("API details successfully added to the API Manager Database. API Name: " + api.getId()
+                    .getApiName() + ", API Version : " + api.getId().getVersion() + ", API context : " + api
+                    .getContext());
+        }
+
+        if (APIUtil.isAPIManagementEnabled()) {
+            Cache contextCache = APIUtil.getAPIContextCache();
+            Boolean apiContext = null;
+
+            Object cachedObject = contextCache.get(api.getContext());
+            if (cachedObject != null) {
+                apiContext = Boolean.valueOf(cachedObject.toString());
             }
-
-            int tenantId;
-            String tenantDomain = MultitenantUtils
-                    .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-            try {
-                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
-            } catch (UserStoreException e) {
-                throw new APIManagementException(
-                        "Error in retrieving Tenant Information while adding api :" + api.getId().getApiName(), e);
+            if (apiContext == null) {
+                contextCache.put(api.getContext(), Boolean.TRUE);
             }
-            apiMgtDAO.addAPI(api, tenantId);
-
-            JSONObject apiLogObject = new JSONObject();
-            apiLogObject.put(APIConstants.AuditLogConstants.NAME, api.getId().getApiName());
-            apiLogObject.put(APIConstants.AuditLogConstants.CONTEXT, api.getContext());
-            apiLogObject.put(APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
-            apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, api.getId().getProviderName());
-
-            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
-                    APIConstants.AuditLogConstants.CREATED, this.username);
-
-            if (log.isDebugEnabled()) {
-                log.debug("API details successfully added to the API Manager Database. API Name: " + api.getId()
-                        .getApiName() + ", API Version : " + api.getId().getVersion() + ", API context : " + api
-                        .getContext());
-            }
-
-            if (APIUtil.isAPIManagementEnabled()) {
-                Cache contextCache = APIUtil.getAPIContextCache();
-                Boolean apiContext = null;
-
-                Object cachedObject = contextCache.get(api.getContext());
-                if (cachedObject != null) {
-                    apiContext = Boolean.valueOf(cachedObject.toString());
-                }
-                if (apiContext == null) {
-                    contextCache.put(api.getContext(), Boolean.TRUE);
-                }
-            }
-        } catch (APIManagementException e) {
-            throw new APIManagementException("Error in adding API :" + api.getId().getApiName(), e);
         }
     }
 

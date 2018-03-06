@@ -67,7 +67,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.uri.template.URITemplateException;
 
-import javax.validation.ConstraintViolation;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -86,6 +85,7 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.validation.ConstraintViolation;
 
 public class RestApiUtil {
 
@@ -313,6 +313,18 @@ public class RestApiUtil {
     public static InternalServerErrorException buildInternalServerErrorException() {
         ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_INTERNAL_SERVER_ERROR_MESSAGE_DEFAULT, 500l,
                 RestApiConstants.STATUS_INTERNAL_SERVER_ERROR_DESCRIPTION_DEFAULT);
+        return new InternalServerErrorException(errorDTO);
+    }
+
+    /**
+     * Returns a new InternalServerErrorException
+     *
+     * @param errorDescription Error Description
+     * @return a new InternalServerErrorException with default details as a response DTO
+     */
+    public static InternalServerErrorException buildInternalServerErrorException(String errorDescription) {
+        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_INTERNAL_SERVER_ERROR_MESSAGE_DEFAULT, 500l,
+                errorDescription);
         return new InternalServerErrorException(errorDTO);
     }
 
@@ -724,7 +736,7 @@ public class RestApiUtil {
      */
     public static void handleInternalServerError(String msg, Throwable t, Log log)
             throws InternalServerErrorException {
-        InternalServerErrorException internalServerErrorException = buildInternalServerErrorException();
+        InternalServerErrorException internalServerErrorException = buildInternalServerErrorException(msg);
         log.error(msg, t);
         throw internalServerErrorException;
     }
