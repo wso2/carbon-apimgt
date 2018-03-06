@@ -384,6 +384,16 @@ public final class APIConstants {
     public static final String OAUTH_RESPONSE_TOKEN_SCOPE = "scope";
     public static final String OAUTH_RESPONSE_EXPIRY_TIME = "expires_in";
     public static final String APP_DISPLAY_NAME = "DisplayName";
+    public static final String RECEIVER_URL = "receiverURL";
+    public static final String AUTHENTICATOR_URL = "authenticatorURL";
+    public static final String USERNAME = "username";
+    public static final String PASSWORD = "password";
+    public static final String PROTOCOL = "protocol";
+    public static final String PUBLISHING_MODE = "publishingMode";
+    public static final String PUBLISHING_TIME_OUT = "publishTimeout";
+    public static final String NON_BLOCKING = "non-blocking";
+    public static final String BLOCKING_CONDITIONS_STREAM_ID = "org.wso2.blocking.request.stream:1.0.0";
+    public static final String KEY_TEMPLATE_STREM_ID = "org.wso2.keytemplate.request.stream:1.0.0";
 
     public static class TokenStatus {
         public static final String ACTIVE = "ACTIVE";
@@ -1196,8 +1206,8 @@ public final class APIConstants {
 
     public static final String BILLING_PLAN_FREE = "FREE";
 
-    public static final String BLOCKING_EVENT_TYPE = "jms";
-    public static final String BLOCKING_EVENT_FORMAT = "map";
+    public static final String BLOCKING_EVENT_TYPE = "wso2event";
+    public static final String BLOCKING_EVENT_FORMAT = "wso2event";
     public static final String THROTTLE_KEY = "throttleKey";
     public static final String BLOCKING_CONDITION_STATE = "state";
     public static final String BLOCKING_CONDITION_KEY = "blockingCondition";

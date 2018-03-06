@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
@@ -49,6 +50,8 @@ import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.context.RegistryType;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterConfiguration;
+import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterFactory;
+import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterSchema;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.event.output.adapter.core.exception.OutputEventAdapterException;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
@@ -83,7 +86,9 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -222,7 +227,7 @@ public class APIManagerComponent {
             setupImagePermissions();
             APIMgtDBUtil.initialize();
 
-            configureJMSPublisher();
+            configureEventPublisherProperties();
             //Load initially available api contexts at the server startup. This Cache is only use by the products other than the api-manager
             /* TODO: Load Config values from apimgt.core*/
             boolean apiManagementEnabled = APIUtil.isAPIManagementEnabled();
@@ -560,33 +565,40 @@ public class APIManagerComponent {
                 RegistryType.USER_GOVERNANCE);
     }
 
-    private void configureJMSPublisher() {
+    private void configureEventPublisherProperties() {
         OutputEventAdapterConfiguration adapterConfiguration = new OutputEventAdapterConfiguration();
         adapterConfiguration.setName(APIConstants.BLOCKING_EVENT_PUBLISHER);
         adapterConfiguration.setType(APIConstants.BLOCKING_EVENT_TYPE);
         adapterConfiguration.setMessageFormat(APIConstants.BLOCKING_EVENT_FORMAT);
-
+        Map<String,String> adapterParameters = new HashMap<>();
         if (ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService() != null) {
             APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
                     .getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration();
-            if (configuration.getThrottleProperties().getJmsPublisherParameters() != null && !configuration
-                    .getThrottleProperties().getJmsPublisherParameters().isEmpty()) {
-                adapterConfiguration
-                        .setStaticProperties(configuration.getThrottleProperties().getJmsPublisherParameters());
-
+            if (configuration.getThrottleProperties().getDataPublisher() != null && configuration
+                    .getThrottleProperties().getDataPublisher().isEnabled()) {
+                ThrottleProperties.DataPublisher dataPublisher = configuration.getThrottleProperties()
+                        .getDataPublisher();
+                adapterParameters.put(APIConstants.RECEIVER_URL,dataPublisher.getReceiverUrlGroup());
+                adapterParameters.put(APIConstants.AUTHENTICATOR_URL,dataPublisher.getAuthUrlGroup());
+                adapterParameters.put(APIConstants.USERNAME,dataPublisher.getUsername());
+                adapterParameters.put(APIConstants.PASSWORD,dataPublisher.getPassword());
+                adapterParameters.put(APIConstants.PROTOCOL,dataPublisher.getType());
+                adapterParameters.put(APIConstants.PUBLISHING_MODE, APIConstants.NON_BLOCKING);
+                adapterParameters.put(APIConstants.PUBLISHING_TIME_OUT, "0");
+                adapterConfiguration.setStaticProperties(adapterParameters);
                 try {
                     ServiceReferenceHolder.getInstance().getOutputEventAdapterService().create(adapterConfiguration);
                 } catch (OutputEventAdapterException e) {
                     log.warn(
-                            "Exception occurred while creating JMS Event Adapter. Request Blocking may not work properly",
+                            "Exception occurred while creating WSO2 Event Adapter. Request Blocking may not work properly",
                             e);
                 }
             } else {
-                log.info("JMS Publisher not enabled.");
+                log.info("Wso2Event Publisher not enabled.");
             }
         } else {
-            log.info("api-manager.xml not loaded. JMS Publisher will not be enabled.");
+            log.info("api-manager.xml not loaded. Wso2Event Publisher will not be enabled.");
         }
 
     }
