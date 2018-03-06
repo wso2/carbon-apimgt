@@ -391,7 +391,7 @@ public class DefaultKeyManagerImpl implements KeyManager {
                                     + "apim:subscription_block apim:api_update apim:subscription_view apim:api_create "
                                     + "apim:apidef_update apim:api_view openid"));
                     tokenInfo.setConsumerKey((String) jsonObject.get("clientId"));
-                    tokenInfo.setEndUserName("admin");
+                    tokenInfo.setEndUserName((String) jsonObject.get("username"));
                     tokenInfo.setIssuedTime((long) jsonObject.get(KeyManagerConstants.OAUTH2_TOKEN_ISSUED_TIME));
                     tokenInfo.setExpiryTime((long) jsonObject.get(KeyManagerConstants.OAUTH2_TOKEN_EXP_TIME));
 
