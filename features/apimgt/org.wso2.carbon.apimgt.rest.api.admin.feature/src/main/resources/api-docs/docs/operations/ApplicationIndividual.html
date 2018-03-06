@@ -1,58 +1,42 @@
 <div class="main-content">
     <h1><a name="Application (Individual)"></a>Application (Individual)</h1>
 
-
-
             <hr/>
-            <h3 class="operation-heading"><a name="exportApplicationsGet"></a>Export an Application <br><small>GET https://apis.wso2.com/api/am/admin/v0.12/export/applications</small></h3>
+            <h4 class="operation-heading"><a name="exportApplicationsGet"></a>Export an Application</h4> <code>GET https://apis.wso2.com/api/am/admin/v0.12/export/applications</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to export the details of a particular Application as a zip file.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
-
                 <code>apim:app_import_export</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:app_import_export' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
-
-
 
             <div class="pointer" data-toggle="collapse" data-target="#request-exportApplicationsGet">
                 <h4 class="section-heading">
                     Request
-
                         <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-
                 </h4>
             </div>
 
-
-                <div id="request-exportApplicationsGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v0.12/export/applications?appName=sampleApp&amp;appOwner=admin
+                <div id="request-exportApplicationsGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v0.12/export/applications?appName&#x3D;sampleApp&amp;appOwner&#x3D;admin
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
-
-
 
             <div class="pointer" data-toggle="collapse" data-target="#response-exportApplicationsGet">
                 <h4 class="section-heading">
                     Response
-
                         <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-
                 </h4>
             </div>
-
                 <div id="response-exportApplicationsGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
-Connection: keep-alive
-Content-Disposition: attachment; filename=&quot;exported-application.zip&quot;
-Content-Type: application/zip</code></div>
-
-
+ Connection: keep-alive
+  Content-Disposition: attachment; filename&#x3D;&quot;exported-application.zip&quot;
+  Content-Type: application/zip</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -X GET https://localhost:9443/api/am/admin/v0.12/export/applications?appName&#x3D;sampleApp&amp;appOwner&#x3D;admin &gt; admin_sampleApp.zip</code></div>
 
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -X GET https://localhost:9443/api/am/admin/v0.12/export/applications?appName=sampleApp&amp;appOwner=admin &gt; admin_sampleApp.zip</code></div>
-
-
+         
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -72,69 +56,62 @@ Content-Type: application/zip</code></div>
                     <th>Default</th>
                 </tr>
                 </thead>
-
                     <tr>
                         <td class="parameter">
-
+                            
                             <span class="param-in">Query </span>
-
-
-
+                            
+                            
+                            
                         </td>
                         <td class="param-name">
                             <p>appName</p>
                             <p class="param-required">
                                 required
-
+                                
                             </p>
                         </td>
                         <td>
                             <p class="param-description marked">Application Name
 </p>
-
                         </td>
                         <td>
                             <span class="param-type">
                                 String
-
                             </span>
                         </td>
                         <td>
                             <p class="marked"></p>
                         </td>
                     </tr>
-
                     <tr>
                         <td class="parameter">
-
+                            
                             <span class="param-in">Query </span>
-
-
-
+                            
+                            
+                            
                         </td>
                         <td class="param-name">
                             <p>appOwner</p>
                             <p class="param-required">
                                 required
-
+                                
                             </p>
                         </td>
                         <td>
                             <p class="param-description marked">Owner of the Application
 </p>
-
                         </td>
                         <td>
                             <span class="param-type">
                                 String
-
                             </span>
                         </td>
                         <td>
                             <p class="marked"></p>
                         </td>
                     </tr>
-
             </table>
 
             <h4 class="section-heading">Responses</h4>
@@ -153,120 +130,88 @@ Content-Type: application/zip</code></div>
                 </tr>
                 </thead>
                 <tbody>
-
                     <tr>
                         <td class="parameter"><p class="marked">200</p></td>
-                        <td class="parameter"><p class="marked">OK.\nExport Successful.\n</p></td>
+                        <td class="parameter"><p class="marked">OK. Export Successful. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-
                                     <a href="#!/models#file">file</a>
-
-
                             </span>
                         </td>
                     </tr>
-
                     <tr>
                         <td class="parameter"><p class="marked">400</p></td>
-                        <td class="parameter"><p class="marked">Bad Request.\nInvalid request or validation error\n</p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error </p></td>
                         <td class="parameter">
                             <span class="parameter">
-
                                     <a href="#!/models#Error">Error</a>
-
-
                             </span>
                         </td>
                     </tr>
-
                     <tr>
                         <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found.\nRequested Application does not exist.\n</p></td>
+                        <td class="parameter"><p class="marked">Not Found. Requested Application does not exist. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-
                                     <a href="#!/models#Error">Error</a>
-
-
                             </span>
                         </td>
                     </tr>
-
                     <tr>
                         <td class="parameter"><p class="marked">406</p></td>
-                        <td class="parameter"><p class="marked">Not Acceptable.\nThe requested media type is not supported\n</p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
                         <td class="parameter">
                             <span class="parameter">
-
                                     <a href="#!/models#Error">Error</a>
-
-
                             </span>
                         </td>
                     </tr>
-
                 </tbody>
             </table>
-
             <hr/>
-            <h3 class="operation-heading"><a name="importApplicationsPost"></a>Import an Application <br><small>POST https://apis.wso2.com/api/am/admin/v0.12/import/applications</small></h3>
+            <h4 class="operation-heading"><a name="importApplicationsPost"></a>Import an Application</h4> <code>POST https://apis.wso2.com/api/am/admin/v0.12/import/applications</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to import an Application.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
-
                 <code>apim:app_import_export</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:app_import_export' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
-
-
 
             <div class="pointer" data-toggle="collapse" data-target="#request-importApplicationsPost">
                 <h4 class="section-heading">
                     Request
-
                         <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-
                 </h4>
             </div>
-
 
                 <div id="request-importApplicationsPost"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/store/v0.12/import/applications
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
-
-
             <div class="pointer" data-toggle="collapse" data-target="#response-importApplicationsPost">
                 <h4 class="section-heading">
                     Response
-
                         <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-
                 </h4>
             </div>
-
                 <div id="response-importApplicationsPost" class="pre collapse in"><code class="json">HTTP/1.1 201 Created
 Location: https://localhost:9443/api/am/admin/v0.12/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524
 Content-Type: application/json
 
 {
-   &quot;groupId&quot;: "",
+   &quot;groupId&quot;: &quot;&quot;,
    &quot;callbackUrl&quot;: &quot;http://my.server.com/callback&quot;,
    &quot;owner&quot;: &quot;admin&quot;,
    &quot;applicationId&quot;: &quot;c30f3a6e-ffa4-4ae7-afce-224d1f820524&quot;,
    &quot;status&quot;: &quot;APPROVED&quot;,
-   &quot;name&quot;: &quot;sampleapp&quot;
+   &quot;name&quot;: &quot;sampleapp&quot; 
 }</code></div>
 
-
-
             <h4 class="section-heading">Sample CURL</h4>
+                <div class="pre"><code class="bash">curl -k -F &quot;file&#x3D;@exported.zip&quot; -X POST -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://localhost:9443/api/am/admin/v0.12/import/applications</code></div>
 
-                <div class="pre"><code class="bash">curl -k -F &quot;file=@exported.zip&quot; -X POST -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://localhost:9443/api/am/admin/v0.12/import/applications</code></div>
-
-
+         
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -286,131 +231,118 @@ Content-Type: application/json
                     <th>Default</th>
                 </tr>
                 </thead>
-
                     <tr>
                         <td class="parameter">
                             <span class="param-in">Form </span>
-
-
-
-
+                            
+                            
+                            
+                            
                         </td>
                         <td class="param-name">
                             <p>file</p>
                             <p class="param-required">
                                 required
-
+                                
                             </p>
                         </td>
                         <td>
                             <p class="param-description marked">Zip archive consisting of exported Application Configuration.
 </p>
-
                         </td>
                         <td>
                             <span class="param-type">
-                                file
-
+                                File
                             </span>
                         </td>
                         <td>
                             <p class="marked"></p>
                         </td>
                     </tr>
-
                     <tr>
                         <td class="parameter">
-
+                            
                             <span class="param-in">Query </span>
-
-
-
+                            
+                            
+                            
                         </td>
                         <td class="param-name">
                             <p>preserveOwner</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
                         <td>
                             <p class="param-description marked">Preserve Original Creator of the Application
 </p>
-
                         </td>
                         <td>
                             <span class="param-type">
                                 Boolean
-
                             </span>
                         </td>
                         <td>
                             <p class="marked"></p>
                         </td>
                     </tr>
-
                     <tr>
                         <td class="parameter">
-
+                            
                             <span class="param-in">Query </span>
-
-
-
+                            
+                            
+                            
                         </td>
                         <td class="param-name">
                             <p>skipSubscriptions</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
                         <td>
                             <p class="param-description marked">Skip importing Subscriptions of the Application
 </p>
-
                         </td>
                         <td>
                             <span class="param-type">
                                 Boolean
-
                             </span>
                         </td>
                         <td>
                             <p class="marked"></p>
                         </td>
                     </tr>
-
                     <tr>
                         <td class="parameter">
-
+                            
                             <span class="param-in">Query </span>
-
-
-
+                            
+                            
+                            
                         </td>
                         <td class="param-name">
                             <p>appOwner</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
                         <td>
                             <p class="param-description marked">Expected Owner of the Application in the Import Environment
 </p>
-
                         </td>
                         <td>
                             <span class="param-type">
                                 String
-
                             </span>
                         </td>
                         <td>
                             <p class="marked"></p>
                         </td>
                     </tr>
-
             </table>
 
             <h4 class="section-heading">Responses</h4>
@@ -429,61 +361,42 @@ Content-Type: application/json
                 </tr>
                 </thead>
                 <tbody>
-
                     <tr>
                         <td class="parameter"><p class="marked">200</p></td>
-                        <td class="parameter"><p class="marked">OK.\nSuccessful response with the updated object information as entity in the body.\n</p></td>
+                        <td class="parameter"><p class="marked">OK. Successful response with the updated object information as entity in the body. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-
                                     <a href="#!/models#ApplicationInfo">ApplicationInfo</a>
-
-
                             </span>
                         </td>
                     </tr>
-
                     <tr>
                         <td class="parameter"><p class="marked">207</p></td>
-                        <td class="parameter"><p class="marked">Multi Status.\nPartially successful response with skipped APIs information object as entity in the body.\n</p></td>
+                        <td class="parameter"><p class="marked">Multi Status. Partially successful response with skipped APIs information object as entity in the body. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-
                                     <a href="#!/models#APIInfoList">APIInfoList</a>
-
-
                             </span>
                         </td>
                     </tr>
-
                     <tr>
                         <td class="parameter"><p class="marked">400</p></td>
-                        <td class="parameter"><p class="marked">Bad Request.\nInvalid request or validation error\n</p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error </p></td>
                         <td class="parameter">
                             <span class="parameter">
-
                                     <a href="#!/models#Error">Error</a>
-
-
                             </span>
                         </td>
                     </tr>
-
                     <tr>
                         <td class="parameter"><p class="marked">406</p></td>
-                        <td class="parameter"><p class="marked">Not Acceptable.\nThe requested media type is not supported\n</p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
                         <td class="parameter">
                             <span class="parameter">
-
                                     <a href="#!/models#Error">Error</a>
-
-
                             </span>
                         </td>
                     </tr>
-
                 </tbody>
             </table>
-
-
 </div>
