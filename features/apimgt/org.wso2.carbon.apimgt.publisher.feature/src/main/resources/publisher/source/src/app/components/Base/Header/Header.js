@@ -187,14 +187,14 @@ class Header extends React.Component {
                                 <IconButton aria-label="Search" onClick={this.toggleSearch} color="default">
                                     <SearchIcon />
                                 </IconButton>
-                                {/* API add menu */}
-                                {/* enable "create API" menu depending on user scopes */}
                                 <ScopeValidation resourcePath={resourcePath.APIS} resourceMethod={resourceMethod.POST}>
                                     <Button aria-owns="simple-menu" aria-haspopup="true" onClick={this.handleClickAddMenu}
                                             color="contrast">
                                         <PlaylistAddIcon />
                                     </Button>
                                 </ScopeValidation>
+                                {/* API add menu */}
+                                {/* enable "create API" menu depending on user scopes */}
                                 <Menu
                                     id="simple-menu"
                                     anchorEl={this.state.anchorElAddMenu}
