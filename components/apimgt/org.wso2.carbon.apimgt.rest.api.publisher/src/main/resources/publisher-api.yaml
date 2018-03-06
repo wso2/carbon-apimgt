@@ -124,10 +124,8 @@ paths:
           description: |
             **Search condition**.
 
-            You can search in attributes by using an **"<attribute>:"** modifier.
-
-            Eg.
-            "provider:wso2" will match an API if the provider of the API is exactly "wso2".
+            You can search in attributes by using an **"<attribute>:"** modifier. The search will display results
+            containing the given string.
 
             Additionally you can use wildcards.
 
