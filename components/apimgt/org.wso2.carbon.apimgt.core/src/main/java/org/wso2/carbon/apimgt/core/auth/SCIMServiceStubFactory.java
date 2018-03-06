@@ -33,7 +33,7 @@ import org.wso2.carbon.apimgt.core.util.AMSSLSocketFactory;
  */
 public class SCIMServiceStubFactory {
 
-    private static final String WSO2_SCIM_BASE_PATH = "/wso2/scim";
+    private static final String WSO2_SCIM_BASE_PATH = "/api/identity/scim2/v1.0";
 
     /**
      * Create and return SCIM service stubs
