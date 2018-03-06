@@ -21,8 +21,9 @@ package org.wso2.carbon.apimgt.micro.gateway.tenant.initializer.utils;
  * Constants used in tenant initialization component
  */
 public class TenantInitializationConstants {
-    public static final int DEFAULT_WAIT_DURATION = 30;
+    public static final int DEFAULT_WAIT_DURATION = 10;
     public static final String DEFAULT_FIRST_NAME = "John";
     public static final String DEFAULT_LAST_NAME = "Doe";
     public static final String DEFAULT_EMAIL = "Doe@org.com";
+    public static final String EMPTY_STRING = "";
 }
