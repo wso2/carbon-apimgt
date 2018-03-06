@@ -200,6 +200,7 @@ public class ServerStartupListener implements ServerStartupObserver {
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
                 carbonContext.setTenantDomain(tenantDomain);
+                carbonContext.setUsername(MultitenantUtils.getTenantAwareUsername(username));
                 ConfigurationContext context =
                         ServiceDataHolder.getInstance().getConfigurationContextService().getServerConfigContext();
                 int tenantId = carbonContext.getTenantId(true);
