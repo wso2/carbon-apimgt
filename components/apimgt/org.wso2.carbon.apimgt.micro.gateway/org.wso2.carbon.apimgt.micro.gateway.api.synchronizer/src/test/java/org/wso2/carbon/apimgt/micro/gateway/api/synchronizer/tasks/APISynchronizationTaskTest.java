@@ -17,6 +17,7 @@
 
 package org.wso2.carbon.apimgt.micro.gateway.api.synchronizer.tasks;
 
+import org.apache.axis2.context.ConfigurationContext;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -39,9 +40,12 @@ import org.wso2.carbon.apimgt.micro.gateway.common.dto.OAuthApplicationInfoDTO;
 import org.wso2.carbon.apimgt.micro.gateway.common.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.micro.gateway.common.util.HttpRequestUtil;
 import org.wso2.carbon.apimgt.micro.gateway.common.util.TokenUtil;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.ConfigurationContextService;
 
 import java.util.Properties;
 
@@ -53,7 +57,8 @@ import static org.mockito.Matchers.any;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({CarbonUtils.class, APIManagerConfiguration.class,
         ServiceReferenceHolder.class, APIManagerConfigurationService.class, TokenUtil.class, HttpClients.class,
-        HttpRequestUtil.class, APIMappingUtil.class, ServiceDataHolder.class
+        HttpRequestUtil.class, APIMappingUtil.class, ServiceDataHolder.class, RealmService.class,
+        PrivilegedCarbonContext.class, TenantAxisUtils.class
 })
 public class APISynchronizationTaskTest {
     @Before
@@ -141,6 +146,11 @@ public class APISynchronizationTaskTest {
                 any(Integer.class))).thenReturn(updatedAPIs, apiInfo, mediationPolicies, mediationPolicyInfo);
         PowerMockito.mockStatic(APIMappingUtil.class);
 
+        PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
+        PowerMockito.mockStatic(PrivilegedCarbonContext.class);
+        PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
+        PowerMockito.mockStatic(TenantAxisUtils.class);
+
         RealmService realmService = Mockito.mock(RealmService.class);
         TenantManager tenantManager = Mockito.mock(TenantManager.class);
         ServiceDataHolder serviceDataHolder = Mockito.mock(ServiceDataHolder.class);
@@ -150,6 +160,11 @@ public class APISynchronizationTaskTest {
         PowerMockito.when(serviceDataHolder.getRealmService()).thenReturn(realmService);
         PowerMockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         PowerMockito.when(tenantManager.getTenantId(any(String.class))).thenReturn(1);
+
+        ConfigurationContextService contextService = Mockito.mock(ConfigurationContextService.class);
+        ConfigurationContext context = Mockito.mock(ConfigurationContext.class);
+        PowerMockito.when(serviceDataHolder.getConfigurationContextService()).thenReturn(contextService);
+        PowerMockito.when(contextService.getServerConfigContext()).thenReturn(context);
 
         String tenantDirPath = System.getProperty(Constants.CARBON_HOME) + Constants.CARBON_TENANT_CONFIGS_PATH;
         PowerMockito.when(CarbonUtils.getCarbonTenantsDirPath()).thenReturn(tenantDirPath);

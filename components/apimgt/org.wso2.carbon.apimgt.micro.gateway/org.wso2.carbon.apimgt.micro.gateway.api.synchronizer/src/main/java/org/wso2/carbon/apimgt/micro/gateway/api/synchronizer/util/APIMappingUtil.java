@@ -42,7 +42,6 @@ import org.wso2.carbon.apimgt.micro.gateway.api.synchronizer.dto.APIEndpointSecu
 import org.wso2.carbon.apimgt.micro.gateway.api.synchronizer.dto.APIMaxTpsDTO;
 import org.wso2.carbon.apimgt.micro.gateway.api.synchronizer.exceptions.APISynchronizationException;
 import org.wso2.carbon.apimgt.micro.gateway.api.synchronizer.internal.ServiceDataHolder;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -68,8 +67,6 @@ public class APIMappingUtil {
                     getAPIManagerConfigurationService().getAPIManagerConfiguration();
             String adminUsername = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
             String tenantDomain = MultitenantUtils.getTenantDomain(adminUsername);
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
 
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(adminUsername);
             boolean isWSApi = APIDTO.TypeEnum.WS == body.getType();
@@ -112,8 +109,6 @@ public class APIMappingUtil {
             String errorMessage = "An error occurred while publishing API : " + body.getProvider() + "-" +
                     body.getName() + "-" + body.getVersion() + " to gateway.";
             throw new APISynchronizationException(errorMessage, e);
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
