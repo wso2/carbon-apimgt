@@ -526,7 +526,6 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertTrue(policyValidationData.size() == size + 3);
     }
 
-
     @Test
     public void testGetCustomPolicies() throws Exception {
         PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
