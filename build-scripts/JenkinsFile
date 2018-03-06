@@ -1,6 +1,5 @@
 #!groovy
 def mvnHome = env.MVN_HOME;
-String dockerHost = env.DOCKER_HOST;
 String nodeLabel = env.NODE_LABEL;
 String repositoryName = 'carbon-apimgt';
 node("${nodeLabel}") {
@@ -17,38 +16,38 @@ node("${nodeLabel}") {
             // Run the maven build
             dir(repositoryName) {
                 withEnv(["PATH+MAVEN=${mvnHome}/bin:${env.JAVA_HOME}/bin:${env.NODE_HOME}/bin"]) {
-                    sh "mvn clean install -Dmaven.test.failure.ignore "
+                    sh "mvn clean install"
                 }
             }
         }
         stage('Running Test on H2 database') {
-            runProfileTests(mvnHome,dockerHost,repositoryName,'local-h2');
+            runProfileTests(mvnHome,repositoryName,'local-h2');
         }
         stage('Running Test on Mysql database') {
-            runProfileTests(mvnHome,dockerHost,repositoryName,'local-mysql');
+            runProfileTests(mvnHome,repositoryName,'local-mysql');
         }
         stage('Running Test on Oracle database') {
-            runProfileTests(mvnHome,dockerHost,repositoryName,'local-oracle');
+            runProfileTests(mvnHome,repositoryName,'local-oracle');
         }
         stage('Running Test on PostgreSql database') {
-            runProfileTests(mvnHome,dockerHost,repositoryName,'local-postgres');
+            runProfileTests(mvnHome,repositoryName,'local-postgres');
         }
         stage('Running Test on Mssql database') {
-            runProfileTests(mvnHome,dockerHost,repositoryName,'local-mssql');
+            runProfileTests(mvnHome,repositoryName,'local-mssql');
         }
         currentBuild.result = 'SUCCESS'
     } catch (any) {
         currentBuild.result = 'FAILURE'
         throw any //rethrow exception to prevent the build from proceeding
     }finally{
-        step([$class: 'JacocoPublisher', changeBuildStatus: true, exclusionPattern: '**/carbon/apimgt/authenticator/*.class,**/apimgt/ballerina/deployment/*.class,**/carbon/apimgt/authenticator/**/*.class,**/dto/*.class,**/exception/*.class,**/exceptions/*.class,**/models/*.class,**/models/**/*.class,**/rest/api/*/factories/*.class,**/rest/api/*/*.class', maximumBranchCoverage: '32', maximumClassCoverage: '55', maximumComplexityCoverage: '30', maximumInstructionCoverage: '40', maximumLineCoverage: '50', maximumMethodCoverage: '50', minimumBranchCoverage: '32', minimumClassCoverage: '55', minimumComplexityCoverage: '30', minimumInstructionCoverage: '40', minimumMethodCoverage: '50'])
+        step([$class: 'JacocoPublisher', changeBuildStatus: true, exclusionPattern: '**/carbon/apimgt/authenticator/*.class,**/apimgt/ballerina/deployment/*.class,**/carbon/apimgt/authenticator/**/*.class,**/dto/*.class,**/exception/*.class,**/exceptions/*.class,**/models/*.class,**/models/**/*.class,**/rest/api/*/factories/*.class,**/rest/api/*/*.class', maximumBranchCoverage: '28', maximumClassCoverage: '70', maximumComplexityCoverage: '30', maximumInstructionCoverage: '55', maximumLineCoverage: '71', maximumMethodCoverage: '70', minimumBranchCoverage: '38', minimumClassCoverage: '70', minimumComplexityCoverage: '32', minimumInstructionCoverage: '55', minimumLineCoverage: '71', minimumMethodCoverage: '70'])
         step([$class: 'Mailer', notifyEveryUnstableBuild: true, recipients: '', sendToIndividuals: true])
     }
 }
-def runProfileTests(String mvnHome,String dockerHost,String repositoryName,String profileName){
+def runProfileTests(String mvnHome,String repositoryName,String profileName){
     dir(repositoryName) {
-        withEnv(["PATH+MAVEN=${mvnHome}/bin:${env.JAVA_HOME}/bin:${env.NODE_HOME}/bin","DOCKER_HOST=${dockerHost}"]) {
-            sh "mvn verify -P ${profileName} -f components/apimgt/org.wso2.carbon.apimgt.core/pom.xml -Dmaven.test.failure.ignore -Dskip.surefire.test=true"
+        withEnv(["PATH+MAVEN=${mvnHome}/bin:${env.JAVA_HOME}/bin:${env.NODE_HOME}/bin"]) {
+            sh "mvn verify -P ${profileName} -f components/apimgt/org.wso2.carbon.apimgt.core/pom.xml -Dskip.surefire.test=true"
         }
     }
 }
