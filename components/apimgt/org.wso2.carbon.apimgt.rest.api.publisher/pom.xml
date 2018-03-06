@@ -150,7 +150,7 @@
                             <directory>src/main/webapp</directory>
                         </resource>
                     </webResources>
-                    <warName>api#am#publisher#v0.11</warName>
+                    <warName>api#am#publisher#v0.12</warName>
                 </configuration>
             </plugin>
 
