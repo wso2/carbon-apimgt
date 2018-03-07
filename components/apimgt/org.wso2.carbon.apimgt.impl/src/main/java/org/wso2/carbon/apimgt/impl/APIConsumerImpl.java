@@ -2117,6 +2117,14 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (originalSubscribedAPIs != null && !originalSubscribedAPIs.isEmpty()) {
                 Map<String, Tier> tiers = APIUtil.getTiers(tenantId);
                 for (SubscribedAPI subscribedApi : originalSubscribedAPIs) {
+                    Application application = subscribedApi.getApplication();
+                    if (application != null) {
+                        int applicationId = application.getId();
+                        Set<APIKey> keys = getApplicationKeys(applicationId);
+                        for (APIKey key : keys) {
+                            application.addKey(key);
+                        }
+                    }
                     Tier tier = tiers.get(subscribedApi.getTier().getName());
                     subscribedApi.getTier().setDisplayName(tier != null ? tier.getDisplayName() : subscribedApi.getTier().getName());
                     subscribedAPIs.add(subscribedApi);
@@ -2533,6 +2541,13 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         String uuid = application.getUUID();
         if (!StringUtils.isEmpty(uuid)) {
             existingApp = apiMgtDAO.getApplicationByUUID(uuid);
+            if (existingApp != null) {
+                Set<APIKey> keys = getApplicationKeys(existingApp.getId());
+
+                for (APIKey key : keys) {
+                    existingApp.addKey(key);
+                }
+            }
             application.setId(existingApp.getId());
         } else {
             existingApp = apiMgtDAO.getApplicationById(application.getId());
@@ -2647,6 +2662,13 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         String uuid = application.getUUID();
         if (application.getId() == 0 && !StringUtils.isEmpty(uuid)) {
             application = apiMgtDAO.getApplicationByUUID(uuid);
+            if (application != null) {
+                Set<APIKey> keys = getApplicationKeys(application.getId());
+
+                for (APIKey key : keys) {
+                    application.addKey(key);
+                }
+            }
         }
         boolean isTenantFlowStarted = false;
         int applicationId = application.getId();
@@ -3311,18 +3333,139 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return null;
     }
 
+    /**
+     * Returns all applications associated with given subscriber, groupingId and search criteria.
+     *
+     * @param subscriber Subscriber
+     * @param groupingId The groupId to which the applications must belong.
+     * @param offset     The offset.
+     * @param search     The search string.
+     * @param sortColumn The sort column.
+     * @param sortOrder  The sort order.
+     * @return Application[] The Applications.
+     * @throws APIManagementException
+     */
     @Override
-    public Application[] getApplicationsWithPagination(Subscriber subscriber, String groupingId,int start , int offset
+    public Application[] getApplicationsWithPagination(Subscriber subscriber, String groupingId, int start , int offset
             , String search, String sortColumn, String sortOrder)
             throws APIManagementException {
-        return apiMgtDAO.getApplicationsWithPagination(subscriber, groupingId, start, offset, search,sortColumn,sortOrder);
+        Application[] applications = apiMgtDAO.getApplicationsWithPagination(subscriber, groupingId, start, offset,
+                search, sortColumn, sortOrder);
+        for (Application application : applications) {
+            Set<APIKey> keys = getApplicationKeys(application.getId());
+
+            for (APIKey key : keys) {
+                application.addKey(key);
+            }
+        }
+        return applications;
     }
 
+    /**
+     * Returns all applications associated with given subscriber and groupingId.
+     *
+     * @param subscriber The subscriber.
+     * @param groupingId The groupId to which the applications must belong.
+     * @return Application[] Array of applications.
+     * @throws APIManagementException
+     */
     @Override
     public Application[] getApplications(Subscriber subscriber, String groupingId)
 			throws APIManagementException {
-		return apiMgtDAO.getApplications(subscriber, groupingId);
-	}
+        Application[] applications = apiMgtDAO.getApplications(subscriber, groupingId);
+        for (Application application : applications) {
+            Set<APIKey> keys = getApplicationKeys(application.getId());
+
+            for (APIKey key : keys) {
+                application.addKey(key);
+            }
+        }
+        return applications;
+    }
+
+    /**
+     * Returns all API keys associated with given application id.
+     *
+     * @param applicationId The id of the application.
+     * @return Set<APIKey>  Set of API keys of the application.
+     * @throws APIManagementException
+     */
+    protected Set<APIKey> getApplicationKeys(int applicationId) throws APIManagementException {
+        Set<APIKey> apiKeys = new HashSet<APIKey>();
+        APIKey productionKey = getApplicationKey(applicationId, APIConstants.API_KEY_TYPE_PRODUCTION);
+        if (productionKey != null) {
+            apiKeys.add(productionKey);
+        } else {
+            productionKey = apiMgtDAO.getKeyStatusOfApplication(APIConstants.API_KEY_TYPE_PRODUCTION, applicationId);
+            if (productionKey != null) {
+                productionKey.setType(APIConstants.API_KEY_TYPE_PRODUCTION);
+                apiKeys.add(productionKey);
+            }
+        }
+
+        APIKey sandboxKey = getApplicationKey(applicationId, APIConstants.API_KEY_TYPE_SANDBOX);
+        if (sandboxKey != null) {
+            apiKeys.add(sandboxKey);
+        } else {
+            sandboxKey = apiMgtDAO.getKeyStatusOfApplication(APIConstants.API_KEY_TYPE_SANDBOX, applicationId);
+            if (sandboxKey != null) {
+                sandboxKey.setType(APIConstants.API_KEY_TYPE_SANDBOX);
+                apiKeys.add(sandboxKey);
+            }
+        }
+        return apiKeys;
+    }
+
+    /**
+     * Returns the key associated with given application id and key type.
+     *
+     * @param applicationId Id of the Application.
+     * @param keyType The type of key.
+     * @return APIKey The key of the application.
+     * @throws APIManagementException
+     */
+    protected APIKey getApplicationKey(int applicationId, String keyType) throws APIManagementException {
+        String consumerKey = apiMgtDAO.getConsumerkeyByApplicationIdAndKeyType(String.valueOf(applicationId), keyType);
+        if (StringUtils.isNotEmpty(consumerKey)) {
+            String consumerKeyStatus = apiMgtDAO.getKeyStatusOfApplication(keyType, applicationId).getState();
+            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+            OAuthApplicationInfo oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);
+            AccessTokenInfo tokenInfo = keyManager.getAccessTokenByConsumerKey(consumerKey);
+            APIKey apiKey = new APIKey();
+            apiKey.setConsumerKey(consumerKey);
+            apiKey.setType(keyType);
+            apiKey.setState(consumerKeyStatus);
+            if (oAuthApplicationInfo != null) {
+                apiKey.setConsumerSecret(oAuthApplicationInfo.getClientSecret());
+                apiKey.setCallbackUrl(oAuthApplicationInfo.getCallBackURL());
+                apiKey.setGrantTypes(oAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES).toString());
+            }
+            if (tokenInfo != null) {
+                apiKey.setAccessToken(tokenInfo.getAccessToken());
+                apiKey.setValidityPeriod(tokenInfo.getValidityPeriod());
+                apiKey.setTokenScope(getScopeString(tokenInfo.getScopes()));
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Access token does not exist for Consumer Key: " + consumerKey);
+                }
+            }
+            return apiKey;
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Consumer key does not exist for Application Id: " + applicationId + " Key Type: " + keyType);
+        }
+        return null;
+    }
+
+    /**
+     * Returns a single string containing the provided array of scopes.
+     *
+     * @param scopes The array of scopes.
+     * @return String Single string containing the provided array of scopes.
+     */
+    private String getScopeString(String[] scopes) {
+        return StringUtils.join(scopes, " ");
+    }
 
     @Override
     public Application[] getLightWeightApplications(Subscriber subscriber, String groupingId) throws

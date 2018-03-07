@@ -22,6 +22,7 @@ import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.entity.ContentType;
@@ -53,11 +54,15 @@ import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.Wsdl;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -1556,6 +1561,16 @@ public abstract class AbstractAPIManager implements APIManager {
     public Set<API> getSubscriberAPIs(Subscriber subscriber) throws APIManagementException {
         SortedSet<API> apiSortedSet = new TreeSet<API>(new APINameComparator());
         Set<SubscribedAPI> subscribedAPIs = apiMgtDAO.getSubscribedAPIs(subscriber, null);
+        for (SubscribedAPI subscribedApi : subscribedAPIs) {
+            Application application = subscribedApi.getApplication();
+            if (application != null) {
+                int applicationId = application.getId();
+                Set<APIKey> keys = getApplicationKeys(applicationId);
+                for (APIKey key : keys) {
+                    application.addKey(key);
+                }
+            }
+        }
         boolean isTenantFlowStarted = false;
         try {
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -1601,14 +1616,21 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     /**
-     * Returns the corresponding application given the uuid
+     * Returns the corresponding application given the uuid.
      *
-     * @param uuid uuid of the Application
+     * @param uuid uuid of the Application.
      * @return it will return Application corresponds to the uuid provided.
      * @throws APIManagementException
      */
     public Application getApplicationByUUID(String uuid) throws APIManagementException {
-        return apiMgtDAO.getApplicationByUUID(uuid);
+        Application application = apiMgtDAO.getApplicationByUUID(uuid);
+        if (application != null) {
+            Set<APIKey> keys = getApplicationKeys(application.getId());
+            for (APIKey key : keys) {
+                application.addKey(key);
+            }
+        }
+        return application;
     }
 
     /**
@@ -2617,5 +2639,89 @@ public abstract class AbstractAPIManager implements APIManager {
      */
     protected String getSearchQuery(String searchQuery) throws APIManagementException {
         return searchQuery;
+    }
+
+    /**
+     * Returns all API keys associated with given application id.
+     *
+     * @param applicationId The id of the application.
+     * @return Set<APIKey>  Set of API keys of the application.
+     * @throws APIManagementException
+     */
+    private Set<APIKey> getApplicationKeys(int applicationId) throws APIManagementException {
+        Set<APIKey> apiKeys = new HashSet<APIKey>();
+        APIKey productionKey = getApplicationKey(applicationId, APIConstants.API_KEY_TYPE_PRODUCTION);
+        if (productionKey != null) {
+            apiKeys.add(productionKey);
+        } else {
+            productionKey = apiMgtDAO.getKeyStatusOfApplication(APIConstants.API_KEY_TYPE_PRODUCTION, applicationId);
+            if (productionKey != null) {
+                productionKey.setType(APIConstants.API_KEY_TYPE_PRODUCTION);
+                apiKeys.add(productionKey);
+            }
+        }
+
+        APIKey sandboxKey = getApplicationKey(applicationId, APIConstants.API_KEY_TYPE_SANDBOX);
+        if (sandboxKey != null) {
+            apiKeys.add(sandboxKey);
+        } else {
+            sandboxKey = apiMgtDAO.getKeyStatusOfApplication(APIConstants.API_KEY_TYPE_SANDBOX, applicationId);
+            if (sandboxKey != null) {
+                sandboxKey.setType(APIConstants.API_KEY_TYPE_SANDBOX);
+                apiKeys.add(sandboxKey);
+            }
+        }
+        return apiKeys;
+    }
+
+    /**
+     * Returns the key associated with given application id and key type.
+     *
+     * @param applicationId Id of the Application.
+     * @param keyType The type of key.
+     * @return APIKey The key of the application.
+     * @throws APIManagementException
+     */
+    private APIKey getApplicationKey(int applicationId, String keyType) throws APIManagementException {
+        String consumerKey = apiMgtDAO.getConsumerkeyByApplicationIdAndKeyType(String.valueOf(applicationId), keyType);
+        if (StringUtils.isNotEmpty(consumerKey)) {
+            String consumerKeyStatus = apiMgtDAO.getKeyStatusOfApplication(keyType, applicationId).getState();
+            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+            OAuthApplicationInfo oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);
+            AccessTokenInfo tokenInfo = keyManager.getAccessTokenByConsumerKey(consumerKey);
+            APIKey apiKey = new APIKey();
+            apiKey.setConsumerKey(consumerKey);
+            apiKey.setType(keyType);
+            apiKey.setState(consumerKeyStatus);
+            if (oAuthApplicationInfo != null) {
+                apiKey.setConsumerSecret(oAuthApplicationInfo.getClientSecret());
+                apiKey.setCallbackUrl(oAuthApplicationInfo.getCallBackURL());
+                apiKey.setGrantTypes(oAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES).toString());
+            }
+            if (tokenInfo != null) {
+                apiKey.setAccessToken(tokenInfo.getAccessToken());
+                apiKey.setValidityPeriod(tokenInfo.getValidityPeriod());
+                apiKey.setTokenScope(getScopeString(tokenInfo.getScopes()));
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Access token does not exist for Consumer Key: " + consumerKey);
+                }
+            }
+            return apiKey;
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Consumer key does not exist for Application Id: " + applicationId + " Key Type: " + keyType);
+        }
+        return null;
+    }
+
+    /**
+     * Returns a single string containing the provided array of scopes.
+     *
+     * @param scopes The array of scopes.
+     * @return String Single string containing the provided array of scopes.
+     */
+    private String getScopeString(String[] scopes) {
+        return StringUtils.join(scopes, " ");
     }
 }

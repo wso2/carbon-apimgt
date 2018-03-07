@@ -42,11 +42,13 @@ import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClientPool;
+import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.identity.core.util.IdentityConfigParser;
 import org.wso2.carbon.identity.core.util.IdentityCoreConstants;
 import org.wso2.carbon.identity.oauth.common.OAuthConstants;
@@ -57,6 +59,7 @@ import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationResponseDTO;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -618,9 +621,34 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         return apiMgtDAO.getActiveTokensOfConsumerKey(consumerKey);
     }
 
+    /**
+     * Returns the access token information of the provided consumer key.
+     *
+     * @param consumerKey The consumer key.
+     * @return AccessTokenInfo The access token information.
+     * @throws APIManagementException
+     */
     @Override
     public AccessTokenInfo getAccessTokenByConsumerKey(String consumerKey) throws APIManagementException {
-        return null;
+        AccessTokenInfo tokenInfo = new AccessTokenInfo();
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+
+        APIKey apiKey;
+        try {
+            apiKey = apiMgtDAO.getAccessTokenInfoByConsumerKey(consumerKey);
+            tokenInfo.setAccessToken(apiKey.getAccessToken());
+            tokenInfo.setConsumerKey(consumerKey);
+            tokenInfo.setConsumerSecret(apiKey.getConsumerSecret());
+            tokenInfo.setValidityPeriod(apiKey.getValidityPeriod());
+            tokenInfo.setScope(apiKey.getTokenScope().split("\\s"));
+        } catch (SQLException e) {
+            handleException("Cannot retrieve information for the given consumer key : "
+                    + consumerKey, e);
+        } catch (CryptoException e) {
+            handleException("Token decryption failed of an access token for the given consumer key : "
+                    + consumerKey, e);
+        }
+        return tokenInfo;
     }
     
     protected org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo createOAuthApplicationbyApplicationInfo(
