@@ -77,6 +77,10 @@ import java.util.List;
 public class ThrottlingSynchronizer implements OnPremiseGatewayInitListener {
 
     private static final Log log = LogFactory.getLog(ThrottlingSynchronizer.class);
+    private String applicationPolicyUrl = ThrottlingConstants.EMPTY_STRING;
+    private String subscriptionPolicyUrl = ThrottlingConstants.EMPTY_STRING;
+    private String advancedPolicyUrl = ThrottlingConstants.EMPTY_STRING;
+    private String blockingPolicyUrl = ThrottlingConstants.EMPTY_STRING;
 
     @Override
     public void completedInitialization() {
@@ -92,13 +96,52 @@ public class ThrottlingSynchronizer implements OnPremiseGatewayInitListener {
             loadTenant();
             username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
 
+            //Initialize Rest API urls
+            String apiAdminUrl = ConfigManager.getConfigManager()
+                    .getProperty(OnPremiseGatewayConstants.API_ADMIN_URL_PROPERTY_KEY);
+            String apiVersion = ConfigManager.getConfigManager()
+                    .getProperty(ThrottlingConstants.API_VERSION_PROPERTY);
+            if (apiVersion == null) {
+                apiVersion = ThrottlingConstants.API_DEFAULT_VERSION;
+                if (log.isDebugEnabled()) {
+                    log.debug("Using default API version: " + apiVersion);
+                }
+            } else if (ThrottlingConstants.CLOUD_API.equals(apiVersion)) {
+                apiVersion = ThrottlingConstants.EMPTY_STRING;
+                if (log.isDebugEnabled()) {
+                    log.debug("Cloud API doesn't have an version. Therefore, removing the version: " + apiVersion);
+                }
+            }
+            if (apiAdminUrl == null) {
+                apiAdminUrl = ThrottlingConstants.DEFAULT_API_ADMIN_URL;
+                if (log.isDebugEnabled()) {
+                    log.debug("Using default API Admin URL." + apiAdminUrl);
+                }
+            }
+            //Remove '//' which is created in the cloud case.
+            applicationPolicyUrl = apiAdminUrl + ThrottlingConstants.APPLICATION_POLICIES_SUFFIX
+                    .replace(ThrottlingConstants.API_VERSION_PARAM, apiVersion)
+                    .replace("//", ThrottlingConstants.URL_PATH_SEPARATOR);
+
+            subscriptionPolicyUrl = apiAdminUrl + ThrottlingConstants.SUBSCRIPTION_POLICIES_SUFFIX
+                    .replace(ThrottlingConstants.API_VERSION_PARAM, apiVersion)
+                    .replace("//", ThrottlingConstants.URL_PATH_SEPARATOR);
+
+            advancedPolicyUrl = apiAdminUrl + ThrottlingConstants.ADVANCED_POLICIES_SUFFIX
+                    .replace(ThrottlingConstants.API_VERSION_PARAM, apiVersion)
+                    .replace("//", ThrottlingConstants.URL_PATH_SEPARATOR);
+
+            blockingPolicyUrl = apiAdminUrl + ThrottlingConstants.BLOCKING_POLICIES_SUFFIX
+                    .replace(ThrottlingConstants.API_VERSION_PARAM, apiVersion)
+                    .replace("//", ThrottlingConstants.URL_PATH_SEPARATOR);
+
             //fist we need to get an access token to invoke the Admin Rest API
             try {
                 OAuthApplicationInfoDTO responseDto = TokenUtil.registerClient();
                 String combinedScopes = ThrottlingConstants.TOKEN_TIER_VIEW_SCOPE + " "
                         + ThrottlingConstants.BLOCKING_CONDITION_VIEW_SCOPE;
-                accessTokenDTO = TokenUtil
-                        .generateAccessToken(responseDto.getClientId(), responseDto.getClientSecret(), combinedScopes);
+                accessTokenDTO = TokenUtil.generateAccessToken(responseDto.getClientId(),
+                        responseDto.getClientSecret().toCharArray(), combinedScopes);
             } catch (OnPremiseGatewayException e) {
                 log.error("Error occurred while creating policies. Unable to generate Access Token.", e);
                 return;
@@ -107,7 +150,7 @@ public class ThrottlingSynchronizer implements OnPremiseGatewayInitListener {
             createSubscriptionPolicies(username, accessTokenDTO);
             createApplicationPolicies(username, accessTokenDTO);
             createAdvancedPolicies(username, accessTokenDTO);
-        } catch (ThrottlingSynchronizerException e) {
+        } catch (ThrottlingSynchronizerException | OnPremiseGatewayException e) {
             log.error("Error occurred while creating policies.", e);
             return;
         } finally {
@@ -179,10 +222,6 @@ public class ThrottlingSynchronizer implements OnPremiseGatewayInitListener {
         }
 
         CloseableHttpClient httpClient = HttpClients.createDefault();
-        String subscriptionPolicyUrl = ConfigManager.getConfigManager()
-                .getProperty(OnPremiseGatewayConstants.API_ADMIN_URL_PROPERTY_KEY) +
-                ThrottlingConstants.SUBSCRIPTION_POLICIES_SUFFIX;
-
         HttpGet httpGet = new HttpGet(subscriptionPolicyUrl);
         String authHeaderValue = OnPremiseGatewayConstants.AUTHORIZATION_BEARER + accessTokenDTO.getAccessToken();
         httpGet.addHeader(OnPremiseGatewayConstants.AUTHORIZATION_HEADER, authHeaderValue);
@@ -251,11 +290,8 @@ public class ThrottlingSynchronizer implements OnPremiseGatewayInitListener {
             log.debug("Getting Subscription Policies using Admin REST API.");
         }
         CloseableHttpClient httpClient = HttpClients.createDefault();
-        String subscriptionPolicyUrl = ConfigManager.getConfigManager()
-                .getProperty(OnPremiseGatewayConstants.API_ADMIN_URL_PROPERTY_KEY) +
-                ThrottlingConstants.APPLICATION_POLICIES_SUFFIX;
 
-        HttpGet httpGet = new HttpGet(subscriptionPolicyUrl);
+        HttpGet httpGet = new HttpGet(applicationPolicyUrl);
         String authHeaderValue = OnPremiseGatewayConstants.AUTHORIZATION_BEARER + accessTokenDTO.getAccessToken();
         httpGet.addHeader(OnPremiseGatewayConstants.AUTHORIZATION_HEADER, authHeaderValue);
 
@@ -321,11 +357,8 @@ public class ThrottlingSynchronizer implements OnPremiseGatewayInitListener {
         if (log.isDebugEnabled()) {
             log.debug("Getting Advanced Policies using Admin REST API.");
         }
-        CloseableHttpClient httpClient = HttpClients.createDefault();
-        String advancedPolicyUrl = ConfigManager.getConfigManager()
-                .getProperty(OnPremiseGatewayConstants.API_ADMIN_URL_PROPERTY_KEY) +
-                ThrottlingConstants.ADVANCED_POLICIES_SUFFIX;
 
+        CloseableHttpClient httpClient = HttpClients.createDefault();
         HttpGet httpGet = new HttpGet(advancedPolicyUrl);
         String authHeaderValue = OnPremiseGatewayConstants.AUTHORIZATION_BEARER + accessTokenDTO.getAccessToken();
         httpGet.addHeader(OnPremiseGatewayConstants.AUTHORIZATION_HEADER, authHeaderValue);
@@ -348,14 +381,10 @@ public class ThrottlingSynchronizer implements OnPremiseGatewayInitListener {
                                                                   AdvancedThrottlePolicyListDTO policyListDTO)
             throws OnPremiseGatewayException {
         List<AdvancedThrottlePolicyDTO> policyDTOList = new ArrayList<>();
-
         CloseableHttpClient httpClient = HttpClients.createDefault();
-        String advancePolicyUrl = ConfigManager.getConfigManager()
-                .getProperty(OnPremiseGatewayConstants.API_ADMIN_URL_PROPERTY_KEY) +
-                ThrottlingConstants.ADVANCED_POLICIES_SUFFIX;
 
         for (AdvancedThrottlePolicyInfoDTO infoDTO : policyListDTO.getList()) {
-            HttpGet httpGet = new HttpGet(advancePolicyUrl + "/" + infoDTO.getPolicyId());
+            HttpGet httpGet = new HttpGet(advancedPolicyUrl + ThrottlingConstants.URL_PATH_SEPARATOR + infoDTO.getPolicyId());
             String authHeaderValue = OnPremiseGatewayConstants.AUTHORIZATION_BEARER + accessTokenDTO.getAccessToken();
             httpGet.addHeader(OnPremiseGatewayConstants.AUTHORIZATION_HEADER, authHeaderValue);
 
@@ -412,18 +441,14 @@ public class ThrottlingSynchronizer implements OnPremiseGatewayInitListener {
 
     private BlockingConditionListDTO getBlockingConditions(AccessTokenDTO accessTokenDTO)
             throws OnPremiseGatewayException, IOException {
+
         if (log.isDebugEnabled()) {
             log.debug("Getting Blocking conditions using Admin REST API.");
         }
         CloseableHttpClient httpClient = HttpClients.createDefault();
-        String advancedPolicyUrl = ConfigManager.getConfigManager()
-                .getProperty(OnPremiseGatewayConstants.API_ADMIN_URL_PROPERTY_KEY) +
-                ThrottlingConstants.BLOCKING_POLICIES_SUFFIX;
-
-        HttpGet httpGet = new HttpGet(advancedPolicyUrl);
+        HttpGet httpGet = new HttpGet(blockingPolicyUrl);
         String authHeaderValue = OnPremiseGatewayConstants.AUTHORIZATION_BEARER + accessTokenDTO.getAccessToken();
         httpGet.addHeader(OnPremiseGatewayConstants.AUTHORIZATION_HEADER, authHeaderValue);
-
 
         String response = HttpRequestUtil.executeHTTPMethodWithRetry(httpClient, httpGet,
                 OnPremiseGatewayConstants.DEFAULT_RETRY_COUNT);
@@ -447,12 +472,18 @@ public class ThrottlingSynchronizer implements OnPremiseGatewayInitListener {
         PrivilegedCarbonContext.startTenantFlow();
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(username);
-        ConfigurationContext context = ServiceReferenceHolder.getInstance()
-                .getConfigContextService().getServerConfigContext();
-        TenantAxisUtils.getTenantAxisConfiguration(tenantDomain, context);
-        if (log.isDebugEnabled()) {
-            log.debug("Tenant was loaded into Carbon Context. Tenant : " + tenantDomain
-                    + ", Username : " + username);
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            ConfigurationContext context = ServiceReferenceHolder.getInstance()
+                    .getConfigContextService().getServerConfigContext();
+            TenantAxisUtils.getTenantAxisConfiguration(tenantDomain, context);
+            if (log.isDebugEnabled()) {
+                log.debug("Tenant was loaded into Carbon Context. Tenant : " + tenantDomain
+                        + ", Username : " + username);
+            }
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Skipping loading super tenant space since execution is currently in super tenant flow.");
+            }
         }
     }
 

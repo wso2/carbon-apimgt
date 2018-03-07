@@ -244,7 +244,7 @@
     "Gateway URLs": "Gateway URLs",
     "Gateways Unchecked": "Since a Gateway environment is not selected, changes will not be done to the Gateways. Do you want to proceed?",
     "General Details": "General Details",
-    "Generate Rest Apis": "Generate Rest Apis",
+    "Generate Rest Apis": "Generate REST APIs",
     "Global mediation policies": "Global mediation policies",
     "Go Back": "Go Back",
     "Go to API Store": "Go to API Store",
@@ -602,5 +602,7 @@
     "user": "user",
     "Authorization Header": "Authorization Header",
     "Here a custom authorization header can be defined as a replacement to the default <strong>Authorization</strong> header used to send a request. If a value is specified here, that will be used as the header field to send the access token in a request to consume the API": "Here a custom authorization header can be defined as a replacement to the default <strong>Authorization</strong> header used to send a request. If a value is specified here, that will be used as the header field to send the access token in a request to consume the API",
-    "Number of API Subscriptions" : "Number of API Subscriptions"
+    "Number of API Subscriptions" : "Number of API Subscriptions",
+    "You must select a mediation policy to download": "You must select a mediation policy to download.",
+    "Error while retrieving the selected mediation policy": "Error while retrieving the selected mediation policy."
 }

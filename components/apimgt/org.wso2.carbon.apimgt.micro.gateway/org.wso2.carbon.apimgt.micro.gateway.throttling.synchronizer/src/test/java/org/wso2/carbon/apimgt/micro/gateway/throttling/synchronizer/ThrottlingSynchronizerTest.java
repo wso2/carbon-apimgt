@@ -40,9 +40,9 @@ import org.wso2.carbon.apimgt.micro.gateway.common.dto.AccessTokenDTO;
 import org.wso2.carbon.apimgt.micro.gateway.common.dto.OAuthApplicationInfoDTO;
 import org.wso2.carbon.apimgt.micro.gateway.common.util.HttpRequestUtil;
 import org.wso2.carbon.apimgt.micro.gateway.common.util.TokenUtil;
-import org.wso2.carbon.apimgt.micro.gateway.throttling.synchronizer.util.mapping.throttling.AdvancedThrottlePolicyMappingUtil;
 import org.wso2.carbon.apimgt.micro.gateway.throttling.synchronizer.dto.AdvancedThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.micro.gateway.throttling.synchronizer.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.micro.gateway.throttling.synchronizer.util.mapping.throttling.AdvancedThrottlePolicyMappingUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
@@ -81,7 +81,7 @@ public class ThrottlingSynchronizerTest {
                 .getClientSecret();
 
         AccessTokenDTO accessTknDTO = Mockito.mock(AccessTokenDTO.class);
-        PowerMockito.when(TokenUtil.generateAccessToken(any(String.class), any(String.class), any(String.class)))
+        PowerMockito.when(TokenUtil.generateAccessToken(any(String.class), any(char[].class), any(String.class)))
                 .thenReturn(accessTknDTO);
         Mockito.doReturn("ssfhhh-jenfho-wfembj").when(accessTknDTO)
                 .getAccessToken();
@@ -124,9 +124,9 @@ public class ThrottlingSynchronizerTest {
         PowerMockito.when(ConfigManager.getConfigManager()).thenReturn(configManager);
 
         Mockito.when(configManager.getProperty(any(String.class)))
-                .thenReturn("https://api.cloud.wso2.com/api/am/admin/v0.11/throttling/policies/subscription",
-                        "https://api.cloud.wso2.com/api/am/admin/v0.11/throttling/policies/application",
-                        "https://api.cloud.wso2.com/api/am/admin/v0.11/throttling/policies/advanced");
+                .thenReturn("https://api.cloud.wso2.com/api/am/admin/v0.12/throttling/policies/subscription",
+                        "https://api.cloud.wso2.com/api/am/admin/v0.12/throttling/policies/application",
+                        "https://api.cloud.wso2.com/api/am/admin/v0.12/throttling/policies/advanced");
 
         String subPolicies = "{\"count\":2,\"list\":[{\"policyId\":\"8e73b2b4-76c2-4a0f-9520-087337395ce6\"," +
                 "\"policyName\":\"Gold\",\"displayName\":\"Gold\",\"description\":" +

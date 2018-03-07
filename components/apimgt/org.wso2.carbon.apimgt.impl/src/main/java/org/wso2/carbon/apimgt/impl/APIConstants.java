@@ -1368,4 +1368,8 @@ public final class APIConstants {
     public static final String RESTRICTED_STORE_VISIBILITY = "restricted";
 
     public static final String CREATED_DATE = "createdDate";
+
+    public static final String UNLIMITED_TIER_NAME = "unlimited";
+    public static final String FAULT_SEQUENCE = "fault";
+    public static final String OUT_SEQUENCE = "out";
 }

@@ -25,13 +25,17 @@ public class APISynchronizationConstants {
     public static final String API_MEDIATION_POLICY_VIEW_SCOPE = "apim:mediation_policy_view";
     public static final String API_VIEW_SCOPE = "apim:api_view";
     public static final String API_PUBLISHER_URL_PROPERTY = "api.publisher.url";
-    public static final String DEFAULT_API_PUBLISHER_URL = "https://api.cloud.wso2.com";
+    public static final String API_VERSION_PROPERTY = "rest.api.version";
+    public static final String DEFAULT_API_PUBLISHER_URL = "https://localhost:9443";
     public static final String DEFAULT_API_UPDATE_URL_PROPERTY = "api.lifecycle.event.publisher.url";
-    public static final String API_VIEW_PATH = "/api/am/publisher/v0.11/apis";
+    public static final String API_VIEW_PATH = "/api/am/publisher/{version}/apis";
     public static final String API_VIEW_MEDIATION_POLICY_PATH = "/policies/mediation";
-    public static final String API_VIEW_GLOBAL_MEDIATION_POLICY_PATH = "/api/am/publisher/v0.11/policies/mediation";
-    public static final String DEFAULT_API_UPDATE_SERVICE_URL = "https://api.cloud.wso2.com/micro-gateway/updated-apis";
+    public static final String API_VIEW_GLOBAL_MEDIATION_POLICY_PATH = "/api/am/publisher/{version}/policies/mediation";
+    public static final String DEFAULT_API_UPDATE_SERVICE_URL = "https://localhost:9443/micro-gateway/v0.9/updated-apis";
     public static final String API_NAME = "name";
     public static final String API_SEQUENCE = "sequence";
-    static final String API_VERSION_PARAM = "{version}";
+    public static final String API_VERSION_PARAM = "{version}";
+    public static final String API_DEFAULT_VERSION = "v0.12";
+    public static final String URL_PATH_SEPARATOR = "/";
+    public static final String CLOUD_API = "cloud";
 }

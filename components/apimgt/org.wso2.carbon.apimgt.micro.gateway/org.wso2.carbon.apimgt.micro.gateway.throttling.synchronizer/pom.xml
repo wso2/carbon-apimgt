@@ -21,7 +21,7 @@
     <parent>
         <artifactId>org.wso2.carbon.apimgt.micro.gateway</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>6.2.113-SNAPSHOT</version>
+        <version>6.2.133-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -131,7 +131,7 @@
                         </Private-Package>
                         <Export-Package>
                             !org.wso2.carbon.apimgt.micro.gateway.throttling.synchronizer.internal,
-                            org.wso2.carbon.apimgt.micro.gateway.throttling.synchronizer.*"
+                            org.wso2.carbon.apimgt.micro.gateway.throttling.synchronizer.*;version="${project.version}"
                         </Export-Package>
                         <Import-Package>
                             org.osgi.framework.*,
@@ -144,8 +144,8 @@
                             org.wso2.carbon.utils.*;version="${carbon.platform.package.import.version.range}",
                             org.wso2.carbon.context.*;version="${carbon.platform.package.import.version.range}",
                             org.wso2.carbon.tenant.common.*;version="${carbon.platform.package.import.version.range}",
-                            org.wso2.carbon.ntask.common;version="${carbon.platform.package.import.version.range}",
-                            org.wso2.carbon.ntask.core.*;version="${carbon.platform.package.import.version.range}",
+                            org.wso2.carbon.ntask.common;version="${carbon.ntask.import.version.range}",
+                            org.wso2.carbon.ntask.core.*;version="${carbon.ntask.import.version.range}",
                             com.fasterxml.jackson.databind.*; version="${fasterxml.jackson.version}",
                             com.fasterxml.jackson.annotation.*; version="${fasterxml.jackson.version}",
                             org.apache.commons.*,

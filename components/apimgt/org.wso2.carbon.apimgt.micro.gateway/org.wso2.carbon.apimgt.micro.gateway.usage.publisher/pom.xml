@@ -21,7 +21,7 @@
     <parent>
         <artifactId>org.wso2.carbon.apimgt.micro.gateway</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>6.2.113-SNAPSHOT</version>
+        <version>6.2.133-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -137,8 +137,8 @@
                             org.wso2.carbon.apimgt.micro.gateway.usage.publisher.internal
                         </Private-Package>
                         <Export-Package>
+                            !org.wso2.carbon.apimgt.micro.gateway.usage.publisher.internal,
                             org.wso2.carbon.apimgt.micro.gateway.usage.publisher.*;version="${project.version}"
-                            !org.wso2.carbon.apimgt.micro.gateway.usage.publisher.internal
                         </Export-Package>
                         <Import-Package>
                             org.osgi.framework.*,
@@ -151,8 +151,8 @@
                             org.wso2.carbon.base.*;version="${imp.pkg.version.org.wso2.carbon.base}",
                             org.wso2.carbon.databridge.agent.*;version="${databridge.agent.range}",
                             org.wso2.carbon.databridge.commons.*;version="${databridge.agent.range}",
-                            org.wso2.carbon.ntask.common;version="${carbon.platform.package.import.version.range}",
-                            org.wso2.carbon.ntask.core.*;version="${carbon.registry.package.import.version.range}",
+                            org.wso2.carbon.ntask.common;version="${carbon.ntask.import.version.range}",
+                            org.wso2.carbon.ntask.core.*;version="${carbon.ntask.import.version.range}",
                             org.wso2.carbon.registry.core.exceptions;version="${carbon.registry.imp.pkg.version}",
                             org.wso2.carbon.user.core.service;version="${carbon.platform.package.import.version.range}",
                             org.wso2.carbon.utils;version="${carbon.platform.package.import.version.range}",

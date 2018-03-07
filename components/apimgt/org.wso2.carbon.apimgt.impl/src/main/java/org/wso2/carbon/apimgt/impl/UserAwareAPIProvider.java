@@ -440,4 +440,11 @@ public class UserAwareAPIProvider extends APIProviderImpl {
         checkAccessControlPermission(apiIdentifier);
         return super.getApiSpecificMediationResourceFromUuid(uuid, resourcePath);
     }
+
+    @Override
+    public String getSequenceFileContent(APIIdentifier apiIdentifier, String sequenceType, String sequenceName)
+            throws APIManagementException {
+        checkAccessControlPermission(apiIdentifier);
+        return super.getSequenceFileContent(apiIdentifier, sequenceType, sequenceName);
+    }
 }

@@ -27,7 +27,7 @@ public class DataBridgeAlertTypesPublisherDTO extends AlertTypeDTO {
     public Object createPayload(){
         return new Object[]{alertTypeDTOInstance.getUserName(),alertTypeDTOInstance.getAlertTypes(),
                 alertTypeDTOInstance.getEmails(),alertTypeDTOInstance.isSubscriber(),
-                alertTypeDTOInstance.isPublisher()};
+                alertTypeDTOInstance.isPublisher(),alertTypeDTOInstance.isAdmin()};
     }
 
 

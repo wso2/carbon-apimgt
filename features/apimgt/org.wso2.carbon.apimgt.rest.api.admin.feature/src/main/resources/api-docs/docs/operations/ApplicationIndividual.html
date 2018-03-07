@@ -4,7 +4,7 @@
 
 
             <hr/>
-            <h3 class="operation-heading"><a name="exportApplicationsGet"></a>Export an Application <br><small>GET https://apis.wso2.com/api/am/admin/v0.11/export/applications</small></h3>
+            <h3 class="operation-heading"><a name="exportApplicationsGet"></a>Export an Application <br><small>GET https://apis.wso2.com/api/am/admin/v0.12/export/applications</small></h3>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to export the details of a particular Application as a zip file.
@@ -26,7 +26,7 @@
             </div>
 
 
-                <div id="request-exportApplicationsGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v0.11/export/applications?appName=sampleApp&amp;appOwner=admin
+                <div id="request-exportApplicationsGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v0.12/export/applications?appName=sampleApp&amp;appOwner=admin
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -50,7 +50,7 @@ Content-Type: application/zip</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
 
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -X GET https://localhost:9443/api/am/admin/v0.11/export/applications?appName=sampleApp&amp;appOwner=admin &gt; admin_sampleApp.zip</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -X GET https://localhost:9443/api/am/admin/v0.12/export/applications?appName=sampleApp&amp;appOwner=admin &gt; admin_sampleApp.zip</code></div>
 
 
 
@@ -210,7 +210,7 @@ Content-Type: application/zip</code></div>
             </table>
 
             <hr/>
-            <h3 class="operation-heading"><a name="importApplicationsPost"></a>Import an Application <br><small>POST https://apis.wso2.com/api/am/admin/v0.11/import/applications</small></h3>
+            <h3 class="operation-heading"><a name="importApplicationsPost"></a>Import an Application <br><small>POST https://apis.wso2.com/api/am/admin/v0.12/import/applications</small></h3>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to import an Application.
@@ -232,7 +232,7 @@ Content-Type: application/zip</code></div>
             </div>
 
 
-                <div id="request-importApplicationsPost"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/store/v0.11/import/applications
+                <div id="request-importApplicationsPost"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/store/v0.12/import/applications
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -248,7 +248,7 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
             </div>
 
                 <div id="response-importApplicationsPost" class="pre collapse in"><code class="json">HTTP/1.1 201 Created
-Location: https://localhost:9443/api/am/admin/v0.11/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524
+Location: https://localhost:9443/api/am/admin/v0.12/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524
 Content-Type: application/json
 
 {
@@ -264,7 +264,7 @@ Content-Type: application/json
 
             <h4 class="section-heading">Sample CURL</h4>
 
-                <div class="pre"><code class="bash">curl -k -F &quot;file=@exported.zip&quot; -X POST -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://localhost:9443/api/am/admin/v0.11/import/applications</code></div>
+                <div class="pre"><code class="bash">curl -k -F &quot;file=@exported.zip&quot; -X POST -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://localhost:9443/api/am/admin/v0.12/import/applications</code></div>
 
 
 

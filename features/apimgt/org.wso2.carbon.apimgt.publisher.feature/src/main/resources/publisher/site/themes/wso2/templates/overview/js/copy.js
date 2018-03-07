@@ -10,11 +10,17 @@ var copyAPIToNewVersion = function (provider) {
 
                       $("#copy-api #new-version").val('');
                       var current = window.location.pathname;
-                      if (current.indexOf(".jag") >= 0) {
-                          location.href = "index.jag";
-                      } else {
-                          location.href = 'site/pages/index.jag';
-                      }
+                      jagg.message({
+                          content: i18n.t('You have successfully created a new version'),
+                          type: 'info',
+                          cbk: function () {
+                              if (current.indexOf(".jag") >= 0) {
+                                  location.href = "index.jag";
+                              } else {
+                                  location.href = 'site/pages/index.jag';
+                              }
+                          }
+                      });
 
                   } else {
                       if (result.message == "AuthenticateError") {

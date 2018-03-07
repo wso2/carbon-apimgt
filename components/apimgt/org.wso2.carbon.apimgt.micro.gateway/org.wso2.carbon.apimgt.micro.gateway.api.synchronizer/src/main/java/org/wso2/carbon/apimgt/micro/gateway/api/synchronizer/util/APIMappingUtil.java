@@ -75,7 +75,6 @@ public class APIMappingUtil {
             boolean isWSApi = APIDTO.TypeEnum.WS == body.getType();
 
             //Set admin as the API provider since admin is the only user in this tenant space
-
             API apiToAdd = APIMappingUtil.fromDTOtoAPI(body, adminUsername);
             APIIdentifier apiId = apiToAdd.getId();
 
@@ -96,18 +95,15 @@ public class APIMappingUtil {
                 apiProvider.saveSwagger20Definition(apiId, body.getApiDefinition());
             }
             log.info("Successfully created API " + apiId);
-
             // Publishing the API
             if (APIStatus.PUBLISHED.toString().equals(initialState)) {
                 apiProvider.changeLifeCycleStatus(apiToAdd.getId(), "Publish");
                 log.info("Successfully published API with identifier " + apiId);
             }
-
             if (APIStatus.PROTOTYPED.toString().equals(initialState)) {
                 apiProvider.changeLifeCycleStatus(apiToAdd.getId(), "Deploy as a Prototype");
                 log.info("Successfully published API with identifier " + apiId);
             }
-
         } catch (APIManagementException e) {
             String errorMessage = "An error occurred while adding new API : " + body.getProvider() + "-" +
                     body.getName() + "-" + body.getVersion();

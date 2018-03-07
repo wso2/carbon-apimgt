@@ -34,5 +34,6 @@
     "context": ""
     //"regContext":"" // Use only if different path is used for registry
   },
-  "whiteListedHostNames" : ["localhost"]
+  "whiteListedHostNames" : ["localhost"],
+  "enableLogAnalyzer" : false
 }

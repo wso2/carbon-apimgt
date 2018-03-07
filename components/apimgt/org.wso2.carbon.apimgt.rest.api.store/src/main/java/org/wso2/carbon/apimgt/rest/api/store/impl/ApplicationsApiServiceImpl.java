@@ -88,7 +88,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application[] allMatchedApps = new Application[0];
             if (StringUtils.isBlank(query)) {
-                allMatchedApps = apiConsumer.getApplications(new Subscriber(username), groupId);
+                allMatchedApps = apiConsumer.getLightWeightApplications(new Subscriber(username), groupId);
             } else {
                 Application application = apiConsumer.getApplicationsByName(username, query, groupId);
                 if (application != null) {

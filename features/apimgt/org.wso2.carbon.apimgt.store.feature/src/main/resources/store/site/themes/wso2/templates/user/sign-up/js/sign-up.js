@@ -66,6 +66,20 @@ $(document).ready(function() {
         $('#password-help').hide();
         $('.password-meter').hide();
     });
+
+    var agreementChk = $(".agreement-checkbox input");
+    var registrationBtn = $("#registrationSubmit");
+
+    if(agreementChk.length > 0) {
+        registrationBtn.prop("disabled", true).addClass("disabled");
+    }
+    agreementChk.click(function() {
+        if($(this).is(":checked")) {
+            registrationBtn.prop("disabled", false).removeClass("disabled");
+        } else {
+           registrationBtn.prop("disabled", true).addClass("disabled");
+        }
+   })
 });
 
 var showMoreFields = function () {

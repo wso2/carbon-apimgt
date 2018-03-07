@@ -628,6 +628,13 @@
                                                                             <option value="none" selected="selected"><%=i18n.localize("None")%></option>
                                                                         </optgroup>
 							                                    	</select>
+							                                    	<span class="input-group-btn" >
+                                                                        <a href="#sequenceDownload" role="button" class="btn btn-sequenceDownload"
+                                                                        id="in-seq-download" data-id="in"
+                                                                        data-name="In Flow" title="Download" >
+                                                                            <i class="fw fw-download"></i>
+                                                                        </a>
+                                                                    </span>
 							                                    	<span class="input-group-btn">
                                                                         <a href="#sequenceUpload" role="button" class="btn btn-secondary btn-sequenceUpload" data-id="in" data-name="In Flow" data-toggle="modal" title="Mediation Policy Upload" ><i class="fw fw-upload"></i> Upload In Flow</a>
                                                                     </span>
@@ -648,6 +655,13 @@
                                                                             <option value="none" selected="selected"><%=i18n.localize("None")%></option>
                                                                         </optgroup>
 							                                    	</select>
+							                                    	 <span class="input-group-btn" >
+                                                                        <a href="#sequenceDownload" role="button" class="btn btn-sequenceDownload"
+                                                                        id="in-seq-download" data-id="out"
+                                                                        data-name="Out Flow" title="Download" >
+                                                                            <i class="fw fw-download"></i>
+                                                                        </a>
+                                                                    </span>
 																    <span class="input-group-btn">
                                                                         <a href="#sequenceUpload" role="button" class="btn btn-secondary btn-sequenceUpload" data-id="out" data-name="Out Flow" data-toggle="modal" title="Mediation Policy Upload" ><i class="fw fw-upload"></i> Upload Out Flow</a>
                                                                     </span>
@@ -668,6 +682,13 @@
                                                                             <option value="none" selected="selected"><%=i18n.localize("None")%></option>
                                                                         </optgroup>
 																	</select>
+																	 <span class="input-group-btn" >
+                                                                        <a href="#sequenceDownload" role="button" class="btn btn-sequenceDownload"
+                                                                        id="in-seq-download" data-id="fault"
+                                                                        data-name="Fault Flow" title="Download" >
+                                                                            <i class="fw fw-download"></i>
+                                                                        </a>
+                                                                    </span>
 																	<span class="input-group-btn" >
                                                                         <a href="#sequenceUpload" role="button" class="btn btn-secondary btn-sequenceUpload" data-id="fault" data-name="Fault Flow" data-toggle="modal" title="<%=i18n.localize("Mediation Policy Upload")%>" ><i class="fw fw-upload"></i> <%=i18n.localize("Upload Fault Flow")%></a>
                                                                     </span>

@@ -17,6 +17,11 @@
     <h2><%=i18n.localize("My Account")%></h2>
     <p class="lead"><%=i18n.localize("Change Password")%></p>
 </div>
+
+<div class="alert alert-info" id="profileAlert">
+  <p><%=i18n.localize("request.to.update.or.delete.user.profile")%></p>
+</div>
+
 <div class="white-wrapper add-padding-5x">
 
 <form class="form-horizontal">

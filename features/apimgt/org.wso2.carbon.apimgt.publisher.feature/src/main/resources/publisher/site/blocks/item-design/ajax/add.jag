@@ -122,17 +122,18 @@ if(jagg.isCSRFTokenValid())
                                 errorMsg = getSwaggerError(swaggerErrors);
                                 print({
                                     error: true,
-                                    message: "<div><div>" + url + " contains invalid swagger definition" + "</div>" + errorMsg
+                                    message: "<div><div> Input URL contains invalid swagger definition" + "</div>" +
+                                    errorMsg
                                 });
                                 return;
                             }
                         } else {
-                            print({error: true, message: url + " contains invalid swagger definition"});
+                            print({error: true, message: "Input URL contains invalid swagger definition"});
                             return;
                         }
 
                     } catch (e) {
-                        print({error: true, message: url + " is not a valid Swagger Definition url"});
+                        print({error: true, message: "Input URL contains invalid swagger definition"});
                         return;
                     }
                 }

@@ -22,8 +22,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.micro.gateway.common.config.ConfigManager;
+import org.wso2.carbon.apimgt.micro.gateway.common.exception.OnPremiseGatewayException;
 import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.tasks.UploadedUsagePublisherExecutorTask;
-import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.util.MicroAPIUsageConstants;
+import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.util.MicroGatewayAPIUsageConstants;
 import org.wso2.carbon.ntask.core.service.TaskService;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -50,39 +52,45 @@ public class APIUsagePublisherComponent {
     protected void activate(ComponentContext ctx) {
 
         //Scheduling a timer task for publishing uploaded on-premise gw's usage data if
-        // usage data publishing is enabled thorough a system property.
-        String isUsageDataPublishingEnabled = System
-                .getProperty(MicroAPIUsageConstants.IS_UPLOADED_USAGE_DATA_PUBLISH_ENABLED_PROPERTY);
-        if (StringUtils.equals("true", isUsageDataPublishingEnabled)) {
-            int usagePublishFrequency = MicroAPIUsageConstants.DEFAULT_UPLOADED_USAGE_PUBLISH_FREQUENCY;
-            String usagePublishFrequencySystemProperty = System
-                    .getProperty(MicroAPIUsageConstants.UPLOADED_USAGE_PUBLISH_FREQUENCY_PROPERTY);
-            if (StringUtils.isNotBlank(usagePublishFrequencySystemProperty)) {
-                try {
-                    usagePublishFrequency = Integer.parseInt(usagePublishFrequencySystemProperty);
-                } catch (NumberFormatException e) {
-                    log.error("Error while parsing the system property: "
-                            + MicroAPIUsageConstants.UPLOADED_USAGE_PUBLISH_FREQUENCY_PROPERTY
-                            + " to integer. Using default usage publish frequency configuration: "
-                            + MicroAPIUsageConstants.DEFAULT_UPLOADED_USAGE_PUBLISH_FREQUENCY, e);
+        //usage data publishing is enabled thorough a property.
+        try {
+            ConfigManager configManager = ConfigManager.getConfigManager();
+            String isUsageDataPublishingEnabled = configManager
+                    .getProperty(MicroGatewayAPIUsageConstants.IS_UPLOADED_USAGE_DATA_PUBLISH_ENABLED_PROPERTY);
+            if (StringUtils.equals("true", isUsageDataPublishingEnabled)) {
+                int usagePublishFrequency = MicroGatewayAPIUsageConstants.DEFAULT_UPLOADED_USAGE_PUBLISH_FREQUENCY;
+                String usagePublishFrequencyProperty = configManager
+                        .getProperty(MicroGatewayAPIUsageConstants.UPLOADED_USAGE_PUBLISH_FREQUENCY_PROPERTY);
+                if (StringUtils.isNotBlank(usagePublishFrequencyProperty)) {
+                    try {
+                        usagePublishFrequency = Integer.parseInt(usagePublishFrequencyProperty);
+                    } catch (NumberFormatException e) {
+                        log.error("Error while parsing the system property: "
+                                + MicroGatewayAPIUsageConstants.UPLOADED_USAGE_PUBLISH_FREQUENCY_PROPERTY
+                                + " to integer. Using default usage publish frequency configuration: "
+                                + MicroGatewayAPIUsageConstants.DEFAULT_UPLOADED_USAGE_PUBLISH_FREQUENCY, e);
+                    }
+                }
+                TimerTask usagePublisherTask = new UploadedUsagePublisherExecutorTask();
+                Timer timer = new Timer();
+                timer.schedule(usagePublisherTask, 0, usagePublishFrequency);
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Micro GW API Usage data publishing is disabled.");
                 }
             }
-            TimerTask usagePublisherTask = new UploadedUsagePublisherExecutorTask();
-            Timer timer = new Timer();
-            timer.schedule(usagePublisherTask, 0, usagePublishFrequency);
-        } else {
-            if (log.isDebugEnabled()) {
-                log.debug("OnPremise GW API Usage data publishing is disabled.");
-            }
+        } catch (OnPremiseGatewayException e) {
+            log.error("Unexpected error occurred while reading properties from the config file. Micro GW API Usage "
+                    + "data publishing is disabled.", e);
         }
         if (log.isDebugEnabled()) {
-            log.debug("OnPremise API Usage Publisher bundle is activated ");
+            log.debug("Micro gateway API Usage Publisher bundle is activated.");
         }
     }
 
     protected void deactivate(ComponentContext ctx) {
         if (log.isDebugEnabled()) {
-            log.debug("OnPremise API Usage Publisher bundle is de-activated ");
+            log.debug("Micro gateway API Usage Publisher bundle is de-activated ");
         }
     }
 

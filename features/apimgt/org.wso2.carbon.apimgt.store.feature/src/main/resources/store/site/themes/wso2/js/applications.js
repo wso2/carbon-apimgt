@@ -564,7 +564,7 @@ $("#application-actions").each(function(){
               "render": function ( data, type, rec, meta ) {
                   rec.isOwner = true;
                   if (loggedInUser.toLowerCase() !== rec.owner.toLowerCase()) {
-                    rec.isOwner = false;
+                      rec.isOwner = false;
                   }
 
                   rec.isActive = false;

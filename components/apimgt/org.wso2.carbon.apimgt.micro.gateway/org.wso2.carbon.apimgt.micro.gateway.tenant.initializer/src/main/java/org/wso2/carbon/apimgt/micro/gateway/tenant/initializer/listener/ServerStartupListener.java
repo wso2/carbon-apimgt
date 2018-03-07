@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.micro.gateway.common.GatewayListenerNotifier;
+import org.wso2.carbon.apimgt.micro.gateway.common.util.MicroGatewayCommonUtil;
 import org.wso2.carbon.apimgt.micro.gateway.tenant.initializer.internal.ServiceDataHolder;
 import org.wso2.carbon.apimgt.micro.gateway.tenant.initializer.utils.TenantInitializationConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -80,43 +81,38 @@ public class ServerStartupListener implements ServerStartupObserver {
         APIManagerConfiguration config = ServiceDataHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
         String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
-        char [] password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD).toCharArray();
+        char[] password = MicroGatewayCommonUtil.getRandomString(20).toCharArray();
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
-        String email = MultitenantUtils.getTenantAwareUsername(username);
-        try {
-            CommonUtil.validateEmail(email);
-        } catch (Exception e) {
-            if (log.isDebugEnabled()) {
-                log.debug("Invalid email is provided: " + email);
-            }
-            email = TenantInitializationConstants.DEFAULT_EMAIL;
-        }
-        if (CommonUtil.isDomainNameAvailable(tenantDomain)) {
-            tenantInfoBean.setActive(true);
-            tenantInfoBean.setAdmin(email);
-            tenantInfoBean.setAdminPassword(password.toString());
-            tenantInfoBean.setFirstname(TenantInitializationConstants.DEFAULT_FIRST_NAME);
-            tenantInfoBean.setLastname(TenantInitializationConstants.DEFAULT_LAST_NAME);
-            tenantInfoBean.setTenantDomain(tenantDomain);
-            tenantInfoBean.setEmail(email);
-            try {
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext()
-                        .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(username);
+            if (CommonUtil.isDomainNameAvailable(tenantDomain)) {
+                tenantInfoBean.setActive(true);
+                tenantInfoBean.setAdmin(tenantAwareUsername);
+                tenantInfoBean.setAdminPassword(password.toString());
+                tenantInfoBean.setFirstname(TenantInitializationConstants.DEFAULT_FIRST_NAME);
+                tenantInfoBean.setLastname(TenantInitializationConstants.DEFAULT_LAST_NAME);
+                tenantInfoBean.setTenantDomain(tenantDomain);
+                tenantInfoBean.setEmail(TenantInitializationConstants.DEFAULT_EMAIL);
+                try {
+                    PrivilegedCarbonContext.startTenantFlow();
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                            .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(MultitenantConstants.SUPER_TENANT_ID);
 
-                tenantMgtAdminService.addTenant(tenantInfoBean);
-                tenantMgtAdminService.activateTenant(tenantDomain);
-            } finally {
-                PrivilegedCarbonContext.endTenantFlow();
+                    tenantMgtAdminService.addTenant(tenantInfoBean);
+                    tenantMgtAdminService.activateTenant(tenantDomain);
+                } finally {
+                    PrivilegedCarbonContext.endTenantFlow();
+                }
+                MicroGatewayCommonUtil.cleanPasswordCharArray(password);
+                log.info("Successfully initialized tenant with tenant domain: " + tenantDomain);
+            } else {
+                log.info("Tenant with tenant domain " + tenantDomain + " already exists.");
             }
-            // Overwriting the char array to clean up password
-            for (int i = 0; i < password.length; i++) {
-                password[i] = 0;
-            }
-            log.info("Successfully initialized tenant with tenant domain: " + tenantDomain);
         } else {
-            log.info("Tenant with tenant domain " + tenantDomain + " already exists.");
+            if (log.isDebugEnabled()) {
+                log.debug("Skipping initializing super tenant space since execution is currently in super tenant flow.");
+            }
         }
     }
 
@@ -129,16 +125,22 @@ public class ServerStartupListener implements ServerStartupObserver {
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
         String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
         tenantDomain = MultitenantUtils.getTenantDomain(username);
-        try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-            carbonContext.setTenantDomain(tenantDomain);
-            ConfigurationContext context =
-                    ServiceDataHolder.getInstance().getConfigurationContextService().getServerConfigContext();
-            TenantAxisUtils.getTenantAxisConfiguration(tenantDomain, context);
-            log.info("Successfully loaded tenant with tenant domain : " + tenantDomain);
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            try {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                carbonContext.setTenantDomain(tenantDomain);
+                ConfigurationContext context =
+                        ServiceDataHolder.getInstance().getConfigurationContextService().getServerConfigContext();
+                TenantAxisUtils.getTenantAxisConfiguration(tenantDomain, context);
+                log.info("Successfully loaded tenant with tenant domain : " + tenantDomain);
+            } finally {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Skipping loading super tenant space since execution is currently in super tenant flow.");
+            }
         }
     }
 

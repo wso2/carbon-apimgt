@@ -27,7 +27,7 @@ import com.lmax.disruptor.dsl.ProducerType;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.util.MicroAPIUsageConstants;
+import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.util.MicroGatewayAPIUsageConstants;
 import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.util.UsageFileWriter;
 import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.util.UsagePublisherException;
 import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.util.WrappedEventFactory;
@@ -155,27 +155,27 @@ public class FileDataPublisher {
             Event event = wrappedEvent.getEvent();
             StringBuilder builder = new StringBuilder();
             builder.append(EBCommonsConstants.STREAM_ID)
-                    .append(MicroAPIUsageConstants.KEY_VALUE_SEPARATOR)
+                    .append(MicroGatewayAPIUsageConstants.KEY_VALUE_SEPARATOR)
                     .append(event.getStreamId())
-                    .append(MicroAPIUsageConstants.EVENT_SEPARATOR);
+                    .append(MicroGatewayAPIUsageConstants.EVENT_SEPARATOR);
             builder.append(EBCommonsConstants.TIME_STAMP)
-                    .append(MicroAPIUsageConstants.KEY_VALUE_SEPARATOR)
+                    .append(MicroGatewayAPIUsageConstants.KEY_VALUE_SEPARATOR)
                     .append(event.getTimeStamp())
-                    .append(MicroAPIUsageConstants.EVENT_SEPARATOR);
+                    .append(MicroGatewayAPIUsageConstants.EVENT_SEPARATOR);
             builder.append(EBCommonsConstants.META_DATA)
-                    .append(MicroAPIUsageConstants.KEY_VALUE_SEPARATOR)
+                    .append(MicroGatewayAPIUsageConstants.KEY_VALUE_SEPARATOR)
                     .append((event.getMetaData() == null ? null :
-                            StringUtils.join(event.getMetaData(), MicroAPIUsageConstants.OBJECT_SEPARATOR)))
-                    .append(MicroAPIUsageConstants.EVENT_SEPARATOR);
+                            StringUtils.join(event.getMetaData(), MicroGatewayAPIUsageConstants.OBJECT_SEPARATOR)))
+                    .append(MicroGatewayAPIUsageConstants.EVENT_SEPARATOR);
             builder.append(EBCommonsConstants.CORRELATION_DATA)
-                    .append(MicroAPIUsageConstants.KEY_VALUE_SEPARATOR)
+                    .append(MicroGatewayAPIUsageConstants.KEY_VALUE_SEPARATOR)
                     .append((event.getCorrelationData() == null ? null :
-                            StringUtils.join(event.getCorrelationData(), MicroAPIUsageConstants.OBJECT_SEPARATOR)))
-                    .append(MicroAPIUsageConstants.EVENT_SEPARATOR);
+                            StringUtils.join(event.getCorrelationData(), MicroGatewayAPIUsageConstants.OBJECT_SEPARATOR)))
+                    .append(MicroGatewayAPIUsageConstants.EVENT_SEPARATOR);
             builder.append(EBCommonsConstants.PAYLOAD_DATA)
-                    .append(MicroAPIUsageConstants.KEY_VALUE_SEPARATOR).
+                    .append(MicroGatewayAPIUsageConstants.KEY_VALUE_SEPARATOR).
                     append((event.getPayloadData() == null ? null :
-                            StringUtils.join(event.getPayloadData(), MicroAPIUsageConstants.OBJECT_SEPARATOR)));
+                            StringUtils.join(event.getPayloadData(), MicroGatewayAPIUsageConstants.OBJECT_SEPARATOR)));
 
             try {
                 UsageFileWriter.getInstance().writeToFile(builder.toString());

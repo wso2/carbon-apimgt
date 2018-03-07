@@ -64,8 +64,8 @@ public class TokenUtil {
      * @param secret password or consumer secret
      * @return a Basic Auth header (base64 encoded) for the given username and password
      */
-    public static String getBasicAuthHeaderValue(String key, String secret) {
-        String credentials = key + ":" + secret;
+    public static String getBasicAuthHeaderValue(String key, char[] secret) {
+        String credentials = key + ":" + String.valueOf(secret);
         byte[] encodedCredentials = Base64.encodeBase64(
                 credentials.getBytes(Charset.forName(OnPremiseGatewayConstants.DEFAULT_CHARSET)));
         return AUTHORIZATION_BASIC + " " +
@@ -83,7 +83,7 @@ public class TokenUtil {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
         String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
-        String password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
+        char[] password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD).toCharArray();
 
         OAuthApplicationRequestDTO dto = new OAuthApplicationRequestDTO();
         dto.setAppCallbackUrl(OnPremiseGatewayConstants.DEFAULT_DCR_CALLBACK_URL);
@@ -106,12 +106,35 @@ public class TokenUtil {
      * @return OAuthApplicationInfoDTO
      */
     public static OAuthApplicationInfoDTO registerClient(OAuthApplicationRequestDTO applicationRequestDTO,
-                                                         String username, String password)
+                                                         String username, char[] password)
             throws OnPremiseGatewayException {
+
+        String restApiVersion = ConfigManager.getConfigManager()
+                .getProperty(OnPremiseGatewayConstants.API_VERSION_PROPERTY);
+        if (restApiVersion == null) {
+            restApiVersion = OnPremiseGatewayConstants.API_DEFAULT_VERSION;
+            if (log.isDebugEnabled()) {
+                log.debug("Using default API version: " + restApiVersion);
+            }
+        } else if (OnPremiseGatewayConstants.CLOUD_API.equals(restApiVersion)) {
+            restApiVersion = OnPremiseGatewayConstants.EMPTY_STRING;
+            if (log.isDebugEnabled()) {
+                log.debug("Cloud API doesn't have an version. Therefore, removing the version");
+            }
+        }
+        String apiPublisherUrl = ConfigManager.getConfigManager()
+                .getProperty(OnPremiseGatewayConstants.API_PUBLISHER_URL_PROPERTY_KEY);
+        if (apiPublisherUrl == null) {
+            apiPublisherUrl = OnPremiseGatewayConstants.DEFAULT_API_PUBLISHER_URL;
+            if (log.isDebugEnabled()) {
+                log.debug("Using default API publisher URL: " + apiPublisherUrl);
+            }
+        }
+        String clientRegistrationUrl =
+                apiPublisherUrl + OnPremiseGatewayConstants.DYNAMIC_CLIENT_REGISTRATION_URL_SUFFIX
+                        .replace(OnPremiseGatewayConstants.API_VERSION_PARAM, restApiVersion).replace("//",
+                                OnPremiseGatewayConstants.URL_PATH_SEPARATOR); //remove "//" created in cloud case.
         CloseableHttpClient httpClient = HttpClients.createDefault();
-        String clientRegistrationUrl = ConfigManager.getConfigManager()
-                .getProperty(OnPremiseGatewayConstants.API_PUBLISHER_URL_PROPERTY_KEY) +
-                OnPremiseGatewayConstants.DYNAMIC_CLIENT_REGISTRATION_URL_SUFFIX;
         String authHeader = getBasicAuthHeaderValue(username, password);
         HttpPost httpPost = new HttpPost(clientRegistrationUrl);
         httpPost.addHeader(OnPremiseGatewayConstants.AUTHORIZATION_HEADER, authHeader);
@@ -150,18 +173,19 @@ public class TokenUtil {
      * @param clientSecret secret key
      * @return a json string containing consumer key/secret key pair
      */
-    public static AccessTokenDTO generateAccessToken(String clientId, String clientSecret, String requiredScope)
+    public static AccessTokenDTO generateAccessToken(String clientId, char[] clientSecret, String requiredScope)
             throws OnPremiseGatewayException {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
         String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
-        String password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
+        char[] password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD).toCharArray();
         Map<String, String> params = new HashMap<>();
         params.put(OnPremiseGatewayConstants.TOKEN_GRANT_TYPE_KEY,
                 OnPremiseGatewayConstants.TOKEN_GRANT_TYPE);
         params.put(OnPremiseGatewayConstants.USERNAME_KEY, username);
-        params.put(OnPremiseGatewayConstants.PASSWORD_KEY, password);
+        params.put(OnPremiseGatewayConstants.PASSWORD_KEY, String.valueOf(password));
         params.put(OnPremiseGatewayConstants.TOKEN_SCOPE, requiredScope);
+        MicroGatewayCommonUtil.cleanPasswordCharArray(password);
         return generateAccessToken(params, clientId, clientSecret);
     }
 
@@ -174,7 +198,7 @@ public class TokenUtil {
      * @return a json string containing consumer key/secret key pair
      */
     public static AccessTokenDTO generateAccessToken(Map<String, String> params, String clientId,
-                                                     String clientSecret)
+                                                     char[] clientSecret)
             throws OnPremiseGatewayException {
         CloseableHttpClient httpClient = HttpClients.createDefault();
         String tokenApiUrl = ConfigManager.getConfigManager()

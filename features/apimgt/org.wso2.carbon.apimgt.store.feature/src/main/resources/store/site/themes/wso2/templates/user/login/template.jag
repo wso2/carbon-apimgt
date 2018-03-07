@@ -44,6 +44,28 @@
 					                    <a href="<%=jagg.getAbsoluteUrl("/site/pages/initiate.jag")%>">Forgot Password</a>
                                     </div>
                                 </div>
+                                <hr>
+                                <div class="form-group">
+                                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                       <div class="alert alert-warning" role="alert">
+                                          <div>
+                                              <%=i18n.localize("privacy.policy.cookies.short.description")%>
+                                              <a href=<%=jagg.getAbsoluteUrl("/site/pages/policy-pages/cookie-policy.jag")%> target="policy-pane">
+                                                  <u><strong><%=i18n.localize("privacy.policy.cookies")%></strong></u>
+                                              </a>
+                                              <%=i18n.localize("privacy.policy.for.more.details")%>
+                                          </div>
+                                       </div>
+                                       <div class="alert alert-warning margin-none" role="alert">
+                                          <div>
+                                              <%=i18n.localize("privacy.policy.privacy.short.description")%>
+                                              <a href=<%=jagg.getAbsoluteUrl("/site/pages/policy-pages/privacy-policy.jag")%> target="policy-pane">
+                                                  <u><strong><%=i18n.localize("privacy.policy.general")%>.</strong></u>
+                                              </a>
+                                          </div>
+                                       </div>
+                                    </div>
+                                </div>
                             </form>
                         </div>
                     </div>

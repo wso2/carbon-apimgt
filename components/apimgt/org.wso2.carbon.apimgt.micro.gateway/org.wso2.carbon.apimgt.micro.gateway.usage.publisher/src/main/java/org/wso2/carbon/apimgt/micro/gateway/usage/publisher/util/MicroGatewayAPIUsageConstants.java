@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.micro.gateway.usage.publisher.util;
 /**
  * Constants Class
  */
-public class MicroAPIUsageConstants {
+public class MicroGatewayAPIUsageConstants {
 
     public static final String GZIP_EXTENSION = ".gz";
 
@@ -37,9 +37,9 @@ public class MicroAPIUsageConstants {
 
     public static final String ACCEPT_HEADER_APPLICATION_JSON = "application/json";
 
-    public static final String IS_UPLOADED_USAGE_DATA_PUBLISH_ENABLED_PROPERTY = "isUsageDataPublishEnabled";
+    public static final String IS_UPLOADED_USAGE_DATA_PUBLISH_ENABLED_PROPERTY = "usage.data.publishing.enabled";
 
-    public static final String UPLOADED_USAGE_PUBLISH_FREQUENCY_PROPERTY = "usagePublishingFrequency";
+    public static final String UPLOADED_USAGE_PUBLISH_FREQUENCY_PROPERTY = "usage.publishing.frequency";
 
     public static final String WORKER_THREAD_COUNT_PROPERTY = "microGatewayUsagePublishers";
 
@@ -48,8 +48,7 @@ public class MicroAPIUsageConstants {
     public static final String UPLOADED_FILE_SUFFIX = ".uploaded";
 
     public static final String USAGE_UPLOAD_SERVICE_URL = "usage.upload.service.url";
-    public static final String DEFAULT_UPLOAD_SERVICE_URL =
-            "https://api.cloud.wso2.com/api-usage-upload-service-1.0.0/upload-file";
+    public static final String DEFAULT_UPLOAD_SERVICE_URL = "https://localhost:9443/micro-gateway/v0.9/upload-file";
 
     public static final String STREAM_DEFINITIONS_DIRECTORY = "stream-definitions";
 

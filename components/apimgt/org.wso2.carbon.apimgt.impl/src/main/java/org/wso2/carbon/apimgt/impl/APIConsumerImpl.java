@@ -3324,6 +3324,12 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 		return apiMgtDAO.getApplications(subscriber, groupingId);
 	}
 
+    @Override
+    public Application[] getLightWeightApplications(Subscriber subscriber, String groupingId) throws
+            APIManagementException {
+        return apiMgtDAO.getLightWeightApplications(subscriber, groupingId);
+    }
+
     /**
      * @param userId Subscriber name.
      * @param applicationName of the Application.
