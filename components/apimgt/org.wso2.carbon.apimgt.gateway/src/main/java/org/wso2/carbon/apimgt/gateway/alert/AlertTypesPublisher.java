@@ -152,12 +152,15 @@ public class AlertTypesPublisher {
             if ("publisher".equals(agent)) {
                 alertTypeDTO.setPublisher(true);
                 alertTypeDTO.setSubscriber(false);
+                alertTypeDTO.setAdmin(false);
             } else if ("subscriber".equals(agent)) {
                 alertTypeDTO.setSubscriber(true);
                 alertTypeDTO.setPublisher(false);
+                alertTypeDTO.setAdmin(false);
             } else if ("admin-dashboard".equals(agent)) {
-                alertTypeDTO.setSubscriber(true);
-                alertTypeDTO.setPublisher(true);
+                alertTypeDTO.setSubscriber(false);
+                alertTypeDTO.setPublisher(false);
+                alertTypeDTO.setAdmin(true);
             }
             publisher.publishEvent(alertTypeDTO);
 
