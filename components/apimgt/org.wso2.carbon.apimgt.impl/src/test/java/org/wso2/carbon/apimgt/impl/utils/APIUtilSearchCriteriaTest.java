@@ -97,4 +97,15 @@ public class APIUtilSearchCriteriaTest {
         Assert.assertEquals("Invalid search criteria", expectedValue, searchCriteria);
 
     }
+
+    @Test
+    public void testGetSingleSearchCriteriaForTagsWithSpace() throws Exception {
+        String queryString1 = "tag:tag 1";
+
+        String expectedSearchQuery = "tags=tag\\ 1";
+        String searchString;
+        //Both should result in same search query.
+        searchString = APIUtil.getSingleSearchCriteria(queryString1);
+        Assert.assertEquals("Invalid tag search query", expectedSearchQuery, searchString);
+    }
 }

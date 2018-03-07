@@ -6624,14 +6624,17 @@ public final class APIUtil {
 
         if (criteria.contains(":")) {
             if (criteria.split(":").length > 1) {
-                searchKey = criteria.split(":")[0].trim();
+                String[] splitValues = criteria.split(":");
+                searchKey = splitValues[0].trim();
+                searchValue = splitValues[1];
                 //if search key is 'tag' instead of 'tags', allow it as well since rest api document says query
-                // param to use for tag search is 'tag' 
+                // param to use for tag search is 'tag'
 
                 if (APIConstants.TAG_SEARCH_TYPE_PREFIX3.equals(searchKey)) {
                     searchKey = APIConstants.TAG_SEARCH_TYPE_PREFIX;
+                    searchValue = searchValue.replace(" ", "\\ ");
                 }
-                searchValue = criteria.split(":")[1];
+
                 if (!APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchKey) &&
                         !APIConstants.TAG_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchKey)) {
                     if (!(searchValue.endsWith("\"") && searchValue.startsWith("\""))) {
@@ -6900,8 +6903,10 @@ public final class APIUtil {
     public static String constructNewSearchQuery(String query) throws APIManagementException {
         String newSearchQuery = "";
         String inputSearchQuery = query.trim();
+
         // sub context and doc content doesn't support AND search
-        if (inputSearchQuery != null && inputSearchQuery.contains(" ")) {
+        if (inputSearchQuery != null && inputSearchQuery.contains(" ") && !inputSearchQuery
+                .contains(APIConstants.TAG_SEARCH_TYPE_PREFIX4)) {
             if (inputSearchQuery.split(" ").length > 1) {
                 String[] searchCriterias = inputSearchQuery.split(" ");
                 for (int i = 0; i < searchCriterias.length; i++) {
