@@ -82,14 +82,29 @@ public class CustomAPIIndexer extends RXTIndexer {
             resource = registry.get(resourcePath);
             String storeViewRoles = resource.getProperty(APIConstants.STORE_VIEW_ROLES);
 
-            if (storeViewRoles == null) {
-                if (log.isDebugEnabled()) {
-                    log.debug("API at " + resourcePath + "did not have property : " + APIConstants.STORE_VIEW_ROLES
-                            + ", hence adding the values for that API resource.");
+            try {
+                GenericArtifact artifact = APIUtil.getArtifactManager(registry, APIConstants.API_KEY)
+                        .getGenericArtifact(resource.getUUID());
+                String storeVisibility = artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY);
+                String storeVisibleRoles = artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES);
+                if (storeViewRoles == null) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("API at " + resourcePath + "did not have property : " + APIConstants.STORE_VIEW_ROLES
+                                + ", hence adding the values for that API resource.");
+                    }
+                    updateStoreVisibilityProperties(registry, resourcePath, resource, publisherAccessControl);
+                } else if (APIConstants.PUBLIC_STORE_VISIBILITY.equals(storeVisibility)
+                        && !APIConstants.NULL_USER_ROLE_LIST
+                        .equals(resource.getProperty(APIConstants.STORE_VIEW_ROLES))) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("API at " + resourcePath + "has the public visibility, but  : "
+                                + APIConstants.STORE_VIEW_ROLES + " property is not set to "
+                                + APIConstants.NULL_USER_ROLE_LIST + ". Hence setting the correct value");
+                    }
+                    updateStoreVisibilityProperties(registry, resourcePath, resource, publisherAccessControl);
                 }
-                setStoreViewRoles(registry, resource, publisherAccessControl);
-                resource.setProperty(CUSTOM_API_INDEXER_PROPERTY, "true");
-                registry.put(resourcePath, resource);
+            } catch (APIManagementException e) {
+                log.error("Error while getting generic artifact for resource path : " + resourcePath, e);
             }
         }
 
@@ -116,6 +131,13 @@ public class CustomAPIIndexer extends RXTIndexer {
         return indexDocument;
     }
 
+    private void updateStoreVisibilityProperties(Registry registry, String resourcePath, Resource resource,
+            String publisherAccessControl) throws RegistryException {
+        setStoreViewRoles(registry, resource, publisherAccessControl);
+        resource.setProperty(CUSTOM_API_INDEXER_PROPERTY, "true");
+        registry.put(resourcePath, resource);
+    }
+
     /**
      * To set the store_view_roles property
      *
@@ -137,8 +159,6 @@ public class CustomAPIIndexer extends RXTIndexer {
         }
         if (APIConstants.PUBLIC_STORE_VISIBILITY.equals(storeVisibility)) {
             resource.setProperty(APIConstants.STORE_VIEW_ROLES, APIConstants.NULL_USER_ROLE_LIST);
-        } else if (APIConstants.RESTRICTED_STORE_VISIBILITY.equals(storeVisibility)) {
-            resource.setProperty(APIConstants.STORE_VIEW_ROLES, storeVisibleRoles + "," + publisherAccessControl);
         }
     }
 

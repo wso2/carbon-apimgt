@@ -3,6 +3,7 @@
 include("/jagg/constants.jag");
 
 var login = function (username, password, tenantMode) {
+    username = username.trim();
     var result, isSuperTenant, message,
             log = new Log();
 
@@ -130,6 +131,9 @@ var loginWithSAMLToken = function (token) {
     // var cookieString = cookie.split(";")[0].split(":")[1];
     var cookieString = xhr.getResponseHeader("Set-Cookie");
     var userName = ssoRelyingParty.getSAMLResponseNameId(token);
+    if (userName) {
+        userName = userName.trim();
+    }
     getWorkflowCookie(username, password);
 
     return {
