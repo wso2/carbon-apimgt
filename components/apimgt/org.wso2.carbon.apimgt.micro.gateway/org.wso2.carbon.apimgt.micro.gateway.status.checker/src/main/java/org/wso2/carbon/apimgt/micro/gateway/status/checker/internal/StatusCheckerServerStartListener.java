@@ -70,7 +70,7 @@ public class StatusCheckerServerStartListener implements ServerStartupHandler {
                                           TimeUnit.MINUTES);
             log.info("StatusCheckerServerStartListener started");
         } else {
-            //Else print a log indicating that the pinging details are note set
+            //Else print a log indicating that the pinging details are not set
             log.info("You have not configured the Micro Gateway Ping URL, pinging will not be activated.");
         }
     }
