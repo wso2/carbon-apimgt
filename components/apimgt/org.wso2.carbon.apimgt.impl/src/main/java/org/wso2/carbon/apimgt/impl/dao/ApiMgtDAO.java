@@ -5291,17 +5291,17 @@ public class ApiMgtDAO {
             prepStmt.execute();
 
             rs = prepStmt.getGeneratedKeys();
-            int applicationId = -1;
+            int apiId = -1;
             if (rs.next()) {
-                applicationId = rs.getInt(1);
+                apiId = rs.getInt(1);
             }
 
             connection.commit();
 
             if (api.getScopes() != null) {
-                addScopes(api.getScopes(), applicationId, tenantId);
+                addScopes(api.getScopes(), apiId, tenantId);
             }
-            addURLTemplates(applicationId, api, connection);
+            addURLTemplates(apiId, api, connection);
             String tenantUserName = MultitenantUtils
                     .getTenantAwareUsername(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
             recordAPILifeCycleEvent(api.getId(), null, APIStatus.CREATED.toString(), tenantUserName, tenantId,
@@ -7599,6 +7599,9 @@ public class ApiMgtDAO {
                         conn.commit();
                     } else if (object instanceof Scope) {
                         Scope scope = (Scope) object;
+                        if(isScopeExists(scope.getKey(), tenantID)){
+                            throw new APIManagementException("Scope '" + scope.getKey() + "' already exists.");
+                        }
                         ps.setString(1, scope.getKey());
                         ps.setString(2, scope.getName());
                         ps.setString(3, scope.getDescription());
