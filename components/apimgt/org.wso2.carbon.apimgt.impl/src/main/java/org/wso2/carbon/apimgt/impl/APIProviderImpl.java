@@ -110,6 +110,7 @@ import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceClusteri
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceExceptionException;
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceStub;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
@@ -4998,42 +4999,30 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     private void publishBlockingEvent(String conditionType, String conditionValue, String state) {
         OutputEventAdapterService eventAdapterService = ServiceReferenceHolder.getInstance().getOutputEventAdapterService();
-
-        // Encoding the message into a map.
-        HashMap<String, String> blockingMessage = new HashMap<String, String>();
-        blockingMessage.put(APIConstants.BLOCKING_CONDITION_KEY, conditionType);
-        blockingMessage.put(APIConstants.BLOCKING_CONDITION_VALUE, conditionValue);
-        blockingMessage.put(APIConstants.BLOCKING_CONDITION_STATE, state);
-        blockingMessage.put(APIConstants.BLOCKING_CONDITION_DOMAIN, tenantDomain);
+        Object[] objects = new Object[]{conditionType,conditionValue,state,tenantDomain};
+        Event blockingMessage = new Event(APIConstants.BLOCKING_CONDITIONS_STREAM_ID, System.currentTimeMillis(),
+                null, null, objects);
         ThrottleProperties throttleProperties = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration().getThrottleProperties();
 
-        // Checking whether EventPublisherName is provided.  An empty HashMap is set so that it can be used to keep transport.jms
-        // .Header value.
-        if (throttleProperties.getJmsPublisherParameters() != null && !throttleProperties.getJmsPublisherParameters()
-                .isEmpty()) {
-            eventAdapterService.publish(APIConstants.BLOCKING_EVENT_PUBLISHER, new HashMap<String, String>()
-                    , blockingMessage);
+        if (throttleProperties.getDataPublisher() != null && throttleProperties.getDataPublisher().isEnabled()) {
+            eventAdapterService.publish(APIConstants.BLOCKING_EVENT_PUBLISHER, Collections.EMPTY_MAP, blockingMessage);
         }
     }
 
     private void publishKeyTemplateEvent(String templateValue, String state) {
-
-        //Publishing an event to notify that a policy has been added.
-        HashMap<String, String> keyTemplateMap = new HashMap<String, String>();
-        keyTemplateMap.put(APIConstants.POLICY_TEMPLATE_KEY, templateValue);
-        keyTemplateMap.put(APIConstants.TEMPLATE_KEY_STATE, state);
+        OutputEventAdapterService eventAdapterService = ServiceReferenceHolder.getInstance().getOutputEventAdapterService();
+        Object[] objects = new Object[]{templateValue,state};
+        Event keyTemplateMessage = new Event(APIConstants.KEY_TEMPLATE_STREM_ID, System.currentTimeMillis(),
+                null, null, objects);
 
         ThrottleProperties throttleProperties = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration().getThrottleProperties();
 
-        // Getting JMS Publisher name from config. An empty HashMap is set so that it can be used to keep transport.jms
-        // .Header value.
-        if (throttleProperties.getJmsPublisherParameters() != null && !throttleProperties.getJmsPublisherParameters()
-                .isEmpty()) {
-            ServiceReferenceHolder.getInstance().getOutputEventAdapterService().publish(APIConstants.BLOCKING_EVENT_PUBLISHER,
-                    new HashMap<String, String>()
-                    , keyTemplateMap);
+
+        if (throttleProperties.getDataPublisher() != null && throttleProperties.getDataPublisher().isEnabled()) {
+            eventAdapterService.publish(APIConstants.BLOCKING_EVENT_PUBLISHER, Collections.EMPTY_MAP,
+                    keyTemplateMessage);
         }
     }
 
