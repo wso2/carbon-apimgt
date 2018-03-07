@@ -10,26 +10,32 @@ var tenantDomain = request.getParameter("tenant");
 var resourceUrl = request.getParameter("resourceUrl");
 var environmentName = request.getParameter(ENVIRONMENT_NAME);
 var environmentType = request.getParameter(ENVIRONMENT_TYPE);
-if (environmentType != null && environmentName != null) {
-    var apiName = request.getParameter(API_NAME);
-    var apiVersion = request.getParameter(API_VERSION);
-    if (jagg.getUser()) {
-        var username = jagg.getUser().username;
-    }
-    var HashMap = Packages.java.util.HashMap;
-    var apiAttributesMap = new HashMap();
-    apiAttributesMap.put(API_NAME, apiName);
-    apiAttributesMap.put(API_VERSION, apiVersion);
-    var environmentDetails = new HashMap();
-    environmentDetails.put(ENVIRONMENT_NAME, environmentName);
-    environmentDetails.put(ENVIRONMENT_TYPE, environmentType);
 
-    var apiConsumer = new Packages.org.wso2.carbon.apimgt.impl.APIConsumerImpl();
-    var document = apiConsumer.getWSDLDocument(username, tenantDomain, resourceUrl, environmentDetails, apiAttributesMap);
-    var object = JSON.parse(document);
-} else {
-    var object = store.getDocument(tenantDomain, resourceUrl);
+if (resourceUrl.indexOf("/documentation/files") != -1 ||
+    resourceUrl.indexOf("/apimgt/applicationdata/wsdls/") != -1 ) {
+
+    if (environmentType != null && environmentName != null) {
+        var apiName = request.getParameter(API_NAME);
+        var apiVersion = request.getParameter(API_VERSION);
+        if (jagg.getUser()) {
+            var username = jagg.getUser().username;
+        }
+        var HashMap = Packages.java.util.HashMap;
+        var apiAttributesMap = new HashMap();
+        apiAttributesMap.put(API_NAME, apiName);
+        apiAttributesMap.put(API_VERSION, apiVersion);
+        var environmentDetails = new HashMap();
+        environmentDetails.put(ENVIRONMENT_NAME, environmentName);
+        environmentDetails.put(ENVIRONMENT_TYPE, environmentType);
+
+        var apiConsumer = new Packages.org.wso2.carbon.apimgt.impl.APIConsumerImpl();
+        var document = apiConsumer.getWSDLDocument(username, tenantDomain, resourceUrl, environmentDetails, apiAttributesMap);
+        var object = JSON.parse(document);
+    } else {
+        var object = store.getDocument(tenantDomain, resourceUrl);
+    }
 }
+
 if (object == null) {
     response.status = 500;
 } else {
