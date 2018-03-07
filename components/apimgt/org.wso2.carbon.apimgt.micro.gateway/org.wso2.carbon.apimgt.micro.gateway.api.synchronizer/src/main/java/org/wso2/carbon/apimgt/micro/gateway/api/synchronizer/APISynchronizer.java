@@ -527,6 +527,9 @@ public class APISynchronizer implements OnPremiseGatewayInitListener {
             // Retrieve all API specific mediation policies from publisher REST API
             String response = HttpRequestUtil.executeHTTPMethodWithRetry(httpClient, httpGet,
                     OnPremiseGatewayConstants.DEFAULT_RETRY_COUNT);
+            if (log.isDebugEnabled()) {
+                log.debug("Received response from GET api sequence: " + seqId);
+            }
 
             InputStream is = new ByteArrayInputStream(response.getBytes(
                     Charset.forName(OnPremiseGatewayConstants.DEFAULT_CHARSET)));
@@ -572,6 +575,9 @@ public class APISynchronizer implements OnPremiseGatewayInitListener {
             String seqElementName = provider + "--" + name + ":" + "v" + version + "--" + type;
             String seqName = provider + "--" + name + "_v" + version + "--" + type;
             seqFileName = seqName + ".xml";
+            if (log.isDebugEnabled()) {
+                log.debug("Starting to deploy sequence: " + seqName);
+            }
 
             Document doc = convertStringToDocument(xmlStr);
             Node seqNode = doc.getElementsByTagName(APISynchronizationConstants.API_SEQUENCE).item(0);
@@ -594,6 +600,9 @@ public class APISynchronizer implements OnPremiseGatewayInitListener {
             File dir = new File(path);
             File file = new File(dir, seqFileName);
             FileUtils.writeStringToFile(file, str);
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully deployed sequence: " + seqName);
+            }
         } catch (UserStoreException e) {
             throw new APISynchronizationException("An error occurred while obtaining tenant identifier of " +
                     "tenant domain " + tenantDomain, e);
