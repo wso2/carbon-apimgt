@@ -24,7 +24,8 @@
     "assertionEncryptionEnabled": "false",
     "idpInit" : "false",
     "idpInitSSOURL" : "https://localhost:9443/samlsso?spEntityID=API_WORKFLOW_ADMIN",
-    "externalLogoutPage" : "https://localhost:9443/samlsso?slo=true"
+    "externalLogoutPage" : "https://localhost:9443/samlsso?slo=true",
+    "loginUserNameAttribute" : ""
   },
   "reverseProxy": {
     "enabled": false,
