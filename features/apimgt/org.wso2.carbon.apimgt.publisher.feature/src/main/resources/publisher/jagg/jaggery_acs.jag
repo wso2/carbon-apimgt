@@ -40,8 +40,12 @@
             site.ssoConfiguration.signRequests = "false";
         }
 
-        if (site.ssoConfiguration.nameIdPolicy == null){
+        if (site.ssoConfiguration.nameIdPolicy == null) {
             site.ssoConfiguration.nameIdPolicy = "";
+        }
+
+        if (site.ssoConfiguration.loginUserNameAttribute == null) {
+            site.ssoConfiguration.loginUserNameAttribute = "";
         }
            
         ssoRelyingParty.setProperty("idpInitSSOURL", site.ssoConfiguration.idpInitSSOURL);

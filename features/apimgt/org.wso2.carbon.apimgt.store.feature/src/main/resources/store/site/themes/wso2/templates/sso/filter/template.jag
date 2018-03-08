@@ -38,11 +38,14 @@
     var site = require("/site/conf/site.json");
     var api = jagg.module("api");
     var ssoRelyingParty = new security.SSORelyingParty(site.ssoConfiguration.issuer);
-    var isUserPermitted=api.hasUserPermissions(ssoRelyingParty.getLoggedInUser(sessionId));
-
+    var errorAuthorizationURL = "/site/pages/error-pages/401.html";
+    var isUserPermitted = null;
+    if (ssoRelyingParty.getLoggedInUser(sessionId) != null) {
+        isUserPermitted = api.hasUserPermissions(ssoRelyingParty.getLoggedInUser(sessionId));
+    }
     if(!isPassiveAuthRequired) {
         if(Boolean(isAuthenticated) && !Boolean(isUserPermitted.permitted)) {
-            response.sendRedirect("../site/pages/error-pages/401.html");
+            response.sendRedirect(jagg.getAbsoluteUrl(errorAuthorizationURL));
         }
     }
 
