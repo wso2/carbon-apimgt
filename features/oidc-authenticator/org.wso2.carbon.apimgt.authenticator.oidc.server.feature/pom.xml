@@ -20,7 +20,7 @@
 	<parent>
 		<groupId>org.wso2.carbon.apimgt</groupId>
 		<artifactId>oidc-authenticator-feature</artifactId>
-		<version>6.2.145-SNAPSHOT</version>
+		<version>6.2.145</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
