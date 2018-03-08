@@ -159,7 +159,7 @@ function addReceiptInformation(container) {
         newPurpose['purposeCategoryId'] = [1];
         var piiCategory = [];
         var categories = purpose.children;
-        for (var j = 0; j < categories.length; j++){
+        for (var j = 0; j < categories.length; j++) {
             var category = categories[j];
             var c = {};
             c['piiCategoryId']  =  category.li_attr.piicategoryid;
