@@ -458,7 +458,36 @@ public class DefaultKeyManagerImpl implements KeyManager {
 
     @Override
     public boolean registerScope(Scope scope) throws KeyManagementException {
-        return false;
+        APIUtils.logDebug("Register Scope request is being sent.", log);
+        HttpResponse response;
+        try {
+            String url = keyManagerConfigs.getScopeRegistrationEndpoint();
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("name", scope.getName());
+            payload.put("bindings", scope.getBindings());
+            payload.put("description", scope.getDescription());
+
+            Gson gson = new Gson();
+            String jsonPayload = gson.toJson(payload);
+            response = restCallUtil
+                    .postRequest(new URI(url), MediaType.APPLICATION_JSON_TYPE, null, Entity.text(jsonPayload),
+                            MediaType.APPLICATION_JSON_TYPE, Collections.emptyMap());
+        } catch (URISyntaxException e) {
+            throw new KeyManagementException("Error occurred while parsing scope registration endpoint", e,
+                    ExceptionCodes.SCOPE_REGISTRATION_FAILED);
+        } catch (APIManagementException e) {
+            throw new KeyManagementException("Error occurred while invoking scope registration endpoint", e,
+                    ExceptionCodes.SCOPE_REGISTRATION_FAILED);
+        }
+
+        if (response == null) {
+            throw new KeyManagementException("Error occurred while invoking scope registration. Response is null",
+                    ExceptionCodes.SCOPE_REGISTRATION_FAILED);
+        }
+        APIUtils.logDebug("Scope registration Response code: " + response.getResponseCode(), log);
+        APIUtils.logDebug("Scope registration Response: " + response.getResults(), log);
+
+        return response.getResponseCode() == APIMgtConstants.HTTPStatusCodes.SC_201_CREATED;
     }
 
     @Override

@@ -16,26 +16,19 @@
  * under the License.
  */
 
-import React from 'react'
-import prototypes from 'prop-types'
-import { Route, Switch } from 'react-router-dom'
+import 'typeface-roboto';
+import 'material-design-icons';
+import 'material-ui-icons';
+import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
+import ReactDOM from 'react-dom';
+import React from 'react';
+import Publisher from './src/App.jsx';
 
-import Listing from './Listing/Listing'
-import Details from './Details/index'
-import { PageNotFound } from '../Base/Errors'
-
-
-class Apis extends React.Component {
-    render() {
-        return (
-            <Switch>
-                <Route exact path={"/apis"} component={Listing} />
-                <Route path={"/apis/:api_uuid/"} render={props => (
-                    <Details {...props} />)} />
-                <Route component={PageNotFound} />
-            </Switch>
-        );
-    }
-}
-
-export default Apis;
+const theme = createMuiTheme({
+    palette: {
+        type: 'light', // Switching the dark mode on is a single property value change.
+    },
+});
+ReactDOM.render((<MuiThemeProvider theme={theme}><Publisher /></MuiThemeProvider>),
+    document.getElementById('react-root'),
+);

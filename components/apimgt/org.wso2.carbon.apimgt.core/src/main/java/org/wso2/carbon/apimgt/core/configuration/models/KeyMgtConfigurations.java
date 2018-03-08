@@ -38,7 +38,7 @@ public class KeyMgtConfigurations {
     @Element(description = "Introspect Endpoint URL")
     private String introspectEndpoint = "https://localhost:9443/api/identity/oauth2/introspect/v1.0/introspect";
     @Element(description = "Scope Registration Endpoint URL")
-    private String scopeRegistrationEndpoint = "https://localhost:9443/api/identity/oauth2/v1.0/scopes";
+    private String scopeRegistrationEndpoint = "https://localhost:9443/api/auth/scope-registration/v1.0/scopes";
     @Element(description = "Key manager Credentials")
     private CredentialConfigurations keyManagerCredentials = new CredentialConfigurations();
     @Element(description = "Alias of Key Manager Certificate in Client Trust Store")
