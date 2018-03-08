@@ -17,24 +17,39 @@
 
 package org.wso2.carbon.apimgt.micro.gateway.tenant.initializer.listener;
 
+import org.apache.axis2.client.Options;
+import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.engine.AxisConfiguration;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.micro.gateway.common.GatewayListenerNotifier;
 import org.wso2.carbon.apimgt.micro.gateway.common.util.MicroGatewayCommonUtil;
 import org.wso2.carbon.apimgt.micro.gateway.tenant.initializer.internal.ServiceDataHolder;
 import org.wso2.carbon.apimgt.micro.gateway.tenant.initializer.utils.TenantInitializationConstants;
+import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
+import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.ServerStartupObserver;
 import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
 import org.wso2.carbon.stratos.common.util.CommonUtil;
 import org.wso2.carbon.tenant.mgt.services.TenantMgtAdminService;
+import org.wso2.carbon.um.ws.api.stub.Tenant;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.rmi.RemoteException;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -46,29 +61,87 @@ public class ServerStartupListener implements ServerStartupObserver {
 
     @Override
     public void completedServerStartup() {
-        ScheduledThreadPoolExecutorImpl.waitForAdminServiceActivation();
+        ScheduledThreadPoolExecutorImpl.waitAndInitialize();
     }
 
     /**
-     * Inner class for holding API Synchronization until Authentication Admin Service starts
-     * NOTE: The time delay introduced here is a temporary fix.
-     * This is tracked by issue https://github.com/wso2/cloud/issues/1581 and will be handled shortly
+     * Inner class for holding API and Throttling Synchronization until Authentication Admin Service starts
      */
-    static class ScheduledThreadPoolExecutorImpl {
-        static void waitForAdminServiceActivation() {
-            ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
-            executor.schedule(new Runnable() {
-                public void run() {
+    static class ScheduledThreadPoolExecutorImpl implements Runnable {
+        private int retryCount = 4;
+        private int executionCount = 1;
+        private static ScheduledThreadPoolExecutor executor;
+        private static String adminName;
+        private static char[] adminPwd;
+        private static String url;
+
+        public static void waitAndInitialize() {
+            try {
+                String mgtTransport = CarbonUtils.getManagementTransport();
+                AxisConfiguration axisConfiguration = ServiceReferenceHolder
+                        .getContextService().getServerConfigContext().getAxisConfiguration();
+                int mgtTransportPort = CarbonUtils.getTransportProxyPort(axisConfiguration, mgtTransport);
+                if (mgtTransportPort <= 0) {
+                    mgtTransportPort = CarbonUtils.getTransportPort(axisConfiguration, mgtTransport);
+                }
+                // Using localhost as the hostname since this is always an internal admin service call.
+                // Hostnames that can be retrieved using other approaches does not work in this context.
+                url = mgtTransport + "://" + TenantInitializationConstants.LOCAL_HOST_NAME + ":" + mgtTransportPort
+                        + "/services/";
+                adminName = ServiceDataHolder.getInstance().getRealmService()
+                        .getTenantUserRealm(MultitenantConstants.SUPER_TENANT_ID).getRealmConfiguration()
+                        .getAdminUserName();
+                adminPwd = ServiceDataHolder.getInstance().getRealmService()
+                        .getTenantUserRealm(MultitenantConstants.SUPER_TENANT_ID).getRealmConfiguration()
+                        .getAdminPassword().toCharArray();
+                executor = new ScheduledThreadPoolExecutor(1);
+                executor.scheduleAtFixedRate(new ScheduledThreadPoolExecutorImpl(),
+                        TenantInitializationConstants.DEFAULT_WAIT_DURATION,
+                        TenantInitializationConstants.DEFAULT_WAIT_DURATION, TimeUnit.SECONDS);
+            } catch (UserStoreException e) {
+                log.error("An error occurred while retrieving admin credentials for initializing on-premise " +
+                        "gateway configuration.", e);
+            }
+        }
+
+        public void run() {
+            String serviceEndPoint = url + "AuthenticationAdmin";
+            try {
+                String host = new URL(url).getHost();
+                AuthenticationAdminStub authAdminStub =
+                        new AuthenticationAdminStub(null, serviceEndPoint);
+                ServiceClient client = authAdminStub._getServiceClient();
+                Options options = client.getOptions();
+                options.setManageSession(true);
+                boolean isLoginSuccessful = authAdminStub.login(adminName, String.valueOf(adminPwd), host);
+                if (isLoginSuccessful) {
                     try {
                         initializeTenant();
                         loadTenant();
                         GatewayListenerNotifier.notifyListeners();
                     } catch (Exception e) {
-                        log.error("An error occurred while initializing and loading tenant upon initial server " +
+                        log.error("An error occurred while initializing tenant upon initial server " +
                                 "startup.", e);
                     }
+                    executor.shutdown();
                 }
-            }, TenantInitializationConstants.DEFAULT_WAIT_DURATION, TimeUnit.SECONDS);
+            } catch (RemoteException e) {
+                log.warn("Login request to authentication admin service failed for URL: " + serviceEndPoint +
+                        " with exception " + e.getMessage() + " Retry attempt: " + executionCount +
+                        "/" + retryCount);
+            } catch (LoginAuthenticationExceptionException e) {
+                log.error("Error while authenticating against the authentication admin service for URL: "
+                        + serviceEndPoint, e);
+                executor.shutdown();
+            } catch (MalformedURLException e) {
+                log.error("Service URL: " + serviceEndPoint + " is malformed.", e);
+                executor.shutdown();
+            }
+            if (executionCount++ >= retryCount) {
+                log.error("Login request to authentication admin service failed for the maximum no. of " +
+                        "attempts(" + retryCount + ") for URL: " + serviceEndPoint);
+                executor.shutdown();
+            }
         }
     }
 
@@ -119,7 +192,7 @@ public class ServerStartupListener implements ServerStartupObserver {
     /**
      * Method to load the configurations of a tenant
      */
-    private static void loadTenant() {
+    private static void loadTenant() throws IOException {
         String tenantDomain;
         APIManagerConfiguration config = ServiceDataHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
@@ -130,8 +203,14 @@ public class ServerStartupListener implements ServerStartupObserver {
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
                 carbonContext.setTenantDomain(tenantDomain);
+                carbonContext.setUsername(MultitenantUtils.getTenantAwareUsername(username));
                 ConfigurationContext context =
                         ServiceDataHolder.getInstance().getConfigurationContextService().getServerConfigContext();
+                int tenantId = carbonContext.getTenantId(true);
+                String path = CarbonUtils.getCarbonTenantsDirPath() + File.separator + tenantId;
+                // delete existing configurations of tenant
+                FileUtils.deleteDirectory(new File(path));
+                // load tenant configuration
                 TenantAxisUtils.getTenantAxisConfiguration(tenantDomain, context);
                 log.info("Successfully loaded tenant with tenant domain : " + tenantDomain);
             } finally {

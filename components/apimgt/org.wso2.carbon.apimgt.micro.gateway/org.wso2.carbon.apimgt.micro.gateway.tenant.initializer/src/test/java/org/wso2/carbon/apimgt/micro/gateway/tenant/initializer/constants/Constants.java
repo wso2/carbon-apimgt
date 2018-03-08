@@ -26,4 +26,6 @@ public class Constants {
     public static final String KEY_VALIDATOR_PASSWORD = "APIKeyValidator.Password";
     public static final String DEFAULT_KEY_VALIDATOR_PASSWORD = "pwd123";
     public static final String DEFAULT_KEY_VALIDATOR_USERNAME = "janedoe@gmail.com@org123";
+    public static final String ADMIN_USERNAME = "admin";
+    public static final String ADMIN_PASSWORD = "admin";
 }
