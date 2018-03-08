@@ -1049,13 +1049,7 @@ public class AbstractAPIManagerTestCase {
         Assert.assertEquals(docContent,docObject);
     }
 
-    @Test
-    public void testGetSubscriberById() throws APIManagementException {
-        Subscriber subscriber = new Subscriber("subscriber");
-        Mockito.when(apiMgtDAO.getSubscriberById(Mockito.anyString())).thenReturn(subscriber);
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
-        Assert.assertEquals(abstractAPIManager.getSubscriberById(SAMPLE_RESOURCE_ID).getName(),"subscriber");
-    }
+
 
     @Test
     public void testIsContextExist() throws APIManagementException {
@@ -1345,35 +1339,14 @@ public class AbstractAPIManagerTestCase {
 
     @Test
     public void testSearchAccessToken() throws APIManagementException {
-        APIKey apiKey1 = new APIKey();
-        apiKey1.setAccessToken("token1");
-        Map<Integer, APIKey> accessTokenMap = new HashMap<Integer, APIKey>();
-        accessTokenMap.put(1, apiKey1);
-
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
-        Mockito.when(apiMgtDAO.getAccessTokens(Mockito.anyString())).thenReturn(accessTokenMap);
-        Assert.assertEquals(abstractAPIManager.searchAccessToken(null, "query1", API_PROVIDER).size(), 1);
-        Mockito.when(apiMgtDAO.getAccessTokensByUser(Mockito.anyString(), Mockito.anyString()))
-                .thenReturn(accessTokenMap);
-        Assert.assertEquals(abstractAPIManager.searchAccessToken("User", "query1", API_PROVIDER).size(), 1);
-        APIKey apiKey2 = new APIKey();
-        apiKey1.setAccessToken("token2");
-        accessTokenMap.put(2, apiKey2);
-        Mockito.when(apiMgtDAO.getAccessTokensByDate(Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyString()))
-                .thenReturn(accessTokenMap);
-        Assert.assertEquals(abstractAPIManager.searchAccessToken("Before", "query1", API_PROVIDER).size(), 2);
-        Assert.assertEquals(abstractAPIManager.searchAccessToken("After", "query1", API_PROVIDER).size(), 2);
-        Assert.assertEquals(abstractAPIManager.searchAccessToken("default", "query1", API_PROVIDER).size(), 2);
-
+        Assert.assertEquals(abstractAPIManager.searchAccessToken("Before", "query1", API_PROVIDER).size(), 0);
     }
 
     @Test
     public void testGetAPIByAccessToken() throws APIManagementException {
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
-        Set<APIIdentifier> apis = new HashSet<APIIdentifier>();
-        apis.add(getAPIIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION));
-        Mockito.when(apiMgtDAO.getAPIByAccessToken(Mockito.anyString())).thenReturn(apis);
-        Assert.assertEquals(abstractAPIManager.getAPIByAccessToken(SAMPLE_RESOURCE_ID).size(), 1);
+        Assert.assertEquals(abstractAPIManager.getAPIByAccessToken(SAMPLE_RESOURCE_ID).size(), 0);
     }
 
     @Test
