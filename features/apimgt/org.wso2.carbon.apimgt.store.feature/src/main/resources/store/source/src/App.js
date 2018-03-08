@@ -24,12 +24,17 @@ import {PageNotFound} from './app/components/Base/Errors'
 import AuthManager from './app/data/AuthManager'
 import qs from 'qs'
 
-import 'antd/dist/antd.css'
 import {message} from 'antd'
-import './App.css'
 import 'typeface-roboto'
 import Utils from "./app/data/Utils";
 import ConfigManager from "./app/data/ConfigManager";
+import {MuiThemeProvider, createMuiTheme} from 'material-ui/styles';
+import DarkTheme from './app/components/Shared/DarkTheme'
+import LightTheme from './app/components/Shared/LightTheme'
+const themes = [];
+
+themes.push(createMuiTheme(LightTheme));
+themes.push(createMuiTheme(DarkTheme));
 
 // import './materialize.css'
 
@@ -41,6 +46,7 @@ class Protected extends Component {
         super(props);
         this.state = {
             showLeftMenu: false,
+            themeIndex: 0,
         };
         this.environments = [];
         message.config({top: '48px'}); // .custom-header height + some offset
@@ -81,6 +87,20 @@ class Protected extends Component {
         Utils.setEnvironment(environment);
         return environmentName;
     }
+    /**
+     * Change the theme index incrementally
+     */
+    componentWillMount() {
+        let storedThemeIndex = localStorage.getItem("themeIndex");
+        if (storedThemeIndex) {
+            this.setState({themeIndex: parseInt(storedThemeIndex)})
+        }
+    }
+    setTheme() {
+        this.setState({theme: themes[this.state.themeIndex % 3]});
+        this.state.themeIndex++;
+        localStorage.setItem("themeIndex", this.state.themeIndex);
+    }
 
     render() {
         const environmentName = this.handleEnvironmentQueryParam();
@@ -88,15 +108,17 @@ class Protected extends Component {
         // Not actively check validity of access token from backend
         if (AuthManager.getUser(environmentName)) {
             return (
-                <Base>
-                    <Switch>
-                        <Redirect exact from="/" to="/apis"/>
-                        <Route path={"/apis"} component={Apis}/>
-                        <Route path={"/applications"} component={Applications}/>
-                        <Route path={"/application/create"} component={ApplicationCreate}/>
-                        <Route component={PageNotFound}/>
-                    </Switch>
-                </Base>
+                <MuiThemeProvider theme={themes[this.state.themeIndex % 2]}>
+                    <Base setTheme={() => this.setTheme()}>
+                        <Switch>
+                            <Redirect exact from="/" to="/apis"/>
+                            <Route path={"/apis"} component={Apis}/>
+                            <Route path={"/applications"} component={Applications}/>
+                            <Route path={"/application/create"} component={ApplicationCreate}/>
+                            <Route component={PageNotFound}/>
+                        </Switch>
+                    </Base>
+                </MuiThemeProvider>
             );
         }
 

@@ -17,27 +17,34 @@
  */
 
 import React from 'react'
-import {withStyles} from 'material-ui/styles';
-import BottomNavigation, {BottomNavigationButton} from 'material-ui/BottomNavigation';
+import PropTypes from 'prop-types';
+import { withStyles } from 'material-ui/styles';
 import Typography from 'material-ui/Typography';
 
-const styles = {
+const styles = theme => ({
     footer: {
-        clear: "both",
-        position: "relative",
-        "z-index": 10,
-        height: "3em",
-        "margin-top": "-3em",
-    },
-};
+        position: 'fixed',
+        bottom: 0,
+        width: '100%',
+        backgroundColor: theme.palette.background.paper,
+        padding: 8,
+        textAlign: 'center',
+        zIndex: 10,
+    }
+});
 
 export const Footer = (props) => {
+    const { classes } = props;
     return (
-        <div className='footer'>
+        <div className={classes.footer}>
             <Typography type="caption" className='text-gutter text-welcome'>
-                WSO2 APIM Publisher v3.0.0 | © 2018 <span><a href="http://wso2.com/" target="_blank">
+                WSO2 APIM v3.0.0 | © 2018 <span><a href="http://wso2.com/" target="_blank">
                 WSO2 Inc</a></span></Typography>
         </div>
     );
 };
+Footer.propTypes = {
+    classes: PropTypes.object.isRequired,
+};
+
 export default withStyles(styles)(Footer);

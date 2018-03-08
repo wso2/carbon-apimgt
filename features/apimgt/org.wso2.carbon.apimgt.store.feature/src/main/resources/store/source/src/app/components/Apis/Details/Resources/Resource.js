@@ -127,7 +127,6 @@ class Resource extends React.Component{
             visible: false,
             method:this.props.methodData
         };
-        console.info(this.props);
         this.propsSubmitHandler = this.propsSubmitHandler.bind(this);
         this.saveFieldCallback = this.saveFieldCallback.bind(this);
         this.toggleMethodData = this.toggleMethodData.bind(this);

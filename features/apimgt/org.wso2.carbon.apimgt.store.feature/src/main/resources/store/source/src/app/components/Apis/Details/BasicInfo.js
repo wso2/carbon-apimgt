@@ -306,14 +306,14 @@ class BasicInfo extends Component {
                 <div>
                     <Grid container className="tab-grid" spacing={0}>
                         {/*<Button aria-owns="simple-menu" aria-haspopup="true" >
-                                 <Edit /> Edit
-                                 </Button>
-                                 <Button aria-owns="simple-menu" aria-haspopup="true" >
-                                 <CreateNewFolder /> Create New Version
-                                 </Button>
-                                 <Button aria-owns="simple-menu" aria-haspopup="true" >
-                                 <Description /> View Swagger
-                                 </Button>*/}
+                         <Edit /> Edit
+                         </Button>
+                         <Button aria-owns="simple-menu" aria-haspopup="true" >
+                         <CreateNewFolder /> Create New Version
+                         </Button>
+                         <Button aria-owns="simple-menu" aria-haspopup="true" >
+                         <Description /> View Swagger
+                         </Button>*/}
                         <Grid item xs={12} sm={12} md={6} lg={3} xl={2}>
                             <Card>
                                 <CardMedia className={classes.media}
@@ -375,61 +375,61 @@ class BasicInfo extends Component {
                                     </IconButton>
                                 </CardActions>
                             </Card>
-                            <Button onClick={this.openSubscribeMenu} color="accent" raised 
+                            <Button onClick={this.openSubscribeMenu} color="accent" raised
                                     className="form-buttons full-width"> Subscribe to an Application </Button>
                         </Grid>
                         <Grid item xs={12} sm={12} md={6} lg={4} xl={4} className="add-item-left-padding ">
-                                <Dialog open={this.state.openSubscribeMenu} transition={Slide}
-                                        onClose={this.closeSubscribeMenu}>
-                                    <DialogTitle>
-                                        {"Subscribe"}
-                                    </DialogTitle>
-                                    <DialogContent>
-                                        <DialogContentText>
-                                            Select the Application name and Tier to Subscribe to an Application
-                                        </DialogContentText>
-                                        {this.state.options &&
-                                        <FormControl style={{width: "100%", marginBottom: "20px"}}
-                                                     className={classes.formControl}>
-                                            <InputLabel>Applications</InputLabel>
-                                            <Select
-                                                style={{width: "100%"}}
-                                                value={this.state.applicationId}
-                                                onChange={this.handleChange('applicationId')}
-                                            >
-                                                {this.state.options.map((option) => <MenuItem key={option.value}
-                                                                                              value={option.value}>
-                                                    {option.label}</MenuItem>)}
-                                            </Select>
-                                        </FormControl>
-                                        }
-                                        {this.state.tiers &&
-                                        <FormControl style={{width: "100%"}}>
-                                            <InputLabel>Tiers</InputLabel>
-                                            <Select
-                                                style={{width: "100%"}}
-                                                value={this.state.policyName}
-                                                onChange={this.handleChange('policyName')}
-                                            >
-                                                {this.state.tiers.map((tier) => <MenuItem key={tier.value}
-                                                                                          value={tier.value}>
-                                                    {tier.label}</MenuItem>)}
-                                            </Select>
-                                        </FormControl>
-                                        }
-                                        <br/>
-                                    </DialogContent>
-                                    <DialogActions>
-                                        <Button onClick={this.closeSubscribeMenu} color="primary">
-                                            <NotificationSystem ref="notificationSystem"/>
-                                            Cancel
-                                        </Button>
-                                        <Button onClick={this.createSubscription} color="primary">
-                                            <NotificationSystem ref="notificationSystem"/>
-                                            Subscribe
-                                        </Button>
-                                    </DialogActions>
-                                </Dialog>
+                            <Dialog open={this.state.openSubscribeMenu} transition={Slide}
+                                    onClose={this.closeSubscribeMenu}>
+                                <DialogTitle>
+                                    {"Subscribe"}
+                                </DialogTitle>
+                                <DialogContent>
+                                    <DialogContentText>
+                                        Select the Application name and Tier to Subscribe to an Application
+                                    </DialogContentText>
+                                    {this.state.options &&
+                                    <FormControl style={{width: "100%", marginBottom: "20px"}}
+                                                 className={classes.formControl}>
+                                        <InputLabel>Applications</InputLabel>
+                                        <Select
+                                            style={{width: "100%"}}
+                                            value={this.state.applicationId}
+                                            onChange={this.handleChange('applicationId')}
+                                        >
+                                            {this.state.options.map((option) => <MenuItem key={option.value}
+                                                                                          value={option.value}>
+                                                {option.label}</MenuItem>)}
+                                        </Select>
+                                    </FormControl>
+                                    }
+                                    {this.state.tiers &&
+                                    <FormControl style={{width: "100%"}}>
+                                        <InputLabel>Tiers</InputLabel>
+                                        <Select
+                                            style={{width: "100%"}}
+                                            value={this.state.policyName}
+                                            onChange={this.handleChange('policyName')}
+                                        >
+                                            {this.state.tiers.map((tier) => <MenuItem key={tier.value}
+                                                                                      value={tier.value}>
+                                                {tier.label}</MenuItem>)}
+                                        </Select>
+                                    </FormControl>
+                                    }
+                                    <br/>
+                                </DialogContent>
+                                <DialogActions>
+                                    <Button onClick={this.closeSubscribeMenu} color="primary">
+                                        <NotificationSystem ref="notificationSystem"/>
+                                        Cancel
+                                    </Button>
+                                    <Button onClick={this.createSubscription} color="primary">
+                                        <NotificationSystem ref="notificationSystem"/>
+                                        Subscribe
+                                    </Button>
+                                </DialogActions>
+                            </Dialog>
                             <Table>
                                 <TableBody>
                                     <TableRow>

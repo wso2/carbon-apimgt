@@ -17,87 +17,176 @@
  */
 
 import React from 'react'
-import {Link} from 'react-router-dom'
-import API from '../../../data/api'
-
-import Card, { CardActions, CardContent, CardMedia } from 'material-ui/Card';
 import Typography from 'material-ui/Typography';
-import Button from 'material-ui/Button';
-import Dialog, {
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle,
-} from 'material-ui/Dialog';
-import Slide from 'material-ui/transitions/Slide';
 import Grid from 'material-ui/Grid';
-import DeleteIcon from 'material-ui-icons/Delete';
+import {withStyles} from 'material-ui/styles';
+import { Manager, Target, Popper } from 'react-popper';
+import ImageGenerator from './ImageGenerator';
+import { Link } from 'react-router-dom'
+import PropTypes from 'prop-types';
 
-import Avatar from 'material-ui/Avatar';
-import {red, purple} from 'material-ui/colors';
-import deepOrange from 'material-ui/colors/deepOrange';
-import Color from 'random-material-color';
-import GridList, { GridListTile, GridListTileBar } from 'material-ui/GridList';
+
+const styles = theme => ({
+    lifeCycleState: {
+        width: "1.5em",
+        height: "1.5em",
+        borderRadius: "50%",
+        marginRight: "0.5em"
+    },
+    lifeCycleDisplay: {
+        width: 95,
+        height: 30,
+        marginTop: -15,
+        marginLeft: 10,
+        color: '#fff',
+        textAlign: 'center',
+        lineHeight: '30px',
+        position: 'absolute',
+    },
+    lifeCycleState_Created: {backgroundColor: "#0000ff"},
+    lifeCycleState_Prototyped: {backgroundColor: "#42dfff"},
+    lifeCycleState_Published: {backgroundColor: "#41830A"},
+    lifeCycleState_Maintenance: {backgroundColor: "#cecece"},
+    lifeCycleState_Deprecated: {backgroundColor: "#D7C850"},
+    lifeCycleState_Retired: {backgroundColor: "#000000"},
+    thumbContent: {
+        width: 250,
+        backgroundColor: theme.palette.background.paper,
+        padding: 10
+    },
+    thumbLeft: {
+        alignSelf: 'flex-start',
+        flex: 1
+    },
+    thumbRight: {
+        alignSelf: 'flex-end',
+    },
+    thumbInfo: {
+        display: 'flex',
+    },
+    thumbHeader: {
+        width: 250,
+        whiteSpace: 'nowrap',
+        overflow : 'hidden',
+        textOverflow : 'ellipsis',
+        cursor: 'pointer',
+        margin: 0,
+    },
+    contextBox: {
+        width: 140,
+        whiteSpace: 'nowrap',
+        overflow : 'hidden',
+        textOverflow : 'ellipsis',
+        cursor: 'pointer',
+        margin: 0,
+        display: 'inline-block',
+        lineHeight: '1em',
+    },
+    descriptionOverlay: {
+        content:'',
+        width:'100%',
+        height:'100%' ,
+        position:'absolute',
+        left:0,
+        top:0,
+        background:'linear-gradient(transparent 25px, theme.palette.background.paper)',
+    },
+    descriptionWrapper: {
+        color: theme.palette.text.secondary,
+        position: 'relative',
+        height: 50,
+        overflow: 'hidden'
+    },
+    thumbDelete: {
+        cursor: 'pointer',
+        backgroundColor: '#ffffff9a',
+        display: 'inline-block',
+        position: 'absolute',
+        top: 20,
+        left: 224,
+    },
+    thumbWrapper: {
+        position: 'relative',
+        paddingTop: 20,
+    },
+    deleteIcon: {
+        fill: 'red'
+    }
+});
 
 class ApiThumb extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {active: true, loading: false, open: false};
-        this.handleApiDelete = this.handleApiDelete.bind(this);
+        this.state = {
+            active: true,
+            loading: false,
+            open: false,
+            overview_link: '',
+            isRedirect: false,
+            openMoreMenu: false,
+        };
+
     }
 
-    handleRequestClose = () => {
-        this.setState({ openUserMenu: false });
-    };
-
-    handleApiDelete(e) {
-        this.setState({loading: true});
-        const api = new API();
-        const api_uuid = this.props.api.id;
-        const name = this.props.api.name;
-        let promised_delete = api.deleteAPI(api_uuid);
-        promised_delete.then(
-            response => {
-                if (response.status !== 200) {
-                    console.log(response);
-                    message.error("Something went wrong while deleting the " + name + " API!");
-                    this.setState({open: false});
-                    return;
-                }
-                message.success(name + " API deleted successfully!");
-                this.setState({active: false, loading: false});
-            }
-        );
-    };
-    
-    firstTwoLetters(name) {
-        let two_letters = name.substr(0,2);
-        return two_letters.charAt(0).toUpperCase() + two_letters.slice(1);
-    };
 
     render() {
         let details_link = "/apis/" + this.props.api.id;
-        const {name, version, context, description} = this.props.api;
-        if (!this.state.active) { // Controls the delete state, We set the state to inactive on delete success call
-            return null;
-        }
+        const {api, classes} = this.props;
 
-        let randomApiThumbColor = Color.getColor({shades: ['400']});
+        const {name, lifeCycleStatus, version, context, description} = this.props.api;
+        console.info(this.props.api)
+
         return (
-            <Grid item xs={12} sm={6} md={3} lg={3} xl={3}>
+            <Grid item xs={12} sm={6} md={4} lg={3} xl={2} className={classes.thumbWrapper}>
+                {this.props.api &&  <div
+                    className={
+                        `${classes.lifeCycleDisplay} ${classes[`lifeCycleState_${lifeCycleStatus}`]}`
+                    }
+                    >{lifeCycleStatus}</div> }
                 <Link to={details_link}>
-                    <GridListTile className="api-list-tile">
-                        <Avatar className="default-thumb" style={{backgroundColor: randomApiThumbColor}}>
-                                    {this.firstTwoLetters(name)}
-                                 </Avatar>
-                        <GridListTileBar
-                            title= {name}
-                            subtitle={<span>by:  {name}</span>}
-                        />
-                    </GridListTile>
+                    <ImageGenerator apiName={name} />
                 </Link>
+
+                <div className={classes.thumbContent}>
+                    <Typography className={classes.thumbHeader} variant="display1" gutterBottom
+                                onClick={this.handleRedirectToAPIOverview} title={name}>
+                        {name}
+                    </Typography>
+                    <Typography variant="caption" gutterBottom align="left">
+                        By: provider}
+                    </Typography>
+                    <div className={classes.thumbInfo}>
+                        <div className={classes.thumbLeft}>
+                            <Typography variant="subheading">
+                                {version}
+                            </Typography>
+                            <Typography variant="caption" gutterBottom align="left">
+                                Version
+                            </Typography>
+                        </div>
+                        <div className={classes.thumbRight}>
+                            <Typography variant="subheading" align="right" className={classes.contextBox}>{context}</Typography>
+                            <Typography variant="caption" gutterBottom align="right">
+                                Context
+                            </Typography>
+                        </div>
+                    </div>
+                    <div className={classes.descriptionWrapper}>
+                        {description}
+                        <div className={classes.descriptionOverlay} />
+                        </div>
+
+                </div>
+
             </Grid>
         );
     }
+
 }
-export default ApiThumb
+
+ApiThumb.propTypes = {
+    classes: PropTypes.object.isRequired,
+    theme: PropTypes.object.isRequired,
+};
+
+export default withStyles(styles, { withTheme: true })(ApiThumb);

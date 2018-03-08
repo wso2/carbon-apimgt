@@ -37,8 +37,42 @@ import ForumIcon from 'material-ui-icons/Forum';
 import GavelIcon from 'material-ui-icons/Gavel';
 import Typography from 'material-ui/Typography';
 import Paper from 'material-ui/Paper';
+import {withStyles} from 'material-ui/styles';
+import PropTypes from 'prop-types';
 
-export default class Details extends Component {
+const styles = theme => ({
+    imageSideContent: {
+        display: 'inline-block',
+        paddingLeft: 20,
+    },
+    imageWrapper: {
+        display: 'flex',
+        flexAlign: 'top',
+    },
+    headline: {
+        marginTop: 20
+    },
+    titleCase: {
+        textTransform: 'capitalize',
+    },
+    chip: {
+        marginLeft: 0,
+        cursor: 'pointer',
+    },
+    openNewIcon: {
+        display: 'inline-block',
+        marginLeft: 20,
+    },
+    endpointsWrapper: {
+        display: 'flex',
+        justifyContent: 'flex-start',
+    },
+    paper: {
+        marginBottom: 20,
+    }
+});
+
+class Details extends Component {
     constructor(props){
         super(props);
         this.state = {
@@ -59,14 +93,14 @@ export default class Details extends Component {
 
     render() {
         let redirect_url = "/apis/" + this.props.match.params.api_uuid + "/overview";
-        const {api} = this.state;
+        const classes = this.props.classes;
         return (
             <Grid container spacing={0} justify="center">
-                <Grid item xs={12} sm={6} md={8} lg={8} xl={10} >
-                    <Typography type="title" gutterBottom className="page-title">
-                        {api && api.name}  <span style={{fontSize: "50%"}}>{api && api.version} </span>
+                <Grid item xs={12} sm={12} md={12} lg={11} xl={10} >
+                    <Typography variant="display1" gutterBottom >
+                        {this.state.api && <span>{this.state.api.name}</span> }
                     </Typography>
-                    <Paper>
+                    <Paper className={classes.paper}>
                         <Tabs
                             value={this.state.value}
                             onChange={this.handleChange}
@@ -95,3 +129,9 @@ export default class Details extends Component {
         );
     }
 }
+
+Details.propTypes = {
+    classes: PropTypes.object.isRequired,
+};
+
+export default withStyles(styles)(Details);

@@ -18,25 +18,48 @@
 
 import React, {Component} from 'react'
 import {Link} from 'react-router-dom'
-import {Col, Popconfirm, Row, Form, Select, Dropdown, Tag, Menu, Badge, message} from 'antd';
-
-const FormItem = Form.Item;
 import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
-import Api from '../../../data/api';
-import BasicInfo from './BasicInfo';
+import Api from '../../../data/api'
 
-import Paper from 'material-ui/Paper';
 import Grid from 'material-ui/Grid';
 import Typography from 'material-ui/Typography';
-import Button from 'material-ui/Button';
-import TextField from 'material-ui/TextField';
-import Card, {CardActions, CardContent, CardMedia} from 'material-ui/Card';
-import Table, {TableBody, TableCell, TableRow} from 'material-ui/Table';
-import {Delete, Edit, CreateNewFolder, Description}from 'material-ui-icons';
-import Tabs, {Tab} from 'material-ui/Tabs';
-import AppBar from 'material-ui/AppBar';
-import AddIcon from 'material-ui-icons/';
+
+import ImageGenerator from "../Listing/ImageGenerator"
+import {withStyles} from 'material-ui/styles';
+import PropTypes from 'prop-types';
+import Chip from 'material-ui/Chip';
+import Subscribe from './Subscribe'
+
+
+const styles = theme => ({
+    imageSideContent: {
+        display: 'inline-block',
+        paddingLeft: 20,
+    },
+    imageWrapper: {
+        display: 'flex',
+        flexAlign: 'top',
+    },
+    headline: {
+        marginTop: 20
+    },
+    titleCase: {
+        textTransform: 'capitalize',
+    },
+    chip: {
+        marginLeft: 0,
+        cursor: 'pointer',
+    },
+    openNewIcon: {
+        display: 'inline-block',
+        marginLeft: 20,
+    },
+    endpointsWrapper: {
+        display: 'flex',
+        justifyContent: 'flex-start',
+    }
+});
 
 class Overview extends Component {
     constructor(props) {
@@ -96,34 +119,7 @@ class Overview extends Component {
         let promised_subscriptions = api.getSubscriptions(this.api_uuid, null);
         promised_subscriptions.then(
             response => {
-                this.dropDownApplications = [<Option key="custom" onClick={this.handleClick}>New Application</Option>];
 
-                for (let i = 0; i < this.api.policies.length; i++) {
-                    this.dropDownPolicies.push(<Option key={this.api.policies[i]}>{this.api.policies[i]}</Option>);
-                }
-                let subscription = {};
-                let subscriptions = response.obj.list;
-                let application = {};
-                let subscribedApp = false;
-                for (let i = 0; i < this.applications.length; i++) {
-                    subscribedApp = false;
-                    application = applications[i];
-                    if (application.lifeCycleStatus != "APPROVED") {
-                        continue;
-                    }
-                    for (let j = 0; j < subscriptions.length; j++) {
-                        subscription = subscriptions[j];
-                        if (subscription.applicationId === application.applicationId) {
-                            subscribedApp = true;
-                            continue;
-                        }
-                    }
-                    if (!subscribedApp) {
-                        this.dropDownApplications.push(<Option key={application.id}>{application.name}</Option>);
-                    }
-                }
-                this.policies = this.api.policies;
-                console.info(this.api.policies)
             }
         ).catch(
             error => {
@@ -147,37 +143,207 @@ class Overview extends Component {
     };
 
     render() {
-        const formItemLayout = {
-            labelCol: {span: 6},
-            wrapperCol: {span: 18}
-        };
-        if (this.state.notFound) {
-            return <ResourceNotFound/>
-        }
-
-        if (this.state.redirect) {
-            return <Redirect push to="/application-create"/>;
-        }
         const api = this.state.api;
-
+        if (this.state.notFound) {
+            return <ResourceNotFound message={this.props.resourceNotFountMessage}/>
+        }
+        if (!api) {
+            return <Loading/>
+        }
+        const { classes } = this.props;
+        console.info(api);
         return (
-            this.state.api ?
-                <Paper>
-                    <BasicInfo uuid={this.props.match.params.api_uuid}/>
-                    <Grid container className="tab-grid" spacing={0}>
-                        <Grid item xs={12} sm={12} md={6} lg={6} xl={4}>
-                            { api.endpoint &&
-                            api.endpoint.map(ep => <div>
-                                <span>{ep.type}</span>
-                                <span>{ep.inline ? ep.inline.endpointConfig.serviceUrl : ''}</span>
-                            </div>)
+            <Grid container>
+                <Grid item xs={12} className={classes.imageWrapper}>
+                    <ImageGenerator apiName={api.name} />
+                    <div className={classes.imageSideContent}>
+                        <Typography variant="headline" >
+                            {api.version} {api.isDefaultVersion ? <span>( Default )</span> : <span></span>}
+                            {/* TODO We need to show the default verison and a link to it here if this
+                            is not the default version*/}
+                        </Typography>
+                        <Typography variant="caption" gutterBottom align="left">
+                            Version
+                        </Typography>
+                        {/* Context */}
+                        <Typography variant="headline" className={classes.headline} >
+                            {api.context}
+                        </Typography>
+                        <Typography variant="caption" gutterBottom align="left">
+                            Context
+                        </Typography>
+                        {/*Visibility */}
+                        <Typography variant="headline" className={classes.headline}>
+                            {api.lifeCycleStatus}
+                        </Typography>
+                        <Typography variant="caption" gutterBottom align="left">
+                            Lifecycle Status
+                        </Typography>
+                    </div>
+                    <div>
+                        <Subscribe uuid={this.props.match.params.api_uuid}/>
+                    </div>
+
+                </Grid>
+                <Grid item xs={12}>
+                    <Typography variant="subheading" align="left">
+                        Created by {api.provider} : {api.createdTime}
+                    </Typography>
+                    <Typography variant="caption" gutterBottom align="left">
+                        Last update : {api.lastUpdatedTime}
+                    </Typography>
+
+                    <Typography variant="subheading" align="left">
+                        <StarRatingBar apiIdProp={this.api_uuid}></StarRatingBar>
+                    </Typography>
+
+
+                    <Grid container>
+                        <Grid item xs={12} sm={6} md={4} lg={3}>
+                            {api.policies && api.policies.length ?
+                                    <Typography variant="subheading" align="left" className={classes.headline}>
+                                        {api.policies.map(policy => policy + ", ")}
+                                    </Typography>
+                                :
+                                    <Typography variant="subheading" align="left" className={classes.headline}>
+                                        &lt; NOT SET FOR THIS API &gt;
+                                    </Typography>
                             }
+                            <Typography variant="caption" gutterBottom align="left">
+                                Throttling Policies
+                            </Typography>
                         </Grid>
+
+                        <Grid item xs={12} sm={6} md={4} lg={3}>
+                            {api.tags && api.tags.length ?
+                                <div className={classes.headline}>
+                                    {api.tags.map(tag => <Link to={"/apis/" + api.id + "/tags" }>
+                                        <Chip label={tag} className={classes.chip} />
+                                    </Link>)}
+                                </div>
+                                :
+                                    <Typography variant="subheading" align="left" className={classes.headline}>
+                                        &lt; NOT SET FOR THIS API &gt;
+                                    </Typography>
+                            }
+                            <Typography variant="caption" gutterBottom align="left">
+                                Tags
+                            </Typography>
+
+                        </Grid>
+                        <Grid item xs={12} sm={6} md={4} lg={3}>
+
+                            {api.transport && api.transport.length ?
+                                <Typography variant="subheading" align="left" className={classes.headline}>
+                                    {api.transport.map(trans => trans + ", ")}
+                                </Typography>
+                                :
+                                <Typography variant="subheading" align="left" className={classes.headline}>
+                                    &lt; NOT SET FOR THIS API &gt;
+                                </Typography>
+                            }
+                            <Typography variant="caption" gutterBottom align="left">
+                                Transport
+                            </Typography>
+
+                        </Grid>
+
                     </Grid>
-                </Paper>
-                : <Loading/>
+                </Grid>
+
+            </Grid>
         );
     }
 }
+class Star extends React.Component {
+    constructor(props) {
+        super(props);
 
-export default Overview
+        this.handleHoveringOver = this.handleHoveringOver.bind(this);
+    }
+
+    handleHoveringOver(event) {
+        this.props.hoverOver(this.props.name);
+    }
+
+    render() {
+        return this.props.isRated ?
+            <span onMouseOver={this.handleHoveringOver} style={{color: 'gold'}}>
+                ★
+            </span> :
+            <span onMouseOver={this.handleHoveringOver} style={{color: 'gold'}}>
+                ☆
+            </span>;
+    }
+}
+class StarRatingBar extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            previousRating: 0,
+            rating: 0
+        };
+
+        this.handleMouseOver = this.handleMouseOver.bind(this);
+        this.handleRatingUpdate = this.handleRatingUpdate.bind(this);
+        this.handleMouseOut = this.handleMouseOut.bind(this);
+    }
+
+    componentDidMount() {
+        var api = new Api();
+        let promised_api = api.getAPIById(this.props.apiIdProp);
+        promised_api.then(
+            response => {
+            }
+        );
+
+        //get user rating
+        let promised_rating = api.getRatingFromUser(this.props.apiIdProp, null);
+        promised_rating.then(
+            response => {
+                this.setState({rating: response.obj.userRating});
+                this.setState({previousRating: response.obj.userRating});
+            }
+        );
+    }
+
+    handleMouseOver(index) {
+        this.setState({rating: index});
+    }
+
+    handleMouseOut() {
+        this.setState({rating: this.state.previousRating});
+    }
+
+    handleRatingUpdate() {
+        this.setState({previousRating: this.state.rating});
+        this.setState({rating: this.state.rating});
+
+        var api = new Api();
+        let ratingInfo = {"rating": this.state.rating};
+        let promise = api.addRating(this.props.apiIdProp, ratingInfo);
+        promise.then(
+            response => {
+                message.success("Rating updated successfully");
+            }).catch(
+            error => {
+                message.error("Error occurred while adding ratings!");
+            }
+        );
+    }
+
+    render() {
+        return (<div onClick={this.handleRatingUpdate} onMouseOut={this.handleMouseOut}>
+            <Star name={1} isRated={this.state.rating >= 1} hoverOver={this.handleMouseOver}> </Star>
+            <Star name={2} isRated={this.state.rating >= 2} hoverOver={this.handleMouseOver}> </Star>
+            <Star name={3} isRated={this.state.rating >= 3} hoverOver={this.handleMouseOver}> </Star>
+            <Star name={4} isRated={this.state.rating >= 4} hoverOver={this.handleMouseOver}> </Star>
+            <Star name={5} isRated={this.state.rating >= 5} hoverOver={this.handleMouseOver}> </Star>
+        </div>);
+    }
+}
+Overview.propTypes = {
+    classes: PropTypes.object.isRequired,
+};
+
+export default withStyles(styles)(Overview);

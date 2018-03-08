@@ -60,7 +60,6 @@ class ApplicationCreate extends Component {
             this.setState({tiers: tiers});
 
             if (tiers.length > 0){
-                console.info(tiers[0]);
                 this.setState({quota: tiers[0]});
             }
         }
@@ -150,7 +149,7 @@ class ApplicationCreate extends Component {
                             <Button onClick={this.handleSubmit} raised color="primary" style={{marginRight:"20px"}}>
                                 Add Application
                             </Button>
-                            <Button raised >
+                            <Button variant="raised" >
                                 Cancel
                             </Button>
                         </div>    
