@@ -1552,4 +1552,26 @@ public class APIConsumerImplTest {
         apiConsumer.rateAPI(identifier, apiRating, user);
         Mockito.verify(apiMgtDAO, Mockito.times(1)).addRating(identifier, apiRating.getRating(), user);
     }
+
+    @Test
+    public void testGetApplicationKeys() throws APIManagementException {
+        APIKey apiKey1 = new APIKey();
+        apiKey1.setConsumerKey(UUID.randomUUID().toString());
+        apiKey1.setType(APIConstants.API_KEY_TYPE_PRODUCTION);
+        apiKey1.setState(UUID.randomUUID().toString());
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
+
+        Mockito.when(apiMgtDAO.getConsumerkeyByApplicationIdAndKeyType(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(apiKey1.getConsumerKey());
+        Mockito.when(apiMgtDAO.getKeyStatusOfApplication(Mockito.anyString(), Mockito.anyInt()))
+                .thenReturn(apiKey1);
+
+        AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
+        accessTokenInfo.setAccessToken(UUID.randomUUID().toString());
+        Mockito.when(keyManager.getAccessTokenByConsumerKey(Mockito.anyString())).thenReturn(accessTokenInfo);
+
+        assertNotNull(apiConsumer.getApplicationKeys(1));
+        assertEquals(apiConsumer.getApplicationKeys(1).size(),2);
+        assertNotNull(apiConsumer.getApplicationKeys(1).iterator().next().getAccessToken());
+    }
 }

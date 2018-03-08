@@ -1,5 +1,6 @@
 <%
 var login = function (username, password,tenantMode) {
+    username = username.trim();
     var result, isSuperTenant, message,showStoreURL,
             log = new Log(),
             manager = jagg.module("manager"),
@@ -78,6 +79,9 @@ var loginWithSAMLToken = function (token) {
 
     var cookieString = cookie.split(";")[0].split(":")[1];
     var userName = ssoRelyingParty.getSAMLResponseNameId(token);
+    if (userName) {
+        userName = userName.trim();
+    }
     return {
         error:false,
         username:userName,

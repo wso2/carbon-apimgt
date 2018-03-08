@@ -1,0 +1,16 @@
+{
+  "name": "org.wso2.keytemplate.request.stream",
+  "version": "1.0.0",
+  "nickName": "",
+  "description": "KeyTemplate Stream",
+  "payloadData": [
+    {
+      "name": "keyTemplateValue",
+      "type": "STRING"
+    },
+    {
+      "name": "keyTemplateState",
+      "type": "STRING"
+    }
+  ]
+}

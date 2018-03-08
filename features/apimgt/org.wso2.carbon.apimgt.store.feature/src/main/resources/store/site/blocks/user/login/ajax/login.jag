@@ -79,6 +79,9 @@ include("/jagg/jagg.jag");
     else if (action === "login" && request.getMethod() == 'POST') {
         mod = jagg.module("user");
         username = request.getParameter("username");
+        if (username) {
+            username = username.trim();
+        }
         var MultitenantConstants = Packages.org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 		var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
     	var user= MultitenantUtils.getTenantAwareUsername(username);

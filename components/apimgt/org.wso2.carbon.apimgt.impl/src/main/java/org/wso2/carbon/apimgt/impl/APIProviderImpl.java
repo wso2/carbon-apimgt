@@ -110,6 +110,7 @@ import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceClusteri
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceExceptionException;
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceStub;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
@@ -146,6 +147,7 @@ import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -4417,7 +4419,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 List<GovernanceArtifact> genericArtifacts = null;
 
                 if (isAccessControlRestrictionEnabled && !APIUtil.hasPermission(userNameWithoutChange, APIConstants
-                        .Permissions.APIM_ADMIN, true)) {
+                        .Permissions.APIM_ADMIN)) {
                     genericArtifacts = GovernanceUtils.findGovernanceArtifacts(getUserRoleListQuery(), userRegistry,
                             APIConstants.API_RXT_MEDIA_TYPE, true);
                 } else {
@@ -4998,42 +5000,30 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     private void publishBlockingEvent(String conditionType, String conditionValue, String state) {
         OutputEventAdapterService eventAdapterService = ServiceReferenceHolder.getInstance().getOutputEventAdapterService();
-
-        // Encoding the message into a map.
-        HashMap<String, String> blockingMessage = new HashMap<String, String>();
-        blockingMessage.put(APIConstants.BLOCKING_CONDITION_KEY, conditionType);
-        blockingMessage.put(APIConstants.BLOCKING_CONDITION_VALUE, conditionValue);
-        blockingMessage.put(APIConstants.BLOCKING_CONDITION_STATE, state);
-        blockingMessage.put(APIConstants.BLOCKING_CONDITION_DOMAIN, tenantDomain);
+        Object[] objects = new Object[]{conditionType,conditionValue,state,tenantDomain};
+        Event blockingMessage = new Event(APIConstants.BLOCKING_CONDITIONS_STREAM_ID, System.currentTimeMillis(),
+                null, null, objects);
         ThrottleProperties throttleProperties = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration().getThrottleProperties();
 
-        // Checking whether EventPublisherName is provided.  An empty HashMap is set so that it can be used to keep transport.jms
-        // .Header value.
-        if (throttleProperties.getJmsPublisherParameters() != null && !throttleProperties.getJmsPublisherParameters()
-                .isEmpty()) {
-            eventAdapterService.publish(APIConstants.BLOCKING_EVENT_PUBLISHER, new HashMap<String, String>()
-                    , blockingMessage);
+        if (throttleProperties.getDataPublisher() != null && throttleProperties.getDataPublisher().isEnabled()) {
+            eventAdapterService.publish(APIConstants.BLOCKING_EVENT_PUBLISHER, Collections.EMPTY_MAP, blockingMessage);
         }
     }
 
     private void publishKeyTemplateEvent(String templateValue, String state) {
-
-        //Publishing an event to notify that a policy has been added.
-        HashMap<String, String> keyTemplateMap = new HashMap<String, String>();
-        keyTemplateMap.put(APIConstants.POLICY_TEMPLATE_KEY, templateValue);
-        keyTemplateMap.put(APIConstants.TEMPLATE_KEY_STATE, state);
+        OutputEventAdapterService eventAdapterService = ServiceReferenceHolder.getInstance().getOutputEventAdapterService();
+        Object[] objects = new Object[]{templateValue,state};
+        Event keyTemplateMessage = new Event(APIConstants.KEY_TEMPLATE_STREM_ID, System.currentTimeMillis(),
+                null, null, objects);
 
         ThrottleProperties throttleProperties = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration().getThrottleProperties();
 
-        // Getting JMS Publisher name from config. An empty HashMap is set so that it can be used to keep transport.jms
-        // .Header value.
-        if (throttleProperties.getJmsPublisherParameters() != null && !throttleProperties.getJmsPublisherParameters()
-                .isEmpty()) {
-            ServiceReferenceHolder.getInstance().getOutputEventAdapterService().publish(APIConstants.BLOCKING_EVENT_PUBLISHER,
-                    new HashMap<String, String>()
-                    , keyTemplateMap);
+
+        if (throttleProperties.getDataPublisher() != null && throttleProperties.getDataPublisher().isEnabled()) {
+            eventAdapterService.publish(APIConstants.BLOCKING_EVENT_PUBLISHER, Collections.EMPTY_MAP,
+                    keyTemplateMessage);
         }
     }
 
@@ -5274,7 +5264,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     protected Map<String, Object> searchAPIsByURLPattern(Registry registry, String searchTerm, int start, int end)
             throws APIManagementException {
         if (!isAccessControlRestrictionEnabled || APIUtil
-                .hasPermission(userNameWithoutChange, APIConstants.Permissions.APIM_ADMIN, true)) {
+                .hasPermission(userNameWithoutChange, APIConstants.Permissions.APIM_ADMIN)) {
             return super.searchAPIsByURLPattern(registry, searchTerm, start, end);
         }
         SortedSet<API> apiSet = new TreeSet<API>(new APINameComparator());
@@ -5359,7 +5349,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         StringBuilder rolesQuery = new StringBuilder();
         rolesQuery.append('(');
         rolesQuery.append(APIConstants.NULL_USER_ROLE_LIST);
-        String[] userRoles = APIUtil.getListOfRoles(userNameWithoutChange, true);
+        String[] userRoles = APIUtil.getListOfRoles(userNameWithoutChange);
         if (userRoles != null) {
             for (String userRole : userRoles) {
                 rolesQuery.append(" OR ");
@@ -5373,7 +5363,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     protected String getSearchQuery(String searchQuery) throws APIManagementException {
         if (!isAccessControlRestrictionEnabled || APIUtil.hasPermission(userNameWithoutChange, APIConstants.Permissions
-                .APIM_ADMIN, true)) {
+                .APIM_ADMIN)) {
             return searchQuery;
         }
         String criteria = getUserRoleListQuery();
@@ -5554,4 +5544,76 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         return null;
     }
+     /* To check authorization of the API against current logged in user. If the user is not authorized an exception
+     * will be thrown.
+     *
+     * @param identifier API identifier
+     * @throws APIManagementException APIManagementException
+     */
+    protected void checkAccessControlPermission(APIIdentifier identifier) throws APIManagementException {
+        if (identifier == null || !isAccessControlRestrictionEnabled) {
+            if (!isAccessControlRestrictionEnabled && log.isDebugEnabled()) {
+                log.debug("Publisher access control restriction is not enabled. Hence the API " + identifier
+                        + " can be editable and viewable by all the API publishers and creators.");
+            }
+            return;
+        }
+        String apiPath = APIUtil.getAPIPath(identifier);
+        try {
+            // Need user name with tenant domain to get correct domain name from
+            // MultitenantUtils.getTenantDomain(username)
+            String userNameWithTenantDomain = (userNameWithoutChange != null) ? userNameWithoutChange : username;
+            if (!registry.resourceExists(apiPath)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Resource does not exist in the path : " + apiPath + " this can happen if this in the "
+                            + "middle of the new API creation, hence not checking the access control");
+                }
+                return;
+            }
+            Resource apiResource = registry.get(apiPath);
+            if (apiResource == null) {
+                return;
+            }
+            String accessControlProperty = apiResource.getProperty(APIConstants.ACCESS_CONTROL);
+            if (accessControlProperty == null || accessControlProperty.trim().isEmpty() || accessControlProperty
+                    .equalsIgnoreCase(APIConstants.NO_ACCESS_CONTROL)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("API in the path  " + apiPath + " does not have any access control restriction");
+                }
+                return;
+            }
+            if (APIUtil.hasPermission(userNameWithTenantDomain, APIConstants.Permissions.APIM_ADMIN)) {
+                return;
+            }
+            String publisherAccessControlRoles = apiResource.getProperty(APIConstants.PUBLISHER_ROLES);
+            if (publisherAccessControlRoles != null && !publisherAccessControlRoles.trim().isEmpty()) {
+                String[] accessControlRoleList = publisherAccessControlRoles.replaceAll("\\s+", "").split(",");
+                if (log.isDebugEnabled()) {
+                    log.debug("API has restricted access to creators and publishers with the roles : " + Arrays
+                            .toString(accessControlRoleList));
+                }
+                String[] userRoleList = APIUtil.getListOfRoles(userNameWithTenantDomain);
+                if (log.isDebugEnabled()) {
+                    log.debug("User " + username + " has roles " + Arrays.toString(userRoleList));
+                }
+                for (String role : accessControlRoleList) {
+                    if (!role.equalsIgnoreCase(APIConstants.NULL_USER_ROLE_LIST) && APIUtil
+                            .compareRoleList(userRoleList, role)) {
+                        return;
+                    }
+                }
+                if (log.isDebugEnabled()) {
+                    log.debug("API " + identifier + " cannot be accessed by user '" + username + "'. It "
+                            + "has a publisher access control restriction");
+                }
+                throw new APIManagementException(
+                        APIConstants.UN_AUTHORIZED_ERROR_MESSAGE + " view or modify the API " + identifier);
+            }
+        } catch (RegistryException e) {
+            throw new APIManagementException(
+                    "Registry Exception while trying to check the access control restriction of API " + identifier
+                            .getApiName(), e);
+        }
+    }
+
 }

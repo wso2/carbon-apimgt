@@ -34,27 +34,7 @@ import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIKey;
-import org.wso2.carbon.apimgt.api.model.APIRating;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
-import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
-import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
-import org.wso2.carbon.apimgt.api.model.ApplicationKeysDTO;
-import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.KeyManager;
-import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
-import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
-import org.wso2.carbon.apimgt.api.model.Tag;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.TierPermission;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidator;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
@@ -421,6 +401,16 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         }
                     }
                     if (api != null) {
+                        try {
+                            checkAccessControlPermission(api.getId());
+                        } catch (APIManagementException e) {
+                            // This is a second level of filter to get apis based on access control and visibility.
+                            // Hence log is set as debug and continued.
+                            if(log.isDebugEnabled()) {
+                                log.debug("User is not authorized to view the api " + api.getId().getApiName(), e);
+                            }
+                            continue;
+                        }
                         String key;
                         //Check the configuration to allow showing multiple versions of an API true/false
                         if (!displayMultipleVersions) { //If allow only showing the latest version of an API
@@ -2117,6 +2107,14 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (originalSubscribedAPIs != null && !originalSubscribedAPIs.isEmpty()) {
                 Map<String, Tier> tiers = APIUtil.getTiers(tenantId);
                 for (SubscribedAPI subscribedApi : originalSubscribedAPIs) {
+                    Application application = subscribedApi.getApplication();
+                    if (application != null) {
+                        int applicationId = application.getId();
+                        Set<APIKey> keys = getApplicationKeys(applicationId);
+                        for (APIKey key : keys) {
+                            application.addKey(key);
+                        }
+                    }
                     Tier tier = tiers.get(subscribedApi.getTier().getName());
                     subscribedApi.getTier().setDisplayName(tier != null ? tier.getDisplayName() : subscribedApi.getTier().getName());
                     subscribedAPIs.add(subscribedApi);
@@ -2533,6 +2531,13 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         String uuid = application.getUUID();
         if (!StringUtils.isEmpty(uuid)) {
             existingApp = apiMgtDAO.getApplicationByUUID(uuid);
+            if (existingApp != null) {
+                Set<APIKey> keys = getApplicationKeys(existingApp.getId());
+
+                for (APIKey key : keys) {
+                    existingApp.addKey(key);
+                }
+            }
             application.setId(existingApp.getId());
         } else {
             existingApp = apiMgtDAO.getApplicationById(application.getId());
@@ -2647,6 +2652,13 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         String uuid = application.getUUID();
         if (application.getId() == 0 && !StringUtils.isEmpty(uuid)) {
             application = apiMgtDAO.getApplicationByUUID(uuid);
+            if (application != null) {
+                Set<APIKey> keys = getApplicationKeys(application.getId());
+
+                for (APIKey key : keys) {
+                    application.addKey(key);
+                }
+            }
         }
         boolean isTenantFlowStarted = false;
         int applicationId = application.getId();
@@ -3311,18 +3323,139 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return null;
     }
 
+    /**
+     * Returns all applications associated with given subscriber, groupingId and search criteria.
+     *
+     * @param subscriber Subscriber
+     * @param groupingId The groupId to which the applications must belong.
+     * @param offset     The offset.
+     * @param search     The search string.
+     * @param sortColumn The sort column.
+     * @param sortOrder  The sort order.
+     * @return Application[] The Applications.
+     * @throws APIManagementException
+     */
     @Override
-    public Application[] getApplicationsWithPagination(Subscriber subscriber, String groupingId,int start , int offset
+    public Application[] getApplicationsWithPagination(Subscriber subscriber, String groupingId, int start , int offset
             , String search, String sortColumn, String sortOrder)
             throws APIManagementException {
-        return apiMgtDAO.getApplicationsWithPagination(subscriber, groupingId, start, offset, search,sortColumn,sortOrder);
+        Application[] applications = apiMgtDAO.getApplicationsWithPagination(subscriber, groupingId, start, offset,
+                search, sortColumn, sortOrder);
+        for (Application application : applications) {
+            Set<APIKey> keys = getApplicationKeys(application.getId());
+
+            for (APIKey key : keys) {
+                application.addKey(key);
+            }
+        }
+        return applications;
     }
 
+    /**
+     * Returns all applications associated with given subscriber and groupingId.
+     *
+     * @param subscriber The subscriber.
+     * @param groupingId The groupId to which the applications must belong.
+     * @return Application[] Array of applications.
+     * @throws APIManagementException
+     */
     @Override
     public Application[] getApplications(Subscriber subscriber, String groupingId)
 			throws APIManagementException {
-		return apiMgtDAO.getApplications(subscriber, groupingId);
-	}
+        Application[] applications = apiMgtDAO.getApplications(subscriber, groupingId);
+        for (Application application : applications) {
+            Set<APIKey> keys = getApplicationKeys(application.getId());
+
+            for (APIKey key : keys) {
+                application.addKey(key);
+            }
+        }
+        return applications;
+    }
+
+    /**
+     * Returns all API keys associated with given application id.
+     *
+     * @param applicationId The id of the application.
+     * @return Set<APIKey>  Set of API keys of the application.
+     * @throws APIManagementException
+     */
+    protected Set<APIKey> getApplicationKeys(int applicationId) throws APIManagementException {
+        Set<APIKey> apiKeys = new HashSet<APIKey>();
+        APIKey productionKey = getApplicationKey(applicationId, APIConstants.API_KEY_TYPE_PRODUCTION);
+        if (productionKey != null) {
+            apiKeys.add(productionKey);
+        } else {
+            productionKey = apiMgtDAO.getKeyStatusOfApplication(APIConstants.API_KEY_TYPE_PRODUCTION, applicationId);
+            if (productionKey != null) {
+                productionKey.setType(APIConstants.API_KEY_TYPE_PRODUCTION);
+                apiKeys.add(productionKey);
+            }
+        }
+
+        APIKey sandboxKey = getApplicationKey(applicationId, APIConstants.API_KEY_TYPE_SANDBOX);
+        if (sandboxKey != null) {
+            apiKeys.add(sandboxKey);
+        } else {
+            sandboxKey = apiMgtDAO.getKeyStatusOfApplication(APIConstants.API_KEY_TYPE_SANDBOX, applicationId);
+            if (sandboxKey != null) {
+                sandboxKey.setType(APIConstants.API_KEY_TYPE_SANDBOX);
+                apiKeys.add(sandboxKey);
+            }
+        }
+        return apiKeys;
+    }
+
+    /**
+     * Returns the key associated with given application id and key type.
+     *
+     * @param applicationId Id of the Application.
+     * @param keyType The type of key.
+     * @return APIKey The key of the application.
+     * @throws APIManagementException
+     */
+    protected APIKey getApplicationKey(int applicationId, String keyType) throws APIManagementException {
+        String consumerKey = apiMgtDAO.getConsumerkeyByApplicationIdAndKeyType(String.valueOf(applicationId), keyType);
+        if (StringUtils.isNotEmpty(consumerKey)) {
+            String consumerKeyStatus = apiMgtDAO.getKeyStatusOfApplication(keyType, applicationId).getState();
+            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+            OAuthApplicationInfo oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);
+            AccessTokenInfo tokenInfo = keyManager.getAccessTokenByConsumerKey(consumerKey);
+            APIKey apiKey = new APIKey();
+            apiKey.setConsumerKey(consumerKey);
+            apiKey.setType(keyType);
+            apiKey.setState(consumerKeyStatus);
+            if (oAuthApplicationInfo != null) {
+                apiKey.setConsumerSecret(oAuthApplicationInfo.getClientSecret());
+                apiKey.setCallbackUrl(oAuthApplicationInfo.getCallBackURL());
+                apiKey.setGrantTypes(oAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES).toString());
+            }
+            if (tokenInfo != null) {
+                apiKey.setAccessToken(tokenInfo.getAccessToken());
+                apiKey.setValidityPeriod(tokenInfo.getValidityPeriod());
+                apiKey.setTokenScope(getScopeString(tokenInfo.getScopes()));
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Access token does not exist for Consumer Key: " + consumerKey);
+                }
+            }
+            return apiKey;
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Consumer key does not exist for Application Id: " + applicationId + " Key Type: " + keyType);
+        }
+        return null;
+    }
+
+    /**
+     * Returns a single string containing the provided array of scopes.
+     *
+     * @param scopes The array of scopes.
+     * @return String Single string containing the provided array of scopes.
+     */
+    private String getScopeString(String[] scopes) {
+        return StringUtils.join(scopes, " ");
+    }
 
     @Override
     public Application[] getLightWeightApplications(Subscriber subscriber, String groupingId) throws
@@ -3646,7 +3779,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         StringBuilder rolesQuery = new StringBuilder();
         rolesQuery.append('(');
         rolesQuery.append(APIConstants.NULL_USER_ROLE_LIST);
-        String[] userRoles = APIUtil.getListOfRoles(username, true);
+        String[] userRoles = APIUtil.getListOfRoles((userNameWithoutChange != null)? userNameWithoutChange: username);
         if (userRoles != null) {
             for (String userRole : userRoles) {
                 rolesQuery.append(" OR ");
@@ -3670,7 +3803,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 add(APIConstants.NULL_USER_ROLE_LIST);
             }};
         } else {
-            userRoleList = new ArrayList<String>(Arrays.asList(APIUtil.getListOfRoles(username, true)));
+            userRoleList = new ArrayList<String>(Arrays.asList(APIUtil.getListOfRoles(username)));
         }
         return userRoleList;
     }
@@ -3685,7 +3818,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             return criteria;
         }
         if (!isAccessControlRestrictionEnabled || APIUtil.hasPermission(userNameWithoutChange, APIConstants.Permissions
-                .APIM_ADMIN, true)) {
+                .APIM_ADMIN)) {
             return searchQuery;
         }
         String criteria = getUserRoleListQuery();
@@ -3744,6 +3877,89 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     data.toJSONString());
         }
         return data.toJSONString();
+    }
+
+    /**
+     * To check authorization of the API against current logged in user. If the user is not authorized an exception
+     * will be thrown.
+     *
+     * @param identifier API identifier
+     * @throws APIManagementException APIManagementException
+     */
+    protected void checkAccessControlPermission(APIIdentifier identifier) throws APIManagementException {
+        if (identifier == null || !isAccessControlRestrictionEnabled) {
+            if (!isAccessControlRestrictionEnabled && log.isDebugEnabled() && identifier != null) {
+                log.debug(
+                        "Publisher access control restriction is not enabled. Hence the API " + identifier.getApiName()
+                                + " should not be checked for further permission. Registry permission check "
+                                + "is sufficient");
+            }
+            return;
+        }
+        String apiPath = APIUtil.getAPIPath(identifier);
+        Registry registry;
+        try {
+            // Need user name with tenant domain to get correct domain name from
+            // MultitenantUtils.getTenantDomain(username)
+            String userNameWithTenantDomain = (userNameWithoutChange != null) ? userNameWithoutChange : username;
+            String apiTenantDomain = getTenantDomain(identifier);
+            int apiTenantId = getTenantManager().getTenantId(apiTenantDomain);
+            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(apiTenantDomain)) {
+                APIUtil.loadTenantRegistry(apiTenantId);
+            }
+
+            if (this.tenantDomain == null || !this.tenantDomain.equals(apiTenantDomain)) { //cross tenant scenario
+                registry = getRegistryService().getGovernanceUserRegistry(
+                        getTenantAwareUsername(APIUtil.replaceEmailDomainBack(identifier.getProviderName())),
+                        apiTenantId);
+            } else {
+                registry = this.registry;
+            }
+            Resource apiResource = registry.get(apiPath);
+            String accessControlProperty = apiResource.getProperty(APIConstants.ACCESS_CONTROL);
+            if (accessControlProperty == null || accessControlProperty.trim().isEmpty() || accessControlProperty
+                    .equalsIgnoreCase(APIConstants.NO_ACCESS_CONTROL)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("API in the path  " + apiPath + " does not have any access control restriction");
+                }
+                return;
+            }
+            if (APIUtil.hasPermission(userNameWithTenantDomain, APIConstants.Permissions.APIM_ADMIN)) {
+                return;
+            }
+            String storeVisibilityRoles = apiResource.getProperty(APIConstants.STORE_VIEW_ROLES);
+            if (storeVisibilityRoles != null && !storeVisibilityRoles.trim().isEmpty()) {
+                String[] storeVisibilityRoleList = storeVisibilityRoles.replaceAll("\\s+", "").split(",");
+                if (log.isDebugEnabled()) {
+                    log.debug("API has restricted access to users with the roles : " + Arrays
+                            .toString(storeVisibilityRoleList));
+                }
+                String[] userRoleList = APIUtil.getListOfRoles(userNameWithTenantDomain);
+                if (log.isDebugEnabled()) {
+                    log.debug("User " + username + " has roles " + Arrays.toString(userRoleList));
+                }
+                for (String role : storeVisibilityRoleList) {
+                    if (role.equalsIgnoreCase(APIConstants.NULL_USER_ROLE_LIST) || APIUtil
+                            .compareRoleList(userRoleList, role)) {
+                        return;
+                    }
+                }
+                if (log.isDebugEnabled()) {
+                    log.debug("API " + identifier + " cannot be accessed by user '" + username + "'. It "
+                            + "has a store visibility  restriction");
+                }
+                throw new APIManagementException(
+                        APIConstants.UN_AUTHORIZED_ERROR_MESSAGE + " view  the API " + identifier);
+            }
+        } catch (RegistryException e) {
+            throw new APIManagementException(
+                    "Registry Exception while trying to check the store visibility restriction of API " + identifier
+                            .getApiName(), e);
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            String msg = "Failed to get API from : " + apiPath;
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
     }
 
     /**

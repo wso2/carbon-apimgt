@@ -30,16 +30,13 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.clients.util.ApplicationManagementServiceClientWrapper;
-import org.wso2.carbon.apimgt.impl.clients.util.OAuth2TokenValidationServiceClientWrapper;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.identity.application.common.model.xsd.*;
 import org.wso2.carbon.identity.application.mgt.stub.IdentityApplicationManagementServiceIdentityApplicationManagementException;
 import org.wso2.carbon.identity.application.mgt.stub.IdentityApplicationManagementServiceStub;
-import org.wso2.carbon.identity.oauth2.stub.OAuth2TokenValidationServiceStub;
 
 import java.rmi.RemoteException;
 

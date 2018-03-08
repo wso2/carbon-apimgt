@@ -24,6 +24,9 @@ include("/jagg/jagg.jag");
     } else if (action === "login" && request.getMethod() == 'POST') {
         mod = jagg.module("user");
         username = request.getParameter("username");
+        if (username) {
+            username = username.trim();
+        }
 
 	if (username.indexOf("@") != -1) {
             var splitUserName = username.split("@");

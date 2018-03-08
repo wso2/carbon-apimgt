@@ -70,9 +70,8 @@ public class StatusCheckerServerStartListener implements ServerStartupHandler {
                                           TimeUnit.MINUTES);
             log.info("StatusCheckerServerStartListener started");
         } else {
-            //Else print an error log
-            log.error("You have not configured the Micro Gateway properly. Please contact cloud@wso2.com, if the " +
-                              "issue persists");
+            //Else print a log indicating that the pinging details are not set
+            log.info("You have not configured the Micro Gateway Ping URL, pinging will not be activated.");
         }
     }
 

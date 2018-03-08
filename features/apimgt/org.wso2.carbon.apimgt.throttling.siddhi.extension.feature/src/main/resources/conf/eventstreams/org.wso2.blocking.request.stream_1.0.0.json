@@ -1,0 +1,24 @@
+{
+  "name": "org.wso2.blocking.request.stream",
+  "version": "1.0.0",
+  "nickName": "",
+  "description": "Blocking Event Stream",
+  "payloadData": [
+    {
+      "name": "blockingCondition",
+      "type": "STRING"
+    },
+    {
+      "name": "conditionValue",
+      "type": "STRING"
+    },
+    {
+      "name": "state",
+      "type": "STRING"
+    },
+    {
+      "name": "tenantDomain",
+      "type": "STRING"
+    }
+  ]
+}
