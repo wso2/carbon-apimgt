@@ -559,3 +559,20 @@ a.remove_rating:hover{
     margin-bottom: 25px;
     padding-top: 3px;
 }
+.padding-bottom-100 {
+    padding-bottom: 100px;
+}
+#consent-mgt-container p span {
+    margin-top: 4px;
+    display: block;
+}
+#consent-mgt-container #tree-table {
+    background: #fff;
+    padding: 10px;
+    color: #333;
+}
+.policy-alert-warning {
+  background-color: #ffe0b2 ;
+  color: #333;
+  border-color: #ffe0b2 ;
+}

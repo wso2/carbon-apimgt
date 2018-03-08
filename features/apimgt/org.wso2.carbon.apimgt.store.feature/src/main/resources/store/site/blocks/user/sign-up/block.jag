@@ -5,11 +5,15 @@ jagg.block("user/sign-up", {
     },
 
 	getOutputs:function () {
+        var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+        var request_tenant = jagg.getTenantDomain();
+        var purposes = APIUtil.getConsentPurposes(request_tenant);
         var result, fields, user = jagg.module("user");
         result = user.getUserFields();
         fields = result.fields;
         return {
-            "fields":fields
+            "fields":fields,
+            "purposes":purposes
         };
     },
     

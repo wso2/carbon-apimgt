@@ -6,6 +6,9 @@ jagg.initializer("user/sign-up", {
         jagg.addFooterJS("api/api-info", "api-info", "templates/user/sign-up/js/sign-up.js");
         jagg.addFooterJS("comment/comment-add", "comment-add", "libs/jquery-charCount/jquery.charCount.js");
         jagg.addHeaderJS("validate", "sign-up", "templates/ui/validation/custom-validation.js");
+        jagg.addHeaderCSS("user/sign-up", "sign-up", "libs/jstree/dist/themes/default/style.min.css");
+        jagg.addHeaderJS("user/sign-up", "sign-up", "libs/jstree/dist/jstree.min.js");
+        jagg.addFooterJS("user/sign-up", "sign-up", "libs/jstree/src/jstree-actions.js");
     }
     
 });
