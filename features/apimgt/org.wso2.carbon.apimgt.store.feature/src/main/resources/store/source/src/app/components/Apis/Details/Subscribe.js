@@ -1,0 +1,334 @@
+/*
+ * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import React, {Component} from 'react'
+import Loading from '../../Base/Loading/Loading'
+import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
+import Api from '../../../data/api'
+
+import {withStyles} from 'material-ui/styles';
+import Button from 'material-ui/Button';
+import Dialog, {DialogActions, DialogContent, DialogContentText, DialogTitle} from 'material-ui/Dialog';
+import {MenuItem} from 'material-ui/Menu';
+import Select from 'material-ui/Select';
+import {FormControl} from 'material-ui/Form';
+import NotificationSystem from 'react-notification-system';
+import {InputLabel} from 'material-ui/Input';
+import Slide from "material-ui/transitions/Slide";
+
+const styles = theme => ({
+    media: {
+        height: 200,
+    },
+});
+
+class Subscribe extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            api: null,
+            applications: null,
+            policies: null,
+            dropDownApplications: null,
+            dropDownPolicies: null,
+            notFound: false,
+            openSubscribeMenu: false,
+            matDropVisible: false,
+            matDropValue: 'one',
+            subscribedApplicationIds: [],
+            options: [],
+            tiers: [],
+            applicationId: null,
+            policyName: null,
+            openPopup: false,
+            anchorEl: null
+        };
+        this.api_uuid = this.props.uuid;
+        this.logChange = this.logChange.bind(this);
+        this.openSubscribeMenu = this.openSubscribeMenu.bind(this);
+        this.closeSubscribeMenu = this.closeSubscribeMenu.bind(this);
+        this.handlePopupOpen = this.handlePopupOpen.bind(this);
+        this.handlePopupClose = this.handlePopupClose.bind(this);
+    }
+
+    componentDidMount() {
+        const api = new Api();
+        let promised_api = api.getAPIById(this.api_uuid);
+        promised_api.then(
+            response => {
+                this.setState({api: response.obj});
+                if(response.obj && response.obj.policies){
+                    let apiTiers = response.obj.policies;
+                    let tiers = [];
+                    for (let i = 0; i < apiTiers.length; i++) {
+                        let tierName = apiTiers[i];
+                        tiers.push({value: tierName, label: tierName});
+                    }
+                    this.setState({tiers: tiers});
+                    if (tiers.length > 0) {
+                        this.setState({policyName: tiers[0].value});
+                    }
+                }
+
+            }
+        ).catch(
+            error => {
+                if (process.env.NODE_ENV !== "production") {
+                    console.log(error);
+                }
+                let status = error.status;
+                if (status === 404) {
+                    this.setState({notFound: true});
+                }
+            }
+        );
+
+        let existing_subscriptions = api.getSubscriptions(this.api_uuid, null);
+        existing_subscriptions.then((response) => {
+            let subscribedApplications = [];
+            //get the application IDs of existing subscriptions
+            response.body.list.map(element => subscribedApplications.push(element.applicationId));
+            this.setState({subscribedApplicationIds: subscribedApplications});
+        }).catch(
+            error => {
+                if (process.env.NODE_ENV !== "production") {
+                    console.log(error);
+                }
+                let status = error.status;
+                if (status === 404) {
+                    this.setState({notFound: true});
+                }
+            }
+        );
+
+        let promised_applications = api.getAllApplications();
+        promised_applications.then(
+            (response) => {
+                let applicationResponseObj = response.body;
+                let applications = [];
+                for (let i = 0; i < applicationResponseObj.list.length; i++) {
+                    let applicationId = applicationResponseObj.list[i].applicationId;
+                    let applicationName = applicationResponseObj.list[i].name;
+                    //include the application only if it does not has an existing subscriptions
+                    if (this.state.subscribedApplicationIds.includes(applicationId)) {
+                        continue;
+                    } else {
+                        applications.push({value: applicationId, label: applicationName});
+                    }
+                }
+                this.setState({options: applications});
+                if (options && options.length > 0) {
+                    this.setState({applicationId: options[0].value});
+                }
+            }
+        ).catch(
+            error => {
+                if (process.env.NODE_ENV !== "production") {
+                    console.log(error);
+                }
+                let status = error.status;
+                if (status === 404) {
+                    this.setState({notFound: true});
+                }
+            }
+        );
+
+        let promised_subscriptions = api.getSubscriptions(this.api_uuid, null);
+        promised_subscriptions.then(
+            response => {
+                this.dropDownApplications = [<Option key="custom" onClick={this.handleClick}>New Application</Option>];
+
+                for (var i = 0; i < this.api.policies.length; i++) {
+                    this.dropDownPolicies.push(<Option key={this.api.policies[i]}>{this.api.policies[i]}</Option>);
+                }
+                var subscription = {};
+                var subscriptions = response.obj.list;
+                var application = {};
+                var subscribedApp = false;
+                for (var i = 0; i < this.applications.length; i++) {
+                    subscribedApp = false;
+                    application = applications[i];
+                    if (application.lifeCycleStatus != "APPROVED") {
+                        continue;
+                    }
+                    for (var j = 0; j < subscriptions.length; j++) {
+                        subscription = subscriptions[j];
+                        if (subscription.applicationId === application.applicationId) {
+                            subscribedApp = true;
+                            continue;
+                        }
+                    }
+                    if (!subscribedApp) {
+                        this.dropDownApplications.push(<Option key={application.id}>{application.name}</Option>);
+                    }
+                }
+                this.policies = this.api.policies;
+            }
+        ).catch(
+            error => {
+                if (process.env.NODE_ENV !== "production") {
+                    console.log(error);
+                }
+                let status = error.status;
+                if (status === 404) {
+                    this.setState({notFound: true});
+                }
+            }
+        );
+    }
+
+    handleChange = name => event => {
+        this.setState({[name]: event.target.value});
+    };
+
+    addNotifications() {
+        this.refs.notificationSystem.addNotification({
+            message: 'Subscribe to API successfully',
+            position: 'tc',
+            level: 'success'
+        });
+    };
+
+    createSubscription = (e) => {
+        e.preventDefault();
+        let apiId = this.api_uuid;
+        let applicationId = this.state.applicationId;
+        let policy = this.state.policyName;
+        let api = new Api();
+        let promised_subscribe = api.subscribe(apiId, applicationId, policy);
+        promised_subscribe.then(response => {
+            console.log("Subscription created successfully with ID : " + response.body.subscriptionId);
+            this.addNotifications();
+            let applications = this.state.options.filter(application => applicationId !== application.value);
+            this.setState({options: applications, openSubscribeMenu: false});
+        }).catch(error => {
+                console.log("Error while creating the subscription.");
+                console.error(error);
+            }
+        )
+    };
+
+    handleClick() {
+        this.setState({redirect: true});
+    }
+
+    openSubscribeMenu() {
+        this.setState({openSubscribeMenu: true});
+    }
+
+    closeSubscribeMenu() {
+        this.setState({openSubscribeMenu: false});
+    }
+
+    handlePopupClose() {
+        this.setState({openPopup: false});
+    };
+
+    handlePopupOpen(event) {
+        this.setState({openPopup: true, anchorEl: event.currentTarget});
+    };
+
+    onBlur(e) {
+        if (!e.currentTarget.contains(document.activeElement)) {
+            this.setState({matDropVisible: false});
+        }
+    }
+
+    logChange(val) {
+        this.setState({matDropValue: val.value});
+        console.log("Selected: " + JSON.stringify(val));
+    }
+
+    render() {
+        if (this.state.notFound) {
+            return <ResourceNotFound/>
+        }
+        if (this.state.redirect) {
+            return <Redirect push to="/application-create"/>;
+        }
+        const {classes} = this.props;
+        const api = this.state.api;
+
+        return (
+            this.state.api ?
+                <div>
+                    <Button onClick={this.openSubscribeMenu} color="primary" variant="raised"
+                            className="form-buttons full-width"> Subscribe to an Application </Button>
+
+                    <Dialog open={this.state.openSubscribeMenu} transition={Slide}
+                            onClose={this.closeSubscribeMenu}>
+                        <DialogTitle>
+                            {"Subscribe"}
+                        </DialogTitle>
+                        <DialogContent>
+                            <DialogContentText>
+                                Select the Application name and Tier to Subscribe to an Application
+                            </DialogContentText>
+                            {this.state.options &&
+                            <FormControl style={{width: "100%", marginBottom: "20px"}}
+                                         className={classes.formControl}>
+                                <InputLabel>Applications</InputLabel>
+                                <Select
+                                    style={{width: "100%"}}
+                                    value={this.state.applicationId}
+                                    onChange={this.handleChange('applicationId')}
+                                >
+                                    {this.state.options.map((option) => <MenuItem key={option.value}
+                                                                                  value={option.value}>
+                                        {option.label}</MenuItem>)}
+                                </Select>
+                            </FormControl>
+                            }
+                            {this.state.tiers &&
+                            <FormControl style={{width: "100%"}}>
+                                <InputLabel>Tiers</InputLabel>
+                                <Select
+                                    style={{width: "100%"}}
+                                    value={this.state.policyName}
+                                    onChange={this.handleChange('policyName')}
+                                >
+                                    {this.state.tiers.map((tier) => <MenuItem key={tier.value}
+                                                                              value={tier.value}>
+                                        {tier.label}</MenuItem>)}
+                                </Select>
+                            </FormControl>
+                            }
+                            <br/>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={this.closeSubscribeMenu} color="primary">
+                                <NotificationSystem ref="notificationSystem"/>
+                                Cancel
+                            </Button>
+                            <Button onClick={this.createSubscription} color="primary">
+                                <NotificationSystem ref="notificationSystem"/>
+                                Subscribe
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
+
+                </div>
+                : <Loading/>
+        );
+    }
+}
+
+
+
+
+export default withStyles(styles)(Subscribe);

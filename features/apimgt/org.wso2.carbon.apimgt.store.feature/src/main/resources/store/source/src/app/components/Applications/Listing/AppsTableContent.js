@@ -44,7 +44,7 @@ const AppsTableBody = (props) => {
                 <TableCell>
                     <Tooltip title="Delete" placement="right-start">
                         <IconButton disabled={app.deleting} data-appId={app.applicationId}
-                                    onClick={handleAppDelete} color="accent"
+                                    onClick={handleAppDelete} color="default"
                                     aria-label="Delete">
                             <DeleteIcon />
                         </IconButton>

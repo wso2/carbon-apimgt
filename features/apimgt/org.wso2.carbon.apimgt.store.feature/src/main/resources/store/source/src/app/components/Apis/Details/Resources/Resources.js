@@ -197,7 +197,6 @@ class Resources extends React.Component{
         this.setState({api:tmpSwagger});
         let promised_api = this.api.updateSwagger(this.api_uuid, this.state.swagger);
         promised_api.then((response) => {
-            console.info(response);
         }).catch(error => {
             if (process.env.NODE_ENV !== "production")
                 console.log(error);

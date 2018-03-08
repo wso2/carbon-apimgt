@@ -63,7 +63,7 @@ class EnvironmentMenu extends React.Component {
             <div style={{display: "flex"}}>
                 <Button aria-owns="simple-menu" aria-haspopup="true"
                         onClick={this.handleClickEnvironmentMenu}
-                        color="contrast">
+                        color="default">
                     {environmentLabel}
                 </Button>
 

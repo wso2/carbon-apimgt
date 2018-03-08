@@ -43,7 +43,6 @@ class Documents extends Component {
         let promised_api = api.getDocumentsByAPIId(this.api_id);
         promised_api.then(
             response => {
-		console.info(response.obj)
                 this.setState({documentsList: response.obj.list});
             }
         ).catch(

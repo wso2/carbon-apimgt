@@ -318,7 +318,8 @@ class Login extends Component {
                                                 {/*Buttons*/}
                                                 <Button
                                                     type="submit"
-                                                    raised color="primary"
+                                                    variant="raised"
+                                                    color="primary"
                                                     className="login-form-submit"
                                                     disabled={!isSsoUpdated}
                                                 >

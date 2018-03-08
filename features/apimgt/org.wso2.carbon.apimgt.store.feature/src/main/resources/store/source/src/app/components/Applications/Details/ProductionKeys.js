@@ -123,7 +123,7 @@ class ProductionKeys extends React.Component {
                     <Grid container className="tab-grid" spacing={20} >
                         <Grid item xs={12}>
                             { !consumerKey &&
-                            <Button raised  color="primary" onClick={() => this.handleClickToken()}>Generate Keys</Button>}
+                            <Button variant="raised"  color="primary" onClick={() => this.handleClickToken()}>Generate Keys</Button>}
                         </Grid>
                         <Grid item xs={7}>
                                 <TextField
@@ -159,7 +159,7 @@ class ProductionKeys extends React.Component {
                         </Grid>
                         <Grid item xs={12}>
                             <Button disabled={this.state.showAT || accessToken} onMouseDown={this.handleMouseDownGeneric}
-                                    onClick={this.handleShowToken} raised color="accent"
+                                    onClick={this.handleShowToken} variant="raised" color="default"
                                     className="form-buttons">Generate Token</Button>
                         </Grid>
                         <Grid item xs={7}>
