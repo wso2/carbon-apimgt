@@ -4,6 +4,7 @@
         var user = session.get("logged.user");
         var mod = jagg.module("manager");
         var httpsUrl= mod.getHTTPsURL();
+        var purposes = outputs.purposes, hasPurposes = (purposes != null && purposes != "");
         if(user){ %>
 	        <script>
 	            location.href = "<%= jagg.getSiteContext()%>";
@@ -29,7 +30,7 @@
                             <h2 class="text-center-sm text-center-xs text-center-md text-right">API Store</h2>
                         </div>
                     </div>
-                    <div class="col-xs-12 col-sm-12 col-md-9 col-lg-9 login">
+                    <div class="col-xs-12 col-sm-12 col-md-9 col-lg-9 login padding-bottom-100"">
                         <div class="data-container">
                             <form class="form-horizontal" id="sign-up" autocomplete="off">
                                 <h3>Create your Account</h3>
@@ -141,14 +142,31 @@
 									<% } %>                     
                                     
                                 </div>
-								<input type="hidden" id="fieldCount" name="fieldCount" value="<%=length%>"/>
-									<hr>
+                                <input type="hidden" id="fieldCount" name="fieldCount" value="<%=length%>"/>
+                                <input type="hidden" id="consentPurposes" name="consentPurposes" value='<%=purposes%>'/>
+                                <input type="hidden" id="hasConsentPurposes" name="hasConsentPurposes" value="<%=hasPurposes%>"/>
+                                <hr>
+                                <!--User Consents-->
+                                    <%
+                                        if (hasPurposes) {
+                                    %>
+                                    <div class="alert alert-warning policy-alert-warning margin-none" role="alert">
+                                        <div id="consent-mgt-container">
+                                            <p>
+                                                <strong><%=i18n.localize("need.consent")%></strong>
+                                                <span><%=i18n.localize("need.consent.sub.info")%></span>
+                                            </p>
+                                            <div id="tree-table"></div>
+                                         </div>
+                                     </div>
+                                     <%}%>
+                                     <!--End User Consents-->
                                     <!--Cookie Policy-->
-                                    <div class="alert alert-warning" role="alert">
+                                    <div class="alert alert-warning policy-alert-warning" role="alert">
                                             <div>
                                                     <%=i18n.localize("privacy.policy.cookies.short.description")%>
                                                     <a href=<%=jagg.getAbsoluteUrl("/site/pages/policy-pages/cookie-policy.jag")%> target="policy-pane">
-                                                            <u><strong><%=i18n.localize("privacy.policy.cookies")%></strong></u>
+                                                            <strong><%=i18n.localize("privacy.policy.cookies")%></strong>
                                                     </a>
                                                     <%=i18n.localize("privacy.policy.for.more.details")%>
                                             </div>
@@ -159,10 +177,11 @@
                                         <label class="agreement-checkbox">
                                                 <input type="checkbox" /> <%=i18n.localize("have.read.and.understood")%>
                                                 <a href=<%=jagg.getAbsoluteUrl("/site/pages/policy-pages/privacy-policy.jag")%> target="policy-pane">
-                                                        <u><strong><%=i18n.localize("privacy.policy.general")%>.</strong></u>
+                                                        <strong><%=i18n.localize("privacy.policy.general")%>.</strong>
                                                 </a>
                                         </label>
                                     </div>
+                                    <br>
                                     <!--End Terms/Privacy Policy-->
                                 <div class="form-group">
                                     <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
