@@ -208,15 +208,18 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>${maven.checkstyleplugin.version}</version>
                 <configuration>
                     <!-- Excluding the DTO classes taken from apimgt.rest.api.publisher -->
-                    <excludes>org/wso2/carbon/apimgt/micro/gateway/api/synchronizer/dto/*
+                    <excludes>
+                        <exclude>org/wso2/carbon/apimgt/micro/gateway/api/synchronizer/dto/*</exclude>
                     </excludes>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>findbugs-maven-plugin</artifactId>
+                <version>${maven.findbugsplugin.version}</version>
                 <configuration>
                     <!-- Excluding the DTO classes and Mapping Utils taken from apimgt.rest.api.admin -->
                     <excludeFilterFile>findbugs-exclude.xml</excludeFilterFile>

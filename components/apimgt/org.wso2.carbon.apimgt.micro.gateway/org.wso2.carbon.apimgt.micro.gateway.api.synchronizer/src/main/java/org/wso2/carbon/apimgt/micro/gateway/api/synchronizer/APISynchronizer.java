@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.micro.gateway.api.synchronizer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -55,6 +56,8 @@ import org.wso2.carbon.apimgt.micro.gateway.common.util.HttpRequestUtil;
 import org.wso2.carbon.apimgt.micro.gateway.common.util.MicroGatewayCommonUtil;
 import org.wso2.carbon.apimgt.micro.gateway.common.util.OnPremiseGatewayConstants;
 import org.wso2.carbon.apimgt.micro.gateway.common.util.TokenUtil;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -147,39 +150,44 @@ public class APISynchronizer implements OnPremiseGatewayInitListener {
      */
     public void synchronizeApis(JSONArray updatedApiIds)
             throws APISynchronizationException {
-        log.info("Started synchronizing APIs.");
-        initializeOnPremiseGatewayProperties();
-        // Registering API client and obtaining an access token to invoke the publisher REST API
-        AccessTokenDTO accessTokenDTO = getAccessToken();
+        try {
+            log.info("Started synchronizing APIs.");
+            loadTenant();
+            initializeOnPremiseGatewayProperties();
+            // Registering API client and obtaining an access token to invoke the publisher REST API
+            AccessTokenDTO accessTokenDTO = getAccessToken();
 
-        List<APIDTO> apiInfo;
-        if (updatedApiIds != null) {
-            // Retrieve updated API details
-            apiInfo = getDetailsOfUpdatedAPIs(updatedApiIds, accessTokenDTO);
-        } else {
-            // Retrieve API details
-            apiInfo = getDetailsOfAllAPIs(accessTokenDTO);
-        }
-
-        // Create APIs
-        for (APIDTO apidto : apiInfo) {
-            try {
-                // Create custom sequences
-                createCustomSequences(apidto, accessTokenDTO);
-                // Overriding context information to remove path /t/providerDomain/ since it will be appended at the
-                // time of creating an API
-                String providerDomain =
-                        MultitenantUtils.getTenantDomain(apidto.getProvider());
-                String removeStr = "/t/" + providerDomain;
-                String contextReturned = apidto.getContext();
-                String context = contextReturned.replaceAll(removeStr, APISynchronizationConstants.EMPTY_STRING);
-                apidto.setContext(context);
-                APIMappingUtil.apisUpdate(apidto);
-            } catch (APISynchronizationException e) {
-                log.error("Failed to create API " + apidto.getId());
+            List<APIDTO> apiInfo;
+            if (updatedApiIds != null) {
+                // Retrieve updated API details
+                apiInfo = getDetailsOfUpdatedAPIs(updatedApiIds, accessTokenDTO);
+            } else {
+                // Retrieve API details
+                apiInfo = getDetailsOfAllAPIs(accessTokenDTO);
             }
+
+            // Create APIs
+            for (APIDTO apidto : apiInfo) {
+                try {
+                    // Create custom sequences
+                    createCustomSequences(apidto, accessTokenDTO);
+                    // Overriding context information to remove path /t/providerDomain/ since it will be appended at the
+                    // time of creating an API
+                    String providerDomain =
+                            MultitenantUtils.getTenantDomain(apidto.getProvider());
+                    String removeStr = "/t/" + providerDomain;
+                    String contextReturned = apidto.getContext();
+                    String context = contextReturned.replaceAll(removeStr, APISynchronizationConstants.EMPTY_STRING);
+                    apidto.setContext(context);
+                    APIMappingUtil.apisUpdate(apidto);
+                } catch (APISynchronizationException e) {
+                    log.error("Failed to create API " + apidto.getId());
+                }
+            }
+            log.info("API synchronization completed.");
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
         }
-        log.info("API synchronization completed.");
     }
 
     /**
@@ -519,6 +527,9 @@ public class APISynchronizer implements OnPremiseGatewayInitListener {
             // Retrieve all API specific mediation policies from publisher REST API
             String response = HttpRequestUtil.executeHTTPMethodWithRetry(httpClient, httpGet,
                     OnPremiseGatewayConstants.DEFAULT_RETRY_COUNT);
+            if (log.isDebugEnabled()) {
+                log.debug("Received response from GET api sequence: " + seqId);
+            }
 
             InputStream is = new ByteArrayInputStream(response.getBytes(
                     Charset.forName(OnPremiseGatewayConstants.DEFAULT_CHARSET)));
@@ -564,6 +575,9 @@ public class APISynchronizer implements OnPremiseGatewayInitListener {
             String seqElementName = provider + "--" + name + ":" + "v" + version + "--" + type;
             String seqName = provider + "--" + name + "_v" + version + "--" + type;
             seqFileName = seqName + ".xml";
+            if (log.isDebugEnabled()) {
+                log.debug("Starting to deploy sequence: " + seqName);
+            }
 
             Document doc = convertStringToDocument(xmlStr);
             Node seqNode = doc.getElementsByTagName(APISynchronizationConstants.API_SEQUENCE).item(0);
@@ -586,6 +600,9 @@ public class APISynchronizer implements OnPremiseGatewayInitListener {
             File dir = new File(path);
             File file = new File(dir, seqFileName);
             FileUtils.writeStringToFile(file, str);
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully deployed sequence: " + seqName);
+            }
         } catch (UserStoreException e) {
             throw new APISynchronizationException("An error occurred while obtaining tenant identifier of " +
                     "tenant domain " + tenantDomain, e);
@@ -629,6 +646,26 @@ public class APISynchronizer implements OnPremiseGatewayInitListener {
             return builder.parse(new InputSource(new StringReader(xmlStr)));
         } catch (ParserConfigurationException | SAXException | IOException e) {
             throw new APISynchronizationException("An error occurred while transforming string to document.", e);
+        }
+    }
+
+    /**
+     * Method to load the configurations of a tenant
+     */
+    private void loadTenant() {
+        APIManagerConfiguration config = ServiceDataHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
+        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+        PrivilegedCarbonContext.startTenantFlow();
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(username);
+        ConfigurationContext context = ServiceDataHolder.getInstance().getConfigurationContextService()
+                .getServerConfigContext();
+        TenantAxisUtils.getTenantAxisConfiguration(tenantDomain, context);
+        if (log.isDebugEnabled()) {
+            log.debug("Tenant was loaded into Carbon Context. Tenant : " + tenantDomain
+                    + ", Username : " + username);
         }
     }
 }

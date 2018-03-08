@@ -26,6 +26,7 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.micro.gateway.tenant.initializer.listener.ServerStartupListener;
 import org.wso2.carbon.core.ServerStartupObserver;
+import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
 /**
@@ -95,5 +96,23 @@ public class TenantInitializerServiceComponent {
     protected void unsetAPIManagerConfigurationService(APIManagerConfigurationService service) {
         log.debug("API manager configuration service unbound from Tenant Initializer.");
         ServiceDataHolder.getInstance().setAPIManagerConfigurationService(null);
+    }
+
+    /**
+     * Method to set realm service
+     *
+     * @param realmService realm service
+     */
+    protected void setRealmService(RealmService realmService) {
+        ServiceDataHolder.getInstance().setRealmService(realmService);
+    }
+
+    /**
+     * Method to remove realm service
+     *
+     * @param realmService realm service
+     */
+    protected void unsetRealmService(RealmService realmService) {
+        ServiceDataHolder.getInstance().setRealmService(null);
     }
 }

@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.micro.gateway.tenant.initializer.internal;
 
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
 /**
@@ -27,6 +28,7 @@ public class ServiceDataHolder {
     private static final ServiceDataHolder instance = new ServiceDataHolder();
     private ConfigurationContextService configurationContextService;
     private APIManagerConfigurationService amConfigurationService;
+    private RealmService realmService;
 
     private ServiceDataHolder() {
     }
@@ -70,4 +72,23 @@ public class ServiceDataHolder {
     public void setAPIManagerConfigurationService(APIManagerConfigurationService amConfigurationService) {
         this.amConfigurationService = amConfigurationService;
     }
+
+    /**
+     * Method to get RealmService.
+     *
+     * @return RealmService.
+     */
+    public RealmService getRealmService() {
+        return realmService;
+    }
+
+    /**
+     * Method to set RealmService.
+     *
+     * @param service RealmService.
+     */
+    public void setRealmService(RealmService service) {
+        this.realmService = service;
+    }
+
 }
