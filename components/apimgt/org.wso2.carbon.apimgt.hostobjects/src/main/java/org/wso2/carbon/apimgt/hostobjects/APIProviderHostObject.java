@@ -3148,53 +3148,6 @@ public class APIProviderHostObject extends ScriptableObject {
         return myn;
     }
 
-    public static NativeArray jsFunction_getAllAPIUsageByProvider(Context cx, Scriptable thisObj,
-                                                                  Object[] args, Function funObj)
-            throws APIManagementException {
-
-        NativeArray myn = new NativeArray(0);
-        String providerName = null;
-        APIProvider apiProvider = getAPIProvider(thisObj);
-
-        if (args == null || !isStringValues(args)) {
-            handleException("Invalid input parameters.");
-        }
-        try {
-            providerName = (String) args[0];
-            if (providerName != null) {
-                UserApplicationAPIUsage[] apiUsages = apiProvider.getAllAPIUsageByProvider(providerName);
-                for (int i = 0; i < apiUsages.length; i++) {
-                    NativeObject row = new NativeObject();
-                    row.put("userName", row, apiUsages[i].getUserId());
-                    row.put("application", row, apiUsages[i].getApplicationName());
-                    row.put("appId", row, "" + apiUsages[i].getAppId());
-                    row.put("token", row, apiUsages[i].getAccessToken());
-                    row.put("tokenStatus", row, apiUsages[i].getAccessTokenStatus());
-                    row.put("subStatus", row, apiUsages[i].getSubStatus());
-
-                    StringBuilder apiSet = new StringBuilder("");
-                    for (int k = 0; k < apiUsages[i].getApiSubscriptions().length; k++) {
-                        apiSet.append(apiUsages[i].getApiSubscriptions()[k].getSubStatus());
-                        apiSet.append("::");
-                        apiSet.append(apiUsages[i].getApiSubscriptions()[k].getApiId().getApiName());
-                        apiSet.append("::");
-                        apiSet.append(apiUsages[i].getApiSubscriptions()[k].getApiId().getVersion());
-                        apiSet.append("::");
-                        apiSet.append(apiUsages[i].getApiSubscriptions()[k].getSubCreatedStatus());
-                        if (k != apiUsages[i].getApiSubscriptions().length - 1) {
-                            apiSet.append(",");
-                        }
-                    }
-                    row.put("apis", row, apiSet.toString());
-                    myn.put(i, myn, row);
-                }
-            }
-        } catch (Exception e) {
-            handleException("Error occurred while getting subscribers of the provider: " + providerName, e);
-        }
-        return myn;
-    }
-
     public static NativeArray jsFunction_getAllDocumentation(Context cx, Scriptable thisObj,
                                                              Object[] args, Function funObj)
             throws APIManagementException {

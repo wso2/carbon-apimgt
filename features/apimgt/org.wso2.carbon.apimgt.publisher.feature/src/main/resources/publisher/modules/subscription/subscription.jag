@@ -31,42 +31,6 @@ var getSubscribersOfAPI = function (api) {
     }
 };
 
-var getSubscribersOfProvider = function (username) {
-    var i, length, subscriber, subscribers,
-            list = [],
-            log = new Log(),
-            provider = jagg.module("manager").getAPIProviderObj();
-    try {
-        subscribers = provider.getAllAPIUsageByProvider(username);
-        if (log.isDebugEnabled()) {
-            log.debug("getSubscribersOfAPI : " + stringify(subscribers));
-        }
-        length = subscribers.length;
-        for (i = 0; i < length; i++) {
-            subscriber = subscribers[i];
-            list.push({
-                username:subscriber.userName,
-                application:subscriber.application,
-                appId:subscriber.appId,
-                token:subscriber.token,
-                tokenStatus:subscriber.tokenStatus,
-                apis:subscriber.apis
-            });
-        }
-        return {
-            error:false,
-            subscribers:list
-        };
-    } catch (e) {
-        log.error(e.message);
-        return {
-            error:e,
-            subscribers:null,
-            message:e.message.split(":")[1]
-        };
-    }
-};
-
 var getSubscribedAPIs = function (username) {
     var api, apis, i, length,log = new Log(),
             list = [],

@@ -193,66 +193,6 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Get access token key for given userId and API Identifier
-     *
-     * @param userId          id of the user
-     * @param applicationName name of the Application
-     * @param identifier      APIIdentifier
-     * @param keyType         Type of the key required
-     * @return Access token
-     * @throws APIManagementException if failed to get Access token
-     */
-    public String getAccessKeyForAPI(String userId, String applicationName, APIInfoDTO identifier, String keyType)
-            throws APIManagementException {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        String accessKey = null;
-        String loginUserName = getLoginUserName(userId);
-
-        //get the tenant id for the corresponding domain
-        String tenantAwareUserId = MultitenantUtils.getTenantAwareUsername(loginUserName);
-        int tenantId = APIUtil.getTenantId(loginUserName);
-
-        if (log.isDebugEnabled()) {
-            log.debug("Searching for: " + identifier.getAPIIdentifier() + ", User: " + tenantAwareUserId +
-                    ", ApplicationName: " + applicationName + ", Tenant ID: " + tenantId);
-        }
-
-        String sqlQuery = SQLConstants.GET_ACCESS_KEY_FOR_API_SQL;
-        if (forceCaseInsensitiveComparisons) {
-            sqlQuery = SQLConstants.GET_ACCESS_KEY_FOR_API_CASE_INSENSITIVE_SQL;
-        }
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, tenantAwareUserId);
-            ps.setInt(2, tenantId);
-            ps.setString(3, APIUtil.replaceEmailDomainBack(identifier.getProviderId()));
-            ps.setString(4, identifier.getApiName());
-            ps.setString(5, identifier.getVersion());
-            ps.setString(6, applicationName);
-            ps.setString(7, keyType);
-
-            rs = ps.executeQuery();
-
-            while (rs.next()) {
-                accessKey = APIUtil.decryptToken(rs.getString(APIConstants.SUBSCRIPTION_FIELD_ACCESS_TOKEN));
-            }
-        } catch (SQLException e) {
-            handleException("Error when executing the SQL query to read the access key for user : " + loginUserName +
-                    "of tenant(id) : " + tenantId, e);
-        } catch (CryptoException e) {
-            handleException("Error when decrypting access key for user : " + loginUserName + "of tenant(id) : " +
-                    tenantId, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-        }
-        return accessKey;
-    }
-
-    /**
      * Persist the details of the token generation request (allowed domains & validity period) to be used back
      * when approval has been granted.
      *
@@ -1911,65 +1851,6 @@ public class ApiMgtDAO {
         return SQLConstants.GET_TOKEN_SQL_PREFIX + tokenStoreTable + SQLConstants.GET_TOKEN_SQL_SUFFIX;
     }
 
-    public Map<Integer, APIKey> getAccessTokensByUser(String user, String loggedInUser) throws APIManagementException {
-        Connection connection = null;
-        PreparedStatement ps = null;
-        ResultSet result = null;
-        Map<Integer, APIKey> tokenDataMap = new HashMap<Integer, APIKey>();
-
-        String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
-        accessTokenStoreTable = getAccessTokenStoreTableNameOfUserId(user, accessTokenStoreTable);
-
-        String getTokenSql = SQLConstants.GET_ACCESS_TOKEN_BY_USER_PREFIX + accessTokenStoreTable + SQLConstants
-                .GET_ACCESS_TOKEN_BY_USER_SUFFIX;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            ps = connection.prepareStatement(getTokenSql);
-            ps.setString(1, user);
-            result = ps.executeQuery();
-            Integer i = 0;
-            boolean accessTokenRowBreaker = false;
-            while (accessTokenRowBreaker || result.next()) {
-                accessTokenRowBreaker = false;
-                String username = result.getString(APIConstants.IDENTITY_OAUTH2_FIELD_AUTHORIZED_USER);
-                String domainName = result.getString(APIConstants.IDENTITY_OAUTH2_FIELD_USER_DOMAIN);
-                String authorizedUserWithDomain = UserCoreUtil.addDomainToName(username, domainName);
-
-                if (APIUtil.isLoggedInUserAuthorizedToRevokeToken(loggedInUser, authorizedUserWithDomain)) {
-                    String accessToken = APIUtil.decryptToken(result.getString("ACCESS_TOKEN"));
-                    APIKey apiKey = new APIKey();
-                    apiKey.setAccessToken(accessToken);
-                    apiKey.setAuthUser(authorizedUserWithDomain);
-                    apiKey.setCreatedDate(result.getTimestamp("TIME_CREATED").toString().split("\\.")[0]);
-                    String consumerKey = result.getString("CONSUMER_KEY");
-                    apiKey.setConsumerKey(consumerKey);
-                    apiKey.setValidityPeriod(result.getLong("VALIDITY_PERIOD"));
-                    // Load all the rows to in memory and build the scope string
-                    List<String> scopes = new ArrayList<String>();
-                    String tokenString = result.getString("ACCESS_TOKEN");
-                    do {
-                        String currentRowTokenString = result.getString("ACCESS_TOKEN");
-                        if (tokenString.equals(currentRowTokenString)) {
-                            scopes.add(result.getString(APIConstants.IDENTITY_OAUTH2_FIELD_TOKEN_SCOPE));
-                        } else {
-                            accessTokenRowBreaker = true;
-                            break;
-                        }
-                    } while (result.next());
-                    apiKey.setTokenScope(getScopeString(scopes));
-                    tokenDataMap.put(i, apiKey);
-                    i++;
-                }
-            }
-        } catch (SQLException e) {
-            handleException("Failed to get access token data. ", e);
-        } catch (CryptoException e) {
-            handleException("Failed to get access token data. ", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, connection, result);
-        }
-        return tokenDataMap;
-    }
     
 
     private Map<String, OAuthApplicationInfo> getOAuthApplications(int applicationId) throws APIManagementException {
@@ -6108,33 +5989,6 @@ public class ApiMgtDAO {
             return authorizedDomains.toString();
         }
         return null;
-    }
-
-    public String findConsumerKeyFromAccessToken(String accessToken) throws APIManagementException {
-        String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
-        accessTokenStoreTable = getAccessTokenStoreTableFromAccessToken(accessToken, accessTokenStoreTable);
-        Connection connection = null;
-        PreparedStatement smt = null;
-        ResultSet rs = null;
-        String consumerKey = null;
-        try {
-            String getConsumerKeySql = SQLConstants.GET_CONSUMER_KEY_BY_ACCESS_TOKEN_PREFIX + accessTokenStoreTable +
-                    SQLConstants.GET_CONSUMER_KEY_BY_ACCESS_TOKEN_SUFFIX;
-            connection = APIMgtDBUtil.getConnection();
-            smt = connection.prepareStatement(getConsumerKeySql);
-            smt.setString(1, APIUtil.encryptToken(accessToken));
-            rs = smt.executeQuery();
-            while (rs.next()) {
-                consumerKey = rs.getString(1);
-            }
-        } catch (SQLException e) {
-            handleException("Error while getting authorized domians.", e);
-        } catch (CryptoException e) {
-            handleException("Error while getting authorized domians.", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(smt, connection, rs);
-        }
-        return consumerKey;
     }
 
     /**
