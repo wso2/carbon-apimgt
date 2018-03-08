@@ -119,7 +119,7 @@ public class ServerStartupListenerTest {
         RealmConfiguration configuration = Mockito.mock(RealmConfiguration.class);
         Mockito.when(realmService.getTenantUserRealm(any(Integer.class))).thenReturn(userRealm);
         Mockito.when(userRealm.getRealmConfiguration()).thenReturn(configuration);
-        Mockito.when(configuration.getAdminUserName()).thenReturn("ADMIN");
-        Mockito.when(configuration.getAdminPassword()).thenReturn("ADMIN");
+        Mockito.when(configuration.getAdminUserName()).thenReturn(Constants.ADMIN_USERNAME);
+        Mockito.when(configuration.getAdminPassword()).thenReturn(Constants.ADMIN_PASSWORD);
     }
 }

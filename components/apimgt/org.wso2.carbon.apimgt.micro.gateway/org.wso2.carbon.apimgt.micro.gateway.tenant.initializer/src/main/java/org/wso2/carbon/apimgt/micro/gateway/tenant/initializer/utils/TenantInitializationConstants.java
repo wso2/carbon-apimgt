@@ -26,4 +26,5 @@ public class TenantInitializationConstants {
     public static final String DEFAULT_LAST_NAME = "Doe";
     public static final String DEFAULT_EMAIL = "Doe@org.com";
     public static final String EMPTY_STRING = "";
+    public static final String LOCAL_HOST_NAME = "localhost";
 }

@@ -69,7 +69,7 @@ public class ServerStartupListener implements ServerStartupObserver {
      */
     static class ScheduledThreadPoolExecutorImpl implements Runnable {
         private int retryCount = 4;
-        private int executionCount = 0;
+        private int executionCount = 1;
         private static ScheduledThreadPoolExecutor executor;
         private static String adminName;
         private static char[] adminPwd;
@@ -84,7 +84,10 @@ public class ServerStartupListener implements ServerStartupObserver {
                 if (mgtTransportPort <= 0) {
                     mgtTransportPort = CarbonUtils.getTransportPort(axisConfiguration, mgtTransport);
                 }
-                url = mgtTransport + "://localhost:" + mgtTransportPort + "/services/";
+                // Using localhost as the hostname since this is always an internal admin service call.
+                // Hostnames that can be retrieved using other approaches does not work in this context.
+                url = mgtTransport + "://" + TenantInitializationConstants.LOCAL_HOST_NAME + ":" + mgtTransportPort
+                        + "/services/";
                 adminName = ServiceDataHolder.getInstance().getRealmService()
                         .getTenantUserRealm(MultitenantConstants.SUPER_TENANT_ID).getRealmConfiguration()
                         .getAdminUserName();
@@ -102,16 +105,11 @@ public class ServerStartupListener implements ServerStartupObserver {
         }
 
         public void run() {
-            if (++executionCount > retryCount) {
-                log.error("Login request to authentication admin service failed for the maximum no. of " +
-                        "attempts(" + retryCount + ") for URL: " + url);
-                executor.shutdown();
-            }
+            String serviceEndPoint = url + "AuthenticationAdmin";
             try {
                 String host = new URL(url).getHost();
                 AuthenticationAdminStub authAdminStub =
-                        new AuthenticationAdminStub(null, url +
-                                "AuthenticationAdmin");
+                        new AuthenticationAdminStub(null, serviceEndPoint);
                 ServiceClient client = authAdminStub._getServiceClient();
                 Options options = client.getOptions();
                 options.setManageSession(true);
@@ -128,15 +126,20 @@ public class ServerStartupListener implements ServerStartupObserver {
                     executor.shutdown();
                 }
             } catch (RemoteException e) {
-                log.warn("Login request to authentication admin service failed for URL: " + url +
+                log.warn("Login request to authentication admin service failed for URL: " + serviceEndPoint +
                         " with exception " + e.getMessage() + " Retry attempt: " + executionCount +
                         "/" + retryCount);
             } catch (LoginAuthenticationExceptionException e) {
                 log.error("Error while authenticating against the authentication admin service for URL: "
-                        + url, e);
+                        + serviceEndPoint, e);
                 executor.shutdown();
             } catch (MalformedURLException e) {
-                log.error("Service URL: " + url + " is malformed.", e);
+                log.error("Service URL: " + serviceEndPoint + " is malformed.", e);
+                executor.shutdown();
+            }
+            if (executionCount++ >= retryCount) {
+                log.error("Login request to authentication admin service failed for the maximum no. of " +
+                        "attempts(" + retryCount + ") for URL: " + serviceEndPoint);
                 executor.shutdown();
             }
         }
