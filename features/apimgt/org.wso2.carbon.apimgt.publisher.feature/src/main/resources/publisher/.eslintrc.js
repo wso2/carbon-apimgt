@@ -5,7 +5,6 @@ module.exports = {
         ecmaFeatures: {
             jsx: true,
             modules: true,
-            experimentalObjectRestSpread: true,
         },
     },
     env: {
