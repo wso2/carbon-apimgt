@@ -855,7 +855,7 @@ var jagg = jagg || (function () {
         }
     }
 
-    var isForgotPasswordConfigured = function(){
+    var isForgotPasswordConfigured = function() {
         var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
         return APIUtil.isForgetPasswordConfigured();
     }
