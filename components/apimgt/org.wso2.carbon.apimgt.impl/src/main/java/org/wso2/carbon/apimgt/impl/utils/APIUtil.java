@@ -27,6 +27,7 @@ import org.apache.axis2.Constants;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.axis2.util.JavaUtils;
@@ -7085,6 +7086,16 @@ public final class APIUtil {
             purposesJsonString = purposesJson.toString();
         }
         return purposesJsonString;
+    }
+
+    public static boolean isForgetPasswordConfigured() {
+        AxisConfiguration axis2Config = ServiceReferenceHolder.getContextService().getServerConfigContext()
+                .getAxisConfiguration();
+        TransportOutDescription emailTransportSender = axis2Config.getTransportOut(APIConstants.EMAIL_TRANSPORT);
+        if (emailTransportSender != null) {
+            return true;
+        }
+        return false;
     }
 
     /**

@@ -855,6 +855,11 @@ var jagg = jagg || (function () {
         }
     }
 
+    var isForgotPasswordConfigured = function() {
+        var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+        return APIUtil.isForgetPasswordConfigured();
+    }
+
     var validateInputs = function(config){
         var errors = [];
         //set most used parapeters
@@ -955,7 +960,8 @@ var jagg = jagg || (function () {
         validateInputs:validateInputs,
         getTenantURLPrefix:getTenantURLPrefix,
         log:log,
-        isMultiGroupEnabled:isMultiGroupEnabled
+        isMultiGroupEnabled:isMultiGroupEnabled,
+        isForgotPasswordConfigured:isForgotPasswordConfigured
     };
 
 }());
