@@ -3,6 +3,7 @@ body {
      font-family: 'Roboto Light', Arial, Helvetica, sans-serif;
      font-weight: 300;
      min-height: 100%;
+     overflow-x: hidden;
      position: relative;
  }
  header {
