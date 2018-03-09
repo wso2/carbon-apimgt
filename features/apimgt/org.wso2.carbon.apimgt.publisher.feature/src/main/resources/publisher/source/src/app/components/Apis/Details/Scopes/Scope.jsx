@@ -17,15 +17,27 @@
  */
 
 import React from 'react';
-import { Input, Icon, Checkbox, Button, Card, Tag, Form } from 'antd';
-import { Row, Col } from 'antd';
-import Api from '../../../../data/api';
+import { Input, Icon, Button, Row, Col } from 'antd';
+import 'react-tagsinput/react-tagsinput.css';
 import { message } from 'antd/lib/index';
 import TagsInput from 'react-tagsinput';
-import 'react-tagsinput/react-tagsinput.css';
+import PropTypes from 'prop-types';
+import Log from 'log4javascript';
+
+import Api from '../../../../data/api';
 import Loading from '../../../Base/Loading/Loading';
 
+/**
+ * Renders an individual Scope record in table
+ * @class Scope
+ * @extends {React.Component}
+ */
 class Scope extends React.Component {
+    /**
+     * Creates an instance of Scope.
+     * @param {any} props @inheritDoc
+     * @memberof Scope
+     */
     constructor(props) {
         super(props);
         this.state = {
@@ -38,68 +50,99 @@ class Scope extends React.Component {
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleChangeDescription = this.handleChangeDescription.bind(this);
     }
+
+    /**
+     * Update scope data
+     * @memberof Scope
+     */
     toggleScopeData() {
         const api = new Api();
-        const promised_scopes_object = api.getScopeDetail(this.props.api_uuid, this.props.name);
-        promised_scopes_object
+        const promisedScopesObject = api.getScopeDetail(this.props.api_uuid, this.props.name);
+        promisedScopesObject
             .then((response) => {
                 this.setState({ apiScope: response.obj });
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
+                    Log.log(error);
                 }
-                const status = error.status;
+                const { status } = error;
                 if (status === 404) {
                     this.setState({ notFound: true });
                 }
             });
         this.setState({ visible: !this.state.visible });
     }
+
+    /**
+     * Handle remove scope action
+     * @memberof Scope
+     */
     removeScope() {
-        const scope_name = this.props.name;
+        const scopeName = this.props.name;
         const hideMessage = message.loading('Deleting the Scope ...', 0);
         const api = new Api();
-        const promised_scope_delete = api.deleteScope(this.props.api_uuid, scope_name);
-        promised_scope_delete.then((response) => {
+        const promisedScopeDelete = api.deleteScope(this.props.api_uuid, scopeName);
+        promisedScopeDelete.then((response) => {
             if (response.status !== 200) {
-                console.log(response);
-                message.error('Something went wrong while deleting the ' + scope_name + ' Scope!');
+                Log.log(response);
+                message.error('Something went wrong while deleting the ' + scopeName + ' Scope!');
                 hideMessage();
                 return;
             }
-            message.success(scope_name + ' Scope deleted successfully!');
-            this.props.deleteScope(scope_name);
+            message.success(scopeName + ' Scope deleted successfully!');
+            this.props.deleteScope(scopeName);
             hideMessage();
         });
     }
+    /**
+     *
+     * @param {any} roles Associate roles for the group
+     * @memberof Scope
+     */
     handleChange(roles) {
-        const apiScope = this.state.apiScope;
+        const { apiScope } = this.state;
         apiScope.bindings.values = roles;
         this.setState({ apiScope });
     }
+
+    /**
+     *
+     * @param {any} e
+     * @memberof Scope
+     */
     handleChangeDescription(e) {
         const { apiScope } = this.state;
         apiScope.description = e.target.value;
         this.setState({ apiScope });
     }
+
+    /**
+     *
+     * @memberof Scope
+     */
     handleSubmit() {
-        const scope_name = this.props.name;
+        const scopeName = this.props.name;
         const hideMessage = message.loading('Updating the Scope ...', 0);
         const api = new Api();
-        const promised_scope_update = api.updateScope(this.props.api_uuid, scope_name, this.state.apiScope);
-        promised_scope_update.then((response) => {
+        const promisedScopeUpdate = api.updateScope(this.props.api_uuid, scopeName, this.state.apiScope);
+        promisedScopeUpdate.then((response) => {
             if (response.status !== 200) {
                 console.log(response);
-                message.error('Something went wrong while updating the ' + scope_name + ' Scope!');
+                message.error('Something went wrong while updating the ' + scopeName + ' Scope!');
                 hideMessage();
                 return;
             }
-            message.success(scope_name + ' Scope updated successfully!');
-            this.props.updateScope(scope_name, this.state.apiScope);
+            message.success(scopeName + ' Scope updated successfully!');
+            this.props.updateScope(scopeName, this.state.apiScope);
             hideMessage();
         });
     }
+
+    /**
+     * @returns {React.Component} @inheritDoc
+     * @memberof Scope
+     */
     render() {
         return (
             <div id={this.props.name}>
@@ -148,5 +191,13 @@ class Scope extends React.Component {
         );
     }
 }
+
+Scope.propTypes = {
+    api_uuid: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    description: PropTypes.string.isRequired,
+    deleteScope: PropTypes.func.isRequired,
+    updateScope: PropTypes.func.isRequired,
+};
 
 export default Scope;
