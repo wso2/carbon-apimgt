@@ -101,15 +101,12 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -121,7 +118,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -5268,10 +5264,13 @@ public class ApiMgtDAO {
             throws APIManagementException {
 
         Application application = getApplicationByName(applicationName, userId, groupId);
-        Map<String, OAuthApplicationInfo> keyMap = getOAuthApplications(application.getId());
 
-        for (Map.Entry<String, OAuthApplicationInfo> entry : keyMap.entrySet()) {
-            application.addOAuthApp(entry.getKey(), entry.getValue());
+        if (application != null) {
+            Map<String, OAuthApplicationInfo> keyMap = getOAuthApplications(application.getId());
+
+            for (Map.Entry<String, OAuthApplicationInfo> entry : keyMap.entrySet()) {
+                application.addOAuthApp(entry.getKey(), entry.getValue());
+            }
         }
 
         return application;
