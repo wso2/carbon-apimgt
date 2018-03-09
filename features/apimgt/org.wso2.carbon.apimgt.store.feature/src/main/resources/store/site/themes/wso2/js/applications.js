@@ -35,7 +35,7 @@ GrantTypes.prototype.getMap = function(selected){
     return map;
 };
 
-;(function ( $, window, document, undefined ) {
+(function ( $, window, document, undefined ) {
 
     var pluginName = "codeHighlight";
 
@@ -403,32 +403,6 @@ GrantTypes.prototype.getMap = function(selected){
 })( jQuery, window, document );
 
 $(document).ready(function() {
-    $(document.body).on('click','.copy-button', function(event) {
-        var text = this.getAttribute("data-clipboard-text");
-
-        if (document.queryCommandSupported('copy')) {
-            try {
-                var temp = $("<input>");
-                var target = $(event.target);
-                $("body").append(temp);
-                temp.val(text).select();
-                document.execCommand("copy");
-                temp.remove();
-                target.attr("title","Copied!")
-                target.tooltip('enable');
-                target.tooltip("show");
-                target.tooltip('disable');
-                target.attr("title","Copy")
-            } catch(e) {
-                // Copy command failed. Therefore prompting user to manually copy the text
-                window.prompt("Press : Ctrl+C and hit Enter to copy the value", text);
-            }
-        } else {
-            // Copy command not supported. Therefore prompting user to manually copy the text
-            window.prompt("Press : Ctrl+C and hit Enter to copy the value", text);
-        }
-    });
-
 $("#subscription-actions").each(function(){
     var source   = $("#subscription-actions").html();
     var subscription_actions = Handlebars.compile(source);

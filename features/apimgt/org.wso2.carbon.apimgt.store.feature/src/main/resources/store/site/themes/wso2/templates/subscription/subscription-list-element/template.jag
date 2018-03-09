@@ -752,7 +752,6 @@
                     </div>
             </div>
         <% } %>
-		<script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("libs/zeroclipboard/ZeroClipboard.min.js"))%>"></script>
 		<script>
 
 			var client = new ZeroClipboard($('.curl-copybtn'));
