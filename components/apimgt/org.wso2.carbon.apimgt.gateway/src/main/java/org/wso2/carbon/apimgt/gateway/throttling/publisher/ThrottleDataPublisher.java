@@ -47,7 +47,7 @@ import java.util.concurrent.TimeUnit;
 public class ThrottleDataPublisher {
     public static ThrottleDataPublisherPool dataPublisherPool;
 
-    private static final Log log = LogFactory.getLog(ThrottleDataPublisher.class);
+    public static final Log log = LogFactory.getLog(ThrottleDataPublisher.class);
 
     public static DataPublisher getDataPublisher() {
         return dataPublisher;
