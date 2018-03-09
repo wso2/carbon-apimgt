@@ -235,7 +235,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
     }
 
 
-    private byte[] signJWT(String assertion, String endUserName) throws APIManagementException {
+    public byte[] signJWT(String assertion, String endUserName) throws APIManagementException {
 
         String tenantDomain = null;
 
