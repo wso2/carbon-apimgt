@@ -5268,7 +5268,6 @@ public class ApiMgtDAO {
             throws APIManagementException {
 
         Application application = getApplicationByName(applicationName, userId, groupId);
-
         Map<String, OAuthApplicationInfo> keyMap = getOAuthApplications(application.getId());
 
         for (Map.Entry<String, OAuthApplicationInfo> entry : keyMap.entrySet()) {
