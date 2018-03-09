@@ -1643,11 +1643,6 @@ public class ApiMgtDAO {
                     application.setId(result.getInt("APP_ID"));
                     application.setCallbackUrl(result.getString("CALLBACK_URL"));
                     application.setUUID(result.getString("APP_UUID"));
-                    Map<String, OAuthApplicationInfo> oauthApps = getOAuthApplications(applicationId);
-
-                    for (Map.Entry<String, OAuthApplicationInfo> entry : oauthApps.entrySet()) {
-                        application.addOAuthApp(entry.getKey(), entry.getValue());
-                    }
 
                     if (multiGroupAppSharingEnabled) {
                         application.setGroupId(getGroupId(application.getId()));
@@ -1659,13 +1654,9 @@ public class ApiMgtDAO {
                 subscribedAPI.setApplication(application);
 
                 int subscriptionId = result.getInt("SUBS_ID");
-                Set<APIKey> apiKeys = getAPIKeysBySubscription(subscriptionId);
-                for (APIKey key : apiKeys) {
-                    subscribedAPI.addKey(key);
-                }
 
                 if (!map.containsKey(application.getName())) {
-                    map.put(application.getName(), new TreeSet<SubscribedAPI>(new Comparator<SubscribedAPI>() {
+                    map.put(application.getName(), new TreeSet<>(new Comparator<SubscribedAPI>() {
                         public int compare(SubscribedAPI o1, SubscribedAPI o2) {
                             int placement = o1.getApiId().getApiName().compareTo(o2.getApiId().getApiName());
                             if (placement == 0) {
@@ -1688,35 +1679,6 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, connection, result);
         }
         return subscribedAPIs;
-    }
-
-    private Set<APIKey> getAPIKeysBySubscription(int subscriptionId) throws APIManagementException {
-        Connection connection = null;
-        PreparedStatement ps = null;
-        ResultSet result = null;
-
-        String getKeysSql = SQLConstants.GET_API_KEY_BY_SUBSCRIPTION_SQL;
-        Set<APIKey> apiKeys = new HashSet<APIKey>();
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            ps = connection.prepareStatement(getKeysSql);
-            ps.setInt(1, subscriptionId);
-            result = ps.executeQuery();
-            while (result.next()) {
-                APIKey apiKey = new APIKey();
-                String decryptedAccessToken = APIUtil.decryptToken(result.getString("ACCESS_TOKEN"));
-                apiKey.setAccessToken(decryptedAccessToken);
-                apiKey.setType(result.getString("TOKEN_TYPE"));
-                apiKeys.add(apiKey);
-            }
-        } catch (SQLException e) {
-            handleException("Failed to get API keys for subscription: " + subscriptionId, e);
-        } catch (CryptoException e) {
-            handleException("Failed to get API keys for subscription: " + subscriptionId, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, connection, result);
-        }
-        return apiKeys;
     }
 
     public boolean isAccessTokenExists(String accessToken) throws APIManagementException {
@@ -3974,7 +3936,6 @@ public class ApiMgtDAO {
                 application = new Application(rs.getString("NAME"), subscriber);
                 application.setId(rs.getInt("APPLICATION_ID"));
                 application.setTier(rs.getString("APPLICATION_TIER"));
-                application.setCallbackUrl(rs.getString("CALLBACK_URL"));
                 application.setDescription(rs.getString("DESCRIPTION"));
                 application.setStatus(rs.getString("APPLICATION_STATUS"));
                 application.setGroupId(rs.getString("GROUP_ID"));
@@ -3986,14 +3947,7 @@ public class ApiMgtDAO {
                     setGroupIdInApplication(application);
                 }
 
-                Map<String, OAuthApplicationInfo> keyMap = getOAuthApplications(application.getId());
-
-                for (Map.Entry<String, OAuthApplicationInfo> entry : keyMap.entrySet()) {
-                    application.addOAuthApp(entry.getKey(), entry.getValue());
-                }
-
                 applicationsList.add(application);
-
             }
 
             applications = applicationsList.toArray(new Application[applicationsList.size()]);
@@ -4029,6 +3983,14 @@ public class ApiMgtDAO {
         return applications;
     }
 
+    /**
+     * Returns all the applications associated with given subscriber and group id, without their keys.
+     *
+     * @param subscriber The subscriber.
+     * @param groupingId The groupId to which the applications must belong.
+     * @return Application[] Array of applications.
+     * @throws APIManagementException
+     */
     public Application[] getLightWeightApplications(Subscriber subscriber, String groupingId) throws
             APIManagementException {
 
@@ -5295,10 +5257,32 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Fetches an Application with OAuth Apps, by name.
+     *
+     * @param applicationName Name of the Application
+     * @param userId          Name of the User.
+     * @param groupId         Group ID
+     * @throws APIManagementException
+     */
+    public Application getApplicationWithOAuthApps(String applicationName, String userId, String groupId)
+            throws APIManagementException {
+
+        Application application = getApplicationByName(applicationName, userId, groupId);
+        Map<String, OAuthApplicationInfo> keyMap = getOAuthApplications(application.getId());
+
+        for (Map.Entry<String, OAuthApplicationInfo> entry : keyMap.entrySet()) {
+            application.addOAuthApp(entry.getKey(), entry.getValue());
+        }
+
+        return application;
+    }
+
+    /**
      * Fetches an Application by name.
      *
      * @param applicationName Name of the Application
      * @param userId          Name of the User.
+     * @param groupId         Group ID
      * @throws APIManagementException
      */
     public Application getApplicationByName(String applicationName, String userId, String groupId)
