@@ -2594,16 +2594,8 @@ public class APIStoreHostObject extends ScriptableObject {
                     NativeObject row = new NativeObject();
                     row.put("application", row, api.getApplication().getName());
                     row.put("applicationId", row, api.getApplication().getId());
-                    row.put("prodKey", row, getKey(api, APIConstants.API_KEY_TYPE_PRODUCTION));
-                    row.put("sandboxKey", row, getKey(api, APIConstants.API_KEY_TYPE_SANDBOX));
-
                     if (APIUtil.isMultiGroupAppSharingEnabled()) {
                         row.put("owner", row, api.getApplication().getOwner());
-                    }
-
-                    ArrayList<APIKey> keys = (ArrayList<APIKey>) api.getApplication().getKeys();
-                    for(APIKey key : keys){
-                        row.put(key.getType()+"_KEY", row, key.getAccessToken());
                     }
                     myn.put(i++, myn, row);
                 }
@@ -2752,7 +2744,12 @@ public class APIStoreHostObject extends ScriptableObject {
             Subscriber subscriber = new Subscriber(username);
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
             Application[] applications;
-            applications = apiConsumer.getApplications(new Subscriber(username), groupingId);
+
+            if(!StringUtils.isEmpty(appName)){
+                applications = new Application[] {apiConsumer.getApplicationsByName(username, appName, groupingId)};
+            } else {
+                applications = apiConsumer.getApplications(new Subscriber(username), groupingId);
+            }
 
             if (applications != null) {
                 int i = 0;
@@ -2780,7 +2777,6 @@ public class APIStoreHostObject extends ScriptableObject {
                         for (SubscribedAPI subscribedAPI : subscribedAPIs) {
                             addAPIObj(subscribedAPI, apisArray, thisObj, application);
                             identifiers.add(subscribedAPI.getApiId());
-
                         }
 
                         if (!identifiers.isEmpty()) {
@@ -2805,7 +2801,6 @@ public class APIStoreHostObject extends ScriptableObject {
                         NativeObject appObj = new NativeObject();
                         appObj.put("id", appObj, application.getId());
                         appObj.put("name", appObj, application.getName());
-                        appObj.put("callbackUrl", appObj, application.getCallbackUrl());
                         APIKey prodKey = getAppKey(application, APIConstants.API_KEY_TYPE_PRODUCTION);
 
                         OAuthApplicationInfo prodApp = application.getOAuthApp("PRODUCTION");
@@ -3037,7 +3032,6 @@ public class APIStoreHostObject extends ScriptableObject {
                 } else {
                     apiObj.put("prodValidityTime", apiObj, prodKey.getValidityPeriod());
                 }
-                //apiObj.put("prodValidityRemainingTime", apiObj, apiMgtDAO.getApplicationAccessTokenRemainingValidityPeriod(prodKey.getAccessToken()));
             } else {
                 apiObj.put("prodKey", apiObj, null);
                 apiObj.put("prodConsumerKey", apiObj, null);
@@ -3048,7 +3042,6 @@ public class APIStoreHostObject extends ScriptableObject {
                 } else {
                     apiObj.put("prodValidityTime", apiObj, getApplicationAccessTokenValidityPeriodInSeconds() * 1000);
                 }
-                // apiObj.put("prodValidityRemainingTime", apiObj, getApplicationAccessTokenValidityPeriodInSeconds() * 1000);
             }
 
             APIKey sandboxKey = getAppKey(appObject, APIConstants.API_KEY_TYPE_SANDBOX);
@@ -3062,7 +3055,6 @@ public class APIStoreHostObject extends ScriptableObject {
                 } else {
                     apiObj.put("sandValidityTime", apiObj, sandboxKey.getValidityPeriod());
                 }
-                //apiObj.put("sandValidityRemainingTime", apiObj, apiMgtDAO.getApplicationAccessTokenRemainingValidityPeriod(sandboxKey.getAccessToken()));
             } else {
                 apiObj.put("sandboxKey", apiObj, null);
                 apiObj.put("sandboxConsumerKey", apiObj, null);
@@ -3073,7 +3065,6 @@ public class APIStoreHostObject extends ScriptableObject {
                 } else {
                     apiObj.put("sandValidityTime", apiObj, getApplicationAccessTokenValidityPeriodInSeconds() * 1000);
                 }
-                // apiObj.put("sandValidityRemainingTime", apiObj, getApplicationAccessTokenValidityPeriodInSeconds() * 1000);
             }
             apiObj.put("hasMultipleEndpoints", apiObj, String.valueOf(api.getSandboxUrl() != null));
             apisArray.put(apisArray.getIds().length, apisArray, apiObj);
@@ -3181,7 +3172,6 @@ public class APIStoreHostObject extends ScriptableObject {
                     row.put("name", row, application.getName());
                     row.put("tier", row, application.getTier());
                     row.put("id", row, application.getId());
-                    row.put("callbackUrl", row, application.getCallbackUrl());
                     row.put("status", row, application.getStatus());
                     row.put("description", row, application.getDescription());
                     row.put("apiCount", row, subscriptionCount);
@@ -3210,7 +3200,8 @@ public class APIStoreHostObject extends ScriptableObject {
             if(args.length >1 && args[1] != null){
             	 groupId = args[1].toString();
             }
-            applications = apiConsumer.getApplications(new Subscriber(username), groupId);
+            applications = apiConsumer.getLightWeightApplications(new Subscriber(username), groupId);
+
             Subscriber subscriber = new Subscriber(username);
 
             if (applications != null) {
@@ -3221,7 +3212,6 @@ public class APIStoreHostObject extends ScriptableObject {
                     row.put("name", row, application.getName());
                     row.put("tier", row, application.getTier());
                     row.put("id", row, application.getId());
-                    row.put("callbackUrl", row, application.getCallbackUrl());
                     row.put("status", row, application.getStatus());
                     row.put("description", row, application.getDescription());
                     row.put("apiCount", row, subscriptionCount);
@@ -3263,7 +3253,6 @@ public class APIStoreHostObject extends ScriptableObject {
                 row.put("name", row, application.getName());
                 row.put("tier", row, application.getTier());
                 row.put("id", row, application.getId());
-                row.put("callbackUrl", row, application.getCallbackUrl());
                 row.put("status", row, application.getStatus());
                 row.put("description", row, application.getDescription());
                 row.put("groupId", row, application.getGroupId());
