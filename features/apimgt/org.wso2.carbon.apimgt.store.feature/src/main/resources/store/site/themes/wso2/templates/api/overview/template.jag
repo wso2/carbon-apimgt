@@ -235,6 +235,22 @@
 </div>
 <script language="javascript">
     $(document).ready(function(){
+         var clipboard = new ClipboardJS('.copy-button',{
+           text: function(trigger) {
+               $(trigger).parent().notify("Copied",{ position:"top right" ,className: 'success'});
+               return trigger.getAttribute('data-clipboard-text');
+           }}
+        );
+
+
+        clipboard.on('success', function(e) {
+            e.clearSelection();
+        });
+
+        clipboard.on('error', function(e) {
+            console.error('Action:', e.action);
+            console.error('Trigger:', e.trigger);
+        });
         var link = window.location+'';
         $('#api_mailto').on("click",function(){
             location.href = "mailto:?Subject="+encodeURIComponent(document.title)+"&body=Link : "+ encodeURIComponent(window.location);

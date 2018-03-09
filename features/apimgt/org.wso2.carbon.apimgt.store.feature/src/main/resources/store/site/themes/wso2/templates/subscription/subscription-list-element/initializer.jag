@@ -2,7 +2,6 @@
 jagg.initializer("subscription/subscription-list-element", {
 
     preInitialize:function () {
-    	jagg.addHeaderJS("subscription/subscription-list-element", "subscription-list-element", "libs/zeroclipboard/ZeroClipboard.min.js");
     } 
 });
 %>
