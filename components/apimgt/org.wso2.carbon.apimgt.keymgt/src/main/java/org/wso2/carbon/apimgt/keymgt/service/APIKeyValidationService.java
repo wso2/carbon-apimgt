@@ -51,6 +51,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -128,7 +129,9 @@ public class APIKeyValidationService extends AbstractAdmin {
         }
 
         if (log.isDebugEnabled()) {
-            String logMsg = "KeyValidation request from gateway: requestTime=" + new Date(System.currentTimeMillis());
+            String logMsg = "KeyValidation request from gateway: requestTime= "
+                    + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()) + " , for:"
+                    + context + " with accessToken=" + accessToken;
             if (activityID != null) {
                 logMsg = logMsg + " , transactionId=" + activityID;
             }
@@ -207,6 +210,8 @@ public class APIKeyValidationService extends AbstractAdmin {
 
         if (log.isDebugEnabled()) {
             log.debug("APIKeyValidationInfoDTO before returning : " + validationContext.getValidationInfoDTO());
+            log.debug("KeyValidation response from keymanager to gateway for access token:" + accessToken + " at "
+                    + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
         }
 
         timerContext.stop();
@@ -227,7 +232,16 @@ public class APIKeyValidationService extends AbstractAdmin {
         Timer timer6 = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "GET_URI_TEMPLATE"));
         Timer.Context timerContext6 = timer6.start();
+        if (log.isDebugEnabled()) {
+            log.debug("getAllURITemplates request from gateway to keymanager: requestTime="
+                    + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date())
+                    + " ,for:" + context);
+        }
         ArrayList<URITemplate> templates = ApiMgtDAO.getInstance().getAllURITemplates(context, version);
+        if (log.isDebugEnabled()) {
+            log.debug("getAllURITemplates response from keyManager to gateway for:" + context + " at "
+                    + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
+        }
         timerContext6.stop();
         return templates;
     }
