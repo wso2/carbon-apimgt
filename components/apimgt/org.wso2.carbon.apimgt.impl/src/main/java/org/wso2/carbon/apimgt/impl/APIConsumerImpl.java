@@ -3108,10 +3108,13 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             APIManagementException {
 
         Application application = apiMgtDAO.getApplicationWithOAuthApps(ApplicationName, userId, groupingId);
-        Set<APIKey> keys = getApplicationKeys(application.getId());
 
-        for (APIKey key : keys) {
-            application.addKey(key);
+        if (application != null) {
+            Set<APIKey> keys = getApplicationKeys(application.getId());
+
+            for (APIKey key : keys) {
+                application.addKey(key);
+            }
         }
 
         return application;
