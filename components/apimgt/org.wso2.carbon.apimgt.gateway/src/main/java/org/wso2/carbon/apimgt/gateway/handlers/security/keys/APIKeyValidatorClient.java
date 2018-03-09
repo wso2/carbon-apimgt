@@ -26,6 +26,8 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.httpclient.Header;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.dto.xsd.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.xsd.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -39,12 +41,16 @@ import org.wso2.carbon.apimgt.keymgt.stub.validator.APIKeyValidationServiceStub;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.utils.CarbonUtils;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
 public class APIKeyValidatorClient {
+
+    private static final Log log = LogFactory.getLog(APIKeyValidatorClient.class);
 
     private APIKeyValidationServiceStub keyValidationServiceStub;
     private String username;
@@ -96,9 +102,19 @@ public class APIKeyValidatorClient {
             keyValidationServiceStub._getServiceClient().getOptions().setProperty(org.apache.axis2.transport.http.HTTPConstants.HTTP_HEADERS, headerList);
             /**/
 
+            if (log.isDebugEnabled()) {
+                log.debug("KeyValidation request from gateway to keymanager via web service call for:" + context
+                        + " with ID: " + MessageContext.getCurrentMessageContext().getMessageID() + " at "
+                        + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
+            }
             org.wso2.carbon.apimgt.impl.dto.xsd.APIKeyValidationInfoDTO dto =
                     keyValidationServiceStub.validateKey(context, apiVersion, apiKey, requiredAuthenticationLevel, clientDomain,
                                                          matchingResource, httpVerb);
+            if (log.isDebugEnabled()) {
+                log.debug("KeyValidation response received to gateway from keymanager via web service call for:"
+                        + context + " with ID: " + MessageContext.getCurrentMessageContext().getMessageID() + " at "
+                        + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
+            }
 
             ServiceContext serviceContext = keyValidationServiceStub.
                     _getServiceClient().getLastOperationContext().getServiceContext();
@@ -149,8 +165,18 @@ public class APIKeyValidatorClient {
             keyValidationServiceStub._getServiceClient().getOptions().setProperty(HTTPConstants.COOKIE_STRING, cookie);
         }
         try {
+            if (log.isDebugEnabled()) {
+                log.debug("Get all URI templates request from gateway to keymanager via web service call for:"
+                        + context + " at "
+                        + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
+            }
             org.wso2.carbon.apimgt.api.model.xsd.URITemplate[] dto =
                     keyValidationServiceStub.getAllURITemplates(context, apiVersion);
+            if (log.isDebugEnabled()) {
+                log.debug("Get all URI templates response received to gateway from keymanager via web service"
+                        + " call for:" + context + " at "
+                        + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
+            }
             ServiceContext serviceContext = keyValidationServiceStub.
                     _getServiceClient().getLastOperationContext().getServiceContext();
             cookie = (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);

@@ -37,6 +37,8 @@ import org.wso2.carbon.apimgt.usage.publisher.dto.RequestPublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -153,7 +155,17 @@ public class APIMgtUsageHandler extends AbstractHandler {
             requestPublisherDTO.setApplicationOwner(applicationOwner);
             requestPublisherDTO.setKeyType(keyType);
             requestPublisherDTO.setCorrelationID(correlationID);
+            if (log.isDebugEnabled()) {
+                log.debug("Publishing event from gateway to analytics for: " + context + " with ID: " +
+                        mc.getMessageID() + " started" + " at "
+                        + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
+            }
             publisher.publishEvent(requestPublisherDTO);
+            if (log.isDebugEnabled()) {
+                log.debug("Publishing event from gateway to analytics for: " + context + " with ID: " +
+                        mc.getMessageID() + " ended" + " at "
+                        + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
+            }
         } catch (Exception e) {
             log.error("Cannot publish event. " + e.getMessage(), e);
         }

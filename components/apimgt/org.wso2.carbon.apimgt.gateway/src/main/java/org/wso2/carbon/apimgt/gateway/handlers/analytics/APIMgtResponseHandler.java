@@ -38,6 +38,8 @@ import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 
 /*
@@ -170,8 +172,19 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
             responsePublisherDTO.setProtocol(protocol);
             responsePublisherDTO.setKeyType(keyType);
             responsePublisherDTO.setCorrelationID(correlationID);
+            if (log.isDebugEnabled()) {
+                log.debug("Publishing success API invocation event from gateway to analytics for: "
+                        + mc.getProperty(APIMgtGatewayConstants.CONTEXT) + " with ID: " +
+                        mc.getMessageID() + " started" + " at "
+                        + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
+            }
             publisher.publishEvent(responsePublisherDTO);
-
+            if (log.isDebugEnabled()) {
+                log.debug("Publishing success API invocation event from gateway to analytics for: "
+                        + mc.getProperty(APIMgtGatewayConstants.CONTEXT) + " with ID: " +
+                        mc.getMessageID() + " ended" + " at "
+                        + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
+            }
         } catch (Exception e) {
             log.error("Cannot publish response event. " + e.getMessage(), e);
         }

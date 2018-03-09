@@ -26,6 +26,9 @@ import org.wso2.carbon.apimgt.gateway.mediators.APIMgtCommonExecutionPublisher;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ThrottlePublisherDTO;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /*
 * This is the class mediator which will handle publishing events upon throttle out events
 */
@@ -86,7 +89,19 @@ public class APIMgtThrottleUsageHandler extends APIMgtCommonExecutionPublisher {
                 throttlePublisherDTO.setSubscriber(authContext.getSubscriber());
                 throttlePublisherDTO.setKeyType(keyType);
                 throttlePublisherDTO.setCorrelationID(correlationID);
+                if (log.isDebugEnabled()) {
+                    log.debug("Publishing throttling event from gateway to analytics for: "
+                            + messageContext.getProperty(APIMgtGatewayConstants.CONTEXT) + " with ID: "
+                            + messageContext.getMessageID() + " started" + " at "
+                            + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
+                }
                 publisher.publishEvent(throttlePublisherDTO);
+                if (log.isDebugEnabled()) {
+                    log.debug("Publishing throttling event from gateway to analytics for: "
+                            + messageContext.getProperty(APIMgtGatewayConstants.CONTEXT) + " with ID: "
+                            + messageContext.getMessageID() + " ended" + " at "
+                            + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
+                }
             }
         } catch (Exception e) {
             log.error("Cannot publish throttling event. " + e.getMessage(), e);

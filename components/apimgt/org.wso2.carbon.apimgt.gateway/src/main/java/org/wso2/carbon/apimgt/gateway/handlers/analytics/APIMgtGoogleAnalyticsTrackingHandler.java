@@ -20,6 +20,8 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
@@ -48,8 +50,7 @@ import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsDataPublisher;
 
 public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
 
-	private static final Log log = LogFactory
-			.getLog(APIMgtGoogleAnalyticsTrackingHandler.class);
+    private static final Log log = LogFactory.getLog(APIMgtGoogleAnalyticsTrackingHandler.class);
 
 	private static final String GOOGLE_ANALYTICS_TRACKER_VERSION = "1";
 
@@ -181,7 +182,17 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
                 .build();
 
         String payload = GoogleAnalyticsDataPublisher.buildPayloadString(data);
+        if (log.isDebugEnabled()) {
+            log.debug("Publishing https GET from gateway to Google analytics" + " with ID: " + msgCtx.getMessageID()
+                    + " started" + " at "
+                    + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
+        }
         GoogleAnalyticsDataPublisher.publishGET(payload, userAgent, false);
+        if (log.isDebugEnabled()) {
+            log.debug("Publishing https GET from gateway to Google analytics" + " with ID: " + msgCtx.getMessageID()
+                    + " ended" + " at "
+                    + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
+        }
 	}
 
 	/**
