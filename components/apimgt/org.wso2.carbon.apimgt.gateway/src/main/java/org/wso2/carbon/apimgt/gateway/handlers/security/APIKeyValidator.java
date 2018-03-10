@@ -63,7 +63,7 @@ import java.util.Set;
  */
 public class APIKeyValidator {
 
-    private APIKeyDataStore dataStore;
+    protected APIKeyDataStore dataStore;
 
     private boolean gatewayKeyCacheEnabled = true;
 

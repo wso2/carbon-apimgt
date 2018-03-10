@@ -30,7 +30,6 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.base.SequenceMediator;
 import org.apache.synapse.rest.RESTConstants;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
@@ -51,7 +50,7 @@ public class APIManagerCacheExtensionHandlerTest {
     private final String SUPER_TENANT_DOMAIN = "carbon.super";
     
     private Map<String, String> cache = new HashMap<String, String>();
-	private Map<String, String> invalidTokencache = new HashMap<String, String>();
+	private Map<String, String> invalidTokenCache = new HashMap<String, String>();
 
 
     @Test
@@ -95,7 +94,7 @@ public class APIManagerCacheExtensionHandlerTest {
 		Mockito.when(((Mediator) globalOutSeq).mediate(messageContext)).thenReturn(false);
 
 
-		APIManagerCacheExtensionHandler handler = new APIManagerCacheExtensionHandlerWrapper(cache, invalidTokencache);
+		APIManagerCacheExtensionHandler handler = new APIManagerCacheExtensionHandlerWrapper(cache, invalidTokenCache);
 		// both methods are executed during a full request path
 		handler.handleRequest(messageContext);
 		handler.handleResponse(messageContext);
@@ -156,7 +155,7 @@ public class APIManagerCacheExtensionHandlerTest {
 		//Global mediation returns a true to continue further sequence
 		Mockito.when(((Mediator) globalOutSeq).mediate(messageContext)).thenReturn(true);
 
-		APIManagerCacheExtensionHandler handler = new APIManagerCacheExtensionHandlerWrapper(cache, invalidTokencache);
+		APIManagerCacheExtensionHandler handler = new APIManagerCacheExtensionHandlerWrapper(cache, invalidTokenCache);
 		// both methods are executed during a full request path
 		handler.handleRequest(messageContext);
 		handler.handleResponse(messageContext);
@@ -204,7 +203,7 @@ public class APIManagerCacheExtensionHandlerTest {
 		.thenReturn(SUPER_TENANT_DEACTIVATED_TOKEN);
 
 
-		APIManagerCacheExtensionHandler handler = new APIManagerCacheExtensionHandlerWrapper(cache, invalidTokencache);
+		APIManagerCacheExtensionHandler handler = new APIManagerCacheExtensionHandlerWrapper(cache, invalidTokenCache);
 		// both methods are executed during a full request path
 		handler.handleRequest(messageContext);
 		handler.handleResponse(messageContext);
@@ -249,7 +248,7 @@ public class APIManagerCacheExtensionHandlerTest {
 		Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn(API_NAME);
 
 
-		APIManagerCacheExtensionHandler handler = new APIManagerCacheExtensionHandlerWrapper(cache, invalidTokencache);
+		APIManagerCacheExtensionHandler handler = new APIManagerCacheExtensionHandlerWrapper(cache, invalidTokenCache);
 		// both methods are executed during a full request path
 		handler.handleRequest(messageContext);
 		handler.handleResponse(messageContext);
@@ -290,7 +289,7 @@ public class APIManagerCacheExtensionHandlerTest {
 		Mockito.when((String) transportHeaders.get(APIMgtGatewayConstants.DEACTIVATED_ACCESS_TOKEN))
 		.thenReturn(NOT_CACHED_DEACTIVATED_TOKEN);
 
-		APIManagerCacheExtensionHandler handler = new APIManagerCacheExtensionHandlerWrapper(cache, invalidTokencache);
+		APIManagerCacheExtensionHandler handler = new APIManagerCacheExtensionHandlerWrapper(cache, invalidTokenCache);
 		// both methods are executed during a full request path
 		handler.handleRequest(messageContext);
 		handler.handleResponse(messageContext);
@@ -321,7 +320,7 @@ public class APIManagerCacheExtensionHandlerTest {
 		Mockito.when((TreeMap) axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
 				.thenReturn(transportHeaders);
 
-		APIManagerCacheExtensionHandler handler = new APIManagerCacheExtensionHandlerWrapper(cache, invalidTokencache);
+		APIManagerCacheExtensionHandler handler = new APIManagerCacheExtensionHandlerWrapper(cache, invalidTokenCache);
 		// both methods are executed during a full request path
 		handler.handleRequest(messageContext);
 		handler.handleResponse(messageContext);
