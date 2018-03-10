@@ -49,7 +49,7 @@ if(app.groupId != null ){
   <div class="form-group">
     <label class="control-label col-md-3 col-lg-3" for="application-name"><%=i18n.localize("Name")%><span class="requiredAstrix">*</span></label>
     <div class="col-md-9 col-lg-9">
-      <input type="text" class="form-control required validateSpecialChars validName" title="application-name" id="application-name" autofocus="autofocus" value="<%= encode.forHtmlAttribute(app.name)%>"/>
+      <input type="text" class="form-control required validateSpecialChars validName" id="application-name" autofocus="autofocus" value="<%= encode.forHtmlAttribute(app.name)%>"/>
     </div>
   </div>
   <div class="form-group">
