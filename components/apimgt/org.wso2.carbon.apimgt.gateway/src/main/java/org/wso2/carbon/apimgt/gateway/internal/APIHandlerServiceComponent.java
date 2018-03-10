@@ -153,8 +153,7 @@ public class APIHandlerServiceComponent {
     }
 
     protected String getFilePath() {
-        return CarbonUtils.getCarbonHome() + File.separator + "repository" +
-                File.separator + "conf" + File.separator + "api-manager.xml";
+        return CarbonUtils.getCarbonConfigDirPath() + File.separator + "api-manager.xml";
     }
 
     protected void setConfiguration(APIManagerConfiguration configuration) {
