@@ -22,41 +22,49 @@ package org.wso2.carbon.apimgt.gateway.handlers.ext;
 
 import java.util.Map;
 
-public class APIManagerCacheExtensionHandlerWrapper extends APIManagerCacheExtensionHandler{
-	private boolean tenantFlowStarted = false;
-	private boolean tenantFlowFinished = false;
-	private Map<String, String> cache;
+public class APIManagerCacheExtensionHandlerWrapper extends APIManagerCacheExtensionHandler {
+    private boolean tenantFlowStarted = false;
+    private boolean tenantFlowFinished = false;
+    private Map<String, String> tokenCache;
+    private Map<String, String> invalidTokenCache;
 
-	public APIManagerCacheExtensionHandlerWrapper(Map<String, String> cache) {
-		this.cache = cache;
-	}
+    public APIManagerCacheExtensionHandlerWrapper(Map<String, String> tokenCache, Map<String, String>
+			invalidTokenCache) {
+        this.tokenCache = tokenCache;
+        this.invalidTokenCache = invalidTokenCache;
+    }
 
-	@Override
-	protected void startTenantFlow(String tenantDomain) {
-		tenantFlowStarted = true;
-	}
+    @Override
+    protected void startTenantFlow(String tenantDomain) {
+        tenantFlowStarted = true;
+    }
 
-	@Override
-	protected void endTenantFlow() {
-		tenantFlowFinished = true;
-	}
-	@Override
-	protected String getCachedTenantDomain(String token) {
-		return cache.get(token);
-	}
+    @Override
+    protected void endTenantFlow() {
+        tenantFlowFinished = true;
+    }
 
-	@Override
-	protected void removeCacheEntryFromGatewayCache(String key) {
-		cache.remove(key);
-	}
-	
-	
-	public boolean isTenantFlowStarted() {
-		return tenantFlowStarted;
-	}
+    @Override
+    protected String getCachedTenantDomain(String token) {
+        return tokenCache.get(token);
+    }
 
-	public boolean isTenantFlowFinished() {
-		return tenantFlowFinished;
-	}
-	
+    @Override
+    protected void removeCacheEntryFromGatewayCache(String key) {
+        tokenCache.remove(key);
+    }
+
+    @Override
+    protected void putInvalidTokenEntryIntoInvalidTokenCache(String cachedToken, String tenantDomain) {
+        invalidTokenCache.put(cachedToken, tenantDomain);
+    }
+
+    public boolean isTenantFlowStarted() {
+        return tenantFlowStarted;
+    }
+
+    public boolean isTenantFlowFinished() {
+        return tenantFlowFinished;
+    }
+
 }

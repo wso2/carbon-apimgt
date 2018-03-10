@@ -592,4 +592,5 @@ public class APIKeyValidatorTestCase {
         verbInfoDTO.setAuthType("None");
         return verbInfoDTO;
     }
+    private
 }
