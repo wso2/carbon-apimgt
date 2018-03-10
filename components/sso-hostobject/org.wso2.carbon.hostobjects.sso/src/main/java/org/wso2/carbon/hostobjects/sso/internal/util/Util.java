@@ -68,6 +68,7 @@ import org.wso2.carbon.hostobjects.sso.exception.SSOHostObjectException;
 import org.wso2.carbon.hostobjects.sso.internal.SSOConstants;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.xml.sax.SAXException;
 
 import javax.crypto.SecretKey;
 import javax.xml.XMLConstants;
@@ -87,6 +88,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 
 public class Util {
 
@@ -175,8 +180,12 @@ public class Util {
             DocumentBuilderFactory documentBuilderFactory = getSecuredDocumentBuilder();
             documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
             documentBuilderFactory.setNamespaceAware(true);
-            DocumentBuilder docBuilder = documentBuilderFactory.newDocumentBuilder();
-            Document document = docBuilder.parse(new ByteArrayInputStream(authReqStr.trim().getBytes()));
+            documentBuilderFactory.setIgnoringComments(true);
+            Document document = getDocument(documentBuilderFactory, authReqStr);
+            if (isSignedWithComments(document)) {
+                documentBuilderFactory.setIgnoringComments(false);
+                document = getDocument(documentBuilderFactory, authReqStr);
+            }
             Element element = document.getDocumentElement();
             UnmarshallerFactory unmarshallerFactory = Configuration.getUnmarshallerFactory();
             Unmarshaller unmarshaller = unmarshallerFactory.getUnmarshaller(element);
@@ -524,5 +533,49 @@ public class Util {
             }
         }
         return username;
+    }
+
+    /**
+     * Return whether SAML Assertion has the canonicalization method
+     * set to 'http://www.w3.org/2001/10/xml-exc-c14n#WithComments'.
+     *
+     * @param document
+     * @return true if canonicalization method equals to 'http://www.w3.org/2001/10/xml-exc-c14n#WithComments'
+     */
+    private static boolean isSignedWithComments(Document document) {
+
+        XPath xPath = XPathFactory.newInstance().newXPath();
+        try {
+            String assertionId = (String) xPath.compile("//*[local-name()='Assertion']/@ID")
+                    .evaluate(document, XPathConstants.STRING);
+
+            if (StringUtils.isBlank(assertionId)) {
+                return false;
+            }
+
+            NodeList nodeList = ((NodeList) xPath.compile(
+                    "//*[local-name()='Assertion']" + "/*[local-name()='Signature']" + "/*[local-name()='SignedInfo']"
+                            + "/*[local-name()='Reference'][@URI='#" + assertionId + "']"
+                            + "/*[local-name()='Transforms']" + "/*[local-name()='Transform']"
+                            + "[@Algorithm='http://www.w3.org/2001/10/xml-exc-c14n#WithComments']")
+                    .evaluate(document, XPathConstants.NODESET));
+            return nodeList != null && nodeList.getLength() > 0;
+        } catch (XPathExpressionException e) {
+            String message = "Failed to find the canonicalization algorithm of the assertion. Defaulting to: "
+                    + "http://www.w3.org/2001/10/xml-exc-c14n#";
+            log.warn(message);
+            if (log.isDebugEnabled()) {
+                log.debug(message, e);
+            }
+            return false;
+        }
+    }
+
+    private static Document getDocument(DocumentBuilderFactory documentBuilderFactory, String samlString)
+            throws IOException, SAXException, ParserConfigurationException {
+
+        DocumentBuilder docBuilder = documentBuilderFactory.newDocumentBuilder();
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(samlString.getBytes());
+        return docBuilder.parse(inputStream);
     }
 }
