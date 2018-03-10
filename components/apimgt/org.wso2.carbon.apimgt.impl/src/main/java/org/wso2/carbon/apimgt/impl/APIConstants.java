@@ -773,6 +773,7 @@ public final class APIConstants {
     public static final String POLICY_CACHE_CONTEXT = "POLICY:";
     public static final String GATEWAY_KEY_CACHE_NAME = "gatewayKeyCache";
     public static final String GATEWAY_TOKEN_CACHE_NAME = "GATEWAY_TOKEN_CACHE";
+    public static final String GATEWAY_INVALID_TOKEN_CACHE_NAME = "GATEWAY_INVALID_TOKEN_CACHE";
     public static final String KEY_CACHE_NAME = "keyCache";
     public static final String API_CONTEXT_CACHE = "apiContextCache";
     public static final String WORKFLOW_CACHE_NAME = "workflowCache";
