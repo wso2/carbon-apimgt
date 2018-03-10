@@ -2597,6 +2597,10 @@ public class APIStoreHostObject extends ScriptableObject {
                     if (APIUtil.isMultiGroupAppSharingEnabled()) {
                         row.put("owner", row, api.getApplication().getOwner());
                     }
+                    List<APIKey> keys = api.getKeys();
+                    for (APIKey key : keys) {
+                        row.put(key.getType() + "_KEY", row, key.getAccessToken());
+                    }
                     myn.put(i++, myn, row);
                 }
             }
