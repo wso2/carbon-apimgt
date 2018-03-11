@@ -39,7 +39,6 @@ import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
 import org.wso2.carbon.stratos.common.util.CommonUtil;
 import org.wso2.carbon.tenant.mgt.services.TenantMgtAdminService;
-import org.wso2.carbon.um.ws.api.stub.Tenant;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
