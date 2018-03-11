@@ -39,14 +39,28 @@
     isPermitted=jagg.getCreatePermitted().permitted;
     isManageTierPermitted = jagg.getManageTierPermitted().permitted;
 
-    var highlightLink;
-    var collapsedStatus;
-    if(reqUrl.equals(allStatsMappedUrl) || reqUrl.equals(allStatsListUrl)) {
-        highlightLink = "in";
-    } else {
-        collapsedStatus = "collapsed";
+    //Deside the show  hide options for each sub section base on the page
+
+    var showAPI = false;
+    var showApplications = false;
+    var showSubscriptions = false;
+
+    if( page === "apis-time" || page === "api-usage-user" || page === "api-top-users" ||
+        page === "api-last-access-times" || page === "api-usage-resource-path" || page === "api-usage-destination" ||
+        page === "api-usage" || page === "api-throttledcounts" || page === "faulty-invocations" ||
+        page === "api-latencytime" || page === "api-geolocation-usage" || page === "api-user-agent-usage"
+    ){
+        showAPI = true;
     }
-%>
+
+    if( page === "application-throttledcounts" || page === "applications-time" ){
+        showApplications = true;
+    }
+
+    if( page === "api-subscriptions" || page === "developers-time"  || page === "subscriptions-time" ) {
+        showSubscriptions = true;
+    }
+    %>
 
    <div class="sidebar-wrapper sidebar-nav" id="left-sidebar" data-side="left" data-width="300" data-fixed-offset-top="0" data-spy="affix" data-offset-top="80" style="width: 300px; left: 0px;">
 		<div class="nano">
@@ -56,18 +70,20 @@
 						href="<%=listMappedUrl%>?page=1<%=urlPostfix%>" title="<%=i18n.localize("APIs")%>"
 						onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>?page=1<%=urlPostfix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><i class="fw fw-api fw-2x" title="<%=i18n.localize("APIs")%>" style="font-size:22px;"></i> <%=i18n.localize("APIs")%></a></li>
 					<li>
-					<a title="<%=i18n.localize("Statistics")%>" data-toggle="collapse" data-target="#analytics" class="<%=collapsedStatus%>">
+					<a title="<%=i18n.localize("Statistics")%>" data-toggle="collapse" data-target="#analytics"
+					            <% if(!showAPI || !showApplications || !showSubscriptions){ %> class="collapsed" <% } %> >
                                <i class="fw fw-statistics fw-2x" title="<%=i18n.localize("Analytics")%>" style="font-size:22px;"></i> <%=i18n.localize("Analytics")%>
                                <span class="arrow"></span>
                                </a>
 
-<ul class="nav nav-pills secondary-nav collapse sub-menu <%=highlightLink%>" id="analytics" aria-expanded="true">
+        <ul class="nav nav-pills secondary-nav collapse sub-menu <% if(showAPI || showApplications || showSubscriptions){ %> in <% } %> "
+        id="analytics" aria-expanded="true">
             <li>
-                <a data-toggle="collapse" data-target="#api" class="<%=collapsedStatus%>">
-                    <%=i18n.localize("API")%>
+                <a data-toggle="collapse" data-target="#api" <% if(!showAPI){ %> class="collapsed" <% } %>>
+                    <%=i18n.localize("API")%> - <%=showAPI%>
                     <span class="arrow"></span>
                 </a>
-                <ul id="api" class="nav nav-pills secondary-nav collapse sub-sub-menu <%=highlightLink%>" aria-expanded="true">
+                <ul id="api" class="nav nav-pills secondary-nav collapse sub-sub-menu <% if(showAPI){ %> in <% } %> aria-expanded="true">
                     <li><a class="substats" title="<%=i18n.localize("Created APIs Over Time")%>"
                         href="<%=allStatsMappedUrl%>?page=apis-time&stat=stat<%=urlPrefix%>"
                         onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=apis-time&stat=stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
@@ -124,11 +140,11 @@
             </li>
 
               <li>
-                  <a data-toggle="collapse" data-target="#applications" class="<%=collapsedStatus%>">
-                      <%=i18n.localize("Applications")%>
+                  <a data-toggle="collapse" data-target="#applications" <% if(!showApplications){ %> class="collapsed" <% } %>>
+                      <%=i18n.localize("Applications")%> <%=showApplications%>
                       <span class="arrow"></span>
                   </a>
-                  <ul id="applications" class="nav nav-pills secondary-nav collapse sub-sub-menu <%=highlightLink%>" aria-expanded="true">
+                  <ul id="applications" class="nav nav-pills secondary-nav collapse sub-sub-menu <% if(showApplications){ %> in <% } %>" aria-expanded="true">
                     <li><a class="substats" title="<%=i18n.localize("App Throttled Requests")%>"
                         href="<%=allStatsMappedUrl%>?page=application-throttledcounts&stat=all-stat<%=urlPrefix%>"
                         onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=application-throttledcounts&stat=all-stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
@@ -141,11 +157,11 @@
               </li>
 
             <li>
-                <a data-toggle="collapse" data-target="#subscriptions" class="<%=collapsedStatus%>">
-                    <%=i18n.localize("Subscriptions")%>
+                <a data-toggle="collapse" data-target="#subscriptions" <% if(!showSubscriptions){ %> class="collapsed" <% } %>>
+                    <%=i18n.localize("Subscriptions")%> - <%=showSubscriptions%>
                     <span class="arrow"></span>
                 </a>
-                <ul id="subscriptions" class="nav nav-pills secondary-nav collapse sub-sub-menu <%=highlightLink%>" aria-expanded="true">
+                <ul id="subscriptions" class="nav nav-pills secondary-nav collapse sub-sub-menu <% if(showSubscriptions){ %> in <% } %> " aria-expanded="true">
                     <li><a class="substats" title="<%=i18n.localize("API Subscriptions")%>"
                         href="<%=allStatsMappedUrl%>?page=api-subscriptions&stat=all-stat<%=urlPrefix%>"
                         onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=api-subscriptions&stat=all-stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
