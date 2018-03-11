@@ -1790,7 +1790,7 @@ public class APIProviderHostObject extends ScriptableObject {
             visibleRoles = (String) apiData.get("visibleRoles", apiData);
         }
         if (publisherAccessControl != null && publisherAccessControl.equals(APIConstants.API_RESTRICTED_VISIBILITY)) {
-            publisherAccessControlRoles = (String) apiData.get(APIConstants.ACCESS_CONTROL_PARAMETER, apiData);
+            publisherAccessControlRoles = (String) apiData.get(APIConstants.ACCESS_CONTROL_ROLES_PARAMETER, apiData);
         }
 
         String visibleTenants = "";
