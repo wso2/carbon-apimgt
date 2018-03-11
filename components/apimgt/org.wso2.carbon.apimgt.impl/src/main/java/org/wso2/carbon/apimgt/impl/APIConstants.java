@@ -340,6 +340,7 @@ public final class APIConstants {
     public static final String REGISTRY_HIDDEN_ENDPOINT_PROPERTY = "registry.HiddenEpProperty";
     public static final String OVERVIEW_ELEMENT = "overview";
     public static final String ENDPOINT_PASSWORD_ELEMENT = "endpointPpassword";
+    public static final String FEDERATED_USER = "FEDERATED";
 
     //documentation rxt
 
