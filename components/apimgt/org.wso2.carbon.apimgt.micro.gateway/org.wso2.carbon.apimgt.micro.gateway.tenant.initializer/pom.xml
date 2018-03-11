@@ -155,6 +155,7 @@
                             org.wso2.carbon.user.api.*; version="${imp.pkg.version.org.wso2.carbon.user.api}",
                             org.wso2.carbon.user.core.*; version="${carbon.platform.package.import.version.range}",
                             org.wso2.carbon.base.*; version="${imp.pkg.version.org.wso2.carbon.base}",
+                            org.apache.commons.io.*
                         </Import-Package>
                         <Export-Package>
                             !org.wso2.carbon.apimgt.micro.gateway.tenant.initializer.internal,
