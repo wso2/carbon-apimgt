@@ -97,9 +97,9 @@ $(document).ready(function() {
 
     $('.default_version_check').change(function(){
         if($(this).is(":checked")){
-            $(default_version_checked).val($(this).val());
+            $('#default_version_checked').val($(this).val());
         }else{
-            $(default_version_checked).val("");
+            $('#default_version_checked').val("");
         }
     });
 
