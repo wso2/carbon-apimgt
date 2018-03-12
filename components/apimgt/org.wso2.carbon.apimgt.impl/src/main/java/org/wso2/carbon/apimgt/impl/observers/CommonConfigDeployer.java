@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -46,29 +47,34 @@ public class CommonConfigDeployer extends AbstractAxis2ConfigurationContextObser
         final String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         final int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
 
-
-        try {
-            APIUtil.loadTenantAPIPolicy(tenantDomain, tenantId);
-        } catch (Exception e) {
-            log.error("Failed to load tiers.xml to tenant's registry", e);
-        }
-
+        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
         try {
             //TODO adding only the policies to data wouldn't be sufficient. Need to figure out approach after tenant story has finalized
             //Add default set of policies to database
-            if(APIUtil.isAdvanceThrottlingEnabled()) {
+            if (APIUtil.isAdvanceThrottlingEnabled()) {
+                ThrottleProperties.PolicyDeployer policyDeployer = configuration.getThrottleProperties()
+                        .getPolicyDeployer();
                 //This has schedule to separate thread due to issues arise when calling this method in same thread
                 //Also this will avoid tenant login overhead as well
-                Thread t1 = new Thread(new Runnable() {
-                    public void run() {
-                        try {
-                            APIUtil.addDefaultTenantAdvancedThrottlePolicies(tenantDomain, tenantId);
-                        } catch (APIManagementException e) {
-                            log.error("Error while deploying throttle policies", e);
+                if (policyDeployer.isEnabled()) {
+                    Thread t1 = new Thread(new Runnable() {
+                        public void run() {
+                            try {
+                                APIUtil.addDefaultTenantAdvancedThrottlePolicies(tenantDomain, tenantId);
+                            } catch (APIManagementException e) {
+                                log.error("Error while deploying throttle policies", e);
+                            }
                         }
-                    }
-                });
-                t1.start();
+                    });
+                    t1.start();
+                }
+            } else {
+                try {
+                    APIUtil.loadTenantAPIPolicy(tenantDomain, tenantId);
+                } catch (Exception e) {
+                    log.error("Failed to load tiers.xml to tenant's registry", e);
+                }
             }
         } catch (Exception e) {
             log.error("Failed to load default policies to tenant" + tenantDomain, e);
@@ -76,8 +82,6 @@ public class CommonConfigDeployer extends AbstractAxis2ConfigurationContextObser
 
         try {
             //Check whether GatewayType is "Synapse" before attempting to load Custom-Sequences into registry
-            APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
-                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
             String gatewayType = configuration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
 

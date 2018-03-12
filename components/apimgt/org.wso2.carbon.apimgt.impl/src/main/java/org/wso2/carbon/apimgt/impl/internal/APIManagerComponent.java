@@ -587,20 +587,19 @@ public class APIManagerComponent {
         adapterConfiguration.setName(APIConstants.BLOCKING_EVENT_PUBLISHER);
         adapterConfiguration.setType(APIConstants.BLOCKING_EVENT_TYPE);
         adapterConfiguration.setMessageFormat(APIConstants.BLOCKING_EVENT_FORMAT);
-        Map<String,String> adapterParameters = new HashMap<>();
+        Map<String, String> adapterParameters = new HashMap<>();
         if (ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService() != null) {
             APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
-                    .getAPIManagerConfigurationService()
-                    .getAPIManagerConfiguration();
-            if (configuration.getThrottleProperties().getDataPublisher() != null && configuration
-                    .getThrottleProperties().getDataPublisher().isEnabled()) {
-                ThrottleProperties.DataPublisher dataPublisher = configuration.getThrottleProperties()
-                        .getDataPublisher();
-                adapterParameters.put(APIConstants.RECEIVER_URL,dataPublisher.getReceiverUrlGroup());
-                adapterParameters.put(APIConstants.AUTHENTICATOR_URL,dataPublisher.getAuthUrlGroup());
-                adapterParameters.put(APIConstants.USERNAME,dataPublisher.getUsername());
-                adapterParameters.put(APIConstants.PASSWORD,dataPublisher.getPassword());
-                adapterParameters.put(APIConstants.PROTOCOL,dataPublisher.getType());
+                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+            if (configuration.getThrottleProperties().getTrafficManager() != null && configuration
+                    .getThrottleProperties().getPolicyDeployer().isEnabled()) {
+                ThrottleProperties.TrafficManager trafficManager = configuration.getThrottleProperties()
+                        .getTrafficManager();
+                adapterParameters.put(APIConstants.RECEIVER_URL, trafficManager.getReceiverUrlGroup());
+                adapterParameters.put(APIConstants.AUTHENTICATOR_URL, trafficManager.getAuthUrlGroup());
+                adapterParameters.put(APIConstants.USERNAME, trafficManager.getUsername());
+                adapterParameters.put(APIConstants.PASSWORD, trafficManager.getPassword());
+                adapterParameters.put(APIConstants.PROTOCOL, trafficManager.getType());
                 adapterParameters.put(APIConstants.PUBLISHING_MODE, APIConstants.NON_BLOCKING);
                 adapterParameters.put(APIConstants.PUBLISHING_TIME_OUT, "0");
                 adapterConfiguration.setStaticProperties(adapterParameters);
@@ -608,7 +607,8 @@ public class APIManagerComponent {
                     ServiceReferenceHolder.getInstance().getOutputEventAdapterService().create(adapterConfiguration);
                 } catch (OutputEventAdapterException e) {
                     log.warn(
-                            "Exception occurred while creating WSO2 Event Adapter. Request Blocking may not work properly",
+                            "Exception occurred while creating WSO2 Event Adapter. Request Blocking may not work " +
+                                    "properly",
                             e);
                 }
             } else {
