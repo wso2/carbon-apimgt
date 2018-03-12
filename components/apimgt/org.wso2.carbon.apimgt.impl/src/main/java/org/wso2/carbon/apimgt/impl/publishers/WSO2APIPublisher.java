@@ -762,7 +762,7 @@ public class WSO2APIPublisher implements APIPublisher {
             FileBody fileBody = new FileBody(fileToUpload, "application/octet-stream");
             entity.addPart("apiThumb", fileBody);
             // fileToUpload.delete();
-
+            entity.addPart("thumbUrl", new StringBody(checkValue(getIconUrlWithHttpRedirect(registryIconUrl))));
             StringBuilder tagsSet = new StringBuilder();
             Iterator it = api.getTags().iterator();
             int j = 0;
