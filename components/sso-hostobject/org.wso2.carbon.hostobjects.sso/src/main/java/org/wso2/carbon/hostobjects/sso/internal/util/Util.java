@@ -499,7 +499,7 @@ public class Util {
      */
     public static String getUsernameFromAssertion(Assertion assertion, String usernameAttribute) {
         String username = null;
-        if (usernameAttribute != null) {
+        if (!StringUtils.isEmpty(usernameAttribute)) {
             // There can be multiple AttributeStatements in Assertion
             List<AttributeStatement> attributeStatements = assertion.getAttributeStatements();
             if (attributeStatements != null) {
