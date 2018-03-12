@@ -629,5 +629,6 @@
     "Property value can have maximum of 900 characters." : "Property value can have maximum of 900 characters.",
     "Number of API Subscriptions" : "Number of API Subscriptions",
     "You must select a mediation policy to download": "You must select a mediation policy to download.",
-    "Error while retrieving the selected mediation policy": "Error while retrieving the selected mediation policy."
+    "Error while retrieving the selected mediation policy": "Error while retrieving the selected mediation policy.",
+    "Delete Task" : "Delete Task"
 }
