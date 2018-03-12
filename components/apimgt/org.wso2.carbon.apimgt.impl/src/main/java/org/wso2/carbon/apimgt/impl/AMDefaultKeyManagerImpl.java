@@ -654,7 +654,6 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
     @Override
     public Map<String, Set<Scope>> getScopesForAPIS(String apiIdsString) throws APIManagementException {
-
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         Map<String, Set<Scope>> scopes = apiMgtDAO.getScopesForAPIS(apiIdsString);
         return scopes;
