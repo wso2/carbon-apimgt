@@ -51,7 +51,7 @@ import static org.wso2.carbon.apimgt.impl.APIConstants.OVERVIEW_PREFIX;
 @SuppressWarnings("unused")
 public class CustomAPIIndexer extends RXTIndexer {
     public static final Log log = LogFactory.getLog(CustomAPIIndexer.class);
-    private static final int FIVE_MINUTES_TO_SECONDS = 300000;
+    private static final int FIVE_MINUTES_TO_MILLI_SECONDS = 300000;
 
     public IndexDocument getIndexedDocument(AsyncIndexer.File2Index fileData) throws SolrException, RegistryException {
         Registry registry = GovernanceUtils
@@ -69,7 +69,7 @@ public class CustomAPIIndexer extends RXTIndexer {
             String publisherAccessControl = resource.getProperty(APIConstants.PUBLISHER_ROLES);
 
             if ((publisherAccessControl == null || publisherAccessControl.trim().isEmpty())
-                    && System.currentTimeMillis() - resource.getCreatedTime().getTime() > FIVE_MINUTES_TO_SECONDS) {
+                    && System.currentTimeMillis() - resource.getCreatedTime().getTime() > FIVE_MINUTES_TO_MILLI_SECONDS) {
                 if (log.isDebugEnabled()) {
                     log.debug("API at " + resourcePath + "did not have property : " + APIConstants.PUBLISHER_ROLES
                             + ", hence adding the null value for that API resource.");
@@ -90,7 +90,7 @@ public class CustomAPIIndexer extends RXTIndexer {
                 String storeVisibility = artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY);
                 String storeVisibleRoles = artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES);
 
-                if (System.currentTimeMillis() - resource.getCreatedTime().getTime() > FIVE_MINUTES_TO_SECONDS) {
+                if (System.currentTimeMillis() - resource.getCreatedTime().getTime() > FIVE_MINUTES_TO_MILLI_SECONDS) {
                     if (storeViewRoles == null) {
                         if (log.isDebugEnabled()) {
                             log.debug("API at " + resourcePath + "did not have property : "
