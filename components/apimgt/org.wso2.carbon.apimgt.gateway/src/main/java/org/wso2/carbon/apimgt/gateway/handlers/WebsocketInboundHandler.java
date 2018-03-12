@@ -84,7 +84,6 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                     if (usageDataPublisher == null) {
                         try {
                             log.debug("Instantiating Web Socket Data Publisher");
-
                             usageDataPublisher =
                                     (APIMgtUsageDataPublisher) APIUtil.getClassForName(publisherClass).newInstance();
                             usageDataPublisher.init();
