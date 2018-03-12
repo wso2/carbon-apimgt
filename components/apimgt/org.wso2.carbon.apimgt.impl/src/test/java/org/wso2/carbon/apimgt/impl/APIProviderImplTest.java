@@ -4155,4 +4155,125 @@ public class APIProviderImplTest {
         field.set(null, newValue);
     }
 
+    /**
+     * This method tests adding file to documentation method.
+     *
+     * @throws GovernanceException    Governance Exception.
+     * @throws APIManagementException API Management Exception.
+     */
+    @Test
+    public void testAddFileToDocumentation() throws APIManagementException, GovernanceException {
+
+        APIIdentifier identifier = new APIIdentifier("admin-AT-carbon.super", "API1", "1.0.0");
+        Set<String> environments = new HashSet<String>();
+
+        Set<URITemplate> uriTemplates = new HashSet<URITemplate>();
+
+        URITemplate uriTemplate1 = new URITemplate();
+        uriTemplate1.setHTTPVerb("POST");
+        uriTemplate1.setAuthType("Application");
+        uriTemplate1.setUriTemplate("/add");
+        uriTemplate1.setThrottlingTier("Gold");
+        uriTemplates.add(uriTemplate1);
+
+        final API api = new API(identifier);
+        api.setStatus(APIStatus.CREATED);
+        api.setVisibility("public");
+        api.setAccessControl("all");
+        api.setTransports("http,https");
+        api.setContext("/test");
+        api.setEnvironments(environments);
+        api.setUriTemplates(uriTemplates);
+
+        PowerMockito.when(APIUtil.getApiStatus("PUBLISHED")).thenReturn(APIStatus.PUBLISHED);
+
+        List<Documentation> documentationList = getDocumentationList();
+
+        final APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, documentationList, null);
+
+        Mockito.when(artifactManager.newGovernanceArtifact(Matchers.any(QName.class))).thenReturn(artifact);
+        Mockito.when(APIUtil.createAPIArtifactContent(artifact, api)).thenReturn(artifact);
+        apiProvider.addAPI(api);
+
+        String fileName = "test.txt";
+        String contentType = "application/force-download";
+        Documentation doc = new Documentation(DocumentationType.HOWTO, fileName);
+        doc.setSourceType(DocumentSourceType.FILE);
+        PowerMockito.when(APIUtil.getDocumentationFilePath(api.getId(), fileName)).thenReturn("filePath");
+        InputStream inputStream = Mockito.mock(InputStream.class);
+
+        apiProvider.addFileToDocumentation(api.getId(), doc, fileName, inputStream, contentType);
+    }
+
+    /**
+     * This method tests adding file to documentation method when document source type is not file.
+     *
+     * @throws GovernanceException    Governance Exception.
+     * @throws APIManagementException API Management Exception.
+     */
+    @Test(expected = APIManagementException.class)
+    public void testAddFileToDocumentationWhenDocSourceTypeIsNotFile() throws APIManagementException,
+            GovernanceException {
+
+        APIIdentifier identifier = new APIIdentifier("admin-AT-carbon.super", "API1", "1.0.0");
+        final APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, null, null);
+
+        String fileName = "test.txt";
+        String contentType = "application/force-download";
+        Documentation doc = new Documentation(DocumentationType.HOWTO, fileName);
+        doc.setSourceType(DocumentSourceType.INLINE);
+        InputStream inputStream = Mockito.mock(InputStream.class);
+
+        apiProvider.addFileToDocumentation(identifier, doc, fileName, inputStream, contentType);
+    }
+
+    /**
+     * This method tests adding file to documentation method for exception.
+     *
+     * @throws GovernanceException    Governance Exception.
+     * @throws APIManagementException API Management Exception.
+     */
+    @Test(expected = APIManagementException.class)
+    public void testAddFileToDocumentationForException() throws Exception {
+
+        APIIdentifier identifier = new APIIdentifier("admin-AT-carbon.super", "API1", "1.0.0");
+        Set<String> environments = new HashSet<String>();
+
+        Set<URITemplate> uriTemplates = new HashSet<URITemplate>();
+
+        URITemplate uriTemplate1 = new URITemplate();
+        uriTemplate1.setHTTPVerb("POST");
+        uriTemplate1.setAuthType("Application");
+        uriTemplate1.setUriTemplate("/add");
+        uriTemplate1.setThrottlingTier("Gold");
+        uriTemplates.add(uriTemplate1);
+
+        final API api = new API(identifier);
+        api.setStatus(APIStatus.CREATED);
+        api.setVisibility("public");
+        api.setAccessControl("all");
+        api.setTransports("http,https");
+        api.setContext("/test");
+        api.setEnvironments(environments);
+        api.setUriTemplates(uriTemplates);
+        api.setVisibleRoles("role1 role2");
+
+        PowerMockito.when(APIUtil.getApiStatus("PUBLISHED")).thenReturn(APIStatus.PUBLISHED);
+        List<Documentation> documentationList = getDocumentationList();
+        final APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, documentationList, null);
+
+        Mockito.when(artifactManager.newGovernanceArtifact(Matchers.any(QName.class))).thenReturn(artifact);
+        Mockito.when(APIUtil.createAPIArtifactContent(artifact, api)).thenReturn(artifact);
+        apiProvider.addAPI(api);
+
+        String fileName = "test.txt";
+        String contentType = "application/force-download";
+        Documentation doc = new Documentation(DocumentationType.HOWTO, fileName);
+        doc.setSourceType(DocumentSourceType.FILE);
+        PowerMockito.when(APIUtil.getDocumentationFilePath(api.getId(), fileName)).thenReturn("filePath");
+        PowerMockito.doThrow(new APIManagementException("MultiTenantUserAdmin")).when(APIUtil.class,
+                "setFilePermission", "filePath");
+        InputStream inputStream = Mockito.mock(InputStream.class);
+        apiProvider.addFileToDocumentation(api.getId(), doc, fileName, inputStream, contentType);
+    }
 }
