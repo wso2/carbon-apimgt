@@ -350,46 +350,6 @@
         <Observer>org.wso2.carbon.apimgt.impl.observers.SimpleLoggingObserver</Observer>
     </StatusObservers-->
 
-    <!-- Use this configuration Create APIs at the Server startup -->
-    <StartupAPIPublisher>
-        <!-- Enable/Disable the API Startup Publisher -->
-        <Enabled>false</Enabled>
-
-        <!-- Configuration to create APIs for local endpoints.
-             Endpoint will be computed as http://${carbon.local.ip}:${mgt.transport.http.port}/Context.
-             Define many LocalAPI elements as below to create many APIs
-             for local Endpoints.
-             IconPath should be relative to CARBON_HOME. -->
-        <LocalAPIs>
-            <LocalAPI>
-                <Context>/resource</Context>
-                <Provider>admin</Provider>
-                <Version>1.0.0</Version>
-                <IconPath>none</IconPath>
-                <DocumentURL>none</DocumentURL>
-                <AuthType>Any</AuthType>
-            </LocalAPI>
-        </LocalAPIs>
-
-        <!-- Configuration to create APIs for remote endpoints.
-             When Endpoint need to be defined use this configuration.
-             Define many API elements as below to create many APIs
-             for external Endpoints.
-             If you do not need to add Icon or Documentation set
-             'none' as the value for IconPath & DocumentURL. -->
-        <!--APIs>
-            <API>
-                <Context>/resource</Context>
-                <Endpoint>http://localhost:9764/resource</Endpoint>
-                <Provider>admin</Provider>
-                <Version>1.0.0</Version>
-                <IconPath>none</IconPath>
-                <DocumentURL>none</DocumentURL>
-                <AuthType>Any</AuthType>
-            </API>
-        </APIs-->
-    </StartupAPIPublisher>
-
     <!-- Configuration to enable/disable sending CORS headers in the Gateway response
          and define the Access-Control-Allow-Origin header value.-->
     <CORSConfiguration>
