@@ -372,9 +372,7 @@
         var port = a.port;
         var protocol = a.protocol;
         var address;
-        if (document.location.hostname === a.hostname) {
-            return undefined;
-        }
+
         if (port) {
             address = protocol + "//" + hostname + ":" + port;
         } else {
