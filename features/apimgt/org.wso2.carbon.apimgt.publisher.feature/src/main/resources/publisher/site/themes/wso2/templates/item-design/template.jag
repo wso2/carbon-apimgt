@@ -641,7 +641,7 @@
 			<tr id="{{name}}">
 				<td>{{ name }}</td>
 				<td><a class="param_desc" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="description" title="description">{{ description }}</a></td>
-				<td><a class="param_paramType" data-type="select" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="in" title="in">{{ in }}</a></td>
+				<td><a class="param_paramType" data-type="select" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="in" title="Path">{{ in }}</a></td>
 				{{#if ../isOpenAPI3}}
 				    <td><a class="param_type" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="type" title="type">{{ schema.type }}</a></td>
 				{{else}}

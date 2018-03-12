@@ -576,3 +576,6 @@ a.remove_rating:hover{
   color: #333;
   border-color: #ffe0b2 ;
 }
+#query::placeholder{
+    color:#fff;
+}

@@ -80,7 +80,7 @@
         id="analytics" aria-expanded="true">
             <li>
                 <a data-toggle="collapse" data-target="#api" <% if(!showAPI){ %> class="collapsed" <% } %>>
-                    <%=i18n.localize("API")%> - <%=showAPI%>
+                    <%=i18n.localize("API")%>
                     <span class="arrow"></span>
                 </a>
                 <ul id="api" class="nav nav-pills secondary-nav collapse sub-sub-menu <% if(showAPI){ %> in <% } %> aria-expanded="true">
@@ -141,7 +141,7 @@
 
               <li>
                   <a data-toggle="collapse" data-target="#applications" <% if(!showApplications){ %> class="collapsed" <% } %>>
-                      <%=i18n.localize("Applications")%> <%=showApplications%>
+                      <%=i18n.localize("Applications")%>
                       <span class="arrow"></span>
                   </a>
                   <ul id="applications" class="nav nav-pills secondary-nav collapse sub-sub-menu <% if(showApplications){ %> in <% } %>" aria-expanded="true">
@@ -158,7 +158,7 @@
 
             <li>
                 <a data-toggle="collapse" data-target="#subscriptions" <% if(!showSubscriptions){ %> class="collapsed" <% } %>>
-                    <%=i18n.localize("Subscriptions")%> - <%=showSubscriptions%>
+                    <%=i18n.localize("Subscriptions")%>
                     <span class="arrow"></span>
                 </a>
                 <ul id="subscriptions" class="nav nav-pills secondary-nav collapse sub-sub-menu <% if(showSubscriptions){ %> in <% } %> " aria-expanded="true">
