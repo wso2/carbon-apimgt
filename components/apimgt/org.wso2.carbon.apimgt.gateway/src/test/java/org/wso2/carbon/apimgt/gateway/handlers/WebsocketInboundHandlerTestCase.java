@@ -175,6 +175,11 @@ public class WebsocketInboundHandlerTestCase {
     * */
     @Test
     public void testChannelRead() throws AxisFault {
+        String publisherClass = "publisherClass";
+        PowerMockito.mockStatic(DataPublisherUtil.class);
+        APIManagerAnalyticsConfiguration apiMngAnalyticsConfig = Mockito.mock(APIManagerAnalyticsConfiguration.class);
+        PowerMockito.when(DataPublisherUtil.getApiManagerAnalyticsConfiguration()).thenReturn(apiMngAnalyticsConfig);
+        Mockito.when(apiMngAnalyticsConfig.getPublisherClass()).thenReturn(publisherClass);
         //test when the request is a handshake
         WebsocketInboundHandler websocketInboundHandler = new WebsocketInboundHandler();
         ChannelHandlerContext channelHandlerContext = Mockito.mock(ChannelHandlerContext.class);
@@ -273,6 +278,11 @@ public class WebsocketInboundHandlerTestCase {
    * */
     @Test
     public void testChannelRead1() throws Exception {
+        String publisherClass = "publisherClass";
+        PowerMockito.mockStatic(DataPublisherUtil.class);
+        APIManagerAnalyticsConfiguration apiMngAnalyticsConfig = Mockito.mock(APIManagerAnalyticsConfiguration.class);
+        PowerMockito.when(DataPublisherUtil.getApiManagerAnalyticsConfiguration()).thenReturn(apiMngAnalyticsConfig);
+        Mockito.when(apiMngAnalyticsConfig.getPublisherClass()).thenReturn(publisherClass);
         //test when the request is a handshake
         WebsocketInboundHandler websocketInboundHandler = new WebsocketInboundHandler() {
             @Override
@@ -301,10 +311,14 @@ public class WebsocketInboundHandlerTestCase {
     * */
     @Test
     public void testChannelReadForSuperTenant() throws Exception {
+        String publisherClass = "publisherClass";
+        PowerMockito.mockStatic(DataPublisherUtil.class);
+        APIManagerAnalyticsConfiguration apiMngAnalyticsConfig = Mockito.mock(APIManagerAnalyticsConfiguration.class);
+        PowerMockito.when(DataPublisherUtil.getApiManagerAnalyticsConfiguration()).thenReturn(apiMngAnalyticsConfig);
+        Mockito.when(apiMngAnalyticsConfig.getPublisherClass()).thenReturn(publisherClass);
         //test when the request is a handshake
         WebsocketInboundHandler websocketInboundHandler = new WebsocketInboundHandler();
         PowerMockito.when(MultitenantUtils.getTenantDomainFromUrl(SUPER_TENANT_URL)).thenReturn(SUPER_TENANT_DOMAIN);
-
         try {
             websocketInboundHandler.channelRead(channelHandlerContext, fullHttpRequest);
             fail("Expected exception is not thrown. Hence test fails.");
@@ -463,6 +477,11 @@ public class WebsocketInboundHandlerTestCase {
     * */
     @Test
     public void testDoThrottle() throws APIManagementException {
+        String publisherClass = "publisherClass";
+        PowerMockito.mockStatic(DataPublisherUtil.class);
+        APIManagerAnalyticsConfiguration apiMngAnalyticsConfig = Mockito.mock(APIManagerAnalyticsConfiguration.class);
+        PowerMockito.when(DataPublisherUtil.getApiManagerAnalyticsConfiguration()).thenReturn(apiMngAnalyticsConfig);
+        Mockito.when(apiMngAnalyticsConfig.getPublisherClass()).thenReturn(publisherClass);
         //todo
         ChannelHandlerContext channelHandlerContext = Mockito.mock(ChannelHandlerContext.class);
         WebSocketFrame webSocketFrame = Mockito.mock(WebSocketFrame.class);
@@ -485,6 +504,11 @@ public class WebsocketInboundHandlerTestCase {
     * */
     @Test
     public void testDoThrottle1() {
+        String publisherClass = "publisherClass";
+        PowerMockito.mockStatic(DataPublisherUtil.class);
+        APIManagerAnalyticsConfiguration apiMngAnalyticsConfig = Mockito.mock(APIManagerAnalyticsConfiguration.class);
+        PowerMockito.when(DataPublisherUtil.getApiManagerAnalyticsConfiguration()).thenReturn(apiMngAnalyticsConfig);
+        Mockito.when(apiMngAnalyticsConfig.getPublisherClass()).thenReturn(publisherClass);
         //todo
         ChannelHandlerContext channelHandlerContext = Mockito.mock(ChannelHandlerContext.class);
         WebSocketFrame webSocketFrame = Mockito.mock(WebSocketFrame.class);

@@ -31,13 +31,15 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
+import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 /**
  * Test class for WebsocketHandler
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(PrivilegedCarbonContext.class)
+@PrepareForTest({PrivilegedCarbonContext.class, DataPublisherUtil.class})
 public class WebsocketHandlerTestCase {
 
     @Before
@@ -57,6 +59,11 @@ public class WebsocketHandlerTestCase {
         ChannelHandlerContext channelHandlerContext = Mockito.mock(ChannelHandlerContext.class);
         ChannelPromise channelPromise = Mockito.mock(ChannelPromise.class);
         Object msg = "msg";
+        String publisherClass = "publisherClass";
+        PowerMockito.mockStatic(DataPublisherUtil.class);
+        APIManagerAnalyticsConfiguration apiMngAnalyticsConfig = Mockito.mock(APIManagerAnalyticsConfiguration.class);
+        PowerMockito.when(DataPublisherUtil.getApiManagerAnalyticsConfiguration()).thenReturn(apiMngAnalyticsConfig);
+        Mockito.when(apiMngAnalyticsConfig.getPublisherClass()).thenReturn(publisherClass);
         WebsocketHandler websocketHandler = new WebsocketHandler();
         websocketHandler.write(channelHandlerContext, msg, channelPromise);
         Assert.assertTrue(true);  // No error has occurred. hence test passes.
@@ -68,6 +75,11 @@ public class WebsocketHandlerTestCase {
    * */
     @Test
     public void testWrite1() throws Exception {
+        String publisherClass = "publisherClass";
+        PowerMockito.mockStatic(DataPublisherUtil.class);
+        APIManagerAnalyticsConfiguration apiMngAnalyticsConfig = Mockito.mock(APIManagerAnalyticsConfiguration.class);
+        PowerMockito.when(DataPublisherUtil.getApiManagerAnalyticsConfiguration()).thenReturn(apiMngAnalyticsConfig);
+        Mockito.when(apiMngAnalyticsConfig.getPublisherClass()).thenReturn(publisherClass);
         PowerMockito.mockStatic(PrivilegedCarbonContext.class);
         ChannelHandlerContext channelHandlerContext = Mockito.mock(ChannelHandlerContext.class);
         ChannelPromise channelPromise = Mockito.mock(ChannelPromise.class);
