@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.2.155-SNAPSHOT</version>
+        <version>6.2.172-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -419,7 +419,7 @@
                             org.json.*,
                             org.slf4j,
                             org.w3c.dom,
-                            com.ibm.wsdl.*; version="${wsdl4j.version.range}",
+                            com.ibm.wsdl.*; version="${wsdl4j.version.range}";resolution:=optional,
                             net.sf.saxon.*,
                             org.wso2.carbon.identity.oauth.*;version="${carbon.identity-inbound-auth-oauth.imp.pkg.version}",
                             org.wso2.carbon.identity.oauth2.*;version="${carbon.identity-inbound-auth-oauth.imp.pkg.version}",

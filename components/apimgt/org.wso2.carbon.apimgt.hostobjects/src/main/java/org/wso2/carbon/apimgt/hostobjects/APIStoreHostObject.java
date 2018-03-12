@@ -632,8 +632,14 @@ public class APIStoreHostObject extends ScriptableObject {
 
             if (tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
                 isSuperTenant = true;
+                // If email user name is not enabled and user name is an email user name then only append
+                // carbon.super to the username
+                if (!MultitenantUtils.isEmailUserName() && MultitenantUtils.getTenantAwareUsername(username)
+                        .contains(APIConstants.EMAIL_DOMAIN_SEPARATOR)) {
+                    usernameWithDomain = usernameWithDomain + APIConstants.EMAIL_DOMAIN_SEPARATOR + tenantDomain;
+                }
             } else {
-                usernameWithDomain = usernameWithDomain + "@" + tenantDomain;
+                usernameWithDomain = usernameWithDomain + APIConstants.EMAIL_DOMAIN_SEPARATOR + tenantDomain;
             }
             boolean authorized =
                     APIUtil.checkPermissionQuietly(usernameWithDomain, APIConstants.Permissions.API_SUBSCRIBE);
@@ -2596,6 +2602,10 @@ public class APIStoreHostObject extends ScriptableObject {
                     row.put("applicationId", row, api.getApplication().getId());
                     if (APIUtil.isMultiGroupAppSharingEnabled()) {
                         row.put("owner", row, api.getApplication().getOwner());
+                    }
+                    List<APIKey> keys = api.getKeys();
+                    for (APIKey key : keys) {
+                        row.put(key.getType() + "_KEY", row, key.getAccessToken());
                     }
                     myn.put(i++, myn, row);
                 }

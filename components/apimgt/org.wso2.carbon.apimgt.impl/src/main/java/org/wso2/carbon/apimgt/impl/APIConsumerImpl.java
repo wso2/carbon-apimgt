@@ -3154,6 +3154,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         Set<SubscribedAPI> subscribedAPIs = getSubscribedAPIs(subscriber, groupingId);
         for (SubscribedAPI api : subscribedAPIs) {
             if (api.getApiId().equals(identifier)) {
+                Set<APIKey> keys = getApplicationKeys(api.getApplication().getId());
+                for (APIKey key : keys) {
+                    api.addKey(key);
+                }
                 subscribedAPISet.add(api);
             }
         }
@@ -3482,7 +3486,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @param applicationName of the Application.
      * @param tokenType Token type (PRODUCTION | SANDBOX)
      * @param callbackUrl callback URL
-     * @param allowedDomains allowedDomains for token.
+     * @param allowedDomains allowedDomains for token.          
      * @param validityTime validity time period.
      * @param groupingId APIM application id.
      * @param jsonString Callback URL for the Application.

@@ -1650,8 +1650,6 @@ public class ApiMgtDAO {
                 }
                 subscribedAPI.setApplication(application);
 
-                int subscriptionId = result.getInt("SUBS_ID");
-
                 if (!map.containsKey(application.getName())) {
                     map.put(application.getName(), new TreeSet<>(new Comparator<SubscribedAPI>() {
                         public int compare(SubscribedAPI o1, SubscribedAPI o2) {

@@ -115,8 +115,6 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import javax.cache.Caching;
-import javax.xml.namespace.QName;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -135,6 +133,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.cache.Caching;
+import javax.xml.namespace.QName;
 
 @SuppressWarnings("unused")
 public class APIProviderHostObject extends ScriptableObject {
@@ -278,6 +278,12 @@ public class APIProviderHostObject extends ScriptableObject {
 
             if (tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
                 isSuperTenant = true;
+                // If email user name is not enabled and user name is an email user name then only append
+                // carbon.super to the username
+                if (!MultitenantUtils.isEmailUserName() && MultitenantUtils.getTenantAwareUsername(username)
+                        .contains(APIConstants.EMAIL_DOMAIN_SEPARATOR)) {
+                    usernameWithDomain = usernameWithDomain + APIConstants.EMAIL_DOMAIN_SEPARATOR + tenantDomain;
+                }
             } else {
                 usernameWithDomain = usernameWithDomain + "@" + tenantDomain;
             }
@@ -1784,7 +1790,7 @@ public class APIProviderHostObject extends ScriptableObject {
             visibleRoles = (String) apiData.get("visibleRoles", apiData);
         }
         if (publisherAccessControl != null && publisherAccessControl.equals(APIConstants.API_RESTRICTED_VISIBILITY)) {
-            publisherAccessControlRoles = (String) apiData.get(APIConstants.ACCESS_CONTROL_PARAMETER, apiData);
+            publisherAccessControlRoles = (String) apiData.get(APIConstants.ACCESS_CONTROL_ROLES_PARAMETER, apiData);
         }
 
         String visibleTenants = "";

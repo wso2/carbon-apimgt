@@ -62,8 +62,10 @@ public class APIManagerCacheExtensionHandler extends AbstractHandler {
 
             //Remove the super tenant cache entry.
             removeCacheEntryFromGatewayCache(revokedToken);
+            putInvalidTokenEntryIntoInvalidTokenCache(revokedToken, cachedTenantDomain);
             //Remove token from tenant cache.
             removeTokenFromTenantTokenCache(revokedToken, cachedTenantDomain);
+            putInvalidTokenIntoTenantInvalidTokenCache(revokedToken, cachedTenantDomain);
 
         }
 
@@ -107,6 +109,32 @@ public class APIManagerCacheExtensionHandler extends AbstractHandler {
         }
     }
 
+    /**
+     * Put the access token that was cached in the tenant's cache space into invalid token cache
+     *
+     * @param accessToken        - Token to be removed from the cache.
+     * @param cachedTenantDomain - Tenant domain from which the token should be removed.
+     */
+    private void putInvalidTokenIntoTenantInvalidTokenCache(String accessToken, String cachedTenantDomain) {
+        //If the token was cached in the tenant cache
+        if (cachedTenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(cachedTenantDomain)) {
+
+            if (log.isDebugEnabled()) {
+                log.debug("Going to put cache entry " + accessToken + " from " + cachedTenantDomain + " domain");
+            }
+            try {
+                startTenantFlow(cachedTenantDomain);
+                //Remove the tenant cache entry.
+                putInvalidTokenEntryIntoInvalidTokenCache(accessToken, cachedTenantDomain);
+                if (log.isDebugEnabled()) {
+                    log.debug(" Put invalid cached entry " + accessToken + " from " + cachedTenantDomain + " domain");
+                }
+            } finally {
+                endTenantFlow();
+            }
+        }
+    }
+
     public boolean handleRequest(MessageContext messageContext) {
         return true;
     }
@@ -128,6 +156,11 @@ public class APIManagerCacheExtensionHandler extends AbstractHandler {
     protected void removeCacheEntryFromGatewayCache(String key) {
 		Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.GATEWAY_TOKEN_CACHE_NAME)
 				.remove(key);		
+    }
+
+    protected void putInvalidTokenEntryIntoInvalidTokenCache(String cachedToken, String tenantDomain) {
+        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants
+                .GATEWAY_INVALID_TOKEN_CACHE_NAME).put(cachedToken, tenantDomain);
     }
 
     protected String getCachedTenantDomain(String token) {

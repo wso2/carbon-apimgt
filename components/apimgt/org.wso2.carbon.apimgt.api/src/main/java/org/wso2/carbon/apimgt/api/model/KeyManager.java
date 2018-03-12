@@ -202,4 +202,11 @@ public interface KeyManager {
      */
     AccessTokenInfo getAccessTokenByConsumerKey(String consumerKey) throws APIManagementException;
 
+    /**
+     * Get Scopes of the APIs by API Ids
+     * @param apiIdsString String of API Ids
+     * @return {@link java.util.Map} having scopes of each API
+     * @throws APIManagementException
+     */
+    Map<String,Set<Scope>> getScopesForAPIS(String apiIdsString) throws  APIManagementException;
 }

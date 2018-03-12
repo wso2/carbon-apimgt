@@ -823,7 +823,7 @@ public class SQLConstants {
             APIConstants.TOKEN_SCOPE_ASSOCIATION_TABLE + " ISAT," +
             "       IDN_OAUTH_CONSUMER_APPS ICA " +
             "   WHERE " +
-            "       AND ICA.CONSUMER_KEY = ? " +
+            "       ICA.CONSUMER_KEY = ? " +
             "       AND IAT.USER_TYPE = ? " +
             "       AND IAT.CONSUMER_KEY_ID = ICA.ID " +
             "       AND IAT.TOKEN_ID = ISAT.TOKEN_ID " +
@@ -1971,8 +1971,8 @@ public class SQLConstants {
             "   A.DESCRIPTION, " +
             "   C.SCOPE_BINDING " +
             " FROM  " +
-            " ((IDN_OAUTH2_SCOPE AS A  INNER JOIN  AM_API_SCOPES AS B ON A.SCOPE_ID = B.SCOPE_ID) " +
-            " INNER JOIN  IDN_OAUTH2_SCOPE_BINDING AS C ON B.SCOPE_ID = C.SCOPE_ID ) " +
+            " ((IDN_OAUTH2_SCOPE A  INNER JOIN  AM_API_SCOPES B ON A.SCOPE_ID = B.SCOPE_ID) " +
+            " INNER JOIN  IDN_OAUTH2_SCOPE_BINDING C ON B.SCOPE_ID = C.SCOPE_ID ) " +
             " WHERE B.API_ID = ?";
 
     public static final String GET_SCOPE_BY_SUBSCRIBED_API_PREFIX =
@@ -1996,8 +1996,8 @@ public class SQLConstants {
             "   A.DESCRIPTION, " +
             "   C.SCOPE_BINDING " +
             " FROM  " +
-            " ((IDN_OAUTH2_SCOPE AS A  INNER JOIN  AM_API_SCOPES AS B ON A.SCOPE_ID = B.SCOPE_ID) " +
-            " INNER JOIN  IDN_OAUTH2_SCOPE_BINDING AS C ON B.SCOPE_ID = C.SCOPE_ID ) " +
+            " ((IDN_OAUTH2_SCOPE A  INNER JOIN  AM_API_SCOPES B ON A.SCOPE_ID = B.SCOPE_ID) " +
+            " INNER JOIN  IDN_OAUTH2_SCOPE_BINDING C ON B.SCOPE_ID = C.SCOPE_ID ) " +
             " WHERE B.API_ID IN (";
 
     public static final String GET_SCOPES_BY_SCOPE_KEY_SQL =

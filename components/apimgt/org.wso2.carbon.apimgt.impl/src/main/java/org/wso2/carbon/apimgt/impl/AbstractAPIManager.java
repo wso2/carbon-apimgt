@@ -2449,7 +2449,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 }
             }
 
-            // Creating a apiids string
+            // Creating a apiIds string
             String apiIdsString = "";
             int apiCount = apiList.size();
             for (int i = 0; i < apiCount; i++) {
@@ -2466,7 +2466,8 @@ public abstract class AbstractAPIManager implements APIManager {
 
             // setting scope
             if (apiIdsString != "") {
-                Map<String, Set<Scope>> apiScopeSet = apiMgtDAO.getScopesForAPIS(apiIdsString);
+                KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+                Map<String, Set<Scope>> apiScopeSet = keyManager.getScopesForAPIS(apiIdsString);
                 if (apiScopeSet.size() > 0) {
                     for (int i = 0; i < apiCount; i++) {
                         String apiId = apiList.get(i).getId().getApplicationId();
