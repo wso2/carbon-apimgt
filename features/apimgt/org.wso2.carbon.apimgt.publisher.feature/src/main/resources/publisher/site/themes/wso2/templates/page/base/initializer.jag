@@ -52,6 +52,7 @@ jagg.initializer("page/base", {
         jagg.addFooterJS("page/base", "noty", "libs/noty-2.3.8/js/noty/packaged/jquery.noty.packaged.js");
         jagg.addFooterJS("page/base", "wso2js_noty", "libs/theme-wso2_1.0/js/noty-theme-wso2.js");
         jagg.addFooterJS("page/base", "topRight", "libs/noty-2.3.8/js/noty/layouts/topRight.js");
+        jagg.addFooterJS("page/base", "polyfilled-es6", "libs/polyfilled-es6.js");
     }
 });
 %>
