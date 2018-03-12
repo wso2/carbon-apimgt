@@ -25,6 +25,7 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.micro.gateway.common.config.ConfigManager;
 import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.constants.Constants;
 import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeRequestPublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.dto.RequestPublisherDTO;
@@ -66,6 +67,7 @@ public class FileDataPublisherTest {
         PowerMockito.mockStatic(CarbonUtils.class);
         PowerMockito.when(CarbonUtils.getCarbonHome()).thenReturn(carbonHome);
         PowerMockito.when(CarbonUtils.getCarbonConfigDirPath()).thenReturn(carbonConfigPath);
+        Mockito.when(ConfigManager.getConfigManager().getProperty("MaxUsageFileSize")).thenReturn("sizeInMb");
         DataBridgeRequestPublisherDTO dataBridgeRequestPublisherDTO =
                 new DataBridgeRequestPublisherDTO(new RequestPublisherDTO());
         FileDataPublisher fileDataPublisher = new FileDataPublisher();
