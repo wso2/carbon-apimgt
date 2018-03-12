@@ -129,6 +129,8 @@ public class APIManagerComponent {
     private static TenantRegistryLoader tenantRegistryLoader;
     private APIManagerConfiguration configuration = new APIManagerConfiguration();
     public static final String APPLICATION_ROOT_PERMISSION =  "applications";
+    public static final String API_RXT =  "api.rxt";
+    public static final String AUTHORIZATION_HEADER =  "Authorization Header";
 
 
     protected void activate(ComponentContext componentContext) throws Exception {
@@ -356,6 +358,21 @@ public class APIManagerComponent {
                                   RegistryConstants.PATH_SEPARATOR + rxtPath;
             try {
                 if (systemRegistry.resourceExists(resourcePath)) {
+                    // Adding Authorization header to the template if not exist
+                    if (API_RXT.equals(rxtPath )) {
+                        //get Registry resource
+                        Resource resource = systemRegistry.get(resourcePath);
+                        if(resource.getContent() != null) {
+                            // check whether the resource contains a field called authorization header.
+                            if(!RegistryUtils.decodeBytes((byte[]) resource.getContent()).
+                                    contains(AUTHORIZATION_HEADER)) {
+                                String rxt = FileUtil.readFileToString(rxtDir + File.separator + rxtPath);
+                                resource.setContent(rxt.getBytes(Charset.defaultCharset()));
+                                resource.setMediaType(APIConstants.RXT_MEDIA_TYPE);
+                                systemRegistry.put(resourcePath, resource);
+                            }
+                        }
+                    }
                     continue;
                 }
                 String rxt = FileUtil.readFileToString(rxtDir + File.separator + rxtPath);
