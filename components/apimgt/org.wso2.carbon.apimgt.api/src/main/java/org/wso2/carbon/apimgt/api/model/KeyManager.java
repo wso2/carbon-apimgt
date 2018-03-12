@@ -203,7 +203,7 @@ public interface KeyManager {
     AccessTokenInfo getAccessTokenByConsumerKey(String consumerKey) throws APIManagementException;
 
     /**
-     * Gives details of the Access Token to be displayed on Store.
+     * Get Scopes of the APIs by API Ids
      * @param apiIdsString String of API Ids
      * @return {@link java.util.Map} having scopes of each API
      * @throws APIManagementException
