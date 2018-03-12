@@ -60,6 +60,7 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import org.xml.sax.InputSource;
@@ -660,12 +661,18 @@ public class APISynchronizer implements OnPremiseGatewayInitListener {
         PrivilegedCarbonContext.startTenantFlow();
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(username);
-        ConfigurationContext context = ServiceDataHolder.getInstance().getConfigurationContextService()
-                .getServerConfigContext();
-        TenantAxisUtils.getTenantAxisConfiguration(tenantDomain, context);
-        if (log.isDebugEnabled()) {
-            log.debug("Tenant was loaded into Carbon Context. Tenant : " + tenantDomain
-                    + ", Username : " + username);
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            ConfigurationContext context = ServiceDataHolder.getInstance().getConfigurationContextService()
+                    .getServerConfigContext();
+            TenantAxisUtils.getTenantAxisConfiguration(tenantDomain, context);
+            if (log.isDebugEnabled()) {
+                log.debug("Tenant was loaded into Carbon Context. Tenant : " + tenantDomain
+                        + ", Username : " + username);
+            }
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Skipping loading super tenant space since execution is currently in super tenant flow.");
+            }
         }
     }
 }

@@ -36,7 +36,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
 import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageDataBridgeDataPublisher;
@@ -66,17 +66,40 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 	private io.netty.handler.codec.http.HttpHeaders headers = new DefaultHttpHeaders();
 
 	public WebsocketInboundHandler() {
-
         if (throttleDataPublisher == null) {
             // The publisher initializes in the first request only
             synchronized (this) {
                 throttleDataPublisher = new ThrottleDataPublisher();
             }
         }
+        initializeDataPublisher();
+    }
 
-        if (usageDataPublisher == null) {
-            usageDataPublisher = new APIMgtUsageDataBridgeDataPublisher();
-            usageDataPublisher.init();
+    private void initializeDataPublisher() {
+        if (APIUtil.isAnalyticsEnabled() && usageDataPublisher == null) {
+            String publisherClass = getApiManagerAnalyticsConfiguration().getPublisherClass();
+
+            try {
+                synchronized (this) {
+                    if (usageDataPublisher == null) {
+                        try {
+                            log.debug("Instantiating Web Socket Data Publisher");
+
+                            usageDataPublisher =
+                                    (APIMgtUsageDataPublisher) APIUtil.getClassForName(publisherClass).newInstance();
+                            usageDataPublisher.init();
+                        } catch (ClassNotFoundException e) {
+                            log.error("Class not found " + publisherClass, e);
+                        } catch (InstantiationException e) {
+                            log.error("Error instantiating " + publisherClass, e);
+                        } catch (IllegalAccessException e) {
+                            log.error("Illegal access to " + publisherClass, e);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                log.error("Cannot publish event. " + e.getMessage(), e);
+            }
         }
     }
 
@@ -245,6 +268,10 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 
     protected APIKeyValidationInfoDTO getApiKeyDataForWSClient(String apiKey) throws APISecurityException {
         return new WebsocketWSClient().getAPIKeyData(uri, version, apiKey);
+    }
+
+    protected APIManagerAnalyticsConfiguration getApiManagerAnalyticsConfiguration() {
+        return DataPublisherUtil.getApiManagerAnalyticsConfiguration();
     }
 
     /**

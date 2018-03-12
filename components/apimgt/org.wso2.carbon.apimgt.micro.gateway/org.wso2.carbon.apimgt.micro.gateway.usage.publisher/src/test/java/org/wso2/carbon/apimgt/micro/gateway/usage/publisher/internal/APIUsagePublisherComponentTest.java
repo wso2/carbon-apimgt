@@ -17,6 +17,7 @@
 
 package org.wso2.carbon.apimgt.micro.gateway.usage.publisher.internal;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -29,6 +30,8 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.micro.gateway.common.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.micro.gateway.common.util.HttpRequestUtil;
+import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.TestUtil;
+import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.constants.Constants;
 import org.wso2.carbon.ntask.core.service.TaskService;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -42,17 +45,20 @@ import org.wso2.carbon.utils.CarbonUtils;
 public class APIUsagePublisherComponentTest {
     public static final String CARBON_HOME = "carbon.home";
     public static final String CARBON_CONFIGS_PATH = "/repository/conf";
-    public static final String CARBON_TENANT_CONFIGS_PATH = "/repository/tenants";
+
+    @Before
+    public void setUp() throws Exception {
+        TestUtil util = new TestUtil();
+        util.setupCarbonHome();
+    }
 
     @Test
     public void activate() throws Exception {
-
-        String carbonConfigPath = System.getProperty(CARBON_HOME) + CARBON_CONFIGS_PATH;
-        String tenantDirPath = System.getProperty(CARBON_HOME) + CARBON_TENANT_CONFIGS_PATH;
+        String carbonHome = System.getProperty(Constants.CARBON_HOME);
         PowerMockito.mockStatic(CarbonUtils.class);
-        PowerMockito.when(CarbonUtils.getCarbonTenantsDirPath()).thenReturn(tenantDirPath);
+        PowerMockito.when(CarbonUtils.getCarbonHome()).thenReturn(carbonHome);
+        String carbonConfigPath = System.getProperty(CARBON_HOME) + CARBON_CONFIGS_PATH;
         PowerMockito.when(CarbonUtils.getCarbonConfigDirPath()).thenReturn(carbonConfigPath);
-
         APIUsagePublisherComponent serviceComponent = new APIUsagePublisherComponent();
         ComponentContext componentContext = Mockito.mock(ComponentContext.class);
         BundleContext bundleContext = Mockito.mock(BundleContext.class);
@@ -110,5 +116,4 @@ public class APIUsagePublisherComponentTest {
         TaskService taskService = Mockito.mock(TaskService.class);
         serviceComponent.unsetTaskService(taskService);
     }
-
 }
