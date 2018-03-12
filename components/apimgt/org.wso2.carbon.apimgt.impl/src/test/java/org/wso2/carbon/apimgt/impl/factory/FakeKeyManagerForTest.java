@@ -16,13 +16,7 @@
 package org.wso2.carbon.apimgt.impl.factory;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
-import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
-import org.wso2.carbon.apimgt.api.model.KeyManager;
-import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
-import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
-import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.*;
 
 import java.util.Map;
 import java.util.Set;
@@ -113,6 +107,11 @@ public class FakeKeyManagerForTest implements KeyManager {
     }
 
     @Override public AccessTokenInfo getAccessTokenByConsumerKey(String s) throws APIManagementException {
+        return null;
+    }
+
+    @Override
+    public Map<String, Set<Scope>> getScopesForAPIS(String apiIdsString) throws APIManagementException {
         return null;
     }
 }
