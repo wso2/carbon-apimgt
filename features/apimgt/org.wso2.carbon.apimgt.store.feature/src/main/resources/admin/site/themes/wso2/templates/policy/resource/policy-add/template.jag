@@ -86,7 +86,7 @@
                     <p id="desc_help" class="hide"><%=i18n.localize("Description of the throttle policy.")%></p>
                 </label>
                 <div class="col-sm-9">
-                	<textarea class="form-control validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace" id="policy-description" cols="40" rows="2" name="policy-description"><%=encode.forHtml(String(policyDesc))%></textarea>
+                	<textarea class="form-control validInput" id="policy-description" cols="40" rows="2" name="policy-description"><%=encode.forHtml(String(policyDesc))%></textarea>
                 </div>
             </div>            
             <!--<div class="form-group">
@@ -111,7 +111,7 @@
                 <h2><br/></h2>
                 <p class="lead"><%=i18n.localize("Default Limits")%></p>
             </div>
-            
+
             <div id="quotaTypeRadioDev">
             <div class="form-group">
                 <label class="control-label col-sm-3"></label>
@@ -259,16 +259,16 @@
 <script id="designer-policy-template" type="text/x-handlebars-template">
 <div class="panel-group form-group accordion" role="tablist" aria-multiselectable="true">
     <div class="panel panel-default">
-        <div class="panel-heading" role="tab" id="collapse-{{executionFlow.id}}" data-toggle="collapse" href="#pipeline-{{executionFlow.id}}" aria-expanded="false" aria-controls="pipeline-{{executionFlow.id}}">
+        <div class="panel-heading" role="tab" id="collapse-{{executionFlow.id}}">
             <h4 class="panel-title">
-                <label class="radio">
+                <label class="radio" data-toggle="collapse" href="#pipeline-{{executionFlow.id}}" aria-expanded="false" aria-controls="pipeline-{{executionFlow.id}}">
                     <span class="fw-stack fw-lg">
                         <i class="fw fw-circle fw-stack-2x fw-inverse"></i>
                         <i class="fw fw-number fw-stack-1x">{{executionFlow.id}}</i>
                     </span>
                 </label>
                 <div>
-                    <div class="heading"><%=i18n.localize("Condition Group")%></div>
+                    <div class="heading" data-toggle="collapse" href="#pipeline-{{executionFlow.id}}" aria-expanded="false" aria-controls="pipeline-{{executionFlow.id}}"><%=i18n.localize("Condition Group")%></div>
                     <div class="description truncate title" title="">
                         <a href="#" id="executionFlow-desc-{{executionFlow.id}}" data-type="text" data-pk="1" data-title="<%=i18n.localize("Enter Description")%>">{{executionFlow.description}}</a>
                     </div>
