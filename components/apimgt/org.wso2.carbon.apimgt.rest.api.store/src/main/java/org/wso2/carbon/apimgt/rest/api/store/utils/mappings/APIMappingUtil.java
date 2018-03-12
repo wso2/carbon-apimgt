@@ -318,7 +318,6 @@ public class APIMappingUtil {
             ScopeInfoDTO scopeInfoDTO = new ScopeInfoDTO();
             scopeInfoDTO.setKey(scope.getKey());
             scopeInfoDTO.setName(scope.getName());
-
             if (scope.getRoles() != null) {
                 scopeInfoDTO.setRoles(Arrays.asList(scope.getRoles().split(",")));
             }
