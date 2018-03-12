@@ -51,6 +51,7 @@ import static org.wso2.carbon.apimgt.impl.APIConstants.OVERVIEW_PREFIX;
 @SuppressWarnings("unused")
 public class CustomAPIIndexer extends RXTIndexer {
     public static final Log log = LogFactory.getLog(CustomAPIIndexer.class);
+    private static final int FIVE_MINUTES_TO_SECONDS = 300000;
 
     public IndexDocument getIndexedDocument(AsyncIndexer.File2Index fileData) throws SolrException, RegistryException {
         Registry registry = GovernanceUtils
@@ -67,7 +68,8 @@ public class CustomAPIIndexer extends RXTIndexer {
         if (resource != null) {
             String publisherAccessControl = resource.getProperty(APIConstants.PUBLISHER_ROLES);
 
-            if (publisherAccessControl == null || publisherAccessControl.trim().isEmpty()) {
+            if ((publisherAccessControl == null || publisherAccessControl.trim().isEmpty())
+                    && System.currentTimeMillis() - resource.getCreatedTime().getTime() > FIVE_MINUTES_TO_SECONDS) {
                 if (log.isDebugEnabled()) {
                     log.debug("API at " + resourcePath + "did not have property : " + APIConstants.PUBLISHER_ROLES
                             + ", hence adding the null value for that API resource.");
@@ -87,21 +89,25 @@ public class CustomAPIIndexer extends RXTIndexer {
                         .getGenericArtifact(resource.getUUID());
                 String storeVisibility = artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY);
                 String storeVisibleRoles = artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES);
-                if (storeViewRoles == null) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("API at " + resourcePath + "did not have property : " + APIConstants.STORE_VIEW_ROLES
-                                + ", hence adding the values for that API resource.");
+
+                if (System.currentTimeMillis() - resource.getCreatedTime().getTime() > FIVE_MINUTES_TO_SECONDS) {
+                    if (storeViewRoles == null) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("API at " + resourcePath + "did not have property : "
+                                    + APIConstants.STORE_VIEW_ROLES
+                                    + ", hence adding the values for that API resource.");
+                        }
+                        updateStoreVisibilityProperties(registry, resourcePath, resource, publisherAccessControl);
+                    } else if (APIConstants.PUBLIC_STORE_VISIBILITY.equals(storeVisibility)
+                            && !APIConstants.NULL_USER_ROLE_LIST
+                            .equals(resource.getProperty(APIConstants.STORE_VIEW_ROLES))) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("API at " + resourcePath + "has the public visibility, but  : "
+                                    + APIConstants.STORE_VIEW_ROLES + " property is not set to "
+                                    + APIConstants.NULL_USER_ROLE_LIST + ". Hence setting the correct value");
+                        }
+                        updateStoreVisibilityProperties(registry, resourcePath, resource, publisherAccessControl);
                     }
-                    updateStoreVisibilityProperties(registry, resourcePath, resource, publisherAccessControl);
-                } else if (APIConstants.PUBLIC_STORE_VISIBILITY.equals(storeVisibility)
-                        && !APIConstants.NULL_USER_ROLE_LIST
-                        .equals(resource.getProperty(APIConstants.STORE_VIEW_ROLES))) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("API at " + resourcePath + "has the public visibility, but  : "
-                                + APIConstants.STORE_VIEW_ROLES + " property is not set to "
-                                + APIConstants.NULL_USER_ROLE_LIST + ". Hence setting the correct value");
-                    }
-                    updateStoreVisibilityProperties(registry, resourcePath, resource, publisherAccessControl);
                 }
             } catch (APIManagementException e) {
                 log.error("Error while getting generic artifact for resource path : " + resourcePath, e);
