@@ -573,17 +573,7 @@ public class ApiMgtDAO {
             if (!defaultVersionInvoked) {
                 ps.setString(3, version);
             }
-            if (log.isDebugEnabled()) {
-                log.debug("Execution of validateSubscriptionDetails sql query for:" + context + " with consumer key="
-                        + consumerKey + " started at "
-                        + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new java.util.Date()));
-            }
             rs = ps.executeQuery();
-            if (log.isDebugEnabled()) {
-                log.debug("Execution of validateSubscriptionDetails sql query for:" + context + " with consumer key="
-                        + consumerKey + " ended at "
-                        + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new java.util.Date()));
-            }
             if (rs.next()) {
                 String subscriptionStatus = rs.getString("SUB_STATUS");
                 String type = rs.getString("KEY_TYPE");
@@ -693,15 +683,7 @@ public class ApiMgtDAO {
             ps.setInt(10, subscriptionTenantId);
             ps.setString(11, appPolicy);
             ps.setInt(12, appTenantId);
-            if (log.isDebugEnabled()) {
-                log.debug("Execution of isAnyPolicyContentAware sql query for apiId:" + apiId + " started at "
-                        + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new java.util.Date()));
-            }
             resultSet = ps.executeQuery();
-            if (log.isDebugEnabled()) {
-                log.debug("Execution of isAnyPolicyContentAware sql query for apiId:" + apiId + " ended at "
-                        + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new java.util.Date()));
-            }
             // We only expect one result if all are not content aware.
             if (resultSet == null) {
                 throw new APIManagementException(" Result set Null");
@@ -5572,15 +5554,7 @@ public class ApiMgtDAO {
             prepStmt.setString(1, apiContext);
             prepStmt.setString(2, version);
 
-            if (log.isDebugEnabled()) {
-                log.debug("Execution of getAllURITemplatesOldThrottle sql query for:" + apiContext + " started at "
-                        + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new java.util.Date()));
-            }
             rs = prepStmt.executeQuery();
-            if (log.isDebugEnabled()) {
-                log.debug("Execution getAllURITemplatesOldThrottle sql query for:" + apiContext + " ended at "
-                        + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new java.util.Date()));
-            }
 
             URITemplate uriTemplate;
             while (rs.next()) {
@@ -5620,15 +5594,7 @@ public class ApiMgtDAO {
             prepStmt.setString(1, apiContext);
             prepStmt.setString(2, version);
 
-            if (log.isDebugEnabled()) {
-                log.debug("Execution getAllURITemplatesAdvancedThrottle sql query for:" + apiContext + " started at "
-                        + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new java.util.Date()));
-            }
             rs = prepStmt.executeQuery();
-            if (log.isDebugEnabled()) {
-                log.debug("Execution getAllURITemplatesAdvancedThrottle sql query for:" + apiContext + " ended at "
-                        + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new java.util.Date()));
-            }
             Map<String, Set<ConditionGroupDTO>> mapByHttpVerbURLPatternToId = new HashMap<String, Set<ConditionGroupDTO>>();
             while (rs != null && rs.next()) {
 
@@ -10899,17 +10865,7 @@ public class ApiMgtDAO {
                 ps.setString(3, version);
             }
 
-            if (log.isDebugEnabled()) {
-                log.debug("Execution of validateSubscriptionDetails sql query for:" + context + " with consumer key="
-                        + consumerKey + " started at "
-                        + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new java.util.Date()));
-            }
             rs = ps.executeQuery();
-            if (log.isDebugEnabled()) {
-                log.debug("Execution of validateSubscriptionDetails sql query for:" + context
-                        + " with consumer key=" + consumerKey + " ended at "
-                        + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new java.util.Date()));
-            }
             if (rs.next()) {
                 String subscriptionStatus = rs.getString("SUB_STATUS");
                 String type = rs.getString("KEY_TYPE");
