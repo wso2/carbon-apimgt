@@ -43,6 +43,7 @@ import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -650,7 +651,14 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         }
         return tokenInfo;
     }
-    
+
+    @Override
+    public Map<String, Set<Scope>> getScopesForAPIS(String apiIdsString) throws APIManagementException {
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+        Map<String, Set<Scope>> scopes = apiMgtDAO.getScopesForAPIS(apiIdsString);
+        return scopes;
+    }
+
     protected org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo createOAuthApplicationbyApplicationInfo(
                       org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo applicationToCreate) throws Exception {
         SubscriberKeyMgtClient keyMgtClient = null;
