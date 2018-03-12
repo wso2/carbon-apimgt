@@ -25,18 +25,19 @@
     <link rel="icon" href="../../themes/wso2/images/favicon.png" type="image/x-icon"/>
     <link href="../../themes/wso2/libs/bootstrap_3.3.5/css/bootstrap.min.css" rel="stylesheet">
     <link href="../../themes/wso2/css/policy-pages-custom.css" rel="stylesheet">
+    <link href="../../themes/wso2/libs/font-wso2_1.0.2/css/font-wso2.min.css" rel="stylesheet">
 </head>
 
 <body>
 
 <!-- header -->
 <header class="header header-default">
-    <div class="container-fluid"><br></div>
+    <br>
     <div class="container-fluid">
         <div class="pull-left brand float-remove-xs text-center-xs">
-            <a href="#">
-                <img class="img-responsive brand-spacer" src="../../themes/wso2/libs/theme-wso2_1.0/images/logo-inverse.svg" alt="wso2" title="wso2">
-                <h1><em>API Manager</em></h1>
+            <a href="../../pages/index.jag">
+                <img class="logo" src="../../themes/wso2/libs/theme-wso2_1.0/images/logo-inverse.svg" alt="WSO2 API Manager">
+                <h1>API Manager</h1>
             </a>
         </div>
     </div>
@@ -57,6 +58,7 @@
             </div>
             <div class="boarder-all ">
                 <div class="clearfix"></div>
+                <!-- Customizable content -->
                 <div id="privacyPolicy" class="padding-double">
                     <h4><a href="https://wso2.com/api-management/"><strong>About WSO2 API Manager</strong></a></h4>
                     <p>WSO2 API Manager (referred hereafter as &ldquo;API-M 2.2&rdquo;) is an open source enterprise-class solution that supports API publishing, lifecycle management, application development, access control, rate limiting, and analytics in one cleanly integrated system.</p>
@@ -160,7 +162,7 @@
                         <li>This policy should be modified according to the organizational requirements.</li>
                     </ol>
                 </div>
-                <!-- /Costomizable content -->
+                <!-- /Customizable content -->
                 <div class="clearfix"></div>
             </div>
         </div>
@@ -176,7 +178,7 @@
             <script>document.write(new Date().getFullYear());</script>
             <a href="http://wso2.com/" target="_blank"><i class="icon fw fw-wso2"></i>
                 Inc
-            </a>. All Rights Reserved
+            </a>.
         </p>
     </div>
 </footer>
