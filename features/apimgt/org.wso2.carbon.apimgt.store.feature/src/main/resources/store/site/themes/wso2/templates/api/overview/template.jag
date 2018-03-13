@@ -26,13 +26,17 @@
                 // since we are using context versioning, we remove the api.version from the URL.
                 // The reason is that the context will have the version now
                 for(var t=0;t < transports.length;t++){
+                    var transport = transports[t];
+                    if (api.type.toUpperCase() == "WS") {
+                        transport = "ws";
+                    }
                 %>
-                <div  class="well well-sm add-margin-bottom-1x"><%=encode.forHtml(transports[t]) %>://<%=domainValue%><%= contextWithoutTenant %>
+                <div  class="well well-sm add-margin-bottom-1x"><%=encode.forHtml(transport) %>://<%=domainValue%><%= contextWithoutTenant %>
                     <%if (api.isDefaultVersion){
                         var contextWithoutTenantAndVersion = contextWithoutTenant;
                         contextWithoutTenantAndVersion = contextWithoutTenantAndVersion.replace(api.version + "/", "");
                         contextWithoutTenantAndVersion = contextWithoutTenantAndVersion.replace(api.version, "");%>
-                        <br/><%= encode.forHtml(transports[t]) %>://<%=domainValue%><%= contextWithoutTenantAndVersion %>
+                        <br/><%= encode.forHtml(transport) %>://<%=domainValue%><%= contextWithoutTenantAndVersion %>
                     <%}%>
                 </div>
                 <%
