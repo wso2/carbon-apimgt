@@ -30,14 +30,21 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * This class contains test cases for {@link APIMappingUtil}.
@@ -46,17 +53,18 @@ import java.util.HashSet;
 @PrepareForTest({RestApiUtil.class, RestAPIStoreUtils.class, ServiceReferenceHolder.class})
 public class APIMappingUtilTestCase {
 
+    private  APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+    private APIConsumer apiConsumer = Mockito.mock(APIConsumer.class);
+
     /**
      * Mocking the relevant methods.
      * @throws APIManagementException API Management Exception.
      */
     @Before
     public void init() throws APIManagementException {
-        APIConsumer apiConsumer = Mockito.mock(APIConsumer.class);
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
         APIManagerConfigurationService apiManagerConfigurationService = Mockito
                 .mock(APIManagerConfigurationService.class);
-        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
         Mockito.doReturn(apiManagerConfiguration).when(apiManagerConfigurationService).getAPIManagerConfiguration();
         Mockito.doReturn(apiManagerConfigurationService).when(serviceReferenceHolder)
                 .getAPIManagerConfigurationService();
@@ -78,7 +86,7 @@ public class APIMappingUtilTestCase {
     public void testFromAPItoDTOWithAdditionalProperties() throws APIManagementException {
         API api = getSampleAPI();
         api.addProperty("securedAPI", "true");
-        APIDTO apidto = APIMappingUtil.fromAPItoDTO(api);
+        APIDTO apidto = APIMappingUtil.fromAPItoDTO(api, "carbon.super");
         Assert.assertNotNull("API model to DTO conversion failed when there are additional properties in the API",
                 apidto);
         Assert.assertEquals("API model to DTO conversion failed when there are additional properties in the API",
@@ -93,12 +101,50 @@ public class APIMappingUtilTestCase {
      */
     @Test
     public void testFromAPItoDTOWithoutAdditionalProperties() throws APIManagementException {
-        APIDTO apidto = APIMappingUtil.fromAPItoDTO(getSampleAPI());
+        APIDTO apidto = APIMappingUtil.fromAPItoDTO(getSampleAPI(), "carbon.super");
         Assert.assertNotNull("API model to DTO conversion failed when there are no custom properties", apidto);
         Assert.assertEquals("API model to DTO conversion failed when there are no custom properties", null,
                 apidto.getAdditionalProperties().get("securedAPI"));
         Assert.assertEquals("API model to DTO conversion failed when there are no custom properties",
                 apidto.getStatus(), APIStatus.CREATED.getStatus());
+    }
+
+    /**
+     * Test for Custom urls
+     *
+     * @throws APIManagementException API Management Exception.
+     */
+    @Test
+    public void testFromAPItoDTOForCustomUrls() throws APIManagementException {
+
+        String tenantDomain = "abc.com";
+        Map<String, String> domainMappings = new HashMap<>();
+        domainMappings.put(APIConstants.CUSTOM_URL, "https://abc.gw.com");
+        Mockito.when(apiConsumer.getTenantDomainMappings(tenantDomain, APIConstants.API_DOMAIN_MAPPINGS_GATEWAY))
+                .thenReturn(domainMappings);
+
+        Map<String, Environment> environmentMap = new HashMap<>();
+        String envProdAndSandbox = "Production and Sandbox";
+        Environment prodAndSandbox = new Environment();
+        prodAndSandbox.setApiGatewayEndpoint("https://prodAndSandbox.com, http://prodAndSandbox.com");
+        environmentMap.put(envProdAndSandbox, prodAndSandbox);
+        Mockito.doReturn(environmentMap).when(apiManagerConfiguration).getApiGatewayEnvironments();
+
+        API api = getSampleAPI();
+        Set<Tier> availableTiers = new HashSet<>();
+        availableTiers.add(new Tier("Unlimited"));
+        api.addAvailableTiers(availableTiers);
+        api.setThumbnailUrl("ThumbnailUrl");
+        api.setUUID(UUID.randomUUID().toString());
+        api.setContext("/test");
+
+        Set<String> environments = new HashSet<>();
+        environments.add(envProdAndSandbox);
+        environments.add("Sandbox");
+        api.setEnvironments(environments);
+
+        APIDTO apidto = APIMappingUtil.fromAPItoDTO(api, tenantDomain);
+        Assert.assertNotNull("APIDto is returned", apidto);
     }
 
     /**
