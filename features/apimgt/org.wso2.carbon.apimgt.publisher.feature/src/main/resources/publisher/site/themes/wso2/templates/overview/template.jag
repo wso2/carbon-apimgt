@@ -204,7 +204,7 @@
                     href="#accordion1-collapse1" aria-controls="accordion1-collapse1">
                     <h4 class="panel-title">
                         <div>
-                            <div class="no-description" style="margin-left: 10px"><%=i18n.localize("Meta Information")%></div>
+                            <div class="no-description" style="margin-left: 10px"><%=i18n.localize("API Properties")%></div>
                             <div class="status">
                                 <i class="fw fw-down"></i>
                             </div>
