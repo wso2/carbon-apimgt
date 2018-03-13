@@ -802,7 +802,7 @@
                 href="#accordion1-collapse3" aria-controls="accordion1-collapse3">
                     <h4 class="panel-title">
                         <div>
-                            <div class="heading no-description"><%=i18n.localize("Meta Information")%></div>
+                            <div class="heading no-description"><%=i18n.localize("API Properties")%></div>
                             <div class="status">
                                 <i class="fw fw-down"></i>
                             </div>

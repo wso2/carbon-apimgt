@@ -55,7 +55,7 @@ if(request.getParameter("type") == "prototyped"){
                 <li><%=i18n.localize("By Tags [ Syntax - tags:xxxx ] or")%></li>
                 <li><%=i18n.localize("By Sub-Context [ Syntax - subcontext:xxxx ] or")%></li>
                 <li><%=i18n.localize("By Documentation Content [ Syntax - doc:xxxx ]")%></li>
-                <li><%=i18n.localize("By Custom Meta Information [Syntax - {property name}:{property value}]")%></li>
+                <li><%=i18n.localize("By API Properties [Syntax - {property name}:{property value}]")%></li>
             </ol>
         </div>
       <%if(tenant != null){ %>
