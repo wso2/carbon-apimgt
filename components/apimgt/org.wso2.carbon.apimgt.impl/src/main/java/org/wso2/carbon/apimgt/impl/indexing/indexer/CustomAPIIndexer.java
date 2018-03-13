@@ -51,6 +51,7 @@ import static org.wso2.carbon.apimgt.impl.APIConstants.OVERVIEW_PREFIX;
 @SuppressWarnings("unused")
 public class CustomAPIIndexer extends RXTIndexer {
     public static final Log log = LogFactory.getLog(CustomAPIIndexer.class);
+    private static final int FIVE_MINUTES_TO_MILLI_SECONDS = 300000;
 
     public IndexDocument getIndexedDocument(AsyncIndexer.File2Index fileData) throws SolrException, RegistryException {
         Registry registry = GovernanceUtils
@@ -64,7 +65,8 @@ public class CustomAPIIndexer extends RXTIndexer {
         if (log.isDebugEnabled()) {
             log.debug("CustomAPIIndexer is currently indexing the api at path " + resourcePath);
         }
-        if (resource != null) {
+        if (resource != null
+                && System.currentTimeMillis() - resource.getCreatedTime().getTime() > FIVE_MINUTES_TO_MILLI_SECONDS) {
             String publisherAccessControl = resource.getProperty(APIConstants.PUBLISHER_ROLES);
 
             if (publisherAccessControl == null || publisherAccessControl.trim().isEmpty()) {
