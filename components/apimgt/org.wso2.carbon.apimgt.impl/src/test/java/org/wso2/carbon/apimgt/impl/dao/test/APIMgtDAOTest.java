@@ -193,16 +193,6 @@ public class APIMgtDAOTest {
         assertTrue(subscribers.size() > 0);
     }
     @Test
-    public void testAccessKeyForAPI() throws Exception {
-        APIInfoDTO apiInfoDTO = new APIInfoDTO();
-        apiInfoDTO.setApiName("API1");
-        apiInfoDTO.setProviderId("SUMEDHA");
-        apiInfoDTO.setVersion("V1.0.0");
-        String accessKey = apiMgtDAO.getAccessKeyForAPI("SUMEDHA", "APPLICATION1", apiInfoDTO, "PRODUCTION");
-        assertNotNull(accessKey);
-        assertTrue(accessKey.length() > 0);
-    }
-    @Test
     public void testGetSubscribedAPIsOfUser() throws Exception {
         APIInfoDTO[] apis = apiMgtDAO.getSubscribedAPIsOfUser("SUMEDHA");
         assertNotNull(apis);
@@ -1017,7 +1007,6 @@ public class APIMgtDAOTest {
         Set<SubscribedAPI> subscribedAPIS = apiMgtDAO.getSubscribedAPIs(subscriber, application.getName(), null);
         assertEquals(subscribedAPIS.size(), 1);
         assertTrue(apiMgtDAO.isAccessTokenExists(tokenProduction));
-        assertTrue(clientIdProduction.equals(apiMgtDAO.findConsumerKeyFromAccessToken(tokenProduction)));
         apiMgtDAO.revokeAccessToken(tokenProduction);
         apiMgtDAO.updateSubscription(apiId, APIConstants.SubscriptionStatus.BLOCKED, application.getId());
         subscribedAPI.setSubStatus(APIConstants.SubscriptionStatus.REJECTED);
