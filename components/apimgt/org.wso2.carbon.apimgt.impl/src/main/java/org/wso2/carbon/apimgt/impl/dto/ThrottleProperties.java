@@ -35,9 +35,8 @@ public class ThrottleProperties {
     private boolean enableHeaderConditions;
     private boolean enableJwtConditions;
     private boolean enableQueryParamConditions;
-    private Map<String, String> jmsPublisherParameters = new HashMap<String, String>();
     private Map<String, Long> defaultThrottleTierLimits = new HashMap<String, Long>();
-
+    private TrafficManager trafficManager;
     public boolean isEnabledSubscriptionLevelSpikeArrest() {
         return enabledSubscriptionLevelSpikeArrest;
     }
@@ -84,14 +83,6 @@ public class ThrottleProperties {
 
     public void setThrottleDataSourceName(String throttleDataSourceName) {
         this.throttleDataSourceName = throttleDataSourceName;
-    }
-
-    public Map<String, String> getJmsPublisherParameters() {
-        return jmsPublisherParameters;
-    }
-
-    public void addJMSPublisherParameter(String paramName, String paramValue) {
-        jmsPublisherParameters.put(paramName, paramValue);
     }
 
     public boolean isEnabled() {
@@ -159,6 +150,14 @@ public class ThrottleProperties {
         this.enableQueryParamConditions = enableQueryParamConditions;
     }
 
+    public void setTrafficManager(TrafficManager trafficManager) {
+        this.trafficManager = trafficManager;
+    }
+
+    public TrafficManager getTrafficManager() {
+        return trafficManager;
+    }
+
     public Map<String, Long> getDefaultThrottleTierLimits() {
         return defaultThrottleTierLimits;
     }
@@ -223,6 +222,56 @@ public class ThrottleProperties {
             return enabled;
         }
     }
+
+    public static class TrafficManager {
+        private String type = "Binary";
+        private String receiverUrlGroup = "tcp://localhost:9611";
+        private String authUrlGroup = "ssl://localhost:9711";
+        private String username = "admin";
+        private String password = "admin";
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public String getReceiverUrlGroup() {
+            return receiverUrlGroup;
+        }
+
+        public void setReceiverUrlGroup(String receiverUrlGroup) {
+            this.receiverUrlGroup = receiverUrlGroup;
+        }
+
+        public String getAuthUrlGroup() {
+            return authUrlGroup;
+        }
+
+        public void setAuthUrlGroup(String authUrlGroup) {
+            this.authUrlGroup = authUrlGroup;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
+
+    }
+
 
     public static class DataPublisherPool {
         private int maxIdle = 1000;
@@ -377,7 +426,10 @@ public class ThrottleProperties {
         }
 
         public static class JMSTaskManagerProperties {
-            private int minThreadPoolSize, maxThreadPoolSize, keepAliveTimeInMillis, jobQueueSize;
+            private int minThreadPoolSize = 20;
+            private int maxThreadPoolSize = 100;
+            private int keepAliveTimeInMillis = 1000;
+            private int jobQueueSize = 10;
 
             public int getMinThreadPoolSize() {
                 return minThreadPoolSize;

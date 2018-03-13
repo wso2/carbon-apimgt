@@ -74,7 +74,6 @@ public class APIManagerComponentTest {
         UserRealm userRealm = Mockito.mock(UserRealm.class);
         OutputEventAdapterService adapterService = Mockito.mock(OutputEventAdapterService.class);
         ThrottleProperties throttleProperties = new ThrottleProperties();
-        throttleProperties.addJMSPublisherParameter("url", "jms://localhost");
 
         Mockito.doNothing().when(configuration).load(Mockito.anyString());
         Mockito.doNothing().when(authManager)

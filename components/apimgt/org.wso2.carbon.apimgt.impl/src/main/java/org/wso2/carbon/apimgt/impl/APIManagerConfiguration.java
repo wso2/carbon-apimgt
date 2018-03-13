@@ -561,7 +561,50 @@ public class APIManagerConfiguration {
             }
             // if advance Throttling enable
             if (throttleProperties.isEnabled()) {
-
+                // Reading TrafficManager configuration
+                OMElement trafficManagerConfigurationElement = throttleConfigurationElement.getFirstChildWithName(new
+                        QName(APIConstants.AdvancedThrottleConstants.TRAFFIC_MANAGER));
+                ThrottleProperties.TrafficManager trafficManager = new ThrottleProperties.TrafficManager();
+                if (trafficManagerConfigurationElement != null) {
+                    OMElement receiverUrlGroupElement = trafficManagerConfigurationElement.getFirstChildWithName(new
+                            QName
+                            (APIConstants.AdvancedThrottleConstants.DATA_PUBLISHER_CONFIGURAION_REVEIVER_URL_GROUP));
+                    if (receiverUrlGroupElement != null) {
+                        trafficManager.setReceiverUrlGroup(APIUtil.replaceSystemProperty(receiverUrlGroupElement
+                                .getText()));
+                    }
+                    OMElement authUrlGroupElement = trafficManagerConfigurationElement.getFirstChildWithName(new QName
+                            (APIConstants.AdvancedThrottleConstants.DATA_PUBLISHER_CONFIGURAION_AUTH_URL_GROUP));
+                    if (authUrlGroupElement != null) {
+                        trafficManager.setAuthUrlGroup(APIUtil.replaceSystemProperty(authUrlGroupElement.getText()));
+                    }
+                    OMElement dataPublisherUsernameElement = trafficManagerConfigurationElement.getFirstChildWithName
+                            (new QName(APIConstants.AdvancedThrottleConstants.USERNAME));
+                    if (dataPublisherUsernameElement != null) {
+                        trafficManager.setUsername(APIUtil.replaceSystemProperty(dataPublisherUsernameElement.getText
+                                ()));
+                    }
+                    OMElement dataPublisherTypeElement = trafficManagerConfigurationElement.getFirstChildWithName(new
+                            QName
+                            (APIConstants.AdvancedThrottleConstants.DATA_PUBLISHER_CONFIGURAION_TYPE));
+                    if (dataPublisherTypeElement != null) {
+                        trafficManager.setType(dataPublisherTypeElement.getText());
+                    }
+                    String dataPublisherConfigurationPassword;
+                    String dataPublisherConfigurationPasswordKey = APIConstants.AdvancedThrottleConstants
+                            .THROTTLING_CONFIGURATIONS + "." + APIConstants.AdvancedThrottleConstants
+                            .TRAFFIC_MANAGER + "." + APIConstants.AdvancedThrottleConstants.PASSWORD;
+                    if (secretResolver.isInitialized() && secretResolver.isTokenProtected
+                            (dataPublisherConfigurationPasswordKey)) {
+                        dataPublisherConfigurationPassword = secretResolver.resolve
+                                (dataPublisherConfigurationPasswordKey);
+                    } else {
+                        dataPublisherConfigurationPassword = trafficManagerConfigurationElement.getFirstChildWithName
+                                (new QName(APIConstants.AdvancedThrottleConstants.PASSWORD)).getText();
+                    }
+                    trafficManager.setPassword(APIUtil.replaceSystemProperty(dataPublisherConfigurationPassword));
+                    throttleProperties.setTrafficManager(trafficManager);
+                }
                 // Configuring throttle data publisher
                 ThrottleProperties.DataPublisher dataPublisher = new ThrottleProperties.DataPublisher();
                 OMElement dataPublisherConfigurationElement = throttleConfigurationElement.getFirstChildWithName(new
@@ -570,49 +613,13 @@ public class APIManagerConfiguration {
                     OMElement dataPublisherEnabledElement = dataPublisherConfigurationElement
                             .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.ENABLED));
                     dataPublisher.setEnabled(JavaUtils.isTrueExplicitly(dataPublisherEnabledElement.getText()));
+                    dataPublisher.setAuthUrlGroup(trafficManager.getAuthUrlGroup());
+                    dataPublisher.setReceiverUrlGroup(trafficManager.getReceiverUrlGroup());
+                    dataPublisher.setUsername(trafficManager.getUsername());
+                    dataPublisher.setPassword(trafficManager.getPassword());
                 }
                 if (dataPublisher.isEnabled()) {
 
-                    OMElement receiverUrlGroupElement = dataPublisherConfigurationElement.getFirstChildWithName(new
-                            QName
-                            (APIConstants.AdvancedThrottleConstants.DATA_PUBLISHER_CONFIGURAION_REVEIVER_URL_GROUP));
-                    if (receiverUrlGroupElement != null) {
-                        dataPublisher.setReceiverUrlGroup(APIUtil.replaceSystemProperty(receiverUrlGroupElement
-                                .getText()));
-                    }
-                    OMElement authUrlGroupElement = dataPublisherConfigurationElement.getFirstChildWithName(new QName
-                            (APIConstants.AdvancedThrottleConstants.DATA_PUBLISHER_CONFIGURAION_AUTH_URL_GROUP));
-                    if (authUrlGroupElement != null) {
-                        dataPublisher.setAuthUrlGroup(APIUtil.replaceSystemProperty(authUrlGroupElement.getText()));
-                    }
-                    OMElement dataPublisherUsernameElement = dataPublisherConfigurationElement.getFirstChildWithName(new
-                            QName
-                            (APIConstants.AdvancedThrottleConstants.USERNAME));
-                    if (dataPublisherUsernameElement != null) {
-                        dataPublisher.setUsername(APIUtil.replaceSystemProperty(dataPublisherUsernameElement.getText
-                                ()));
-                    }
-                    OMElement dataPublisherTypeElement = dataPublisherConfigurationElement.getFirstChildWithName(new
-                            QName
-                            (APIConstants.AdvancedThrottleConstants.DATA_PUBLISHER_CONFIGURAION_TYPE));
-                    if (dataPublisherTypeElement != null) {
-                        dataPublisher.setType(dataPublisherTypeElement.getText());
-                    }
-                    String dataPublisherConfigurationPassword;
-                    String dataPublisherConfigurationPasswordKey = APIConstants.AdvancedThrottleConstants
-                            .THROTTLING_CONFIGURATIONS + "." + APIConstants.AdvancedThrottleConstants
-                            .DATA_PUBLISHER_CONFIGURATION + "." + APIConstants.AdvancedThrottleConstants
-                            .PASSWORD;
-                    if (secretResolver.isInitialized() && secretResolver.isTokenProtected
-                            (dataPublisherConfigurationPasswordKey)) {
-                        dataPublisherConfigurationPassword = secretResolver.resolve
-                                (dataPublisherConfigurationPasswordKey);
-                    } else {
-                        dataPublisherConfigurationPassword = dataPublisherConfigurationElement.getFirstChildWithName(new
-                                QName(APIConstants
-                                .AdvancedThrottleConstants.PASSWORD)).getText();
-                    }
-                    dataPublisher.setPassword(APIUtil.replaceSystemProperty(dataPublisherConfigurationPassword));
                     throttleProperties.setDataPublisher(dataPublisher);
 
                     // Data publisher pool configuration
@@ -648,10 +655,10 @@ public class APIManagerConfiguration {
                     if (dataPublisherThreadPoolConfigurationElement != null) {
                         OMElement corePoolSizeElement = dataPublisherThreadPoolConfigurationElement
                                 .getFirstChildWithName
-                                (new
-                                        QName
-                                        (APIConstants.AdvancedThrottleConstants
-                                                .DATA_PUBLISHER_THREAD_POOL_CONFIGURATION_CORE_POOL_SIZE));
+                                        (new
+                                                QName
+                                                (APIConstants.AdvancedThrottleConstants
+                                                        .DATA_PUBLISHER_THREAD_POOL_CONFIGURATION_CORE_POOL_SIZE));
                         if (corePoolSizeElement != null) {
                             dataPublisherThreadPool.setCorePoolSize(Integer.parseInt(corePoolSizeElement.getText()));
                         }
@@ -666,10 +673,10 @@ public class APIManagerConfiguration {
                         }
                         OMElement keepAliveTimeElement = dataPublisherThreadPoolConfigurationElement
                                 .getFirstChildWithName
-                                (new
-                                        QName
-                                        (APIConstants.AdvancedThrottleConstants
-                                                .DATA_PUBLISHER_THREAD_POOL_CONFIGURATION_KEEP_ALIVE_TIME));
+                                        (new
+                                                QName
+                                                (APIConstants.AdvancedThrottleConstants
+                                                        .DATA_PUBLISHER_THREAD_POOL_CONFIGURATION_KEEP_ALIVE_TIME));
                         if (keepAliveTimeElement != null) {
                             dataPublisherThreadPool.setKeepAliveTime(Long.parseLong(keepAliveTimeElement.getText()));
                         }
@@ -713,19 +720,25 @@ public class APIManagerConfiguration {
                     if (jmsConnectionDestinationElement != null) {
                         jmsConnectionProperties.setDestination(jmsConnectionDestinationElement.getText());
                     }
-                    String jmsConnectionPassword;
-                    String jmsConnectionPasswordKey = APIConstants.AdvancedThrottleConstants
-                            .THROTTLING_CONFIGURATIONS + "." + APIConstants.AdvancedThrottleConstants
-                            .JMS_CONNECTION_DETAILS + "." + APIConstants.AdvancedThrottleConstants
-                            .PASSWORD;
-                    if (secretResolver.isInitialized() && secretResolver.isTokenProtected(jmsConnectionPasswordKey)) {
-                        jmsConnectionPassword = secretResolver.resolve(jmsConnectionPasswordKey);
-                    } else {
-                        jmsConnectionPassword = jmsConnectionDetailElement.getFirstChildWithName(new QName(APIConstants
-                                .AdvancedThrottleConstants.PASSWORD)).getText();
+                    OMElement jmsConnectionPasswordElement = jmsConnectionDetailElement.getFirstChildWithName(new
+                            QName(APIConstants.AdvancedThrottleConstants.PASSWORD));
+                    if (jmsConnectionPasswordElement != null) {
+                        String jmsConnectionPassword;
+                        String jmsConnectionPasswordKey = APIConstants.AdvancedThrottleConstants
+                                .THROTTLING_CONFIGURATIONS + "." + APIConstants.AdvancedThrottleConstants
+                                .JMS_CONNECTION_DETAILS + "." + APIConstants.AdvancedThrottleConstants
+                                .PASSWORD;
+                        if (secretResolver.isInitialized() && secretResolver.isTokenProtected
+                                (jmsConnectionPasswordKey)) {
+                            jmsConnectionPassword = secretResolver.resolve(jmsConnectionPasswordKey);
+                        } else {
+                            jmsConnectionPassword = jmsConnectionDetailElement.getFirstChildWithName(new QName
+                                    (APIConstants
+                                            .AdvancedThrottleConstants.PASSWORD)).getText();
+                        }
+                        jmsConnectionProperties.setPassword(APIUtil.replaceSystemProperty(jmsConnectionPassword));
+                        System.setProperty("jms.password", jmsConnectionProperties.getPassword());
                     }
-                    jmsConnectionProperties.setPassword(APIUtil.replaceSystemProperty(jmsConnectionPassword));
-                    System.setProperty("jms.password", jmsConnectionProperties.getPassword());
 
                     OMElement jmsConnectionParameterElement = jmsConnectionDetailElement.getFirstChildWithName(new
                             QName(APIConstants.AdvancedThrottleConstants.JMS_CONNECTION_PARAMETERS));
@@ -739,9 +752,8 @@ public class APIManagerConfiguration {
                         jmsConnectionProperties.setJmsConnectionProperties(properties);
                     }
                     // Configuring JMS Task Manager
-                    ThrottleProperties.JMSConnectionProperties.JMSTaskManagerProperties
-                            jmsTaskManagerProperties = new
-                            ThrottleProperties.JMSConnectionProperties.JMSTaskManagerProperties();
+                    ThrottleProperties.JMSConnectionProperties.JMSTaskManagerProperties jmsTaskManagerProperties =
+                            new ThrottleProperties.JMSConnectionProperties.JMSTaskManagerProperties();
                     OMElement jmsTaskManagerElement = jmsConnectionDetailElement.getFirstChildWithName
                             (new QName(APIConstants.AdvancedThrottleConstants.JMS_TASK_MANAGER));
                     if (jmsTaskManagerElement != null) {
@@ -772,8 +784,8 @@ public class APIManagerConfiguration {
                         if (keepAliveTimeInMillisElement != null) {
                             jmsTaskManagerProperties.setJobQueueSize(Integer.parseInt(jobQueueSizeElement.getText()));
                         }
-                        jmsConnectionProperties.setJmsTaskManagerProperties(jmsTaskManagerProperties);
                     }
+                    jmsConnectionProperties.setJmsTaskManagerProperties(jmsTaskManagerProperties);
                     OMElement jmsConnectionInitialDelayElement = jmsConnectionDetailElement
                             .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants
                                     .BLOCK_CONDITION_RETRIEVER_INIT_DELAY));
@@ -890,6 +902,10 @@ public class APIManagerConfiguration {
                         ThrottleProperties
                                 .PolicyDeployer();
                 if (policyDeployerConnectionElement != null) {
+                    OMElement policyDeployerConnectionEnabledElement = jmsConnectionDetailElement
+                            .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.ENABLED));
+                    policyDeployerConfiguration.setEnabled(JavaUtils.isTrueExplicitly
+                            (policyDeployerConnectionEnabledElement.getText()));
                     OMElement policyDeployerServiceUrlElement = policyDeployerConnectionElement
                             .getFirstChildWithName(new QName
                                     (APIConstants.AdvancedThrottleConstants.SERVICE_URL));
@@ -927,9 +943,8 @@ public class APIManagerConfiguration {
                 OMElement blockConditionRetrieverElement = throttleConfigurationElement.getFirstChildWithName(new
                         QName(APIConstants.AdvancedThrottleConstants.BLOCK_CONDITION_RETRIEVER_CONFIGURATION));
 
-                ThrottleProperties.BlockCondition blockConditionRetrieverConfiguration = new
-                        ThrottleProperties
-                                .BlockCondition();
+                ThrottleProperties.BlockCondition blockConditionRetrieverConfiguration = new ThrottleProperties
+                        .BlockCondition();
                 if (blockConditionRetrieverElement != null) {
                     OMElement blockingConditionEnabledElement = blockConditionRetrieverElement
                             .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.ENABLED));
@@ -968,16 +983,6 @@ public class APIManagerConfiguration {
                             .API_KEY_VALIDATOR_PASSWORD));
                 }
                 throttleProperties.setBlockCondition(blockConditionRetrieverConfiguration);
-
-                OMElement jmsPublisherParams = throttleConfigurationElement.getFirstChildWithName(new QName
-                     (APIConstants.AdvancedThrottleConstants.JMS_PUBLISHER_PARAMETERS));
-                if(jmsPublisherParams != null){
-                    Iterator<OMElement> paramIterator = jmsPublisherParams.getChildElements();
-                    while (paramIterator.hasNext()){
-                        OMElement parameter = paramIterator.next();
-                        throttleProperties.addJMSPublisherParameter(parameter.getLocalName(),parameter.getText());
-                    }
-                }
 
             }
         }
