@@ -88,7 +88,6 @@ class BasicInfo extends Component {
         let promised_api = api.getAPIById(this.api_uuid);
         promised_api.then(
             response => {
-                console.info(response.obj);
                 this.setState({api: response.obj});
                 let apiTiers = response.obj.policies;
                 let tiers = [];
@@ -193,7 +192,6 @@ class BasicInfo extends Component {
                     }
                 }
                 this.policies = this.api.policies;
-                console.info(this.api.policies)
             }
         ).catch(
             error => {
@@ -271,14 +269,12 @@ class BasicInfo extends Component {
     }
 
     onBlur(e) {
-        console.info(document.activeElement);
         if (!e.currentTarget.contains(document.activeElement)) {
             this.setState({matDropVisible: false});
         }
     }
 
     selectOption(option) {
-        console.info(option);
         this.setState({selectOption: option});
     }
 

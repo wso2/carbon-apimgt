@@ -30,5 +30,8 @@ export default {
             appBar: grey[100],
             contentFrame: grey[200],
         },
+        custom: {
+            imageIconColor: grey[50]
+        }
     }
 };

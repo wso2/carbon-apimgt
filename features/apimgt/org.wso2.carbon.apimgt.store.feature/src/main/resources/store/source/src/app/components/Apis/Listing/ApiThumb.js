@@ -50,7 +50,7 @@ const styles = theme => ({
     lifeCycleState_Deprecated: {backgroundColor: "#D7C850"},
     lifeCycleState_Retired: {backgroundColor: "#000000"},
     thumbContent: {
-        width: 250,
+        width: 230,
         backgroundColor: theme.palette.background.paper,
         padding: 10
     },
@@ -111,6 +111,10 @@ const styles = theme => ({
     },
     deleteIcon: {
         fill: 'red'
+    },
+    imageWrapper: {
+        color: theme.palette.text.secondary,
+        textDecoration: 'none',
     }
 });
 
@@ -134,24 +138,21 @@ class ApiThumb extends React.Component {
         const {api, classes} = this.props;
 
         const {name, lifeCycleStatus, version, context, description} = this.props.api;
-        console.info(this.props.api)
 
         return (
             <Grid item xs={12} sm={6} md={4} lg={3} xl={2} className={classes.thumbWrapper}>
-                {this.props.api &&  <div
-                    className={
-                        `${classes.lifeCycleDisplay} ${classes[`lifeCycleState_${lifeCycleStatus}`]}`
-                    }
-                    >{lifeCycleStatus}</div> }
-                <Link to={details_link}>
+              
+                <Link to={details_link} className={classes.imageWrapper}>
                     <ImageGenerator apiName={name} />
                 </Link>
 
                 <div className={classes.thumbContent}>
-                    <Typography className={classes.thumbHeader} variant="display1" gutterBottom
-                                onClick={this.handleRedirectToAPIOverview} title={name}>
-                        {name}
-                    </Typography>
+                    <Link to={details_link} className={classes.imageWrapper}>
+                        <Typography className={classes.thumbHeader} variant="display1" gutterBottom
+                                    onClick={this.handleRedirectToAPIOverview} title={name}>
+                            {name}
+                        </Typography>
+                    </Link>
                     <Typography variant="caption" gutterBottom align="left">
                         By: provider}
                     </Typography>

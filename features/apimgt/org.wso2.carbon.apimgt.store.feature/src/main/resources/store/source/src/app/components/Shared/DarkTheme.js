@@ -30,5 +30,8 @@ export default {
             contentFrame: grey[900],
             status: common.black,
         },
+        custom: {
+            imageIconColor: grey[50]
+        }
     }
 };

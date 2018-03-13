@@ -23,6 +23,7 @@ import API from '../../../data/api'
 import Button from 'material-ui/Button';
 import { MenuItem } from 'material-ui/Menu';
 import {Form} from 'material-ui/Form'
+import { FormGroup, FormControlLabel, FormControl, FormHelperText, FormLabel } from 'material-ui/Form';
 import Grid from 'material-ui/Grid';
 import Typography from 'material-ui/Typography';
 import { Delete, Edit, CreateNewFolder, Description  }from 'material-ui-icons';
@@ -31,8 +32,51 @@ import IconButton from 'material-ui/IconButton';
 import Paper from 'material-ui/Paper';
 import Input, { InputLabel } from 'material-ui/Input';
 import Select from 'material-ui/Select';
-import { FormControl, FormHelperText } from 'material-ui/Form';
-import BackIcon from 'material-ui-icons/ArrowBack';
+import ArrowBack from 'material-ui-icons/ArrowBack';
+import Divider from 'material-ui/Divider';
+import {withStyles} from 'material-ui/styles';
+import PropTypes from 'prop-types';
+
+const styles = theme => ({
+    titleBar: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        borderBottomWidth: '1px',
+        borderBottomStyle: 'solid',
+        borderColor: theme.palette.text.secondary,
+        marginBottom: 20,
+    },
+    buttonLeft: {
+        alignSelf: 'flex-start',
+        display: 'flex',
+    },
+    buttonRight: {
+        alignSelf: 'flex-end',
+        display: 'flex',
+    },
+    title: {
+        display: 'inline-block',
+        marginLeft: 20
+    },
+    buttonsWrapper: {
+        marginTop: 40
+    },
+    legend: {
+        marginBottom: 0,
+        borderBottomStyle: 'none',
+        marginTop: 20,
+        fontSize: 12,
+    },
+    inputText: {
+        marginTop: 20,
+    },
+    buttonRight: {
+        marginLeft: 20,
+    },
+    buttonRightLink: {
+        textDecoration: 'none',
+    }
+});
 
 class ApplicationCreate extends Component {
 
@@ -106,24 +150,42 @@ class ApplicationCreate extends Component {
     };
 
     render() {
+        const { classes } = this.props;
         return (
-            <Grid container justify="center" alignItems="center" className="full-width">
-                <Grid item xs={12} sm={12} md={8} lg={8} xl={8} >
-                    <Typography type="title" gutterBottom className="page-title"> 
-                        <Link to={"/applications"}>
-                            <IconButton aria-label="Back">
-                                <BackIcon/>
-                            </IconButton>
-                        </Link>Create Applications
-                    </Typography>
-                    <Paper className="add-form-padding">
+            <Grid container spacing={0} justify="flex-start">
+                <Grid item xs={12} sm={12} md={12} lg={11} xl={10} className={classes.titleBar}>
+                    <div className={classes.buttonLeft}>
+                        <Link to={"/applications/"}>
+                            <Button  variant="raised" size="small" className={classes.buttonBack}
+                                    color="default">
+                                <ArrowBack />
+                            </Button>
+                        </Link>
+                        <div className={classes.title}>
+                            <Typography variant="display2">
+                                Add New Application
+                            </Typography>
+                        </div>
+                    </div>
+                </Grid>
+                <Grid item xs={12} lg={6} xl={4}>
+                    <form className={classes.container} noValidate autoComplete="off">
                         <TextField
-                            required
                             label="Application Name"
-                            margin="normal"
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                            helperText="Enter a name to identify the Application. You will be able to pick this application
+                                        when subscribing to APIs "
+                            fullWidth
+                            name="name"
                             onChange={this.handleChange('name')}
+                            placeholder="My Mobile Application"
+                            autoFocus={true}
+                            className={classes.inputText}
                         />
-                        <br />
+            
+                     
                         {this.state.tiers &&
                         <FormControl margin="normal">
                             <InputLabel htmlFor="quota-helper">Per Token Quota</InputLabel>
@@ -131,7 +193,6 @@ class ApplicationCreate extends Component {
                                 value={this.state.quota}
                                 onChange={this.handlePolicyChange('quota')}
                                 input={<Input name="quota" id="quota-helper" />}
-                                className="form-select"
                             >
                                 {this.state.tiers.map((tier) => <MenuItem key={tier} value={tier}>{tier}</MenuItem>)}
                             </Select>
@@ -139,26 +200,40 @@ class ApplicationCreate extends Component {
                             shared among all the subscribed APIs of the application.</FormHelperText>
                         </FormControl>
                         }
+
                         <TextField
                             label="Application Description"
-                            margin="normal"
-                            onChange={this.handleChange('description')}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                            helperText="Describe the application"
                             fullWidth
+                            multiline
+                            rowsMax="4"
+                            name="description"
+                            onChange={this.handleChange('description')}
+                            placeholder="This application is grouping apis for my mobile application"
+                            className={classes.inputText}
                         />
-                        <div className="form-buttons">
-                            <Button onClick={this.handleSubmit} raised color="primary" style={{marginRight:"20px"}}>
-                                Add Application
+                        <div className={classes.buttonsWrapper}>
+                            <Button variant="raised" color="primary"  onClick={this.handleSubmit}>
+                                Create
                             </Button>
-                            <Button variant="raised" >
-                                Cancel
-                            </Button>
-                        </div>    
-                    </Paper>
+                            <Link to={"/applications/"} className={classes.buttonRightLink}>
+                                <Button variant="raised" className={classes.buttonRight}>
+                                    Cancel
+                                </Button>
+                            </Link>
+                        </div>
+                    </form>
                 </Grid>
             </Grid>
         );
     }
 }
 
-
-export default ApplicationCreate;
+ApplicationCreate.propTypes = {
+    classes: PropTypes.object.isRequired,
+};
+  
+export default withStyles(styles)(ApplicationCreate);
