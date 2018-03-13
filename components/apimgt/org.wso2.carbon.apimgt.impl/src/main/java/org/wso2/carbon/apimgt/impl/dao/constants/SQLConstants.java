@@ -2027,6 +2027,20 @@ public class SQLConstants {
             " INNER JOIN  IDN_OAUTH2_SCOPE_BINDING AS B ON IAS.SCOPE_ID = B.SCOPE_ID  " +
             " WHERE" +
             "   NAME IN (";
+    
+    public static final String GET_SCOPES_BY_SCOPE_KEYS_PREFIX_ORACLE =
+            "SELECT " +
+            "   IAS.SCOPE_ID, " +
+            "   IAS.NAME, " +
+            "   IAS.DISPLAY_NAME, " +
+            "   IAS.DESCRIPTION, " +
+            "   IAS.TENANT_ID, " +
+            "   B.SCOPE_BINDING " +
+            " FROM " +
+            "   IDN_OAUTH2_SCOPE IAS " +
+            " INNER JOIN  IDN_OAUTH2_SCOPE_BINDING B ON IAS.SCOPE_ID = B.SCOPE_ID  " +
+            " WHERE" +
+            "   NAME IN (";
 
     public static final String GET_SCOPES_BY_SCOPE_KEYS_SUFFIX = ") AND TENANT_ID = ?";
 

@@ -7446,6 +7446,10 @@ public class ApiMgtDAO {
             conn = APIMgtDBUtil.getConnection();
             String sqlQuery = SQLConstants.GET_SCOPES_BY_SCOPE_KEYS_PREFIX + placeHolderStr + SQLConstants
                     .GET_SCOPES_BY_SCOPE_KEYS_SUFFIX;
+            if (conn.getMetaData().getDriverName().contains("Oracle")) {
+                sqlQuery = SQLConstants.GET_SCOPES_BY_SCOPE_KEYS_PREFIX_ORACLE + placeHolderStr
+                        + SQLConstants.GET_SCOPES_BY_SCOPE_KEYS_SUFFIX;
+            }
             ps = conn.prepareStatement(sqlQuery);
 
             for (int i = 0; i < inputScopeList.size(); i++) {
