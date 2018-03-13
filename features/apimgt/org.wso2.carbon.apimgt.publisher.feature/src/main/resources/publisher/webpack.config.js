@@ -33,10 +33,21 @@ const config = {
     watch: false,
     devtool: 'source-map',
     resolve: {
-        extensions: ['.js', '.jsx']
+        extensions: ['.js', '.jsx'],
     },
     module: {
         rules: [{
+                enforce: 'pre',
+                test: /\.(js|jsx)$/,
+                /* exclude: /node_modules/, */
+                include: [/.*\/Apis\/Details\/NavBar.jsx/, /.*\/Apis\/Details\/index.jsx/],
+                loader: 'eslint-loader',
+                options: {
+                    failOnError: true,
+                    quiet: true,
+                },
+            },
+            {
                 test: /\.(js|jsx)$/,
                 exclude: /node_modules/,
                 use: [{
