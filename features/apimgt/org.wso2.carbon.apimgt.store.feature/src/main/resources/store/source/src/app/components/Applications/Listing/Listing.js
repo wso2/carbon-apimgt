@@ -32,15 +32,39 @@ import Loading from "../../Base/Loading/Loading";
 import AppsTableContent from "./AppsTableContent";
 import Tooltip from 'material-ui/Tooltip';
 import Alert from "../../Base/Alert";
+import Card, { CardActions, CardContent } from 'material-ui/Card';
+import Divider from 'material-ui/Divider';
 import qs from 'qs';
 
 const styles = theme => ({
-    fab: {
-        position:'fixed',
-        float: 'right',
-        right: theme.spacing.unit * 3,
-        bottom: theme.spacing.unit * 6,
-    },
+        card: {
+            minWidth: 275,
+            paddingBottom: 20,
+        },
+        bullet: {
+            display: 'inline-block',
+            margin: '0 2px',
+            transform: 'scale(0.8)',
+        },
+        pos: {
+            marginBottom: 12,
+            color: theme.palette.text.secondary,
+        },
+        createAppWrapper: {
+            textDecoration: 'none',
+        },
+        divider: {
+            marginBottom: 20,
+        },
+        createButton:{
+            textDecoration: 'none',
+            display: 'inline-block',
+            marginLeft: 20,
+            alignSelf: 'flex-start',
+        },
+        titleWrapper: {
+            display: 'flex',
+        }
 });
 
 class ApplicationTableHead extends Component {
@@ -152,54 +176,68 @@ class Listing extends Component {
         if (!data) {
             return <Loading/>;
         }
-        const {classes} = this.props;
+        const { classes } = this.props;
+        const bull = <span className={classes.bullet}>•</span>;
         return (
             <div>
                 {alertMessage && <Alert message={alertMessage}/>}
-                <Grid className="full-width" container justify="center" alignItems="center">
-                    <Grid item xs={12} sm={12} md={8} lg={8} xl={8} >
-                        <Typography type="title" gutterBottom className="page-title">
+                <Grid container justify="center" alignItems="center">
+                    <Grid item xs={12} sm={12} md={12} lg={11} xl={10}>
+                        <div className={classes.titleWrapper}>
+                            <Typography variant="display1" gutterBottom >
                             Applications
-                        </Typography>
-
-                        <Typography type="caption" gutterBottom className="page-title">
-                            An application is a logical collection of APIs. Applications allow you to use a
-                            single
-                            access
-                            token to invoke a collection of APIs and to subscribe to one API multiple times with
-                            different
-                            SLA levels. The DefaultApplication is pre-created and allows unlimited access by
-                            default.
-                        </Typography>
-                        <Paper>
+                            </Typography>
+                            { data.size > 0 &&
+                            <Link to={"/application/create"} className={classes.createButton}>
+                                <Button variant="raised" color="secondary" className={classes.button}>
+                                Add New Application
+                                </Button>
+                            </Link>
+                            }
+                        </div>
+                        <Divider className={classes.divider} />
+                        
                             {data.size > 0 ? (
-                                <Table>
-                                    <ApplicationTableHead order={order} orderBy={orderBy}
-                                                          onRequestSort={this.handleRequestSort}/>
-                                    <AppsTableContent handleAppDelete={this.handleAppDelete} apps={data}/>
-                                </Table>
+                                <div>
+                                    <Typography variant="caption" gutterBottom align="left">
+                                    An application is a logical collection of APIs. Applications allow you to use a single
+                            access token to invoke a collection of APIs and to subscribe to one API multiple times with different
+                            SLA levels. The DefaultApplication is pre-created and allows unlimited access by default.
+                                    </Typography>
+                                    <Table>
+                                        <ApplicationTableHead order={order} orderBy={orderBy}
+                                                            onRequestSort={this.handleRequestSort}/>
+                                        <AppsTableContent handleAppDelete={this.handleAppDelete} apps={data}/>
+                                    </Table>
+                                </div>
                             ) : (
-                                <Grid container justify="center" alignItems="center">
-                                    <Grid item xs={8}>
-                                        <Typography type="display1" className="page-title">
-                                            No Applications.
-                                        </Typography>
-                                    </Grid>
+                                <Grid item xs={12} sm={12} md={6} lg={4} xl={4} >
+                                    <Card className={classes.card}>
+                                        <CardContent>
+                                        <Typography className={classes.title}>
+                                        An application is a logical collection of APIs. Applications allow you to use a single
+                            access token to invoke a collection of APIs and to subscribe to one API multiple times with different
+                            SLA levels. The DefaultApplication is pre-created and allows unlimited access by default.</Typography>
+                                        </CardContent>
+                                        <CardActions>
+                                            <Link to={"/application/create"} className={classes.createAppWrapper}>
+                                                <Button  variant="raised" color="primary">
+                                                    Add New Application
+                                                </Button>
+                                            </Link>
+                                        </CardActions>
+                                    </Card>
                                 </Grid>
                             )}
-                        </Paper>
-                        <Link to={"/application/create"}>
-                            <Tooltip title="Create Application" placement="bottom" aria-label="Create Application">
-                                <Button fab color="primary" className={classes.fab} aria-label="add" >
-                                    <AddIcon />
-                                </Button>
-                            </Tooltip>
-                        </Link>
+                        
                     </Grid>
                 </Grid>
             </div>
         );
     }
 }
-
+Listing.propTypes = {
+    classes: PropTypes.object.isRequired,
+};
+  
 export default withStyles(styles)(Listing);

@@ -7,8 +7,24 @@ import TextField from 'material-ui/TextField';
 import Typography from 'material-ui/Typography'
 import Api from '../../../data/api'
 import {CircularProgress} from "material-ui/Progress";
+import {withStyles} from 'material-ui/styles';
+import PropTypes from 'prop-types';
+import List, { ListItem, ListItemText } from 'material-ui/List';
+import Avatar from 'material-ui/Avatar';
+import ImageIcon from 'material-ui-icons/Image';
 // TODO: need to add alert library to store as well
 // import Alert from '../../Shared/alert'
+
+const styles = theme => ({
+    titleBar: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        borderBottomWidth: '1px',
+        borderBottomStyle: 'solid',
+        borderColor: theme.palette.text.secondary,
+        marginBottom: 20,
+    }
+});
 
 class Forum extends React.Component {
     constructor(props) {
@@ -63,48 +79,58 @@ class Forum extends React.Component {
 
     render() {
         const {commentList, comment, api} = this.state;
+        const { classes } = this.props;
         return (
-            <Paper>
-                <Grid container spacing={0}>
-                    <Grid item xs={12}>
-                        <div>
-                            <Typography type="title" gutterBottom>
-                                Comments
-                            </Typography>
-                            <Grid container justify="center" spacing={0}>
-                                <Grid item xs={10}>
-                                    <TextField
-                                        fullWidth
-                                        label="Type your comments here"
-                                        placeholder="Type your comments here"
-                                        multiline
-                                        rows="4"
-                                        helperText="Please proved your comments on this API"
-                                        margin="normal"
-                                        value={comment}
-                                        onChange={this.updateCommentString}
-                                    />
-                                    <Button onClick={this.handleAddComment}>Add</Button>
-                                </Grid>
-                                <Grid item xs={10}>
-                                    {commentList ? commentList.map((comment) => (
-                                        <div>
-                                            <Grid item>
-                                                <Card bodyStyle={{padding: 5}} style={{background: "#e0d9d8"}}>
-                                                    <p>{comment.commentText}</p></Card>
-                                            </Grid>
-                                            <Grid item>
-                                                <p>Posted By {comment.createdBy} at {comment.createdTime}</p>
-                                            </Grid>
-                                        </div>))
-                                        : <CircularProgress/>}
-                                </Grid>
-                            </Grid>
-                        </div>
-                    </Grid>
+            <Grid container>
+                <Grid item xs={12} sm={12} md={12} lg={11} xl={10}  >
+                    <TextField
+                            label="Comment"
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                            helperText="Please proved your comments on this API "
+                            fullWidth
+                            name="name"
+                            multiline
+                            rows="4"
+                            onChange={this.updateCommentString}
+                            placeholder="Type your comments here"
+                            autoFocus={true}
+                            className={classes.inputText}
+                        />
                 </Grid>
-            </Paper>
+                <Grid item xs={12} sm={12} md={12} lg={11} xl={10}  >
+                    <Button variant="raised" color="primary"  onClick={this.handleAddComment}>
+                            Add New Comment
+                    </Button>
+                </Grid>
+                <Grid item xs={12}>
+                <Paper>
+                    <List>
+                        {commentList ? commentList.map((comment,index) => (
+                            <ListItem key={index}>
+                                <Avatar>
+                                    <ImageIcon />
+                                </Avatar>
+                                <ListItemText primary={comment.commentText} 
+                                                secondary={ "Posted By "  + comment.createdBy +  " at " + comment.createdTime } />
+                            </ListItem>))
+                                        : 
+                            <CircularProgress/>
+                        }
+                    </List>
+                    </Paper>
+                </Grid>
+            </Grid>
+
+
+            
         );
     }
 }
-export default Forum
+
+Forum.propTypes = {
+    classes: PropTypes.object.isRequired,
+};
+  
+export default withStyles(styles)(Forum);

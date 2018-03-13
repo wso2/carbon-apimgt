@@ -33,6 +33,7 @@ import Switch from 'material-ui/Switch';
 import Typography from 'material-ui/Typography';
 import classNames from 'classnames';
 
+
 const helpTips = [
     "By API Name [Default]",
     "By API Provider [ Syntax - provider:xxxx ] or",
@@ -124,6 +125,9 @@ const styles = theme => ({
         marginRight: 20,
         display: 'flex',
         alignItems: 'flex-start',
+    },
+    brandWrapper: {
+        textDecoration: 'none',
     },
     input: {
         margin: '0 20 0 20',
@@ -237,10 +241,10 @@ class Layout extends React.Component {
                             <MenuIcon />
                         </IconButton>
 
-                        <Link to="/"  >
+                        <Link to="/"  className={classes.brandWrapper}>
                                 <Typography variant="title"  noWrap className={classes.brand}>
                                 <img className={classes.siteLogo} src="/store/public/app/images/logo.png"
-                                     alt="wso2-logo"/> <span>API PUBLISHER</span>
+                                     alt="wso2-logo"/> <span>API STORE</span>
                             </Typography>
                         </Link>
 

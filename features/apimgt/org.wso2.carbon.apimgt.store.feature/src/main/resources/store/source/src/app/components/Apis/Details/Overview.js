@@ -151,7 +151,6 @@ class Overview extends Component {
             return <Loading/>
         }
         const { classes } = this.props;
-        console.info(api);
         return (
             <Grid container>
                 <Grid item xs={12} className={classes.imageWrapper}>
