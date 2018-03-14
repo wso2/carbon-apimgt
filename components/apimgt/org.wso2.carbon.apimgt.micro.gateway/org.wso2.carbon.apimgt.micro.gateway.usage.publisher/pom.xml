@@ -21,7 +21,7 @@
     <parent>
         <artifactId>org.wso2.carbon.apimgt.micro.gateway</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>6.2.194-SNAPSHOT</version>
+        <version>6.2.194</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
