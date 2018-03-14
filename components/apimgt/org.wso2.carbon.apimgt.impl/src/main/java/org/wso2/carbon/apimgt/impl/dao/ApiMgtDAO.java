@@ -4873,7 +4873,7 @@ public class ApiMgtDAO {
             connection.commit();
 
             if (api.getScopes() != null) {
-                addScopes(api.getScopes(), apiId, tenantId);
+                addScopes(api.getScopes(), api.getId(), apiId, tenantId);
             }
             addURLTemplates(apiId, api, connection);
             String tenantUserName = MultitenantUtils
@@ -7100,7 +7100,8 @@ public class ApiMgtDAO {
         return storesSet;
     }
 
-    public void addScopes(Set<?> objects, int apiID, int tenantID) throws APIManagementException {
+    public void addScopes(Set<?> objects, APIIdentifier apiIdentifier, int apiID, int tenantID)
+            throws APIManagementException {
         Connection conn = null;
         PreparedStatement ps = null, ps2 = null, ps3 = null;
         ResultSet rs = null;
@@ -7157,7 +7158,7 @@ public class ApiMgtDAO {
                         conn.commit();
                     } else if (object instanceof Scope) {
                         Scope scope = (Scope) object;
-                        if(isScopeExists(scope.getKey(), tenantID)){
+                        if(isScopeKeyAssigned(apiIdentifier, scope.getKey(), tenantID)){
                             throw new APIManagementException("Scope '" + scope.getKey() + "' already exists.");
                         }
                         ps.setString(1, scope.getKey());
@@ -7523,7 +7524,7 @@ public class ApiMgtDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
         }
-        addScopes(api.getUriTemplates(), apiId, tenantId);
+        addScopes(api.getUriTemplates(), api.getId(), apiId, tenantId);
     }
 
     public HashMap<String, String> getResourceToScopeMapping(APIIdentifier identifier) throws APIManagementException {
