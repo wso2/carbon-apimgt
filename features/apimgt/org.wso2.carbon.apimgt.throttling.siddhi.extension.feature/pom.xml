@@ -75,6 +75,9 @@
                                 <bundleDef>
                                     org.wso2.siddhi:siddhi-query-api:${siddhi.version}
                                 </bundleDef>
+                                <bundleDef>
+                                    com.google.code.gson:gson:${google.code.gson.version}
+                                </bundleDef>
                             </bundles>
                         </configuration>
                     </execution>
