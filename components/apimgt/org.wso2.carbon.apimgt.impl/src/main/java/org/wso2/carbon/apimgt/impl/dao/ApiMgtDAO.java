@@ -7127,10 +7127,15 @@ public class ApiMgtDAO {
                     if (object instanceof URITemplate) {
                         URITemplate uriTemplate = (URITemplate) object;
 
-                        if (uriTemplate.getScope() == null || isScopeExists(uriTemplate.getScope().getKey(),
-                                tenantID)) {
+                        if (uriTemplate.getScope() == null) {
                             continue;
                         }
+
+                        if (isScopeKeyAssigned(apiIdentifier, uriTemplate.getScope().getKey(), tenantID)) {
+                            throw new APIManagementException("Scope '" + uriTemplate.getScope().getKey() + "' " +
+                                    "is already used by another API.");
+                        }
+
                         ps.setString(1, uriTemplate.getScope().getKey());
                         ps.setString(2, uriTemplate.getScope().getName());
                         ps.setString(3, uriTemplate.getScope().getDescription());
@@ -7160,7 +7165,8 @@ public class ApiMgtDAO {
                     } else if (object instanceof Scope) {
                         Scope scope = (Scope) object;
                         if(isScopeKeyAssigned(apiIdentifier, scope.getKey(), tenantID)){
-                            throw new APIManagementException("Scope '" + scope.getKey() + "' already exists.");
+                            throw new APIManagementException("Scope '" + scope.getKey() + "' is already used " +
+                                    "by another API.");
                         }
                         ps.setString(1, scope.getKey());
                         ps.setString(2, scope.getName());
