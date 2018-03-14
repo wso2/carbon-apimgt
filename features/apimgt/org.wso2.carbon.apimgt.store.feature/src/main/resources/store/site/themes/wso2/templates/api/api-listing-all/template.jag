@@ -61,8 +61,9 @@ if (isEnabledTutorial && user && apisCount > 0) {
     }
     else {
         var isAPIStoreWalkthroughClicked = false;
-        if (request.getParameter('storeInteractiveTutorial') != null) {
-            isAPIStoreWalkthroughClicked = request.getParameter('storeInteractiveTutorial');
+        var storeInteractiveTutorialParamValue = request.getParameter('storeInteractiveTutorial');
+        if ( storeInteractiveTutorialParamValue != null && storeInteractiveTutorialParamValue === "true") {
+            isAPIStoreWalkthroughClicked = true;
         }
     }
 }
