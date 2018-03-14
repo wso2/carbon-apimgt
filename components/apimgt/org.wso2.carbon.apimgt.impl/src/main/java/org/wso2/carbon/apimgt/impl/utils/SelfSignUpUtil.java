@@ -274,163 +274,163 @@ public final class SelfSignUpUtil {
 		return modifiedUsername;
 	}
 
-	/**
-	 * This method is used to get the consent purposes
-	 *
-	 * @param tenantDomain tenant domain
-	 * @return A json string containing consent purposes
-	 * @throws APIManagementException APIManagement Exception
-	 * @throws IOException            IO Exception
-	 * @throws ParseException         Parse Exception
-	 */
-	public static String getConsentPurposes(String tenantDomain)
-			throws APIManagementException, IOException, ParseException {
-		String tenant = tenantDomain;
-		String purposesEndpoint;
-		String purposesJsonString = "";
-		if (tenant == null) {
-			tenant = APIConstants.SUPER_TENANT_DOMAIN;
-		}
-		purposesEndpoint = getPurposesEndpoint(tenant);
-		String purposesResponse = executeGet(purposesEndpoint, tenantDomain);
-		JSONParser parser = new JSONParser();
-		JSONArray purposes = (JSONArray) parser.parse(purposesResponse);
-		JSONArray purposesResponseArray = new JSONArray();
-		for (int purposeIndex = 0; purposeIndex < purposes.size(); purposeIndex++) {
-			JSONObject purpose = (JSONObject) purposes.get(purposeIndex);
-			if (!isDefaultPurpose(purpose)) {
-				purpose = retrievePurpose(((Long) purpose.get(PURPOSE_ID)).intValue(), tenant);
-				if (hasPIICategories(purpose)) {
-					purposesResponseArray.add(purpose);
-				}
-			}
-		}
-		if (!purposesResponseArray.isEmpty()) {
-			JSONObject purposesJson = new JSONObject();
-			purposesJson.put(PURPOSES, purposesResponseArray);
-			purposesJsonString = purposesJson.toString();
-		}
-		return purposesJsonString;
-	}
+    /**
+     * This method is used to get the consent purposes
+     *
+     * @param tenantDomain tenant domain
+     * @return A json string containing consent purposes
+     * @throws APIManagementException APIManagement Exception
+     * @throws IOException            IO Exception
+     * @throws ParseException         Parse Exception
+     */
+    public static String getConsentPurposes(String tenantDomain)
+            throws APIManagementException, IOException, ParseException {
+        String tenant = tenantDomain;
+        String purposesEndpoint;
+        String purposesJsonString = "";
+        if (tenant == null) {
+            tenant = APIConstants.SUPER_TENANT_DOMAIN;
+        }
+        purposesEndpoint = getPurposesEndpoint(tenant);
+        String purposesResponse = executeGet(purposesEndpoint, tenantDomain);
+        JSONParser parser = new JSONParser();
+        JSONArray purposes = (JSONArray) parser.parse(purposesResponse);
+        JSONArray purposesResponseArray = new JSONArray();
+        for (int purposeIndex = 0; purposeIndex < purposes.size(); purposeIndex++) {
+            JSONObject purpose = (JSONObject) purposes.get(purposeIndex);
+            if (!isDefaultPurpose(purpose)) {
+                purpose = retrievePurpose(((Long) purpose.get(PURPOSE_ID)).intValue(), tenant);
+                if (hasPIICategories(purpose)) {
+                    purposesResponseArray.add(purpose);
+                }
+            }
+        }
+        if (!purposesResponseArray.isEmpty()) {
+            JSONObject purposesJson = new JSONObject();
+            purposesJson.put(PURPOSES, purposesResponseArray);
+            purposesJsonString = purposesJson.toString();
+        }
+        return purposesJsonString;
+    }
 
-	/**
-	 * This method is used to construct the endpoint URL to call the consent management service
-	 *
-	 * @param tenantDomain The tenant domain
-	 * @return endpoint url
-	 */
-	private static String getPurposesEndpoint(String tenantDomain) {
-		APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-				.getAPIManagerConfiguration();
-		String serviceUrl = config.getFirstProperty(APIConstants.AUTH_MANAGER_URL);
-		String purposesEndpoint;
-		if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(tenantDomain)) {
-			purposesEndpoint = serviceUrl.replace(APIConstants.SERVICES_URL_RELATIVE_PATH,
-					"t/" + tenantDomain + "/" + CONSENT_API_RELATIVE_PATH + PURPOSES_ENDPOINT_RELATIVE_PATH);
-		} else {
-			purposesEndpoint = serviceUrl.replace(APIConstants.SERVICES_URL_RELATIVE_PATH,
-					CONSENT_API_RELATIVE_PATH + PURPOSES_ENDPOINT_RELATIVE_PATH);
-		}
-		return purposesEndpoint;
-	}
+    /**
+     * This method is used to construct the endpoint URL to call the consent management service
+     *
+     * @param tenantDomain The tenant domain
+     * @return endpoint url
+     */
+    private static String getPurposesEndpoint(String tenantDomain) {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        String serviceUrl = config.getFirstProperty(APIConstants.AUTH_MANAGER_URL);
+        String purposesEndpoint;
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(tenantDomain)) {
+            purposesEndpoint = serviceUrl.replace(APIConstants.SERVICES_URL_RELATIVE_PATH,
+                    "t/" + tenantDomain + "/" + CONSENT_API_RELATIVE_PATH + PURPOSES_ENDPOINT_RELATIVE_PATH);
+        } else {
+            purposesEndpoint = serviceUrl.replace(APIConstants.SERVICES_URL_RELATIVE_PATH,
+                    CONSENT_API_RELATIVE_PATH + PURPOSES_ENDPOINT_RELATIVE_PATH);
+        }
+        return purposesEndpoint;
+    }
 
-	/**
-	 * This method is used to execute a get request to the consent management service
-	 *
-	 * @param url          The endpoint url of the consent management service
-	 * @param tenantDomain The tenant domain
-	 * @return The response string
-	 * @throws APIManagementException APIManagement Exception
-	 * @throws IOException            IO Exception
-	 */
-	private static String executeGet(String url, String tenantDomain) throws APIManagementException, IOException {
+    /**
+     * This method is used to execute a get request to the consent management service
+     *
+     * @param url          The endpoint url of the consent management service
+     * @param tenantDomain The tenant domain
+     * @return The response string
+     * @throws APIManagementException APIManagement Exception
+     * @throws IOException            IO Exception
+     */
+    private static String executeGet(String url, String tenantDomain) throws APIManagementException, IOException {
 
-		boolean isDebugEnabled = log.isDebugEnabled();
-		try (CloseableHttpClient httpclient = HttpClientBuilder.create().useSystemProperties().build()) {
+        boolean isDebugEnabled = log.isDebugEnabled();
+        try (CloseableHttpClient httpclient = HttpClientBuilder.create().useSystemProperties().build()) {
 
-			HttpGet httpGet = new HttpGet(url);
-			setAuthorizationHeader(httpGet, tenantDomain);
+            HttpGet httpGet = new HttpGet(url);
+            setAuthorizationHeader(httpGet, tenantDomain);
 
-			try (CloseableHttpResponse response = httpclient.execute(httpGet)) {
+            try (CloseableHttpResponse response = httpclient.execute(httpGet)) {
 
-				if (isDebugEnabled) {
-					log.debug("HTTP status " + response.getStatusLine().getStatusCode());
-				}
-				if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-					BufferedReader reader = new BufferedReader(
-							new InputStreamReader(response.getEntity().getContent()));
-					String inputLine;
-					StringBuilder responseString = new StringBuilder();
+                if (isDebugEnabled) {
+                    log.debug("HTTP status " + response.getStatusLine().getStatusCode());
+                }
+                if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                    BufferedReader reader = new BufferedReader(
+                            new InputStreamReader(response.getEntity().getContent()));
+                    String inputLine;
+                    StringBuilder responseString = new StringBuilder();
 
-					while ((inputLine = reader.readLine()) != null) {
-						responseString.append(inputLine);
-					}
-					return responseString.toString();
-				} else {
-					throw new APIManagementException(
-							"Error while retrieving data from " + url + ". Found http status " + response
-									.getStatusLine());
-				}
-			} finally {
-				httpGet.releaseConnection();
-			}
-		}
-	}
+                    while ((inputLine = reader.readLine()) != null) {
+                        responseString.append(inputLine);
+                    }
+                    return responseString.toString();
+                } else {
+                    throw new APIManagementException(
+                            "Error while retrieving data from " + url + ". Found http status " + response
+                                    .getStatusLine());
+                }
+            } finally {
+                httpGet.releaseConnection();
+            }
+        }
+    }
 
-	/**
-	 * This method is used to set the Authorization header for the request sent to consent management service
-	 *
-	 * @param httpMethod   The method which requires to add the Authorization header
-	 * @param tenantDomain The tenant domain
-	 * @throws APIManagementException APIManagement Exception
-	 */
-	private static void setAuthorizationHeader(HttpRequestBase httpMethod, String tenantDomain)
-			throws APIManagementException {
-		UserRegistrationConfigDTO signupConfig = SelfSignUpUtil.getSignupConfiguration(tenantDomain);
-		String adminUsername = signupConfig.getAdminUserName();
-		String adminPassword = signupConfig.getAdminPassword();
-		String toEncode = adminUsername + ":" + adminPassword;
-		byte[] encoding = Base64.encodeBase64(toEncode.getBytes());
-		String authHeader = new String(encoding, Charset.defaultCharset());
-		httpMethod.addHeader(HTTPConstants.HEADER_AUTHORIZATION,
-				APIConstants.AUTHORIZATION_HEADER_BASIC + " " + authHeader);
-	}
+    /**
+     * This method is used to set the Authorization header for the request sent to consent management service
+     *
+     * @param httpMethod   The method which requires to add the Authorization header
+     * @param tenantDomain The tenant domain
+     * @throws APIManagementException APIManagement Exception
+     */
+    private static void setAuthorizationHeader(HttpRequestBase httpMethod, String tenantDomain)
+            throws APIManagementException {
+        UserRegistrationConfigDTO signupConfig = SelfSignUpUtil.getSignupConfiguration(tenantDomain);
+        String adminUsername = signupConfig.getAdminUserName();
+        String adminPassword = signupConfig.getAdminPassword();
+        String toEncode = adminUsername + ":" + adminPassword;
+        byte[] encoding = Base64.encodeBase64(toEncode.getBytes());
+        String authHeader = new String(encoding, Charset.defaultCharset());
+        httpMethod.addHeader(HTTPConstants.HEADER_AUTHORIZATION,
+                APIConstants.AUTHORIZATION_HEADER_BASIC + " " + authHeader);
+    }
 
-	/**
-	 * This method is used to retrieve the set of attributes for a given consent purpose
-	 *
-	 * @param purposeId    Id of the purpose
-	 * @param tenantDomain The tenant domain
-	 * @return A JSONObject for the given consent purpose
-	 * @throws APIManagementException APIManagement Exception
-	 * @throws IOException            IO Exception
-	 * @throws ParseException         Parse Exception
-	 */
-	private static JSONObject retrievePurpose(int purposeId, String tenantDomain)
-			throws APIManagementException, IOException, ParseException {
-		String purposeResponse = executeGet(getPurposesEndpoint(tenantDomain) + purposeId, tenantDomain);
-		JSONParser parser = new JSONParser();
-		return (JSONObject) parser.parse(purposeResponse);
-	}
+    /**
+     * This method is used to retrieve the set of attributes for a given consent purpose
+     *
+     * @param purposeId    Id of the purpose
+     * @param tenantDomain The tenant domain
+     * @return A JSONObject for the given consent purpose
+     * @throws APIManagementException APIManagement Exception
+     * @throws IOException            IO Exception
+     * @throws ParseException         Parse Exception
+     */
+    private static JSONObject retrievePurpose(int purposeId, String tenantDomain)
+            throws APIManagementException, IOException, ParseException {
+        String purposeResponse = executeGet(getPurposesEndpoint(tenantDomain) + purposeId, tenantDomain);
+        JSONParser parser = new JSONParser();
+        return (JSONObject) parser.parse(purposeResponse);
+    }
 
-	/**
-	 * This method is used to check whether a given consent purpose is the default purpose
-	 *
-	 * @param purpose The consent purpose
-	 * @return Boolean whether it is the default purpose
-	 */
-	private static boolean isDefaultPurpose(JSONObject purpose) {
-		return DEFAULT.equalsIgnoreCase((String) purpose.get(PURPOSE));
-	}
+    /**
+     * This method is used to check whether a given consent purpose is the default purpose
+     *
+     * @param purpose The consent purpose
+     * @return Boolean whether it is the default purpose
+     */
+    private static boolean isDefaultPurpose(JSONObject purpose) {
+        return DEFAULT.equalsIgnoreCase((String) purpose.get(PURPOSE));
+    }
 
-	/**
-	 * This method is used to check for PII Categories for a particular consent management purpose
-	 *
-	 * @param purpose The consent purpose
-	 * @return Boolean if there are PII Categories for the purpose
-	 */
-	private static boolean hasPIICategories(JSONObject purpose) {
-		JSONArray piiCategories = (JSONArray) purpose.get(PII_CATEGORIES);
-		return !piiCategories.isEmpty();
-	}
+    /**
+     * This method is used to check for PII Categories for a particular consent management purpose
+     *
+     * @param purpose The consent purpose
+     * @return Boolean if there are PII Categories for the purpose
+     */
+    private static boolean hasPIICategories(JSONObject purpose) {
+        JSONArray piiCategories = (JSONArray) purpose.get(PII_CATEGORIES);
+        return !piiCategories.isEmpty();
+    }
 }
