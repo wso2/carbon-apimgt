@@ -107,7 +107,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -137,6 +136,7 @@ public class ApiMgtDAO {
 
     private boolean forceCaseInsensitiveComparisons = false;
     private boolean multiGroupAppSharingEnabled = false;
+    public static final String API_SCOPES_SHARING = "api-scopes-sharing";
 
     private ApiMgtDAO() {
         APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
@@ -7159,7 +7159,12 @@ public class ApiMgtDAO {
                         conn.commit();
                     } else if (object instanceof Scope) {
                         Scope scope = (Scope) object;
-                        if(isScopeKeyAssigned(apiIdentifier, scope.getKey(), tenantID)){
+                        Boolean scopeSharingEnabled = false;
+                        String scopeSharingProp = System.getProperty(API_SCOPES_SHARING);
+                        if (scopeSharingProp != null && !scopeSharingProp.isEmpty()) {
+                            scopeSharingEnabled = Boolean.parseBoolean(scopeSharingProp);
+                        }
+                        if (!scopeSharingEnabled && isScopeKeyAssigned(apiIdentifier, scope.getKey(), tenantID)) {
                             throw new APIManagementException("Scope '" + scope.getKey() + "' already exists.");
                         }
                         ps.setString(1, scope.getKey());
