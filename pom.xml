@@ -1375,7 +1375,7 @@
         <carbon.apimgt.imp.pkg.version>[6.0.0, 7.0.0)</carbon.apimgt.imp.pkg.version>
 
         <analytics.shared.version>1.0.1</analytics.shared.version>
-        <carbon.analytics.common.version>5.1.33</carbon.analytics.common.version>
+        <carbon.analytics.common.version>5.1.35</carbon.analytics.common.version>
         <!-- Carbon kernel version -->
         <carbon.kernel.version>4.4.26</carbon.kernel.version>
         <carbon.kernel.package.import.version.range>[4.4.0, 5.0.0)</carbon.kernel.package.import.version.range>
@@ -1385,7 +1385,7 @@
         <carbon.mediation.version>4.6.62</carbon.mediation.version>
 
         <!-- Carbon Identity versions -->
-        <carbon.identity.version>5.11.144</carbon.identity.version>
+        <carbon.identity.version>5.11.145</carbon.identity.version>
         <carbon.identity-captcha.version>4.5.2</carbon.identity-captcha.version>
         <carbon.identity-inbound-auth-oauth.version>5.6.60</carbon.identity-inbound-auth-oauth.version>
         <carbon.identity-user-ws.version>5.1.8</carbon.identity-user-ws.version>
