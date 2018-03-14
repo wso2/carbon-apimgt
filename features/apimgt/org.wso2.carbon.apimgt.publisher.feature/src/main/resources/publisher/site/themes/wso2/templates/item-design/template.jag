@@ -460,7 +460,7 @@
                                         <div class="form-actions" id="saveButtons">
 											<button type="submit" class="btn btn-secondary has-spinner" id="saveBtn"><%=i18n.localize("Save")%></button>
 											<input type="hidden" value="Save" action="design"/>
-											<button id="go_to_implement" class="btn btn-primary has-spinner" disabled=""><%=i18n.localize("Next: Implement")%><i class="fw fw-right add-margin-left-2x"></i></button>
+											<button type="button" id="go_to_implement" class="btn btn-primary has-spinner" disabled=""><%=i18n.localize("Next: Implement")%><i class="fw fw-right add-margin-left-2x"></i></button>
 										</div>
 									</div>
 								</div>
