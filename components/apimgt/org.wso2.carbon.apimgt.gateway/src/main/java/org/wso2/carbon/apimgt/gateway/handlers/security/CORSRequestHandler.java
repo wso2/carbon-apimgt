@@ -57,6 +57,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
     private Set<String> allowedOrigins;
     private boolean initializeHeaderValues;
     private String allowedMethods;
+    private List<String> allowedMethodList;
     private boolean allowCredentialsEnabled;
     private String authorizationHeader;
 
@@ -96,6 +97,9 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
         }
         if (allowedMethods == null) {
             allowedMethods = APIUtil.getAllowedMethods();
+            if (allowedMethods != null) {
+                allowedMethodList = Arrays.asList(allowedMethods.split(","));
+            }
         }
 
         initializeHeaderValues = true;
@@ -285,12 +289,14 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
         }
 
         messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, allowedOrigin);
-        String allowedMethods = "";
-        StringBuffer allowedMethodsBuffer = new StringBuffer();
+        String allowedMethods;
+        StringBuffer allowedMethodsBuffer = new StringBuffer(20);
         if (selectedResource != null) {
             String[] methods = selectedResource.getMethods();
             for (String method : methods) {
-                allowedMethodsBuffer.append(method).append(',');
+                if (this.allowedMethodList.contains(method)) {
+                    allowedMethodsBuffer.append(method).append(',');
+                }
             }
             allowedMethods = allowedMethodsBuffer.toString();
             if (methods.length != 0) {
@@ -301,7 +307,6 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
         }
         if ("*".equals(allowHeaders)) {
             allowHeaders = headers.get("Access-Control-Request-Headers");
-
         }
         messageContext.setProperty(APIConstants.CORS_CONFIGURATION_ENABLED, isCorsEnabled());
         messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_METHODS, allowedMethods);
@@ -368,6 +373,9 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 
     public void setAllowedMethods(String allowedMethods) {
         this.allowedMethods = allowedMethods;
+        if (allowedMethods != null) {
+            allowedMethodList = Arrays.asList(allowedMethods.split(","));
+        }
     }
 
     public String getAuthorizationHeader() {
