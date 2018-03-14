@@ -6,12 +6,18 @@
  */
 package org.wso2.carbon.apimgt.impl.generated.thrift;
 
+import org.apache.axis2.context.MessageContext;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.scheme.IScheme;
 import org.apache.thrift.scheme.SchemeFactory;
 import org.apache.thrift.scheme.StandardScheme;
 
 import org.apache.thrift.scheme.TupleScheme;
 import org.apache.thrift.protocol.TTupleProtocol;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -28,6 +34,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class APIKeyValidationService {
+
+  private static final Log log = LogFactory.getLog(APIKeyValidationService.class);
 
   public interface Iface {
 
@@ -86,6 +94,11 @@ public class APIKeyValidationService {
       args.setClientDomain(clientDomain);
       args.setMatchingResource(matchingResource);
       args.setHttpVerb(httpVerb);
+      if (log.isDebugEnabled()) {
+        log.debug("KeyValidation request from gateway to keymanager via thrift call for: " + context + " with ID: "
+                + MessageContext.getCurrentMessageContext().getMessageID() + " at "
+                + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
+      }
       sendBase("validateKey", args);
     }
 
@@ -93,6 +106,11 @@ public class APIKeyValidationService {
     {
       validateKey_result result = new validateKey_result();
       receiveBase(result, "validateKey");
+      if (log.isDebugEnabled()) {
+        log.debug("KeyValidation response received to gateway from keymanager via thrift call for:"
+                + " with ID: " + MessageContext.getCurrentMessageContext().getMessageID() + " at "
+                + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
+      }
       if (result.isSetSuccess()) {
         return result.success;
       }
@@ -117,6 +135,11 @@ public class APIKeyValidationService {
       args.setContext(context);
       args.setApiVersion(apiVersion);
       args.setSessionId(sessionId);
+      if (log.isDebugEnabled()) {
+        log.debug("Get all URI templates request from gateway to keymanager via thrift call for:" + context + " at "
+                + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
+
+      }
       sendBase("getAllURITemplates", args);
     }
 
@@ -124,6 +147,10 @@ public class APIKeyValidationService {
     {
       getAllURITemplates_result result = new getAllURITemplates_result();
       receiveBase(result, "getAllURITemplates");
+      if (log.isDebugEnabled()) {
+        log.debug("Get all URI templates response received to gateway from keymanager via thrift call at "
+                + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
+      }
       if (result.isSetSuccess()) {
         return result.success;
       }

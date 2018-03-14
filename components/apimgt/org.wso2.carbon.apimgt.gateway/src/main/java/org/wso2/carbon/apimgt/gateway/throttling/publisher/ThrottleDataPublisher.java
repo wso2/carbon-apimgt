@@ -32,6 +32,8 @@ import org.wso2.carbon.databridge.agent.exception.DataEndpointConfigurationExcep
 import org.wso2.carbon.databridge.agent.exception.DataEndpointException;
 import org.wso2.carbon.databridge.commons.exception.TransportException;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -123,7 +125,17 @@ public class ThrottleDataPublisher {
                     resourceLevelThrottleKey, resourceLevelTier,
                     authorizedUser, apiContext, apiVersion, appTenant, apiTenant, appId, messageContext,
                     authenticationContext);
+            if (log.isDebugEnabled()) {
+                log.debug("Publishing throttle data from gateway to traffic-manager for: " + apiContext
+                        + " with ID: " + messageContext.getMessageID() + " started" + " at "
+                        + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
+            }
             executor.execute(agent);
+            if (log.isDebugEnabled()) {
+                log.debug("Publishing throttle data from gateway to traffic-manager for: " + apiContext
+                        + " with ID: " + messageContext.getMessageID() + " ended" + " at "
+                        + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
+            }
         } catch (Exception e) {
             log.error("Error while publishing throttling events to global policy server", e);
         }
