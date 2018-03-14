@@ -3064,7 +3064,12 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Sequence'
-        example: []
+        example: "\"sequences\":
+        [
+          {\"name\": \"json_to_xml_in_message\",\"config\": null,\"type\": \"in\"},
+          {\"name\": \"xml_to_json_out_message\",\"config\": null,\"type\": \"out\"},
+          {\"name\": \"json_fault\",\"config\": null,\"type\": \"fault\"}
+        ],"
       subscriptionAvailability:
         type: string
         description: The subscription availability. Accepts one of the following. current_tenant, all_tenants or specific_tenants.
