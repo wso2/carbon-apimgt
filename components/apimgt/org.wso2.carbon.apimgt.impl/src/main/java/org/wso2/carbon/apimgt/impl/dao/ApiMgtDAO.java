@@ -107,7 +107,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -7110,6 +7109,10 @@ public class ApiMgtDAO {
         String scopeEntry = SQLConstants.ADD_SCOPE_ENTRY_SQL;
         String scopeRoleEntry = SQLConstants.ADD_SCOPE_ROLE_SQL;
         String scopeLink = SQLConstants.ADD_SCOPE_LINK_SQL;
+        Boolean scopeSharingEnabled = false;
+        if (!StringUtils.isEmpty(System.getProperty(APIConstants.ENABLE_API_SCOPES_SHARING))) {
+            scopeSharingEnabled = Boolean.parseBoolean(System.getProperty(APIConstants.ENABLE_API_SCOPES_SHARING));
+        }
         try {
             conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
@@ -7131,7 +7134,7 @@ public class ApiMgtDAO {
                             continue;
                         }
 
-                        if (isScopeKeyAssigned(apiIdentifier, uriTemplate.getScope().getKey(), tenantID)) {
+                        if (!scopeSharingEnabled && isScopeKeyAssigned(apiIdentifier, uriTemplate.getScope().getKey(), tenantID)) {
                             throw new APIManagementException("Scope '" + uriTemplate.getScope().getKey() + "' " +
                                     "is already used by another API.");
                         }
@@ -7164,7 +7167,7 @@ public class ApiMgtDAO {
                         conn.commit();
                     } else if (object instanceof Scope) {
                         Scope scope = (Scope) object;
-                        if(isScopeKeyAssigned(apiIdentifier, scope.getKey(), tenantID)){
+                        if (!scopeSharingEnabled && isScopeKeyAssigned(apiIdentifier, scope.getKey(), tenantID)) {
                             throw new APIManagementException("Scope '" + scope.getKey() + "' is already used " +
                                     "by another API.");
                         }

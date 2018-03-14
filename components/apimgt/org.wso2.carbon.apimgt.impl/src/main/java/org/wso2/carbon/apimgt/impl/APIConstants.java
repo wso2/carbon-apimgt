@@ -397,6 +397,9 @@ public final class APIConstants {
     public static final String BLOCKING_CONDITIONS_STREAM_ID = "org.wso2.blocking.request.stream:1.0.0";
     public static final String KEY_TEMPLATE_STREM_ID = "org.wso2.keytemplate.request.stream:1.0.0";
 
+    //Property for enabling scope sharing between APIs
+    public static final String ENABLE_API_SCOPES_SHARING = "enable-api-scopes-sharing";
+
     public static class TokenStatus {
         public static final String ACTIVE = "ACTIVE";
         public static final String BLOCKED = "BLOCKED";
