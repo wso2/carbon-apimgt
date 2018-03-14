@@ -107,7 +107,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -137,7 +136,6 @@ public class ApiMgtDAO {
 
     private boolean forceCaseInsensitiveComparisons = false;
     private boolean multiGroupAppSharingEnabled = false;
-    public static final String API_SCOPES_SHARING = "api-scopes-sharing";
 
     private ApiMgtDAO() {
         APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
@@ -7112,9 +7110,8 @@ public class ApiMgtDAO {
         String scopeRoleEntry = SQLConstants.ADD_SCOPE_ROLE_SQL;
         String scopeLink = SQLConstants.ADD_SCOPE_LINK_SQL;
         Boolean scopeSharingEnabled = false;
-        String scopeSharingProp = System.getProperty(API_SCOPES_SHARING);
-        if (scopeSharingProp != null && !scopeSharingProp.isEmpty()) {
-            scopeSharingEnabled = Boolean.parseBoolean(scopeSharingProp);
+        if (!StringUtils.isEmpty(System.getProperty(APIConstants.ENABLE_API_SCOPES_SHARING))) {
+            scopeSharingEnabled = Boolean.parseBoolean(System.getProperty(APIConstants.ENABLE_API_SCOPES_SHARING));
         }
         try {
             conn = APIMgtDBUtil.getConnection();
