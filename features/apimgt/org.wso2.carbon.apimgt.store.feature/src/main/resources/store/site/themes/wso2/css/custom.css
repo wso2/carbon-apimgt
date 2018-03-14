@@ -579,3 +579,11 @@ a.remove_rating:hover{
 #query::placeholder{
     color:#fff;
 }
+
+.scheme-container {
+    display: none;
+}
+
+.global-server-container {
+    display: none;
+}
