@@ -27,6 +27,8 @@ public class MicroGatewayAPIUsageConstants {
 
     public static final String API_USAGE_OUTPUT_DIRECTORY = "api-usage-data";
 
+    public static final String API_USAGE_FILE_CONTENT = "FILE_CONTENT";
+
     public static final String API_USAGE_OUTPUT_FILE_NAME = "api-usage-data.dat";
 
     public static final String FILE_NAME_HEADER = "FileName";
@@ -53,7 +55,7 @@ public class MicroGatewayAPIUsageConstants {
     public static final String STREAM_DEFINITIONS_DIRECTORY = "stream-definitions";
 
     public static final String INSERT_UPLOADED_FILE_INFO_QUERY = "INSERT INTO AM_USAGE_UPLOADED_FILES "
-            + "(TENANT_DOMAIN,FILE_NAME,FILE_TIMESTAMP,FILE_CONTENT) VALUES(?,?,?,?);";
+            + "(TENANT_DOMAIN,FILE_NAME,FILE_TIMESTAMP,FILE_CONTENT) VALUES(?,?,?,?)";
 
     public static final String GET_NEXT_FILES_TO_PROCESS_QUERY_DEFAULT =
             "SELECT TENANT_DOMAIN,FILE_NAME,FILE_TIMESTAMP FROM AM_USAGE_UPLOADED_FILES "

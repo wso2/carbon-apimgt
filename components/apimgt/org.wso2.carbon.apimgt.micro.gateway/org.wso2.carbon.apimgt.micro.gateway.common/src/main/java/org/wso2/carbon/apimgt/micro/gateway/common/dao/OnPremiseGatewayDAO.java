@@ -39,9 +39,9 @@ import java.sql.Timestamp;
 public class OnPremiseGatewayDAO {
     Log log = LogFactory.getLog(OnPremiseGatewayDAO.class);
     private static final String insertIntoAPIPublishEvents = "INSERT INTO AM_API_LC_PUBLISH_EVENTS " +
-            "(TENANT_DOMAIN, API_ID, EVENT_TIME) VALUES (?, ?, ?);";
+            "(TENANT_DOMAIN, API_ID, EVENT_TIME) VALUES (?, ?, ?)";
     private static final String selectAllAPIPublishEvents = "SELECT DISTINCT API_ID FROM AM_API_LC_PUBLISH_EVENTS " +
-            "WHERE TENANT_DOMAIN = (?) AND EVENT_TIME > (?);";
+            "WHERE TENANT_DOMAIN = (?) AND EVENT_TIME > (?)";
 
     public static OnPremiseGatewayDAO getInstance() {
         return new OnPremiseGatewayDAO();
