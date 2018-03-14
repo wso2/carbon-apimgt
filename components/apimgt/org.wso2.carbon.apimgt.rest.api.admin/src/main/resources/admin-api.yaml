@@ -1812,9 +1812,9 @@ paths:
 #-----------------------------------------------------
     post:
       x-scope: apim:app_owner_change
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X POST \"https://localhost:9443/api/am/publisher/v0.12/applications/890a4f4d-09eb-4877-a323-57f6ce2ed79b/change-owner?owner=admin\""
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X POST \"https://localhost:9443/api/am/admin/v0.12/applications/890a4f4d-09eb-4877-a323-57f6ce2ed79b/change-owner?owner=admin\""
       x-wso2-request: |
-        POST https://localhost:9443/api/am/publisher/v0.12/apis/change-owner?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish
+        POST https://localhost:9443/api/am/admin/v0.12/apis/change-owner?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
       x-wso2-response: "HTTP/1.1 200 OK"
       summary: Change Application Owner
@@ -2452,7 +2452,11 @@ definitions:
       invertCondition:
         type: boolean
         default: false
-        description: Specifies whether inversion of the condition to be matched against the request
+        description: |
+          Specifies whether inversion of the condition to be matched against the request.
+
+          **Note:** When you add conditional groups for advanced throttling policies, this paramater should have the same value (`true` or `false`)
+          for the same type of conditional group.
 
 #-----------------------------------------------------
 # The Throttling HTTP Header Condition resource
