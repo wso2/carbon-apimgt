@@ -67,7 +67,6 @@ $( document ).ready(function() {
          versionComparison = false;
          renderGraph(from,to,depth);
          $('#compare-selection').css("display", "none");
-         $('#compare-selection-label').css("display", "none");
          $('#compare-version-btn').css("display", "inline");
          $('#clear-btn-wrapper').css("display", "none");
          });
@@ -93,7 +92,6 @@ $( document ).ready(function() {
         $('#compare-btn').on('click', function () {
           populateVersionList(apiName,true);
                $('#compare-selection').css("display", "inline");
-               $('#compare-selection-label').css("display", "inline");
                $('#compare-version-btn').css("display", "none");
                $('#clear-btn-wrapper').css("display", "inline");
         });
