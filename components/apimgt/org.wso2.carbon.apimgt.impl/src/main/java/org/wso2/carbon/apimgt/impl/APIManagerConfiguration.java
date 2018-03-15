@@ -902,7 +902,7 @@ public class APIManagerConfiguration {
                         ThrottleProperties
                                 .PolicyDeployer();
                 if (policyDeployerConnectionElement != null) {
-                    OMElement policyDeployerConnectionEnabledElement = jmsConnectionDetailElement
+                    OMElement policyDeployerConnectionEnabledElement = policyDeployerConnectionElement
                             .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.ENABLED));
                     policyDeployerConfiguration.setEnabled(JavaUtils.isTrueExplicitly
                             (policyDeployerConnectionEnabledElement.getText()));
