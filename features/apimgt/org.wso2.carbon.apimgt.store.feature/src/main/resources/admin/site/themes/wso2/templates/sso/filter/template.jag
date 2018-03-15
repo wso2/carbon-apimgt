@@ -34,8 +34,8 @@
 	    ssoRelyingParty.setProperty("keyStorePassword", site.ssoConfiguration.keyStorePassword);
 	    ssoRelyingParty.setProperty("identityAlias",site.ssoConfiguration.identityAlias);
 	    ssoRelyingParty.setProperty("keyStoreName",site.ssoConfiguration.keyStoreName);
-		ssoRelyingParty.setProperty("assertionEncryptionEnabled", site.ssoConfiguration.assertionEncryptionEnabled);
-		ssoRelyingParty.setProperty("signRequests", String(site.ssoConfiguration.signRequests));
+	    ssoRelyingParty.setProperty("assertionEncryptionEnabled", site.ssoConfiguration.assertionEncryptionEnabled);
+	    ssoRelyingParty.setProperty("signRequests", String(site.ssoConfiguration.signRequests));
 
 		// if it is IDP initiated SSO, we should just do a HTTP GET to IDP with SP ID and relay state optionally
         if (site.ssoConfiguration.idpInit == "true") {
