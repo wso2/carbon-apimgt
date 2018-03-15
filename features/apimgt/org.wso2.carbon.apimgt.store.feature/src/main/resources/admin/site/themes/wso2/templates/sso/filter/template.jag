@@ -29,7 +29,7 @@
 	}
 	if (checkSSO && !Boolean(isAuthenticated)) {
 
-        site.ssoConfiguration.signRequests = (site.ssoConfiguration.signRequests == "true") ? "true" : "false";
+	    site.ssoConfiguration.signRequests = (site.ssoConfiguration.signRequests == "true") ? "true" : "false";
 	    ssoRelyingParty.setProperty("identityProviderURL", site.ssoConfiguration.identityProviderURL);
 	    ssoRelyingParty.setProperty("keyStorePassword", site.ssoConfiguration.keyStorePassword);
 	    ssoRelyingParty.setProperty("identityAlias",site.ssoConfiguration.identityAlias);
