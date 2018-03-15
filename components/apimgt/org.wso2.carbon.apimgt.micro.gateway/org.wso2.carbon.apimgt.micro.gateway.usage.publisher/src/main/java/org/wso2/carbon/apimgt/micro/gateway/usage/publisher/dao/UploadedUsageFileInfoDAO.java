@@ -112,6 +112,9 @@ public class UploadedUsageFileInfoDAO {
             } else if (connection.getMetaData().getDatabaseProductName().contains("Microsoft")) {
                 selectStatement = connection
                         .prepareStatement(MicroGatewayAPIUsageConstants.GET_NEXT_FILES_TO_PROCESS_QUERY_MSSQL);
+            } else if (connection.getMetaData().getDatabaseProductName().contains("DB2")) {
+                selectStatement = connection
+                        .prepareStatement(MicroGatewayAPIUsageConstants.GET_NEXT_FILES_TO_PROCESS_QUERY_DB2);
             } else {
                 selectStatement = connection
                         .prepareStatement(MicroGatewayAPIUsageConstants.GET_NEXT_FILES_TO_PROCESS_QUERY_DEFAULT);
