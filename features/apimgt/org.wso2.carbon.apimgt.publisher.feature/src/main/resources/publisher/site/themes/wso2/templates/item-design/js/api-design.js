@@ -567,8 +567,32 @@ APIDesigner.prototype.init_controllers = function(){
         jagg.message({content: i18n.t('Are you sure you want to delete the scope'),
            type: 'confirm', title: i18n.t("Delete Scope"),
            okCallback: function () {
+               //Get the key of the scope we need to delete
+               var scopeKeyToDelete = API_DESIGNER.api_doc['x-wso2-security'].apim['x-wso2-scopes'][i].key;
+
+               //Iterate all the paths
+               if(API_DESIGNER.api_doc.paths){
+                   for(var path in API_DESIGNER.api_doc.paths){
+                       if(API_DESIGNER.api_doc.paths.hasOwnProperty(path)){
+                            pathObj = API_DESIGNER.api_doc.paths[path];
+                            //Iterate all the resources
+                            for(var method in pathObj){
+                                if(pathObj.hasOwnProperty(method)){
+                                    var methodObj = pathObj[method];
+                                    
+                                    //If the scope is added to the resource, remove it.
+                                    if(methodObj['x-scope'] && methodObj['x-scope'] === scopeKeyToDelete){
+                                        methodObj['x-scope'] = "";
+                                    }
+
+                                }
+                            }
+                       }
+                   }
+               }
               API_DESIGNER.api_doc['x-wso2-security'].apim['x-wso2-scopes'].splice(i, 1);
               API_DESIGNER.render_scopes();
+              API_DESIGNER.render_resources();
            }});
         API_DESIGNER.render_scopes();
         API_DESIGNER.render_resources();
