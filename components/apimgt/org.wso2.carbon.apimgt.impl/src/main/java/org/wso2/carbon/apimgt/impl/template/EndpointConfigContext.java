@@ -58,7 +58,18 @@ public class EndpointConfigContext extends ConfigContextDecorator {
         VelocityContext context = super.getContext();
 
         context.put("endpoint_config", this.endpoint_config);
+        context.put("endpointKey", this.getEndpointKey(api));
 
         return context;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    /**
+     * Get the endpoint key name
+     *
+     * @param api API that the endpoint belong
+     * @return String of endpoint key
+     */
+    private String getEndpointKey(API api) {
+        return api.getId().getApiName() + "--v" + api.getId().getVersion();
     }
 }

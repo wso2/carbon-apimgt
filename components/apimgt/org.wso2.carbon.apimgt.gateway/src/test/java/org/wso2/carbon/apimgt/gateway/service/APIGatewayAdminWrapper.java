@@ -3,24 +3,30 @@ package org.wso2.carbon.apimgt.gateway.service;
 
 import org.apache.axis2.AxisFault;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.gateway.utils.EndpointAdminServiceClient;
 import org.wso2.carbon.apimgt.gateway.utils.MediationSecurityAdminServiceClient;
 import org.wso2.carbon.apimgt.gateway.utils.RESTAPIAdminClient;
 import org.wso2.carbon.apimgt.gateway.utils.SequenceAdminServiceClient;
 
 public class APIGatewayAdminWrapper extends APIGatewayAdmin {
     private RESTAPIAdminClient restapiAdminClient;
+    private EndpointAdminServiceClient endpointAdminServiceClient;
     private SequenceAdminServiceClient sequenceAdminServiceClient;
     private MediationSecurityAdminServiceClient mediationSecurityAdminServiceClient;
-    public APIGatewayAdminWrapper(RESTAPIAdminClient restapiAdminClient,SequenceAdminServiceClient sequenceAdminServiceClient) {
+    public APIGatewayAdminWrapper(RESTAPIAdminClient restapiAdminClient, EndpointAdminServiceClient
+            endpointAdminServiceClient, SequenceAdminServiceClient sequenceAdminServiceClient) {
 
         this.restapiAdminClient = restapiAdminClient;
+        this.endpointAdminServiceClient = endpointAdminServiceClient;
         this.sequenceAdminServiceClient = sequenceAdminServiceClient;
     }
 
-    public APIGatewayAdminWrapper(RESTAPIAdminClient restapiAdminClient, SequenceAdminServiceClient
-            sequenceAdminServiceClient, MediationSecurityAdminServiceClient mediationSecurityAdminServiceClient) {
+    public APIGatewayAdminWrapper(RESTAPIAdminClient restapiAdminClient, EndpointAdminServiceClient
+            endpointAdminServiceClient, SequenceAdminServiceClient sequenceAdminServiceClient,
+                                  MediationSecurityAdminServiceClient mediationSecurityAdminServiceClient) {
         this.restapiAdminClient = restapiAdminClient;
         this.sequenceAdminServiceClient = sequenceAdminServiceClient;
+        this.endpointAdminServiceClient = endpointAdminServiceClient;
         this.mediationSecurityAdminServiceClient = mediationSecurityAdminServiceClient;
     }
 
@@ -28,6 +34,11 @@ public class APIGatewayAdminWrapper extends APIGatewayAdmin {
     protected RESTAPIAdminClient getRestapiAdminClient(String apiProviderName, String apiName, String version) throws
             AxisFault {
         return restapiAdminClient;
+    }
+
+    @Override
+    protected EndpointAdminServiceClient getEndpointAdminServiceClient() throws AxisFault {
+        return endpointAdminServiceClient;
     }
 
     @Override
