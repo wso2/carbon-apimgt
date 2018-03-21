@@ -135,14 +135,23 @@ class ApplicationCreate extends Component {
             throttlingTier: this.state.quota,
             description: this.state.description
         };
+        let updateSubscriptionData = this.props.updateSubscriptionData;
+        let handleAppDialogClose = this.props.handleAppDialogClose;
         let new_api = new API();
         let promised_create = new_api.createApplication(application_data);
         promised_create.then(response => {
-        let uuid = JSON.parse(response.data).applicationId;
-	//Once application loading fixed this need to pass application ID and load app
-        let redirect_url = "/applications/";
-        this.props.history.push(redirect_url);
-        console.log("Application created successfully.");
+            let uuid = JSON.parse(response.data).applicationId;
+            //Once application loading fixed this need to pass application ID and load app
+            
+            if(updateSubscriptionData){
+                handleAppDialogClose();
+                updateSubscriptionData();   
+            } else {
+                let redirect_url = "/applications/";
+                this.props.history.push(redirect_url);
+                console.log("Application created successfully.");
+            }
+            
         }).catch(
             function (error_response) {
                 console.log("Error while creating the application");
@@ -150,9 +159,12 @@ class ApplicationCreate extends Component {
     };
 
     render() {
-        const { classes } = this.props;
+        const { classes, updateSubscriptionData } = this.props;
+        
         return (
             <Grid container spacing={0} justify="flex-start">
+                {/* Show the heading only for the normal application creation page */}
+                {!updateSubscriptionData &&
                 <Grid item xs={12} sm={12} md={12} lg={11} xl={10} className={classes.titleBar}>
                     <div className={classes.buttonLeft}>
                         <Link to={"/applications/"}>
@@ -168,6 +180,7 @@ class ApplicationCreate extends Component {
                         </div>
                     </div>
                 </Grid>
+                }
                 <Grid item xs={12} lg={6} xl={4}>
                     <form className={classes.container} noValidate autoComplete="off">
                         <TextField
@@ -219,11 +232,17 @@ class ApplicationCreate extends Component {
                             <Button variant="raised" color="primary"  onClick={this.handleSubmit}>
                                 Create
                             </Button>
-                            <Link to={"/applications/"} className={classes.buttonRightLink}>
-                                <Button variant="raised" className={classes.buttonRight}>
+                            {updateSubscriptionData ?
+                                <Button variant="raised" className={classes.buttonRight} onClick={this.props.handleAppDialogClose}>
                                     Cancel
                                 </Button>
-                            </Link>
+                            :
+                                <Link to={"/applications/"} className={classes.buttonRightLink}>
+                                    <Button variant="raised" className={classes.buttonRight}>
+                                        Cancel
+                                    </Button>
+                                </Link>
+                             }
                         </div>
                     </form>
                 </Grid>
