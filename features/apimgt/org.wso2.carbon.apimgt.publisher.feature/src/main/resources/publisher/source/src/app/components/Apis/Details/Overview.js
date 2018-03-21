@@ -140,13 +140,13 @@ class Overview extends Component {
 
         return (
             <Grid container>
-                <Grid item xs={12} className={classes.imageWrapper}>
+                <Grid item xs={12} sm={6} md={6} lg={4} className={classes.imageWrapper}>
                     <ImageGenerator apiName={api.name} />
                     <div className={classes.imageSideContent}>
                         <Typography variant="headline" >
-                            {api.version} {api.isDefaultVersion ? <span>( Default )</span> : <span></span>}
+                            {api.version} {api.isDefaultVersion ? <span>( Default )</span> : <span />}
                             {/* TODO We need to show the default verison and a link to it here if this
-                            is not the default version*/}
+                            is not the default version */}
                         </Typography>
                         <Typography variant="caption" gutterBottom align="left">
                             Version
@@ -158,12 +158,23 @@ class Overview extends Component {
                         <Typography variant="caption" gutterBottom align="left">
                             Context
                         </Typography>
-                        {/*Visibility */}
+                        {/* Visibility */}
                         <Typography variant="headline" className={classes.headline}>
                             {api.lifeCycleStatus}
                         </Typography>
                         <Typography variant="caption" gutterBottom align="left">
                             Lifecycle Status
+                        </Typography>
+                    </div>
+                </Grid>
+                <Grid item xs={12} sm={6} md={6} lg={8} className={classes.headline}>
+                    <div>
+                        {/* Description */}
+                        <Typography variant="subheading" className={classes.headline} >
+                            {api.description}
+                        </Typography>
+                        <Typography variant="caption" gutterBottom align="left">
+                            Description
                         </Typography>
                     </div>
                 </Grid>
@@ -174,7 +185,7 @@ class Overview extends Component {
                     <Typography variant="caption" gutterBottom align="left">
                         Last update : {api.lastUpdatedTime}
                     </Typography>
-                    {/* Endpoints*/}
+                    {/* Endpoints */}
                     {
                         api.endpoint.map(ep => <div key={ep.inline.id}>
                             <div className={classes.endpointsWrapper + " "  + classes.headline}>
