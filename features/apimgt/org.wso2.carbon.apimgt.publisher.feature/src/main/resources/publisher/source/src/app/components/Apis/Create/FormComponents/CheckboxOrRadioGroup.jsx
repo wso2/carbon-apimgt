@@ -32,7 +32,7 @@ const CheckboxOrRadioGroup = props => (
                             value={option}
                             checked={props.selectedOptions.indexOf(option) > -1}
                             type={props.type}
-                        />{' '}
+                        />
                         {option}
                     </label>
                 );

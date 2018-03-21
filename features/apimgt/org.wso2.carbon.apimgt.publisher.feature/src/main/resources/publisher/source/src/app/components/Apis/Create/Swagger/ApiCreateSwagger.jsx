@@ -172,7 +172,7 @@ class ApiCreateSwagger extends React.Component {
                 <Grid item xs={12}>
                     <Paper>
                         <Typography className='page-title' type='display2' gutterBottom>
-                            Create New API -{' '}
+                            Create New API -
                             {this.state.uploadMethod === 'file' ? (
                                 <span>Swagger file upload</span>
                             ) : (

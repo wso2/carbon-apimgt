@@ -18,16 +18,15 @@
 import React, { Component } from 'react';
 /* MUI Imports */
 import { Grid, Button, Typography, withStyles } from 'material-ui';
-import { FormControl, FormControlLabel, FormLabel } from 'material-ui/Form';
 import Stepper, { Step, StepLabel, StepContent } from 'material-ui/Stepper';
 import Card, { CardContent } from 'material-ui/Card';
-import Radio, { RadioGroup } from 'material-ui/Radio';
 import PropTypes from 'prop-types';
 
 import InputForm from '../Endpoint/InputForm';
 import ProvideWSDL from './Steps/ProvideWSDL';
 import API from '../../../../data/api';
 import Alert from '../../../Shared/Alert';
+import BindingInfo from './BindingInfo';
 
 const styles = theme => ({
     button: {
@@ -271,34 +270,7 @@ class ApiCreateWSDL extends Component {
                                         </Typography>
                                         <InputForm apiFields={apiFields} handleInputChange={this.updateApiInputs} />
                                         <Grid item xs={10}>
-                                            {wsdlBean.info &&
-                                                (wsdlBean.info.bindingInfo.hasHttpBinding ||
-                                                    wsdlBean.info.bindingInfo.hasSoapBinding) && (
-                                                    <FormControl component='fieldset'>
-                                                        <FormLabel component='legend'>Implementation Type</FormLabel>
-                                                        <RadioGroup
-                                                            aria-label='Implementation-Type'
-                                                            name='implementationType'
-                                                            value={apiFields.implementationType}
-                                                            onChange={this.updateApiInputs}
-                                                        >
-                                                            <FormControlLabel
-                                                                disabled={!wsdlBean.info.bindingInfo.hasSoapBinding}
-                                                                value='soap'
-                                                                control={<Radio />}
-                                                                label='Pass-through SOAP API'
-                                                                className={classes.radioGroup}
-                                                            />
-                                                            <FormControlLabel
-                                                                disabled={!wsdlBean.info.bindingInfo.hasHttpBinding}
-                                                                value='httpBinding'
-                                                                control={<Radio />}
-                                                                label='With HTTP binding operations'
-                                                                className={classes.radioGroup}
-                                                            />
-                                                        </RadioGroup>
-                                                    </FormControl>
-                                                )}
+                                            <BindingInfo wsdlBean={wsdlBean} classes={classes} apiFields={apiFields} />
                                         </Grid>
                                         <div className={classes.optionAction}>
                                             <Button color='primary' onClick={this.stepBack}>

@@ -84,7 +84,12 @@ if (process.env.NODE_ENV === 'development') {
         enforce: 'pre',
         test: /\.(js|jsx)$/,
         /* exclude: /node_modules/, */
-        include: [/.*\/Apis\/Details\/NavBar.jsx/, /.*\/Apis\/Details\/index.jsx/, /.*\/Apis\/Create\/*/],
+        include: [
+            /.*\/Apis\/Details\/NavBar.jsx/,
+            /.*\/Apis\/Details\/index.jsx/,
+            /.*\/Apis\/Create\/*/,
+            /.*\/Base\/*/,
+        ],
         loader: 'eslint-loader',
         options: {
             failOnError: true,

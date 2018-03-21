@@ -16,15 +16,7 @@
  * under the License.
  */
 
-import React from 'react'
-import {CircularProgress} from "material-ui/Progress";
+import PageNotFound from './PageNotfound';
+import ResourceNotFound from './ResourceNotFound';
 
-const LoadingAnimation = (props) => {
-    return (
-        <div>
-            <CircularProgress style={{margin: "auto", display: "block"}}/>
-        </div>
-    );
-};
-
-export default LoadingAnimation
+export { PageNotFound, ResourceNotFound };

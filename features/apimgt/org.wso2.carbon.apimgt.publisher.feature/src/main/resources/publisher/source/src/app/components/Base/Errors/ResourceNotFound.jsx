@@ -16,22 +16,23 @@
  * under the License.
  */
 
-import React, {Component} from 'react'
+import React from 'react';
 import Typography from 'material-ui/Typography';
+import PropTypes from 'prop-types';
 
 const ResourceNotFound = (props) => {
-    const {response} = props;
+    const { response } = props;
     const message = props.message || {};
 
     return (
         <div>
-            <div className="message message-danger">
-                <Typography variant="title" gutterBottom>
-                    {message.title || "404 Resource Not Found!"}
+            <div className='message message-danger'>
+                <Typography variant='title' gutterBottom>
+                    {message.title || '404 Resource Not Found!'}
                 </Typography>
-                <Typography variant="subheading" gutterBottom>
+                <Typography variant='subheading' gutterBottom>
                     {message.body || "Can't find the resource you are looking for"}
-                    <span style={{color: 'green'}}> {response ? response.statusText : ""} </span>
+                    <span style={{ color: 'green' }}> {response ? response.statusText : ''} </span>
                 </Typography>
                 {message.more}
             </div>
@@ -39,4 +40,15 @@ const ResourceNotFound = (props) => {
     );
 };
 
-export default ResourceNotFound
+ResourceNotFound.defaultProps = {
+    message: 'No Error message give, Please give a proper error message when using `ResourceNotFound` Component',
+};
+
+ResourceNotFound.propTypes = {
+    response: PropTypes.shape({
+        statusText: PropTypes.string,
+    }).isRequired,
+    message: PropTypes.string,
+};
+
+export default ResourceNotFound;
