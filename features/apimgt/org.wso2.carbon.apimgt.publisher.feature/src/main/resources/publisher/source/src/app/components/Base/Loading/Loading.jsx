@@ -16,17 +16,15 @@
  * under the License.
  */
 
-import React from 'react'
+import React from 'react';
+import { CircularProgress } from 'material-ui/Progress';
 
-export const Footer = () => (
-    <footer className="footer">
-        <div style={{textAlign: "center"}}>
-            <p>WSO2 APIM Publisher v3.0.0 | © 2018 <a href="http://wso2.com/" target="_blank">
-                <img className="footer-logo" src="/publisher/public/app/images/logo-footer.svg" alt="wso2-logo"/>
-                 Inc</a>.
-            </p>
+const LoadingAnimation = () => {
+    return (
+        <div>
+            <CircularProgress style={{ margin: 'auto', display: 'block' }} />
         </div>
-    </footer>
-);
+    );
+};
 
-export default Footer
+export default LoadingAnimation;

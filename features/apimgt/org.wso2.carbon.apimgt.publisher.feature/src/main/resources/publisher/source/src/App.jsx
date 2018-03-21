@@ -29,6 +29,7 @@ import ConfigManager from './app/data/ConfigManager';
 import MaterialDesignCustomTheme from './app/components/Shared/CustomTheme';
 import { PageNotFound } from './app/components/Base/Errors';
 import AuthManager from './app/data/AuthManager';
+import ApiCreate from './app/components/Apis/Create/ApiCreate';
 
 const themes = [];
 const darkTheme = createMuiTheme({
@@ -53,7 +54,6 @@ themes.push(createMuiTheme(MaterialDesignCustomTheme));
 
 const Apis = () => import(/* webpackChunkName: "apis" */ './app/components/Apis/Apis');
 const Endpoints = () => import(/* webpackChunkName: "endpoints" */ './app/components/Endpoints');
-const ApiCreate = () => import(/* webpackChunkName: "create" */ './app/components/Apis/Create/ApiCreate');
 const Base = () => import(/* webpackChunkName: "base" */ './app/components/Base');
 const BaseLayout = getAsyncComponent(Base);
 const Login = () => import(/* webpackChunkName: "login" */ './app/components/Login/Login');
@@ -154,7 +154,7 @@ class Protected extends Component {
                             <Redirect exact from='/' to='/apis' />
                             <Route path='/apis' component={getAsyncComponent(Apis)} />
                             <Route path='/endpoints' component={getAsyncComponent(Endpoints)} />
-                            <Route path='/api/create' component={getAsyncComponent(ApiCreate)} />
+                            <Route path='/api/create' component={ApiCreate} />
                             <Route component={PageNotFound} />
                         </Switch>
                     </BaseLayout>

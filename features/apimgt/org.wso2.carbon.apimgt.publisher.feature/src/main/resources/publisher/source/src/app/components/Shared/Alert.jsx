@@ -15,16 +15,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-"use strict";
-import React, {Component} from 'react';
-import Message from './Message'
+
+import React from 'react';
 import Notification from 'rc-notification';
+import Message from './Message';
 
 /**
  * Common alerting/message displaying component for Store application, Pre-set vertical: 'top',
  horizontal: 'center' and close action for consistent UX through out the app.
  */
 class Alert {
+    /**
+     * Creates an instance of Alert.
+     * @param {String} message Message which needs to be displayed
+     * @param {any} type Message category, i:e Alert, Info, Error ect
+     * @param {any} duration Duration of the massage needs to be visible on the page
+     * @param {any} onClose Callback function to trigger when message get closed
+     * @memberof Alert
+     */
     constructor(message, type, duration, onClose) {
         this.defaultTop = 1;
         this.key = Alert.count++;
@@ -44,20 +52,23 @@ class Alert {
      */
     show() {
         const promisedInstance = this._getMessageInstance();
-        const onClose = this.onClose;
-        promisedInstance.then(instance => {
-            instance.notice({
-                closable: true,
-                onClose,
-                key: this.key,
-                duration: this.duration,
-                content: (
-                    <div >
-                        <Message handleClose={this.remove} message={this.message} type={this.type}/>
-                    </div>
-                ),
-            });
-        }).catch(error => console.error("Error while showing alert" + error))
+        const { onClose } = this;
+        promisedInstance
+            .then((instance) => {
+                instance.notice({
+                    closable: true,
+                    onClose,
+                    key: this.key,
+                    duration: this.duration,
+                    content: (
+                        <div>
+                            <Message handleClose={this.remove} message={this.message} type={this.type} />
+                        </div>
+                    ),
+                });
+            })
+            .catch(error => console.error('Error while showing alert' + error));
+        /* TODO: Remove above console error with logging library error method */
     }
 
     /**
@@ -65,36 +76,40 @@ class Alert {
      */
     remove() {
         const promisedInstance = this._getMessageInstance();
-        promisedInstance.then(instance => {
+        promisedInstance.then((instance) => {
             instance.removeNotice(this.key);
         });
     }
 
     /**
      * Return a promise resolving to an instance of RC-Notification which can be use to display a notification on screen
-     * @returns {Promise}
+     * @returns {Promise} Promise object with new React component for alert
      * @private
      */
     _getMessageInstance() {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             if (Alert.messageInstance) {
                 resolve(Alert.messageInstance);
             } else {
-                Notification.newInstance({
-                    transitionName: 'move-down',
-                    style: {top: 0, marginLeft: '45%', position: 'absolute'},
-                }, (instance) => {
-                    Alert.messageInstance = instance;
-                    resolve(Alert.messageInstance);
-                });
+                Notification.newInstance(
+                    {
+                        transitionName: 'move-down',
+                        style: { top: 0, marginLeft: '45%', position: 'absolute' },
+                    },
+                    (instance) => {
+                        Alert.messageInstance = instance;
+                        resolve(Alert.messageInstance);
+                    },
+                );
             }
         });
     }
 
     /**
-     * Can be used to configure the global Alert configurations, Currently support position top alignment and message display duration in seconds
+     * Can be used to configure the global Alert configurations, Currently support position top alignment and
+     * message display duration in seconds
      * If set here , will use in all the places where Alert has been used
-     * @param options i:e {top: '10px', duration: 30}
+     * @param {Object} options i:e {top: '10px', duration: 30}
      */
     static config(options) {
         if (options.top !== undefined) {
@@ -105,11 +120,10 @@ class Alert {
             Alert.defaultDuration = options.duration;
         }
     }
-
 }
 
 Alert.messageInstance = null;
-/* Class property to hold a RC-Notification instance*/
+/* Class property to hold a RC-Notification instance */
 Alert.count = 1;
 /* Number of Notifications showed, This is used to generate unique key for each message */
 Alert.defaultDuration = 5;
@@ -118,29 +132,29 @@ Alert.defaultTop = 0;
 
 export default {
     info: (message, duration, onClose) => {
-        let msg = new Alert(message, 'info', duration, onClose);
+        const msg = new Alert(message, 'info', duration, onClose);
         msg.show();
-        return msg
+        return msg;
     },
     success: (message, duration, onClose) => {
-        let msg = new Alert(message, 'success', duration, onClose);
+        const msg = new Alert(message, 'success', duration, onClose);
         msg.show();
-        return msg
+        return msg;
     },
     error: (message, duration, onClose) => {
-        let msg = new Alert(message, 'error', duration, onClose);
+        const msg = new Alert(message, 'error', duration, onClose);
         msg.show();
-        return msg
+        return msg;
     },
     warning: (message, duration, onClose) => {
-        let msg = new Alert(message, 'warning', duration, onClose);
+        const msg = new Alert(message, 'warning', duration, onClose);
         msg.show();
-        return msg
+        return msg;
     },
     loading: (message, duration, onClose) => {
-        let msg = new Alert(message, 'loading', duration, onClose);
+        const msg = new Alert(message, 'loading', duration, onClose);
         msg.show();
-        return msg
+        return msg;
     },
-    configs: Alert.config
+    configs: Alert.config,
 };

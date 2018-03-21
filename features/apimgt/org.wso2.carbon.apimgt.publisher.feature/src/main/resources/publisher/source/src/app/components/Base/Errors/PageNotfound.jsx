@@ -16,21 +16,30 @@
  * under the License.
  */
 
-import React, {Component} from 'react'
+import React from 'react';
+import PropType from 'prop-types';
 
-const APINotFound = (props) => {
+const NotFound = (props) => {
     return (
         <div>
-            <div className="message message-danger">
-                <h4><i className="icon fw fw-error"/>404 API Not Found!</h4>
+            <div className='message message-danger'>
+                <h4>
+                    <i className='icon fw fw-error' />404 Page Not Found!
+                </h4>
                 <p>
-                    Can't find an API associate with the given API ID <span
-                    style={{color: 'green'}}> {props.match.params.api_uuid} </span>
+                    Sorry the page you are looking for{' '}
+                    <span style={{ color: 'green' }}> {props.location.pathname} </span>
+                    is not available.
                 </p>
             </div>
-
         </div>
     );
 };
 
-export default APINotFound
+NotFound.propTypes = {
+    location: PropType.shape({
+        pathname: PropType.string,
+    }).isRequired,
+};
+
+export default NotFound;

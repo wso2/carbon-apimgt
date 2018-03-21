@@ -15,18 +15,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-"use strict";
-import {FormControl} from 'material-ui'
-import Dropzone from 'react-dropzone'
-import PropTypes from 'prop-types'
 
-import React from 'react'
+
+import { FormControl } from 'material-ui';
+import Dropzone from 'react-dropzone';
+import PropTypes from 'prop-types';
+
+import React from 'react';
 
 const FileUploader = (props) => {
-    const {onDropHandler, currentFiles} = props;
+    const { onDropHandler, currentFiles } = props;
     return (
-        <FormControl className="horizontal dropzone-wrapper">
-            <div className="dropzone">
+        <FormControl className='horizontal dropzone-wrapper'>
+            <div className='dropzone'>
                 <Dropzone onDrop={onDropHandler} multiple={false}>
                     <p>Try dropping some files here, or click to select files to upload.</p>
                 </Dropzone>
@@ -34,18 +35,23 @@ const FileUploader = (props) => {
             <aside>
                 <h2>Uploaded files</h2>
                 <ul>
-                    {currentFiles && currentFiles.map(file => <li key={file.name}>{file.name} - {file.size} bytes</li>)}
+                    {currentFiles &&
+                        currentFiles.map(file => (
+                            <li key={file.name}>
+                                {file.name} - {file.size} bytes
+                            </li>
+                        ))}
                 </ul>
             </aside>
         </FormControl>
     );
-}
+};
 
 FileUploader.propTypes = {
     onDropHandler: PropTypes.func.isRequired,
-    currentFiles: PropTypes.array
-}
+    currentFiles: PropTypes.arrayOf(Object),
+};
 FileUploader.defaultProps = {
-    currentFiles: []
-}
-export default FileUploader
+    currentFiles: [],
+};
+export default FileUploader;

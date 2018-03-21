@@ -36,23 +36,15 @@ const config = {
         extensions: ['.js', '.jsx'],
     },
     module: {
-        rules: [{
-                enforce: 'pre',
-                test: /\.(js|jsx)$/,
-                /* exclude: /node_modules/, */
-                include: [/.*\/Apis\/Details\/NavBar.jsx/, /.*\/Apis\/Details\/index.jsx/],
-                loader: 'eslint-loader',
-                options: {
-                    failOnError: true,
-                    quiet: true,
-                },
-            },
+        rules: [
             {
                 test: /\.(js|jsx)$/,
                 exclude: /node_modules/,
-                use: [{
-                    loader: 'babel-loader',
-                }, ],
+                use: [
+                    {
+                        loader: 'babel-loader',
+                    },
+                ],
             },
             {
                 test: /\.css$/,
@@ -60,7 +52,8 @@ const config = {
             },
             {
                 test: /\.less$/,
-                use: [{
+                use: [
+                    {
                         loader: 'style-loader', // creates style nodes from JS strings
                     },
                     {
@@ -85,6 +78,25 @@ const config = {
 
 if (process.env.NODE_ENV === 'development') {
     config.watch = true;
+} else if (process.env.NODE_ENV === 'production') {
+    /* ESLint will only un in production build to increase the continues build(watch) time in the development mode */
+    const esLintLoader = {
+        enforce: 'pre',
+        test: /\.(js|jsx)$/,
+        /* exclude: /node_modules/, */
+        include: [
+            /.*\/Apis\/Details\/NavBar.jsx/,
+            /.*\/Apis\/Details\/index.jsx/,
+            /.*\/Apis\/Create\/*/,
+            /.*\/Base\/*/,
+        ],
+        loader: 'eslint-loader',
+        options: {
+            failOnError: true,
+            quiet: true,
+        },
+    };
+    config.module.rules.push(esLintLoader);
 }
 
 module.exports = function(env) {

@@ -16,13 +16,12 @@
  * under the License.
  */
 
-import Axios from "axios";
+import Axios from 'axios';
 
 /**
  * Utility class for Publisher application
  */
 class Utils {
-
     /**
      * Get JavaScript accessible cookies saved in browser, by giving the cooke name.
      * @param {String} name - Name of the cookie which need to be retrieved
@@ -32,12 +31,12 @@ class Utils {
     static getCookie(name, environmentName = Utils.getCurrentEnvironment().label) {
         name = `${name}_${environmentName}`;
 
-        let pairs = document.cookie.split(";");
+        const pairs = document.cookie.split(';');
         let cookie = null;
         for (let pair of pairs) {
-            pair = pair.split("=");
-            let cookie_name = pair[0].trim();
-            let value = encodeURIComponent(pair[1]);
+            pair = pair.split('=');
+            const cookie_name = pair[0].trim();
+            const value = encodeURIComponent(pair[1]);
             if (cookie_name === name) {
                 cookie = value;
                 break;
@@ -66,13 +65,20 @@ class Utils {
      * @param {String} environmentName - Name of the environment to be appended to cookie name
      * @param {boolean} secured - secured parameter is set
      */
-    static setCookie(name, value, validityPeriod, path = "/", environmentName = Utils.getCurrentEnvironment().label, secured = true) {
-        let expiresDirective = "";
-        const securedDirective = secured ? "; Secure" : "";
+    static setCookie(
+        name,
+        value,
+        validityPeriod,
+        path = '/',
+        environmentName = Utils.getCurrentEnvironment().label,
+        secured = true,
+    ) {
+        let expiresDirective = '';
+        const securedDirective = secured ? '; Secure' : '';
         if (validityPeriod) {
             const date = new Date();
             date.setTime(date.getTime() + validityPeriod * 1000);
-            expiresDirective = "; expires=" + date.toUTCString();
+            expiresDirective = '; expires=' + date.toUTCString();
         }
 
         document.cookie = `${name}_${environmentName}=${value}; path=${path}${expiresDirective}${securedDirective}`;
@@ -84,7 +90,7 @@ class Utils {
      * @returns {boolean}
      */
     static isEmptyObject(object) {
-        return Object.keys(object).length === 0 && object.constructor === Object
+        return Object.keys(object).length === 0 && object.constructor === Object;
     }
 
     /**
@@ -96,7 +102,7 @@ class Utils {
             return Utils._environment;
         }
 
-        let environmentData = localStorage.getItem(Utils.CONST.LOCAL_STORAGE_ENVIRONMENT);
+        const environmentData = localStorage.getItem(Utils.CONST.LOCAL_STORAGE_ENVIRONMENT);
         if (!environmentData) {
             return Utils._getDefaultEnvironment();
         }
@@ -135,7 +141,7 @@ class Utils {
         if (!environment.host) {
             environment.host = window.location.host;
         }
-        //Store environment.
+        // Store environment.
         Utils._environment = environment;
         localStorage.setItem(Utils.CONST.LOCAL_STORAGE_ENVIRONMENT, JSON.stringify(environment));
     }
@@ -149,7 +155,9 @@ class Utils {
     }
 
     static getAppLogoutURL() {
-        return Utils.CONST.PROTOCOL + Utils.getCurrentEnvironment().host + Utils.CONST.LOGOUT + Utils.CONST.CONTEXT_PATH;
+        return (
+            Utils.CONST.PROTOCOL + Utils.getCurrentEnvironment().host + Utils.CONST.LOGOUT + Utils.CONST.CONTEXT_PATH
+        );
     }
 
     static getLoginTokenPath(environment = Utils.getCurrentEnvironment()) {
@@ -157,7 +165,7 @@ class Utils {
     }
 
     static getSwaggerURL() {
-        return "https://" + Utils.getCurrentEnvironment().host + Utils.CONST.SWAGGER_YAML;
+        return 'https://' + Utils.getCurrentEnvironment().host + Utils.CONST.SWAGGER_YAML;
     }
 
     /**
@@ -176,9 +184,9 @@ class Utils {
      * @param {Array} configs - Array of Auth Config objects
      */
     static setMultiEnvironmentOverviewEnabledInfo(environments, configs) {
-        let autoLoginInfo = {};
+        const autoLoginInfo = {};
         if (!Array.isArray(environments) || !Array.isArray(configs)) {
-            console.error("Error while storing auto login configs in local-storage");
+            console.error('Error while storing auto login configs in local-storage');
         }
 
         for (let i = 0; i < environments.length; i++) {
@@ -205,7 +213,7 @@ class Utils {
      * @private
      */
     static _getDefaultEnvironment() {
-        return {label: 'Default', host: window.location.host, loginTokenPath: '/login/token'};
+        return { label: 'Default', host: window.location.host, loginTokenPath: '/login/token' };
     }
 }
 
@@ -217,7 +225,7 @@ Utils.CONST = {
     LOGIN_TOKEN_PATH: '/login/token',
     SWAGGER_YAML: '/api/am/publisher/v1.0/apis/swagger.yaml',
     PROTOCOL: 'https://',
-    CONTEXT_PATH: '/publisher'
+    CONTEXT_PATH: '/publisher',
 };
 
 /**

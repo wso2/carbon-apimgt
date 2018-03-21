@@ -87,7 +87,6 @@ export default class Details extends Component {
     render() {
         const apiUUID = this.props.match.params.api_uuid;
         const redirectUrl = `/apis/${apiUUID}/overview`;
-
         const environmentOverview = Utils.isMultiEnvironmentOverviewEnabled();
         const { resourceNotFountMessage } = this.state;
 
