@@ -15,27 +15,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-'use strict';
 
-import React from 'react'
-import {Switch, Route} from 'react-router-dom'
 
-import EndpointsListing from './Listing'
-import EndpointDetails from './Details'
-import EndpointCreate from './Create'
-import EndpointsDiscover from './Discover'
-import {PageNotFound} from '../Base/Errors'
+import React from 'react';
+import { Switch, Route } from 'react-router-dom';
+
+import EndpointsListing from './Listing';
+import EndpointDetails from './Details';
+import EndpointCreate from './Create';
+import EndpointsDiscover from './Discover';
+import { PageNotFound } from '../Base/Errors';
 
 const Endpoints = () => {
     return (
         <Switch>
-            <Route exact path="/endpoints" component={EndpointsListing}/>
-            <Route path="/endpoints/create" component={EndpointCreate}/>
-            <Route path="/endpoints/discover" component={EndpointsDiscover}/>
-            <Route path={"/endpoints/:endpoint_uuid/"} component={EndpointDetails}/>
-            <Route component={PageNotFound}/>
+            <Route exact path='/endpoints' component={EndpointsListing} />
+            <Route path='/endpoints/create' component={EndpointCreate} />
+            <Route path='/endpoints/discover' component={EndpointsDiscover} />
+            <Route path='/endpoints/:endpoint_uuid/' component={EndpointDetails} />
+            <Route component={PageNotFound} />
         </Switch>
     );
 };
 
-export default Endpoints
+export default Endpoints;

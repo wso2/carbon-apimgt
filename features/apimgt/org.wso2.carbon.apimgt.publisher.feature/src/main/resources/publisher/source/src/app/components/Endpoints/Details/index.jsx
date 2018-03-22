@@ -15,19 +15,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-'use strict';
 
-import React, {Component} from 'react'
+import React from 'react';
 
-export default class EndpointDetails extends Component {
+const EndpointDetails = () => {
+    return (
+        <div>
+            <h4>Endpoint details page!</h4>
+        </div>
+    );
+};
 
-    render() {
-        return (
-            <div>
-                <h4>
-                    Endpoint details page!
-                </h4>
-            </div>
-        );
-    }
-}
+export default EndpointDetails;
