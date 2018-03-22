@@ -8,10 +8,8 @@ import { withStyles } from 'material-ui/styles';
 import { Manager, Target, Popper } from 'react-popper';
 import ClickAwayListener from 'material-ui/utils/ClickAwayListener';
 import ArrowDropDownCircle from 'material-ui-icons/ArrowDropDownCircle';
-import List, {ListItem, ListItemText} from 'material-ui/List';
-import {Link} from 'react-router-dom'
-import {ScopeValidation, resourceMethod, resourcePath} from '../../../data/ScopeValidation';
-
+import List, { ListItem, ListItemText } from 'material-ui/List';
+import { Link } from 'react-router-dom';
 
 const styles = theme => ({
     root: {
@@ -22,7 +20,7 @@ const styles = theme => ({
         pointerEvents: 'none',
     },
     rightIcon: {
-        marginLeft: theme.spacing.unit
+        marginLeft: theme.spacing.unit,
     },
 });
 
@@ -49,40 +47,56 @@ class AddNewMenu extends React.Component {
                     <Target>
                         <Button
                             aria-owns={open ? 'menu-list' : null}
-                            aria-haspopup="true"
+                            aria-haspopup='true'
                             onClick={this.handleClick}
-                            variant="raised" color="secondary"
+                            variant='raised'
+                            color='secondary'
                         >
                             Create
                             <ArrowDropDownCircle className={classes.rightIcon} />
                         </Button>
                     </Target>
                     <Popper
-                        placement="bottom-start"
+                        placement='bottom-start'
                         eventsEnabled={open}
                         className={classNames({ [classes.popperClose]: !open })}
                     >
                         <ClickAwayListener onClickAway={this.handleClose}>
-                            <Grow in={open} id="menu-list" style={{ transformOrigin: '0 0 0' }}>
+                            <Grow in={open} id='menu-list' style={{ transformOrigin: '0 0 0' }}>
                                 <Paper>
                                     <List>
                                         <ListItem>
-                                            <Link to="/endpoints/create">
-                                                <ListItemText primary="Create new Endpoint"
-                                                    secondary="Create a new global endpoint"
+                                            <Link to='/api/create/rest'>
+                                                <ListItemText
+                                                    primary='Design a New REST API'
+                                                    secondary='Design and prototype a new REST API'
                                                 />
                                             </Link>
                                         </ListItem>
-                                        <ScopeValidation resourcePath={resourcePath.SERVICE_DISCOVERY}
-                                                         resourceMethod={resourceMethod.GET}>
                                         <ListItem>
-                                            <Link to="/endpoints/discover">
-                                                <ListItemText primary="Service Discovery"
-                                                    secondary="Add Global Endpoints Via Service Discovery"
+                                            <Link to='/api/create/swagger'>
+                                                <ListItemText
+                                                    primary='I Have an Existing REST API'
+                                                    secondary='Use an existing REST endpoint or Swagger definition'
                                                 />
                                             </Link>
                                         </ListItem>
-                                        </ScopeValidation>
+                                        <ListItem>
+                                            <Link to='/api/create/wsdl'>
+                                                <ListItemText
+                                                    primary='I Have a SOAP Endpoint'
+                                                    secondary='Use an existing SOAP or Import the WSDL'
+                                                />
+                                            </Link>
+                                        </ListItem>
+                                        <ListItem>
+                                            <Link to='/api/create/rest'>
+                                                <ListItemText
+                                                    primary='Design New Websocket API'
+                                                    secondary='Design and prototype a new WebSocket API'
+                                                />
+                                            </Link>
+                                        </ListItem>
                                     </List>
                                 </Paper>
                             </Grow>
@@ -95,7 +109,7 @@ class AddNewMenu extends React.Component {
 }
 
 AddNewMenu.propTypes = {
-    classes: PropTypes.object.isRequired,
+    classes: PropTypes.shape({}).isRequired,
 };
 
 export default withStyles(styles)(AddNewMenu);

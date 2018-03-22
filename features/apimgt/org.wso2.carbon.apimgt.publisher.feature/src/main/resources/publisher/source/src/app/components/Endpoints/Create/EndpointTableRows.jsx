@@ -16,18 +16,18 @@
  * under the License.
  */
 
-import React from 'react'
-import {Link} from 'react-router-dom'
-
-import {TableCell, TableRow} from 'material-ui/Table';
-import {ScopeValidation, resourceMethod, resourcePath} from '../../../data/ScopeValidation';
-import Dialog, {DialogActions, DialogContent, DialogContentText, DialogTitle} from 'material-ui/Dialog';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { TableCell, TableRow } from 'material-ui/Table';
+import Dialog, { DialogActions, DialogContent, DialogContentText, DialogTitle } from 'material-ui/Dialog';
 import Button from 'material-ui/Button';
 import Delete from 'material-ui-icons/Delete';
-import Slide from "material-ui/transitions/Slide";
+import Slide from 'material-ui/transitions/Slide';
 import IconButton from 'material-ui/IconButton';
 import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
+
+import { ScopeValidation, resourceMethod, resourcePath } from '../../../data/ScopeValidation';
 
 const styles = theme => ({
     button: {
@@ -41,61 +41,69 @@ const styles = theme => ({
 class EndpointTableRows extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {active: true, loading: false, open: false, openMenu: false};
+        this.state = {
+            openMenu: false,
+        };
         this.handleRequestClose = this.handleRequestClose.bind(this);
         this.handleRequestOpen = this.handleRequestOpen.bind(this);
     }
 
     handleRequestClose() {
-        this.setState({openMenu: false});
-    };
+        this.setState({ openMenu: false });
+    }
 
     handleRequestOpen() {
-        this.setState({openMenu: true});
-    };
+        this.setState({ openMenu: true });
+    }
 
     render() {
-        const { classes } = this.props;
-        const {name, type, maxTps, endpointConfig, id} = this.props.endpoint;
+        const {
+            name, type, maxTps, endpointConfig, id,
+        } = this.props.endpoint;
         return (
             <TableRow hover>
                 <TableCell>
-                    <Link to={"/endpoints/" + id}>{name}</Link></TableCell>
+                    <Link to={'/endpoints/' + id}>{name}</Link>
+                </TableCell>
                 <TableCell>{type}</TableCell>
                 <TableCell>{JSON.parse(endpointConfig).serviceUrl}</TableCell>
                 <TableCell>{maxTps}</TableCell>
                 <TableCell>
                     <div>
                         <ScopeValidation resourceMethod={resourceMethod.PUT} resourcePath={resourcePath.SINGLE_API}>
-                            <IconButton aria-label="Delete" onClick={this.handleRequestOpen}>
-                                <Delete/>
+                            <IconButton aria-label='Delete' onClick={this.handleRequestOpen}>
+                                <Delete />
                             </IconButton>
                         </ScopeValidation>
                         <Dialog open={this.state.openMenu} transition={Slide}>
-                            <DialogTitle>
-                                {"Confirm"}
-                            </DialogTitle>
+                            <DialogTitle>Confirm</DialogTitle>
                             <DialogContent>
-                                <DialogContentText>
-                                    Are you sure you want to delete the Endpoint?
-                                </DialogContentText>
+                                <DialogContentText>Are you sure you want to delete the Endpoint?</DialogContentText>
                             </DialogContent>
                             <DialogActions>
-                                <Button dense color="primary" onClick={this.handleRequestClose}>
+                                <Button dense color='primary' onClick={this.handleRequestClose}>
                                     Cancel
                                 </Button>
-                                <Button dense color="primary" onClick={() => this.props.handleEndpointDelete(id, name)}>
+                                <Button dense color='primary' onClick={() => this.props.handleEndpointDelete(id, name)}>
                                     Delete
                                 </Button>
                             </DialogActions>
-                        </Dialog></div>
+                        </Dialog>
+                    </div>
                 </TableCell>
             </TableRow>
         );
     }
 }
 EndpointTableRows.propTypes = {
-    classes: PropTypes.object.isRequired,
+    endpoint: PropTypes.shape({
+        id: PropTypes.string,
+        maxTps: PropTypes.string,
+        name: PropTypes.string,
+        type: PropTypes.string,
+        endpointConfig: PropTypes.string,
+    }).isRequired,
+    handleEndpointDelete: PropTypes.func.isRequired,
 };
 
 export default withStyles(styles)(EndpointTableRows);
