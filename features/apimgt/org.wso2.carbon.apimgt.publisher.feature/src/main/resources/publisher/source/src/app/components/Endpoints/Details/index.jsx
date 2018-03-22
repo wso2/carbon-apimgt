@@ -15,29 +15,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-"use strict";
 
 import React from 'react';
 
-function ApiPermissionValidation(props) {
-    var checkingPermissionType = props.checkingPermissionType;
-    var userPermissions = props.userPermissions;
-
-    if (userPermissions.includes(checkingPermissionType)) {
-        return (props.children);
-    }
-    return null;
-}
-
-ApiPermissionValidation.permissionType = {
-    READ: "READ",
-    UPDATE: "UPDATE",
-    DELETE: "DELETE",
-    MANAGE_SUBSCRIPTION: "MANAGE_SUBSCRIPTION"
+const EndpointDetails = () => {
+    return (
+        <div>
+            <h4>Endpoint details page!</h4>
+        </div>
+    );
 };
 
-ApiPermissionValidation.defaultProps = {
-    checkingPermissionType: ApiPermissionValidation.permissionType.UPDATE
-};
-
-export default ApiPermissionValidation;
+export default EndpointDetails;

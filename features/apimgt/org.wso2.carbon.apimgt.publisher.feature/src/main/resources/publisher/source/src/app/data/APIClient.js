@@ -15,20 +15,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-"use strict";
-import SwaggerClient from 'swagger-client'
-import AuthManager from './AuthManager'
-import Utils from "./Utils";
+
+import SwaggerClient from 'swagger-client';
+import AuthManager from './AuthManager';
+import Utils from './Utils';
 
 /**
  * This class expose single swaggerClient instance created using the given swagger URL (Publisher, Store, ect ..)
  * it's highly unlikely to change the REST API Swagger definition (swagger.json) file on the fly,
- * Hence this singleton class help to preserve consecutive swagger client object creations saving redundant IO operations.
+ * Hence this singleton class help to preserve consecutive swagger client object creations saving redundant IO
+ * operations.
  */
 class APIClient {
     /**
      * @param {Object} environment - Environment to get host for the swagger-client's spec property.
-     * @param {{}} args - Accept as an optional argument for APIClient constructor.Merge the given args with default args.
+     * @param {{}} args - Accept as an optional argument for APIClient constructor.Merge the given args with
+     *  default args.
      * @returns {APIClient}
      */
     constructor(environment, args = {}) {
@@ -36,25 +38,23 @@ class APIClient {
 
         const authorizations = {
             OAuth2Security: {
-                token: {access_token: AuthManager.getUser(environment.label).getPartialToken()}
-            }
+                token: { access_token: AuthManager.getUser(environment.label).getPartialToken() },
+            },
         };
 
         SwaggerClient.http.withCredentials = true;
-        let promisedResolve = SwaggerClient.resolve({ url: Utils.getSwaggerURL() });
+        const promisedResolve = SwaggerClient.resolve({ url: Utils.getSwaggerURL() });
         APIClient.spec = promisedResolve;
-        this._client = promisedResolve.then(
-            resolved => {
-                const argsv = Object.assign(args, {
-                    spec: this._fixSpec(resolved.spec),
-                    authorizations: authorizations,
-                    requestInterceptor: this._getRequestInterceptor(),
-                    responseInterceptor: this._getResponseInterceptor()
-                });
-                SwaggerClient.http.withCredentials = true;
-                return new SwaggerClient(argsv);
-            }
-        );
+        this._client = promisedResolve.then((resolved) => {
+            const argsv = Object.assign(args, {
+                spec: this._fixSpec(resolved.spec),
+                authorizations,
+                requestInterceptor: this._getRequestInterceptor(),
+                responseInterceptor: this._getResponseInterceptor(),
+            });
+            SwaggerClient.http.withCredentials = true;
+            return new SwaggerClient(argsv);
+        });
         this._client.catch(AuthManager.unauthorizedErrorHandler);
     }
 
@@ -72,7 +72,7 @@ class APIClient {
      * @returns {String} ETag value for the given key
      */
     static getETag(key) {
-        return sessionStorage.getItem("etag_" + key);
+        return sessionStorage.getItem('etag_' + key);
     }
 
     /**
@@ -81,7 +81,7 @@ class APIClient {
      * @param etag {string} etag value to be stored against the key
      */
     static addETag(key, etag) {
-        sessionStorage.setItem("etag_" + key, etag);
+        sessionStorage.setItem('etag_' + key, etag);
     }
 
     /**
@@ -95,11 +95,13 @@ class APIClient {
             SwaggerClient.http.withCredentials = true;
             APIClient.spec = SwaggerClient.resolve({ url: Utils.getSwaggerURL() });
         }
-        return APIClient.spec.then(
-            resolved => {
-                return resolved.spec.paths[resourcePath] && resolved.spec.paths[resourcePath][resourceMethod] && resolved.spec.paths[resourcePath][resourceMethod].security[0].OAuth2Security[0];
-            }
-        )
+        return APIClient.spec.then((resolved) => {
+            return (
+                resolved.spec.paths[resourcePath] &&
+                resolved.spec.paths[resourcePath][resourceMethod] &&
+                resolved.spec.paths[resourcePath][resourceMethod].security[0].OAuth2Security[0]
+            );
+        });
     }
 
     /**
@@ -111,8 +113,9 @@ class APIClient {
      * @private
      */
     _fixSpec(spec) {
-        spec.host = this.environment.host;
-        return spec;
+        const updatedSpec = spec;
+        updatedSpec.host = this.environment.host;
+        return updatedSpec;
     }
 
     _getResponseInterceptor() {
@@ -121,17 +124,20 @@ class APIClient {
                 APIClient.addETag(data.url, data.headers.etag);
             }
             return data;
-        }
+        };
     }
 
     _getRequestInterceptor() {
         return (request) => {
             AuthManager.refreshTokenOnExpire(request, this.environment);
-            if (APIClient.getETag(request.url) && (request.method === "PUT" || request.method === "DELETE" || request.method === "POST")) {
-                request.headers["If-Match"] = APIClient.getETag(request.url);
+            if (
+                APIClient.getETag(request.url) &&
+                (request.method === 'PUT' || request.method === 'DELETE' || request.method === 'POST')
+            ) {
+                request.headers['If-Match'] = APIClient.getETag(request.url);
             }
             return request;
-        }
+        };
     }
 }
 

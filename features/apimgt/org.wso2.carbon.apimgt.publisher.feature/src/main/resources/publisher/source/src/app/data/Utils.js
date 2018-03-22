@@ -35,9 +35,9 @@ class Utils {
         let cookie = null;
         for (let pair of pairs) {
             pair = pair.split('=');
-            const cookie_name = pair[0].trim();
+            const cookieName = pair[0].trim();
             const value = encodeURIComponent(pair[1]);
-            if (cookie_name === name) {
+            if (cookieName === name) {
                 cookie = value;
                 break;
             }

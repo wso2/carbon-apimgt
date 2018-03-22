@@ -86,9 +86,18 @@ if (process.env.NODE_ENV === 'development') {
         /* exclude: /node_modules/, */
         include: [
             /.*\/Apis\/Details\/NavBar.jsx/,
+            /.*\/components\/Endpoints\/*/,
             /.*\/Apis\/Details\/index.jsx/,
             /.*\/Apis\/Create\/*/,
             /.*\/Base\/*/,
+            /.*\/data\/APIClient.js/,
+            /.*\/data\/AuthManager.js/,
+            /.*\/data\/APIClientFactory.js/,
+            /.*\/data\/ApiPermissionValidation.js/,
+            /.*\/data\/AuthManager.js/,
+            /.*\/data\/ConfigManager.js/,
+            /.*\/data\/ScopeValidation.jsx/,
+            /.*\/data\/User.js/,
         ],
         loader: 'eslint-loader',
         options: {
