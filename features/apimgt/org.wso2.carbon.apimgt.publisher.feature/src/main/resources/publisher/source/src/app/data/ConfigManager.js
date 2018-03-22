@@ -16,23 +16,24 @@
  * under the License.
  */
 
-import axios from 'axios'
+import axios from 'axios';
 
 class ConfigManager {
-
     /**
      * get promised config and update the configMap
      * @param configPath: Path to read configs from
      * @returns {Promise}: promised config
      * @private
      */
+    /* eslint-disable no-underscore-dangle */
+    // indicate “private” members of APIClientFactory that is why underscore has used here
     static _getPromisedConfigs(configPath) {
         let promisedConfig = ConfigManager._promisedConfigMap.get(configPath);
         if (promisedConfig) {
             return promisedConfig;
         }
-        let origin = window.location.origin;
-        let requestUrl = origin + configPath;
+        const { origin } = window.location;
+        const requestUrl = origin + configPath;
 
         promisedConfig = axios.get(requestUrl);
         ConfigManager._promisedConfigMap.set(configPath, promisedConfig);
@@ -45,8 +46,8 @@ class ConfigManager {
      */
     static getConfigs() {
         return {
-            'environments': ConfigManager._getPromisedConfigs(ConfigRequestPaths.ENVIRONMENT_CONFIG_PATH),
-            'features': ConfigManager._getPromisedConfigs(ConfigRequestPaths.FEATURE_LIST_PATH)
+            environments: ConfigManager._getPromisedConfigs(ConfigManager.ConfigRequestPaths.ENVIRONMENT_CONFIG_PATH),
+            features: ConfigManager._getPromisedConfigs(ConfigManager.ConfigRequestPaths.FEATURE_LIST_PATH),
         };
     }
 }
@@ -55,9 +56,9 @@ class ConfigManager {
  * ConfigRequestPaths: Configuration requesting url paths
  * @type {Object}
  */
-const ConfigRequestPaths = {
-    ENVIRONMENT_CONFIG_PATH: "/api/am/config/v1.0/environments",
-    FEATURE_LIST_PATH: "/api/am/config/v1.0/features"
+ConfigManager.ConfigRequestPaths = {
+    ENVIRONMENT_CONFIG_PATH: '/api/am/config/v1.0/environments',
+    FEATURE_LIST_PATH: '/api/am/config/v1.0/features',
 };
 
 /**
@@ -68,5 +69,5 @@ const ConfigRequestPaths = {
  * @private
  */
 ConfigManager._promisedConfigMap = new Map();
-
+/* eslint-enable no-underscore-dangle */
 export default ConfigManager;

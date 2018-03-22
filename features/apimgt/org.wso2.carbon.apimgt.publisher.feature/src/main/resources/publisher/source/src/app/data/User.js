@@ -15,9 +15,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-"use strict";
 
-import Utils from './Utils'
+import Utils from './Utils';
 
 /**
  * Represent an user logged in to the application, There will be allays one user per session and
@@ -32,6 +31,8 @@ export default class User {
      * @returns {User|null} user object
      */
     constructor(environmentName, name, remember = false) {
+        /* eslint-disable no-underscore-dangle */
+        // indicate “private” members of APIClientFactory that is why underscore has used here
         const user = User._userMap.get(environmentName);
         if (user) {
             return user;
@@ -67,7 +68,7 @@ export default class User {
      */
     static fromJson(userJson, environmentName = Utils.getCurrentEnvironment().label) {
         if (!userJson.name) {
-            throw "Need to provide user `name` key in the JSON object, to create an user";
+            throw new Error('Need to provide user `name` key in the JSON object, to create an user');
         }
 
         const _user = new User(environmentName, userJson.name);
@@ -80,7 +81,7 @@ export default class User {
      * Remove the user from static in-memory user map
      * @param {String} environmentName - Name of the environment the user to be removed
      */
-    static destroyInMemoryUser(environmentName){
+    static destroyInMemoryUser(environmentName) {
         User._userMap.delete(environmentName);
     }
 
@@ -126,7 +127,7 @@ export default class User {
      */
     setExpiryTime(expireTime) {
         const currentTime = Date.now();
-        const timeDiff = (1000 * expireTime);
+        const timeDiff = 1000 * expireTime;
         localStorage.setItem(User.CONST.USER_EXPIRY_TIME, currentTime + timeDiff);
         this.expiryTime = new Date(currentTime + timeDiff);
         return this.expiryTime;
@@ -136,8 +137,8 @@ export default class User {
      *
      * @param type
      */
-    checkPermission(type) {
-        throw ("Not implemented!");
+    checkPermission() {
+        throw new Error('Not implemented!');
     }
 
     /**
@@ -149,17 +150,17 @@ export default class User {
             name: this.name,
             scopes: this._scopes,
             remember: this._remember,
-            expiryTime: this.getExpiryTime()
+            expiryTime: this.getExpiryTime(),
         };
     }
 }
 
 User.CONST = {
-    WSO2_AM_TOKEN_MSF4J: "WSO2_AM_TOKEN_MSF4J",
-    WSO2_AM_TOKEN_1: "WSO2_AM_TOKEN_1",
-    WSO2_AM_REFRESH_TOKEN_1: "WSO2_AM_REFRESH_TOKEN_1",
-    LOCAL_STORAGE_USER: "wso2_user_publisher",
-    USER_EXPIRY_TIME: "user_expiry_time"
+    WSO2_AM_TOKEN_MSF4J: 'WSO2_AM_TOKEN_MSF4J',
+    WSO2_AM_TOKEN_1: 'WSO2_AM_TOKEN_1',
+    WSO2_AM_REFRESH_TOKEN_1: 'WSO2_AM_REFRESH_TOKEN_1',
+    LOCAL_STORAGE_USER: 'wso2_user_publisher',
+    USER_EXPIRY_TIME: 'user_expiry_time',
 };
 /**
  * Map of users (key = environmentLabel, value = User instance)
@@ -167,3 +168,4 @@ User.CONST = {
  * @private
  */
 User._userMap = new Map();
+/* eslint-enable no-underscore-dangle */

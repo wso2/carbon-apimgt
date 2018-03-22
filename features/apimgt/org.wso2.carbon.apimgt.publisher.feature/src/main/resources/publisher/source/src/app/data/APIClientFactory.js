@@ -15,8 +15,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-"use strict";
-import APIClient from "./APIClient";
+
+import APIClient from './APIClient';
 
 /**
  * Class representing a Factory of APIClients
@@ -27,12 +27,15 @@ class APIClientFactory {
      * @returns {APIClientFactory}
      */
     constructor() {
+        /* eslint-disable no-underscore-dangle */
+        // indicate “private” members of APIClientFactory that is why underscore has used here
         if (APIClientFactory._instance) {
             return APIClientFactory._instance;
         }
 
         this._APIClientMap = new Map();
         APIClientFactory._instance = this;
+        /* eslint-enable no-underscore-dangle */
     }
 
     /**
@@ -41,15 +44,15 @@ class APIClientFactory {
      * @returns {APIClient} APIClient object for the environment
      */
     getAPIClient(environment) {
-        let api_Client = this._APIClientMap.get(environment.label);
+        let apiClient = this._APIClientMap.get(environment.label);
 
-        if (api_Client) {
-            return api_Client;
+        if (apiClient) {
+            return apiClient;
         }
 
-        api_Client = new APIClient(environment);
-        this._APIClientMap.set(environment.label, api_Client);
-        return api_Client;
+        apiClient = new APIClient(environment);
+        this._APIClientMap.set(environment.label, apiClient);
+        return apiClient;
     }
 
     /**
@@ -70,10 +73,11 @@ class APIClientFactory {
 }
 
 /**
- * Single instance of APIClientFactory
+ * Single instance of APIClientFactory indicate “private” members of objects
  * @type {APIClientFactory}
  * @private
  */
+// eslint-disable-next-line no-underscore-dangle
 APIClientFactory._instance = null;
 
 export default APIClientFactory;

@@ -15,29 +15,33 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-"use strict";
-
+/* TODO: Move this file to components/Shared/ location ~tmkb */
 import React from 'react';
+import PropTypes from 'prop-types';
 
-function ApiPermissionValidation(props) {
-    var checkingPermissionType = props.checkingPermissionType;
-    var userPermissions = props.userPermissions;
-
+const ApiPermissionValidation = (props) => {
+    const { checkingPermissionType, userPermissions } = props;
     if (userPermissions.includes(checkingPermissionType)) {
-        return (props.children);
+        return <div>{props.children}</div>;
     }
     return null;
-}
+};
+
+ApiPermissionValidation.propTypes = {
+    checkingPermissionType: PropTypes.string,
+    userPermissions: PropTypes.arrayOf(PropTypes.string).isRequired,
+    children: PropTypes.node.isRequired,
+};
 
 ApiPermissionValidation.permissionType = {
-    READ: "READ",
-    UPDATE: "UPDATE",
-    DELETE: "DELETE",
-    MANAGE_SUBSCRIPTION: "MANAGE_SUBSCRIPTION"
+    READ: 'READ',
+    UPDATE: 'UPDATE',
+    DELETE: 'DELETE',
+    MANAGE_SUBSCRIPTION: 'MANAGE_SUBSCRIPTION',
 };
 
 ApiPermissionValidation.defaultProps = {
-    checkingPermissionType: ApiPermissionValidation.permissionType.UPDATE
+    checkingPermissionType: ApiPermissionValidation.permissionType.UPDATE,
 };
 
 export default ApiPermissionValidation;
