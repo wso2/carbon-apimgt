@@ -86,6 +86,8 @@ if (process.env.NODE_ENV === 'development') {
         /* exclude: /node_modules/, */
         include: [
             /.*\/Apis\/Details\/NavBar.jsx/,
+            /.*\/Endpoints\/Create\/*/,
+            /.*\/Endpoints\/Listing\/*/,
             /.*\/Apis\/Details\/index.jsx/,
             /.*\/Apis\/Create\/*/,
             /.*\/Base\/*/,
