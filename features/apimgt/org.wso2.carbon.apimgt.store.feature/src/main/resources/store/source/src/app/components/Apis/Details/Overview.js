@@ -153,37 +153,6 @@ class Overview extends Component {
         const { classes } = this.props;
         return (
             <Grid container>
-                <Grid item xs={12} className={classes.imageWrapper}>
-                    <ImageGenerator apiName={api.name} />
-                    <div className={classes.imageSideContent}>
-                        <Typography variant="headline" >
-                            {api.version} {api.isDefaultVersion ? <span>( Default )</span> : <span></span>}
-                            {/* TODO We need to show the default verison and a link to it here if this
-                            is not the default version*/}
-                        </Typography>
-                        <Typography variant="caption" gutterBottom align="left">
-                            Version
-                        </Typography>
-                        {/* Context */}
-                        <Typography variant="headline" className={classes.headline} >
-                            {api.context}
-                        </Typography>
-                        <Typography variant="caption" gutterBottom align="left">
-                            Context
-                        </Typography>
-                        {/*Visibility */}
-                        <Typography variant="headline" className={classes.headline}>
-                            {api.lifeCycleStatus}
-                        </Typography>
-                        <Typography variant="caption" gutterBottom align="left">
-                            Lifecycle Status
-                        </Typography>
-                    </div>
-                    <div>
-                        <Subscribe uuid={this.props.match.params.api_uuid}/>
-                    </div>
-
-                </Grid>
                 <Grid item xs={12}>
                     <Typography variant="subheading" align="left">
                         Created by {api.provider} : {api.createdTime}
@@ -216,7 +185,7 @@ class Overview extends Component {
                         <Grid item xs={12} sm={6} md={4} lg={3}>
                             {api.tags && api.tags.length ?
                                 <div className={classes.headline}>
-                                    {api.tags.map(tag => <Link to={"/apis/" + api.id + "/tags" }>
+                                    {api.tags.map(tag => <Link to={"/apis/" + api.id + "/tags" } key={tag}>
                                         <Chip label={tag} className={classes.chip} />
                                     </Link>)}
                                 </div>

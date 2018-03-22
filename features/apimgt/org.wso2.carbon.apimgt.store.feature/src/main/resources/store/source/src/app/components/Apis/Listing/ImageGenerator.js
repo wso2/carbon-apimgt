@@ -5,7 +5,8 @@ import * as icons from 'material-ui-icons';
 
 const styles = theme => ({
     svgImage: {
-        cursor: 'pointer'
+        cursor: 'pointer',
+        minWidth: 250,
     },
 });
 

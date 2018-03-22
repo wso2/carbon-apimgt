@@ -100,6 +100,7 @@ class Details extends Component {
                     <Typography variant="display1" gutterBottom >
                         {this.state.api && <span>{this.state.api.name}</span> }
                     </Typography>
+                    <BasicInfo api_uuid={this.props.match.params.api_uuid} />
                     <Paper className={classes.paper}>
                         <Tabs
                             value={this.state.value}
