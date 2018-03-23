@@ -85,7 +85,7 @@ export default class Details extends Component {
      * @returns {Component} Render API Details page
      */
     render() {
-        const apiUUID = this.props.match.params.api_uuid;
+        const { apiUUID } = this.props.match.params;
         const redirectUrl = `/apis/${apiUUID}/overview`;
         const environmentOverview = Utils.isMultiEnvironmentOverviewEnabled();
         const { resourceNotFountMessage } = this.state;
@@ -100,7 +100,7 @@ export default class Details extends Component {
         return (
             <Grid container spacing={0}>
                 <Grid item xs={12}>
-                    <NavBar api_uuid={this.props.match.params.api_uuid} />
+                    <NavBar apiUUID={apiUUID} />
                 </Grid>
                 <Grid item xs={12}>
                     <Switch>
@@ -136,7 +136,7 @@ export default class Details extends Component {
                             render={props => <Documents resourceNotFountMessage={resourceNotFountMessage} {...props} />}
                         />
                         <Route
-                            path='/apis/:api_uuid/endpoints'
+                            path='/apis/:apiUUID/endpoints'
                             render={props => <Endpoints resourceNotFountMessage={resourceNotFountMessage} {...props} />}
                         />
                         <Route

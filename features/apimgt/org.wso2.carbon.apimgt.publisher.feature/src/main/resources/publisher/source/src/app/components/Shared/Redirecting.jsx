@@ -16,26 +16,28 @@
  * under the License.
  */
 
-import React from 'react'
-import './redirecting.css'
-import {CircularProgress} from "material-ui/Progress";
-import Grid from "material-ui/Grid";
-import Paper from "material-ui/Paper";
+import React from 'react';
+import { CircularProgress } from 'material-ui/Progress';
+import Grid from 'material-ui/Grid';
+import Paper from 'material-ui/Paper';
+import PropTypes from 'prop-types';
+
+import './redirecting.css';
 
 const Redirecting = (props) => {
-    const {message} = props;
+    const { message } = props;
 
     return (
-        <div className="redirect-flex-container">
-            <Grid container justify={"center"} alignItems={"center"} spacing={0} className={"redirect-grid-container"}>
+        <div className='redirect-flex-container'>
+            <Grid container justify='center' alignItems='center' spacing={0} className='redirect-grid-container'>
                 <Grid item lg={6} md={8} xs={10}>
-                    <Grid container alignItems={"center"}>
+                    <Grid container alignItems='center'>
                         <Grid item sm={2} xs={12}>
-                            <CircularProgress className={"redirect-loadingbar"}/>
+                            <CircularProgress className='redirect-loadingbar' />
                         </Grid>
                         <Grid item sm={10} xs={12}>
-                            <div className="redirect-main-content">
-                                <Paper elevation={5} square={true} className="redirect-paper">
+                            <div className='redirect-main-content'>
+                                <Paper elevation={5} square className='redirect-paper'>
                                     {message}
                                 </Paper>
                             </div>
@@ -45,6 +47,10 @@ const Redirecting = (props) => {
             </Grid>
         </div>
     );
+};
+
+Redirecting.propTypes = {
+    message: PropTypes.string.isRequired,
 };
 
 export default Redirecting;

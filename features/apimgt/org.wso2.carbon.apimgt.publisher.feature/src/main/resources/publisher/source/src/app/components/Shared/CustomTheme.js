@@ -28,6 +28,6 @@ export default {
             appBar: 'rgba(38, 50, 56, 1)',
             contentFrame: grey[900],
             active: 'rgba(67, 160, 71, 1)',
-        }
-    }
+        },
+    },
 };
