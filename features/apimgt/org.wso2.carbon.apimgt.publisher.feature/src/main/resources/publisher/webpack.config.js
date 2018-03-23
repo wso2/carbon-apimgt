@@ -85,11 +85,16 @@ if (process.env.NODE_ENV === 'development') {
         test: /\.(js|jsx)$/,
         /* exclude: /node_modules/, */
         include: [
-            /.*\/Apis\/Details\/NavBar.jsx/,
             /.*\/components\/Endpoints\/*/,
+            /.*\/components\/Shared\/*/,
+            /.*\/components\/Landing\/*/,
+            /.*\/components\/Base\/*/,
+            /.*\/components\/Login\/*/,
+            /.*\/Apis\/Details\/NavBar.jsx/,
             /.*\/Apis\/Details\/index.jsx/,
+            // /.*\/Apis\/Details\/Endpoints\/*/,
+            /.*\/Apis\/Details\/Scopes\/*/,
             /.*\/Apis\/Create\/*/,
-            /.*\/Base\/*/,
             /.*\/data\/APIClient.js/,
             /.*\/data\/AuthManager.js/,
             /.*\/data\/APIClientFactory.js/,
