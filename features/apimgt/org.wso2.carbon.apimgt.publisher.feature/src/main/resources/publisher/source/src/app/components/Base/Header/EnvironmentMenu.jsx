@@ -118,7 +118,11 @@ class EnvironmentMenu extends React.Component {
 
 EnvironmentMenu.propTypes = {
     handleEnvironmentChange: PropTypes.func.isRequired,
-    environments: PropTypes.shape({}).isRequired,
+    environments: PropTypes.arrayOf(PropTypes.shape({
+        host: PropTypes.string,
+        label: PropTypes.string,
+        loginTokenPath: PropTypes.string,
+    })).isRequired,
     environmentLabel: PropTypes.string.isRequired,
 };
 export default EnvironmentMenu;

@@ -118,14 +118,15 @@ class NavBar extends Component {
      */
     componentDidMount() {
         const api = new Api();
-        const promisedApi = api.get(this.props.api_uuid);
+        const { apiUUID } = this.props;
+        const promisedApi = api.get(apiUUID);
         promisedApi
             .then((response) => {
                 this.setState({ api: response.obj });
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
+                    console.error(error);
                 }
             });
         this.updateWindowSize();
@@ -170,10 +171,10 @@ class NavBar extends Component {
      * @memberof NavBar
      */
     render() {
-        /* TODO: This could have been done easily with match object containing api_uuid value , But
+        /* TODO: This could have been done easily with match object containing apiUUID value , But
          Due to a bug (https://github.com/ReactTraining/react-router/issues/4649) in the latest version(4.1.1),
          it's not working as expected, Hence doing this hack, revert to following with react-router upgrade
-         const api_uuid = this.props.match.params.api_uuid; ~tmkb */
+         const apiUUID = this.props.match.params.apiUUID; ~tmkb */
         const pathSegments = this.props.location.pathname.split('/');
         // This assume that last segment and segment before it contains detail page action and API UUID
         const [activeTab, apiUUID] = pathSegments.reverse();
@@ -218,7 +219,7 @@ class NavBar extends Component {
                 </Link>
                 {tabs.map(tab =>
                     tab.important && (
-                        <Link name={tab.name} to={'/apis/' + apiUUID + '/' + tab.name}>
+                        <Link key={tab.name} name={tab.name} to={'/apis/' + apiUUID + '/' + tab.name}>
                             <Button
                                 key={tab.name}
                                 variant='raised'
@@ -258,7 +259,11 @@ class NavBar extends Component {
                                     <MenuList role='menu'>
                                         {tabs.map(tab =>
                                             !tab.important && (
-                                                <Link name={tab.name} to={'/apis/' + apiUUID + '/' + tab.name}>
+                                                <Link
+                                                    key={tab.name}
+                                                    name={tab.name}
+                                                    to={'/apis/' + apiUUID + '/' + tab.name}
+                                                >
                                                     <MenuItem
                                                         onClick={this.handleCloseMore}
                                                         key={tab.name}
@@ -295,7 +300,7 @@ NavBar.propTypes = {
     location: PropTypes.shape({
         pathname: PropTypes.string,
     }).isRequired,
-    api_uuid: PropTypes.string.isRequired,
+    apiUUID: PropTypes.string.isRequired,
     classes: PropTypes.shape({}).isRequired,
 };
 

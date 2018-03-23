@@ -16,15 +16,12 @@
  * under the License.
  */
 
-import Input from 'material-ui/Input';
-import TagsInput from 'react-tagsinput';
 import 'react-tagsinput/react-tagsinput.css';
 import { message } from 'antd/lib/index';
 import PropTypes from 'prop-types';
 import React from 'react';
 import Api from '../../../../data/api';
 import Loading from '../../../Base/Loading/Loading';
-import Scope from './Scope';
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
 
 /**
@@ -173,7 +170,7 @@ class Scopes extends React.Component {
      * @memberof Scopes
      */
     render() {
-        const { apiScopes, apiScope, roles } = this.state;
+        const { apiScopes } = this.state;
 
         if (this.state.notFound) {
             return <ResourceNotFound message={this.props.resourceNotFountMessage} />;

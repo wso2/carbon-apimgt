@@ -19,10 +19,10 @@
 import React from 'react';
 import { Input, Icon, Button, Row, Col } from 'antd';
 import 'react-tagsinput/react-tagsinput.css';
-import { message } from 'antd/lib/index';
 import TagsInput from 'react-tagsinput';
 import PropTypes from 'prop-types';
 import Log from 'log4javascript';
+import Alert from '../../../Shared/Alert';
 
 import Api from '../../../../data/api';
 import Loading from '../../../Base/Loading/Loading';
@@ -42,7 +42,6 @@ class Scope extends React.Component {
         super(props);
         this.state = {
             visible: false,
-            tags: [],
         };
         this.toggleScopeData = this.toggleScopeData.bind(this);
         this.removeScope = this.removeScope.bind(this);
@@ -68,7 +67,7 @@ class Scope extends React.Component {
                 }
                 const { status } = error;
                 if (status === 404) {
-                    this.setState({ notFound: true });
+                    console.warn('Page not found');
                 }
             });
         this.setState({ visible: !this.state.visible });
@@ -80,19 +79,17 @@ class Scope extends React.Component {
      */
     removeScope() {
         const scopeName = this.props.name;
-        const hideMessage = message.loading('Deleting the Scope ...', 0);
+        Alert.info('Deleting the Scope ...');
         const api = new Api();
         const promisedScopeDelete = api.deleteScope(this.props.api_uuid, scopeName);
         promisedScopeDelete.then((response) => {
             if (response.status !== 200) {
                 Log.log(response);
-                message.error('Something went wrong while deleting the ' + scopeName + ' Scope!');
-                hideMessage();
+                Alert.error('Something went wrong while deleting the ' + scopeName + ' Scope!');
                 return;
             }
-            message.success(scopeName + ' Scope deleted successfully!');
+            Alert.success(scopeName + ' Scope deleted successfully!');
             this.props.deleteScope(scopeName);
-            hideMessage();
         });
     }
     /**
@@ -123,19 +120,17 @@ class Scope extends React.Component {
      */
     handleSubmit() {
         const scopeName = this.props.name;
-        const hideMessage = message.loading('Updating the Scope ...', 0);
+        Alert.info('Updating the Scope ...');
         const api = new Api();
         const promisedScopeUpdate = api.updateScope(this.props.api_uuid, scopeName, this.state.apiScope);
         promisedScopeUpdate.then((response) => {
             if (response.status !== 200) {
                 console.log(response);
-                message.error('Something went wrong while updating the ' + scopeName + ' Scope!');
-                hideMessage();
+                Alert.error('Something went wrong while updating the ' + scopeName + ' Scope!');
                 return;
             }
-            message.success(scopeName + ' Scope updated successfully!');
+            Alert.success(scopeName + ' Scope updated successfully!');
             this.props.updateScope(scopeName, this.state.apiScope);
-            hideMessage();
         });
     }
 
@@ -148,7 +143,9 @@ class Scope extends React.Component {
             <div id={this.props.name}>
                 <Row type='flex' justify='start' className='resource-head'>
                     <Col span={8}>
-                        <a onClick={this.toggleScopeData}>{this.props.name}</a>
+                        <a onKeyPress={this.toggleScopeData} onClick={this.toggleScopeData}>
+                            {this.props.name}
+                        </a>
                     </Col>
                     <Col span={8}>{this.props.description}</Col>
                     <Col span={8} style={{ textAlign: 'right', cursor: 'pointer' }} onClick={this.removeScope}>

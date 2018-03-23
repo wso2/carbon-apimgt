@@ -16,37 +16,38 @@
  * under the License.
  */
 
-import React from 'react'
+import React from 'react';
+import PropTypes from 'prop-types';
 
 const LoginBase = (props) => {
     return (
         <div>
-            <header className="header header-default">
-                <div className="container-fluid">
-                    <div className="pull-left brand float-remove-xs text-center-xs">
-                        <a href="/publisher/">
-                            <img
-                                src="/publisher/public/app/images/logo.svg"
-
-                                className="logo"/>
+            <header className='header header-default'>
+                <div className='container-fluid'>
+                    <div className='pull-left brand float-remove-xs text-center-xs'>
+                        <a href='/publisher/'>
+                            <img alt='logo' src='/publisher/public/app/images/logo.svg' className='logo' />
                             <h1>API Publisher</h1>
                         </a>
                     </div>
                 </div>
             </header>
             {props.children}
-            <footer className="footer">
-                <div className="container-fluid">
+            <footer className='footer'>
+                <div className='container-fluid'>
                     <p>
                         WSO2 | © 2018
-                        <a href="http://wso2.com/" target="_blank"><i
-                            className="icon fw fw-wso2"/> Inc</a>.
+                        <a href='http://wso2.com/' rel='noopener noreferrer' target='_blank'>
+                            <i className='icon fw fw-wso2' /> Inc
+                        </a>.
                     </p>
                 </div>
             </footer>
         </div>
-
     );
 };
 
-export default LoginBase
+LoginBase.propTypes = {
+    children: PropTypes.node.isRequired,
+};
+export default LoginBase;

@@ -179,7 +179,7 @@ class Layout extends React.Component {
         open: false,
         openPopA: false,
         openPopB: false,
-        environments: {},
+        environments: [],
     };
 
     /**
