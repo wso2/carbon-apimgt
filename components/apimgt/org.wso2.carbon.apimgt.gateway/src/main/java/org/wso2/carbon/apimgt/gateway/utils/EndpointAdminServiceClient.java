@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.gateway.utils;
 
 import org.apache.axis2.AxisFault;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -117,7 +118,7 @@ public class EndpointAdminServiceClient {
         try {
             ArrayList<Integer> arrayList = new ArrayList<>();
             String[] endpointNames;
-            if (tenantDomain != null && !("").equals(tenantDomain)
+            if (!StringUtils.isEmpty(tenantDomain)
                     && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 endpointNames = endpointAdminStub.getEndPointsNamesForTenant(tenantDomain);
             } else {
@@ -131,7 +132,7 @@ public class EndpointAdminServiceClient {
 
             for (int index : arrayList) {
                 if (index >= 0) { //If not found, don't delete
-                    if (tenantDomain != null && !("").equals(tenantDomain)
+                    if (!StringUtils.isEmpty(tenantDomain)
                             && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                         endpointAdminStub.deleteEndpointForTenant(endpointNames[index], tenantDomain);
                     } else {

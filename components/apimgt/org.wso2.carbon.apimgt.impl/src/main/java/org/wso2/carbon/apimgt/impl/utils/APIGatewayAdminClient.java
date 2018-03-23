@@ -1,6 +1,24 @@
+/*
+* Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*
+* WSO2 Inc. licenses this file to you under the Apache License,
+* Version 2.0 (the "License"); you may not use this file except
+* in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied. See the License for the
+* specific language governing permissions and limitations
+* under the License.
+*/
 package org.wso2.carbon.apimgt.impl.utils;
 
 import org.apache.axis2.AxisFault;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.parser.ParseException;
@@ -294,7 +312,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
             log.debug("Deleting endpoint from gateway");
             for (String type : arrayList) {
                 String endpointType = type.replace("_endpoints", "");
-                if (tenantDomain != null && !("").equals(tenantDomain)
+                if (!StringUtils.isEmpty(tenantDomain)
                         && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                     apiGatewayAdminStub.deleteEndpointForTenant(endpointName + "_API" + endpointType +
                                     "Endpoint", tenantDomain);
@@ -346,7 +364,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
     private void checkForTenantWhenAdding(APIGatewayAdminStub stub, String epContext, String tenantDomain)
             throws EndpointAdminException {
         try {
-            if (tenantDomain != null && !("").equals(tenantDomain)
+            if (!StringUtils.isEmpty(tenantDomain)
                     && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 stub.addEndpointForTenant(epContext, tenantDomain);
             } else {
