@@ -94,6 +94,7 @@ if (process.env.NODE_ENV === 'development') {
             /.*\/Apis\/Details\/index.jsx/,
             // /.*\/Apis\/Details\/Endpoints\/*/,
             /.*\/Apis\/Details\/Scopes\/*/,
+            /.*\/Apis\/Details\/Subscriptions\/*/,
             /.*\/Apis\/Create\/*/,
             /.*\/data\/APIClient.js/,
             /.*\/data\/AuthManager.js/,

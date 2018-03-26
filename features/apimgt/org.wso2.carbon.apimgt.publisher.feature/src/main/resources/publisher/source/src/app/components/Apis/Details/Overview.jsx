@@ -18,7 +18,7 @@
 
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import Loading from '../../Base/Loading/Loading';
+import { Progress } from '../../Shared';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 import Api from '../../../data/api';
 
@@ -129,7 +129,7 @@ class Overview extends Component {
             return <ResourceNotFound message={this.props.resourceNotFountMessage} />;
         }
         if (!api) {
-            return <Loading />;
+            return <Progress />;
         }
         const { classes } = this.props;
 

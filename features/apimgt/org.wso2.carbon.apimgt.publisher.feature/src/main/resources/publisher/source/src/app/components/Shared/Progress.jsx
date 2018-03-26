@@ -19,7 +19,7 @@
 import React from 'react';
 import { CircularProgress } from 'material-ui/Progress';
 
-const LoadingAnimation = () => {
+const Progress = () => {
     return (
         <div>
             <CircularProgress style={{ margin: 'auto', display: 'block' }} />
@@ -27,4 +27,4 @@ const LoadingAnimation = () => {
     );
 };
 
-export default LoadingAnimation;
+export default Progress;

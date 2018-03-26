@@ -1,15 +1,13 @@
 import React, { Component } from 'react';
-import { Grid, Button } from 'material-ui';
+import { Grid, Card, CardContent } from 'material-ui';
 import PropTypes from 'prop-types';
 
 import GenericEndpointInputs from './GenericEndpointInputs';
 import Api from '../../../../data/api';
-import Loading from '../../../Base/Loading/Loading';
 import ApiPermissionValidation from '../../../../data/ApiPermissionValidation';
 import { resourceMethod, resourcePath, ScopeValidation } from '../../../../data/ScopeValidation';
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
-import Alert from '../../../Shared/Alert';
-
+import { Alert, InteractiveButton, Progress } from '../../../Shared';
 /**
  * API Details Endpoint page component
  * @class Endpoint
@@ -211,43 +209,56 @@ class Endpoint extends Component {
             return <ResourceNotFound message={this.props.resourceNotFountMessage} />;
         }
         if (!api) {
-            return <Loading />;
+            return <Progress />;
         }
 
         return (
             <div>
-                <Grid container spacing={16} justify='center'>
-                    <Grid item md={5} title='Production Endpoint'>
-                        <GenericEndpointInputs
-                            handleInputs={this.handleProductionInputs}
-                            epList={this.state.endpoints}
-                            endpoint={this.state.productionEndpoint}
-                            dropdownItems={this.dropdownItems}
-                            match={this.props.match}
-                        />
-                    </Grid>
-                    <Grid item md={5} title='Sandbox Endpoint'>
-                        <GenericEndpointInputs
-                            handleInputs={this.handleSandboxInputs}
-                            epList={this.state.endpoints}
-                            dropdownItems={this.dropdownItems}
-                            endpoint={this.state.sandboxEndpoint}
-                            match={this.props.match}
-                        />
-                    </Grid>
-                </Grid>
-                <Grid container justify='flex-end'>
-                    <Grid item md={4}>
-                        {/* Allowing create endpoints based on scopes */}
-                        <ScopeValidation resourcePath={resourcePath.ENDPOINTS} resourceMethod={resourceMethod.POST}>
-                            <ApiPermissionValidation userPermissions={JSON.parse(this.state.api).userPermissionsForApi}>
-                                <Button variant='raised' color='primary' onClick={this.updateEndpoints}>
-                                    Save
-                                </Button>
-                            </ApiPermissionValidation>
-                        </ScopeValidation>
-                    </Grid>
-                </Grid>
+                <Card>
+                    <CardContent>
+                        <Grid container spacing={16} justify='center'>
+                            <Grid item md={5} title='Production Endpoint'>
+                                <GenericEndpointInputs
+                                    handleInputs={this.handleProductionInputs}
+                                    epList={this.state.endpoints}
+                                    endpoint={this.state.productionEndpoint}
+                                    dropdownItems={this.dropdownItems}
+                                    match={this.props.match}
+                                />
+                            </Grid>
+                            <Grid item md={5} title='Sandbox Endpoint'>
+                                <GenericEndpointInputs
+                                    handleInputs={this.handleSandboxInputs}
+                                    epList={this.state.endpoints}
+                                    dropdownItems={this.dropdownItems}
+                                    endpoint={this.state.sandboxEndpoint}
+                                    match={this.props.match}
+                                />
+                            </Grid>
+                        </Grid>
+                        <Grid container justify='flex-end'>
+                            <Grid item md={4}>
+                                {/* Allowing create endpoints based on scopes */}
+                                <ScopeValidation
+                                    resourcePath={resourcePath.ENDPOINTS}
+                                    resourceMethod={resourceMethod.POST}
+                                >
+                                    <ApiPermissionValidation
+                                        userPermissions={JSON.parse(this.state.api).userPermissionsForApi}
+                                    >
+                                        <InteractiveButton
+                                            variant='raised'
+                                            color='primary'
+                                            onClick={this.updateEndpoints}
+                                        >
+                                            Save
+                                        </InteractiveButton>
+                                    </ApiPermissionValidation>
+                                </ScopeValidation>
+                            </Grid>
+                        </Grid>
+                    </CardContent>
+                </Card>
             </div>
         );
     }
