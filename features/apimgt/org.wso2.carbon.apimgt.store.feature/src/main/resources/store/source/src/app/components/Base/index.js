@@ -107,6 +107,8 @@ const styles = theme => ({
         backgroundColor: theme.palette.background.default,
         padding: theme.spacing.unit * 3,
         marginTop: 64,
+        paddingBottom: 50,
+        overflowY: 'auto'
     },
     brandText: {
         marginRight: 10,

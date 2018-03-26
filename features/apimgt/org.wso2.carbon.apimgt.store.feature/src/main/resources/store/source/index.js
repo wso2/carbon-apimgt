@@ -19,7 +19,7 @@
 import ReactDOM from 'react-dom'
 import React from 'react'
 import Store from "./src/App.js"
-import 'typeface-roboto'
+// import 'typeface-roboto'
 import 'material-design-icons'
 import 'material-ui-icons'
 import {MuiThemeProvider, createMuiTheme} from 'material-ui/styles';

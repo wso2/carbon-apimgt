@@ -18,9 +18,7 @@
 
 import React, {Component} from 'react'
 import {Link} from 'react-router-dom'
-import {Col, Popconfirm, Row, Form, Dropdown, Tag, Menu, Badge, message} from 'antd';
 
-const FormItem = Form.Item;
 import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import API from '../../../data/api'
