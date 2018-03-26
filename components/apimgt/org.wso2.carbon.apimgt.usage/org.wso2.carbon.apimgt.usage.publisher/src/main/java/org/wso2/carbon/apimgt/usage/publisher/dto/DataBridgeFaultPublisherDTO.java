@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.usage.publisher.dto;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 
 public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
@@ -87,7 +88,7 @@ public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
     }
 
     public Object createMetaData() {
-        String jsonString = "{\"keyType\":\"" + getKeyType() + "\",\"correlationID\", \"" + getCorrelationID() + "\"}";
-        return new Object[] { jsonString };
+        String jsonString = "{\"keyType\":\"" + getKeyType() + "\",\"correlationID\": \"" + getCorrelationID() + "\"}";
+        return new Object[] { StringEscapeUtils.escapeJava(jsonString) };
     }
 }
