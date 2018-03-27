@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.rest.api.authenticator.factories;
 import org.junit.Assert;
 import org.junit.Test;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
-import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
+import org.wso2.carbon.apimgt.core.exception.IdentityProviderException;
 import org.wso2.carbon.apimgt.rest.api.authenticator.AuthenticatorService;
 
 public class AuthenticatorAPIFactoryTestCase {
@@ -35,7 +35,7 @@ public class AuthenticatorAPIFactoryTestCase {
     }
 
     @Test
-    public void getService() throws KeyManagementException, APIMgtDAOException {
+    public void getService() throws APIMgtDAOException, IdentityProviderException {
         AuthenticatorService expectedService = AuthenticatorAPIFactory.getInstance().getService();
         AuthenticatorService actualService = AuthenticatorAPIFactory.getInstance().getService();
         Assert.assertSame(expectedService, actualService);

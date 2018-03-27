@@ -30,14 +30,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.UserNameMapper;
-import org.wso2.carbon.apimgt.core.auth.DCRMServiceStub;
-import org.wso2.carbon.apimgt.core.auth.DCRMServiceStubFactory;
-import org.wso2.carbon.apimgt.core.auth.OAuth2ServiceStubs;
-import org.wso2.carbon.apimgt.core.auth.OAuth2ServiceStubsFactory;
 import org.wso2.carbon.apimgt.core.auth.SCIMServiceStub;
 import org.wso2.carbon.apimgt.core.auth.SCIMServiceStubFactory;
-import org.wso2.carbon.apimgt.core.auth.ScopeRegistrationServiceStub;
-import org.wso2.carbon.apimgt.core.auth.ScopeRegistrationServiceStubFactory;
 import org.wso2.carbon.apimgt.core.auth.dto.SCIMGroup;
 import org.wso2.carbon.apimgt.core.auth.dto.SCIMUser;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
@@ -78,17 +72,13 @@ public class DefaultIdentityProviderImpl implements IdentityProvider {
     private static final String GROUPNAME = "displayName";
 
     DefaultIdentityProviderImpl() throws APIManagementException {
-        this(SCIMServiceStubFactory.getSCIMServiceStub(), DCRMServiceStubFactory.getDCRMServiceStub(),
-                OAuth2ServiceStubsFactory.getOAuth2ServiceStubs(), ScopeRegistrationServiceStubFactory
-                        .getScopeRegistrationServiceStub(), APIManagerFactory.getInstance().getUserNameMapper());
+        this(SCIMServiceStubFactory.getSCIMServiceStub(), APIManagerFactory.getInstance().getUserNameMapper());
     }
 
-    DefaultIdentityProviderImpl(SCIMServiceStub scimServiceStub, DCRMServiceStub dcrmServiceStub,
-                                OAuth2ServiceStubs oAuth2ServiceStubs, ScopeRegistrationServiceStub
-                                        scopeRegistrationServiceStub, UserNameMapper userNameMapper) throws
+    DefaultIdentityProviderImpl(SCIMServiceStub scimServiceStub, UserNameMapper userNameMapper) throws
             APIManagementException {
-        this.userNameMapper = userNameMapper;
         this.scimServiceStub = scimServiceStub;
+        this.userNameMapper = userNameMapper;
     }
 
     @Override
@@ -447,7 +437,7 @@ public class DefaultIdentityProviderImpl implements IdentityProvider {
 
     @Override
     public void deleteRegisteredResourceByAPIId(String apiID) throws KeyManagementException {
-        APIManagerFactory.getInstance().getKeyManager().deleteRegisteredResourceByAPIId(apiID);
+
     }
 
     @Override

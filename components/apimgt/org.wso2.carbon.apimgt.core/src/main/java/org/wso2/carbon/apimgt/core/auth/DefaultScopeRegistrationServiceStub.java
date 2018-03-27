@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -27,7 +27,7 @@ import org.wso2.carbon.apimgt.core.auth.dto.ScopeInfo;
 /**
  * This is the stub class for Scope Registration services
  */
-public interface ScopeRegistrationServiceStub {
+public interface DefaultScopeRegistrationServiceStub {
 
     @Headers("Content-Type: application/json")
     @RequestLine("POST ")
@@ -36,17 +36,17 @@ public interface ScopeRegistrationServiceStub {
     @RequestLine("GET ")
     Response getScopes();
 
-    @RequestLine("GET /name/{name}")
+    @RequestLine("GET /{name}")
     Response getScopeByName(@Param("name") String name);
 
     @Headers("Content-Type: application/json")
-    @RequestLine("PUT /name/{name}")
+    @RequestLine("PUT /{name}")
     Response updateScope(ScopeInfo scopeInfo, @Param("name") String name);
 
-    @RequestLine("DELETE /name/{name}")
+    @RequestLine("DELETE /{name}")
     Response deleteScope(@Param("name") String name);
 
-    @RequestLine("HEAD /name/{name}")
+    @RequestLine("HEAD /{name}")
     Response isScopeExist(@Param("name") String name);
 }
 
