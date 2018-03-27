@@ -27,7 +27,7 @@ const Apis = () => {
     return (
         <Switch>
             <Route exact path='/apis' component={Listing} />
-            <Route path='/apis/:api_uuid/' render={props => <Details {...props} />} />
+            <Route path='/apis/:apiUUID/' render={props => <Details {...props} />} />
             <Route component={PageNotFound} />
         </Switch>
     );
