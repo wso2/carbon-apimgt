@@ -106,8 +106,10 @@ class Protected extends Component {
      * Change the theme index incrementally
      */
     setTheme() {
-        this.state.themeIndex++;
-        localStorage.setItem('themeIndex', this.state.themeIndex);
+        let { themeIndex } = this.state;
+        themeIndex++;
+        localStorage.setItem('themeIndex', themeIndex);
+        this.setState({ themeIndex });
     }
 
     /**
