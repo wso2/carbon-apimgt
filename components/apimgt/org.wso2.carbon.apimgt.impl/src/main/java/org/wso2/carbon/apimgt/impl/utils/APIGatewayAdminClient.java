@@ -1,31 +1,43 @@
+/*
+* Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*
+* WSO2 Inc. licenses this file to you under the Apache License,
+* Version 2.0 (the "License"); you may not use this file except
+* in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied. See the License for the
+* specific language governing permissions and limitations
+* under the License.
+*/
 package org.wso2.carbon.apimgt.impl.utils;
 
 import org.apache.axis2.AxisFault;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.gateway.stub.APIGatewayAdminStub;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.EndpointAdminException;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.apimgt.gateway.dto.stub.APIData;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.apache.axiom.om.OMElement;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.StringWriter;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 
 public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
 
@@ -262,6 +274,126 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
         } catch (Exception e) {
             throw new AxisFault("Error while deleting default API from the gateway. " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * Add the endpoint file/s to the gateway
+     *
+     * @param api API that the endpoint/s belong
+     * @param builder The endpoint template builder instance
+     * @param tenantDomain Domain of the logged tenant
+     * @throws AxisFault Thrown if an error occurred
+     */
+    public void addEndpoint(API api, APITemplateBuilder builder, String tenantDomain) throws EndpointAdminException {
+        try {
+            ArrayList<String> arrayList = getEndpointType(api);
+            log.debug("Adding endpoint to gateway");
+            for (String type : arrayList) {
+                String endpointConfigContext = builder.getConfigStringForEndpointTemplate(type);
+                checkForTenantWhenAdding(apiGatewayAdminStub, endpointConfigContext, tenantDomain);
+            }
+        } catch (Exception e) {
+            log.error("Error while adding endpoint to the gateway", e);
+            throw new EndpointAdminException("Error while generating Endpoint file in Gateway " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Delete the endpoint file/s from the gateway
+     *
+     * @param api API that the endpoint/s belong
+     * @param tenantDomain Domain of the logged tenant
+     * @throws AxisFault Thrown if an error occurred
+     */
+    public void deleteEndpoint(API api, String tenantDomain) throws EndpointAdminException {
+        try {
+            String endpointName = api.getId().getApiName() + "--v" + api.getId().getVersion();
+            ArrayList<String> arrayList = getEndpointType(api);
+            log.debug("Deleting endpoint from gateway");
+            for (String type : arrayList) {
+                String endpointType = type.replace("_endpoints", "");
+                if (!StringUtils.isEmpty(tenantDomain)
+                        && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                    apiGatewayAdminStub.deleteEndpointForTenant(endpointName + "_API" + endpointType +
+                                    "Endpoint", tenantDomain);
+                } else {
+                    apiGatewayAdminStub.deleteEndpoint(endpointName + "_API" + endpointType +
+                            "Endpoint");
+                }
+            }
+        } catch (Exception e) {
+            log.error("Error while deleting endpoint from the gateway", e);
+            throw new EndpointAdminException("Error while deleting Endpoint from the gateway. " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Update the endpoint file/s in the gateway
+     *
+     * @param api API that the endpoint/s belong
+     * @param builder The endpoint template builder instance
+     * @param tenantDomain Domain of the logged tenant
+     * @throws AxisFault Thrown if an error occurred
+     */
+    public void saveEndpoint(API api, APITemplateBuilder builder, String tenantDomain) throws EndpointAdminException {
+        try {
+            log.debug("Removing endpoints from gateway to update");
+            apiGatewayAdminStub.removeEndpointsToUpdate(api.getId().getApiName(), api.getId().getVersion(),
+                    tenantDomain);
+
+            log.debug("Adding updated endpoints to gateway");
+            ArrayList<String> arrayListToAdd = getEndpointType(api);
+            for (String type : arrayListToAdd) {
+                String endpointConfigContext = builder.getConfigStringForEndpointTemplate(type);
+                checkForTenantWhenAdding(apiGatewayAdminStub, endpointConfigContext, tenantDomain);
+            }
+        } catch (Exception e) {
+            log.error("Error while updating endpoint file in the gateway", e);
+            throw new EndpointAdminException("Error updating Endpoint file" + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Check if add the endpoint for tenant space or not
+     *
+     * @param stub Stub instance for adding the endpoint
+     * @param epContext The content of the endpoint file
+     * @param tenantDomain Domain of the logged tenant
+     * @throws AxisFault Thrown if an error occurred
+     */
+    private void checkForTenantWhenAdding(APIGatewayAdminStub stub, String epContext, String tenantDomain)
+            throws EndpointAdminException {
+        try {
+            if (!StringUtils.isEmpty(tenantDomain)
+                    && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                stub.addEndpointForTenant(epContext, tenantDomain);
+            } else {
+                stub.addEndpoint(epContext);
+            }
+        } catch (Exception e) {
+            log.error("Error while adding endpoint to the gateway", e);
+            throw new EndpointAdminException("Error while generating endpoint file in gateway" + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Returns the defined endpoint types of the in the publisher
+     *
+     * @param api API that the endpoint/s belong
+     * @return ArrayList containing defined endpoint types
+     * @throws ParseException Thrown if an error occurred
+     */
+    public ArrayList<String> getEndpointType(API api) throws ParseException {
+        ArrayList<String> arrayList = new ArrayList<>();
+        if (APIUtil.isProductionEndpointsExists(api) && !APIUtil.isSandboxEndpointsExists(api)) {
+            arrayList.add(APIConstants.API_DATA_PRODUCTION_ENDPOINTS);
+        } else if (APIUtil.isSandboxEndpointsExists(api) && !APIUtil.isProductionEndpointsExists(api)) {
+            arrayList.add(APIConstants.API_DATA_SANDBOX_ENDPOINTS);
+        } else {
+            arrayList.add(APIConstants.API_DATA_PRODUCTION_ENDPOINTS);
+            arrayList.add(APIConstants.API_DATA_SANDBOX_ENDPOINTS);
+        }
+        return arrayList;
     }
 
     /**

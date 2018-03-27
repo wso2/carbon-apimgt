@@ -1,3 +1,21 @@
+/*
+* Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*
+* WSO2 Inc. licenses this file to you under the Apache License,
+* Version 2.0 (the "License"); you may not use this file except
+* in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied. See the License for the
+* specific language governing permissions and limitations
+* under the License.
+*/
+
 package org.wso2.carbon.apimgt.gateway.service;
 
 import org.apache.axiom.om.OMElement;
@@ -6,6 +24,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.gateway.utils.EndpointAdminServiceClient;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
@@ -268,6 +287,79 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
 
     }
 
+    /**
+     * Add the endpoint to the gateway
+     *
+     * @param endpointData Content of the endpoint file
+     * @return True if the endpoint file is added
+     * @throws AxisFault Thrown if an error occurs
+     */
+    public boolean addEndpoint(String endpointData) throws AxisFault {
+        EndpointAdminServiceClient endpointAdminServiceClient = getEndpointAdminServiceClient();
+        return endpointAdminServiceClient.addEndpoint(endpointData);
+    }
+
+    /**
+     * Add the endpoint to the tenant
+     *
+     * @param endpointData Content of the endpoint file
+     * @param tenantDomain Domain of the logged tensnt
+     * @return True if the endpoint file is added
+     * @throws AxisFault Thrown if an error occurred
+     */
+    public boolean addEndpointForTenant(String endpointData, String tenantDomain) throws AxisFault {
+        EndpointAdminServiceClient endpointAdminServiceClient = getEndpointAdminServiceClient();
+        return endpointAdminServiceClient.addEndpoint(endpointData, tenantDomain);
+    }
+
+    /**
+     * Delete the endpoint file from the gateway
+     *
+     * @param endpointName Name of the endpoint to be deleted
+     * @return True if the endpoint file is deleted
+     * @throws AxisFault Thrown if an error occurred
+     */
+    public boolean deleteEndpoint(String endpointName) throws AxisFault {
+        EndpointAdminServiceClient endpointAdminServiceClient = getEndpointAdminServiceClient();
+        return endpointAdminServiceClient.deleteEndpoint(endpointName);
+    }
+
+    /**
+     * Delete the endpoint file from the tenant
+     *
+     * @param endpointName Name of the endpoint file to br deleted
+     * @param tenantDomain Domain of the logged tenant
+     * @return True if the endpoint file is deleted
+     * @throws AxisFault Thrown if an error occurred
+     */
+    public boolean deleteEndpointForTenant(String endpointName, String tenantDomain) throws AxisFault {
+        EndpointAdminServiceClient endpointAdminServiceClient = getEndpointAdminServiceClient();
+        return endpointAdminServiceClient.deleteEndpoint(endpointName, tenantDomain);
+    }
+
+    /**
+     * Removes the existing endpoints of synapse config for updating them
+     *
+     * @param apiName Name of the API
+     * @param apiVersion Version of the API
+     * @param tenantDomain Domain of the logged tenant
+     * @return True if endpoints are successfully removed for updating
+     * @throws AxisFault Thrown if an error occurred
+     */
+    public boolean removeEndpointsToUpdate(String apiName, String apiVersion, String tenantDomain) throws AxisFault {
+        EndpointAdminServiceClient endpointAdminServiceClient = getEndpointAdminServiceClient();
+        return endpointAdminServiceClient.removeEndpointsToUpdate(apiName, apiVersion, tenantDomain);
+    }
+
+    /**
+     * Returns an instance of EndpointAdminServiceClient
+     *
+     * @return An instance of EndpointAdminServiceClient
+     * @throws AxisFault Thrown if an error occurred
+     */
+    protected EndpointAdminServiceClient getEndpointAdminServiceClient() throws AxisFault {
+        return new EndpointAdminServiceClient();
+    }
 
     /**
      * Deploy the sequence to the gateway

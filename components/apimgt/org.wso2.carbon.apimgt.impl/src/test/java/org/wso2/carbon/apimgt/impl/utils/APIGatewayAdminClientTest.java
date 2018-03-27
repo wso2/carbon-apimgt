@@ -37,7 +37,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -46,6 +45,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.gateway.stub.APIGatewayAdminStub;
+import org.wso2.carbon.apimgt.impl.*;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
@@ -177,7 +177,6 @@ public class APIGatewayAdminClientTest {
         client.addApi(apiTemplateBuilder, "", identifier);
         client.addApi(apiTemplateBuilder, "tenant", identifier);
     }
-
 
     @Test
     public void testAddPrototypeScripImpl() throws Exception {
@@ -496,6 +495,283 @@ public class APIGatewayAdminClientTest {
         APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
         client.deleteDefaultApi("", identifier);
         client.deleteDefaultApi("tenant", identifier);
+    }
+
+    @Test
+    public void testAddEndpointForProductionEndpoint() throws Exception {
+        PowerMockito.whenNew(APIGatewayAdminStub.class)
+                .withArguments(Mockito.any(ConfigurationContext.class), Mockito.anyString())
+                .thenReturn(apiGatewayAdminStub);
+        Mockito.when(apiGatewayAdminStub.addEndpoint(Mockito.anyString())).thenReturn(true);
+        Mockito.when(apiGatewayAdminStub.addEndpointForTenant(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(true);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APITemplateBuilder apiTemplateBuilder = Mockito.mock(APITemplateBuilder.class);
+        APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
+        API api = new API(identifier);
+        api.setEndpointConfig("{\"production_endpoints\":\"http://ep1.com\"}");
+        Mockito.when(apiTemplateBuilder.getConfigStringForEndpointTemplate(Mockito.anyString()))
+                .thenReturn(Mockito.anyString());
+        client.addEndpoint(api, apiTemplateBuilder, "");
+        client.addEndpoint(api, apiTemplateBuilder, null);
+        client.addEndpoint(api, apiTemplateBuilder, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        Mockito.verify(apiGatewayAdminStub, times(3)).addEndpoint(Mockito.anyString());
+        client.addEndpoint(api, apiTemplateBuilder, "tenant");
+        Mockito.verify(apiGatewayAdminStub, times(1)).addEndpointForTenant(Mockito.anyString(),
+                Mockito.anyString());
+    }
+
+    @Test
+    public void testAddEndpointForSandboxEndpoint() throws Exception {
+        PowerMockito.whenNew(APIGatewayAdminStub.class)
+                .withArguments(Mockito.any(ConfigurationContext.class), Mockito.anyString())
+                .thenReturn(apiGatewayAdminStub);
+        Mockito.when(apiGatewayAdminStub.addEndpoint(Mockito.anyString())).thenReturn(true);
+        Mockito.when(apiGatewayAdminStub.addEndpointForTenant(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(true);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APITemplateBuilder apiTemplateBuilder = Mockito.mock(APITemplateBuilder.class);
+        APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
+        API api = new API(identifier);
+        api.setEndpointConfig("{\"sandbox_endpoints\":\"http://ep2.com\"}");
+        Mockito.when(apiTemplateBuilder.getConfigStringForEndpointTemplate(Mockito.anyString()))
+                .thenReturn(Mockito.anyString());
+        client.addEndpoint(api, apiTemplateBuilder, "");
+        client.addEndpoint(api, apiTemplateBuilder, null);
+        client.addEndpoint(api, apiTemplateBuilder, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        Mockito.verify(apiGatewayAdminStub, times(3)).addEndpoint(Mockito.anyString());
+        client.addEndpoint(api, apiTemplateBuilder, "tenant");
+        Mockito.verify(apiGatewayAdminStub, times(1)).addEndpointForTenant(Mockito.anyString(),
+                Mockito.anyString());
+    }
+
+    @Test
+    public void testAddEndpointForBothEndpointTypes() throws Exception {
+        PowerMockito.whenNew(APIGatewayAdminStub.class)
+                .withArguments(Mockito.any(ConfigurationContext.class), Mockito.anyString())
+                .thenReturn(apiGatewayAdminStub);
+        Mockito.when(apiGatewayAdminStub.addEndpoint(Mockito.anyString())).thenReturn(true);
+        Mockito.when(apiGatewayAdminStub.addEndpointForTenant(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(true);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APITemplateBuilder apiTemplateBuilder = Mockito.mock(APITemplateBuilder.class);
+        APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
+        API api = new API(identifier);
+        api.setEndpointConfig("{\"production_endpoints\":\"http://ep1.com\",\"sandbox_endpoints\":\"http://ep2.com\"}");
+        Mockito.when(apiTemplateBuilder.getConfigStringForEndpointTemplate(Mockito.anyString()))
+                .thenReturn(Mockito.anyString());
+        client.addEndpoint(api, apiTemplateBuilder, "");
+        client.addEndpoint(api, apiTemplateBuilder, null);
+        client.addEndpoint(api, apiTemplateBuilder, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        Mockito.verify(apiGatewayAdminStub, times(6)).addEndpoint(Mockito.anyString());
+        client.addEndpoint(api, apiTemplateBuilder, "tenant");
+        Mockito.verify(apiGatewayAdminStub, times(2)).addEndpointForTenant(Mockito.anyString(),
+                Mockito.anyString());
+    }
+
+    @Test (expected = EndpointAdminException.class)
+    public void testAddEndpointException() throws Exception {
+        PowerMockito.whenNew(APIGatewayAdminStub.class)
+                .withArguments(Mockito.any(ConfigurationContext.class), Mockito.anyString())
+                .thenReturn(apiGatewayAdminStub);
+        Mockito.when(apiGatewayAdminStub.addEndpoint(Mockito.anyString())).thenThrow(EndpointAdminException.class);
+        Mockito.when(apiGatewayAdminStub.addEndpointForTenant(Mockito.anyString(), Mockito.anyString()))
+                .thenThrow(EndpointAdminException.class);
+        APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
+        API api = new API(identifier);
+        api.setEndpointConfig("{\"production_endpoints\":\"http://ep1.com\",\"sandbox_endpoints\":\"http://ep2.com\"}");
+        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APITemplateBuilder apiTemplateBuilder = Mockito.mock(APITemplateBuilder.class);
+        Mockito.when(apiTemplateBuilder.getConfigStringForEndpointTemplate(Mockito.anyString()))
+                .thenReturn(Mockito.anyString());
+        client.addEndpoint(api, apiTemplateBuilder, "");
+        client.addEndpoint(api, apiTemplateBuilder, "tenant");
+    }
+
+    @Test
+    public void testDeleteEndpointForProductionEndpoint() throws Exception {
+        PowerMockito.whenNew(APIGatewayAdminStub.class)
+                .withArguments(Mockito.any(ConfigurationContext.class), Mockito.anyString())
+                .thenReturn(apiGatewayAdminStub);
+        Mockito.when(apiGatewayAdminStub.addEndpoint(Mockito.anyString())).thenReturn(true);
+        Mockito.when(apiGatewayAdminStub.addEndpointForTenant(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(true);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
+        API api = new API(identifier);
+        api.setEndpointConfig("{\"production_endpoints\":\"http://ep1.com\"}");
+        client.deleteEndpoint(api, "");
+        client.deleteEndpoint(api, null);
+        client.deleteEndpoint(api, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        Mockito.verify(apiGatewayAdminStub, times(3)).deleteEndpoint(Mockito.anyString());
+        client.deleteEndpoint(api, "tenant");
+        Mockito.verify(apiGatewayAdminStub, times(1))
+                .deleteEndpointForTenant(Mockito.anyString(), Mockito.anyString());
+    }
+
+    @Test
+    public void testDeleteEndpointForSandboxEndpoint() throws Exception {
+        PowerMockito.whenNew(APIGatewayAdminStub.class)
+                .withArguments(Mockito.any(ConfigurationContext.class), Mockito.anyString())
+                .thenReturn(apiGatewayAdminStub);
+        Mockito.when(apiGatewayAdminStub.addEndpoint(Mockito.anyString())).thenReturn(true);
+        Mockito.when(apiGatewayAdminStub.addEndpointForTenant(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(true);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
+        API api = new API(identifier);
+        api.setEndpointConfig("{\"sandbox_endpoints\":\"http://ep2.com\"}");
+        client.deleteEndpoint(api, "");
+        client.deleteEndpoint(api, null);
+        client.deleteEndpoint(api, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        Mockito.verify(apiGatewayAdminStub, times(3)).deleteEndpoint(Mockito.anyString());
+        client.deleteEndpoint(api, "tenant");
+        Mockito.verify(apiGatewayAdminStub, times(1))
+                .deleteEndpointForTenant(Mockito.anyString(), Mockito.anyString());
+    }
+
+    @Test
+    public void testDeleteEndpointForBothEndpoint() throws Exception {
+        PowerMockito.whenNew(APIGatewayAdminStub.class)
+                .withArguments(Mockito.any(ConfigurationContext.class), Mockito.anyString())
+                .thenReturn(apiGatewayAdminStub);
+        Mockito.when(apiGatewayAdminStub.addEndpoint(Mockito.anyString())).thenReturn(true);
+        Mockito.when(apiGatewayAdminStub.addEndpointForTenant(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(true);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
+        API api = new API(identifier);
+        api.setEndpointConfig("{\"production_endpoints\":\"http://ep1.com\",\"sandbox_endpoints\":\"http://ep2.com\"}");
+        client.deleteEndpoint(api, "");
+        client.deleteEndpoint(api, null);
+        client.deleteEndpoint(api, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        Mockito.verify(apiGatewayAdminStub, times(6)).deleteEndpoint(Mockito.anyString());
+        client.deleteEndpoint(api, "tenant");
+    }
+
+    @Test (expected = EndpointAdminException.class)
+    public void testDeleteEndpointException() throws Exception {
+        PowerMockito.whenNew(APIGatewayAdminStub.class)
+                .withArguments(Mockito.any(ConfigurationContext.class), Mockito.anyString())
+                .thenReturn(apiGatewayAdminStub);
+        Mockito.when(apiGatewayAdminStub.deleteEndpoint(Mockito.anyString())).thenThrow(EndpointAdminException.class);
+        Mockito.when(apiGatewayAdminStub.deleteEndpointForTenant(Mockito.anyString(), Mockito.anyString()))
+                .thenThrow(EndpointAdminException.class);
+        APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
+        API api = new API(identifier);
+        api.setEndpointConfig("{\"production_endpoints\":\"http://ep1.com\",\"sandbox_endpoints\":\"http://ep2.com\"}");
+        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        client.deleteEndpoint(api, "");
+        client.deleteEndpoint(api, "tenant");
+    }
+
+    @Test
+    public void testSaveEndpointForProductionEndpoint() throws Exception {
+        PowerMockito.whenNew(APIGatewayAdminStub.class)
+                .withArguments(Mockito.any(ConfigurationContext.class), Mockito.anyString())
+                .thenReturn(apiGatewayAdminStub);
+        Mockito.when(apiGatewayAdminStub
+                .removeEndpointsToUpdate(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(true);
+        Mockito.when(apiGatewayAdminStub.addEndpoint(Mockito.anyString())).thenReturn(true);
+        Mockito.when(apiGatewayAdminStub.addEndpointForTenant(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(true);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APITemplateBuilder apiTemplateBuilder = Mockito.mock(APITemplateBuilder.class);
+        APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
+        API api = new API(identifier);
+        api.setEndpointConfig("{\"production_endpoints\":\"http://ep1.com\"}");
+        Mockito.when(apiTemplateBuilder.getConfigStringForEndpointTemplate(Mockito.anyString()))
+                .thenReturn("endpointData");
+        client.saveEndpoint(api, apiTemplateBuilder, "");
+        client.saveEndpoint(api, apiTemplateBuilder, null);
+        client.saveEndpoint(api, apiTemplateBuilder, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        client.saveEndpoint(api, apiTemplateBuilder, "tenant");
+        Mockito.verify(apiGatewayAdminStub, times(4))
+                .removeEndpointsToUpdate(Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
+        Mockito.verify(apiGatewayAdminStub, times(3)).addEndpoint(Mockito.anyString());
+        Mockito.verify(apiGatewayAdminStub, times(1))
+                .addEndpointForTenant(Mockito.anyString(), Mockito.anyString());
+    }
+
+    @Test
+    public void testSaveEndpointForSandboxEndpoint() throws Exception {
+        PowerMockito.whenNew(APIGatewayAdminStub.class)
+                .withArguments(Mockito.any(ConfigurationContext.class), Mockito.anyString())
+                .thenReturn(apiGatewayAdminStub);
+        Mockito.when(apiGatewayAdminStub
+                .removeEndpointsToUpdate(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(true);
+        Mockito.when(apiGatewayAdminStub.addEndpoint(Mockito.anyString())).thenReturn(true);
+        Mockito.when(apiGatewayAdminStub.addEndpointForTenant(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(true);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APITemplateBuilder apiTemplateBuilder = Mockito.mock(APITemplateBuilder.class);
+        APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
+        API api = new API(identifier);
+        api.setEndpointConfig("{\"sandbox_endpoints\":\"http://ep2.com\"}");
+        Mockito.when(apiTemplateBuilder.getConfigStringForEndpointTemplate(Mockito.anyString()))
+                .thenReturn("endpointData");
+        client.saveEndpoint(api, apiTemplateBuilder, "");
+        client.saveEndpoint(api, apiTemplateBuilder, null);
+        client.saveEndpoint(api, apiTemplateBuilder, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        client.saveEndpoint(api, apiTemplateBuilder, "tenant");
+        Mockito.verify(apiGatewayAdminStub, times(4))
+                .removeEndpointsToUpdate(Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
+        Mockito.verify(apiGatewayAdminStub, times(3)).addEndpoint(Mockito.anyString());
+        Mockito.verify(apiGatewayAdminStub, times(1))
+                .addEndpointForTenant(Mockito.anyString(), Mockito.anyString());
+    }
+
+    @Test
+    public void testSaveEndpointForBothEndpoints() throws Exception {
+        PowerMockito.whenNew(APIGatewayAdminStub.class)
+                .withArguments(Mockito.any(ConfigurationContext.class), Mockito.anyString())
+                .thenReturn(apiGatewayAdminStub);
+        Mockito.when(apiGatewayAdminStub
+                .removeEndpointsToUpdate(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(true);
+        Mockito.when(apiGatewayAdminStub.addEndpoint(Mockito.anyString())).thenReturn(true);
+        Mockito.when(apiGatewayAdminStub.addEndpointForTenant(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(true);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APITemplateBuilder apiTemplateBuilder = Mockito.mock(APITemplateBuilder.class);
+        APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
+        API api = new API(identifier);
+        api.setEndpointConfig("{\"production_endpoints\":\"http://ep1.com\",\"sandbox_endpoints\":\"http://ep2.com\"}");
+        Mockito.when(apiTemplateBuilder.getConfigStringForEndpointTemplate(Mockito.anyString()))
+                .thenReturn("endpointData");
+        client.saveEndpoint(api, apiTemplateBuilder, "");
+        client.saveEndpoint(api, apiTemplateBuilder, null);
+        client.saveEndpoint(api, apiTemplateBuilder, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        client.saveEndpoint(api, apiTemplateBuilder, "tenant");
+        Mockito.verify(apiGatewayAdminStub, times(4))
+                .removeEndpointsToUpdate(Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
+        Mockito.verify(apiGatewayAdminStub, times(6)).addEndpoint(Mockito.anyString());
+        Mockito.verify(apiGatewayAdminStub, times(2))
+                .addEndpointForTenant(Mockito.anyString(), Mockito.anyString());
+    }
+
+    @Test (expected = EndpointAdminException.class)
+    public void testSaveEndpointException() throws Exception {
+        PowerMockito.whenNew(APIGatewayAdminStub.class)
+                .withArguments(Mockito.any(ConfigurationContext.class), Mockito.anyString())
+                .thenReturn(apiGatewayAdminStub);
+        Mockito.when(apiGatewayAdminStub
+                .removeEndpointsToUpdate(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+                .thenThrow(EndpointAdminException.class);
+        Mockito.when(apiGatewayAdminStub.addEndpoint(Mockito.anyString())).thenThrow(EndpointAdminException.class);
+        Mockito.when(apiGatewayAdminStub.addEndpointForTenant(Mockito.anyString(), Mockito.anyString()))
+                .thenThrow(EndpointAdminException.class);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APITemplateBuilder apiTemplateBuilder = Mockito.mock(APITemplateBuilder.class);
+        APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
+        API api = new API(identifier);
+        api.setEndpointConfig("{\"production_endpoints\":\"http://ep1.com\",\"sandbox_endpoints\":\"http://ep2.com\"}");
+        Mockito.when(apiTemplateBuilder.getConfigStringForEndpointTemplate(Mockito.anyString()))
+                .thenReturn("endpointData");
+        client.saveEndpoint(api, apiTemplateBuilder, "");
+        client.saveEndpoint(api, apiTemplateBuilder, "tenant");
     }
 
     @Test
