@@ -79,6 +79,7 @@ public class AuthenticatorService {
      * @param keyManager               KeyManager object
      * @param systemApplicationDao     systemApplicationDao object
      * @param apimConfigurationService apimConfigurationService object
+     * @param apimAppConfigurationService   configuration ofject for app
      */
     public AuthenticatorService(KeyManager keyManager, SystemApplicationDao systemApplicationDao,
                                 APIMConfigurationService apimConfigurationService,
@@ -351,6 +352,8 @@ public class AuthenticatorService {
      * @param appName          Name of the Application
      * @param authResponseBean Authentication response bean
      * @return URI of the UI Service
+     * @throws UnsupportedEncodingException encoding format not supported
+     * @throws URISyntaxException syntax of url is incorrect.
      */
     public URI getUIServiceRedirectionURI(String appName, AuthResponseBean authResponseBean)
             throws URISyntaxException,UnsupportedEncodingException {

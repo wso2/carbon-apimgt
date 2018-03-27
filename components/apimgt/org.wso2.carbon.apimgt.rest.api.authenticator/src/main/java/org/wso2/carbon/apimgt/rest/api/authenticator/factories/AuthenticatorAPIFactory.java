@@ -18,12 +18,12 @@
 
 package org.wso2.carbon.apimgt.rest.api.authenticator.factories;
 
-import org.wso2.carbon.apimgt.core.api.KeyManager;
+import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.configuration.APIMConfigurationService;
 import org.wso2.carbon.apimgt.core.dao.SystemApplicationDao;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
-import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
+import org.wso2.carbon.apimgt.core.exception.IdentityProviderException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.rest.api.authenticator.AuthenticatorService;
 import org.wso2.carbon.apimgt.rest.api.authenticator.configuration.APIMAppConfigurationService;
@@ -49,17 +49,17 @@ public class AuthenticatorAPIFactory {
      *
      * @return AuthenticatorService
      * @throws APIMgtDAOException     if failed to initialize SystemApplicationDao
-     * @throws KeyManagementException if failed to initialize KeyManager
+     * @throws IdentityProviderException if failed to initialize IdentityProvider
      */
-    public synchronized AuthenticatorService getService() throws APIMgtDAOException, KeyManagementException {
+    public synchronized AuthenticatorService getService() throws APIMgtDAOException, IdentityProviderException {
         if (service == null) {
-            KeyManager keyManager = APIManagerFactory.getInstance().getKeyManager();
+            IdentityProvider identityProvider = APIManagerFactory.getInstance().getIdentityProvider();
             SystemApplicationDao systemApplicationDao = DAOFactory.getSystemApplicationDao();
             APIMConfigurationService apimConfigurationService = APIMConfigurationService.getInstance();
             APIMAppConfigurationService apimAppConfigurationService = APIMAppConfigurationService.getInstance();
 
-            service = new AuthenticatorService(keyManager,
-                    systemApplicationDao, apimConfigurationService, apimAppConfigurationService);
+            service = new AuthenticatorService(identityProvider, systemApplicationDao, apimConfigurationService,
+                    apimAppConfigurationService);
         }
         return service;
     }

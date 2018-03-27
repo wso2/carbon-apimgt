@@ -25,6 +25,7 @@ import feign.gson.GsonDecoder;
 import feign.gson.GsonEncoder;
 import org.wso2.carbon.apimgt.core.configuration.models.KeyMgtConfigurations;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.impl.WSO2ISKeyManagerImpl;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.util.AMSSLSocketFactory;
 
@@ -36,38 +37,28 @@ public class ScopeRegistrationServiceStubFactory {
     /**
      * Create and return Scope Registration service stubs
      *
-     * @return ScopeRegistrationServiceStub service stubs
-     * @throws APIManagementException if error occurs while crating {@link ScopeRegistrationServiceStub} service stub
+     * @return ScopeRegistration implementation
+     * @throws APIManagementException if error occurs while crating {@link ScopeRegistration}
      */
-    public static ScopeRegistrationServiceStub getScopeRegistrationServiceStub() throws APIManagementException {
+    public static ScopeRegistration getScopeRegistration() throws APIManagementException {
         KeyMgtConfigurations keyManagerConfigs = ServiceReferenceHolder.getInstance().getAPIMConfiguration()
                 .getKeyManagerConfigs();
-        return getScopeRegistrationServiceStub(keyManagerConfigs.getScopeRegistrationEndpoint(),
-                keyManagerConfigs.getKeyManagerCredentials().getUsername(),
-                keyManagerConfigs.getKeyManagerCredentials().getPassword(),
-                keyManagerConfigs.getKeyManagerCertAlias());
+        if (WSO2ISKeyManagerImpl.class.getCanonicalName().equals(keyManagerConfigs.getKeyManagerImplClass())) {
+            WSO2ISScopeRegistrationServiceStub wso2ISScopeRegistrationServiceStub = Feign.builder().requestInterceptor
+                    (new BasicAuthRequestInterceptor(keyManagerConfigs.getKeyManagerCredentials().getUsername(),
+                            keyManagerConfigs.getKeyManagerCredentials().getPassword())).encoder(new GsonEncoder())
+                    .decoder(new GsonDecoder()).client(new Client.Default(AMSSLSocketFactory.getSSLSocketFactory
+                            (keyManagerConfigs.getKeyManagerCertAlias()), (hostname, sslSession) -> true)).target
+                            (WSO2ISScopeRegistrationServiceStub.class, keyManagerConfigs.getDcrEndpoint());
+            return new WSO2ISScopeRegistrationImpl(wso2ISScopeRegistrationServiceStub);
+        } else {
+            DefaultScopeRegistrationServiceStub defaultScopeRegistrationServiceStub = Feign.builder().requestInterceptor
+                    (new BasicAuthRequestInterceptor(keyManagerConfigs.getKeyManagerCredentials().getUsername(),
+                            keyManagerConfigs.getKeyManagerCredentials().getPassword())).encoder(new GsonEncoder())
+                    .decoder(new GsonDecoder()).client(new Client.Default(AMSSLSocketFactory.getSSLSocketFactory
+                            (keyManagerConfigs.getKeyManagerCertAlias()), (hostname, sslSession) -> true)).target
+                            (DefaultScopeRegistrationServiceStub.class, keyManagerConfigs.getDcrEndpoint());
+            return new DefaultScopeRegistrationImpl(defaultScopeRegistrationServiceStub);
+        }
     }
-
-    /**
-     * Create and return Resource Registration service stubs
-     *
-     * @param scopeRegistrationEndpoint Scope Registration Endpoint
-     * @param username    Username of Key Manager
-     * @param password    Password of Key Manager
-     * @param kmCertAlias Alias of Public Key of Key Manager
-     * @return ScopeRegistrationServiceStub service stubs
-     * @throws APIManagementException if error occurs while {@link ScopeRegistrationServiceStub} service stub
-     */
-    public static ScopeRegistrationServiceStub getScopeRegistrationServiceStub(String scopeRegistrationEndpoint, String
-            username, String password, String kmCertAlias) throws APIManagementException {
-        return Feign.builder()
-                .requestInterceptor(new BasicAuthRequestInterceptor(username, password))
-                .encoder(new GsonEncoder())
-                .decoder(new GsonDecoder())
-                .client(new Client.Default(AMSSLSocketFactory.getSSLSocketFactory(kmCertAlias),
-                        (hostname, sslSession) -> true))
-                .target(ScopeRegistrationServiceStub.class, scopeRegistrationEndpoint);
-
-    }
-
 }

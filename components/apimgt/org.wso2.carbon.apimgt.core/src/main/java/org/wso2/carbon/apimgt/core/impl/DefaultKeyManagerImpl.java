@@ -1,11 +1,10 @@
-package org.wso2.carbon.apimgt.core.impl;
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
- * WSO2 Inc. licenses this file to you under the Apache License,
- * Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License.
- * You may obtain a copy of the License at
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -16,68 +15,83 @@ package org.wso2.carbon.apimgt.core.impl;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.wso2.carbon.apimgt.core.impl;
 
-import com.google.gson.Gson;
+import feign.Response;
+import feign.gson.GsonDecoder;
 import org.apache.commons.lang3.StringUtils;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
-import org.wso2.carbon.apimgt.core.api.RestCallUtil;
+import org.wso2.carbon.apimgt.core.auth.DCRMServiceStub;
+import org.wso2.carbon.apimgt.core.auth.DCRMServiceStubFactory;
+import org.wso2.carbon.apimgt.core.auth.OAuth2ServiceStubs;
+import org.wso2.carbon.apimgt.core.auth.OAuth2ServiceStubsFactory;
+import org.wso2.carbon.apimgt.core.auth.ScopeRegistration;
+import org.wso2.carbon.apimgt.core.auth.ScopeRegistrationServiceStubFactory;
 import org.wso2.carbon.apimgt.core.auth.dto.DCRClientInfo;
-import org.wso2.carbon.apimgt.core.configuration.models.KeyMgtConfigurations;
+import org.wso2.carbon.apimgt.core.auth.dto.DCRError;
+import org.wso2.carbon.apimgt.core.auth.dto.OAuth2IntrospectionResponse;
+import org.wso2.carbon.apimgt.core.auth.dto.OAuth2TokenInfo;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
-import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
-import org.wso2.carbon.apimgt.core.models.HttpResponse;
 import org.wso2.carbon.apimgt.core.models.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
-import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.HashMap;
+import java.io.IOException;
 import java.util.Map;
-import java.util.stream.Collectors;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.MediaType;
 
 /**
- * This class holds the key manager implementation for light weight key manager
+ * This class holds the key manager implementation considering WSO2 as the identity provider
+ * This is the default key manager supported by API Manager
  */
 public class DefaultKeyManagerImpl implements KeyManager {
     private static final Logger log = LoggerFactory.getLogger(DefaultKeyManagerImpl.class);
-    private KeyMgtConfigurations keyManagerConfigs;
-    private RestCallUtil restCallUtil;
 
-    public DefaultKeyManagerImpl() {
-        keyManagerConfigs = ServiceReferenceHolder.getInstance().getAPIMConfiguration().getKeyManagerConfigs();
-        restCallUtil = new RestCallUtilImpl();
+    protected DCRMServiceStub dcrmServiceStub;
+    protected OAuth2ServiceStubs oAuth2ServiceStubs;
+    protected ScopeRegistration scopeRegistration;
+
+    /**
+     * Default Constructor
+     *
+     * @throws APIManagementException if error occurred while instantiating DefaultKeyManagerImpl
+     */
+    public DefaultKeyManagerImpl() throws APIManagementException {
+
+        this(DCRMServiceStubFactory.getDCRMServiceStub(), OAuth2ServiceStubsFactory.getOAuth2ServiceStubs(),
+                ScopeRegistrationServiceStubFactory.getScopeRegistration());
     }
 
-    public DefaultKeyManagerImpl(KeyMgtConfigurations keyManagerConfigs, RestCallUtil restCallUtil) {
-        this.keyManagerConfigs = keyManagerConfigs;
-        this.restCallUtil = restCallUtil;
+    /**
+     * Constructor
+     *
+     * @param dcrmServiceStub    Service stub for DCR(M) service
+     * @param oAuth2ServiceStubs Service stub for OAuth2 services
+     * @param scopeRegistration  Service stub for Scope registration service
+     * @throws APIManagementException if error occurred while instantiating DefaultKeyManagerImpl
+     */
+    public DefaultKeyManagerImpl(DCRMServiceStub dcrmServiceStub, OAuth2ServiceStubs oAuth2ServiceStubs,
+                                 ScopeRegistration scopeRegistration)
+            throws APIManagementException {
+        this.dcrmServiceStub = dcrmServiceStub;
+        this.oAuth2ServiceStubs = oAuth2ServiceStubs;
+        this.scopeRegistration = scopeRegistration;
     }
 
     @Override
     public OAuthApplicationInfo createApplication(OAuthAppRequest oauthAppRequest) throws KeyManagementException {
-        APIUtils.logDebug("Creating OAuth2 application: " + oauthAppRequest.toString(), log);
+        if (log.isDebugEnabled()) {
+            log.debug("Creating OAuth2 application: " + oauthAppRequest.toString());
+        }
 
         String applicationName = oauthAppRequest.getClientName();
         String keyType = oauthAppRequest.getKeyType();
@@ -92,119 +106,152 @@ public class DefaultKeyManagerImpl implements KeyManager {
             dcrClientInfo.addCallbackUrl(oauthAppRequest.getCallBackURL());
         }
 
-        HttpResponse httpResponse = null;
-        try {
-            String url = keyManagerConfigs.getDcrEndpoint();
-            Map<String, String> map = new HashMap<>();
-            map.put(KeyManagerConstants.AUTHORIZATION_HEADER, "Basic " + Base64.getEncoder().encodeToString(
-                    (keyManagerConfigs.getKeyManagerCredentials().getUsername() + ":" + keyManagerConfigs
-                            .getKeyManagerCredentials().getPassword()).getBytes(Charset.defaultCharset())));
-            Map<String, Object> payload = new HashMap<>();
-            payload.put(KeyManagerConstants.OAUTH_CLIENT_NAME, applicationName);
-            payload.put("grant_types", dcrClientInfo.getGrantTypes());
-            if (!StringUtils.isBlank(oauthAppRequest.getCallBackURL())) {
-                String callbackURIs[] = { oauthAppRequest.getCallBackURL() };
-                payload.put("redirect_uris", callbackURIs);
-            }
-            Gson gson = new Gson();
-            String jsonPayload = gson.toJson(payload);
-            httpResponse = restCallUtil
-                    .postRequest(new URI(url), MediaType.APPLICATION_JSON_TYPE, null, Entity.text(jsonPayload),
-                            MediaType.APPLICATION_JSON_TYPE, map);
-        } catch (URISyntaxException e) {
-            throw new KeyManagementException("Error occurred while parsing DCR endpoint", e,
-                    ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
-        } catch (APIManagementException e) {
-            throw new KeyManagementException("Error occurred while invoking DCR endpoint", e,
-                    ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
-        }
-
-        if (httpResponse == null) {
+        Response response = dcrmServiceStub.registerApplication(dcrClientInfo);
+        if (response == null) {
             throw new KeyManagementException("Error occurred while DCR application creation. Response is null",
                     ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
         }
-
-        APIUtils.logDebug("DCR Response code: " + httpResponse.getResponseCode(), log);
-        APIUtils.logDebug("DCR Response: " + httpResponse.getResults(), log);
-
-        if (httpResponse.getResponseCode() == APIMgtConstants.HTTPStatusCodes.SC_201_CREATED) {  //201 - Success
+        if (response.status() == APIMgtConstants.HTTPStatusCodes.SC_201_CREATED) {  //201 - Success
             try {
-                OAuthApplicationInfo oAuthApplicationInfoResponse = getOAuthApplicationInfo(httpResponse);
+                OAuthApplicationInfo oAuthApplicationInfoResponse = getOAuthApplicationInfo(response);
                 //setting original parameter list
                 oAuthApplicationInfoResponse.setParameters(oauthAppRequest.getParameters());
-                APIUtils.logDebug("OAuth2 application created: " + oAuthApplicationInfoResponse.toString(), log);
+                if (log.isDebugEnabled()) {
+                    log.debug("OAuth2 application created: " + oAuthApplicationInfoResponse.toString());
+                }
                 return oAuthApplicationInfoResponse;
-            } catch (ParseException e) {
-                throw new KeyManagementException(
-                        "Error occurred while parsing the DCR application creation response " + "message.", e,
+            } catch (IOException e) {
+                throw new KeyManagementException("Error occurred while parsing the DCR application creation response " +
+                        "message.", e, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
+            }
+        } else if (response.status() == APIMgtConstants.HTTPStatusCodes.SC_400_BAD_REQUEST) {  //400 - Known Error
+            try {
+                DCRError error = (DCRError) new GsonDecoder().decode(response, DCRError.class);
+                throw new KeyManagementException("Error occurred while DCR application creation. Error: " +
+                        error.getError() + ". Error Description: " + error.getErrorDescription() + ". Status Code: " +
+                        response.status(), ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
+            } catch (IOException e) {
+                throw new KeyManagementException("Error occurred while parsing the DCR error message.", e,
                         ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
             }
-        } else if (httpResponse.getResponseCode()
-                == APIMgtConstants.HTTPStatusCodes.SC_400_BAD_REQUEST) {  //400 - Known Error
-            throw new KeyManagementException(
-                    "Error occurred while DCR application creation. Error: " + ". Error Description: "
-                            + ". Status Code: " + httpResponse.getResponseCode(),
-                    ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
         } else {  //Unknown Error
-            throw new KeyManagementException(
-                    "Error occurred while DCR application creation. Error: " + " Status Code: " + httpResponse
-                            .getResponseCode(), ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
+            throw new KeyManagementException("Error occurred while DCR application creation. Error: " +
+                    response.body().toString() + " Status Code: " + response.status(),
+                    ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
         }
     }
 
     @Override
     public OAuthApplicationInfo updateApplication(OAuthApplicationInfo oAuthApplicationInfo)
             throws KeyManagementException {
-        //todo: implement
-        return null;
+        if (log.isDebugEnabled()) {
+            log.debug("Updating OAuth2 application with : " + oAuthApplicationInfo.toString());
+        }
+
+        String applicationName = oAuthApplicationInfo.getClientName();
+        String keyType = (String) oAuthApplicationInfo.getParameter(KeyManagerConstants.APP_KEY_TYPE);
+        if (keyType != null) {  //Derive oauth2 app name based on key type and user input for app name
+            applicationName = applicationName + '_' + keyType;
+        }
+
+        DCRClientInfo dcrClientInfo = new DCRClientInfo();
+        dcrClientInfo.setClientName(applicationName);
+        dcrClientInfo.setClientId(oAuthApplicationInfo.getClientId());
+        dcrClientInfo.setClientSecret(oAuthApplicationInfo.getClientSecret());
+        dcrClientInfo.addCallbackUrl(oAuthApplicationInfo.getCallBackURL());
+        dcrClientInfo.setGrantTypes(oAuthApplicationInfo.getGrantTypes());
+
+        Response response = dcrmServiceStub.updateApplication(dcrClientInfo, dcrClientInfo.getClientId());
+        if (response == null) {
+            throw new KeyManagementException("Error occurred while updating DCR application. Response is null",
+                    ExceptionCodes.OAUTH2_APP_UPDATE_FAILED);
+        }
+        if (response.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {   //200 - Success
+            try {
+                OAuthApplicationInfo oAuthApplicationInfoResponse = getOAuthApplicationInfo(response);
+                //setting original parameter list
+                oAuthApplicationInfoResponse.setParameters(oAuthApplicationInfo.getParameters());
+                if (log.isDebugEnabled()) {
+                    log.debug("OAuth2 application updated: " + oAuthApplicationInfoResponse.toString());
+                }
+                return oAuthApplicationInfoResponse;
+            } catch (IOException e) {
+                throw new KeyManagementException("Error occurred while parsing the DCR application update response " +
+                        "message.", e, ExceptionCodes.OAUTH2_APP_UPDATE_FAILED);
+            }
+        } else if (response.status() == APIMgtConstants.HTTPStatusCodes.SC_400_BAD_REQUEST) {  //400 - Known Error
+            try {
+                DCRError error = (DCRError) new GsonDecoder().decode(response, DCRError.class);
+                throw new KeyManagementException("Error occurred while updating DCR application. Error: " +
+                        error.getError() + ". Error Description: " + error.getErrorDescription() + ". Status Code: " +
+                        response.status(), ExceptionCodes.OAUTH2_APP_UPDATE_FAILED);
+            } catch (IOException e) {
+                throw new KeyManagementException("Error occurred while parsing the DCR error message.", e,
+                        ExceptionCodes.OAUTH2_APP_UPDATE_FAILED);
+            }
+        } else {  //Unknown Error
+            throw new KeyManagementException("Error occurred while updating DCR application. Error: " +
+                    response.body().toString() + " Status Code: " + response.status(),
+                    ExceptionCodes.OAUTH2_APP_UPDATE_FAILED);
+        }
     }
 
     @Override
     public void deleteApplication(String consumerKey) throws KeyManagementException {
-        //todo: implement
+        if (log.isDebugEnabled()) {
+            log.debug("Deleting OAuth application for consumer key: " + consumerKey);
+        }
+        if (StringUtils.isEmpty(consumerKey)) {
+            throw new KeyManagementException("Unable to delete OAuth Application. Consumer Key is null or empty",
+                    ExceptionCodes.OAUTH2_APP_DELETION_FAILED);
+        }
+        Response response = dcrmServiceStub.deleteApplication(consumerKey);
+        if (response == null) {
+            throw new KeyManagementException("Error occurred while deleting DCR application. Response is null",
+                    ExceptionCodes.OAUTH2_APP_DELETION_FAILED);
+        }
+        if (response.status() != APIMgtConstants.HTTPStatusCodes.SC_204_NO_CONTENT) {
+            throw new KeyManagementException("Error occurred while deleting DCR application. Error: " +
+                    response.body().toString() + " Status Code: " + response.status(),
+                    ExceptionCodes.OAUTH2_APP_DELETION_FAILED);
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("OAuth2 application for consumer key: " + consumerKey + " deleted.");
+        }
     }
 
     @Override
     public OAuthApplicationInfo retrieveApplication(String consumerKey) throws KeyManagementException {
-        APIUtils.logDebug("Retrieving OAuth application for consumer key: " + consumerKey, log);
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving OAuth application for consumer key: " + consumerKey);
+        }
 
         if (StringUtils.isEmpty(consumerKey)) {
             throw new KeyManagementException("Unable to retrieve OAuth Application. Consumer Key is null or empty",
                     ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
         }
-        HttpResponse response = null;
-        try {
-            String url = keyManagerConfigs.getDcrEndpoint() + "/" + consumerKey;
-            response = restCallUtil.getRequest(new URI(url), MediaType.APPLICATION_JSON_TYPE, null);
-        } catch (APIManagementException e) {
-            throw new KeyManagementException("Error occurred while invoking DCR endpoint", e,
-                    ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
-        } catch (URISyntaxException e) {
-            throw new KeyManagementException("Error occurred while parsing DCR endpoint", e,
-                    ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
-        }
 
+        Response response = dcrmServiceStub.getApplication(consumerKey);
         if (response == null) {
             throw new KeyManagementException("Error occurred while retrieving DCR application. Response is null",
                     ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
         }
-        APIUtils.logDebug("DCR Response code: " + response.getResponseCode(), log);
-        APIUtils.logDebug("DCR Response: " + response.getResults(), log);
-
-        if (response.getResponseCode() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {   //200 - Success
+        if (response.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {   //200 - Success
             try {
                 OAuthApplicationInfo oAuthApplicationInfoResponse = getOAuthApplicationInfo(response);
-                APIUtils.logDebug("OAuth2 application retrieved: " + oAuthApplicationInfoResponse.toString(), log);
+                if (log.isDebugEnabled()) {
+                    log.debug("OAuth2 application retrieved: " + oAuthApplicationInfoResponse.toString());
+                }
                 return oAuthApplicationInfoResponse;
-            } catch (ParseException e) {
-                throw new KeyManagementException(
-                        "Error occurred while parsing the DCR application retrieval " + "response message.", e,
-                        ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
+            } catch (IOException e) {
+                throw new KeyManagementException("Error occurred while parsing the DCR application retrieval " +
+                        "response message.", e, ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
             }
         } else {  //Unknown Error
-            throw new KeyManagementException(
-                    "Error occurred while retrieving DCR application. Error: " + " Status Code: " + response
-                            .getResponseCode(), ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
+            throw new KeyManagementException("Error occurred while retrieving DCR application. Error: " +
+                    response.body().toString() + " Status Code: " + response.status(),
+                    ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
         }
     }
 
@@ -227,87 +274,32 @@ public class DefaultKeyManagerImpl implements KeyManager {
             tokenRequest.setValidityPeriod(-2L);
         }
 
-        HttpResponse response = null;
+        Response response;
         try {
             if (KeyManagerConstants.CLIENT_CREDENTIALS_GRANT_TYPE.equals(tokenRequest.getGrantType())) {
-                try {
-                    String url =
-                            keyManagerConfigs.getTokenEndpoint() + "?" + KeyManagerConstants.OAUTH_CLIENT_GRANT + "="
-                                    + KeyManagerConstants.CLIENT_CREDENTIALS_GRANT_TYPE + "&"
-                                    + KeyManagerConstants.OAUTH_CLIENT_SCOPE + "=" + URLEncoder
-                                    .encode(tokenRequest.getScopes());
-                    Map<String, String> map = new HashMap<>();
-                    map.put(KeyManagerConstants.AUTHORIZATION_HEADER, "Basic " + Base64.getEncoder().encodeToString(
-                            (tokenRequest.getClientId() + ":" + tokenRequest.getClientSecret())
-                                    .getBytes(Charset.defaultCharset())));
-                    response = restCallUtil.postRequest(new URI(url), null, null, Entity.text(""),
-                            MediaType.APPLICATION_FORM_URLENCODED_TYPE, map);
-                } catch (APIManagementException e) {
-                    throw new KeyManagementException("Error occurred while invoking token endpoint", e,
-                            ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);
-                } catch (URISyntaxException e) {
-                    throw new KeyManagementException("Error occurred while parsing token endpoint", e,
-                            ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);
-                }
+                response = oAuth2ServiceStubs.getTokenServiceStub().generateClientCredentialsGrantAccessToken(
+                        tokenRequest.getScopes(), tokenRequest.getValidityPeriod(), tokenRequest.getClientId(),
+                        tokenRequest.getClientSecret());
             } else if (KeyManagerConstants.PASSWORD_GRANT_TYPE.equals(tokenRequest.getGrantType())) {
-                try {
-                    String url =
-                            keyManagerConfigs.getTokenEndpoint() + "?" + KeyManagerConstants.OAUTH_CLIENT_GRANT + "="
-                                    + KeyManagerConstants.PASSWORD_GRANT_TYPE + "&"
-                                    + KeyManagerConstants.OAUTH_CLIENT_ID + "=" + tokenRequest.getClientId() + "&"
-                                    + KeyManagerConstants.OAUTH_CLIENT_SCOPE + "=" + URLEncoder
-                                    .encode(tokenRequest.getScopes());
-                    Map<String, String> map = new HashMap<>();
-                    map.put(KeyManagerConstants.AUTHORIZATION_HEADER, "Basic " + Base64.getEncoder().encodeToString(
-                            (tokenRequest.getClientId() + ":" + tokenRequest.getClientSecret())
-                                    .getBytes(Charset.defaultCharset())));
-                    String payload =
-                            KeyManagerConstants.OAUTH_CLIENT_USERNAME + "=" + tokenRequest.getResourceOwnerUsername()
-                                    + "&" + KeyManagerConstants.OAUTH_CLIENT_PASSWORD + "=" + tokenRequest
-                                    .getResourceOwnerPassword();
-                    response = restCallUtil.postRequest(new URI(url), null, null, Entity.text(payload),
-                            MediaType.APPLICATION_FORM_URLENCODED_TYPE, map);
-                } catch (APIManagementException e) {
-                    throw new KeyManagementException("Error occurred while invoking token endpoint", e,
-                            ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);
-                } catch (URISyntaxException e) {
-                    throw new KeyManagementException("Error occurred while parsing token endpoint", e,
-                            ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);
-                }
+                response = oAuth2ServiceStubs.getTokenServiceStub().generatePasswordGrantAccessToken(
+                        tokenRequest.getResourceOwnerUsername(), tokenRequest.getResourceOwnerPassword(),
+                        tokenRequest.getScopes(), tokenRequest.getValidityPeriod(), tokenRequest.getClientId(),
+                        tokenRequest.getClientSecret());
             } else if (KeyManagerConstants.AUTHORIZATION_CODE_GRANT_TYPE.equals(tokenRequest.getGrantType())) {
-                //todo: implement
+                response = oAuth2ServiceStubs.getTokenServiceStub().generateAuthCodeGrantAccessToken(
+                        tokenRequest.getAuthorizationCode(), tokenRequest.getCallbackURI(), tokenRequest.getScopes(),
+                        tokenRequest.getValidityPeriod(), tokenRequest.getClientId(), tokenRequest.getClientSecret());
             } else if (KeyManagerConstants.REFRESH_GRANT_TYPE.equals(tokenRequest.getGrantType())) {
-                try {
-                    String url = keyManagerConfigs.getTokenEndpoint();
-                    Map<String, Object> payload = new HashMap<>();
-                    payload.put(KeyManagerConstants.OAUTH_CLIENT_GRANT, KeyManagerConstants.REFRESH_GRANT_TYPE);
-                    payload.put(KeyManagerConstants.REFRESH_GRANT_TYPE, tokenRequest.getRefreshToken());
-                    payload.put(KeyManagerConstants.OAUTH_CLIENT_ID, tokenRequest.getClientId());
-                    payload.put(KeyManagerConstants.OAUTH_CLIENT_SCOPE,
-                            URLEncoder.encode(tokenRequest.getScopes(), "UTF-8"));
-                    String queryString =
-                            "?" + payload.entrySet().stream().map(entry -> entry.getKey() + "=" + entry.getValue())
-                                    .collect(Collectors.joining("&"));
-                    Map<String, String> headers = new HashMap<>();
-                    headers.put(KeyManagerConstants.AUTHORIZATION_HEADER, "Basic " + Base64.getEncoder().encodeToString(
-                            (tokenRequest.getClientId() + ":" + tokenRequest.getClientSecret())
-                                    .getBytes(Charset.defaultCharset())));
-                    response = restCallUtil
-                            .postRequest(new URI(url + queryString), MediaType.APPLICATION_JSON_TYPE, null,
-                                    Entity.text(""), MediaType.APPLICATION_FORM_URLENCODED_TYPE, headers);
-                } catch (APIManagementException e) {
-                    throw new KeyManagementException("Error occurred while invoking token endpoint", e,
-                            ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);
-                } catch (URISyntaxException | UnsupportedEncodingException e) {
-                    throw new KeyManagementException("Error occurred while parsing token endpoint", e,
-                            ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);
-                }
+                response = oAuth2ServiceStubs.getTokenServiceStub().generateRefreshGrantAccessToken(
+                        tokenRequest.getRefreshToken(), tokenRequest.getScopes(), tokenRequest.getValidityPeriod(),
+                        tokenRequest.getClientId(), tokenRequest.getClientSecret());
             } else if (KeyManagerConstants.JWT_GRANT_TYPE.equals(tokenRequest.getGrantType())) {
-                //todo: implement
+                response = oAuth2ServiceStubs.getTokenServiceStub().generateJWTGrantAccessToken(
+                        tokenRequest.getAssertion(), KeyManagerConstants.JWT_GRANT_TYPE, tokenRequest.getScopes(),
+                        tokenRequest.getValidityPeriod(), tokenRequest.getClientId(), tokenRequest.getClientSecret());
             } else {
-                throw new KeyManagementException(
-                        "Invalid access token request. Unsupported grant type: " + tokenRequest.getGrantType(),
-                        ExceptionCodes.INVALID_TOKEN_REQUEST);
+                throw new KeyManagementException("Invalid access token request. Unsupported grant type: "
+                        + tokenRequest.getGrantType(), ExceptionCodes.INVALID_TOKEN_REQUEST);
             }
         } catch (APIManagementException ex) {
             throw new KeyManagementException("Token generation request failed. Error: " + ex.getMessage(), ex,
@@ -315,87 +307,65 @@ public class DefaultKeyManagerImpl implements KeyManager {
         }
 
         if (response == null) {
-            throw new KeyManagementException("Error occurred while generating an access token. " + "Response is null",
-                    ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);
+            throw new KeyManagementException("Error occurred while generating an access token. " +
+                    "Response is null", ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);
         }
-        APIUtils.logDebug("Token endpoint Response code: " + response.getResponseCode(), log);
-        APIUtils.logDebug("Token endpoint Response: " + response.getResults(), log);
 
-        if (response.getResponseCode() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {   //200 - Success
-            APIUtils.logDebug("A new access token is successfully generated.", log);
+        if (response.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {   //200 - Success
+            log.debug("A new access token is successfully generated.");
             try {
-                JSONParser jsonParser = new JSONParser();
-                Object obj = jsonParser.parse(response.getResults());
-                JSONObject jsonObject = (JSONObject) obj;
-
+                OAuth2TokenInfo oAuth2TokenInfo = (OAuth2TokenInfo) new GsonDecoder().decode(response,
+                        OAuth2TokenInfo.class);
                 AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
-                accessTokenInfo.setAccessToken((String) jsonObject.get(KeyManagerConstants.OAUTH_RESPONSE_ACCESSTOKEN));
-                accessTokenInfo.setScopes((String) jsonObject.get(KeyManagerConstants.OAUTH_RESPONSE_SCOPE));
-                accessTokenInfo
-                        .setRefreshToken((String) jsonObject.get(KeyManagerConstants.OAUTH_RESPONSE_REFRESH_TOKEN));
-                //accessTokenInfo.setIdToken((String) jsonObject.get("refresh_token"));
-                accessTokenInfo
-                        .setValidityPeriod((long) jsonObject.get(KeyManagerConstants.OAUTH_RESPONSE_EXPIRY_TIME));
+                accessTokenInfo.setAccessToken(oAuth2TokenInfo.getAccessToken());
+                accessTokenInfo.setScopes(oAuth2TokenInfo.getScope());
+                accessTokenInfo.setRefreshToken(oAuth2TokenInfo.getRefreshToken());
+                accessTokenInfo.setIdToken(oAuth2TokenInfo.getIdToken());
+                accessTokenInfo.setValidityPeriod(oAuth2TokenInfo.getExpiresIn());
                 return accessTokenInfo;
-            } catch (ParseException e) {
+            } catch (IOException e) {
                 throw new KeyManagementException("Error occurred while parsing token response", e,
                         ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);
             }
         } else {  //Error case
-            throw new KeyManagementException(
-                    "Token generation request failed. HTTP error code: " + response.getResponseCode()
-                            + " Error Response Body: " + response.getResults(),
+            throw new KeyManagementException("Token generation request failed. HTTP error code: " + response.status() +
+                    " Error Response Body: " + response.body().toString(),
                     ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);
         }
     }
 
     @Override
     public AccessTokenInfo getTokenMetaData(String accessToken) throws KeyManagementException {
-        APIUtils.logDebug("Token introspection request is being sent.", log);
-        HttpResponse response;
+        log.debug("Token introspection request is being sent.");
+        Response response;
         try {
-            String url = keyManagerConfigs.getIntrospectEndpoint();
-            String payload = KeyManagerConstants.OAUTH_TOKEN + "=" + accessToken;
-            response = restCallUtil
-                    .postRequest(new URI(url), MediaType.APPLICATION_JSON_TYPE, null, Entity.text(payload),
-                            MediaType.APPLICATION_FORM_URLENCODED_TYPE, Collections.emptyMap());
-        } catch (URISyntaxException e) {
-            throw new KeyManagementException("Error occurred while parsing introspecting endpoint", e,
-                    ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
+            response = oAuth2ServiceStubs.getIntrospectionServiceStub().introspectToken(accessToken);
         } catch (APIManagementException e) {
-            throw new KeyManagementException("Error occurred while invoking introspecting endpoint", e,
+            throw new KeyManagementException("Error occurred while introspecting access token.", e,
                     ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
         }
-
         if (response == null) {
-            throw new KeyManagementException("Error occurred while introspecting access token. " + "Response is null",
-                    ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
+            throw new KeyManagementException("Error occurred while introspecting access token. " +
+                    "Response is null", ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
         }
-        APIUtils.logDebug("Introspect Response code: " + response.getResponseCode(), log);
-        APIUtils.logDebug("Introspect Response: " + response.getResults(), log);
-
-        if (response.getResponseCode() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {
-            APIUtils.logDebug("Token introspection is successful", log);
+        if (response.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {
+            log.debug("Token introspection is successful");
             try {
-                JSONParser jsonParser = new JSONParser();
-                Object obj = jsonParser.parse(response.getResults());
-                JSONObject jsonObject = (JSONObject) obj;
+                OAuth2IntrospectionResponse introspectResponse = (OAuth2IntrospectionResponse) new GsonDecoder()
+                        .decode(response, OAuth2IntrospectionResponse.class);
                 AccessTokenInfo tokenInfo = new AccessTokenInfo();
-                boolean active = (Boolean) jsonObject.get("active");
+                boolean active = introspectResponse.isActive();
                 if (active) {
                     tokenInfo.setTokenValid(true);
                     tokenInfo.setAccessToken(accessToken);
-                    //                    tokenInfo.setScopes((String) jsonObject.get("scope"));
-                    tokenInfo.setScopes((String) jsonObject
-                            .get("apim:api_delete apim:api_publish apim:external_services_discover "
-                                    + "apim:subscription_block apim:api_update apim:subscription_view apim:api_create "
-                                    + "apim:apidef_update apim:api_view openid"));
-                    tokenInfo.setConsumerKey((String) jsonObject.get("clientId"));
-                    tokenInfo.setEndUserName((String) jsonObject.get("username"));
-                    tokenInfo.setIssuedTime((long) jsonObject.get(KeyManagerConstants.OAUTH2_TOKEN_ISSUED_TIME));
-                    tokenInfo.setExpiryTime((long) jsonObject.get(KeyManagerConstants.OAUTH2_TOKEN_EXP_TIME));
-
-                    long validityPeriod = tokenInfo.getExpiryTime() - tokenInfo.getIssuedTime();
+                    tokenInfo.setScopes(introspectResponse.getScope());
+                    tokenInfo.setConsumerKey(introspectResponse.getClientId());
+                    tokenInfo.setIssuedTime(introspectResponse.getIat());
+                    tokenInfo.setExpiryTime(introspectResponse.getExp());
+                    if (StringUtils.isNotEmpty(introspectResponse.getUsername())) {
+                        tokenInfo.setEndUserName(introspectResponse.getUsername());
+                    }
+                    long validityPeriod = introspectResponse.getExp() - introspectResponse.getIat();
                     tokenInfo.setValidityPeriod(validityPeriod);
                 } else {
                     tokenInfo.setTokenValid(false);
@@ -403,37 +373,58 @@ public class DefaultKeyManagerImpl implements KeyManager {
                     tokenInfo.setErrorCode(KeyManagerConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
                 }
                 return tokenInfo;
-            } catch (ParseException e) {
+            } catch (IOException e) {
                 throw new KeyManagementException("Error occurred while parsing token introspection response", e,
                         ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
             }
         } else {
-            throw new KeyManagementException(
-                    "Token introspection request failed. HTTP error code: " + response.getResponseCode()
-                            + " Error Response Body: " + response.getResults(),
+            throw new KeyManagementException("Token introspection request failed. HTTP error code: "
+                    + response.status() + " Error Response Body: " + response.body().toString(),
                     ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
         }
     }
 
     @Override
-    public KeyManagerConfiguration getKeyManagerConfiguration() throws KeyManagementException {
-        return null;
+    public void revokeAccessToken(String accessToken, String clientId, String clientSecret)
+            throws KeyManagementException {
+        //TODO: Uncomment after revoke endpoint implementation done
+//        log.debug("Revoking access token");
+//        Response response;
+//        try {
+//            response = oAuth2ServiceStubs.getRevokeServiceStub().revokeAccessToken(accessToken, clientId,
+//                    clientSecret);
+//        } catch (APIManagementException e) {
+//            throw new KeyManagementException("Error occurred while revoking current access token", e,
+//                    ExceptionCodes.ACCESS_TOKEN_REVOKE_FAILED);
+//        }
+//        if (response == null) {
+//            throw new KeyManagementException("Error occurred while revoking current access token. " +
+//                    "Response is null", ExceptionCodes.ACCESS_TOKEN_REVOKE_FAILED);
+//        }
+//        if (response.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {
+//            if (log.isDebugEnabled()) {
+//                log.debug("Successfully revoked access token: " + accessToken);
+//            }
+//        } else {
+//            throw new KeyManagementException("Token revocation failed. HTTP error code: " + response.status()
+//                    + " Error Response Body: " + response.body().toString(),
+//                    ExceptionCodes.ACCESS_TOKEN_REVOKE_FAILED);
+//        }
     }
 
     @Override
-    public void revokeAccessToken(String accessToken, String clientId, String clientSecret)
-            throws KeyManagementException {
-
+    public KeyManagerConfiguration getKeyManagerConfiguration() throws KeyManagementException {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
     public void loadConfiguration(KeyManagerConfiguration configuration) throws KeyManagementException {
-
+        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
     public boolean registerNewResource(API api, Map resourceAttributes) throws KeyManagementException {
-        return false;
+        return true;
     }
 
     @Override
@@ -458,66 +449,36 @@ public class DefaultKeyManagerImpl implements KeyManager {
 
     @Override
     public boolean registerScope(Scope scope) throws KeyManagementException {
-        APIUtils.logDebug("Register Scope request is being sent.", log);
-        HttpResponse response;
-        try {
-            String url = keyManagerConfigs.getScopeRegistrationEndpoint();
-            Map<String, Object> payload = new HashMap<>();
-            payload.put("name", scope.getName());
-            payload.put("bindings", scope.getBindings());
-            payload.put("description", scope.getDescription());
-
-            Gson gson = new Gson();
-            String jsonPayload = gson.toJson(payload);
-            response = restCallUtil
-                    .postRequest(new URI(url), MediaType.APPLICATION_JSON_TYPE, null, Entity.text(jsonPayload),
-                            MediaType.APPLICATION_JSON_TYPE, Collections.emptyMap());
-        } catch (URISyntaxException e) {
-            throw new KeyManagementException("Error occurred while parsing scope registration endpoint", e,
-                    ExceptionCodes.SCOPE_REGISTRATION_FAILED);
-        } catch (APIManagementException e) {
-            throw new KeyManagementException("Error occurred while invoking scope registration endpoint", e,
-                    ExceptionCodes.SCOPE_REGISTRATION_FAILED);
+        boolean status = scopeRegistration.isScopeExist(scope.getName());
+        if (!status) {
+            return scopeRegistration.registerScope(scope);
         }
-
-        if (response == null) {
-            throw new KeyManagementException("Error occurred while invoking scope registration. Response is null",
-                    ExceptionCodes.SCOPE_REGISTRATION_FAILED);
-        }
-        APIUtils.logDebug("Scope registration Response code: " + response.getResponseCode(), log);
-        APIUtils.logDebug("Scope registration Response: " + response.getResults(), log);
-
-        return response.getResponseCode() == APIMgtConstants.HTTPStatusCodes.SC_201_CREATED;
+        throw new KeyManagementException("Scope Registration Failed", ExceptionCodes.SCOPE_REGISTRATION_FAILED);
     }
 
     @Override
     public Scope retrieveScope(String name) throws KeyManagementException {
-        return null;
+        return scopeRegistration.getScopeByName(name);
     }
 
     @Override
     public boolean updateScope(Scope scope) throws KeyManagementException {
-        return false;
+        return scopeRegistration.updateScope(scope);
     }
 
     @Override
     public boolean deleteScope(String name) throws KeyManagementException {
-        return false;
+        return scopeRegistration.deleteScope(name);
     }
 
-    private OAuthApplicationInfo getOAuthApplicationInfo(HttpResponse response) throws ParseException {
-        String body = response.getResults();
-        JSONParser jsonParser = new JSONParser();
-        Object obj = jsonParser.parse(body);
-        JSONObject jsonObject = (JSONObject) obj;
-
+    private OAuthApplicationInfo getOAuthApplicationInfo(Response response) throws IOException {
         OAuthApplicationInfo oAuthApplicationInfoResponse = new OAuthApplicationInfo();
-        oAuthApplicationInfoResponse.setClientName(KeyManagerConstants.APPLICATION_CLIENT_NAME);
-        oAuthApplicationInfoResponse.setClientId((String) jsonObject.get(KeyManagerConstants.APPLICATION_CLIENT_ID));
-        oAuthApplicationInfoResponse
-                .setClientSecret((String) jsonObject.get(KeyManagerConstants.APPLICATION_CLIENT_SECRET));
-        //        oAuthApplicationInfoResponse.setGrantTypes(dcrClientInfoResponse.getGrantTypes());
-        //        oAuthApplicationInfoResponse.setCallBackURL(dcrClientInfoResponse.getRedirectURIs().get(0));
+        DCRClientInfo dcrClientInfoResponse = (DCRClientInfo) new GsonDecoder().decode(response, DCRClientInfo.class);
+        oAuthApplicationInfoResponse.setClientName(dcrClientInfoResponse.getClientName());
+        oAuthApplicationInfoResponse.setClientId(dcrClientInfoResponse.getClientId());
+        oAuthApplicationInfoResponse.setClientSecret(dcrClientInfoResponse.getClientSecret());
+        oAuthApplicationInfoResponse.setGrantTypes(dcrClientInfoResponse.getGrantTypes());
+        oAuthApplicationInfoResponse.setCallBackURL(dcrClientInfoResponse.getRedirectURIs().get(0));
         return oAuthApplicationInfoResponse;
     }
 }
