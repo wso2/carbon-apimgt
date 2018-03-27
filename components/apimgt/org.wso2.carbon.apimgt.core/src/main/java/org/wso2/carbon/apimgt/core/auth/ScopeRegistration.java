@@ -24,14 +24,43 @@ import org.wso2.carbon.apimgt.core.models.Scope;
  */
 public interface ScopeRegistration {
 
+    /**
+     * Used to Register Scope
+     * @param scope Scope object
+     * @return true if scope get created
+     * @throws KeyManagementException if scope Registration endpoint failed
+     */
     boolean registerScope(Scope scope) throws KeyManagementException;
 
-
+    /**
+     * Used to get Scope by name
+     * @param name name of scope
+     * @return Scope object
+     * @throws KeyManagementException  if scope Registration endpoint failed
+     */
     Scope getScopeByName(String name) throws KeyManagementException;
 
+    /**
+     * Used to update scope
+     * @param scope Scope object
+     * @return true if scope get updated
+     * @throws KeyManagementException  if scope Registration endpoint failed
+     */
     boolean updateScope(Scope scope) throws KeyManagementException;
 
+    /**
+     * Used to delete Scope
+     * @param name name of scope
+     * @return true if scope is deleted
+     * @throws KeyManagementException  if scope Registration endpoint failed
+     */
     boolean deleteScope(String name) throws KeyManagementException;
 
-    boolean isScopeExist(String name);
+    /**
+     * Used to check existence of scope
+     * @param name name of scope
+     * @return true if scope exist
+     * @throws KeyManagementException if scope Registration endpoint failed
+     */
+    boolean isScopeExist(String name) throws KeyManagementException;
 }

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -89,9 +89,7 @@ public class DefaultKeyManagerImpl implements KeyManager {
 
     @Override
     public OAuthApplicationInfo createApplication(OAuthAppRequest oauthAppRequest) throws KeyManagementException {
-        if (log.isDebugEnabled()) {
-            log.debug("Creating OAuth2 application: " + oauthAppRequest.toString());
-        }
+        log.debug("Creating OAuth2 application:{}", oauthAppRequest.toString());
 
         String applicationName = oauthAppRequest.getClientName();
         String keyType = oauthAppRequest.getKeyType();
@@ -116,9 +114,7 @@ public class DefaultKeyManagerImpl implements KeyManager {
                 OAuthApplicationInfo oAuthApplicationInfoResponse = getOAuthApplicationInfo(response);
                 //setting original parameter list
                 oAuthApplicationInfoResponse.setParameters(oauthAppRequest.getParameters());
-                if (log.isDebugEnabled()) {
-                    log.debug("OAuth2 application created: " + oAuthApplicationInfoResponse.toString());
-                }
+                log.debug("OAuth2 application created: {}", oAuthApplicationInfoResponse.toString());
                 return oAuthApplicationInfoResponse;
             } catch (IOException e) {
                 throw new KeyManagementException("Error occurred while parsing the DCR application creation response " +

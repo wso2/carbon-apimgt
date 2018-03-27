@@ -42,6 +42,7 @@ public class WSO2ISKeyManagerImpl extends DefaultKeyManagerImpl {
     }
 
     public WSO2ISKeyManagerImpl() throws APIManagementException {
+        super();
     }
 
     public WSO2ISKeyManagerImpl(DCRMServiceStub dcrmServiceStub, OAuth2ServiceStubs oAuth2ServiceStubs,

@@ -72,7 +72,7 @@ public class DefaultScopeRegistrationImpl implements ScopeRegistration {
         if (response.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {
             return true;
         } else {
-            throw new KeyManagementException("Scope Couldn't get updated", ExceptionCodes.INTERNAL_ERROR);
+            throw new KeyManagementException("Scope update failed", ExceptionCodes.INTERNAL_ERROR);
         }
     }
 
@@ -83,7 +83,7 @@ public class DefaultScopeRegistrationImpl implements ScopeRegistration {
         if (response.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {
             return true;
         } else {
-            throw new KeyManagementException("Scope Couldn't get deleted" + name, ExceptionCodes.SCOPE_DELETE_FAILED);
+            throw new KeyManagementException("Scope deletion failed" + name, ExceptionCodes.SCOPE_DELETE_FAILED);
         }
     }
 
