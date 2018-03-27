@@ -21,8 +21,7 @@ import {Route, Switch, Redirect} from 'react-router-dom'
 
 import Overview from './Overview'
 import ApiConsole from './ApiConsole'
-import Documentation from './Documentation'
-import Documents from './Documents/Documents'
+import Documentation from './Documents/Documentation'
 import Forum from './Forum'
 import Sdk from './Sdk'
 import BasicInfo from './BasicInfo'
@@ -91,15 +90,18 @@ class Details extends Component {
         this.props.history.push({pathname: "/apis/" + this.props.match.params.api_uuid + "/" + value});
     };
 
+    componentDidMount() {
+        let currentTab = this.props.location.pathname.match(/[^\/]+(?=\/$|$)/g);
+        if( currentTab && currentTab.length > 0){
+            this.setState({ value: currentTab[0] });
+        }
+    }
     render() {
         let redirect_url = "/apis/" + this.props.match.params.api_uuid + "/overview";
         const classes = this.props.classes;
         return (
             <Grid container spacing={0} justify="center">
                 <Grid item xs={12} sm={12} md={12} lg={11} xl={10} >
-                    <Typography variant="display1" gutterBottom >
-                        {this.state.api && <span>{this.state.api.name}</span> }
-                    </Typography>
                     <BasicInfo api_uuid={this.props.match.params.api_uuid} />
                     <Paper className={classes.paper}>
                         <Tabs
@@ -120,7 +122,7 @@ class Details extends Component {
                         <Redirect exact from="/apis/:api_uuid" to={redirect_url}/>
                         <Route path="/apis/:api_uuid/overview" render={props => <Overview {...props} setDetailsAPI={this.setDetailsAPI}/>}/>
                         <Route path="/apis/:api_uuid/console" component={ApiConsole}/>
-                        <Route path="/apis/:api_uuid/documentation" component={Documents}/>
+                        <Route path="/apis/:api_uuid/documentation" component={Documentation}/>
                         <Route path="/apis/:api_uuid/forum" component={Forum}/>
                         <Route path="/apis/:api_uuid/sdk" component={Sdk}/>
                         <Route component={PageNotFound}/>
