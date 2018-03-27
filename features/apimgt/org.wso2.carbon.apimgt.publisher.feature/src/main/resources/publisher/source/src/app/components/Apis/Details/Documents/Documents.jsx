@@ -22,7 +22,7 @@ import React, { Component } from 'react';
 import API from '../../../../data/api.js';
 import DocumentsTable from './DocumentsTable';
 import NewDocDiv from './NewDocDiv';
-import Loading from '../../../Base/Loading/Loading';
+import { Progress } from '../../../Shared/';
 import ApiPermissionValidation from '../../../../data/ApiPermissionValidation';
 import { ScopeValidation, resourcePath, resourceMethod } from '../../../../data/ScopeValidation';
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
@@ -304,11 +304,7 @@ class Documents extends Component {
             visibility: 'API_LEVEL',
             fileName: this.state.docFilePath != null ? this.state.docFilePath.replace(/^.*[\\\/]/, '') : null,
         };
-        const promised_update = this.client.updateDocument(
-            this.api_id,
-            apiDocumentsData.documentId,
-            apiDocumentsData,
-        );
+        const promised_update = this.client.updateDocument(this.api_id, apiDocumentsData.documentId, apiDocumentsData);
         promised_update
             .then((response) => {
                 const dt_data = response.obj;
@@ -442,7 +438,7 @@ class Documents extends Component {
             return <ResourceNotFound message={this.props.resourceNotFountMessage} />;
         }
         if (!api) {
-            return <Loading />;
+            return <Progress />;
         }
 
         return (

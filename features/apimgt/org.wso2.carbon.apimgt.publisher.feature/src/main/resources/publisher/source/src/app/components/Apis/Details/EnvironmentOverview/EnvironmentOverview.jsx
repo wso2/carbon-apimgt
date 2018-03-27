@@ -16,18 +16,16 @@
  * under the License.
  */
 
-import React, {Component} from 'react'
+import React, { Component } from 'react';
 import Grid from 'material-ui/Grid';
 import Paper from 'material-ui/Paper';
 import Typography from 'material-ui/Typography';
+
 import Api from '../../../../data/api';
-import ResourceNotFound from "../../../Base/Errors/ResourceNotFound";
-import Loading from "../../../Base/Loading/Loading";
-import EnvironmentPanel from "./EnvironmentPanel";
-import ConfigManager from "../../../../data/ConfigManager";
-import Utils from "../../../../data/Utils";
-import {Link} from "react-router-dom";
-import Button from 'material-ui/Button';
+import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
+import { Progress } from '../../../Shared';
+import EnvironmentPanel from './EnvironmentPanel';
+import ConfigManager from '../../../../data/ConfigManager';
 
 class EnvironmentOverview extends Component {
     constructor(props) {
@@ -36,61 +34,61 @@ class EnvironmentOverview extends Component {
             environments: [],
             api: null,
             notFound: false,
-            openMenu: false
+            openMenu: false,
         };
         this.api_uuid = this.props.match.params.api_uuid;
     }
 
     componentDidMount() {
         const api = new Api();
-        let promised_api = api.get(this.api_uuid);
-        promised_api.then(
-            response => {
-                this.setState({api: response.obj});
-            }
-        ).catch(
-            error => {
-                if (process.env.NODE_ENV !== "production") {
+        const promised_api = api.get(this.api_uuid);
+        promised_api
+            .then((response) => {
+                this.setState({ api: response.obj });
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                 }
-                let status = error.status;
+                const status = error.status;
                 if (status === 404) {
-                    this.setState({notFound: true});
+                    this.setState({ notFound: true });
                 }
-            }
-        );
+            });
 
-        ConfigManager.getConfigs().environments.then(response => {
-            const environments = response.data.environments;
-            this.setState({environments});
-        }).catch(error => {
-            console.error('Error while receiving environment configurations : ', error);
-        });
+        ConfigManager.getConfigs()
+            .environments.then((response) => {
+                const environments = response.data.environments;
+                this.setState({ environments });
+            })
+            .catch((error) => {
+                console.error('Error while receiving environment configurations : ', error);
+            });
     }
 
     render() {
         const api = this.state.api;
 
         if (this.state.notFound) {
-            return <ResourceNotFound message={this.props.resourceNotFountMessage}/>
+            return <ResourceNotFound message={this.props.resourceNotFountMessage} />;
         }
         if (!api) {
-            return <Loading/>
+            return <Progress />;
         }
 
         return (
             <Grid container>
                 <Grid item xs={12}>
                     <Paper>
-                        <Typography type="display1" gutterBottom>
+                        <Typography type='display1' gutterBottom>
                             {api.name} {api.version} - Multi Environment Overview
                         </Typography>
                     </Paper>
                 </Grid>
                 <Grid item xs={12}>
-                    {this.state.environments.map((environment, index) =>
-                        <EnvironmentPanel rootAPI={api} environment={environment} key={index}/>
-                    )}
+                    {this.state.environments.map((environment, index) => (
+                        <EnvironmentPanel rootAPI={api} environment={environment} key={index} />
+                    ))}
                 </Grid>
             </Grid>
         );

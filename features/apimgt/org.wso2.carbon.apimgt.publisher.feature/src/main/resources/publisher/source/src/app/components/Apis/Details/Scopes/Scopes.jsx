@@ -21,7 +21,7 @@ import { message } from 'antd/lib/index';
 import PropTypes from 'prop-types';
 import React from 'react';
 import Api from '../../../../data/api';
-import Loading from '../../../Base/Loading/Loading';
+import { Progress } from '../../../Shared';
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
 
 /**
@@ -177,7 +177,7 @@ class Scopes extends React.Component {
         }
 
         if (!apiScopes) {
-            return <Loading />;
+            return <Progress />;
         }
 
         return (

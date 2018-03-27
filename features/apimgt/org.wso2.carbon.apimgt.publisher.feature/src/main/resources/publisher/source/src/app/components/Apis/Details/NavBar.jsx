@@ -267,7 +267,6 @@ class NavBar extends Component {
                                                     <MenuItem
                                                         onClick={this.handleCloseMore}
                                                         key={tab.name}
-                                                        variant='raised'
                                                         size='small'
                                                         color={highlightActiveTab(tab.name)}
                                                         className={classes.button}
