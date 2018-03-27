@@ -115,7 +115,8 @@ public class EndpointAdminServiceClient {
      * @throws AxisFault Thrown if an error occurred
      */
     public boolean removeEndpointsToUpdate(String apiName, String apiVersion, String tenantDomain) throws AxisFault {
-        try {
+        boolean status = false;
+        try {            
             ArrayList<Integer> arrayList = new ArrayList<>();
             String[] endpointNames;
             if (!StringUtils.isEmpty(tenantDomain)
@@ -138,17 +139,14 @@ public class EndpointAdminServiceClient {
                     } else {
                         endpointAdminStub.deleteEndpoint(endpointNames[index]);
                     }
+                    status = true;
                 } //No else as there should always be a file to delete
-
-                if (index == arrayList.size() - 1) {
-                    return true;
-                }
             }
         } catch (Exception e) {
             log.error("Error while removing endpoint/s for updating endpoint/s", e);
             throw new AxisFault("Error while removing endpoint/s for updating endpoint/s" + e.getMessage(), e);
         }
-        return false;
+        return status;
     }
 
     protected void setEndpointAdminStub(EndpointAdminStub endpointAdminStub) {
