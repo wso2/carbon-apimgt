@@ -24,6 +24,7 @@ import { withStyles } from 'material-ui/styles';
 import PropTypes from 'prop-types';
 import ChipInput from 'material-ui-chip-input';
 import OpenInNew from 'material-ui-icons/OpenInNew';
+import Tooltip from 'material-ui/Tooltip';
 
 import { Progress } from '../../Shared';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
@@ -293,9 +294,21 @@ class Overview extends Component {
                                 </div>
                             ) : (
                                 <div className={classes.headline}>
-                                    <ChipInput
-                                        onChange={this.handleTagChange}
-                                    />
+                                    <Tooltip
+                                        id='tooltip-controlled'
+                                        title='Type and hit <Enter> to add Tags'
+                                        onClose={this.handleTooltipClose}
+                                        enterDelay={0}
+                                        leaveDelay={300}
+                                        onOpen={this.handleTooltipOpen}
+                                        open={this.state.open}
+                                        placement='top'
+                                    >
+                                        <ChipInput
+                                            placeholder='< CLICK TO ADD TAGS >'
+                                            onChange={this.handleTagChange}
+                                        />
+                                    </Tooltip>
                                 </div>
                             )}
                             <Typography variant='caption' gutterBottom align='left'>
