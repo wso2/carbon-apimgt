@@ -377,7 +377,7 @@ class Subscribe extends Component {
                                     </Typography>
                                         {this.state.subscribedApplications.slice(0).reverse().map( (app, index)  => 
                                         index < 2 && 
-                                            <div className={classes.appListWrapper}>
+                                            <div className={classes.appListWrapper} key={index}>
                                                 <Link to={"/applications/" + app.value} key={app.value} className={classes.appLink}>
                                                     <span className={classes.applicationName}>
                                                         {app.label} 
