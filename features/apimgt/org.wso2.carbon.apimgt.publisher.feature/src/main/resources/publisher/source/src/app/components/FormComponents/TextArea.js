@@ -16,6 +16,7 @@
  * under the License.
  */
 import React from 'react';
+import PropTypes from 'prop-types';
 
 const TextArea = (props) => (
 	<div className="form-group">
@@ -32,13 +33,13 @@ const TextArea = (props) => (
 );
 
 TextArea.propTypes = {
-	title: React.PropTypes.string.isRequired,
-	rows: React.PropTypes.number.isRequired,
-	name: React.PropTypes.string.isRequired,
-	content: React.PropTypes.string.isRequired,
-	resize: React.PropTypes.bool,
-	placeholder: React.PropTypes.string,
-	controlFunc: React.PropTypes.func.isRequired
+	title: PropTypes.string.isRequired,
+	rows: PropTypes.number.isRequired,
+	name: PropTypes.string.isRequired,
+	content: PropTypes.string.isRequired,
+	resize: PropTypes.bool,
+	placeholder: PropTypes.string,
+	controlFunc: PropTypes.func.isRequired
 };
 
 export default TextArea;

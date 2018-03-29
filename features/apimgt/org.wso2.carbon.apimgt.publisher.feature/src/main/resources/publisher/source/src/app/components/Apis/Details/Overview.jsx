@@ -70,13 +70,14 @@ class Overview extends Component {
             notFound: false,
             openMenu: false,
         };
-        this.api_uuid = this.props.match.params.api_uuid;
+        this.apiUUID = this.props.match.params.apiUUID;
         this.downloadWSDL = this.downloadWSDL.bind(this);
+        this.handleTagChange = this.handleTagChange.bind(this);
     }
 
     componentDidMount() {
         const api = new Api();
-        const promised_api = api.get(this.api_uuid);
+        const promised_api = api.get(this.apiUUID);
         promised_api
             .then((response) => {
                 this.setState({ api: response.obj });
@@ -94,7 +95,7 @@ class Overview extends Component {
 
     downloadWSDL() {
         const api = new Api();
-        const promised_wsdl = api.getWSDL(this.api_uuid);
+        const promised_wsdl = api.getWSDL(this.apiUUID);
         promised_wsdl.then((response) => {
             const windowUrl = window.URL || window.webkitURL;
             const binary = new Blob([response.data]);
@@ -131,9 +132,10 @@ class Overview extends Component {
      * @param {string} apiId API Id
      * @param {string[]} tags Tag List
      */
-    handleTagChange(apiId, tags) {
+    handleTagChange(tags) {
         const api = new Api();
-        const promisedApi = api.get(apiId);
+        const { apiUUID } = this;
+        const promisedApi = api.get(apiUUID);
         promisedApi
             .then((response) => {
                 const apiData = JSON.parse(response.data);
@@ -290,9 +292,11 @@ class Overview extends Component {
                                     />
                                 </div>
                             ) : (
-                                <Typography variant='subheading' align='left' className={classes.headline}>
-                                    &lt; NOT SET FOR THIS API &gt;
-                                </Typography>
+                                <div className={classes.headline}>
+                                    <ChipInput
+                                        onChange={this.handleTagChange}
+                                    />
+                                </div>
                             )}
                             <Typography variant='caption' gutterBottom align='left'>
                                 Tags

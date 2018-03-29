@@ -16,6 +16,7 @@
  * under the License.
  */
 import React from 'react';
+import PropTypes from 'prop-types';
 
 const SingleInput = (props) => (
 	<div className="form-group label-floating is-empty">
@@ -32,15 +33,15 @@ const SingleInput = (props) => (
 );
 
 SingleInput.propTypes = {
-	inputType: React.PropTypes.oneOf(['text', 'number']).isRequired,
-	title: React.PropTypes.string.isRequired,
-	name: React.PropTypes.string.isRequired,
-	controlFunc: React.PropTypes.func.isRequired,
-	content: React.PropTypes.oneOfType([
-		React.PropTypes.string,
-		React.PropTypes.number,
+	inputType: PropTypes.oneOf(['text', 'number']).isRequired,
+	title: PropTypes.string.isRequired,
+	name: PropTypes.string.isRequired,
+	controlFunc: PropTypes.func.isRequired,
+	content: PropTypes.oneOfType([
+		PropTypes.string,
+		PropTypes.number,
 	]).isRequired,
-	placeholder: React.PropTypes.string,
+	placeholder: PropTypes.string,
 };
 
 export default SingleInput;
