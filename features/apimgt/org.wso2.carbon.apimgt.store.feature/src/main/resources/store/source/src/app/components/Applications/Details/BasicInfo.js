@@ -30,8 +30,6 @@ import Button from 'material-ui/Button';
 import Card, { CardActions, CardContent, CardMedia } from 'material-ui/Card';
 import { Delete, Edit, CreateNewFolder, Description  }from 'material-ui-icons';
 import Table, { TableBody, TableCell, TableRow } from 'material-ui/Table';
-import Select from 'react-select';
-import 'react-select/dist/react-select.css';
 import Subscriptions  from 'material-ui-icons/Subscriptions';
 
 class BasicInfo extends Component {
