@@ -106,7 +106,7 @@ export default class Details extends Component {
                     <Switch>
                         <Redirect exact from='/apis/:api_uuid' to={redirectUrl} />
                         <Route
-                            path='/apis/:api_uuid/overview'
+                            path='/apis/:apiUUID/overview'
                             render={props => <Overview resourceNotFountMessage={resourceNotFountMessage} {...props} />}
                         />
                         {environmentOverview ? (

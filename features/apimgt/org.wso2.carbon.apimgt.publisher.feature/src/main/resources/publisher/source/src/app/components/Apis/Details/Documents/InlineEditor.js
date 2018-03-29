@@ -17,9 +17,11 @@
  */
 
 import React, { Component } from 'react';
-import ReactQuill from 'react-quill';
+// import ReactQuill from 'react-quill';
 import ReactModal from 'react-modal';
 import { Button, Row, Col, message } from 'antd';
+import PropTypes from 'prop-types';
+
 import '../../../../../../../node_modules/react-quill/dist/quill.snow.css';
 import API from '../../../../data/api.js';
 import { Progress } from '../../../Shared';
@@ -124,7 +126,7 @@ class InlineEditor extends Component {
                         <Row style={{ paddingTop: 20 }}>
                             <Col span={100}>
                                 <div>
-                                    <ReactQuill
+                                    {/* <ReactQuill
                                         theme='snow'
                                         onChange={html => this.handleChange(html)}
                                         value={this.state.editorHtml}
@@ -133,7 +135,7 @@ class InlineEditor extends Component {
                                         bounds='.app'
                                         placeholder={this.props.placeholder}
                                         style={{ paddingBottom: 50 }}
-                                    />
+                                    /> */}
                                 </div>
                             </Col>
                         </Row>
@@ -215,7 +217,7 @@ InlineEditor.formats = [
  * PropType validation
  */
 InlineEditor.propTypes = {
-    placeholder: React.PropTypes.string,
+    placeholder: PropTypes.string,
 };
 
 InlineEditor.customStyle = {
