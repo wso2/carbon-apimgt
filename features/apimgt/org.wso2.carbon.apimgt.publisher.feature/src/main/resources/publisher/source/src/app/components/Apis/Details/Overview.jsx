@@ -286,7 +286,7 @@ class Overview extends Component {
                                 <div className={classes.headline}>
                                     <ChipInput
                                         defaultValue={api.tags}
-                                        onChange={(api.id, chips => this.handleTagChange(api.id, chips))}
+                                        onChange={this.handleTagChange}
                                     />
                                 </div>
                             ) : (
