@@ -18,18 +18,18 @@
 
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
+import Grid from 'material-ui/Grid';
+import Typography from 'material-ui/Typography';
+import { withStyles } from 'material-ui/styles';
+import PropTypes from 'prop-types';
+import ChipInput from 'material-ui-chip-input';
+import OpenInNew from 'material-ui-icons/OpenInNew';
+
 import { Progress } from '../../Shared';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 import Api from '../../../data/api';
-
-import Grid from 'material-ui/Grid';
-import Typography from 'material-ui/Typography';
-
 import ImageGenerator from '../Listing/ImageGenerator';
-import { withStyles } from 'material-ui/styles';
-import PropTypes from 'prop-types';
-import Chip from 'material-ui/Chip';
-import OpenInNew from 'material-ui-icons/OpenInNew';
+import Alert from '../../Shared/Alert';
 
 const styles = theme => ({
     imageSideContent: {
@@ -59,7 +59,9 @@ const styles = theme => ({
         justifyContent: 'flex-start',
     },
 });
-
+/**
+ * API Overview Coponent
+ */
 class Overview extends Component {
     constructor(props) {
         super(props);
@@ -123,6 +125,32 @@ class Overview extends Component {
         return filename;
     }
 
+    /**
+     * Handle tag update
+     *
+     * @param {string} apiId API Id
+     * @param {string[]} tags Tag List
+     */
+    handleTagChange(apiId, tags) {
+        const api = new Api();
+        const promisedApi = api.get(apiId);
+        promisedApi
+            .then((response) => {
+                const apiData = JSON.parse(response.data);
+                apiData.tags = tags;
+                const promisedUpdate = api.update(apiData);
+                promisedUpdate.catch((errorResponse) => {
+                    console.error(errorResponse);
+                    Alert.error('Error occurred while updating tags');
+                });
+            })
+            .catch((errorResponse) => {
+                console.error(errorResponse);
+                Alert.error('Error occurred while retrieving API');
+            });
+    }
+
+    /** @inheritDoc */
     render() {
         const api = this.state.api;
         if (this.state.notFound) {
@@ -256,18 +284,15 @@ class Overview extends Component {
                         <Grid item xs={12} sm={6} md={4} lg={3}>
                             {api.tags && api.tags.length ? (
                                 <div className={classes.headline}>
-                                    {api.tags.map(tag => (
-                                        <Link to={'/apis/' + api.id + '/tags'}>
-                                            <Chip label={tag} className={classes.chip} />
-                                        </Link>
-                                    ))}
+                                    <ChipInput
+                                        defaultValue={api.tags}
+                                        onChange={this.handleTagChange}
+                                    />
                                 </div>
                             ) : (
-                                <Link to={'/apis/' + api.id + '/tags'}>
-                                    <Typography variant='subheading' align='left' className={classes.headline}>
-                                        &lt; NOT SET FOR THIS API &gt;
-                                    </Typography>
-                                </Link>
+                                <Typography variant='subheading' align='left' className={classes.headline}>
+                                    &lt; NOT SET FOR THIS API &gt;
+                                </Typography>
                             )}
                             <Typography variant='caption' gutterBottom align='left'>
                                 Tags
