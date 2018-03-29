@@ -139,7 +139,7 @@ class Overview extends Component {
                 const apiData = JSON.parse(response.data);
                 apiData.tags = tags;
                 const promisedUpdate = api.update(apiData);
-                promisedUpdate.then(() => {}).catch((errorResponse) => {
+                promisedUpdate.catch((errorResponse) => {
                     console.log(JSON.stringify(errorResponse));
                     Alert.error('Error occurred while updating tags');
                 });
