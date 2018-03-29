@@ -5371,7 +5371,7 @@ public class ApiMgtDAO {
 
     private void setGroupIdInApplication(Application application) throws APIManagementException {
         String applicationGroupId = application.getGroupId();
-        if (applicationGroupId.isEmpty()) { // No migrated App groupId
+        if (StringUtils.isEmpty(applicationGroupId)) { // No migrated App groupId
             application.setGroupId(getGroupId(application.getId()));
         } else {
             // Migrated data exists where Group ID for this App has been stored in AM_APPLICATION table
