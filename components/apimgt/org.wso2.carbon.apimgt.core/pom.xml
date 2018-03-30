@@ -256,11 +256,11 @@
             <artifactId>kubernetes-client</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.messaging</groupId>
+            <groupId>io.ballerina.messaging</groupId>
             <artifactId>broker-amqp</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.messaging</groupId>
+            <groupId>io.ballerina.messaging</groupId>
             <artifactId>broker-core</artifactId>
         </dependency>
     </dependencies>
@@ -897,11 +897,13 @@
             io.swagger.codegen.*;version="${swagger.codegen.version}",
             org.wso2.carbon.config.*;version="${carbon.config.package.import.version.range}",
             org.wso2.carbon.utils.*;version="${carbon.utils.package.import.version.range}",
-            org.wso2.broker.amqp.*;version="${broker.package.import.version.range}",
-            org.wso2.broker.common.*;version="${broker.package.import.version.range}",
-            org.wso2.broker.core.*;version="${broker.package.import.version.range}",
-            org.wso2.broker.rest.*;version="${broker.package.import.version.range}",
+            io.ballerina.messaging.broker.amqp.*;version="${broker.package.import.version.range}",
+            io.ballerina.messaging.broker.common.*;version="${broker.package.import.version.range}",
+            io.ballerina.messaging.broker.core.*;version="${broker.package.import.version.range}",
+            io.ballerina.messaging.broker.rest.*;version="${broker.package.import.version.range}",
+            io.ballerina.messaging.broker.metrics.*;version="${broker.package.import.version.range}",
             feign.gson.*;version="${feign.version}",
+            com.google.gson.annotations.*;version="${google.code.gson.import.version.range}",
         </import.package>
         <export.package>
             !org.wso2.carbon.apimgt.core.internal,

@@ -83,11 +83,13 @@ public class BundleActivator {
             WorkflowExtensionsConfigBuilder.build(configProvider);
             ServiceDiscoveryConfigBuilder.build(configProvider);
             ContainerBasedGatewayConfigBuilder.build(configProvider);
-            BrokerManager.start();
+            BrokerManager.start(ctx, configProvider);
             Broker broker = new BrokerImpl();
             BrokerUtil.initialize(broker);
         } catch (NamingException e) {
             log.error("Error occurred while jndi lookup", e);
+        } catch (Exception e) {
+            log.error("Error occured while starting broker", e);
         }
 
         // deploying default policies
