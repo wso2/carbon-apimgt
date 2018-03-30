@@ -91,9 +91,12 @@ public class BrokerManager {
 
     public static void stop() {
         try {
-            restServer.stop();
-            broker.stopMessageDelivery();
-            amqpServer.stop();
+            restServer.shutdown();
+            authManager.stop();
+            amqpServer.shutdown();
+            amqpServer.awaitServerClose();
+            broker.shutdown();
+            metricService.stop();
         } catch (Exception e) {
             log.error("Error while stoping the broker", e);
         }
