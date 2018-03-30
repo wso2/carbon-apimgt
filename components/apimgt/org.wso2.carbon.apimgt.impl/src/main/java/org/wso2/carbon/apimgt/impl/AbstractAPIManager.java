@@ -2439,7 +2439,6 @@ public abstract class AbstractAPIManager implements APIManager {
                 if (resultAPI != null) {
                     apiList.add(resultAPI);
                 }
-                String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
 
                 // Ensure the APIs returned matches the length, there could be an additional API
                 // returned due incrementing the pagination limit when getting from registry

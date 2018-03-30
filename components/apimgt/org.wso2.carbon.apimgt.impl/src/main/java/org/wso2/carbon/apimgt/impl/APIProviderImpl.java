@@ -817,7 +817,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             Resource apiSourceArtifact = registry.get(apiSourcePath);
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
             GenericArtifact artifact = artifactManager.getGenericArtifact(apiSourceArtifact.getUUID());
-            String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
+            String status = artifact.getLifecycleState();
 
             if (!APIConstants.CREATED.equals(status) && !APIConstants.PROTOTYPED.equals(status)) {
                 //api at least is in published status
@@ -1960,7 +1960,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             //Check the status of the existing api,if its not in 'CREATED' status set
             //the new api status as "CREATED"
-            String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
+            String status = artifact.getLifecycleState();
             if (!APIConstants.CREATED.equals(status)) {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_STATUS, APIConstants.CREATED);
             }

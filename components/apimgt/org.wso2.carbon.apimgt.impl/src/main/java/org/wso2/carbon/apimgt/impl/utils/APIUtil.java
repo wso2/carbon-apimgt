@@ -307,7 +307,7 @@ public final class APIUtil {
             //setting api ID for scope retrieval
             api.getId().setApplicationId(Integer.toString(apiId));
             // set url
-            api.setStatus(getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
+            api.setStatus(getApiStatus(artifact.getLifecycleState()));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             api.setWsdlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WSDL));
             api.setWadlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WADL));
@@ -492,7 +492,7 @@ public final class APIUtil {
             //set last access time
             api.setLastUpdated(registry.get(artifactPath).getLastModified());
             // set url
-            api.setStatus(getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
+            api.setStatus(getApiStatus(artifact.getLifecycleState()));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             api.setWsdlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WSDL));
             api.setWadlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WADL));
@@ -678,7 +678,7 @@ public final class APIUtil {
             api.setUUID(artifact.getId());
             api.setRating(getAverageRating(apiId));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
-            api.setStatus(getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
+            api.setStatus(getApiStatus(artifact.getLifecycleState()));
             api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
             api.setVisibility(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY));
             api.setVisibleRoles(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES));
@@ -2575,7 +2575,7 @@ public final class APIUtil {
             //set uuid
             api.setUUID(artifact.getId());
             // set url
-            api.setStatus(getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
+            api.setStatus(getApiStatus(artifact.getLifecycleState()));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             api.setWsdlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WSDL));
             api.setWadlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WADL));
@@ -4583,7 +4583,7 @@ public final class APIUtil {
             //set uuid
             api.setUUID(artifact.getId());
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
-            api.setStatus(getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
+            api.setStatus(getApiStatus(artifact.getLifecycleState()));
             api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
             api.setVisibility(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY));
             api.setVisibleRoles(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES));
@@ -4912,7 +4912,7 @@ public final class APIUtil {
                 StringBuilder apiNames = new StringBuilder();
                 for (GenericArtifact artifact : genericArtifacts) {
                     if (apiNames.indexOf(artifact.getAttribute(APIConstants.API_OVERVIEW_NAME)) < 0) {
-                        String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
+                        String status = artifact.getLifecycleState();
                         if (isAllowDisplayAPIsWithMultipleStatus()) {
                             if (APIConstants.PUBLISHED.equals(status) || APIConstants.DEPRECATED.equals(status)) {
                                 API api = APIUtil.getAPI(artifact, registry);
