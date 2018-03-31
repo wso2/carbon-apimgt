@@ -86,7 +86,7 @@ class Overview extends Component {
         const promisedApi = api.get(this.apiUUID);
         promisedApi
             .then((response) => {
-                this.setState({ api: response.obj });
+                this.setState({ api: response.data });
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -145,17 +145,17 @@ class Overview extends Component {
         const promisedApi = api.get(apiUUID);
         promisedApi
             .then((getResponse) => {
-                const apiData = JSON.parse(getResponse.data);
+                const apiData = getResponse.body;
                 apiData.tags = tags;
                 const promisedUpdate = api.update(apiData);
                 promisedUpdate
                     .then((updateResponse) => {
-                        this.setState({ api: updateResponse.obj });
+                        this.setState({ api: updateResponse.body });
                     })
                     .catch((errorResponse) => {
                         console.error(errorResponse);
                         Alert.error('Error occurred while updating tags');
-                        this.setState({ api: getResponse.obj });
+                        this.setState({ api: getResponse.body });
                     });
             })
             .catch((errorResponse) => {
@@ -177,18 +177,18 @@ class Overview extends Component {
         const promisedApi = api.get(apiUUID);
         promisedApi
             .then((getResponse) => {
-                const apiData = JSON.parse(getResponse.data);
+                const apiData = getResponse.body;
                 apiData.transport = event.target.value;
                 const promisedUpdate = api.update(apiData);
                 promisedUpdate
                     .then((updateResponse) => {
-                        this.setState({ api: updateResponse.obj });
+                        this.setState({ api: updateResponse.body });
                     })
                     .catch((errorResponse) => {
                         this.setState({ api: promisedApi });
                         console.error(errorResponse);
                         Alert.error('Error occurred while updating transports');
-                        this.setState({ api: getResponse.obj });
+                        this.setState({ api: getResponse.body });
                     });
             })
             .catch((errorResponse) => {
@@ -382,7 +382,7 @@ class Overview extends Component {
                             </Typography>
                         </Grid>
                         <Grid item xs={12} sm={6} md={4} lg={3}>
-                            <InputLabel htmlFor='transport-checkbox' />{' '} {/* TODO: Set placeholder 'Select Transports' */}
+                            <InputLabel htmlFor='transport-checkbox' />{/* TODO:Set placeholder 'Select Transports' */}
                             <Select
                                 multiple
                                 autoWidth
