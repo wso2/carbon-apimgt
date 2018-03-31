@@ -17,20 +17,26 @@
 */
 package org.wso2.carbon.apimgt.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opensaml.Configuration;
 import org.opensaml.saml2.core.Assertion;
-import org.opensaml.saml2.core.Response;
-import org.opensaml.saml2.core.Subject;
+import org.opensaml.saml2.core.Attribute;
+import org.opensaml.saml2.core.AttributeStatement;
+import org.opensaml.xml.XMLObject;
 import org.opensaml.xml.io.Unmarshaller;
 import org.opensaml.xml.io.UnmarshallerFactory;
 import org.opensaml.xml.io.UnmarshallingException;
+import org.opensaml.xml.schema.XSString;
+import org.opensaml.xml.schema.impl.XSAnyImpl;
+import org.opensaml.saml2.core.Response;
+import org.opensaml.saml2.core.Subject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.core.security.AuthenticatorsConfiguration;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
@@ -45,6 +51,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 public class SAMLGroupIDExtractorImpl implements NewPostLoginExecutor {
 
@@ -79,15 +86,21 @@ public class SAMLGroupIDExtractorImpl implements NewPostLoginExecutor {
                     }
                 }
             }
-
-            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
             String tenantDomain = MultitenantUtils.getTenantDomain(username);
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(tenantDomain);
-            UserRealm realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
-            UserStoreManager manager = realm.getUserStoreManager();
-            organization =
-                    manager.getUserClaimValue(MultitenantUtils.getTenantAwareUsername(username), claim, null);
+            String isSAML2Enabled = System.getProperty(APIConstants.CHECK_ORGANIZATION_FROM_SAML_ASSERTION);
+
+            if (!StringUtils.isEmpty(isSAML2Enabled) && Boolean.parseBoolean(isSAML2Enabled)) {
+                organization = getOrganizationFromAssertion(assertions);
+
+            } else {
+                RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                        .getTenantId(tenantDomain);
+                UserRealm realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
+                UserStoreManager manager = realm.getUserStoreManager();
+                organization =
+                        manager.getUserClaimValue(MultitenantUtils.getTenantAwareUsername(username), claim, null);
+            }
             if (log.isDebugEnabled()) {
                 log.debug("User organization " + organization);
             }
@@ -121,6 +134,101 @@ public class SAMLGroupIDExtractorImpl implements NewPostLoginExecutor {
             }
         }
         return organization;
+    }
+
+    /**
+     * Get the organization claim from authenticators configuration
+     *
+     * @return OrganizationClaimAttribute value configured in authenticators.xml
+     */
+    private String getOrganizationClaim() {
+        AuthenticatorsConfiguration authenticatorsConfiguration = AuthenticatorsConfiguration.getInstance();
+        AuthenticatorsConfiguration.AuthenticatorConfig authenticatorConfig = authenticatorsConfiguration
+                .getAuthenticatorConfig(APIConstants.SAML2_SSO_AUTHENTICATOR_NAME);
+
+        if (authenticatorConfig != null) {
+            Map<String, String> configParameters = authenticatorConfig.getParameters();
+            if (configParameters.containsKey(APIConstants.ORGANIZATION_CLAIM_ATTRIBUTE)) {
+                return configParameters.get(APIConstants.ORGANIZATION_CLAIM_ATTRIBUTE);
+            }
+        }
+        return APIConstants.ORGANIZATION_ATTRIBUTE_NAME;
+    }
+
+    /**
+     * Get the organization list from the SAML2 Assertion
+     *
+     * @param assertions SAML2 assertions returned in SAML response
+     * @return Organization list from the assertion
+     */
+    private String getOrganizationFromAssertion(List<Assertion> assertions) {
+        String attributeValueString = null;
+        String organizationAttributeName = getOrganizationClaim();
+
+        for (Assertion assertion : assertions) {
+            List<AttributeStatement> attributeStatementList = assertion.getAttributeStatements();
+            if (attributeStatementList != null) {
+                for (AttributeStatement statement : attributeStatementList) {
+                    List<Attribute> attributesList = statement.getAttributes();
+                    for (Attribute attribute : attributesList) {
+                        String attributeName = attribute.getName();
+                        if (attributeName != null && organizationAttributeName.equals(attributeName)) {
+                            List<XMLObject> attributeValues = attribute.getAttributeValues();
+                            if (attributeValues != null) {
+                                attributeValueString = getAttributeValue(attributeValues.get(0));
+
+                                if (log.isDebugEnabled()) {
+                                    log.debug(", AttributeValue : " + attributeValueString);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Organization list found for assertion: " + attributeValueString );
+        }
+
+        return attributeValueString;
+    }
+
+    /**
+     * Get the String value from XMLObject
+     *
+     * @param attributeValue XMLObject of attribute value recived in SAML Assertion     *
+     * @return attribute value as a String
+     */
+    private String getAttributeValue(XMLObject attributeValue) {
+        if (attributeValue == null){
+            return null;
+        } else if (attributeValue instanceof XSString){
+            return getStringAttributeValue((XSString) attributeValue);
+        } else if(attributeValue instanceof XSAnyImpl){
+            return getAnyAttributeValue((XSAnyImpl) attributeValue);
+        } else {
+            return attributeValue.toString();
+        }
+    }
+
+    /**
+     * Get the String value from XSAnyImpl object
+     *
+     * @param attributeValue XSAnyImpl Object instance of attribute value received in SAML Assertion
+     * @return attribute value as a String
+     */
+    private String getAnyAttributeValue(XSAnyImpl attributeValue) {
+        return attributeValue.getTextContent();
+    }
+
+    /**
+     * Get the String value from XSString object
+     *
+     * @param attributeValue XSString Object instance of attribute value received in SAML Assertion
+     * @return attribute value as a String
+     */
+    private String getStringAttributeValue(XSString attributeValue) {
+        return attributeValue.getValue();
     }
 
     protected ByteArrayInputStream getByteArrayInputStream(String loginResponse) {
