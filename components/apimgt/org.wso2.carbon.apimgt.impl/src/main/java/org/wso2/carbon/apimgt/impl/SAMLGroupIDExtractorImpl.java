@@ -91,7 +91,6 @@ public class SAMLGroupIDExtractorImpl implements NewPostLoginExecutor {
 
             if (!StringUtils.isEmpty(isSAML2Enabled) && Boolean.parseBoolean(isSAML2Enabled)) {
                 organization = getOrganizationFromSamlAssertion(assertions);
-
             } else {
                 RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
                 int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
