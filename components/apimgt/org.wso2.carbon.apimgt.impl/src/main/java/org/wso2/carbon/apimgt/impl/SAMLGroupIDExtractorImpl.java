@@ -87,7 +87,7 @@ public class SAMLGroupIDExtractorImpl implements NewPostLoginExecutor {
                 }
             }
             String tenantDomain = MultitenantUtils.getTenantDomain(username);
-            String isSAML2Enabled = System.getProperty(APIConstants.CHECK_ORGANIZATION_FROM_SAML_ASSERTION);
+            String isSAML2Enabled = System.getProperty(APIConstants.READ_ORGANIZATION_FROM_SAML_ASSERTION);
 
             if (!StringUtils.isEmpty(isSAML2Enabled) && Boolean.parseBoolean(isSAML2Enabled)) {
                 organization = getOrganizationFromAssertion(assertions);
@@ -152,7 +152,7 @@ public class SAMLGroupIDExtractorImpl implements NewPostLoginExecutor {
                 return configParameters.get(APIConstants.ORGANIZATION_CLAIM_ATTRIBUTE);
             }
         }
-        return APIConstants.ORGANIZATION_ATTRIBUTE_NAME;
+        return APIConstants.DEFAULT_ORGANIZATION_CLAIM_NAME;
     }
 
     /**
