@@ -25,6 +25,11 @@ import PropTypes from 'prop-types';
 import ChipInput from 'material-ui-chip-input';
 import OpenInNew from 'material-ui-icons/OpenInNew';
 import Tooltip from 'material-ui/Tooltip';
+import Select from 'material-ui/Select';
+import Input, { InputLabel } from 'material-ui/Input';
+import { MenuItem } from 'material-ui/Menu';
+import { ListItemText } from 'material-ui/List';
+import Checkbox from 'material-ui/Checkbox';
 
 import { Progress } from '../../Shared';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
@@ -69,25 +74,25 @@ class Overview extends Component {
         this.state = {
             api: null,
             notFound: false,
-            openMenu: false,
         };
         this.apiUUID = this.props.match.params.apiUUID;
         this.downloadWSDL = this.downloadWSDL.bind(this);
         this.handleTagChange = this.handleTagChange.bind(this);
+        this.handleTransportChange = this.handleTransportChange.bind(this);
     }
 
-    componentDidMount() {
+    componentWillMount() {
         const api = new Api();
-        const promised_api = api.get(this.apiUUID);
-        promised_api
+        const promisedApi = api.get(this.apiUUID);
+        promisedApi
             .then((response) => {
-                this.setState({ api: response.obj });
+                this.setState({ api: response.data });
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                 }
-                const status = error.status;
+                const { status } = error;
                 if (status === 404) {
                     this.setState({ notFound: true });
                 }
@@ -136,26 +141,66 @@ class Overview extends Component {
     handleTagChange(tags) {
         const api = new Api();
         const { apiUUID } = this;
+        const currentAPI = this.state.api;
         const promisedApi = api.get(apiUUID);
         promisedApi
-            .then((response) => {
-                const apiData = JSON.parse(response.data);
+            .then((getResponse) => {
+                const apiData = getResponse.body;
                 apiData.tags = tags;
                 const promisedUpdate = api.update(apiData);
-                promisedUpdate.catch((errorResponse) => {
-                    console.error(errorResponse);
-                    Alert.error('Error occurred while updating tags');
-                });
+                promisedUpdate
+                    .then((updateResponse) => {
+                        this.setState({ api: updateResponse.body });
+                    })
+                    .catch((errorResponse) => {
+                        console.error(errorResponse);
+                        Alert.error('Error occurred while updating tags');
+                        this.setState({ api: getResponse.body });
+                    });
             })
             .catch((errorResponse) => {
                 console.error(errorResponse);
                 Alert.error('Error occurred while retrieving API');
+                this.setState({ api: currentAPI });
+            });
+    }
+
+    /**
+     * Handle transport update
+     *
+     * @param {Event} event Event
+     */
+    handleTransportChange(event) {
+        const api = new Api();
+        const { apiUUID } = this;
+        const currentAPI = this.state.api;
+        const promisedApi = api.get(apiUUID);
+        promisedApi
+            .then((getResponse) => {
+                const apiData = getResponse.body;
+                apiData.transport = event.target.value;
+                const promisedUpdate = api.update(apiData);
+                promisedUpdate
+                    .then((updateResponse) => {
+                        this.setState({ api: updateResponse.body });
+                    })
+                    .catch((errorResponse) => {
+                        this.setState({ api: promisedApi });
+                        console.error(errorResponse);
+                        Alert.error('Error occurred while updating transports');
+                        this.setState({ api: getResponse.body });
+                    });
+            })
+            .catch((errorResponse) => {
+                console.error(errorResponse);
+                Alert.error('Error occurred while retrieving API');
+                this.setState({ api: currentAPI });
             });
     }
 
     /** @inheritDoc */
     render() {
-        const api = this.state.api;
+        const { api } = this.state;
         if (this.state.notFound) {
             return <ResourceNotFound message={this.props.resourceNotFountMessage} />;
         }
@@ -287,10 +332,15 @@ class Overview extends Component {
                         <Grid item xs={12} sm={6} md={4} lg={3}>
                             {api.tags && api.tags.length ? (
                                 <div className={classes.headline}>
-                                    <ChipInput
-                                        defaultValue={api.tags}
-                                        onChange={this.handleTagChange}
-                                    />
+                                    <Tooltip
+                                        id='tooltip-controlled'
+                                        title='Type and hit <Enter> to add Tags'
+                                        enterDelay={300}
+                                        leaveDelay={300}
+                                        placement='top'
+                                    >
+                                        <ChipInput defaultValue={api.tags} onChange={this.handleTagChange} />
+                                    </Tooltip>
                                 </div>
                             ) : (
                                 <div className={classes.headline}>
@@ -298,10 +348,8 @@ class Overview extends Component {
                                         id='tooltip-controlled'
                                         title='Type and hit <Enter> to add Tags'
                                         onClose={this.handleTooltipClose}
-                                        enterDelay={0}
+                                        enterDelay={300}
                                         leaveDelay={300}
-                                        onOpen={this.handleTooltipOpen}
-                                        open={this.state.open}
                                         placement='top'
                                     >
                                         <ChipInput
@@ -334,21 +382,26 @@ class Overview extends Component {
                             </Typography>
                         </Grid>
                         <Grid item xs={12} sm={6} md={4} lg={3}>
-                            {api.transport && api.transport.length ? (
-                                <Link to={'/apis/' + api.id + '/transport'}>
-                                    <Typography variant='subheading' align='left' className={classes.headline}>
-                                        {api.transport.map(trans => trans + ', ')}
-                                    </Typography>
-                                </Link>
-                            ) : (
-                                <Link to={'/apis/' + api.id + '/transport'}>
-                                    <Typography variant='subheading' align='left' className={classes.headline}>
-                                        &lt; NOT SET FOR THIS API &gt;
-                                    </Typography>
-                                </Link>
-                            )}
+                            <InputLabel htmlFor='transport-checkbox' />{/* TODO:Set placeholder 'Select Transports' */}
+                            <Select
+                                multiple
+                                autoWidth
+                                value={api.transport}
+                                onChange={this.handleTransportChange}
+                                input={<Input id='transport-checkbox' />}
+                                renderValue={selected => selected.join(',  ')}
+                            >
+                                <MenuItem key='HTTP' value='HTTP'>
+                                    <Checkbox checked={api.transport.includes('HTTP')} />
+                                    <ListItemText primary='HTTP' />
+                                </MenuItem>
+                                <MenuItem key='HTTPS' value='HTTPS'>
+                                    <Checkbox checked={api.transport.includes('HTTPS')} />
+                                    <ListItemText primary='HTTPS' />
+                                </MenuItem>
+                            </Select>
                             <Typography variant='caption' gutterBottom align='left'>
-                                Transport
+                                Transports
                             </Typography>
                         </Grid>
                         <Grid item xs={12} sm={6} md={4} lg={3}>
