@@ -400,6 +400,12 @@ public final class APIConstants {
     //Property for enabling scope sharing between APIs
     public static final String ENABLE_API_SCOPES_SHARING = "enable-api-scopes-sharing";
 
+    // Constants for obtaining organization claims
+    public static final String READ_ORGANIZATION_FROM_SAML_ASSERTION = "readOrganizationClaimFromSamlAssertion";
+    public static final String SAML2_SSO_AUTHENTICATOR_NAME = "SAML2SSOAuthenticator";
+    public static final String ORGANIZATION_CLAIM_ATTRIBUTE = "OrganizationClaimAttribute";
+    public static final String DEFAULT_ORGANIZATION_CLAIM_NAME = "http://wso2.org/claims/organization";
+
     public static class TokenStatus {
         public static final String ACTIVE = "ACTIVE";
         public static final String BLOCKED = "BLOCKED";
