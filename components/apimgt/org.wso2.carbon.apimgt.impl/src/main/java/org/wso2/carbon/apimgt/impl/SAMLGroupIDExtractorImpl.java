@@ -90,7 +90,7 @@ public class SAMLGroupIDExtractorImpl implements NewPostLoginExecutor {
             String isSAML2Enabled = System.getProperty(APIConstants.READ_ORGANIZATION_FROM_SAML_ASSERTION);
 
             if (!StringUtils.isEmpty(isSAML2Enabled) && Boolean.parseBoolean(isSAML2Enabled)) {
-                organization = getOrganizationFromAssertion(assertions);
+                organization = getOrganizationFromSamlAssertion(assertions);
 
             } else {
                 RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
@@ -161,7 +161,7 @@ public class SAMLGroupIDExtractorImpl implements NewPostLoginExecutor {
      * @param assertions SAML2 assertions returned in SAML response
      * @return Organization list from the assertion
      */
-    private String getOrganizationFromAssertion(List<Assertion> assertions) {
+    private String getOrganizationFromSamlAssertion(List<Assertion> assertions) {
         String attributeValueString = null;
         String organizationAttributeName = getOrganizationClaim();
 
