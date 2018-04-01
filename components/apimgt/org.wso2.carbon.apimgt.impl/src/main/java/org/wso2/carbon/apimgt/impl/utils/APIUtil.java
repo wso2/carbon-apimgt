@@ -4912,7 +4912,8 @@ public final class APIUtil {
                 StringBuilder apiNames = new StringBuilder();
                 for (GenericArtifact artifact : genericArtifacts) {
                     if (apiNames.indexOf(artifact.getAttribute(APIConstants.API_OVERVIEW_NAME)) < 0) {
-                        String status = artifact.getLifecycleState();
+                        APIStatus apiLcStatus = APIUtil.getApiStatus(artifact.getLifecycleState());
+                        String status = (apiLcStatus != null) ? apiLcStatus.getStatus() : null;
                         if (isAllowDisplayAPIsWithMultipleStatus()) {
                             if (APIConstants.PUBLISHED.equals(status) || APIConstants.DEPRECATED.equals(status)) {
                                 API api = APIUtil.getAPI(artifact, registry);
