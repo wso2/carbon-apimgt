@@ -86,20 +86,14 @@ public class SAMLGroupIDExtractorImpl implements NewPostLoginExecutor {
                     }
                 }
             }
+            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
             String tenantDomain = MultitenantUtils.getTenantDomain(username);
-            String isSAML2Enabled = System.getProperty(APIConstants.READ_ORGANIZATION_FROM_SAML_ASSERTION);
-
-            if (!StringUtils.isEmpty(isSAML2Enabled) && Boolean.parseBoolean(isSAML2Enabled)) {
-                organization = getOrganizationFromSamlAssertion(assertions);
-            } else {
-                RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
-                UserRealm realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
-                UserStoreManager manager = realm.getUserStoreManager();
-                organization =
-                        manager.getUserClaimValue(MultitenantUtils.getTenantAwareUsername(username), claim, null);
-            }
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+            UserRealm realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
+            UserStoreManager manager = realm.getUserStoreManager();
+            organization =
+                    manager.getUserClaimValue(MultitenantUtils.getTenantAwareUsername(username), claim, null);
             if (log.isDebugEnabled()) {
                 log.debug("User organization " + organization);
             }
@@ -268,19 +262,23 @@ public class SAMLGroupIDExtractorImpl implements NewPostLoginExecutor {
                     }
                 }
             }
+            String isSAML2Enabled = System.getProperty(APIConstants.READ_ORGANIZATION_FROM_SAML_ASSERTION);
 
-            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-            String tenantDomain = MultitenantUtils.getTenantDomain(username);
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(tenantDomain);
-            UserRealm realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
-            UserStoreManager manager = realm.getUserStoreManager();
-            organization =
-                    manager.getUserClaimValue(MultitenantUtils.getTenantAwareUsername(username), claim, null);
+            if (!StringUtils.isEmpty(isSAML2Enabled) && Boolean.parseBoolean(isSAML2Enabled)) {
+                organization = getOrganizationFromSamlAssertion(assertions);
+            } else {
+                RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+                String tenantDomain = MultitenantUtils.getTenantDomain(username);
+                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                        .getTenantId(tenantDomain);
+                UserRealm realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
+                UserStoreManager manager = realm.getUserStoreManager();
+                organization =
+                        manager.getUserClaimValue(MultitenantUtils.getTenantAwareUsername(username), claim, null);
+            }
             if (log.isDebugEnabled()) {
                 log.debug("User organization " + organization);
             }
-
             if (organization != null) {
                 if (organization.contains(",")) {
                     groupIdArray = organization.split(",");
