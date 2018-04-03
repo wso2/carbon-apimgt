@@ -30,6 +30,10 @@ import Input, { InputLabel } from 'material-ui/Input';
 import { MenuItem } from 'material-ui/Menu';
 import { ListItemText } from 'material-ui/List';
 import Checkbox from 'material-ui/Checkbox';
+import EditIcon from 'material-ui-icons/ModeEdit';
+import { FormControl } from 'material-ui/Form';
+import IconButton from 'material-ui/IconButton';
+import TextField from 'material-ui/TextField';
 
 import { Progress } from '../../Shared';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
@@ -37,7 +41,7 @@ import Api from '../../../data/api';
 import ImageGenerator from '../Listing/ImageGenerator';
 import Alert from '../../Shared/Alert';
 
-const styles = theme => ({
+const styles = () => ({
     imageSideContent: {
         display: 'inline-block',
         paddingLeft: 20,
@@ -74,11 +78,15 @@ class Overview extends Component {
         this.state = {
             api: null,
             notFound: false,
+            editDescription: false,
+            editableDescriptionText: null,
         };
         this.apiUUID = this.props.match.params.apiUUID;
         this.downloadWSDL = this.downloadWSDL.bind(this);
         this.handleTagChange = this.handleTagChange.bind(this);
         this.handleTransportChange = this.handleTransportChange.bind(this);
+        this.editDescription = this.editDescription.bind(this);
+        this.handleInput = this.handleInput.bind(this);
     }
 
     componentWillMount() {
@@ -86,7 +94,13 @@ class Overview extends Component {
         const promisedApi = api.get(this.apiUUID);
         promisedApi
             .then((response) => {
-                this.setState({ api: response.data });
+                let apiDescription;
+                if (response.body.description && response.body.description.length) {
+                    apiDescription = response.body.description;
+                } else {
+                    apiDescription = '< NOT SET FOR THIS API >';
+                }
+                this.setState({ api: response.body, editableDescriptionText: apiDescription });
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -179,13 +193,13 @@ class Overview extends Component {
             .then((getResponse) => {
                 const apiData = getResponse.body;
                 apiData.transport = event.target.value;
+                this.setState({ api: apiData });
                 const promisedUpdate = api.update(apiData);
                 promisedUpdate
                     .then((updateResponse) => {
                         this.setState({ api: updateResponse.body });
                     })
                     .catch((errorResponse) => {
-                        this.setState({ api: promisedApi });
                         console.error(errorResponse);
                         Alert.error('Error occurred while updating transports');
                         this.setState({ api: getResponse.body });
@@ -198,9 +212,54 @@ class Overview extends Component {
             });
     }
 
+    /**
+     * Edit description
+     *
+     * @param {SyntheticEvent} sEvent Synthetic Event
+     */
+    editDescription(sEvent) {
+        const { id } = sEvent.currentTarget;
+        if (id === 'edit-description-button') {
+            this.setState({ editDescription: true });
+        } else {
+            this.setState({ editDescription: false });
+            const api = new Api();
+            const { apiUUID } = this;
+            const { editableDescriptionText } = this.state;
+            const promisedApi = api.get(apiUUID);
+            promisedApi
+                .then((getResponse) => {
+                    const apiData = getResponse.body;
+                    apiData.description = editableDescriptionText;
+                    const promisedUpdate = api.update(apiData);
+                    promisedUpdate
+                        .then((updateResponse) => {
+                            this.setState({ api: updateResponse.body });
+                        })
+                        .catch((errorResponse) => {
+                            console.error(errorResponse);
+                            Alert.error('Error occurred while updating API description');
+                        });
+                })
+                .catch((errorResponse) => {
+                    console.error(errorResponse);
+                    Alert.error('Error occurred while retrieving API');
+                });
+        }
+    }
+
+    /**
+     * Update state with input
+     *
+     * @param {SyntheticEvent} sEvent Synthetic Event
+     */
+    handleInput(sEvent) {
+        this.setState({ [sEvent.target.id]: sEvent.target.value });
+    }
+
     /** @inheritDoc */
     render() {
-        const { api } = this.state;
+        const { api, editDescription, editableDescriptionText } = this.state;
         if (this.state.notFound) {
             return <ResourceNotFound message={this.props.resourceNotFountMessage} />;
         }
@@ -239,11 +298,32 @@ class Overview extends Component {
                     </div>
                 </Grid>
                 <Grid item xs={12} sm={6} md={6} lg={8} className={classes.headline}>
+                    {/* Description */}
                     <div>
-                        {/* Description */}
-                        <Typography variant='subheading' className={classes.headline}>
-                            {api.description}
-                        </Typography>
+                        {editDescription ? (
+                            <FormControl fullWidth>
+                                <Input
+                                    id='editableDescriptionText'
+                                    multiline
+                                    autoFocus
+                                    rowsMax='5'
+                                    value={editableDescriptionText}
+                                    onChange={this.handleInput}
+                                    onBlur={this.editDescription}
+                                />
+                            </FormControl>
+                        ) : (
+                            <Typography variant='subheading' gutterBottom align='left'>
+                                {editableDescriptionText}
+                                <IconButton
+                                    id='edit-description-button'
+                                    onClick={this.editDescription}
+                                    aria-label='Edit Description'
+                                >
+                                    <EditIcon />
+                                </IconButton>
+                            </Typography>
+                        )}
                         <Typography variant='caption' gutterBottom align='left'>
                             Description
                         </Typography>
@@ -257,27 +337,28 @@ class Overview extends Component {
                         Last update : {api.lastUpdatedTime}
                     </Typography>
                     {/* Endpoints */}
-                    {api.endpoint.map(ep => (
-                        <div key={ep.inline.id}>
-                            <div className={classes.endpointsWrapper + ' ' + classes.headline}>
-                                <Link to={'/apis/' + api.id + '/endpoints'} title='Edit endpoint'>
-                                    <Typography variant='subheading' align='left'>
-                                        {JSON.parse(ep.inline.endpointConfig).serviceUrl}
-                                    </Typography>
-                                </Link>
-                                <a
-                                    href={JSON.parse(ep.inline.endpointConfig).serviceUrl}
-                                    target='_blank'
-                                    className={classes.openNewIcon}
-                                >
-                                    <OpenInNew />
-                                </a>
+                    {api.endpoint &&
+                        api.endpoint.map(ep => (
+                            <div key={ep.inline.id}>
+                                <div className={classes.endpointsWrapper + ' ' + classes.headline}>
+                                    <Link to={'/apis/' + api.id + '/endpoints'} title='Edit endpoint'>
+                                        <Typography variant='subheading' align='left'>
+                                            {JSON.parse(ep.inline.endpointConfig).serviceUrl}
+                                        </Typography>
+                                    </Link>
+                                    <a
+                                        href={JSON.parse(ep.inline.endpointConfig).serviceUrl}
+                                        target='_blank'
+                                        className={classes.openNewIcon}
+                                    >
+                                        <OpenInNew />
+                                    </a>
+                                </div>
+                                <Typography variant='caption' gutterBottom align='left'>
+                                    <span className={classes.titleCase}>{ep.type}</span> Endpoint
+                                </Typography>
                             </div>
-                            <Typography variant='caption' gutterBottom align='left'>
-                                <span className={classes.titleCase}>{ep.type}</span> Endpoint
-                            </Typography>
-                        </div>
-                    ))}
+                        ))}
                     {api.wsdlUri && (
                         <div>
                             <div className={classes.endpointsWrapper + ' ' + classes.headline}>
@@ -382,7 +463,8 @@ class Overview extends Component {
                             </Typography>
                         </Grid>
                         <Grid item xs={12} sm={6} md={4} lg={3}>
-                            <InputLabel htmlFor='transport-checkbox' />{/* TODO:Set placeholder 'Select Transports' */}
+                            <InputLabel htmlFor='transport-checkbox' />
+                            {/* TODO:Set placeholder 'Select Transports' */}
                             <Select
                                 multiple
                                 autoWidth
@@ -392,11 +474,17 @@ class Overview extends Component {
                                 renderValue={selected => selected.join(',  ')}
                             >
                                 <MenuItem key='HTTP' value='HTTP'>
-                                    <Checkbox checked={api.transport.includes('HTTP')} />
+                                    <Checkbox
+                                        checked={api.transport && api.transport.includes('HTTP')}
+                                        color='primary'
+                                    />
                                     <ListItemText primary='HTTP' />
                                 </MenuItem>
                                 <MenuItem key='HTTPS' value='HTTPS'>
-                                    <Checkbox checked={api.transport.includes('HTTPS')} />
+                                    <Checkbox
+                                        checked={api.transport && api.transport.includes('HTTPS')}
+                                        color='primary'
+                                    />
                                     <ListItemText primary='HTTPS' />
                                 </MenuItem>
                             </Select>
