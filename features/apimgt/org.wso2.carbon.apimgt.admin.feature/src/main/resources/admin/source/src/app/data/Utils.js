@@ -177,7 +177,7 @@ Utils.CONST = {
     SSO_LOGIN: '/login/login',
     LOGOUT: '/login/logout',
     LOGIN_TOKEN_PATH: '/login/token',
-    SWAGGER_YAML: '/api/am/admin/v1.0/apis/swagger.yaml',
+    SWAGGER_YAML: '/api/am/admin/v1.0/workflows/swagger.yaml',
     PROTOCOL: 'https://',
     CONTEXT_PATH: '/admin'
 };
