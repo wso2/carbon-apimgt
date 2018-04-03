@@ -262,14 +262,13 @@ public class SAMLGroupIDExtractorImpl implements NewPostLoginExecutor {
                     }
                 }
             }
-
-            String tenantDomain = MultitenantUtils.getTenantDomain(username);
             String isSAML2Enabled = System.getProperty(APIConstants.READ_ORGANIZATION_FROM_SAML_ASSERTION);
 
             if (!StringUtils.isEmpty(isSAML2Enabled) && Boolean.parseBoolean(isSAML2Enabled)) {
                 organization = getOrganizationFromSamlAssertion(assertions);
             } else {
                 RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+                String tenantDomain = MultitenantUtils.getTenantDomain(username);
                 int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                         .getTenantId(tenantDomain);
                 UserRealm realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
