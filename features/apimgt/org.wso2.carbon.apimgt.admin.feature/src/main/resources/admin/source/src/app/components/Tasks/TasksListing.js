@@ -23,9 +23,11 @@
  import Table, { TableBody, TableCell, TableHead, TableRow } from 'material-ui/Table';
  import Snackbar from 'material-ui/Snackbar';
  import Button from 'material-ui/Button';
+ import Typography from 'material-ui/Typography';
+ import Card, { CardActions, CardContent } from 'material-ui/Card';
 
  import API from '../../data/api'
- import Message from '../Shared/Message'
+ import Alert from '../Shared/Alert'
 
  const messages = {
    success: 'Updated successfully!',
@@ -33,6 +35,25 @@
    error: 'Something went wrong while updating the workflow task!',
    retrieveFailure: 'Error while retrieving tasks'
  };
+const styles = theme => ({
+    card: {
+        minWidth: 275,
+        paddingBottom: 20,
+    },
+    pos: {
+        marginBottom: 12,
+        color: theme.palette.text.secondary,
+    },
+    createAppWrapper: {
+        textDecoration: 'none',
+    },
+    divider: {
+        marginBottom: 20,
+    },
+    titleWrapper: {
+        display: 'flex',
+    }
+});
 
  class TasksListing extends Component {
    constructor(props) {
@@ -66,12 +87,13 @@
                      break;
                  }
              }
+             Alert.info(messages.success);
              this.setState({active: false, workflows: workflows});
-             this.msg.info(messages.success);
+
            }
        ).catch(
            error => {
-             this.msg.error(messages.updateFailure);
+             Alert.error(messages.updateFailure);
            }
        );
    }
@@ -96,7 +118,7 @@
            }
        ).catch(
            error => {
-             this.msg.error(message.retrieveFailure);
+             Alert.error(messages.retrieveFailure);
            }
        );
      }
@@ -113,7 +135,7 @@
            }
        ).catch(
            error => {
-             this.msg.error(message.retrieveFailure);
+             Alert.error(messages.retrieveFailure);
            }
        );
    }
@@ -128,7 +150,7 @@
            selectedRowKeys,
            onChange: this.onSelectChange,
        };
-
+       const { classes } = this.props;
        let data = [];
        if(workflows) {
          data = workflows
@@ -136,7 +158,22 @@
 
        return (
            <div>
+               <div className={classes.titleWrapper}>
+                   <Typography variant="display1" gutterBottom >
+                       Pending Tasks
+                   </Typography>
+               </div>
+               {data.length === 0 ? (
+                   <div>
 
+                       <Card className={classes.card}>
+                           <CardContent>
+                               <Typography className={classes.title}>
+                                   There are no pending tasks to be approved</Typography>
+                           </CardContent>
+                       </Card>
+                   </div>
+               ) : (
              <Table>
                <TableHead>
                  <TableRow>
@@ -155,7 +192,7 @@
                        <span>
                           <Button color="primary" onClick = {
                             () => this.handleWorkflowComplete(n.referenceId, 'APPROVED')}>Approve</Button>
-                          <Button color="accent" onClick = {
+                          <Button color="secondary" onClick = {
                             () => this.handleWorkflowComplete(n.referenceId, 'REJECTED')}>Reject</Button>
                        </span>
                        </TableCell>
@@ -164,9 +201,9 @@
                  })}
                </TableBody>
              </Table>
-             <Message ref={a => this.msg = a}/>
+               )}
            </div>
        );
    }
  }
-export default TasksListing
+export default withStyles(styles)(TasksListing);

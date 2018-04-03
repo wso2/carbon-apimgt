@@ -11,6 +11,9 @@ const config = {
     devtool: "source-map",
     plugins: [],
     watch: false,
+    resolve: {
+        extensions: ['.js', '.jsx'],
+    },
     module: {
         rules: [
             {
