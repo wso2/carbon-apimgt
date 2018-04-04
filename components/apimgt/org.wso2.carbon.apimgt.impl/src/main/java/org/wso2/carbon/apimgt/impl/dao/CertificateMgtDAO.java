@@ -114,35 +114,28 @@ public class CertificateMgtDAO {
         String getCertsQuery = SQLConstants.CertificateConstants.GET_CERTIFICATES;
 
         try {
-            try {
-                connection = APIMgtDBUtil.getConnection();
-                initialAutoCommit = connection.getAutoCommit();
-                connection.setAutoCommit(false);
-                connection.commit();
-                preparedStatement = connection.prepareStatement(getCertsQuery);
-                preparedStatement.setInt(1, tenantId);
-                resultSet = preparedStatement.executeQuery();
+            connection = APIMgtDBUtil.getConnection();
+            initialAutoCommit = connection.getAutoCommit();
+            connection.setAutoCommit(false);
+            connection.commit();
+            preparedStatement = connection.prepareStatement(getCertsQuery);
+            preparedStatement.setInt(1, tenantId);
+            resultSet = preparedStatement.executeQuery();
 
-                while (resultSet.next()) {
-                    certificateMetadataDTO = new CertificateMetadataDTO();
-                    certificateMetadataDTO.setAlias(resultSet.getString("ALIAS"));
-                    certificateMetadataDTO.setEndpoint(resultSet.getString("END_POINT"));
-                    certificates.add(certificateMetadataDTO);
-                }
-            } catch (SQLException e) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Error occurred while retrieving certificate metadata. ", e);
-                }
-                handleException("Error while retrieving certificates.", e);
-            } finally {
-                connection.setAutoCommit(initialAutoCommit);
-                APIMgtDBUtil.closeStatement(preparedStatement);
-                APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
+            while (resultSet.next()) {
+                certificateMetadataDTO = new CertificateMetadataDTO();
+                certificateMetadataDTO.setAlias(resultSet.getString("ALIAS"));
+                certificateMetadataDTO.setEndpoint(resultSet.getString("END_POINT"));
+                certificates.add(certificateMetadataDTO);
             }
         } catch (SQLException e) {
             if (log.isDebugEnabled()) {
-                log.debug("Error occurred in finally block while retrieving certificate metadata. ", e);
+                log.debug("Error occurred while retrieving certificate metadata. ", e);
             }
+            handleException("Error while retrieving certificates.", e);
+        } finally {
+            APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
         }
         return certificates;
     }
@@ -180,40 +173,33 @@ public class CertificateMgtDAO {
         }
 
         try {
-            try {
-                connection = APIMgtDBUtil.getConnection();
-                initialAutoCommit = connection.getAutoCommit();
-                connection.setAutoCommit(false);
-                preparedStatement = connection.prepareStatement(addCertQuery);
-                preparedStatement.setInt(1, tenantId);
-                preparedStatement.setString(2, endpoint);
-                preparedStatement.setString(3, alias);
-                result = preparedStatement.executeUpdate() == 1;
-                connection.commit();
+            connection = APIMgtDBUtil.getConnection();
+            initialAutoCommit = connection.getAutoCommit();
+            connection.setAutoCommit(false);
+            preparedStatement = connection.prepareStatement(addCertQuery);
+            preparedStatement.setInt(1, tenantId);
+            preparedStatement.setString(2, endpoint);
+            preparedStatement.setString(3, alias);
+            result = preparedStatement.executeUpdate() == 1;
+            connection.commit();
 
-            } catch (SQLException e) {
-                try {
-                    if (connection != null) {
-                        connection.rollback();
-                    } else {
-                        log.error("Could not perform rollback since the connection is null.");
-                    }
-                } catch (SQLException e1) {
-                    log.error("Error while rolling back the transaction.", e1);
-                }
-                if (log.isDebugEnabled()) {
-                    log.debug("Error occurred while adding certificate metadata to database.", e);
-                }
-                handleException("Error while persisting certificate metadata.", e);
-            } finally {
-                connection.setAutoCommit(initialAutoCommit);
-                APIMgtDBUtil.closeStatement(preparedStatement);
-                APIMgtDBUtil.closeAllConnections(preparedStatement, connection, null);
-            }
         } catch (SQLException e) {
-            if (log.isDebugEnabled()) {
-                log.debug("Error occurred in finally block while adding certificate metadata. ", e);
+            try {
+                if (connection != null) {
+                    connection.rollback();
+                } else {
+                    log.warn("Could not perform rollback since the connection is null.");
+                }
+            } catch (SQLException e1) {
+                log.error("Error while rolling back the transaction.", e1);
             }
+            if (log.isDebugEnabled()) {
+                log.debug("Error occurred while adding certificate metadata to database.", e);
+            }
+            handleException("Error while persisting certificate metadata.", e);
+        } finally {
+            APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, null);
         }
         return result;
     }
@@ -237,32 +223,25 @@ public class CertificateMgtDAO {
         String getCertQuery = SQLConstants.CertificateConstants.GET_CERTIFICATE_ALL_TENANTS;
 
         try {
-            try {
-                connection = APIMgtDBUtil.getConnection();
-                initialAutoCommit = connection.getAutoCommit();
-                connection.setAutoCommit(false);
-                connection.commit();
-                preparedStatement = connection.prepareStatement(getCertQuery);
-                preparedStatement.setString(1, alias);
-                preparedStatement.setString(2, endpoint);
-                resultSet = preparedStatement.executeQuery();
+            connection = APIMgtDBUtil.getConnection();
+            initialAutoCommit = connection.getAutoCommit();
+            connection.setAutoCommit(false);
+            connection.commit();
+            preparedStatement = connection.prepareStatement(getCertQuery);
+            preparedStatement.setString(1, alias);
+            preparedStatement.setString(2, endpoint);
+            resultSet = preparedStatement.executeQuery();
 
-                while (resultSet.next()) {
-                    certificateMetadataDTO = new CertificateMetadataDTO();
-                    certificateMetadataDTO.setAlias(resultSet.getString("ALIAS"));
-                    certificateMetadataDTO.setEndpoint(resultSet.getString("END_POINT"));
-                }
-            } catch (SQLException e) {
-                handleException("Error while retrieving certificate metadata.", e);
-            } finally {
-                connection.setAutoCommit(initialAutoCommit);
-                APIMgtDBUtil.closeStatement(preparedStatement);
-                APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
+            while (resultSet.next()) {
+                certificateMetadataDTO = new CertificateMetadataDTO();
+                certificateMetadataDTO.setAlias(resultSet.getString("ALIAS"));
+                certificateMetadataDTO.setEndpoint(resultSet.getString("END_POINT"));
             }
         } catch (SQLException e) {
-            if (log.isDebugEnabled()) {
-                log.debug("Error occurred in finally block while retrieving certificate metadata. ", e);
-            }
+            handleException("Error while retrieving certificate metadata.", e);
+        } finally {
+            APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
         }
         return certificateMetadataDTO;
     }
@@ -285,33 +264,26 @@ public class CertificateMgtDAO {
         String getCertQuery = SQLConstants.CertificateConstants.GET_CERTIFICATE_TENANT;
 
         try {
-            try {
-                connection = APIMgtDBUtil.getConnection();
-                initialAutoCommit = connection.getAutoCommit();
-                connection.setAutoCommit(false);
-                connection.commit();
-                preparedStatement = connection.prepareStatement(getCertQuery);
-                preparedStatement.setInt(1, tenantId);
-                preparedStatement.setString(2, alias);
-                preparedStatement.setString(3, endpoint);
-                resultSet = preparedStatement.executeQuery();
+            connection = APIMgtDBUtil.getConnection();
+            initialAutoCommit = connection.getAutoCommit();
+            connection.setAutoCommit(false);
+            connection.commit();
+            preparedStatement = connection.prepareStatement(getCertQuery);
+            preparedStatement.setInt(1, tenantId);
+            preparedStatement.setString(2, alias);
+            preparedStatement.setString(3, endpoint);
+            resultSet = preparedStatement.executeQuery();
 
-                while (resultSet.next()) {
-                    certificateMetadataDTO = new CertificateMetadataDTO();
-                    certificateMetadataDTO.setAlias(resultSet.getString("ALIAS"));
-                    certificateMetadataDTO.setEndpoint(resultSet.getString("END_POINT"));
-                }
-            } catch (SQLException e) {
-                handleException("Error while retrieving certificate metadata.", e);
-            } finally {
-                connection.setAutoCommit(initialAutoCommit);
-                APIMgtDBUtil.closeStatement(preparedStatement);
-                APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
+            while (resultSet.next()) {
+                certificateMetadataDTO = new CertificateMetadataDTO();
+                certificateMetadataDTO.setAlias(resultSet.getString("ALIAS"));
+                certificateMetadataDTO.setEndpoint(resultSet.getString("END_POINT"));
             }
         } catch (SQLException e) {
-            if (log.isDebugEnabled()) {
-                log.debug("Error occurred in finally block while retrieving certificate metadata. ", e);
-            }
+            handleException("Error while retrieving certificate metadata.", e);
+        } finally {
+            APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
         }
         return certificateMetadataDTO;
     }

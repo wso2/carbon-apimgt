@@ -196,4 +196,19 @@ public final class APIMgtDBUtil {
         }
         return str;
     }
+
+    /**
+     * Set autocommit state of the connection
+     * @param dbConnection Connection
+     * @param autoCommit autoCommitState
+     */
+    public static void setAutoCommit(Connection dbConnection, boolean autoCommit) {
+        if (dbConnection != null) {
+            try {
+                dbConnection.setAutoCommit(autoCommit);
+            } catch (SQLException e) {
+                log.error("Could not set auto commit back to initial state", e);
+            }
+        }
+    }
 }
