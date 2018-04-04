@@ -16,61 +16,63 @@
  * under the License.
  */
 
-  import React, {Component} from 'react'
+import React, { Component } from 'react';
 
+import Grid from 'material-ui/Grid';
+import Divider from 'material-ui/Divider';
+import TextField from 'material-ui/TextField';
+import Paper from 'material-ui/Paper';
+import Typography from 'material-ui/Typography';
 
-  import Grid from 'material-ui/Grid';
-  import Divider from 'material-ui/Divider';
-  import TextField from 'material-ui/TextField';
-  import Paper from 'material-ui/Paper';
-  import Typography from 'material-ui/Typography';
+import './Shared.css';
 
-  import './Shared.css'
+class GeneralDetails extends Component {
+    constructor(props) {
+        super(props);
+        this.handleChange = this.handleChange.bind(this);
+    }
 
-  class GeneralDetails extends Component{
-
-    handleChange = name => event => {
-      this.props.handleChangeChild(name, event.target.value);
-    };
+    handleChange(name) {
+        return (event) => {
+            this.props.handleChangeChild(name, event.target.value);
+        };
+    }
 
     render() {
-      return (
-        <Paper elevation ={20}>
-
-            <Grid item xs={12}>
-                <Typography className="page-title" type="subheading" gutterBottom>
-                   General Details
-                </Typography>
-            </Grid>
-            <Grid item xs={6} className="grid-item" >
-
-                <Divider />
-                <TextField
-                  id="policyName"
-                  required
-                  label="Name"
-                  value={this.props.policy.policyName}
-                  onChange={this.handleChange('policyName')}
-                  className="text-field-full"
-                  margin="normal"
-                />
-            </Grid>
-            <Grid item xs={6} className="grid-item">
-                <TextField
-                  id="description"
-                  label="Description"
-                  value={this.props.policy.description}
-                  onChange={this.handleChange('description')}
-                  className="text-field-full"
-                  multiline
-                  rowsMax="4"
-                  margin="normal"
-                />
-            </Grid>
-          </Paper>
-      );
+        return (
+            <Paper elevation={20}>
+                <Grid item xs={12}>
+                    <Typography className='page-title' type='subheading' gutterBottom>
+                        General Details
+                    </Typography>
+                </Grid>
+                <Grid item xs={6} className='grid-item'>
+                    <Divider />
+                    <TextField
+                        id='policyName'
+                        required
+                        label='Name'
+                        value={this.props.policy.policyName}
+                        onChange={this.handleChange('policyName')}
+                        className='text-field-full'
+                        margin='normal'
+                    />
+                </Grid>
+                <Grid item xs={6} className='grid-item'>
+                    <TextField
+                        id='description'
+                        label='Description'
+                        value={this.props.policy.description}
+                        onChange={this.handleChange('description')}
+                        className='text-field-full'
+                        multiline
+                        rowsMax='4'
+                        margin='normal'
+                    />
+                </Grid>
+            </Paper>
+        );
     }
-  }
+}
 
-
-  export default GeneralDetails;
+export default GeneralDetails;
