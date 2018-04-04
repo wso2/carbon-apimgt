@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 
 import TextField from 'material-ui/TextField';
 import Grid from 'material-ui/Grid';
@@ -26,22 +26,28 @@ import Input, { InputLabel } from 'material-ui/Input';
 import { MenuItem } from 'material-ui/Menu';
 
 class XMLPolicyFields extends Component {
-    handleChange = name => event => {
-        switch (name) {
-            case "dtdEnabled":
-            case "externalEntitiesEnabled":
-                this.props.handleChangeChild(name, event.target.value == "true");
-                break;
+    constructor(props) {
+        super(props);
+        this.handleChange = this.handleChange.bind(this);
+    }
 
-            case "name":
-                this.props.handleChangeChild(name, event.target.value);
-                break;
+    handleChange(name) {
+        return (event) => {
+            switch (name) {
+                case 'dtdEnabled':
+                case 'externalEntitiesEnabled':
+                    this.props.handleChangeChild(name, event.target.value == 'true');
+                    break;
 
-            default:
-                this.props.handleChangeChild(name, parseInt(event.target.value));
-                break;
-        }
+                case 'name':
+                    this.props.handleChangeChild(name, event.target.value);
+                    break;
 
+                default:
+                    this.props.handleChangeChild(name, parseInt(event.target.value));
+                    break;
+            }
+        };
     }
 
     render() {
@@ -49,113 +55,113 @@ class XMLPolicyFields extends Component {
             return (
                 <Paper elevation={20}>
                     <br />
-                    <Grid item xs={6} className="grid-item">
+                    <Grid item xs={6} className='grid-item'>
                         <TextField
-                            id="name"
+                            id='name'
                             required
-                            label="Policy Name"
+                            label='Policy Name'
                             defaultValue={this.props.policy.name}
-                            className="text-field-half"
-                            onChange={this.handleChange("name")}
+                            className='text-field-half'
+                            onChange={this.handleChange('name')}
                         />
                     </Grid>
                     <br />
-                    <Grid item xs={6} className="grid-item">
-                        <InputLabel htmlFor="dtdEnabled">DTD Enabled</InputLabel>
+                    <Grid item xs={6} className='grid-item'>
+                        <InputLabel htmlFor='dtdEnabled'>DTD Enabled</InputLabel>
                         &nbsp;&nbsp;
                         <Select
                             value={this.props.policy.policy.dtdEnabled.toString()}
-                            onChange={this.handleChange("dtdEnabled")}
-                            input={<Input name="dtdEnabled" id="dtdEnabled" />}
+                            onChange={this.handleChange('dtdEnabled')}
+                            input={<Input name='dtdEnabled' id='dtdEnabled' />}
                         >
-                            <MenuItem value={"true"}>true</MenuItem>
-                            <MenuItem value={"false"}>false</MenuItem>
+                            <MenuItem value='true'>true</MenuItem>
+                            <MenuItem value='false'>false</MenuItem>
                         </Select>
                     </Grid>
                     <br />
-                    <Grid item xs={6} className="grid-item">
-                        <InputLabel htmlFor="externalEntitiesEnabled">External Entities Enabled</InputLabel>
+                    <Grid item xs={6} className='grid-item'>
+                        <InputLabel htmlFor='externalEntitiesEnabled'>External Entities Enabled</InputLabel>
                         &nbsp;&nbsp;
                         <Select
                             value={this.props.policy.policy.externalEntitiesEnabled.toString()}
-                            onChange={this.handleChange("externalEntitiesEnabled")}
-                            input={<Input name="externalEntitiesEnabled" id="externalEntitiesEnabled" />}
+                            onChange={this.handleChange('externalEntitiesEnabled')}
+                            input={<Input name='externalEntitiesEnabled' id='externalEntitiesEnabled' />}
                         >
-                            <MenuItem value={"true"}>true</MenuItem>
-                            <MenuItem value={"false"}>false</MenuItem>
+                            <MenuItem value='true'>true</MenuItem>
+                            <MenuItem value='false'>false</MenuItem>
                         </Select>
                     </Grid>
                     <br />
-                    <Grid item xs={6} className="grid-item">
+                    <Grid item xs={6} className='grid-item'>
                         <TextField
-                            id="maxDepth"
+                            id='maxDepth'
                             required
-                            label="Max Depth"
+                            label='Max Depth'
                             defaultValue={this.props.policy.policy.maxDepth.toString()}
-                            className="text-field-half"
-                            onChange={this.handleChange("maxDepth")}
+                            className='text-field-half'
+                            onChange={this.handleChange('maxDepth')}
                         />
                     </Grid>
                     <br />
-                    <Grid item xs={6} className="grid-item">
+                    <Grid item xs={6} className='grid-item'>
                         <TextField
-                            id="maxElementCount"
+                            id='maxElementCount'
                             required
-                            label="Max Element Count"
+                            label='Max Element Count'
                             defaultValue={this.props.policy.policy.maxElementCount.toString()}
-                            className="text-field-half"
-                            onChange={this.handleChange("maxElementCount")}
+                            className='text-field-half'
+                            onChange={this.handleChange('maxElementCount')}
                         />
                     </Grid>
                     <br />
-                    <Grid item xs={6} className="grid-item">
+                    <Grid item xs={6} className='grid-item'>
                         <TextField
-                            id="maxAttributeCount"
+                            id='maxAttributeCount'
                             required
-                            label="Max Attribute Count"
+                            label='Max Attribute Count'
                             defaultValue={this.props.policy.policy.maxAttributeCount.toString()}
-                            className="text-field-half"
-                            onChange={this.handleChange("maxAttributeCount")}
+                            className='text-field-half'
+                            onChange={this.handleChange('maxAttributeCount')}
                         />
                     </Grid>
                     <br />
-                    <Grid item xs={6} className="grid-item">
+                    <Grid item xs={6} className='grid-item'>
                         <TextField
-                            id="maxAttributeLength"
+                            id='maxAttributeLength'
                             required
-                            label="Max Attribute Length"
+                            label='Max Attribute Length'
                             defaultValue={this.props.policy.policy.maxAttributeLength.toString()}
-                            className="text-field-half"
-                            onChange={this.handleChange("maxAttributeLength")}
+                            className='text-field-half'
+                            onChange={this.handleChange('maxAttributeLength')}
                         />
                     </Grid>
                     <br />
-                    <Grid item xs={6} className="grid-item">
+                    <Grid item xs={6} className='grid-item'>
                         <TextField
-                            id="entityExpansionLimit"
+                            id='entityExpansionLimit'
                             required
-                            label="Entity Expansion Limit"
+                            label='Entity Expansion Limit'
                             defaultValue={this.props.policy.policy.entityExpansionLimit.toString()}
-                            className="text-field-half"
-                            onChange={this.handleChange("entityExpansionLimit")}
+                            className='text-field-half'
+                            onChange={this.handleChange('entityExpansionLimit')}
                         />
                     </Grid>
                     <br />
-                    <Grid item xs={6} className="grid-item">
+                    <Grid item xs={6} className='grid-item'>
                         <TextField
-                            id="maxChildrenPerElement"
+                            id='maxChildrenPerElement'
                             required
-                            label="Max Children Per Element"
+                            label='Max Children Per Element'
                             defaultValue={this.props.policy.policy.maxChildrenPerElement.toString()}
-                            className="text-field-half"
-                            onChange={this.handleChange("maxChildrenPerElement")}
+                            className='text-field-half'
+                            onChange={this.handleChange('maxChildrenPerElement')}
                         />
                     </Grid>
-                    <br/>
+                    <br />
                 </Paper>
             );
         } else {
-            return (<h1>Please wait...</h1>);
+            return <h1>Please wait...</h1>;
         }
     }
 }

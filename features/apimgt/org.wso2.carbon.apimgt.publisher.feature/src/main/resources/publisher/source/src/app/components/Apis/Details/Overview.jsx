@@ -33,7 +33,6 @@ import Checkbox from 'material-ui/Checkbox';
 import EditIcon from 'material-ui-icons/ModeEdit';
 import { FormControl } from 'material-ui/Form';
 import IconButton from 'material-ui/IconButton';
-import TextField from 'material-ui/TextField';
 
 import { Progress } from '../../Shared';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
@@ -70,9 +69,34 @@ const styles = () => ({
     },
 });
 /**
- * API Overview Coponent
+ * Handle API overview/details of an individual APIs in Publisher app.
+ * @class Overview
+ * @extends {Component}
  */
 class Overview extends Component {
+    /**
+     * Extract WSDL file name from the `content-disposition` in the response of GET WSDL file request giving the API ID
+     * @static
+     * @param {String} contentDispositionHeader Value of the content-disposition header
+     * @returns {String} filename
+     * @memberof Overview
+     */
+    static getWSDLFileName(contentDispositionHeader) {
+        let filename = 'default.wsdl';
+        if (contentDispositionHeader && contentDispositionHeader.indexOf('attachment') !== -1) {
+            const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+            const matches = filenameRegex.exec(contentDispositionHeader);
+            if (matches !== null && matches[1]) {
+                filename = matches[1].replace(/['"]/g, '');
+            }
+        }
+        return filename;
+    }
+    /**
+     * Creates an instance of Overview.
+     * @param {any} props @inheritDoc
+     * @memberof Overview
+     */
     constructor(props) {
         super(props);
         this.state = {
@@ -89,6 +113,10 @@ class Overview extends Component {
         this.handleInput = this.handleInput.bind(this);
     }
 
+    /**
+     * @inheritDoc
+     * @memberof Overview
+     */
     componentWillMount() {
         const api = new Api();
         const promisedApi = api.get(this.apiUUID);
@@ -115,8 +143,8 @@ class Overview extends Component {
 
     downloadWSDL() {
         const api = new Api();
-        const promised_wsdl = api.getWSDL(this.apiUUID);
-        promised_wsdl.then((response) => {
+        const promisedWSDL = api.getWSDL(this.apiUUID);
+        promisedWSDL.then((response) => {
             const windowUrl = window.URL || window.webkitURL;
             const binary = new Blob([response.data]);
             const url = windowUrl.createObjectURL(binary);
@@ -132,18 +160,6 @@ class Overview extends Component {
             anchor.click();
             windowUrl.revokeObjectURL(url);
         });
-    }
-
-    static getWSDLFileName(content_disposition_header) {
-        let filename = 'default.wsdl';
-        if (content_disposition_header && content_disposition_header.indexOf('attachment') !== -1) {
-            const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
-            const matches = filenameRegex.exec(content_disposition_header);
-            if (matches !== null && matches[1]) {
-                filename = matches[1].replace(/['"]/g, '');
-            }
-        }
-        return filename;
     }
 
     /**
@@ -362,7 +378,7 @@ class Overview extends Component {
                     {api.wsdlUri && (
                         <div>
                             <div className={classes.endpointsWrapper + ' ' + classes.headline}>
-                                <a onClick={this.downloadWSDL}>
+                                <a onClick={this.downloadWSDL} onKeyDown={this.downloadWSDL}>
                                     <Typography variant='subheading' align='left'>
                                         {api.wsdlUri}
                                     </Typography>
@@ -568,8 +584,19 @@ class Overview extends Component {
         );
     }
 }
+
+Overview.defaultProps = {
+    resourceNotFountMessage: 'Resource not found!',
+};
+
 Overview.propTypes = {
-    classes: PropTypes.object.isRequired,
+    classes: PropTypes.shape({}).isRequired,
+    match: PropTypes.shape({
+        params: PropTypes.shape({
+            apiUUID: PropTypes.string,
+        }),
+    }).isRequired,
+    resourceNotFountMessage: PropTypes.string,
 };
 
 export default withStyles(styles)(Overview);

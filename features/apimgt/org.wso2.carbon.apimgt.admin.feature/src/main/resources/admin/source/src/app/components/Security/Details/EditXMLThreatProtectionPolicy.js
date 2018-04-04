@@ -16,12 +16,11 @@
  * under the License.
  */
 
+import React, { Component } from 'react';
 
-import React, {Component} from 'react'
-
-import {Link} from 'react-router-dom'
+import { Link } from 'react-router-dom';
 import AppBar from 'material-ui/AppBar';
-import Toolbar from 'material-ui/Toolbar';;
+import Toolbar from 'material-ui/Toolbar';
 import IconButton from 'material-ui/IconButton';
 import Button from 'material-ui/Button';
 import MenuIcon from 'material-ui-icons/Menu';
@@ -30,85 +29,86 @@ import Divider from 'material-ui/Divider';
 import Grid from 'material-ui/Grid';
 import Paper from 'material-ui/Paper';
 
-import API from '../../../data/api'
-import Message from '../../Shared/Message'
-import XMLPolicyFields from '../Shared/XMLPolicyFields'
+import API from '../../../data/api';
+import Message from '../../Shared/Message';
+import XMLPolicyFields from '../Shared/XMLPolicyFields';
 
 class EditXMLThreatProtectionPolicy extends Component {
-    state = {
-        policy: null
-    };
+    constructor(props) {
+        super(props);
+        this.state = {
+            policy: null,
+        };
+    }
 
     componentDidMount() {
-        var api = new API();
+        const api = new API();
         const promised_policy = api.getThreatProtectionPolicy(this.props.match.params.policy_uuid);
-        promised_policy.then(
-            response => {
-                var policy = response.obj;
-                policy.policy = JSON.parse(policy.policy);
-                this.setState({policy: policy});
-            }
-        );
+        promised_policy.then((response) => {
+            const policy = response.obj;
+            policy.policy = JSON.parse(policy.policy);
+            this.setState({ policy });
+        });
     }
 
     handleChangeChild(name, value) {
-        var policy = this.state.policy;
-        if (name == "name") {
+        const policy = this.state.policy;
+        if (name == 'name') {
             policy.name = value;
         } else {
             policy.policy[name] = value;
         }
-        this.setState({policy: policy});
+        this.setState({ policy });
     }
 
     handlePolicyUpdate(name, value) {
-        var api = new API();
-        var policy = this.state.policy;
+        const api = new API();
+        const policy = this.state.policy;
         policy.policy = JSON.stringify(policy.policy);
         const promised_policy = api.addThreatProtectionPolicy(policy);
-        promised_policy.then(
-            response => {
-                if (response.status == 200) {
-                    this.msg.info("Threat protection policy updated successfully.");
-                } else {
-                    this.msg.error("Failed to update threat protection policy.");
-                    console.log(response.statusText);
-                }
+        promised_policy.then((response) => {
+            if (response.status == 200) {
+                this.msg.info('Threat protection policy updated successfully.');
+            } else {
+                this.msg.error('Failed to update threat protection policy.');
+                console.log(response.statusText);
             }
-        );
+        });
     }
 
     render() {
         return (
             <div>
-                <AppBar position="static" >
-                    <Toolbar style={{minHeight:'30px'}}>
-                        <IconButton color="contrast" aria-label="Menu">
+                <AppBar position='static'>
+                    <Toolbar style={{ minHeight: '30px' }}>
+                        <IconButton color='contrast' aria-label='Menu'>
                             <MenuIcon />
                         </IconButton>
-                        <Link to={"/security/xml_threat_protection"}>
-                            <Button color="contrast">Go Back</Button>
+                        <Link to='/security/xml_threat_protection'>
+                            <Button color='contrast'>Go Back</Button>
                         </Link>
                     </Toolbar>
                 </AppBar>
-                <Message ref={a => this.msg = a}/>
+                <Message ref={a => (this.msg = a)} />
                 <Paper>
-                    <Grid container className="root" direction="column">
-                        <Grid item xs={12} className="grid-item">
-                            <Typography className="page-title" type="display1" gutterBottom>
+                    <Grid container className='root' direction='column'>
+                        <Grid item xs={12} className='grid-item'>
+                            <Typography className='page-title' type='display1' gutterBottom>
                                 Edit Threat Protection Policy
                             </Typography>
                         </Grid>
-                        <XMLPolicyFields policy={this.state.policy} handleChangeChild={this.handleChangeChild.bind(this)} />
-                        <Paper elevation ={20}>
-                            <Grid item xs={6} className="grid-item">
+                        <XMLPolicyFields
+                            policy={this.state.policy}
+                            handleChangeChild={this.handleChangeChild.bind(this)}
+                        />
+                        <Paper elevation={20}>
+                            <Grid item xs={6} className='grid-item'>
                                 <Divider />
-                                <div >
-                                    <Button raised color="primary" onClick = {
-                                        () => this.handlePolicyUpdate()}>
+                                <div>
+                                    <Button raised color='primary' onClick={() => this.handlePolicyUpdate()}>
                                         Update
                                     </Button>
-                                    <Link to={"/security/xml_threat_protection"}>
+                                    <Link to='/security/xml_threat_protection'>
                                         <Button raised>Cancel</Button>
                                     </Link>
                                 </div>
@@ -121,4 +121,4 @@ class EditXMLThreatProtectionPolicy extends Component {
     }
 }
 
-export default EditXMLThreatProtectionPolicy
+export default EditXMLThreatProtectionPolicy;

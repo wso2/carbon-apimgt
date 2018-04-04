@@ -16,10 +16,16 @@
  * under the License.
  */
 
-import ReactDOM from 'react-dom'
-import React from 'react'
-import AdminPortal from "./src/App.js"
+import ReactDOM from 'react-dom';
+import React from 'react';
 import { LocaleProvider } from 'antd';
 import enUS from 'antd/lib/locale-provider/en_US';
 
-ReactDOM.render(<LocaleProvider locale={enUS}><AdminPortal/></LocaleProvider>, document.getElementById("react-root"));
+import AdminPortal from './src/App';
+
+ReactDOM.render(
+    <LocaleProvider locale={enUS}>
+        <AdminPortal />
+    </LocaleProvider>,
+    document.getElementById('react-root'),
+);
