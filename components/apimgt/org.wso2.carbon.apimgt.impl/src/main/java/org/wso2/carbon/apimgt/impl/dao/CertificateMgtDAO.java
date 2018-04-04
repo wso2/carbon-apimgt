@@ -135,7 +135,6 @@ public class CertificateMgtDAO {
             handleException("Error while retrieving certificates.", e);
         } finally {
             APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
-            APIMgtDBUtil.closeStatement(preparedStatement);
             APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
         }
         return certificates;
@@ -200,7 +199,6 @@ public class CertificateMgtDAO {
             handleException("Error while persisting certificate metadata.", e);
         } finally {
             APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
-            APIMgtDBUtil.closeStatement(preparedStatement);
             APIMgtDBUtil.closeAllConnections(preparedStatement, connection, null);
         }
         return result;
@@ -243,7 +241,6 @@ public class CertificateMgtDAO {
             handleException("Error while retrieving certificate metadata.", e);
         } finally {
             APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
-            APIMgtDBUtil.closeStatement(preparedStatement);
             APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
         }
         return certificateMetadataDTO;
@@ -286,7 +283,6 @@ public class CertificateMgtDAO {
             handleException("Error while retrieving certificate metadata.", e);
         } finally {
             APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
-            APIMgtDBUtil.closeStatement(preparedStatement);
             APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
         }
         return certificateMetadataDTO;
