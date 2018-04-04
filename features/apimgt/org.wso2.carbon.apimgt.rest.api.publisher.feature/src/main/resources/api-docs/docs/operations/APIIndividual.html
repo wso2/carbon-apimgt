@@ -33,6 +33,8 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
             <h4 class="section-heading">Sample CURL</h4>
                 <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -X DELETE https://localhost:9443/api/am/publisher/v0.12/apis/6fb74674-4ab8-4b52-9886-f9a376985060</code></div>
 
+         
+
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
                 <colgroup>
@@ -291,6 +293,8 @@ Content-Type: application/json
             <h4 class="section-heading">Sample CURL</h4>
                 <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://localhost:9443/api/am/publisher/v0.12/apis/7a2298c4-c905-403f-8fac-38c73301631f</code></div>
 
+         
+
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
                 <colgroup>
@@ -537,7 +541,7 @@ Content-Type: application/json
       &quot;password&quot;: &quot;pass&quot;
    },
    &quot;gatewayEnvironments&quot;: &quot;Production and Sandbox&quot;,
-   &quot;sequences&quot;: [],
+   &quot;sequences&quot;: [{&quot;name&quot;:&quot;json_validator&quot;,&quot;type&quot;: &quot;in&quot;},{&quot;name&quot;:&quot;log_out_message&quot;,&quot;type&quot;: &quot;out&quot;}],
    &quot;subscriptionAvailability&quot;: null,
    &quot;subscriptionAvailableTenants&quot;: [],
    &quot;businessInformation&quot;:    {
@@ -611,7 +615,7 @@ Content-Type: application/json
       &quot;password&quot;: &quot;pass&quot;
    },
    &quot;gatewayEnvironments&quot;: &quot;Production and Sandbox&quot;,
-   &quot;sequences&quot;: [],
+   &quot;sequences&quot;: [{&quot;name&quot;:&quot;json_validator&quot;,&quot;type&quot;:&quot;in&quot;,&quot;id&quot;:&quot;142ece76-b208-4aab-b29a-f382045ed066&quot;,&quot;shared&quot;:false},{&quot;name&quot;:&quot;log_out_message&quot;,&quot;type&quot;:&quot;out&quot;,&quot;id&quot;:&quot;b3527be8-95e6-41e0-8097-3276987b7d4b&quot;,&quot;shared&quot;:false}],
    &quot;subscriptionAvailability&quot;: null,
    &quot;subscriptionAvailableTenants&quot;: [],
    &quot;businessInformation&quot;:    {
@@ -643,6 +647,8 @@ Content-Type: application/json
 
             <h4 class="section-heading">Sample CURL</h4>
                 <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -H &quot;Content-Type: application/json&quot; -X PUT -d @data.json https://localhost:9443/api/am/publisher/v0.12/apis/7a2298c4-c905-403f-8fac-38c73301631f</code></div>
+
+         
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -923,6 +929,8 @@ Content-Length: 329
             <h4 class="section-heading">Sample CURL</h4>
                 <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://localhost:9443/api/am/publisher/v0.12/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/swagger</code></div>
 
+         
+
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
                 <colgroup>
@@ -1172,6 +1180,8 @@ Content-Type: application/json
 
             <h4 class="section-heading">Sample CURL</h4>
                 <div class="pre"><code class="bash">curl -k -H &quot;Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013&quot; -F apiDefinition&#x3D;&quot;{\&quot;paths\&quot;:{\&quot;\/*\&quot;:{\&quot;get\&quot;:{\&quot;x-auth-type\&quot;:\&quot;Application\&quot;,\&quot;x-throttling-tier\&quot;:\&quot;Unlimited\&quot;,\&quot;responses\&quot;:{\&quot;200\&quot;:{\&quot;description\&quot;:\&quot;OK\&quot;}}}}},\&quot;x-wso2-security\&quot;:{\&quot;apim\&quot;:{\&quot;x-wso2-scopes\&quot;:[]}},\&quot;swagger\&quot;:\&quot;2.0\&quot;,\&quot;info\&quot;:{\&quot;title\&quot;:\&quot;PhoneVerification\&quot;,\&quot;description\&quot;:\&quot;Verify a phone number\&quot;,\&quot;contact\&quot;:{\&quot;email\&quot;:\&quot;xx@ee.com\&quot;,\&quot;name\&quot;:\&quot;xx\&quot;},\&quot;version\&quot;:\&quot;1.0.0\&quot;}}&quot; -X PUT &quot;https://localhost:9443/api/am/publisher/v0.12/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/swagger&quot;</code></div>
+
+         
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -1432,6 +1442,8 @@ Content-Type: image/jpeg
             <h4 class="section-heading">Sample CURL</h4>
                 <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer d34baf74-3f02-3929-814e-88b27f750ba9&quot; https://localhost:9443/api/am/publisher/v0.12/apis/29c9ec3d-f590-467e-83e6-96d43517080f/thumbnail &gt; image.jpg</code></div>
 
+         
+
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
                 <colgroup>
@@ -1670,6 +1682,8 @@ Content-Type: application/json
 
             <h4 class="section-heading">Sample CURL</h4>
                 <div class="pre"><code class="bash">curl -X POST -H &quot;Authorization: Bearer d34baf74-3f02-3929-814e-88b27f750ba9&quot; https://localhost:9443/api/am/publisher/v0.12/apis/29c9ec3d-f590-467e-83e6-96d43517080f/thumbnail -F file&#x3D;@image.jpg</code></div>
+
+         
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -1921,6 +1935,8 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 
             <h4 class="section-heading">Sample CURL</h4>
                 <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -X POST &quot;https://localhost:9443/api/am/publisher/v0.12/apis/change-lifecycle?apiId&#x3D;890a4f4d-09eb-4877-a323-57f6ce2ed79b&amp;action&#x3D;Publish&quot;</code></div>
+
+         
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -2266,6 +2282,8 @@ Content-Type: application/json
             <h4 class="section-heading">Sample CURL</h4>
                 <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -X POST &quot;https://localhost:9443/api/am/publisher/v0.12/apis/copy-api?apiId&#x3D;890a4f4d-09eb-4877-a323-57f6ce2ed79b&amp;newVersion&#x3D;2.0.0&quot;</code></div>
 
+         
+
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
                 <colgroup>
@@ -2427,7 +2445,7 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
    &quot;provider&quot;: &quot;admin&quot;,
    &quot;apiDefinition&quot;: &quot;{\&quot;paths\&quot;:{\&quot;/order\&quot;:{\&quot;post\&quot;:{\&quot;x-auth-type\&quot;:\&quot;Application &amp; Application User\&quot;,\&quot;x-throttling-tier\&quot;:\&quot;Unlimited\&quot;,\&quot;description\&quot;:\&quot;Create a new Order\&quot;,\&quot;parameters\&quot;:[{\&quot;schema\&quot;:{\&quot;$ref\&quot;:\&quot;#/definitions/Order\&quot;},\&quot;description\&quot;:\&quot;Order object that needs to be added\&quot;,\&quot;name\&quot;:\&quot;body\&quot;,\&quot;required\&quot;:true,\&quot;in\&quot;:\&quot;body\&quot;}],\&quot;responses\&quot;:{\&quot;201\&quot;:{\&quot;headers\&quot;:{\&quot;Location\&quot;:{\&quot;description\&quot;:\&quot;The URL of the newly created resource.\&quot;,\&quot;type\&quot;:\&quot;string\&quot;}},\&quot;schema\&quot;:{\&quot;$ref\&quot;:\&quot;#/definitions/Order\&quot;},\&quot;description\&quot;:\&quot;Created.\&quot;}}}},\&quot;/menu\&quot;:{\&quot;get\&quot;:{\&quot;x-auth-type\&quot;:\&quot;Application &amp; Application User\&quot;,\&quot;x-throttling-tier\&quot;:\&quot;Unlimited\&quot;,\&quot;description\&quot;:\&quot;Return a list of available menu items\&quot;,\&quot;parameters\&quot;:[],\&quot;responses\&quot;:{\&quot;200\&quot;:{\&quot;headers\&quot;:{},\&quot;schema\&quot;:{\&quot;title\&quot;:\&quot;Menu\&quot;,\&quot;properties\&quot;:{\&quot;list\&quot;:{\&quot;items\&quot;:{\&quot;$ref\&quot;:\&quot;#/definitions/MenuItem\&quot;},\&quot;type\&quot;:\&quot;array\&quot;}},\&quot;type\&quot;:\&quot;object\&quot;},\&quot;description\&quot;:\&quot;OK.\&quot;}}}}},\&quot;schemes\&quot;:[\&quot;https\&quot;],\&quot;produces\&quot;:[\&quot;application/json\&quot;],\&quot;swagger\&quot;:\&quot;2.0\&quot;,\&quot;definitions\&quot;:{\&quot;MenuItem\&quot;:{\&quot;title\&quot;:\&quot;Pizza menu Item\&quot;,\&quot;properties\&quot;:{\&quot;price\&quot;:{\&quot;type\&quot;:\&quot;string\&quot;},\&quot;description\&quot;:{\&quot;type\&quot;:\&quot;string\&quot;},\&quot;name\&quot;:{\&quot;type\&quot;:\&quot;string\&quot;},\&quot;image\&quot;:{\&quot;type\&quot;:\&quot;string\&quot;}},\&quot;required\&quot;:[\&quot;name\&quot;]},\&quot;Order\&quot;:{\&quot;title\&quot;:\&quot;Pizza Order\&quot;,\&quot;properties\&quot;:{\&quot;customerName\&quot;:{\&quot;type\&quot;:\&quot;string\&quot;},\&quot;delivered\&quot;:{\&quot;type\&quot;:\&quot;boolean\&quot;},\&quot;address\&quot;:{\&quot;type\&quot;:\&quot;string\&quot;},\&quot;pizzaType\&quot;:{\&quot;type\&quot;:\&quot;string\&quot;},\&quot;creditCardNumber\&quot;:{\&quot;type\&quot;:\&quot;string\&quot;},\&quot;quantity\&quot;:{\&quot;type\&quot;:\&quot;number\&quot;},\&quot;orderId\&quot;:{\&quot;type\&quot;:\&quot;string\&quot;}},\&quot;required\&quot;:[\&quot;orderId\&quot;]}},\&quot;consumes\&quot;:[\&quot;application/json\&quot;],\&quot;info\&quot;:{\&quot;title\&quot;:\&quot;PizzaShackAPI\&quot;,\&quot;description\&quot;:\&quot;This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\n\&quot;,\&quot;license\&quot;:{\&quot;name\&quot;:\&quot;Apache 2.0\&quot;,\&quot;url\&quot;:\&quot;http://www.apache.org/licenses/LICENSE-2.0.html\&quot;},\&quot;contact\&quot;:{\&quot;email\&quot;:\&quot;architecture@pizzashack.com\&quot;,\&quot;name\&quot;:\&quot;John Doe\&quot;,\&quot;url\&quot;:\&quot;http://www.pizzashack.com\&quot;},\&quot;version\&quot;:\&quot;1.0.0\&quot;}}&quot;,
    &quot;wsdlUri&quot;: null,
-   &quot;status&quot;: &quot;PUBLISHED&quot;,
+   &quot;status&quot;: &quot;CREATED&quot;,
    &quot;responseCaching&quot;: &quot;Disabled&quot;,
    &quot;cacheTimeout&quot;: 300,
    &quot;destinationStatsEnabled&quot;: false,
@@ -2452,7 +2470,7 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
       &quot;password&quot;: &quot;pass&quot;
    },
    &quot;gatewayEnvironments&quot;: &quot;Production and Sandbox&quot;,
-   &quot;sequences&quot;: [],
+   &quot;sequences&quot;: [{&quot;name&quot;:&quot;json_validator&quot;,&quot;type&quot;: &quot;in&quot;},{&quot;name&quot;:&quot;log_out_message&quot;,&quot;type&quot;: &quot;out&quot;}],
    &quot;subscriptionAvailability&quot;: null,
    &quot;subscriptionAvailableTenants&quot;: [],
    &quot;businessInformation&quot;:    {
@@ -2526,7 +2544,7 @@ Content-Type: application/json
       &quot;password&quot;: &quot;pass&quot;
    },
    &quot;gatewayEnvironments&quot;: &quot;Production and Sandbox&quot;,
-   &quot;sequences&quot;: [],
+   &quot;sequences&quot;: [{&quot;name&quot;:&quot;json_validator&quot;,&quot;type&quot;:&quot;in&quot;,&quot;id&quot;:&quot;142ece76-b208-4aab-b29a-f382045ed066&quot;,&quot;shared&quot;:false},{&quot;name&quot;:&quot;log_out_message&quot;,&quot;type&quot;:&quot;out&quot;,&quot;id&quot;:&quot;b3527be8-95e6-41e0-8097-3276987b7d4b&quot;,&quot;shared&quot;:false}],
    &quot;subscriptionAvailability&quot;: null,
    &quot;subscriptionAvailableTenants&quot;: [],
    &quot;businessInformation&quot;:    {
@@ -2558,6 +2576,8 @@ Content-Type: application/json
 
             <h4 class="section-heading">Sample CURL</h4>
                 <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -H &quot;Content-Type: application/json&quot; -X POST -d @data.json https://localhost:9443/api/am/publisher/v0.12/apis</code></div>
+
+         
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
