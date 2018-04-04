@@ -69,6 +69,13 @@ class ApplicationPolicy extends Component {
                 },
             },
         };
+        this.setBandwithDataUnit = this.setBandwithDataUnit.bind(this);
+        this.setRateLimitUnit = this.setRateLimitUnit.bind(this);
+        this.handleLimitTypeRadioButtonChild = this.handleLimitTypeRadioButtonChild.bind(this);
+        this.handleChangeChild = this.handleChangeChild.bind(this);
+        this.handleAttributeChange = this.handleAttributeChange.bind(this);
+        this.handleDefaultQuotaChangeChild = this.handleDefaultQuotaChangeChild.bind(this);
+        this.handlePolicyUpdate = this.handlePolicyUpdate.bind(this);
     }
 
     componentDidMount() {

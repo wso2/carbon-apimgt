@@ -1,8 +1,8 @@
 {
   "name": "wso2_apim_publisher",
-  "version": "1.0.0",
-  "description": "WSO2 API Manager Web Apps Publisher",
-  "main": "app.js",
+  "version": "3.0.0",
+  "description": "WSO2 API Manager Publisher Web App",
+  "main": "app.jsx",
   "scripts": {
     "test": "NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED='0' mocha --recursive --require babel-register  -r mock-local-storage \"./source/test/**/*.test.js\"",
     "build_prod": "NODE_ENV=production webpack -p --progress --colors --config webpack.config.js",
