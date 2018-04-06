@@ -30,6 +30,7 @@ import Divider from 'material-ui/Divider';
 import Button from 'material-ui/Button';
 import MenuIcon from 'material-ui-icons/Menu';
 import TextField from 'material-ui/TextField';
+import {withStyles} from 'material-ui/styles';
 
 import API from '../../data/api'
 import Message from '../Shared/Message'
@@ -41,7 +42,22 @@ const messages = {
   retrieveError: 'Error while retrieving business plans'
 };
 
-export default class BusinessPlans extends Component {
+const styles = theme => ({
+    divider: {
+        marginBottom: 20,
+    },
+    createButton:{
+        textDecoration: 'none',
+        display: 'inline-block',
+        marginLeft: 20,
+        alignSelf: 'flex-start',
+    },
+    titleWrapper: {
+        display: 'flex',
+    }
+});
+
+class BusinessPlans extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -84,6 +100,7 @@ export default class BusinessPlans extends Component {
     render() {
         /*TODO implement search and pagination*/
         const tiers = this.state.policies;
+        const {classes} = this.props;
         let data = [];
         if(tiers) {
           data = tiers;
@@ -91,36 +108,26 @@ export default class BusinessPlans extends Component {
 
         return (
             <div>
-                <AppBar position="static" >
-                    <Toolbar style={{minHeight:'30px'}}>
-                        <IconButton color="contrast" aria-label="Menu">
-                            <MenuIcon />
-                        </IconButton>
-                        <Link to={"/policies/business_plans/create/"}>
-                             <Button color="contrast">Add Plan</Button>
-                        </Link>
-                    </Toolbar>
-                </AppBar>
                 <Message ref={a => this.msg = a}/>
-                <Grid container>
+                <Grid container justify="center" alignItems="center">
                     <Grid item xs={12}>
-                        <Paper>
-                            <Typography className="page-title" type="display1" gutterBottom>
-                               Business Plans
+                    
+                        <div className={classes.titleWrapper}>
+                            <Typography variant="display1" gutterBottom >
+                                    Business Plans
                             </Typography>
+                            <Link to={"/policies/business_plans/create/"} className={classes.createButton}>
+                                <Button variant="raised" color="primary" className={classes.button}>
+                                Add Plan
+                                </Button>
+                            </Link>
                             <Typography type="caption" gutterBottom align="left" className="page-title-help">
                             Discription goes here.
-                            </Typography>
-
-                            <Divider />
-                            <div className="page-content">
-                              <TextField
-                                label="Search"
-                                margin="normal"
-                              />
-                            </div>
-                            <Divider />
-                        </Paper>
+                            </Typography>                          
+                        </div>
+                        <Divider className={classes.divider} />
+                    
+                       
                     </Grid>
                     <Grid item xs={12} className="page-content">
                           <Paper>
@@ -170,3 +177,5 @@ export default class BusinessPlans extends Component {
         );
     }
 }
+
+export default withStyles(styles)(BusinessPlans)

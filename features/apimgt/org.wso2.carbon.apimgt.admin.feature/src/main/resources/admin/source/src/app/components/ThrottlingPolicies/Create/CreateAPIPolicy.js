@@ -68,6 +68,13 @@ class CreateAPIPolicy extends Component {
                 conditionalGroups: [],
             },
         };
+        this.setBandwithDataUnit = this.setBandwithDataUnit.bind(this);
+        this.setRateLimitUnit = this.setRateLimitUnit.bind(this);
+        this.handleLimitTypeRadioButtonChild = this.handleLimitTypeRadioButtonChild.bind(this);
+        this.handleChangeChild = this.handleChangeChild.bind(this);
+        this.handleDefaultQuotaChangeChild = this.handleDefaultQuotaChangeChild.bind(this);
+        this.handleAttributeChange = this.handleAttributeChange.bind(this);
+        
     }
 
     setBandwithDataUnit(value) {
@@ -91,10 +98,7 @@ class CreateAPIPolicy extends Component {
     handleChangeChild(name, value) {
         const policy = this.state.policy;
         const intValue = parseInt(value);
-        policy[name] = isNaN(intValue) ? value : intValue;
-        if (name == 'policyName') {
-            policy.displayName = value;
-        }
+        policy[name] = value;
         this.setState({
             policy,
         });
@@ -131,6 +135,8 @@ class CreateAPIPolicy extends Component {
         promised_policies
             .then((response) => {
                 this.msg.info(messages.success);
+                let redirect_url = "/policies/api_policies";
+                this.props.history.push(redirect_url);
             })
             .catch((error) => {
                 this.msg.error(messages.failure);

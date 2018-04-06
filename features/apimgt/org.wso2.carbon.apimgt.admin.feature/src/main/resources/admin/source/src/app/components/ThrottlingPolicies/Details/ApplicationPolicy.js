@@ -118,11 +118,7 @@ class ApplicationPolicy extends Component {
 
     handleChangeChild(name, value) {
         const policy = this.state.policy;
-        const intValue = parseInt(value);
-        policy[name] = isNaN(intValue) ? value : intValue;
-        if (name == 'policyName') {
-            policy.displayName = value;
-        }
+        policy[name] = value;
         this.setState({
             policy,
         });
@@ -159,6 +155,8 @@ class ApplicationPolicy extends Component {
         promised_policies
             .then((response) => {
                 this.msg.info(messages.success);
+                let redirect_url = "/policies/application_policies";
+                this.props.history.push(redirect_url);
             })
             .catch((error) => {
                 this.msg.error(messages.failure);

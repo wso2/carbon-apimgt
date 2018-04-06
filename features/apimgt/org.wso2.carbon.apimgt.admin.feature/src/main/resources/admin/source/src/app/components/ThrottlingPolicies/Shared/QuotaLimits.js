@@ -46,6 +46,7 @@ class QuotaLimits extends Component {
             anchorElUnit: null,
             openUnit: false,
             selectedIndexUnit: 0,
+            error:true
         };
         this.handleDefaultQuotaChange = this.handleDefaultQuotaChange.bind(this);
         this.handleQuotaClickListItem = this.handleQuotaClickListItem.bind(this);
@@ -53,8 +54,8 @@ class QuotaLimits extends Component {
         this.handleQuotaRequestClose = this.handleQuotaRequestClose.bind(this);
         this.handleUnitRequestClose = this.handleUnitRequestClose.bind(this);
         this.handleQuotaMenuItemClick = this.handleQuotaMenuItemClick.bind(this);
-        this.handleUnitMenuItemClick = this.handleQuotaMenuItemClick.bind(this);
-        this.handleLimitTypeRadioButton = this.handleQuotaMenuItemClick.bind(this);
+        this.handleUnitMenuItemClick = this.handleUnitMenuItemClick.bind(this);
+        this.handleLimitTypeRadioButton = this.handleLimitTypeRadioButton.bind(this);
     }
 
     // get the index values to load the menus
@@ -154,6 +155,7 @@ class QuotaLimits extends Component {
                         onChange={this.handleDefaultQuotaChange('RequestCountLimit')}
                         className='text-field-full'
                         margin='normal'
+                        
                     />
                 </Grid>
             );
