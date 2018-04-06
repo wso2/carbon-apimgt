@@ -3,11 +3,7 @@ package org.wso2.carbon.apimgt.rest.api.store.impl;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -898,9 +894,9 @@ public class ApisApiServiceImpl extends ApisApiService {
         try {
             String username = RestApiUtil.getLoggedInUsername(request);
             APIStore apiStore = RestApiUtil.getConsumer(username);
-            List<String> labelList = new ArrayList<>();
+            Set<String> labelList = new HashSet<>();
             if (labels != null){
-                labelList = Arrays.asList(labels.split(","));
+                labelList.addAll(Arrays.asList(labels.split(",")));
             }
             apisResult = apiStore.searchAPIsByStoreLabels(query, offset, limit, labelList);
             // convert API
