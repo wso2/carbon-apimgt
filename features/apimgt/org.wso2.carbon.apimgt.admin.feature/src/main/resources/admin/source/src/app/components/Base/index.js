@@ -45,7 +45,7 @@ class Base extends Component {
 
     render() {
         return (
-            <Layout style={{ height: '100vh' }}>
+            <Layout style={{ height: '100vh'}}>
                 <ComposeHeader />
                 <Sider
                     collapsed={this.state.collapsed}
@@ -58,7 +58,7 @@ class Base extends Component {
                 >
                     <NavBar />
                 </Sider>
-                <Layout>
+                <Layout style={{ height: '100vh', backgroundColor : "#fafafa" }}>
                     <Content style={{ marginTop: 45 }}>{this.props.children}</Content>
                     <Footer />
                 </Layout>

@@ -73,6 +73,7 @@ class CreateApplicationPolicy extends Component {
         this.handleDefaultQuotaChangeChild = this.handleDefaultQuotaChangeChild.bind(this);
         this.handleAttributeChange = this.handleAttributeChange.bind(this);
         this.handlePolicySave = this.handlePolicySave.bind(this);
+        this.handleChangeChild = this.handleChangeChild.bind(this);
     }
 
     setBandwithDataUnit(value) {
@@ -96,10 +97,7 @@ class CreateApplicationPolicy extends Component {
     handleChangeChild(name, value) {
         const policy = this.state.policy;
         const intValue = parseInt(value);
-        policy[name] = isNaN(intValue) ? value : intValue;
-        if (name == 'policyName') {
-            policy.displayName = value;
-        }
+        policy[name] = value
         this.setState({
             policy,
         });
@@ -136,6 +134,8 @@ class CreateApplicationPolicy extends Component {
         promised_policies
             .then((response) => {
                 this.msg.info(messages.success);
+                let redirect_url = "/policies/application_policies";
+                this.props.history.push(redirect_url);
             })
             .catch((error) => {
                 this.msg.error(messages.failure);
@@ -147,11 +147,11 @@ class CreateApplicationPolicy extends Component {
             <div>
                 <AppBar position='static'>
                     <Toolbar style={{ minHeight: '30px' }}>
-                        <IconButton color='contrast' aria-label='Menu'>
+                        <IconButton color='default' aria-label='Menu'>
                             <MenuIcon />
                         </IconButton>
                         <Link to='/policies/application_policies'>
-                            <Button color='contrast'>Go Back</Button>
+                            <Button color='default'>Go Back</Button>
                         </Link>
                     </Toolbar>
                 </AppBar>
@@ -177,11 +177,11 @@ class CreateApplicationPolicy extends Component {
                             <Grid item xs={6} className='grid-item'>
                                 <Divider />
                                 <div>
-                                    <Button raised color='primary' onClick={() => this.handlePolicySave()}>
+                                    <Button  color='primary' onClick={() => this.handlePolicySave()}>
                                         Save
                                     </Button>
                                     <Link to='/policies/application_policies'>
-                                        <Button raised>Cancel</Button>
+                                        <Button >Cancel</Button>
                                     </Link>
                                 </div>
                             </Grid>
