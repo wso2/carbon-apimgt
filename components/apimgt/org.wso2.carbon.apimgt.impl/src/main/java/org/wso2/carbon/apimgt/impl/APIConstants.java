@@ -1397,4 +1397,6 @@ public final class APIConstants {
     public static final String UNLIMITED_TIER_NAME = "unlimited";
     public static final String FAULT_SEQUENCE = "fault";
     public static final String OUT_SEQUENCE = "out";
+
+    public static final String ENABLE_DUPLICATE_SCOPES = "enableDuplicateScopes";
 }
