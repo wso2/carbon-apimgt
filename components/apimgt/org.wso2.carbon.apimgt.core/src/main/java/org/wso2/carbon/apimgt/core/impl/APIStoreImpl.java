@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
+import org.wso2.carbon.apimgt.core.dao.SearchType;
 import org.wso2.carbon.apimgt.core.dao.TagDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APICommentException;
@@ -115,6 +116,8 @@ import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -173,9 +176,15 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
     @Override
     public List<API> getAllAPIsByStatus(int offset, int limit, String[] statuses) throws APIManagementException {
-        List<API> apiResults = null;
+        List<API> apiResults;
+        EnumSet<APIStatus> apiStatuses = EnumSet.noneOf(APIStatus.class);
+
+        for (String status : statuses) {
+            apiStatuses.add(APIStatus.valueOf(status));
+        }
+
         try {
-            apiResults = getApiDAO().getAPIsByStatus(new ArrayList<>(Arrays.asList(statuses)));
+            apiResults = getApiDAO().getAPIsByStatus(apiStatuses);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while fetching APIs for the given statuses     - "
                     + Arrays.toString(statuses);
@@ -1412,7 +1421,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
      * {@inheritDoc}
      */
     @Override
-    public List<API> searchAPIsByStoreLabels(String query, int offset, int limit, List<String> labels) throws
+    public List<API> searchAPIsByStoreLabels(String query, int offset, int limit, Set<String> labels) throws
             APIManagementException {
 
         List<API> apiResults = null;
@@ -1426,7 +1435,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             Set<String> roles = APIUtils.getAllRolesOfUser(user);
             if (query != null && !query.isEmpty()) {
                 String[] attributes = query.split(",");
-                Map<String, String> attributeMap = new HashMap<>();
+                Map<SearchType, String> attributeMap = new EnumMap<>(SearchType.class);
                 // TODO get the logged in user and user roles from key manager.
                 boolean isFullTextSearch = false;
                 String searchAttribute, searchValue;
@@ -1435,20 +1444,18 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 } else {
                     searchAttribute = attributes[0].split(":")[0];
                     searchValue = attributes[0].split(":")[1];
-                    attributeMap.put(searchAttribute, searchValue);
+                    attributeMap.put(SearchType.fromString(searchAttribute), searchValue);
                 }
 
                 if (isFullTextSearch) {
                     apiResults = getApiDAO().searchAPIsByStoreLabel(roles, user, query, offset, limit, labels);
                 } else {
-                    apiResults = getApiDAO().searchAPIsByAttributeInStore(new ArrayList<>(roles), labels,
+                    apiResults = getApiDAO().searchAPIsByAttributeInStore(roles, labels,
                             attributeMap,
                             offset, limit);
                 }
             } else {
-                List<String> statuses = new ArrayList<>();
-                statuses.add(APIStatus.PUBLISHED.getStatus());
-                statuses.add(APIStatus.PROTOTYPED.getStatus());
+                Set<APIStatus> statuses = EnumSet.of(APIStatus.PUBLISHED, APIStatus.PROTOTYPED);
                 apiResults = getApiDAO().getAPIsByStatus(roles, statuses, labels);
             }
 

@@ -48,6 +48,7 @@ import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
+import org.wso2.carbon.apimgt.core.dao.SearchType;
 import org.wso2.carbon.apimgt.core.dao.TagDAO;
 import org.wso2.carbon.apimgt.core.dao.ThreatProtectionDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
@@ -113,6 +114,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -1460,7 +1462,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             if (query != null && !query.isEmpty()) {
 
                 String[] attributes = query.split(ATTRIBUTE_DELIMITER);
-                Map<String, String> attributeMap = new HashMap<>();
+                Map<SearchType, String> attributeMap = new EnumMap<>(SearchType.class);
 
                 boolean isFullTextSearch = false;
                 String searchAttribute, searchValue;
@@ -1472,7 +1474,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         searchAttribute = attribute.split(KEY_VALUE_DELIMITER)[0];
                         searchValue = attribute.split(KEY_VALUE_DELIMITER)[1];
                         log.debug(searchAttribute + KEY_VALUE_DELIMITER + searchValue);
-                        attributeMap.put(searchAttribute, searchValue);
+                        attributeMap.put(SearchType.fromString(searchAttribute), searchValue);
                     }
                 }
 

@@ -47,6 +47,7 @@ import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationResponse;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Set;
 
 /**
  * This interface used to write Store specific methods.
@@ -79,13 +80,13 @@ public interface APIStore extends APIManager {
      * Returns a paginated list of all APIs which match the given search criteria.
      *
      * @param query searchType
-     * @param limit limit
      * @param offset offset
-     * @param labelIds ids of the labels
+     * @param limit limit
+     * @param labels ids of the labels
      * @return {@code List<API>} matching results
      * @throws APIManagementException   If failed to search apis.
      */
-    List<API> searchAPIsByStoreLabels(String query, int offset, int limit, List<String> labelIds) throws
+    List<API> searchAPIsByStoreLabels(String query, int offset, int limit, Set<String> labels) throws
             APIManagementException;
 
     /**

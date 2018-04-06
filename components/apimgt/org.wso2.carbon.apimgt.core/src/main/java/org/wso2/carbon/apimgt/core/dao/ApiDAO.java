@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.core.dao;
 
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.DedicatedGateway;
@@ -152,7 +153,7 @@ public interface ApiDAO {
      * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    List<API> getAPIsByStatus(List<String> statuses) throws APIMgtDAOException;
+    List<API> getAPIsByStatus(Set<APIStatus> statuses) throws APIMgtDAOException;
 
     /**
      * Retrieves summary data of all available APIs with life cycle status that matches the status list provided
@@ -160,10 +161,11 @@ public interface ApiDAO {
      *
      * @param roles    role list of current user
      * @param statuses status of APIs to be returned
+     * @param labels
      * @return API list
      * @throws APIMgtDAOException if failed to fetch APIs from database
      */
-    List<API> getAPIsByStatus(Set<String> roles, List<String> statuses, List<String> labels) throws APIMgtDAOException;
+    List<API> getAPIsByStatus(Set<String> roles, Set<APIStatus> statuses, Set<String> labels) throws APIMgtDAOException;
 
     /**
      * Retrieves summary of paginated data of all available APIs that match the given search criteria. This will use
@@ -196,7 +198,7 @@ public interface ApiDAO {
      *
      */
     List<API> searchAPIsByStoreLabel(Set<String> roles, String user, String searchString, int offset, int limit,
-                                     List<String> labels)
+                                     Set<String> labels)
             throws APIMgtDAOException;
 
     /**
@@ -227,7 +229,7 @@ public interface ApiDAO {
      * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    List<API> attributeSearchAPIs(Set<String> roles, String user, Map<String, String> attributeMap,
+    List<API> attributeSearchAPIs(Set<String> roles, String user, Map<SearchType, String> attributeMap,
                                   int offset, int limit) throws APIMgtDAOException;
 
     /**
@@ -235,14 +237,15 @@ public interface ApiDAO {
      * given search criteria.
      *
      * @param roles List of the roles of the user.
+     * @param labels Id's of the labels
      * @param attributeMap Map containing the attributes to be searched
      * @param offset The starting point of the search results.
      * @param limit Number of search results that will be returned.
-     * @param labels Id's of the labels
      * @return {@code List<API>} matching results
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    List<API> searchAPIsByAttributeInStore(List<String> roles, List<String> labels, Map<String, String> attributeMap,
+    List<API> searchAPIsByAttributeInStore(Set<String> roles, Set<String> labels,
+                                           Map<SearchType, String> attributeMap,
                                            int offset, int limit) throws APIMgtDAOException;
 
     /**
