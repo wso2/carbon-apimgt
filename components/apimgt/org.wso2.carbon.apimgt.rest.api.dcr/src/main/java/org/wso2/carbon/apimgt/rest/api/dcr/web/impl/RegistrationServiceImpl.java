@@ -39,11 +39,14 @@ import org.wso2.carbon.identity.application.common.model.InboundAuthenticationCo
 import org.wso2.carbon.identity.application.common.model.InboundAuthenticationRequestConfig;
 import org.wso2.carbon.identity.application.common.model.Property;
 import org.wso2.carbon.identity.application.common.model.ServiceProvider;
+import org.wso2.carbon.identity.application.common.model.ServiceProviderProperty;
 import org.wso2.carbon.identity.application.mgt.ApplicationManagementService;
 import org.wso2.carbon.identity.oauth.IdentityOAuthAdminException;
 import org.wso2.carbon.identity.oauth.OAuthAdminService;
 import org.wso2.carbon.identity.oauth.common.OAuthConstants;
 import org.wso2.carbon.identity.oauth.dto.OAuthConsumerAppDTO;
+import org.wso2.carbon.user.core.UserCoreConstants;
+import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -68,6 +71,8 @@ import static org.wso2.carbon.apimgt.api.model.ApplicationConstants.OAUTH_REDIRE
 public class RegistrationServiceImpl implements RegistrationService {
 
     private static final Log log = LogFactory.getLog(RegistrationServiceImpl.class);
+    private static final String APP_DISPLAY_NAME = "DisplayName";
+
     @POST
     @Override
     public Response register(RegistrationProfile profile) {
@@ -129,8 +134,13 @@ public class RegistrationServiceImpl implements RegistrationService {
                 loggedInUserTenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
                 String userId = (String) oauthApplicationInfo.getParameter(OAUTH_CLIENT_USERNAME);
                 String userNameForSP = MultitenantUtils.getTenantAwareUsername(userId);
-                applicationName = APIUtil.replaceEmailDomain(userNameForSP) + "_" +
-                        profile.getClientName();
+                // Replace domain separator by "_" if user is coming from a secondary userstore.
+                String domain = UserCoreUtil.extractDomainFromName(userNameForSP);
+                if (domain != null && !domain.isEmpty() && !UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME.equals
+                        (domain)) {
+                    userNameForSP = userNameForSP.replace(UserCoreConstants.DOMAIN_SEPARATOR, "_");
+                }
+                applicationName = APIUtil.replaceEmailDomain(userNameForSP) + "_" + profile.getClientName();
 
                 ApplicationManagementService applicationManagementService =
                         ApplicationManagementService.getInstance();
@@ -306,15 +316,19 @@ public class RegistrationServiceImpl implements RegistrationService {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
             }
-
             //Creating the service provider
-            ServiceProvider serviceprovider = new ServiceProvider();
-            serviceprovider.setApplicationName(applicationName);
-            serviceprovider.setDescription("Service Provider for application " + appName);
-            serviceprovider.setSaasApp(applicationInfo.getIsSaasApplication());
-
+            ServiceProvider serviceProvider = new ServiceProvider();
+            serviceProvider.setApplicationName(applicationName);
+            serviceProvider.setDescription("Service Provider for application " + appName);
+            serviceProvider.setSaasApp(applicationInfo.getIsSaasApplication());
+            ServiceProviderProperty[] serviceProviderProperties = new ServiceProviderProperty[1];
+            ServiceProviderProperty serviceProviderProperty = new ServiceProviderProperty();
+            serviceProviderProperty.setName(APP_DISPLAY_NAME);
+            serviceProviderProperty.setValue(applicationName);
+            serviceProviderProperties[0] = serviceProviderProperty;
+            serviceProvider.setSpProperties(serviceProviderProperties);
             ApplicationManagementService appMgtService = ApplicationManagementService.getInstance();
-            appMgtService.createApplication(serviceprovider, tenantDomain, userName);
+            appMgtService.createApplication(serviceProvider, tenantDomain, userName);
 
             //Retrieving the created service provider
             ServiceProvider createdServiceProvider =
