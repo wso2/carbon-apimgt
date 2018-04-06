@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -28,24 +28,22 @@ import Typography from 'material-ui/Typography';
 import Divider from 'material-ui/Divider';
 import Grid from 'material-ui/Grid';
 import Paper from 'material-ui/Paper';
+import TextField from 'material-ui/TextField'
 
 import GeneralDetails from '../Shared/GeneralDetails';
-import QuotaLimits from '../Shared/QuotaLimits';
-import BurstControl from '../Shared/BurstControl';
-import PolicyFlags from '../Shared/PolicyFlags';
-import CustomAttributes from '../Shared/CustomAttributes';
 
 import API from '../../../data/api';
 import Message from '../../Shared/Message';
 import '../Shared/Shared.css';
 import Alert from '../../Shared/Alert'
+import CustomRuleDetails from '../Shared/CustomRuleDetails';
 
 const messages = {
     success: 'Created API rate limit successfully',
     failure: 'Error while creating API rate limit',
 };
 
-class CreateAPIPolicy extends Component {
+class CreateCustomRulePolicy extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -54,89 +52,33 @@ class CreateAPIPolicy extends Component {
                 displayName: '',
                 description: '',
                 isDeployed: true,
-                defaultLimit: {
-                    bandwidthLimit: {
-                        dataAmount: 0,
-                        dataUnit: 'MB',
-                    },
-                    requestCountLimit: {
-                        requestCount: 0,
-                    },
-                    type: 'RequestCountLimit',
-                    timeUnit: 'min',
-                    unitTime: 0,
-                },
-                conditionalGroups: [],
+                siddhiQuery: '',
+                keyTemplate: ''
             },
         };
-        this.setBandwithDataUnit = this.setBandwithDataUnit.bind(this);
-        this.setRateLimitUnit = this.setRateLimitUnit.bind(this);
-        this.handleLimitTypeRadioButtonChild = this.handleLimitTypeRadioButtonChild.bind(this);
+       
         this.handleChangeChild = this.handleChangeChild.bind(this);
-        this.handleDefaultQuotaChangeChild = this.handleDefaultQuotaChangeChild.bind(this);
-        this.handleAttributeChange = this.handleAttributeChange.bind(this);
         
     }
 
-    setBandwithDataUnit(value) {
-        const policy = this.state.policy;
-        policy.defaultLimit.bandwidthLimit.dataUnit = value;
-        this.setState({ policy });
-    }
-
-    setRateLimitUnit(value) {
-        const policy = this.state.policy;
-        policy.defaultLimit.timeUnit = value;
-        this.setState({ policy });
-    }
-
-    handleLimitTypeRadioButtonChild(value) {
-        const policy = this.state.policy;
-        policy.defaultLimit.type = value;
-        this.setState({ policy });
-    }
 
     handleChangeChild(name, value) {
         const policy = this.state.policy;
-        const intValue = parseInt(value);
         policy[name] = value;
         this.setState({
             policy,
         });
     }
 
-    handleDefaultQuotaChangeChild(name, value) {
-        const policy = this.state.policy;
-        const intValue = parseInt(value);
-        var value = isNaN(intValue) ? value : intValue;
-        if (name == 'RequestCountLimit') {
-            policy.defaultLimit.requestCountLimit.requestCount = value;
-        } else if (name == 'BandwidthLimit') {
-            policy.defaultLimit.bandwidthLimit.dataAmount = value;
-        } else if (name == 'unitTime') {
-            policy.defaultLimit.unitTime = value;
-        }
-        this.setState({
-            policy,
-        });
-    }
-
-    handleAttributeChange(attributes) {
-        const policy = this.state.policy;
-        policy.customAttributes = attributes;
-        this.setState({
-            policy,
-        });
-    }
 
     handlePolicySave() {
         const api = new API();
-        const promised_policies = api.createAPILevelPolicy(this.state.policy);
+        const promised_policies = api.createCustomRulePolicy(this.state.policy);
         const props = this.props;
         promised_policies
             .then((response) => {
                 Alert.info(messages.success);
-                let redirect_url = "/policies/api_policies";
+                let redirect_url = "/policies/custom_rules";
                 this.props.history.push(redirect_url);
             })
             .catch((error) => {
@@ -152,7 +94,7 @@ class CreateAPIPolicy extends Component {
                         <IconButton color='contrast' aria-label='Menu'>
                             <MenuIcon />
                         </IconButton>
-                        <Link to='/policies/api_policies'>
+                        <Link to='/policies/custom_rules'>
                             <Button color='contrast'>Go Back</Button>
                         </Link>
                     </Toolbar>
@@ -162,17 +104,14 @@ class CreateAPIPolicy extends Component {
                     <Grid container className='root' direction='column'>
                         <Grid item xs={12} className='grid-item'>
                             <Typography className='page-title' type='display1' gutterBottom>
-                                Create API Rate Limit
+                                Create Custom Rule
                             </Typography>
                         </Grid>
                         <GeneralDetails policy={this.state.policy} handleChangeChild={this.handleChangeChild} />
 
-                        <QuotaLimits
+                        <CustomRuleDetails
                             policy={this.state.policy}
-                            setBandwithDataUnit={this.setBandwithDataUnit}
-                            handleLimitTypeRadioButtonChild={this.handleLimitTypeRadioButtonChild}
-                            handleDefaultQuotaChangeChild={this.handleDefaultQuotaChangeChild}
-                            setRateLimitUnit={this.setRateLimitUnit}
+                            handleChangeChild={this.handleChangeChild}
                         />
 
                         <Paper elevation={20}>
@@ -182,7 +121,7 @@ class CreateAPIPolicy extends Component {
                                     <Button raised color='primary' onClick={() => this.handlePolicySave()}>
                                         Save
                                     </Button>
-                                    <Link to='/policies/api_policies'>
+                                    <Link to='/policies/custom_rules'>
                                         <Button raised>Cancel</Button>
                                     </Link>
                                 </div>
@@ -195,4 +134,4 @@ class CreateAPIPolicy extends Component {
     }
 }
 
-export default CreateAPIPolicy;
+export default CreateCustomRulePolicy;

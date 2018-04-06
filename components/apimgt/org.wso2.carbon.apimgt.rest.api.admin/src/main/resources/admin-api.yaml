@@ -930,7 +930,7 @@ paths:
             $ref: '#/definitions/Error'
 
 #-----------------------------------------------------
-# Add a Custom Rule
+# Add a Blocking Condition
 #-----------------------------------------------------
     post:
       security:

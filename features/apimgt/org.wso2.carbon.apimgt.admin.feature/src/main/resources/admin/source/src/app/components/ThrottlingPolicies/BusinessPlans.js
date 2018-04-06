@@ -35,6 +35,7 @@ import {withStyles} from 'material-ui/styles';
 import API from '../../data/api'
 import Message from '../Shared/Message'
 import Confirm from '../Shared/Confirm'
+import Alert from '../Shared/Alert'
 
 const messages = {
   success: 'Deleted business plan successfully',
@@ -73,11 +74,11 @@ class BusinessPlans extends Component {
       const promised_policies = api.deleteSubscriptionLevelPolicy(id);
       promised_policies.then(
           response => {
-            this.msg.info(messages.success);
+            Alert.info(messages.success);
           }
       ).catch(
           error => {
-            this.msg.error(messages.failure);
+            Alert.error(messages.failure);
           }
       );
     }
@@ -93,7 +94,7 @@ class BusinessPlans extends Component {
             }
         ).catch(
             error => {
-              this.msg.error(messages.retrieveError);
+              Alert.error(messages.retrieveError);
             }
         );
     }
@@ -108,7 +109,6 @@ class BusinessPlans extends Component {
 
         return (
             <div>
-                <Message ref={a => this.msg = a}/>
                 <Grid container justify="center" alignItems="center">
                     <Grid item xs={12}>
                     

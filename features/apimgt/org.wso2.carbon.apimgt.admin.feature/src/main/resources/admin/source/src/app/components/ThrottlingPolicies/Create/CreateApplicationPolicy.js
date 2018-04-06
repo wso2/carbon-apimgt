@@ -38,6 +38,7 @@ import CustomAttributes from '../Shared/CustomAttributes';
 import API from '../../../data/api';
 import Message from '../../Shared/Message';
 import '../Shared/Shared.css';
+import Alert from '../../Shared/Alert'
 
 const messages = {
     success: 'Created Application rate limit successfully',
@@ -133,12 +134,12 @@ class CreateApplicationPolicy extends Component {
         const props = this.props;
         promised_policies
             .then((response) => {
-                this.msg.info(messages.success);
+                Alert.info(messages.success);
                 let redirect_url = "/policies/application_policies";
                 this.props.history.push(redirect_url);
             })
             .catch((error) => {
-                this.msg.error(messages.failure);
+                Alert.error(messages.failure);
             });
     }
 

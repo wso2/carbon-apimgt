@@ -17,17 +17,160 @@
  */
 
 import React, {Component} from 'react'
-import ActionBar from '../ActionBar'
 
-export default class CustomRules extends Component {
+import {Link} from 'react-router-dom'
+import Grid from 'material-ui/Grid';
+import Paper from 'material-ui/Paper';
+import Typography from 'material-ui/Typography';
+import Table, { TableBody, TableCell, TableHead, TableRow } from 'material-ui/Table';
+import AppBar from 'material-ui/AppBar';
+import Toolbar from 'material-ui/Toolbar';;
+import IconButton from 'material-ui/IconButton';
+import Divider from 'material-ui/Divider';
+import Button from 'material-ui/Button';
+import MenuIcon from 'material-ui-icons/Menu';
+import TextField from 'material-ui/TextField';
+import {withStyles} from 'material-ui/styles';
+
+import API from '../../data/api'
+import Message from '../Shared/Message'
+import Confirm from '../Shared/Confirm'
+import Alert from '../Shared/Alert'
+
+const messages = {
+    success: 'Deleted custom rule successfully',
+    failure: 'Error while deleting custom rule',
+    retrieveError: 'Error while retrieving custom rules'
+  };
+  
+  const styles = theme => ({
+      divider: {
+          marginBottom: 20,
+      },
+      createButton:{
+          textDecoration: 'none',
+          display: 'inline-block',
+          marginLeft: 20,
+          alignSelf: 'flex-start',
+      },
+      titleWrapper: {
+          display: 'flex',
+      }
+  });
+
+class CustomRules extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            policies: null,
+            selectedRowKeys: [],
+            open:false,
+            message: ''
+        };
+
+    }
+
+    deleteCustomRulePolicy(id) {
+        const api = new API();
+        const promisedPolicies = api.deleteCustomRulePolicy(id);
+        promisedPolicies.then(
+            response => {
+              Alert.info(messages.success);
+              this.state.policies.delete(id);
+              this.setState({policies: this.state.policies});
+            }
+        ).catch(
+            error => {
+              Alert.error(messages.failure);
+              console.error(error);
+            }
+        );
+      }
+
+    componentDidMount() {
+        const api = new API();
+
+        const promised_policies = api.getCustomRulePolicies();
+        promised_policies.then(
+            response => {
+               this.setState({policies: response.obj.list});
+            }
+        ).catch(
+            error => {
+              Alert.error(messages.retrieveError);
+              console.error(error);
+            }
+        );
+    }
+
     render() {
+        /*TODO implement search and pagination*/
+        const tiers = this.state.policies;
+        const { classes } = this.props;
+        let data = [];
+        if(tiers) {
+          data = tiers;
+        }
+
         return (
             <div>
-                <ActionBar/>
-                <div style={{margin:'20px'}}>
-                    Custom Rules page is not implemented yet
-                </div>
+                <Grid container justify="center" alignItems="center">
+                    <Grid item xs={12}>
+                    
+                        <div className={classes.titleWrapper}>
+                            <Typography variant="display1" gutterBottom >
+                                    Custom Rules
+                            </Typography>
+                            <Link to={"/policies/custom_rules/create"} className={classes.createButton}>
+                                <Button variant="raised" color="primary" className={classes.button}>
+                                Add Custom Rule
+                                </Button>
+                            </Link>
+                            <Typography type="caption" gutterBottom align="left" className="page-title-help">
+                            Description goes here.
+                            </Typography>                          
+                        </div>
+                        <Divider className={classes.divider} />
+                       
+                    </Grid>
+                    <Grid item xs={12} className="page-content">
+                          <Paper>
+                            <Table>
+                              <TableHead>
+                                <TableRow>
+                                  <TableCell>Name</TableCell>
+                                  <TableCell>Description</TableCell>
+                                  <TableCell>Key Template</TableCell>
+
+                                  <TableCell></TableCell>
+                                </TableRow>
+                              </TableHead>
+                              <TableBody>
+                                {data.map(n => {
+                                  return (
+                                    <TableRow key={n.id}>
+                                      <TableCell>{n.policyName}</TableCell>
+                                      <TableCell>{n.description}</TableCell>
+                                      <TableCell>{n.keyTemplate}</TableCell>
+                                      <TableCell>
+                                      <span>
+                                         <Link to={"/policies/custom_rules/" + n.id}>
+                                              <Button color="primary">Edit</Button>
+                                         </Link>
+                                         <Button color="default"
+                                              onClick={() => this.deleteCustomRulePolicy(n.id)} >Delete</Button>
+                                      </span>
+                                      </TableCell>
+                                    </TableRow>
+                                  );
+                                })}
+                              </TableBody>
+                            </Table>
+                          </Paper>
+                    </Grid>
+                </Grid>
             </div>
         );
     }
 }
+export default withStyles(styles)(CustomRules);
