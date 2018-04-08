@@ -35,6 +35,7 @@ import {withStyles} from 'material-ui/styles';
 import API from '../../data/api'
 import Message from '../Shared/Message'
 import Confirm from '../Shared/Confirm'
+import Alert from '../Shared/Alert'
 
 
 const messages = {
@@ -71,15 +72,14 @@ class APIPolicies extends Component {
     }
     deletePolicy(id) {
       const api = new API();
-      debugger;
       const promised_policies = api.deleteAPILevelPolicy(id);
       promised_policies.then(
           response => {
-            this.msg.info(messages.success);
+            Alert.info(messages.success);
           }
       ).catch(
           error => {
-            this.msg.error(messages.failure);
+            Alert.error(messages.failure);
           }
       );
     }
@@ -95,7 +95,7 @@ class APIPolicies extends Component {
             }
         ).catch(
             error => {
-              this.msg.error(messages.retrieveError);
+              Alert.error(messages.retrieveError);
             }
         );
     }
@@ -110,7 +110,6 @@ class APIPolicies extends Component {
 
         return (
             <div>
-                <Message ref={a => this.msg = a}/>
                 <Grid container justify="center" alignItems="center">
                     <Grid item xs={12}>
                     
