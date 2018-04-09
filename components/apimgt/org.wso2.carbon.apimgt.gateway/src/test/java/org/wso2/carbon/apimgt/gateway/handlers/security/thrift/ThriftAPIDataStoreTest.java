@@ -29,6 +29,9 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 
 import java.util.ArrayList;
@@ -58,6 +61,14 @@ public class ThriftAPIDataStoreTest {
 
     @Before
     public void init() throws Exception {
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        Mockito.when(apiManagerConfiguration.getFirstProperty("APIKeyValidator.ConnectionPool.MaxIdle")).thenReturn
+                ("10");
+        Mockito.when(apiManagerConfiguration.getFirstProperty("APIKeyValidator.ConnectionPool.InitIdleCapacity"))
+                .thenReturn("5");
+        ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(new APIManagerConfigurationServiceImpl
+                (apiManagerConfiguration));
+        Whitebox.setInternalState(ThriftAPIDataStore.class, "clientPool", thriftKeyValidatorClientPool);
         thriftKeyValidatorClientPool = Mockito.mock(ThriftKeyValidatorClientPool.class);
         client = Mockito.mock(ThriftKeyValidatorClient.class);
         PowerMockito.mockStatic(ThriftKeyValidatorClientPool.class);
