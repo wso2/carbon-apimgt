@@ -69,8 +69,7 @@ public class APIKeyValidatorClient {
                                            "Required connection details for the key management server not provided");
         }
         try {
-            ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContextFromFileSystem
-                    (getClientRepoLocation(),getAxis2ClientXmlLocation());
+            ConfigurationContext ctx = ServiceReferenceHolder.getInstance().getAxis2ConfigurationContext();
             keyValidationServiceStub = new APIKeyValidationServiceStub(ctx, serviceURL + "APIKeyValidationService");
             ServiceClient client = keyValidationServiceStub._getServiceClient();
             Options options = client.getOptions();
@@ -241,14 +240,4 @@ public class APIKeyValidatorClient {
         return template;
     }
 
-    protected String getAxis2ClientXmlLocation() {
-        String axis2ClientXml = ServerConfiguration.getInstance().getFirstProperty("Axis2Config" +
-                ".clientAxis2XmlLocation");
-        return axis2ClientXml;
-    }
-    protected String getClientRepoLocation() {
-        String axis2ClientXml = ServerConfiguration.getInstance().getFirstProperty("Axis2Config" +
-                ".ClientRepositoryLocation");
-        return axis2ClientXml;
-    }
 }
