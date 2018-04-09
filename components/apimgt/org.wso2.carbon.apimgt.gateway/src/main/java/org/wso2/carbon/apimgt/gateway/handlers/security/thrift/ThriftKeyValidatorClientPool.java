@@ -17,11 +17,13 @@
 */
 package org.wso2.carbon.apimgt.gateway.handlers.security.thrift;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.pool.BasePoolableObjectFactory;
 import org.apache.commons.pool.ObjectPool;
 import org.apache.commons.pool.impl.StackObjectPool;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 
 public class ThriftKeyValidatorClientPool {
 
@@ -31,7 +33,24 @@ public class ThriftKeyValidatorClientPool {
 
     private final ObjectPool clientPool;
 
+    private static int maxIdle;
+
     private ThriftKeyValidatorClientPool() {
+        String maxIdleClients = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getFirstProperty
+                ("APIKeyValidator.ConnectionPool.MaxIdle");
+        String initIdleCapacity = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getFirstProperty
+                ("APIKeyValidator.ConnectionPool.InitIdleCapacity");
+        if (StringUtils.isNotEmpty(maxIdleClients)) {
+            maxIdle = Integer.parseInt(maxIdleClients);
+        } else {
+            maxIdle = 50;
+        }
+        int initIdleCapSize;
+        if (StringUtils.isNotEmpty(initIdleCapacity)) {
+            initIdleCapSize = Integer.parseInt(initIdleCapacity);
+        } else {
+            initIdleCapSize = 20;
+        }
         log.debug("Initializing thrift key validator client pool");
         clientPool = new StackObjectPool(new BasePoolableObjectFactory() {
             @Override
@@ -39,7 +58,7 @@ public class ThriftKeyValidatorClientPool {
                 log.debug("Initializing new ThriftKeyValidatorClient instance");
                 return new ThriftKeyValidatorClient();
             }
-        }, 50, 20);
+        }, maxIdle, initIdleCapSize);
     }
 
     public static ThriftKeyValidatorClientPool getInstance() {
@@ -47,6 +66,12 @@ public class ThriftKeyValidatorClientPool {
     }
 
     public ThriftKeyValidatorClient get() throws Exception {
+        if (log.isTraceEnabled()) {
+            int active = clientPool.getNumActive();
+            if (active >= maxIdle) {
+                log.trace("Key validation pool size is :" + active);
+            }
+        }
         return (ThriftKeyValidatorClient) clientPool.borrowObject();
     }
 

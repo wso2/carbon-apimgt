@@ -22,10 +22,10 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
@@ -55,8 +55,7 @@ public class WebsocketWSClient {
 		}
 
 		try {
-			ConfigurationContext ctx = ConfigurationContextFactory
-					.createConfigurationContextFromFileSystem(null, null);
+			ConfigurationContext ctx = ServiceReferenceHolder.getInstance().getAxis2ConfigurationContext();
 			keyValidationServiceStub =
 					new APIKeyValidationServiceStub(ctx, serviceURL + "APIKeyValidationService");
 			ServiceClient client = keyValidationServiceStub._getServiceClient();

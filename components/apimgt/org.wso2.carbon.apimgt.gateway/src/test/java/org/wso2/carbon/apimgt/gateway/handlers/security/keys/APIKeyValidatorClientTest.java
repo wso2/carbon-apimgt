@@ -18,6 +18,8 @@ package org.wso2.carbon.apimgt.gateway.handlers.security.keys;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.axis2.context.MessageContext;
 import org.apache.http.conn.ssl.SSLContexts;
 import org.junit.Assert;
@@ -25,6 +27,7 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.testng.annotations.BeforeMethod;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -47,6 +50,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.net.ssl.SSLContext;
+import javax.xml.ws.Service;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
@@ -62,10 +66,17 @@ public class APIKeyValidatorClientTest {
     private static final String TRUSTSTORE_FILE_PATH =
             "src" + File.separator + "test" + File.separator + "resources" + File.separator + "jks"
                     + File.separator + "client-truststore.jks";
+    private static final String AXIS2_CLIENT_REPO_PATH =
+            "src" + File.separator + "test" + File.separator + "resources";
 
     @BeforeClass
     public static void setTrustManager() throws KeyStoreException, IOException, CertificateException,
             NoSuchAlgorithmException, UnrecoverableKeyException, KeyManagementException {
+        ConfigurationContext configurationContext = ConfigurationContextFactory
+                .createConfigurationContextFromFileSystem(AXIS2_CLIENT_REPO_PATH, AXIS2_CLIENT_REPO_PATH + File
+                        .separator + "axis2_client.xml");
+        ServiceReferenceHolder.getInstance().setAxis2ConfigurationContext(configurationContext);
+
         wireMockConfiguration.trustStoreType("JKS").keystoreType("JKS").keystorePath(KEYSTORE_FILE_PATH)
                 .trustStorePath(TRUSTSTORE_FILE_PATH).port(18081).httpsPort(18082).trustStorePassword("wso2carbon")
                 .keystorePassword("wso2carbon");

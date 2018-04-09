@@ -31,7 +31,7 @@ public class APIKeyValidatorClientPool {
     private static final APIKeyValidatorClientPool instance = new APIKeyValidatorClientPool();
 
     private final ObjectPool clientPool;
-        private static int maxIdle;
+    private static int maxIdle;
 
     private APIKeyValidatorClientPool() {
         String maxIdleClients = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getFirstProperty

@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.security.thrift;
 
 import org.apache.commons.pool.impl.StackObjectPool;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -27,6 +28,9 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 
 /**
  * ThriftAuthClient test cases
@@ -34,6 +38,18 @@ import org.powermock.reflect.Whitebox;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ThriftKeyValidatorClientPool.class})
 public class ThriftKeyValidatorClientPoolTest {
+
+    @Before
+    public void init() {
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        Mockito.when(apiManagerConfiguration.getFirstProperty("APIKeyValidator.ConnectionPool.MaxIdle")).thenReturn
+                ("10");
+        Mockito.when(apiManagerConfiguration.getFirstProperty("APIKeyValidator.ConnectionPool.InitIdleCapacity"))
+                .thenReturn("5");
+        ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(new APIManagerConfigurationServiceImpl
+                (apiManagerConfiguration));
+
+    }
 
     @Test
     public void testBorrowingThriftValidatorClientFromPool() throws Exception {
@@ -57,9 +73,9 @@ public class ThriftKeyValidatorClientPoolTest {
         PowerMockito.doNothing().when(clientPool).returnObject(Mockito.anyObject());
         ThriftKeyValidatorClientPool thriftKeyValidatorClientPool = ThriftKeyValidatorClientPool.getInstance();
 
-        try{
+        try {
             thriftKeyValidatorClientPool.release(thriftKeyValidatorClient);
-        } catch (Exception e){
+        } catch (Exception e) {
             Assert.fail("Unexpected exception occurred while releasing ThriftKeyValidatorClient from pool");
         }
     }
@@ -71,9 +87,9 @@ public class ThriftKeyValidatorClientPoolTest {
         PowerMockito.doNothing().when(clientPool).close();
         ThriftKeyValidatorClientPool thriftKeyValidatorClientPool = ThriftKeyValidatorClientPool.getInstance();
 
-        try{
+        try {
             thriftKeyValidatorClientPool.cleanup();
-        } catch (Exception e){
+        } catch (Exception e) {
             Assert.fail("Unexpected exception occurred while cleaning up ThriftKeyValidatorClient pool");
         }
     }
@@ -86,9 +102,9 @@ public class ThriftKeyValidatorClientPoolTest {
         PowerMockito.doThrow(new Exception()).when(clientPool).close();
         ThriftKeyValidatorClientPool thriftKeyValidatorClientPool = ThriftKeyValidatorClientPool.getInstance();
 
-        try{
+        try {
             thriftKeyValidatorClientPool.cleanup();
-        } catch (Exception e){
+        } catch (Exception e) {
             Assert.fail("Exception should not throw when ThriftKeyValidatorClient pool clean up failed");
         }
     }
