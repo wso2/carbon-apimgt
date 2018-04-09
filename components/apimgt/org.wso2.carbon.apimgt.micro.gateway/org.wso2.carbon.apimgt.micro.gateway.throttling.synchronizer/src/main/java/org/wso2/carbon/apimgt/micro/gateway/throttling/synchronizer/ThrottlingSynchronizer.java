@@ -22,9 +22,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
@@ -36,6 +35,7 @@ import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.micro.gateway.common.OnPremiseGatewayInitListener;
 import org.wso2.carbon.apimgt.micro.gateway.common.config.ConfigManager;
 import org.wso2.carbon.apimgt.micro.gateway.common.dto.AccessTokenDTO;
@@ -221,7 +221,27 @@ public class ThrottlingSynchronizer implements OnPremiseGatewayInitListener {
             log.debug("Getting Subscription Policies using Admin REST API.");
         }
 
-        CloseableHttpClient httpClient = HttpClients.createDefault();
+        String apiAdminUrl = ConfigManager.getConfigManager()
+                .getProperty(OnPremiseGatewayConstants.API_ADMIN_URL_PROPERTY_KEY);
+        if (apiAdminUrl == null) {
+            apiAdminUrl = ThrottlingConstants.DEFAULT_API_ADMIN_URL;
+            if (log.isDebugEnabled()) {
+                log.debug("Using default API Admin URL." + apiAdminUrl);
+            }
+        }
+        String[] adminUrl = apiAdminUrl.split(":");
+        String adminPort = null;
+        Integer adminPortValue = 0;
+        if (adminUrl.length > 3) {
+            adminPort = adminUrl[2];
+        }
+        if (adminPort != null) {
+            adminPortValue =  Integer.valueOf(adminPort);
+        }
+        else {
+            adminPortValue = OnPremiseGatewayConstants.DEFAULT_PORT;
+        }
+        HttpClient httpClient = APIUtil.getHttpClient(adminPortValue, apiAdminUrl.split(":")[0]);
         HttpGet httpGet = new HttpGet(subscriptionPolicyUrl);
         String authHeaderValue = OnPremiseGatewayConstants.AUTHORIZATION_BEARER + accessTokenDTO.getAccessToken();
         httpGet.addHeader(OnPremiseGatewayConstants.AUTHORIZATION_HEADER, authHeaderValue);
@@ -289,7 +309,27 @@ public class ThrottlingSynchronizer implements OnPremiseGatewayInitListener {
         if (log.isDebugEnabled()) {
             log.debug("Getting Subscription Policies using Admin REST API.");
         }
-        CloseableHttpClient httpClient = HttpClients.createDefault();
+        String apiAdminUrl = ConfigManager.getConfigManager()
+                .getProperty(OnPremiseGatewayConstants.API_ADMIN_URL_PROPERTY_KEY);
+        if (apiAdminUrl == null) {
+            apiAdminUrl = ThrottlingConstants.DEFAULT_API_ADMIN_URL;
+            if (log.isDebugEnabled()) {
+                log.debug("Using default API Admin URL." + apiAdminUrl);
+            }
+        }
+        String[] adminUrl = apiAdminUrl.split(":");
+        String adminPort = null;
+        Integer adminPortValue = 0;
+        if (adminUrl.length > 3) {
+            adminPort = adminUrl[2];
+        }
+        if (adminPort != null) {
+            adminPortValue =  Integer.valueOf(adminPort);
+        }
+        else {
+            adminPortValue = OnPremiseGatewayConstants.DEFAULT_PORT;
+        }
+        HttpClient httpClient = APIUtil.getHttpClient(adminPortValue, apiAdminUrl.split(":")[0]);
 
         HttpGet httpGet = new HttpGet(applicationPolicyUrl);
         String authHeaderValue = OnPremiseGatewayConstants.AUTHORIZATION_BEARER + accessTokenDTO.getAccessToken();
@@ -358,7 +398,27 @@ public class ThrottlingSynchronizer implements OnPremiseGatewayInitListener {
             log.debug("Getting Advanced Policies using Admin REST API.");
         }
 
-        CloseableHttpClient httpClient = HttpClients.createDefault();
+        String apiAdminUrl = ConfigManager.getConfigManager()
+                .getProperty(OnPremiseGatewayConstants.API_ADMIN_URL_PROPERTY_KEY);
+        if (apiAdminUrl == null) {
+            apiAdminUrl = ThrottlingConstants.DEFAULT_API_ADMIN_URL;
+            if (log.isDebugEnabled()) {
+                log.debug("Using default API Admin URL." + apiAdminUrl);
+            }
+        }
+        String[] adminUrl = apiAdminUrl.split(":");
+        String adminPort = null;
+        Integer adminPortValue = 0;
+        if (adminUrl.length > 3) {
+            adminPort = adminUrl[2];
+        }
+        if (adminPort != null) {
+            adminPortValue =  Integer.valueOf(adminPort);
+        }
+        else {
+            adminPortValue = OnPremiseGatewayConstants.DEFAULT_PORT;
+        }
+        HttpClient httpClient = APIUtil.getHttpClient(adminPortValue, apiAdminUrl.split(":")[0]);
         HttpGet httpGet = new HttpGet(advancedPolicyUrl);
         String authHeaderValue = OnPremiseGatewayConstants.AUTHORIZATION_BEARER + accessTokenDTO.getAccessToken();
         httpGet.addHeader(OnPremiseGatewayConstants.AUTHORIZATION_HEADER, authHeaderValue);
@@ -381,7 +441,27 @@ public class ThrottlingSynchronizer implements OnPremiseGatewayInitListener {
                                                                   AdvancedThrottlePolicyListDTO policyListDTO)
             throws OnPremiseGatewayException {
         List<AdvancedThrottlePolicyDTO> policyDTOList = new ArrayList<>();
-        CloseableHttpClient httpClient = HttpClients.createDefault();
+        String apiAdminUrl = ConfigManager.getConfigManager()
+                .getProperty(OnPremiseGatewayConstants.API_ADMIN_URL_PROPERTY_KEY);
+        if (apiAdminUrl == null) {
+            apiAdminUrl = ThrottlingConstants.DEFAULT_API_ADMIN_URL;
+            if (log.isDebugEnabled()) {
+                log.debug("Using default API Admin URL." + apiAdminUrl);
+            }
+        }
+        String[] adminUrl = apiAdminUrl.split(":");
+        String adminPort = null;
+        Integer adminPortValue = 0;
+        if (adminUrl.length > 3) {
+            adminPort = adminUrl[2];
+        }
+        if (adminPort != null) {
+            adminPortValue =  Integer.valueOf(adminPort);
+        }
+        else {
+            adminPortValue = OnPremiseGatewayConstants.DEFAULT_PORT;
+        }
+        HttpClient httpClient = APIUtil.getHttpClient(adminPortValue, apiAdminUrl.split(":")[0]);
 
         for (AdvancedThrottlePolicyInfoDTO infoDTO : policyListDTO.getList()) {
             HttpGet httpGet = new HttpGet(advancedPolicyUrl + ThrottlingConstants.URL_PATH_SEPARATOR + infoDTO.getPolicyId());
@@ -445,7 +525,27 @@ public class ThrottlingSynchronizer implements OnPremiseGatewayInitListener {
         if (log.isDebugEnabled()) {
             log.debug("Getting Blocking conditions using Admin REST API.");
         }
-        CloseableHttpClient httpClient = HttpClients.createDefault();
+        String apiAdminUrl = ConfigManager.getConfigManager()
+                .getProperty(OnPremiseGatewayConstants.API_ADMIN_URL_PROPERTY_KEY);
+        if (apiAdminUrl == null) {
+            apiAdminUrl = ThrottlingConstants.DEFAULT_API_ADMIN_URL;
+            if (log.isDebugEnabled()) {
+                log.debug("Using default API Admin URL." + apiAdminUrl);
+            }
+        }
+        String[] adminUrl = apiAdminUrl.split(":");
+        String adminPort = null;
+        Integer adminPortValue = 0;
+        if (adminUrl.length > 3) {
+            adminPort = adminUrl[2];
+        }
+        if (adminPort != null) {
+            adminPortValue =  Integer.valueOf(adminPort);
+        }
+        else {
+            adminPortValue = OnPremiseGatewayConstants.DEFAULT_PORT;
+        }
+        HttpClient httpClient = APIUtil.getHttpClient(adminPortValue, apiAdminUrl.split(":")[0]);
         HttpGet httpGet = new HttpGet(blockingPolicyUrl);
         String authHeaderValue = OnPremiseGatewayConstants.AUTHORIZATION_BEARER + accessTokenDTO.getAccessToken();
         httpGet.addHeader(OnPremiseGatewayConstants.AUTHORIZATION_HEADER, authHeaderValue);

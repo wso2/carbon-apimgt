@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.micro.gateway.api.synchronizer.tasks;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,10 +30,12 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.micro.gateway.api.synchronizer.TestUtil;
 import org.wso2.carbon.apimgt.micro.gateway.api.synchronizer.constants.Constants;
 import org.wso2.carbon.apimgt.micro.gateway.api.synchronizer.internal.ServiceDataHolder;
 import org.wso2.carbon.apimgt.micro.gateway.api.synchronizer.util.APIMappingUtil;
+import org.wso2.carbon.apimgt.micro.gateway.common.config.ConfigManager;
 import org.wso2.carbon.apimgt.micro.gateway.common.dto.AccessTokenDTO;
 import org.wso2.carbon.apimgt.micro.gateway.common.dto.OAuthApplicationInfoDTO;
 import org.wso2.carbon.apimgt.micro.gateway.common.internal.ServiceReferenceHolder;
@@ -58,7 +59,7 @@ import static org.mockito.Matchers.any;
 @PrepareForTest({CarbonUtils.class, APIManagerConfiguration.class,
         ServiceReferenceHolder.class, APIManagerConfigurationService.class, TokenUtil.class, HttpClients.class,
         HttpRequestUtil.class, APIMappingUtil.class, ServiceDataHolder.class, RealmService.class,
-        PrivilegedCarbonContext.class, TenantAxisUtils.class
+        PrivilegedCarbonContext.class, TenantAxisUtils.class, ConfigManager.class, APIUtil.class
 })
 public class APISynchronizationTaskTest {
     @Before
@@ -89,8 +90,12 @@ public class APISynchronizationTaskTest {
                 .getAccessToken();
 
         PowerMockito.mockStatic(HttpClients.class);
-        CloseableHttpClient httpClient = Mockito.mock(CloseableHttpClient.class);
-        PowerMockito.when(HttpClients.createDefault()).thenReturn(httpClient);
+        HttpClient httpClient = Mockito.mock(HttpClient.class);
+        PowerMockito.mockStatic(ConfigManager.class);
+        ConfigManager configManager = Mockito.mock(ConfigManager.class);
+        PowerMockito.when(ConfigManager.getConfigManager()).thenReturn(configManager);
+        PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.when(APIUtil.getHttpClient(Mockito.anyInt(), Mockito.anyString())).thenReturn(httpClient);
 
         String updatedAPIs = "{\"API_IDs\":[\"jane-AT-wso2.com-AT-onpremgw-YahooWeather-1.0\"]}";
 
