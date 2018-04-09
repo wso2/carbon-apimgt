@@ -45,14 +45,12 @@ import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.models.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
-import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.exception.APIMgtSecurityException;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.RatingDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.RatingMappingUtil;
-import org.wso2.carbon.messaging.CarbonMessage;
 import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 import org.wso2.msf4j.Request;
 
@@ -63,6 +61,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -946,7 +945,7 @@ public class ApisApiServiceImplTestCase {
         List<API> apiList = new ArrayList<>();
         apiList.add(api);
 
-        Mockito.when(apiStore.searchAPIsByStoreLabels("", 0, 1, new ArrayList<>())).thenReturn(apiList);
+        Mockito.when(apiStore.searchAPIsByStoreLabels("", 0, 1, new HashSet<>())).thenReturn(apiList);
 
         Response response = apisApiService.apisGet(10, 0, "", null, null, request);
 
@@ -967,7 +966,7 @@ public class ApisApiServiceImplTestCase {
         PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.API_NOT_FOUND))
-                .when(apiStore).searchAPIsByStoreLabels("", 0, 10,  new ArrayList<>());
+                .when(apiStore).searchAPIsByStoreLabels("", 0, 10,  new HashSet<>());
 
         Response response = apisApiService.apisGet(10, 0, null, "",  null, request);
 

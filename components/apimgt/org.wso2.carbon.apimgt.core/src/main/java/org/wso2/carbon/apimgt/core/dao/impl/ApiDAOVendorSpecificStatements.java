@@ -21,12 +21,12 @@
 package org.wso2.carbon.apimgt.core.dao.impl;
 
 import org.wso2.carbon.apimgt.core.dao.ApiType;
-import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.dao.SearchType;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -36,19 +36,13 @@ import java.util.Set;
  */
 public interface ApiDAOVendorSpecificStatements {
 
-    String EVERYONE_ROLE = "EVERYONE";
-
-   String API_SUMMARY_SELECT_STORE = "SELECT UUID, PROVIDER, NAME, CONTEXT, " +
-            "VERSION, DESCRIPTION, CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS " +
-            "FROM AM_API ";
-
     /**
      * Returns the query string to be used for the search query. This is required to construct the PreparedStatement
      * which will be created externally
      * @param roleCount Number of roles to be passed to query
      * @return String
      */
-    String getApiSearchQuery(int roleCount);
+    String getPermissionBasedApiFullTextSearchQuery(int roleCount);
 
     /**
      * Returns the query string to be used for the attribute search query. This is required to construct the
@@ -57,7 +51,7 @@ public interface ApiDAOVendorSpecificStatements {
      * @param roleCount Number of roles to be passed to query
      * @return String
      */
-    String getApiAttributeSearchQuery(Map<String, String> attributeMap, int roleCount);
+    String getPermissionBasedApiAttributeSearchQuery(Map<SearchType, String> attributeMap, int roleCount);
 
     /**
      * Format supplied search string to DB compatible value
@@ -70,9 +64,9 @@ public interface ApiDAOVendorSpecificStatements {
      * @param limit result pagination limit
      * @throws SQLException if DB error occurs
      */
-    void setApiSearchStatement(PreparedStatement statement, Set<String> roles, String user,
-                           String searchString, ApiType apiType, int offset, int limit, List<String> labels)
-            throws SQLException;
+    void setPermissionBasedApiFullTextSearchStatement(PreparedStatement statement, Set<String> roles, String user,
+                                                      String searchString, ApiType apiType, int offset, int limit)
+                                                        throws SQLException;
 
     /**
      * Set parameters of the PreparedStatement created for the attribute search query
@@ -85,36 +79,102 @@ public interface ApiDAOVendorSpecificStatements {
      * @param limit result pagination limit
      * @throws SQLException if DB error occurs
      */
-    void setApiAttributeSearchStatement(PreparedStatement statement, Set<String> roles, String user,
-                                        Map<String, String> attributeMap, ApiType apiType, int offset, int limit)
-                                        throws SQLException;
+    void setPermissionBasedApiAttributeSearchStatement(PreparedStatement statement, Set<String> roles, String user,
+                                                       Map<SearchType, String> attributeMap, ApiType apiType,
+                                                       int offset, int limit) throws SQLException;
 
     /**
-     * Creates attribute search query in API store, specific to database
+     * Returns the query string to be used for the visibility based full text search query. This is required
+     * to construct the PreparedStatement which will be created externally.
      *
-     * @param connection DB connection
-     * @param roles user roles
-     * @param attributeMap map containing the attributes and search queries for those attributes
-     * @param offset the starting point of the search results.
-     * @param limit number of search results that will be returned.
-     * @return statement build for specific database type.
-     * @throws APIMgtDAOException if error occurs while accessing data layer
+     * @param roleCount Number of roles to be passed to query
+     * @param labelCount Number of labels to be passed to query
+     * @return Constructed query string
      */
-    PreparedStatement prepareAttributeSearchStatementForStore(Connection connection, List<String> roles,
-                                                              List<String> labels, Map<String, String> attributeMap,
-                                                              int offset, int limit) throws APIMgtDAOException;
+    String getVisibilityBasedApiFullTextSearchQuery(int roleCount, int labelCount);
 
+    /**
+     * Set parameters of the PreparedStatement created for the visibility based full text search query
+     *
+     * @param statement SQL PreparedStatement
+     * @param roles roles assigned to the user doing the search
+     * @param labels labels associated with the API
+     * @param searchString
+     * @param offset
+     * @param limit
+     * @throws SQLException
+     */
+    void setVisibilityBasedApiFullTextSearchStatement(PreparedStatement statement, Set<String> roles,
+                                                      Set<String> labels, String searchString, int offset,
+                                                      int limit) throws SQLException;
 
-    default String getStoreAPIsByLabelJoinQuery(List<String> labels) {
+    /**
+     * Returns the query string to be used for the visibility based attribute search query. This is required
+     * to construct the PreparedStatement which will be created externally.
+     *
+     * @param roleCount Number of roles to be passed to query
+     * @param labelCount Number of labels to be passed to query
+     * @param attributeMap Search attributes to be queried
+     * @return Constructed query string
+     */
+    String getVisibilityBasedApiAttributeSearchQuery(int roleCount, int labelCount,
+                                                     Map<SearchType, String> attributeMap);
 
-        if (labels.size() > 0) {
+    /**
+     * Set parameters of the PreparedStatement created for the visibility based attribute search query
+     *
+     * @param statement SQL PreparedStatement
+     * @param roles roles assigned to the user doing the search
+     * @param labels labels associated with the API
+     * @param attributeMap map containing the attributes and search queries for those attributes
+     * @param offset the starting point of the search results
+     * @param limit number of search results that will be returned
+     * @throws SQLException if DB error occurs
+     */
+    void setVisibilityBasedApiAttributeSearchStatement(PreparedStatement statement, Set<String> roles,
+                                                       Set<String> labels, Map<SearchType, String> attributeMap,
+                                                       int offset, int limit) throws SQLException;
+
+    default String getStoreAPIsByLabelJoinQuery(int labelCount) {
+
+        if (labelCount > 0) {
             return " INNER JOIN AM_API_LABEL_MAPPING LM ON UUID=LM.API_ID" +
                     " WHERE LM.LABEL_ID IN ( SELECT LABEL_ID FROM AM_LABELS WHERE LABEL_NAME IN (" +
-                    DAOUtil.getParameterString(labels.size()) +  "AND TYPE_NAME ='STORE')";
+                    DAOUtil.getParameterString(labelCount) +  ") AND TYPE_NAME ='STORE')";
         } else {
             return " INNER JOIN AM_API_LABEL_MAPPING LM ON UUID=LM.API_ID" +
                     " WHERE LM.LABEL_ID IN ( SELECT LABEL_ID FROM AM_LABELS WHERE TYPE_NAME ='STORE')";
         }
+    }
+
+    /**
+     * Maps the search attribute specified with the relevant DB table/column that needs to be queried.
+     * This default implementation is suitable for most DB implementations and can be overridden to support specific
+     * requirements of a DB implementation.
+     *
+     * @param attributeKey Key fo the attribute that is being searched
+     * @return DBTableMetaData which contains the relevant DB table/column combination
+     */
+    default DBTableMetaData mapSearchAttributesToDB(SearchType attributeKey) {
+        DBTableMetaData metaData = new DBTableMetaData();
+
+        if (SearchType.TAG == attributeKey) {
+            //if the search is related to tags, need to check NAME column in AM_TAGS table
+            metaData.setTableName(SQLConstants.AM_TAGS_TABLE_NAME);
+            metaData.setColumnName(APIMgtConstants.TAG_NAME_COLUMN.toUpperCase(Locale.ENGLISH));
+        } else if (SearchType.SUBCONTEXT == attributeKey) {
+            //if the search is related to subcontext, need to check URL_PATTERN column in
+            //AM_API_OPERATION_MAPPING table
+            metaData.setTableName(SQLConstants.AM_API_OPERATION_MAPPING_TABLE_NAME);
+            metaData.setColumnName(APIMgtConstants.URL_PATTERN_COLUMN.toUpperCase(Locale.ENGLISH));
+        } else {
+            //if the search is related to any other attribute, need to check that attribute
+            //in AM_API table
+            metaData.setTableName(SQLConstants.AM_API_TABLE_NAME);
+            metaData.setColumnName(attributeKey.toString().toUpperCase(Locale.ENGLISH));
+        }
+
+        return metaData;
     }
 
 }

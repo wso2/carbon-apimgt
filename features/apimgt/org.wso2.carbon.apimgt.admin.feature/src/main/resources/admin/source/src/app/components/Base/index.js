@@ -16,23 +16,26 @@
  * under the License.
  */
 
-import React, {Component} from 'react'
-import  NavBar  from '../NavBar';
-import {Layout} from 'antd';
-import ComposeHeader from './Header/ComposeHeader'
-import Footer from './Footer/Footer'
-const {Content, Sider} = Layout;
+import React, { Component } from 'react';
+import { Layout } from 'antd';
+
+import NavBar from '../NavBar';
+import ComposeHeader from './Header/ComposeHeader';
+import Footer from './Footer/Footer';
+
+const { Content, Sider } = Layout;
 
 class Base extends Component {
     constructor(props) {
         super(props);
         this.state = {
             collapsed: false,
-            mode: 'inline'
-        }
+            mode: 'inline',
+        };
+        this.onCollapse = this.onCollapse.bind(this);
     }
 
-    onCollapse = (collapsed) => {
+    onCollapse(collapsed) {
         console.log(collapsed);
         this.setState({
             collapsed,
@@ -42,7 +45,7 @@ class Base extends Component {
 
     render() {
         return (
-            <Layout style={{height: '100vh'}}>
+            <Layout style={{ height: '100vh'}}>
                 <ComposeHeader />
                 <Sider
                     collapsed={this.state.collapsed}
@@ -50,16 +53,14 @@ class Base extends Component {
                     width={300}
                     style={{
                         padding: '20px 10px 15px 15px',
-                        backgroundColor: 'White'
+                        backgroundColor: 'White',
                     }}
                 >
-                    <NavBar/>
+                    <NavBar />
                 </Sider>
-                <Layout>
-                    <Content style={{marginTop: 45}}>
-                        {this.props.children}
-                    </Content>
-                    <Footer/>
+                <Layout style={{ height: '100vh', backgroundColor : "#fafafa" }}>
+                    <Content style={{ marginTop: 45 }}>{this.props.children}</Content>
+                    <Footer />
                 </Layout>
             </Layout>
         );

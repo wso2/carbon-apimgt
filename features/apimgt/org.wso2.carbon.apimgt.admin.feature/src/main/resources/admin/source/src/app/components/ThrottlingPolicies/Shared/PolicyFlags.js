@@ -15,117 +15,119 @@
  * specific language governing permissions and limitations
  * under the License.
  */
- import React, {Component} from 'react'
+import React, { Component } from 'react';
 
- import Grid from 'material-ui/Grid';
- import Divider from 'material-ui/Divider';
- import TextField from 'material-ui/TextField';
- import Paper from 'material-ui/Paper';
- import Typography from 'material-ui/Typography';
- import { FormControl, FormLabel, FormGroup, FormControlLabel } from 'material-ui/Form';
- import Checkbox from 'material-ui/Checkbox';
- import List, { ListItem, ListItemText } from 'material-ui/List';
- import Menu, { MenuItem } from 'material-ui/Menu';
+import Grid from 'material-ui/Grid';
+import Divider from 'material-ui/Divider';
+import TextField from 'material-ui/TextField';
+import Paper from 'material-ui/Paper';
+import Typography from 'material-ui/Typography';
+import { FormControl, FormLabel, FormGroup, FormControlLabel } from 'material-ui/Form';
+import Checkbox from 'material-ui/Checkbox';
+import List, { ListItem, ListItemText } from 'material-ui/List';
+import Menu, { MenuItem } from 'material-ui/Menu';
 
- import './Shared.css'
+import './Shared.css';
 
- const billingOptions = [
-  'Free',
-  'Commercial'
- ];
+const billingOptions = ['Free', 'Commercial'];
 
- const billingOptionsMap = [
-  'FREE',
-  'COMMERCIAL'
- ];
+const billingOptionsMap = ['FREE', 'COMMERCIAL'];
 
- class PolicyFlags extends Component{
-   state = {
-     value:'',
-     anchorElBilling: null,
-     openBilling: false,
-     selectedIndexBilling: 0
-   }
-   //get the index values to load the menus
-   componentWillReceiveProps(nextProps){
-     //get the relevent id related to plan.
-     var planId  = billingOptionsMap.indexOf(nextProps.policy.billingPlan)
-     this.setState({ selectedIndexBilling: planId });
-   }
-   handlePolicyFlageChange = name => (event, checked) => {
-     this.props.handleChangeChild(name, checked);
-   };
+class PolicyFlags extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            value: '',
+            anchorElBilling: null,
+            openBilling: false,
+            selectedIndexBilling: 0,
+        };
+        this.handlePolicyFlageChange = this.handlePolicyFlageChange.bind(this);
+        this.handleBillingClickListItem = this.handleBillingClickListItem.bind(this);
+        this.handleBillingRequestClose = this.handleBillingRequestClose.bind(this);
+        this.handleBillingMenuItemClick = this.handleBillingMenuItemClick.bind(this);
+    }
 
-   handleBillingClickListItem = event => {
-     this.setState({ openBilling: true, anchorElBilling: event.currentTarget });
-   };
+    // get the index values to load the menus
+    componentWillReceiveProps(nextProps) {
+        // get the relevent id related to plan.
+        const planId = billingOptionsMap.indexOf(nextProps.policy.billingPlan);
+        this.setState({ selectedIndexBilling: planId });
+    }
+    handlePolicyFlageChange(name) {
+        return (event, checked) => {
+            this.props.handleChangeChild(name, checked);
+        };
+    }
 
-   handleBillingRequestClose = () => {
-     this.setState({ openBilling: false });
-   };
+    handleBillingClickListItem(event) {
+        this.setState({ openBilling: true, anchorElBilling: event.currentTarget });
+    }
 
-   handleBillingMenuItemClick = (event, index) => {
-     this.setState({ selectedIndexBilling: index, openBilling: false });
-     this.props.handleChangeChild("billingPlan", billingOptionsMap[index]);
-   };
+    handleBillingRequestClose() {
+        this.setState({ openBilling: false });
+    }
 
-   render(){
-     return(
-       <Paper elevation ={20}>
-          <Grid item xs={12}>
-              <Typography className="page-title" type="subheading" gutterBottom>
-                 Policy Flags
-              </Typography>
+    handleBillingMenuItemClick(event, index) {
+        this.setState({ selectedIndexBilling: index, openBilling: false });
+        this.props.handleChangeChild('billingPlan', billingOptionsMap[index]);
+    }
 
-          </Grid>
-          <Grid item xs={6} className="grid-item">
-              <Divider />
-              <FormControlLabel
-                   control={
-                     <Checkbox
-                        checked={this.props.policy.stopOnQuotaReach}
-                        onChange={this.handlePolicyFlageChange('stopOnQuotaReach')}
-                        value="stopOnQuotaReach"
-                     />
-                   }
-                   label="Stop On Quota Reach"
-               />
-          </Grid>
-          <Grid item xs={6} className="grid-item">
-              <List>
-                <ListItem
-                  button
-                  aria-haspopup="true"
-                  aria-controls="lock-menu"
-                  aria-label="Billing Plan"
-                  onClick={this.handleBillingClickListItem}
-                >
-                  <ListItemText
-                    primary="Billing Plan"
-                    secondary={billingOptions[this.state.selectedIndexBilling]}
-                  />
-                </ListItem>
-              </List>
-              <Menu
-                id="lock-menu"
-                anchorEl={this.state.anchorElBilling}
-                open={this.state.openBilling}
-                onClose={this.handleBillingRequestClose}
-              >
-                {billingOptions.map((option, index) => (
-                  <MenuItem
-                    key={option}
-                    selected={index === this.state.selectedIndexBilling}
-                    onClick={event => this.handleBillingMenuItemClick(event, index)}
-                  >
-                    {option}
-                  </MenuItem>
-                ))}
-              </Menu>
-          </Grid>
-        </Paper>
-     );
-   }
-
- }
- export default PolicyFlags;
+    render() {
+        return (
+            <Paper elevation={20}>
+                <Grid item xs={12}>
+                    <Typography className='page-title' type='subheading' gutterBottom>
+                        Policy Flags
+                    </Typography>
+                </Grid>
+                <Grid item xs={6} className='grid-item'>
+                    <Divider />
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                checked={this.props.policy.stopOnQuotaReach}
+                                onChange={this.handlePolicyFlageChange('stopOnQuotaReach')}
+                                value='stopOnQuotaReach'
+                            />
+                        }
+                        label='Stop On Quota Reach'
+                    />
+                </Grid>
+                <Grid item xs={6} className='grid-item'>
+                    <List>
+                        <ListItem
+                            button
+                            aria-haspopup='true'
+                            aria-controls='lock-menu'
+                            aria-label='Billing Plan'
+                            onClick={this.handleBillingClickListItem}
+                        >
+                            <ListItemText
+                                primary='Billing Plan'
+                                secondary={billingOptions[this.state.selectedIndexBilling]}
+                            />
+                        </ListItem>
+                    </List>
+                    <Menu
+                        id='lock-menu'
+                        anchorEl={this.state.anchorElBilling}
+                        open={this.state.openBilling}
+                        onClose={this.handleBillingRequestClose}
+                    >
+                        {billingOptions.map((option, index) => (
+                            <MenuItem
+                                key={option}
+                                selected={index === this.state.selectedIndexBilling}
+                                onClick={event => this.handleBillingMenuItemClick(event, index)}
+                            >
+                                {option}
+                            </MenuItem>
+                        ))}
+                    </Menu>
+                </Grid>
+            </Paper>
+        );
+    }
+}
+export default PolicyFlags;

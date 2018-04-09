@@ -37,8 +37,7 @@ import Footer from '../Base/Footer/Footer';
 import User from '../../data/User';
 import ConfigManager from '../../data/ConfigManager';
 import Utils from '../../data/Utils';
-import Loading from '../Base/Loading/Loading';
-import Redirecting from '../Shared/Redirecting';
+import { Redirecting, Progress } from '../Shared';
 
 /**
  * Login page React Component
@@ -118,7 +117,7 @@ class Login extends Component {
 
         Promise.all(promisedSSoData)
             .then((responses) => {
-                const authConfigs = responses.map(response => response.data.members);
+                const authConfigs = responses.map(response => response.data);
                 this.setState({ authConfigs });
                 // If idToken is not null or redirected from IDP
                 if (idToken) this.authManager.handleAutoLoginEnvironments(idToken, environments, authConfigs);
@@ -359,7 +358,7 @@ class Login extends Component {
                                                     </span>
                                                 ) : (
                                                     <FormControl style={{ width: '100%', margin: '10% 0 6% 0' }}>
-                                                        <Loading />
+                                                        <Progress />
                                                     </FormControl>
                                                 )}
 

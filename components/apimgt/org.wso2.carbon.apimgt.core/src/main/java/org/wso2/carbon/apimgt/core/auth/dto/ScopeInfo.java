@@ -42,7 +42,6 @@ public final class ScopeInfo {
 
     public void setName(String name) {
         this.name = name;
-        this.displayName = name;
     }
 
     public String getDescription() {

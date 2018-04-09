@@ -20,11 +20,18 @@ import TextField from 'material-ui/TextField';
 import Grid from 'material-ui/Grid';
 import Paper from 'material-ui/Paper';
 
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 
 class JSONPolicyFields extends Component {
-    handleChange = name => event => {
-        this.props.handleChangeChild(name, event.target.value);
+    constructor(props) {
+        super(props);
+        this.handleChange = this.handleChange.bind(this);
+    }
+
+    handleChange(name) {
+        return (event) => {
+            this.props.handleChangeChild(name, event.target.value);
+        };
     }
 
     render() {
@@ -32,76 +39,76 @@ class JSONPolicyFields extends Component {
             return (
                 <Paper elevation={20}>
                     <br />
-                    <Grid item xs={6} className="grid-item">
+                    <Grid item xs={6} className='grid-item'>
                         <TextField
-                            id="name"
+                            id='name'
                             required
-                            label="Policy Name"
+                            label='Policy Name'
                             defaultValue={this.props.policy.name}
-                            className="text-field-half"
-                            onChange={this.handleChange("name")}
+                            className='text-field-half'
+                            onChange={this.handleChange('name')}
                         />
                     </Grid>
                     <br />
-                    <Grid item xs={6} className="grid-item">
+                    <Grid item xs={6} className='grid-item'>
                         <TextField
-                            id="maxFieldCount"
+                            id='maxFieldCount'
                             required
-                            label="Max Field Count"
+                            label='Max Field Count'
                             defaultValue={this.props.policy.policy.maxFieldCount.toString()}
-                            className="text-field-half"
-                            onChange={this.handleChange("maxFieldCount")}
+                            className='text-field-half'
+                            onChange={this.handleChange('maxFieldCount')}
                         />
                     </Grid>
                     <br />
-                    <Grid item xs={6} className="grid-item">
+                    <Grid item xs={6} className='grid-item'>
                         <TextField
-                            id="maxStringLength"
+                            id='maxStringLength'
                             required
-                            label="Max String Length"
+                            label='Max String Length'
                             defaultValue={this.props.policy.policy.maxStringLength.toString()}
-                            className="text-field-half"
-                            onChange={this.handleChange("maxStringLength")}
+                            className='text-field-half'
+                            onChange={this.handleChange('maxStringLength')}
                         />
                     </Grid>
                     <br />
-                    <Grid item xs={6} className="grid-item">
+                    <Grid item xs={6} className='grid-item'>
                         <TextField
-                            id="maxArrayElementCount"
+                            id='maxArrayElementCount'
                             required
-                            label="Max Array Element Count"
+                            label='Max Array Element Count'
                             defaultValue={this.props.policy.policy.maxArrayElementCount.toString()}
-                            className="text-field-half"
-                            onChange={this.handleChange("maxArrayElementCount")}
+                            className='text-field-half'
+                            onChange={this.handleChange('maxArrayElementCount')}
                         />
                     </Grid>
                     <br />
-                    <Grid item xs={6} className="grid-item">
+                    <Grid item xs={6} className='grid-item'>
                         <TextField
-                            id="maxFieldLength"
+                            id='maxFieldLength'
                             required
-                            label="Max Field Length"
+                            label='Max Field Length'
                             defaultValue={this.props.policy.policy.maxFieldLength.toString()}
-                            className="text-field-half"
-                            onChange={this.handleChange("maxFieldLength")}
+                            className='text-field-half'
+                            onChange={this.handleChange('maxFieldLength')}
                         />
                     </Grid>
                     <br />
-                    <Grid item xs={6} className="grid-item">
+                    <Grid item xs={6} className='grid-item'>
                         <TextField
-                            id="maxDepth"
+                            id='maxDepth'
                             required
-                            label="Max Depth"
+                            label='Max Depth'
                             defaultValue={this.props.policy.policy.maxDepth.toString()}
-                            className="text-field-half"
-                            onChange={this.handleChange("maxDepth")}
+                            className='text-field-half'
+                            onChange={this.handleChange('maxDepth')}
                         />
                     </Grid>
                     <br />
                 </Paper>
             );
         } else {
-            return (<h1>Please wait...</h1>);
+            return <h1>Please wait...</h1>;
         }
     }
 }

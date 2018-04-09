@@ -27,12 +27,9 @@ interface StoreApiAttributeSearch {
      * This method will return the query query to be executed, for each search type
      * (i.e - tag, subcontext or general search)
      *
-     * @param roleListBuilder a parameterized string builder with question marks constructed based on user roles
+     * @param roleCount Number of roles to be passed to query
      * @param searchQuery a sub string containing only the attributes
-     * @param offset the starting point of the search results.
-     * @param limit number of search results that will be returned.
      * @return the query to be executed, as a string
      */
-    String getStoreAttributeSearchQuery(StringBuilder roleListBuilder,
-                                        StringBuilder searchQuery, int offset, int limit);
+    String getStoreAttributeSearchQuery(int roleCount, StringBuilder searchQuery);
 }

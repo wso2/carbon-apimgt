@@ -16,142 +16,152 @@
  * under the License.
  */
 
-import React, {Component} from 'react';
-import ReactQuill from 'react-quill';
+import React, { Component } from 'react';
+// import ReactQuill from 'react-quill';
 import ReactModal from 'react-modal';
-import {Button, Row, Col, message} from 'antd';
-import "../../../../../../../node_modules/react-quill/dist/quill.snow.css"
-import API from '../../../../data/api.js'
-import Loading from '../../../Base/Loading/Loading'
-import ApiPermissionValidation from '../../../../data/ApiPermissionValidation'
+import { Button, Row, Col, message } from 'antd';
+import PropTypes from 'prop-types';
+
+import '../../../../../../../node_modules/react-quill/dist/quill.snow.css';
+import API from '../../../../data/api.js';
+import { Progress } from '../../../Shared';
+import ApiPermissionValidation from '../../../../data/ApiPermissionValidation';
 
 class InlineEditor extends Component {
     constructor(props) {
         super(props);
         this.api_id = this.props.apiId;
         this.state = {
-            editorHtml: "",
-        }
+            editorHtml: '',
+        };
 
         this.handleChange = this.handleChange.bind(this);
         this.saveInlineDocContent = this.saveInlineDocContent.bind(this);
     }
 
     handleChange(html) {
-        this.setState({editorHtml: html});
+        this.setState({ editorHtml: html });
     }
 
     componentDidMount() {
-
         const api = new API();
-        let promised_api = api.get(this.api_id);
-        promised_api.then(
-            response => {
-                this.setState({api: response.obj});
-            }
-        ).catch(
-            error => {
-                if (process.env.NODE_ENV !== "production") {
+        const promised_api = api.get(this.api_id);
+        promised_api
+            .then((response) => {
+                this.setState({ api: response.obj });
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                 }
-                let status = error.status;
+                const status = error.status;
                 if (status === 404) {
-                    this.setState({notFound: true});
+                    this.setState({ notFound: true });
                 }
-            }
-        );
-
-        const promised_inline_content = this.props.client.getInlineContentOfDocument(this.props.apiId, this.props.documentId);
-        promised_inline_content.then(response => {
-            const contentType = response.headers["content-type"];
-            const blob = new Blob([response.data], {
-                type: contentType
             });
-            var reader = new FileReader();
-            reader.onload =  (value) => {
-                this.setState({
-                    editorHtml: value.target.result
+
+        const promised_inline_content = this.props.client.getInlineContentOfDocument(
+            this.props.apiId,
+            this.props.documentId,
+        );
+        promised_inline_content
+            .then((response) => {
+                const contentType = response.headers['content-type'];
+                const blob = new Blob([response.data], {
+                    type: contentType,
                 });
-            };
-            reader.readAsText(blob);
-        }).catch(error_response => {
-            const error_data = JSON.parse(error_response.data);
-            const messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
-            console.error(messageTxt);
-            message.error("Failed getting inline content of the document");
-        });
+                const reader = new FileReader();
+                reader.onload = (value) => {
+                    this.setState({
+                        editorHtml: value.target.result,
+                    });
+                };
+                reader.readAsText(blob);
+            })
+            .catch((error_response) => {
+                const error_data = JSON.parse(error_response.data);
+                const messageTxt =
+                    'Error[' + error_data.code + ']: ' + error_data.description + ' | ' + error_data.message + '.';
+                console.error(messageTxt);
+                message.error('Failed getting inline content of the document');
+            });
     }
 
     /*
       Save the inline document content
      */
     saveInlineDocContent(close_after_save) {
-        const promised_add_inline_content = this.props.client.addInlineContentToDocument(this.props.apiId, this.props.documentId, this.state.editorHtml);
-        promised_add_inline_content.then(() => {
-            message.success("Saved inline content successfully");
-            if (close_after_save) {
-                this.props.handleCloseModal();
-            }
-        }).catch( (error_response) => {
-            const error_data = JSON.parse(error_response.data);
-            const messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
-            console.error(messageTxt);
-            message.error("Failed adding inline content to the document");
-        });
+        const promised_add_inline_content = this.props.client.addInlineContentToDocument(
+            this.props.apiId,
+            this.props.documentId,
+            this.state.editorHtml,
+        );
+        promised_add_inline_content
+            .then(() => {
+                message.success('Saved inline content successfully');
+                if (close_after_save) {
+                    this.props.handleCloseModal();
+                }
+            })
+            .catch((error_response) => {
+                const error_data = JSON.parse(error_response.data);
+                const messageTxt =
+                    'Error[' + error_data.code + ']: ' + error_data.description + ' | ' + error_data.message + '.';
+                console.error(messageTxt);
+                message.error('Failed adding inline content to the document');
+            });
     }
 
     render() {
         if (!this.state.api) {
-            return <Loading/>
+            return <Progress />;
         }
         return (
             <div>
                 <div>
-                    <ReactModal
-                        isOpen={true}
-                        contentLabel="Document Inline Editor"
-                        style={InlineEditor.customStyle}
-                    >
-                        <h3 style={{paddingTop: 20}}>Inline Editor</h3>
-                        <hr/>
+                    <ReactModal isOpen contentLabel='Document Inline Editor' style={InlineEditor.customStyle}>
+                        <h3 style={{ paddingTop: 20 }}>Inline Editor</h3>
+                        <hr />
                         <h2>Document Name : {this.props.documentName}</h2>
-                        <Row style={{paddingTop: 20}}>
+                        <Row style={{ paddingTop: 20 }}>
                             <Col span={100}>
                                 <div>
-                                    <ReactQuill
+                                    {/* <ReactQuill
                                         theme='snow'
-                                        onChange={(html) => this.handleChange(html)}
+                                        onChange={html => this.handleChange(html)}
                                         value={this.state.editorHtml}
                                         modules={InlineEditor.modules}
                                         formats={InlineEditor.formats}
-                                        bounds={'.app'}
+                                        bounds='.app'
                                         placeholder={this.props.placeholder}
-                                        style={{paddingBottom: 50}}
-                                    />
+                                        style={{ paddingBottom: 50 }}
+                                    /> */}
                                 </div>
                             </Col>
                         </Row>
                         <Row>
                             <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
-                            <Col span={2}>
-                                    <Button type="primary"
-                                            onClick={() => this.saveInlineDocContent(false)}>Save</Button>
-                            </Col>
-                            <Col span={3}>
-                                <Button type="primary"
-                                        onClick={() => this.saveInlineDocContent(true)}>Save And
-                                                                                        Close</Button>
-                            </Col>
+                                <Col span={2}>
+                                    <Button type='primary' onClick={() => this.saveInlineDocContent(false)}>
+                                        Save
+                                    </Button>
+                                </Col>
+                                <Col span={3}>
+                                    <Button type='primary' onClick={() => this.saveInlineDocContent(true)}>
+                                        Save And Close
+                                    </Button>
+                                </Col>
                             </ApiPermissionValidation>
                             <Col span={3}>
-                                <Button type="primary"
-                                        onClick={this.props.handleCloseModal}>Close</Button>
+                                <Button type='primary' onClick={this.props.handleCloseModal}>
+                                    Close
+                                </Button>
                             </Col>
                         </Row>
                     </ReactModal>
                 </div>
             </div>
-        )
+        );
     }
 }
 
@@ -161,60 +171,76 @@ class InlineEditor extends Component {
  */
 InlineEditor.modules = {
     toolbar: [
-        [{'font': []}],
-        [{size: []}, {'header': '1'}, {'header': '2'}, {'header': '3'}, {'header': '4'}],
-        [{'color': []}, {'background': []}, 'bold', 'italic', 'underline', 'strike', 'blockquote'],
-        [{'list': 'ordered'}, {'list': 'bullet'}, {'align': []}, {'indent': '-1'}, {'indent': '+1'}],
+        [{ font: [] }],
+        [{ size: [] }, { header: '1' }, { header: '2' }, { header: '3' }, { header: '4' }],
+        [{ color: [] }, { background: [] }, 'bold', 'italic', 'underline', 'strike', 'blockquote'],
+        [{ list: 'ordered' }, { list: 'bullet' }, { align: [] }, { indent: '-1' }, { indent: '+1' }],
         ['link', 'image', 'video'],
-        [{'direction': 'rtl'}, {'script': 'sub'}, {'script': 'super'}, 'clean'],
-        ['history']
+        [{ direction: 'rtl' }, { script: 'sub' }, { script: 'super' }, 'clean'],
+        ['history'],
     ],
     history: {
         delay: 2000,
         maxStack: 500,
-        userOnly: true
-    }
-}
+        userOnly: true,
+    },
+};
 /*
  * Quill editor formats
  * See https://quilljs.com/docs/formats/
  */
 InlineEditor.formats = [
-    'header', 'font', 'size',
-    'bold', 'italic', 'underline', 'strike', 'blockquote',
-    'list', 'bullet', 'indent',
-    'link', 'image', 'video',
-    'clean', 'color', 'background', 'align', 'direction', 'script', 'history'
-]
+    'header',
+    'font',
+    'size',
+    'bold',
+    'italic',
+    'underline',
+    'strike',
+    'blockquote',
+    'list',
+    'bullet',
+    'indent',
+    'link',
+    'image',
+    'video',
+    'clean',
+    'color',
+    'background',
+    'align',
+    'direction',
+    'script',
+    'history',
+];
 
 /*
  * PropType validation
  */
 InlineEditor.propTypes = {
-    placeholder: React.PropTypes.string,
-}
+    placeholder: PropTypes.string,
+};
 
 InlineEditor.customStyle = {
-    overlay : {
-        position          : 'fixed',
-        top               : 0,
-        left              : 0,
-        right             : 0,
-        bottom            : 0,
-        backgroundColor   : 'rgba(79, 79, 101, 0.5)'
+    overlay: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(79, 79, 101, 0.5)',
     },
-    content : {
-        top           : '50%',
-        left          : '50%',
-        right         : 'auto',
-        bottom        : 'auto',
-        maxWidth      : '90%',
-        maxHeight     : '80%',
-        marginRight   : '-50%',
-        minWidth      : '40%',
-        minHeight     : '40%',
-        transform     : 'translate(-50%, -50%)'
-    }
+    content: {
+        top: '50%',
+        left: '50%',
+        right: 'auto',
+        bottom: 'auto',
+        maxWidth: '90%',
+        maxHeight: '80%',
+        marginRight: '-50%',
+        minWidth: '40%',
+        minHeight: '40%',
+        transform: 'translate(-50%, -50%)',
+    },
 };
 
 export default InlineEditor;

@@ -45,6 +45,9 @@ public class AuthUtil {
 
     /**
      * This method authenticate the user.
+     *
+     * @param cookie Cookie value
+     * @return Header Value
      */
     public static String getHttpOnlyCookieHeader(Cookie cookie) {
         return cookie + "; HttpOnly";
@@ -66,10 +69,22 @@ public class AuthUtil {
 
     /**
      * This method is used to generate access token request to login for uuf apps.
+     *
+     * @param username username for generate token
+     * @param password password for generate token
+     * @param grantType grantType requested
+     * @param refreshToken refreshToken if present
+     * @param accessToken accessToken to revoke
+     * @param validityPeriod validityPeriod for token
+     * @param scopes requested scopes
+     * @param clientId clientId of app
+     * @param clientSecret clientSecret of app
+     * @return AccessTokenRequest object
      */
     public static AccessTokenRequest createAccessTokenRequest(String username, String password, String grantType,
-                                                              String refreshToken, String accessToken, long validityPeriod, String scopes, String clientId, String
-                                                                      clientSecret) {
+                                                              String refreshToken, String accessToken, long
+                                                                      validityPeriod, String scopes, String clientId,
+                                                              String clientSecret) {
 
         AccessTokenRequest tokenRequest = new AccessTokenRequest();
         tokenRequest.setClientId(clientId);
@@ -97,6 +112,7 @@ public class AuthUtil {
      * Returns a generic errorDTO
      *
      * @param errorHandler The error handler object.
+     * @param paramList list of parameters for more detail
      * @return A generic errorDTO with the specified details
      */
     public static ErrorDTO getErrorDTO(ErrorHandler errorHandler, HashMap<String, String> paramList) {
@@ -112,6 +128,8 @@ public class AuthUtil {
      * Method used to extract refresh token from headers.
      *
      * @param request msf4j request to get the headers
+     * @param cookieHeader header value of cookie
+     * @param environmentName environment name for token to be extract
      * @return refresh token present in the cookie and authorization header..
      */
     public static String extractTokenFromHeaders(Request request, String cookieHeader, String environmentName) {
@@ -155,6 +173,7 @@ public class AuthUtil {
      * @param isHttpOnly If this a http only cookie.
      * @param isSecure   If this a secure cookie.
      * @param expiresIn  Expiration time of the cookie.
+     * @param environmentName environment name for cookie to be created
      * @return Cookie object.
      */
     public static NewCookie cookieBuilder(String name, String value, String path, boolean isSecure,

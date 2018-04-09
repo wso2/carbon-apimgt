@@ -155,14 +155,14 @@ class SampleAPI extends Component {
                         <Grid container spacing={24} justify="center">
                             <Grid item xs={3}>
                                 <Link to="/api/create/home">
-                                    <Button raised>
+                                    <Button variant='raised'>
                                         <Create style={{fontSize: 50}}/>
                                         Create New API
                                     </Button>
                                 </Link>
                             </Grid>
                             <Grid item xs={3}>
-                                <Button disabled={deploying} raised onClick={this.handleDeploySample}>
+                                <Button disabled={deploying} variant='raised' onClick={this.handleDeploySample}>
                                     <GetApp style={{fontSize: 50}}/>
                                     Deploy Sample API
                                 </Button>

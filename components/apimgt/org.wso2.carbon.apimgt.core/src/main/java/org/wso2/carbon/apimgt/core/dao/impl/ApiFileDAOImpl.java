@@ -22,9 +22,11 @@ import com.google.gson.stream.JsonReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.dao.SearchType;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.DedicatedGateway;
@@ -650,16 +652,17 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     /**
-     * @see ApiDAO#getAPIsByStatus(List)
+     * @see ApiDAO#getAPIsByStatus(Set)
+     * @param statuses
      */
     @Override
-    public List<API> getAPIsByStatus(List<String> statuses) throws APIMgtDAOException {
+    public List<API> getAPIsByStatus(Set<APIStatus> statuses) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 
 
     @Override
-    public List<API> getAPIsByStatus(Set<String> roles, List<String> statuses, List<String> labels)
+    public List<API> getAPIsByStatus(Set<String> roles, Set<APIStatus> statuses, Set<String> labels)
             throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
@@ -675,7 +678,7 @@ public class ApiFileDAOImpl implements ApiDAO {
 
     @Override
     public List<API> searchAPIsByStoreLabel(Set<String> roles, String user, String searchString, int offset, int limit,
-                                            List<String> labels) throws APIMgtDAOException {
+                                            Set<String> labels) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 
@@ -689,19 +692,17 @@ public class ApiFileDAOImpl implements ApiDAO {
      * @see ApiDAO#attributeSearchAPIs(Set, String, Map, int, int)
      */
     @Override
-    public List<API> attributeSearchAPIs(Set<String> roles, String user, Map<String, String> attributeMap, int offset,
-                                         int limit) throws APIMgtDAOException {
+    public List<API> attributeSearchAPIs(Set<String> roles, String user, Map<SearchType, String> attributeMap,
+                                         int offset, int limit) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * @see ApiDAO#searchAPIsByAttributeInStore(List roles, List labels, Map attributeMap, int offset, int limit)
+     * @see ApiDAO#searchAPIsByAttributeInStore(Set, Set, Map, int, int)
      */
     @Override
-    public List<API> searchAPIsByAttributeInStore(List<String> roles, List<String> labels, Map<String, String>
-            attributeMap, int
-            offset,
-                                                  int limit) throws APIMgtDAOException {
+    public List<API> searchAPIsByAttributeInStore(Set<String> roles, Set<String> labels, Map<SearchType, String>
+            attributeMap, int offset, int limit) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 

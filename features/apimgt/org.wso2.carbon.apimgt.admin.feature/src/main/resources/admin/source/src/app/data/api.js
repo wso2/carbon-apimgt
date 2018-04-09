@@ -351,6 +351,73 @@ class API {
             }
         );
     }
+
+    /**
+     * Create custom rule policy
+     * @returns {Promise} Promised policies response
+     */
+    createCustomRulePolicy(body) {
+        let payload = {body: body, "Content-Type": "application/json"};
+        return this.client.then(
+            (client) => {
+                return client.apis["Custom Rules"].post_policies_throttling_custom(
+                    payload, this._requestMetaData());
+            }
+        );
+    }
+
+    /**
+     * Get custom rule policies.
+     * @returns {Promise} Promised policies response
+     */
+    getCustomRulePolicies() {
+        return this.client.then(
+            (client) => {
+                return client.apis["Custom Rules"].get_policies_throttling_custom(
+                    {}, this._requestMetaData());
+            }
+        );
+    }
+
+    /**
+     * Delete custom rule policy.
+     * @returns {Promise} Promised policies response
+     */
+    deleteCustomRulePolicy(id) {
+        return this.client.then(
+            (client) => {
+                return client.apis["Custom Rules"].delete_policies_throttling_custom__ruleId_(
+                    {ruleId: id}, this._requestMetaData());
+            }
+        );
+    }
+
+    /**
+     * Get custom rule policy.
+     * @returns {Promise} Promised policies response
+     */
+    getCustomRulePolicy(id) {
+        return this.client.then(
+            (client) => {
+                return client.apis["Custom Rules"].get_policies_throttling_custom__ruleId_(
+                    {ruleId: id}, this._requestMetaData());
+            }
+        );
+    }
+
+    /**
+     * update custom rule policy.
+     * @returns {Promise} Promised policies response
+     */
+    updateCustomRulePolicy(id, body) {
+        let payload = {ruleId: id, body: body, "Content-Type": "application/json"};
+        return this.client.then(
+            (client) => {
+                return client.apis["Custom Rules"].put_policies_throttling_custom__ruleId_(
+                    payload, this._requestMetaData());
+            }
+        );
+    }
 }
 
 export default API

@@ -18,20 +18,29 @@
 
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import Loading from '../../Base/Loading/Loading';
-import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
-import Api from '../../../data/api';
-
 import Grid from 'material-ui/Grid';
 import Typography from 'material-ui/Typography';
-
-import ImageGenerator from '../Listing/ImageGenerator';
 import { withStyles } from 'material-ui/styles';
 import PropTypes from 'prop-types';
-import Chip from 'material-ui/Chip';
+import ChipInput from 'material-ui-chip-input';
 import OpenInNew from 'material-ui-icons/OpenInNew';
+import Tooltip from 'material-ui/Tooltip';
+import Select from 'material-ui/Select';
+import Input, { InputLabel } from 'material-ui/Input';
+import { MenuItem } from 'material-ui/Menu';
+import { ListItemText } from 'material-ui/List';
+import Checkbox from 'material-ui/Checkbox';
+import EditIcon from 'material-ui-icons/ModeEdit';
+import { FormControl } from 'material-ui/Form';
+import IconButton from 'material-ui/IconButton';
 
-const styles = theme => ({
+import { Progress } from '../../Shared';
+import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
+import Api from '../../../data/api';
+import ImageGenerator from '../Listing/ImageGenerator';
+import Alert from '../../Shared/Alert';
+
+const styles = () => ({
     imageSideContent: {
         display: 'inline-block',
         paddingLeft: 20,
@@ -59,31 +68,73 @@ const styles = theme => ({
         justifyContent: 'flex-start',
     },
 });
-
+/**
+ * Handle API overview/details of an individual APIs in Publisher app.
+ * @class Overview
+ * @extends {Component}
+ */
 class Overview extends Component {
+    /**
+     * Extract WSDL file name from the `content-disposition` in the response of GET WSDL file request giving the API ID
+     * @static
+     * @param {String} contentDispositionHeader Value of the content-disposition header
+     * @returns {String} filename
+     * @memberof Overview
+     */
+    static getWSDLFileName(contentDispositionHeader) {
+        let filename = 'default.wsdl';
+        if (contentDispositionHeader && contentDispositionHeader.indexOf('attachment') !== -1) {
+            const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+            const matches = filenameRegex.exec(contentDispositionHeader);
+            if (matches !== null && matches[1]) {
+                filename = matches[1].replace(/['"]/g, '');
+            }
+        }
+        return filename;
+    }
+    /**
+     * Creates an instance of Overview.
+     * @param {any} props @inheritDoc
+     * @memberof Overview
+     */
     constructor(props) {
         super(props);
         this.state = {
             api: null,
             notFound: false,
-            openMenu: false,
+            editDescription: false,
+            editableDescriptionText: null,
         };
-        this.api_uuid = this.props.match.params.api_uuid;
+        this.apiUUID = this.props.match.params.apiUUID;
         this.downloadWSDL = this.downloadWSDL.bind(this);
+        this.handleTagChange = this.handleTagChange.bind(this);
+        this.handleTransportChange = this.handleTransportChange.bind(this);
+        this.editDescription = this.editDescription.bind(this);
+        this.handleInput = this.handleInput.bind(this);
     }
 
-    componentDidMount() {
+    /**
+     * @inheritDoc
+     * @memberof Overview
+     */
+    componentWillMount() {
         const api = new Api();
-        const promised_api = api.get(this.api_uuid);
-        promised_api
+        const promisedApi = api.get(this.apiUUID);
+        promisedApi
             .then((response) => {
-                this.setState({ api: response.obj });
+                let apiDescription;
+                if (response.body.description && response.body.description.length) {
+                    apiDescription = response.body.description;
+                } else {
+                    apiDescription = '< NOT SET FOR THIS API >';
+                }
+                this.setState({ api: response.body, editableDescriptionText: apiDescription });
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                 }
-                const status = error.status;
+                const { status } = error;
                 if (status === 404) {
                     this.setState({ notFound: true });
                 }
@@ -92,8 +143,8 @@ class Overview extends Component {
 
     downloadWSDL() {
         const api = new Api();
-        const promised_wsdl = api.getWSDL(this.api_uuid);
-        promised_wsdl.then((response) => {
+        const promisedWSDL = api.getWSDL(this.apiUUID);
+        promisedWSDL.then((response) => {
             const windowUrl = window.URL || window.webkitURL;
             const binary = new Blob([response.data]);
             const url = windowUrl.createObjectURL(binary);
@@ -111,25 +162,125 @@ class Overview extends Component {
         });
     }
 
-    static getWSDLFileName(content_disposition_header) {
-        let filename = 'default.wsdl';
-        if (content_disposition_header && content_disposition_header.indexOf('attachment') !== -1) {
-            const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
-            const matches = filenameRegex.exec(content_disposition_header);
-            if (matches !== null && matches[1]) {
-                filename = matches[1].replace(/['"]/g, '');
-            }
-        }
-        return filename;
+    /**
+     * Handle tag update
+     *
+     * @param {string} apiId API Id
+     * @param {string[]} tags Tag List
+     */
+    handleTagChange(tags) {
+        const api = new Api();
+        const { apiUUID } = this;
+        const currentAPI = this.state.api;
+        const promisedApi = api.get(apiUUID);
+        promisedApi
+            .then((getResponse) => {
+                const apiData = getResponse.body;
+                apiData.tags = tags;
+                const promisedUpdate = api.update(apiData);
+                promisedUpdate
+                    .then((updateResponse) => {
+                        this.setState({ api: updateResponse.body });
+                    })
+                    .catch((errorResponse) => {
+                        console.error(errorResponse);
+                        Alert.error('Error occurred while updating tags');
+                        this.setState({ api: getResponse.body });
+                    });
+            })
+            .catch((errorResponse) => {
+                console.error(errorResponse);
+                Alert.error('Error occurred while retrieving API');
+                this.setState({ api: currentAPI });
+            });
     }
 
+    /**
+     * Handle transport update
+     *
+     * @param {Event} event Event
+     */
+    handleTransportChange(event) {
+        const api = new Api();
+        const { apiUUID } = this;
+        const currentAPI = this.state.api;
+        const promisedApi = api.get(apiUUID);
+        promisedApi
+            .then((getResponse) => {
+                const apiData = getResponse.body;
+                apiData.transport = event.target.value;
+                this.setState({ api: apiData });
+                const promisedUpdate = api.update(apiData);
+                promisedUpdate
+                    .then((updateResponse) => {
+                        this.setState({ api: updateResponse.body });
+                    })
+                    .catch((errorResponse) => {
+                        console.error(errorResponse);
+                        Alert.error('Error occurred while updating transports');
+                        this.setState({ api: getResponse.body });
+                    });
+            })
+            .catch((errorResponse) => {
+                console.error(errorResponse);
+                Alert.error('Error occurred while retrieving API');
+                this.setState({ api: currentAPI });
+            });
+    }
+
+    /**
+     * Edit description
+     *
+     * @param {SyntheticEvent} sEvent Synthetic Event
+     */
+    editDescription(sEvent) {
+        const { id } = sEvent.currentTarget;
+        if (id === 'edit-description-button') {
+            this.setState({ editDescription: true });
+        } else {
+            this.setState({ editDescription: false });
+            const api = new Api();
+            const { apiUUID } = this;
+            const { editableDescriptionText } = this.state;
+            const promisedApi = api.get(apiUUID);
+            promisedApi
+                .then((getResponse) => {
+                    const apiData = getResponse.body;
+                    apiData.description = editableDescriptionText;
+                    const promisedUpdate = api.update(apiData);
+                    promisedUpdate
+                        .then((updateResponse) => {
+                            this.setState({ api: updateResponse.body });
+                        })
+                        .catch((errorResponse) => {
+                            console.error(errorResponse);
+                            Alert.error('Error occurred while updating API description');
+                        });
+                })
+                .catch((errorResponse) => {
+                    console.error(errorResponse);
+                    Alert.error('Error occurred while retrieving API');
+                });
+        }
+    }
+
+    /**
+     * Update state with input
+     *
+     * @param {SyntheticEvent} sEvent Synthetic Event
+     */
+    handleInput(sEvent) {
+        this.setState({ [sEvent.target.id]: sEvent.target.value });
+    }
+
+    /** @inheritDoc */
     render() {
-        const api = this.state.api;
+        const { api, editDescription, editableDescriptionText } = this.state;
         if (this.state.notFound) {
             return <ResourceNotFound message={this.props.resourceNotFountMessage} />;
         }
         if (!api) {
-            return <Loading />;
+            return <Progress />;
         }
         const { classes } = this.props;
 
@@ -163,11 +314,32 @@ class Overview extends Component {
                     </div>
                 </Grid>
                 <Grid item xs={12} sm={6} md={6} lg={8} className={classes.headline}>
+                    {/* Description */}
                     <div>
-                        {/* Description */}
-                        <Typography variant='subheading' className={classes.headline}>
-                            {api.description}
-                        </Typography>
+                        {editDescription ? (
+                            <FormControl fullWidth>
+                                <Input
+                                    id='editableDescriptionText'
+                                    multiline
+                                    autoFocus
+                                    rowsMax='5'
+                                    value={editableDescriptionText}
+                                    onChange={this.handleInput}
+                                    onBlur={this.editDescription}
+                                />
+                            </FormControl>
+                        ) : (
+                            <Typography variant='subheading' gutterBottom align='left'>
+                                {editableDescriptionText}
+                                <IconButton
+                                    id='edit-description-button'
+                                    onClick={this.editDescription}
+                                    aria-label='Edit Description'
+                                >
+                                    <EditIcon />
+                                </IconButton>
+                            </Typography>
+                        )}
                         <Typography variant='caption' gutterBottom align='left'>
                             Description
                         </Typography>
@@ -181,31 +353,32 @@ class Overview extends Component {
                         Last update : {api.lastUpdatedTime}
                     </Typography>
                     {/* Endpoints */}
-                    {api.endpoint.map(ep => (
-                        <div key={ep.inline.id}>
-                            <div className={classes.endpointsWrapper + ' ' + classes.headline}>
-                                <Link to={'/apis/' + api.id + '/endpoints'} title='Edit endpoint'>
-                                    <Typography variant='subheading' align='left'>
-                                        {JSON.parse(ep.inline.endpointConfig).serviceUrl}
-                                    </Typography>
-                                </Link>
-                                <a
-                                    href={JSON.parse(ep.inline.endpointConfig).serviceUrl}
-                                    target='_blank'
-                                    className={classes.openNewIcon}
-                                >
-                                    <OpenInNew />
-                                </a>
+                    {api.endpoint &&
+                        api.endpoint.map(ep => (
+                            <div key={ep.inline.id}>
+                                <div className={classes.endpointsWrapper + ' ' + classes.headline}>
+                                    <Link to={'/apis/' + api.id + '/endpoints'} title='Edit endpoint'>
+                                        <Typography variant='subheading' align='left'>
+                                            {JSON.parse(ep.inline.endpointConfig).serviceUrl}
+                                        </Typography>
+                                    </Link>
+                                    <a
+                                        href={JSON.parse(ep.inline.endpointConfig).serviceUrl}
+                                        target='_blank'
+                                        className={classes.openNewIcon}
+                                    >
+                                        <OpenInNew />
+                                    </a>
+                                </div>
+                                <Typography variant='caption' gutterBottom align='left'>
+                                    <span className={classes.titleCase}>{ep.type}</span> Endpoint
+                                </Typography>
                             </div>
-                            <Typography variant='caption' gutterBottom align='left'>
-                                <span className={classes.titleCase}>{ep.type}</span> Endpoint
-                            </Typography>
-                        </div>
-                    ))}
+                        ))}
                     {api.wsdlUri && (
                         <div>
                             <div className={classes.endpointsWrapper + ' ' + classes.headline}>
-                                <a onClick={this.downloadWSDL}>
+                                <a onClick={this.downloadWSDL} onKeyDown={this.downloadWSDL}>
                                     <Typography variant='subheading' align='left'>
                                         {api.wsdlUri}
                                     </Typography>
@@ -256,18 +429,32 @@ class Overview extends Component {
                         <Grid item xs={12} sm={6} md={4} lg={3}>
                             {api.tags && api.tags.length ? (
                                 <div className={classes.headline}>
-                                    {api.tags.map(tag => (
-                                        <Link to={'/apis/' + api.id + '/tags'}>
-                                            <Chip label={tag} className={classes.chip} />
-                                        </Link>
-                                    ))}
+                                    <Tooltip
+                                        id='tooltip-controlled'
+                                        title='Type and hit <Enter> to add Tags'
+                                        enterDelay={300}
+                                        leaveDelay={300}
+                                        placement='top'
+                                    >
+                                        <ChipInput defaultValue={api.tags} onChange={this.handleTagChange} />
+                                    </Tooltip>
                                 </div>
                             ) : (
-                                <Link to={'/apis/' + api.id + '/tags'}>
-                                    <Typography variant='subheading' align='left' className={classes.headline}>
-                                        &lt; NOT SET FOR THIS API &gt;
-                                    </Typography>
-                                </Link>
+                                <div className={classes.headline}>
+                                    <Tooltip
+                                        id='tooltip-controlled'
+                                        title='Type and hit <Enter> to add Tags'
+                                        onClose={this.handleTooltipClose}
+                                        enterDelay={300}
+                                        leaveDelay={300}
+                                        placement='top'
+                                    >
+                                        <ChipInput
+                                            placeholder='< CLICK TO ADD TAGS >'
+                                            onChange={this.handleTagChange}
+                                        />
+                                    </Tooltip>
+                                </div>
                             )}
                             <Typography variant='caption' gutterBottom align='left'>
                                 Tags
@@ -292,21 +479,33 @@ class Overview extends Component {
                             </Typography>
                         </Grid>
                         <Grid item xs={12} sm={6} md={4} lg={3}>
-                            {api.transport && api.transport.length ? (
-                                <Link to={'/apis/' + api.id + '/transport'}>
-                                    <Typography variant='subheading' align='left' className={classes.headline}>
-                                        {api.transport.map(trans => trans + ', ')}
-                                    </Typography>
-                                </Link>
-                            ) : (
-                                <Link to={'/apis/' + api.id + '/transport'}>
-                                    <Typography variant='subheading' align='left' className={classes.headline}>
-                                        &lt; NOT SET FOR THIS API &gt;
-                                    </Typography>
-                                </Link>
-                            )}
+                            <InputLabel htmlFor='transport-checkbox' />
+                            {/* TODO:Set placeholder 'Select Transports' */}
+                            <Select
+                                multiple
+                                autoWidth
+                                value={api.transport}
+                                onChange={this.handleTransportChange}
+                                input={<Input id='transport-checkbox' />}
+                                renderValue={selected => selected.join(',  ')}
+                            >
+                                <MenuItem key='HTTP' value='HTTP'>
+                                    <Checkbox
+                                        checked={api.transport && api.transport.includes('HTTP')}
+                                        color='primary'
+                                    />
+                                    <ListItemText primary='HTTP' />
+                                </MenuItem>
+                                <MenuItem key='HTTPS' value='HTTPS'>
+                                    <Checkbox
+                                        checked={api.transport && api.transport.includes('HTTPS')}
+                                        color='primary'
+                                    />
+                                    <ListItemText primary='HTTPS' />
+                                </MenuItem>
+                            </Select>
                             <Typography variant='caption' gutterBottom align='left'>
-                                Transport
+                                Transports
                             </Typography>
                         </Grid>
                         <Grid item xs={12} sm={6} md={4} lg={3}>
@@ -385,8 +584,19 @@ class Overview extends Component {
         );
     }
 }
+
+Overview.defaultProps = {
+    resourceNotFountMessage: 'Resource not found!',
+};
+
 Overview.propTypes = {
-    classes: PropTypes.object.isRequired,
+    classes: PropTypes.shape({}).isRequired,
+    match: PropTypes.shape({
+        params: PropTypes.shape({
+            apiUUID: PropTypes.string,
+        }),
+    }).isRequired,
+    resourceNotFountMessage: PropTypes.string,
 };
 
 export default withStyles(styles)(Overview);

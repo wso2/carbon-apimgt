@@ -36,7 +36,7 @@ import { ScopeValidation, resourceMethod, resourcePath } from '../../../data/Sco
 import ApiThumb from './ApiThumb';
 import '../Apis.css';
 import API from '../../../data/api.js';
-import Loading from '../../Base/Loading/Loading';
+import { Progress } from '../../Shared';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 import SampleAPI from './SampleAPI';
 
@@ -196,7 +196,7 @@ class Listing extends React.Component {
             },
         ];
         if (!apis) {
-            return <Loading />;
+            return <Progress />;
         } else if (apis.count === 0) {
             return <SampleAPI />;
         } else {

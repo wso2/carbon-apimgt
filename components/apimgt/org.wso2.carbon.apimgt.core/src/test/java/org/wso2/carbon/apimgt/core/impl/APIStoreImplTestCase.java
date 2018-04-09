@@ -96,6 +96,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -171,11 +172,11 @@ public class APIStoreImplTestCase {
         APIStore apiStore = getApiStoreImpl(apiDAO);
         List<API> apimResultsFromDAO = new ArrayList<>();
         Mockito.when(apiDAO.searchAPIsByStoreLabel(new HashSet<>(), "admin", "pizza",
-                1, 2, new ArrayList<>())).thenReturn(apimResultsFromDAO);
-        List<API> apis = apiStore.searchAPIsByStoreLabels("pizza", 1, 2, new ArrayList<>());
+                1, 2, new HashSet<>())).thenReturn(apimResultsFromDAO);
+        List<API> apis = apiStore.searchAPIsByStoreLabels("pizza", 1, 2, new HashSet<>());
         Assert.assertNotNull(apis);
         Mockito.verify(apiDAO, Mockito.atLeastOnce()).searchAPIsByStoreLabel(APIUtils.getAllRolesOfUser("admin"),
-                "admin", "pizza", 1, 2, new ArrayList<>());
+                "admin", "pizza", 1, 2, new HashSet<>());
     }
 
     @Test(description = "Search APIs with labels")
@@ -183,7 +184,7 @@ public class APIStoreImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIStore apiStore = getApiStoreImpl(apiDAO);
         List<API> apimResultsFromDAO = new ArrayList<>();
-        List<String> labelList = new ArrayList<>();
+        Set<String> labelList = new HashSet<>();
         labelList.add("Default");
         Mockito.when(apiDAO.searchAPIsByStoreLabel(new HashSet<>(), "admin", "pizza",
                 1, 2, labelList)).thenReturn(apimResultsFromDAO);
@@ -198,34 +199,30 @@ public class APIStoreImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIStore apiStore = getApiStoreImpl(apiDAO);
         List<API> apimResultsFromDAO = new ArrayList<>();
-        List<String> statuses = new ArrayList<>();
-        statuses.add(APIStatus.PUBLISHED.getStatus());
-        statuses.add(APIStatus.PROTOTYPED.getStatus());
+        Set<APIStatus> statuses = EnumSet.of(APIStatus.PUBLISHED, APIStatus.PROTOTYPED);
         Mockito.when(apiDAO.getAPIsByStatus(statuses)).thenReturn(apimResultsFromDAO);
-        List<API> apis = apiStore.searchAPIsByStoreLabels("", 1, 2, new ArrayList<>());
+        List<API> apis = apiStore.searchAPIsByStoreLabels("", 1, 2, new HashSet<>());
         Assert.assertNotNull(apis);
         Mockito.verify(apiDAO, Mockito.atLeastOnce()).getAPIsByStatus(APIUtils
-                .getAllRolesOfUser("admin"), statuses, new ArrayList<String>());
+                .getAllRolesOfUser("admin"), statuses, new HashSet<>());
     }
 
     @Test(description = "Search API", expectedExceptions = APIManagementException.class)
     public void searchAPIsWithException() throws Exception {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIStore apiStore = getApiStoreImpl(apiDAO);
-        List<String> statuses = new ArrayList<>();
-        statuses.add(APIStatus.PUBLISHED.getStatus());
-        statuses.add(APIStatus.PROTOTYPED.getStatus());
+        Set<APIStatus> statuses = EnumSet.of(APIStatus.PUBLISHED, APIStatus.PROTOTYPED);
         Set<String> roles = new HashSet<>();
         roles.add("admin");
         roles.add("comment-moderator");
         roles.add("EVERYONE");
-        List<String> labels = new ArrayList<>();
+        Set<String> labels = new HashSet<>();
         PowerMockito.mockStatic(APIUtils.class); // TODO
         Mockito.doThrow(new APIMgtDAOException("Error occurred while getting APIs by statuses")).when(apiDAO)
                 .getAPIsByStatus(roles, statuses, labels);
 
         //doThrow(new Exception()).when(APIUtils).logAndThrowException(null, null, null)).
-        apiStore.searchAPIsByStoreLabels(null, 1, 2, new ArrayList<>());
+        apiStore.searchAPIsByStoreLabels(null, 1, 2, new HashSet<>());
     }
 
     @Test(description = "get all labels")
@@ -289,12 +286,12 @@ public class APIStoreImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIStore apiStore = getApiStoreImpl(apiDAO);
         List<API> expectedAPIs = new ArrayList<API>();
-        Mockito.when(apiDAO.getAPIsByStatus(Arrays.asList(STATUS_CREATED, STATUS_PUBLISHED))).
+        Mockito.when(apiDAO.getAPIsByStatus(EnumSet.of(APIStatus.CREATED, APIStatus.PUBLISHED))).
                 thenReturn(expectedAPIs);
         List<API> actualAPIs = apiStore.getAllAPIsByStatus(1, 2, new String[]{STATUS_CREATED, STATUS_PUBLISHED});
         Assert.assertNotNull(actualAPIs);
         Mockito.verify(apiDAO, Mockito.times(1)).
-                getAPIsByStatus(Arrays.asList(STATUS_CREATED, STATUS_PUBLISHED));
+                getAPIsByStatus(EnumSet.of(APIStatus.CREATED, APIStatus.PUBLISHED));
     }
 
     @Test(description = "Retrieve a WSDL of an API")
@@ -1276,7 +1273,7 @@ public class APIStoreImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIStore apiStore = getApiStoreImpl(apiDAO);
         String[] statuses = {STATUS_CREATED, STATUS_PUBLISHED};
-        Mockito.when(apiDAO.getAPIsByStatus(Arrays.asList(STATUS_CREATED, STATUS_PUBLISHED))).
+        Mockito.when(apiDAO.getAPIsByStatus(EnumSet.of(APIStatus.CREATED, APIStatus.PUBLISHED))).
                 thenThrow(new APIMgtDAOException(
                         "Error occurred while fetching APIs for the given statuses - " + Arrays.toString(statuses),
                         new SQLException()));

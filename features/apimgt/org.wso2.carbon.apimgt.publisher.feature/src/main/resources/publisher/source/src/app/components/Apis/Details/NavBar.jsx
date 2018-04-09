@@ -33,7 +33,7 @@ import {
     ArrowDropDown,
     OpenInNew,
 } from 'material-ui-icons';
-import { MenuItem, MenuList } from 'material-ui/Menu';
+import Menu, { MenuItem } from 'material-ui/Menu';
 import Grow from 'material-ui/transitions/Grow';
 import classNames from 'classnames';
 import Paper from 'material-ui/Paper';
@@ -108,6 +108,7 @@ class NavBar extends Component {
             api: null,
             openMore: false,
             windowWidth: 0,
+            anchorEl: null,
         };
         this.updateWindowSize = this.updateWindowSize.bind(this);
     }
@@ -142,19 +143,12 @@ class NavBar extends Component {
         window.removeEventListener('resize', this.updateWindowSize);
     }
 
-    handleClickMore = () => {
-        this.setState({ openMore: !this.state.openMore });
+    handleClickMore = (event) => {
+        this.setState({ openMore: !this.state.openMore, anchorEl: event.currentTarget });
     };
 
     handleCloseMore = () => {
-        if (!this.state.openMore) {
-            return;
-        }
-
-        // setTimeout to ensure a close event comes after a target click event
-        this.timeout = setTimeout(() => {
-            this.setState({ openMore: false });
-        });
+        this.setState({ anchorEl: null, openMore: false });
     };
 
     /**
@@ -179,7 +173,9 @@ class NavBar extends Component {
         // This assume that last segment and segment before it contains detail page action and API UUID
         const [activeTab, apiUUID] = pathSegments.reverse();
         const { classes } = this.props;
-        const { openMore, api, windowWidth } = this.state;
+        const {
+            openMore, api, windowWidth, anchorEl,
+        } = this.state;
 
         const tabs = [
             { name: 'lifecycle', icon: <DonutLarge className={classes.icon} />, important: true },
@@ -256,7 +252,7 @@ class NavBar extends Component {
                         <ClickAwayListener onClickAway={this.handleCloseMore}>
                             <Grow in={openMore} id='menu-list' style={{ transformOrigin: '0 0 0' }}>
                                 <Paper>
-                                    <MenuList role='menu'>
+                                    <Menu anchorEl={anchorEl} open={openMore} onClose={this.handleCloseMore}>
                                         {tabs.map(tab =>
                                             !tab.important && (
                                                 <Link
@@ -265,9 +261,7 @@ class NavBar extends Component {
                                                     to={'/apis/' + apiUUID + '/' + tab.name}
                                                 >
                                                     <MenuItem
-                                                        onClick={this.handleCloseMore}
                                                         key={tab.name}
-                                                        variant='raised'
                                                         size='small'
                                                         color={highlightActiveTab(tab.name)}
                                                         className={classes.button}
@@ -276,7 +270,7 @@ class NavBar extends Component {
                                                     </MenuItem>
                                                 </Link>
                                             ))}
-                                    </MenuList>
+                                    </Menu>
                                 </Paper>
                             </Grow>
                         </ClickAwayListener>

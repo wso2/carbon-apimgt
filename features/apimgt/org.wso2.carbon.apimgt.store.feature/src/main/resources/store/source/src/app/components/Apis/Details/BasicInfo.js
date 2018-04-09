@@ -30,6 +30,7 @@ import {withStyles} from 'material-ui/styles';
 import PropTypes from 'prop-types';
 import Chip from 'material-ui/Chip';
 import Subscribe from './Subscribe'
+import Divider from 'material-ui/Divider';
 
 
 const styles = theme => ({
@@ -84,7 +85,6 @@ class BasicInfo extends Component {
 
     componentDidMount() {
         const api = new Api();
-        console.info(this.api_uuid);
         let promised_api = api.getAPIById(this.api_uuid);
         promised_api.then(
             response => {
@@ -156,7 +156,14 @@ class BasicInfo extends Component {
         }
         const { classes } = this.props;
         return (
+            
             <Grid container className={classes.root}>
+                <Grid item xs={12}>
+                    <Typography variant="display1" >
+                        {api.name}
+                    </Typography>
+                    <Divider />
+                </Grid>
                 <Grid item xs={12} className={classes.imageWrapper}>
                     <ImageGenerator apiName={api.name} />
                     <div className={classes.imageSideContent}>

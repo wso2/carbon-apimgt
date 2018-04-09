@@ -18,9 +18,7 @@
 
 import React, {Component} from 'react'
 import {Link} from 'react-router-dom'
-import {Col, Popconfirm, Row, Form, Dropdown, Tag, Menu, Badge, message} from 'antd';
 
-const FormItem = Form.Item;
 import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import API from '../../../data/api'
@@ -32,8 +30,6 @@ import Button from 'material-ui/Button';
 import Card, { CardActions, CardContent, CardMedia } from 'material-ui/Card';
 import { Delete, Edit, CreateNewFolder, Description  }from 'material-ui-icons';
 import Table, { TableBody, TableCell, TableRow } from 'material-ui/Table';
-import Select from 'react-select';
-import 'react-select/dist/react-select.css';
 import Subscriptions  from 'material-ui-icons/Subscriptions';
 
 class BasicInfo extends Component {

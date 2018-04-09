@@ -119,7 +119,7 @@ class Login extends Component {
 
         Promise.all(promised_ssoData).then(responses => {
             this.setState({
-                authConfigs: responses.map(response => response.data.members)
+                authConfigs: responses.map(response => response.data)
             });
         });
     }

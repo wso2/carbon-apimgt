@@ -30,10 +30,12 @@ import Divider from 'material-ui/Divider';
 import Button from 'material-ui/Button';
 import MenuIcon from 'material-ui-icons/Menu';
 import TextField from 'material-ui/TextField';
+import {withStyles} from 'material-ui/styles';
 
 import API from '../../data/api'
 import Message from '../Shared/Message'
 import Confirm from '../Shared/Confirm'
+import Alert from '../Shared/Alert'
 
 const messages = {
   success: 'Deleted Application rate limit successfully',
@@ -41,7 +43,22 @@ const messages = {
   retrieveError: 'Error while retrieving Application rate limits'
 };
 
-export default class ApplicationPolicies extends Component {
+const styles = theme => ({
+    divider: {
+        marginBottom: 20,
+    },
+    createButton:{
+        textDecoration: 'none',
+        display: 'inline-block',
+        marginLeft: 20,
+        alignSelf: 'flex-start',
+    },
+    titleWrapper: {
+        display: 'flex',
+    }
+});
+
+class ApplicationPolicies extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -54,15 +71,14 @@ export default class ApplicationPolicies extends Component {
     }
     deletePolicy(id) {
       const api = new API();
-      debugger;
       const promised_policies = api.deleteApplicationLevelPolicy(id);
       promised_policies.then(
           response => {
-            this.msg.info(messages.success);
+            Alert.info(messages.success);
           }
       ).catch(
           error => {
-            this.msg.error(messages.failure);
+            Alert.error(messages.failure);
           }
       );
     }
@@ -77,13 +93,14 @@ export default class ApplicationPolicies extends Component {
             }
         ).catch(
             error => {
-              this.msg.error(messages.retrieveError);
+              Alert.error(messages.retrieveError);
             }
         );
     }
     render() {
         /*TODO implement search and pagination*/
         const tiers = this.state.policies;
+        const { classes } = this.props;
         let data = [];
         if(tiers) {
           data = tiers;
@@ -91,36 +108,24 @@ export default class ApplicationPolicies extends Component {
 
         return (
             <div>
-                <AppBar position="static" >
-                    <Toolbar style={{minHeight:'30px'}}>
-                        <IconButton color="contrast" aria-label="Menu">
-                            <MenuIcon />
-                        </IconButton>
-                        <Link to={"/policies/application_policies/create/"}>
-                             <Button color="contrast">Add Policy</Button>
-                        </Link>
-                    </Toolbar>
-                </AppBar>
-                <Message ref={a => this.msg = a}/>
-                <Grid container>
+                <Grid container justify="center" alignItems="center">
                     <Grid item xs={12}>
-                        <Paper>
-                            <Typography className="page-title" type="display1" gutterBottom>
-                               Application Rate Limits
+                    
+                        <div className={classes.titleWrapper}>
+                            <Typography variant="display1" gutterBottom >
+                                    Application Rate Limits
                             </Typography>
+                            <Link to={"/policies/application_policies/create"} className={classes.createButton}>
+                                <Button variant="raised" color="primary" className={classes.button}>
+                                Add Application Policy
+                                </Button>
+                            </Link>
                             <Typography type="caption" gutterBottom align="left" className="page-title-help">
                             Discription goes here.
-                            </Typography>
-
-                            <Divider />
-                            <div className="page-content">
-                              <TextField
-                                label="Search"
-                                margin="normal"
-                              />
-                            </div>
-                            <Divider />
-                        </Paper>
+                            </Typography>                          
+                        </div>
+                        <Divider className={classes.divider} />
+                       
                     </Grid>
                     <Grid item xs={12} className="page-content">
                           <Paper>
@@ -167,3 +172,5 @@ export default class ApplicationPolicies extends Component {
         );
     }
 }
+
+export default withStyles(styles)(ApplicationPolicies)

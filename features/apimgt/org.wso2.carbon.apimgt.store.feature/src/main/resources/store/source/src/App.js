@@ -24,8 +24,7 @@ import {PageNotFound} from './app/components/Base/Errors'
 import AuthManager from './app/data/AuthManager'
 import qs from 'qs'
 
-import {message} from 'antd'
-import 'typeface-roboto'
+// import 'typeface-roboto'
 import Utils from "./app/data/Utils";
 import ConfigManager from "./app/data/ConfigManager";
 import {MuiThemeProvider, createMuiTheme} from 'material-ui/styles';
@@ -49,7 +48,6 @@ class Protected extends Component {
             themeIndex: 0,
         };
         this.environments = [];
-        message.config({top: '48px'}); // .custom-header height + some offset
         /* TODO: need to fix the header to avoid conflicting with messages ~tmkb*/
     }
 

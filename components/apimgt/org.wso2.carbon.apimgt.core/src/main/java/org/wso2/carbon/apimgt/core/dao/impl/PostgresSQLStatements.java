@@ -22,15 +22,12 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.ApiType;
-import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.dao.SearchType;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -47,62 +44,48 @@ public class PostgresSQLStatements implements ApiDAOVendorSpecificStatements {
                     + "API.SECURITY_SCHEME FROM AM_API API LEFT JOIN AM_API_GROUP_PERMISSION PERMISSION ON "
                     + "UUID = API_ID";
 
-    private static final String API_SUMMARY_SELECT_STORE = "SELECT UUID, PROVIDER, NAME, CONTEXT, " +
-            "VERSION, DESCRIPTION, CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS " +
-            "FROM AM_API ";
+    private static final String API_FULL_TEXT_SEARCH = "textsearchable_index_col @@ to_tsquery(replace(?, ' ', '+'))";
 
-    private Map<String, StoreApiAttributeSearch> searchMap;
+    private static final String API_SEARCH_GROUP_BY = " GROUP BY UUID";
+    private static final String API_SEARCH_ORDER_BY = " ORDER BY NAME";
 
-    public PostgresSQLStatements() {
-        searchMap = new HashMap<>();
-        //for tag search, need to check AM_API_TAG_MAPPING and AM_TAGS tables
-        searchMap.put(APIMgtConstants.TAG_SEARCH_TYPE_PREFIX, new PostgresTagSearchImpl());
-        //for subcontext search, need to check AM_API_OPERATION_MAPPING table
-        searchMap.put(APIMgtConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX, new PostgresSubcontextSearchImpl());
-        //for any other attribute search, need to check AM_API table
-        searchMap.put(APIMgtConstants.PROVIDER_SEARCH_TYPE_PREFIX, new PostgresGenericSearchImpl());
-        searchMap.put(APIMgtConstants.VERSION_SEARCH_TYPE_PREFIX, new PostgresGenericSearchImpl());
-        searchMap.put(APIMgtConstants.CONTEXT_SEARCH_TYPE_PREFIX, new PostgresGenericSearchImpl());
-        searchMap.put(APIMgtConstants.DESCRIPTION_SEARCH_TYPE_PREFIX, new PostgresGenericSearchImpl());
+    private static final String PAGINATION = " OFFSET ? LIMIT ?";
+
+    PostgresSQLStatements() {
     }
 
     /**
-     * @see ApiDAOVendorSpecificStatements#getApiSearchQuery(int)
+     * @see ApiDAOVendorSpecificStatements#getPermissionBasedApiFullTextSearchQuery(int)
      */
     @Override
-    public String getApiSearchQuery(int roleCount) {
+    public String getPermissionBasedApiFullTextSearchQuery(int roleCount) {
+        String query = API_SUMMARY_SELECT +
+                        " WHERE " +
+                        API_FULL_TEXT_SEARCH +
+                        " AND API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)";
+
         if (roleCount > 0) {
-            return API_SUMMARY_SELECT +
-                    " WHERE textsearchable_index_col @@ to_tsquery(replace(?, ' ', '+'))" +
-                    " AND API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)" +
-                    " AND (((GROUP_ID IN (" + DAOUtil.getParameterString(roleCount) + "))" +
+            query += " AND (((GROUP_ID IN (" + DAOUtil.getParameterString(roleCount) + "))" +
                     " AND PERMISSION.PERMISSION >= " + APIMgtConstants.Permission.READ_PERMISSION +
-                    ") OR (PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))" +
-                    " GROUP BY UUID ORDER BY NAME  OFFSET ? LIMIT ?";
+                    ") OR (PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))";
         } else {
-            return API_SUMMARY_SELECT +
-                    " WHERE textsearchable_index_col @@ to_tsquery(replace(?, ' ', '+'))" +
-                    " AND API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)" +
-                    " AND ((PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))" +
-                    " GROUP BY UUID ORDER BY NAME  OFFSET ? LIMIT ?";
+            query += " AND ((PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))";
         }
+
+        return query + API_SEARCH_GROUP_BY + API_SEARCH_ORDER_BY + PAGINATION;
     }
 
     /**
-     * @see ApiDAOVendorSpecificStatements#setApiSearchStatement(PreparedStatement, Set, String, String, ApiType,
-     * int, int, List)
+     * @see ApiDAOVendorSpecificStatements#setPermissionBasedApiFullTextSearchStatement(PreparedStatement, Set, String,
+     * String, ApiType, int, int)
      */
     @Override
     @SuppressFBWarnings({"SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
             "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE"})
-    public void setApiSearchStatement(PreparedStatement statement, Set<String> roles, String user,
-                                      String searchString, ApiType apiType,
-                                      int offset, int limit, List<String> labels) throws SQLException {
+    public void setPermissionBasedApiFullTextSearchStatement(PreparedStatement statement, Set<String> roles,
+                                                             String user, String searchString, ApiType apiType,
+                                                             int offset, int limit) throws SQLException {
         int index = 0;
-
-        for (String label : labels) {
-            statement.setString(++index, label);
-        }
         // Replacing special characters and allowing only alphabetical letters, numbers and space
         statement.setString(++index, searchString.toLowerCase(Locale.ENGLISH) + ":*");
         statement.setString(++index, apiType.toString());
@@ -117,14 +100,14 @@ public class PostgresSQLStatements implements ApiDAOVendorSpecificStatements {
     }
 
     /**
-     * @see ApiDAOVendorSpecificStatements#getApiAttributeSearchQuery(Map, int)
+     * @see ApiDAOVendorSpecificStatements#getPermissionBasedApiAttributeSearchQuery(Map, int)
      */
     @Override
-    public String getApiAttributeSearchQuery(Map<String, String> attributeMap, int roleCount) {
+    public String getPermissionBasedApiAttributeSearchQuery(Map<SearchType, String> attributeMap, int roleCount) {
         StringBuilder searchQuery = new StringBuilder();
-        Iterator<Map.Entry<String, String>> entries = attributeMap.entrySet().iterator();
+        Iterator<Map.Entry<SearchType, String>> entries = attributeMap.entrySet().iterator();
         while (entries.hasNext()) {
-            Map.Entry<String, String> entry = entries.next();
+            Map.Entry<SearchType, String> entry = entries.next();
             searchQuery.append("LOWER(");
             searchQuery.append(entry.getKey());
             searchQuery.append(") LIKE ?");
@@ -133,34 +116,34 @@ public class PostgresSQLStatements implements ApiDAOVendorSpecificStatements {
             }
         }
 
+        String query = API_SUMMARY_SELECT + " WHERE " + searchQuery.toString() +
+                " AND API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)";
+
         if (roleCount > 0) {
-            return API_SUMMARY_SELECT + " WHERE " + searchQuery.toString() +
-                    " AND API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)" +
-                    " AND (((GROUP_ID IN (" + DAOUtil.getParameterString(roleCount) +
+            query += " AND (((GROUP_ID IN (" + DAOUtil.getParameterString(roleCount) +
                     ")) AND PERMISSION.PERMISSION >= " + APIMgtConstants.Permission.READ_PERMISSION +
-                    ") OR  (PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))" +
-                    " GROUP BY UUID ORDER BY NAME  OFFSET ? LIMIT ?";
+                    ") OR  (PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))";
         } else {
-            return API_SUMMARY_SELECT + " WHERE " + searchQuery.toString() +
-                    " AND API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)" +
-                    " AND ((PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))" +
-                    " GROUP BY UUID ORDER BY NAME  OFFSET ? LIMIT ?";
+            query += " AND ((PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))";
         }
+
+        return query + API_SEARCH_GROUP_BY + API_SEARCH_ORDER_BY + PAGINATION;
     }
 
     /**
-     * @see ApiDAOVendorSpecificStatements#setApiAttributeSearchStatement(PreparedStatement, Set, String, Map, ApiType,
-     * int, int)
+     * @see ApiDAOVendorSpecificStatements#setPermissionBasedApiAttributeSearchStatement(PreparedStatement, Set,
+     * String, Map, ApiType, int, int)
      */
     @Override
     @SuppressFBWarnings({"SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
             "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE"})
-    public void setApiAttributeSearchStatement(PreparedStatement statement, Set<String> roles, String user,
-                                               Map<String, String> attributeMap, ApiType apiType,
-                                               int offset, int limit) throws SQLException {
+    public void setPermissionBasedApiAttributeSearchStatement(PreparedStatement statement, Set<String> roles,
+                                                              String user, Map<SearchType, String> attributeMap,
+                                                              ApiType apiType,
+                                                              int offset, int limit) throws SQLException {
         int index = 0;
 
-        for (Map.Entry<String, String> entry : attributeMap.entrySet()) {
+        for (Map.Entry<SearchType, String> entry : attributeMap.entrySet()) {
             entry.setValue('%' + entry.getValue().toLowerCase(Locale.ENGLISH) + '%');
             statement.setString(++index, entry.getValue());
         }
@@ -176,32 +159,69 @@ public class PostgresSQLStatements implements ApiDAOVendorSpecificStatements {
         statement.setInt(++index, limit);
     }
 
-    /**
-     * @see ApiDAOVendorSpecificStatements#prepareAttributeSearchStatementForStore(Connection connection, List, List,
-     * Map, int, int)
-     */
     @Override
-    @SuppressFBWarnings({"SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
-            "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE"})
-    public PreparedStatement prepareAttributeSearchStatementForStore(Connection connection, List<String> roles,
-                                                                     List<String> labels,
-                                                                     Map<String, String> attributeMap, int offset,
-                                                                     int limit) throws APIMgtDAOException {
-        StringBuilder roleListBuilder = new StringBuilder();
-        roleListBuilder.append("?");
-        for (int i = 0; i < roles.size() - 1; i++) {
-            roleListBuilder.append(",?");
+    public String getVisibilityBasedApiFullTextSearchQuery(int roleCount, int labelCount) {
+        String query = SQLConstants.API_SUMMARY_SELECT_STORE +
+                        " WHERE " +
+                        API_FULL_TEXT_SEARCH +
+                        " AND " +
+                        SQLConstants.API_LC_STATUS_PUBLISHED_OR_PROTOTYPED +
+                        " AND " +
+                        SQLConstants.API_VISIBILITY_PUBLIC;
+
+        if (roleCount > 0) {
+            query += " UNION " +
+                        SQLConstants.API_SUMMARY_SELECT_STORE +
+                        " WHERE " +
+                        API_FULL_TEXT_SEARCH +
+                        " AND " +
+                        SQLConstants.API_LC_STATUS_PUBLISHED_OR_PROTOTYPED +
+                        " AND " +
+                        SQLConstants.getApiVisibilityRestricted(roleCount);
         }
+
+        return "Select * from ( " + query + API_SEARCH_GROUP_BY + " ) A " + getStoreAPIsByLabelJoinQuery(labelCount) +
+                API_SEARCH_ORDER_BY + PAGINATION;
+    }
+
+    @Override
+    public void setVisibilityBasedApiFullTextSearchStatement(PreparedStatement statement, Set<String> roles,
+                                                             Set<String> labels, String searchString,
+                                                             int offset, int limit) throws SQLException {
+        int index = 0;
+        // Replacing special characters and allowing only alphabetical letters, numbers and space
+        statement.setString(++index, searchString.toLowerCase(Locale.ENGLISH) + ":*");
+
+        if (!roles.isEmpty()) {
+            // Set values after UNION
+            statement.setString(++index, searchString.toLowerCase(Locale.ENGLISH) + ":*");
+
+            for (String role : roles) {
+                statement.setString(++index, role);
+            }
+        }
+
+        for (String label : labels) {
+            statement.setString(++index, label);
+        }
+
+        statement.setInt(++index, offset);
+        statement.setInt(++index, limit);
+
+    }
+
+    @Override
+    public String getVisibilityBasedApiAttributeSearchQuery(int roleCount, int labelCount,
+                                                            Map<SearchType, String> attributeMap) {
         StringBuilder searchQuery = new StringBuilder();
-        Iterator<Map.Entry<String, String>> entries = attributeMap.entrySet().iterator();
+        Iterator<Map.Entry<SearchType, String>> entries = attributeMap.entrySet().iterator();
 
         while (entries.hasNext()) {
-            Map.Entry<String, String> entry = entries.next();
+            Map.Entry<SearchType, String> entry = entries.next();
             searchQuery.append("LOWER(");
-            if (APIMgtConstants.TAG_SEARCH_TYPE_PREFIX.equalsIgnoreCase(entry.getKey())) {
+            if (SearchType.TAG == entry.getKey()) {
                 searchQuery.append(APIMgtConstants.TAG_NAME_COLUMN);
-            } else if (APIMgtConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX.
-                    equalsIgnoreCase(entry.getKey())) {
+            } else if (SearchType.SUBCONTEXT == entry.getKey()) {
                 searchQuery.append(APIMgtConstants.URL_PATTERN_COLUMN);
             } else {
                 searchQuery.append(entry.getKey());
@@ -213,45 +233,63 @@ public class PostgresSQLStatements implements ApiDAOVendorSpecificStatements {
         }
 
         //retrieve the attribute applicable for the search
-        String searchAttribute = attributeMap.entrySet().iterator().next().getKey();
+        SearchType searchAttribute = attributeMap.entrySet().iterator().next().getKey();
         //get the corresponding implementation based on the attribute to be searched
-        String query = searchMap.get(searchAttribute).
-                getStoreAttributeSearchQuery(roleListBuilder, searchQuery, offset, limit);
-        query = "Select * from ( " + query + " ) A " + getStoreAPIsByLabelJoinQuery(labels);
+        String query = SearchQueryDictionary.getSearchQuery(searchAttribute).
+                getStoreAttributeSearchQuery(roleCount, searchQuery);
 
-        try {
-            int queryIndex = 1;
-            PreparedStatement statement = connection.prepareStatement(query);
-            //include the attribute in the query (for APIs with public visibility)
-            for (Map.Entry<String, String> entry : attributeMap.entrySet()) {
-                statement.setString(queryIndex, '%' + entry.getValue().
-                        toLowerCase(Locale.ENGLISH) + '%');
-                queryIndex++;
-            }
-            //include user roles in the query
-            for (String role : roles) {
-                statement.setString(queryIndex, role);
-                queryIndex++;
-            }
-            //include the attribute in the query (for APIs with restricted visibility)
-            for (Map.Entry<String, String> entry : attributeMap.entrySet()) {
-                statement.setString(queryIndex, '%' + entry.getValue().
-                        toLowerCase(Locale.ENGLISH) + '%');
-                queryIndex++;
-            }
+        return "Select * from ( " + query + API_SEARCH_GROUP_BY + " ) A " + getStoreAPIsByLabelJoinQuery(labelCount) +
+                API_SEARCH_ORDER_BY + PAGINATION;
+    }
 
-            for (String label : labels) {
-                statement.setString(queryIndex, label);
-                queryIndex++;
-            }
-            //setting 0 as the default offset based on store-api.yaml and Postgress specifications
-            statement.setInt(queryIndex, (offset < 0) ? 0 : offset);
-            statement.setInt(++queryIndex, limit);
-            return statement;
-        } catch (SQLException e) {
-            String errorMsg = "Error occurred while searching APIs for attributes in the database.";
-            log.error(errorMsg, e);
-            throw new APIMgtDAOException(errorMsg, e);
+    @Override
+    public void setVisibilityBasedApiAttributeSearchStatement(PreparedStatement statement, Set<String> roles,
+                                                              Set<String> labels, Map<SearchType, String> attributeMap,
+                                                              int offset, int limit) throws SQLException {
+        int index = 0;
+        //include the attribute in the query (for APIs with public visibility)
+        for (Map.Entry<SearchType, String> entry : attributeMap.entrySet()) {
+            statement.setString(++index, '%' + entry.getValue().
+                    toLowerCase(Locale.ENGLISH) + '%');
         }
+        //include user roles in the query
+        for (String role : roles) {
+            statement.setString(++index, role);
+        }
+        //include the attribute in the query (for APIs with restricted visibility)
+        for (Map.Entry<SearchType, String> entry : attributeMap.entrySet()) {
+            statement.setString(++index, '%' + entry.getValue().
+                    toLowerCase(Locale.ENGLISH) + '%');
+        }
+
+        for (String label : labels) {
+            statement.setString(++index, label);
+        }
+        //setting 0 as the default offset based on store-api.yaml and Postgress specifications
+        statement.setInt(++index, (offset < 0) ? 0 : offset);
+        statement.setInt(++index, limit);
+    }
+
+    @Override
+    public DBTableMetaData mapSearchAttributesToDB(SearchType attributeKey) {
+        DBTableMetaData metaData = new DBTableMetaData();
+
+        if (SearchType.TAG == attributeKey) {
+            //if the search is related to tags, need to check NAME column in AM_TAGS table
+            metaData.setTableName(SQLConstants.AM_TAGS_TABLE_NAME.toLowerCase(Locale.ENGLISH));
+            metaData.setColumnName(APIMgtConstants.TAG_NAME_COLUMN.toLowerCase(Locale.ENGLISH));
+        } else if (SearchType.SUBCONTEXT == attributeKey) {
+            //if the search is related to subcontext, need to check URL_PATTERN column in
+            //AM_API_OPERATION_MAPPING table
+            metaData.setTableName(SQLConstants.AM_API_OPERATION_MAPPING_TABLE_NAME.toLowerCase(Locale.ENGLISH));
+            metaData.setColumnName(APIMgtConstants.URL_PATTERN_COLUMN.toLowerCase(Locale.ENGLISH));
+        } else {
+            //if the search is related to any other attribute, need to check that attribute
+            //in AM_API table
+            metaData.setTableName(SQLConstants.AM_API_TABLE_NAME.toLowerCase(Locale.ENGLISH));
+            metaData.setColumnName(attributeKey.toString().toLowerCase(Locale.ENGLISH));
+        }
+
+        return metaData;
     }
 }

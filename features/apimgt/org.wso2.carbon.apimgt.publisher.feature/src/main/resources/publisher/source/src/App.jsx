@@ -20,7 +20,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom';
 import qs from 'qs';
-import { getAsyncComponent } from 'async-react-component';
 import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
 import Log from 'log4javascript';
 import './App.css';
@@ -30,6 +29,11 @@ import MaterialDesignCustomTheme from './app/components/Shared/CustomTheme';
 import { PageNotFound } from './app/components/Base/Errors';
 import AuthManager from './app/data/AuthManager';
 import ApiCreate from './app/components/Apis/Create/ApiCreate';
+import Apis from './app/components/Apis/Apis';
+import Endpoints from './app/components/Endpoints';
+import Base from './app/components/Base';
+import Login from './app/components/Login/Login';
+import Logout from './app/components/Logout';
 
 const themes = [];
 const darkTheme = createMuiTheme({
@@ -51,13 +55,6 @@ lightTheme.palette.text.brand = 'rgba(255,255,255,1)';
 themes.push(darkTheme);
 themes.push(lightTheme);
 themes.push(createMuiTheme(MaterialDesignCustomTheme));
-
-const Apis = () => import(/* webpackChunkName: "apis" */ './app/components/Apis/Apis');
-const Endpoints = () => import(/* webpackChunkName: "endpoints" */ './app/components/Endpoints');
-const Base = () => import(/* webpackChunkName: "base" */ './app/components/Base');
-const BaseLayout = getAsyncComponent(Base);
-const Login = () => import(/* webpackChunkName: "login" */ './app/components/Login/Login');
-const Logout = () => import(/* webpackChunkName: "logout" */ './app/components/Logout');
 
 /**
  * Render protected application paths
@@ -106,8 +103,10 @@ class Protected extends Component {
      * Change the theme index incrementally
      */
     setTheme() {
-        this.state.themeIndex++;
-        localStorage.setItem('themeIndex', this.state.themeIndex);
+        let { themeIndex } = this.state;
+        themeIndex++;
+        localStorage.setItem('themeIndex', themeIndex);
+        this.setState({ themeIndex });
     }
 
     /**
@@ -149,15 +148,15 @@ class Protected extends Component {
         if (AuthManager.getUser(environmentName)) {
             return (
                 <MuiThemeProvider theme={themes[this.state.themeIndex % 3]}>
-                    <BaseLayout setTheme={() => this.setTheme()}>
+                    <Base setTheme={() => this.setTheme()}>
                         <Switch>
                             <Redirect exact from='/' to='/apis' />
-                            <Route path='/apis' component={getAsyncComponent(Apis)} />
-                            <Route path='/endpoints' component={getAsyncComponent(Endpoints)} />
+                            <Route path='/apis' component={Apis} />
+                            <Route path='/endpoints' component={Endpoints} />
                             <Route path='/api/create' component={ApiCreate} />
                             <Route component={PageNotFound} />
                         </Switch>
-                    </BaseLayout>
+                    </Base>
                 </MuiThemeProvider>
             );
         }
@@ -182,8 +181,8 @@ const Publisher = () => {
     return (
         <Router basename='/publisher'>
             <Switch>
-                <Route path='/login' component={getAsyncComponent(Login)} />
-                <Route path='/logout' component={getAsyncComponent(Logout)} /> <Route component={Protected} />
+                <Route path='/login' component={Login} />
+                <Route path='/logout' component={Logout} /> <Route component={Protected} />
             </Switch>
         </Router>
     );

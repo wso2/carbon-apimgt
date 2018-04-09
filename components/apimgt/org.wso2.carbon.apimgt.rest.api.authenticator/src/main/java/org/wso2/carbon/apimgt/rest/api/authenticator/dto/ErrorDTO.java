@@ -39,6 +39,7 @@ public class ErrorDTO {
 
 
     /**
+     * @return error code
      **/
     @ApiModelProperty(required = true, value = "") @JsonProperty("code") public Long getCode() {
         return code;
@@ -50,6 +51,7 @@ public class ErrorDTO {
 
     /**
      * Error message.
+     * @return error message
      */
     @ApiModelProperty(required = true, value = "Error message.") @JsonProperty("message")
     public String getMessage() {
@@ -62,6 +64,7 @@ public class ErrorDTO {
 
     /**
      * A detail description about the error message.
+     * @return detail of description
      */
     @ApiModelProperty(value = "A detail description about the error message.") @JsonProperty("description")
     public String getDescription() {
@@ -74,6 +77,7 @@ public class ErrorDTO {
 
     /**
      * Preferably an url with more details about the error.
+     * @return more details on error
      */
     @ApiModelProperty(value = "Preferably an url with more details about the error.") @JsonProperty("moreInfo")
     public HashMap<String, String> getMoreInfo() {
