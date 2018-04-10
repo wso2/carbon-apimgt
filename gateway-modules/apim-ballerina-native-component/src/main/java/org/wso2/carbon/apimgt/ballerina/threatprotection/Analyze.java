@@ -72,7 +72,7 @@ public class Analyze extends AbstractNativeFunction {
 
         APIMThreatAnalyzer analyzer = AnalyzerHolder.getAnalyzer(payloadType, policyId);
         if (analyzer == null) {
-            return getBValues(new BBoolean(false), new BString("Unknown Payload Type"));
+            return getBValues(new BBoolean(true), new BString(""));
         }
 
         boolean noThreatsDetected = true;
