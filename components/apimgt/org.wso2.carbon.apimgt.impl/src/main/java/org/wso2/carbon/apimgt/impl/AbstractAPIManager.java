@@ -1383,11 +1383,19 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     public boolean isScopeKeyExist(String scopeKey, int tenantid) throws APIManagementException {
+        if (System.getProperty(APIConstants.ENABLE_DUPLICATE_SCOPES) != null && Boolean
+                .parseBoolean(System.getProperty(APIConstants.ENABLE_DUPLICATE_SCOPES))) {
+            return false;
+        }
         return apiMgtDAO.isScopeKeyExist(scopeKey, tenantid);
     }
 
     public boolean isScopeKeyAssigned(APIIdentifier identifier, String scopeKey, int tenantid)
             throws APIManagementException {
+        if (System.getProperty(APIConstants.ENABLE_DUPLICATE_SCOPES) != null && Boolean
+                .parseBoolean(System.getProperty(APIConstants.ENABLE_DUPLICATE_SCOPES))) {
+            return false;
+        }
         return apiMgtDAO.isScopeKeyAssigned(identifier, scopeKey, tenantid);
     }
 
