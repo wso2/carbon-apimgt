@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -24,13 +24,14 @@ import Paper from 'material-ui/Paper';
 import Typography from 'material-ui/Typography';
 import Table, { TableBody, TableCell, TableHead, TableRow } from 'material-ui/Table';
 import AppBar from 'material-ui/AppBar';
-import Toolbar from 'material-ui/Toolbar';;
+import Toolbar from 'material-ui/Toolbar';
 import IconButton from 'material-ui/IconButton';
 import Divider from 'material-ui/Divider';
 import Button from 'material-ui/Button';
 import MenuIcon from 'material-ui-icons/Menu';
 import TextField from 'material-ui/TextField';
 import { withStyles } from 'material-ui/styles';
+import Switch from 'material-ui/Switch';
 
 import API from '../../data/api'
 import Message from '../Shared/Message'
@@ -38,12 +39,12 @@ import Confirm from '../Shared/Confirm'
 import Alert from '../Shared/Alert'
 
 const messages = {
-    success: 'Deleted custom rule successfully',
-    failure: 'Error while deleting custom rule',
-    retrieveError: 'Error while retrieving custom rules'
+    success: 'Deleted black list policy successfully',
+    failure: 'Error while deleting black list policy',
+    retrieveError: 'Error while retrieving black list policies'
 };
 
-const styles = theme => ({
+const styles = ({
     divider: {
         marginBottom: 20,
     },
@@ -58,7 +59,7 @@ const styles = theme => ({
     }
 });
 
-class CustomRules extends Component {
+class BlackLists extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -67,19 +68,20 @@ class CustomRules extends Component {
             open: false,
             message: ''
         };
-        this.deleteCustomRulePolicy = this.deleteCustomRulePolicy.bind(this);
+        this.handlePolicyChange = this.handlePolicyChange.bind(this);
+        this.deleteBlackListPolicy = this.deleteBlackListPolicy.bind(this);
 
     }
 
-    deleteCustomRulePolicy(event) {
+    deleteBlackListPolicy(event) {
         const api = new API();
-        const { id } = event.currentTarget;
-        const promisedPolicies = api.deleteCustomRulePolicy(id);
+        const id = event.currentTarget.id;
+        const promisedPolicies = api.deleteBlackListPolicy(id);
         promisedPolicies.then(
             response => {
                 Alert.info(messages.success);
                 var data = this.state.policies.filter(obj => {
-                    return obj.id !== id;
+                    return obj.conditionId !== id;
                 });
                 this.setState({ policies: data });
             }
@@ -94,10 +96,34 @@ class CustomRules extends Component {
     componentDidMount() {
         const api = new API();
 
-        const promised_policies = api.getCustomRulePolicies();
+        const promised_policies = api.getBlockListPolicies();
         promised_policies.then(
             response => {
                 this.setState({ policies: response.obj.list });
+            }
+        ).catch(
+            error => {
+                Alert.error(messages.retrieveError);
+                console.error(error);
+            }
+        );
+    }
+
+    handlePolicyChange(event) {
+        const api = new API();
+        const status = event.target.checked;
+        const id = event.target.id;
+
+        const promisedPolicies = api.updateBlackListPolicy(id, { status: status });
+        promisedPolicies.then(
+            response => {
+                const policies = this.state.policies;
+                policies.forEach(element => {
+                    if (element.conditionId === id) {
+                        element.status = status;
+                    }
+                });
+                this.setState({ policies: policies });
             }
         ).catch(
             error => {
@@ -123,11 +149,11 @@ class CustomRules extends Component {
 
                         <div className={classes.titleWrapper}>
                             <Typography variant="display1" gutterBottom >
-                                Custom Rules
+                                Black List Policies
                             </Typography>
-                            <Link to={"/policies/custom_rules/create"} className={classes.createButton}>
+                            <Link to={"/policies/black_list_policies/create"} className={classes.createButton}>
                                 <Button variant="raised" color="primary" className={classes.button}>
-                                    Add Custom Rule
+                                    Add Black List Policy
                                 </Button>
                             </Link>
                             <Typography type="caption" gutterBottom align="left" className="page-title-help">
@@ -142,27 +168,30 @@ class CustomRules extends Component {
                             <Table>
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell>Name</TableCell>
-                                        <TableCell>Description</TableCell>
-                                        <TableCell>Key Template</TableCell>
-
+                                        <TableCell>Condition Id</TableCell>
+                                        <TableCell>Type</TableCell>
+                                        <TableCell>Value</TableCell>
+                                        <TableCell>Status</TableCell>
                                         <TableCell></TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
                                     {data.map(n => {
                                         return (
-                                            <TableRow key={n.id}>
-                                                <TableCell>{n.policyName}</TableCell>
-                                                <TableCell>{n.description}</TableCell>
-                                                <TableCell>{n.keyTemplate}</TableCell>
+                                            <TableRow key={n.conditionId}>
+                                                <TableCell>{n.conditionId}</TableCell>
+                                                <TableCell>{n.conditionType}</TableCell>
+                                                <TableCell>{n.conditionValue}</TableCell>
+                                                <TableCell><Switch id={n.conditionId}
+                                                    checked={n.status}
+                                                    onChange={this.handlePolicyChange}
+                                                    value={n.conditionId}
+                                                    color="primary"
+                                                /></TableCell>
                                                 <TableCell>
                                                     <span>
-                                                        <Link to={"/policies/custom_rules/" + n.id}>
-                                                            <Button color="primary">Edit</Button>
-                                                        </Link>
-                                                        <Button id={n.id} color="default"
-                                                            onClick={this.deleteCustomRulePolicy} >Delete</Button>
+                                                        <Button id={n.conditionId} color="default"
+                                                            onClick={this.deleteBlackListPolicy} >Delete</Button>
                                                     </span>
                                                 </TableCell>
                                             </TableRow>
@@ -177,4 +206,4 @@ class CustomRules extends Component {
         );
     }
 }
-export default withStyles(styles)(CustomRules);
+export default withStyles(styles)(BlackLists);

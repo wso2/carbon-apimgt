@@ -33,8 +33,11 @@ import ApplicationPolicies from './ApplicationPolicies'
 import CustomRules from './CustomRules'
 import CreateCustomRulePolicy from './Create/CreateCustomRulePolicy'
 import CustomRule from './Details/CustomRule'
+import BlackLists from './BlackLists'
+import CreateBlackListPolicy from './Create/CreateBlackListPolicy'
 
 import {PageNotFound} from '../Base/Errors'
+
 
 const ThrottlingPolicies = () => {
     return (
@@ -51,6 +54,9 @@ const ThrottlingPolicies = () => {
             <Route path={"/policies/custom_rules/create"} render={props => (<CreateCustomRulePolicy/>)}/>  
             <Route path={"/policies/custom_rules/:policy_uuid/"} component={CustomRule}/>          
             <Route path={"/policies/custom_rules"} render={props => (<CustomRules/>)}/>
+            <Route path={"/policies/black_list_policies/create"} render={props => (<CreateBlackListPolicy/>)}/>
+            <Route path={"/policies/black_list"} render={props => (<BlackLists/>)}/>
+            <Route path={"/policies"} render={props => (<APIPolicies/>)}/>
             <Route component={PageNotFound}/>
         </Switch>
     );

@@ -418,6 +418,61 @@ class API {
             }
         );
     }
+
+    /**
+     * Create black list policy
+     * @returns {Promise} Promised policies response
+     */
+    createBlackListPolicy(body) {
+        let payload = {body: body, "Content-Type": "application/json"};
+        return this.client.then(
+            (client) => {
+                return client.apis["Blacklist"].post_blacklist(
+                    payload, this._requestMetaData());
+            }
+        );
+    }
+
+    /**
+     * Get custom rule policies.
+     * @returns {Promise} Promised policies response
+     */
+    getBlockListPolicies() {
+        return this.client.then(
+            (client) => {
+                return client.apis["Blacklist"].get_blacklist(
+                    {}, this._requestMetaData());
+            }
+        );
+    }
+
+    /**
+     * update black list policy.
+     * @returns {Promise} Promised policies response
+     */
+    updateBlackListPolicy(id, body) {
+        let payload = {conditionId: id, body: body, "Content-Type": "application/json"};
+        return this.client.then(
+            (client) => {
+                return client.apis["Blacklist condition"].put_blacklist__conditionId_(
+                    payload, this._requestMetaData());
+            }
+        );
+    }
+
+    /**
+     * Delete black list policy.
+     * @returns {Promise} Promised policies response
+     */
+    deleteBlackListPolicy(id) {
+        return this.client.then(
+            (client) => {
+                return client.apis["Blacklist"].delete_blacklist__conditionId_(
+                    {conditionId: id}, this._requestMetaData());
+            }
+        );
+    }
+
 }
 
 export default API

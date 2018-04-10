@@ -68,7 +68,7 @@ class APIPolicies extends Component {
             open:false,
             message: ''
         };
-
+        this.deletePolicy = this.deletePolicy.bind(this);
     }
     deletePolicy(id) {
       const api = new API();
@@ -76,6 +76,10 @@ class APIPolicies extends Component {
       promised_policies.then(
           response => {
             Alert.info(messages.success);
+            const data = this.state.policies.filter(obj => {
+              return obj.id !== id;
+            });
+            this.setState({policies: data});
           }
       ).catch(
           error => {

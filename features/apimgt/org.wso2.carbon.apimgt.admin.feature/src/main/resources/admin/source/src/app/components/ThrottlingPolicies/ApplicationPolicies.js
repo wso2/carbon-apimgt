@@ -67,6 +67,7 @@ class ApplicationPolicies extends Component {
             open:false,
             message: ''
         };
+        this.deletePolicy = this.deletePolicy.bind(this);
 
     }
     deletePolicy(id) {
@@ -75,6 +76,10 @@ class ApplicationPolicies extends Component {
       promised_policies.then(
           response => {
             Alert.info(messages.success);
+            const data = this.state.policies.filter(obj => {
+                return obj.id !== id;
+              });
+              this.setState({policies: data});
           }
       ).catch(
           error => {
