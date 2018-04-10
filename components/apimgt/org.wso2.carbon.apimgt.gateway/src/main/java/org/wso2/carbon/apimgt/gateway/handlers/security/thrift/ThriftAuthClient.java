@@ -20,21 +20,14 @@ package org.wso2.carbon.apimgt.gateway.handlers.security.thrift;
 
 
 import org.apache.http.client.HttpClient;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TCompactProtocol;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.THttpClient;
 import org.apache.thrift.transport.TTransportException;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 public class ThriftAuthClient {
 
@@ -69,35 +62,8 @@ public class ThriftAuthClient {
             throws AuthenticationException {
 
         try {
-            TrustManager easyTrustManager = new X509TrustManager() {
-                public void checkClientTrusted(
-                        java.security.cert.X509Certificate[] x509Certificates,
-                        String s){
-                }
-
-                public void checkServerTrusted(
-                        java.security.cert.X509Certificate[] x509Certificates,
-                        String s){
-                }
-
-                public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                    return null;
-                }
-            };
-
-            //skip host name verification
-            SSLContext sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(null, new TrustManager[]{easyTrustManager}, null);
-            SSLSocketFactory sf = new SSLSocketFactory(sslContext);
-            sf.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-
-            //REGISTERS SCHEMES FOR BOTH HTTP AND HTTPS
-            SchemeRegistry registry = new SchemeRegistry();
-            registry.register(new Scheme("https", sf,Integer.parseInt(remoteServerPort)));
-
-
-            PoolingClientConnectionManager manager = new PoolingClientConnectionManager (registry);
-            HttpClient httpClient = new DefaultHttpClient(manager);
+            HttpClient httpClient = APIUtil.getHttpClient(Integer.parseInt(remoteServerPort),
+                    APIConstants.HTTPS_PROTOCOL);
 
             //If the webContextRoot is null or /
             if(webContextRoot == null || "/".equals(webContextRoot)){
