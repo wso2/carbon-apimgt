@@ -197,6 +197,28 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
         }
     }
 
+    @Override
+    public void deleteSubscriptionsByAPIId(String apiId) throws APIMgtDAOException {
+        final String deleteSubscriptionSql = "DELETE FROM AM_SUBSCRIPTION WHERE API_ID = ? ";
+        try (Connection conn = DAOUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement ps = conn.prepareStatement(deleteSubscriptionSql)) {
+                ps.setString(1, apiId);
+                ps.execute();
+                conn.commit();
+            } catch (SQLException ex) {
+                conn.rollback();
+                throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                        "deleting api subscription(apiId: " + apiId + ")", ex);
+            } finally {
+                conn.setAutoCommit(DAOUtil.isAutoCommit());
+            }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                    "deleting api subscription(apiId: " + apiId + ")", e);
+        }
+    }
+
     /**
      * Retrieve all API Subscriptions for validation
      *
@@ -784,4 +806,5 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
             ps.execute();
         }
     }
+
 }
