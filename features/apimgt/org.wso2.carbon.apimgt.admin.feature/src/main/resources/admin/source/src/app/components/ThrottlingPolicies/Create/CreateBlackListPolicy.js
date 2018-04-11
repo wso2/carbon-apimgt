@@ -16,7 +16,7 @@
  * under the License.
  */
 import React, { Component } from 'react';
-import {withRouter} from 'react-router-dom'
+import { withRouter } from 'react-router-dom'
 
 import { Link } from 'react-router-dom';
 import AppBar from 'material-ui/AppBar';
@@ -37,47 +37,69 @@ import API from '../../../data/api';
 import Message from '../../Shared/Message';
 import '../Shared/Shared.css';
 import Alert from '../../Shared/Alert'
-import CustomRuleDetails from '../Shared/CustomRuleDetails';
+import BlackListDetails from '../Shared/BlackListDetail';
 
 const messages = {
     success: 'Created API rate limit successfully',
     failure: 'Error while creating API rate limit',
 };
 
-class CreateCustomRulePolicy extends Component {
+class CreateBlackListPolicy extends Component {
     constructor(props) {
         super(props);
         this.state = {
             policy: {
-                policyName: '',
-                displayName: '',
-                description: '',
-                isDeployed: true,
-                siddhiQuery: '',
-                keyTemplate: ''
+                conditionId: '',
+                conditionType: 'API',
+                conditionValue: '',
+                status: true,
+                ipCondition: {
+                    ipConditionType: '',
+                    specificIP: '',
+                    startingIP: '',
+                    endingIP: ''
+                }
+
             },
+            value: 'API',
         };
         this.handleChangeChild = this.handleChangeChild.bind(this);
+        this.handleChangeChildValue = this.handleChangeChildValue.bind(this);
+        this.handlePolicySave = this.handlePolicySave.bind(this);
     }
 
 
-    handleChangeChild(name, value) {
+    handleChangeChild(event) {
         const policy = this.state.policy;
-        policy[name] = value;
-        this.setState({
-            policy,
-        });
-    }
+        const value = event.target.value
+        policy.conditionType = value;
+        if (value === 'IP' || value === 'IP_RANGE') {
+            policy.ipCondition.ipConditionType = value;
+        }
+        this.setState({ value: value, policy: policy });
+    };
 
+    handleChangeChildValue(event) {
+        const policy = this.state.policy;
+        const { id, value } = event.target;
+        policy.conditionValue = value;
+        if (id === 'ip') {
+            policy.ipCondition.specificIP = value;
+        } else if (id === 'start_ip') {
+            policy.ipCondition.startingIP = value;
+        } else if (id === 'end_ip') {
+            policy.ipCondition.endingIP = value;
+        }
+        this.setState({ policy: policy });
+    };
 
     handlePolicySave() {
         const api = new API();
-        const promised_policies = api.createCustomRulePolicy(this.state.policy);
-        const props = this.props;
-        promised_policies
+        const promisedPolicies = api.createBlackListPolicy(this.state.policy);
+        promisedPolicies
             .then((response) => {
                 Alert.info(messages.success);
-                let redirect_url = "/policies/custom_rules";
+                let redirect_url = "/policies/black_list";
                 this.props.history.push(redirect_url);
             })
             .catch((error) => {
@@ -90,38 +112,35 @@ class CreateCustomRulePolicy extends Component {
             <div>
                 <AppBar position='static'>
                     <Toolbar style={{ minHeight: '30px' }}>
-                        <IconButton color='contrast' aria-label='Menu'>
+                        <IconButton color='default' aria-label='Menu'>
                             <MenuIcon />
                         </IconButton>
-                        <Link to='/policies/custom_rules'>
-                            <Button color='contrast'>Go Back</Button>
+                        <Link to='/policies/black_list'>
+                            <Button color='default'>Go Back</Button>
                         </Link>
                     </Toolbar>
                 </AppBar>
-                <Message ref={a => (this.msg = a)} />
                 <Paper>
                     <Grid container className='root' direction='column'>
                         <Grid item xs={12} className='grid-item'>
                             <Typography className='page-title' type='display1' gutterBottom>
-                                Create Custom Rule
+                                Create Black List Policy
                             </Typography>
                         </Grid>
-                        <GeneralDetails policy={this.state.policy} handleChangeChild={this.handleChangeChild} />
-
-                        <CustomRuleDetails
-                            policy={this.state.policy}
+                        <BlackListDetails policy={this.state.policy}
+                            selectedValue={this.state.value}
                             handleChangeChild={this.handleChangeChild}
-                        />
+                            handleChangeChildValue={this.handleChangeChildValue} />
 
                         <Paper elevation={20}>
                             <Grid item xs={6} className='grid-item'>
                                 <Divider />
                                 <div>
-                                    <Button raised color='primary' onClick={() => this.handlePolicySave()}>
+                                    <Button color='primary' onClick={this.handlePolicySave}>
                                         Save
                                     </Button>
-                                    <Link to='/policies/custom_rules'>
-                                        <Button raised>Cancel</Button>
+                                    <Link to='policies/black_list'>
+                                        <Button>Cancel</Button>
                                     </Link>
                                 </div>
                             </Grid>
@@ -133,4 +152,4 @@ class CreateCustomRulePolicy extends Component {
     }
 }
 
-export default withRouter(CreateCustomRulePolicy);
+export default withRouter(CreateBlackListPolicy);

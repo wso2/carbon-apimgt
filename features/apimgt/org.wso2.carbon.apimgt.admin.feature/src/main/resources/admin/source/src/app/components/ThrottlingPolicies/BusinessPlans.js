@@ -67,7 +67,7 @@ class BusinessPlans extends Component {
             open:false,
             message: ''
         };
-
+        this.deletePolicy = this.deletePolicy.bind(this);
     }
     deletePolicy(id) {
       const api = new API();
@@ -75,6 +75,10 @@ class BusinessPlans extends Component {
       promised_policies.then(
           response => {
             Alert.info(messages.success);
+            const data = this.state.policies.filter(obj => {
+                return obj.id !== id;
+              });
+              this.setState({policies: data});
           }
       ).catch(
           error => {
@@ -86,9 +90,9 @@ class BusinessPlans extends Component {
     componentDidMount() {
         const api = new API();
 
-        const promised_policies = api.getSubscriptionLevelPolicies();
+        const promisedPolicies = api.getSubscriptionLevelPolicies();
         /* TODO: Handle catch case , auth errors and ect ~tmkb*/
-        promised_policies.then(
+        promisedPolicies.then(
             response => {
                this.setState({policies: response.obj.list});
             }
