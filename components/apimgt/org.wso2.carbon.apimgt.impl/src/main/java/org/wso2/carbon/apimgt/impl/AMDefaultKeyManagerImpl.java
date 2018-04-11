@@ -643,7 +643,9 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 tokenInfo.setValidityPeriod(apiKey.getValidityPeriod());
                 tokenInfo.setScope(apiKey.getTokenScope().split("\\s"));
             } else {
-                tokenInfo.setAccessToken("");      
+                tokenInfo.setAccessToken("");
+                //set default validity period
+                tokenInfo.setValidityPeriod(3600);
             }
             tokenInfo.setConsumerKey(consumerKey);
 
