@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.micro.gateway.throttling.synchronizer.tasks;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,6 +34,7 @@ import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.micro.gateway.common.config.ConfigManager;
 import org.wso2.carbon.apimgt.micro.gateway.common.dto.AccessTokenDTO;
 import org.wso2.carbon.apimgt.micro.gateway.common.dto.OAuthApplicationInfoDTO;
@@ -58,7 +58,7 @@ import static org.mockito.Matchers.any;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({PrivilegedCarbonContext.class, TokenUtil.class, TenantAxisUtils.class, ServiceReferenceHolder.class,
         TenantAxisUtils.class, APIManagerFactory.class, HttpClients.class, ConfigManager.class, HttpRequestUtil.class,
-        AdvancedThrottlePolicyMappingUtil.class})
+        AdvancedThrottlePolicyMappingUtil.class, APIUtil.class})
 public class ThrottlingSyncTaskTest {
     @Before
     public void setUp() throws Exception {
@@ -117,13 +117,13 @@ public class ThrottlingSyncTaskTest {
         Mockito.doReturn(apiProvider).when(apiManagerFactory).getAPIProvider(any(String.class));
         Mockito.doReturn(policies).when(apiProvider).getPolicies(any(String.class), any(String.class));
 
-        PowerMockito.mockStatic(HttpClients.class);
-        CloseableHttpClient httpClient = Mockito.mock(CloseableHttpClient.class);
-        PowerMockito.when(HttpClients.createDefault()).thenReturn(httpClient);
-
         PowerMockito.mockStatic(ConfigManager.class);
         ConfigManager configManager = Mockito.mock(ConfigManager.class);
         PowerMockito.when(ConfigManager.getConfigManager()).thenReturn(configManager);
+
+        PowerMockito.mockStatic(APIUtil.class);
+        HttpClient httpClient = Mockito.mock(HttpClient.class);
+        PowerMockito.when(APIUtil.getHttpClient(Mockito.anyInt(), Mockito.anyString())).thenReturn(httpClient);
 
         Mockito.when(configManager.getProperty(any(String.class)))
                 .thenReturn("https://api.cloud.wso2.com/api/am/admin/v0.12/throttling/policies/subscription",

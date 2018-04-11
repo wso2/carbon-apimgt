@@ -36,7 +36,9 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.micro.gateway.common.TestBase;
+import org.wso2.carbon.apimgt.micro.gateway.common.config.ConfigManager;
 import org.wso2.carbon.apimgt.micro.gateway.common.dto.AccessTokenDTO;
 import org.wso2.carbon.apimgt.micro.gateway.common.dto.OAuthApplicationInfoDTO;
 import org.wso2.carbon.apimgt.micro.gateway.common.internal.ServiceReferenceHolder;
@@ -48,7 +50,7 @@ import static org.mockito.Matchers.any;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({APIManagerConfiguration.class, ServiceReferenceHolder.class, APIManagerConfigurationService.class,
-        TokenUtil.class, HttpClients.class, HttpRequestUtil.class, LogFactory.class})
+        TokenUtil.class, HttpClients.class, HttpRequestUtil.class, LogFactory.class, APIUtil.class, ConfigManager.class})
 public class TokenUtilTest extends TestBase {
 
     private static final String KEY = "Key";
@@ -78,6 +80,13 @@ public class TokenUtilTest extends TestBase {
         configMap.put(APIConstants.API_KEY_VALIDATOR_PASSWORD, "Password");
         mockAPIMConfiguration(configMap);
         mockAppCreationCall();
+        PowerMockito.mockStatic(ConfigManager.class);
+        ConfigManager configManager = Mockito.mock(ConfigManager.class);
+        PowerMockito.when(ConfigManager.getConfigManager()).thenReturn(configManager);
+        PowerMockito.mockStatic(APIUtil.class);
+        HttpClient httpClient = Mockito.mock(HttpClient.class);
+        PowerMockito.when(APIUtil.getHttpClient(Mockito.anyInt(), Mockito.anyString())).thenReturn(httpClient);
+        Mockito.when(configManager.getProperty(any(String.class))).thenReturn("https://localhost:9443");
         OAuthApplicationInfoDTO infoDTO = TokenUtil.registerClient();
         Assert.assertNotNull(infoDTO);
     }
@@ -89,6 +98,13 @@ public class TokenUtilTest extends TestBase {
         configMap.put(APIConstants.API_KEY_VALIDATOR_PASSWORD, "Password");
         mockAPIMConfiguration(configMap);
         mockTokenGenCall();
+        PowerMockito.mockStatic(ConfigManager.class);
+        ConfigManager configManager = Mockito.mock(ConfigManager.class);
+        PowerMockito.when(ConfigManager.getConfigManager()).thenReturn(configManager);
+        PowerMockito.mockStatic(APIUtil.class);
+        HttpClient httpClient = Mockito.mock(HttpClient.class);
+        PowerMockito.when(APIUtil.getHttpClient(Mockito.anyInt(), Mockito.anyString())).thenReturn(httpClient);
+        Mockito.when(configManager.getProperty(any(String.class))).thenReturn("https://localhost:8243");
         AccessTokenDTO tokenDTO = TokenUtil.generateAccessToken("ClientId", "ClientSecret".toCharArray(), "Scope");
         Assert.assertNotNull(tokenDTO);
     }

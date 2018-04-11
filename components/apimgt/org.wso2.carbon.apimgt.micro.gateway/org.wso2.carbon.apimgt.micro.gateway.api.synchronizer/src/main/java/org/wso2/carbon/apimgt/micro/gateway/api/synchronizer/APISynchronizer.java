@@ -24,8 +24,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.http.client.HttpClient;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -36,6 +35,7 @@ import org.w3c.dom.Node;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.micro.gateway.api.synchronizer.dto.APIDTO;
 import org.wso2.carbon.apimgt.micro.gateway.api.synchronizer.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.micro.gateway.api.synchronizer.dto.APIListDTO;
@@ -267,7 +267,27 @@ public class APISynchronizer implements OnPremiseGatewayInitListener {
                 log.debug("Retrieving details of API " + id + " using publisher REST API.");
             }
 
-            CloseableHttpClient httpClient = HttpClients.createDefault();
+            String apiPublisherUrl = ConfigManager.getConfigManager()
+                    .getProperty(OnPremiseGatewayConstants.API_PUBLISHER_URL_PROPERTY_KEY);
+            if (apiPublisherUrl == null) {
+                apiPublisherUrl = OnPremiseGatewayConstants.DEFAULT_API_PUBLISHER_URL;
+                if (log.isDebugEnabled()) {
+                    log.debug("Using default API publisher URL: " + apiPublisherUrl);
+                }
+            }
+            String[] publisherUrl = apiPublisherUrl.split(":");
+            String publisherPort = null;
+            Integer publisherPortValue = 0;
+            if (publisherUrl.length > 3) {
+                publisherPort = publisherUrl[2];
+            }
+            if (publisherPort != null) {
+                publisherPortValue =  Integer.valueOf(publisherPort);
+            }
+            else {
+                publisherPortValue = OnPremiseGatewayConstants.DEFAULT_PORT;
+            }
+            HttpClient httpClient = APIUtil.getHttpClient(publisherPortValue, apiPublisherUrl.split(":")[0]);
             HttpGet httpGet = new HttpGet(detailedAPIViewUrl);
             String authHeaderValue = OnPremiseGatewayConstants.AUTHORIZATION_BEARER + accessTokenDTO.getAccessToken();
             httpGet.addHeader(OnPremiseGatewayConstants.AUTHORIZATION_HEADER, authHeaderValue);
@@ -302,7 +322,32 @@ public class APISynchronizer implements OnPremiseGatewayInitListener {
             log.debug("Retrieving details of all APIs using publisher REST API.");
         }
 
-        CloseableHttpClient httpClient = HttpClients.createDefault();
+        String apiPublisherUrl = null;
+        try {
+            apiPublisherUrl = ConfigManager.getConfigManager()
+                    .getProperty(OnPremiseGatewayConstants.API_PUBLISHER_URL_PROPERTY_KEY);
+        } catch (OnPremiseGatewayException e) {
+            throw new APISynchronizationException(e);
+        }
+        if (apiPublisherUrl == null) {
+            apiPublisherUrl = OnPremiseGatewayConstants.DEFAULT_API_PUBLISHER_URL;
+            if (log.isDebugEnabled()) {
+                log.debug("Using default API publisher URL: " + apiPublisherUrl);
+            }
+        }
+        String[] publisherUrl = apiPublisherUrl.split(":");
+        String publisherPort = null;
+        Integer publisherPortValue = 0;
+        if (publisherUrl.length > 3) {
+            publisherPort = publisherUrl[2];
+        }
+        if (publisherPort != null) {
+            publisherPortValue =  Integer.valueOf(publisherPort);
+        }
+        else {
+            publisherPortValue = OnPremiseGatewayConstants.DEFAULT_PORT;
+        }
+        HttpClient httpClient = APIUtil.getHttpClient(publisherPortValue, apiPublisherUrl.split(":")[0]);
 
         HttpGet httpGet = new HttpGet(apiViewUrl);
         String authHeaderValue = OnPremiseGatewayConstants.AUTHORIZATION_BEARER + accessTokenDTO.getAccessToken();
@@ -346,8 +391,19 @@ public class APISynchronizer implements OnPremiseGatewayInitListener {
             if (updatedAPIViewUrl == null) {
                 updatedAPIViewUrl = APISynchronizationConstants.DEFAULT_API_UPDATE_SERVICE_URL;
             }
-
-            CloseableHttpClient httpClient = HttpClients.createDefault();
+            String[] updatedAPIsUrl = updatedAPIViewUrl.split(":");
+            String updatedAPIsPort = null;
+            Integer updatedAPIsPortValue = 0;
+            if (updatedAPIsUrl.length > 3) {
+                updatedAPIsPort = updatedAPIsUrl[2].split("/")[0];
+            }
+            if (updatedAPIsPort != null) {
+                updatedAPIsPortValue =  Integer.valueOf(updatedAPIsPort);
+            }
+            else {
+                updatedAPIsPortValue = OnPremiseGatewayConstants.DEFAULT_PORT;
+            }
+            HttpClient httpClient = APIUtil.getHttpClient(updatedAPIsPortValue, updatedAPIViewUrl.split(":")[0]);
 
             HttpGet httpGet = new HttpGet(updatedAPIViewUrl);
             String authHeaderValue = TokenUtil.getBasicAuthHeaderValue(username, password);
@@ -408,7 +464,27 @@ public class APISynchronizer implements OnPremiseGatewayInitListener {
 
             Map<String, String> policies = new HashMap<>();
             try {
-                CloseableHttpClient httpClient = HttpClients.createDefault();
+                String apiPublisherUrl = ConfigManager.getConfigManager()
+                        .getProperty(OnPremiseGatewayConstants.API_PUBLISHER_URL_PROPERTY_KEY);
+                if (apiPublisherUrl == null) {
+                    apiPublisherUrl = OnPremiseGatewayConstants.DEFAULT_API_PUBLISHER_URL;
+                    if (log.isDebugEnabled()) {
+                        log.debug("Using default API publisher URL: " + apiPublisherUrl);
+                    }
+                }
+                String[] publisherUrl = apiPublisherUrl.split(":");
+                String publisherPort = null;
+                Integer publisherPortValue = 0;
+                if (publisherUrl.length > 3) {
+                    publisherPort = publisherUrl[2];
+                }
+                if (publisherPort != null) {
+                    publisherPortValue =  Integer.valueOf(publisherPort);
+                }
+                else {
+                    publisherPortValue = OnPremiseGatewayConstants.DEFAULT_PORT;
+                }
+                HttpClient httpClient = APIUtil.getHttpClient(publisherPortValue, apiPublisherUrl.split(":")[0]);
                 HttpGet httpGet = new HttpGet(mediationPolicyViewUrl);
                 String authHeaderValue = OnPremiseGatewayConstants.AUTHORIZATION_BEARER +
                         accessTokenDTO.getAccessToken();
@@ -476,7 +552,27 @@ public class APISynchronizer implements OnPremiseGatewayInitListener {
         }
         Map<String, String> globalMediationSeq = new HashMap<>();
         try {
-            CloseableHttpClient httpClient = HttpClients.createDefault();
+            String apiPublisherUrl = ConfigManager.getConfigManager()
+                    .getProperty(OnPremiseGatewayConstants.API_PUBLISHER_URL_PROPERTY_KEY);
+            if (apiPublisherUrl == null) {
+                apiPublisherUrl = OnPremiseGatewayConstants.DEFAULT_API_PUBLISHER_URL;
+                if (log.isDebugEnabled()) {
+                    log.debug("Using default API publisher URL: " + apiPublisherUrl);
+                }
+            }
+            String[] publisherUrl = apiPublisherUrl.split(":");
+            String publisherPort = null;
+            Integer publisherPortValue = 0;
+            if (publisherUrl.length > 3) {
+                publisherPort = publisherUrl[2];
+            }
+            if (publisherPort != null) {
+                publisherPortValue =  Integer.valueOf(publisherPort);
+            }
+            else {
+                publisherPortValue = OnPremiseGatewayConstants.DEFAULT_PORT;
+            }
+            HttpClient httpClient = APIUtil.getHttpClient(publisherPortValue, apiPublisherUrl.split(":")[0]);
             HttpGet httpGet = new HttpGet(mediationPolicyUrl);
             String authHeaderValue = OnPremiseGatewayConstants.AUTHORIZATION_BEARER +
                     accessTokenDTO.getAccessToken();
@@ -519,7 +615,27 @@ public class APISynchronizer implements OnPremiseGatewayInitListener {
                 + APISynchronizationConstants.API_VIEW_MEDIATION_POLICY_PATH
                 + APISynchronizationConstants.URL_PATH_SEPARATOR + seqId;
         try {
-            CloseableHttpClient httpClient = HttpClients.createDefault();
+            String apiPublisherUrl = ConfigManager.getConfigManager()
+                    .getProperty(OnPremiseGatewayConstants.API_PUBLISHER_URL_PROPERTY_KEY);
+            if (apiPublisherUrl == null) {
+                apiPublisherUrl = OnPremiseGatewayConstants.DEFAULT_API_PUBLISHER_URL;
+                if (log.isDebugEnabled()) {
+                    log.debug("Using default API publisher URL: " + apiPublisherUrl);
+                }
+            }
+            String[] publisherUrl = apiPublisherUrl.split(":");
+            String publisherPort = null;
+            Integer publisherPortValue = 0;
+            if (publisherUrl.length > 3) {
+                publisherPort = publisherUrl[2];
+            }
+            if (publisherPort != null) {
+                publisherPortValue =  Integer.valueOf(publisherPort);
+            }
+            else {
+                publisherPortValue = OnPremiseGatewayConstants.DEFAULT_PORT;
+            }
+            HttpClient httpClient = APIUtil.getHttpClient(publisherPortValue, apiPublisherUrl.split(":")[0]);
             HttpGet httpGet = new HttpGet(uri);
             String authHeaderValue = OnPremiseGatewayConstants.AUTHORIZATION_BEARER +
                     accessTokenDTO.getAccessToken();

@@ -18,17 +18,17 @@
 
 package org.wso2.carbon.apimgt.micro.gateway.usage.publisher.tasks;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.micro.gateway.common.util.OnPremiseGatewayConstants;
 import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.util.MicroGatewayAPIUsageConstants;
 import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.util.UsageFileWriter;
 import org.wso2.carbon.apimgt.micro.gateway.usage.publisher.util.UsagePublisherException;
@@ -128,13 +128,25 @@ public class APIUsageFileUploadTask implements Task {
      * @return  Returns boolean true if uploading is successful
      */
     private boolean uploadCompressedFile(Path compressedFilePath, String fileName) {
-        CloseableHttpClient httpclient = HttpClients.createDefault();
         String response;
 
         try {
             String uploadServiceUrl = configManager.getProperty(MicroGatewayAPIUsageConstants.USAGE_UPLOAD_SERVICE_URL);
             uploadServiceUrl = (uploadServiceUrl != null && !uploadServiceUrl.isEmpty()) ? uploadServiceUrl :
                     MicroGatewayAPIUsageConstants.DEFAULT_UPLOAD_SERVICE_URL;
+            String[] fileUploadServiceUrl = uploadServiceUrl.split(":");
+            String uploadServicePort = null;
+            Integer uploadServicePortValue = 0;
+            if (fileUploadServiceUrl.length > 3) {
+                uploadServicePort = fileUploadServiceUrl[2].split("/")[0];
+            }
+            if (uploadServicePort != null) {
+                uploadServicePortValue =  Integer.valueOf(uploadServicePort);
+            }
+            else {
+                uploadServicePortValue = OnPremiseGatewayConstants.DEFAULT_PORT;
+            }
+            HttpClient httpClient = APIUtil.getHttpClient(uploadServicePortValue, uploadServiceUrl.split(":")[0]);
             HttpPost httppost = new HttpPost(uploadServiceUrl);
 
             HttpEntity reqEntity = MultipartEntityBuilder.create()
@@ -154,15 +166,13 @@ public class APIUsageFileUploadTask implements Task {
                     MicroGatewayAPIUsageConstants.ACCEPT_HEADER_APPLICATION_JSON);
             httppost.setEntity(reqEntity);
 
-            response = HttpRequestUtil.executeHTTPMethodWithRetry(httpclient, httppost,
+            response = HttpRequestUtil.executeHTTPMethodWithRetry(httpClient, httppost,
                     MicroGatewayAPIUsageConstants.MAX_RETRY_COUNT);
             log.info("API Usage file : " + compressedFilePath.getFileName() + " uploaded successfully. " +
                     "Server Response : " + response);
             return true;
         } catch (OnPremiseGatewayException e) {
             log.error("Error occurred while uploading API Usage file.", e);
-        } finally {
-            IOUtils.closeQuietly(httpclient);
         }
         return false;
     }

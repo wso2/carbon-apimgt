@@ -19,7 +19,6 @@
 package org.wso2.carbon.apimgt.micro.gateway.status.checker;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.client.methods.HttpPost;
@@ -38,7 +37,6 @@ import org.wso2.carbon.apimgt.micro.gateway.status.checker.internal.ServiceRefer
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
 
 /**
  * Status Checker which pings to update Gateway status

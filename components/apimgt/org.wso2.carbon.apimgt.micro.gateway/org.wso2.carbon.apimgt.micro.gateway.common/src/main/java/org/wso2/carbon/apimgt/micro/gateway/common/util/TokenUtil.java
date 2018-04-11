@@ -23,14 +23,14 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.micro.gateway.common.config.ConfigManager;
 import org.wso2.carbon.apimgt.micro.gateway.common.dto.AccessTokenDTO;
 import org.wso2.carbon.apimgt.micro.gateway.common.dto.OAuthApplicationInfoDTO;
@@ -134,7 +134,19 @@ public class TokenUtil {
                 apiPublisherUrl + OnPremiseGatewayConstants.DYNAMIC_CLIENT_REGISTRATION_URL_SUFFIX
                         .replace(OnPremiseGatewayConstants.API_VERSION_PARAM, restApiVersion).replace("//",
                                 OnPremiseGatewayConstants.URL_PATH_SEPARATOR); //remove "//" created in cloud case.
-        CloseableHttpClient httpClient = HttpClients.createDefault();
+        String[] publisherUrl = apiPublisherUrl.split(":");
+        String publisherPort = null;
+        Integer publisherPortValue = 0;
+        if (publisherUrl.length > 3) {
+            publisherPort = publisherUrl[2];
+        }
+        if (publisherPort != null) {
+            publisherPortValue =  Integer.valueOf(publisherPort);
+        }
+        else {
+            publisherPortValue = OnPremiseGatewayConstants.DEFAULT_PORT;
+        }
+        HttpClient httpClient = APIUtil.getHttpClient(publisherPortValue, apiPublisherUrl.split(":")[0]);
         String authHeader = getBasicAuthHeaderValue(username, password);
         HttpPost httpPost = new HttpPost(clientRegistrationUrl);
         httpPost.addHeader(OnPremiseGatewayConstants.AUTHORIZATION_HEADER, authHeader);
@@ -200,11 +212,24 @@ public class TokenUtil {
     public static AccessTokenDTO generateAccessToken(Map<String, String> params, String clientId,
                                                      char[] clientSecret)
             throws OnPremiseGatewayException {
-        CloseableHttpClient httpClient = HttpClients.createDefault();
         String tokenApiUrl = ConfigManager.getConfigManager()
                 .getProperty(OnPremiseGatewayConstants.API_GATEWAY_URL_PROPERTY_KEY) +
                 OnPremiseGatewayConstants.TOKEN_API_SUFFIX;
-
+        String gatewayUrl = ConfigManager.getConfigManager()
+                .getProperty(OnPremiseGatewayConstants.API_GATEWAY_URL_PROPERTY_KEY);
+        String[] apiGatewayUrl = gatewayUrl.split(":");
+        String gatewayPort = null;
+        Integer gatewayPortValue = 0;
+        if (apiGatewayUrl.length > 3) {
+            gatewayPort = apiGatewayUrl[2];
+        }
+        if (gatewayPort != null) {
+            gatewayPortValue =  Integer.valueOf(gatewayPort);
+        }
+        else {
+            gatewayPortValue = OnPremiseGatewayConstants.DEFAULT_GATEWAY_PORT;
+        }
+        HttpClient httpClient = APIUtil.getHttpClient(gatewayPortValue, gatewayUrl.split(":")[0]);
         List<NameValuePair> paramsArray = new ArrayList<>();
         for (Map.Entry<String, String> entry : params.entrySet()) {
             paramsArray.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
