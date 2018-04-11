@@ -69,10 +69,17 @@ public class Scope implements Serializable{
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this) return true;
-        return obj instanceof Scope && key.equals(((Scope) obj).getKey()) && name.equals(((Scope) obj).getName()) &&
-                roles.equals(((Scope) obj).getRoles()) && description.equals(((Scope) obj).getDescription());
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Scope scope = (Scope) o;
+
+        if (id != scope.id) return false;
+        if (!key.equals(scope.key)) return false;
+        if (!name.equals(scope.name)) return false;
+        if (roles != null ? !roles.equals(scope.roles) : scope.roles != null) return false;
+        return description != null ? description.equals(scope.description) : scope.description == null;
     }
 
     @Override
