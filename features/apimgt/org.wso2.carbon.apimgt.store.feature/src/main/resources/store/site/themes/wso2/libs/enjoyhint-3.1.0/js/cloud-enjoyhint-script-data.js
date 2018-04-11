@@ -198,7 +198,7 @@ var api_store_select_one_api = [
     },
     {
         selector: '.page-content',
-        selectNextElement : '.white-wrapper',
+        selectNextElement : '.square-element',
         targetNext : 'INSIDE_PARENT',
         event: 'click',
         description: 'Shown here is an API that is published in  our API Store. Click this API to open it.',
@@ -276,7 +276,7 @@ var api_store_view_application_subscriptions = [
     {
         selector: '#subscription-table',
         event: 'click',
-        description: 'You can see the list of APIs which was subscriped to this application. Next Click the <b class="enjoy_hint_emphasize_text" id="selectedAPIName"> ' + getSelectedAPIName() + '</b> API to move.',
+        description: 'You can see the list of APIs that are subscribed to this application. Next, Click the <b class="enjoy_hint_emphasize_text" id="selectedAPIName"> ' + getSelectedAPIName() + '</b> API link.',
         'showSkip' : false
     }
 ];
@@ -307,7 +307,7 @@ var api_store_view_application_subscriptions_for_generated_keys = [
     {
         selector: '#subscription-table',
         event: 'click',
-        description: 'You can see the list of APIs which was subscriped to this application. Next Click the <b class="enjoy_hint_emphasize_text">' + getSelectedAPIName() + '</b> API to move.',
+        description: 'You can see the list of APIs that are subscribed to this application. Next, Click the <b class="enjoy_hint_emphasize_text">' + getSelectedAPIName() + '</b> API link.',
         'showSkip' : false
     }
 ];
