@@ -12,10 +12,16 @@ if (outputs.error) { %>
 <% }else {
 
           var i, api, path, thumbURL, apis = outputs.apis,totalLength=outputs.totalLength, isRatingActivated=outputs.isRatingActivated ;
+          var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
                         if(apis!=null) {
 	                        length = totalLength;
 	
-	                        var itemsPerPage = 12; //reduce this number to preview the pagination
+	                        var itemsPerPage; //reduce this number to preview the pagination
+                               if (APIUtil.getApisPerPageInStore() == 0) {
+                                    itemsPerPage = 12;
+                               } else {
+                                    itemsPerPage = APIUtil.getApisPerPageInStore();
+                               }
 	                        var page = 1;
 	                        var numberOfPages = parseInt(length / itemsPerPage);
 

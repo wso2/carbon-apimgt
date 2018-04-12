@@ -125,9 +125,15 @@
         var i, api,path,mode=outputs.mode,apis = outputs.apis,length;
         var reqUrl = request.getRequestURI();
         var docViewMappedUrl = jagg.getMappedUrl("/site/pages/doc-viewer.jag") + urlPrefix;
-        
+        var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+
         length = outputs.totalLength;
-        var itemsPerPage = 12; //reduce this number to preview the pagination
+        var itemsPerPage; //reduce this number to preview the pagination
+        if (APIUtil.getApisPerPageInPublisher() == 0) {
+            itemsPerPage = 12;
+        } else {
+            itemsPerPage = APIUtil.getApisPerPageInPublisher();
+        }
         var currentPage = 1;
         var numberOfPages = outputs.numberOfPages;
         if (request.getParameter('page') != null) {
