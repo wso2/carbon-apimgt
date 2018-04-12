@@ -15,6 +15,7 @@ jagg.block("api/api-listing-all", {
                 tag = request.getParameter("tag"), page = request.getParameter("page"),
                 query = request.getParameter("query")
                 apiStatus = request.getParameter("apiStatus");
+        var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
         //fix for broken listing page if the query had one quote
         if( query != null && ((query.split("\"").length - 1 ) % 2 == 1)){
             var query = query+"\""
@@ -38,8 +39,13 @@ jagg.block("api/api-listing-all", {
         if(page==null){
         page=1;
         }
-        var start = (page - 1)*12;
-        var end = 12;
+        var end;
+        if (APIUtil.getApisPerPageInStore() == 0) {
+            end = 12;
+        } else {
+            end = APIUtil.getApisPerPageInStore();
+        }
+        var start = (page - 1)*end;
 
         if (tag) {
             mod = jagg.module("api");
