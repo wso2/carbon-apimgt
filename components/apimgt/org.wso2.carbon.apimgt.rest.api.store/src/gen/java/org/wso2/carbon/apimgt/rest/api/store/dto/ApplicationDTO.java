@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
@@ -15,31 +14,31 @@ import java.util.Objects;
  * ApplicationDTO
  */
 public class ApplicationDTO   {
-  @JsonProperty("applicationId")
+  @SerializedName("applicationId")
   private String applicationId = null;
 
-  @JsonProperty("name")
+  @SerializedName("name")
   private String name = null;
 
-  @JsonProperty("subscriber")
+  @SerializedName("subscriber")
   private String subscriber = null;
 
-  @JsonProperty("throttlingTier")
+  @SerializedName("throttlingTier")
   private String throttlingTier = null;
 
-  @JsonProperty("permission")
+  @SerializedName("permission")
   private String permission = null;
 
-  @JsonProperty("description")
+  @SerializedName("description")
   private String description = null;
 
-  @JsonProperty("lifeCycleStatus")
+  @SerializedName("lifeCycleStatus")
   private String lifeCycleStatus = null;
 
-  @JsonProperty("token")
+  @SerializedName("token")
   private ApplicationTokenDTO token = null;
 
-  @JsonProperty("keys")
+  @SerializedName("keys")
   private List<ApplicationKeysDTO> keys = new ArrayList<ApplicationKeysDTO>();
 
   public ApplicationDTO applicationId(String applicationId) {
@@ -123,7 +122,7 @@ public class ApplicationDTO   {
    * Get permission
    * @return permission
   **/
-  @ApiModelProperty(example = "[{&quot;groupId&quot; : 1000, &quot;permission&quot; : [&quot;READ&quot;,&quot;UPDATE&quot;]},{&quot;groupId&quot; : 1001, &quot;permission&quot; : [&quot;READ&quot;,&quot;UPDATE&quot;]}]", value = "")
+  @ApiModelProperty(example = "[{\"groupId\" : 1000, \"permission\" : [\"READ\",\"UPDATE\"]},{\"groupId\" : 1001, \"permission\" : [\"READ\",\"UPDATE\"]}]", value = "")
   public String getPermission() {
     return permission;
   }

@@ -33,6 +33,8 @@ import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.BaseAPIDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.BaseAPIInfoDTO;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -75,6 +77,7 @@ public class APIMappingUtilTestCase {
 
         Assert.assertEquals(apiListDTO.getList().get(0).getName(), "testapi1");
         Assert.assertEquals(apiListDTO.getList().get(1).getName(), "testapi2");
+        Assert.assertEquals(apiListDTO.getList().get(0).getType(), BaseAPIInfoDTO.TypeEnum.APIINFO);
     }
 
     @Test
@@ -91,6 +94,8 @@ public class APIMappingUtilTestCase {
         APIDTO apidto = apiMappingUtil.toAPIDTO(api1);
 
         Assert.assertEquals(apidto.getName(), "testapi1");
+        Assert.assertEquals(apidto.getType(), BaseAPIDTO.TypeEnum.API);
+
     }
 
     private static API.APIBuilder createApi(String provider, String apiId, String name, String version, String

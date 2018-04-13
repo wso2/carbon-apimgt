@@ -1,37 +1,33 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
-import io.swagger.annotations.ApiModel;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModelProperty;
+
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.store.dto.API_businessInformationDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.BaseAPIDTO;
 import java.util.Objects;
 
 /**
  * APIDTO
  */
 public class APIDTO extends BaseAPIDTO  {
-  @JsonProperty("lifeCycleStatus")
+  @SerializedName("lifeCycleStatus")
   private String lifeCycleStatus = null;
 
-  @JsonProperty("isDefaultVersion")
+  @SerializedName("isDefaultVersion")
   private Boolean isDefaultVersion = null;
 
-  @JsonProperty("tags")
+  @SerializedName("tags")
   private List<String> tags = new ArrayList<String>();
 
-  @JsonProperty("policies")
+  @SerializedName("policies")
   private List<String> policies = new ArrayList<String>();
 
-  @JsonProperty("wsdlUri")
+  @SerializedName("wsdlUri")
   private String wsdlUri = null;
 
-  @JsonProperty("businessInformation")
+  @SerializedName("businessInformation")
   private API_businessInformationDTO businessInformation = null;
 
   public APIDTO lifeCycleStatus(String lifeCycleStatus) {

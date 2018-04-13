@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
@@ -14,19 +13,19 @@ import java.util.Objects;
  * ErrorDTO
  */
 public class ErrorDTO   {
-  @JsonProperty("code")
+  @SerializedName("code")
   private Long code = null;
 
-  @JsonProperty("message")
+  @SerializedName("message")
   private String message = null;
 
-  @JsonProperty("description")
+  @SerializedName("description")
   private String description = null;
 
-  @JsonProperty("moreInfo")
+  @SerializedName("moreInfo")
   private String moreInfo = null;
 
-  @JsonProperty("error")
+  @SerializedName("error")
   private List<ErrorListItemDTO> error = new ArrayList<ErrorListItemDTO>();
 
   public ErrorDTO code(Long code) {

@@ -33,10 +33,10 @@ import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.msf4j.Request;
 
-import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import javax.ws.rs.core.Response;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(RestApiUtil.class)
@@ -68,8 +68,7 @@ public class LabelsApiServiceImplTestCase {
 
         Mockito.when(apiStore.getAllLabels()).thenReturn(labelList);
 
-        Response response = labelsApiService.labelsGet("STORE", null, null, null,
-                request);
+        Response response = labelsApiService.labelsGet("STORE", null, null, request);
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -91,8 +90,7 @@ public class LabelsApiServiceImplTestCase {
 
         Mockito.when(apiStore.getAllLabels()).thenReturn(labelList);
 
-        Response response = labelsApiService.labelsGet(null, null, null, null,
-                request);
+        Response response = labelsApiService.labelsGet(null, null, null, request);
 
         Assert.assertEquals(200, response.getStatus());
     }

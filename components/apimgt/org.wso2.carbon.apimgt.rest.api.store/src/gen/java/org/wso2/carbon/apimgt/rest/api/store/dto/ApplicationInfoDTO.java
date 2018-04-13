@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
@@ -11,22 +10,22 @@ import java.util.Objects;
  * ApplicationInfoDTO
  */
 public class ApplicationInfoDTO   {
-  @JsonProperty("applicationId")
+  @SerializedName("applicationId")
   private String applicationId = null;
 
-  @JsonProperty("name")
+  @SerializedName("name")
   private String name = null;
 
-  @JsonProperty("subscriber")
+  @SerializedName("subscriber")
   private String subscriber = null;
 
-  @JsonProperty("throttlingTier")
+  @SerializedName("throttlingTier")
   private String throttlingTier = null;
 
-  @JsonProperty("description")
+  @SerializedName("description")
   private String description = null;
 
-  @JsonProperty("lifeCycleStatus")
+  @SerializedName("lifeCycleStatus")
   private String lifeCycleStatus = null;
 
   public ApplicationInfoDTO applicationId(String applicationId) {

@@ -24,6 +24,8 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.BaseAPIDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.BaseAPIInfoDTO;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,6 +64,7 @@ public class APIMappingUtil {
             apiInfo.setProvider(apiSummary.getProvider());
             apiInfo.setLifeCycleStatus(apiSummary.getLifeCycleStatus());
             apiInfo.setVersion(apiSummary.getVersion());
+            apiInfo.setType(BaseAPIInfoDTO.TypeEnum.APIINFO);
             apiInfoList.add(apiInfo);
         }
         return apiInfoList;
@@ -84,6 +87,7 @@ public class APIMappingUtil {
         apiDTO.setDescription(api.getDescription());
         api.getPolicies().forEach(policy -> apiDTO.addPoliciesItem(policy.getPolicyName()));
         apiDTO.setLabels(new ArrayList<>(api.getLabels()));
+        apiDTO.setType(BaseAPIDTO.TypeEnum.API);
         return apiDTO;
     }
 

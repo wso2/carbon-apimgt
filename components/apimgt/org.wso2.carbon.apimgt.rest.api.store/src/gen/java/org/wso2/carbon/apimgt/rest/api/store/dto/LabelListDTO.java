@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
@@ -14,16 +13,16 @@ import java.util.Objects;
  * LabelListDTO
  */
 public class LabelListDTO   {
-  @JsonProperty("count")
+  @SerializedName("count")
   private Integer count = null;
 
-  @JsonProperty("next")
+  @SerializedName("next")
   private String next = null;
 
-  @JsonProperty("previous")
+  @SerializedName("previous")
   private String previous = null;
 
-  @JsonProperty("list")
+  @SerializedName("list")
   private List<LabelDTO> list = new ArrayList<LabelDTO>();
 
   public LabelListDTO count(Integer count) {

@@ -1,9 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
@@ -12,18 +10,20 @@ import java.util.Objects;
  * ApplicationKeyMappingRequestDTO
  */
 public class ApplicationKeyMappingRequestDTO   {
-  @JsonProperty("consumerKey")
+  @SerializedName("consumerKey")
   private String consumerKey = null;
 
-  @JsonProperty("consumerSecret")
+  @SerializedName("consumerSecret")
   private String consumerSecret = null;
 
   /**
    * Gets or Sets keyType
    */
   public enum KeyTypeEnum {
+    @SerializedName("PRODUCTION")
     PRODUCTION("PRODUCTION"),
     
+    @SerializedName("SANDBOX")
     SANDBOX("SANDBOX");
 
     private String value;
@@ -33,12 +33,9 @@ public class ApplicationKeyMappingRequestDTO   {
     }
 
     @Override
-    @JsonValue
     public String toString() {
       return String.valueOf(value);
     }
-
-    @JsonCreator
     public static KeyTypeEnum fromValue(String text) {
       for (KeyTypeEnum b : KeyTypeEnum.values()) {
         if (String.valueOf(b.value).equals(text)) {
@@ -49,7 +46,7 @@ public class ApplicationKeyMappingRequestDTO   {
     }
   }
 
-  @JsonProperty("keyType")
+  @SerializedName("keyType")
   private KeyTypeEnum keyType = null;
 
   public ApplicationKeyMappingRequestDTO consumerKey(String consumerKey) {

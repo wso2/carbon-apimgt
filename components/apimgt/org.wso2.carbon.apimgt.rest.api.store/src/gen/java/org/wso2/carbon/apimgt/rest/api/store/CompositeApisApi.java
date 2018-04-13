@@ -22,6 +22,7 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
 import javax.ws.rs.OPTIONS;
@@ -69,10 +70,12 @@ public class CompositeApisApi implements Microservice  {
     public Response compositeApisApiIdDedicatedGatewayGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID. Should be formatted as **provider-name-version**. ",required=true) @PathParam("apiId") String apiId
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.compositeApisApiIdDedicatedGatewayGet(apiId,ifNoneMatch,ifModifiedSince, request);
+        
+        return delegate.compositeApisApiIdDedicatedGatewayGet(apiId,ifNoneMatch,ifModifiedSince,request);
     }
+    @OPTIONS
     @PUT
     @Path("/{apiId}/dedicated-gateway")
     @Consumes({ "application/json" })
@@ -94,10 +97,12 @@ public class CompositeApisApi implements Microservice  {
 ,@ApiParam(value = "dedicated Gateway object that needs to be added " ,required=true) DedicatedGatewayDTO body
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.compositeApisApiIdDedicatedGatewayPut(apiId,body,ifMatch,ifUnmodifiedSince, request);
+        
+        return delegate.compositeApisApiIdDedicatedGatewayPut(apiId,body,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @DELETE
     @Path("/{apiId}")
     @Consumes({ "application/json" })
@@ -120,6 +125,7 @@ public class CompositeApisApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.compositeApisApiIdDelete(apiId,ifMatch,ifUnmodifiedSince,request);
     }
     @OPTIONS
@@ -145,6 +151,7 @@ public class CompositeApisApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.compositeApisApiIdGet(apiId,ifNoneMatch,ifModifiedSince,request);
     }
     @OPTIONS
@@ -170,6 +177,7 @@ public class CompositeApisApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.compositeApisApiIdImplementationGet(apiId,ifNoneMatch,ifModifiedSince,request);
     }
     @OPTIONS
@@ -200,6 +208,7 @@ public class CompositeApisApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.compositeApisApiIdImplementationPut(apiId,apiImplementationInputStream, apiImplementationDetail,ifMatch,ifUnmodifiedSince,request);
     }
     @OPTIONS
@@ -228,6 +237,7 @@ public class CompositeApisApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.compositeApisApiIdPut(apiId,body,ifMatch,ifUnmodifiedSince,request);
     }
     @OPTIONS
@@ -253,6 +263,7 @@ public class CompositeApisApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.compositeApisApiIdSwaggerGet(apiId,ifNoneMatch,ifModifiedSince,request);
     }
     @OPTIONS
@@ -281,6 +292,7 @@ public class CompositeApisApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.compositeApisApiIdSwaggerPut(apiId,apiDefinition,ifMatch,ifUnmodifiedSince,request);
     }
     @OPTIONS
@@ -305,6 +317,9 @@ public class CompositeApisApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
  ,@Context Request request)
     throws NotFoundException {
+        limit=limit==null?Integer.valueOf("25"):limit;
+        offset=offset==null?Integer.valueOf("0"):offset;
+        
         return delegate.compositeApisGet(limit,offset,query,ifNoneMatch,request);
     }
     @OPTIONS
@@ -326,6 +341,7 @@ public class CompositeApisApi implements Microservice  {
     public Response compositeApisPost(@ApiParam(value = "API object that needs to be added " ,required=true) CompositeAPIDTO body
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.compositeApisPost(body,request);
     }
 }

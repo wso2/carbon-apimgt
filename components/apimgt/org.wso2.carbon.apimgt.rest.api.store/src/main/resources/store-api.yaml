@@ -326,6 +326,7 @@ paths:
         This operation can be used to retrieve the swagger definition of an API.
       parameters:
         - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/label-Q'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -736,7 +737,7 @@ paths:
 # Add a new Comment
 #-----------------------------------------------------
     post:
-      summary: Add an API comment 
+      summary: Add an API comment
       security:
         - OAuth2Security:
           - apim:subscribe
@@ -3169,12 +3170,12 @@ parameters:
 
 # List of labels
 # Specified as part of the query string
-  labels-Q:
-    name: labels
+  label-Q:
+    name: label
     in: query
     description: |
-      Defines comma separated list of labels
-    required: true
+      Gateway Label
+    required: false
     type: string
 
 # Store Labels

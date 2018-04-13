@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
@@ -11,19 +10,19 @@ import java.util.Objects;
  * UserDTO
  */
 public class UserDTO   {
-  @JsonProperty("username")
+  @SerializedName("username")
   private String username = null;
 
-  @JsonProperty("password")
+  @SerializedName("password")
   private String password = null;
 
-  @JsonProperty("firstName")
+  @SerializedName("firstName")
   private String firstName = null;
 
-  @JsonProperty("lastName")
+  @SerializedName("lastName")
   private String lastName = null;
 
-  @JsonProperty("email")
+  @SerializedName("email")
   private String email = null;
 
   public UserDTO username(String username) {

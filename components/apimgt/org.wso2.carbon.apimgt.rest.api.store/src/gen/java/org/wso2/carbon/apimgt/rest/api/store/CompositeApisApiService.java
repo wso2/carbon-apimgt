@@ -26,12 +26,12 @@ public abstract class CompositeApisApiService {
     public abstract Response compositeApisApiIdDedicatedGatewayGet(String apiId
  ,String ifNoneMatch
  ,String ifModifiedSince
- , Request request) throws NotFoundException;
+  ,Request request) throws NotFoundException;
     public abstract Response compositeApisApiIdDedicatedGatewayPut(String apiId
  ,DedicatedGatewayDTO body
  ,String ifMatch
  ,String ifUnmodifiedSince
- , Request request) throws NotFoundException;
+  ,Request request) throws NotFoundException;
     public abstract Response compositeApisApiIdDelete(String apiId
  ,String ifMatch
  ,String ifUnmodifiedSince
