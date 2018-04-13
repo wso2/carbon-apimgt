@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
@@ -11,19 +10,19 @@ import java.util.Objects;
  * WorkflowDTO
  */
 public class WorkflowDTO   {
-  @JsonProperty("referenceId")
+  @SerializedName("referenceId")
   private String referenceId = null;
 
-  @JsonProperty("type")
+  @SerializedName("type")
   private String type = null;
 
-  @JsonProperty("description")
+  @SerializedName("description")
   private String description = null;
 
-  @JsonProperty("createdTime")
+  @SerializedName("createdTime")
   private String createdTime = null;
 
-  @JsonProperty("workflowStatus")
+  @SerializedName("workflowStatus")
   private String workflowStatus = null;
 
   public WorkflowDTO referenceId(String referenceId) {

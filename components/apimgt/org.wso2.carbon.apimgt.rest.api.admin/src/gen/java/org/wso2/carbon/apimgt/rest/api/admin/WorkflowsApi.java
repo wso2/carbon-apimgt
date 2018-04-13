@@ -21,6 +21,7 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
 import javax.ws.rs.OPTIONS;
@@ -70,6 +71,7 @@ public class WorkflowsApi implements Microservice  {
 ,@ApiParam(value = "Type of the worklfow ") @QueryParam("workflowType") String workflowType
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.workflowsGet(ifNoneMatch,ifModifiedSince,workflowType,request);
     }
     @OPTIONS
@@ -91,6 +93,7 @@ public class WorkflowsApi implements Microservice  {
     public Response workflowsWorkflowReferenceIdGet(@ApiParam(value = "Workflow reference id ",required=true) @PathParam("workflowReferenceId") String workflowReferenceId
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.workflowsWorkflowReferenceIdGet(workflowReferenceId,request);
     }
     @OPTIONS
@@ -113,6 +116,7 @@ public class WorkflowsApi implements Microservice  {
 ,@ApiParam(value = "Workflow event that need to be updated " ,required=true) WorkflowRequestDTO body
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.workflowsWorkflowReferenceIdPut(workflowReferenceId,body,request);
     }
 }

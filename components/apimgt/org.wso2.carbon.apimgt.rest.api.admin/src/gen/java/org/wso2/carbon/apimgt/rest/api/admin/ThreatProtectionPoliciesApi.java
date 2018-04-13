@@ -18,6 +18,7 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
 import javax.ws.rs.OPTIONS;
@@ -58,6 +59,7 @@ public class ThreatProtectionPoliciesApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK", response = ThreatProtectionPolicyListDTO.class) })
     public Response threatProtectionPoliciesGet( @Context Request request)
     throws NotFoundException {
+        
         return delegate.threatProtectionPoliciesGet(request);
     }
     @OPTIONS
@@ -75,6 +77,7 @@ public class ThreatProtectionPoliciesApi implements Microservice  {
     public Response threatProtectionPoliciesPost(@ApiParam(value = "Threat protection json policy request parameter " ,required=true) ThreatProtectionPolicyDTO threatProtectionPolicy
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.threatProtectionPoliciesPost(threatProtectionPolicy,request);
     }
     @OPTIONS
@@ -94,6 +97,7 @@ public class ThreatProtectionPoliciesApi implements Microservice  {
     public Response threatProtectionPoliciesThreatProtectionPolicyIdDelete(@ApiParam(value = "The UUID of a Policy ",required=true) @PathParam("threatProtectionPolicyId") String threatProtectionPolicyId
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.threatProtectionPoliciesThreatProtectionPolicyIdDelete(threatProtectionPolicyId,request);
     }
     @OPTIONS
@@ -111,6 +115,7 @@ public class ThreatProtectionPoliciesApi implements Microservice  {
     public Response threatProtectionPoliciesThreatProtectionPolicyIdGet(@ApiParam(value = "The UUID of a Policy ",required=true) @PathParam("threatProtectionPolicyId") String threatProtectionPolicyId
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.threatProtectionPoliciesThreatProtectionPolicyIdGet(threatProtectionPolicyId,request);
     }
     @OPTIONS
@@ -129,6 +134,7 @@ public class ThreatProtectionPoliciesApi implements Microservice  {
 ,@ApiParam(value = "Threat protection json policy request parameter " ,required=true) ThreatProtectionPolicyDTO threatProtectionPolicy
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.threatProtectionPoliciesThreatProtectionPolicyIdPost(threatProtectionPolicyId,threatProtectionPolicy,request);
     }
 }

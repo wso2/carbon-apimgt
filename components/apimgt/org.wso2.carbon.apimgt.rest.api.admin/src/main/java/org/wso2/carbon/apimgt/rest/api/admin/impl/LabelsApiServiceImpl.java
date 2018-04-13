@@ -47,23 +47,17 @@ public class LabelsApiServiceImpl extends LabelsApiService {
 
     /**
      * Gets all labels
-     * @param accept Accept header value
+     *
      * @param request ms4j request object
-     * @return  a list of label objects
-     * @throws NotFoundException
+     * @return a list of label objects
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response labelsGet(String labelId, String accept , Request request) throws NotFoundException {
-        List<Label> labels = new ArrayList<>();
+    public Response labelsGet(Request request) throws NotFoundException {
+        List<Label> labels;
         try {
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
-            //get all labels
-            if (labelId == null) {
-                labels = apiMgtAdminService.getLabels();
-            } else {
-                 Label label = apiMgtAdminService.getLabelByID(labelId);
-                 labels.add(label);
-            }
+            labels = apiMgtAdminService.getLabels();
         } catch (APIManagementException e) {
             String errorMessage = "Error occurred while retrieving all labels";
             ErrorHandler errorHandler = ExceptionCodes.LABEL_EXCEPTION;
@@ -77,13 +71,14 @@ public class LabelsApiServiceImpl extends LabelsApiService {
     /**
      * Delete label by label id
      *
-     * @param labelId           Id of the label
-     * @param request           msf4j request object
+     * @param labelId Id of the label
+     * @param request msf4j request object
      * @return 200 OK if the operation is successful
      * @throws NotFoundException If failed to find the particular resource
      */
     @Override
-    public Response labelsLabelIdDelete(String labelId, Request request) throws NotFoundException {
+    public Response labelsLabelIdDelete(String labelId, String ifMatch, String ifUnmodifiedSince, Request request)
+            throws NotFoundException {
 
         try {
             if (labelId != null) {
@@ -108,21 +103,20 @@ public class LabelsApiServiceImpl extends LabelsApiService {
         return Response.status(Response.Status.NO_CONTENT).build();
     }
 
-     /**
-     *  Update the label
-     * @param body     The body of the label with fields to be modified
-     * @param contentType The content type of the body
-     * @param request     The ms4j request object
-     * @return  200 OK response.
-     * @throws NotFoundException
+    /**
+     * Update the label
+     *
+     * @param body    The body of the label with fields to be modified
+     * @param request The ms4j request object
+     * @return 200 OK response.
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response labelsLabelIdPut(String labelId, LabelDTO body, String contentType, Request request) throws
-            NotFoundException {
+    public Response labelsLabelIdPut(String labelId, LabelDTO body, Request request) throws NotFoundException {
         try {
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             body.labelUUID(labelId);
-             Label updatedLabel = apiMgtAdminService.updateLabel(LabelMappingUtil.fromDTOTLabel(body));
+            Label updatedLabel = apiMgtAdminService.updateLabel(LabelMappingUtil.fromDTOTLabel(body));
             return Response.status(Response.Status.OK).entity(LabelMappingUtil.fromLabelToDTO(updatedLabel)).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error occurred while adding label, label name: " + body.getName();
@@ -134,20 +128,29 @@ public class LabelsApiServiceImpl extends LabelsApiService {
 
     public Response labelsLabelIdGet(String labelId, String ifNoneMatch, String ifModifiedSince, Request request)
             throws NotFoundException {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
+            Label label = apiMgtAdminService.getLabelByID(labelId);
+            return Response.status(Response.Status.OK).entity(LabelMappingUtil.fromLabelToDTO(label)).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error occurred while retrieving label with id " + labelId;
+            ErrorHandler errorHandler = ExceptionCodes.LABEL_EXCEPTION;
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorHandler);
+            log.error(errorMessage, e);
+            return Response.status(errorHandler.getHttpStatusCode()).entity(errorDTO).build();
+        }
     }
 
-       /**
+    /**
      * Adds a label
-     * @param body        The label details of the label to be added
-     * @param contentType Content type of the body
-     * @param request     ms4j request obect
-     * @return  the label object that was added, with the label ID and label name.
-     * @throws NotFoundException
+     *
+     * @param body    The label details of the label to be added
+     * @param request ms4j request obect
+     * @return the label object that was added, with the label ID and label name.
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response labelsPost(LabelDTO body, String contentType, Request request) throws NotFoundException {
+    public Response labelsPost(LabelDTO body, Request request) throws NotFoundException {
 
         try {
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();

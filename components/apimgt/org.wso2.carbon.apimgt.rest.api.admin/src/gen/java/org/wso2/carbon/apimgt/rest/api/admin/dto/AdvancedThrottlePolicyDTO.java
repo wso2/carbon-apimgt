@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
@@ -16,10 +15,10 @@ import java.util.Objects;
  * AdvancedThrottlePolicyDTO
  */
 public class AdvancedThrottlePolicyDTO extends ThrottlePolicyDTO  {
-  @JsonProperty("defaultLimit")
+  @SerializedName("defaultLimit")
   private ThrottleLimitDTO defaultLimit = null;
 
-  @JsonProperty("conditionalGroups")
+  @SerializedName("conditionalGroups")
   private List<ConditionalGroupDTO> conditionalGroups = new ArrayList<ConditionalGroupDTO>();
 
   public AdvancedThrottlePolicyDTO defaultLimit(ThrottleLimitDTO defaultLimit) {

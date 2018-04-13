@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.HeaderConditionDTO;
@@ -16,22 +15,22 @@ import java.util.Objects;
  */
 @ApiModel(description = "Throttling Conditions")
 public class ThrottleConditionDTO   {
-  @JsonProperty("headerCondition")
+  @SerializedName("headerCondition")
   private HeaderConditionDTO headerCondition = null;
 
-  @JsonProperty("ipCondition")
+  @SerializedName("ipCondition")
   private IPConditionDTO ipCondition = null;
 
-  @JsonProperty("jwtClaimsCondition")
+  @SerializedName("jwtClaimsCondition")
   private JWTClaimsConditionDTO jwtClaimsCondition = null;
 
-  @JsonProperty("queryParameterCondition")
+  @SerializedName("queryParameterCondition")
   private QueryParameterConditionDTO queryParameterCondition = null;
 
-  @JsonProperty("type")
+  @SerializedName("type")
   private String type = null;
 
-  @JsonProperty("invertCondition")
+  @SerializedName("invertCondition")
   private Boolean invertCondition = false;
 
   public ThrottleConditionDTO headerCondition(HeaderConditionDTO headerCondition) {

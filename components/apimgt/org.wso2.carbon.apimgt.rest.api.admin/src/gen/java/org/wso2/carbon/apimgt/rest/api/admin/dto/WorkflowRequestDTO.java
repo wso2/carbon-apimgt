@@ -1,9 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.HashMap;
@@ -19,8 +17,10 @@ public class WorkflowRequestDTO   {
    * This attribute declares whether this workflow task is approved or rejected. 
    */
   public enum StatusEnum {
+    @SerializedName("APPROVED")
     APPROVED("APPROVED"),
     
+    @SerializedName("REJECTED")
     REJECTED("REJECTED");
 
     private String value;
@@ -30,12 +30,9 @@ public class WorkflowRequestDTO   {
     }
 
     @Override
-    @JsonValue
     public String toString() {
       return String.valueOf(value);
     }
-
-    @JsonCreator
     public static StatusEnum fromValue(String text) {
       for (StatusEnum b : StatusEnum.values()) {
         if (String.valueOf(b.value).equals(text)) {
@@ -46,13 +43,13 @@ public class WorkflowRequestDTO   {
     }
   }
 
-  @JsonProperty("status")
+  @SerializedName("status")
   private StatusEnum status = null;
 
-  @JsonProperty("attributes")
+  @SerializedName("attributes")
   private Map<String, String> attributes = new HashMap<String, String>();
 
-  @JsonProperty("description")
+  @SerializedName("description")
   private String description = null;
 
   public WorkflowRequestDTO status(StatusEnum status) {

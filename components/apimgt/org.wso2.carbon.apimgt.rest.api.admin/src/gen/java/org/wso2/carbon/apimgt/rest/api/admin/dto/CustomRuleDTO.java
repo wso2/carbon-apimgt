@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ThrottlePolicyDTO;
@@ -12,10 +11,10 @@ import java.util.Objects;
  * CustomRuleDTO
  */
 public class CustomRuleDTO extends ThrottlePolicyDTO  {
-  @JsonProperty("siddhiQuery")
+  @SerializedName("siddhiQuery")
   private String siddhiQuery = null;
 
-  @JsonProperty("keyTemplate")
+  @SerializedName("keyTemplate")
   private String keyTemplate = null;
 
   public CustomRuleDTO siddhiQuery(String siddhiQuery) {

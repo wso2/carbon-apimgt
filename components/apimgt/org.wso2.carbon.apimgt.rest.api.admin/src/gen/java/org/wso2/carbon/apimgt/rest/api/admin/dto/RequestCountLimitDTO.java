@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
@@ -11,7 +10,7 @@ import java.util.Objects;
  * RequestCountLimitDTO
  */
 public class RequestCountLimitDTO   {
-  @JsonProperty("requestCount")
+  @SerializedName("requestCount")
   private Integer requestCount = 0;
 
   public RequestCountLimitDTO requestCount(Integer requestCount) {

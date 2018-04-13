@@ -19,6 +19,7 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
 import javax.ws.rs.OPTIONS;
@@ -66,6 +67,7 @@ public class BlacklistApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.blacklistConditionIdDelete(conditionId,ifMatch,ifUnmodifiedSince,request);
     }
     @OPTIONS
@@ -91,6 +93,7 @@ public class BlacklistApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.blacklistConditionIdGet(conditionId,ifNoneMatch,ifModifiedSince,request);
     }
     @OPTIONS
@@ -117,6 +120,7 @@ public class BlacklistApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.blacklistConditionIdPut(conditionId,body,ifMatch,ifUnmodifiedSince,request);
     }
     @OPTIONS
@@ -139,6 +143,7 @@ public class BlacklistApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.blacklistGet(ifNoneMatch,ifModifiedSince,request);
     }
     @OPTIONS
@@ -160,6 +165,7 @@ public class BlacklistApi implements Microservice  {
     public Response blacklistPost(@ApiParam(value = "Blocking condition object that should to be added " ,required=true) BlockingConditionDTO body
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.blacklistPost(body,request);
     }
 }

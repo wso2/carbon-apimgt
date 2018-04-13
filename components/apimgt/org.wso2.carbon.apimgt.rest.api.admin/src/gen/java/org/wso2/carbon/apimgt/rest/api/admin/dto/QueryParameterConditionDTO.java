@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
@@ -11,10 +10,10 @@ import java.util.Objects;
  * QueryParameterConditionDTO
  */
 public class QueryParameterConditionDTO   {
-  @JsonProperty("parameterName")
+  @SerializedName("parameterName")
   private String parameterName = null;
 
-  @JsonProperty("parameterValue")
+  @SerializedName("parameterValue")
   private String parameterValue = null;
 
   public QueryParameterConditionDTO parameterName(String parameterName) {
