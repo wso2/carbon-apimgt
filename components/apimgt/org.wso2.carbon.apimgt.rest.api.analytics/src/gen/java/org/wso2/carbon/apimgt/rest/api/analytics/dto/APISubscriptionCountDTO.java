@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.analytics.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
@@ -11,19 +10,19 @@ import java.util.Objects;
  * APISubscriptionCountDTO
  */
 public class APISubscriptionCountDTO   {
-  @JsonProperty("id")
+  @SerializedName("id")
   private String id = null;
 
-  @JsonProperty("name")
+  @SerializedName("name")
   private String name = null;
 
-  @JsonProperty("version")
+  @SerializedName("version")
   private String version = null;
 
-  @JsonProperty("provider")
+  @SerializedName("provider")
   private String provider = null;
 
-  @JsonProperty("count")
+  @SerializedName("count")
   private Integer count = null;
 
   public APISubscriptionCountDTO id(String id) {

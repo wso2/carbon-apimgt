@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.analytics.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
@@ -11,10 +10,10 @@ import java.util.Objects;
  * ApplicationCountDTO
  */
 public class ApplicationCountDTO   {
-  @JsonProperty("time")
+  @SerializedName("time")
   private String time = null;
 
-  @JsonProperty("count")
+  @SerializedName("count")
   private Long count = null;
 
   public ApplicationCountDTO time(String time) {
