@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.core.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
@@ -14,7 +13,7 @@ import java.util.Objects;
  * ThreatProtectionPolicyListDTO
  */
 public class ThreatProtectionPolicyListDTO   {
-  @JsonProperty("list")
+  @SerializedName("list")
   private List<ThreatProtectionPolicyDTO> list = new ArrayList<ThreatProtectionPolicyDTO>();
 
   public ThreatProtectionPolicyListDTO list(List<ThreatProtectionPolicyDTO> list) {

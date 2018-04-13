@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.core.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
@@ -14,7 +13,7 @@ import java.util.Objects;
  * ApplicationListDTO
  */
 public class ApplicationListDTO   {
-  @JsonProperty("list")
+  @SerializedName("list")
   private List<ApplicationDTO> list = new ArrayList<ApplicationDTO>();
 
   public ApplicationListDTO list(List<ApplicationDTO> list) {

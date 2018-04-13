@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.core.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.wso2.carbon.apimgt.rest.api.core.dto.CredentialsDTO;
@@ -12,19 +11,19 @@ import java.util.Objects;
  * KeyManagerInfoDTO
  */
 public class KeyManagerInfoDTO   {
-  @JsonProperty("dcrEndpoint")
+  @SerializedName("dcrEndpoint")
   private String dcrEndpoint = null;
 
-  @JsonProperty("tokenEndpoint")
+  @SerializedName("tokenEndpoint")
   private String tokenEndpoint = null;
 
-  @JsonProperty("revokeEndpoint")
+  @SerializedName("revokeEndpoint")
   private String revokeEndpoint = null;
 
-  @JsonProperty("introspectEndpoint")
+  @SerializedName("introspectEndpoint")
   private String introspectEndpoint = null;
 
-  @JsonProperty("credentials")
+  @SerializedName("credentials")
   private CredentialsDTO credentials = null;
 
   public KeyManagerInfoDTO dcrEndpoint(String dcrEndpoint) {

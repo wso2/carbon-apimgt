@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.core.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.wso2.carbon.apimgt.rest.api.core.dto.CredentialsDTO;
@@ -12,10 +11,10 @@ import java.util.Objects;
  * ThrottlingInfoDTO
  */
 public class ThrottlingInfoDTO   {
-  @JsonProperty("serverURL")
+  @SerializedName("serverURL")
   private String serverURL = null;
 
-  @JsonProperty("credentials")
+  @SerializedName("credentials")
   private CredentialsDTO credentials = null;
 
   public ThrottlingInfoDTO serverURL(String serverURL) {

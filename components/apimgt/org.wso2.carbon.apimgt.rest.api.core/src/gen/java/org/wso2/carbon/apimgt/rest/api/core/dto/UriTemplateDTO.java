@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.core.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
@@ -11,19 +10,19 @@ import java.util.Objects;
  * UriTemplateDTO
  */
 public class UriTemplateDTO   {
-  @JsonProperty("uriTemplate")
+  @SerializedName("uriTemplate")
   private String uriTemplate = null;
 
-  @JsonProperty("httpVerb")
+  @SerializedName("httpVerb")
   private String httpVerb = null;
 
-  @JsonProperty("authType")
+  @SerializedName("authType")
   private String authType = null;
 
-  @JsonProperty("policy")
+  @SerializedName("policy")
   private String policy = null;
 
-  @JsonProperty("scope")
+  @SerializedName("scope")
   private String scope = null;
 
   public UriTemplateDTO uriTemplate(String uriTemplate) {

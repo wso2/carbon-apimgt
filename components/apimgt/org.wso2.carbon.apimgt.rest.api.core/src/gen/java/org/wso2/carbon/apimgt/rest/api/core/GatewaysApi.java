@@ -19,6 +19,7 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
 import javax.ws.rs.OPTIONS;
@@ -61,6 +62,8 @@ public class GatewaysApi implements Microservice  {
 ,@ApiParam(value = "Media type of the entity in the body. Default is JSON. " ,required=true, defaultValue="JSON")@HeaderParam("Content-Type") String contentType
  ,@Context Request request)
     throws NotFoundException {
+        contentType=contentType==null?String.valueOf("JSON"):contentType;
+        
         return delegate.gatewaysRegisterPost(body,contentType,request);
     }
 }

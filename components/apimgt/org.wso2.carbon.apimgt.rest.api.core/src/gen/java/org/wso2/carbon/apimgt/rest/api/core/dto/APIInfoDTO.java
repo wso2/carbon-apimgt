@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.core.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
@@ -13,25 +12,25 @@ import java.util.Objects;
  * APIInfoDTO
  */
 public class APIInfoDTO   {
-  @JsonProperty("id")
+  @SerializedName("id")
   private String id = null;
 
-  @JsonProperty("name")
+  @SerializedName("name")
   private String name = null;
 
-  @JsonProperty("context")
+  @SerializedName("context")
   private String context = null;
 
-  @JsonProperty("version")
+  @SerializedName("version")
   private String version = null;
 
-  @JsonProperty("lifeCycleStatus")
+  @SerializedName("lifeCycleStatus")
   private String lifeCycleStatus = null;
 
-  @JsonProperty("securityScheme")
+  @SerializedName("securityScheme")
   private Integer securityScheme = null;
 
-  @JsonProperty("threatProtectionPolicies")
+  @SerializedName("threatProtectionPolicies")
   private List<String> threatProtectionPolicies = new ArrayList<String>();
 
   public APIInfoDTO id(String id) {

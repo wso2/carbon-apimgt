@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.core.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.wso2.carbon.apimgt.rest.api.core.dto.AnalyticsInfoDTO;
@@ -16,19 +15,19 @@ import java.util.Objects;
  * RegistrationSummaryDTO
  */
 public class RegistrationSummaryDTO   {
-  @JsonProperty("KeyManagerInfo")
+  @SerializedName("KeyManagerInfo")
   private KeyManagerInfoDTO keyManagerInfo = null;
 
-  @JsonProperty("JWTInfo")
+  @SerializedName("JWTInfo")
   private JWTInfoDTO jwTInfo = null;
 
-  @JsonProperty("AnalyticsInfo")
+  @SerializedName("AnalyticsInfo")
   private AnalyticsInfoDTO analyticsInfo = null;
 
-  @JsonProperty("ThrottlingInfo")
+  @SerializedName("ThrottlingInfo")
   private ThrottlingInfoDTO throttlingInfo = null;
 
-  @JsonProperty("GoogleAnalyticsTrackingInfo")
+  @SerializedName("GoogleAnalyticsTrackingInfo")
   private GoogleAnalyticsTrackingInfoDTO googleAnalyticsTrackingInfo = null;
 
   public RegistrationSummaryDTO keyManagerInfo(KeyManagerInfoDTO keyManagerInfo) {

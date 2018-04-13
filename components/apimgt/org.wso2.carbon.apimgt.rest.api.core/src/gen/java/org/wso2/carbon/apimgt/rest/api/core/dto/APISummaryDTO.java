@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.core.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
@@ -14,19 +13,19 @@ import java.util.Objects;
  * APISummaryDTO
  */
 public class APISummaryDTO   {
-  @JsonProperty("id")
+  @SerializedName("id")
   private String id = null;
 
-  @JsonProperty("name")
+  @SerializedName("name")
   private String name = null;
 
-  @JsonProperty("context")
+  @SerializedName("context")
   private String context = null;
 
-  @JsonProperty("version")
+  @SerializedName("version")
   private String version = null;
 
-  @JsonProperty("uriTemplates")
+  @SerializedName("uriTemplates")
   private List<UriTemplateDTO> uriTemplates = new ArrayList<UriTemplateDTO>();
 
   public APISummaryDTO id(String id) {

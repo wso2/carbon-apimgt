@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.core.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
@@ -11,10 +10,10 @@ import java.util.Objects;
  * CredentialsDTO
  */
 public class CredentialsDTO   {
-  @JsonProperty("username")
+  @SerializedName("username")
   private String username = null;
 
-  @JsonProperty("password")
+  @SerializedName("password")
   private String password = null;
 
   public CredentialsDTO username(String username) {

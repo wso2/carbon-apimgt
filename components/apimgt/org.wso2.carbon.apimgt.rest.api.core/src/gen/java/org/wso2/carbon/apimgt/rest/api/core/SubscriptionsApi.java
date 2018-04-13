@@ -18,6 +18,7 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
 import javax.ws.rs.OPTIONS;
@@ -64,6 +65,8 @@ public class SubscriptionsApi implements Microservice  {
 ,@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
  ,@Context Request request)
     throws NotFoundException {
+        accept=accept==null?String.valueOf("application/json"):accept;
+        
         return delegate.subscriptionsGet(apiContext,apiVersion,limit,accept,request);
     }
 }
