@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
@@ -11,16 +10,16 @@ import java.util.Objects;
  * EndPoint_endpointSecurityDTO
  */
 public class EndPoint_endpointSecurityDTO   {
-  @JsonProperty("enabled")
+  @SerializedName("enabled")
   private Boolean enabled = null;
 
-  @JsonProperty("type")
+  @SerializedName("type")
   private String type = null;
 
-  @JsonProperty("username")
+  @SerializedName("username")
   private String username = null;
 
-  @JsonProperty("password")
+  @SerializedName("password")
   private String password = null;
 
   public EndPoint_endpointSecurityDTO enabled(Boolean enabled) {

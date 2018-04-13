@@ -1,9 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
@@ -20,77 +18,80 @@ import java.util.Objects;
  * APIDTO
  */
 public class APIDTO   {
-  @JsonProperty("id")
+  @SerializedName("id")
   private String id = null;
 
-  @JsonProperty("name")
+  @SerializedName("name")
   private String name = null;
 
-  @JsonProperty("description")
+  @SerializedName("description")
   private String description = null;
 
-  @JsonProperty("context")
+  @SerializedName("context")
   private String context = null;
 
-  @JsonProperty("version")
+  @SerializedName("version")
   private String version = null;
 
-  @JsonProperty("provider")
+  @SerializedName("provider")
   private String provider = null;
 
-  @JsonProperty("wsdlUri")
+  @SerializedName("wsdlUri")
   private String wsdlUri = null;
 
-  @JsonProperty("lifeCycleStatus")
+  @SerializedName("lifeCycleStatus")
   private String lifeCycleStatus = null;
 
-  @JsonProperty("workflowStatus")
+  @SerializedName("workflowStatus")
   private String workflowStatus = null;
 
-  @JsonProperty("createdTime")
+  @SerializedName("createdTime")
   private String createdTime = null;
 
-  @JsonProperty("apiPolicy")
+  @SerializedName("apiPolicy")
   private String apiPolicy = null;
 
-  @JsonProperty("lastUpdatedTime")
+  @SerializedName("lastUpdatedTime")
   private String lastUpdatedTime = null;
 
-  @JsonProperty("responseCaching")
+  @SerializedName("responseCaching")
   private String responseCaching = null;
 
-  @JsonProperty("cacheTimeout")
+  @SerializedName("cacheTimeout")
   private Integer cacheTimeout = null;
 
-  @JsonProperty("destinationStatsEnabled")
+  @SerializedName("destinationStatsEnabled")
   private String destinationStatsEnabled = null;
 
-  @JsonProperty("isDefaultVersion")
+  @SerializedName("isDefaultVersion")
   private Boolean isDefaultVersion = null;
 
-  @JsonProperty("transport")
+  @SerializedName("transport")
   private List<String> transport = new ArrayList<String>();
 
-  @JsonProperty("tags")
+  @SerializedName("tags")
   private List<String> tags = new ArrayList<String>();
 
-  @JsonProperty("hasOwnGateway")
+  @SerializedName("hasOwnGateway")
   private Boolean hasOwnGateway = null;
 
-  @JsonProperty("labels")
+  @SerializedName("labels")
   private List<String> labels = new ArrayList<String>();
 
-  @JsonProperty("policies")
+  @SerializedName("policies")
   private List<String> policies = new ArrayList<String>();
 
   /**
    * Gets or Sets visibility
    */
   public enum VisibilityEnum {
+    @SerializedName("PUBLIC")
     PUBLIC("PUBLIC"),
     
+    @SerializedName("PRIVATE")
     PRIVATE("PRIVATE"),
     
+    @SerializedName("RESTRICTED")
     RESTRICTED("RESTRICTED");
 
     private String value;
@@ -100,12 +101,9 @@ public class APIDTO   {
     }
 
     @Override
-    @JsonValue
     public String toString() {
       return String.valueOf(value);
     }
-
-    @JsonCreator
     public static VisibilityEnum fromValue(String text) {
       for (VisibilityEnum b : VisibilityEnum.values()) {
         if (String.valueOf(b.value).equals(text)) {
@@ -116,46 +114,46 @@ public class APIDTO   {
     }
   }
 
-  @JsonProperty("visibility")
+  @SerializedName("visibility")
   private VisibilityEnum visibility = null;
 
-  @JsonProperty("visibleRoles")
+  @SerializedName("visibleRoles")
   private List<String> visibleRoles = new ArrayList<String>();
 
-  @JsonProperty("permission")
+  @SerializedName("permission")
   private String permission = null;
 
-  @JsonProperty("userPermissionsForApi")
+  @SerializedName("userPermissionsForApi")
   private List<String> userPermissionsForApi = new ArrayList<String>();
 
-  @JsonProperty("visibleTenants")
+  @SerializedName("visibleTenants")
   private List<String> visibleTenants = new ArrayList<String>();
 
-  @JsonProperty("gatewayEnvironments")
+  @SerializedName("gatewayEnvironments")
   private String gatewayEnvironments = null;
 
-  @JsonProperty("sequences")
+  @SerializedName("sequences")
   private List<SequenceDTO> sequences = new ArrayList<SequenceDTO>();
 
-  @JsonProperty("businessInformation")
+  @SerializedName("businessInformation")
   private API_businessInformationDTO businessInformation = null;
 
-  @JsonProperty("corsConfiguration")
+  @SerializedName("corsConfiguration")
   private API_corsConfigurationDTO corsConfiguration = null;
 
-  @JsonProperty("endpoint")
+  @SerializedName("endpoint")
   private List<API_endpointDTO> endpoint = new ArrayList<API_endpointDTO>();
 
-  @JsonProperty("securityScheme")
+  @SerializedName("securityScheme")
   private List<String> securityScheme = new ArrayList<String>();
 
-  @JsonProperty("scopes")
+  @SerializedName("scopes")
   private List<String> scopes = new ArrayList<String>();
 
-  @JsonProperty("operations")
+  @SerializedName("operations")
   private List<API_operationsDTO> operations = new ArrayList<API_operationsDTO>();
 
-  @JsonProperty("threatProtectionPolicies")
+  @SerializedName("threatProtectionPolicies")
   private API_threatProtectionPoliciesDTO threatProtectionPolicies = null;
 
   public APIDTO id(String id) {
@@ -460,7 +458,7 @@ public class APIDTO   {
    * Supported transports for the API (http and/or https). 
    * @return transport
   **/
-  @ApiModelProperty(example = "[&quot;http&quot;,&quot;https&quot;]", required = true, value = "Supported transports for the API (http and/or https). ")
+  @ApiModelProperty(example = "[\"http\",\"https\"]", required = true, value = "Supported transports for the API (http and/or https). ")
   public List<String> getTransport() {
     return transport;
   }
@@ -483,7 +481,7 @@ public class APIDTO   {
    * Get tags
    * @return tags
   **/
-  @ApiModelProperty(example = "[&quot;substract&quot;,&quot;add&quot;]", value = "")
+  @ApiModelProperty(example = "[\"substract\",\"add\"]", value = "")
   public List<String> getTags() {
     return tags;
   }
@@ -524,7 +522,7 @@ public class APIDTO   {
    * Get labels
    * @return labels
   **/
-  @ApiModelProperty(example = "[&quot;public&quot;,&quot;private&quot;]", value = "")
+  @ApiModelProperty(example = "[\"public\",\"private\"]", value = "")
   public List<String> getLabels() {
     return labels;
   }
@@ -547,7 +545,7 @@ public class APIDTO   {
    * Get policies
    * @return policies
   **/
-  @ApiModelProperty(example = "[&quot;Unlimited&quot;]", required = true, value = "")
+  @ApiModelProperty(example = "[\"Unlimited\"]", required = true, value = "")
   public List<String> getPolicies() {
     return policies;
   }
@@ -606,7 +604,7 @@ public class APIDTO   {
    * Get permission
    * @return permission
   **/
-  @ApiModelProperty(example = "[{&quot;groupId&quot; : 1000, &quot;permission&quot; : [&quot;READ&quot;,&quot;UPDATE&quot;]},{&quot;groupId&quot; : 1001, &quot;permission&quot; : [&quot;READ&quot;,&quot;UPDATE&quot;]}]", value = "")
+  @ApiModelProperty(example = "[{\"groupId\" : 1000, \"permission\" : [\"READ\",\"UPDATE\"]},{\"groupId\" : 1001, \"permission\" : [\"READ\",\"UPDATE\"]}]", value = "")
   public String getPermission() {
     return permission;
   }
@@ -629,7 +627,7 @@ public class APIDTO   {
    * LoggedIn user permissions for the API 
    * @return userPermissionsForApi
   **/
-  @ApiModelProperty(example = "[&quot;READ&quot;,&quot;UPDATE&quot;]", value = "LoggedIn user permissions for the API ")
+  @ApiModelProperty(example = "[\"READ\",\"UPDATE\"]", value = "LoggedIn user permissions for the API ")
   public List<String> getUserPermissionsForApi() {
     return userPermissionsForApi;
   }
@@ -897,7 +895,7 @@ public class APIDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, wsdlUri, lifeCycleStatus, workflowStatus, createdTime, apiPolicy, lastUpdatedTime, responseCaching, cacheTimeout, destinationStatsEnabled, isDefaultVersion, transport, tags, labels, policies, visibility, visibleRoles, permission, userPermissionsForApi, visibleTenants, gatewayEnvironments, sequences, businessInformation, corsConfiguration, endpoint, securityScheme, scopes, operations, threatProtectionPolicies, hasOwnGateway);
+    return Objects.hash(id, name, description, context, version, provider, wsdlUri, lifeCycleStatus, workflowStatus, createdTime, apiPolicy, lastUpdatedTime, responseCaching, cacheTimeout, destinationStatsEnabled, isDefaultVersion, transport, tags, hasOwnGateway, labels, policies, visibility, visibleRoles, permission, userPermissionsForApi, visibleTenants, gatewayEnvironments, sequences, businessInformation, corsConfiguration, endpoint, securityScheme, scopes, operations, threatProtectionPolicies);
   }
 
   @Override

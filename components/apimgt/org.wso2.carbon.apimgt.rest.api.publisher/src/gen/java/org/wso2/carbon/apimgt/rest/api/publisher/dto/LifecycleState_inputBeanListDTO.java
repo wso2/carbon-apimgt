@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
@@ -11,28 +10,28 @@ import java.util.Objects;
  * LifecycleState_inputBeanListDTO
  */
 public class LifecycleState_inputBeanListDTO   {
-  @JsonProperty("name")
+  @SerializedName("name")
   private String name = null;
 
-  @JsonProperty("isRequired")
+  @SerializedName("isRequired")
   private Boolean isRequired = null;
 
-  @JsonProperty("label")
+  @SerializedName("label")
   private String label = null;
 
-  @JsonProperty("placeHolder")
+  @SerializedName("placeHolder")
   private String placeHolder = null;
 
-  @JsonProperty("tooltip")
+  @SerializedName("tooltip")
   private String tooltip = null;
 
-  @JsonProperty("regex")
+  @SerializedName("regex")
   private String regex = null;
 
-  @JsonProperty("values")
+  @SerializedName("values")
   private String values = null;
 
-  @JsonProperty("forTarget")
+  @SerializedName("forTarget")
   private String forTarget = null;
 
   public LifecycleState_inputBeanListDTO name(String name) {

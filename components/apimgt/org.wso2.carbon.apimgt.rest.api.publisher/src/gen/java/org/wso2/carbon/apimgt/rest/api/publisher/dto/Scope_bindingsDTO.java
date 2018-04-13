@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
@@ -13,10 +12,10 @@ import java.util.Objects;
  * Scope_bindingsDTO
  */
 public class Scope_bindingsDTO   {
-  @JsonProperty("type")
+  @SerializedName("type")
   private String type = null;
 
-  @JsonProperty("values")
+  @SerializedName("values")
   private List<String> values = new ArrayList<String>();
 
   public Scope_bindingsDTO type(String type) {

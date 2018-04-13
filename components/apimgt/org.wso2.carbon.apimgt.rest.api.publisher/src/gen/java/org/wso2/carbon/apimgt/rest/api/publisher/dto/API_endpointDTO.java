@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPointDTO;
@@ -12,13 +11,13 @@ import java.util.Objects;
  * API_endpointDTO
  */
 public class API_endpointDTO   {
-  @JsonProperty("key")
+  @SerializedName("key")
   private String key = null;
 
-  @JsonProperty("inline")
+  @SerializedName("inline")
   private EndPointDTO inline = null;
 
-  @JsonProperty("type")
+  @SerializedName("type")
   private String type = null;
 
   public API_endpointDTO key(String key) {

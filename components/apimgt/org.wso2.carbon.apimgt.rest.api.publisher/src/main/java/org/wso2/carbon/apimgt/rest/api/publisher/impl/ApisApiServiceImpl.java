@@ -6,7 +6,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.core.api.APIDefinition;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.api.WSDLProcessor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
@@ -17,11 +16,9 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.impl.APIDefinitionFromSwagger20;
-import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.impl.WSDLProcessFactory;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DedicatedGateway;
-import org.wso2.carbon.apimgt.core.models.APIResource;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Scope;
@@ -38,12 +35,10 @@ import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
-import org.wso2.carbon.apimgt.rest.api.publisher.StringUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDefinitionValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DedicatedGatewayDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_operationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
@@ -67,7 +62,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.StringTokenizer;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -1276,7 +1270,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param ifModifiedSince If-Modified-Since header value
      * @param request         msf4j request
      * @return WSDL archive/file content
-     * @throws NotFoundException
+     * @throws NotFoundException  When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdWsdlGet(String apiId, String ifNoneMatch, String ifModifiedSince,
@@ -1330,7 +1324,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @param request           msf4j request
      * @return 200 OK if upadating was successful.
-     * @throws NotFoundException
+     * @throws NotFoundException  When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdWsdlPut(String apiId, InputStream fileInputStream, FileInfo fileDetail,
@@ -1725,7 +1719,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param url             URL of the definition
      * @param request         msf4j request
      * @return API definition validation information
-     * @throws NotFoundException
+     * @throws NotFoundException  When the particular resource does not exist in the system
      */
     @Override
     public Response apisValidateDefinitionPost(String type, InputStream fileInputStream, FileInfo fileDetail,

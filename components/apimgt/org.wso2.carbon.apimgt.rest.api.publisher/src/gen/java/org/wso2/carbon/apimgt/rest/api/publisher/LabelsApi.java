@@ -2,7 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.publisher;
 
 
 import io.swagger.annotations.ApiParam;
-import org.osgi.service.component.annotations.Component;
+
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.factories.LabelsApiServiceFactory;
 
@@ -17,6 +18,7 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
 import javax.ws.rs.OPTIONS;
@@ -59,12 +61,12 @@ public class LabelsApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = LabelListDTO.class),
         
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Requested API does not exist. ", response = LabelListDTO.class) })
-    public Response labelsGet(@ApiParam(value = "type of the label. ") @QueryParam("labelType") String labelType
-,@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
-,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
+    public Response labelsGet(@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
-, @Context Request request)
+,@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API I. Should be formatted as **provider-name-version**. ") @QueryParam("labelType") String labelType
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.labelsGet(labelType,accept,ifNoneMatch,ifModifiedSince, request);
+        
+        return delegate.labelsGet(ifNoneMatch,ifModifiedSince,labelType,request);
     }
 }

@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
@@ -14,16 +13,16 @@ import java.util.Objects;
  * APIListDTO
  */
 public class APIListDTO   {
-  @JsonProperty("count")
+  @SerializedName("count")
   private Integer count = null;
 
-  @JsonProperty("next")
+  @SerializedName("next")
   private String next = null;
 
-  @JsonProperty("previous")
+  @SerializedName("previous")
   private String previous = null;
 
-  @JsonProperty("list")
+  @SerializedName("list")
   private List<APIInfoDTO> list = new ArrayList<APIInfoDTO>();
 
   public APIListDTO count(Integer count) {
@@ -53,7 +52,7 @@ public class APIListDTO   {
    * Link to the next subset of resources qualified. Empty if no more resources are to be returned. 
    * @return next
   **/
-  @ApiModelProperty(example = "/apis?limit&#x3D;1&amp;offset&#x3D;2&amp;query&#x3D;", value = "Link to the next subset of resources qualified. Empty if no more resources are to be returned. ")
+  @ApiModelProperty(example = "/apis?limit=1&offset=2&query=", value = "Link to the next subset of resources qualified. Empty if no more resources are to be returned. ")
   public String getNext() {
     return next;
   }
@@ -71,7 +70,7 @@ public class APIListDTO   {
    * Link to the previous subset of resources qualified. Empty if current subset is the first subset returned. 
    * @return previous
   **/
-  @ApiModelProperty(example = "/apis?limit&#x3D;1&amp;offset&#x3D;0&amp;query&#x3D;", value = "Link to the previous subset of resources qualified. Empty if current subset is the first subset returned. ")
+  @ApiModelProperty(example = "/apis?limit=1&offset=0&query=", value = "Link to the previous subset of resources qualified. Empty if current subset is the first subset returned. ")
   public String getPrevious() {
     return previous;
   }

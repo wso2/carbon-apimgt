@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
@@ -14,25 +13,25 @@ import java.util.Objects;
  * API_operationsDTO
  */
 public class API_operationsDTO   {
-  @JsonProperty("id")
+  @SerializedName("id")
   private String id = null;
 
-  @JsonProperty("uritemplate")
+  @SerializedName("uritemplate")
   private String uritemplate = "/_*";
 
-  @JsonProperty("httpVerb")
+  @SerializedName("httpVerb")
   private String httpVerb = "GET";
 
-  @JsonProperty("authType")
+  @SerializedName("authType")
   private String authType = "Any";
 
-  @JsonProperty("policy")
+  @SerializedName("policy")
   private String policy = null;
 
-  @JsonProperty("endpoint")
+  @SerializedName("endpoint")
   private List<API_endpointDTO> endpoint = new ArrayList<API_endpointDTO>();
 
-  @JsonProperty("scopes")
+  @SerializedName("scopes")
   private List<String> scopes = new ArrayList<String>();
 
   public API_operationsDTO id(String id) {

@@ -18,6 +18,7 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
 import javax.ws.rs.OPTIONS;
@@ -67,6 +68,9 @@ public class ExportApi implements Microservice  {
 ,@ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset
  ,@Context Request request)
     throws NotFoundException {
+        limit=limit==null?Integer.valueOf("25"):limit;
+        offset=offset==null?Integer.valueOf("0"):offset;
+        
         return delegate.exportApisGet(query,limit,offset,request);
     }
 }

@@ -1,9 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
@@ -12,28 +10,35 @@ import java.util.Objects;
  * DocumentDTO
  */
 public class DocumentDTO   {
-  @JsonProperty("documentId")
+  @SerializedName("documentId")
   private String documentId = null;
 
-  @JsonProperty("name")
+  @SerializedName("name")
   private String name = null;
 
   /**
    * Gets or Sets type
    */
   public enum TypeEnum {
+    @SerializedName("HOWTO")
     HOWTO("HOWTO"),
     
+    @SerializedName("SAMPLES")
     SAMPLES("SAMPLES"),
     
+    @SerializedName("PUBLIC_FORUM")
     PUBLIC_FORUM("PUBLIC_FORUM"),
     
+    @SerializedName("SUPPORT_FORUM")
     SUPPORT_FORUM("SUPPORT_FORUM"),
     
+    @SerializedName("API_MESSAGE_FORMAT")
     API_MESSAGE_FORMAT("API_MESSAGE_FORMAT"),
     
+    @SerializedName("SWAGGER_DOC")
     SWAGGER_DOC("SWAGGER_DOC"),
     
+    @SerializedName("OTHER")
     OTHER("OTHER");
 
     private String value;
@@ -43,12 +48,9 @@ public class DocumentDTO   {
     }
 
     @Override
-    @JsonValue
     public String toString() {
       return String.valueOf(value);
     }
-
-    @JsonCreator
     public static TypeEnum fromValue(String text) {
       for (TypeEnum b : TypeEnum.values()) {
         if (String.valueOf(b.value).equals(text)) {
@@ -59,20 +61,23 @@ public class DocumentDTO   {
     }
   }
 
-  @JsonProperty("type")
+  @SerializedName("type")
   private TypeEnum type = null;
 
-  @JsonProperty("summary")
+  @SerializedName("summary")
   private String summary = null;
 
   /**
    * Gets or Sets sourceType
    */
   public enum SourceTypeEnum {
+    @SerializedName("INLINE")
     INLINE("INLINE"),
     
+    @SerializedName("URL")
     URL("URL"),
     
+    @SerializedName("FILE")
     FILE("FILE");
 
     private String value;
@@ -82,12 +87,9 @@ public class DocumentDTO   {
     }
 
     @Override
-    @JsonValue
     public String toString() {
       return String.valueOf(value);
     }
-
-    @JsonCreator
     public static SourceTypeEnum fromValue(String text) {
       for (SourceTypeEnum b : SourceTypeEnum.values()) {
         if (String.valueOf(b.value).equals(text)) {
@@ -98,32 +100,35 @@ public class DocumentDTO   {
     }
   }
 
-  @JsonProperty("sourceType")
+  @SerializedName("sourceType")
   private SourceTypeEnum sourceType = null;
 
-  @JsonProperty("sourceUrl")
+  @SerializedName("sourceUrl")
   private String sourceUrl = null;
 
-  @JsonProperty("fileName")
+  @SerializedName("fileName")
   private String fileName = null;
 
-  @JsonProperty("inlineContent")
+  @SerializedName("inlineContent")
   private String inlineContent = null;
 
-  @JsonProperty("otherTypeName")
+  @SerializedName("otherTypeName")
   private String otherTypeName = null;
 
-  @JsonProperty("permission")
+  @SerializedName("permission")
   private String permission = null;
 
   /**
    * Gets or Sets visibility
    */
   public enum VisibilityEnum {
+    @SerializedName("OWNER_ONLY")
     OWNER_ONLY("OWNER_ONLY"),
     
+    @SerializedName("PRIVATE")
     PRIVATE("PRIVATE"),
     
+    @SerializedName("API_LEVEL")
     API_LEVEL("API_LEVEL");
 
     private String value;
@@ -133,12 +138,9 @@ public class DocumentDTO   {
     }
 
     @Override
-    @JsonValue
     public String toString() {
       return String.valueOf(value);
     }
-
-    @JsonCreator
     public static VisibilityEnum fromValue(String text) {
       for (VisibilityEnum b : VisibilityEnum.values()) {
         if (String.valueOf(b.value).equals(text)) {
@@ -149,19 +151,19 @@ public class DocumentDTO   {
     }
   }
 
-  @JsonProperty("visibility")
+  @SerializedName("visibility")
   private VisibilityEnum visibility = null;
 
-  @JsonProperty("createdTime")
+  @SerializedName("createdTime")
   private String createdTime = null;
 
-  @JsonProperty("createdBy")
+  @SerializedName("createdBy")
   private String createdBy = null;
 
-  @JsonProperty("lastUpdatedTime")
+  @SerializedName("lastUpdatedTime")
   private String lastUpdatedTime = null;
 
-  @JsonProperty("lastUpdatedBy")
+  @SerializedName("lastUpdatedBy")
   private String lastUpdatedBy = null;
 
   public DocumentDTO documentId(String documentId) {
@@ -335,7 +337,7 @@ public class DocumentDTO   {
    * Get permission
    * @return permission
   **/
-  @ApiModelProperty(example = "[{&quot;groupId&quot; : 1000, &quot;permission&quot; : [&quot;READ&quot;,&quot;UPDATE&quot;]},{&quot;groupId&quot; : 1001, &quot;permission&quot; : [&quot;READ&quot;,&quot;UPDATE&quot;]}]", value = "")
+  @ApiModelProperty(example = "[{\"groupId\" : 1000, \"permission\" : [\"READ\",\"UPDATE\"]},{\"groupId\" : 1001, \"permission\" : [\"READ\",\"UPDATE\"]}]", value = "")
   public String getPermission() {
     return permission;
   }

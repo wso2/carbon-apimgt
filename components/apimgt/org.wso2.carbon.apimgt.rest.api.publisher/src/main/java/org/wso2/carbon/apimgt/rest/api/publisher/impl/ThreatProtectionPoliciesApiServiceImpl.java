@@ -2,29 +2,19 @@ package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.policy.ThreatProtectionPolicy;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.*;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
-
-
-import java.util.ArrayList;
-import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
-
-import java.io.InputStream;
-
+import org.wso2.carbon.apimgt.rest.api.publisher.ThreatProtectionPoliciesApiService;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThreatProtectionPolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.MappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
-import org.wso2.msf4j.formparam.FormDataParam;
-import org.wso2.msf4j.formparam.FileInfo;
 import org.wso2.msf4j.Request;
+
+import java.util.List;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
 public class ThreatProtectionPoliciesApiServiceImpl extends ThreatProtectionPoliciesApiService {
     private static final Logger log = LoggerFactory.getLogger(ThreatProtectionPoliciesApiServiceImpl.class);
@@ -32,9 +22,9 @@ public class ThreatProtectionPoliciesApiServiceImpl extends ThreatProtectionPoli
     /**
      * Get a list of all threat protection policies
      *
-     * @param request
+     * @param request ms4j request object
      * @return List of threat protection policies
-     * @throws NotFoundException
+     * @throws NotFoundException  When the particular resource does not exist in the system
      */
     @Override
     public Response threatProtectionPoliciesGet(Request request) throws NotFoundException {
@@ -57,9 +47,9 @@ public class ThreatProtectionPoliciesApiServiceImpl extends ThreatProtectionPoli
      * Get a specific threat protection policy
      *
      * @param policyId ID of the policy to be retrieved
-     * @param request
+     * @param request ms4j request object
      * @return Threat protection policy
-     * @throws NotFoundException
+     * @throws NotFoundException  When the particular resource does not exist in the system
      */
     @Override
     public Response threatProtectionPoliciesPolicyIdGet(String policyId, Request request) throws NotFoundException {

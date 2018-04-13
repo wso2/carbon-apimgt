@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
@@ -15,19 +14,19 @@ import java.util.Objects;
  * LifecycleState_checkItemBeanListDTO
  */
 public class LifecycleState_checkItemBeanListDTO   {
-  @JsonProperty("permissionBeans")
+  @SerializedName("permissionBeans")
   private List<LifecycleState_permissionBeansDTO> permissionBeans = new ArrayList<LifecycleState_permissionBeansDTO>();
 
-  @JsonProperty("name")
+  @SerializedName("name")
   private String name = null;
 
-  @JsonProperty("validationBeans")
+  @SerializedName("validationBeans")
   private List<LifecycleState_validationBeansDTO> validationBeans = new ArrayList<LifecycleState_validationBeansDTO>();
 
-  @JsonProperty("targets")
+  @SerializedName("targets")
   private List<String> targets = new ArrayList<String>();
 
-  @JsonProperty("value")
+  @SerializedName("value")
   private Boolean value = null;
 
   public LifecycleState_checkItemBeanListDTO permissionBeans(List<LifecycleState_permissionBeansDTO> permissionBeans) {

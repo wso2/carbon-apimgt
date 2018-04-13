@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
@@ -13,10 +12,10 @@ import java.util.Objects;
  * LifecycleState_permissionBeansDTO
  */
 public class LifecycleState_permissionBeansDTO   {
-  @JsonProperty("roles")
+  @SerializedName("roles")
   private List<String> roles = new ArrayList<String>();
 
-  @JsonProperty("forTarget")
+  @SerializedName("forTarget")
   private String forTarget = null;
 
   public LifecycleState_permissionBeansDTO roles(List<String> roles) {

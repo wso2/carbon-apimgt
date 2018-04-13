@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
@@ -11,10 +10,10 @@ import java.util.Objects;
  * APIDefinitionValidationResponse_wsdlInfo_endpointsDTO
  */
 public class APIDefinitionValidationResponse_wsdlInfo_endpointsDTO   {
-  @JsonProperty("name")
+  @SerializedName("name")
   private String name = null;
 
-  @JsonProperty("location")
+  @SerializedName("location")
   private String location = null;
 
   public APIDefinitionValidationResponse_wsdlInfo_endpointsDTO name(String name) {

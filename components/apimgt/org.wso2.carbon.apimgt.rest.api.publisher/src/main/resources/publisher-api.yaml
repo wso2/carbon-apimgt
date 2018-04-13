@@ -3393,6 +3393,7 @@ paths:
       parameters:
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
+        - $ref: '#/parameters/labelType-Q'
       tags:
         - Label (Collection)
       responses:
@@ -3546,6 +3547,19 @@ parameters:
       Should be formatted as **provider-name-version**.
     required: true
     type: string
+
+# Label Type
+# Specified as part of the query string
+  labelType-Q:
+    name: labelType
+    in: query
+    description: |
+      **API ID** consisting of the **UUID** of the API.
+      The combination of the provider of the API, name of the API and the version is also accepted as a valid API I.
+      Should be formatted as **provider-name-version**.
+    required: false
+    type: string
+
 
 # API name
 # Specified as part of the query string

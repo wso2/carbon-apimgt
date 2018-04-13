@@ -1,9 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.HashMap;
@@ -15,20 +13,23 @@ import java.util.Objects;
  * TierDTO
  */
 public class TierDTO   {
-  @JsonProperty("name")
+  @SerializedName("name")
   private String name = null;
 
-  @JsonProperty("description")
+  @SerializedName("description")
   private String description = null;
 
   /**
    * Gets or Sets tierLevel
    */
   public enum TierLevelEnum {
+    @SerializedName("api")
     API("api"),
     
+    @SerializedName("application")
     APPLICATION("application"),
     
+    @SerializedName("resource")
     RESOURCE("resource");
 
     private String value;
@@ -38,12 +39,9 @@ public class TierDTO   {
     }
 
     @Override
-    @JsonValue
     public String toString() {
       return String.valueOf(value);
     }
-
-    @JsonCreator
     public static TierLevelEnum fromValue(String text) {
       for (TierLevelEnum b : TierLevelEnum.values()) {
         if (String.valueOf(b.value).equals(text)) {
@@ -54,27 +52,29 @@ public class TierDTO   {
     }
   }
 
-  @JsonProperty("tierLevel")
+  @SerializedName("tierLevel")
   private TierLevelEnum tierLevel = null;
 
-  @JsonProperty("attributes")
+  @SerializedName("attributes")
   private Map<String, String> attributes = new HashMap<String, String>();
 
-  @JsonProperty("requestCount")
+  @SerializedName("requestCount")
   private Long requestCount = null;
 
-  @JsonProperty("unitTime")
+  @SerializedName("unitTime")
   private Long unitTime = null;
 
-  @JsonProperty("timeUnit")
+  @SerializedName("timeUnit")
   private String timeUnit = null;
 
   /**
    * This attribute declares whether this policy is available under commercial or free 
    */
   public enum TierPlanEnum {
+    @SerializedName("FREE")
     FREE("FREE"),
     
+    @SerializedName("COMMERCIAL")
     COMMERCIAL("COMMERCIAL");
 
     private String value;
@@ -84,12 +84,9 @@ public class TierDTO   {
     }
 
     @Override
-    @JsonValue
     public String toString() {
       return String.valueOf(value);
     }
-
-    @JsonCreator
     public static TierPlanEnum fromValue(String text) {
       for (TierPlanEnum b : TierPlanEnum.values()) {
         if (String.valueOf(b.value).equals(text)) {
@@ -100,10 +97,10 @@ public class TierDTO   {
     }
   }
 
-  @JsonProperty("tierPlan")
+  @SerializedName("tierPlan")
   private TierPlanEnum tierPlan = null;
 
-  @JsonProperty("stopOnQuotaReach")
+  @SerializedName("stopOnQuotaReach")
   private Boolean stopOnQuotaReach = null;
 
   public TierDTO name(String name) {
