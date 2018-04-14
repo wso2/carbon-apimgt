@@ -1,7 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -810,11 +809,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
-        } catch (IOException e) {
-            String errorMessage = "Error while retrieving API : " + apiId;
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
-            log.error(errorMessage, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
         }
     }
 
@@ -956,16 +950,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
 
-        } catch (JsonProcessingException e) {
-            String errorMessage = "Error while updating API : " + apiId;
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
-            log.error(errorMessage, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
-        } catch (IOException e) {
-            String errorMessage = "Error while updating API : " + apiId;
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
-            log.error(errorMessage, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
         }
     }
 
@@ -1452,11 +1436,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList, e);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
-        } catch (IOException e) {
-            String errorMessage = "Error while create new API version " + apiId;
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
-            log.error(errorMessage, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
         }
     }
 
@@ -1573,8 +1552,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 if (log.isDebugEnabled()) {
                     log.debug("Deseriallizing additionalProperties: " + additionalProperties);
                 }
-                ObjectMapper mapper = new ObjectMapper();
-                additionalPropertiesAPI = mapper.readValue(additionalProperties, APIDTO.class);
+                additionalPropertiesAPI = new Gson().fromJson(additionalProperties, APIDTO.class);
                 apiBuilder = MappingUtil.toAPI(additionalPropertiesAPI);
                 if (log.isDebugEnabled()) {
                     log.debug("Successfully deseriallized additionalProperties: " + additionalProperties);
@@ -1697,16 +1675,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
-        } catch (JsonProcessingException e) {
-            String errorMessage = "Error while adding new API";
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
-            log.error(errorMessage, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
-        } catch (IOException e) {
-            String errorMessage = "Error while adding new API";
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
-            log.error(errorMessage, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
         }
     }
 

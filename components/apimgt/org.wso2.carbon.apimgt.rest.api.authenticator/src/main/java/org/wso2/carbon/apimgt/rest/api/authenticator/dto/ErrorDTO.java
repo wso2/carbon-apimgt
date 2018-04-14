@@ -16,32 +16,37 @@
 
 package org.wso2.carbon.apimgt.rest.api.authenticator.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.annotations.ApiModel;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.util.HashMap;
-import javax.validation.constraints.NotNull;
 
 /**
  * DTO class for Error
  */
-@ApiModel(description = "")
 public class ErrorDTO {
 
-    @NotNull private long code;
+    @SerializedName("code")
+    @ApiModelProperty(required = true, value = "")
+    private long code;
 
-    @NotNull private String message = null;
+    @ApiModelProperty(required = true, value = "Error message.")
+    @SerializedName("message")
+    private String message = null;
 
+    @ApiModelProperty(value = "A detail description about the error message.")
+    @SerializedName("description")
     private String description = null;
 
-    private  HashMap<String, String>   paramList = null;
+    @ApiModelProperty(value = "Preferably an url with more details about the error.")
+    @SerializedName("moreInfo")
+    private HashMap<String, String> paramList = null;
 
 
     /**
      * @return error code
      **/
-    @ApiModelProperty(required = true, value = "") @JsonProperty("code") public Long getCode() {
+    public Long getCode() {
         return code;
     }
 
@@ -51,9 +56,9 @@ public class ErrorDTO {
 
     /**
      * Error message.
+     *
      * @return error message
      */
-    @ApiModelProperty(required = true, value = "Error message.") @JsonProperty("message")
     public String getMessage() {
         return message;
     }
@@ -64,9 +69,9 @@ public class ErrorDTO {
 
     /**
      * A detail description about the error message.
+     *
      * @return detail of description
      */
-    @ApiModelProperty(value = "A detail description about the error message.") @JsonProperty("description")
     public String getDescription() {
         return description;
     }
@@ -77,9 +82,9 @@ public class ErrorDTO {
 
     /**
      * Preferably an url with more details about the error.
+     *
      * @return more details on error
      */
-    @ApiModelProperty(value = "Preferably an url with more details about the error.") @JsonProperty("moreInfo")
     public HashMap<String, String> getMoreInfo() {
         return paramList;
     }

@@ -16,11 +16,9 @@
 
 package org.wso2.carbon.apimgt.rest.api.common.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-
-import javax.validation.constraints.NotNull;
 
 /**
  * DTO class for ErrorListItem
@@ -29,22 +27,25 @@ import javax.validation.constraints.NotNull;
 public class ErrorListItemDTO {
 
 
-    @NotNull
+    @ApiModelProperty(required = true, value = "")
+    @SerializedName("code")
     private String code = null;
 
-    @NotNull
+    @ApiModelProperty(required = true, value = "Description about individual errors occurred")
+    @SerializedName("message")
     private String message = null;
 
 
     /**
      * Gets the error code.
+     *
      * @return Error code . for ex :900404
      **/
-    @ApiModelProperty(required = true, value = "")
-    @JsonProperty("code")
+
     public String getCode() {
         return code;
     }
+
     public void setCode(String code) {
         this.code = code;
     }
@@ -52,21 +53,21 @@ public class ErrorListItemDTO {
 
     /**
      * Description about individual errors occurred
+     *
      * @return error message.
      **/
-    @ApiModelProperty(required = true, value = "Description about individual errors occurred")
-    @JsonProperty("message")
+
     public String getMessage() {
         return message;
     }
+
     public void setMessage(String message) {
         this.message = message;
     }
 
 
-
     @Override
-    public String toString()  {
+    public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("class ErrorListItemDTO {\n");
 
