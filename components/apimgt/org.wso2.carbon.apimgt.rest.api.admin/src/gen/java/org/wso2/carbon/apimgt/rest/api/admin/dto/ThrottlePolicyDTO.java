@@ -1,10 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
@@ -13,22 +10,22 @@ import java.util.Objects;
  * ThrottlePolicyDTO
  */
 public class ThrottlePolicyDTO   {
-  @JsonProperty("id")
+  @SerializedName("id")
   private String id = null;
 
-  @JsonProperty("policyName")
+  @SerializedName("policyName")
   private String policyName = null;
 
-  @JsonProperty("displayName")
+  @SerializedName("displayName")
   private String displayName = null;
 
-  @JsonProperty("description")
+  @SerializedName("description")
   private String description = null;
 
-  @JsonProperty("isDeployed")
+  @SerializedName("isDeployed")
   private Boolean isDeployed = false;
 
-  @JsonProperty("type")
+  @SerializedName("type")
   private String type = null;
 
   public ThrottlePolicyDTO id(String id) {

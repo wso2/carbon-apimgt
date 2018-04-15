@@ -25,14 +25,13 @@ public class LabelsApiServiceImpl extends LabelsApiService {
      * Get all the labels.
      *
      * @param labelType       the type of the labels to be fetched
-     * @param accept          Accept header value
      * @param ifNoneMatch     If-None-Match header value
      * @param request         ms4j request object
-     * @return Lable List
+     * @return Lable List     List of labels in type (gateway,store)
      * @throws NotFoundException If failed to get the label values
      */
     @Override
-    public Response labelsGet(String labelType, String accept, String ifNoneMatch, String ifModifiedSince,
+    public Response labelsGet(String labelType, String ifNoneMatch, String ifModifiedSince,
                               Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {

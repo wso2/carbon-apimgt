@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.core.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
@@ -11,16 +10,16 @@ import java.util.Objects;
  * ThreatProtectionPolicyDTO
  */
 public class ThreatProtectionPolicyDTO   {
-  @JsonProperty("uuid")
+  @SerializedName("uuid")
   private String uuid = null;
 
-  @JsonProperty("name")
+  @SerializedName("name")
   private String name = null;
 
-  @JsonProperty("type")
+  @SerializedName("type")
   private String type = null;
 
-  @JsonProperty("policy")
+  @SerializedName("policy")
   private String policy = null;
 
   public ThreatProtectionPolicyDTO uuid(String uuid) {

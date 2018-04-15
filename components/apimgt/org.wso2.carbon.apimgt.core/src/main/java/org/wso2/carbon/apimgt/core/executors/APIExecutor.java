@@ -22,10 +22,12 @@ package org.wso2.carbon.apimgt.core.executors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.lcm.core.Executor;
 import org.wso2.carbon.lcm.core.exception.LifecycleException;
 
@@ -52,7 +54,7 @@ public class APIExecutor implements Executor {
      *                     <parameter name="service.mediatype" value="application/vnd.wso2-service+xml"/>
      *                     </execution>
      *                     <p>
-     *                         }
+     *                     }
      *                     The parameters defined here are passed to the executor using this method.
      */
     @Override
@@ -77,6 +79,10 @@ public class APIExecutor implements Executor {
             //todo:This place need to write how to handle Gateway publishing
             try {
                 ApiDAO apiDAO = DAOFactory.getApiDAO();
+                APISubscriptionDAO apiSubscriptionDAO = DAOFactory.getAPISubscriptionDAO();
+                if (APIStatus.RETIRED.getStatus().equals(targetState)) {
+                    apiSubscriptionDAO.deleteSubscriptionsByAPIId(api.getId());
+                }
                 apiDAO.changeLifeCycleStatus(api.getId(), targetState);
             } catch (APIMgtDAOException e) {
                 throw new LifecycleException("Couldn't create APIPublisher from user", e);

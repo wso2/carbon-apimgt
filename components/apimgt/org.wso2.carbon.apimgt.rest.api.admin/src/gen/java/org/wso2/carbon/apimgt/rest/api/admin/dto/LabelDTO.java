@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
@@ -13,19 +12,19 @@ import java.util.Objects;
  * LabelDTO
  */
 public class LabelDTO   {
-  @JsonProperty("labelUUID")
+  @SerializedName("labelUUID")
   private String labelUUID = null;
 
-  @JsonProperty("name")
+  @SerializedName("name")
   private String name = null;
 
-  @JsonProperty("description")
+  @SerializedName("description")
   private String description = null;
 
-  @JsonProperty("type")
+  @SerializedName("type")
   private String type = null;
 
-  @JsonProperty("accessUrls")
+  @SerializedName("accessUrls")
   private List<String> accessUrls = new ArrayList<String>();
 
   public LabelDTO labelUUID(String labelUUID) {

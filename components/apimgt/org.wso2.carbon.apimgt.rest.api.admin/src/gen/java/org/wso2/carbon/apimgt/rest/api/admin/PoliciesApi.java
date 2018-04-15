@@ -25,6 +25,7 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
 import javax.ws.rs.OPTIONS;
@@ -71,6 +72,7 @@ public class PoliciesApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.policiesThrottlingAdvancedGet(ifNoneMatch,ifModifiedSince,request);
     }
     @OPTIONS
@@ -94,6 +96,7 @@ public class PoliciesApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.policiesThrottlingAdvancedIdDelete(id,ifMatch,ifUnmodifiedSince,request);
     }
     @OPTIONS
@@ -119,6 +122,7 @@ public class PoliciesApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.policiesThrottlingAdvancedIdGet(id,ifNoneMatch,ifModifiedSince,request);
     }
     @OPTIONS
@@ -145,6 +149,7 @@ public class PoliciesApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.policiesThrottlingAdvancedIdPut(id,body,ifMatch,ifUnmodifiedSince,request);
     }
     @OPTIONS
@@ -166,6 +171,7 @@ public class PoliciesApi implements Microservice  {
     public Response policiesThrottlingAdvancedPost(@ApiParam(value = "Advanced level policy object that should to be added " ,required=true) AdvancedThrottlePolicyDTO body
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.policiesThrottlingAdvancedPost(body,request);
     }
     @OPTIONS
@@ -188,6 +194,7 @@ public class PoliciesApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.policiesThrottlingApplicationGet(ifNoneMatch,ifModifiedSince,request);
     }
     @OPTIONS
@@ -211,6 +218,7 @@ public class PoliciesApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.policiesThrottlingApplicationIdDelete(id,ifMatch,ifUnmodifiedSince,request);
     }
     @OPTIONS
@@ -236,6 +244,7 @@ public class PoliciesApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.policiesThrottlingApplicationIdGet(id,ifNoneMatch,ifModifiedSince,request);
     }
     @OPTIONS
@@ -262,6 +271,7 @@ public class PoliciesApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.policiesThrottlingApplicationIdPut(id,body,ifMatch,ifUnmodifiedSince,request);
     }
     @OPTIONS
@@ -283,6 +293,7 @@ public class PoliciesApi implements Microservice  {
     public Response policiesThrottlingApplicationPost(@ApiParam(value = "Application level policy object that should to be added " ,required=true) ApplicationThrottlePolicyDTO body
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.policiesThrottlingApplicationPost(body,request);
     }
     @OPTIONS
@@ -305,6 +316,7 @@ public class PoliciesApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.policiesThrottlingCustomGet(ifNoneMatch,ifModifiedSince,request);
     }
     @OPTIONS
@@ -326,6 +338,7 @@ public class PoliciesApi implements Microservice  {
     public Response policiesThrottlingCustomPost(@ApiParam(value = "Custom Rule object that should to be added " ,required=true) CustomRuleDTO body
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.policiesThrottlingCustomPost(body,request);
     }
     @OPTIONS
@@ -349,6 +362,7 @@ public class PoliciesApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.policiesThrottlingCustomRuleIdDelete(ruleId,ifMatch,ifUnmodifiedSince,request);
     }
     @OPTIONS
@@ -374,6 +388,7 @@ public class PoliciesApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.policiesThrottlingCustomRuleIdGet(ruleId,ifNoneMatch,ifModifiedSince,request);
     }
     @OPTIONS
@@ -400,6 +415,7 @@ public class PoliciesApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.policiesThrottlingCustomRuleIdPut(ruleId,body,ifMatch,ifUnmodifiedSince,request);
     }
     @OPTIONS
@@ -422,6 +438,7 @@ public class PoliciesApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.policiesThrottlingSubscriptionGet(ifNoneMatch,ifModifiedSince,request);
     }
     @OPTIONS
@@ -445,6 +462,7 @@ public class PoliciesApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.policiesThrottlingSubscriptionIdDelete(id,ifMatch,ifUnmodifiedSince,request);
     }
     @OPTIONS
@@ -470,6 +488,7 @@ public class PoliciesApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.policiesThrottlingSubscriptionIdGet(id,ifNoneMatch,ifModifiedSince,request);
     }
     @OPTIONS
@@ -496,6 +515,7 @@ public class PoliciesApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.policiesThrottlingSubscriptionIdPut(id,body,ifMatch,ifUnmodifiedSince,request);
     }
     @OPTIONS
@@ -517,6 +537,7 @@ public class PoliciesApi implements Microservice  {
     public Response policiesThrottlingSubscriptionPost(@ApiParam(value = "Subscripion level policy object that should to be added " ,required=true) SubscriptionThrottlePolicyDTO body
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.policiesThrottlingSubscriptionPost(body,request);
     }
 }

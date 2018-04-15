@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.BandwidthLimitDTO;
@@ -13,19 +12,19 @@ import java.util.Objects;
  * ThrottleLimitDTO
  */
 public class ThrottleLimitDTO   {
-  @JsonProperty("bandwidthLimit")
+  @SerializedName("bandwidthLimit")
   private BandwidthLimitDTO bandwidthLimit = null;
 
-  @JsonProperty("requestCountLimit")
+  @SerializedName("requestCountLimit")
   private RequestCountLimitDTO requestCountLimit = null;
 
-  @JsonProperty("type")
+  @SerializedName("type")
   private String type = null;
 
-  @JsonProperty("timeUnit")
+  @SerializedName("timeUnit")
   private String timeUnit = null;
 
-  @JsonProperty("unitTime")
+  @SerializedName("unitTime")
   private Integer unitTime = null;
 
   public ThrottleLimitDTO bandwidthLimit(BandwidthLimitDTO bandwidthLimit) {

@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.core.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
@@ -11,31 +10,31 @@ import java.util.Objects;
  * SubscriptionDTO
  */
 public class SubscriptionDTO   {
-  @JsonProperty("apiName")
+  @SerializedName("apiName")
   private String apiName = null;
 
-  @JsonProperty("apiContext")
+  @SerializedName("apiContext")
   private String apiContext = null;
 
-  @JsonProperty("apiVersion")
+  @SerializedName("apiVersion")
   private String apiVersion = null;
 
-  @JsonProperty("apiProvider")
+  @SerializedName("apiProvider")
   private String apiProvider = null;
 
-  @JsonProperty("consumerKey")
+  @SerializedName("consumerKey")
   private String consumerKey = null;
 
-  @JsonProperty("subscriptionPolicy")
+  @SerializedName("subscriptionPolicy")
   private String subscriptionPolicy = null;
 
-  @JsonProperty("keyEnvType")
+  @SerializedName("keyEnvType")
   private String keyEnvType = null;
 
-  @JsonProperty("applicationId")
+  @SerializedName("applicationId")
   private String applicationId = null;
 
-  @JsonProperty("status")
+  @SerializedName("status")
   private String status = null;
 
   public SubscriptionDTO apiName(String apiName) {

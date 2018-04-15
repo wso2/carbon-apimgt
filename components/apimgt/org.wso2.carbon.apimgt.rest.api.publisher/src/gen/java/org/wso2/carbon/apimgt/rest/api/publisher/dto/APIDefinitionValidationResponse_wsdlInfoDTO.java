@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
@@ -16,13 +15,13 @@ import java.util.Objects;
  */
 @ApiModel(description = "Summary of the WSDL including the basic information")
 public class APIDefinitionValidationResponse_wsdlInfoDTO   {
-  @JsonProperty("version")
+  @SerializedName("version")
   private String version = null;
 
-  @JsonProperty("endpoints")
+  @SerializedName("endpoints")
   private List<APIDefinitionValidationResponse_wsdlInfo_endpointsDTO> endpoints = new ArrayList<APIDefinitionValidationResponse_wsdlInfo_endpointsDTO>();
 
-  @JsonProperty("bindingInfo")
+  @SerializedName("bindingInfo")
   private APIDefinitionValidationResponse_wsdlInfo_bindingInfoDTO bindingInfo = null;
 
   public APIDefinitionValidationResponse_wsdlInfoDTO version(String version) {

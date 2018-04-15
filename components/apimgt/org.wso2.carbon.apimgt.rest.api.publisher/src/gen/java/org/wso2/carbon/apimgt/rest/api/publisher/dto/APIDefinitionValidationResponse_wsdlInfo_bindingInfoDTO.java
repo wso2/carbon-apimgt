@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
@@ -12,10 +11,10 @@ import java.util.Objects;
  */
 @ApiModel(description = "WSDL binding related information ")
 public class APIDefinitionValidationResponse_wsdlInfo_bindingInfoDTO   {
-  @JsonProperty("hasHttpBinding")
+  @SerializedName("hasHttpBinding")
   private Boolean hasHttpBinding = null;
 
-  @JsonProperty("hasSoapBinding")
+  @SerializedName("hasSoapBinding")
   private Boolean hasSoapBinding = null;
 
   public APIDefinitionValidationResponse_wsdlInfo_bindingInfoDTO hasHttpBinding(Boolean hasHttpBinding) {

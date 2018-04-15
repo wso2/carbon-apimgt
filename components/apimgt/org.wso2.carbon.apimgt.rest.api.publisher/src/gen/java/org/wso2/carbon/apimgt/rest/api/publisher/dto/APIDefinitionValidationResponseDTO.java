@@ -1,9 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDefinitionValidationResponse_wsdlInfoDTO;
@@ -13,15 +11,17 @@ import java.util.Objects;
  * APIDefinitionValidationResponseDTO
  */
 public class APIDefinitionValidationResponseDTO   {
-  @JsonProperty("isValid")
+  @SerializedName("isValid")
   private Boolean isValid = null;
 
   /**
    * This attribute declares whether this definition is a swagger or WSDL 
    */
   public enum DefinitionTypeEnum {
+    @SerializedName("SWAGGER")
     SWAGGER("SWAGGER"),
     
+    @SerializedName("WSDL")
     WSDL("WSDL");
 
     private String value;
@@ -31,12 +31,9 @@ public class APIDefinitionValidationResponseDTO   {
     }
 
     @Override
-    @JsonValue
     public String toString() {
       return String.valueOf(value);
     }
-
-    @JsonCreator
     public static DefinitionTypeEnum fromValue(String text) {
       for (DefinitionTypeEnum b : DefinitionTypeEnum.values()) {
         if (String.valueOf(b.value).equals(text)) {
@@ -47,10 +44,10 @@ public class APIDefinitionValidationResponseDTO   {
     }
   }
 
-  @JsonProperty("definitionType")
+  @SerializedName("definitionType")
   private DefinitionTypeEnum definitionType = null;
 
-  @JsonProperty("wsdlInfo")
+  @SerializedName("wsdlInfo")
   private APIDefinitionValidationResponse_wsdlInfoDTO wsdlInfo = null;
 
   public APIDefinitionValidationResponseDTO isValid(Boolean isValid) {

@@ -1,13 +1,9 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonValue;
-import io.swagger.annotations.ApiModel;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModelProperty;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -16,42 +12,44 @@ import java.util.Objects;
  * BaseAPIDTO
  */
 public class BaseAPIDTO   {
-  @JsonProperty("id")
+  @SerializedName("id")
   private String id = null;
 
-  @JsonProperty("name")
+  @SerializedName("name")
   private String name = null;
 
-  @JsonProperty("description")
+  @SerializedName("description")
   private String description = null;
 
-  @JsonProperty("context")
+  @SerializedName("context")
   private String context = null;
 
-  @JsonProperty("version")
+  @SerializedName("version")
   private String version = null;
 
-  @JsonProperty("provider")
+  @SerializedName("provider")
   private String provider = null;
 
-  @JsonProperty("apiDefinition")
+  @SerializedName("apiDefinition")
   private String apiDefinition = null;
 
-  @JsonProperty("transport")
+  @SerializedName("transport")
   private List<String> transport = new ArrayList<String>();
 
-  @JsonProperty("labels")
+  @SerializedName("labels")
   private List<String> labels = new ArrayList<String>();
 
-  @JsonProperty("hasOwnGateway")
+  @SerializedName("hasOwnGateway")
   private Boolean hasOwnGateway = null;
 
   /**
    * Gets or Sets type
    */
   public enum TypeEnum {
+    @SerializedName("API")
     API("API"),
     
+    @SerializedName("CompositeAPI")
     COMPOSITEAPI("CompositeAPI");
 
     private String value;
@@ -61,12 +59,9 @@ public class BaseAPIDTO   {
     }
 
     @Override
-    @JsonValue
     public String toString() {
       return String.valueOf(value);
     }
-
-    @JsonCreator
     public static TypeEnum fromValue(String text) {
       for (TypeEnum b : TypeEnum.values()) {
         if (String.valueOf(b.value).equals(text)) {
@@ -77,7 +72,7 @@ public class BaseAPIDTO   {
     }
   }
 
-  @JsonProperty("type")
+  @SerializedName("type")
   private TypeEnum type = null;
 
   public BaseAPIDTO id(String id) {

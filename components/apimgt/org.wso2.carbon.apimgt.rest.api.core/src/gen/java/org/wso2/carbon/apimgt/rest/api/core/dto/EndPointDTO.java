@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.core.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
@@ -11,22 +10,22 @@ import java.util.Objects;
  * EndPointDTO
  */
 public class EndPointDTO   {
-  @JsonProperty("id")
+  @SerializedName("id")
   private String id = null;
 
-  @JsonProperty("name")
+  @SerializedName("name")
   private String name = null;
 
-  @JsonProperty("endpointConfig")
+  @SerializedName("endpointConfig")
   private String endpointConfig = null;
 
-  @JsonProperty("security")
+  @SerializedName("security")
   private String security = null;
 
-  @JsonProperty("maxTps")
+  @SerializedName("maxTps")
   private Long maxTps = null;
 
-  @JsonProperty("type")
+  @SerializedName("type")
   private String type = null;
 
   public EndPointDTO id(String id) {

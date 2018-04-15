@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
@@ -11,10 +10,10 @@ import java.util.Objects;
  * LifecycleState_availableTransitionBeanListDTO
  */
 public class LifecycleState_availableTransitionBeanListDTO   {
-  @JsonProperty("event")
+  @SerializedName("event")
   private String event = null;
 
-  @JsonProperty("targetState")
+  @SerializedName("targetState")
   private String targetState = null;
 
   public LifecycleState_availableTransitionBeanListDTO event(String event) {

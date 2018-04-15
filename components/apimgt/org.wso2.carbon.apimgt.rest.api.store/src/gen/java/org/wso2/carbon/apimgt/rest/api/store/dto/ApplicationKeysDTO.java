@@ -1,9 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
@@ -14,24 +12,26 @@ import java.util.Objects;
  * ApplicationKeysDTO
  */
 public class ApplicationKeysDTO   {
-  @JsonProperty("consumerKey")
+  @SerializedName("consumerKey")
   private String consumerKey = null;
 
-  @JsonProperty("consumerSecret")
+  @SerializedName("consumerSecret")
   private String consumerSecret = null;
 
-  @JsonProperty("supportedGrantTypes")
+  @SerializedName("supportedGrantTypes")
   private List<String> supportedGrantTypes = new ArrayList<String>();
 
-  @JsonProperty("callbackUrl")
+  @SerializedName("callbackUrl")
   private String callbackUrl = null;
 
   /**
    * Key type
    */
   public enum KeyTypeEnum {
+    @SerializedName("PRODUCTION")
     PRODUCTION("PRODUCTION"),
     
+    @SerializedName("SANDBOX")
     SANDBOX("SANDBOX");
 
     private String value;
@@ -41,12 +41,9 @@ public class ApplicationKeysDTO   {
     }
 
     @Override
-    @JsonValue
     public String toString() {
       return String.valueOf(value);
     }
-
-    @JsonCreator
     public static KeyTypeEnum fromValue(String text) {
       for (KeyTypeEnum b : KeyTypeEnum.values()) {
         if (String.valueOf(b.value).equals(text)) {
@@ -57,7 +54,7 @@ public class ApplicationKeysDTO   {
     }
   }
 
-  @JsonProperty("keyType")
+  @SerializedName("keyType")
   private KeyTypeEnum keyType = null;
 
   public ApplicationKeysDTO consumerKey(String consumerKey) {

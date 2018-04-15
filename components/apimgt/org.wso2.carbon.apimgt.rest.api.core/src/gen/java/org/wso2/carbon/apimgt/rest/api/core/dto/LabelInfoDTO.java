@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.core.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
@@ -14,10 +13,10 @@ import java.util.Objects;
  * LabelInfoDTO
  */
 public class LabelInfoDTO   {
-  @JsonProperty("overwriteLabels")
+  @SerializedName("overwriteLabels")
   private String overwriteLabels = null;
 
-  @JsonProperty("labelList")
+  @SerializedName("labelList")
   private List<LabelDTO> labelList = new ArrayList<LabelDTO>();
 
   public LabelInfoDTO overwriteLabels(String overwriteLabels) {

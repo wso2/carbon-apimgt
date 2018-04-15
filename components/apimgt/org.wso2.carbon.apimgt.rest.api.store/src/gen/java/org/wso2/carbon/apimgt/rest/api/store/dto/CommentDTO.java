@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
@@ -11,28 +10,28 @@ import java.util.Objects;
  * CommentDTO
  */
 public class CommentDTO   {
-  @JsonProperty("commentId")
+  @SerializedName("commentId")
   private String commentId = null;
 
-  @JsonProperty("apiId")
+  @SerializedName("apiId")
   private String apiId = null;
 
-  @JsonProperty("username")
+  @SerializedName("username")
   private String username = null;
 
-  @JsonProperty("commentText")
+  @SerializedName("commentText")
   private String commentText = null;
 
-  @JsonProperty("createdTime")
+  @SerializedName("createdTime")
   private String createdTime = null;
 
-  @JsonProperty("createdBy")
+  @SerializedName("createdBy")
   private String createdBy = null;
 
-  @JsonProperty("lastUpdatedTime")
+  @SerializedName("lastUpdatedTime")
   private String lastUpdatedTime = null;
 
-  @JsonProperty("lastUpdatedBy")
+  @SerializedName("lastUpdatedBy")
   private String lastUpdatedBy = null;
 
   public CommentDTO commentId(String commentId) {

@@ -1,8 +1,5 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
-import java.util.HashMap;
-import java.util.List;
-import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
@@ -30,7 +27,6 @@ public class LabelsApiServiceImpl extends LabelsApiService {
      * Get all the labels.
      *
      * @param labelType       the type of the labels to be fetched
-     * @param accept          Accept header value
      * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
      * @param request         ms4j request object
@@ -38,17 +34,16 @@ public class LabelsApiServiceImpl extends LabelsApiService {
      * @throws NotFoundException If failed to get the label values
      */
     @Override
-    public Response labelsGet(String labelType, String accept, String ifNoneMatch, String ifModifiedSince, Request
-            request) throws
+    public Response labelsGet(String ifNoneMatch, String ifModifiedSince, String labelType, Request request) throws
             NotFoundException {
 
         String username = RestApiUtil.getLoggedInUsername(request);
 
         try {
             List<Label> labels;
-            if(labelType == null) {
+            if (labelType == null) {
                 labels = RestAPIPublisherUtil.getApiPublisher(username).getAllLabels();
-            } else{
+            } else {
                 labels = RestAPIPublisherUtil.getApiPublisher(username).getLabelsByType(labelType);
             }
             LabelListDTO labelListDTO = MappingUtil.toLabelListDTO(labels);

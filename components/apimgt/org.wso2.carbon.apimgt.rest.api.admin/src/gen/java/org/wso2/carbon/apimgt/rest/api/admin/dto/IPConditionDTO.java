@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
@@ -11,16 +10,16 @@ import java.util.Objects;
  * IPConditionDTO
  */
 public class IPConditionDTO   {
-  @JsonProperty("ipConditionType")
+  @SerializedName("ipConditionType")
   private String ipConditionType = null;
 
-  @JsonProperty("specificIP")
+  @SerializedName("specificIP")
   private String specificIP = null;
 
-  @JsonProperty("startingIP")
+  @SerializedName("startingIP")
   private String startingIP = null;
 
-  @JsonProperty("endingIP")
+  @SerializedName("endingIP")
   private String endingIP = null;
 
   public IPConditionDTO ipConditionType(String ipConditionType) {

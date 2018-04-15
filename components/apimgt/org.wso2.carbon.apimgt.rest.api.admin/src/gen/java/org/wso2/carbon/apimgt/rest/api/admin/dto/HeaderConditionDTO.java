@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
@@ -11,10 +10,10 @@ import java.util.Objects;
  * HeaderConditionDTO
  */
 public class HeaderConditionDTO   {
-  @JsonProperty("headerName")
+  @SerializedName("headerName")
   private String headerName = null;
 
-  @JsonProperty("headerValue")
+  @SerializedName("headerValue")
   private String headerValue = null;
 
   public HeaderConditionDTO headerName(String headerName) {

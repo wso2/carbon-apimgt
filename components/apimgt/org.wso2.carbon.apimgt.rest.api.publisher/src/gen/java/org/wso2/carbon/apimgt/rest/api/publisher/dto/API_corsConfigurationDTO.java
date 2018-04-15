@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
@@ -14,19 +13,19 @@ import java.util.Objects;
  */
 @ApiModel(description = "CORS configuration for the API ")
 public class API_corsConfigurationDTO   {
-  @JsonProperty("corsConfigurationEnabled")
+  @SerializedName("corsConfigurationEnabled")
   private Boolean corsConfigurationEnabled = false;
 
-  @JsonProperty("accessControlAllowOrigins")
+  @SerializedName("accessControlAllowOrigins")
   private List<String> accessControlAllowOrigins = new ArrayList<String>();
 
-  @JsonProperty("accessControlAllowCredentials")
+  @SerializedName("accessControlAllowCredentials")
   private Boolean accessControlAllowCredentials = false;
 
-  @JsonProperty("accessControlAllowHeaders")
+  @SerializedName("accessControlAllowHeaders")
   private List<String> accessControlAllowHeaders = new ArrayList<String>();
 
-  @JsonProperty("accessControlAllowMethods")
+  @SerializedName("accessControlAllowMethods")
   private List<String> accessControlAllowMethods = new ArrayList<String>();
 
   public API_corsConfigurationDTO corsConfigurationEnabled(Boolean corsConfigurationEnabled) {

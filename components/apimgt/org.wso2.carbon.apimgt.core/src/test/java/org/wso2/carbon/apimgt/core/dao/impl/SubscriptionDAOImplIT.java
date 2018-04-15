@@ -704,6 +704,27 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
+    public void testDeleteSubscriptionByApiId() throws Exception {
+        //add new app
+        Application app = TestUtil.addTestApplication();
+        //add new api
+        API api = TestUtil.addTestAPI();
+        //add subscription
+        APISubscriptionDAO apiSubscriptionDAO = DAOFactory.getAPISubscriptionDAO();
+        String uuid = UUID.randomUUID().toString();
+        apiSubscriptionDAO.addAPISubscription(uuid, api.getId(), app.getId(), goldSubscriptionPolicy.getUuid(),
+                APIMgtConstants.SubscriptionStatus.ACTIVE);
+        //get subscription
+        Subscription subscription = apiSubscriptionDAO.getAPISubscription(uuid);
+        //validate
+        Assert.assertEquals(subscription.getId(), uuid);
+        //delete subscription
+        apiSubscriptionDAO.deleteSubscriptionsByAPIId(api.getId());
+        //validate
+        Assert.assertNull(apiSubscriptionDAO.getAPISubscription(uuid));
+    }
+
+    @Test
     public void testGetPendingAPISubscriptionsByApplication() throws Exception {
         //add new app
         Application app = TestUtil.addTestApplication();

@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
@@ -14,10 +13,10 @@ import java.util.Objects;
  * CustomRuleListDTO
  */
 public class CustomRuleListDTO   {
-  @JsonProperty("count")
+  @SerializedName("count")
   private Integer count = null;
 
-  @JsonProperty("list")
+  @SerializedName("list")
   private List<CustomRuleDTO> list = new ArrayList<CustomRuleDTO>();
 
   public CustomRuleListDTO count(Integer count) {

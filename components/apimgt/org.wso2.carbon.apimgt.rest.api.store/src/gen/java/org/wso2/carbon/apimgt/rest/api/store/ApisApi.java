@@ -2,28 +2,34 @@ package org.wso2.carbon.apimgt.rest.api.store;
 
 
 import io.swagger.annotations.ApiParam;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
+
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.CommentListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.RatingDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.RatingListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.factories.ApisApiServiceFactory;
+
 import org.wso2.msf4j.Microservice;
 import org.wso2.msf4j.Request;
+import org.wso2.msf4j.formparam.FileInfo;
+import org.wso2.msf4j.formparam.FormDataParam;
+import org.osgi.service.component.annotations.Component;
 
+import java.io.InputStream;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
+import javax.ws.rs.HEAD;
 import javax.ws.rs.OPTIONS;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -66,6 +72,7 @@ public class ApisApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.apisApiIdCommentsCommentIdDelete(commentId,apiId,ifMatch,ifUnmodifiedSince,request);
     }
     @OPTIONS
@@ -92,6 +99,7 @@ public class ApisApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.apisApiIdCommentsCommentIdGet(commentId,apiId,ifNoneMatch,ifModifiedSince,request);
     }
     @OPTIONS
@@ -119,6 +127,7 @@ public class ApisApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.apisApiIdCommentsCommentIdPut(commentId,apiId,body,ifMatch,ifUnmodifiedSince,request);
     }
     @OPTIONS
@@ -140,6 +149,9 @@ public class ApisApi implements Microservice  {
 ,@ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset
  ,@Context Request request)
     throws NotFoundException {
+        limit=limit==null?Integer.valueOf("25"):limit;
+        offset=offset==null?Integer.valueOf("0"):offset;
+        
         return delegate.apisApiIdCommentsGet(apiId,limit,offset,request);
     }
     @OPTIONS
@@ -162,6 +174,7 @@ public class ApisApi implements Microservice  {
 ,@ApiParam(value = "Comment object that should to be added " ,required=true) CommentDTO body
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.apisApiIdCommentsPost(apiId,body,request);
     }
     @OPTIONS
@@ -190,6 +203,7 @@ public class ApisApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.apisApiIdDocumentsDocumentIdContentGet(apiId,documentId,ifNoneMatch,ifModifiedSince,request);
     }
     @OPTIONS
@@ -216,6 +230,7 @@ public class ApisApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.apisApiIdDocumentsDocumentIdGet(apiId,documentId,ifNoneMatch,ifModifiedSince,request);
     }
     @OPTIONS
@@ -242,6 +257,9 @@ public class ApisApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
  ,@Context Request request)
     throws NotFoundException {
+        limit=limit==null?Integer.valueOf("25"):limit;
+        offset=offset==null?Integer.valueOf("0"):offset;
+        
         return delegate.apisApiIdDocumentsGet(apiId,limit,offset,ifNoneMatch,request);
     }
     @OPTIONS
@@ -267,6 +285,7 @@ public class ApisApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.apisApiIdGet(apiId,ifNoneMatch,ifModifiedSince,request);
     }
     @OPTIONS
@@ -290,6 +309,9 @@ public class ApisApi implements Microservice  {
 ,@ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset
  ,@Context Request request)
     throws NotFoundException {
+        limit=limit==null?Integer.valueOf("25"):limit;
+        offset=offset==null?Integer.valueOf("0"):offset;
+        
         return delegate.apisApiIdRatingsGet(apiId,limit,offset,request);
     }
     @OPTIONS
@@ -316,6 +338,7 @@ public class ApisApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.apisApiIdRatingsRatingIdGet(apiId,ratingId,ifNoneMatch,ifModifiedSince,request);
     }
     @OPTIONS
@@ -340,6 +363,7 @@ public class ApisApi implements Microservice  {
 ,@ApiParam(value = "Programming language of the SDK that is required. ",required=true) @PathParam("language") String language
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.apisApiIdSdksLanguageGet(apiId,language,request);
     }
     @OPTIONS
@@ -365,6 +389,7 @@ public class ApisApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.apisApiIdSwaggerGet(apiId,ifNoneMatch,ifModifiedSince,request);
     }
     @OPTIONS
@@ -387,6 +412,7 @@ public class ApisApi implements Microservice  {
 ,@ApiParam(value = "Rating object that should to be added " ,required=true) RatingDTO body
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.apisApiIdUserRatingPut(apiId,body,request);
     }
     @OPTIONS
@@ -408,19 +434,24 @@ public class ApisApi implements Microservice  {
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = void.class) })
     public Response apisApiIdWsdlGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID. Should be formatted as **provider-name-version**. ",required=true) @PathParam("apiId") String apiId
-,@ApiParam(value = "Name of the label ") @QueryParam("labelName") String labelName
+,@ApiParam(value = "Gateway Label ") @QueryParam("label") String label
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
  ,@Context Request request)
     throws NotFoundException {
-        return delegate.apisApiIdWsdlGet(apiId,labelName,ifNoneMatch,ifModifiedSince,request);
+        
+        return delegate.apisApiIdWsdlGet(apiId,label,ifNoneMatch,ifModifiedSince,request);
     }
     @OPTIONS
     @GET
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Retrieving APIs ", notes = "Get a list of available APIs qualifying under a given search condition. ", response = APIListDTO.class, tags={ "Retrieve", })
+    @io.swagger.annotations.ApiOperation(value = "Retrieve/Search APIs ", notes = "Get a list of available APIs qualifying under a given search condition. ", response = APIListDTO.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            
+        })
+    }, tags={ "Retrieve", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. List of qualifying APIs is returned. ", response = APIListDTO.class),
         
@@ -434,6 +465,9 @@ public class ApisApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
  ,@Context Request request)
     throws NotFoundException {
-        return delegate.apisGet(limit,offset,labels,query,ifNoneMatch, request);
+        limit=limit==null?Integer.valueOf("25"):limit;
+        offset=offset==null?Integer.valueOf("0"):offset;
+        
+        return delegate.apisGet(limit,offset,labels,query,ifNoneMatch,request);
     }
 }

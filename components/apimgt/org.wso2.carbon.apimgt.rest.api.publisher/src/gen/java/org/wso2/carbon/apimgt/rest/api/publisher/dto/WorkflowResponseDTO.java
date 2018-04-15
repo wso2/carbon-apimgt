@@ -1,9 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
@@ -16,12 +14,16 @@ public class WorkflowResponseDTO   {
    * This attribute declares whether this workflow task is approved or rejected. 
    */
   public enum WorkflowStatusEnum {
+    @SerializedName("CREATED")
     CREATED("CREATED"),
     
+    @SerializedName("APPROVED")
     APPROVED("APPROVED"),
     
+    @SerializedName("REJECTED")
     REJECTED("REJECTED"),
     
+    @SerializedName("REGISTERED")
     REGISTERED("REGISTERED");
 
     private String value;
@@ -31,12 +33,9 @@ public class WorkflowResponseDTO   {
     }
 
     @Override
-    @JsonValue
     public String toString() {
       return String.valueOf(value);
     }
-
-    @JsonCreator
     public static WorkflowStatusEnum fromValue(String text) {
       for (WorkflowStatusEnum b : WorkflowStatusEnum.values()) {
         if (String.valueOf(b.value).equals(text)) {
@@ -47,10 +46,10 @@ public class WorkflowResponseDTO   {
     }
   }
 
-  @JsonProperty("workflowStatus")
+  @SerializedName("workflowStatus")
   private WorkflowStatusEnum workflowStatus = null;
 
-  @JsonProperty("jsonPayload")
+  @SerializedName("jsonPayload")
   private String jsonPayload = null;
 
   public WorkflowResponseDTO workflowStatus(WorkflowStatusEnum workflowStatus) {

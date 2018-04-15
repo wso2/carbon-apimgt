@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.IPConditionDTO;
@@ -13,19 +12,19 @@ import java.util.Objects;
  */
 @ApiModel(description = "Blocking Conditions")
 public class BlockingConditionDTO   {
-  @JsonProperty("conditionId")
+  @SerializedName("conditionId")
   private String conditionId = null;
 
-  @JsonProperty("conditionType")
+  @SerializedName("conditionType")
   private String conditionType = null;
 
-  @JsonProperty("conditionValue")
+  @SerializedName("conditionValue")
   private String conditionValue = null;
 
-  @JsonProperty("status")
+  @SerializedName("status")
   private Boolean status = null;
 
-  @JsonProperty("ipCondition")
+  @SerializedName("ipCondition")
   private IPConditionDTO ipCondition = null;
 
   public BlockingConditionDTO conditionId(String conditionId) {

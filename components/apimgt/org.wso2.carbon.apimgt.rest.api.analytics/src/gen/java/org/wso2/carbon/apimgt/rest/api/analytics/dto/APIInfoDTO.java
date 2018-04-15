@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.analytics.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
@@ -11,31 +10,31 @@ import java.util.Objects;
  * APIInfoDTO
  */
 public class APIInfoDTO   {
-  @JsonProperty("id")
+  @SerializedName("id")
   private String id = null;
 
-  @JsonProperty("name")
+  @SerializedName("name")
   private String name = null;
 
-  @JsonProperty("description")
+  @SerializedName("description")
   private String description = null;
 
-  @JsonProperty("context")
+  @SerializedName("context")
   private String context = null;
 
-  @JsonProperty("version")
+  @SerializedName("version")
   private String version = null;
 
-  @JsonProperty("provider")
+  @SerializedName("provider")
   private String provider = null;
 
-  @JsonProperty("lifeCycleStatus")
+  @SerializedName("lifeCycleStatus")
   private String lifeCycleStatus = null;
 
-  @JsonProperty("workflowStatus")
+  @SerializedName("workflowStatus")
   private String workflowStatus = null;
 
-  @JsonProperty("time")
+  @SerializedName("time")
   private String time = null;
 
   public APIInfoDTO id(String id) {

@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
@@ -16,22 +15,22 @@ import java.util.Objects;
  * SubscriptionThrottlePolicyDTO
  */
 public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
-  @JsonProperty("defaultLimit")
+  @SerializedName("defaultLimit")
   private ThrottleLimitDTO defaultLimit = null;
 
-  @JsonProperty("rateLimitCount")
+  @SerializedName("rateLimitCount")
   private Integer rateLimitCount = null;
 
-  @JsonProperty("rateLimitTimeUnit")
+  @SerializedName("rateLimitTimeUnit")
   private String rateLimitTimeUnit = null;
 
-  @JsonProperty("customAttributes")
+  @SerializedName("customAttributes")
   private List<CustomAttributeDTO> customAttributes = new ArrayList<CustomAttributeDTO>();
 
-  @JsonProperty("stopOnQuotaReach")
+  @SerializedName("stopOnQuotaReach")
   private Boolean stopOnQuotaReach = false;
 
-  @JsonProperty("billingPlan")
+  @SerializedName("billingPlan")
   private String billingPlan = null;
 
   public SubscriptionThrottlePolicyDTO defaultLimit(ThrottleLimitDTO defaultLimit) {

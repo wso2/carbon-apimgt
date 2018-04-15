@@ -1,9 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
@@ -18,8 +16,10 @@ public class ApplicationKeyGenerateRequestDTO   {
    * Gets or Sets keyType
    */
   public enum KeyTypeEnum {
+    @SerializedName("PRODUCTION")
     PRODUCTION("PRODUCTION"),
     
+    @SerializedName("SANDBOX")
     SANDBOX("SANDBOX");
 
     private String value;
@@ -29,12 +29,9 @@ public class ApplicationKeyGenerateRequestDTO   {
     }
 
     @Override
-    @JsonValue
     public String toString() {
       return String.valueOf(value);
     }
-
-    @JsonCreator
     public static KeyTypeEnum fromValue(String text) {
       for (KeyTypeEnum b : KeyTypeEnum.values()) {
         if (String.valueOf(b.value).equals(text)) {
@@ -45,13 +42,13 @@ public class ApplicationKeyGenerateRequestDTO   {
     }
   }
 
-  @JsonProperty("keyType")
+  @SerializedName("keyType")
   private KeyTypeEnum keyType = null;
 
-  @JsonProperty("grantTypesToBeSupported")
+  @SerializedName("grantTypesToBeSupported")
   private List<String> grantTypesToBeSupported = new ArrayList<String>();
 
-  @JsonProperty("callbackUrl")
+  @SerializedName("callbackUrl")
   private String callbackUrl = null;
 
   public ApplicationKeyGenerateRequestDTO keyType(KeyTypeEnum keyType) {

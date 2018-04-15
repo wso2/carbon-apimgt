@@ -1,9 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationDTO;
@@ -13,29 +11,35 @@ import java.util.Objects;
  * SubscriptionDTO
  */
 public class SubscriptionDTO   {
-  @JsonProperty("subscriptionId")
+  @SerializedName("subscriptionId")
   private String subscriptionId = null;
 
-  @JsonProperty("applicationInfo")
+  @SerializedName("applicationInfo")
   private ApplicationDTO applicationInfo = null;
 
-  @JsonProperty("policy")
+  @SerializedName("policy")
   private String policy = null;
 
   /**
    * Gets or Sets subscriptionStatus
    */
   public enum SubscriptionStatusEnum {
+    @SerializedName("BLOCKED")
     BLOCKED("BLOCKED"),
     
+    @SerializedName("PROD_ONLY_BLOCKED")
     PROD_ONLY_BLOCKED("PROD_ONLY_BLOCKED"),
     
+    @SerializedName("SANDBOX_ONLY_BLOCKED")
     SANDBOX_ONLY_BLOCKED("SANDBOX_ONLY_BLOCKED"),
     
+    @SerializedName("ACTIVE")
     ACTIVE("ACTIVE"),
     
+    @SerializedName("ON_HOLD")
     ON_HOLD("ON_HOLD"),
     
+    @SerializedName("REJECTED")
     REJECTED("REJECTED");
 
     private String value;
@@ -45,12 +49,9 @@ public class SubscriptionDTO   {
     }
 
     @Override
-    @JsonValue
     public String toString() {
       return String.valueOf(value);
     }
-
-    @JsonCreator
     public static SubscriptionStatusEnum fromValue(String text) {
       for (SubscriptionStatusEnum b : SubscriptionStatusEnum.values()) {
         if (String.valueOf(b.value).equals(text)) {
@@ -61,7 +62,7 @@ public class SubscriptionDTO   {
     }
   }
 
-  @JsonProperty("subscriptionStatus")
+  @SerializedName("subscriptionStatus")
   private SubscriptionStatusEnum subscriptionStatus = null;
 
   public SubscriptionDTO subscriptionId(String subscriptionId) {

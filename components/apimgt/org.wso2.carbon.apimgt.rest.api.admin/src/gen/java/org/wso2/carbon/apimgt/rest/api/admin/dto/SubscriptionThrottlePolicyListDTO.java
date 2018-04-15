@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
@@ -14,10 +13,10 @@ import java.util.Objects;
  * SubscriptionThrottlePolicyListDTO
  */
 public class SubscriptionThrottlePolicyListDTO   {
-  @JsonProperty("count")
+  @SerializedName("count")
   private Integer count = null;
 
-  @JsonProperty("list")
+  @SerializedName("list")
   private List<SubscriptionThrottlePolicyDTO> list = new ArrayList<SubscriptionThrottlePolicyDTO>();
 
   public SubscriptionThrottlePolicyListDTO count(Integer count) {

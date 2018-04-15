@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ThrottleLimitDTO;
@@ -13,7 +12,7 @@ import java.util.Objects;
  * ApplicationThrottlePolicyDTO
  */
 public class ApplicationThrottlePolicyDTO extends ThrottlePolicyDTO  {
-  @JsonProperty("defaultLimit")
+  @SerializedName("defaultLimit")
   private ThrottleLimitDTO defaultLimit = null;
 
   public ApplicationThrottlePolicyDTO defaultLimit(ThrottleLimitDTO defaultLimit) {

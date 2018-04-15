@@ -20,6 +20,7 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
 import javax.ws.rs.OPTIONS;
@@ -70,6 +71,9 @@ public class SubscriptionsApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
  ,@Context Request request)
     throws NotFoundException {
+        offset=offset==null?Integer.valueOf("0"):offset;
+        limit=limit==null?Integer.valueOf("25"):limit;
+        
         return delegate.subscriptionsGet(apiId,applicationId,apiType,offset,limit,ifNoneMatch,request);
     }
     @OPTIONS
@@ -93,6 +97,7 @@ public class SubscriptionsApi implements Microservice  {
     public Response subscriptionsPost(@ApiParam(value = "Subscription object that should to be added " ,required=true) SubscriptionDTO body
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.subscriptionsPost(body,request);
     }
     @OPTIONS
@@ -118,6 +123,7 @@ public class SubscriptionsApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.subscriptionsSubscriptionIdDelete(subscriptionId,ifMatch,ifUnmodifiedSince,request);
     }
     @OPTIONS
@@ -141,6 +147,7 @@ public class SubscriptionsApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.subscriptionsSubscriptionIdGet(subscriptionId,ifNoneMatch,ifModifiedSince,request);
     }
 }

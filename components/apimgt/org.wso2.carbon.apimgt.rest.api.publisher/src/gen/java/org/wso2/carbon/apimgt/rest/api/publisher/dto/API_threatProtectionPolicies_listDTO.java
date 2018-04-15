@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
@@ -11,10 +10,10 @@ import java.util.Objects;
  * API_threatProtectionPolicies_listDTO
  */
 public class API_threatProtectionPolicies_listDTO   {
-  @JsonProperty("policyId")
+  @SerializedName("policyId")
   private String policyId = null;
 
-  @JsonProperty("priority")
+  @SerializedName("priority")
   private Integer priority = null;
 
   public API_threatProtectionPolicies_listDTO policyId(String policyId) {

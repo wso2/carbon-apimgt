@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
@@ -11,16 +10,16 @@ import java.util.Objects;
  * RatingDTO
  */
 public class RatingDTO   {
-  @JsonProperty("ratingId")
+  @SerializedName("ratingId")
   private String ratingId = null;
 
-  @JsonProperty("apiId")
+  @SerializedName("apiId")
   private String apiId = null;
 
-  @JsonProperty("username")
+  @SerializedName("username")
   private String username = null;
 
-  @JsonProperty("rating")
+  @SerializedName("rating")
   private Integer rating = null;
 
   public RatingDTO ratingId(String ratingId) {

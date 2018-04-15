@@ -16,35 +16,46 @@
 
 package org.wso2.carbon.apimgt.rest.api.common.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import javax.validation.constraints.NotNull;
+
 /**
  * DTO class for Error
  */
 @ApiModel(description = "")
 public class ErrorDTO {
+    @ApiModelProperty(required = true, value = "")
+    @SerializedName("code")
+    private Long code = null;
 
-    @NotNull private Long code = null;
+    @ApiModelProperty(required = true, value = "Error message.")
+    @SerializedName("message")
+    private String message = null;
 
-    @NotNull private String message = null;
-
+    @ApiModelProperty(value = "A detail description about the error message.")
+    @SerializedName("description")
     private String description = null;
 
-    private  Map<String, String>   paramList = null;
+    @ApiModelProperty(value = "Preferably an url with more details about the error.")
+    @SerializedName("moreInfo")
+    private Map<String, String> paramList = null;
 
+    @ApiModelProperty(value = "If there are more than one error list them out. Ex. list out validation errors "
+            + "by each field.")
+    @SerializedName("error")
     private List<ErrorListItemDTO> error = new ArrayList<ErrorListItemDTO>();
 
     /**
      * Method to get the error code
-     * @return  error code.
+     *
+     * @return error code.
      **/
-    @ApiModelProperty(required = true, value = "") @JsonProperty("code") public Long getCode() {
+    public Long getCode() {
         return code;
     }
 
@@ -54,9 +65,9 @@ public class ErrorDTO {
 
     /**
      * Method th get the error message.
+     *
      * @return error message.
      */
-    @ApiModelProperty(required = true, value = "Error message.") @JsonProperty("message")
     public String getMessage() {
         return message;
     }
@@ -67,9 +78,10 @@ public class ErrorDTO {
 
     /**
      * A detail description about the error message.
+     *
      * @return error description.
      */
-    @ApiModelProperty(value = "A detail description about the error message.") @JsonProperty("description")
+
     public String getDescription() {
         return description;
     }
@@ -80,9 +92,10 @@ public class ErrorDTO {
 
     /**
      * Preferably an url with more details about the error.
-     * @return  map of parameters specific to the error.
+     *
+     * @return map of parameters specific to the error.
      */
-    @ApiModelProperty(value = "Preferably an url with more details about the error.") @JsonProperty("moreInfo")
+
     public Map<String, String> getMoreInfo() {
         return paramList;
     }
@@ -93,12 +106,9 @@ public class ErrorDTO {
 
     /**
      * If there are more than one error list them out. Ex. list out validation errors by each field.
+     *
      * @return {@code List<ErrorListItemDTO>}   List of error objects.
      */
-    @ApiModelProperty(value = "If there are more than one error list them out. Ex. list out validation errors "
-            + "by each field.")
-    @JsonProperty("error")
-
     public List<ErrorListItemDTO> getError() {
         return error;
     }
@@ -107,7 +117,8 @@ public class ErrorDTO {
         this.error = error;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("class ErrorDTO {\n");
 

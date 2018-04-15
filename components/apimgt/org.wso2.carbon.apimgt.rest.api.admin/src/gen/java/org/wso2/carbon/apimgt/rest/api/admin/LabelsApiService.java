@@ -20,16 +20,18 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 public abstract class LabelsApiService {
-    public abstract Response labelsGet(String labelId
- ,String accept
- , Request request) throws NotFoundException;
+    public abstract Response labelsGet( Request request) throws NotFoundException;
     public abstract Response labelsLabelIdDelete(String labelId
- , Request request) throws NotFoundException;
+ ,String ifMatch
+ ,String ifUnmodifiedSince
+  ,Request request) throws NotFoundException;
+    public abstract Response labelsLabelIdGet(String labelId
+ ,String ifNoneMatch
+ ,String ifModifiedSince
+  ,Request request) throws NotFoundException;
     public abstract Response labelsLabelIdPut(String labelId
  ,LabelDTO body
- ,String contentType
- , Request request) throws NotFoundException;
+  ,Request request) throws NotFoundException;
     public abstract Response labelsPost(LabelDTO body
- ,String contentType
- , Request request) throws NotFoundException;
+  ,Request request) throws NotFoundException;
 }

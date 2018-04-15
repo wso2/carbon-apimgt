@@ -1,9 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
@@ -12,36 +10,41 @@ import java.util.Objects;
  * SubscriptionDTO
  */
 public class SubscriptionDTO   {
-  @JsonProperty("subscriptionId")
+  @SerializedName("subscriptionId")
   private String subscriptionId = null;
 
-  @JsonProperty("applicationId")
+  @SerializedName("applicationId")
   private String applicationId = null;
 
-  @JsonProperty("apiIdentifier")
+  @SerializedName("apiIdentifier")
   private String apiIdentifier = null;
 
-  @JsonProperty("apiName")
+  @SerializedName("apiName")
   private String apiName = null;
 
-  @JsonProperty("apiVersion")
+  @SerializedName("apiVersion")
   private String apiVersion = null;
 
-  @JsonProperty("policy")
+  @SerializedName("policy")
   private String policy = null;
 
   /**
    * Gets or Sets lifeCycleStatus
    */
   public enum LifeCycleStatusEnum {
+    @SerializedName("BLOCKED")
     BLOCKED("BLOCKED"),
     
+    @SerializedName("PROD_ONLY_BLOCKED")
     PROD_ONLY_BLOCKED("PROD_ONLY_BLOCKED"),
     
+    @SerializedName("ACTIVE")
     ACTIVE("ACTIVE"),
     
+    @SerializedName("ON_HOLD")
     ON_HOLD("ON_HOLD"),
     
+    @SerializedName("REJECTED")
     REJECTED("REJECTED");
 
     private String value;
@@ -51,12 +54,9 @@ public class SubscriptionDTO   {
     }
 
     @Override
-    @JsonValue
     public String toString() {
       return String.valueOf(value);
     }
-
-    @JsonCreator
     public static LifeCycleStatusEnum fromValue(String text) {
       for (LifeCycleStatusEnum b : LifeCycleStatusEnum.values()) {
         if (String.valueOf(b.value).equals(text)) {
@@ -67,7 +67,7 @@ public class SubscriptionDTO   {
     }
   }
 
-  @JsonProperty("lifeCycleStatus")
+  @SerializedName("lifeCycleStatus")
   private LifeCycleStatusEnum lifeCycleStatus = null;
 
   public SubscriptionDTO subscriptionId(String subscriptionId) {

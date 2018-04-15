@@ -26,6 +26,7 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
 import javax.ws.rs.OPTIONS;
@@ -75,6 +76,7 @@ public class ApplicationsApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.applicationsApplicationIdDelete(applicationId,ifMatch,ifUnmodifiedSince,request);
     }
     @OPTIONS
@@ -99,6 +101,7 @@ public class ApplicationsApi implements Microservice  {
 ,@ApiParam(value = "Application key generation request object " ,required=true) ApplicationKeyGenerateRequestDTO body
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.applicationsApplicationIdGenerateKeysPost(applicationId,body,request);
     }
     @OPTIONS
@@ -125,6 +128,7 @@ public class ApplicationsApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.applicationsApplicationIdGenerateTokenPost(applicationId,body,ifMatch,ifUnmodifiedSince,request);
     }
     @OPTIONS
@@ -150,6 +154,7 @@ public class ApplicationsApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.applicationsApplicationIdGet(applicationId,ifNoneMatch,ifModifiedSince,request);
     }
     @OPTIONS
@@ -173,6 +178,7 @@ public class ApplicationsApi implements Microservice  {
     public Response applicationsApplicationIdKeysGet(@ApiParam(value = "**Application Identifier** consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.applicationsApplicationIdKeysGet(applicationId,request);
     }
     @OPTIONS
@@ -197,6 +203,7 @@ public class ApplicationsApi implements Microservice  {
 ,@ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.applicationsApplicationIdKeysKeyTypeGet(applicationId,keyType,request);
     }
     @OPTIONS
@@ -222,6 +229,7 @@ public class ApplicationsApi implements Microservice  {
 ,@ApiParam(value = "Grant types/Callback URL update request object " ,required=true) ApplicationKeysDTO body
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.applicationsApplicationIdKeysKeyTypePut(applicationId,keyType,body,request);
     }
     @OPTIONS
@@ -246,6 +254,7 @@ public class ApplicationsApi implements Microservice  {
 ,@ApiParam(value = "Application key mapping request object " ,required=true) ApplicationKeyMappingRequestDTO body
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.applicationsApplicationIdMapKeysPost(applicationId,body,request);
     }
     @OPTIONS
@@ -272,6 +281,7 @@ public class ApplicationsApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.applicationsApplicationIdPut(applicationId,body,ifMatch,ifUnmodifiedSince,request);
     }
     @OPTIONS
@@ -298,6 +308,9 @@ public class ApplicationsApi implements Microservice  {
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
  ,@Context Request request)
     throws NotFoundException {
+        limit=limit==null?Integer.valueOf("25"):limit;
+        offset=offset==null?Integer.valueOf("0"):offset;
+        
         return delegate.applicationsGet(query,limit,offset,ifNoneMatch,request);
     }
     @OPTIONS
@@ -323,6 +336,7 @@ public class ApplicationsApi implements Microservice  {
     public Response applicationsPost(@ApiParam(value = "Application object that is to be created. " ,required=true) ApplicationDTO body
  ,@Context Request request)
     throws NotFoundException {
+        
         return delegate.applicationsPost(body,request);
     }
 }

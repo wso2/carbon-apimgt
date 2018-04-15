@@ -1,44 +1,25 @@
 package org.wso2.carbon.apimgt.rest.api.publisher;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.*;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
-
-import org.wso2.msf4j.formparam.FormDataParam;
-import org.wso2.msf4j.formparam.FileInfo;
-import org.wso2.msf4j.Request;
-
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDefinitionValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DedicatedGatewayDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorDTO;
-import java.io.File;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.LifecycleStateDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ScopeDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.ScopeListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.WorkflowResponseDTO;
-
-import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
+import org.wso2.msf4j.Request;
+import org.wso2.msf4j.formparam.FileInfo;
 
 import java.io.InputStream;
-
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
 public abstract class ApisApiService {
     public abstract Response apisApiIdDedicatedGatewayGet(String apiId
  ,String ifNoneMatch
  ,String ifModifiedSince
- , Request request) throws NotFoundException;
+  ,Request request) throws NotFoundException;
     public abstract Response apisApiIdDedicatedGatewayPut(String apiId
  ,DedicatedGatewayDTO body
  ,String ifMatch
  ,String ifUnmodifiedSince
- , Request request) throws NotFoundException;
+  ,Request request) throws NotFoundException;
     public abstract Response apisApiIdDelete(String apiId
  ,String ifMatch
  ,String ifUnmodifiedSince

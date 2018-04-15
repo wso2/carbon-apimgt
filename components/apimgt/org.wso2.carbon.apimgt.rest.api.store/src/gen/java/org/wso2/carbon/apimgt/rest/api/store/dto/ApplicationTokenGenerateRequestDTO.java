@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
@@ -11,19 +10,19 @@ import java.util.Objects;
  * ApplicationTokenGenerateRequestDTO
  */
 public class ApplicationTokenGenerateRequestDTO   {
-  @JsonProperty("consumerKey")
+  @SerializedName("consumerKey")
   private String consumerKey = null;
 
-  @JsonProperty("consumerSecret")
+  @SerializedName("consumerSecret")
   private String consumerSecret = null;
 
-  @JsonProperty("validityPeriod")
+  @SerializedName("validityPeriod")
   private Integer validityPeriod = null;
 
-  @JsonProperty("scopes")
+  @SerializedName("scopes")
   private String scopes = null;
 
-  @JsonProperty("revokeToken")
+  @SerializedName("revokeToken")
   private String revokeToken = null;
 
   public ApplicationTokenGenerateRequestDTO consumerKey(String consumerKey) {

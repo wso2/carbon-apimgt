@@ -19,6 +19,7 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
 import javax.ws.rs.OPTIONS;
@@ -50,25 +51,32 @@ public class LabelsApi implements Microservice  {
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Get all registered Labels", notes = "Get all registered Labels ", response = LabelListDTO.class, tags={ "Label Collection", })
+    @io.swagger.annotations.ApiOperation(value = "Get all registered Labels", notes = "Get all registered Labels ", response = LabelListDTO.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:label_manage", description = "Label manage")
+        })
+    }, tags={ "Label Collection", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Labels returned ", response = LabelListDTO.class),
         
         @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource. ", response = LabelListDTO.class),
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported. ", response = LabelListDTO.class) })
-    public Response labelsGet(@ApiParam(value = "id of the label. ") @QueryParam("labelId") String labelId
-,@ApiParam(value = "Media types acceptable for the response. Default is JSON. " , defaultValue="JSON")@HeaderParam("Accept") String accept
-, @Context Request request)
+    public Response labelsGet( @Context Request request)
     throws NotFoundException {
-        return delegate.labelsGet(labelId,accept, request);
+        
+        return delegate.labelsGet(request);
     }
     @OPTIONS
     @DELETE
     @Path("/{labelId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Delete a Label", notes = "Delete a Label by label Id ", response = void.class, tags={ "Label", })
+    @io.swagger.annotations.ApiOperation(value = "Delete a Label", notes = "Delete a Label by label Id ", response = void.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:label_manage", description = "Label manage")
+        })
+    }, tags={ "Label", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Label successfully deleted. ", response = void.class),
         
@@ -76,15 +84,49 @@ public class LabelsApi implements Microservice  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = void.class) })
     public Response labelsLabelIdDelete(@ApiParam(value = "Label identifier ",required=true) @PathParam("labelId") String labelId
-, @Context Request request)
+,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
+,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.labelsLabelIdDelete(labelId, request);
+        
+        return delegate.labelsLabelIdDelete(labelId,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
+    @GET
+    @Path("/{labelId}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Retrieve a Label", notes = "Retrieve a Label for labelId ", response = LabelDTO.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:label_view", description = "Label view")
+        })
+    }, tags={ "Label", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Label returned ", response = LabelDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource. ", response = LabelDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Requested Label does not exist. ", response = LabelDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported. ", response = LabelDTO.class) })
+    public Response labelsLabelIdGet(@ApiParam(value = "Label identifier ",required=true) @PathParam("labelId") String labelId
+,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
+,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
+ ,@Context Request request)
+    throws NotFoundException {
+        
+        return delegate.labelsLabelIdGet(labelId,ifNoneMatch,ifModifiedSince,request);
+    }
+    @OPTIONS
     @PUT
     @Path("/{labelId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Update a Label", notes = "Update a Label by label Id ", response = LabelDTO.class, tags={ "Label", })
+    @io.swagger.annotations.ApiOperation(value = "Update a Label", notes = "Update a Label by label Id ", response = LabelDTO.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:label_manage", description = "Label manage")
+        })
+    }, tags={ "Label", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Label updated. ", response = LabelDTO.class),
         
@@ -95,17 +137,21 @@ public class LabelsApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = LabelDTO.class) })
     public Response labelsLabelIdPut(@ApiParam(value = "Label identifier ",required=true) @PathParam("labelId") String labelId
 ,@ApiParam(value = "Label object with updated information " ,required=true) LabelDTO body
-,@ApiParam(value = "Media type of the entity in the body. Default is JSON. " ,required=true, defaultValue="JSON")@HeaderParam("Content-Type") String contentType
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.labelsLabelIdPut(labelId,body,contentType, request);
+        
+        return delegate.labelsLabelIdPut(labelId,body,request);
     }
     @OPTIONS
     @POST
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Add a Label", notes = "Add a new gateway/store Label ", response = LabelDTO.class, tags={ "Label Collection", })
+    @io.swagger.annotations.ApiOperation(value = "Add a Label", notes = "Add a new gateway/store Label ", response = LabelDTO.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:label_manage", description = "Label manage")
+        })
+    }, tags={ "Label Collection", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = LabelDTO.class),
         
@@ -113,9 +159,9 @@ public class LabelsApi implements Microservice  {
         
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type. The entity of the request was in a not supported format. ", response = LabelDTO.class) })
     public Response labelsPost(@ApiParam(value = "Label object that should to be added " ,required=true) LabelDTO body
-,@ApiParam(value = "Media type of the entity in the body. Default is JSON. " ,required=true, defaultValue="JSON")@HeaderParam("Content-Type") String contentType
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.labelsPost(body,contentType, request);
+        
+        return delegate.labelsPost(body,request);
     }
 }

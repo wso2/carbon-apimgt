@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
@@ -11,10 +10,10 @@ import java.util.Objects;
  * BandwidthLimitDTO
  */
 public class BandwidthLimitDTO   {
-  @JsonProperty("dataAmount")
+  @SerializedName("dataAmount")
   private Integer dataAmount = 0;
 
-  @JsonProperty("dataUnit")
+  @SerializedName("dataUnit")
   private String dataUnit = null;
 
   public BandwidthLimitDTO dataAmount(Integer dataAmount) {

@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.core.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.wso2.carbon.apimgt.rest.api.core.dto.LabelInfoDTO;
@@ -12,7 +11,7 @@ import java.util.Objects;
  * RegistrationDTO
  */
 public class RegistrationDTO   {
-  @JsonProperty("labelInfo")
+  @SerializedName("labelInfo")
   private LabelInfoDTO labelInfo = null;
 
   public RegistrationDTO labelInfo(LabelInfoDTO labelInfo) {

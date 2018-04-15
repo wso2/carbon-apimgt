@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
@@ -18,28 +17,28 @@ import java.util.Objects;
  * LifecycleStateDTO
  */
 public class LifecycleStateDTO   {
-  @JsonProperty("lcName")
+  @SerializedName("lcName")
   private String lcName = null;
 
-  @JsonProperty("state")
+  @SerializedName("state")
   private String state = null;
 
-  @JsonProperty("lifecyelId")
+  @SerializedName("lifecyelId")
   private String lifecyelId = null;
 
-  @JsonProperty("checkItemBeanList")
+  @SerializedName("checkItemBeanList")
   private List<LifecycleState_checkItemBeanListDTO> checkItemBeanList = new ArrayList<LifecycleState_checkItemBeanListDTO>();
 
-  @JsonProperty("inputBeanList")
+  @SerializedName("inputBeanList")
   private List<LifecycleState_inputBeanListDTO> inputBeanList = new ArrayList<LifecycleState_inputBeanListDTO>();
 
-  @JsonProperty("customCodeBeanList")
+  @SerializedName("customCodeBeanList")
   private List<LifecycleState_validationBeansDTO> customCodeBeanList = new ArrayList<LifecycleState_validationBeansDTO>();
 
-  @JsonProperty("availableTransitionBeanList")
+  @SerializedName("availableTransitionBeanList")
   private List<LifecycleState_availableTransitionBeanListDTO> availableTransitionBeanList = new ArrayList<LifecycleState_availableTransitionBeanListDTO>();
 
-  @JsonProperty("permissionBeanList")
+  @SerializedName("permissionBeanList")
   private List<LifecycleState_permissionBeansDTO> permissionBeanList = new ArrayList<LifecycleState_permissionBeansDTO>();
 
   public LifecycleStateDTO lcName(String lcName) {

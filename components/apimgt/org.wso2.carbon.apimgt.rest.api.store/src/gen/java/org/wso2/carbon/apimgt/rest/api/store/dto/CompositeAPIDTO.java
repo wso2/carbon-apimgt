@@ -1,9 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
@@ -14,7 +12,7 @@ import java.util.Objects;
  * CompositeAPIDTO
  */
 public class CompositeAPIDTO extends BaseAPIDTO  {
-  @JsonProperty("applicationId")
+  @SerializedName("applicationId")
   private String applicationId = null;
 
   public CompositeAPIDTO applicationId(String applicationId) {

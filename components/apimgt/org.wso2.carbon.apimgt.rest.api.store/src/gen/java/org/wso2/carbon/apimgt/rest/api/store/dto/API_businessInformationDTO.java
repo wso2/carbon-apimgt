@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
@@ -11,16 +10,16 @@ import java.util.Objects;
  * API_businessInformationDTO
  */
 public class API_businessInformationDTO   {
-  @JsonProperty("businessOwner")
+  @SerializedName("businessOwner")
   private String businessOwner = null;
 
-  @JsonProperty("businessOwnerEmail")
+  @SerializedName("businessOwnerEmail")
   private String businessOwnerEmail = null;
 
-  @JsonProperty("technicalOwner")
+  @SerializedName("technicalOwner")
   private String technicalOwner = null;
 
-  @JsonProperty("technicalOwnerEmail")
+  @SerializedName("technicalOwnerEmail")
   private String technicalOwnerEmail = null;
 
   public API_businessInformationDTO businessOwner(String businessOwner) {
