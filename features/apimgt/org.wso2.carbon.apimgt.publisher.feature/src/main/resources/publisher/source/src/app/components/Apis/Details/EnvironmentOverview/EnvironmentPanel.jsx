@@ -88,8 +88,7 @@ class EnvironmentPanel extends Component {
             <ExpansionPanel defaultExpanded>
                 <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                     <Typography variant='title' gutterBottom>
-                        {' '}
-                        {`${environment.label} Environment`}{' '}
+                        {`${environment.label} Environment`}
                     </Typography>
                 </ExpansionPanelSummary>
 

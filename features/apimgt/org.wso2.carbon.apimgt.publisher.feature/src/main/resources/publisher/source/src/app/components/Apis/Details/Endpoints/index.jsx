@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Grid, Card, CardContent } from 'material-ui';
+import { Grid, Paper, Typography, Divider } from 'material-ui';
 import PropTypes from 'prop-types';
 
 import GenericEndpointInputs from './GenericEndpointInputs';
@@ -22,7 +22,7 @@ class Endpoint extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            endpoints: {},
+            endpointsMap: new Map(),
             productionEndpoint: {},
             sandboxEndpoint: {},
             notFound: false,
@@ -31,7 +31,6 @@ class Endpoint extends Component {
         this.handleProductionInputs = this.handleProductionInputs.bind(this);
         this.handleSandboxInputs = this.handleSandboxInputs.bind(this);
         this.updateEndpoints = this.updateEndpoints.bind(this);
-        this.dropdownItems = null;
     }
 
     /**
@@ -48,16 +47,13 @@ class Endpoint extends Component {
 
         const setSelectedEp = Promise.all([promisedEndpoints, promisedAPI]);
         setSelectedEp
-            .then((response) => {
-                const epMap = {};
-                this.dropdownItems = [<option key='custom'>Custom...</option>];
-                for (const ep of JSON.parse(response[0].data).list) {
-                    epMap[ep.id] = ep;
-                    // construct dropdown
-                    this.dropdownItems.push(<option key={ep.id}>{ep.name}</option>);
+            .then((responses) => {
+                const epMap = new Map();
+                for (const ep of responses[0].body.list) {
+                    epMap.set(ep.id, ep);
                 }
 
-                this.setState({ endpoints: epMap });
+                this.setState({ endpointsMap: epMap });
 
                 let defaultProdEP = null;
                 let defaultSandboxEP = null;
@@ -66,7 +62,7 @@ class Endpoint extends Component {
                 let isGlobalEPSelectedSand = false;
                 let isGlobalEPSelectedProd = false;
 
-                const endpointInAPI = JSON.parse(response[1].data).endpoint;
+                const endpointInAPI = responses[1].body.endpoint;
                 for (const i in endpointInAPI) {
                     if (endpointInAPI[i].inline !== undefined) {
                         const endpointElement = endpointInAPI[i].inline.endpointConfig;
@@ -91,24 +87,24 @@ class Endpoint extends Component {
                 }
 
                 this.setState({
-                    api: response[1].data,
+                    api: responses[1].data,
                     productionEndpoint: {
                         url: defaultProdEP,
                         username: '',
-                        selectedep: selectedProdEP,
+                        selectedEP: selectedProdEP,
                         isGlobalEPSelected: isGlobalEPSelectedProd,
                     },
                     sandboxEndpoint: {
                         url: defaultSandboxEP,
                         username: '',
-                        selectedep: selectedSandboxEP,
+                        selectedEP: selectedSandboxEP,
                         isGlobalEPSelected: isGlobalEPSelectedSand,
                     },
                 });
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
+                    console.error(error);
                 }
                 const { status } = error;
                 if (status === 404) {
@@ -203,7 +199,8 @@ class Endpoint extends Component {
      * @memberof Endpoint
      */
     render() {
-        const { api } = this.state;
+        const { api, endpointsMap } = this.state;
+        const { match } = this.props;
 
         if (this.state.notFound) {
             return <ResourceNotFound message={this.props.resourceNotFountMessage} />;
@@ -213,53 +210,45 @@ class Endpoint extends Component {
         }
 
         return (
-            <div>
-                <Card>
-                    <CardContent>
-                        <Grid container spacing={16} justify='center'>
-                            <Grid item md={5} title='Production Endpoint'>
-                                <GenericEndpointInputs
-                                    handleInputs={this.handleProductionInputs}
-                                    epList={this.state.endpoints}
-                                    endpoint={this.state.productionEndpoint}
-                                    dropdownItems={this.dropdownItems}
-                                    match={this.props.match}
-                                />
-                            </Grid>
-                            <Grid item md={5} title='Sandbox Endpoint'>
-                                <GenericEndpointInputs
-                                    handleInputs={this.handleSandboxInputs}
-                                    epList={this.state.endpoints}
-                                    dropdownItems={this.dropdownItems}
-                                    endpoint={this.state.sandboxEndpoint}
-                                    match={this.props.match}
-                                />
-                            </Grid>
-                        </Grid>
-                        <Grid container justify='flex-end'>
-                            <Grid item md={4}>
-                                {/* Allowing create endpoints based on scopes */}
-                                <ScopeValidation
-                                    resourcePath={resourcePath.ENDPOINTS}
-                                    resourceMethod={resourceMethod.POST}
-                                >
-                                    <ApiPermissionValidation
-                                        userPermissions={JSON.parse(this.state.api).userPermissionsForApi}
-                                    >
-                                        <InteractiveButton
-                                            variant='raised'
-                                            color='primary'
-                                            onClick={this.updateEndpoints}
-                                        >
-                                            Save
-                                        </InteractiveButton>
-                                    </ApiPermissionValidation>
-                                </ScopeValidation>
-                            </Grid>
-                        </Grid>
-                    </CardContent>
-                </Card>
-            </div>
+            <Paper>
+                <Grid container spacing={16} justify='center'>
+                    <Grid item md={6}>
+                        <Typography variant='subheading' gutterBottom>
+                            Production Endpoint
+                        </Typography>
+                        <GenericEndpointInputs
+                            endpointsMap={endpointsMap}
+                            match={match}
+                            endpoint={this.state.productionEndpoint}
+                            handleInputs={this.handleProductionInputs}
+                        />
+                    </Grid>
+                    <Grid item md={6}>
+                        <Typography variant='subheading' gutterBottom>
+                            Sandbox Endpoint
+                        </Typography>
+                        <GenericEndpointInputs
+                            endpointsMap={endpointsMap}
+                            match={match}
+                            endpoint={this.state.sandboxEndpoint}
+                            handleInputs={this.handleSandboxInputs}
+                        />
+                    </Grid>
+                </Grid>
+                <Divider />
+                <Grid container justify='flex-end'>
+                    <Grid item md={5}>
+                        {/* Allowing create endpoints based on scopes */}
+                        <ScopeValidation resourcePath={resourcePath.ENDPOINTS} resourceMethod={resourceMethod.POST}>
+                            <ApiPermissionValidation userPermissions={JSON.parse(this.state.api).userPermissionsForApi}>
+                                <InteractiveButton variant='raised' color='primary' onClick={this.updateEndpoints}>
+                                    Save
+                                </InteractiveButton>
+                            </ApiPermissionValidation>
+                        </ScopeValidation>
+                    </Grid>
+                </Grid>
+            </Paper>
         );
     }
 }

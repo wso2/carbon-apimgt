@@ -87,8 +87,17 @@ const styles = theme => ({
         marginTop: 40,
     },
 });
-
+/**
+ * Endpoint create form
+ * @class EndpointCreate
+ * @extends {Component}
+ */
 class EndpointCreate extends Component {
+    /**
+     * Creates an instance of EndpointCreate.
+     * @param {any} props @inheritDoc
+     * @memberof EndpointCreate
+     */
     constructor(props) {
         super(props);
         this.state = {
@@ -141,6 +150,11 @@ class EndpointCreate extends Component {
             });
     }
 
+    /**
+     * @inheritDoc
+     * @returns {React.Component} return component
+     * @memberof EndpointCreate
+     */
     render() {
         const { classes } = this.props;
         return (

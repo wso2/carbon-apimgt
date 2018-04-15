@@ -27,7 +27,7 @@ const NotFound = (props) => {
                     <i className='icon fw fw-error' />404 Page Not Found!
                 </h4>
                 <p>
-                    Sorry the page you are looking for{' '}
+                    Sorry the page you are looking for
                     <span style={{ color: 'green' }}> {props.location.pathname} </span>
                     is not available.
                 </p>

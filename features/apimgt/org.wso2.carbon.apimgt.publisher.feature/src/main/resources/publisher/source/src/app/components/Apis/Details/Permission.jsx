@@ -486,7 +486,7 @@ class Permission extends Component {
                                                     checked={this.state.readField}
                                                     onChange={this.handleChangeReadField}
                                                 >
-                                                    Read{' '}
+                                                    Read
                                                 </Checkbox>
                                             </Col>
                                             <Col span={2} style={{ margin: '10px' }}>
@@ -496,7 +496,7 @@ class Permission extends Component {
                                                     checked={this.state.updateField}
                                                     onChange={this.handleChangeUpdateField}
                                                 >
-                                                    Update{' '}
+                                                    Update
                                                 </Checkbox>
                                             </Col>
                                             <Col span={2} style={{ margin: '10px' }}>
@@ -506,7 +506,7 @@ class Permission extends Component {
                                                     checked={this.state.deleteField}
                                                     onChange={this.handleChangeDeleteField}
                                                 >
-                                                    Delete{' '}
+                                                    Delete
                                                 </Checkbox>
                                             </Col>
                                             <Col span={5} style={{ margin: '10px' }}>
@@ -516,7 +516,7 @@ class Permission extends Component {
                                                     checked={this.state.manageSubField}
                                                     onChange={this.handleChangeManageSubField}
                                                 >
-                                                    Manage Subscriptions{' '}
+                                                    Manage Subscriptions
                                                 </Checkbox>
                                             </Col>
                                             <Col span={1} style={{ margin: '10px' }}>
@@ -524,8 +524,7 @@ class Permission extends Component {
                                                     name='add'
                                                     onClick={this.handleAddRole.bind(this, permissionData)}
                                                 >
-                                                    {' '}
-                                                    Add{' '}
+                                                    Add
                                                 </Button>
                                             </Col>
                                         </Row>

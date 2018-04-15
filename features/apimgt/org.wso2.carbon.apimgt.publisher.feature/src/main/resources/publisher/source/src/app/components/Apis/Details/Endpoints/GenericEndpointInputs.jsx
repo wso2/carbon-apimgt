@@ -1,9 +1,22 @@
 import React, { Component } from 'react';
-import { Input, Col, Row, Select } from 'antd';
+import PropTypes from 'prop-types';
+import { Grid } from 'material-ui';
+import Input, { InputLabel } from 'material-ui/Input';
+import { FormControl, FormHelperText } from 'material-ui/Form';
+import Select from 'material-ui/Select';
 
-const Option = Select.Option;
-
+/**
+ * Define common Endpoint definition form to be used both in API details and global endpoint creation.
+ * @export
+ * @class GenericEndpointInputs
+ * @extends {Component}
+ */
 export default class GenericEndpointInputs extends Component {
+    /**
+     * Creates an instance of GenericEndpointInputs.
+     * @param {any} props @inheritDoc
+     * @memberof GenericEndpointInputs
+     */
     constructor(props) {
         super(props);
         this.handleEndpointType = this.handleEndpointType.bind(this);
@@ -12,20 +25,12 @@ export default class GenericEndpointInputs extends Component {
         this.state = { url: this.props.endpoint.url };
     }
 
-    handleEndpointType(type) {
-        this.setState({ endpointType: type });
-    }
-
     handleSecurityType(type) {
         let isSecured = false;
         if (type !== 'nonsecured') {
             isSecured = true;
         }
         this.setState({ isSecured });
-    }
-
-    populateDropdown() {
-        return this.props.dropdownItems;
     }
 
     handleEndpointType(endpointUUID) {
@@ -38,8 +43,8 @@ export default class GenericEndpointInputs extends Component {
             },
         };
 
-        if (endpointUUID != 'custom') {
-            ep = JSON.parse(this.props.epList[endpointUUID].endpointConfig).serviceUrl;
+        if (endpointUUID !== 'custom') {
+            ep = JSON.parse(this.props.endpointsMap.get(endpointUUID).endpointConfig).serviceUrl;
             isGlobalEPSelected = true;
         } else {
             // custom
@@ -49,44 +54,49 @@ export default class GenericEndpointInputs extends Component {
         this.setState({ url: ep, isGlobalEPSelected });
     }
 
+    /**
+     * @inheritDoc
+     * @returns {React.Component} Common endpoint component
+     * @memberof GenericEndpointInputs
+     */
     render() {
+        const { endpoint, endpointsMap } = this.props;
         return (
-            <div>
-                <Row style={{ marginTop: '10px' }}>
-                    <Col span={6} offset={2}>
-                        Select Defined Endpoint
-                    </Col>
-                    <Col span={10}>
+            <Grid container>
+                <Grid item>
+                    <FormControl error>
+                        <InputLabel htmlFor='endpoint-select'>Endpoint</InputLabel>
                         <Select
-                            style={{ width: '60%' }}
-                            defaultValue={this.props.endpoint.selectedep || 'Custom...'}
+                            native
+                            value={endpoint.selectedEP || 'Custom...'}
                             onChange={this.handleEndpointType}
+                            input={<Input id='endpoint-select' />}
                         >
-                            {this.populateDropdown()}
+                            <option value='in-line'>In-Line</option>
+                            <optgroup label='Global'>
+                                {[...endpointsMap].map(ep => <option key={ep.id}>{ep.name}</option>)}
+                            </optgroup>
                         </Select>
-                    </Col>
-                </Row>
-                <Row style={{ marginTop: '10px' }}>
-                    <Col span={6} offset={2}>
-                        Endpoint URL{' '}
-                    </Col>
-                    <Col span={10}>
+                        <FormHelperText>Global or In-line</FormHelperText>
+                    </FormControl>
+                </Grid>
+                <Grid>
+                    <Grid>Endpoint URL</Grid>
+                    <Grid>
                         <Input
-                            disabled={this.props.endpoint.isGlobalEPSelected || this.state.isGlobalEPSelected}
-                            value={this.props.endpoint.url || this.state.url}
+                            disabled={endpoint.isGlobalEPSelected || this.state.isGlobalEPSelected}
+                            value={endpoint.url || this.state.url}
                             name='url'
                             onChange={this.props.handleInputs}
                             placeholder='https://sample.wso2.org/api/endpoint'
                         />
-                    </Col>
-                </Row>
-                <Row style={{ marginTop: '10px' }}>
-                    <Col span={6} offset={2}>
-                        Security Scheme{' '}
-                    </Col>
-                    <Col span={15}>
+                    </Grid>
+                </Grid>
+                <Grid>
+                    <Grid>Security Scheme</Grid>
+                    <Grid>
                         <Select
-                            disabled={this.props.endpoint.isGlobalEPSelected || this.state.isGlobalEPSelected}
+                            disabled={endpoint.isGlobalEPSelected || this.state.isGlobalEPSelected}
                             name='security'
                             onChange={this.handleSecurityType}
                             defaultValue='None Secured'
@@ -96,32 +106,38 @@ export default class GenericEndpointInputs extends Component {
                             <Option value='basic'>Basic Auth</Option>
                             <Option value='digest'>Digest Auth</Option>
                         </Select>
-                    </Col>
-                </Row>
+                    </Grid>
+                </Grid>
                 <div hidden={!this.state.isSecured}>
-                    <Row style={{ marginTop: '10px' }}>
-                        <Col span={6} offset={2}>
-                            Username{' '}
-                        </Col>
-                        <Col span={10}>
+                    <Grid>
+                        <Grid>Username</Grid>
+                        <Grid>
                             <Input
                                 name='username'
-                                defaultValue={this.props.endpoint.username}
+                                defaultValue={endpoint.username}
                                 onChange={this.props.handleInputs}
                                 placeholder='Enter Username'
                             />
-                        </Col>
-                    </Row>
-                    <Row style={{ marginTop: '10px' }}>
-                        <Col span={6} offset={2}>
-                            Password{' '}
-                        </Col>
-                        <Col span={10}>
+                        </Grid>
+                    </Grid>
+                    <Grid>
+                        <Grid>Password</Grid>
+                        <Grid>
                             <Input name='password' onChange={this.handleTextInputs} placeholder='Basic usage' />
-                        </Col>
-                    </Row>
+                        </Grid>
+                    </Grid>
                 </div>
-            </div>
+            </Grid>
         );
     }
 }
+
+GenericEndpointInputs.propTypes = {
+    endpoint: PropTypes.shape({
+        url: PropTypes.string,
+        username: PropTypes.string,
+        selectedEP: PropTypes.string,
+        isGlobalEPSelected: PropTypes.bool,
+    }).isRequired,
+    endpointsMap: PropTypes.instanceOf(Map).isRequired,
+};

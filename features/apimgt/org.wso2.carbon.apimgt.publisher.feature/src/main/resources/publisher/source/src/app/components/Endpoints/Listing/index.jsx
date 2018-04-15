@@ -24,7 +24,7 @@ import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
 import Alert from '../../Shared/Alert';
 
-import EndpointTableRows from '../Create/EndpointTableRows';
+import EndpointTableRows from './EndpointTableRows';
 import API from '../../../data/api';
 import AddNewMenu from './AddNewMenu';
 
@@ -83,9 +83,7 @@ class EndpointsListing extends Component {
         this.state = {
             endpoints: null,
         };
-        this.onSelectChange = this.onSelectChange.bind(this);
         this.handleEndpointDelete = this.handleEndpointDelete.bind(this);
-        this.handleRequestOpenAddMenu = this.handleRequestOpenAddMenu.bind(this);
     }
 
     /**
