@@ -19,7 +19,7 @@
  */
 package org.wso2.carbon.apimgt.core.models;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * Represents an instance of the average rating of an API.
@@ -29,9 +29,9 @@ public class AvgRating {
     private String apiId;
     private String avgRating;
     private String createdUser;
-    private LocalDateTime createdTime;
+    private Instant createdTime;
     private String lastUpdatedUser;
-    private LocalDateTime lastUpdatedTime;
+    private Instant lastUpdatedTime;
 
     public String getApiId() {
         return apiId;
@@ -57,11 +57,11 @@ public class AvgRating {
         this.createdUser = createdUser;
     }
 
-    public LocalDateTime getCreatedTime() {
+    public Instant getCreatedTime() {
         return createdTime;
     }
 
-    public void setCreatedTime(LocalDateTime createdTime) {
+    public void setCreatedTime(Instant createdTime) {
         this.createdTime = createdTime;
     }
 
@@ -73,11 +73,11 @@ public class AvgRating {
         this.lastUpdatedUser = lastUpdatedUser;
     }
 
-    public LocalDateTime getLastUpdatedTime() {
+    public Instant getLastUpdatedTime() {
         return lastUpdatedTime;
     }
 
-    public void setLastUpdatedTime(LocalDateTime lastUpdatedTime) {
+    public void setLastUpdatedTime(Instant lastUpdatedTime) {
         this.lastUpdatedTime = lastUpdatedTime;
     }
 }

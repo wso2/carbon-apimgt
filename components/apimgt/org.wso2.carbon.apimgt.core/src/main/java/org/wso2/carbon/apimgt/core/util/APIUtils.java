@@ -38,6 +38,7 @@ import org.wso2.carbon.lcm.core.impl.LifecycleState;
 import org.yaml.snakeyaml.Yaml;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -549,5 +550,13 @@ public class APIUtils {
         Map map = (Map) yaml.load(yamlString);
         JSONObject jsonObject = new JSONObject(map);
         return jsonObject.toString();
+    }
+
+    /**
+     * Get current UTC time stamp
+     * @return Instant object
+     */
+    public static Instant getCurrentUTCTime() {
+        return Instant.now();
     }
 }

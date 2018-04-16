@@ -73,7 +73,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -215,6 +215,7 @@ public class SampleTestObjectCreator {
 
         List<String> defaultLabels = getDefaultLabels();
 
+        Instant time = APIUtils.getCurrentUTCTime();
         API.APIBuilder apiBuilder = new API.APIBuilder(ADMIN, "WeatherAPI", API_VERSION).
                 id(UUID.randomUUID().toString()).
                 context("weather").
@@ -234,10 +235,10 @@ public class SampleTestObjectCreator {
                 visibleRoles(new HashSet<>()).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration).
-                createdTime(LocalDateTime.now()).
+                createdTime(time).
                 createdBy(ADMIN).
                 updatedBy(ADMIN).
-                lastUpdatedTime(LocalDateTime.now()).
+                lastUpdatedTime(time).
                 apiPermission(permissionJson).
                 uriTemplates(getMockUriTemplates()).
                 apiDefinition(apiDefinition).
@@ -327,6 +328,7 @@ public class SampleTestObjectCreator {
 
         List<String> defaultLabels = getDefaultLabels();
 
+        Instant time = APIUtils.getCurrentUTCTime();
         API.APIBuilder apiBuilder = new API.APIBuilder(ADMIN, "restaurantAPI", "0.9").
                 id(UUID.randomUUID().toString()).
                 context("weather").
@@ -347,10 +349,10 @@ public class SampleTestObjectCreator {
                 corsConfiguration(corsConfiguration).
                 apiPermission(permissionJson).
                 permissionMap(permissionMap).
-                createdTime(LocalDateTime.now()).
+                createdTime(time).
                 createdBy(API_CREATOR).
                 apiDefinition(apiDefinition).
-                lastUpdatedTime(LocalDateTime.now()).
+                lastUpdatedTime(time).
                 securityScheme(3).
                 threatProtectionPolicies(threatProtectionPolicies);
 
@@ -393,7 +395,7 @@ public class SampleTestObjectCreator {
         permissionMap.put(ADMIN_ROLE_ID, 15);
 
         List<String> defaultLabels = getDefaultLabels();
-
+        Instant time = APIUtils.getCurrentUTCTime();
 
         API.APIBuilder apiBuilder = new API.APIBuilder(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
                 API_VERSION).
@@ -416,11 +418,11 @@ public class SampleTestObjectCreator {
                 corsConfiguration(corsConfiguration).
                 apiPermission(permissionJson).
                 permissionMap(permissionMap).
-                createdTime(LocalDateTime.now()).
+                createdTime(time).
                 createdBy(API_CREATOR).
                 uriTemplates(Collections.emptyMap()).
                 apiDefinition(apiDefinition).
-                lastUpdatedTime(LocalDateTime.now()).
+                lastUpdatedTime(time).
                 securityScheme(3).
                 threatProtectionPolicies(threatProtectionPolicies);
 
@@ -444,6 +446,7 @@ public class SampleTestObjectCreator {
             log.error("Error adding application", e);
         }
 
+        Instant time = APIUtils.getCurrentUTCTime();
         CompositeAPI.Builder apiBuilder = new CompositeAPI.Builder().
                 id(UUID.randomUUID().toString()).
                 name(UUID.randomUUID().toString()).
@@ -454,11 +457,11 @@ public class SampleTestObjectCreator {
                 transport(transport).
                 permissionMap(permissionMap).
                 applicationId(app.getId()).
-                createdTime(LocalDateTime.now()).
+                createdTime(time).
                 createdBy(API_CREATOR).
                 uriTemplates(Collections.emptyMap()).
                 apiDefinition(apiDefinition).
-                lastUpdatedTime(LocalDateTime.now()).
+                lastUpdatedTime(time).
                 threatProtectionPolicies(threatProtectionPolicies);
 
         return apiBuilder;
@@ -514,6 +517,7 @@ public class SampleTestObjectCreator {
     }
 
     public static DocumentInfo createDefaultDocumentationInfo() {
+        Instant time = APIUtils.getCurrentUTCTime();
         //created by admin
         DocumentInfo.Builder builder = new DocumentInfo.Builder();
         builder.id(UUID.randomUUID().toString());
@@ -524,12 +528,13 @@ public class SampleTestObjectCreator {
         builder.sourceURL(EMPTY_STRING);
         builder.otherType(EMPTY_STRING);
         builder.visibility(DocumentInfo.Visibility.API_LEVEL);
-        builder.createdTime(LocalDateTime.now());
-        builder.lastUpdatedTime(LocalDateTime.now());
+        builder.createdTime(time);
+        builder.lastUpdatedTime(time);
         return builder.build();
     }
 
     public static DocumentInfo createAlternativeDocumentationInfo(String uuid) {
+        Instant time = APIUtils.getCurrentUTCTime();
         //created by admin
         DocumentInfo.Builder builder = new DocumentInfo.Builder();
         builder.id(uuid);
@@ -540,8 +545,8 @@ public class SampleTestObjectCreator {
         builder.sourceURL(EMPTY_STRING);
         builder.otherType(EMPTY_STRING);
         builder.visibility(DocumentInfo.Visibility.API_LEVEL);
-        builder.createdTime(LocalDateTime.now());
-        builder.lastUpdatedTime(LocalDateTime.now());
+        builder.createdTime(time);
+        builder.lastUpdatedTime(time);
         return builder.build();
     }
 
@@ -551,6 +556,7 @@ public class SampleTestObjectCreator {
      * @return a file type documentation info sample
      */
     public static DocumentInfo createFileDocumentationInfo() {
+        Instant time = APIUtils.getCurrentUTCTime();
         //created by admin
         DocumentInfo.Builder builder = new DocumentInfo.Builder();
         builder.id(UUID.randomUUID().toString());
@@ -561,8 +567,8 @@ public class SampleTestObjectCreator {
         builder.sourceURL(EMPTY_STRING);
         builder.otherType(EMPTY_STRING);
         builder.visibility(DocumentInfo.Visibility.API_LEVEL);
-        builder.createdTime(LocalDateTime.now());
-        builder.lastUpdatedTime(LocalDateTime.now());
+        builder.createdTime(time);
+        builder.lastUpdatedTime(time);
         return builder.build();
     }
 
@@ -597,19 +603,21 @@ public class SampleTestObjectCreator {
     }
 
     public static Application createDefaultApplication() {
+        Instant time = APIUtils.getCurrentUTCTime();
         //created by admin
         Application application = new Application(TEST_APP_1, ADMIN);
         application.setId(UUID.randomUUID().toString());
         application.setDescription("This is a test application");
         application.setStatus(APIMgtConstants.ApplicationStatus.APPLICATION_CREATED);
         application.setPolicy(fiftyPerMinApplicationPolicy);
-        application.setCreatedTime(LocalDateTime.now());
+        application.setCreatedTime(time);
         application.setUpdatedUser(ADMIN);
-        application.setUpdatedTime(LocalDateTime.now());
+        application.setUpdatedTime(time);
         return application;
     }
 
     public static Application createAlternativeApplication() {
+        Instant time = APIUtils.getCurrentUTCTime();
         //created by admin and updated by admin2
         Application application = new Application(TEST_APP_2, ADMIN);
         application.setId(UUID.randomUUID().toString());
@@ -617,23 +625,25 @@ public class SampleTestObjectCreator {
         application.setStatus(APIMgtConstants.ApplicationStatus.APPLICATION_APPROVED);
         application.setPolicy(twentyPerMinApplicationPolicy);
         application.setUpdatedUser("admin2");
-        application.setUpdatedTime(LocalDateTime.now());
+        application.setUpdatedTime(time);
         return application;
     }
 
     public static Application createCustomApplication(String applicationName, String owner) {
+        Instant time = APIUtils.getCurrentUTCTime();
         Application application = new Application(applicationName, owner);
         application.setId(UUID.randomUUID().toString());
         application.setDescription("This is a test application");
         application.setStatus(APIMgtConstants.ApplicationStatus.APPLICATION_CREATED);
         application.setPolicy(fiftyPerMinApplicationPolicy);
-        application.setCreatedTime(LocalDateTime.now());
+        application.setCreatedTime(time);
         application.setUpdatedUser(owner);
-        application.setUpdatedTime(LocalDateTime.now());
+        application.setUpdatedTime(time);
         return application;
     }
 
     public static Application createApplicationWithPermissions() {
+        Instant time = APIUtils.getCurrentUTCTime();
         //created by admin
         HashMap permissionMap = new HashMap();
         permissionMap.put(APIMgtConstants.Permission.UPDATE, APIMgtConstants.Permission.UPDATE_PERMISSION);
@@ -643,9 +653,9 @@ public class SampleTestObjectCreator {
         application.setStatus(APIMgtConstants.ApplicationStatus.APPLICATION_CREATED);
         application.setPolicy(fiftyPerMinApplicationPolicy);
         application.setPermissionMap(permissionMap);
-        application.setCreatedTime(LocalDateTime.now());
+        application.setCreatedTime(time);
         application.setUpdatedUser(ADMIN);
-        application.setUpdatedTime(LocalDateTime.now());
+        application.setUpdatedTime(time);
         return application;
     }
 
@@ -1072,11 +1082,12 @@ public class SampleTestObjectCreator {
     }
 
     public static Workflow createWorkflow(String workflowReferenceID) throws APIMgtDAOException {
+        Instant time = APIUtils.getCurrentUTCTime();
         Workflow workflow = new ApplicationCreationWorkflow(DAOFactory.getApplicationDAO(),
                 DAOFactory.getWorkflowDAO(), null);
         workflow.setExternalWorkflowReference(workflowReferenceID);
         workflow.setStatus(WorkflowStatus.CREATED);
-        workflow.setCreatedTime(LocalDateTime.now());
+        workflow.setCreatedTime(time);
         workflow.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
         workflow.setWorkflowReference(UUID.randomUUID().toString());
 
@@ -1089,6 +1100,7 @@ public class SampleTestObjectCreator {
     }
 
     public static DocumentInfo createDefaultFileDocumentationInfo() {
+        Instant time = APIUtils.getCurrentUTCTime();
         //created by admin
         DocumentInfo.Builder builder = new DocumentInfo.Builder();
         builder.id(UUID.randomUUID().toString());
@@ -1099,44 +1111,47 @@ public class SampleTestObjectCreator {
         builder.sourceURL(EMPTY_STRING);
         builder.otherType(EMPTY_STRING);
         builder.visibility(DocumentInfo.Visibility.API_LEVEL);
-        builder.createdTime(LocalDateTime.now());
-        builder.lastUpdatedTime(LocalDateTime.now());
+        builder.createdTime(time);
+        builder.lastUpdatedTime(time);
         return builder.build();
     }
 
     public static Comment createDefaultComment(String apiId) {
+        Instant time = APIUtils.getCurrentUTCTime();
         Comment comment = new Comment();
         comment.setUuid(UUID.randomUUID().toString());
         comment.setApiId(apiId);
         comment.setCommentText("this is a sample comment");
         comment.setCommentedUser("admin");
         comment.setUpdatedUser("admin");
-        comment.setCreatedTime(LocalDateTime.now());
-        comment.setUpdatedTime(LocalDateTime.now());
+        comment.setCreatedTime(time);
+        comment.setUpdatedTime(time);
         return comment;
     }
 
     public static Comment createAlternativeComment(String apiId) {
+        Instant time = APIUtils.getCurrentUTCTime();
         Comment comment = new Comment();
         comment.setUuid(UUID.randomUUID().toString());
         comment.setApiId(apiId);
         comment.setCommentText("this is a sample comment - alternative");
         comment.setCommentedUser("admin");
         comment.setUpdatedUser("admin");
-        comment.setCreatedTime(LocalDateTime.now());
-        comment.setUpdatedTime(LocalDateTime.now());
+        comment.setCreatedTime(time);
+        comment.setUpdatedTime(time);
         return comment;
     }
 
     public static Rating createDefaultRating(String apiId) {
+        Instant time = APIUtils.getCurrentUTCTime();
         Rating rating = new Rating();
         rating.setUuid(UUID.randomUUID().toString());
         rating.setApiId(apiId);
         rating.setRating(4);
         rating.setUsername("john");
         rating.setLastUpdatedUser("john");
-        rating.setCreatedTime(LocalDateTime.now());
-        rating.setLastUpdatedTime(LocalDateTime.now());
+        rating.setCreatedTime(time);
+        rating.setLastUpdatedTime(time);
         return rating;
     }
 
@@ -1171,6 +1186,8 @@ public class SampleTestObjectCreator {
         endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT,
                 new Endpoint.Builder().id(endpointId).name("api1-production--endpint")
                         .applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).build());
+        Instant time = APIUtils.getCurrentUTCTime();
+
         API.APIBuilder apiBuilder = new API.APIBuilder(ADMIN, "WeatherAPI", API_VERSION).
                 id(UUID.randomUUID().toString()).
                 context("weather").
@@ -1190,10 +1207,10 @@ public class SampleTestObjectCreator {
                 visibleRoles(new HashSet<>()).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration).
-                createdTime(LocalDateTime.now()).
+                createdTime(time).
                 createdBy(ADMIN).
                 updatedBy(ADMIN).
-                lastUpdatedTime(LocalDateTime.now()).
+                lastUpdatedTime(time).
                 apiPermission(permissionJson).
                 uriTemplates(getMockUriTemplates()).
                 apiDefinition(apiDefinition);

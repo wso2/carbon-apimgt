@@ -45,6 +45,7 @@ import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.models.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.rest.api.common.exception.APIMgtSecurityException;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
@@ -59,6 +60,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -185,6 +187,7 @@ public class ApisApiServiceImplTestCase {
         Request request = getRequest();
         PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
+        Instant time = APIUtils.getCurrentUTCTime();
         Comment comment = new Comment();
         comment.setUuid(commentId);
         comment.setApiId(apiId);
@@ -192,8 +195,8 @@ public class ApisApiServiceImplTestCase {
         comment.setCommentText("this is a comment");
         comment.setCreatedUser("createdUser");
         comment.setUpdatedUser("updatedUser");
-        comment.setCreatedTime(LocalDateTime.now().minusHours(1));
-        comment.setUpdatedTime(LocalDateTime.now());
+        comment.setCreatedTime(time);
+        comment.setUpdatedTime(time);
 
         Mockito.when(apiStore.getCommentByUUID(commentId, apiId)).thenReturn(comment);
 
@@ -239,23 +242,25 @@ public class ApisApiServiceImplTestCase {
         Request request = getRequest();
         PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
+        Instant time = APIUtils.getCurrentUTCTime();
         Comment comment1 = new Comment();
         comment1.setUuid(UUID.randomUUID().toString());
         comment1.setCommentedUser("commentedUser1");
         comment1.setCommentText("this is a comment 1");
         comment1.setCreatedUser("createdUser1");
         comment1.setUpdatedUser("updatedUser1");
-        comment1.setCreatedTime(LocalDateTime.now().minusHours(1));
-        comment1.setUpdatedTime(LocalDateTime.now());
+        comment1.setCreatedTime(time);
+        comment1.setUpdatedTime(time);
 
+        time = APIUtils.getCurrentUTCTime();
         Comment comment2 = new Comment();
         comment2.setUuid(UUID.randomUUID().toString());
         comment2.setCommentedUser("commentedUser2");
         comment2.setCommentText("this is a comment 2");
         comment2.setCreatedUser("createdUser2");
         comment2.setUpdatedUser("updatedUser2");
-        comment2.setCreatedTime(LocalDateTime.now().minusHours(1));
-        comment2.setUpdatedTime(LocalDateTime.now());
+        comment2.setCreatedTime(time);
+        comment2.setUpdatedTime(time);
 
         List<Comment> commentList = new ArrayList<>();
         commentList.add(comment1);
@@ -308,13 +313,14 @@ public class ApisApiServiceImplTestCase {
         commentDTO.setCreatedBy("creater");
         commentDTO.setLastUpdatedBy("updater");
 
+        Instant time = APIUtils.getCurrentUTCTime();
         Comment comment = new Comment();
         comment.setCommentedUser("commentedUser");
         comment.setCommentText("this is a comment");
         comment.setCreatedUser("createdUser");
         comment.setUpdatedUser("updatedUser");
-        comment.setCreatedTime(LocalDateTime.now().minusHours(1));
-        comment.setUpdatedTime(LocalDateTime.now());
+        comment.setCreatedTime(time);
+        comment.setUpdatedTime(time);
 
         Mockito.doNothing().doThrow(new IllegalArgumentException()).when(apiStore)
                 .updateComment(comment, commentId, apiId, USER);
@@ -346,13 +352,14 @@ public class ApisApiServiceImplTestCase {
         commentDTO.setCreatedBy("creater");
         commentDTO.setLastUpdatedBy("updater");
 
+        Instant time = APIUtils.getCurrentUTCTime();
         Comment comment = new Comment();
         comment.setCommentedUser("commentedUser");
         comment.setCommentText("this is a comment");
         comment.setCreatedUser("createdUser");
         comment.setUpdatedUser("updatedUser");
-        comment.setCreatedTime(LocalDateTime.now().minusHours(1));
-        comment.setUpdatedTime(LocalDateTime.now());
+        comment.setCreatedTime(time);
+        comment.setUpdatedTime(time);
 
         Mockito.doThrow(new APICommentException("Error occurred", ExceptionCodes.INTERNAL_ERROR))
                 .when(apiStore).updateComment(comment, commentId, apiId, USER);
@@ -600,28 +607,30 @@ public class ApisApiServiceImplTestCase {
         Request request = getRequest();
         PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
+        Instant time = APIUtils.getCurrentUTCTime();
         Rating rating = new Rating();
         rating.setApiId(apiId);
         rating.setRating(5);
         rating.setUsername(USER);
         rating.setUuid(rateId);
         rating.setCreatedUser(USER);
-        rating.setCreatedTime(LocalDateTime.now().minusHours(2));
+        rating.setCreatedTime(time);
         rating.setLastUpdatedUser(USER);
-        rating.setLastUpdatedTime(LocalDateTime.now());
+        rating.setLastUpdatedTime(time);
 
         Mockito.when(apiStore.getRatingForApiFromUser(apiId, USER)).thenReturn(rating);
         Mockito.when(apiStore.getAvgRating(apiId)).thenReturn(5.0);
 
+        time = APIUtils.getCurrentUTCTime();
         Rating rating1 = new Rating();
         rating1.setApiId(apiId);
         rating1.setRating(3);
         rating1.setUsername(USER);
         rating1.setUuid(rateId);
         rating1.setCreatedUser(USER);
-        rating1.setCreatedTime(LocalDateTime.now().minusHours(2));
+        rating1.setCreatedTime(time);
         rating1.setLastUpdatedUser(USER);
-        rating1.setLastUpdatedTime(LocalDateTime.now());
+        rating1.setLastUpdatedTime(time);
 
         List<Rating> ratingList = new ArrayList<>();
         ratingList.add(rating);
@@ -670,15 +679,16 @@ public class ApisApiServiceImplTestCase {
         Request request = getRequest();
         PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
+        Instant time = APIUtils.getCurrentUTCTime();
         Rating rating = new Rating();
         rating.setApiId(apiId);
         rating.setRating(5);
         rating.setUsername(USER);
         rating.setUuid(rateId);
         rating.setCreatedUser(USER);
-        rating.setCreatedTime(LocalDateTime.now().minusHours(2));
+        rating.setCreatedTime(time);
         rating.setLastUpdatedUser(USER);
-        rating.setLastUpdatedTime(LocalDateTime.now());
+        rating.setLastUpdatedTime(time);
 
         Mockito.when(apiStore.getRatingByUUID(apiId, rateId)).thenReturn(rating);
 
@@ -723,27 +733,29 @@ public class ApisApiServiceImplTestCase {
         Request request = getRequest();
         PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
+        Instant time = APIUtils.getCurrentUTCTime();
         Rating rating = new Rating();
         rating.setApiId(apiId);
         rating.setRating(5);
         rating.setUsername(USER);
         rating.setUuid(rateId);
         rating.setCreatedUser(USER);
-        rating.setCreatedTime(LocalDateTime.now().minusHours(2));
+        rating.setCreatedTime(time);
         rating.setLastUpdatedUser(USER);
-        rating.setLastUpdatedTime(LocalDateTime.now());
+        rating.setLastUpdatedTime(time);
 
         RatingDTO ratingDTO = RatingMappingUtil.fromRatingToDTO(rating);
 
+        time = APIUtils.getCurrentUTCTime();
         Rating ratingNow = new Rating();
         ratingNow.setApiId(apiId);
         ratingNow.setRating(3);
         ratingNow.setUsername(USER);
         ratingNow.setUuid(rateId);
         ratingNow.setCreatedUser(USER);
-        ratingNow.setCreatedTime(LocalDateTime.now().minusHours(2));
+        ratingNow.setCreatedTime(time);
         ratingNow.setLastUpdatedUser(USER);
-        ratingNow.setLastUpdatedTime(LocalDateTime.now());
+        ratingNow.setLastUpdatedTime(time);
 
         Mockito.when(apiStore.getRatingForApiFromUser(apiId, USER)).thenReturn(ratingNow);
         Mockito.doNothing().doThrow(new IllegalArgumentException()).when(apiStore)
@@ -772,15 +784,16 @@ public class ApisApiServiceImplTestCase {
         Mockito.doThrow(new APIRatingException("Error Occured", ExceptionCodes.RATING_NOT_FOUND))
                 .when(apiStore).getRatingForApiFromUser(apiId, USER);
 
+        Instant time = APIUtils.getCurrentUTCTime();
         Rating rating = new Rating();
         rating.setApiId(apiId);
         rating.setRating(5);
         rating.setUsername(USER);
         rating.setUuid(rateId);
         rating.setCreatedUser(USER);
-        rating.setCreatedTime(LocalDateTime.now().minusHours(2));
+        rating.setCreatedTime(time);
         rating.setLastUpdatedUser(USER);
-        rating.setLastUpdatedTime(LocalDateTime.now());
+        rating.setLastUpdatedTime(time);
 
         RatingDTO ratingDTO = RatingMappingUtil.fromRatingToDTO(rating);
 

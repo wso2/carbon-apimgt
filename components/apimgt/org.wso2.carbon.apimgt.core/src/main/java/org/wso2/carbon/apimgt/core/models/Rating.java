@@ -18,7 +18,7 @@
  */
 package org.wso2.carbon.apimgt.core.models;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * Represents an instance of a Rating. Rating is given to an API by a API Store user.
@@ -30,9 +30,9 @@ public class Rating {
     private int rating;
     private String username;
     private String createdUser;
-    private LocalDateTime createdTime;
+    private Instant createdTime;
     private String lastUpdatedUser;
-    private LocalDateTime lastUpdatedTime;
+    private Instant lastUpdatedTime;
 
     public String getUuid() {
         return uuid;
@@ -74,11 +74,11 @@ public class Rating {
         this.createdUser = createdUser;
     }
 
-    public LocalDateTime getCreatedTime() {
+    public Instant getCreatedTime() {
         return createdTime;
     }
 
-    public void setCreatedTime(LocalDateTime createdTime) {
+    public void setCreatedTime(Instant createdTime) {
         this.createdTime = createdTime;
     }
 
@@ -90,11 +90,11 @@ public class Rating {
         this.lastUpdatedUser = lastUpdatedUser;
     }
 
-    public LocalDateTime getLastUpdatedTime() {
+    public Instant getLastUpdatedTime() {
         return lastUpdatedTime;
     }
 
-    public void setLastUpdatedTime(LocalDateTime lastUpdatedTime) {
+    public void setLastUpdatedTime(Instant lastUpdatedTime) {
         this.lastUpdatedTime = lastUpdatedTime;
     }
 }

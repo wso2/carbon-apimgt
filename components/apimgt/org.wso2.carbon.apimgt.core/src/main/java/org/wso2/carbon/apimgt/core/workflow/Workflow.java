@@ -29,7 +29,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,8 +47,8 @@ public abstract class Workflow {
     //Used to hold the status of the workflow. When a workflow is initially executed, it will be in the CREATED state.
     //It will then move to the APPROVED or REJECTED states depending on the output of the workflow execution.
     private WorkflowStatus status;
-    private LocalDateTime createdTime;
-    private LocalDateTime updatedTime;
+    private Instant createdTime;
+    private Instant updatedTime;
 
     //Holds the workflow description. This is used for having a human readable description from the output of the
     //workflow execution. Ex: If an approval was rejected, why was it so.
@@ -129,19 +129,19 @@ public abstract class Workflow {
     }
 
 
-    public LocalDateTime getCreatedTime() {
+    public Instant getCreatedTime() {
         return createdTime;
     }
 
-    public void setCreatedTime(LocalDateTime createdTime) {
+    public void setCreatedTime(Instant createdTime) {
         this.createdTime = createdTime;
     }
 
-    public LocalDateTime getUpdatedTime() {
+    public Instant getUpdatedTime() {
         return updatedTime;
     }
 
-    public void setUpdatedTime(LocalDateTime updatedTime) {
+    public void setUpdatedTime(Instant updatedTime) {
         this.updatedTime = updatedTime;
     }
 
@@ -181,7 +181,7 @@ public abstract class Workflow {
      * @throws APIManagementException if error occurred while updating workflow status
      */
     protected void updateWorkflowEntries(Workflow workflow) throws APIManagementException {
-        this.updatedTime = LocalDateTime.now();
+        this.updatedTime = Instant.now();
         try {
             workflowDAO.updateWorkflowStatus(workflow);
             // TODO stats stuff

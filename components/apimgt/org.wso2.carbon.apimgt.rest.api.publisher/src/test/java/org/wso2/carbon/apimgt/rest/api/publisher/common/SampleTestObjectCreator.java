@@ -42,6 +42,7 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -212,10 +213,10 @@ public class SampleTestObjectCreator {
                 visibleRoles(visibleRoles).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration).
-                createdTime(LocalDateTime.now()).
+                createdTime(Instant.now()).
                 createdBy(ADMIN).
                 updatedBy(ADMIN).
-                lastUpdatedTime(LocalDateTime.now()).
+                lastUpdatedTime(Instant.now()).
                 apiPermission(permissionJson).
                 uriTemplates(getMockUriTemplates()).
                 apiDefinition(apiDefinition).workflowStatus(WORKFLOW_STATUS).
@@ -262,8 +263,8 @@ public class SampleTestObjectCreator {
         builder.sourceURL(EMPTY_STRING);
         builder.otherType(EMPTY_STRING);
         builder.visibility(DocumentInfo.Visibility.API_LEVEL);
-        builder.createdTime(LocalDateTime.now());
-        builder.lastUpdatedTime(LocalDateTime.now());
+        builder.createdTime(Instant.now());
+        builder.lastUpdatedTime(Instant.now());
         return builder;
     }
 
@@ -284,9 +285,9 @@ public class SampleTestObjectCreator {
         application.setDescription("This is a test application");
         application.setStatus(APIMgtConstants.ApplicationStatus.APPLICATION_CREATED);
         application.setPolicy(fiftyPerMinApplicationPolicy);
-        application.setCreatedTime(LocalDateTime.now());
+        application.setCreatedTime(Instant.now());
         application.setUpdatedUser(ADMIN);
-        application.setUpdatedTime(LocalDateTime.now());
+        application.setUpdatedTime(Instant.now());
         return application;
     }
 

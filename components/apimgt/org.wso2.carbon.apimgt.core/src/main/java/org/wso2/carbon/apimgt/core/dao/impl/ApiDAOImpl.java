@@ -1297,9 +1297,9 @@ public class ApiDAOImpl implements ApiDAO {
         comment.setCommentedUser(rs.getString("USER_IDENTIFIER"));
         comment.setApiId(rs.getString("API_ID"));
         comment.setCreatedUser(rs.getString("CREATED_BY"));
-        comment.setCreatedTime(rs.getTimestamp("CREATED_TIME").toLocalDateTime());
+        comment.setCreatedTime(rs.getTimestamp("CREATED_TIME").toInstant());
         comment.setUpdatedUser(rs.getString("UPDATED_BY"));
-        comment.setUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME").toLocalDateTime());
+        comment.setUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME").toInstant());
 
         return comment;
     }
@@ -1529,9 +1529,9 @@ public class ApiDAOImpl implements ApiDAO {
             rating.setApiId(rs.getString("API_ID"));
             rating.setUsername(rs.getString("USER_IDENTIFIER"));
             rating.setCreatedUser(rs.getString("CREATED_BY"));
-            rating.setCreatedTime(rs.getTimestamp("CREATED_TIME").toLocalDateTime());
+            rating.setCreatedTime(rs.getTimestamp("CREATED_TIME").toInstant());
             rating.setLastUpdatedUser(rs.getString("UPDATED_BY"));
-            rating.setLastUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME").toLocalDateTime());
+            rating.setLastUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME").toInstant());
         } catch (SQLException e) {
             String errorMessage = "constructing Rating from ResultSet";
             throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + errorMessage, e);
@@ -1549,7 +1549,7 @@ public class ApiDAOImpl implements ApiDAO {
                 connection.setAutoCommit(false);
                 statement.setInt(1, rating.getRating());
                 statement.setString(2, rating.getUsername());
-                statement.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
+                statement.setTimestamp(3, Timestamp.from(rating.getLastUpdatedTime()));
                 statement.setString(4, apiId);
                 statement.setString(5, ratingId);
                 statement.execute();
@@ -2162,8 +2162,8 @@ public class ApiDAOImpl implements ApiDAO {
                         corsConfiguration(corsConfiguration).
                         createdBy(rs.getString("CREATED_BY")).
                         updatedBy(rs.getString("UPDATED_BY")).
-                        createdTime(rs.getTimestamp("CREATED_TIME").toLocalDateTime()).
-                        lastUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME").toLocalDateTime()).
+                        createdTime(rs.getTimestamp("CREATED_TIME").toInstant()).
+                        lastUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME").toInstant()).
                         uriTemplates(getUriTemplates(connection, apiPrimaryKey)).
                         policies(getSubscripitonPolciesByAPIId(connection, apiPrimaryKey)).copiedFromApiId(rs.getString
                         ("COPIED_FROM_API")).
@@ -2219,8 +2219,8 @@ public class ApiDAOImpl implements ApiDAO {
                         applicationId(getCompositeAPIApplicationId(connection, apiPrimaryKey)).
                         createdBy(rs.getString("CREATED_BY")).
                         updatedBy(rs.getString("UPDATED_BY")).
-                        createdTime(rs.getTimestamp("CREATED_TIME").toLocalDateTime()).
-                        lastUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME").toLocalDateTime()).
+                        createdTime(rs.getTimestamp("CREATED_TIME").toInstant()).
+                        lastUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME").toInstant()).
                         uriTemplates(getUriTemplates(connection, apiPrimaryKey)).
                         copiedFromApiId(rs.getString("COPIED_FROM_API")).
                         workflowStatus(rs.getString("LC_WORKFLOW_STATUS")).

@@ -20,7 +20,7 @@
 
 package org.wso2.carbon.apimgt.core.models;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.HashMap;
 
 /**
@@ -112,11 +112,11 @@ public final class DocumentInfo {
 
     }
 
-    public LocalDateTime getCreatedTime() {
+    public Instant getCreatedTime() {
         return createdTime;
     }
 
-    public LocalDateTime getLastUpdatedTime() {
+    public Instant getLastUpdatedTime() {
         return lastUpdatedTime;
     }
 
@@ -208,8 +208,8 @@ public final class DocumentInfo {
     private final Visibility visibility;
     private final String fileName;
     private final HashMap permissionMap;
-    private final LocalDateTime createdTime;
-    private final LocalDateTime lastUpdatedTime;
+    private final Instant createdTime;
+    private final Instant lastUpdatedTime;
     private final String createdBy;
     private final String updatedBy;
 
@@ -228,8 +228,8 @@ public final class DocumentInfo {
         private Visibility visibility;
         private String permission;
         private  String fileName;
-        private LocalDateTime createdTime;
-        private LocalDateTime lastUpdatedTime;
+        private Instant createdTime;
+        private Instant lastUpdatedTime;
         private String createdBy;
         private String updatedBy;
 
@@ -422,7 +422,7 @@ public final class DocumentInfo {
          * @param createdTime the {@code createdTime} to set
          * @return a reference to this Builder
          */
-        public Builder createdTime(LocalDateTime createdTime) {
+        public Builder createdTime(Instant createdTime) {
             this.createdTime = createdTime;
             return this;
         }
@@ -434,7 +434,7 @@ public final class DocumentInfo {
          * @param lastUpdatedTime the {@code lastUpdatedTime} to set
          * @return a reference to this Builder
          */
-        public Builder lastUpdatedTime(LocalDateTime lastUpdatedTime) {
+        public Builder lastUpdatedTime(Instant lastUpdatedTime) {
             this.lastUpdatedTime = lastUpdatedTime;
             return this;
         }

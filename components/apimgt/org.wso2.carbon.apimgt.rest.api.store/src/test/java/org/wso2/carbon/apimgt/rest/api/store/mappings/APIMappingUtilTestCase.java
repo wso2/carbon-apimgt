@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.BaseAPIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.BaseAPIInfoDTO;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -144,9 +145,9 @@ public class APIMappingUtilTestCase {
                 visibleRoles(new HashSet<>(Arrays.asList("customer", "manager", "employee"))).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration).
-                createdTime(LocalDateTime.now()).
+                createdTime(Instant.now()).
                 createdBy("Adam Doe").
-                lastUpdatedTime(LocalDateTime.now()).
+                lastUpdatedTime(Instant.now()).
                 endpoint(endpointTypeToIdMap);
 
 

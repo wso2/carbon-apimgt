@@ -44,6 +44,7 @@ import org.wso2.msf4j.Request;
 import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
 import javax.ws.rs.core.Response;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -131,7 +132,7 @@ public class WorkflowsApiServiceImplTestCase {
         workflowRequestDTO.setStatus(WorkflowRequestDTO.StatusEnum.APPROVED);
         Workflow workflow = new ApplicationCreationWorkflow(null, null, null);
         workflow.setStatus(WorkflowStatus.APPROVED);
-        LocalDateTime date1 = LocalDateTime.now();
+        Instant date1 = Instant.now();
         workflow.setCreatedTime(date1);
         workflow.setWorkflowDescription("Description 1");
         workflow.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);

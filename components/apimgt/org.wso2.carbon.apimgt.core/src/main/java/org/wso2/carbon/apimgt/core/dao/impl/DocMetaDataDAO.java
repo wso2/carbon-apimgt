@@ -176,9 +176,9 @@ class DocMetaDataDAO {
             statement.setString(8, documentInfo.getSourceType().toString());
             statement.setString(9, documentInfo.getVisibility().toString());
             statement.setString(10, documentInfo.getCreatedBy());
-            statement.setTimestamp(11, Timestamp.valueOf(documentInfo.getCreatedTime()));
+            statement.setTimestamp(11, Timestamp.from(documentInfo.getCreatedTime()));
             statement.setString(12, documentInfo.getUpdatedBy());
-            statement.setTimestamp(13, Timestamp.valueOf(documentInfo.getLastUpdatedTime()));
+            statement.setTimestamp(13, Timestamp.from(documentInfo.getLastUpdatedTime()));
             statement.execute();
             addDOCPermission(connection, documentInfo.getPermissionMap(), documentInfo.getId());
         }
