@@ -2580,11 +2580,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     "attempted to update application owned by: " + existingApp.getSubscriber().getName());
         }
 
-        //validate callback url
-        if(!APIUtil.isValidURL(application.getCallbackUrl())){
-            log.warn("Invalid Call Back URL "+ application.getCallbackUrl());
-        }
-
         if (application.getName() != null && (application.getName().length() != application.getName().trim().length())) {
             handleApplicationNameContainSpacesException("Application name " +
                     "cannot contain leading or trailing white spaces");
@@ -2611,44 +2606,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
                 APIConstants.AuditLogConstants.UPDATED, this.username);
 
-        APIKey[] apiKeys = null;
-
-        // Update on OAuthApps are performed by
-        if ((application.getCallbackUrl() != null && existingApp != null &&
-                !application.getCallbackUrl().equals(existingApp.getCallbackUrl())) ||
-                (existingApp != null && !application.getName().equals(existingApp.getName()))) {
-
-            // Only the OauthApps created from UI will be changed. Mapped Clients won't be touched.
-            apiKeys = apiMgtDAO.getConsumerKeysWithMode(application.getId(),
-                                                        APIConstants.OAuthAppMode.CREATED.toString());
-        }
-        if (apiKeys != null && apiKeys.length > 0) {
-            for (APIKey apiKey : apiKeys) {
-                OAuthApplicationInfo applicationInfo = new OAuthApplicationInfo();
-                applicationInfo.setClientId(apiKey.getConsumerKey());
-
-                if (application.getCallbackUrl() != null &&
-                    application.getCallbackUrl().equals(existingApp.getCallbackUrl())) {
-                    applicationInfo.setCallBackURL(application.getCallbackUrl());
-                }
-
-                if (application.getName() != null && !application.getName().equals(existingApp.getName())) {
-                    applicationInfo.setClientName(application.getName() + '_' + apiKey.getType());
-                }
-                applicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME, application.getSubscriber().getName());
-
-                // This parameter is set as a way of indicating from which point updateApplication was called. When
-                // integrating with different OAuthProviders, if the implementers do not wish to change CallBackUrl
-                // when an update is performed on the AM_Application, then using this variable that update can be
-                // ignored.
-                applicationInfo.addParameter("executing_mode", "AM_APPLICATION_UPDATE");
-
-                OAuthAppRequest oAuthAppRequest = new OAuthAppRequest();
-                oAuthAppRequest.setOAuthApplicationInfo(applicationInfo);
-                KeyManagerHolder.getKeyManagerInstance().updateApplication(oAuthAppRequest);
-
-            }
-        }
         try {
             invalidateCachedKeys(application.getId());
         } catch (APIManagementException ignore) {
