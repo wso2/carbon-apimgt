@@ -35,6 +35,7 @@ public class ApplicationKeyMappingUtil {
         applicationKeyDTO.setConsumerKey(applicationKeys.getClientId());
         applicationKeyDTO.setConsumerSecret(applicationKeys.getClientSecret());
         applicationKeyDTO.setSupportedGrantTypes(applicationKeys.getGrantTypes());
+        applicationKeyDTO.setCallbackUrl(applicationKeys.getCallBackURL());
         return applicationKeyDTO;
     }
 
