@@ -125,15 +125,15 @@ class CreateCustomRulePolicy extends Component {
                             policy={this.state.policy}
                             state={this.state}
                             handleChangeChild={this.handleChangeChild}
-                            handlePopoverOpen= {this.handlePopoverOpen}
-                            handlePopoverClose= {this.handlePopoverClose}
+                            handlePopoverOpen={this.handlePopoverOpen}
+                            handlePopoverClose={this.handlePopoverClose}
                         />
 
                         <Paper elevation={20}>
                             <Grid item xs={6} className='grid-item'>
                                 <Divider />
                                 <div>
-                                    <Button  color='primary' onClick={() => this.handlePolicySave()}>
+                                    <Button color='primary' onClick={() => this.handlePolicySave()}>
                                         Save
                                     </Button>
                                     <Link to='/policies/custom_rules'>

@@ -76,7 +76,7 @@ class BlackListDetails extends Component {
                             value={this.props.selectedValue}
                             onClick={this.handleChange}
                         >
-                            <FormControlLabel value="API" control={<Radio />} label="Api Context" />
+                            <FormControlLabel value="API" control={<Radio />} label="API Context" />
                             <FormControlLabel value="APPLICATION" control={<Radio />} label="Application" />
                             <FormControlLabel value="USER" control={<Radio />} label="User" />
                             <FormControlLabel value="IP" control={<Radio />} label="IP Address" />

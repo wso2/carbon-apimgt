@@ -123,9 +123,6 @@ class CustomRules extends Component {
                                     Add Custom Rule
                                 </Button>
                             </Link>
-                            <Typography type="caption" gutterBottom align="left" className="page-title-help">
-                                Description goes here.
-                            </Typography>
                         </div>
                         <Divider className={classes.divider} />
 

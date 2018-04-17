@@ -124,10 +124,7 @@ class ApplicationPolicies extends Component {
                                 <Button variant="raised" color="primary" className={classes.button}>
                                 Add Application Policy
                                 </Button>
-                            </Link>
-                            <Typography type="caption" gutterBottom align="left" className="page-title-help">
-                            Discription goes here.
-                            </Typography>                          
+                            </Link>                                              
                         </div>
                         <Divider className={classes.divider} />
                        

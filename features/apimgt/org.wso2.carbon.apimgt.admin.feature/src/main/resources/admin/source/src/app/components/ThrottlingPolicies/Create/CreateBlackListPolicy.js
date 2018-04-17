@@ -44,6 +44,16 @@ const messages = {
     failure: 'Error while creating API rate limit',
 };
 
+const helperTextObject = [
+    ['API', { format: 'Format : ${context}', example: 'Eg : /test/1.0.0' }],
+    ['APPLICATION',
+        { format: 'Format : ${userName}:${applicationName}', example: 'Eg : admin:DefaultApplication' }],
+    ['USER', { format: 'Format : ${userName}', example: 'Eg : admin' }],
+    ['IP', { format: 'Format : ${ip}', example: 'Eg : 127.0.0.1' }],
+    ['IP_RANGE', { format: 'Format : ${ip}', example: 'Eg : 127.0.0.1' }]
+];
+const helperTextMap = new Map(helperTextObject);
+
 class CreateBlackListPolicy extends Component {
     constructor(props) {
         super(props);
@@ -75,29 +85,18 @@ class CreateBlackListPolicy extends Component {
 
     handleChangeChild(event) {
         const policy = this.state.policy;
-        const value = event.target.value;
+        const { value } = event.target;
         const helperText = this.getHelperText(value);
         policy.conditionType = value;
 
         if (value === 'IP' || value === 'IP_RANGE') {
             policy.ipCondition.ipConditionType = value;
         }
-        this.setState({ value: value, policy: policy, helperText: helperText });
+        this.setState({ value, policy, helperText });
     };
 
     getHelperText(policyType) {
-        switch (policyType) {
-            case 'API':
-                return { format: 'Format : ${context}', example: 'Eg : /test/1.0.0' };
-            case 'APPLICATION':
-                return { format: 'Format : ${userName}:${applicationName}', example: 'Eg : admin:DefaultApplication' };
-            case 'USER':
-                return { format: 'Format : ${userName}', example: 'Eg : admin' };
-            case 'IP':
-                return { format: 'Format : ${ip}', example: 'Eg : 127.0.0.1' };
-            case 'IP_RANGE':
-                return { format: 'Format : ${ip}', example: 'Eg : 127.0.0.1' };
-        }
+        return helperTextMap.get(policyType);
     }
 
     handleChangeChildValue(event) {

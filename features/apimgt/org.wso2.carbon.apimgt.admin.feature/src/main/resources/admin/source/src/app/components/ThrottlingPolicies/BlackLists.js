@@ -156,9 +156,6 @@ class BlackLists extends Component {
                                     Add Black List Policy
                                 </Button>
                             </Link>
-                            <Typography type="caption" gutterBottom align="left" className="page-title-help">
-                                Description goes here.
-                            </Typography>
                         </div>
                         <Divider className={classes.divider} />
 
