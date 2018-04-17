@@ -1213,25 +1213,6 @@ public class APIConsumerImplTest {
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Cannot update the application while it is INACTIVE"));
         }
-        APIKey apiKey1 = new APIKey();
-        apiKey1.setConsumerKey(UUID.randomUUID().toString());
-        APIKey apiKey2 = new APIKey();
-        apiKey2.setConsumerKey(UUID.randomUUID().toString());
-        APIKey[] apiKeys = new APIKey[] { apiKey1, apiKey2 };
-        Mockito.doNothing().when(apiMgtDAO).updateApplication(newApplication);
-        Mockito.when(apiMgtDAO.getApplicationByUUID(Mockito.anyString())).thenReturn(oldApplication);
-        newApplication.setUUID(UUID.randomUUID().toString());
-        oldApplication.setStatus(APIConstants.ApplicationStatus.APPLICATION_APPROVED);
-        Mockito.when(apiMgtDAO.getConsumerKeysWithMode(Mockito.anyInt(), Mockito.anyString())).thenReturn(apiKeys);
-        apiConsumer.updateApplication(newApplication);
-        Mockito.verify(apiMgtDAO, Mockito.times(1)).getConsumerKeysWithMode(Mockito.anyInt(), Mockito.anyString());
-        String callbackURL = "https://identity.prod.comm";
-        newApplication.setCallbackUrl(callbackURL);
-        oldApplication.setCallbackUrl(callbackURL);
-        Mockito.doThrow(APIManagementException.class).when(cacheInvalidator).invalidateCacheForApp(Mockito.anyInt());
-        apiConsumer.updateApplication(newApplication);
-        Mockito.verify(apiMgtDAO, Mockito.times(2)).getConsumerKeysWithMode(Mockito.anyInt(), Mockito.anyString());
-
     }
 
     @Test

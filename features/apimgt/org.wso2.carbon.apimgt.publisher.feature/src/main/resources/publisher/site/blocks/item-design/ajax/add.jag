@@ -583,9 +583,21 @@ if(jagg.isCSRFTokenValid())
              for (var i = 0; i < inputString.length; ++i) {
                byteArray.push(inputString.charCodeAt(i));
              }
-             var base64EncodedEncryptedPassword = CryptoUtil.getDefaultCryptoUtil().encryptAndBase64Encode(byteArray);
-             session.put(request.getParameter("name", "UTF-8") + "-" + request.getParameter("version") +
-                                                                        "-epPassword", base64EncodedEncryptedPassword);
+
+             try {
+                 var base64EncodedEncryptedPassword = CryptoUtil.getDefaultCryptoUtil().encryptAndBase64Encode(byteArray);
+                 session.put(request.getParameter("name", "UTF-8") + "-" + request.getParameter("version") +
+                        "-epPassword", base64EncodedEncryptedPassword);
+             } catch (e) {
+                 log.error(e);
+                 obj = {
+                     error:true,
+                     message:"Error occurred while encrypting the password"
+                 };
+                 print(obj);
+                 return;
+             }
+
             } else if (apiBackendPassword == "*****") {
              var encryptedPasswordFromSession = session.get(request.getParameter("name", "UTF-8") + "-" +
                                                                 request.getParameter("version") + "-epPassword");
