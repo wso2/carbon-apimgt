@@ -7,7 +7,7 @@ import Paper from 'material-ui/Paper';
 import { withStyles } from 'material-ui/styles';
 import { Manager, Target, Popper } from 'react-popper';
 import ClickAwayListener from 'material-ui/utils/ClickAwayListener';
-import MoreHoriz from 'material-ui-icons/MoreHoriz';
+import MoreHoriz from '@material-ui/icons/MoreHoriz';
 import List, {ListItem, ListItemText} from 'material-ui/List';
 import {Link} from 'react-router-dom'
 

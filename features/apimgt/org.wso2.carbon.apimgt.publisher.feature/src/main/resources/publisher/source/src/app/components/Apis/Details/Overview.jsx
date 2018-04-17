@@ -23,14 +23,14 @@ import Typography from 'material-ui/Typography';
 import { withStyles } from 'material-ui/styles';
 import PropTypes from 'prop-types';
 import ChipInput from 'material-ui-chip-input';
-import OpenInNew from 'material-ui-icons/OpenInNew';
+import OpenInNew from '@material-ui/icons/OpenInNew';
 import Tooltip from 'material-ui/Tooltip';
 import Select from 'material-ui/Select';
 import Input, { InputLabel } from 'material-ui/Input';
 import { MenuItem } from 'material-ui/Menu';
 import { ListItemText } from 'material-ui/List';
 import Checkbox from 'material-ui/Checkbox';
-import EditIcon from 'material-ui-icons/ModeEdit';
+import EditIcon from '@material-ui/icons/ModeEdit';
 import { FormControl } from 'material-ui/Form';
 import IconButton from 'material-ui/IconButton';
 

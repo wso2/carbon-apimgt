@@ -27,8 +27,8 @@ import Button from 'material-ui/Button';
 import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
 import IconButton from 'material-ui/IconButton';
-import List from 'material-ui-icons/List';
-import GridIcon from 'material-ui-icons/GridOn';
+import List from '@material-ui/icons/List';
+import GridIcon from '@material-ui/icons/GridOn';
 import AddNewMenu from './AddNewMenu';
 import Alert from '../../Shared/Alert';
 

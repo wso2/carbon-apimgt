@@ -21,7 +21,7 @@ import { Link } from 'react-router-dom';
 import { TableCell, TableRow } from 'material-ui/Table';
 import Dialog, { DialogActions, DialogContent, DialogContentText, DialogTitle } from 'material-ui/Dialog';
 import Button from 'material-ui/Button';
-import Delete from 'material-ui-icons/Delete';
+import Delete from '@material-ui/icons/Delete';
 import Slide from 'material-ui/transitions/Slide';
 import IconButton from 'material-ui/IconButton';
 import PropTypes from 'prop-types';

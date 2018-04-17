@@ -42,12 +42,27 @@ const styles = () => ({
  */
 class EndpointForm extends Component {
     /**
+     * Creates an instance of EndpointForm.
+     * @param {any} props @inheritDoc
+     * @memberof EndpointForm
+     */
+    constructor(props) {
+        super(props);
+        this.state = {};
+    }
+
+    /**
      * @inheritDoc
-     * @returns {React.Component}
+     * @returns {React.Component} component
      * @memberof EndpointForm
      */
     render() {
-        const { classes, handleInputs } = this.props;
+        const {
+            classes, endpointSecurity, endpointType, endpointSecurityType,
+        } = this.props;
+        let { handleInputs } = this.props;
+        const isReadOnly = !handleInputs; // Showing the endpoint details
+        handleInputs = handleInputs || null;
         return (
             <div>
                 <form className={classes.container} noValidate autoComplete='off'>
@@ -59,7 +74,7 @@ class EndpointForm extends Component {
                         helperText='Enter a name to identify the endpoint. You will be able to pick this endpoint
                                         when creating/editing APIs '
                         fullWidth
-                        name='name'
+                        name='endpointName'
                         onChange={handleInputs}
                         placeholder='Endpoint Name'
                         autoFocus
@@ -71,11 +86,9 @@ class EndpointForm extends Component {
                         row
                         aria-label='type'
                         className={classes.group}
-                        value={this.state.endpointType}
-                        onChange={(e) => {
-                            e.target.name = 'endpointType';
-                            handleInputs(e);
-                        }}
+                        value={endpointType}
+                        name='endpointType'
+                        onChange={handleInputs}
                     >
                         <FormControlLabel value='http' control={<Radio color='primary' />} label='HTTP' />
                         <FormControlLabel value='https' control={<Radio color='primary' />} label='HTTPS' />
@@ -88,16 +101,13 @@ class EndpointForm extends Component {
                         }}
                         helperText='Max Transactions per second'
                         fullWidth
-                        name='name'
-                        onChange={(e) => {
-                            e.target.name = 'maxTPS';
-                            handleInputs(e);
-                        }}
+                        name='endpointMaxTPS'
+                        onChange={handleInputs}
                         placeholder='100'
                     />
                     <TextField
                         className={classes.inputText}
-                        name='serviceUrl'
+                        name='endpointServiceUrl'
                         label='Service URL'
                         InputLabelProps={{
                             shrink: true,
@@ -111,24 +121,23 @@ class EndpointForm extends Component {
                         className={classes.inputText}
                         control={
                             <Switch
-                                checked={this.state.secured}
-                                onChange={this.handleChange('secured')}
+                                name='endpointSecurity'
+                                checked={endpointSecurity}
+                                onChange={handleInputs}
                                 value='secured'
                                 color='primary'
                             />
                         }
                         label='Secured'
                     />
-                    {this.state.secured && (
+                    {endpointSecurity && (
                         <div className={classes.secured}>
                             Type
                             <RadioGroup
                                 row
-                                value={this.state.securityType}
-                                onChange={(e) => {
-                                    e.target.name = 'securityType';
-                                    handleInputs(e);
-                                }}
+                                name='endpointSecurityType'
+                                value={endpointSecurityType}
+                                onChange={handleInputs}
                             >
                                 <FormControlLabel value='basic' control={<Radio />} label='Basic' />
                                 <FormControlLabel value='digest' control={<Radio />} label='Digest' />
@@ -142,7 +151,7 @@ class EndpointForm extends Component {
                                 helperText='Enter the Username'
                                 fullWidth
                                 margin='normal'
-                                name='username'
+                                name='endpointSecurityUsername'
                                 onChange={handleInputs}
                                 placeholder='Username'
                             />
@@ -154,22 +163,12 @@ class EndpointForm extends Component {
                                 }}
                                 helperText='Enter the Password'
                                 fullWidth
-                                name='password'
+                                name='endpointSecurityPassword'
                                 onChange={handleInputs}
                                 placeholder='Password'
                             />
                         </div>
                     )}
-                    <div className={classes.buttonsWrapper}>
-                        <Button variant='raised' color='primary' className={classes.button} onClick={this.handleSubmit}>
-                            Create
-                        </Button>
-                        <Link to='/endpoints/'>
-                            <Button variant='raised' className={classes.button}>
-                                Cancel
-                            </Button>
-                        </Link>
-                    </div>
                 </form>
             </div>
         );

@@ -17,11 +17,13 @@
  */
 
 import React from 'react';
+import EndpointForm from '../Create/EndpointForm';
 
 const EndpointDetails = () => {
     return (
         <div>
             <h4>Endpoint details page!</h4>
+            <EndpointForm />
         </div>
     );
 };

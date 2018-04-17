@@ -22,7 +22,7 @@ import List, {
     ListItemText,
 } from 'material-ui/List';
 import Avatar from 'material-ui/Avatar'
-import Person from 'material-ui-icons/Person';
+import Person from '@material-ui/icons/Person';
 
 const LifeCycleHistory = props => {
     return (

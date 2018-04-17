@@ -27,7 +27,7 @@ import Table, { TableBody, TableCell, TableHead, TableRow, TableFooter, TablePag
 import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
 import Grid from 'material-ui/Grid';
-import ArrowBack from 'material-ui-icons/ArrowBack';
+import ArrowBack from '@material-ui/icons/ArrowBack';
 import { FormControl } from 'material-ui/Form';
 import TextField from 'material-ui/TextField';
 import Select from 'material-ui/Select';

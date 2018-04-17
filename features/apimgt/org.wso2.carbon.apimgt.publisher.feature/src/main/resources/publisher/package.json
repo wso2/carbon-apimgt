@@ -16,6 +16,7 @@
   "author": "WSO2 Org",
   "license": "Apache-2.0",
   "dependencies": {
+    "@material-ui/icons": "^1.0.0-beta.42",
     "antd": "^2.11.2",
     "async-react-component": "^0.7.0",
     "axios": "^0.16.1",
@@ -24,9 +25,8 @@
     "file-loader": "^0.11.2",
     "log4javascript": "^1.4.15",
     "material-design-icons": "^3.0.1",
-    "material-ui": "^1.0.0-beta.38",
+    "material-ui": "^1.0.0-beta.40",
     "material-ui-chip-input": "^1.0.0-beta.4",
-    "material-ui-icons": "^1.0.0-alpha.19",
     "prop-types": "^15.5.10",
     "qs": "^6.4.0",
     "rc-notification": "^3.0.1",

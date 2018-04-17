@@ -29,7 +29,7 @@ import {
     FormHelperText,
     FormControlLabel,
 } from 'material-ui';
-import { Done, ErrorOutline } from 'material-ui-icons';
+import { Done, ErrorOutline } from '@material-ui/icons/';
 import PropTypes from 'prop-types';
 
 import FileUpload from './FileUpload';

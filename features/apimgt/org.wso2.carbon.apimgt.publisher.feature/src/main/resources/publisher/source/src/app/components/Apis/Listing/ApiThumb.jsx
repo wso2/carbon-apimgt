@@ -22,7 +22,7 @@ import { Redirect, Switch } from 'react-router-dom';
 import Typography from 'material-ui/Typography';
 import Grid from 'material-ui/Grid';
 import { withStyles } from 'material-ui/styles';
-import Delete from 'material-ui-icons/Delete';
+import Delete from '@material-ui/icons/Delete';
 import PropTypes from 'prop-types';
 
 import MoreMenu from './MoreMenu';

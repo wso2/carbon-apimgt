@@ -34,6 +34,7 @@ import Endpoints from './app/components/Endpoints';
 import Base from './app/components/Base';
 import Login from './app/components/Login/Login';
 import Logout from './app/components/Logout';
+import AppErrorBoundary from './app/components/Shared/AppErrorBoundary';
 
 const themes = [];
 const darkTheme = createMuiTheme({
@@ -179,12 +180,14 @@ Protected.propTypes = {
  */
 const Publisher = () => {
     return (
-        <Router basename='/publisher'>
-            <Switch>
-                <Route path='/login' component={Login} />
-                <Route path='/logout' component={Logout} /> <Route component={Protected} />
-            </Switch>
-        </Router>
+        <AppErrorBoundary appName='Publisher Application'>
+            <Router basename='/publisher'>
+                <Switch>
+                    <Route path='/login' component={Login} />
+                    <Route path='/logout' component={Logout} /> <Route component={Protected} />
+                </Switch>
+            </Router>
+        </AppErrorBoundary>
     );
 };
 

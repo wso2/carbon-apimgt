@@ -21,12 +21,12 @@ import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
 import Snackbar from 'material-ui/Snackbar';
 import IconButton from 'material-ui/IconButton';
-import CloseIcon from 'material-ui-icons/Close';
+import CloseIcon from '@material-ui/icons/Close';
 
-import Info from 'material-ui-icons/Info';
-import Error from 'material-ui-icons/Error';
-import Warning from 'material-ui-icons/Warning';
-import Done from 'material-ui-icons/Done';
+import Info from '@material-ui/icons/Info';
+import Error from '@material-ui/icons/Error';
+import Warning from '@material-ui/icons/Warning';
+import Done from '@material-ui/icons/Done';
 import { CircularProgress as Loading } from 'material-ui/Progress';
 
 const styles = {

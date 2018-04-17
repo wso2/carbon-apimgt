@@ -19,7 +19,7 @@
 import React, { Component } from 'react';
 import Typography from 'material-ui/Typography';
 import ExpansionPanel, { ExpansionPanelDetails, ExpansionPanelSummary } from 'material-ui/ExpansionPanel';
-import ExpandMoreIcon from 'material-ui-icons/ExpandMore';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { withStyles } from 'material-ui/styles';
 
 import Grid from 'material-ui/Grid';

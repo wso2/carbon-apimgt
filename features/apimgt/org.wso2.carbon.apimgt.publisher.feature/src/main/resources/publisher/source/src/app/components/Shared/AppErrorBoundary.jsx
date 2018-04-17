@@ -9,7 +9,7 @@ import Avatar from 'material-ui/Avatar';
 import red from 'material-ui/colors/red';
 import Divider from 'material-ui/Divider';
 
-const styles = theme => ({
+const styles = () => ({
     cardContent: { color: 'pink', backgroundColor: 'black' },
     avatar: {
         margin: 10,
@@ -72,7 +72,7 @@ class AppErrorBoundary extends Component {
                             }
                             title={
                                 <Typography variant='headline'>
-                                    Aaaah! Something went wrong while rendering {appName}
+                                    Aaaah! Something went wrong while rendering the {appName}
                                 </Typography>
                             }
                             subheader={<Typography color='error'>{error.message}</Typography>}
