@@ -23,7 +23,7 @@ import AppBar from 'material-ui/AppBar';
 import Toolbar from 'material-ui/Toolbar';
 import IconButton from 'material-ui/IconButton';
 import Button from 'material-ui/Button';
-import MenuIcon from 'material-ui-icons/Menu';
+import MenuIcon from '@material-ui/icons/Menu';
 import Menu, { MenuItem } from 'material-ui/Menu';
 import Typography from 'material-ui/Typography';
 import Divider from 'material-ui/Divider';
@@ -44,6 +44,16 @@ const messages = {
     failure: 'Error while creating API rate limit',
 };
 
+const helperTextObject = [
+    ['API', { format: 'Format : ${context}', example: 'Eg : /test/1.0.0' }],
+    ['APPLICATION',
+        { format: 'Format : ${userName}:${applicationName}', example: 'Eg : admin:DefaultApplication' }],
+    ['USER', { format: 'Format : ${userName}', example: 'Eg : admin' }],
+    ['IP', { format: 'Format : ${ip}', example: 'Eg : 127.0.0.1' }],
+    ['IP_RANGE', { format: 'Format : ${ip}', example: 'Eg : 127.0.0.1' }]
+];
+const helperTextMap = new Map(helperTextObject);
+
 class CreateBlackListPolicy extends Component {
     constructor(props) {
         super(props);
@@ -62,6 +72,10 @@ class CreateBlackListPolicy extends Component {
 
             },
             value: 'API',
+            helperText: {
+                format: 'Format : ${context}',
+                example: 'Eg : /test/1.0.0'
+            }
         };
         this.handleChangeChild = this.handleChangeChild.bind(this);
         this.handleChangeChildValue = this.handleChangeChildValue.bind(this);
@@ -71,13 +85,19 @@ class CreateBlackListPolicy extends Component {
 
     handleChangeChild(event) {
         const policy = this.state.policy;
-        const value = event.target.value
+        const { value } = event.target;
+        const helperText = this.getHelperText(value);
         policy.conditionType = value;
+
         if (value === 'IP' || value === 'IP_RANGE') {
             policy.ipCondition.ipConditionType = value;
         }
-        this.setState({ value: value, policy: policy });
+        this.setState({ value, policy, helperText });
     };
+
+    getHelperText(policyType) {
+        return helperTextMap.get(policyType);
+    }
 
     handleChangeChildValue(event) {
         const policy = this.state.policy;
@@ -129,6 +149,7 @@ class CreateBlackListPolicy extends Component {
                         </Grid>
                         <BlackListDetails policy={this.state.policy}
                             selectedValue={this.state.value}
+                            helperText={this.state.helperText}
                             handleChangeChild={this.handleChangeChild}
                             handleChangeChildValue={this.handleChangeChildValue} />
 

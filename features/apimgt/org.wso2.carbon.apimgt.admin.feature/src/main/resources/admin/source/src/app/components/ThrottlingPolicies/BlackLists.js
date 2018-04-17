@@ -28,7 +28,7 @@ import Toolbar from 'material-ui/Toolbar';
 import IconButton from 'material-ui/IconButton';
 import Divider from 'material-ui/Divider';
 import Button from 'material-ui/Button';
-import MenuIcon from 'material-ui-icons/Menu';
+import MenuIcon from '@material-ui/icons/Menu';
 import TextField from 'material-ui/TextField';
 import { withStyles } from 'material-ui/styles';
 import Switch from 'material-ui/Switch';
@@ -156,9 +156,6 @@ class BlackLists extends Component {
                                     Add Black List Policy
                                 </Button>
                             </Link>
-                            <Typography type="caption" gutterBottom align="left" className="page-title-help">
-                                Description goes here.
-                            </Typography>
                         </div>
                         <Divider className={classes.divider} />
 

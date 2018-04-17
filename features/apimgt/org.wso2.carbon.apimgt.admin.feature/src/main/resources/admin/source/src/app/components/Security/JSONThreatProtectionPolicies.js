@@ -28,7 +28,7 @@ import Toolbar from 'material-ui/Toolbar';
 import IconButton from 'material-ui/IconButton';
 import Divider from 'material-ui/Divider';
 import Button from 'material-ui/Button';
-import MenuIcon from 'material-ui-icons/Menu';
+import MenuIcon from '@material-ui/icons/Menu';
 import TextField from 'material-ui/TextField';
 
 import API from '../../data/api'

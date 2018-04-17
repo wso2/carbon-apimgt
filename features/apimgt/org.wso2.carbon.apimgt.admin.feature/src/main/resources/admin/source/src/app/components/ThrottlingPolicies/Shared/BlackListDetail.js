@@ -26,8 +26,8 @@ import Typography from 'material-ui/Typography';
 import green from 'material-ui/colors/green';
 import Radio, { RadioGroup } from 'material-ui/Radio';
 import { FormLabel, FormControl, FormControlLabel, FormHelperText } from 'material-ui/Form';
-import RadioButtonUncheckedIcon from 'material-ui-icons/RadioButtonUnchecked';
-import RadioButtonCheckedIcon from 'material-ui-icons/RadioButtonChecked';
+import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
+import RadioButtonCheckedIcon from '@material-ui/icons/RadioButtonChecked';
 
 import './Shared.css';
 import { withStyles } from 'material-ui/styles';
@@ -35,13 +35,14 @@ import { withStyles } from 'material-ui/styles';
 const styles = theme => ({
     root: {
         display: 'flex',
+        color: 'green'
     },
     formControl: {
         margin: theme.spacing.unit * 3,
     },
     group: {
         margin: `${theme.spacing.unit}px 0`,
-    },
+    }
 });
 
 class BlackListDetails extends Component {
@@ -75,7 +76,7 @@ class BlackListDetails extends Component {
                             value={this.props.selectedValue}
                             onClick={this.handleChange}
                         >
-                            <FormControlLabel value="API" control={<Radio />} label="Api Context" />
+                            <FormControlLabel value="API" control={<Radio />} label="API Context" />
                             <FormControlLabel value="APPLICATION" control={<Radio />} label="Application" />
                             <FormControlLabel value="USER" control={<Radio />} label="User" />
                             <FormControlLabel value="IP" control={<Radio />} label="IP Address" />
@@ -117,6 +118,8 @@ class BlackListDetails extends Component {
                                 className='text-field-full'
                                 margin='normal'
                             />
+                            <FormHelperText className={classes.root} id="format-helper-text">{this.props.helperText.format}</FormHelperText>
+                            <FormHelperText className={classes.root} id="example-helper-text">{this.props.helperText.example}</FormHelperText>
                             <TextField
                                 id='end_ip'
                                 required
@@ -127,6 +130,8 @@ class BlackListDetails extends Component {
                                 margin='normal'
                             />
                         </div>}
+                    <FormHelperText className={classes.root} id="format-helper-text">{this.props.helperText.format}</FormHelperText>
+                    <FormHelperText className={classes.root} id="example-helper-text">{this.props.helperText.example}</FormHelperText>
                 </Grid>
 
             </Paper>

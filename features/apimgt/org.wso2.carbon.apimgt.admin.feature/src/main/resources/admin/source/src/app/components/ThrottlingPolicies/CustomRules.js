@@ -16,25 +16,18 @@
  * under the License.
  */
 
-import React, { Component } from 'react'
+import React, {Component} from 'react'
 
-import { Link } from 'react-router-dom'
+import {Link} from 'react-router-dom'
 import Grid from 'material-ui/Grid';
 import Paper from 'material-ui/Paper';
 import Typography from 'material-ui/Typography';
-import Table, { TableBody, TableCell, TableHead, TableRow } from 'material-ui/Table';
-import AppBar from 'material-ui/AppBar';
-import Toolbar from 'material-ui/Toolbar';;
-import IconButton from 'material-ui/IconButton';
+import Table, {TableBody, TableCell, TableHead, TableRow} from 'material-ui/Table';
 import Divider from 'material-ui/Divider';
 import Button from 'material-ui/Button';
-import MenuIcon from 'material-ui-icons/Menu';
-import TextField from 'material-ui/TextField';
-import { withStyles } from 'material-ui/styles';
+import {withStyles} from 'material-ui/styles';
 
 import API from '../../data/api'
-import Message from '../Shared/Message'
-import Confirm from '../Shared/Confirm'
 import Alert from '../Shared/Alert'
 
 const messages = {
@@ -130,9 +123,6 @@ class CustomRules extends Component {
                                     Add Custom Rule
                                 </Button>
                             </Link>
-                            <Typography type="caption" gutterBottom align="left" className="page-title-help">
-                                Description goes here.
-                            </Typography>
                         </div>
                         <Divider className={classes.divider} />
 
