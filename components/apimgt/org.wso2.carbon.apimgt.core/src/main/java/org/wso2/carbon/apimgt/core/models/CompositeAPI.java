@@ -20,7 +20,7 @@
 
 package org.wso2.carbon.apimgt.core.models;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,10 +45,10 @@ public class CompositeAPI {
     private final Set<String> transport;
     private final List<String> labels;
     private final String applicationId;
-    private final LocalDateTime createdTime;
+    private final Instant createdTime;
     private final String createdBy;
     private final String updatedBy;
-    private final LocalDateTime lastUpdatedTime;
+    private final Instant lastUpdatedTime;
     private final Map<String, UriTemplate> uriTemplates;
     private final String copiedFromApiId;
     private final String apiDefinition;
@@ -124,7 +124,7 @@ public class CompositeAPI {
         return applicationId;
     }
 
-    public LocalDateTime getCreatedTime() {
+    public Instant getCreatedTime() {
         return createdTime;
     }
 
@@ -136,7 +136,7 @@ public class CompositeAPI {
         return updatedBy;
     }
 
-    public LocalDateTime getLastUpdatedTime() {
+    public Instant getLastUpdatedTime() {
         return lastUpdatedTime;
     }
 
@@ -226,10 +226,10 @@ public class CompositeAPI {
         private Set<String> transport;
         private List<String> labels;
         private String applicationId;
-        private LocalDateTime createdTime;
+        private Instant createdTime;
         private String createdBy;
         private String updatedBy;
-        private LocalDateTime lastUpdatedTime;
+        private Instant lastUpdatedTime;
         private Map<String, UriTemplate> uriTemplates;
         private String copiedFromApiId;
         private String apiDefinition;
@@ -389,7 +389,7 @@ public class CompositeAPI {
          * @param createdTime the {@code createdTime} to set
          * @return a reference to this Builder
          */
-        public Builder createdTime(LocalDateTime createdTime) {
+        public Builder createdTime(Instant createdTime) {
             this.createdTime = createdTime;
             return this;
         }
@@ -425,7 +425,7 @@ public class CompositeAPI {
          * @param lastUpdatedTime the {@code lastUpdatedTime} to set
          * @return a reference to this Builder
          */
-        public Builder lastUpdatedTime(LocalDateTime lastUpdatedTime) {
+        public Builder lastUpdatedTime(Instant lastUpdatedTime) {
             this.lastUpdatedTime = lastUpdatedTime;
             return this;
         }
@@ -567,7 +567,7 @@ public class CompositeAPI {
             return applicationId;
         }
 
-        public LocalDateTime getCreatedTime() {
+        public Instant getCreatedTime() {
             return createdTime;
         }
 
@@ -579,7 +579,7 @@ public class CompositeAPI {
             return updatedBy;
         }
 
-        public LocalDateTime getLastUpdatedTime() {
+        public Instant getLastUpdatedTime() {
             return lastUpdatedTime;
         }
 

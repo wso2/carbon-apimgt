@@ -38,6 +38,7 @@ import org.wso2.carbon.messaging.CarbonMessage;
 import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 import org.wso2.msf4j.Request;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import javax.ws.rs.core.Response;
 
@@ -76,8 +77,8 @@ public class ExportApiServiceImplTestCase {
         testApp.setCreatedUser("admin");
         testApp.setUpdatedUser("admin");
         testApp.setStatus("APPROVED");
-        testApp.setCreatedTime(LocalDateTime.now());
-        testApp.setUpdatedTime(LocalDateTime.now());
+        testApp.setCreatedTime(Instant.now());
+        testApp.setUpdatedTime(Instant.now());
         testApp.setApplicationKeys(null);
         testApp.setPermissionString("7");
         testApp.setPermissionMap(null);

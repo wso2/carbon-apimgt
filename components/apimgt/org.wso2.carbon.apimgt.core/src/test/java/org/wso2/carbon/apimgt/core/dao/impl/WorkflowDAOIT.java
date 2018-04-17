@@ -30,7 +30,7 @@ import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
 import org.wso2.carbon.apimgt.core.workflow.Workflow;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -82,7 +82,7 @@ public class WorkflowDAOIT extends DAOIntegrationTestBase {
         Assert.assertEquals(retrieveWorflow.getStatus(), workflow.getStatus());
 
         workflow.setStatus(WorkflowStatus.APPROVED);
-        workflow.setUpdatedTime(LocalDateTime.now());
+        workflow.setUpdatedTime(Instant.now());
         workflowDAO.updateWorkflowStatus(workflow);
         retrieveWorflow = workflowDAO.retrieveWorkflow(workflow.getExternalWorkflowReference());
 
@@ -95,7 +95,7 @@ public class WorkflowDAOIT extends DAOIntegrationTestBase {
         String workflowRefId = UUID.randomUUID().toString();
         Workflow workflow = SampleTestObjectCreator.createWorkflow(workflowRefId);
         workflow.setStatus(WorkflowStatus.APPROVED);
-        workflow.setUpdatedTime(LocalDateTime.now());
+        workflow.setUpdatedTime(Instant.now());
         workflowDAO.updateWorkflowStatus(workflow);        
 
         // Workflow entry should not be in the db. so exception should be thrown

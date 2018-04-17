@@ -22,7 +22,7 @@ package org.wso2.carbon.apimgt.core.models;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -57,10 +57,10 @@ public class FileApi {
     private BusinessInformation businessInformation;
     private CorsConfiguration corsConfiguration;
     private String applicationId;
-    private LocalDateTime createdTime;
+    private Instant createdTime;
     private String createdBy;
     private String updatedBy;
-    private LocalDateTime lastUpdatedTime;
+    private Instant lastUpdatedTime;
     private LifecycleState lifecycleState;
     private Map<String, FileUriTemplate> uriTemplates;
     private String copiedFromApiId;
@@ -321,11 +321,11 @@ public class FileApi {
         this.applicationId = applicationId;
     }
 
-    public LocalDateTime getCreatedTime() {
+    public Instant getCreatedTime() {
         return createdTime;
     }
 
-    public void setCreatedTime(LocalDateTime createdTime) {
+    public void setCreatedTime(Instant createdTime) {
         this.createdTime = createdTime;
     }
 
@@ -345,11 +345,11 @@ public class FileApi {
         this.updatedBy = updatedBy;
     }
 
-    public LocalDateTime getLastUpdatedTime() {
+    public Instant getLastUpdatedTime() {
         return lastUpdatedTime;
     }
 
-    public void setLastUpdatedTime(LocalDateTime lastUpdatedTime) {
+    public void setLastUpdatedTime(Instant lastUpdatedTime) {
         this.lastUpdatedTime = lastUpdatedTime;
     }
 

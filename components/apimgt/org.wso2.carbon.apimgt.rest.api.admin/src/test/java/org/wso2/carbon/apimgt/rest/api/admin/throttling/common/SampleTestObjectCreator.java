@@ -41,6 +41,7 @@ import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 import java.io.InputStream;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -228,10 +229,10 @@ public class SampleTestObjectCreator {
                 visibleRoles(visibleRoles).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration).
-                createdTime(LocalDateTime.now()).
+                createdTime(Instant.now()).
                 createdBy(ADMIN).
                 updatedBy(ADMIN).
-                lastUpdatedTime(LocalDateTime.now()).
+                lastUpdatedTime(Instant.now()).
                 apiPermission(permissionJson).
                 uriTemplates(getMockUriTemplates()).
                 apiDefinition(apiDefinition).workflowStatus(WORKFLOW_STATUS).
@@ -268,9 +269,9 @@ public class SampleTestObjectCreator {
         application.setDescription("This is a test application");
         application.setStatus(APIMgtConstants.ApplicationStatus.APPLICATION_CREATED);
         application.setPolicy(fiftyPerMinApplicationPolicy);
-        application.setCreatedTime(LocalDateTime.now());
+        application.setCreatedTime(Instant.now());
         application.setUpdatedUser(ADMIN);
-        application.setUpdatedTime(LocalDateTime.now());
+        application.setUpdatedTime(Instant.now());
         return application;
     }
 

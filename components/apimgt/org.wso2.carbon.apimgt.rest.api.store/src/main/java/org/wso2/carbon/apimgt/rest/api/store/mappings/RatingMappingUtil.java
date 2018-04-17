@@ -20,9 +20,11 @@
 package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
 import java.text.DecimalFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.core.models.Rating;
+import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.rest.api.store.dto.RatingDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.RatingListDTO;
 
@@ -107,6 +109,9 @@ public class RatingMappingUtil {
         rating.setApiId(apiId);
         rating.setRating(body.getRating());
         rating.setUsername(username);
+        Instant time = APIUtils.getCurrentUTCTime();
+        rating.setCreatedTime(time);
+        rating.setLastUpdatedTime(time);
 
         return rating;
     }

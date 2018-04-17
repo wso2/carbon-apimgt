@@ -18,7 +18,7 @@
 */
 package org.wso2.carbon.apimgt.core.models;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Set;
 
 /**
@@ -38,9 +38,9 @@ public class APISummary {
 
     private String lifeCycleStatus;
 
-    private LocalDateTime createdTime;
+    private Instant createdTime;
 
-    private LocalDateTime lastUpdatedTime;
+    private Instant lastUpdatedTime;
 
     private int securityScheme;
 
@@ -90,19 +90,19 @@ public class APISummary {
         this.lifeCycleStatus = lifeCycleStatus;
     }
 
-    public LocalDateTime getCreatedTime() {
+    public Instant getCreatedTime() {
         return createdTime;
     }
 
-    public void setCreatedTime(LocalDateTime createdTime) {
+    public void setCreatedTime(Instant createdTime) {
         this.createdTime = createdTime;
     }
 
-    public LocalDateTime getLastUpdatedTime() {
+    public Instant getLastUpdatedTime() {
         return lastUpdatedTime;
     }
 
-    public void setLastUpdatedTime(LocalDateTime lastUpdatedTime) {
+    public void setLastUpdatedTime(Instant lastUpdatedTime) {
         this.lastUpdatedTime = lastUpdatedTime;
     }
 

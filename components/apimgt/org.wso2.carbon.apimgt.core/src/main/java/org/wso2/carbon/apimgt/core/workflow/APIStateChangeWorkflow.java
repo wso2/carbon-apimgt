@@ -46,7 +46,7 @@ import org.wso2.carbon.lcm.core.beans.CheckItemBean;
 import org.wso2.carbon.lcm.core.exception.LifecycleException;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -191,7 +191,7 @@ public class APIStateChangeWorkflow extends Workflow {
             }
 
             String localTime = getAttribute(APIMgtConstants.WorkflowConstants.ATTRIBUTE_API_LAST_UPTIME);
-            LocalDateTime time = LocalDateTime.parse(localTime);
+            Instant time = Instant.parse(localTime);
             updateAPIStatusForWorkflowComplete(getWorkflowReference(), targetState, invoker, time);
 
             // check whether this removal of gateway cause events left in the topic.
@@ -228,7 +228,7 @@ public class APIStateChangeWorkflow extends Workflow {
                 + invoker + ", toString()=" + super.toString() + "]";
     }
 
-    private void updateAPIStatusForWorkflowComplete(String apiId, String status, String updatedBy, LocalDateTime time)
+    private void updateAPIStatusForWorkflowComplete(String apiId, String status, String updatedBy, Instant time)
             throws APIManagementException {
         boolean requireReSubscriptions = false;
         boolean deprecateOlderVersion = false;

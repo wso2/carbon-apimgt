@@ -110,7 +110,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -368,9 +368,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             apiBuilder.id(UUID.randomUUID().toString());
         }
 
-        LocalDateTime localDateTime = LocalDateTime.now();
-        apiBuilder.createdTime(localDateTime);
-        apiBuilder.lastUpdatedTime(localDateTime);
+        Instant dateTime = Instant.now();
+        apiBuilder.createdTime(dateTime);
+        apiBuilder.lastUpdatedTime(dateTime);
         apiBuilder.createdBy(getUsername());
         apiBuilder.updatedBy(getUsername());
 
@@ -964,7 +964,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             API api = getApiDAO().getAPI(apiId);
             if (api != null && !APILCWorkflowStatus.PENDING.toString().equals(api.getWorkflowStatus())) {
                 API.APIBuilder apiBuilder = new API.APIBuilder(api);
-                apiBuilder.lastUpdatedTime(LocalDateTime.now());
+                apiBuilder.lastUpdatedTime(Instant.now());
                 apiBuilder.updatedBy(getUsername());
                 LifecycleState currentState = getApiLifecycleManager().getLifecycleDataForState(apiBuilder
                         .getLifecycleInstanceId(), apiBuilder.getLifeCycleStatus());
@@ -986,7 +986,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
                 workflow.setWorkflowReference(originalAPI.getId());
                 workflow.setExternalWorkflowReference(UUID.randomUUID().toString());
-                workflow.setCreatedTime(LocalDateTime.now());
+                workflow.setCreatedTime(Instant.now());
                 workflow.setWorkflowType(WorkflowConstants.WF_TYPE_AM_API_STATE);
                 workflow.setInvoker(getUsername());
 
@@ -1061,7 +1061,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         API api = getApiDAO().getAPI(apiId);
         try {
             API.APIBuilder apiBuilder = new API.APIBuilder(api);
-            apiBuilder.lastUpdatedTime(LocalDateTime.now());
+            apiBuilder.lastUpdatedTime(Instant.now());
             apiBuilder.updatedBy(getUsername());
             apiBuilder.lifecycleState(getApiLifecycleManager()
                     .getLifecycleDataForState(apiBuilder.getLifecycleInstanceId(),
@@ -1150,7 +1150,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public String addDocumentationInfo(String apiId, DocumentInfo documentInfo) throws APIManagementException {
         try {
-            LocalDateTime localDateTime = LocalDateTime.now();
+            Instant localDateTime = Instant.now();
             DocumentInfo document;
             DocumentInfo.Builder docBuilder = new DocumentInfo.Builder(documentInfo);
             docBuilder.createdBy(getUsername());
@@ -1272,7 +1272,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public String updateDocumentation(String apiId, DocumentInfo documentInfo) throws APIManagementException {
         try {
-            LocalDateTime localDateTime = LocalDateTime.now();
+            Instant localDateTime = Instant.now();
             DocumentInfo document;
             DocumentInfo.Builder docBuilder = new DocumentInfo.Builder(documentInfo);
             docBuilder.updatedBy(getUsername());
@@ -1789,7 +1789,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public void saveSwagger20Definition(String apiId, String jsonText) throws APIManagementException {
         try {
-            LocalDateTime localDateTime = LocalDateTime.now();
+            Instant localDateTime = Instant.now();
             Map<String, String> oldScopes = apiDefinitionFromSwagger20.getScopesFromSecurityDefinition
                     (getApiSwaggerDefinition(apiId));
             Map<String, String> newScopes = apiDefinitionFromSwagger20.getScopesFromSecurityDefinition(jsonText);

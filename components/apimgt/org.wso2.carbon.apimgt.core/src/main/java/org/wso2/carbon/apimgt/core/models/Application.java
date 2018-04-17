@@ -23,7 +23,7 @@ package org.wso2.carbon.apimgt.core.models;
 
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,9 +39,9 @@ public final class Application {
     private Policy policy;
     private String status;
     private String createdUser;
-    private LocalDateTime createdTime;
+    private Instant createdTime;
     private String updatedUser;
-    private LocalDateTime updatedTime;
+    private Instant updatedTime;
     private List<OAuthApplicationInfo> applicationKeys;
     private ApplicationToken applicationToken;
     private String permissionString;
@@ -74,11 +74,11 @@ public final class Application {
         this.createdUser = createdUser;
     }
 
-    public LocalDateTime getCreatedTime() {
+    public Instant getCreatedTime() {
         return createdTime;
     }
 
-    public void setCreatedTime(LocalDateTime createdTime) {
+    public void setCreatedTime(Instant createdTime) {
         this.createdTime = createdTime;
     }
 
@@ -90,11 +90,11 @@ public final class Application {
         this.updatedUser = updatedUser;
     }
 
-    public LocalDateTime getUpdatedTime() {
+    public Instant getUpdatedTime() {
         return updatedTime;
     }
 
-    public void setUpdatedTime(LocalDateTime updatedTime) {
+    public void setUpdatedTime(Instant updatedTime) {
         this.updatedTime = updatedTime;
     }
 

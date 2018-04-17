@@ -29,7 +29,7 @@ import org.wso2.carbon.lcm.core.ManagedLifecycle;
 import org.wso2.carbon.lcm.core.exception.LifecycleException;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -193,7 +193,7 @@ public final class API {
         return corsConfiguration;
     }
 
-    public LocalDateTime getCreatedTime() {
+    public Instant getCreatedTime() {
         return createdTime;
     }
 
@@ -205,7 +205,7 @@ public final class API {
         return updatedBy;
     }
 
-    public LocalDateTime getLastUpdatedTime() {
+    public Instant getLastUpdatedTime() {
         return lastUpdatedTime;
     }
 
@@ -340,10 +340,10 @@ public final class API {
     private final BusinessInformation businessInformation;
     private final CorsConfiguration corsConfiguration;
     private final String applicationId;
-    private final LocalDateTime createdTime;
+    private final Instant createdTime;
     private final String createdBy;
     private final String updatedBy;
-    private final LocalDateTime lastUpdatedTime;
+    private final Instant lastUpdatedTime;
     private final LifecycleState lifecycleState;
     private final Map<String, UriTemplate> uriTemplates;
     private String copiedFromApiId;
@@ -554,10 +554,10 @@ public final class API {
         private BusinessInformation businessInformation;
         private CorsConfiguration corsConfiguration;
         private String applicationId;
-        private LocalDateTime createdTime;
+        private Instant createdTime;
         private String createdBy;
         private String updatedBy;
-        private LocalDateTime lastUpdatedTime;
+        private Instant lastUpdatedTime;
         private LifecycleState lifecycleState;
         private Map<String, UriTemplate> uriTemplates = Collections.EMPTY_MAP;
         private String copiedFromApiId;
@@ -944,7 +944,7 @@ public final class API {
          * @param createdTime the {@code createdTime} to set
          * @return a reference to this APIBuilder
          */
-        public APIBuilder createdTime(LocalDateTime createdTime) {
+        public APIBuilder createdTime(Instant createdTime) {
             this.createdTime = createdTime;
             return this;
         }
@@ -980,7 +980,7 @@ public final class API {
          * @param lastUpdatedTime the {@code lastUpdatedTime} to set
          * @return a reference to this APIBuilder
          */
-        public APIBuilder lastUpdatedTime(LocalDateTime lastUpdatedTime) {
+        public APIBuilder lastUpdatedTime(Instant lastUpdatedTime) {
             this.lastUpdatedTime = lastUpdatedTime;
             return this;
         }
@@ -1105,7 +1105,7 @@ public final class API {
             return lifecycleState;
         }
 
-        public LocalDateTime getCreatedTime() {
+        public Instant getCreatedTime() {
             return createdTime;
         }
 
@@ -1113,7 +1113,7 @@ public final class API {
             return createdBy;
         }
 
-        public LocalDateTime getLastUpdatedTime() {
+        public Instant getLastUpdatedTime() {
             return lastUpdatedTime;
         }
 

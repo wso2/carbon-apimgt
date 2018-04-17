@@ -196,9 +196,9 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 }
 
                 ps.setString(6, application.getCreatedUser());
-                ps.setTimestamp(7, Timestamp.valueOf(application.getCreatedTime()));
+                ps.setTimestamp(7, Timestamp.from(application.getCreatedTime()));
                 ps.setString(8, application.getCreatedUser());
-                ps.setTimestamp(9, Timestamp.valueOf(application.getCreatedTime()));
+                ps.setTimestamp(9, Timestamp.from(application.getCreatedTime()));
                 ps.executeUpdate();
                 addApplicationPermission(conn, application.getPermissionMap(), application.getId());
                 conn.commit();
@@ -300,7 +300,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 ps.setString(3, updatedApp.getDescription());
                 ps.setString(4, updatedApp.getStatus());
                 ps.setString(5, updatedApp.getUpdatedUser());
-                ps.setTimestamp(6, Timestamp.valueOf(updatedApp.getUpdatedTime()));
+                ps.setTimestamp(6, Timestamp.from(updatedApp.getUpdatedTime()));
                 ps.setString(7, appID);
                 ps.executeUpdate();
                 updateApplicationPermission(conn, updatedApp.getPermissionMap(), updatedApp.getId());
@@ -486,9 +486,9 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             application.setId(rs.getString("UUID"));
             application.setDescription(rs.getString("DESCRIPTION"));
             application.setStatus(rs.getString("APPLICATION_STATUS"));
-            application.setCreatedTime(rs.getTimestamp("CREATED_TIME").toLocalDateTime());
+            application.setCreatedTime(rs.getTimestamp("CREATED_TIME").toInstant());
             application.setUpdatedUser(rs.getString("UPDATED_BY"));
-            application.setUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME").toLocalDateTime());
+            application.setUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME").toInstant());
             application.setPolicy(new ApplicationPolicy(rs.getString("APPLICATION_POLICY_NAME")));
         }
         return application;

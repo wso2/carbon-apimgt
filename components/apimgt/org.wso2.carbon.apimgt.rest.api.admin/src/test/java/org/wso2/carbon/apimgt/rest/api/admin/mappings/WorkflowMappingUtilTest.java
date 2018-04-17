@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.WorkflowResponseDTO.WorkflowStatusEnum;
 import org.wso2.carbon.apimgt.rest.api.admin.mappings.WorkflowMappingUtil;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -61,7 +62,7 @@ public class WorkflowMappingUtilTest {
         List<Workflow> wfList = new ArrayList<>();
         Workflow workflow1 = new ApplicationCreationWorkflow(null, null, null);
         workflow1.setStatus(WorkflowStatus.APPROVED);
-        LocalDateTime date1 = LocalDateTime.now();
+        Instant date1 = Instant.now();
         workflow1.setCreatedTime(date1);
         workflow1.setWorkflowDescription("Description 1");
         workflow1.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
@@ -71,7 +72,7 @@ public class WorkflowMappingUtilTest {
         
         Workflow workflow2 = new SubscriptionCreationWorkflow(null, null, null);
         workflow2.setStatus(WorkflowStatus.APPROVED);
-        LocalDateTime date2 = LocalDateTime.now();
+        Instant date2 = Instant.now();
         workflow2.setCreatedTime(date2);
         workflow2.setWorkflowDescription("Description 2");
         workflow2.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
@@ -108,7 +109,7 @@ public class WorkflowMappingUtilTest {
     public void testToWorkflowDTO() throws Exception {
         Workflow workflow1 = new ApplicationCreationWorkflow(null, null, null);
         workflow1.setStatus(WorkflowStatus.APPROVED);
-        LocalDateTime date1 = LocalDateTime.now();
+        Instant date1 = Instant.now();
         workflow1.setCreatedTime(date1);
         workflow1.setWorkflowDescription("Description 1");
         workflow1.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);

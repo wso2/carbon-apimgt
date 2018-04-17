@@ -73,7 +73,7 @@ public class WorkflowDAOImpl implements WorkflowDAO {
                 prepStmt.setString(1, workflow.getWorkflowReference());
                 prepStmt.setString(2, workflow.getWorkflowType());
                 prepStmt.setString(3, workflow.getStatus().toString());
-                prepStmt.setTimestamp(4, Timestamp.valueOf(workflow.getCreatedTime()));
+                prepStmt.setTimestamp(4, Timestamp.from(workflow.getCreatedTime()));
                 prepStmt.setString(5, workflow.getExternalWorkflowReference());
                 prepStmt.setString(6, WorkflowUtils.mapTojsonString(workflow.getAttributes()));
                 prepStmt.setString(7, workflow.getWorkflowDescription());
@@ -116,7 +116,7 @@ public class WorkflowDAOImpl implements WorkflowDAO {
             try (PreparedStatement prepStmt = connection.prepareStatement(query)) {
                 prepStmt.setString(1, workflow.getStatus().toString());
                 prepStmt.setString(2, workflow.getWorkflowDescription());
-                prepStmt.setTimestamp(3, Timestamp.valueOf(workflow.getUpdatedTime()));
+                prepStmt.setTimestamp(3, Timestamp.from(workflow.getUpdatedTime()));
                 prepStmt.setString(4, workflow.getExternalWorkflowReference());
 
                 prepStmt.execute();
@@ -178,8 +178,8 @@ public class WorkflowDAOImpl implements WorkflowDAO {
             workflow.setStatus(WorkflowStatus.valueOf(rs.getString("WF_STATUS")));
             workflow.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
             workflow.setWorkflowReference(rs.getString("WF_REFERENCE"));
-            workflow.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").toLocalDateTime());
-            workflow.setUpdatedTime(rs.getTimestamp("WF_UPDATED_TIME").toLocalDateTime());
+            workflow.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").toInstant());
+            workflow.setUpdatedTime(rs.getTimestamp("WF_UPDATED_TIME").toInstant());
             workflow.setWorkflowReference(rs.getString("WF_REFERENCE"));
             workflow.setWorkflowDescription(rs.getString("WF_STATUS_DESC"));
             workflow.setAttributes(WorkflowUtils.jsonStringToMap(rs.getString("WF_ATTRIBUTES")));
@@ -200,8 +200,8 @@ public class WorkflowDAOImpl implements WorkflowDAO {
             workflow.setStatus(WorkflowStatus.valueOf(rs.getString("WF_STATUS")));
             workflow.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
             workflow.setWorkflowReference(rs.getString("WF_REFERENCE"));
-            workflow.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").toLocalDateTime());
-            workflow.setUpdatedTime(rs.getTimestamp("WF_UPDATED_TIME").toLocalDateTime());
+            workflow.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").toInstant());
+            workflow.setUpdatedTime(rs.getTimestamp("WF_UPDATED_TIME").toInstant());
             workflow.setWorkflowReference(rs.getString("WF_REFERENCE"));
             workflow.setWorkflowDescription(rs.getString("WF_STATUS_DESC"));
             workflow.setAttributes(WorkflowUtils.jsonStringToMap(rs.getString("WF_ATTRIBUTES")));

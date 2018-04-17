@@ -19,7 +19,7 @@
  */
 package org.wso2.carbon.apimgt.core.models;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * Represents an instance of a Comment. Comments can be associated with APIs.
@@ -31,9 +31,9 @@ public final class Comment {
     private String commentedUser;
     private String commentText;
     private String createdUser;
-    private LocalDateTime createdTime;
+    private Instant createdTime;
     private String updatedUser;
-    private LocalDateTime updatedTime;
+    private Instant updatedTime;
 
     public String getApiId() {
         return apiId;
@@ -75,11 +75,11 @@ public final class Comment {
         this.createdUser = createdUser;
     }
 
-    public LocalDateTime getCreatedTime() {
+    public Instant getCreatedTime() {
         return createdTime;
     }
 
-    public void setCreatedTime(LocalDateTime createdTime) {
+    public void setCreatedTime(Instant createdTime) {
         this.createdTime = createdTime;
     }
 
@@ -91,11 +91,11 @@ public final class Comment {
         this.updatedUser = updatedUser;
     }
 
-    public LocalDateTime getUpdatedTime() {
+    public Instant getUpdatedTime() {
         return updatedTime;
     }
 
-    public void setUpdatedTime(LocalDateTime updatedTime) {
+    public void setUpdatedTime(Instant updatedTime) {
         this.updatedTime = updatedTime;
     }
 

@@ -112,7 +112,7 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -249,7 +249,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                         getWorkflowDAO(), getApiGateway());
                 application.setId(uuid);
                 application.setUpdatedUser(getUsername());
-                application.setUpdatedTime(LocalDateTime.now());
+                application.setUpdatedTime(Instant.now());
 
                 Policy appTier = application.getPolicy();
                 if (appTier != null && !appTier.getPolicyName().equals(existingApplication.getPolicy().getPolicyName
@@ -268,7 +268,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 workflow.setCreatedBy(getUsername());
                 workflow.setWorkflowReference(application.getId());
                 workflow.setExternalWorkflowReference(UUID.randomUUID().toString());
-                workflow.setCreatedTime(LocalDateTime.now());
+                workflow.setCreatedTime(Instant.now());
 
                 String workflowDescription = "Update application " + existingApplication.getName() + " with tier "
                         + existingApplication.getPolicy().getPolicyName() + " and description \'"
@@ -611,7 +611,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             SubscriptionCreationWorkflow workflow = new SubscriptionCreationWorkflow(getApiSubscriptionDAO(),
                     getWorkflowDAO(), getApiGateway());
 
-            workflow.setCreatedTime(LocalDateTime.now());
+            workflow.setCreatedTime(Instant.now());
             workflow.setExternalWorkflowReference(UUID.randomUUID().toString());
             workflow.setWorkflowReference(subscriptionId);
             workflow.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
@@ -676,7 +676,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 workflow.setSubscription(subscription);
                 workflow.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
                 workflow.setStatus(WorkflowStatus.CREATED);
-                workflow.setCreatedTime(LocalDateTime.now());
+                workflow.setCreatedTime(Instant.now());
                 workflow.setExternalWorkflowReference(UUID.randomUUID().toString());
                 workflow.setSubscriber(getUsername());
 
@@ -1039,7 +1039,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             apiBuilder.id(UUID.randomUUID().toString());
         }
 
-        LocalDateTime localDateTime = LocalDateTime.now();
+        Instant localDateTime = Instant.now();
         apiBuilder.createdTime(localDateTime);
         apiBuilder.lastUpdatedTime(localDateTime);
         apiBuilder.createdBy(getUsername());
@@ -1562,7 +1562,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             workflow.setWorkflowType(APIMgtConstants.WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION);
             workflow.setWorkflowReference(application.getId());
             workflow.setExternalWorkflowReference(UUID.randomUUID().toString());
-            workflow.setCreatedTime(LocalDateTime.now());
+            workflow.setCreatedTime(Instant.now());
             String workflowDescription = "Application [ " + application.getName() + " ] deletion request from  - "
                     + application.getName();
 
@@ -1668,7 +1668,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 application.setPermissionMap(roleNamePermissionList);
             }
 
-            application.setCreatedTime(LocalDateTime.now());
+            application.setCreatedTime(Instant.now());
             getApplicationDAO().addApplication(application);
 
             WorkflowExecutor appCreationWFExecutor = WorkflowExecutorFactory.getInstance()
@@ -1681,7 +1681,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             workflow.setCreatedBy(getUsername());
             workflow.setWorkflowReference(application.getId());
             workflow.setExternalWorkflowReference(UUID.randomUUID().toString());
-            workflow.setCreatedTime(LocalDateTime.now());
+            workflow.setCreatedTime(Instant.now());
 
             String workflowDescription = "Application [ " + application.getName()
                     + " ] creation request from application creator - " + getUsername() + " with throttling tier - "
