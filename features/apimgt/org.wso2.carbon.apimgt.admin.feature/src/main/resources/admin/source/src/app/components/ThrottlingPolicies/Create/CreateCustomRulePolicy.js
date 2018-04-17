@@ -16,14 +16,14 @@
  * under the License.
  */
 import React, { Component } from 'react';
-import {withRouter} from 'react-router-dom'
+import { withRouter } from 'react-router-dom'
 
 import { Link } from 'react-router-dom';
 import AppBar from 'material-ui/AppBar';
 import Toolbar from 'material-ui/Toolbar';
 import IconButton from 'material-ui/IconButton';
 import Button from 'material-ui/Button';
-import MenuIcon from 'material-ui-icons/Menu';
+import MenuIcon from '@material-ui/icons/Menu';
 import Menu, { MenuItem } from 'material-ui/Menu';
 import Typography from 'material-ui/Typography';
 import Divider from 'material-ui/Divider';
@@ -56,8 +56,13 @@ class CreateCustomRulePolicy extends Component {
                 siddhiQuery: '',
                 keyTemplate: ''
             },
+            anchorEl: null,
+            popperOpen: false,
         };
         this.handleChangeChild = this.handleChangeChild.bind(this);
+        this.handlePolicySave = this.handlePolicySave.bind(this);
+        this.handlePopoverOpen = this.handlePopoverOpen.bind(this);
+        this.handlePopoverClose = this.handlePopoverClose.bind(this);
     }
 
 
@@ -85,16 +90,24 @@ class CreateCustomRulePolicy extends Component {
             });
     }
 
+    handlePopoverOpen(event) {
+        this.setState({ anchorEl: event.target });
+    };
+
+    handlePopoverClose() {
+        this.setState({ anchorEl: null });
+    };
+
     render() {
         return (
             <div>
                 <AppBar position='static'>
                     <Toolbar style={{ minHeight: '30px' }}>
-                        <IconButton color='contrast' aria-label='Menu'>
+                        <IconButton color='default' aria-label='Menu'>
                             <MenuIcon />
                         </IconButton>
                         <Link to='/policies/custom_rules'>
-                            <Button color='contrast'>Go Back</Button>
+                            <Button color='default'>Go Back</Button>
                         </Link>
                     </Toolbar>
                 </AppBar>
@@ -110,18 +123,21 @@ class CreateCustomRulePolicy extends Component {
 
                         <CustomRuleDetails
                             policy={this.state.policy}
+                            state={this.state}
                             handleChangeChild={this.handleChangeChild}
+                            handlePopoverOpen= {this.handlePopoverOpen}
+                            handlePopoverClose= {this.handlePopoverClose}
                         />
 
                         <Paper elevation={20}>
                             <Grid item xs={6} className='grid-item'>
                                 <Divider />
                                 <div>
-                                    <Button raised color='primary' onClick={() => this.handlePolicySave()}>
+                                    <Button  color='primary' onClick={() => this.handlePolicySave()}>
                                         Save
                                     </Button>
                                     <Link to='/policies/custom_rules'>
-                                        <Button raised>Cancel</Button>
+                                        <Button >Cancel</Button>
                                     </Link>
                                 </div>
                             </Grid>
