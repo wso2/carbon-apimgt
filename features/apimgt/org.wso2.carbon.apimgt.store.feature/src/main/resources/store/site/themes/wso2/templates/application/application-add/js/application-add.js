@@ -82,23 +82,7 @@ $(document).ready(function () {
         $('.tagContainer .bootstrap-tagsinput input').keyup(function(e) {
             var tagName = $(this).val();
             $tag = $(this);
-
-            if(/([~!@#;%^&*+=\|\\<>\"\'\/,])/.test(tagName)){
-                $tag.val( $tag.val().replace(/[^a-zA-Z0-9_ -]/g, function(str) {
-                    $('.tags-error').show();
-                    $('.add-tags-error').hide();
-                    $('.add-tags-error').html('');
-                    $('.tags-error').html('Group Id contains one or more illegal characters  (~ ! @ #  ; % ^ & *' +
-                        ' + = { } | &lt; &gt;, \' " \\ \/ ) .');
-                    return '';
-                }));
-            }
-
-            if(tagName.length > 30){
-                $tag.val(tagName.substring(0, 30));
-                $('.tags-error').html(i18n.t('A Group Id can only have a maximum of 30 characters.'));
-            }
-
+            
         });
 
         $('.tags-error').html('');
