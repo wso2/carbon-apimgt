@@ -18,7 +18,6 @@ import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import { Checkbox, FormControlLabel, FormGroup } from "material-ui";
 import Divider from 'material-ui/Divider';
 import Typography from 'material-ui/Typography';
-import { debug } from 'util';
 
 
 // Styles for Grid and Paper elements
@@ -39,10 +38,9 @@ class ProductionKeys extends React.Component {
         this.state = {
             application: null,
             showCS: false, // Show Consumer Secret flag
-            showAT: false// Show Access Token flag
+            showAT: false,// Show Access Token flag
+            key_type: null
         };
-        this.key_type = this.props.location.pathname.split('/').pop() == "productionkeys" 
-            ? Application.KEY_TYPES.PRODUCTION : Application.KEY_TYPES.SANDBOX;
         this.appId = this.props.match.params.applicationId;
         this.handleShowToken = this.handleShowToken.bind(this);
         this.handleCheckboxChange = this.handleCheckboxChange.bind(this);
@@ -51,17 +49,17 @@ class ProductionKeys extends React.Component {
     }
 
     handleClickToken() {
-        let application = this.state.application;
-        const keys = application.keys.get(this.key_type) ||
+        const { application, key_type } = this.state;
+        const keys = application.keys.get(key_type) ||
             {
                 "supportedGrantTypes":
                     ["client_credentials"]
             }
-        if (keys.callbackUrl == null){
+        if (!keys.callbackUrl) {
             keys.callbackUrl = "https://wso2.am.com";
         }
-        application.generateKeys(this.key_type, keys.supportedGrantTypes, keys.callbackUrl).then(
-            () => application.generateToken(this.key_type).then(() => this.setState({ application: application }))
+        application.generateKeys(key_type, keys.supportedGrantTypes, keys.callbackUrl).then(
+            () => application.generateToken(key_type).then(() => this.setState({ application: application }))
         ).catch(
             error => {
                 if (process.env.NODE_ENV !== "production") {
@@ -76,23 +74,35 @@ class ProductionKeys extends React.Component {
     }
 
     handleUpdateToken() {
-        let application = this.state.application;
-        const keys = application.keys.get(this.key_type);
-        application.updateKeys(this.key_type, keys.supportedGrantTypes, keys.callbackUrl, keys.consumerKey, keys.consumerSecret).
+        const { application, key_type } = this.state;
+        const keys = application.keys.get(key_type);
+        application.updateKeys(key_type, keys.supportedGrantTypes, keys.callbackUrl, keys.consumerKey, keys.consumerSecret).
             then(() => this.setState({ application: application })
-        ).catch(
-            error => {
-                if (process.env.NODE_ENV !== "production") {
-                    console.log(error);
+            ).catch(
+                error => {
+                    if (process.env.NODE_ENV !== "production") {
+                        console.log(error);
+                    }
+                    let status = error.status;
+                    if (status === 404) {
+                        this.setState({ notFound: true });
+                    }
                 }
-                let status = error.status;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                }
-            }
-        );
+            );
     }
 
+    static getDerivedStateFromProps(nextProps, prevState) {
+        if (nextProps.location.pathname.split('/').pop() === "productionkeys") {
+            return {
+                key_type: Application.KEY_TYPES.PRODUCTION
+            }
+        }
+        else {
+            return {
+                key_type: Application.KEY_TYPES.SANDBOX
+            }
+        }
+    }
     /**
      * Because application access tokens are not coming with /keys or /application API calls,
      * Fetch access token value upon user request
@@ -103,32 +113,32 @@ class ProductionKeys extends React.Component {
             console.warn("No Application found!");
             return false;
         }
-        let promised_tokens = this.state.application.generateToken(this.key_type);
+        let promised_tokens = this.state.application.generateToken(this.state.key_type);
         promised_tokens.then((token) => this.setState({ showAT: true }))
     }
 
     handleTextChange(event) {
-        const { application } = this.state;
+        const { application, key, key_type } = this.state;
         const { currentTarget } = event;
-        let keys = application.keys.get(this.key_type) ||
+        let keys = application.keys.get(key_type) ||
             {
                 "supportedGrantTypes":
                     ["client_credentials"],
-                "keyType": this.key_type,
+                "keyType": key_type,
             }
         keys.callbackUrl = currentTarget.value;
-        application.keys.set(this.key_type, keys);
+        application.keys.set(key_type, keys);
         this.setState({ application });
     }
 
     handleCheckboxChange(event) {
-        const { application } = this.state;
+        const { application, key_type } = this.state;
         const { currentTarget } = event;
-        const keys = application.keys.get(this.key_type) ||
+        const keys = application.keys.get(key_type) ||
             {
                 "supportedGrantTypes":
                     ["client_credentials"],
-                "keyType": this.key_type,
+                "keyType": key_type,
             }
         let index;
 
@@ -138,7 +148,7 @@ class ProductionKeys extends React.Component {
             index = keys.supportedGrantTypes.indexOf(currentTarget.id)
             keys.supportedGrantTypes.splice(index, 1);
         }
-        application.keys.set(this.key_type, keys);
+        application.keys.set(key_type, keys);
         // update the state with the new array of options
         this.setState({ application });
     };
@@ -177,7 +187,7 @@ class ProductionKeys extends React.Component {
     }
 
     render() {
-        const { notFound } = this.state;
+        const { notFound, showCS, key_type } = this.state;
         if (notFound) {
             return <ResourceNotFound />
         }
@@ -185,14 +195,14 @@ class ProductionKeys extends React.Component {
             return <Loading />
         }
         const { classes } = this.props;
-        let cs_ck_keys = this.state.application.keys.get(this.key_type);
+        let cs_ck_keys = this.state.application.keys.get(key_type);
         let consumerKey = (cs_ck_keys && cs_ck_keys.consumerKey);
         let consumerSecret = (cs_ck_keys && cs_ck_keys.consumerSecret);
         let supportedGrantTypes = (cs_ck_keys && cs_ck_keys.supportedGrantTypes);
         let callbackUrl = (cs_ck_keys && cs_ck_keys.callbackUrl);
         supportedGrantTypes = supportedGrantTypes || false;
-        let accessToken = this.state.application.tokens.has(this.key_type) && 
-            this.state.application.tokens.get(this.key_type).accessToken;
+        let accessToken = this.state.application.tokens.has(key_type) &&
+            this.state.application.tokens.get(key_type).accessToken;
         return (
             <div className={classes.root}>
                 <Paper>
@@ -220,13 +230,13 @@ class ProductionKeys extends React.Component {
                                 <Input
                                     inputProps={{ readonly: true }}
                                     id="consumerSecret"
-                                    type={(this.state.showCS || !consumerSecret) ? 'text' : 'password'}
+                                    type={(showCS || !consumerSecret) ? 'text' : 'password'}
                                     value={consumerSecret || "Keys are not generated yet. Click the Generate token button to generate the keys."}
                                     endAdornment={
                                         <InputAdornment position="end">
                                             <IconButton classes="" onClick={this.handleShowCS}
                                                 onMouseDown={this.handleMouseDownGeneric}>
-                                                {this.state.showCS ? <VisibilityOff /> : <Visibility />}
+                                                {showCS ? <VisibilityOff /> : <Visibility />}
                                             </IconButton>
                                         </InputAdornment>
                                     }
@@ -241,7 +251,7 @@ class ProductionKeys extends React.Component {
                             </Typography>
                             <Typography>
                                 The application can use the following grant types to generate Access Tokens.
-                                Based on the application requirement, you can enable or disable grant types 
+                                Based on the application requirement, you can enable or disable grant types
                                 for this application.
                             </Typography>
                         </Grid>
@@ -298,14 +308,14 @@ class ProductionKeys extends React.Component {
                             <Grid item xs={12}>
                                 <Grid item xs={7}>
                                     <Button variant="raised" color="default"
-                                    onClick={this.handleUpdateToken}
+                                        onClick={this.handleUpdateToken}
                                     >Update</Button>
                                 </Grid>
                                 <Grid item xs={12}>
                                     <Typography variant="subheading">
                                         Generate a Test Access Token
                                     </Typography>
-                                    <Button disabled={this.state.showAT || accessToken} 
+                                    <Button disabled={this.state.showAT || accessToken}
                                         onMouseDown={this.handleMouseDownGeneric}
                                         onClick={this.handleShowToken} variant="raised" color="default"
                                         className="form-buttons">Generate Token</Button>
