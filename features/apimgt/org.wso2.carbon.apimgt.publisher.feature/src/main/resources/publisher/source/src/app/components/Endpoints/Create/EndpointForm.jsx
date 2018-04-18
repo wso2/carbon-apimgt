@@ -56,6 +56,7 @@ class EndpointForm extends Component {
      */
     render() {
         const { classes, endpoint } = this.props;
+        const { endpointConfig, endpointSecurity } = endpoint;
         let { handleInputs } = this.props;
         const isReadOnly = !handleInputs; // Showing the endpoint details
         handleInputs = handleInputs || null;
@@ -70,7 +71,7 @@ class EndpointForm extends Component {
                         helperText='Enter a name to identify the endpoint. You will be able to pick this endpoint
                                         when creating/editing APIs '
                         fullWidth
-                        name='endpointName'
+                        name='name'
                         onChange={handleInputs}
                         placeholder='Endpoint Name'
                         autoFocus
@@ -87,7 +88,7 @@ class EndpointForm extends Component {
                         className={classes.group}
                         value={endpoint.type}
                         disabled={isReadOnly}
-                        name='endpointType'
+                        name='type'
                         onChange={handleInputs}
                     >
                         <FormControlLabel value='http' control={<Radio color='primary' />} label='HTTP' />
@@ -101,7 +102,7 @@ class EndpointForm extends Component {
                         }}
                         helperText='Max Transactions per second'
                         fullWidth
-                        name='endpointMaxTPS'
+                        name='maxTps'
                         defaultValue={endpoint.maxTps}
                         disabled={isReadOnly}
                         onChange={handleInputs}
@@ -110,7 +111,7 @@ class EndpointForm extends Component {
                     />
                     <TextField
                         className={classes.inputText}
-                        name='endpointServiceUrl'
+                        name='serviceUrl'
                         label='Service URL'
                         InputLabelProps={{
                             shrink: true,
@@ -119,7 +120,7 @@ class EndpointForm extends Component {
                         onChange={handleInputs}
                         placeholder='https://forecast-v3.weather.gov'
                         fullWidth
-                        defaultValue={endpoint.endpointConfig.serviceUrl}
+                        defaultValue={endpointConfig && endpointConfig.serviceUrl}
                         disabled={isReadOnly}
                         InputProps={{ classes: { disabled: classes.disabled } }}
                     />
@@ -127,31 +128,32 @@ class EndpointForm extends Component {
                         className={classes.inputText}
                         control={
                             isReadOnly ? (
-                                <Checkbox checked={endpoint.endpointSecurity.enabled} />
+                                <Checkbox checked={endpointSecurity && endpointSecurity.enabled} />
                             ) : (
                                 <Switch
+                                    id='enabled'
                                     name='endpointSecurity'
-                                    checked={endpoint.endpointSecurity.enabled}
+                                    checked={endpointSecurity && endpointSecurity.enabled}
                                     onChange={handleInputs}
-                                    value='secured'
                                     color='primary'
                                 />
                             )
                         }
                         label='Secured'
                     />
-                    {endpoint.endpointSecurity.enabled && (
+                    {endpointSecurity &&
+                        endpointSecurity.enabled && (
                         <div className={classes.secured}>
-                            Type
+                                Type
                             <RadioGroup
                                 row
-                                name='endpointSecurityType'
-                                value={endpoint.endpointSecurity.type}
+                                name='endpointSecurity'
+                                value={endpointSecurity && endpointSecurity.type}
                                 disabled={isReadOnly}
                                 onChange={handleInputs}
                             >
-                                <FormControlLabel value='basic' control={<Radio />} label='Basic' />
-                                <FormControlLabel value='digest' control={<Radio />} label='Digest' />
+                                <FormControlLabel value='basic' control={<Radio id='type' />} label='Basic' />
+                                <FormControlLabel value='digest' control={<Radio id='type' />} label='Digest' />
                             </RadioGroup>
                             <TextField
                                 className={classes.inputText}
@@ -162,10 +164,11 @@ class EndpointForm extends Component {
                                 helperText='Enter the Username'
                                 fullWidth
                                 margin='normal'
-                                name='endpointSecurityUsername'
+                                id='username'
+                                name='endpointSecurity'
                                 onChange={handleInputs}
                                 placeholder='Username'
-                                defaultValue={endpoint.endpointSecurity.username}
+                                defaultValue={endpointSecurity && endpointSecurity.username}
                                 disabled={isReadOnly}
                                 InputProps={{ classes: { disabled: classes.disabled } }}
                             />
@@ -177,10 +180,11 @@ class EndpointForm extends Component {
                                 }}
                                 helperText='Enter the Password'
                                 fullWidth
-                                name='endpointSecurityPassword'
+                                id='password'
+                                name='endpointSecurity'
                                 onChange={handleInputs}
                                 placeholder='Password'
-                                defaultValue={endpoint.endpointSecurity.password}
+                                defaultValue={endpointSecurity && endpointSecurity.password}
                                 disabled={isReadOnly}
                                 InputProps={{ classes: { disabled: classes.disabled } }}
                             />

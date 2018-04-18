@@ -13,8 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import APIClientFactory from './APIClientFactory';
+/* eslint-disable no-underscore-dangle */
+// Because swagerJS generated method contains trailing underscore methods,
+// hence disabling eslint no-underscore-dangle rule
+
 import Resource from './Resource';
+import APIClientFactory from './APIClientFactory';
 import Utils from './Utils';
 
 /**
@@ -27,18 +31,21 @@ export default class Endpoint extends Resource {
      * @param {String} name Endpoint name
      * @param {String} type Endpoint Type
      * @param {Number} maxTps Endpoint max TPS
-     * @param {String} endpointConfig Endpoint config
      * @param {Object} kwargs rest
      * @memberof Endpoint
      */
-    constructor(name, type, maxTps, endpointConfig, kwargs) {
+    constructor(name, type, maxTps, kwargs) {
         super();
         let properties = kwargs;
         if (name instanceof Object) {
             properties = name;
+        } else {
+            this.name = name;
+            this.type = type;
+            this.maxTps = maxTps;
         }
-        this.client = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment().label).client;
         this.endpointSecurity = {};
+        this.endpointConfig = {};
         for (const key in properties) {
             if (Object.prototype.hasOwnProperty.call(properties, key)) {
                 if (key === 'endpointConfig') {
@@ -50,10 +57,44 @@ export default class Endpoint extends Resource {
         }
     }
 
-    /* eslint-disable no-underscore-dangle */
+    /**
+     * Persist the local endpoint object changes via Endpoint REST API
+     * @returns {Promise} Promise resolve with newly created Endpoint object
+     * @memberof Endpoint
+     */
+    save() {
+        const promisedEndpoint = this.client.then((client) => {
+            return this._serialize().then((serializedData) => {
+                const payload = { body: serializedData, 'Content-Type': 'application/json' };
+                return client.apis['Endpoint (Collection)'].post_endpoints(payload, Resource._requestMetaData());
+            });
+        });
+        return promisedEndpoint.then((response) => {
+            return new Endpoint(response.body);
+        });
+    }
 
-    // Because swagerJS generated method contains trailing underscore methods,
-    // hence disabling eslint no-underscore-dangle rule
+    /**
+     * Serialize the object to send over the wire
+     * @returns {Object} serialized JSON object
+     * @memberof Endpoint
+     */
+    _serialize() {
+        return this.client.then((client) => {
+            const { properties } = client.spec.definitions.EndPoint;
+            const data = {};
+            for (const property in this) {
+                if (property in properties) {
+                    if (property === 'endpointConfig') {
+                        data[property] = JSON.stringify(this[property]);
+                    } else {
+                        data[property] = this[property];
+                    }
+                }
+            }
+            return data;
+        });
+    }
     /**
      * Get a global endpoint by giving its UUID
      * @static
@@ -77,6 +118,5 @@ export default class Endpoint extends Resource {
             return new Endpoint(endpointJSON);
         });
     }
-
-    /* eslint-enable no-underscore-dangle */
 }
+/* eslint-enable no-underscore-dangle */

@@ -13,13 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import APIClientFactory from './APIClientFactory';
 import AuthManager from './AuthManager';
+import Utils from './Utils';
 
 /** *
  * Abstract resource representation, Host for generic resource related methods
  */
 export default class Resource {
+    constructor() {
+        this.client = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment().label).client;
+    }
+
     /**
      * @param data
      * @returns {object} Metadata for API request

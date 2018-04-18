@@ -17,21 +17,17 @@
  */
 
 import React, { Component } from 'react';
-import Radio, { RadioGroup } from 'material-ui/Radio';
 import Button from 'material-ui/Button';
 import Typography from 'material-ui/Typography';
-import TextField from 'material-ui/TextField';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
-import { FormControlLabel, FormLabel } from 'material-ui/Form';
-import Switch from 'material-ui/Switch';
 import Grid from 'material-ui/Grid';
 import ArrowBack from '@material-ui/icons/ArrowBack';
 import Alert from '../../Shared/Alert';
 
-import API from '../../../data/api';
 import EndpointForm from './EndpointForm';
+import Endpoint from '../../../data/Endpoint';
 
 const styles = theme => ({
     titleBar: {
@@ -102,10 +98,7 @@ class EndpointCreate extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            endpointType: 'http',
-            endpointSecurity: false,
-            endpointSecurityType: null,
-            endpointMaxTPS: 10,
+            endpoint: new Endpoint('', 'http', 10),
         };
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleInputs = this.handleInputs.bind(this);
@@ -118,12 +111,21 @@ class EndpointCreate extends Component {
      */
     handleInputs(event) {
         const target = event.currentTarget ? event.currentTarget : event.target;
-        const { name } = target;
+        const { endpoint } = this.state;
+
+        const { name, id } = target;
         let { value } = target;
         if (name === 'endpointSecurity') {
-            value = event.currentTarget.checked;
+            if (id === 'enabled') {
+                value = event.currentTarget.checked;
+            }
+            endpoint.endpointSecurity[id] = value;
+        } else if (name === 'serviceUrl') {
+            endpoint.endpointConfig[name] = value;
+        } else {
+            endpoint[name] = value;
         }
-        this.setState({ [name]: value });
+        this.setState({ endpoint });
     }
 
     /**
@@ -132,39 +134,12 @@ class EndpointCreate extends Component {
      * @memberof EndpointCreate
      */
     handleSubmit() {
-        let endpointSecurityObject = { enabled: false };
-        const {
-            endpointSecurity,
-            endpointSecurityUsername,
-            endpointSecurityPassword,
-            endpointSecurityType,
-            endpointType,
-            endpointServiceUrl,
-            endpointMaxTPS,
-            endpointName,
-        } = this.state;
-        if (endpointSecurity) {
-            endpointSecurityObject = {
-                enabled: true,
-                username: endpointSecurityUsername,
-                password: endpointSecurityPassword,
-                type: endpointSecurityType,
-            };
-        }
-        const endpointDefinition = {
-            endpointConfig: JSON.stringify({ serviceUrl: endpointType + '://' + endpointServiceUrl }),
-            endpointSecurity: endpointSecurityObject,
-            type: endpointType,
-            name: endpointName,
-            maxTps: endpointMaxTPS,
-        };
-        const api = new API();
-        const promisedEndpoint = api.addEndpoint(endpointDefinition);
-        return promisedEndpoint
-            .then((response) => {
-                const { name, id } = response.obj;
-                Alert.info('New endpoint ' + name + ' created successfully');
-                const redirectURL = '/endpoints/' + id + '/';
+        const { endpoint } = this.state;
+        endpoint
+            .save()
+            .then((newEndpoint) => {
+                Alert.info('New endpoint ' + newEndpoint.name + ' created successfully');
+                const redirectURL = '/endpoints/' + newEndpoint.id + '/';
                 this.props.history.push(redirectURL);
             })
             .catch((error) => {
@@ -180,6 +155,7 @@ class EndpointCreate extends Component {
      */
     render() {
         const { classes } = this.props;
+        const { endpoint } = this.state;
         return (
             <Grid container spacing={0} justify='flex-start'>
                 <Grid item xs={12} className={classes.titleBar}>
@@ -195,7 +171,7 @@ class EndpointCreate extends Component {
                     </div>
                 </Grid>
                 <Grid item xs={12} lg={6} xl={4}>
-                    <EndpointForm handleInputs={this.handleInputs} {...this.state} />
+                    <EndpointForm handleInputs={this.handleInputs} endpoint={endpoint} />
                     <div className={classes.buttonsWrapper}>
                         <Button variant='raised' color='primary' className={classes.button} onClick={this.handleSubmit}>
                             Create
