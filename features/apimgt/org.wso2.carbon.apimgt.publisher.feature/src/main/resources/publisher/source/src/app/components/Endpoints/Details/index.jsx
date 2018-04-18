@@ -16,16 +16,67 @@
  * under the License.
  */
 
-import React from 'react';
-import EndpointForm from '../Create/EndpointForm';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import Typography from 'material-ui/Typography';
 
-const EndpointDetails = () => {
-    return (
-        <div>
-            <h4>Endpoint details page!</h4>
-            <EndpointForm />
-        </div>
-    );
+import EndpointForm from '../Create/EndpointForm';
+import Endpoint from '../../../data/Endpoint';
+import Progress from '../../Shared/Progress';
+
+/**
+ * Render global endpoint details.
+ * @class EndpointDetails
+ * @extends {Component}
+ */
+class EndpointDetails extends Component {
+    /**
+     * Creates an instance of EndpointDetails.
+     * @param {any} props @inheritDoc
+     * @memberof EndpointDetails
+     */
+    constructor(props) {
+        super(props);
+        this.state = {
+            endpoint: false,
+        };
+        this.endpointUUID = this.props.match.params.endpointUUID;
+    }
+
+    /**
+     * @inheritDoc
+     * @memberof EndpointDetails
+     */
+    componentWillMount() {
+        const promisedEndpoint = Endpoint.get(this.endpointUUID);
+        promisedEndpoint.then(endpoint => this.setState({ endpoint }));
+    }
+
+    /**
+     * @inheritDoc
+     * @returns {React.Component} Global endpoint
+     * @memberof EndpointDetails
+     */
+    render() {
+        const { endpoint } = this.state;
+        if (!endpoint) {
+            return <Progress />;
+        }
+        return (
+            <div>
+                <Typography variant='headline'> {endpoint.name} </Typography>
+                <EndpointForm endpoint={endpoint} />
+            </div>
+        );
+    }
+}
+
+EndpointDetails.propTypes = {
+    match: PropTypes.shape({
+        params: PropTypes.shape({
+            endpointUUID: PropTypes.string,
+        }),
+    }).isRequired,
 };
 
 export default EndpointDetails;

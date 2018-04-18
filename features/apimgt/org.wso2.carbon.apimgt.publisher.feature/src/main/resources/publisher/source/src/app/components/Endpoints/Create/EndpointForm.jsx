@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Radio, { RadioGroup } from 'material-ui/Radio';
-import Button from 'material-ui/Button';
 import TextField from 'material-ui/TextField';
-import { Link } from 'react-router-dom';
 import { FormControlLabel, FormLabel } from 'material-ui/Form';
 import Switch from 'material-ui/Switch';
+import Checkbox from 'material-ui/Checkbox';
 import { withStyles } from 'material-ui/styles';
+import CommonColors from 'material-ui/colors/common';
+import Endpoint from '../../../data/Endpoint';
 
 const styles = () => ({
     textField: {
@@ -27,11 +28,8 @@ const styles = () => ({
     secured: {
         marginTop: 40,
     },
-    button: {
-        marginRight: 20,
-    },
-    buttonsWrapper: {
-        marginTop: 40,
+    disabled: {
+        color: CommonColors.black,
     },
 });
 
@@ -57,9 +55,7 @@ class EndpointForm extends Component {
      * @memberof EndpointForm
      */
     render() {
-        const {
-            classes, endpointSecurity, endpointType, endpointSecurityType,
-        } = this.props;
+        const { classes, endpoint } = this.props;
         let { handleInputs } = this.props;
         const isReadOnly = !handleInputs; // Showing the endpoint details
         handleInputs = handleInputs || null;
@@ -78,6 +74,9 @@ class EndpointForm extends Component {
                         onChange={handleInputs}
                         placeholder='Endpoint Name'
                         autoFocus
+                        defaultValue={endpoint.name}
+                        disabled={isReadOnly}
+                        InputProps={{ classes: { disabled: classes.disabled } }}
                     />
                     <FormLabel component='legend' className={classes.legend}>
                         Endpoint Type
@@ -86,7 +85,8 @@ class EndpointForm extends Component {
                         row
                         aria-label='type'
                         className={classes.group}
-                        value={endpointType}
+                        value={endpoint.type}
+                        disabled={isReadOnly}
                         name='endpointType'
                         onChange={handleInputs}
                     >
@@ -102,8 +102,11 @@ class EndpointForm extends Component {
                         helperText='Max Transactions per second'
                         fullWidth
                         name='endpointMaxTPS'
+                        defaultValue={endpoint.maxTps}
+                        disabled={isReadOnly}
                         onChange={handleInputs}
                         placeholder='100'
+                        InputProps={{ classes: { disabled: classes.disabled } }}
                     />
                     <TextField
                         className={classes.inputText}
@@ -116,27 +119,35 @@ class EndpointForm extends Component {
                         onChange={handleInputs}
                         placeholder='https://forecast-v3.weather.gov'
                         fullWidth
+                        defaultValue={endpoint.endpointConfig.serviceUrl}
+                        disabled={isReadOnly}
+                        InputProps={{ classes: { disabled: classes.disabled } }}
                     />
                     <FormControlLabel
                         className={classes.inputText}
                         control={
-                            <Switch
-                                name='endpointSecurity'
-                                checked={endpointSecurity}
-                                onChange={handleInputs}
-                                value='secured'
-                                color='primary'
-                            />
+                            isReadOnly ? (
+                                <Checkbox checked={endpoint.endpointSecurity.enabled} />
+                            ) : (
+                                <Switch
+                                    name='endpointSecurity'
+                                    checked={endpoint.endpointSecurity.enabled}
+                                    onChange={handleInputs}
+                                    value='secured'
+                                    color='primary'
+                                />
+                            )
                         }
                         label='Secured'
                     />
-                    {endpointSecurity && (
+                    {endpoint.endpointSecurity.enabled && (
                         <div className={classes.secured}>
                             Type
                             <RadioGroup
                                 row
                                 name='endpointSecurityType'
-                                value={endpointSecurityType}
+                                value={endpoint.endpointSecurity.type}
+                                disabled={isReadOnly}
                                 onChange={handleInputs}
                             >
                                 <FormControlLabel value='basic' control={<Radio />} label='Basic' />
@@ -154,6 +165,9 @@ class EndpointForm extends Component {
                                 name='endpointSecurityUsername'
                                 onChange={handleInputs}
                                 placeholder='Username'
+                                defaultValue={endpoint.endpointSecurity.username}
+                                disabled={isReadOnly}
+                                InputProps={{ classes: { disabled: classes.disabled } }}
                             />
                             <TextField
                                 className={classes.inputText}
@@ -166,6 +180,9 @@ class EndpointForm extends Component {
                                 name='endpointSecurityPassword'
                                 onChange={handleInputs}
                                 placeholder='Password'
+                                defaultValue={endpoint.endpointSecurity.password}
+                                disabled={isReadOnly}
+                                InputProps={{ classes: { disabled: classes.disabled } }}
                             />
                         </div>
                     )}
@@ -181,6 +198,7 @@ EndpointForm.defaultProps = {
 EndpointForm.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     handleInputs: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]),
+    endpoint: PropTypes.instanceOf(Endpoint).isRequired,
 };
 
 export default withStyles(styles)(EndpointForm);
