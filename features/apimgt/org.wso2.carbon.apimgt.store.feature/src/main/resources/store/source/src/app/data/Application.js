@@ -58,7 +58,7 @@ export default class Application extends Resource {
      */
     getKeys(key_type) {
         let promise_keys = this.client.then((client) => {
-            return client.apis["Application (Individual)"].get_applications__applicationId__keys({applicationId: this.id});
+            return client.apis["Application (Individual)"].get_applications__applicationId__keys({ applicationId: this.id });
         });
         return promise_keys.then(keys_response => {
             this._setKeys(keys_response.obj);
@@ -79,7 +79,7 @@ export default class Application extends Resource {
                 validityPeriod: 3600,
                 scopes: ""
             };
-            let payload = {applicationId: this.id, body: request_content};
+            let payload = { applicationId: this.id, body: request_content };
             return client.apis["Application (Individual)"].post_applications__applicationId__generate_token(payload);
         });
         return promise_token.then(token_response => {
@@ -92,17 +92,19 @@ export default class Application extends Resource {
     /***
      * Generate Consumer Secret and Consumer Key for this application instance
      * @param key_type {string} Key type either `Production` or `SandBox`
+     * @param supportedGrantTypes {string[]}
+     * @param callbackUrl {string}
      * @returns {promise} Set the generated token into current instance and return tokenObject received as Promise object
      */
-    generateKeys(key_type) {
+    generateKeys(key_type, supportedGrantTypes, callbackUrl) {
         let promised_keys = this.client.then((client) => {
             let request_content =
                 {
                     keyType: key_type, /* TODO: need to support dynamic key types ~tmkb*/
-                    grantTypesToBeSupported: ["password", "client_credentials"], /* TODO: need to give UI checkboxes to get these information ~tmkb*/
-                    callbackUrl: "https://wso2.am.com"
+                    grantTypesToBeSupported: supportedGrantTypes,
+                    callbackUrl: callbackUrl
                 };
-            let payload = {applicationId: this.id, body: request_content};
+            let payload = { applicationId: this.id, body: request_content };
             return client.apis["Application (Individual)"].post_applications__applicationId__generate_keys(payload);
         });
         return promised_keys.then(keys_response => {
@@ -111,11 +113,39 @@ export default class Application extends Resource {
         });
     }
 
+    /***
+     * Generate Consumer Secret and Consumer Key for this application instance
+     * @param key_type {string} Key type either `Production` or `SandBox`
+     * @param supportedGrantTypes {String []}
+     * @param callbackUrl {String}
+     * @param consumerKey {String}
+     * @param consumerSecret {String}
+     * @returns {promise} Update the callbackURL and/or supportedGrantTypes
+     */
+    updateKeys(key_type, supportedGrantTypes, callbackUrl, consumerKey, consumerSecret) {
+        let promised_put = this.client.then((client) => {
+            let request_content =
+            {
+                consumerKey: consumerKey,
+                consumerSecret: consumerSecret,
+                supportedGrantTypes: supportedGrantTypes,
+                callbackUrl: callbackUrl,
+                keyType: key_type
+              }
+            let payload = { applicationId: this.id, keyType: key_type, body: request_content };
+            return client.apis["Application (Individual)"].put_applications__applicationId__keys__keyType_(payload);
+        });
+        return promised_put.then(keys_response => {
+            this.keys.set(key_type, keys_response.obj);
+            return this;
+        });
+    }
+
     static get(id) {
         let apiClient = new APIClientFactory().getAPIClient(Utils.getEnvironment());
         let promised_get = apiClient.client.then(
             (client) => {
-                return client.apis["Application (Individual)"].get_applications__applicationId_({applicationId: id},
+                return client.apis["Application (Individual)"].get_applications__applicationId_({ applicationId: id },
                     this._requestMetaData());
             });
         return promised_get.then(response => {
@@ -137,7 +167,7 @@ export default class Application extends Resource {
         let apiClient = new APIClientFactory().getAPIClient(Utils.getEnvironment());
         let promised_delete = apiClient.client.then(
             (client) => {
-                return client.apis["Application (Individual)"].delete_applications__applicationId_({applicationId: id},
+                return client.apis["Application (Individual)"].delete_applications__applicationId_({ applicationId: id },
                     this._requestMetaData());
             });
         return promised_delete.then(response => response.ok);
