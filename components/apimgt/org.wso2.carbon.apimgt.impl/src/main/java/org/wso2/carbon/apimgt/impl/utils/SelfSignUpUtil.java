@@ -27,14 +27,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.cache.Cache;
-import javax.cache.Caching;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.transport.http.HTTPConstants;
+import org.apache.axis2.util.URL;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -43,7 +42,6 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -62,7 +60,6 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
-
 
 /**
  * This class contains the utility methods used for self signup
@@ -346,7 +343,9 @@ public final class SelfSignUpUtil {
     private static String executeGet(String url, String tenantDomain) throws APIManagementException, IOException {
 
         boolean isDebugEnabled = log.isDebugEnabled();
-        try (CloseableHttpClient httpclient = HttpClientBuilder.create().useSystemProperties().build()) {
+	    URL consentURL = new URL(url);
+        try (CloseableHttpClient httpclient = (CloseableHttpClient) APIUtil
+		        .getHttpClient(consentURL.getPort(), consentURL.getProtocol())) {
 
             HttpGet httpGet = new HttpGet(url);
             setAuthorizationHeader(httpGet, tenantDomain);
