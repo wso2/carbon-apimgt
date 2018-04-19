@@ -32,7 +32,7 @@ import {
     VerifiedUser,
     ArrowDropDown,
     OpenInNew,
-} from 'material-ui-icons';
+} from '@material-ui/icons/';
 import Menu, { MenuItem } from 'material-ui/Menu';
 import Grow from 'material-ui/transitions/Grow';
 import classNames from 'classnames';

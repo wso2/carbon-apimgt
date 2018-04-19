@@ -7,7 +7,7 @@ import Paper from 'material-ui/Paper';
 import { withStyles } from 'material-ui/styles';
 import { Manager, Target, Popper } from 'react-popper';
 import ClickAwayListener from 'material-ui/utils/ClickAwayListener';
-import ArrowDropDownCircle from 'material-ui-icons/ArrowDropDownCircle';
+import ArrowDropDownCircle from '@material-ui/icons/ArrowDropDownCircle';
 import List, { ListItem, ListItemText } from 'material-ui/List';
 import { Link } from 'react-router-dom';
 

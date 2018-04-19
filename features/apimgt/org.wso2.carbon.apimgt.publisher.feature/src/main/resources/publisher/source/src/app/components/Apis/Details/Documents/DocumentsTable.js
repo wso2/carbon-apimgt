@@ -112,11 +112,11 @@ class DocumentsTable extends Component {
                     <div>
                         <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
                             <a href='#' onClick={() => this.props.onEditAPIDocument(record)}>
-                                Edit |{' '}
+                                Edit|
                             </a>
                         </ApiPermissionValidation>
                         <a href='#' onClick={() => this.viewDocContentHandler(record)}>
-                            View |{' '}
+                            View |
                         </a>
                         <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
                             <Popconfirm

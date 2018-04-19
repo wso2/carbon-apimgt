@@ -32,7 +32,7 @@ const Endpoints = () => {
             <Route exact path='/endpoints' component={EndpointsListing} />
             <Route path='/endpoints/create' component={EndpointCreate} />
             <Route path='/endpoints/discover' component={EndpointsDiscover} />
-            <Route path='/endpoints/:endpoint_uuid/' component={EndpointDetails} />
+            <Route path='/endpoints/:endpointUUID/' component={EndpointDetails} />
             <Route component={PageNotFound} />
         </Switch>
     );

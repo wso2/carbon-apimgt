@@ -37,7 +37,7 @@ class AuthManager {
      * @param {Request} request
      * @param {Object} environment
      */
-    static refreshTokenOnExpire(request, environment) {
+    static refreshTokenOnExpire(request, environment = Utils.getCurrentEnvironment()) {
         const refreshPeriod = 60;
         const user = AuthManager.getUser(environment.label);
         const timeToExpire = Utils.timeDifference(user.getExpiryTime());

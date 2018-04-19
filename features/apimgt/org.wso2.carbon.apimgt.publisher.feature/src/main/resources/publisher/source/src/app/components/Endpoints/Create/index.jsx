@@ -17,20 +17,17 @@
  */
 
 import React, { Component } from 'react';
-import Radio, { RadioGroup } from 'material-ui/Radio';
 import Button from 'material-ui/Button';
 import Typography from 'material-ui/Typography';
-import TextField from 'material-ui/TextField';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
-import { FormControlLabel, FormLabel } from 'material-ui/Form';
-import Switch from 'material-ui/Switch';
 import Grid from 'material-ui/Grid';
-import ArrowBack from 'material-ui-icons/ArrowBack';
+import ArrowBack from '@material-ui/icons/ArrowBack';
 import Alert from '../../Shared/Alert';
 
-import API from '../../../data/api';
+import EndpointForm from './EndpointForm';
+import Endpoint from '../../../data/Endpoint';
 
 const styles = theme => ({
     titleBar: {
@@ -87,52 +84,62 @@ const styles = theme => ({
         marginTop: 40,
     },
 });
-
+/**
+ * Endpoint create form
+ * @class EndpointCreate
+ * @extends {Component}
+ */
 class EndpointCreate extends Component {
+    /**
+     * Creates an instance of EndpointCreate.
+     * @param {any} props @inheritDoc
+     * @memberof EndpointCreate
+     */
     constructor(props) {
         super(props);
         this.state = {
-            endpointType: 'http',
-            secured: false,
-            securityType: null,
-            maxTPS: 10,
+            endpoint: new Endpoint('', 'http', 10),
         };
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleInputs = this.handleInputs.bind(this);
     }
 
-    handleChange = name => (event, checked) => {
-        this.setState({ [name]: checked });
-    };
+    /**
+     * Handle endpoint form inputs
+     * @param {React.SyntheticEvent} event triggered by user inputs
+     * @memberof EndpointCreate
+     */
+    handleInputs(event) {
+        const target = event.currentTarget ? event.currentTarget : event.target;
+        const { endpoint } = this.state;
 
-    handleInputs(e) {
-        this.setState({ [e.target.name]: e.target.value });
+        const { name, id } = target;
+        let { value } = target;
+        if (name === 'endpointSecurity') {
+            if (id === 'enabled') {
+                value = event.currentTarget.checked;
+            }
+            endpoint.endpointSecurity[id] = value;
+        } else if (name === 'serviceUrl') {
+            endpoint.endpointConfig[name] = value;
+        } else {
+            endpoint[name] = value;
+        }
+        this.setState({ endpoint });
     }
 
+    /**
+     * Send endpoint create POST call via REST API
+     * @returns {void}
+     * @memberof EndpointCreate
+     */
     handleSubmit() {
-        let endpointSecurity = { enabled: false };
-        if (this.state.secured) {
-            endpointSecurity = {
-                enabled: true,
-                username: this.state.username,
-                password: this.state.password,
-                type: this.state.securityType,
-            };
-        }
-        const endpointDefinition = {
-            endpointConfig: JSON.stringify({ serviceUrl: this.state.endpointType + '://' + this.state.serviceUrl }),
-            endpointSecurity,
-            type: this.state.endpointType,
-            name: this.state.name,
-            maxTps: this.state.maxTPS,
-        };
-        const api = new API();
-        const promisedEndpoint = api.addEndpoint(endpointDefinition);
-        return promisedEndpoint
-            .then((response) => {
-                const { name, id } = response.obj;
-                Alert.info('New endpoint ' + name + ' created successfully');
-                const redirectURL = '/endpoints/' + id + '/';
+        const { endpoint } = this.state;
+        endpoint
+            .save()
+            .then((newEndpoint) => {
+                Alert.info('New endpoint ' + newEndpoint.name + ' created successfully');
+                const redirectURL = '/endpoints/' + newEndpoint.id + '/';
                 this.props.history.push(redirectURL);
             })
             .catch((error) => {
@@ -141,10 +148,16 @@ class EndpointCreate extends Component {
             });
     }
 
+    /**
+     * @inheritDoc
+     * @returns {React.Component} return component
+     * @memberof EndpointCreate
+     */
     render() {
         const { classes } = this.props;
+        const { endpoint } = this.state;
         return (
-            <Grid container spacing={0} justify='left'>
+            <Grid container spacing={0} justify='flex-start'>
                 <Grid item xs={12} className={classes.titleBar}>
                     <div className={classes.buttonLeft}>
                         <Link to='/endpoints/'>
@@ -158,132 +171,17 @@ class EndpointCreate extends Component {
                     </div>
                 </Grid>
                 <Grid item xs={12} lg={6} xl={4}>
-                    <form className={classes.container} noValidate autoComplete='off'>
-                        <TextField
-                            label='Endpoint Name'
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
-                            helperText='Enter a name to identify the endpoint. You will be able to pick this endpoint
-                                        when creating/editing APIs '
-                            fullWidth
-                            name='name'
-                            onChange={this.handleInputs}
-                            placeholder='Endpoint Name'
-                            autoFocus
-                        />
-                        <FormLabel component='legend' className={classes.legend}>
-                            Endpoint Type
-                        </FormLabel>
-                        <RadioGroup
-                            row
-                            aria-label='type'
-                            className={classes.group}
-                            value={this.state.endpointType}
-                            onChange={(e) => {
-                                e.target.name = 'endpointType';
-                                this.handleInputs(e);
-                            }}
-                        >
-                            <FormControlLabel value='http' control={<Radio color='primary' />} label='HTTP' />
-                            <FormControlLabel value='https' control={<Radio color='primary' />} label='HTTPS' />
-                        </RadioGroup>
-                        <TextField
-                            className={classes.inputText}
-                            label='Max TPS'
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
-                            helperText='Max Transactions per second'
-                            fullWidth
-                            name='name'
-                            onChange={(e) => {
-                                e.target.name = 'maxTPS';
-                                this.handleInputs(e);
-                            }}
-                            placeholder='100'
-                        />
-                        <TextField
-                            className={classes.inputText}
-                            name='serviceUrl'
-                            label='Service URL'
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
-                            helperText='Provide Service URL'
-                            onChange={this.handleInputs}
-                            placeholder='https://forecast-v3.weather.gov'
-                            fullWidth
-                        />
-                        <FormControlLabel
-                            className={classes.inputText}
-                            control={
-                                <Switch
-                                    checked={this.state.secured}
-                                    onChange={this.handleChange('secured')}
-                                    value='secured'
-                                    color='primary'
-                                />
-                            }
-                            label='Secured'
-                        />
-                        {this.state.secured && (
-                            <div className={classes.secured}>
-                                Type
-                                <RadioGroup
-                                    row
-                                    value={this.state.securityType}
-                                    onChange={(e) => {
-                                        e.target.name = 'securityType';
-                                        this.handleInputs(e);
-                                    }}
-                                >
-                                    <FormControlLabel value='basic' control={<Radio />} label='Basic' />
-                                    <FormControlLabel value='digest' control={<Radio />} label='Digest' />
-                                </RadioGroup>
-                                <TextField
-                                    className={classes.inputText}
-                                    label='Username'
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                    helperText='Enter the Username'
-                                    fullWidth
-                                    margin='normal'
-                                    name='username'
-                                    onChange={this.handleInputs}
-                                    placeholder='Username'
-                                />
-                                <TextField
-                                    className={classes.inputText}
-                                    label='Password'
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                    helperText='Enter the Password'
-                                    fullWidth
-                                    name='password'
-                                    onChange={this.handleInputs}
-                                    placeholder='Password'
-                                />
-                            </div>
-                        )}
-                        <div className={classes.buttonsWrapper}>
-                            <Button
-                                variant='raised'
-                                color='primary'
-                                className={classes.button}
-                                onClick={this.handleSubmit}
-                            >
-                                Create
+                    <EndpointForm handleInputs={this.handleInputs} endpoint={endpoint} />
+                    <div className={classes.buttonsWrapper}>
+                        <Button variant='raised' color='primary' className={classes.button} onClick={this.handleSubmit}>
+                            Create
+                        </Button>
+                        <Link to='/endpoints/'>
+                            <Button variant='raised' className={classes.button}>
+                                Cancel
                             </Button>
-                            <Link to='/endpoints/'>
-                                <Button variant='raised' className={classes.button}>
-                                    Cancel
-                                </Button>
-                            </Link>
-                        </div>
-                    </form>
+                        </Link>
+                    </div>
                 </Grid>
             </Grid>
         );

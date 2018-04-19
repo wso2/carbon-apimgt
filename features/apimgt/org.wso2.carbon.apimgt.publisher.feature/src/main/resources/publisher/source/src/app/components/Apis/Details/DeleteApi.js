@@ -4,7 +4,7 @@ import ApiPermissionValidation from '../../../data/ApiPermissionValidation'
 
 import Dialog, {DialogActions, DialogContent, DialogContentText, DialogTitle} from 'material-ui/Dialog';
 import Button from 'material-ui/Button';
-import { Delete } from 'material-ui-icons';
+import { Delete } from '@material-ui/icons/';
 import Slide from "material-ui/transitions/Slide";
 import Alert from '../../Shared/Alert'
 

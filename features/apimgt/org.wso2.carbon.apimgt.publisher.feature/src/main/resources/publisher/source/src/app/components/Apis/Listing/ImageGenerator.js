@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
-import * as icons from 'material-ui-icons';
+import * as icons from '@material-ui/icons/';
 
 const styles = theme => ({
     svgImage: {

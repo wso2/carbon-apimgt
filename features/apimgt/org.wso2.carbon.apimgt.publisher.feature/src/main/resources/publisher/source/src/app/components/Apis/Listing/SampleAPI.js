@@ -29,7 +29,7 @@ import Redirect from "react-router-dom/Redirect";
 import CircularProgress from "material-ui/Progress/CircularProgress";
 import {withStyles} from 'material-ui/styles';
 import green from "material-ui/colors/green";
-import {Create, GetApp} from 'material-ui-icons/';
+import {Create, GetApp} from '@material-ui/icons/';
 import {Link} from 'react-router-dom';
 
 const styles = {

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Button from 'material-ui/Button';
-import AddIcon from 'material-ui-icons/Add';
-import UpdateIcon from 'material-ui-icons/Update';
+import AddIcon from '@material-ui/icons/Add';
+import UpdateIcon from '@material-ui/icons/Update';
 import PropTypes from 'prop-types';
 
 import API from '../../../data/api';
