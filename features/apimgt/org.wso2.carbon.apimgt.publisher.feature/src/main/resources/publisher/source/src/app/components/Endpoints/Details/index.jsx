@@ -47,7 +47,7 @@ class EndpointDetails extends Component {
      * @inheritDoc
      * @memberof EndpointDetails
      */
-    componentWillMount() {
+    componentDidMount() {
         const promisedEndpoint = Endpoint.get(this.endpointUUID);
         promisedEndpoint.then(endpoint => this.setState({ endpoint }));
     }
