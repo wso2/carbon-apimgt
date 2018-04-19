@@ -264,12 +264,6 @@ public class DefaultKeyManagerImpl implements KeyManager {
                     tokenRequest.getClientSecret());
         }
 
-        // When validity time set to a negative value, a token is considered never to expire.
-        if (tokenRequest.getValidityPeriod() == -1L) {
-            // Setting a different negative value if the set value is -1 (-1 will be ignored by TokenValidator)
-            tokenRequest.setValidityPeriod(-2L);
-        }
-
         Response response;
         try {
             if (KeyManagerConstants.CLIENT_CREDENTIALS_GRANT_TYPE.equals(tokenRequest.getGrantType())) {

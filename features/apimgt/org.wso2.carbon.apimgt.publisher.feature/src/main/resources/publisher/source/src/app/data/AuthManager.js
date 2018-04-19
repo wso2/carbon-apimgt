@@ -44,6 +44,9 @@ class AuthManager {
         if (timeToExpire >= refreshPeriod) {
             return request;
         }
+        if (user.getExpiryTime() < 0) {
+            return request;
+        }
         const loginPromise = AuthManager.refresh(environment);
         loginPromise.then((response) => {
             const loggedInUser = AuthManager.loginUserMapper(response, environment.label);
