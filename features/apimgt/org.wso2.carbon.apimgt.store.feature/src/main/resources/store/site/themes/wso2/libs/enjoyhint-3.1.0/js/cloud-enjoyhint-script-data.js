@@ -141,7 +141,8 @@ var swagger_script_data = [
     {
         'key .parameter required': 'Type a two-letter country code <b class="enjoy_hint_emphasize_text">(e.g., "us")</b> and press Tab',
         'keyCode': 9,
-        'showSkip' : false
+        'showSkip' : false,
+        timeout : 1000
 
     },
     {
@@ -221,7 +222,7 @@ var api_store_subscribe_to_default_application = [
         event: 'click',
         description: 'Now you have subscribed this Application to this selected API. Click <b class="enjoy_hint_emphasize_text">View Subscriptions</b> button to get more information about the Application Subscriptions.',
         'showSkip' : false,
-        timeout : 400
+        timeout : 600
     }
 ];
 
