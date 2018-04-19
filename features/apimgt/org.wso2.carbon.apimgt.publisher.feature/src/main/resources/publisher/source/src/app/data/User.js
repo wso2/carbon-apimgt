@@ -126,6 +126,10 @@ export default class User {
      * @param expireTime {Integer} Number of seconds till the expire time from the current time
      */
     setExpiryTime(expireTime) {
+        if (expireTime < 0) {
+            localStorage.setItem(User.CONST.USER_EXPIRY_TIME, expireTime);
+            return expireTime;
+        }
         const currentTime = Date.now();
         const timeDiff = 1000 * expireTime;
         localStorage.setItem(User.CONST.USER_EXPIRY_TIME, currentTime + timeDiff);

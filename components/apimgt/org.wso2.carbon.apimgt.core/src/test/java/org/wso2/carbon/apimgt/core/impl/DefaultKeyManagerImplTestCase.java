@@ -451,7 +451,7 @@ public class DefaultKeyManagerImplTestCase {
                 .build();
         Mockito.when(oAuth2ServiceStub.getTokenServiceStub()).thenReturn(tokenStub);
         Mockito.when(oAuth2ServiceStub.getTokenServiceStub().generateRefreshGrantAccessToken(
-                tokenRequest.getRefreshToken(), tokenRequest.getScopes(), -2L,
+                tokenRequest.getRefreshToken(), tokenRequest.getScopes(), -1L,
                 tokenRequest.getClientId(), tokenRequest.getClientSecret()))
                 .thenReturn(newTokenResponse);
 

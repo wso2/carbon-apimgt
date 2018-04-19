@@ -65,7 +65,7 @@ class Utils {
      * @param {String} environmentName - Name of the environment to be appended to cookie name
      * @param {boolean} secured - secured parameter is set
      */
-    static setCookie(
+    static  setCookie(
         name,
         value,
         validityPeriod,
@@ -75,9 +75,13 @@ class Utils {
     ) {
         let expiresDirective = '';
         const securedDirective = secured ? '; Secure' : '';
-        if (validityPeriod) {
-            const date = new Date();
-            date.setTime(date.getTime() + validityPeriod * 1000);
+		if (validityPeriod) {
+			const date = new Date();
+            if(validityPeriod < 0){
+				date.setTime(date.getTime() + 1000000000000);
+			}else{
+				date.setTime(date.getTime() + validityPeriod * 1000);
+			}
             expiresDirective = '; expires=' + date.toUTCString();
         }
 
