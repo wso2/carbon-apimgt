@@ -40,7 +40,6 @@ class EndpointDetails extends Component {
         this.state = {
             endpoint: false,
         };
-        this.endpointUUID = this.props.match.params.endpointUUID;
     }
 
     /**
@@ -48,7 +47,8 @@ class EndpointDetails extends Component {
      * @memberof EndpointDetails
      */
     componentDidMount() {
-        const promisedEndpoint = Endpoint.get(this.endpointUUID);
+        const { endpointUUID } = this.props.match.params;
+        const promisedEndpoint = Endpoint.get(endpointUUID);
         promisedEndpoint.then(endpoint => this.setState({ endpoint }));
     }
 
