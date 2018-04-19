@@ -35,11 +35,11 @@ const styles = theme => ({
 class ProductionKeys extends React.Component {
     constructor(props) {
         super(props);
+        this.key_type = props.type;
         this.state = {
             application: null,
             showCS: false, // Show Consumer Secret flag
             showAT: false,// Show Access Token flag
-            key_type: null
         };
         this.appId = this.props.match.params.applicationId;
         this.handleShowToken = this.handleShowToken.bind(this);
@@ -49,8 +49,8 @@ class ProductionKeys extends React.Component {
     }
 
     handleClickToken() {
-        const { application, key_type } = this.state;
-        const keys = application.keys.get(key_type) ||
+        const { application } = this.state;
+        const keys = application.keys.get(this.key_type) ||
             {
                 "supportedGrantTypes":
                     ["client_credentials"]
@@ -58,8 +58,8 @@ class ProductionKeys extends React.Component {
         if (!keys.callbackUrl) {
             keys.callbackUrl = "https://wso2.am.com";
         }
-        application.generateKeys(key_type, keys.supportedGrantTypes, keys.callbackUrl).then(
-            () => application.generateToken(key_type).then(() => this.setState({ application: application }))
+        application.generateKeys(this.key_type, keys.supportedGrantTypes, keys.callbackUrl).then(
+            () => application.generateToken(this.key_type).then(() => this.setState({ application: application }))
         ).catch(
             error => {
                 if (process.env.NODE_ENV !== "production") {
@@ -74,9 +74,10 @@ class ProductionKeys extends React.Component {
     }
 
     handleUpdateToken() {
-        const { application, key_type } = this.state;
-        const keys = application.keys.get(key_type);
-        application.updateKeys(key_type, keys.supportedGrantTypes, keys.callbackUrl, keys.consumerKey, keys.consumerSecret).
+        const { application } = this.state;
+        const keys = application.keys.get(this.key_type);
+        application.updateKeys(this.key_type, keys.supportedGrantTypes, keys.callbackUrl, keys.consumerKey, 
+            keys.consumerSecret).
             then(() => this.setState({ application: application })
             ).catch(
                 error => {
@@ -90,19 +91,7 @@ class ProductionKeys extends React.Component {
                 }
             );
     }
-
-    static getDerivedStateFromProps(nextProps, prevState) {
-        if (nextProps.location.pathname.split('/').pop() === "productionkeys") {
-            return {
-                key_type: Application.KEY_TYPES.PRODUCTION
-            }
-        }
-        else {
-            return {
-                key_type: Application.KEY_TYPES.SANDBOX
-            }
-        }
-    }
+    
     /**
      * Because application access tokens are not coming with /keys or /application API calls,
      * Fetch access token value upon user request
@@ -113,32 +102,32 @@ class ProductionKeys extends React.Component {
             console.warn("No Application found!");
             return false;
         }
-        let promised_tokens = this.state.application.generateToken(this.state.key_type);
+        let promised_tokens = this.state.application.generateToken(this.key_type);
         promised_tokens.then((token) => this.setState({ showAT: true }))
     }
 
     handleTextChange(event) {
-        const { application, key, key_type } = this.state;
+        const { application, key } = this.state;
         const { currentTarget } = event;
-        let keys = application.keys.get(key_type) ||
+        let keys = application.keys.get(this.key_type) ||
             {
                 "supportedGrantTypes":
                     ["client_credentials"],
-                "keyType": key_type,
+                "keyType": this.key_type,
             }
         keys.callbackUrl = currentTarget.value;
-        application.keys.set(key_type, keys);
+        application.keys.set(this.key_type, keys);
         this.setState({ application });
     }
 
     handleCheckboxChange(event) {
-        const { application, key_type } = this.state;
+        const { application } = this.state;
         const { currentTarget } = event;
-        const keys = application.keys.get(key_type) ||
+        const keys = application.keys.get(this.key_type) ||
             {
                 "supportedGrantTypes":
                     ["client_credentials"],
-                "keyType": key_type,
+                "keyType": this.key_type,
             }
         let index;
 
@@ -148,7 +137,7 @@ class ProductionKeys extends React.Component {
             index = keys.supportedGrantTypes.indexOf(currentTarget.id)
             keys.supportedGrantTypes.splice(index, 1);
         }
-        application.keys.set(key_type, keys);
+        application.keys.set(this.key_type, keys);
         // update the state with the new array of options
         this.setState({ application });
     };
@@ -187,7 +176,7 @@ class ProductionKeys extends React.Component {
     }
 
     render() {
-        const { notFound, showCS, key_type } = this.state;
+        const { notFound, showCS } = this.state;
         if (notFound) {
             return <ResourceNotFound />
         }
@@ -195,14 +184,14 @@ class ProductionKeys extends React.Component {
             return <Loading />
         }
         const { classes } = this.props;
-        let cs_ck_keys = this.state.application.keys.get(key_type);
+        let cs_ck_keys = this.state.application.keys.get(this.key_type);
         let consumerKey = (cs_ck_keys && cs_ck_keys.consumerKey);
         let consumerSecret = (cs_ck_keys && cs_ck_keys.consumerSecret);
         let supportedGrantTypes = (cs_ck_keys && cs_ck_keys.supportedGrantTypes);
         let callbackUrl = (cs_ck_keys && cs_ck_keys.callbackUrl);
         supportedGrantTypes = supportedGrantTypes || false;
-        let accessToken = this.state.application.tokens.has(key_type) &&
-            this.state.application.tokens.get(key_type).accessToken;
+        let accessToken = this.state.application.tokens.has(this.key_type) &&
+            this.state.application.tokens.get(this.key_type).accessToken;
         return (
             <div className={classes.root}>
                 <Paper>

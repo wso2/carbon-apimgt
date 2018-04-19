@@ -19,7 +19,8 @@
 import React, {Component} from 'react'
 import BasicTabs from './NavTab'
 import Overview from './Overview'
-import ProductionKeys from './ProductionKeys'
+import ProductionKey from './ProductionKey'
+import SandboxKey from './SandboxKey'
 import Subscriptions from './Subscriptions'
 import {Route, Switch, Redirect} from 'react-router-dom'
 import API from '../../../data/api'
@@ -107,8 +108,8 @@ export default class Details extends Component {
                     <Switch>
                         <Redirect exact from="/applications/:applicationId" to={redirect_url}/>
                         <Route path="/applications/:applicationId/overview" component={Overview}/>
-                        <Route path="/applications/:applicationId/productionkeys" component={ProductionKeys}/>
-                        <Route path="/applications/:applicationId/sandBoxkeys" component={ProductionKeys}/>
+                        <Route path="/applications/:applicationId/productionkeys" component={ProductionKey}/>
+                        <Route path="/applications/:applicationId/sandBoxkeys" component={SandboxKey}/>
                         <Route path="/applications/:applicationId/subscriptions" component={Subscriptions}/>
                         <Route component={PageNotFound}/>
                     </Switch>
