@@ -20,7 +20,7 @@ export default class ButtonCell extends Component {
         };
     }
 
-    componentWillMount() {
+    componentDidMount() {
         if (this.state.storedEndpoints != null) {
             if (this.checkIfEndpointExists()) {
                 this.setState({
