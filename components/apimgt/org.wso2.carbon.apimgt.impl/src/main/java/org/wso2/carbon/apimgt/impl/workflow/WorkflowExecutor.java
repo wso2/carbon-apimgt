@@ -130,7 +130,8 @@ public abstract class WorkflowExecutor implements Serializable {
     public void publishEvents(WorkflowDTO workflowDTO) {
         boolean enabled = APIUtil.isAnalyticsEnabled();
         if (enabled) {
-            APIMgtWorkflowDataPublisher publisher = new APIMgtWorkflowDataPublisher();
+            APIMgtWorkflowDataPublisher publisher = ServiceReferenceHolder.getInstance()
+                    .getApiMgtWorkflowDataPublisher();
             publisher.publishEvent(workflowDTO);
         }
     }

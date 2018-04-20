@@ -59,7 +59,7 @@ public class APIMgtWorkflowDataPublisher {
     private static DataPublisher dataPublisherStatics;
 
     public APIMgtWorkflowDataPublisher() {
-        if (!enabled || skipEventReceiverConnection) {
+        if (!enabled || skipEventReceiverConnection || analyticsConfig.isSkipWorkFlowEventReceiverConnection()) {
             return;
         }
         if (log.isDebugEnabled()) {
@@ -78,35 +78,23 @@ public class APIMgtWorkflowDataPublisher {
 
     private static DataPublisher getDataPublisher() {
 
-        //If a DataPublisher had not been registered for the tenant.
-        if (dataPublisherStatics == null) {
+        String serverURL = analyticsConfig.getDasReceiverUrlGroups();
+        String serverAuthURL = analyticsConfig.getDasReceiverAuthUrlGroups();
+        String serverUser = analyticsConfig.getDasReceiverServerUser();
+        String serverPassword = analyticsConfig.getDasReceiverServerPassword();
 
-            //Get DataPublisher which has been registered for the tenant.
-            String serverURL = analyticsConfig.getDasReceiverUrlGroups();
-            String serverAuthURL = analyticsConfig.getDasReceiverAuthUrlGroups();
-            String serverUser = analyticsConfig.getDasReceiverServerUser();
-            String serverPassword = analyticsConfig.getDasReceiverServerPassword();
-
-            try {
-                //Create new DataPublisher for the tenant.
-                synchronized (APIMgtWorkflowDataPublisher.class) {
-
-                    if (dataPublisherStatics == null) {
-                        dataPublisherStatics = new DataPublisher(null, serverURL, serverAuthURL, serverUser,
-                                serverPassword);
-                    }
-                }
-            } catch (DataEndpointConfigurationException e) {
-                log.error("Error while creating data publisher", e);
-            } catch (DataEndpointException e) {
-                log.error("Error while creating data publisher", e);
-            } catch (DataEndpointAgentConfigurationException e) {
-                log.error("Error while creating data publisher", e);
-            } catch (TransportException e) {
-                log.error("Error while creating data publisher", e);
-            } catch (DataEndpointAuthenticationException e) {
-                log.error("Error while creating data publisher", e);
-            }
+        try {
+            dataPublisherStatics = new DataPublisher(null, serverURL, serverAuthURL, serverUser, serverPassword);
+        } catch (DataEndpointConfigurationException e) {
+            log.error("Error while creating data publisher", e);
+        } catch (DataEndpointException e) {
+            log.error("Error while creating data publisher", e);
+        } catch (DataEndpointAgentConfigurationException e) {
+            log.error("Error while creating data publisher", e);
+        } catch (TransportException e) {
+            log.error("Error while creating data publisher", e);
+        } catch (DataEndpointAuthenticationException e) {
+            log.error("Error while creating data publisher", e);
         }
 
         return dataPublisherStatics;
@@ -114,7 +102,7 @@ public class APIMgtWorkflowDataPublisher {
 
     public boolean publishEvent(WorkflowDTO workflowDTO) {
 
-        if (!enabled|| skipEventReceiverConnection) {
+        if (!enabled || skipEventReceiverConnection || analyticsConfig.isSkipWorkFlowEventReceiverConnection()) {
             return true;
         }
 
@@ -141,7 +129,7 @@ public class APIMgtWorkflowDataPublisher {
     }
 
     public static String getStreamID() {
-        return getWFStreamName() + ":"+ getWFStreamVersion();
+        return getWFStreamName() + ":" + getWFStreamVersion();
     }
 
     public static String getWFStreamVersion() {

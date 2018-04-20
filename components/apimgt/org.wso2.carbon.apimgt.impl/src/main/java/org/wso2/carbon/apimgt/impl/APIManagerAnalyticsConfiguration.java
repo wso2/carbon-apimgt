@@ -47,7 +47,8 @@ public class APIManagerAnalyticsConfiguration {
     private String executionTimeStreamVersion;
     private String alertTypeStreamName;
     private String alertTypeStreamVersion;
-
+    private boolean skipWorkFlowEventReceiverConnection;
+    
     private APIManagerAnalyticsConfiguration() {
     }
     private static class APIManagerAnalyticsConfigurationHolder {
@@ -66,6 +67,10 @@ public class APIManagerAnalyticsConfiguration {
             String skipEventReceiverConnStr = config.getFirstProperty(APIConstants.API_USAGE_SKIP_EVENT_RECEIVER_CONN);
             skipEventReceiverConnection = skipEventReceiverConnStr != null && JavaUtils.isTrueExplicitly
                     (skipEventReceiverConnStr);
+            String skipWorkflowDataPublisherStr = config
+                    .getFirstProperty(APIConstants.API_USAGE_SKIP_WORKFLOW_EVENT_RECEIVER_CONN);
+            skipWorkFlowEventReceiverConnection =
+                    skipWorkflowDataPublisherStr != null && JavaUtils.isTrueExplicitly(skipWorkflowDataPublisherStr);
             publisherClass = config.getFirstProperty(APIConstants.API_USAGE_PUBLISHER_CLASS);
             requestStreamName = config.getFirstProperty(APIConstants.API_REQUEST_STREAM_NAME);
             requestStreamVersion = config.getFirstProperty(APIConstants.API_REQUEST_STREAM_VERSION);
@@ -234,5 +239,9 @@ public class APIManagerAnalyticsConfiguration {
 
     public void setDasReceiverAuthUrlGroups(String dasReceiverAuthUrlGroups) {
         this.dasReceiverAuthUrlGroups = dasReceiverAuthUrlGroups;
+    }
+
+    public boolean isSkipWorkFlowEventReceiverConnection() {
+        return skipWorkFlowEventReceiverConnection;
     }
 }

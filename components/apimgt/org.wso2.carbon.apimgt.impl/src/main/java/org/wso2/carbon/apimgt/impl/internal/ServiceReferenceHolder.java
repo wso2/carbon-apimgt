@@ -17,6 +17,7 @@
 package org.wso2.carbon.apimgt.impl.internal;
 
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.workflow.events.APIMgtWorkflowDataPublisher;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;
@@ -34,6 +35,7 @@ public class ServiceReferenceHolder {
     private static UserRealm userRealm;
     private TenantIndexingLoader indexLoader;
     private OutputEventAdapterService outputEventAdapterService;
+    private APIMgtWorkflowDataPublisher apiMgtWorkflowDataPublisher;
 
     public static ConfigurationContextService getContextService() {
         return contextService;
@@ -96,5 +98,13 @@ public class ServiceReferenceHolder {
 
     public void setOutputEventAdapterService(OutputEventAdapterService outputEventAdapterService) {
         this.outputEventAdapterService = outputEventAdapterService;
+    }
+
+    public APIMgtWorkflowDataPublisher getApiMgtWorkflowDataPublisher() {
+        return apiMgtWorkflowDataPublisher;
+    }
+
+    public void setApiMgtWorkflowDataPublisher(APIMgtWorkflowDataPublisher apiMgtWorkflowDataPublisher) {
+        this.apiMgtWorkflowDataPublisher = apiMgtWorkflowDataPublisher;
     }
 }
