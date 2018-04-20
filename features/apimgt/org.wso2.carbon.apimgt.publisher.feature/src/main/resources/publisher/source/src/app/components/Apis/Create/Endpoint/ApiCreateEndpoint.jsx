@@ -166,7 +166,7 @@ class ApiCreateEndpoint extends Component {
         return (
             <div className={classes.root}>
                 <Grid container spacing={0} justify='center'>
-                    <Grid item md={10} className='page-content'>
+                    <Grid item md={10}>
                         <Paper className={classes.paper}>
                             <Typography type='headline' gutterBottom>
                                 Create New API
