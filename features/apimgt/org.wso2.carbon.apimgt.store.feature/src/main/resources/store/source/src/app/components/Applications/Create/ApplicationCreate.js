@@ -36,6 +36,7 @@ import ArrowBack from 'material-ui-icons/ArrowBack';
 import Divider from 'material-ui/Divider';
 import {withStyles} from 'material-ui/styles';
 import PropTypes from 'prop-types';
+import Alert from '../../Shared/Alert';
 
 const styles = theme => ({
     titleBar: {
@@ -154,6 +155,7 @@ class ApplicationCreate extends Component {
             
         }).catch(
             function (error_response) {
+                Alert.error('Application already exists.');
                 console.log("Error while creating the application");
             });
     };
