@@ -1116,6 +1116,24 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             API.APIBuilder apiBuilder = new API.APIBuilder(api);
             apiBuilder.id(UUID.randomUUID().toString());
             apiBuilder.version(newVersion);
+            apiBuilder.getEndpoint().forEach((type, endpoint) -> {
+                if (APIMgtConstants.API_SPECIFIC_ENDPOINT.equals(endpoint.getApplicableLevel())) {
+                    Endpoint endpoint1 = new Endpoint.Builder(endpoint).id(UUID.randomUUID().toString()).name
+                            (endpoint.getName() + "--" + newVersion).build();
+                    apiBuilder.getEndpoint().replace(type, endpoint1);
+                }
+            });
+            apiBuilder.getUriTemplates().forEach((id, uriTemplate) -> {
+                UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder(uriTemplate);
+                uriTemplateBuilder.getEndpoint().forEach((type, endpoint) -> {
+                    if (APIMgtConstants.API_SPECIFIC_ENDPOINT.equals(endpoint.getApplicableLevel())) {
+                        Endpoint endpoint1 = new Endpoint.Builder(endpoint).id(UUID.randomUUID().toString()).name
+                                (endpoint.getName() + "--" + newVersion).build();
+                        uriTemplateBuilder.getEndpoint().replace(type, endpoint1);
+                    }
+                });
+                apiBuilder.getUriTemplates().replace(id, uriTemplateBuilder.build());
+            });
             apiBuilder.context(api.getContext().replace(api.getVersion(), newVersion));
             lifecycleState = getApiLifecycleManager().addLifecycle(APIMgtConstants.API_LIFECYCLE, getUsername());
             apiBuilder.associateLifecycle(lifecycleState);

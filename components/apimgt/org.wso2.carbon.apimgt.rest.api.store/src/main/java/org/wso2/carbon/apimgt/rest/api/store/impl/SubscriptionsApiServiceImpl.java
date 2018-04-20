@@ -267,7 +267,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      */
     @Override
     public Response subscriptionsSubscriptionIdGet(String subscriptionId, String ifNoneMatch,
-            String ifModifiedSince, Request request) throws NotFoundException {
+                                                   String ifModifiedSince, Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         SubscriptionDTO subscriptionDTO = null;
         try {
@@ -280,6 +280,16 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             }
 
             Subscription subscription = apiStore.getSubscriptionByUUID(subscriptionId);
+            if (subscription == null) {
+                String errorMessage = "Subscription not found : " + subscriptionId;
+                APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
+                        ExceptionCodes.SUBSCRIPTION_NOT_FOUND);
+                HashMap<String, String> paramList = new HashMap<String, String>();
+                paramList.put(APIMgtConstants.ExceptionsConstants.SUBSCRIPTION_ID, subscriptionId);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                log.error(errorMessage, e);
+                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+            }
             subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(subscription);
             return Response.ok().entity(subscriptionDTO)
                     .header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"")
