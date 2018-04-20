@@ -45,6 +45,7 @@ import org.wso2.carbon.apimgt.impl.observers.SignupObserver;
 import org.wso2.carbon.apimgt.impl.observers.TenantLoadMessageSender;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.workflow.events.APIMgtWorkflowDataPublisher;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -260,6 +261,10 @@ public class APIManagerComponent {
             KeyManagerHolder.initializeKeyManager(configuration);
             //Initialise sql constants
             SQLConstantManagerFactory.initializeSQLConstantManager();
+            boolean analyticsEnabled = APIUtil.isAnalyticsEnabled();
+            if (analyticsEnabled) {
+                ServiceReferenceHolder.getInstance().setApiMgtWorkflowDataPublisher(new APIMgtWorkflowDataPublisher());
+            }
             APIUtil.init();
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);

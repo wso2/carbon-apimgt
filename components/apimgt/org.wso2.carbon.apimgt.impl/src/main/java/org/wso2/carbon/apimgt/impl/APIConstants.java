@@ -709,6 +709,8 @@ public final class APIConstants {
     public static final String API_EXECUTION_TIME_STREAM_VERSION = API_USAGE_EXECUTION_TIME_STREAM + "Version";
     public static final String API_ALERT_TYPES_STREAM_NAME = API_ALERT_TYPES_STREAM + "Name";
     public static final String API_ALERT_TYPES_STREAM_VERSION = API_ALERT_TYPES_STREAM + "Version";
+    public static final String API_USAGE_SKIP_WORKFLOW_EVENT_RECEIVER_CONN =
+            API_ANALYTICS + "SkipWorkflowEventPublisher";
 
     public static final String API_USAGE_WF_STREAM = API_USAGE_STREAMS + "Workflow.";
     public static final String API_WF_STREAM_NAME = API_USAGE_WF_STREAM + "Name";
