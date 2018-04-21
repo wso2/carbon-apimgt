@@ -4,10 +4,10 @@ import ballerina.lang.messages;
 
 function simulate (message m) {
     messages:setProperty(m, "api", "sampleApi");
-    //messages:setProperty(m, "context", "/sampleApi");
+    messages:setProperty(m, "REQUEST_URL", "/sampleApi");
     messages:setProperty(m, "version", "1.0.0");
     messages:setProperty(m, "subscription_policy", "GOLD");
-    //messages:setProperty(m, "uri_template", "/path");
+    messages:setProperty(m, "SUB_PATH", "/path");
     messages:setProperty(m, "consumer_key", "AKJHSJAHSIIEWW64451231");
 
     messages:setProperty(m, "application_id", "123456789");
@@ -22,7 +22,7 @@ function simulate (message m) {
     messages:setProperty(m, "client_ip", "127.0.0.1");
     messages:setProperty(m, "publisher", "admin");
     messages:setProperty(m, "user_agent", "curl");
-    //messages:setProperty(m, "method", "GET");
+    messages:setProperty(m, "HTTP_METHOD", "GET");
 
     messages:setProperty(m, "application_name", "sampleApp");
     messages:setProperty(m, "application_owner", "admin");
@@ -32,7 +32,7 @@ function simulate (message m) {
 
     messages:setProperty(m, "cache_hit", "0");
     //messages:setProperty(m, "response_size", 123);
-    //messages:setProperty(m, "protocol", "http");
+    messages:setProperty(m, "PROTOCOL", "http");
     //messages:setProperty(m, "response_code", 200);
     messages:setProperty(m, "destination", "destination");
     //messages:setProperty(m, "response_time", "123456");

@@ -7,6 +7,7 @@ import ballerina.lang.system;
 import ballerina.net.http;
 import org.wso2.carbon.apimgt.gateway.dto;
 import ballerina.lang.errors;
+import org.wso2.carbon.apimgt.gateway.event.util;
 
 function mediate (message m, message res) {
     dto:AnalyticsInfoDTO analyticsConf = holder:getAnalyticsConf();
@@ -14,6 +15,7 @@ function mediate (message m, message res) {
         system:println("Analytics is Disabled");
         return;
     }
+    util:simulate(m);
     errors:TypeCastError err;
     int request_start_time;
     int request_end_time;
