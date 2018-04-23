@@ -199,6 +199,11 @@ public class APIKeyMgtUtil {
             Registry registry = APIKeyMgtDataHolder.getRegistryService().getGovernanceSystemRegistry();
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
                     APIConstants.API_KEY);
+            if (artifactManager == null) {
+                String errorMessage = "Artifact manager is null when retrieving API " + identifier.getApiName();
+                log.error(errorMessage);
+                throw new APIManagementException(errorMessage);
+            }
             Resource apiResource = registry.get(apiPath);
             String artifactId = apiResource.getUUID();
             if (artifactId == null) {
