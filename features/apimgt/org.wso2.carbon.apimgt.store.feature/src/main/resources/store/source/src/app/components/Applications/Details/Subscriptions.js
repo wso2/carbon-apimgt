@@ -27,7 +27,6 @@ import Alert from '../../Shared/Alert';
 
 import Subscription from '../../../data/Subscription';
 
-
 class Subscriptions extends React.Component {
     constructor(props) {
         super(props);
@@ -39,14 +38,14 @@ class Subscriptions extends React.Component {
 
     componentDidMount() {
         const client = new Subscription();
-        this.appId = this.props.match.params.applicationId;
-        let promised_subscriptions = client.getSubscriptions(null, this.appId);
-        promised_subscriptions.then((response) => {
+        const {applicationId} = this.props.match.params;
+        let promisedSubscriptions = client.getSubscriptions(null, applicationId);
+        promisedSubscriptions.then((response) => {
             this.setState({ subscriptions: response.body.list });
         }
         ).catch(
             error => {
-                let status = error.status;
+                const { status } = error;
                 if (status === 404) {
                     this.setState({ notFound: true });
                 }

@@ -28,7 +28,6 @@ export default class Subscription extends Resource {
     constructor() {
         super();
         this.client = new APIClientFactory().getAPIClient(Utils.getEnvironment().label).client;
-        this._requestMetaData = Resource._requestMetaData;
     }
 
     /**
@@ -40,7 +39,7 @@ export default class Subscription extends Resource {
     getSubscriptions(apiId, applicationId, callback = null) {
         var promise_get = this.client.then((client) => {
             return client.apis["Subscription (Collection)"].get_subscriptions(
-                { apiId: apiId, applicationId: applicationId }, this._requestMetaData());
+                { apiId: apiId, applicationId: applicationId });
         }
         );
         if (callback) {
@@ -60,8 +59,7 @@ export default class Subscription extends Resource {
             return client.apis["Subscription (Individual)"].delete_subscriptions__subscriptionId_(
                 {
                     subscriptionId: subscriptionId,
-                },
-                this._requestMetaData(),
+                }
             );
         });
         return promised_delete_subscription;
