@@ -87,7 +87,7 @@ Message.iconTypes = {
 
 Message.propTypes = {
     classes: PropTypes.shape({}).isRequired,
-    message: PropTypes.string.isRequired,
+    message: PropTypes.oneOfType([PropTypes.string, PropTypes.node]).isRequired,
     handleClose: PropTypes.func.isRequired,
     type: PropTypes.string.isRequired,
 };

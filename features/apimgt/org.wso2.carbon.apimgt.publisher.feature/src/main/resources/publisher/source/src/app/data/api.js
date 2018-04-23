@@ -517,6 +517,7 @@ class API {
 
     /**
      * Get All Global Endpoints.
+     * @deprecated Use Endpoint.all() method instead
      * @returns {Promise} Promised all list of endpoint
      */
     getEndpoints() {
@@ -527,6 +528,7 @@ class API {
 
     /**
      * Get endpoint object by its UUID.
+     * @deprecated Use Endpoint.get(uuid) static method instead
      * @param id {String} UUID of the endpoint
      * @returns {Promise.<TResult>}
      */
