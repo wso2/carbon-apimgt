@@ -307,7 +307,9 @@ public final class APIUtil {
             //setting api ID for scope retrieval
             api.getId().setApplicationId(Integer.toString(apiId));
             // set url
-            api.setStatus(getApiStatus(artifact.getLifecycleState()));
+            api.setStatus((artifact.getLifecycleState() != null) ?
+                    getApiStatus(artifact.getLifecycleState()) :
+                    getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             api.setWsdlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WSDL));
             api.setWadlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WADL));
@@ -492,7 +494,9 @@ public final class APIUtil {
             //set last access time
             api.setLastUpdated(registry.get(artifactPath).getLastModified());
             // set url
-            api.setStatus(getApiStatus(artifact.getLifecycleState()));
+            api.setStatus((artifact.getLifecycleState() != null) ?
+                    getApiStatus(artifact.getLifecycleState()) :
+                    getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             api.setWsdlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WSDL));
             api.setWadlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WADL));
@@ -678,7 +682,9 @@ public final class APIUtil {
             api.setUUID(artifact.getId());
             api.setRating(getAverageRating(apiId));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
-            api.setStatus(getApiStatus(artifact.getLifecycleState()));
+            api.setStatus((artifact.getLifecycleState() != null) ?
+                    getApiStatus(artifact.getLifecycleState()) :
+                    getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
             api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
             api.setVisibility(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY));
             api.setVisibleRoles(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES));
@@ -2575,7 +2581,9 @@ public final class APIUtil {
             //set uuid
             api.setUUID(artifact.getId());
             // set url
-            api.setStatus(getApiStatus(artifact.getLifecycleState()));
+            api.setStatus((artifact.getLifecycleState() != null) ?
+                    getApiStatus(artifact.getLifecycleState()) :
+                    getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             api.setWsdlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WSDL));
             api.setWadlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WADL));
@@ -4583,7 +4591,9 @@ public final class APIUtil {
             //set uuid
             api.setUUID(artifact.getId());
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
-            api.setStatus(getApiStatus(artifact.getLifecycleState()));
+            api.setStatus((artifact.getLifecycleState() != null) ?
+                    getApiStatus(artifact.getLifecycleState()) :
+                    getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
             api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
             api.setVisibility(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY));
             api.setVisibleRoles(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES));
@@ -4781,8 +4791,19 @@ public final class APIUtil {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(username);
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
                     APIConstants.API_KEY);
+            if (artifactManager == null) {
+                String errorMessage = "Artifact manager is null when searching APIs by docs in tenant ID " + tenantID;
+                log.error(errorMessage);
+                throw new APIManagementException(errorMessage);
+            }
             GenericArtifactManager docArtifactManager = APIUtil.getArtifactManager(registry,
                     APIConstants.DOCUMENTATION_KEY);
+            if (docArtifactManager == null) {
+                String errorMessage = "Doc artifact manager is null when searching APIs by docs in tenant ID " +
+                        tenantID;
+                log.error(errorMessage);
+                throw new APIManagementException(errorMessage);
+            }
             SolrClient client = SolrClient.getInstance();
             Map<String, String> fields = new HashMap<String, String>();
             fields.put(APIConstants.DOCUMENTATION_SEARCH_PATH_FIELD, "*" + APIConstants.API_ROOT_LOCATION + "*");
@@ -4890,6 +4911,11 @@ public final class APIUtil {
         GenericArtifactManager artifactManager = null;
         try {
             artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
+            if (artifactManager == null) {
+                String errorMessage = "Artifact manager is null when searching APIs by URL pattern " + searchTerm;
+                log.error(errorMessage);
+                throw new APIManagementException(errorMessage);
+            }
             PaginationContext.init(0, 10000, "ASC", APIConstants.API_OVERVIEW_NAME, Integer.MAX_VALUE);
             if (artifactManager != null) {
                 for (int i = 0; i < 20; i++) { //This need to fix in future.We don't have a way to get max value of
@@ -4911,6 +4937,11 @@ public final class APIUtil {
                 totalLength = genericArtifacts.length;
                 StringBuilder apiNames = new StringBuilder();
                 for (GenericArtifact artifact : genericArtifacts) {
+                    if (artifact == null) {
+                        log.error("Failed to retrieve an artifact when searching APIs by URL pattern : " + searchTerm +
+                                " , continuing with next artifact.");
+                        continue;
+                    }
                     if (apiNames.indexOf(artifact.getAttribute(APIConstants.API_OVERVIEW_NAME)) < 0) {
                         APIStatus apiLcStatus = APIUtil.getApiStatus(artifact.getLifecycleState());
                         String status = (apiLcStatus != null) ? apiLcStatus.getStatus() : null;
@@ -5593,6 +5624,12 @@ public final class APIUtil {
             throws APIManagementException {
         String apiPath = APIUtil.getAPIPath(apiIdentifier);
         GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
+        if (artifactManager == null) {
+            String errorMessage = "Artifact manager is null when getting generic artifact for API " +
+                    apiIdentifier.getApiName();
+            log.error(errorMessage);
+            throw new APIManagementException(errorMessage);
+        }
         try {
             Resource apiResource = registry.get(apiPath);
             String artifactId = apiResource.getUUID();
