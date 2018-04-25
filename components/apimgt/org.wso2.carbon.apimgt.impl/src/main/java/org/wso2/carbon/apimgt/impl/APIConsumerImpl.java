@@ -1671,12 +1671,12 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if(apiBizOwner != null && !apiBizOwner.isEmpty()){
                 try {
                     final String bizOwner = apiBizOwner;
-                    GenericArtifact[] genericArtifacts = artifactManager.findGenericArtifacts(new GenericArtifactFilter() {
-                        public boolean matches(GenericArtifact artifact) throws GovernanceException {
-                            return artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER) != null &&
-                                   bizOwner.matches(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
-                        }
-                    });
+                    Map<String, List<String>> listMap = new HashMap<String, List<String>>();
+                    listMap.put(APIConstants.API_OVERVIEW_BUSS_OWNER, new ArrayList<String>() {{
+                        add(bizOwner);
+                    }});
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(this.username);
+                    GenericArtifact[] genericArtifacts = artifactManager.findGenericArtifacts(listMap);
 
                     if(genericArtifacts != null && genericArtifacts.length > 0){
                         for(GenericArtifact artifact : genericArtifacts){
