@@ -3,13 +3,10 @@
 import ballerina/http;
 import ballerina/log;
 import ballerina/auth;
-import ballerina/caching;
 import ballerina/config;
 import ballerina/runtime;
 import ballerina/time;
-import ballerina/util;
 import ballerina/io;
-import ballerina/internal;
 import org.wso2.carbon.apimgt.gateway.handlers as handler;
 import org.wso2.carbon.apimgt.gateway.filters as filter;
 import org.wso2.carbon.apimgt.gateway.constants as constants;
@@ -17,7 +14,7 @@ import org.wso2.carbon.apimgt.gateway.utils as utils;
 
 
 AuthProvider basicAuthProvider = {id: "oauth2", scheme:"oauth2", authProvider:"config"};
-endpoint WSO2APIGatewayListener listener {
+endpoint APIGatewayListener listener {
     port:9091
     //authProviders:[basicAuthProvider]
 };
@@ -46,7 +43,7 @@ service<http:Service> echo bind listener {
 @Description {value:"Representation of an API gateway listener"}
 @Field {value:"config: EndpointConfiguration instance"}
 @Field {value:"secureListener: Secure HTTP Listener instance"}
-public type WSO2APIGatewayListener object {
+public type APIGatewayListener object {
     public {
         EndpointConfiguration config;
         http:Listener httpListener;
@@ -72,7 +69,7 @@ public type WSO2APIGatewayListener object {
 
     @Description {value:"Returns the connector that client code uses"}
     @Return {value:"The connector that client code uses"}
-    public function getClient() returns (http:Connection);
+    public function getCallerActions() returns (http:Connection);
 
     @Description {value:"Stops the registered service"}
     public function stop();
@@ -116,7 +113,7 @@ public type AuthProvider {
     int timeSkew,
 };
 
-public function WSO2APIGatewayListener::init (EndpointConfiguration config) {
+public function APIGatewayListener::init (EndpointConfiguration config) {
     addAuthFiltersForAPIGatewayListener(config);
     self.httpListener.init(config);
 }
@@ -172,7 +169,7 @@ function createAuthFiltersForSecureListener (EndpointConfiguration config) retur
     filter:OAuthnFilter authnFilter = new(oauthnHandler);
 
     filter:OAuthzFilter authzFilter = new;
-    authFilters[0] = check <http:Filter> authnFilter;
+    authFilters[0] = <http:Filter> authnFilter;
     authFilters[1] = <http:Filter> authzFilter;
     return authFilters;
 }
@@ -189,17 +186,17 @@ function createAuthHandler (AuthProvider authProvider) returns http:HttpAuthnHan
             throw e;
         }
         http:HttpBasicAuthnHandler basicAuthHandler = new(authProvider1);
-        return check <http:HttpAuthnHandler> basicAuthHandler;
+        return <http:HttpAuthnHandler> basicAuthHandler;
     } else if(authProvider.scheme == constants:AUTH_SCHEME_JWT){
         auth:JWTAuthProviderConfig jwtConfig = {};
         jwtConfig.issuer = authProvider.issuer;
         jwtConfig.audience = authProvider.audience;
         jwtConfig.certificateAlias = authProvider.certificateAlias;
-        jwtConfig.trustStoreFilePath = authProvider.trustStore.filePath but {() => ""};
+        jwtConfig.trustStoreFilePath = authProvider.trustStore.path but {() => ""};
         jwtConfig.trustStorePassword = authProvider.trustStore.password but {() => ""};
         auth:JWTAuthProvider jwtAuthProvider = new (jwtConfig);
         http:HttpJwtAuthnHandler jwtAuthnHandler = new(jwtAuthProvider);
-        return check <http:HttpAuthnHandler> jwtAuthnHandler;
+        return <http:HttpAuthnHandler> jwtAuthnHandler;
     } else if (authProvider.scheme == constants:AUTH_SCHEME_OAUTH2){
         io:println("Added to registry");
         handler:OAuthnHandler oAuthnHandler = new;
@@ -214,29 +211,29 @@ function createAuthHandler (AuthProvider authProvider) returns http:HttpAuthnHan
 @Description {value:"Gets called every time a service attaches itself to this endpoint. Also happens at package initialization."}
 @Param {value:"ep: The endpoint to which the service should be registered to"}
 @Param {value:"serviceType: The type of the service to be registered"}
-public function WSO2APIGatewayListener::register (typedesc serviceType) {
+public function APIGatewayListener::register (typedesc serviceType) {
     self.httpListener.register(serviceType);
 }
 
 @Description {value:"Gets called when the endpoint is being initialize during package init time"}
 @Return {value:"Error occured during initialization"}
-public function WSO2APIGatewayListener::initEndpoint() returns (error) {
+public function APIGatewayListener::initEndpoint() returns (error) {
     return self.httpListener.initEndpoint();
 }
 
 @Description {value:"Starts the registered service"}
-public function WSO2APIGatewayListener::start () {
+public function APIGatewayListener::start () {
     self.httpListener.start();
 }
 
 @Description {value:"Returns the connector that client code uses"}
 @Return {value:"The connector that client code uses"}
-public function WSO2APIGatewayListener::getClient () returns (http:Connection) {
-    return self.httpListener.getClient();
+public function APIGatewayListener::getCallerActions () returns (http:Connection) {
+    return self.httpListener.getCallerActions();
 }
 
 @Description {value:"Stops the registered service"}
-public function WSO2APIGatewayListener::stop () {
+public function APIGatewayListener::stop () {
     self.httpListener.stop();
 }
 

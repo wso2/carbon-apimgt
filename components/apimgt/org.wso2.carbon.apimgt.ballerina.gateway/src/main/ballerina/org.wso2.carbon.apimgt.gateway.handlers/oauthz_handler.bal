@@ -2,21 +2,19 @@
 import ballerina/http;
 import ballerina/log;
 import ballerina/auth;
-import ballerina/caching;
+import ballerina/cache;
 import ballerina/config;
 import ballerina/runtime;
 import ballerina/time;
-import ballerina/util;
 import ballerina/io;
-import ballerina/internal;
 import org.wso2.carbon.apimgt.gateway.constants as constants;
 @Description {value:"Representation of AuthzHandler"}
 @Field {value:"authzCache: authorization cache instance"}
 public type OAuthAuthzHandler object {
     public {
-        caching:Cache? authzCache;
+        cache:Cache? authzCache;
     }
-    new (authzCache) {
+    public new (authzCache) {
     }
     public function canHandle(http:Request req) returns (boolean);
     public function handle(string username, string serviceName, string resourceName, string method,
@@ -36,7 +34,7 @@ public function OAuthAuthzHandler::handle (string username, string serviceName, 
 string[] scopes) returns (boolean) {
     // first, check in the cache. cache key is <username>-<resource>-<http method>,
     // since different resources can have different scopes
-    string authzCacheKey = runtime:getInvocationContext().authenticationContext.username +
+    string authzCacheKey = runtime:getInvocationContext().userPrincipal.username +
         "-" + serviceName +  "-" + resourceName + "-" + method;
     match self.authorizeFromCache(authzCacheKey) {
         boolean isAuthorized => {
@@ -45,7 +43,7 @@ string[] scopes) returns (boolean) {
         () => {
             // if there are scopes set in the AuthenticationContext already from a previous authentication phase, try to
             // match against those.
-            string[] authCtxtScopes = runtime:getInvocationContext().authenticationContext.scopes;
+            string[] authCtxtScopes = runtime:getInvocationContext().userPrincipal.scopes;
             if (lengthof authCtxtScopes > 0) {
                 boolean authorized = matchScopes(scopes, authCtxtScopes);
                 if (authorized) {
@@ -73,7 +71,7 @@ string[] scopes) returns (boolean) {
 function OAuthAuthzHandler::authorizeFromCache(string authzCacheKey) returns (boolean|()) {
     try {
         match self.authzCache {
-            caching:Cache cache => {
+            cache:Cache cache => {
                 return check <boolean> cache.get(authzCacheKey);
             }
             () => {
@@ -91,7 +89,7 @@ function OAuthAuthzHandler::authorizeFromCache(string authzCacheKey) returns (bo
 @Param {value:"isAuthorized: authorization decision"}
 function OAuthAuthzHandler::cacheAuthzResult (string authzCacheKey, boolean isAuthorized) {
     match self.authzCache {
-        caching:Cache cache => {
+        cache:Cache cache => {
             cache.put(authzCacheKey, isAuthorized);
         }
         () => {
@@ -122,7 +120,7 @@ already set in the authentication context. If not, the flow cannot continue."}
 @Param {value:"req: Request object"}
 @Return {value:"boolean: true if its possible authorize, else false"}
 public function OAuthAuthzHandler::canHandle (http:Request req) returns (boolean) {
-    if (runtime:getInvocationContext().authenticationContext.username.length() == 0) {
+    if (runtime:getInvocationContext().userPrincipal.username.length() == 0) {
         log:printError("Username not set in auth context. Unable to authorize");
         return false;
     }
