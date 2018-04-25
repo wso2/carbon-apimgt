@@ -1,13 +1,11 @@
 import ballerina/http;
 import ballerina/log;
 import ballerina/auth;
-import ballerina/caching;
 import ballerina/config;
 import ballerina/runtime;
 import ballerina/time;
-import ballerina/util;
 import ballerina/io;
-import ballerina/internal;
+import ballerina/reflect;
 import org.wso2.carbon.apimgt.gateway.constants as constants;
 
 public function isResourceSecured (http:ListenerAuthConfig? resourceLevelAuthAnn, http:ListenerAuthConfig?
@@ -42,12 +40,12 @@ and then from the service level, if its not there in the resource level"}
 @Param {value:"annotationName: annotation name"}
 @Param {value:"annData: array of annotationData instances"}
 @Return {value:"ListenerAuthConfig: ListenerAuthConfig instance if its defined, else nil"}
-public function getAuthAnnotation (string annotationPackage, string annotationName, internal:annotationData[] annData)
+public function getAuthAnnotation (string annotationPackage, string annotationName, reflect:annotationData[] annData)
     returns (http:ListenerAuthConfig?) {
     if (lengthof annData == 0) {
         return ();
     }
-    internal:annotationData|() authAnn;
+    reflect:annotationData|() authAnn;
     foreach ann in annData {
         if (ann.name == annotationName && ann.pkgName == annotationPackage) {
             authAnn = ann;
@@ -55,7 +53,7 @@ public function getAuthAnnotation (string annotationPackage, string annotationNa
         }
     }
     match authAnn {
-        internal:annotationData annData1 => {
+        reflect:annotationData annData1 => {
             if (annotationName == constants:RESOURCE_ANN_NAME) {
                 http:HttpResourceConfig resourceConfig = check <http:HttpResourceConfig>annData1.value;
                 return resourceConfig.authConfig;

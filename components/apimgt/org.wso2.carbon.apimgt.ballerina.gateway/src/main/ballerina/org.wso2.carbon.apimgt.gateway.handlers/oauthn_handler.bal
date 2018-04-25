@@ -2,20 +2,18 @@
 import ballerina/http;
 import ballerina/log;
 import ballerina/auth;
-import ballerina/caching;
+import ballerina/cache;
 import ballerina/config;
 import ballerina/runtime;
 import ballerina/time;
-import ballerina/util;
 import ballerina/io;
-import ballerina/internal;
 import org.wso2.carbon.apimgt.gateway.constants as constants;
 import org.wso2.carbon.apimgt.gateway.dto as dto;
 
 // Authorization handler
 
 endpoint http:Client introspectEndpoint {
-    targets:[{url:"https://localhost:9443"}]
+    url:"https://localhost:9443"
 };
 
 @Description {value:"Representation of JWT Auth handler for HTTP traffic"}
@@ -86,7 +84,7 @@ function extractAccessToken (http:Request req) returns (string) {
 public type OAuthAuthProvider object {
     public {
         JWTAuthProviderConfig jwtAuthProviderConfig;
-        caching:Cache authCache;
+        cache:Cache authCache;
     }
 
 
@@ -123,10 +121,10 @@ public function OAuthAuthProvider::authenticate (string authToken) returns (bool
     io:println(introspectDto);
     if (introspectDto.active) {
         // set username
-        runtime:getInvocationContext().authenticationContext.username = introspectDto.username;
+        runtime:getInvocationContext().userPrincipal.username = introspectDto.username;
         string[] scopes = introspectDto.scope.split(" ");
         if (lengthof scopes > 0) {
-            runtime:getInvocationContext().authenticationContext.scopes = scopes;
+            runtime:getInvocationContext().userPrincipal.scopes = scopes;
         }
         // read scopes and set to the invocation context
 
@@ -146,20 +144,23 @@ public function OAuthAuthProvider::authenticate (string authToken) returns (bool
 
 public function OAuthAuthProvider::doIntrospect (string authToken) returns (json) {
     try {
-        string encodedBasicAuthHeader = check util:base64EncodeString("admin:admin");
+        string base64Header = "admin:admin";
+        string encodedBasicAuthHeader = check base64Header.base64Encode();
+        io:println(encodedBasicAuthHeader);
         http:Request clientRequest = new;
 
         http:Response clientResponse = new;
 
-        clientRequest.setStringPayload("token=" + authToken);
-        clientRequest.setHeader("Content-Type", "application/x-www-form-urlencoded");
-        clientRequest.setHeader("Authorization", "Basic " + encodedBasicAuthHeader);
+        clientRequest.setTextPayload("token=" + authToken, contentType=constants:X_WWW_FORM_URLENCODED);
+        clientRequest.setHeader(constants:CONTENT_TYPE_HEADER, constants:X_WWW_FORM_URLENCODED);
+        clientRequest.setHeader(constants:AUTHORIZATION_HEADER, constants:BASIC_PREFIX_WITH_SPACE +
+                encodedBasicAuthHeader);
         //var result = introspectEndpoint -> post("/api/identity/oauth2/introspect/v1.0/introspect", clientRequest);
-        var result = introspectEndpoint -> post("/oauth2/introspect", clientRequest);
+        var result = introspectEndpoint -> post("/oauth2/introspect", request=clientRequest);
 
         match result {
             http:HttpConnectorError err => {
-                io:println("Error occurred while reading locator response");
+                io:println("Error occurred while reading locator response",err);
             }
             http:Response prod => {
                 clientResponse = prod;

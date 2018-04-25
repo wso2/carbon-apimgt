@@ -1,13 +1,11 @@
 import ballerina/http;
 import ballerina/log;
 import ballerina/auth;
-import ballerina/caching;
 import ballerina/config;
 import ballerina/runtime;
 import ballerina/time;
-import ballerina/util;
 import ballerina/io;
-import ballerina/internal;
+import ballerina/reflect;
 import org.wso2.carbon.apimgt.gateway.handlers as handler;
 import org.wso2.carbon.apimgt.gateway.constants as constants;
 import org.wso2.carbon.apimgt.gateway.utils as utils;
@@ -26,7 +24,7 @@ public type OAuthnFilter object {
         handler:OAuthnHandler oauthnHandler;
     }
 
-    new (oauthnHandler) {}
+    public new (oauthnHandler) {}
 
     @Description {value:"filterRequest: Request filter function"}
     public function filterRequest (http:Request request, http:FilterContext context) returns http:FilterResult {
@@ -66,10 +64,10 @@ function getResourceAuthConfig (http:FilterContext context) returns (boolean, st
     // get authn details from the resource level
     http:ListenerAuthConfig? resourceLevelAuthAnn = utils:getAuthAnnotation(constants:ANN_PACKAGE,
     constants:RESOURCE_ANN_NAME,
-        internal:getResourceAnnotations(context.serviceType, context.resourceName));
+    reflect:getResourceAnnotations(context.serviceType, context.resourceName));
     http:ListenerAuthConfig? serviceLevelAuthAnn = utils:getAuthAnnotation(constants:ANN_PACKAGE,
     constants:SERVICE_ANN_NAME,
-        internal:getServiceAnnotations(context.serviceType));
+    reflect:getServiceAnnotations(context.serviceType));
     // check if authentication is enabled
     resourceSecured = utils:isResourceSecured(resourceLevelAuthAnn, serviceLevelAuthAnn);
     // if resource is not secured, no need to check further

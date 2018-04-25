@@ -20,3 +20,12 @@
 @final public string RESOURCE_ANN_NAME = "ResourceConfig";
 @Description {value:"Service level annotation name"}
 @final public string SERVICE_ANN_NAME = "ServiceConfig";
+
+@Description {value:"Basic prefix for authorization header with ending spce"}
+@final public string BASIC_PREFIX_WITH_SPACE = "Basic ";
+@Description {value:"authorization header "}
+@final public string AUTHORIZATION_HEADER = "Authorization";
+@Description {value:"Content type header "}
+@final public string CONTENT_TYPE_HEADER = "Content-Type";
+@Description {value:"Form url encoded"}
+@final public string X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";

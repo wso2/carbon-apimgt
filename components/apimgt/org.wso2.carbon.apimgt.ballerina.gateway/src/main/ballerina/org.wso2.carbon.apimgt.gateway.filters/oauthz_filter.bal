@@ -1,19 +1,18 @@
 import ballerina/http;
 import ballerina/log;
 import ballerina/auth;
-import ballerina/caching;
+import ballerina/cache;
 import ballerina/config;
 import ballerina/runtime;
 import ballerina/time;
-import ballerina/util;
 import ballerina/io;
-import ballerina/internal;
+import ballerina/reflect;
 import org.wso2.carbon.apimgt.gateway.handlers as handler;
 import org.wso2.carbon.apimgt.gateway.constants as constants;
 import org.wso2.carbon.apimgt.gateway.utils as utils;
 
 // authorization filter
-caching:Cache authzCache = new(expiryTimeMillis = 300000);
+cache:Cache authzCache = new(expiryTimeMillis = 300000);
 @Description {value:"Authz handler instance"}
 public handler:OAuthAuthzHandler authzHandler = new(authzCache);
 
@@ -30,10 +29,10 @@ public type OAuthzFilter object {
         // first check if the resource is marked to be authenticated. If not, no need to authorize.
         http:ListenerAuthConfig? resourceLevelAuthAnn = utils:getAuthAnnotation(constants:ANN_PACKAGE,
         constants:RESOURCE_ANN_NAME,
-            internal:getResourceAnnotations(context.serviceType, context.resourceName));
+            reflect:getResourceAnnotations(context.serviceType, context.resourceName));
         http:ListenerAuthConfig? serviceLevelAuthAnn = utils:getAuthAnnotation(constants:ANN_PACKAGE,
         constants:SERVICE_ANN_NAME,
-            internal:getServiceAnnotations(context.serviceType));
+        reflect:getServiceAnnotations(context.serviceType));
         if (!utils:isResourceSecured(resourceLevelAuthAnn, serviceLevelAuthAnn)) {
             // not secured, no need to authorize
             return createAuthzResult(true);
@@ -44,7 +43,7 @@ public type OAuthzFilter object {
         match scopes {
             string[] scopeNames => {
                 if (authzHandler.canHandle(request)) {
-                    authorized = authzHandler.handle(runtime:getInvocationContext().authenticationContext.username,
+                    authorized = authzHandler.handle(runtime:getInvocationContext().userPrincipal.username,
                         context.serviceName, context.resourceName, request.method, scopeNames);
                 } else {
                     authorized = false;
