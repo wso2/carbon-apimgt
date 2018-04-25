@@ -68,6 +68,9 @@ function getResourceAuthConfig (http:FilterContext context) returns (boolean, st
     http:ListenerAuthConfig? serviceLevelAuthAnn = utils:getAuthAnnotation(constants:ANN_PACKAGE,
     constants:SERVICE_ANN_NAME,
     reflect:getServiceAnnotations(context.serviceType));
+    io:println("####################  ");
+    io:println( context.resourceName);
+    io:println( context.serviceName);
     // check if authentication is enabled
     resourceSecured = utils:isResourceSecured(resourceLevelAuthAnn, serviceLevelAuthAnn);
     // if resource is not secured, no need to check further
