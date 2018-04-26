@@ -36,17 +36,13 @@ export default class Subscription extends Resource {
      * @param applicationId id of the application 
      * @returns {promise} With all subscription for given applicationId or apiId.
      */
-    getSubscriptions(apiId, applicationId, callback = null) {
+    getSubscriptions(apiId, applicationId) {
         var promise_get = this.client.then((client) => {
             return client.apis["Subscription (Collection)"].get_subscriptions(
                 { apiId: apiId, applicationId: applicationId });
         }
         );
-        if (callback) {
-            return promise_get.then(callback);
-        } else {
-            return promise_get;
-        }
+        return promise_get;
     }
 
     /**
