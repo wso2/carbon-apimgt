@@ -1,4 +1,4 @@
-;(function ($, window, document, undefined) {
+(function ($, window, document, undefined) {
     var deleteConfirmation = i18n.t("Do you really want to delete the certificate for Endpoint");
     var aliasEPValidationMessage = i18n.t("Alias should not be empty");
     var certFileError = i18n.t("You must upload a Certificate file");
@@ -25,7 +25,7 @@
         this.element = $(element);
         this.options = $.extend({}, defaults, options);
         var filteredCerts = this.getCertsForEndpoint(this.options.config.cert_data, this.options.config.ep_data);
-        this.config = {"certificates": Array.from(filteredCerts)};
+        this.config = {"certificates": filteredCerts};
         this._name = name;
         certUi = this;
         this.init();
@@ -82,34 +82,37 @@
          * When loading the page, check for the user entered endpoints and retrieve the certificates.
          * */
         getCertsForEndpoint: function (certs, eps) {
-            var newCerts = new Set();
-            var endpoints = [];
-
             if (eps === undefined) {
-                return newCerts;
-            } else {
-                endpoints.push(eps.production_endpoints);
-                endpoints.push(eps.sandbox_endpoints);
+                return certs || [];
             }
-
-            //If production_endpoints is an array, iterate through it. Otherwise get the properties.
-            if (endpoints instanceof Array) {
-                for (var eP in endpoints) {
-                    for (var cert in certs) {
-                        if (endpoints[eP] !== "" && endpoints[eP] !== undefined) {
-                            if (endpoints[eP].url.includes(certs[cert].endpoint)) {
-                                newCerts.add(certs[cert]);
-                            }
+            var productionEndpoints = eps.production_endpoints;
+            var sandboxEndpoints = eps.sandbox_endpoints;
+            var newCerts = certs.filter(function (cert) {
+                var certUrl = cert.endpoint.toLowerCase();
+                if (Array.isArray(productionEndpoints)) {
+                    for (var index in productionEndpoints) {
+                        var containInCertUrl = productionEndpoints[index].url.toLowerCase().indexOf(certUrl) !== -1;
+                        if (containInCertUrl) {
+                            return containInCertUrl;
                         }
-
+                            }
+                } else if (productionEndpoints) {
+                    // Skip if productionEndpoints is `undefined`
+                    return productionEndpoints.url.toLowerCase().indexOf(certUrl) !== -1;
+                        }
+                if (Array.isArray(sandboxEndpoints)) {
+                    for (var index in sandboxEndpoints) {
+                        var containInCertUrl = sandboxEndpoints[index].url.toLowerCase().indexOf(certUrl) !== -1;
+                        if (containInCertUrl) {
+                            return containInCertUrl;
                     }
                 }
-            } else {
-                newCerts = certs.filter(function (cert) {
-                    return endpoints.url.includes(cert.endpoint);
-                })
+                } else if (sandboxEndpoints) {
+                    // Skip if sandboxEndpoints is `undefined`
+                    return sandboxEndpoints.url.toLowerCase().indexOf(certUrl) !== -1;
             }
-            return Array.from(newCerts);
+            });
+            return newCerts;
         },
 
         /**
