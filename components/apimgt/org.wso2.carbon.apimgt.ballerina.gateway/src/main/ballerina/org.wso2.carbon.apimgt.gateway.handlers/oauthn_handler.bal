@@ -16,6 +16,10 @@ endpoint http:Client introspectEndpoint {
     url:"https://localhost:9443"
 };
 
+endpoint http:Client keyValidationEndpoint {
+    url:"https://localhost:9443"
+};
+
 @Description {value:"Representation of JWT Auth handler for HTTP traffic"}
 @Field {value:"jwtAuthenticator: JWTAuthenticator instance"}
 @Field {value:"name: Authentication handler name"}
@@ -117,19 +121,22 @@ public type JWTAuthProviderConfig {
 @Return {value:"boolean: true if authentication is a success, else false"}
 @Return {value:"error: If error occured in authentication"}
 public function OAuthAuthProvider::authenticate (string authToken) returns (boolean) {
-    dto:IntrospectDto introspectDto = check <dto:IntrospectDto>self.doIntrospect(authToken);
-    io:println(introspectDto);
-    if (introspectDto.active) {
+    dto:APIKeyValidationDto apiKeyValidationDto = check <dto:APIKeyValidationDto>self.doIntrospect(authToken);
+    io:println(apiKeyValidationDto);
+    boolean authorized = <boolean>apiKeyValidationDto.authorized;
+    if (authorized) {
         // set username
-        runtime:getInvocationContext().userPrincipal.username = introspectDto.username;
-        string[] scopes = introspectDto.scope.split(" ");
+        runtime:getInvocationContext().userPrincipal.username = apiKeyValidationDto.endUserName;
+        string[] scopes = apiKeyValidationDto.scopes;//.split(",");
+        io:println("#####################################################################");
+        io:println(scopes);
         if (lengthof scopes > 0) {
             runtime:getInvocationContext().userPrincipal.scopes = scopes;
         }
         // read scopes and set to the invocation context
 
     }
-    return introspectDto.active;
+    return authorized;
     //match introspectDto.active {
     //    string active => {
     //        return  <boolean>active but {string => false};
@@ -147,28 +154,82 @@ public function OAuthAuthProvider::doIntrospect (string authToken) returns (json
         string base64Header = "admin:admin";
         string encodedBasicAuthHeader = check base64Header.base64Encode();
         io:println(encodedBasicAuthHeader);
-        http:Request clientRequest = new;
 
-        http:Response clientResponse = new;
+        // Intorospect related changes
+        //http:Request clientRequest = new;
+        //
+        //http:Response clientResponse = new;
+        //
+        //clientRequest.setTextPayload("token=" + authToken, contentType=constants:X_WWW_FORM_URLENCODED);
+        //clientRequest.setHeader(constants:CONTENT_TYPE_HEADER, constants:X_WWW_FORM_URLENCODED);
+        //clientRequest.setHeader(constants:AUTHORIZATION_HEADER, constants:BASIC_PREFIX_WITH_SPACE +
+        //        encodedBasicAuthHeader);
+        ////var result = introspectEndpoint -> post("/api/identity/oauth2/introspect/v1.0/introspect", clientRequest);
+        //var result = introspectEndpoint -> post("/oauth2/introspect", request=clientRequest);
+        //
+        //match result {
+        //    http:HttpConnectorError err => {
+        //        io:println("Error occurred while reading locator response",err);
+        //    }
+        //    http:Response prod => {
+        //        clientResponse = prod;
+        //    }
+        //}
+        //io:println("\nPOST request:");
+        //io:println(clientResponse.getJsonPayload());
 
-        clientRequest.setTextPayload("token=" + authToken, contentType=constants:X_WWW_FORM_URLENCODED);
-        clientRequest.setHeader(constants:CONTENT_TYPE_HEADER, constants:X_WWW_FORM_URLENCODED);
-        clientRequest.setHeader(constants:AUTHORIZATION_HEADER, constants:BASIC_PREFIX_WITH_SPACE +
+
+        ////////////////////////////////////////////////////////////////////
+        http:Request clientRequest1 = new;
+
+        http:Response clientResponse1 = new;
+        string xmlString = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"
+            xmlns:xsd=\"http://org.apache.axis2/xsd\">
+            <soapenv:Header/>
+            <soapenv:Body>
+            <xsd:validateKey>
+            <!--Optional:-->
+            <xsd:context>/pizzashack/1.0.0</xsd:context>
+            <!--Optional:-->
+            <xsd:version>1.0.0</xsd:version>
+            <!--Optional:-->
+            <xsd:accessToken>" + authToken + "</xsd:accessToken>
+            <!--Optional:-->
+            <xsd:requiredAuthenticationLevel>Any</xsd:requiredAuthenticationLevel>
+            <!--Optional:-->
+            <xsd:clientDomain>*</xsd:clientDomain>
+            <!--Optional:-->
+            <xsd:matchingResource>/menu</xsd:matchingResource>
+            <!--Optional:-->
+            <xsd:httpVerb>GET</xsd:httpVerb>
+            </xsd:validateKey>
+            </soapenv:Body>
+            </soapenv:Envelope>";
+
+        clientRequest1.setTextPayload(xmlString,contentType="text/xml");
+        clientRequest1.setHeader(constants:CONTENT_TYPE_HEADER, "text/xml");
+        clientRequest1.setHeader(constants:AUTHORIZATION_HEADER, constants:BASIC_PREFIX_WITH_SPACE +
                 encodedBasicAuthHeader);
+        clientRequest1.setHeader("SOAPAction", "urn:validateKey");
         //var result = introspectEndpoint -> post("/api/identity/oauth2/introspect/v1.0/introspect", clientRequest);
-        var result = introspectEndpoint -> post("/oauth2/introspect", request=clientRequest);
+        var result1 = keyValidationEndpoint -> post("/services/APIKeyValidationService", request=clientRequest1);
 
-        match result {
+        match result1 {
             http:HttpConnectorError err => {
                 io:println("Error occurred while reading locator response",err);
             }
             http:Response prod => {
-                clientResponse = prod;
+                clientResponse1 = prod;
             }
         }
         io:println("\nPOST request:");
-        io:println(clientResponse.getJsonPayload());
-        return check clientResponse.getJsonPayload();
+        io:println(clientResponse1.getXmlPayload());
+        xml responsepayload = check clientResponse1.getXmlPayload();
+        json j2 = responsepayload.toJSON({attributePrefix: "", preserveNamespaces: false});
+        j2 = j2["Envelope"]["Body"]["validateKeyResponse"]["return"];
+        io:println(j2);
+        return(j2);
+        //return check clientResponse.getJsonPayload();
 
     } catch (error err) {
         io:println(err);
