@@ -9,6 +9,7 @@ import ballerina/time;
 import ballerina/io;
 import org.wso2.carbon.apimgt.gateway.constants as constants;
 import org.wso2.carbon.apimgt.gateway.dto as dto;
+import org.wso2.carbon.apimgt.gateway.caching as caching;
 
 // Authorization handler
 
@@ -30,7 +31,8 @@ public type OAuthnHandler object {
     }
 
     public function canHandle (http:Request req) returns (boolean);
-    public function handle (http:Request req) returns (boolean);
+    public function handle (http:Request req, dto:APIKeyValidationRequestDto apiKeyValidationDto) returns (boolean);
+
 };
 
 @Description {value:"Intercepts a HTTP request for authentication"}
@@ -57,10 +59,11 @@ public function OAuthnHandler::canHandle (http:Request req) returns (boolean) {
 @Description {value:"Checks if the provided HTTP request can be authenticated with JWT authentication"}
 @Param {value:"req: Request object"}
 @Return {value:"boolean: true if its possible to authenticate with JWT auth, else false"}
-public function OAuthnHandler::handle (http:Request req) returns (boolean) {
+public function OAuthnHandler::handle (http:Request req, dto:APIKeyValidationRequestDto apiKeyValidationDto) returns (boolean) {
     string accessToken = extractAccessToken(req);
+    apiKeyValidationDto.accessToken = accessToken;
     io:println("token " + accessToken);
-    var isAuthenticated = self.oAuthAuthenticator.authenticate(accessToken);
+    var isAuthenticated = self.oAuthAuthenticator.authenticate( apiKeyValidationDto);
     io:println("isAuthenticated " + isAuthenticated);
     return isAuthenticated;
     //match isAuthenticated {
@@ -74,10 +77,16 @@ public function OAuthnHandler::handle (http:Request req) returns (boolean) {
     //}
 }
 
+
 function extractAccessToken (http:Request req) returns (string) {
     string authHeader = req.getHeader(constants:AUTH_HEADER);
     string[] authHeaderComponents = authHeader.split(" ");
     return authHeaderComponents[1];
+}
+
+function  getAccessTokenCacheKey(dto:APIKeyValidationRequestDto dto) returns string {
+    return dto.accessToken + ":" + dto.context + "/" + dto.apiVersion + dto.matchingResource + ":" + dto.httpVerb + ":" +
+    dto.requiredAuthenticationLevel;
 }
 
 
@@ -88,13 +97,14 @@ function extractAccessToken (http:Request req) returns (string) {
 public type OAuthAuthProvider object {
     public {
         JWTAuthProviderConfig jwtAuthProviderConfig;
-        cache:Cache authCache;
+        caching:APIGatewayCache gatewayTokenCache;
     }
 
 
-    public function authenticate (string authToken) returns (boolean);
+    public function authenticate (dto:APIKeyValidationRequestDto apiKeyValidationRequestDto) returns (boolean);
 
-    public function doIntrospect (string authToken) returns (json);
+    public function doIntrospect (dto:APIKeyValidationRequestDto apiKeyValidationRequestDto) returns (json);
+
 };
 
 @Description {value:"Represents JWT validator configurations"}
@@ -120,16 +130,42 @@ public type JWTAuthProviderConfig {
 @Param {value:"jwtToken: Jwt token extracted from the authentication header"}
 @Return {value:"boolean: true if authentication is a success, else false"}
 @Return {value:"error: If error occured in authentication"}
-public function OAuthAuthProvider::authenticate (string authToken) returns (boolean) {
-    dto:APIKeyValidationDto apiKeyValidationDto = check <dto:APIKeyValidationDto>self.doIntrospect(authToken);
-    io:println(apiKeyValidationDto);
-    boolean authorized = <boolean>apiKeyValidationDto.authorized;
+public function OAuthAuthProvider::authenticate (dto:APIKeyValidationRequestDto apiKeyValidationRequestDto) returns
+                                                                                                              (boolean) {
+    string cacheKey = getAccessTokenCacheKey(apiKeyValidationRequestDto);
+    io:println("cacheKey " + cacheKey);
+    boolean authorized;
+    dto:APIKeyValidationDto apiKeyValidationDto;
+    match self.gatewayTokenCache.authenticateFromGatewayKeyValidationCache(cacheKey) {
+        dto:APIKeyValidationDto apiKeyValidationDtoFromcache => {
+        authorized = < boolean > apiKeyValidationDtoFromcache.authorized;
+        apiKeyValidationDto = apiKeyValidationDtoFromcache;
+            io:println("value returned from cache");
+        }
+        () => {
+            apiKeyValidationDto = check < dto:APIKeyValidationDto > self.doIntrospect(
+            apiKeyValidationRequestDto);
+            match <dto:APIKeyValidationDto> self.doIntrospect(apiKeyValidationRequestDto){
+                dto:APIKeyValidationDto dto => {
+                    apiKeyValidationDto = dto;
+                }
+                error err => {
+                    io:println(err);
+                    return false;
+                }
+            }
+            io:println(apiKeyValidationDto);
+            authorized = < boolean > apiKeyValidationDto.authorized;
+            if (authorized) {
+                self.gatewayTokenCache.addToGatewayKeyValidationCache(cacheKey, apiKeyValidationDto);
+            }
+            io:println("value not returned from cache");
+        }
+    }
     if (authorized) {
         // set username
         runtime:getInvocationContext().userPrincipal.username = apiKeyValidationDto.endUserName;
         string[] scopes = apiKeyValidationDto.scopes;//.split(",");
-        io:println("#####################################################################");
-        io:println(scopes);
         if (lengthof scopes > 0) {
             runtime:getInvocationContext().userPrincipal.scopes = scopes;
         }
@@ -137,19 +173,10 @@ public function OAuthAuthProvider::authenticate (string authToken) returns (bool
 
     }
     return authorized;
-    //match introspectDto.active {
-    //    string active => {
-    //        return  <boolean>active but {string => false};
-    //    }
-    //    error err => {
-    //        log:printErrorCause("Error in invoking introspect endpoint", err);
-    //        return false;
-    //    }
-    //}
 }
 
 
-public function OAuthAuthProvider::doIntrospect (string authToken) returns (json) {
+public function OAuthAuthProvider::doIntrospect (dto:APIKeyValidationRequestDto apiKeyValidationRequestDto) returns (json) {
     try {
         string base64Header = "admin:admin";
         string encodedBasicAuthHeader = check base64Header.base64Encode();
@@ -189,19 +216,19 @@ public function OAuthAuthProvider::doIntrospect (string authToken) returns (json
             <soapenv:Body>
             <xsd:validateKey>
             <!--Optional:-->
-            <xsd:context>/pizzashack/1.0.0</xsd:context>
+            <xsd:context>" + apiKeyValidationRequestDto.context + "</xsd:context>
             <!--Optional:-->
-            <xsd:version>1.0.0</xsd:version>
+            <xsd:version>" + apiKeyValidationRequestDto.apiVersion + "</xsd:version>
             <!--Optional:-->
-            <xsd:accessToken>" + authToken + "</xsd:accessToken>
+            <xsd:accessToken>" + apiKeyValidationRequestDto.accessToken + "</xsd:accessToken>
             <!--Optional:-->
-            <xsd:requiredAuthenticationLevel>Any</xsd:requiredAuthenticationLevel>
+            <xsd:requiredAuthenticationLevel>" + apiKeyValidationRequestDto.requiredAuthenticationLevel + "</xsd:requiredAuthenticationLevel>
             <!--Optional:-->
-            <xsd:clientDomain>*</xsd:clientDomain>
+            <xsd:clientDomain>" + apiKeyValidationRequestDto.clientDomain + "</xsd:clientDomain>
             <!--Optional:-->
-            <xsd:matchingResource>/menu</xsd:matchingResource>
+            <xsd:matchingResource>" + apiKeyValidationRequestDto.matchingResource + "</xsd:matchingResource>
             <!--Optional:-->
-            <xsd:httpVerb>GET</xsd:httpVerb>
+            <xsd:httpVerb>" + apiKeyValidationRequestDto.httpVerb + "</xsd:httpVerb>
             </xsd:validateKey>
             </soapenv:Body>
             </soapenv:Envelope>";
@@ -215,7 +242,7 @@ public function OAuthAuthProvider::doIntrospect (string authToken) returns (json
         var result1 = keyValidationEndpoint -> post("/services/APIKeyValidationService", request=clientRequest1);
 
         match result1 {
-            http:HttpConnectorError err => {
+            error err => {
                 io:println("Error occurred while reading locator response",err);
             }
             http:Response prod => {
@@ -224,7 +251,16 @@ public function OAuthAuthProvider::doIntrospect (string authToken) returns (json
         }
         io:println("\nPOST request:");
         io:println(clientResponse1.getXmlPayload());
-        xml responsepayload = check clientResponse1.getXmlPayload();
+        xml responsepayload;
+        match clientResponse1.getXmlPayload() {
+            error err => {
+                io:println("Error occurred while getting key validation service response ",err);
+                return {};
+            }
+            xml responseXml => {
+                responsepayload = responseXml;
+            }
+        }
         json j2 = responsepayload.toJSON({attributePrefix: "", preserveNamespaces: false});
         j2 = j2["Envelope"]["Body"]["validateKeyResponse"]["return"];
         io:println(j2);
