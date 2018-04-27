@@ -13,33 +13,6 @@ import org.wso2.carbon.apimgt.gateway.constants as constants;
 import org.wso2.carbon.apimgt.gateway.utils as utils;
 
 
-AuthProvider basicAuthProvider = {id: "oauth2", scheme:"oauth2", authProvider:"config"};
-endpoint APIGatewayListener listener {
-    port:9091
-    //authProviders:[basicAuthProvider]
-};
-
-
-@http:ServiceConfig {
-    basePath:"/echo",
-    authConfig:{
-        authProviders:["oauth2"],
-        authentication:{enabled:true},
-        scopes:["default"]
-    }
-}
-service<http:Service> echo bind listener {
-    @http:ResourceConfig {
-        methods:["GET"],
-        path:"/test"
-    }
-    echo (endpoint client, http:Request req) {
-        http:Response res = new;
-        _ = client -> respond(res);
-    }
-}
-
-
 @Description {value:"Representation of an API gateway listener"}
 @Field {value:"config: EndpointConfiguration instance"}
 @Field {value:"secureListener: Secure HTTP Listener instance"}
@@ -90,7 +63,6 @@ public type EndpointConfiguration {
     string host,
     int port =9090,
     http:KeepAlive keepAlive = "AUTO",
-    http:TransferEncoding transferEncoding = http:TRANSFERENCODE_CHUNKING,
     http:ServiceSecureSocket? secureSocket,
     string httpVersion = "1.1",
     http:RequestLimits? requestLimits,
@@ -200,7 +172,7 @@ function createAuthHandler (AuthProvider authProvider) returns http:HttpAuthnHan
     } else if (authProvider.scheme == constants:AUTH_SCHEME_OAUTH2){
         io:println("Added to registry");
         handler:OAuthnHandler oAuthnHandler = new;
-        return  <http:HttpAuthnHandler> oAuthnHandler;
+        return  check <http:HttpAuthnHandler> oAuthnHandler;
     } else {
         // TODO: create other HttpAuthnHandlers
         error e = {message:"Invalid auth scheme: " + authProvider.scheme };

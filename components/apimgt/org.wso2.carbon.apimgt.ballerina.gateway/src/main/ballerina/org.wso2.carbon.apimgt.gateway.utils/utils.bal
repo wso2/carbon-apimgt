@@ -7,6 +7,7 @@ import ballerina/time;
 import ballerina/io;
 import ballerina/reflect;
 import org.wso2.carbon.apimgt.gateway.constants as constants;
+import org.wso2.carbon.apimgt.gateway.dto as dto;
 
 public function isResourceSecured (http:ListenerAuthConfig? resourceLevelAuthAnn, http:ListenerAuthConfig?
 serviceLevelAuthAnn)
@@ -69,4 +70,76 @@ public function getAuthAnnotation (string annotationPackage, string annotationNa
         }
     }
 }
+
+
+@Description {value:"Retrieve the annotation related to resources"}
+@Return {value:"HttpResourceConfig: HttpResourceConfig instance if its defined, else nil"}
+public function getResourceConfigAnnotation (reflect:annotationData[] annData)
+    returns (http:HttpResourceConfig) {
+    if (lengthof annData == 0) {
+        return {};
+    }
+    reflect:annotationData|() authAnn;
+    foreach ann in annData {
+        if (ann.name == constants:RESOURCE_ANN_NAME && ann.pkgName == constants:ANN_PACKAGE) {
+            authAnn = ann;
+            break;
+        }
+    }
+    match authAnn {
+        reflect:annotationData annData1 => {
+            http:HttpResourceConfig resourceConfig = check <http:HttpResourceConfig>annData1.value;
+            return resourceConfig;
+        }
+        () => {
+            return {};
+        }
+    }
+}
+
+@Description {value:"Retrieve the annotation related to service"}
+@Return {value:"HttpServiceConfig: HttpResourceConfig instance if its defined, else nil"}
+public function getServiceConfigAnnotation ( reflect:annotationData[] annData)
+    returns (http:HttpServiceConfig) {
+    if (lengthof annData == 0) {
+        return {};
+    }
+    reflect:annotationData|() authAnn;
+    foreach ann in annData {
+        if (ann.name == constants:SERVICE_ANN_NAME && ann.pkgName == constants:ANN_PACKAGE) {
+            authAnn = ann;
+            break;
+        }
+    }
+    match authAnn {
+        reflect:annotationData annData1 => {
+            http:HttpServiceConfig serviceConfig = check <http:HttpServiceConfig>annData1.value;
+            return serviceConfig;
+        }
+        () => {
+            return {};
+        }
+    }
+}
+
+@Description {value:"Retrieve the key validation request dto from service and resource level configs"}
+@Return {value:"api key validation request dto"}
+public function getKeyValidationRequestObject ( http:HttpServiceConfig httpServiceConfig,http:HttpResourceConfig
+httpResourceConfig) returns dto:APIKeyValidationRequestDto {
+    dto:APIKeyValidationRequestDto apiKeyValidationRequest = {};
+    apiKeyValidationRequest.context = httpServiceConfig.basePath;
+    apiKeyValidationRequest.apiVersion = getVersionFromBasePath(httpServiceConfig.basePath); // TODO set correct version
+    apiKeyValidationRequest.requiredAuthenticationLevel = "Any";
+    apiKeyValidationRequest.clientDomain = "*";
+    apiKeyValidationRequest.matchingResource = httpResourceConfig.path;
+    apiKeyValidationRequest.httpVerb = httpResourceConfig.methods[0]; // TODO get correct verb
+    return apiKeyValidationRequest;
+
+}
+
+public function getVersionFromBasePath(string basePath) returns string {
+    string[] splittedArray = basePath.split("/");
+    return splittedArray[lengthof splittedArray -1];
+}
+
 

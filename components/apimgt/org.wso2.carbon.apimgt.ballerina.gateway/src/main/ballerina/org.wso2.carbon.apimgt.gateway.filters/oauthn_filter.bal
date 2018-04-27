@@ -9,6 +9,7 @@ import ballerina/reflect;
 import org.wso2.carbon.apimgt.gateway.handlers as handler;
 import org.wso2.carbon.apimgt.gateway.constants as constants;
 import org.wso2.carbon.apimgt.gateway.utils as utils;
+import org.wso2.carbon.apimgt.gateway.dto as dto;
 
 
 // Authentication filter
@@ -30,10 +31,18 @@ public type OAuthnFilter object {
     public function filterRequest (http:Request request, http:FilterContext context) returns http:FilterResult {
         // get auth config for this resource
         boolean authenticated;
+        http:HttpServiceConfig httpServiceConfig =  utils:getServiceConfigAnnotation(reflect:getServiceAnnotations
+            (context.serviceType));
+        http:HttpResourceConfig httpResourceConfig =  utils:getResourceConfigAnnotation
+        (reflect:getResourceAnnotations
+            (context.serviceType, context
+                .resourceName));
+        dto:APIKeyValidationRequestDto apiKeyValidationDto = utils:getKeyValidationRequestObject(httpServiceConfig,
+            httpResourceConfig);
         var (isSecured, authProviders) = getResourceAuthConfig(context);
         if (isSecured) {
             // if auth providers are there, use those to authenticate
-            authenticated = self.oauthnHandler.handle(request);
+            authenticated = self.oauthnHandler.handle(request, apiKeyValidationDto);
         } else {
             // not secured, no need to authenticate
             return createAuthnResult(true);
@@ -68,9 +77,6 @@ function getResourceAuthConfig (http:FilterContext context) returns (boolean, st
     http:ListenerAuthConfig? serviceLevelAuthAnn = utils:getAuthAnnotation(constants:ANN_PACKAGE,
     constants:SERVICE_ANN_NAME,
     reflect:getServiceAnnotations(context.serviceType));
-    io:println("####################  ");
-    io:println( context.resourceName);
-    io:println( context.serviceName);
     // check if authentication is enabled
     resourceSecured = utils:isResourceSecured(resourceLevelAuthAnn, serviceLevelAuthAnn);
     // if resource is not secured, no need to check further
