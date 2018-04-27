@@ -29,3 +29,5 @@
 @final public string CONTENT_TYPE_HEADER = "Content-Type";
 @Description {value:"Form url encoded"}
 @final public string X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
+
+@final public string API_AUTH_INVALID_CREDENTIALS = "900901";

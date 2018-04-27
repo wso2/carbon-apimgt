@@ -20,6 +20,7 @@ import org.wso2.carbon.apimgt.gateway.dto as dto;
 
 
 cache:Cache gatewayKeyValidationCache = new;
+cache:Cache invalidTokenCache = new;
 
 public type APIGatewayCache object {
 
@@ -27,10 +28,17 @@ public type APIGatewayCache object {
    public function authenticateFromGatewayKeyValidationCache(string tokenCacheKey) returns (dto:APIKeyValidationDto|());
 
    public function addToGatewayKeyValidationCache (string tokenCacheKey, dto:APIKeyValidationDto apiKeyValidationDto) ;
+
+   public function removeFromGatewayKeyValidationCache (string tokenCacheKey);
+
+   public function retrieveFromInvalidTokenCache(string tokenCacheKey) returns (boolean|());
+
+   public function removeFromInvalidTokenCache (string tokenCacheKey);
+
+   public function addToInvalidTokenCache (string tokenCacheKey, boolean authorize) ;
 };
 
 public function APIGatewayCache::authenticateFromGatewayKeyValidationCache(string tokenCacheKey) returns (dto:APIKeyValidationDto|()) {
-    //return  <dto:APIKeyValidationDto> self.gatewayTokenCache.get(tokenCacheKey);
     match <dto:APIKeyValidationDto> gatewayKeyValidationCache.get(tokenCacheKey){
         dto:APIKeyValidationDto apikeyValidationDto => {
             return apikeyValidationDto;
@@ -44,4 +52,27 @@ public function APIGatewayCache::authenticateFromGatewayKeyValidationCache(strin
 public function APIGatewayCache::addToGatewayKeyValidationCache (string tokenCacheKey, dto:APIKeyValidationDto
     apiKeyValidationDto) {
     gatewayKeyValidationCache.put(tokenCacheKey, apiKeyValidationDto);
+}
+
+public function APIGatewayCache::removeFromGatewayKeyValidationCache (string tokenCacheKey) {
+    gatewayKeyValidationCache.remove(tokenCacheKey);
+}
+
+public function APIGatewayCache::retrieveFromInvalidTokenCache(string tokenCacheKey) returns (boolean|()) {
+    match <boolean> invalidTokenCache.get(tokenCacheKey){
+        boolean authorize => {
+            return authorize;
+        }
+        error err => {
+            return ();
+        }
+    }
+}
+
+public function APIGatewayCache::addToInvalidTokenCache (string tokenCacheKey, boolean authorize) {
+    invalidTokenCache.put(tokenCacheKey, authorize);
+}
+
+public function APIGatewayCache::removeFromInvalidTokenCache (string tokenCacheKey) {
+    invalidTokenCache.remove(tokenCacheKey);
 }
