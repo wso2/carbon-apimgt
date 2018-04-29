@@ -143,3 +143,24 @@ public function getVersionFromBasePath(string basePath) returns string {
 }
 
 
+public function isAccessTokenExpired(dto:APIKeyValidationDto apiKeyValidationDto) returns boolean {
+    int validityPeriod = check <int>apiKeyValidationDto.validityPeriod;
+    int issuedTime = check <int>apiKeyValidationDto.issuedTime;
+    int timestampSkew = 5000; // TODO : make this configurable;
+    int currentTime = time:currentTime().time;
+    io:println("validityPeriod = " + validityPeriod);
+    io:println("issuedTime = " + issuedTime);
+    io:println("currentTime = " + currentTime);
+    if (validityPeriod != 9223372036854775807 &&
+    // For cases where validityPeriod is closer to int.MAX_VALUE (then issuedTime + validityPeriod would spill
+    // over and would produce a negative value)
+    (currentTime - timestampSkew) > validityPeriod) {
+        if ((currentTime - timestampSkew) > (issuedTime + validityPeriod)) {
+            apiKeyValidationDto.validationStatus = constants:API_AUTH_INVALID_CREDENTIALS;
+            return true;
+        }
+    }
+    return false;
+}
+
+

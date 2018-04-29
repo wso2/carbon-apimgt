@@ -10,8 +10,9 @@ import ballerina/io;
 import org.wso2.carbon.apimgt.gateway.constants as constants;
 import org.wso2.carbon.apimgt.gateway.dto as dto;
 import org.wso2.carbon.apimgt.gateway.caching as caching;
+import org.wso2.carbon.apimgt.gateway.utils as utils;
 
-// Authorization handler
+// Authentication handler
 
 endpoint http:Client introspectEndpoint {
     url:"https://localhost:9443"
@@ -85,8 +86,7 @@ function extractAccessToken (http:Request req) returns (string) {
 }
 
 function  getAccessTokenCacheKey(dto:APIKeyValidationRequestDto dto) returns string {
-    return dto.accessToken + ":" + dto.context + "/" + dto.apiVersion + dto.matchingResource + ":" + dto.httpVerb + ":" +
-    dto.requiredAuthenticationLevel;
+    return dto.accessToken + ":" + dto.context + "/" + dto.apiVersion + dto.matchingResource + ":" + dto.httpVerb;
 }
 
 
@@ -138,28 +138,53 @@ public function OAuthAuthProvider::authenticate (dto:APIKeyValidationRequestDto 
     dto:APIKeyValidationDto apiKeyValidationDto;
     match self.gatewayTokenCache.authenticateFromGatewayKeyValidationCache(cacheKey) {
         dto:APIKeyValidationDto apiKeyValidationDtoFromcache => {
+        if(utils:isAccessTokenExpired(apiKeyValidationDtoFromcache)) {
+            self.gatewayTokenCache.removeFromGatewayKeyValidationCache(cacheKey);
+            io:println("Token expired, removed from the cache");
+            self.gatewayTokenCache.addToInvalidTokenCache(apiKeyValidationRequestDto.accessToken, true);
+            return false;
+        }
         authorized = < boolean > apiKeyValidationDtoFromcache.authorized;
         apiKeyValidationDto = apiKeyValidationDtoFromcache;
             io:println("value returned from cache");
         }
         () => {
-            apiKeyValidationDto = check < dto:APIKeyValidationDto > self.doIntrospect(
-            apiKeyValidationRequestDto);
-            match <dto:APIKeyValidationDto> self.doIntrospect(apiKeyValidationRequestDto){
-                dto:APIKeyValidationDto dto => {
-                    apiKeyValidationDto = dto;
-                }
-                error err => {
-                    io:println(err);
+            match self.gatewayTokenCache.retrieveFromInvalidTokenCache(apiKeyValidationRequestDto.accessToken) {
+                boolean cacheAuthorizedValue => {
                     return false;
                 }
+                () => {
+                    json keyValidationInfoJson = self.doIntrospect(apiKeyValidationRequestDto);
+                    match <string>keyValidationInfoJson.authorized {
+                        string authorizeValue => {
+                            boolean auth = <boolean>authorizeValue;
+                            if (auth) {
+                                match <dto:APIKeyValidationDto>keyValidationInfoJson {
+                                    dto:APIKeyValidationDto dto => {
+                                        apiKeyValidationDto = dto;
+                                    }
+                                    error err => {
+                                        io:println(err);
+                                        return false;
+                                    }
+                                }
+                                io:println(apiKeyValidationDto);
+                                authorized = auth;
+                                self.gatewayTokenCache.addToGatewayKeyValidationCache(cacheKey, apiKeyValidationDto);
+                                io:println("value not returned from cache");
+                            } else {
+                                self.gatewayTokenCache.addToInvalidTokenCache(apiKeyValidationRequestDto.accessToken, true);
+                                return false;
+                            }
+                        }
+                        error err => {
+                            io:println(err);
+                            return false;
+                        }
+                    }
+                }
             }
-            io:println(apiKeyValidationDto);
-            authorized = < boolean > apiKeyValidationDto.authorized;
-            if (authorized) {
-                self.gatewayTokenCache.addToGatewayKeyValidationCache(cacheKey, apiKeyValidationDto);
-            }
-            io:println("value not returned from cache");
+
         }
     }
     if (authorized) {
