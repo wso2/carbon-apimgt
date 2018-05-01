@@ -17,10 +17,9 @@
 import ballerina/http;
 import org.wso2.carbon.apimgt.gateway.listeners as listeners;
 
-listeners:AuthProvider basicAuthProvider = {id: "oauth2", scheme:"oauth2", authProvider:"config"};
-endpoint listeners:APIGatewayListener listener {
-    //port:9091
-    //authProviders:[basicAuthProvider]
+endpoint listeners:APIGatewayListener apiListener {
+    host:"localhost",
+    authProviders:[listeners:basicAuthProvider, listeners:jwtAuthProvider]
 };
 
 endpoint http:Client pizzaShackEP {
@@ -36,7 +35,7 @@ endpoint http:Client pizzaShackEP {
     }
 
 }
-service<http:Service> pizzashack bind listener {
+service<http:Service> pizzashack bind apiListener {
     @http:ResourceConfig {
         methods:["GET"],
         path:"/menu",

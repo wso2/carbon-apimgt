@@ -3,6 +3,7 @@
 import ballerina/http;
 import ballerina/log;
 import ballerina/auth;
+import ballerina/cache;
 import ballerina/config;
 import ballerina/runtime;
 import ballerina/time;
@@ -67,23 +68,9 @@ public type EndpointConfiguration {
     string httpVersion = "1.1",
     http:RequestLimits? requestLimits,
     http:Filter[] filters,
-    AuthProvider[]? authProviders,
+    http:AuthProvider[]? authProviders,
 };
 
-@Description {value:"Configuration for authentication providers"}
-@Field {value:"scheme: Authentication schem"}
-@Field {value:"id: Authention provider instance id"}
-public type AuthProvider {
-    string scheme,
-    string id,
-    string authProvider,
-    string filePath,
-    string issuer,
-    string audience,
-    http:TrustStore? trustStore,
-    string certificateAlias,
-    int timeSkew,
-};
 
 public function APIGatewayListener::init (EndpointConfiguration config) {
     addAuthFiltersForAPIGatewayListener(config);
@@ -115,38 +102,46 @@ function addAuthFiltersForAPIGatewayListener (EndpointConfiguration config) {
 @Return {value:"Array of Filters comprising of authn and authz Filters"}
 function createAuthFiltersForSecureListener (EndpointConfiguration config) returns (http:Filter[]) {
     // parse and create authentication handlers
-    //http:AuthHandlerRegistry registry;
-    //match config.authProviders {
-    //    AuthProvider[] providers => {
-    //        int i = 1;
-    //        foreach provider in providers {
-    //            if (lengthof provider.id > 0) {
-    //                registry.add(provider.id, createAuthHandler(provider));
-    //            } else {
-    //                registry.add(provider.scheme + "-" + i, createAuthHandler(provider));
-    //            }
-    //            i++;
-    //        }
-    //    }
-    //    () => {
-    //        // if no auth providers are specified, add basic authn handler with config based auth provider
-    //        log:printInfo("No Authenticator found");
-    //    }
-    //
-    //}
+    http:AuthHandlerRegistry registry;
+    match config.authProviders {
+        http:AuthProvider[] providers => {
+            int i = 1;
+            foreach provider in providers {
+                if (lengthof provider.id > 0) {
+                    registry.add(provider.id, createAuthHandler(provider));
+                } else {
+                    registry.add(provider.scheme + "-" + i, createAuthHandler(provider));
+                }
+                i++;
+            }
+        }
+        () => {
+            // if no auth providers are specified, add basic authn handler with config based auth provider
+            log:printInfo("No Authenticator found");
+        }
+
+    }
     http:Filter[] authFilters = [];
-    //http:AuthnHandlerChain authnHandlerChain = new(registry);
+    http:AuthnHandlerChain authnHandlerChain = new(registry);
     //http:AuthnFilter authnFilter = new(authnHandlerChain);
     handler:OAuthnHandler oauthnHandler = new;
-    filter:OAuthnFilter authnFilter = new(oauthnHandler);
+    filter:OAuthnFilter authnFilter = new(oauthnHandler, authnHandlerChain);
 
-    filter:OAuthzFilter authzFilter = new;
+    //filter:OAuthzFilter authzFilter = new;
+
+    // use the ballerina in built scope filter
+    cache:Cache authzCache = new(expiryTimeMillis = 300000);
+    auth:ConfigAuthProvider configAuthProvider = new;
+    auth:AuthProvider authProvider = <auth:AuthProvider>configAuthProvider;
+    http:HttpAuthzHandler authzHandler = new(authProvider, authzCache);
+    http:AuthzFilter authzFilter = new(authzHandler);
+
     authFilters[0] = <http:Filter> authnFilter;
     authFilters[1] = <http:Filter> authzFilter;
     return authFilters;
 }
 
-function createAuthHandler (AuthProvider authProvider) returns http:HttpAuthnHandler {
+function createAuthHandler (http:AuthProvider authProvider) returns http:HttpAuthnHandler {
     if (authProvider.scheme == constants:AUTHN_SCHEME_BASIC) {
         auth:AuthProvider authProvider1;
         if (authProvider.authProvider == constants:AUTH_PROVIDER_CONFIG) {
@@ -169,11 +164,7 @@ function createAuthHandler (AuthProvider authProvider) returns http:HttpAuthnHan
         auth:JWTAuthProvider jwtAuthProvider = new (jwtConfig);
         http:HttpJwtAuthnHandler jwtAuthnHandler = new(jwtAuthProvider);
         return <http:HttpAuthnHandler> jwtAuthnHandler;
-    } else if (authProvider.scheme == constants:AUTH_SCHEME_OAUTH2){
-        io:println("Added to registry");
-        handler:OAuthnHandler oAuthnHandler = new;
-        return  check <http:HttpAuthnHandler> oAuthnHandler;
-    } else {
+    }  else {
         // TODO: create other HttpAuthnHandlers
         error e = {message:"Invalid auth scheme: " + authProvider.scheme };
         throw e;
@@ -208,6 +199,22 @@ public function APIGatewayListener::getCallerActions () returns (http:Connection
 public function APIGatewayListener::stop () {
     self.httpListener.stop();
 }
+
+public http:AuthProvider basicAuthProvider = {
+    scheme:"basic",
+    authProvider:"config"
+};
+
+public http:AuthProvider jwtAuthProvider = {
+    scheme: "jwt",
+    issuer: "ballerina",
+    audience: "ballerina",
+    certificateAlias: "ballerina",
+    trustStore: {
+        path: "${ballerina.home}/bre/security/ballerinaTruststore.p12",
+        password: "ballerina"
+    }
+};
 
 
 

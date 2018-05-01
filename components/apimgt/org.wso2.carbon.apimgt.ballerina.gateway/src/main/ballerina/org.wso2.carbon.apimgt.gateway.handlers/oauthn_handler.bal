@@ -32,7 +32,8 @@ public type OAuthnHandler object {
     }
 
     public function canHandle (http:Request req) returns (boolean);
-    public function handle (http:Request req, dto:APIKeyValidationRequestDto apiKeyValidationDto) returns (boolean);
+    public function handle (http:Request req, dto:APIKeyValidationRequestDto apiKeyValidationRequestDto)
+    returns (dto:APIKeyValidationDto);
 
 };
 
@@ -60,22 +61,20 @@ public function OAuthnHandler::canHandle (http:Request req) returns (boolean) {
 @Description {value:"Checks if the provided HTTP request can be authenticated with JWT authentication"}
 @Param {value:"req: Request object"}
 @Return {value:"boolean: true if its possible to authenticate with JWT auth, else false"}
-public function OAuthnHandler::handle (http:Request req, dto:APIKeyValidationRequestDto apiKeyValidationDto) returns (boolean) {
+public function OAuthnHandler::handle (http:Request req, dto:APIKeyValidationRequestDto apiKeyValidationRequestDto)
+                                   returns (dto:APIKeyValidationDto) {
+    dto:APIKeyValidationDto apiKeyValidationDto;
     string accessToken = extractAccessToken(req);
-    apiKeyValidationDto.accessToken = accessToken;
-    io:println("token " + accessToken);
-    var isAuthenticated = self.oAuthAuthenticator.authenticate( apiKeyValidationDto);
-    io:println("isAuthenticated " + isAuthenticated);
-    return isAuthenticated;
-    //match isAuthenticated {
-    //    boolean authenticated => {
-    //        return authenticated;
-    //
-    //    error err => {
-    //        log:printErrorCause("Error while validating JWT token ", err);
-    //        return false;
-    //    }
-    //}
+    try {
+        apiKeyValidationRequestDto.accessToken = accessToken;
+        io:println("token " + accessToken);
+        apiKeyValidationDto = self.oAuthAuthenticator.authenticate(apiKeyValidationRequestDto);
+        io:println("isAuthenticated " + apiKeyValidationDto.authorized);
+    } catch (error err) {
+        io:println("Error while getting key validation info for access token" + accessToken);
+        io:print(error);
+    }
+    return apiKeyValidationDto;
 }
 
 
@@ -101,7 +100,7 @@ public type OAuthAuthProvider object {
     }
 
 
-    public function authenticate (dto:APIKeyValidationRequestDto apiKeyValidationRequestDto) returns (boolean);
+    public function authenticate (dto:APIKeyValidationRequestDto apiKeyValidationRequestDto) returns (dto:APIKeyValidationDto);
 
     public function doIntrospect (dto:APIKeyValidationRequestDto apiKeyValidationRequestDto) returns (json);
 
@@ -131,7 +130,7 @@ public type JWTAuthProviderConfig {
 @Return {value:"boolean: true if authentication is a success, else false"}
 @Return {value:"error: If error occured in authentication"}
 public function OAuthAuthProvider::authenticate (dto:APIKeyValidationRequestDto apiKeyValidationRequestDto) returns
-                                                                                                              (boolean) {
+                                                                                                              (dto:APIKeyValidationDto) {
     string cacheKey = getAccessTokenCacheKey(apiKeyValidationRequestDto);
     io:println("cacheKey " + cacheKey);
     boolean authorized;
@@ -142,7 +141,8 @@ public function OAuthAuthProvider::authenticate (dto:APIKeyValidationRequestDto 
             self.gatewayTokenCache.removeFromGatewayKeyValidationCache(cacheKey);
             io:println("Token expired, removed from the cache");
             self.gatewayTokenCache.addToInvalidTokenCache(apiKeyValidationRequestDto.accessToken, true);
-            return false;
+            apiKeyValidationDtoFromcache.authorized= "false";
+            return apiKeyValidationDtoFromcache;
         }
         authorized = < boolean > apiKeyValidationDtoFromcache.authorized;
         apiKeyValidationDto = apiKeyValidationDtoFromcache;
@@ -151,7 +151,9 @@ public function OAuthAuthProvider::authenticate (dto:APIKeyValidationRequestDto 
         () => {
             match self.gatewayTokenCache.retrieveFromInvalidTokenCache(apiKeyValidationRequestDto.accessToken) {
                 boolean cacheAuthorizedValue => {
-                    return false;
+                    dto:APIKeyValidationDto apiKeyValidationInfoDTO = { authorized: "false", validationStatus: constants
+                    :API_AUTH_INVALID_CREDENTIALS };
+                    return apiKeyValidationInfoDTO;
                 }
                 () => {
                     json keyValidationInfoJson = self.doIntrospect(apiKeyValidationRequestDto);
@@ -165,7 +167,7 @@ public function OAuthAuthProvider::authenticate (dto:APIKeyValidationRequestDto 
                                     }
                                     error err => {
                                         io:println(err);
-                                        return false;
+                                        throw err;
                                     }
                                 }
                                 io:println(apiKeyValidationDto);
@@ -174,12 +176,14 @@ public function OAuthAuthProvider::authenticate (dto:APIKeyValidationRequestDto 
                                 io:println("value not returned from cache");
                             } else {
                                 self.gatewayTokenCache.addToInvalidTokenCache(apiKeyValidationRequestDto.accessToken, true);
-                                return false;
+                                apiKeyValidationDto.authorized="false";
+                                apiKeyValidationDto.validationStatus = check <string>keyValidationInfoJson
+                                    .validationStatus;
                             }
                         }
                         error err => {
                             io:println(err);
-                            return false;
+                            throw err;
                         }
                     }
                 }
@@ -197,7 +201,7 @@ public function OAuthAuthProvider::authenticate (dto:APIKeyValidationRequestDto 
         // read scopes and set to the invocation context
 
     }
-    return authorized;
+    return apiKeyValidationDto;
 }
 
 

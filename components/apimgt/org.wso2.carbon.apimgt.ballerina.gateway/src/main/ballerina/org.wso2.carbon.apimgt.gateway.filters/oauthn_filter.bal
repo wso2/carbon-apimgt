@@ -14,18 +14,17 @@ import org.wso2.carbon.apimgt.gateway.dto as dto;
 
 // Authentication filter
 
-
-
 @Description {value:"Representation of the Authentication filter"}
 @Field {value:"filterRequest: request filter method which attempts to authenticated the request"}
 @Field {value:"filterRequest: response filter method (not used this scenario)"}
 public type OAuthnFilter object {
 
     public {
-        handler:OAuthnHandler oauthnHandler;
+        handler:OAuthnHandler oauthnHandler;// Handles the oauth2 authentication;
+        http:AuthnHandlerChain authnHandlerChain;
     }
 
-    public new (oauthnHandler) {}
+    public new (oauthnHandler, authnHandlerChain) {}
 
     @Description {value:"filterRequest: Request filter function"}
     public function filterRequest (http:Request request, http:FilterContext context) returns http:FilterResult {
@@ -37,17 +36,32 @@ public type OAuthnFilter object {
         (reflect:getResourceAnnotations
             (context.serviceType, context
                 .resourceName));
-        dto:APIKeyValidationRequestDto apiKeyValidationDto = utils:getKeyValidationRequestObject(httpServiceConfig,
+        dto:APIKeyValidationRequestDto apiKeyValidationRequestDto = utils:getKeyValidationRequestObject
+        (httpServiceConfig,
             httpResourceConfig);
         var (isSecured, authProviders) = getResourceAuthConfig(context);
+        dto:APIKeyValidationDto apiKeyValidationDto;
+        boolean isAuthorized;
         if (isSecured) {
             // if auth providers are there, use those to authenticate
-            authenticated = self.oauthnHandler.handle(request, apiKeyValidationDto);
+            match getAuthenticationProviderType(request.getHeader(constants:AUTH_HEADER)){
+                string providerId => {
+                    string[] providerIds = [providerId];
+                    isAuthorized = self.authnHandlerChain.handleWithSpecificAuthnHandlers(authProviders, request);
+                }
+                () => {
+                    apiKeyValidationDto = self.oauthnHandler.handle(request, apiKeyValidationRequestDto);
+                    // set dto once ballerina supports
+                    //context.attributes["keyValidationDto"] = apiKeyValidationDto;
+                    isAuthorized = <boolean>apiKeyValidationDto.authorized;
+                }
+            }
+
         } else {
             // not secured, no need to authenticate
             return createAuthnResult(true);
         }
-        return createAuthnResult(authenticated);
+        return createAuthnResult(isAuthorized);
     }
 };
 
@@ -101,6 +115,16 @@ function getResourceAuthConfig (http:FilterContext context) returns (boolean, st
         }
     }
     return (resourceSecured, authProviderIds);
+}
+
+function getAuthenticationProviderType(string authHeader) returns (string|()) {
+    if(authHeader.contains(constants:AUTH_SCHEME_BASIC)){
+        return constants:AUTHN_SCHEME_BASIC;
+    } else if (authHeader.contains(constants:AUTH_SCHEME_BEARER) && authHeader.contains(".")) {
+        return constants:AUTH_SCHEME_JWT;
+    } else {
+        return ();
+    }
 }
 
 
