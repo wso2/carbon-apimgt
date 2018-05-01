@@ -33,6 +33,7 @@ public type OAuthzFilter object {
         http:ListenerAuthConfig? serviceLevelAuthAnn = utils:getAuthAnnotation(constants:ANN_PACKAGE,
         constants:SERVICE_ANN_NAME,
         reflect:getServiceAnnotations(context.serviceType));
+
         if (!utils:isResourceSecured(resourceLevelAuthAnn, serviceLevelAuthAnn)) {
             // not secured, no need to authorize
             return createAuthzResult(true);
