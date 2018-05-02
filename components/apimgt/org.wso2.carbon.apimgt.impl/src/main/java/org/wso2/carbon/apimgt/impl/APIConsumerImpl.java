@@ -2279,6 +2279,13 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Override
     public SubscriptionResponse addSubscription(APIIdentifier identifier, String userId, int applicationId)
             throws APIManagementException {
+        //check application is viewable to logged user
+        boolean isValid = validateApplication(userId, applicationId);
+        if (!isValid) {
+            log.error("Application " + applicationId + " is not accessible to user " + userId);
+            throw new APIManagementException("Application is not accessible to user " + userId);
+        }
+
         API api = getAPI(identifier);
         WorkflowResponse workflowResponse = null;
         int subscriptionId;
@@ -2355,6 +2362,34 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
     }
 
+    /**
+     * Check whether the application is accessible to the specified user
+     * @param userId username
+     * @param applicationId application ID
+     * @return true if the application is accessible by the specified user
+     */
+    private boolean validateApplication(String userId, int applicationId) {
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put(APIConstants.USER, userId);
+            obj.put(APIConstants.IS_SUPER_TENANT, MultitenantUtils.getTenantDomain(username)
+                    == org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            String[] groupIds = getGroupIds(obj.toString());
+            StringBuilder groupIDList = new StringBuilder();
+            if (groupIds != null) {
+                for (int i = 0; i < groupIds.length; i++) {
+                    groupIDList = groupIDList.append(groupIds[i] + ",");
+                }
+                groupIDList.deleteCharAt(groupIDList.length() - 1);
+            }
+            return apiMgtDAO.isAppAllowed(applicationId, userId, groupIDList.toString());
+        } catch (APIManagementException e) {
+            //Error will be logged and continue to return false indicating application is not allowed.
+            log.error("Error occurred while getting user group ids", e);
+        }
+        return false;
+    }
+
     @Override
     public String getSubscriptionStatusById(int subscriptionId) throws APIManagementException {
         return apiMgtDAO.getSubscriptionStatusById(subscriptionId);
@@ -2363,6 +2398,13 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Override
     public void removeSubscription(APIIdentifier identifier, String userId, int applicationId)
             throws APIManagementException {
+        //check application is viewable to logged user
+        boolean isValid = validateApplication(userId, applicationId);
+        if (!isValid) {
+            log.error("Application " + applicationId + " is not accessible to user " + userId);
+            throw new APIManagementException("Application is not accessible to user " + userId);
+        }
+
         boolean isTenantFlowStarted = false;
 
         String providerTenantDomain = MultitenantUtils.getTenantDomain(APIUtil.

@@ -5275,6 +5275,80 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Checks whether application is accessible to the specified user
+     *
+     * @param applicationID ID of the Application
+     * @param userId          Name of the User.
+     * @param groupId         Group IDs
+     * @throws APIManagementException
+     */
+    public boolean isAppAllowed(int applicationID, String userId, String groupId)
+            throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+
+            String query = "SELECT APP.APPLICATION_ID FROM AM_SUBSCRIBER SUB, AM_APPLICATION APP";
+            String whereClause = "  WHERE SUB.USER_ID =? AND APP.APPLICATION_ID=? AND " +
+                    "SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID";
+            String whereClauseCaseInSensitive = "  WHERE LOWER(SUB.USER_ID) =LOWER(?) AND APP.APPLICATION_ID=? AND SUB"
+                    + ".SUBSCRIBER_ID=APP.SUBSCRIBER_ID";
+            String whereClauseWithGroupId = "  WHERE  (APP.GROUP_ID = ? OR ((APP.GROUP_ID='' OR APP.GROUP_ID IS NULL)"
+                    + " AND SUB.USER_ID = ?)) AND " + "APP.APPLICATION_ID = ? AND SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID";
+
+            String whereClauseWithMultiGroupId = "  WHERE  ((APP.APPLICATION_ID IN (SELECT APPLICATION_ID  FROM " +
+                    "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?))  OR   SUB.USER_ID = ? " +
+                    "OR (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?))) " +
+                    "AND APP.APPLICATION_ID = ? AND SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID";
+
+            if (!StringUtils.isEmpty(groupId) && !APIConstants.NULL_GROUPID_LIST.equals(groupId)) {
+                if (multiGroupAppSharingEnabled) {
+                    Subscriber subscriber = getSubscriber(userId);
+                    String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
+                    query += whereClauseWithMultiGroupId;
+                    String[] groupIds = groupId.split(",");
+                    int parameterIndex = groupIds.length;
+
+                    prepStmt = fillQueryParams(connection, query, groupIds, 1);
+                    prepStmt.setString(++parameterIndex, tenantDomain);
+                    prepStmt.setString(++parameterIndex, userId);
+                    prepStmt.setString(++parameterIndex, tenantDomain + '/' + groupId);
+                    prepStmt.setInt(++parameterIndex, applicationID);
+                } else {
+                    query += whereClauseWithGroupId;
+                    prepStmt = connection.prepareStatement(query);
+                    prepStmt.setString(1, groupId);
+                    prepStmt.setString(2, userId);
+                    prepStmt.setInt(3, applicationID);
+                }
+            } else {
+                if (forceCaseInsensitiveComparisons) {
+                    query += whereClauseCaseInSensitive;
+                } else {
+                    query += whereClause;
+                }
+                prepStmt = connection.prepareStatement(query);
+                prepStmt.setString(1, userId);
+                prepStmt.setInt(2, applicationID);
+            }
+
+            rs = prepStmt.executeQuery();
+            while (rs.next()) {
+                return true;
+            }
+        } catch (SQLException e) {
+            handleException("Error while checking whether the application : " + applicationID + " is accessible " +
+                    "to user " + userId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+        return false;
+    }
+
+    /**
      * Fetches an Application by name.
      *
      * @param applicationName Name of the Application
