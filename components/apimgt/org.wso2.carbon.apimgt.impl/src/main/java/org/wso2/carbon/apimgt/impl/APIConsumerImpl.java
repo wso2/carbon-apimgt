@@ -2384,6 +2384,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
             return apiMgtDAO.isAppAllowed(applicationId, userId, groupIDList.toString());
         } catch (APIManagementException e) {
+            //Error will be logged and continue to return false indicating application is not allowed.
             log.error("Error occurred while getting user group ids", e);
         }
         return false;
