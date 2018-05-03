@@ -45,6 +45,7 @@ service<http:Service> pizzashack bind apiListener {
             scopes:["default"]
         }
     }
+    //@tier:ResourceTier{tierLevel : "Gold"}
     getMenu (endpoint conn, http:Request req) {
         var result = pizzaShackEP -> get("/menu", request = req);
         match result {
