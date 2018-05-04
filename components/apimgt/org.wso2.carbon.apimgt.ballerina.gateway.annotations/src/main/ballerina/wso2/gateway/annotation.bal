@@ -24,4 +24,14 @@ public type TierConfiguration {
 @Description {value:"Resource level tier annaotation"}
 public annotation <resource> ResourceTier TierConfiguration;
 
+@Description {value:"Configuration used for api version annotation"}
+@Field {value:"apiVersion: version specified for the API"}
+public type VersionConfiguration {
+    string apiVersion;
+
+};
+
+@Description {value:"API version annotation"}
+public annotation <service> Version VersionConfiguration;
+
 

@@ -16,6 +16,7 @@
 
 import ballerina/http;
 import org.wso2.carbon.apimgt.gateway.listeners as listeners;
+//import wso2/gateway;
 
 endpoint listeners:APIGatewayListener apiListener {
     host:"localhost",
@@ -35,6 +36,7 @@ endpoint http:Client pizzaShackEP {
     }
 
 }
+//@gateway:Version { apiVersion: "1.0.0" }
 service<http:Service> pizzashack bind apiListener {
     @http:ResourceConfig {
         methods:["GET"],
@@ -45,7 +47,7 @@ service<http:Service> pizzashack bind apiListener {
             scopes:["default"]
         }
     }
-    //@tier:ResourceTier{tierLevel : "Gold"}
+    //@gateway:ResourceTier{tierLevel : "Gold"}
     getMenu (endpoint conn, http:Request req) {
         var result = pizzaShackEP -> get("/menu", request = req);
         match result {
