@@ -52,7 +52,7 @@ public type OAuthnFilter object {
                 () => {
                     apiKeyValidationDto = self.oauthnHandler.handle(request, apiKeyValidationRequestDto);
                     // set dto once ballerina supports
-                    //context.attributes["keyValidationDto"] = apiKeyValidationDto;
+                    context.attributes[constants:KEY_VALIDATION_RESPONSE] = apiKeyValidationDto;
                     isAuthorized = <boolean>apiKeyValidationDto.authorized;
                 }
             }
