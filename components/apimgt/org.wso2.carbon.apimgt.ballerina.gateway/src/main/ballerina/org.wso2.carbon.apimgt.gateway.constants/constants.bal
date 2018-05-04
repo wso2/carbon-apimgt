@@ -29,5 +29,14 @@
 @final public string CONTENT_TYPE_HEADER = "Content-Type";
 @Description {value:"Form url encoded"}
 @final public string X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
-
 @final public string API_AUTH_INVALID_CREDENTIALS = "900901";
+@Description {value:"X-Forward-For Header "}
+@final public string X_FORWARD_FOR_HEADER = "X-FORWARDED-FOR";
+@Description {value:"KeyValidation Response"}
+@final public string KEY_VALIDATION_RESPONSE = "KEY_VALIDATION_RESPONSE";
+@Description {value:"carbon.super Tenant Domain"}
+@final public string SUPER_TENANT_DOMAIN_NAME = "carbon.super";
+@Description {value:"Super Tenant Domain Tenant Id"}
+@final public int SUPER_TENANT_ID = -1234;
+@Description {value:"throttleKey"}
+@final public string THROTTLE_KEY = "throttleKey";
