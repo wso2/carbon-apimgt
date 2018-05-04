@@ -27,7 +27,7 @@ import org.wso2.ballerinalang.compiler.packaging.repo.Repo;
  * This represents the resource tier extension package repository provider.
  */
 @JavaSPIService("org.ballerinalang.spi.SystemPackageRepositoryProvider")
-public class ResourceTierExtensionProvider implements SystemPackageRepositoryProvider {
+public class GatewayExtensionProvider implements SystemPackageRepositoryProvider {
 
     @Override
     public Repo loadRepository() {

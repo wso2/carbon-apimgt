@@ -15,32 +15,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.wso2.carbon.apimgt.ballerina.gateway.annotations.models;
 
-/**
- * Model class to store tier value.
- */
-public class TierModel {
-    private static TierModel instance;
-    private String tierLevel;
+public class VersionModel {
 
-    private TierModel() {
+    private static VersionModel instance;
+    private String apiVersion;
+
+    private VersionModel() {
     }
 
-    public static TierModel getInstance() {
-        synchronized (TierModel.class) {
+    public static VersionModel getInstance() {
+        synchronized (VersionModel.class) {
             if (instance == null) {
-                instance = new TierModel();
+                instance = new VersionModel();
             }
         }
         return instance;
     }
 
-    public String getTier() {
-        return tierLevel;
+    public String getApiVersion() {
+        return apiVersion;
     }
 
-    public void setTier(String tier) {
-        this.tierLevel = tier;
+    public void setApiVersion(String apiVersion) {
+        this.apiVersion = apiVersion;
     }
 }
