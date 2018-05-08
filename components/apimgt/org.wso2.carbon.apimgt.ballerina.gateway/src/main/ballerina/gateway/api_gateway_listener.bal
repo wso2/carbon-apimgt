@@ -123,6 +123,7 @@ function createAuthFiltersForSecureListener (EndpointConfiguration config) retur
     OAuthnHandler oauthnHandler = new;
     OAuthnFilter authnFilter = new(oauthnHandler, authnHandlerChain);
 
+    ThrottleFilter throttleFilter = new();
     //OAuthzFilter authzFilter = new;
 
     // use the ballerina in built scope filter
@@ -134,6 +135,7 @@ function createAuthFiltersForSecureListener (EndpointConfiguration config) retur
 
     authFilters[0] = <http:Filter> authnFilter;
     authFilters[1] = <http:Filter> authzFilter;
+    authFilters[2] = <http:Filter> throttleFilter;
     return authFilters;
 }
 

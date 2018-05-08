@@ -19,6 +19,7 @@ public type ThrottleFilter object {
                 // request Blocked
                 requestFilterResult = { canProceed: false, statusCode: 429, message: "Message blocked" };
             } else {
+                requestFilterResult = { canProceed: true };
                 // Request not blocked go to check throttling
                 APIKeyValidationDto keyvalidationResult = check <APIKeyValidationDto>context.attributes[
                 KEY_VALIDATION_RESPONSE];
@@ -37,19 +38,23 @@ public type ThrottleFilter object {
                                 }
                             } else {
                                 // Application Level Throttled
+                                requestFilterResult = { canProceed: false, statusCode: 429, message: "Message blocked" };
                             }
                         } else {
                             // Subscription Level Throttled
+                            requestFilterResult = { canProceed: false, statusCode: 429, message: "Message blocked" };
                         }
-
                     } else {
-
+                        //Resource level Throttled
+                        requestFilterResult = { canProceed: false, statusCode: 429, message: "Message blocked" };
                     }
                 } else {
-
+                    //API level Throttled
+                    requestFilterResult = { canProceed: false, statusCode: 429, message: "Message blocked" };
                 }
-
             }
+        } else {
+            requestFilterResult = { canProceed: false, statusCode: 500, message: "Internal Error Occurred" };
         }
         return requestFilterResult;
     }
