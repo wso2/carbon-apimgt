@@ -52,6 +52,11 @@ public class FakeKeyManagerForTest implements KeyManager {
         return null;
     }
 
+    @Override
+    public String getNewApplicationConsumerSecret(AccessTokenRequest tokenRequest) throws APIManagementException {
+        return null;
+    }
+
     @Override public AccessTokenInfo getTokenMetaData(String s) throws APIManagementException {
         return null;
     }

@@ -88,6 +88,13 @@ public class OAuthAdminClient {
 
     }
 
+    public OAuthConsumerAppDTO registerAndRetrieveOAuthApplicationData(OAuthConsumerAppDTO application, String username)
+            throws Exception {
+        Util.setAuthHeaders(oAuthAdminServiceStub._getServiceClient(), username);
+        return oAuthAdminServiceStub.registerAndRetrieveOAuthApplicationData(application);
+
+    }
+
     public void removeOAuthApplicationData(String consumerKey, String username) throws Exception {
         Util.setAuthHeaders(oAuthAdminServiceStub._getServiceClient(), username);
         oAuthAdminServiceStub.removeOAuthApplicationData(consumerKey);

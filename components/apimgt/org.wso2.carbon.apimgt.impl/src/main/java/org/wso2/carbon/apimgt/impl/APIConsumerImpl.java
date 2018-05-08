@@ -599,7 +599,27 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         result.put("totalLength", totalLength);
         return result;
     }
-    
+
+    /**
+     * Regenerate consumer secret.
+     * @param clientId For which consumer key we need to regenerate consumer secret.
+     * @return New consumer secret.
+     * @throws APIManagementException This is the custom exception class for API management.
+     */
+    public String renewConsumerSecret(String clientId) throws APIManagementException {
+        // Create Token Request with parameters provided from UI.
+        AccessTokenRequest tokenRequest = new AccessTokenRequest();
+        tokenRequest.setClientId(clientId);
+
+        try {
+            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+            return keyManager.getNewApplicationConsumerSecret(tokenRequest);
+        } catch (APIManagementException e) {
+            log.error("Error while re-generating AccessToken", e);
+            throw e;
+        }
+    }
+
     /**
      * The method to get APIs in any of the given LC status array
      *

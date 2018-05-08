@@ -75,6 +75,15 @@ public interface KeyManager {
     AccessTokenInfo getNewApplicationAccessToken(AccessTokenRequest tokenRequest) throws APIManagementException;
 
     /**
+     * Store calls this method to get a new Application Consumer Secret.
+     *
+     * @param tokenRequest AccessTokenRequest which encapsulates parameters sent from UI.
+     * @return New consumer secret.
+     * @throws APIManagementException This is the custom exception class for API management.
+     */
+    String getNewApplicationConsumerSecret(AccessTokenRequest tokenRequest) throws APIManagementException;
+
+    /**
      * Get details about an access token. As a part of the response, consumer key against which token was obtained
      * must be returned.
      * @return {@code AccessTokenInfo}

@@ -127,6 +127,8 @@ import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.lcm.util.CommonUtil;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
+import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
+import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
 import org.wso2.carbon.identity.user.profile.stub.UserProfileMgtServiceStub;
 import org.wso2.carbon.identity.user.profile.stub.UserProfileMgtServiceUserProfileExceptionException;
 import org.wso2.carbon.identity.user.profile.stub.types.UserProfileDTO;
@@ -183,6 +185,7 @@ import java.rmi.RemoteException;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
@@ -4453,6 +4456,10 @@ public final class APIUtil {
         if (Boolean.parseBoolean(config.getFirstProperty(APIConstants.ENCRYPT_TOKENS_ON_PERSISTENCE))) {
             return new String(CryptoUtil.getDefaultCryptoUtil().base64DecodeAndDecrypt(token), Charset.defaultCharset());
         }
+
+        if (Boolean.parseBoolean(config.getFirstProperty(APIConstants.HASH_TOKENS_ON_PERSISTENCE))) {
+            return null;
+        }
         return token;
     }
 
@@ -4460,14 +4467,58 @@ public final class APIUtil {
      * @param token
      * @return
      */
-    public static String encryptToken(String token) throws CryptoException {
+    public static String encryptToken(String token) throws CryptoException, APIManagementException {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
         if (Boolean.parseBoolean(config.getFirstProperty(APIConstants.ENCRYPT_TOKENS_ON_PERSISTENCE))) {
             return CryptoUtil.getDefaultCryptoUtil().encryptAndBase64Encode(token.getBytes(Charset.defaultCharset()));
         }
+
+        if (Boolean.parseBoolean(config.getFirstProperty(APIConstants.HASH_TOKENS_ON_PERSISTENCE))) {
+            try {
+                return hash(token);
+            } catch (IdentityOAuth2Exception e) {
+                throw new APIManagementException("Error while hashing the token.");
+            }
+        }
         return token;
+    }
+
+    /**
+     * Method to generate hash value.
+     *
+     * @param plainText Plain text value.
+     * @return hashed value.
+     */
+    private static String hash(String plainText) throws IdentityOAuth2Exception {
+
+        if (StringUtils.isEmpty(plainText)) {
+            throw new IdentityOAuth2Exception("plainText value is null or empty to be hash.");
+        }
+
+        MessageDigest messageDigest = null;
+        byte[] hash = null;
+        String hashAlgorithm = OAuthServerConfiguration.getInstance().getHashAlgorithm();
+        try {
+            messageDigest = MessageDigest.getInstance(hashAlgorithm);
+            messageDigest.update(plainText.getBytes());
+            hash = messageDigest.digest();
+
+        } catch (NoSuchAlgorithmException e) {
+            throw new IdentityOAuth2Exception(
+                    "Error while retrieving MessageDigest for the provided hash algorithm: " + hashAlgorithm, e);
+        }
+        return bytesToHex(hash);
+    }
+
+    private static String bytesToHex(byte[] bytes) {
+
+        StringBuilder result = new StringBuilder();
+        for (byte byt : bytes) {
+            result.append(Integer.toString((byt & 0xff) + 0x100, 16).substring(1));
+        }
+        return result.toString();
     }
 
     public static void loadTenantRegistry(int tenantId) throws RegistryException {

@@ -388,6 +388,41 @@ include("/jagg/jagg.jag");
             }
         }
         print(obj);
+     } else if (action == "regenerateConsumerSecret" && request.getMethod() == 'POST') {
+        if (!user) {
+           if (!ssoEnabled){
+                print({
+                    error:true,
+                    message:msg.error.loginRequired(action)
+                });
+           }
+           return;
+        }
+
+        clientId = request.getParameter("clientId");
+        mod = jagg.module("subscription");
+
+        var APIConsumerImpl = Packages.org.wso2.carbon.apimgt.api.APIConsumer;
+        var APIManagerFactory = Packages.org.wso2.carbon.apimgt.impl.APIManagerFactory;
+        var provider = jagg.getUser().username;
+        var apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(provider);
+        var consumerSecret = apiConsumer.renewConsumerSecret(clientId);
+
+        result = consumerSecret;
+        if (result.error) {
+           obj = {
+               error:result.error,
+               message:result.message
+           };
+        } else {
+           obj = {
+               error:false,
+               data:{
+                   key:result
+               }
+           }
+        }
+        print(obj);
      }else if (action == "mapExistingOauthClient" && request.getMethod() == 'POST') {
 
         if (!user) {
