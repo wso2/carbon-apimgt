@@ -44,3 +44,9 @@
 @final public int SUPER_TENANT_ID = -1234;
 @Description {value:"throttleKey"}
 @final public string THROTTLE_KEY = "throttleKey";
+@Description { value: "Resource Tier annotation package" }
+@final public string RESOURCE_TIER_ANN_PACKAGE = "ballerina.gateway";
+@Description { value: "Resource level annotation name" }
+@final public string RESOURCE_TIER_ANN_NAME = "ResourceTier";
+@Description { value: "Unlimited Tier" }
+@final public string UNLIMITED_TIER = "Unlimited";
