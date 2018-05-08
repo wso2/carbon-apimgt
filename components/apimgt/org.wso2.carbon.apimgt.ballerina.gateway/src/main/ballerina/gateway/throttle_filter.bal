@@ -29,8 +29,8 @@ public type ThrottleFilter object {
                     if (!resourceLevelThrottled){
                         if (!isSubscriptionLevelThrottled(context, keyvalidationResult)){
                             if (!isApplicationLevelThrottled(keyvalidationResult)){
-                                if (!isHardlimitThrottled(getContext(context), getVersionFromBasePath(
-                                        getContext(context)))){
+                                if (!isHardlimitThrottled(getContext(context), getVersionFromServiceAnnotation
+                                (reflect:getServiceAnnotations(context.serviceType)).apiVersion)){
                                     // Send Throttle Event
                                     RequestStream throttleEvent = generateThrottleEvent(request, context,
                                         keyvalidationResult);
@@ -91,7 +91,7 @@ function isHardlimitThrottled(string context, string apiVersion) returns (boolea
 function isSubscriptionLevelThrottled(http:FilterContext context, APIKeyValidationDto keyValidationDto) returns (
             boolean) {
     string subscriptionLevelThrottleKey = keyValidationDto.applicationId + ":" + getContext
-        (context) + ":" + getVersionFromBasePath(getContext(context));
+        (context) + ":" + getVersionFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).apiVersion;
     if (isThrottled(subscriptionLevelThrottleKey)){
         return true;
     } else {
@@ -111,10 +111,12 @@ function generateThrottleEvent(http:Request req, http:FilterContext context, API
              returns (
                      RequestStream) {
     RequestStream requestStream;
-    requestStream.apiKey = getContext(context) + ":" + getVersionFromBasePath(getContext(context));
+    string apiVersion =  getVersionFromServiceAnnotation(reflect:getServiceAnnotations
+    (context.serviceType)).apiVersion;
+    requestStream.apiKey = getContext(context) + ":" + apiVersion;
     requestStream.appKey = keyValidationDto.applicationId + ":" + keyValidationDto.endUserName;
     requestStream.subscriptionKey = keyValidationDto.applicationId + ":" + getContext(context) + ":" +
-        getVersionFromBasePath(getContext(context));
+    apiVersion;
     requestStream.appTier = keyValidationDto.applicationTier;
     requestStream.apiTier = keyValidationDto.apiTier;
     requestStream.subscriptionTier = keyValidationDto.tier;
@@ -122,7 +124,7 @@ function generateThrottleEvent(http:Request req, http:FilterContext context, API
     requestStream.resourceTier = "Unlimited";
     requestStream.userId = keyValidationDto.endUserName;
     requestStream.apiContext = getContext(context);
-    requestStream.apiVersion = getVersionFromBasePath(getContext(context));
+    requestStream.apiVersion = apiVersion;
     requestStream.appTenant = keyValidationDto.subscriberTenantDomain;
     requestStream.apiTenant = SUPER_TENANT_DOMAIN_NAME;
     requestStream.apiName = keyValidationDto.apiName;

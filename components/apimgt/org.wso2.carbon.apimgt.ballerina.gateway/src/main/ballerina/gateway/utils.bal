@@ -120,13 +120,17 @@ public function getServiceConfigAnnotation(reflect:annotationData[] annData)
     }
 }
 
-@Description { value: "Retrieve the key validation request dto from service and resource level configs" }
+@Description { value: "Retrieve the key validation request dto from filter context" }
 @Return { value: "api key validation request dto" }
-public function getKeyValidationRequestObject(http:HttpServiceConfig httpServiceConfig, http:HttpResourceConfig
-    httpResourceConfig) returns APIKeyValidationRequestDto {
+public function getKeyValidationRequestObject(http:FilterContext context) returns APIKeyValidationRequestDto {
     APIKeyValidationRequestDto apiKeyValidationRequest = {};
+    http:HttpServiceConfig httpServiceConfig = getServiceConfigAnnotation(reflect:getServiceAnnotations
+        (context.serviceType));
+    http:HttpResourceConfig httpResourceConfig = getResourceConfigAnnotation
+    (reflect:getResourceAnnotations(context.serviceType, context.resourceName));
     apiKeyValidationRequest.context = httpServiceConfig.basePath;
-    apiKeyValidationRequest.apiVersion = getVersionFromBasePath(httpServiceConfig.basePath);
+    apiKeyValidationRequest.apiVersion = getVersionFromServiceAnnotation(reflect:getServiceAnnotations
+        (context.serviceType)).apiVersion;
     // TODO set correct version
     apiKeyValidationRequest.requiredAuthenticationLevel = "Any";
     apiKeyValidationRequest.clientDomain = "*";
@@ -137,9 +141,26 @@ public function getKeyValidationRequestObject(http:HttpServiceConfig httpService
 
 }
 
-public function getVersionFromBasePath(string basePath) returns string {
-    string[] splittedArray = basePath.split("/");
-    return splittedArray[lengthof splittedArray - 1];
+public function getVersionFromServiceAnnotation(reflect:annotationData[] annData) returns VersionConfiguration {
+    if (lengthof annData == 0) {
+        return {};
+    }
+    reflect:annotationData|() versionAnn;
+    foreach ann in annData {
+        if (ann.name == VERSION_ANN_NAME && ann.pkgName == GATEWAY_ANN_PACKAGE) {
+            versionAnn = ann;
+            break;
+        }
+    }
+    match versionAnn {
+        reflect:annotationData annData1 => {
+            VersionConfiguration versionConfig = check <VersionConfiguration>annData1.value;
+            return versionConfig;
+        }
+        () => {
+            return {};
+        }
+    }
 }
 
 public function getTenantFromBasePath(string basePath) returns string {
