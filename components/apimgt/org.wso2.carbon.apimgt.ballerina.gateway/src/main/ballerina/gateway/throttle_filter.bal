@@ -14,6 +14,25 @@ public type ThrottleFilter object {
     @Return { value: "FilterResult: Authorization result to indicate if the request can proceed or not" }
     public function filterRequest(http:Request request, http:FilterContext context) returns http:FilterResult {
         http:FilterResult requestFilterResult;
+        boolean resourceLevelThrottled;
+        boolean apiLevelThrottled;
+        string resourceLevelThrottleKey;
+        //apiLevelThrottleKey key is combination of {apiContext}:{apiVersion}
+        string apiLevelThrottleKey;
+
+        //Throttle Tiers
+        string applicationLevelTier;
+        string subscriptionLevelTier;
+        TierConfiguration tier = getResourceLevelTier(reflect:getResourceAnnotations(context.serviceType,
+                context.resourceName));
+        string resourceLevelTier = tier.tierLevel;
+        string apiLevelTier;
+        //Throttled decisions
+        boolean isThrottled = false;
+        boolean isResourceLevelThrottled = false;
+        boolean apiLevelThrottledTriggered = false;
+        boolean stopOnQuotaReach = true;
+
         if (context.attributes.hasKey(KEY_VALIDATION_RESPONSE)){
             if (isRquestBlocked(request, context)){
                 // request Blocked
@@ -21,16 +40,26 @@ public type ThrottleFilter object {
             } else {
                 requestFilterResult = { canProceed: true };
                 // Request not blocked go to check throttling
+                apiLevelThrottleKey = getContext(context) + ":" + getVersionFromServiceAnnotation(reflect:
+                        getServiceAnnotations(context.serviceType)).apiVersion;
                 APIKeyValidationDto keyvalidationResult = check <APIKeyValidationDto>context.attributes[
                 KEY_VALIDATION_RESPONSE];
-                boolean apiLevelThrottled = isApiLevelThrottled(keyvalidationResult);
-                boolean resourceLevelThrottled = isResourceLevelThrottled(keyvalidationResult);
+                if (keyvalidationResult.apiTier != "" && keyvalidationResult.apiTier != UNLIMITED_TIER){
+                    resourceLevelThrottleKey = apiLevelThrottleKey;
+                    apiLevelThrottledTriggered = true;
+                }
+                if (resourceLevelTier == UNLIMITED_TIER && !apiLevelThrottledTriggered){
+
+                } else {
+                    // todo: need to handle resource Level throttling with condition groups
+                }
+                //boolean resourceLevelThrottled = isResourceLevelThrottled(keyvalidationResult);
                 if (!apiLevelThrottled){
                     if (!resourceLevelThrottled){
                         if (!isSubscriptionLevelThrottled(context, keyvalidationResult)){
                             if (!isApplicationLevelThrottled(keyvalidationResult)){
                                 if (!isHardlimitThrottled(getContext(context), getVersionFromServiceAnnotation
-                                (reflect:getServiceAnnotations(context.serviceType)).apiVersion)){
+                                        (reflect:getServiceAnnotations(context.serviceType)).apiVersion)){
                                     // Send Throttle Event
                                     RequestStream throttleEvent = generateThrottleEvent(request, context,
                                         keyvalidationResult);
@@ -38,11 +67,17 @@ public type ThrottleFilter object {
                                 }
                             } else {
                                 // Application Level Throttled
-                                requestFilterResult = { canProceed: false, statusCode: 429, message: "Message blocked" };
+                                requestFilterResult = { canProceed: false, statusCode: 429, message:
+                                "You have exceeded your quota" };
                             }
                         } else {
                             // Subscription Level Throttled
-                            requestFilterResult = { canProceed: false, statusCode: 429, message: "Message blocked" };
+                            if (keyvalidationResult.stopOnQuotaReach == "true"){
+                                requestFilterResult = { canProceed: false, statusCode: 429, message:
+                                "You have exceeded your quota" };
+                            } else {
+                                // set properties in order to publish into analytics for billing
+                            }
                         }
                     } else {
                         //Resource level Throttled
@@ -60,8 +95,7 @@ public type ThrottleFilter object {
     }
 };
 function isRquestBlocked(http:Request request, http:FilterContext context) returns (boolean) {
-    APIKeyValidationDto keyvalidationResult = check <APIKeyValidationDto>context.attributes[
-    KEY_VALIDATION_RESPONSE];
+    APIKeyValidationDto keyvalidationResult = check <APIKeyValidationDto>context.attributes[KEY_VALIDATION_RESPONSE];
     string apiLevelBlockingKey = getContext(context);
     string ipLevelBlockingKey = SUPER_TENANT_DOMAIN_NAME + ":" + getClientIp(request);
     string appLevelBlockingKey = keyvalidationResult.subscriber + ":" + keyvalidationResult.applicationName;
@@ -74,11 +108,13 @@ function isRquestBlocked(http:Request request, http:FilterContext context) retur
 }
 
 function isApiLevelThrottled(APIKeyValidationDto keyValidationDto) returns (boolean) {
+    if (keyValidationDto.apiTier != "" && keyValidationDto.apiTier != UNLIMITED_TIER){
+
+    }
     return false;
 }
 
-function isResourceLevelThrottled(
-                                  APIKeyValidationDto keyValidationDto) returns (boolean) {
+function isResourceLevelThrottled(APIKeyValidationDto keyValidationDto) returns (boolean) {
     return false;
 }
 
@@ -120,8 +156,11 @@ function generateThrottleEvent(http:Request req, http:FilterContext context, API
     requestStream.appTier = keyValidationDto.applicationTier;
     requestStream.apiTier = keyValidationDto.apiTier;
     requestStream.subscriptionTier = keyValidationDto.tier;
-    requestStream.resourceKey = "";
-    requestStream.resourceTier = "Unlimited";
+    requestStream.resourceKey = getContext(context) + "/" + getVersionFromServiceAnnotation(reflect:
+            getServiceAnnotations(context.serviceType)).apiVersion;
+    TierConfiguration tier = getResourceLevelTier(reflect:getResourceAnnotations(context.serviceType,
+            context.resourceName));
+    requestStream.resourceTier = tier.tierLevel;
     requestStream.userId = keyValidationDto.endUserName;
     requestStream.apiContext = getContext(context);
     requestStream.apiVersion = apiVersion;

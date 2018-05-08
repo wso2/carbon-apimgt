@@ -95,6 +95,31 @@ public function getResourceConfigAnnotation(reflect:annotationData[] annData)
     }
 }
 
+@Description { value: "Retrieve the annotation related to resource level Tier" }
+@Return { value: "TierConfiguration: TierConfiguration instance if its defined, else nil" }
+public function getResourceLevelTier(reflect:annotationData[] annData)
+                    returns (TierConfiguration) {
+    if (lengthof annData == 0) {
+        return {};
+    }
+    reflect:annotationData|() tierAnn;
+    foreach ann in annData {
+        if (ann.name == RESOURCE_TIER_ANN_NAME && ann.pkgName == RESOURCE_TIER_ANN_PACKAGE) {
+            tierAnn = ann;
+            break;
+        }
+    }
+    match tierAnn {
+        reflect:annotationData annData1 => {
+            TierConfiguration resourceLevelTier = check <TierConfiguration>annData1.value;
+            return resourceLevelTier;
+        }
+        () => {
+            return {};
+        }
+    }
+}
+
 @Description { value: "Retrieve the annotation related to service" }
 @Return { value: "HttpServiceConfig: HttpResourceConfig instance if its defined, else nil" }
 public function getServiceConfigAnnotation(reflect:annotationData[] annData)
