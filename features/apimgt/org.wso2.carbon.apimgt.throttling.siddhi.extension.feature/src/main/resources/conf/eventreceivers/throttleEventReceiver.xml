@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<eventReceiver name="throttleEventReceiver" statistics="disable" trace="disable" xmlns="http://wso2.org/carbon/eventreceiver">
+    <from eventAdapterType="http">
+        <property name="transports">all</property>
+        <property name="basicAuthEnabled">false</property>
+    </from>
+    <mapping customMapping="disable" type="json"/>
+    <to streamName="org.wso2.throttle.request.stream" version="1.0.0"/>
+</eventReceiver>
