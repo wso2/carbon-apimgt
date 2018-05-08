@@ -26,15 +26,7 @@ public type OAuthnFilter object {
     public function filterRequest (http:Request request, http:FilterContext context) returns http:FilterResult {
         // get auth config for this resource
         boolean authenticated;
-        http:HttpServiceConfig httpServiceConfig =  getServiceConfigAnnotation(reflect:getServiceAnnotations
-            (context.serviceType));
-        http:HttpResourceConfig httpResourceConfig =  getResourceConfigAnnotation
-        (reflect:getResourceAnnotations
-            (context.serviceType, context
-                .resourceName));
-        APIKeyValidationRequestDto apiKeyValidationRequestDto = getKeyValidationRequestObject
-        (httpServiceConfig,
-            httpResourceConfig);
+        APIKeyValidationRequestDto apiKeyValidationRequestDto = getKeyValidationRequestObject(context);
         var (isSecured, authProviders) = getResourceAuthConfig(context);
         APIKeyValidationDto apiKeyValidationDto;
         boolean isAuthorized;

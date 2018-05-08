@@ -20,6 +20,10 @@
 @final public string RESOURCE_ANN_NAME = "ResourceConfig";
 @Description {value:"Service level annotation name"}
 @final public string SERVICE_ANN_NAME = "ServiceConfig";
+@Description {value:"Version annotation name in service level"}
+@final public string VERSION_ANN_NAME = "Version";
+@Description {value:"gateway annotation package"}
+@final public string GATEWAY_ANN_PACKAGE = "ballerina.gateway";
 
 @Description {value:"Basic prefix for authorization header with ending spce"}
 @final public string BASIC_PREFIX_WITH_SPACE = "Basic ";
