@@ -1,13 +1,30 @@
+/**
+ * Copyright (c), WSO2 Inc. (http://wso2.com) All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 import React, { Component } from 'react';
 import { Grid, Paper, Typography, Divider } from 'material-ui';
 import PropTypes from 'prop-types';
 
-import GenericEndpointInputs from './GenericEndpointInputs';
+import EndpointForm from '../../../Endpoints/Create/EndpointForm';
 import Api from '../../../../data/api';
 import ApiPermissionValidation from '../../../../data/ApiPermissionValidation';
 import { resourceMethod, resourcePath, ScopeValidation } from '../../../../data/ScopeValidation';
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
 import { Alert, InteractiveButton, Progress } from '../../../Shared';
+import EndpointDAO from '../../../../data/Endpoint';
+import EndpointsSelector from './EndpointsSelector';
 /**
  * API Details Endpoint page component
  * @class Endpoint
@@ -23,14 +40,15 @@ class Endpoint extends Component {
         super(props);
         this.state = {
             endpointsMap: new Map(),
-            productionEndpoint: {},
-            sandboxEndpoint: {},
+            productionEndpoint: new EndpointDAO('', 'https', 10),
+            sandboxEndpoint: new EndpointDAO('', 'https', 10),
+            isInline: true,
             notFound: false,
         };
-        this.apiUUID = props.match.params.apiUUID;
         this.handleProductionInputs = this.handleProductionInputs.bind(this);
         this.handleSandboxInputs = this.handleSandboxInputs.bind(this);
         this.updateEndpoints = this.updateEndpoints.bind(this);
+        this.switchEndpoint = this.switchEndpoint.bind(this);
     }
 
     /**
@@ -38,68 +56,62 @@ class Endpoint extends Component {
      * @memberof Endpoint
      */
     componentDidMount() {
+        const { apiUUID } = this.props.match.params;
         // Populate Defined endpoints dropdowns
         const api = new Api();
-        const promisedEndpoints = api.getEndpoints();
+        const promisedEndpoints = EndpointDAO.all();
 
         // Populate endpoint details
-        const promisedAPI = api.get(this.apiUUID);
+        const promisedAPI = api.get(apiUUID);
 
         const setSelectedEp = Promise.all([promisedEndpoints, promisedAPI]);
         setSelectedEp
             .then((responses) => {
                 const epMap = new Map();
-                for (const ep of responses[0].body.list) {
-                    epMap.set(ep.id, ep);
+                for (const endpoint of responses[0]) {
+                    epMap.set(endpoint.id, endpoint);
                 }
 
-                this.setState({ endpointsMap: epMap });
-
-                let defaultProdEP = null;
-                let defaultSandboxEP = null;
-                let selectedProdEP = null;
-                let selectedSandboxEP = null;
-                let isGlobalEPSelectedSand = false;
-                let isGlobalEPSelectedProd = false;
+                // this.setState({ endpointsMap: epMap });
+                let inline = false;
+                let currentProdEP = null;
+                let currentSandboxEP = null;
+                // let selectedProdEP = null;
+                // let selectedSandboxEP = null;
+                // let isGlobalEPSelectedSand = false;
+                // let isGlobalEPSelectedProd = false;
 
                 const endpointInAPI = responses[1].body.endpoint;
                 for (const i in endpointInAPI) {
                     if (endpointInAPI[i].inline !== undefined) {
-                        const endpointElement = endpointInAPI[i].inline.endpointConfig;
+                        inline = true;
+                        const endpointJSON = endpointInAPI[i].inline;
                         if (endpointInAPI[i].type === 'production') {
-                            defaultProdEP = JSON.parse(endpointElement).serviceUrl;
+                            currentProdEP = new EndpointDAO(endpointJSON); // JSON.parse(endpointElement).serviceUrl;
                         } else if (endpointInAPI[i].type === 'sandbox') {
-                            defaultSandboxEP = JSON.parse(endpointElement).serviceUrl;
+                            currentSandboxEP = new EndpointDAO(endpointJSON); // JSON.parse(endpoint).serviceUrl;
                         }
                     } else {
                         // global endpoint with key
                         const endpointKey = endpointInAPI[i].key;
                         if (endpointInAPI[i].type === 'production') {
-                            selectedProdEP = epMap[endpointKey].name;
-                            defaultProdEP = JSON.parse(epMap[endpointKey].endpointConfig).serviceUrl;
-                            isGlobalEPSelectedProd = true;
+                            currentProdEP = epMap[endpointKey].name;
+                            // currentProdEP = JSON.parse(epMap[endpointKey].endpointConfig).serviceUrl;
+                            // isGlobalEPSelectedProd = true;
                         } else if (endpointInAPI[i].type === 'sandbox') {
-                            selectedSandboxEP = epMap[endpointKey].name;
-                            defaultSandboxEP = JSON.parse(epMap[endpointKey].endpointConfig).serviceUrl;
-                            isGlobalEPSelectedSand = true;
+                            currentSandboxEP = epMap[endpointKey].name;
+                            // currentSandboxEP = JSON.parse(epMap[endpointKey].endpointConfig).serviceUrl;
+                            // isGlobalEPSelectedSand = true;
                         }
                     }
                 }
 
                 this.setState({
                     api: responses[1].data,
-                    productionEndpoint: {
-                        url: defaultProdEP,
-                        username: '',
-                        selectedEP: selectedProdEP,
-                        isGlobalEPSelected: isGlobalEPSelectedProd,
-                    },
-                    sandboxEndpoint: {
-                        url: defaultSandboxEP,
-                        username: '',
-                        selectedEP: selectedSandboxEP,
-                        isGlobalEPSelected: isGlobalEPSelectedSand,
-                    },
+                    productionEndpoint: currentSandboxEP,
+                    sandboxEndpoint: currentProdEP,
+                    isInline: inline,
+                    endpointsMap: epMap,
                 });
             })
             .catch((error) => {
@@ -194,14 +206,31 @@ class Endpoint extends Component {
     }
 
     /**
+     * Event handler for endpoints selector
+     * @param {React.SyntheticEvent} event user select event
+     * @memberof Endpoint
+     */
+    switchEndpoint(event) {
+        const { name, value } = event.target;
+        const { endpointsMap } = this.state;
+        const endpoint = endpointsMap.get(value);
+        if (name === 'production') {
+            this.setState({ productionEndpoint: endpoint });
+        } else if (name === 'sandbox') {
+            this.setState({ sandboxEndpoint: endpoint });
+        }
+    }
+
+    /**
      * @inheritDoc
      * @returns {React.Component} Render endpoints UI
      * @memberof Endpoint
      */
     render() {
-        const { api, endpointsMap } = this.state;
-        const { match } = this.props;
-
+        const {
+            api, endpointsMap, productionEndpoint, sandboxEndpoint, isInline,
+        } = this.state;
+        const globalEndpoints = endpointsMap.values();
         if (this.state.notFound) {
             return <ResourceNotFound message={this.props.resourceNotFountMessage} />;
         }
@@ -216,23 +245,28 @@ class Endpoint extends Component {
                         <Typography variant='subheading' gutterBottom>
                             Production Endpoint
                         </Typography>
-                        <GenericEndpointInputs
-                            endpointsMap={endpointsMap}
-                            match={match}
-                            endpoint={this.state.productionEndpoint}
-                            handleInputs={this.handleProductionInputs}
+                        <EndpointsSelector
+                            type='production'
+                            onChange={this.switchEndpoint}
+                            currentValue={isInline ? 'inline' : productionEndpoint.id}
+                            endpoints={globalEndpoints}
+                        />
+                        <EndpointForm
+                            endpoint={productionEndpoint}
+                            handleInputs={isInline && this.handleProductionInputs}
                         />
                     </Grid>
                     <Grid item md={6}>
                         <Typography variant='subheading' gutterBottom>
                             Sandbox Endpoint
                         </Typography>
-                        <GenericEndpointInputs
-                            endpointsMap={endpointsMap}
-                            match={match}
-                            endpoint={this.state.sandboxEndpoint}
-                            handleInputs={this.handleSandboxInputs}
+                        <EndpointsSelector
+                            type='sandbox'
+                            onChange={this.switchEndpoint}
+                            currentValue={isInline ? 'inline' : sandboxEndpoint.id}
+                            endpoints={globalEndpoints}
                         />
+                        <EndpointForm endpoint={sandboxEndpoint} handleInputs={isInline && this.handleSandboxInputs} />
                     </Grid>
                 </Grid>
                 <Divider />

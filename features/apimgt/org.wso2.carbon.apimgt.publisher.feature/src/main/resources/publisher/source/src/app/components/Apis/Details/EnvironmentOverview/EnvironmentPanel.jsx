@@ -48,7 +48,7 @@ class EnvironmentPanel extends Component {
         };
     }
 
-    componentWillMount() {
+    componentDidMount() {
         const { rootAPI, environment } = this.props;
 
         let api;

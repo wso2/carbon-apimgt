@@ -117,7 +117,7 @@ class Overview extends Component {
      * @inheritDoc
      * @memberof Overview
      */
-    componentWillMount() {
+    componentDidMount() {
         const api = new Api();
         const promisedApi = api.get(this.apiUUID);
         promisedApi
