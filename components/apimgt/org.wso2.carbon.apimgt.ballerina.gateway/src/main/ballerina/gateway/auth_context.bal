@@ -14,24 +14,24 @@
 // specific language governing permissions and limitations
 // under the License.
 
-@Description {value:"Configuration used for resource level tier annotation"}
-@Field {value:"policy: Rate limit speicified for the particular resource"}
-public type TierConfiguration {
-    string policy;
-
+public type AuthenticationContext {
+     boolean authenticated;
+     string username;
+     string applicationTier;
+     string tier;
+     string apiTier;
+     boolean isContentAwareTierPresent;
+     string apiKey;
+     string keyType;
+     string callerToken;
+     string applicationId;
+     string applicationName;
+     string consumerKey;
+     string subscriber;
+     string[] throttlingDataList;
+     int spikeArrestLimit;
+     string subscriberTenantDomain;
+     string spikeArrestUnit;
+     boolean stopOnQuotaReach;
 };
-
-@Description {value:"Resource level tier annaotation"}
-public annotation <resource> RateLimit TierConfiguration;
-
-@Description {value:"Configuration used for api version annotation"}
-@Field {value:"apiVersion: version specified for the API"}
-public type VersionConfiguration {
-    string apiVersion;
-
-};
-
-@Description {value:"API version annotation"}
-public annotation <service> Version VersionConfiguration;
-
 

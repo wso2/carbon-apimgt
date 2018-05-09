@@ -23,7 +23,7 @@
 @Description {value:"Version annotation name in service level"}
 @final public string VERSION_ANN_NAME = "Version";
 @Description {value:"gateway annotation package"}
-@final public string GATEWAY_ANN_PACKAGE = "ballerina.gateway";
+@final public string GATEWAY_ANN_PACKAGE = "wso2.gateway";
 
 @Description {value:"Basic prefix for authorization header with ending spce"}
 @final public string BASIC_PREFIX_WITH_SPACE = "Basic ";
@@ -38,6 +38,8 @@
 @final public string X_FORWARD_FOR_HEADER = "X-FORWARDED-FOR";
 @Description {value:"KeyValidation Response"}
 @final public string KEY_VALIDATION_RESPONSE = "KEY_VALIDATION_RESPONSE";
+@Description {value:"Authentication context attribute"}
+@final public string AUTHENTICATION_CONTEXT = "AUTHENTICATION_CONTEXT";
 @Description {value:"carbon.super Tenant Domain"}
 @final public string SUPER_TENANT_DOMAIN_NAME = "carbon.super";
 @Description {value:"Super Tenant Domain Tenant Id"}
@@ -50,3 +52,7 @@
 @final public string RESOURCE_TIER_ANN_NAME = "ResourceTier";
 @Description { value: "Unlimited Tier" }
 @final public string UNLIMITED_TIER = "Unlimited";
+@Description { value: "Un authenticated tier level" }
+@final public string UNAUTHENTICATED_TIER = "Unauthenticated";
+@Description { value: "Anonymous user name" }
+@final public string END_USER_ANONYMOUS = "anonymous";

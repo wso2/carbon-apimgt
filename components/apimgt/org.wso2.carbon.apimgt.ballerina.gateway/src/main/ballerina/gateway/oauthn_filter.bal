@@ -29,8 +29,16 @@ public type OAuthnFilter object {
         APIKeyValidationRequestDto apiKeyValidationRequestDto = getKeyValidationRequestObject(context);
         var (isSecured, authProviders) = getResourceAuthConfig(context);
         APIKeyValidationDto apiKeyValidationDto;
+        AuthenticationContext authenticationContext;
         boolean isAuthorized;
         if (isSecured) {
+            string authHeader;
+            if(request.hasHeader(AUTH_HEADER)) {
+                authHeader = request.getHeader(AUTH_HEADER);
+            } else {
+                log:printError("No authorization header was provided");
+                return createAuthnResult(false);
+            }
             // if auth providers are there, use those to authenticate
             match getAuthenticationProviderType(request.getHeader(AUTH_HEADER)){
                 string providerId => {
@@ -38,15 +46,65 @@ public type OAuthnFilter object {
                     isAuthorized = self.authnHandlerChain.handleWithSpecificAuthnHandlers(authProviders, request);
                 }
                 () => {
-                    apiKeyValidationDto = self.oauthnHandler.handle(request, apiKeyValidationRequestDto);
-                    // set dto once ballerina supports
-                    context.attributes[KEY_VALIDATION_RESPONSE] = apiKeyValidationDto;
-                    isAuthorized = <boolean>apiKeyValidationDto.authorized;
+                    match extractAccessToken(request) {
+                        string token => {
+                            apiKeyValidationRequestDto.accessToken = token;
+                            match self.oauthnHandler.handle(request, apiKeyValidationRequestDto) {
+                                APIKeyValidationDto apiKeyValidationDto => {
+                                    context.attributes[KEY_VALIDATION_RESPONSE] = apiKeyValidationDto;
+                                    isAuthorized = <boolean>apiKeyValidationDto.authorized;
+                                    if(isAuthorized) {
+                                        authenticationContext.authenticated = true;
+                                        authenticationContext.tier = apiKeyValidationDto.tier;
+                                        authenticationContext.apiKey = token;
+                                        if (apiKeyValidationDto.endUserName != "") {
+                                            authenticationContext.username = apiKeyValidationDto.endUserName;
+                                        } else {
+                                            authenticationContext.username = END_USER_ANONYMOUS;
+                                        }
+                                        authenticationContext.callerToken = apiKeyValidationDto.endUserToken;
+                                        authenticationContext.applicationId = apiKeyValidationDto.applicationId;
+                                        authenticationContext.applicationName = apiKeyValidationDto.applicationName;
+                                        authenticationContext.applicationTier = apiKeyValidationDto.applicationTier;
+                                        authenticationContext.subscriber = apiKeyValidationDto.subscriber;
+                                        authenticationContext.consumerKey = apiKeyValidationDto.consumerKey;
+                                        authenticationContext.apiTier = apiKeyValidationDto.apiTier;
+                                        authenticationContext.subscriberTenantDomain = apiKeyValidationDto.subscriberTenantDomain;
+                                        authenticationContext.spikeArrestLimit = check <int> apiKeyValidationDto.spikeArrestLimit;
+                                        authenticationContext.spikeArrestUnit = apiKeyValidationDto.spikeArrestUnit;
+                                        authenticationContext.stopOnQuotaReach = <boolean>apiKeyValidationDto.stopOnQuotaReach;
+                                        authenticationContext.isContentAwareTierPresent = <boolean> apiKeyValidationDto
+                                        .contentAware;
+                                        context.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
+                                    } else {
+                                        return createAuthnResult(false);
+                                    }
+                                }
+                                error err => {
+                                    log:printError(err.message);
+                                    return createAuthnResult(false);
+                                }
+                            }
+                        }
+                        error err => {
+                            log:printError(err.message);
+                            return createAuthnResult(false);
+                        }
+                    }
+
                 }
             }
 
         } else {
             // not secured, no need to authenticate
+            string clientIp = getClientIp(request);
+            authenticationContext.authenticated = true;
+            authenticationContext.tier = UNAUTHENTICATED_TIER;
+            authenticationContext.stopOnQuotaReach = true;
+            authenticationContext.apiKey = clientIp ;
+            authenticationContext.username = END_USER_ANONYMOUS;
+            authenticationContext.applicationId = clientIp;
+            context.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
             return createAuthnResult(true);
         }
         return createAuthnResult(isAuthorized);

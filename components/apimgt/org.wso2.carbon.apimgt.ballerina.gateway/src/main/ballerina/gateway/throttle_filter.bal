@@ -25,7 +25,7 @@ public type ThrottleFilter object {
         string subscriptionLevelTier;
         TierConfiguration tier = getResourceLevelTier(reflect:getResourceAnnotations(context.serviceType,
                 context.resourceName));
-        string resourceLevelTier = tier.tierLevel;
+        string resourceLevelTier = tier.policy;
         string apiLevelTier;
         //Throttled decisions
         boolean isThrottled = false;
@@ -160,7 +160,7 @@ function generateThrottleEvent(http:Request req, http:FilterContext context, API
             getServiceAnnotations(context.serviceType)).apiVersion;
     TierConfiguration tier = getResourceLevelTier(reflect:getResourceAnnotations(context.serviceType,
             context.resourceName));
-    requestStream.resourceTier = tier.tierLevel;
+    requestStream.resourceTier = tier.policy;
     requestStream.userId = keyValidationDto.endUserName;
     requestStream.apiContext = getContext(context);
     requestStream.apiVersion = apiVersion;

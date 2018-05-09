@@ -135,7 +135,7 @@ function createAuthFiltersForSecureListener (EndpointConfiguration config) retur
 
     authFilters[0] = <http:Filter> authnFilter;
     authFilters[1] = <http:Filter> authzFilter;
-    authFilters[2] = <http:Filter> throttleFilter;
+    //authFilters[2] = <http:Filter> throttleFilter;
     return authFilters;
 }
 
