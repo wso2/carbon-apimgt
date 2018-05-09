@@ -41,8 +41,8 @@ import java.util.List;
 
 public class GatewayAnnotationPlugin extends AbstractCompilerPlugin {
 
-    public static final String TIER_LEVEL = "tierLevel";
-    public static final String VERSION = "version";
+    public static final String POLICY = "policy";
+    public static final String VERSION = "apiVersion";
     private DiagnosticLog dlog;
 
     @Override
@@ -64,7 +64,7 @@ public class GatewayAnnotationPlugin extends AbstractCompilerPlugin {
                 String annotationValue = keyValue.getValue().toString();
                 switch (keyValue.getKey().toString()) {
                 //Match annotation key and assign the value to model class
-                    case TIER_LEVEL:
+                    case POLICY:
                         TierModel.getInstance().setTier(annotationValue);
                         break;
                     default:

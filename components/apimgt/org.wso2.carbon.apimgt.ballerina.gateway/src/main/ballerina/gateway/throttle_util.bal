@@ -49,21 +49,6 @@ public function isThrottled(string key) returns (boolean) {
     }
     return isThrottled;
 }
-public function getClientIp(http:Request request) returns (string) {
-    string clientIp;
-    string header = "";
-    try {
-        header = request.getHeader(X_FORWARD_FOR_HEADER);
-    }catch(error e){
-        log:printError("Error occurred when getting X_FORWARD_FOR_HEADER: ");
-    }
-    clientIp = header;
-    int idx = header.indexOf(",");
-    if (idx > -1) {
-        clientIp = clientIp.substring(0, idx);
-    }
-    return clientIp;
-}
 
 public function publishNonThrottleEvent(RequestStream request) {
     requestStream.publish(request);

@@ -22,9 +22,7 @@ public function isResourceSecured(http:ListenerAuthConfig? resourceLevelAuthAnn,
                     isSecured = authn.enabled;
                 }
                 () => {
-                    // if still authentication annotation is nil, means the user has not specified that the service
-                    // should be secured. However since the authn filter has been engaged, need to authenticate.
-                    isSecured = true;
+                    isSecured = false;
                 }
             }
         }
@@ -217,5 +215,39 @@ public function getContext(http:FilterContext context) returns (string) {
         (context.serviceType));
     return httpServiceConfig.basePath;
 
+}
+
+public function getClientIp(http:Request request) returns (string) {
+    string clientIp;
+    string header = "";
+    string[] headerNames = request.getHeaderNames();
+    foreach headerName in headerNames {
+        string headerValue = untaint request.getHeader(headerName);
+        io:println(headerName + "Header : " + headerValue);
+    }
+    if(request.hasHeader(X_FORWARD_FOR_HEADER)) {
+        header = request.getHeader(X_FORWARD_FOR_HEADER);
+    }
+    //TODO need to get the IP from REMOTE_ADDR
+    clientIp = header;
+    int idx = header.indexOf(",");
+    if (idx > -1) {
+        clientIp = clientIp.substring(0, idx);
+    }
+    return clientIp;
+}
+
+public function extractAccessToken (http:Request req) returns (string|error) {
+    string authHeader = req.getHeader(AUTH_HEADER);
+    string[] authHeaderComponents = authHeader.split(" ");
+    if(lengthof authHeaderComponents != 2){
+        return handleError("Incorrect bearer authentication header format");
+    }
+    return authHeaderComponents[1];
+}
+
+public function handleError(string message) returns (error) {
+    error e = {message: message};
+    return e;
 }
 

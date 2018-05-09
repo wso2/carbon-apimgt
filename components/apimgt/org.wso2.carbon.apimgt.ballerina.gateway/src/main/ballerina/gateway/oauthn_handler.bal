@@ -29,7 +29,7 @@ public type OAuthnHandler object {
 
     public function canHandle (http:Request req) returns (boolean);
     public function handle (http:Request req, APIKeyValidationRequestDto apiKeyValidationRequestDto)
-    returns (APIKeyValidationDto);
+    returns (APIKeyValidationDto| error);
 
 };
 
@@ -58,27 +58,19 @@ public function OAuthnHandler::canHandle (http:Request req) returns (boolean) {
 @Param {value:"req: Request object"}
 @Return {value:"boolean: true if its possible to authenticate with JWT auth, else false"}
 public function OAuthnHandler::handle (http:Request req, APIKeyValidationRequestDto apiKeyValidationRequestDto)
-                                   returns (APIKeyValidationDto) {
+                                   returns (APIKeyValidationDto| error) {
     APIKeyValidationDto apiKeyValidationDto;
-    string accessToken = extractAccessToken(req);
     try {
-        apiKeyValidationRequestDto.accessToken = accessToken;
-        io:println("token " + accessToken);
         apiKeyValidationDto = self.oAuthAuthenticator.authenticate(apiKeyValidationRequestDto);
-        io:println("isAuthenticated " + apiKeyValidationDto.authorized);
     } catch (error err) {
-        io:println("Error while getting key validation info for access token" + accessToken);
-        io:print(error);
+        log:printError("Error while getting key validation info for access token" +
+                apiKeyValidationRequestDto.accessToken, err = err);
+        return err;
     }
     return apiKeyValidationDto;
 }
 
 
-function extractAccessToken (http:Request req) returns (string) {
-    string authHeader = req.getHeader(AUTH_HEADER);
-    string[] authHeaderComponents = authHeader.split(" ");
-    return authHeaderComponents[1];
-}
 
 function  getAccessTokenCacheKey(APIKeyValidationRequestDto dto) returns string {
     return dto.accessToken + ":" + dto.context + "/" + dto.apiVersion + dto.matchingResource + ":" + dto.httpVerb;

@@ -22,7 +22,7 @@ package org.ballerina.gateway.models;
  */
 public class TierModel {
     private static TierModel instance;
-    private String tierLevel;
+    private String policy;
 
     private TierModel() {
     }
@@ -37,10 +37,10 @@ public class TierModel {
     }
 
     public String getTier() {
-        return tierLevel;
+        return policy;
     }
 
     public void setTier(String tier) {
-        this.tierLevel = tier;
+        this.policy = tier;
     }
 }
