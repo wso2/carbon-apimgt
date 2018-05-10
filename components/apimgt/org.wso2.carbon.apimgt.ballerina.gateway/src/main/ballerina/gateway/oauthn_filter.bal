@@ -12,7 +12,6 @@ import ballerina/reflect;
 
 @Description {value:"Representation of the Authentication filter"}
 @Field {value:"filterRequest: request filter method which attempts to authenticated the request"}
-@Field {value:"filterRequest: response filter method (not used this scenario)"}
 public type OAuthnFilter object {
 
     public {
@@ -37,13 +36,13 @@ public type OAuthnFilter object {
                 authHeader = request.getHeader(AUTH_HEADER);
             } else {
                 log:printError("No authorization header was provided");
-                return createAuthnResult(false);
+                return createFilterResult(false, 401, "No authorization header was provided");
             }
             // if auth providers are there, use those to authenticate
             match getAuthenticationProviderType(request.getHeader(AUTH_HEADER)){
                 string providerId => {
                     string[] providerIds = [providerId];
-                    isAuthorized = self.authnHandlerChain.handleWithSpecificAuthnHandlers(authProviders, request);
+                    isAuthorized = self.authnHandlerChain.handleWithSpecificAuthnHandlers(providerIds, request);
                 }
                 () => {
                     match extractAccessToken(request) {
@@ -77,18 +76,19 @@ public type OAuthnFilter object {
                                         .contentAware;
                                         context.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
                                     } else {
-                                        return createAuthnResult(false);
+                                        return createFilterResult(false, 401, "Authentication failed");
                                     }
                                 }
                                 error err => {
                                     log:printError(err.message);
-                                    return createAuthnResult(false);
+                                    return createFilterResult(false, 500, "Error while authenticating the token " +
+                                            token);
                                 }
                             }
                         }
                         error err => {
                             log:printError(err.message);
-                            return createAuthnResult(false);
+                            return createFilterResult(false, 401, err.message);
                         }
                     }
 
@@ -105,24 +105,12 @@ public type OAuthnFilter object {
             authenticationContext.username = END_USER_ANONYMOUS;
             authenticationContext.applicationId = clientIp;
             context.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
-            return createAuthnResult(true);
+            return createFilterResult(true, 200 , "Successfully authenticated");
         }
         return createAuthnResult(isAuthorized);
     }
 };
 
-@Description {value:"Creates an instance of FilterResult"}
-@Param {value:"authorized: authorization status for the request"}
-@Return {value:"FilterResult: Authorization result to indicate if the request can proceed or not"}
-function createAuthnResult (boolean authenticated) returns (http:FilterResult) {
-    http:FilterResult requestFilterResult = {};
-    if (authenticated) {
-        requestFilterResult = {canProceed:true, statusCode:200, message:"Successfully authenticated"};
-    } else {
-        requestFilterResult = {canProceed:false, statusCode:401, message:"Authentication failure"};
-    }
-    return requestFilterResult;
-}
 
 @Description {value:"Checks if the resource is secured"}
 @Param {value:"context: FilterContext object"}
