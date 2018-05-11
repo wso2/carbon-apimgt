@@ -10,11 +10,6 @@ import ballerina/io;
 
 // Authentication handler
 
-
-endpoint http:Client keyValidationEndpoint {
-    url:"https://localhost:9443"
-};
-
 @Description {value:"Representation of OAuth2 Auth handler for HTTP traffic"}
 @Field {value:"oAuthAuthenticator: OAuthAuthProvider instance"}
 @Field {value:"name: Authentication handler name"}
@@ -166,6 +161,9 @@ public function OAuthAuthProvider::authenticate (APIKeyValidationRequestDto apiK
 
 
 public function OAuthAuthProvider::doIntrospect (APIKeyValidationRequestDto apiKeyValidationRequestDto) returns (json) {
+    endpoint http:Client keyValidationEndpoint {
+        url:getGatewayConfInstance().getKeyManagerConf().serverUrl
+    };
     try {
         string base64Header = "admin:admin";
         string encodedBasicAuthHeader = check base64Header.base64Encode();
@@ -211,8 +209,6 @@ public function OAuthAuthProvider::doIntrospect (APIKeyValidationRequestDto apiK
                 clientResponse1 = prod;
             }
         }
-        io:println("\nPOST request:");
-        io:println(clientResponse1.getXmlPayload());
         xml responsepayload;
         match clientResponse1.getXmlPayload() {
             error err => {
@@ -225,7 +221,6 @@ public function OAuthAuthProvider::doIntrospect (APIKeyValidationRequestDto apiK
         }
         json j2 = responsepayload.toJSON({attributePrefix: "", preserveNamespaces: false});
         j2 = j2["Envelope"]["Body"]["validateKeyResponse"]["return"];
-        io:println(j2);
         return(j2);
 
     } catch (error err) {

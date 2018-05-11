@@ -56,3 +56,7 @@
 @final public string UNAUTHENTICATED_TIER = "Unauthenticated";
 @Description { value: "Anonymous user name" }
 @final public string END_USER_ANONYMOUS = "anonymous";
+
+// config constants
+@Description { value: "Key manager related configs"}
+@final public string kmInstanceID = "keyManager";

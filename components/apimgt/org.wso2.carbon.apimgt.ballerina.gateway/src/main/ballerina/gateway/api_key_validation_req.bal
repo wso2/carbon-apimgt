@@ -14,13 +14,13 @@
 // specific language governing permissions and limitations
 // under the License.
 
-public type APIKeyValidationRequestDto {
-    string context;
-    string apiVersion;
-    string accessToken;
-    string requiredAuthenticationLevel;
-    string clientDomain;
-    string matchingResource;
-    string httpVerb;
-};
+//public type APIKeyValidationRequestDto {
+//    string context;
+//    string apiVersion;
+//    string accessToken;
+//    string requiredAuthenticationLevel;
+//    string clientDomain;
+//    string matchingResource;
+//    string httpVerb;
+//};
 

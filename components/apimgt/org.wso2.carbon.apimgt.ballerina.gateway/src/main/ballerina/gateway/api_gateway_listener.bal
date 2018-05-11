@@ -69,6 +69,7 @@ public type EndpointConfiguration {
 
 
 public function APIGatewayListener::init (EndpointConfiguration config) {
+    initiateGatewayConfigurations();
     addAuthFiltersForAPIGatewayListener(config);
     self.httpListener.init(config);
 }
@@ -171,6 +172,25 @@ function createAuthHandler (http:AuthProvider authProvider) returns http:HttpAut
         error e = {message:"Invalid auth scheme: " + authProvider.scheme };
         throw e;
     }
+}
+
+function initiateGatewayConfigurations() {
+    intitateKeyManagerConfigurations();
+}
+
+function intitateKeyManagerConfigurations() {
+    KeyManagerConf keyManagerConf;
+    Credentials credentials;
+    keyManagerConf.serverUrl = getConfigValue(kmInstanceID, "serverUrl", "https://localhost:9443");
+    credentials.username = getConfigValue(kmInstanceID, "username", "admin");
+    credentials.password = getConfigValue(kmInstanceID, "password", "admin");
+    keyManagerConf.credentials = credentials;
+    getGatewayConfInstance().setKeyManagerConf(keyManagerConf);
+    io:println(getGatewayConfInstance().getKeyManagerConf().serverUrl);
+}
+
+function getConfigValue(string instanceId, string property, string defaultValue) returns string {
+    return config:getAsString(instanceId + "." + property, default = defaultValue);
 }
 
 @Description {value:"Gets called every time a service attaches itself to this endpoint. Also happens at package initialization."}
