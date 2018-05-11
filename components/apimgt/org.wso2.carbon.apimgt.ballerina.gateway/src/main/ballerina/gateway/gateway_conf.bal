@@ -14,33 +14,27 @@
 // specific language governing permissions and limitations
 // under the License.
 
-//TODO : change the proper varaible types(ex: authorized should be boolean)
+import ballerina /io;
 
-public type APIKeyValidationDto {
-string apiName ;
-string apiPublisher ;
-string apiTier ;
-string applicationId ;
-string applicationName ;
-string applicationTier ;
-string authorized;
-string authorizedDomains ;
-string consumerKey ;
-string contentAware;
-string endUserName ;
-string endUserToken ;
-string issuedTime;
-string[] scopes ;
-string spikeArrestLimit;
-string spikeArrestUnit ;
-string stopOnQuotaReach;
-string subscriber ;
-string subscriberTenantDomain ;
-string throttlingDataList ;
-string tier ;
-//string type ;
-string userType ;
-string validationStatus;
-string validityPeriod;
+
+GatewayConf gatewayConf = new;
+public type GatewayConf object {
+    private {
+        KeyManagerConf keyManagerConf;
+    }
+    public function getGatewayConf() returns (GatewayConf) {
+        return gatewayConf;
+    }
+
+    public function setKeyManagerConf(KeyManagerConf keyManagerConf) {
+        gatewayConf.keyManagerConf = keyManagerConf;
+    }
+    public function getKeyManagerConf() returns(KeyManagerConf) {
+        return gatewayConf.keyManagerConf;
+    }
+
 };
 
+   public function getGatewayConfInstance() returns (GatewayConf) {
+       return gatewayConf;
+   }

@@ -69,6 +69,7 @@ public type EndpointConfiguration {
 
 
 public function APIGatewayListener::init (EndpointConfiguration config) {
+    initiateGatewayConfigurations();
     addAuthFiltersForAPIGatewayListener(config);
     self.httpListener.init(config);
 }
@@ -124,6 +125,8 @@ function createAuthFiltersForSecureListener (EndpointConfiguration config) retur
     OAuthnFilter authnFilter = new(oauthnHandler, authnHandlerChain);
 
     ThrottleFilter throttleFilter = new();
+    SubscriptionFilter subscriptionFilter = new;
+
     //OAuthzFilter authzFilter = new;
 
     // use the ballerina in built scope filter
@@ -135,7 +138,9 @@ function createAuthFiltersForSecureListener (EndpointConfiguration config) retur
 
     authFilters[0] = <http:Filter> authnFilter;
     authFilters[1] = <http:Filter> authzFilter;
+    authFilters[2] =  <http:Filter> subscriptionFilter;
     //authFilters[2] = <http:Filter> throttleFilter;
+
     return authFilters;
 }
 
@@ -169,6 +174,25 @@ function createAuthHandler (http:AuthProvider authProvider) returns http:HttpAut
     }
 }
 
+function initiateGatewayConfigurations() {
+    intitateKeyManagerConfigurations();
+}
+
+function intitateKeyManagerConfigurations() {
+    KeyManagerConf keyManagerConf;
+    Credentials credentials;
+    keyManagerConf.serverUrl = getConfigValue(kmInstanceID, "serverUrl", "https://localhost:9443");
+    credentials.username = getConfigValue(kmInstanceID, "username", "admin");
+    credentials.password = getConfigValue(kmInstanceID, "password", "admin");
+    keyManagerConf.credentials = credentials;
+    getGatewayConfInstance().setKeyManagerConf(keyManagerConf);
+    io:println(getGatewayConfInstance().getKeyManagerConf().serverUrl);
+}
+
+function getConfigValue(string instanceId, string property, string defaultValue) returns string {
+    return config:getAsString(instanceId + "." + property, default = defaultValue);
+}
+
 @Description {value:"Gets called every time a service attaches itself to this endpoint. Also happens at package initialization."}
 @Param {value:"ep: The endpoint to which the service should be registered to"}
 @Param {value:"serviceType: The type of the service to be registered"}
@@ -199,11 +223,13 @@ public function APIGatewayListener::stop () {
 }
 
 public http:AuthProvider basicAuthProvider = {
+    id : "basic",
     scheme:"basic",
     authProvider:"config"
 };
 
 public http:AuthProvider jwtAuthProvider = {
+    id: "jwt",
     scheme: "jwt",
     issuer: "ballerina",
     audience: "ballerina",

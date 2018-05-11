@@ -164,6 +164,30 @@ public function getKeyValidationRequestObject(http:FilterContext context) return
 
 }
 
+@Description {value:"Creates an instance of FilterResult"}
+@Param {value:"canProceed: authorization status for the request"}
+@Param {value:"statusCode: status code for the filter request"}
+@Param {value:"message: response message from the filter"}
+@Return {value:"FilterResult: Authorization result to indicate if the request can proceed or not"}
+function createFilterResult (boolean canProceed, int statusCode, string message) returns (http:FilterResult) {
+    http:FilterResult requestFilterResult = {};
+    requestFilterResult = {canProceed:canProceed, statusCode:statusCode, message:message};
+    return requestFilterResult;
+}
+
+@Description {value:"Creates an instance of FilterResult"}
+@Param {value:"authenticated: filter status for the request"}
+@Return {value:"FilterResult: Authorization result to indicate if the request can proceed or not"}
+function createAuthnResult(boolean authenticated) returns (http:FilterResult) {
+    http:FilterResult requestFilterResult = {};
+    if (authenticated) {
+        requestFilterResult = {canProceed: true, statusCode: 200, message: "Successfully authenticated"};
+    } else {
+        requestFilterResult = {canProceed: false, statusCode: 401, message: "Authentication failure"};
+    }
+    return requestFilterResult;
+}
+
 public function getVersionFromServiceAnnotation(reflect:annotationData[] annData) returns VersionConfiguration {
     if (lengthof annData == 0) {
         return {};

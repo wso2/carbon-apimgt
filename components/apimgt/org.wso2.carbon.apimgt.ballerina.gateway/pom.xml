@@ -30,7 +30,7 @@
             <!-- copy built-in ballerina sources to the jar -->
             <resource>
                 <directory>${project.build.directory}/../src/main/ballerina</directory>
-                <targetPath>META-INF/ballerina</targetPath>
+                <targetPath>META-INF/wso2</targetPath>
             </resource>
         </resources>
         <plugins>
