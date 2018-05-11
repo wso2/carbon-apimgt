@@ -10,16 +10,13 @@ import ballerina/io;
 
 // Authentication handler
 
-endpoint http:Client introspectEndpoint {
-    url:"https://localhost:9443"
-};
 
 endpoint http:Client keyValidationEndpoint {
     url:"https://localhost:9443"
 };
 
-@Description {value:"Representation of JWT Auth handler for HTTP traffic"}
-@Field {value:"jwtAuthenticator: JWTAuthenticator instance"}
+@Description {value:"Representation of OAuth2 Auth handler for HTTP traffic"}
+@Field {value:"oAuthAuthenticator: OAuthAuthProvider instance"}
 @Field {value:"name: Authentication handler name"}
 public type OAuthnHandler object {
     public {
@@ -78,12 +75,10 @@ function  getAccessTokenCacheKey(APIKeyValidationRequestDto dto) returns string 
 
 
 
-@Description {value:"Represents a JWT Authenticator"}
-@Field {value:"jwtAuthProviderConfig: JWTAuthProviderConfig object"}
-@Field {value:"authCache: Authentication cache object"}
+@Description {value:"Represents a OAuth2 Authenticator"}
+@Field {value:"gatewayTokenCache: Authentication cache object"}
 public type OAuthAuthProvider object {
     public {
-        JWTAuthProviderConfig jwtAuthProviderConfig;
         APIGatewayCache gatewayTokenCache;
     }
 
@@ -94,29 +89,10 @@ public type OAuthAuthProvider object {
 
 };
 
-@Description {value:"Represents JWT validator configurations"}
-public type JWTAuthProviderConfig {
-    string issuer,
-    string audience,
-    int timeSkew,
-    string certificateAlias,
-    string trustStoreFilePath,
-    string trustStorePassword,
-};
 
-@final string JWT_AUTH_CACHE = "jwt_auth_cache";
-@final string SCOPES = "scope";
-@final string GROUPS = "groups";
-@final string USERNAME = "name";
-@final string AUTH_TYPE_JWT = "jwt";
-
-
-
-
-@Description {value:"Authenticate with a jwt token"}
-@Param {value:"jwtToken: Jwt token extracted from the authentication header"}
+@Description {value:"Authenticate with a oauth2 token"}
+@Param {value:"apiKeyValidationRequestDto: Object containig data to call the key validation service"}
 @Return {value:"boolean: true if authentication is a success, else false"}
-@Return {value:"error: If error occured in authentication"}
 public function OAuthAuthProvider::authenticate (APIKeyValidationRequestDto apiKeyValidationRequestDto) returns
                                                                                                               (APIKeyValidationDto) {
     string cacheKey = getAccessTokenCacheKey(apiKeyValidationRequestDto);
@@ -127,14 +103,12 @@ public function OAuthAuthProvider::authenticate (APIKeyValidationRequestDto apiK
         APIKeyValidationDto apiKeyValidationDtoFromcache => {
         if(isAccessTokenExpired(apiKeyValidationDtoFromcache)) {
             self.gatewayTokenCache.removeFromGatewayKeyValidationCache(cacheKey);
-            io:println("Token expired, removed from the cache");
             self.gatewayTokenCache.addToInvalidTokenCache(apiKeyValidationRequestDto.accessToken, true);
             apiKeyValidationDtoFromcache.authorized= "false";
             return apiKeyValidationDtoFromcache;
         }
         authorized = < boolean > apiKeyValidationDtoFromcache.authorized;
         apiKeyValidationDto = apiKeyValidationDtoFromcache;
-            io:println("value returned from cache");
         }
         () => {
             match self.gatewayTokenCache.retrieveFromInvalidTokenCache(apiKeyValidationRequestDto.accessToken) {
@@ -160,7 +134,6 @@ public function OAuthAuthProvider::authenticate (APIKeyValidationRequestDto apiK
                                 io:println(apiKeyValidationDto);
                                 authorized = auth;
                                 self.gatewayTokenCache.addToGatewayKeyValidationCache(cacheKey, apiKeyValidationDto);
-                                io:println("value not returned from cache");
                             } else {
                                 self.gatewayTokenCache.addToInvalidTokenCache(apiKeyValidationRequestDto.accessToken, true);
                                 apiKeyValidationDto.authorized="false";
@@ -196,33 +169,7 @@ public function OAuthAuthProvider::doIntrospect (APIKeyValidationRequestDto apiK
     try {
         string base64Header = "admin:admin";
         string encodedBasicAuthHeader = check base64Header.base64Encode();
-        io:println(encodedBasicAuthHeader);
 
-        // Intorospect related changes
-        //http:Request clientRequest = new;
-        //
-        //http:Response clientResponse = new;
-        //
-        //clientRequest.setTextPayload("token=" + authToken, contentType=X_WWW_FORM_URLENCODED);
-        //clientRequest.setHeader(CONTENT_TYPE_HEADER, X_WWW_FORM_URLENCODED);
-        //clientRequest.setHeader(AUTHORIZATION_HEADER, BASIC_PREFIX_WITH_SPACE +
-        //        encodedBasicAuthHeader);
-        ////var result = introspectEndpoint -> post("/api/identity/oauth2/introspect/v1.0/introspect", clientRequest);
-        //var result = introspectEndpoint -> post("/oauth2/introspect", request=clientRequest);
-        //
-        //match result {
-        //    http:HttpConnectorError err => {
-        //        io:println("Error occurred while reading locator response",err);
-        //    }
-        //    http:Response prod => {
-        //        clientResponse = prod;
-        //    }
-        //}
-        //io:println("\nPOST request:");
-        //io:println(clientResponse.getJsonPayload());
-
-
-        ////////////////////////////////////////////////////////////////////
         http:Request clientRequest1 = new;
 
         http:Response clientResponse1 = new;
@@ -254,7 +201,6 @@ public function OAuthAuthProvider::doIntrospect (APIKeyValidationRequestDto apiK
         clientRequest1.setHeader(AUTHORIZATION_HEADER, BASIC_PREFIX_WITH_SPACE +
                 encodedBasicAuthHeader);
         clientRequest1.setHeader("SOAPAction", "urn:validateKey");
-        //var result = introspectEndpoint -> post("/api/identity/oauth2/introspect/v1.0/introspect", clientRequest);
         var result1 = keyValidationEndpoint -> post("/services/APIKeyValidationService", request=clientRequest1);
 
         match result1 {
@@ -281,7 +227,6 @@ public function OAuthAuthProvider::doIntrospect (APIKeyValidationRequestDto apiK
         j2 = j2["Envelope"]["Body"]["validateKeyResponse"]["return"];
         io:println(j2);
         return(j2);
-        //return check clientResponse.getJsonPayload();
 
     } catch (error err) {
         io:println(err);
