@@ -50,7 +50,6 @@ public type OAuthnFilter object {
                             apiKeyValidationRequestDto.accessToken = token;
                             match self.oauthnHandler.handle(request, apiKeyValidationRequestDto) {
                                 APIKeyValidationDto apiKeyValidationDto => {
-                                    context.attributes[KEY_VALIDATION_RESPONSE] = apiKeyValidationDto;
                                     isAuthorized = <boolean>apiKeyValidationDto.authorized;
                                     if(isAuthorized) {
                                         authenticationContext.authenticated = true;

@@ -274,4 +274,18 @@ public function handleError(string message) returns (error) {
     error e = {message: message};
     return e;
 }
-
+public function getTenantDomain(http:FilterContext context) returns (string) {
+    // todo: need to implement to get tenantDomain
+    string apiContext = getContext(context);
+    string[] splittedContext = apiContext.split("/");
+    if (lengthof splittedContext > 3){
+        // this check if basepath have /t/domain in
+        return splittedContext[2];
+    } else {
+        return SUPER_TENANT_DOMAIN_NAME;
+    }
+}
+public function getApiName(http:FilterContext context) returns (string) {
+    string serviceName = context.serviceName;
+    return serviceName.split("_")[0];
+}

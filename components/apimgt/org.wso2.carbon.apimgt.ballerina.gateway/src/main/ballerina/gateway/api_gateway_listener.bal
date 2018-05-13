@@ -72,6 +72,7 @@ public function APIGatewayListener::init (EndpointConfiguration config) {
     initiateGatewayConfigurations();
     addAuthFiltersForAPIGatewayListener(config);
     self.httpListener.init(config);
+    initializeBlockConditions();
 }
 
 @Description {value:"Add authn and authz filters"}
@@ -139,7 +140,7 @@ function createAuthFiltersForSecureListener (EndpointConfiguration config) retur
     authFilters[0] = <http:Filter> authnFilter;
     authFilters[1] = <http:Filter> authzFilter;
     authFilters[2] =  <http:Filter> subscriptionFilter;
-    //authFilters[2] = <http:Filter> throttleFilter;
+    authFilters[2] = <http:Filter> throttleFilter;
 
     return authFilters;
 }
@@ -186,7 +187,6 @@ function intitateKeyManagerConfigurations() {
     credentials.password = getConfigValue(kmInstanceID, "password", "admin");
     keyManagerConf.credentials = credentials;
     getGatewayConfInstance().setKeyManagerConf(keyManagerConf);
-    io:println(getGatewayConfInstance().getKeyManagerConf().serverUrl);
 }
 
 function getConfigValue(string instanceId, string property, string defaultValue) returns string {

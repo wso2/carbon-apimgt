@@ -4969,13 +4969,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (APIConstants.BLOCKING_CONDITIONS_IP.equals(conditionType)) {
             conditionValue = tenantDomain + ":" + conditionValue.trim();
         }
+        if (APIConstants.BLOCKING_CONDITIONS_USER.equals(conditionType)) {
+            conditionValue = MultitenantUtils.getTenantAwareUsername(conditionValue);
+            conditionValue = conditionValue + "@" + tenantDomain;
+        }
         String uuid = apiMgtDAO.addBlockConditions(conditionType, conditionValue, tenantDomain);
 
         if (uuid != null) {
-            if (APIConstants.BLOCKING_CONDITIONS_USER.equals(conditionType)) {
-                conditionValue = MultitenantUtils.getTenantAwareUsername(conditionValue);
-                conditionValue = conditionValue + "@" + tenantDomain;
-            }
             publishBlockingEvent(conditionType, conditionValue, "true");
         }
 
