@@ -487,4 +487,41 @@ public class RoleBasedScopesIssuerTestCase {
         whiteListedScopes.add("scope 4");
         Assert.assertEquals(null, roleBasedScopesIssuer.getScopes(tokReqMsgCtx, whiteListedScopes));
     }
+
+    @Test
+    public void testGetScopesOfRolesWithSpacesAndCases() throws Exception {
+        AbstractUserStoreManager abstractUserStoreManager = Mockito.mock(AbstractUserStoreManager.class);
+        Mockito.when(cacheManager.getCache(Mockito.anyString())).thenReturn(cache);
+        Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
+        Mockito.when(tenantManager.getTenantId(Mockito.anyString())).thenReturn(-1234);
+        Mockito.when(realmService.getTenantUserRealm(Mockito.anyInt())).thenReturn(defaultRealm);
+        Mockito.when(defaultRealm.getUserStoreManager()).thenReturn(abstractUserStoreManager);
+        String[] roles = { "CaseRole", "space role" };
+        Mockito.when(abstractUserStoreManager.getRoleListOfUser("caseuser@ADMIN.USER.STORE.DOMAIN")).thenReturn(roles);
+
+        OAuth2AccessTokenReqDTO tokenDTO = new OAuth2AccessTokenReqDTO();
+        tokenDTO.setClientId("clientId");
+        OAuthTokenReqMessageContext tokReqMsgCtx = new OAuthTokenReqMessageContext(tokenDTO);
+        tokReqMsgCtx.setScope(new String[] { "caseScope1", "caseScope2", "spaceScope" });
+        AuthenticatedUser authenticatedUser = new AuthenticatedUser();
+        authenticatedUser.setTenantDomain("carbon.super");
+        authenticatedUser.setUserName("caseuser");
+        authenticatedUser.setUserStoreDomain("admin.user.store.domain");
+        tokReqMsgCtx.setAuthorizedUser(authenticatedUser);
+
+        ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
+        Map<String, String> appScopes = new HashMap<String, String>();
+        appScopes.put("caseScope1", "caserole");
+        appScopes.put("caseScope2", "CaseRole");
+        appScopes.put("spaceScope", "space role");
+        Mockito.when(apiMgtDAO.getScopeRolesOfApplication("clientId")).thenReturn(appScopes);
+        RoleBasedScopesIssuer roleBasedScopesIssuer = new RoleBasedScopesIssuerWrapper(cacheManager, realmService,
+                apiMgtDAO);
+        ArrayList<String> whiteListedScopes = new ArrayList<String>();
+        whiteListedScopes.add("scope 3");
+        whiteListedScopes.add("scope 4");
+
+        List<String> returnedScopes = roleBasedScopesIssuer.getScopes(tokReqMsgCtx, whiteListedScopes);
+        Assert.assertEquals(3, returnedScopes.size());
+    }
 }
