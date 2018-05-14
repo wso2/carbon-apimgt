@@ -17,11 +17,12 @@
 import ballerina/http;
 import ballerina/time;
 import ballerina/io;
+import ballerina/log;
 
 map blockConditions;
 map throttleDataMap;
-public stream<RequestStream> requestStream;
-public stream<GlobalThrottleStream> globalThrottleStream;
+public stream<RequestStreamDTO> requestStream;
+public stream<GlobalThrottleStreamDTO> globalThrottleStream;
 future ftr = start initializeThrottleSubscription();
 boolean blockConditionExist;
 public function isBlockConditionExist(string key) returns (boolean) {
@@ -60,19 +61,19 @@ public function isThrottled(string key) returns (boolean) {
     return isThrottled;
 }
 
-public function publishNonThrottleEvent(RequestStream request) {
+public function publishNonThrottleEvent(RequestStreamDTO request) {
     requestStream.publish(request);
 }
 function initializeThrottleSubscription() {
+    future goldPolicyFtr = start initGoldPolicy();
     globalThrottleStream.subscribe(onReceiveThrottleEvent);
     requestStream.subscribe(startToPublish);
 }
-public function onReceiveThrottleEvent(GlobalThrottleStream throttleEvent) {
-
+public function onReceiveThrottleEvent(GlobalThrottleStreamDTO throttleEvent) {
+    io:println("Event GlobalThrottleStream: ", throttleEvent);
     if (throttleEvent.isThrottled){
         throttleDataMap[throttleEvent.throttleKey] = throttleEvent.expiryTimeStamp;
     }
-
 }
 public function initializeBlockConditions() {
     string base64Header = "admin:admin";

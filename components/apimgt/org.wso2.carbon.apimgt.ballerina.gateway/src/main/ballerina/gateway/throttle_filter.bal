@@ -62,7 +62,7 @@ public type ThrottleFilter object {
                                 if (!isHardlimitThrottled(getContext(context), getVersionFromServiceAnnotation
                                     (reflect:getServiceAnnotations(context.serviceType)).apiVersion)){
                                     // Send Throttle Event
-                                    RequestStream throttleEvent = generateThrottleEvent(request, context,
+                                    RequestStreamDTO throttleEvent = generateThrottleEvent(request, context,
                                         keyvalidationResult);
                                     publishNonThrottleEvent(throttleEvent);
                                 }
@@ -148,27 +148,29 @@ function isApplicationLevelThrottled(AuthenticationContext keyValidationDto) ret
 }
 function generateThrottleEvent(http:Request req, http:FilterContext context, AuthenticationContext keyValidationDto)
              returns (
-                     RequestStream) {
-    RequestStream requestStream;
+                     RequestStreamDTO) {
+    RequestStreamDTO requestStreamDto;
     string apiVersion = getVersionFromServiceAnnotation(reflect:getServiceAnnotations
         (context.serviceType)).apiVersion;
-    requestStream.apiKey = getContext(context) + ":" + apiVersion;
-    requestStream.appKey = keyValidationDto.applicationId + ":" + keyValidationDto.username;
-    requestStream.subscriptionKey = keyValidationDto.applicationId + ":" + getContext(context) + ":" +
+    requestStreamDto.messageID = "messageID";
+    requestStreamDto.apiKey = getContext(context) + ":" + apiVersion;
+    requestStreamDto.appKey = keyValidationDto.applicationId + ":" + keyValidationDto.username;
+    requestStreamDto.subscriptionKey = keyValidationDto.applicationId + ":" + getContext(context) + ":" +
         apiVersion;
-    requestStream.appTier = keyValidationDto.applicationTier;
-    requestStream.apiTier = keyValidationDto.apiTier;
-    requestStream.subscriptionTier = keyValidationDto.tier;
-    requestStream.resourceKey = getContext(context) + "/" + getVersionFromServiceAnnotation(reflect:
+    requestStreamDto.appTier = keyValidationDto.applicationTier;
+    requestStreamDto.apiTier = keyValidationDto.apiTier;
+    requestStreamDto.subscriptionTier = keyValidationDto.tier;
+    requestStreamDto.resourceKey = getContext(context) + "/" + getVersionFromServiceAnnotation(reflect:
             getServiceAnnotations(context.serviceType)).apiVersion;
     TierConfiguration tier = getResourceLevelTier(reflect:getResourceAnnotations(context.serviceType,
             context.resourceName));
-    requestStream.resourceTier = tier.policy;
-    requestStream.userId = keyValidationDto.username;
-    requestStream.apiContext = getContext(context);
-    requestStream.apiVersion = apiVersion;
-    requestStream.appTenant = keyValidationDto.subscriberTenantDomain;
-    requestStream.apiTenant = getTenantDomain(context);
-    requestStream.apiName = getApiName(context);
-    return requestStream;
+    requestStreamDto.resourceTier = tier.policy;
+    requestStreamDto.userId = keyValidationDto.username;
+    requestStreamDto.apiContext = getContext(context);
+    requestStreamDto.apiVersion = apiVersion;
+    requestStreamDto.appTenant = keyValidationDto.subscriberTenantDomain;
+    requestStreamDto.apiTenant = getTenantDomain(context);
+    requestStreamDto.apiName = getApiName(context);
+    requestStreamDto.properties = "{}";
+    return requestStreamDto;
 }

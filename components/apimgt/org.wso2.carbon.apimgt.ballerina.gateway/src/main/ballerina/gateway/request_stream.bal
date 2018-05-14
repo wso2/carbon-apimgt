@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-public type RequestStream {
+public type RequestStreamDTO {
     string messageID;
     string apiKey;
     string appKey;
@@ -31,5 +31,5 @@ public type RequestStream {
     string apiTenant;
     string appId;
     string apiName;
-    map properties;
+    string properties;
 };

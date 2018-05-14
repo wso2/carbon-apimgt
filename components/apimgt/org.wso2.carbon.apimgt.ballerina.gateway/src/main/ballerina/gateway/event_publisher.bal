@@ -5,7 +5,7 @@ endpoint http:Client clientEndpoint {
     url: "https://localhost:9443/endpoints/"
 };
 
-public function startToPublish(RequestStream request) {
+public function startToPublish(RequestStreamDTO request) {
     json jsonMsg = {
         event:{
             metaData:{},
@@ -27,7 +27,7 @@ public function startToPublish(RequestStream request) {
                 apiTenant: request.apiTenant,
                 appId:request.appId,
                 apiName: request.apiName,
-                properties: check <json>request.properties
+                properties: request.properties
             }
         }
     };
