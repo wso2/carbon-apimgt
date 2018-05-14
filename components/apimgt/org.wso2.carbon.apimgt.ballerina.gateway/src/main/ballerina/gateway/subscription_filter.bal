@@ -31,6 +31,7 @@ public type SubscriptionFilter object {
         if(authScheme == AUTH_SCHEME_JWT ){
             string jwtToken = runtime:getInvocationContext().authContext.authToken;
             string currentAPIContext = getContext(filterContext);
+            AuthenticationContext authenticationContext;
             match getEncodedJWTPayload(jwtToken) {
                 string  jwtPayload => {
                     match getDecodedJWTPayload(jwtPayload) {
@@ -40,6 +41,33 @@ public type SubscriptionFilter object {
                             int count =0;
                             while(count < numOfSubscriptions) {
                                 if(subscribedAPIList[count].context.toString() == currentAPIContext ) {
+                                    authenticationContext.authenticated = true;
+                                    authenticationContext.tier = subscribedAPIList[count].subscriptionTier.toString();
+                                    authenticationContext.apiKey = jwtToken;
+                                    authenticationContext.username = decodedPayload.endUser.toString();
+                                    authenticationContext.callerToken = decodedPayload.endUserToken.toString();
+                                    authenticationContext.applicationId = decodedPayload.application.id.toString();
+                                    authenticationContext.applicationName = decodedPayload.application.name.toString();
+                                    authenticationContext.applicationTier = decodedPayload.application.tier.toString();
+                                    authenticationContext.subscriber = subscribedAPIList[count].subscriber.toString();
+                                    authenticationContext.consumerKey = decodedPayload.consumerKey.toString();
+                                    authenticationContext.apiTier = decodedPayload.apiTier.toString();
+                                    authenticationContext.subscriberTenantDomain = decodedPayload
+                                                                                    .subscriberTenantDomain.toString();
+                                    json policiesList = decodedPayload.subscriptionPolicies;
+                                    int numOfPolicies = lengthof policiesList;
+                                    int i =0;
+                                    foreach (key in policiesList.getKeys()){
+                                        if(authenticationContext.tier == key) {
+                                            authenticationContext.spikeArrestLimit = check < int > policiesList[i].
+                                            spikeArrestLimit;
+                                            authenticationContext.spikeArrestUnit = policiesList[i].spikeArrestUnit.
+                                            toString();
+                                            authenticationContext.stopOnQuotaReach = check < boolean > policiesList[i][i].
+                                            stopOnQuotaReach;
+                                        }
+                                    }
+                                    filterContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
                                     return createFilterResult(true, 200, "Successfully validated subscriptions");
                                 }
                                 count++;
