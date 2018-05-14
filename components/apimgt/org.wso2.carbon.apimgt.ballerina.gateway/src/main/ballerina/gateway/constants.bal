@@ -60,3 +60,11 @@
 // config constants
 @Description { value: "Key manager related configs"}
 @final public string kmInstanceID = "keyManager";
+@Description { value: "Block condition state"}
+@final public string BLOCKING_CONDITION_STATE = "state";
+@Description { value: "Block condition key"}
+@final public string BLOCKING_CONDITION_KEY = "blockingCondition";
+@Description { value: "Block Condition Value"}
+@final public string BLOCKING_CONDITION_VALUE = "conditionValue";
+
+@final string TRUE = "true";

@@ -32,18 +32,19 @@ public type ThrottleFilter object {
         boolean isResourceLevelThrottled = false;
         boolean apiLevelThrottledTriggered = false;
         boolean stopOnQuotaReach = true;
-
-        if (context.attributes.hasKey(KEY_VALIDATION_RESPONSE)){
+        string apiContext = getContext(context);
+        string apiVersion = getVersionFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).
+        apiVersion;
+        if (context.attributes.hasKey(AUTHENTICATION_CONTEXT)){
             if (isRquestBlocked(request, context)){
                 // request Blocked
                 requestFilterResult = { canProceed: false, statusCode: 429, message: "Message blocked" };
             } else {
                 requestFilterResult = { canProceed: true };
                 // Request not blocked go to check throttling
-                apiLevelThrottleKey = getContext(context) + ":" + getVersionFromServiceAnnotation(reflect:
-                        getServiceAnnotations(context.serviceType)).apiVersion;
-                APIKeyValidationDto keyvalidationResult = check <APIKeyValidationDto>context.attributes[
-                KEY_VALIDATION_RESPONSE];
+                apiLevelThrottleKey = apiContext + ":" + apiVersion;
+                AuthenticationContext keyvalidationResult = check <AuthenticationContext>context.attributes[
+                AUTHENTICATION_CONTEXT];
                 if (keyvalidationResult.apiTier != "" && keyvalidationResult.apiTier != UNLIMITED_TIER){
                     resourceLevelThrottleKey = apiLevelThrottleKey;
                     apiLevelThrottledTriggered = true;
@@ -59,7 +60,7 @@ public type ThrottleFilter object {
                         if (!isSubscriptionLevelThrottled(context, keyvalidationResult)){
                             if (!isApplicationLevelThrottled(keyvalidationResult)){
                                 if (!isHardlimitThrottled(getContext(context), getVersionFromServiceAnnotation
-                                        (reflect:getServiceAnnotations(context.serviceType)).apiVersion)){
+                                    (reflect:getServiceAnnotations(context.serviceType)).apiVersion)){
                                     // Send Throttle Event
                                     RequestStream throttleEvent = generateThrottleEvent(request, context,
                                         keyvalidationResult);
@@ -72,7 +73,7 @@ public type ThrottleFilter object {
                             }
                         } else {
                             // Subscription Level Throttled
-                            if (keyvalidationResult.stopOnQuotaReach == "true"){
+                            if (keyvalidationResult.stopOnQuotaReach){
                                 requestFilterResult = { canProceed: false, statusCode: 429, message:
                                 "You have exceeded your quota" };
                             } else {
@@ -95,26 +96,27 @@ public type ThrottleFilter object {
     }
 };
 function isRquestBlocked(http:Request request, http:FilterContext context) returns (boolean) {
-    APIKeyValidationDto keyvalidationResult = check <APIKeyValidationDto>context.attributes[KEY_VALIDATION_RESPONSE];
+    AuthenticationContext keyvalidationResult = check <AuthenticationContext>context.attributes[AUTHENTICATION_CONTEXT];
     string apiLevelBlockingKey = getContext(context);
-    string ipLevelBlockingKey = SUPER_TENANT_DOMAIN_NAME + ":" + getClientIp(request);
+    string apiTenantDomain = getTenantDomain(context);
+    string ipLevelBlockingKey = apiTenantDomain + ":" + getClientIp(request);
     string appLevelBlockingKey = keyvalidationResult.subscriber + ":" + keyvalidationResult.applicationName;
-    if (isBlockConditionExist(apiLevelBlockingKey) || isBlockConditionExist(ipLevelBlockingKey) ||
-        isBlockConditionExist(appLevelBlockingKey)){
+    if (isAnyBlockConditionExist() && (isBlockConditionExist(apiLevelBlockingKey) || isBlockConditionExist(
+                                                                                         ipLevelBlockingKey) ||
+            isBlockConditionExist(appLevelBlockingKey))|| isBlockConditionExist(keyvalidationResult.username)){
         return true;
     } else {
         return false;
     }
 }
 
-function isApiLevelThrottled(APIKeyValidationDto keyValidationDto) returns (boolean) {
+function isApiLevelThrottled(AuthenticationContext keyValidationDto) returns (boolean) {
     if (keyValidationDto.apiTier != "" && keyValidationDto.apiTier != UNLIMITED_TIER){
-
     }
     return false;
 }
 
-function isResourceLevelThrottled(APIKeyValidationDto keyValidationDto) returns (boolean) {
+function isResourceLevelThrottled(AuthenticationContext keyValidationDto) returns (boolean) {
     return false;
 }
 
@@ -124,10 +126,11 @@ function isHardlimitThrottled(string context, string apiVersion) returns (boolea
 }
 
 
-function isSubscriptionLevelThrottled(http:FilterContext context, APIKeyValidationDto keyValidationDto) returns (
+function isSubscriptionLevelThrottled(http:FilterContext context, AuthenticationContext keyValidationDto) returns (
             boolean) {
     string subscriptionLevelThrottleKey = keyValidationDto.applicationId + ":" + getContext
-        (context) + ":" + getVersionFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).apiVersion;
+        (context) + ":" + getVersionFromServiceAnnotation(reflect:getServiceAnnotations(context.serviceType)).apiVersion
+    ;
     if (isThrottled(subscriptionLevelThrottleKey)){
         return true;
     } else {
@@ -135,24 +138,24 @@ function isSubscriptionLevelThrottled(http:FilterContext context, APIKeyValidati
     }
 }
 
-function isApplicationLevelThrottled(APIKeyValidationDto keyValidationDto) returns (boolean) {
-    string applicationLevelThrottleKey = keyValidationDto.applicationId + ":" + keyValidationDto.endUserName;
+function isApplicationLevelThrottled(AuthenticationContext keyValidationDto) returns (boolean) {
+    string applicationLevelThrottleKey = keyValidationDto.applicationId + ":" + keyValidationDto.username;
     if (isThrottled(applicationLevelThrottleKey)){
         return true;
     } else {
         return false;
     }
 }
-function generateThrottleEvent(http:Request req, http:FilterContext context, APIKeyValidationDto keyValidationDto)
+function generateThrottleEvent(http:Request req, http:FilterContext context, AuthenticationContext keyValidationDto)
              returns (
                      RequestStream) {
     RequestStream requestStream;
-    string apiVersion =  getVersionFromServiceAnnotation(reflect:getServiceAnnotations
-    (context.serviceType)).apiVersion;
+    string apiVersion = getVersionFromServiceAnnotation(reflect:getServiceAnnotations
+        (context.serviceType)).apiVersion;
     requestStream.apiKey = getContext(context) + ":" + apiVersion;
-    requestStream.appKey = keyValidationDto.applicationId + ":" + keyValidationDto.endUserName;
+    requestStream.appKey = keyValidationDto.applicationId + ":" + keyValidationDto.username;
     requestStream.subscriptionKey = keyValidationDto.applicationId + ":" + getContext(context) + ":" +
-    apiVersion;
+        apiVersion;
     requestStream.appTier = keyValidationDto.applicationTier;
     requestStream.apiTier = keyValidationDto.apiTier;
     requestStream.subscriptionTier = keyValidationDto.tier;
@@ -161,11 +164,11 @@ function generateThrottleEvent(http:Request req, http:FilterContext context, API
     TierConfiguration tier = getResourceLevelTier(reflect:getResourceAnnotations(context.serviceType,
             context.resourceName));
     requestStream.resourceTier = tier.policy;
-    requestStream.userId = keyValidationDto.endUserName;
+    requestStream.userId = keyValidationDto.username;
     requestStream.apiContext = getContext(context);
     requestStream.apiVersion = apiVersion;
     requestStream.appTenant = keyValidationDto.subscriberTenantDomain;
-    requestStream.apiTenant = SUPER_TENANT_DOMAIN_NAME;
-    requestStream.apiName = keyValidationDto.apiName;
+    requestStream.apiTenant = getTenantDomain(context);
+    requestStream.apiName = getApiName(context);
     return requestStream;
 }
