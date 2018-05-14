@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-public type GlobalThrottleStream {
+public type GlobalThrottleStreamDTO {
     string throttleKey ;
     boolean isThrottled;
     int expiryTimeStamp;
