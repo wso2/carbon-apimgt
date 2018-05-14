@@ -30,7 +30,6 @@ public type APIKeyValidationDto {
     string endUserName ;
     string endUserToken ;
     string issuedTime;
-    string[] scopes ;
     string spikeArrestLimit;
     string spikeArrestUnit ;
     string stopOnQuotaReach;

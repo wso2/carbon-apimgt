@@ -128,19 +128,19 @@ function createAuthFiltersForSecureListener (EndpointConfiguration config) retur
     ThrottleFilter throttleFilter = new();
     SubscriptionFilter subscriptionFilter = new;
 
-    //OAuthzFilter authzFilter = new;
-
-    // use the ballerina in built scope filter
+    // use the ballerina in built scope(authz) filter
     cache:Cache authzCache = new(expiryTimeMillis = 300000);
     auth:ConfigAuthProvider configAuthProvider = new;
     auth:AuthProvider authProvider = <auth:AuthProvider>configAuthProvider;
     http:HttpAuthzHandler authzHandler = new(authProvider, authzCache);
     http:AuthzFilter authzFilter = new(authzHandler);
+    // wraps the ballerina authz filter in new gateway filter
+    OAuthzFilter authzFilterWrapper = new(authzFilter);
 
     authFilters[0] = <http:Filter> authnFilter;
-    authFilters[1] = <http:Filter> authzFilter;
-    authFilters[2] =  <http:Filter> subscriptionFilter;
-    authFilters[2] = <http:Filter> throttleFilter;
+    authFilters[1] = <http:Filter> authzFilterWrapper;
+    authFilters[2] = <http:Filter> subscriptionFilter;
+    authFilters[3] = <http:Filter> throttleFilter;
 
     return authFilters;
 }
@@ -182,9 +182,9 @@ function initiateGatewayConfigurations() {
 function intitateKeyManagerConfigurations() {
     KeyManagerConf keyManagerConf;
     Credentials credentials;
-    keyManagerConf.serverUrl = getConfigValue(kmInstanceID, "serverUrl", "https://localhost:9443");
-    credentials.username = getConfigValue(kmInstanceID, "username", "admin");
-    credentials.password = getConfigValue(kmInstanceID, "password", "admin");
+    keyManagerConf.serverUrl = getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, "https://localhost:9443");
+    credentials.username = getConfigValue(KM_CONF_INSTANCE_ID, "username", "admin");
+    credentials.password = getConfigValue(KM_CONF_INSTANCE_ID, "password", "admin");
     keyManagerConf.credentials = credentials;
     getGatewayConfInstance().setKeyManagerConf(keyManagerConf);
 }

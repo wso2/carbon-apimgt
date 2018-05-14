@@ -115,18 +115,25 @@ public function OAuthAuthProvider::authenticate (APIKeyValidationRequestDto apiK
             self.gatewayTokenCache.removeFromGatewayKeyValidationCache(cacheKey);
             self.gatewayTokenCache.addToInvalidTokenCache(apiKeyValidationRequestDto.accessToken, true);
             apiKeyValidationDtoFromcache.authorized= "false";
+            log:printDebug("Access token " + apiKeyValidationRequestDto.accessToken + " found in cache. But token is
+            expired");
             return apiKeyValidationDtoFromcache;
         }
         authorized = < boolean > apiKeyValidationDtoFromcache.authorized;
         apiKeyValidationDto = apiKeyValidationDtoFromcache;
+        log:printDebug("Access token " + apiKeyValidationRequestDto.accessToken + " found in cache.");
         }
         () => {
             match self.gatewayTokenCache.retrieveFromInvalidTokenCache(apiKeyValidationRequestDto.accessToken) {
                 boolean cacheAuthorizedValue => {
                     APIKeyValidationDto apiKeyValidationInfoDTO = { authorized: "false", validationStatus:API_AUTH_INVALID_CREDENTIALS };
+                    log:printDebug("Access token " + apiKeyValidationRequestDto.accessToken + " found in invalid
+                    token cache.");
                     return apiKeyValidationInfoDTO;
                 }
                 () => {
+                    log:printDebug("Access token " + apiKeyValidationRequestDto.accessToken + " not found in cache.
+                    Hence calling the key vaidation service.");
                     json keyValidationInfoJson = self.doIntrospect(apiKeyValidationRequestDto);
                     match <string>keyValidationInfoJson.authorized {
                         string authorizeValue => {
@@ -137,11 +144,11 @@ public function OAuthAuthProvider::authenticate (APIKeyValidationRequestDto apiK
                                         apiKeyValidationDto = dto;
                                     }
                                     error err => {
-                                        io:println(err);
+                                        log:printError("Error while converting key validation response json to type APIKeyValidationDto"
+                                            , err = err);
                                         throw err;
                                     }
                                 }
-                                io:println(apiKeyValidationDto);
                                 authorized = auth;
                                 self.gatewayTokenCache.addToGatewayKeyValidationCache(cacheKey, apiKeyValidationDto);
                             } else {
@@ -152,7 +159,8 @@ public function OAuthAuthProvider::authenticate (APIKeyValidationRequestDto apiK
                             }
                         }
                         error err => {
-                            io:println(err);
+                            log:printError("Error while converting authorzed value from key vaidation respnse to a
+                            string value", err=err);
                             throw err;
                         }
                     }
@@ -164,11 +172,6 @@ public function OAuthAuthProvider::authenticate (APIKeyValidationRequestDto apiK
     if (authorized) {
         // set username
         runtime:getInvocationContext().userPrincipal.username = apiKeyValidationDto.endUserName;
-        string[] scopes = apiKeyValidationDto.scopes;//.split(",");
-        if (lengthof scopes > 0) {
-            runtime:getInvocationContext().userPrincipal.scopes = scopes;
-        }
-        // read scopes and set to the invocation context
 
     }
     return apiKeyValidationDto;
@@ -177,7 +180,8 @@ public function OAuthAuthProvider::authenticate (APIKeyValidationRequestDto apiK
 
 public function OAuthAuthProvider::doIntrospect (APIKeyValidationRequestDto apiKeyValidationRequestDto) returns (json) {
     try {
-        string base64Header = "admin:admin";
+        string base64Header = getGatewayConfInstance().getKeyManagerConf().credentials.username + ":" +
+            getGatewayConfInstance().getKeyManagerConf().credentials.password;
         string encodedBasicAuthHeader = check base64Header.base64Encode();
 
         http:Request clientRequest1 = new;

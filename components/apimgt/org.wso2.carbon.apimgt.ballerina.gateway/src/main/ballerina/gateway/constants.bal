@@ -59,7 +59,9 @@
 
 // config constants
 @Description { value: "Key manager related configs"}
-@final public string kmInstanceID = "keyManager";
+@final public string KM_CONF_INSTANCE_ID = "keyManager";
+@Description { value: "Key manager server URL parameter"}
+@final public string KM_SERVER_URL = "serverUrl";
 @Description { value: "Block condition state"}
 @final public string BLOCKING_CONDITION_STATE = "state";
 @Description { value: "Block condition key"}
