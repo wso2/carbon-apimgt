@@ -113,7 +113,7 @@ public class APIKeyMgtSubscriberServiceTest {
 
         mockStatic(OAuthServerConfiguration.class);
         when(OAuthServerConfiguration.getInstance()).thenReturn(mockOAuthServerConfiguration);
-        when(mockOAuthServerConfiguration.isHashEnabled()).thenReturn(false);
+        when(mockOAuthServerConfiguration.isClientSecretHashEnabled()).thenReturn(false);
 
         //Invoke createOAuthApplicationByApplicationInfo method
         apiKeyMgtSubscriberService.createOAuthApplicationByApplicationInfo(oauthApplicationInfo);

@@ -210,8 +210,8 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             oAuthConsumerAppDTO.setOAuthVersion(OAuthConstants.OAuthVersions.VERSION_2);
             log.debug("Creating OAuth App " + applicationName);
             OAuthConsumerAppDTO createdApp;
-            boolean isHashDisabled = OAuth2Util.isHashDisabled();
-            if (isHashDisabled) {
+            boolean isHashingDiabled = OAuth2Util.isHashDisabled();
+            if (isHashingDiabled) {
                 oAuthAdminService.registerOAuthApplicationData(oAuthConsumerAppDTO);
                 createdApp = oAuthAdminService.getOAuthApplicationDataByAppName(oAuthConsumerAppDTO
                         .getApplicationName());

@@ -109,6 +109,7 @@ import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 
@@ -670,6 +671,15 @@ public class APIConsumerImplTest {
 
         assertNotNull(apiConsumer.getPaginatedAPIsWithTag("testTag", 0, 10, MultitenantConstants
                 .SUPER_TENANT_DOMAIN_NAME));
+    }
+
+    @Test
+    public void testRenewConsumerSecret() throws APIManagementException {
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
+        String clientId = UUID.randomUUID().toString();
+        Mockito.when(keyManager.getNewApplicationConsumerSecret((AccessTokenRequest) Mockito.anyObject())).thenReturn
+                ("updatedClientSecret");
+        assertNotNull(apiConsumer.renewConsumerSecret(clientId));
     }
 
     @Test

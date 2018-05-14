@@ -127,8 +127,6 @@ import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.lcm.util.CommonUtil;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
-import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
-import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
 import org.wso2.carbon.identity.user.profile.stub.UserProfileMgtServiceStub;
 import org.wso2.carbon.identity.user.profile.stub.UserProfileMgtServiceUserProfileExceptionException;
 import org.wso2.carbon.identity.user.profile.stub.types.UserProfileDTO;
@@ -4457,7 +4455,8 @@ public final class APIUtil {
             return new String(CryptoUtil.getDefaultCryptoUtil().base64DecodeAndDecrypt(token), Charset.defaultCharset());
         }
 
-        if (Boolean.parseBoolean(config.getFirstProperty(APIConstants.HASH_TOKENS_ON_PERSISTENCE))) {
+        String enableTokenHashMode = config.getFirstProperty(APIConstants.HASH_TOKENS_ON_PERSISTENCE);
+        if (enableTokenHashMode != null && Boolean.parseBoolean(enableTokenHashMode)) {
             return null;
         }
         return token;
@@ -4475,12 +4474,9 @@ public final class APIUtil {
             return CryptoUtil.getDefaultCryptoUtil().encryptAndBase64Encode(token.getBytes(Charset.defaultCharset()));
         }
 
-        if (Boolean.parseBoolean(config.getFirstProperty(APIConstants.HASH_TOKENS_ON_PERSISTENCE))) {
-            try {
-                return hash(token);
-            } catch (IdentityOAuth2Exception e) {
-                throw new APIManagementException("Error while hashing the token.");
-            }
+        String enableTokenHashMode = config.getFirstProperty(APIConstants.HASH_TOKENS_ON_PERSISTENCE);
+        if (enableTokenHashMode != null && Boolean.parseBoolean(enableTokenHashMode)) {
+            return hash(token);
         }
         return token;
     }
@@ -4491,25 +4487,35 @@ public final class APIUtil {
      * @param plainText Plain text value.
      * @return hashed value.
      */
-    private static String hash(String plainText) throws IdentityOAuth2Exception {
+    private static String hash(String plainText) throws APIManagementException {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Hashing the token for " + plainText);
+        }
 
         if (StringUtils.isEmpty(plainText)) {
-            throw new IdentityOAuth2Exception("plainText value is null or empty to be hash.");
+            throw new APIManagementException("plainText value is null or empty to be hash.");
         }
 
         MessageDigest messageDigest = null;
         byte[] hash = null;
         String hashAlgorithm = OAuthServerConfiguration.getInstance().getHashAlgorithm();
+        if (log.isDebugEnabled()) {
+            log.debug("Getting the hash algorithm from the configuration: " + hashAlgorithm);
+        }
         try {
             messageDigest = MessageDigest.getInstance(hashAlgorithm);
             messageDigest.update(plainText.getBytes());
             hash = messageDigest.digest();
-
         } catch (NoSuchAlgorithmException e) {
-            throw new IdentityOAuth2Exception(
+            throw new APIManagementException(
                     "Error while retrieving MessageDigest for the provided hash algorithm: " + hashAlgorithm, e);
         }
-        return bytesToHex(hash);
+        JSONObject object = new JSONObject();
+        object.put("algorithm", hashAlgorithm);
+        object.put("hash", bytesToHex(hash));
+
+        return object.toString();
     }
 
     private static String bytesToHex(byte[] bytes) {

@@ -26,7 +26,7 @@
     }
 
     var OAuthServerConfiguration = Packages.org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
-    var isHashEnabled = OAuthServerConfiguration.getInstance().isHashEnabled();
+    var isHashEnabled = OAuthServerConfiguration.getInstance().isClientSecretHashEnabled();
     var consumerSecretBtnStyle;
     var style;
     if (isHashEnabled) {

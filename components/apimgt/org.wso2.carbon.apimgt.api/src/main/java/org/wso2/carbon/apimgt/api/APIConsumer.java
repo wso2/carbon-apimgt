@@ -609,6 +609,7 @@ public interface APIConsumer extends APIManager {
 
     /**
      * Regenerate new consumer secret.
+     *
      * @param clientId For which consumer key we need to regenerate consumer secret.
      * @return New consumer secret.
      * @throws APIManagementException This is the custom exception class for API management.
