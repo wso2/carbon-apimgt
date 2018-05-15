@@ -54,6 +54,8 @@ public type SubscriptionFilter object {
                                     authenticationContext.apiTier = decodedPayload.apiTier.toString();
                                     authenticationContext.subscriberTenantDomain = decodedPayload
                                                                                     .subscriberTenantDomain.toString();
+                                    authenticationContext.isContentAwareTierPresent = check <boolean> decodedPayload
+                                    .isContentAware;
                                     json policiesList = decodedPayload.subscriptionPolicies;
                                     int numOfPolicies = lengthof policiesList;
                                     int i =0;

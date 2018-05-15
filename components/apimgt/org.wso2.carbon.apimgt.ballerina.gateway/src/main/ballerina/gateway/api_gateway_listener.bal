@@ -65,11 +65,12 @@ public type EndpointConfiguration {
     http:RequestLimits? requestLimits,
     http:Filter[] filters,
     http:AuthProvider[]? authProviders,
+    boolean isSecured,
 };
 
 
 public function APIGatewayListener::init (EndpointConfiguration config) {
-    initiateGatewayConfigurations();
+    initiateGatewayConfigurations(config);
     addAuthFiltersForAPIGatewayListener(config);
     self.httpListener.init(config);
     initializeBlockConditions();
@@ -175,8 +176,13 @@ function createAuthHandler (http:AuthProvider authProvider) returns http:HttpAut
     }
 }
 
-function initiateGatewayConfigurations() {
+function initiateGatewayConfigurations(EndpointConfiguration config) {
+    if(!config.isSecured) {
+        config.port = getConfigIntValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HTTP_PORT, 9090);
+    }
+    config.host = getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HOST,"localhost");
     intitateKeyManagerConfigurations();
+
 }
 
 function intitateKeyManagerConfigurations() {
@@ -191,6 +197,10 @@ function intitateKeyManagerConfigurations() {
 
 function getConfigValue(string instanceId, string property, string defaultValue) returns string {
     return config:getAsString(instanceId + "." + property, default = defaultValue);
+}
+
+function getConfigIntValue(string instanceId, string property, int defaultValue) returns int {
+    return config:getAsInt(instanceId + "." + property, default = defaultValue);
 }
 
 @Description {value:"Gets called every time a service attaches itself to this endpoint. Also happens at package initialization."}

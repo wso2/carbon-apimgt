@@ -69,4 +69,17 @@
 @Description { value: "Block Condition Value"}
 @final public string BLOCKING_CONDITION_VALUE = "conditionValue";
 
+@Description { value: "Listener endpoint related configs"}
+@final public string LISTENER_CONF_INSTANCE_ID = "listenerConfig";
+@Description { value: "Listener endpoint host"}
+@final public string LISTENER_CONF_HOST = "host";
+@Description { value: "Listener endpoint http port"}
+@final public string LISTENER_CONF_HTTP_PORT = "httpPort";
+@Description { value: "Listener endpoint https port"}
+@final public string LISTENER_CONF_HTTPS_PORT = "httpsPort";
+@Description { value: "Listener endpoint key store path"}
+@final public string LISTENER_CONF_KEY_STORE_PATH = "keyStore.path";
+@Description { value: "Listener endpoint key store password"}
+@final public string LISTENER_CONF_KEY_STORE_PASSWORD = "keyStore.password";
+
 @final string TRUE = "true";
