@@ -65,7 +65,6 @@ public function publishNonThrottleEvent(RequestStreamDTO request) {
     requestStream.publish(request);
 }
 function initializeThrottleSubscription() {
-    future goldPolicyFtr = start initGoldPolicy();
     globalThrottleStream.subscribe(onReceiveThrottleEvent);
     requestStream.subscribe(startToPublish);
 }
