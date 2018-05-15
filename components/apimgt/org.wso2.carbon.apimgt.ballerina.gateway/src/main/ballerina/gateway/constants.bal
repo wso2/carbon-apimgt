@@ -82,4 +82,8 @@
 @Description { value: "Listener endpoint key store password"}
 @final public string LISTENER_CONF_KEY_STORE_PASSWORD = "keyStore.password";
 
+@Description { value: "Is Throttled"}
+@final public string IS_THROTTLED = "isThrottled";
+@Description { value: "Expiry TimeStamp"}
+@final public string EXPIRY_TIMESTAMP = "expiryTimeStamp";
 @final string TRUE = "true";

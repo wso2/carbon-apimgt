@@ -111,3 +111,9 @@ public function initializeBlockConditions() {
         }
     }
 }
+public function putThrottleData(string key, int expiryTimeStamp) {
+    throttleDataMap[key] = expiryTimeStamp;
+}
+public function removeThrottleData(string key){
+    _ = throttleDataMap.remove(key);
+}
