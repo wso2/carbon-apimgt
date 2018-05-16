@@ -965,7 +965,7 @@ public class APIConsumerImplTest {
         oAuthAppRequest.setOAuthApplicationInfo(oAuthApplicationInfo);
         BDDMockito.when(ApplicationUtils
                 .createOauthAppRequest(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                        Mockito.anyString(), Mockito.anyString())).thenReturn(oAuthAppRequest);
+                        Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(oAuthAppRequest);
         Mockito.when(apiMgtDAO
                 .getConsumerKeyForApplicationKeyType(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString())).thenReturn(consumerKey);
@@ -1181,7 +1181,7 @@ public class APIConsumerImplTest {
         application = new Application("app1", new Subscriber("1"));
         BDDMockito.when(ApplicationUtils
                 .createOauthAppRequest(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                        Mockito.anyString(), Mockito.anyString())).thenReturn(oAuthAppRequest);
+                        Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(oAuthAppRequest);
         BDDMockito.when(ApplicationUtils
                 .retrieveApplication(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
                 .thenReturn(application);
@@ -1350,7 +1350,7 @@ public class APIConsumerImplTest {
         oAuthAppRequest.setOAuthApplicationInfo(oAuthApplicationInfo);
         BDDMockito.when(ApplicationUtils
                 .createOauthAppRequest(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                        Mockito.anyString(), Mockito.anyString())).thenReturn(oAuthAppRequest);
+                        Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(oAuthAppRequest);
         Mockito.when(apiMgtDAO.isMappingExistsforConsumerKey(Mockito.anyString())).thenReturn(true, false);
         Mockito.when(keyManager.mapOAuthApplication((OAuthAppRequest) Mockito.any())).thenReturn(oAuthApplicationInfo);
         Mockito.doNothing().when(apiMgtDAO).createApplicationKeyTypeMappingForManualClients(Mockito.anyString(),
@@ -1362,13 +1362,13 @@ public class APIConsumerImplTest {
         Mockito.when(keyManager.getNewApplicationAccessToken(accessTokenRequest)).thenReturn(accessTokenInfo);
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         try {
-            apiConsumer.mapExistingOAuthClient("", "admin", "1", "app1", "refresh");
+            apiConsumer.mapExistingOAuthClient("", "admin", "1", "app1", "refresh", "DEFAULT");
             Assert.fail("Exception is not thrown when client id is already mapped to an application");
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("is used for another Application"));
         }
         Assert.assertEquals(6, apiConsumer.mapExistingOAuthClient("", "admin", "1",
-                "app1", "refresh").size());
+                "app1", "refresh", "DEFAULT").size());
     }
 
     @Test

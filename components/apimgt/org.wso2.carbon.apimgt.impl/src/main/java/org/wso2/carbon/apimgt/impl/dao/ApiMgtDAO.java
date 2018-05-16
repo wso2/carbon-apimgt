@@ -3361,6 +3361,7 @@ public class ApiMgtDAO {
             ps.setTimestamp(9, timestamp);
             ps.setTimestamp(10, timestamp);
             ps.setString(11, UUID.randomUUID().toString());
+            ps.setString(12, String.valueOf(application.getTokenType()));
             ps.executeUpdate();
 
             rs = ps.getGeneratedKeys();
@@ -5430,6 +5431,7 @@ public class ApiMgtDAO {
                 application.setUUID(rs.getString("UUID"));
                 application.setGroupId(rs.getString("GROUP_ID"));
                 application.setOwner(rs.getString("CREATED_BY"));
+                application.setTokenType(rs.getString("TOKEN_TYPE"));
 
                 if (multiGroupAppSharingEnabled) {
                     setGroupIdInApplication(application);
@@ -6421,7 +6423,7 @@ public class ApiMgtDAO {
                 OAuthAppRequest request = ApplicationUtils.createOauthAppRequest(application.getName(), null,
                         application.getCallbackUrl(), rs
                                 .getString("TOKEN_SCOPE"),
-                        rs.getString("INPUTS"));
+                        rs.getString("INPUTS"), application.getTokenType());
                 workflowDTO.setAppInfoDTO(request);
             }
         } catch (SQLException e) {

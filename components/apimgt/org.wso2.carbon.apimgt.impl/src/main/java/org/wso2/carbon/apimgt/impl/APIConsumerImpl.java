@@ -2108,19 +2108,20 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @param clientId this is the consumer key of oAuthApplication
      * @param applicationName this is the APIM appication name.
      * @param keyType
+     * @param tokenType this is theApplication Token Type. This can be either default or jwt.
      * @return
      * @throws APIManagementException
      */
     @Override
     public Map<String, Object> mapExistingOAuthClient(String jsonString, String userName, String clientId,
-                                                      String applicationName, String keyType)
+                                                      String applicationName, String keyType, String tokenType)
                                                                         throws APIManagementException {
 
         String callBackURL = null;
 
         OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, clientId, callBackURL,
                                                                                  "default",
-                                                                                  jsonString);
+                                                                                  jsonString, tokenType);
 
         KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
 
@@ -2986,10 +2987,14 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (StringUtils.isBlank(callbackUrl)) {
                 callbackUrl = null;
             }
+            String applicationTokenType = application.getTokenType();
+            if(application.getTokenType().equals(null)){
+                applicationTokenType = APIConstants.APPLICATION_TOKEN_TYPE;
+            }
             // Build key manager instance and create oAuthAppRequest by jsonString.
             OAuthAppRequest request =
                     ApplicationUtils.createOauthAppRequest(applicationName, null,
-                            callbackUrl, authScopeString, jsonString);
+                            callbackUrl, authScopeString, jsonString, applicationTokenType);
             request.getOAuthApplicationInfo().addParameter(ApplicationConstants.VALIDITY_PERIOD, validityTime);
             request.getOAuthApplicationInfo().addParameter(ApplicationConstants.APP_KEY_TYPE, tokenType);
             request.getOAuthApplicationInfo().addParameter(ApplicationConstants.APP_CALLBACK_URL, callbackUrl);
@@ -3594,7 +3599,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
             //Create OauthAppRequest object by passing json String.
             OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, null, callbackUrl,
-                    tokenScope, jsonString);
+                    tokenScope, jsonString, application.getTokenType());
 
             oauthAppRequest.getOAuthApplicationInfo().addParameter(ApplicationConstants.APP_KEY_TYPE, tokenType);
 

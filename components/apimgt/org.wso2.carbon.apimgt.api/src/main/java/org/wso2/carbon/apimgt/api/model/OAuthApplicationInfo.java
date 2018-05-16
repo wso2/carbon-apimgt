@@ -38,7 +38,8 @@ public class OAuthApplicationInfo {
     private boolean isSaasApplication;
     private String appOwner;
     private String jsonString;
-    
+    private String tokenType;
+
     
 
     public void setJsonString(String jsonString) {
@@ -130,6 +131,14 @@ public class OAuthApplicationInfo {
 
     public void setAppOwner(String appOwner) {
         this.appOwner = appOwner;
+    }
+
+    public String getTokenType() {
+        return tokenType;
+    }
+
+    public void setTokenType(String tokenType) {
+        this.tokenType = tokenType;
     }
 
 }

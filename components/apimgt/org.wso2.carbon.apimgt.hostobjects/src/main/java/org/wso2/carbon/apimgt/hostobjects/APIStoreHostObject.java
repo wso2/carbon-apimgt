@@ -133,6 +133,7 @@ public class APIStoreHostObject extends ScriptableObject {
     private static final String httpPort = "mgt.transport.http.port";
     private static final String httpsPort = "mgt.transport.https.port";
     private static final String hostName = "carbon.local.ip";
+    private static final String DEFAULT_TOKEN_TYPE = "default";
 
     private APIConsumer apiConsumer;
 
@@ -3295,6 +3296,14 @@ public class APIStoreHostObject extends ScriptableObject {
                 groupId = (String) args[5];
             }
 
+            String tokenType;
+            if (args.length > 6 && args[6] != null) {
+                tokenType = (String) args[6];
+            } else {
+                tokenType = DEFAULT_TOKEN_TYPE;
+            }
+
+
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
             Subscriber subscriber = new Subscriber(username);
 
@@ -3302,6 +3311,8 @@ public class APIStoreHostObject extends ScriptableObject {
             application.setTier(tier);
             application.setCallbackUrl(callbackUrl);
             application.setDescription(description);
+            application.setTokenType(tokenType);
+
             if (groupId != null) {
                 application.setGroupId(groupId);
             }

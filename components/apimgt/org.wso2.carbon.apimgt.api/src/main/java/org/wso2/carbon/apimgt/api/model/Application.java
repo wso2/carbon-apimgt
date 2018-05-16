@@ -46,6 +46,7 @@ public class Application {
 
     private String createdTime;
     private String lastUpdatedTime;
+    private String tokenType;
 
     public String getCreatedTime() {
         return createdTime;
@@ -230,5 +231,13 @@ public class Application {
 
     public void setOwner(String owner) {
         this.owner = owner;
+    }
+
+    public String getTokenType() {
+        return tokenType;
+    }
+
+    public void setTokenType(String tokenType) {
+        this.tokenType = tokenType;
     }
 }

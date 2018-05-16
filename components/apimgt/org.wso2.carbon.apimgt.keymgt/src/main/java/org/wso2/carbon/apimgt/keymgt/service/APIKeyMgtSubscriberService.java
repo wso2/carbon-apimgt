@@ -143,11 +143,16 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             ServiceProvider serviceProvider = new ServiceProvider();
             serviceProvider.setApplicationName(applicationName);
             serviceProvider.setDescription("Service Provider for application " + applicationName);
-            ServiceProviderProperty[] serviceProviderProperties = new ServiceProviderProperty[1];
+            ServiceProviderProperty[] serviceProviderProperties = new ServiceProviderProperty[2];
             ServiceProviderProperty serviceProviderProperty = new ServiceProviderProperty();
             serviceProviderProperty.setName(APIConstants.APP_DISPLAY_NAME);
             serviceProviderProperty.setValue(displayName);
+            //Set token Type service provider property
+            ServiceProviderProperty tokenTypeSpProperty = new ServiceProviderProperty();
+            tokenTypeSpProperty.setName(APIConstants.APP_TOKEN_TYPE);
+            tokenTypeSpProperty.setValue(oauthApplicationInfo.getTokenType());
             serviceProviderProperties[0] = serviceProviderProperty;
+            serviceProviderProperties[1] = tokenTypeSpProperty;
             serviceProvider.setSpProperties(serviceProviderProperties);
             ApplicationManagementService appMgtService = ApplicationManagementService.getInstance();
             appMgtService.createApplication(serviceProvider, tenantDomain, userName);
@@ -278,13 +283,14 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
      * @throws APIKeyMgtException
      * @throws APIManagementException
      */
-    public OAuthApplicationInfo createOAuthApplication(String userId, String applicationName, String callbackUrl)
-            throws APIKeyMgtException, APIManagementException {
+    public OAuthApplicationInfo createOAuthApplication(String userId, String applicationName, String callbackUrl,
+            String tokenType) throws APIKeyMgtException, APIManagementException {
 
         OAuthApplicationInfo oauthApplicationInfo = new OAuthApplicationInfo();
         oauthApplicationInfo.setClientName(applicationName);
         oauthApplicationInfo.setCallBackURL(callbackUrl);
         oauthApplicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME, userId);
+        oauthApplicationInfo.setTokenType(tokenType);
         return createOAuthApplicationByApplicationInfo(oauthApplicationInfo);
     }
 

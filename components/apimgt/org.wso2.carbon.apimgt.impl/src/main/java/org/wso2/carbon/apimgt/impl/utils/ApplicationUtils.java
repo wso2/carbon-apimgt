@@ -78,7 +78,7 @@ public class ApplicationUtils {
      * @throws APIManagementException
      */
     public static OAuthAppRequest createOauthAppRequest(String clientName, String clientId, String callbackURL,
-            String tokenScope, String clientDetails)
+            String tokenScope, String clientDetails, String tokenType)
             throws
             APIManagementException {
 
@@ -89,6 +89,7 @@ public class ApplicationUtils {
         authApplicationInfo.setCallBackURL(callbackURL);
         authApplicationInfo.addParameter("tokenScope",tokenScope);
         authApplicationInfo.setClientId(clientId);
+        authApplicationInfo.setTokenType(tokenType);
 
         if (clientDetails != null) {
             //parse json string and set applicationInfo parameters.
