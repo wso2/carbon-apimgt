@@ -5,7 +5,7 @@
     <parent>
         <artifactId>apimgt</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>6.2.253-SNAPSHOT</version>
+        <version>6.2.256-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -83,8 +83,7 @@
                             <minimizeJar>true</minimizeJar>
                             <artifactSet>
                                 <excludes>
-                                    <exclude>org.slf4j:slf4j-api</exclude>
-                                    <exclude>org.slf4j:slf4j-jdk14</exclude>
+                                    <exclude>org.slf4j:*</exclude>
                                     <exclude>com.fasterxml.jackson.dataformat:jackson-dataformat-yaml</exclude>
                                     <exclude>com.fasterxml.jackson.core:jackson-databind</exclude>
                                     <exclude>com.fasterxml.jackson.core:jackson-annotations</exclude>

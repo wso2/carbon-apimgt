@@ -3,6 +3,8 @@ import ballerina/runtime;
 import ballerina/http;
 import ballerina/log;
 
+future goldPolicyFtr = start initGoldPolicy();
+
 public type EligibilityStreamDTO {
     string messageID;
     boolean isEligible;
@@ -12,6 +14,7 @@ public type EligibilityStreamDTO {
 function initGoldPolicy() {
     stream<GlobalThrottleStreamDTO> resultStream;
     stream<EligibilityStreamDTO> eligibilityStream;
+    runtime:sleep(1000);
     forever {
         from requestStream
         select messageID, (subscriptionTier == "Bronze") as isEligible, subscriptionKey as throttleKey
