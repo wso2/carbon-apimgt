@@ -131,9 +131,9 @@ function createAuthFiltersForSecureListener (EndpointConfiguration config) retur
 
     // use the ballerina in built scope(authz) filter
     cache:Cache authzCache = new(expiryTimeMillis = 300000);
-    auth:ConfigAuthProvider configAuthProvider = new;
-    auth:AuthProvider authProvider = <auth:AuthProvider>configAuthProvider;
-    http:HttpAuthzHandler authzHandler = new(authProvider, authzCache);
+    auth:ConfigAuthStoreProvider configAuthStoreProvider = new;
+    auth:AuthStoreProvider authStoreProvider = <auth:AuthStoreProvider>configAuthStoreProvider;
+    http:HttpAuthzHandler authzHandler = new(authStoreProvider, authzCache);
     http:AuthzFilter authzFilter = new(authzHandler);
     // wraps the ballerina authz filter in new gateway filter
     OAuthzFilter authzFilterWrapper = new(authzFilter);
@@ -148,17 +148,17 @@ function createAuthFiltersForSecureListener (EndpointConfiguration config) retur
 
 function createAuthHandler (http:AuthProvider authProvider) returns http:HttpAuthnHandler {
     if (authProvider.scheme == AUTHN_SCHEME_BASIC) {
-        auth:AuthProvider authProvider1;
-        if (authProvider.authProvider == AUTH_PROVIDER_CONFIG) {
-            auth:ConfigAuthProvider configAuthProvider = new;
-            authProvider1 = <auth:AuthProvider> configAuthProvider;
+        auth:AuthStoreProvider authStoreProvider;
+        if (authProvider.authStoreProvider == AUTH_PROVIDER_CONFIG) {
+            auth:ConfigAuthStoreProvider configAuthStoreProvider = new;
+            authStoreProvider = <auth:AuthStoreProvider>configAuthStoreProvider;
         } else {
-            // other auth providers are unsupported yet
-            error e = {message:"Invalid auth provider: " + authProvider.authProvider };
+        // other auth providers are unsupported yet
+            error e = {message: "Invalid auth provider: " + authProvider.authStoreProvider };
             throw e;
         }
-        http:HttpBasicAuthnHandler basicAuthHandler = new(authProvider1);
-        return <http:HttpAuthnHandler> basicAuthHandler;
+        http:HttpBasicAuthnHandler basicAuthHandler = new(authStoreProvider);
+        return <http:HttpAuthnHandler>basicAuthHandler;
     } else if(authProvider.scheme == AUTH_SCHEME_JWT){
         auth:JWTAuthProviderConfig jwtConfig = {};
         jwtConfig.issuer = authProvider.issuer;
@@ -235,7 +235,7 @@ public function APIGatewayListener::stop () {
 public http:AuthProvider basicAuthProvider = {
     id : "basic",
     scheme:"basic",
-    authProvider:"config"
+    authStoreProvider: "config"
 };
 
 public http:AuthProvider jwtAuthProvider = {
