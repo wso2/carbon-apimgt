@@ -240,6 +240,13 @@ public class CertificateManagerImplTest {
     }
 
     @Test
+    public void testEmptyCertAddToGateway() throws NoSuchFieldException, IllegalAccessException {
+        CertificateMgtUtils certificateMgtUtils = new CertificateMgtUtils();
+        ResponseCode responseCode = certificateMgtUtils.addCertificateToTrustStore("", "testalias");
+        Assert.assertEquals(ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode(), responseCode.getResponseCode());
+    }
+
+    @Test
     public void testAddToGatewayWithTouchConfigFileFailed() throws NoSuchFieldException, IllegalAccessException {
         PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "addCertificateToTrustStore"))
                 .toReturn(ResponseCode.SUCCESS);
