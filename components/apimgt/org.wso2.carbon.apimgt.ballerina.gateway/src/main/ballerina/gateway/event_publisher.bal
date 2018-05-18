@@ -6,6 +6,9 @@ endpoint http:Client clientEndpoint {
 };
 
 public function startToPublish(RequestStreamDTO request) {
+    if (!getGatewayConfInstance().getThrottleConf().enabledGlobalTMEventPublishing) {
+        return;
+    }
     json jsonMsg = {
         event:{
             metaData:{},
