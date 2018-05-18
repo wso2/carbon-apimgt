@@ -5,12 +5,6 @@ import ballerina/log;
 
 future goldPolicyFtr = start initGoldPolicy();
 
-public type EligibilityStreamDTO {
-    string messageID;
-    boolean isEligible;
-    string throttleKey;
-};
-
 function initGoldPolicy() {
     stream<GlobalThrottleStreamDTO> resultStream;
     stream<EligibilityStreamDTO> eligibilityStream;
