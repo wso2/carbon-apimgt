@@ -173,11 +173,8 @@ function generateThrottleEvent(http:Request req, http:FilterContext context, Aut
     requestStreamDto.apiName = getApiName(context);
 
     json properties = {};
-    string|() remoteAddr = getRemoteAddr(req);
-    if (remoteAddr != null) {
-        string ip = remoteAddr ?: "";
-        properties.ip = ipToLong(ip);
-    }
+    string remoteAddr = getClientIp(req);
+    properties.ip = ipToLong(remoteAddr);
     if (getGatewayConfInstance().getThrottleConf().enabledHeaderConditions){
         string[] headerNames = req.getHeaderNames();
         foreach headerName in headerNames {
@@ -192,15 +189,6 @@ function generateThrottleEvent(http:Request req, http:FilterContext context, Aut
     }
     requestStreamDto.properties = properties.toString();
     return requestStreamDto;
-}
-
-function getRemoteAddr(http:Request request) returns (string?) {
-    string X_FORWARDED_FOR = "X-Forwarded-For";
-    string|() remoteAddr = null;
-    if (request.hasHeader(X_FORWARDED_FOR)) {
-        remoteAddr = request.getHeader(X_FORWARDED_FOR);
-    }
-    return remoteAddr;
 }
 
 function ipToLong(string ipAddress) returns (int) {

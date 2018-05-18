@@ -14,6 +14,39 @@
 // specific language governing permissions and limitations
 // under the License.
 
+public type RequestStreamDTO {
+    string messageID;
+    string apiKey;
+    string appKey;
+    string subscriptionKey;
+    string appTier;
+    string apiTier;
+    string subscriptionTier;
+    string resourceKey;
+    string resourceTier;
+    string userId;
+    string apiContext;
+    string apiVersion;
+    string appTenant;
+    string apiTenant;
+    string appId;
+    string apiName;
+    string properties;
+};
+
+public type ThrottleConf {
+    boolean enabledHeaderConditions = false;
+    boolean enabledJWTClaimConditions = false;
+    boolean enabledQueryParamConditions = false;
+};
+
+public type GlobalThrottleStreamDTO {
+    string throttleKey ;
+    boolean isThrottled;
+    int expiryTimeStamp;
+    string conditions;
+};
+
 public type EligibilityStreamDTO {
     string messageID;
     boolean isEligible;
