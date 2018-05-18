@@ -71,6 +71,7 @@ public type EndpointConfiguration {
 
 public function APIGatewayListener::init (EndpointConfiguration config) {
     initiateGatewayConfigurations(config);
+    initiateAuthProviders(config);
     addAuthFiltersForAPIGatewayListener(config);
     self.httpListener.init(config);
     initializeBlockConditions();
@@ -185,6 +186,27 @@ function initiateGatewayConfigurations(EndpointConfiguration config) {
 
 }
 
+function initiateAuthProviders(EndpointConfiguration config) {
+    http:AuthProvider jwtAuthProvider = {
+        id: AUTH_SCHEME_JWT,
+        scheme: AUTH_SCHEME_JWT,
+        issuer: getConfigValue(JWT_INSTANCE_ID, ISSUER, "https://192.168.42.1:9443/oauth2/token"),
+        audience: getConfigValue(JWT_INSTANCE_ID, AUDIENCE, "RQIO7ti2OThP79wh3fE5_Zksszga"),
+        certificateAlias: getConfigValue(JWT_INSTANCE_ID, CERTIFICATE_ALIAS, "ballerina"),
+        trustStore: {
+        path: getConfigValue(JWT_INSTANCE_ID, TRUST_STORE_PATH, "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
+        password: getConfigValue(JWT_INSTANCE_ID, TRSUT_STORE_PASSWORD, "ballerina")
+        }
+    };
+    http:AuthProvider basicAuthProvider = {
+        id : AUTHN_SCHEME_BASIC,
+        scheme: AUTHN_SCHEME_BASIC,
+        authStoreProvider: AUTH_PROVIDER_CONFIG
+    };
+    http:AuthProvider[] authProivders = [jwtAuthProvider, basicAuthProvider];
+    config.authProviders = authProivders;
+}
+
 function intitateKeyManagerConfigurations() {
     KeyManagerConf keyManagerConf;
     Credentials credentials;
@@ -232,23 +254,6 @@ public function APIGatewayListener::stop () {
     self.httpListener.stop();
 }
 
-public http:AuthProvider basicAuthProvider = {
-    id : "basic",
-    scheme:"basic",
-    authStoreProvider: "config"
-};
-
-public http:AuthProvider jwtAuthProvider = {
-    id: "jwt",
-    scheme: "jwt",
-    issuer: "ballerina",
-    audience: "ballerina",
-    certificateAlias: "ballerina",
-    trustStore: {
-        path: "${ballerina.home}/bre/security/ballerinaTruststore.p12",
-        password: "ballerina"
-    }
-};
 
 
 
