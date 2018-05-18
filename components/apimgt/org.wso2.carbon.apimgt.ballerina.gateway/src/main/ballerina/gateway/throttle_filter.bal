@@ -171,6 +171,68 @@ function generateThrottleEvent(http:Request req, http:FilterContext context, Aut
     requestStreamDto.appTenant = keyValidationDto.subscriberTenantDomain;
     requestStreamDto.apiTenant = getTenantDomain(context);
     requestStreamDto.apiName = getApiName(context);
-    requestStreamDto.properties = "{}";
+
+    json properties = {};
+    string|() remoteAddr = getRemoteAddr(req);
+    if (remoteAddr != null) {
+        string ip = remoteAddr ?: "";
+        properties.ip = ipToLong(ip);
+    }
+    if (getGatewayConfInstance().getThrottleConf().enabledHeaderConditions){
+        string[] headerNames = req.getHeaderNames();
+        foreach headerName in headerNames {
+            string headerValue = untaint req.getHeader(headerName);
+            properties[headerName] = headerValue;
+        }
+    }
+    if (getGatewayConfInstance().getThrottleConf().enabledQueryParamConditions){
+        foreach k, v in req.getQueryParams() {
+            properties[k] = v;
+        }
+    }
+    requestStreamDto.properties = properties.toString();
     return requestStreamDto;
+}
+
+function getRemoteAddr(http:Request request) returns (string?) {
+    string X_FORWARDED_FOR = "X-Forwarded-For";
+    string|() remoteAddr = null;
+    if (request.hasHeader(X_FORWARDED_FOR)) {
+        remoteAddr = request.getHeader(X_FORWARDED_FOR);
+    }
+    return remoteAddr;
+}
+
+function ipToLong(string ipAddress) returns (int) {
+    int result = 0;
+    string[] ipAddressInArray = ipAddress.split("\\.");
+    int i = 3;
+    while (i >= 0) {
+        int ip = check <int>ipAddressInArray[3 - i];
+        //left shifting 24,16,8,0 and bitwise OR
+        //1. 192 << 24
+        //1. 168 << 16
+        //1. 1   << 8
+        //1. 2   << 0
+        result = result + shiftLeft(ip, i * 8);
+        i = i - 1;
+    }
+    return result;
+}
+
+function shiftLeft(int a, int b) returns (int) {
+    if (b == 0) {
+        return a;
+    }
+    int i = b;
+    int result = a;
+    while (i > 0) {
+        result = result * 2;
+        i = i - 1;
+    }
+    return result;
+}
+
+function getMessageSize() returns (int) {
+    return 0;
 }
