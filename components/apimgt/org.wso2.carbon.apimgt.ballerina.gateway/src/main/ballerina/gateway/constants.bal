@@ -60,6 +60,8 @@
 // config constants
 @Description { value: "Key manager related configs"}
 @final public string KM_CONF_INSTANCE_ID = "keyManager";
+@Description { value: "Throttling related configs"}
+@final public string THROTTLE_CONF_INSTANCE_ID = "Throttling";
 @Description { value: "Key manager server URL parameter"}
 @final public string KM_SERVER_URL = "serverUrl";
 @Description { value: "Block condition state"}

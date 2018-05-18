@@ -183,7 +183,15 @@ function initiateGatewayConfigurations(EndpointConfiguration config) {
     }
     config.host = getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HOST,"localhost");
     intitateKeyManagerConfigurations();
+    initiateThrottleConfigs();
+}
 
+function initiateThrottleConfigs() {
+    ThrottleConf config;
+    config.enabledHeaderConditions = getConfigBooleanValue(THROTTLE_CONF_INSTANCE_ID, "enabledHeaderConditions", false);
+    config.enabledJWTClaimConditions = getConfigBooleanValue(THROTTLE_CONF_INSTANCE_ID, "enabledJWTClaimConditions", false);
+    config.enabledQueryParamConditions = getConfigBooleanValue(THROTTLE_CONF_INSTANCE_ID, "enabledQueryParamConditions", false);
+    getGatewayConfInstance().setThrottleConf(config);
 }
 
 function initiateAuthProviders(EndpointConfiguration config) {
@@ -223,6 +231,10 @@ function getConfigValue(string instanceId, string property, string defaultValue)
 
 function getConfigIntValue(string instanceId, string property, int defaultValue) returns int {
     return config:getAsInt(instanceId + "." + property, default = defaultValue);
+}
+
+function getConfigBooleanValue(string instanceId, string property, boolean defaultValue) returns boolean {
+    return config:getAsBoolean(instanceId + "." + property, default = defaultValue);
 }
 
 @Description {value:"Gets called every time a service attaches itself to this endpoint. Also happens at package initialization."}
