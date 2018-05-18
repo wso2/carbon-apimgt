@@ -82,6 +82,21 @@
 @Description { value: "Listener endpoint key store password"}
 @final public string LISTENER_CONF_KEY_STORE_PASSWORD = "keyStore.password";
 
+@Description { value: "JWT related configs"}
+@final public string JWT_INSTANCE_ID = "jwtConfig";
+@Description { value: "JWT issuer"}
+@final public string ISSUER = "issuer";
+@Description { value: "JWT audience"}
+@final public string AUDIENCE = "audience";
+@Description { value: "jwt signed cert alias"}
+@final public string CERTIFICATE_ALIAS = "certificateAlias";
+@Description { value: "trust store  path"}
+@final public string TRUST_STORE_PATH = "trustStore.path";
+@Description { value: "Trust store password"}
+@final public string TRSUT_STORE_PASSWORD = "trustStore.password";
+
+// end of config constants
+
 @Description { value: "Is Throttled"}
 @final public string IS_THROTTLED = "isThrottled";
 @Description { value: "Expiry TimeStamp"}

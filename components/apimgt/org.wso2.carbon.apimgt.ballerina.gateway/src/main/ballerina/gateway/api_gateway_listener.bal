@@ -71,6 +71,7 @@ public type EndpointConfiguration {
 
 public function APIGatewayListener::init (EndpointConfiguration config) {
     initiateGatewayConfigurations(config);
+    initiateAuthProviders(config);
     addAuthFiltersForAPIGatewayListener(config);
     self.httpListener.init(config);
     initializeBlockConditions();
@@ -131,9 +132,9 @@ function createAuthFiltersForSecureListener (EndpointConfiguration config) retur
 
     // use the ballerina in built scope(authz) filter
     cache:Cache authzCache = new(expiryTimeMillis = 300000);
-    auth:ConfigAuthProvider configAuthProvider = new;
-    auth:AuthProvider authProvider = <auth:AuthProvider>configAuthProvider;
-    http:HttpAuthzHandler authzHandler = new(authProvider, authzCache);
+    auth:ConfigAuthStoreProvider configAuthStoreProvider = new;
+    auth:AuthStoreProvider authStoreProvider = <auth:AuthStoreProvider>configAuthStoreProvider;
+    http:HttpAuthzHandler authzHandler = new(authStoreProvider, authzCache);
     http:AuthzFilter authzFilter = new(authzHandler);
     // wraps the ballerina authz filter in new gateway filter
     OAuthzFilter authzFilterWrapper = new(authzFilter);
@@ -148,17 +149,17 @@ function createAuthFiltersForSecureListener (EndpointConfiguration config) retur
 
 function createAuthHandler (http:AuthProvider authProvider) returns http:HttpAuthnHandler {
     if (authProvider.scheme == AUTHN_SCHEME_BASIC) {
-        auth:AuthProvider authProvider1;
-        if (authProvider.authProvider == AUTH_PROVIDER_CONFIG) {
-            auth:ConfigAuthProvider configAuthProvider = new;
-            authProvider1 = <auth:AuthProvider> configAuthProvider;
+        auth:AuthStoreProvider authStoreProvider;
+        if (authProvider.authStoreProvider == AUTH_PROVIDER_CONFIG) {
+            auth:ConfigAuthStoreProvider configAuthStoreProvider = new;
+            authStoreProvider = <auth:AuthStoreProvider>configAuthStoreProvider;
         } else {
-            // other auth providers are unsupported yet
-            error e = {message:"Invalid auth provider: " + authProvider.authProvider };
+        // other auth providers are unsupported yet
+            error e = {message: "Invalid auth provider: " + authProvider.authStoreProvider };
             throw e;
         }
-        http:HttpBasicAuthnHandler basicAuthHandler = new(authProvider1);
-        return <http:HttpAuthnHandler> basicAuthHandler;
+        http:HttpBasicAuthnHandler basicAuthHandler = new(authStoreProvider);
+        return <http:HttpAuthnHandler>basicAuthHandler;
     } else if(authProvider.scheme == AUTH_SCHEME_JWT){
         auth:JWTAuthProviderConfig jwtConfig = {};
         jwtConfig.issuer = authProvider.issuer;
@@ -183,6 +184,27 @@ function initiateGatewayConfigurations(EndpointConfiguration config) {
     config.host = getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HOST,"localhost");
     intitateKeyManagerConfigurations();
 
+}
+
+function initiateAuthProviders(EndpointConfiguration config) {
+    http:AuthProvider jwtAuthProvider = {
+        id: AUTH_SCHEME_JWT,
+        scheme: AUTH_SCHEME_JWT,
+        issuer: getConfigValue(JWT_INSTANCE_ID, ISSUER, "https://192.168.42.1:9443/oauth2/token"),
+        audience: getConfigValue(JWT_INSTANCE_ID, AUDIENCE, "RQIO7ti2OThP79wh3fE5_Zksszga"),
+        certificateAlias: getConfigValue(JWT_INSTANCE_ID, CERTIFICATE_ALIAS, "ballerina"),
+        trustStore: {
+        path: getConfigValue(JWT_INSTANCE_ID, TRUST_STORE_PATH, "${ballerina.home}/bre/security/ballerinaTruststore.p12"),
+        password: getConfigValue(JWT_INSTANCE_ID, TRSUT_STORE_PASSWORD, "ballerina")
+        }
+    };
+    http:AuthProvider basicAuthProvider = {
+        id : AUTHN_SCHEME_BASIC,
+        scheme: AUTHN_SCHEME_BASIC,
+        authStoreProvider: AUTH_PROVIDER_CONFIG
+    };
+    http:AuthProvider[] authProivders = [jwtAuthProvider, basicAuthProvider];
+    config.authProviders = authProivders;
 }
 
 function intitateKeyManagerConfigurations() {
@@ -232,23 +254,6 @@ public function APIGatewayListener::stop () {
     self.httpListener.stop();
 }
 
-public http:AuthProvider basicAuthProvider = {
-    id : "basic",
-    scheme:"basic",
-    authProvider:"config"
-};
-
-public http:AuthProvider jwtAuthProvider = {
-    id: "jwt",
-    scheme: "jwt",
-    issuer: "ballerina",
-    audience: "ballerina",
-    certificateAlias: "ballerina",
-    trustStore: {
-        path: "${ballerina.home}/bre/security/ballerinaTruststore.p12",
-        password: "ballerina"
-    }
-};
 
 
 
