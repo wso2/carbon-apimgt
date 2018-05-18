@@ -187,6 +187,12 @@ function generateThrottleEvent(http:Request req, http:FilterContext context, Aut
             properties[k] = v;
         }
     }
+    if (getGatewayConfInstance().getThrottleConf().enabledJWTClaimConditions){
+        foreach k, v in runtime:getInvocationContext().userPrincipal.claims {
+            properties[k] = <string>v;
+        }
+    }
+
     requestStreamDto.properties = properties.toString();
     return requestStreamDto;
 }
