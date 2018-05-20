@@ -347,7 +347,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
      * @param endUserName - The end user name
      * @throws APIManagementException
      */
-    private String addCertToHeader(String endUserName) throws APIManagementException {
+    protected String addCertToHeader(String endUserName) throws APIManagementException {
 
         try {
             //get tenant domain

@@ -63,9 +63,10 @@ public class SubscriberKeyMgtClient {
         return oAuthApplicationInfo;
     }
 
-    public OAuthApplicationInfo createOAuthApplication(String userId, String applicationName, String callbackUrl) throws Exception {
+    public OAuthApplicationInfo createOAuthApplication(String userId, String applicationName, String callbackUrl, String tokenType) throws Exception {
         //setCookie(subscriberServiceStub);
-        OAuthApplicationInfo oAuthApplicationInfo = subscriberServiceStub.createOAuthApplication(userId, applicationName, callbackUrl);
+        OAuthApplicationInfo oAuthApplicationInfo = subscriberServiceStub
+                .createOAuthApplication(userId, applicationName, callbackUrl, tokenType);
         //updateCookie(subscriberServiceStub);
         return oAuthApplicationInfo;
     }

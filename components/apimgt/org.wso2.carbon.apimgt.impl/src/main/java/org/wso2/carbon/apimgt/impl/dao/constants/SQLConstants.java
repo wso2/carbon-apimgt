@@ -118,7 +118,9 @@ public class SQLConstants {
             " SELECT " +
             "   API.API_PROVIDER AS API_PROVIDER," +
             "   API.API_NAME AS API_NAME," +
-            "   API.API_VERSION AS API_VERSION " +
+            "   API.CONTEXT AS API_CONTEXT, " +
+            "   API.API_VERSION AS API_VERSION, " +
+            "   SP.TIER_ID AS SP_TIER_ID " +
             " FROM " +
             "   AM_SUBSCRIPTION SP, " +
             "   AM_API API," +
@@ -136,7 +138,9 @@ public class SQLConstants {
             " SELECT " +
             "   API.API_PROVIDER AS API_PROVIDER," +
             "   API.API_NAME AS API_NAME," +
-            "   API.API_VERSION AS API_VERSION " +
+            "   API.CONTEXT AS API_CONTEXT," +
+            "   API.API_VERSION AS API_VERSION, " +
+            "   SP.TIER_ID AS SP_TIER_ID " +
             " FROM " +
             "   AM_SUBSCRIPTION SP, " +
             "   AM_API API," +

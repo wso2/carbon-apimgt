@@ -71,7 +71,9 @@ import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
@@ -87,9 +89,11 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.core.util.CryptoException;
+import org.wso2.carbon.event.stub.service.dto.SubscriptionDTO;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.oauth.IdentityOAuthAdminException;
+import org.wso2.carbon.registry.common.beans.SubscriptionBean;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.DBUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -11323,5 +11327,51 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
         return userId;
+    }
+
+
+    /**
+     * Get Subscribed APIs for given userId
+     *
+     * @param userId id of the user
+     * @return APISubscriptionInfoDTO[]
+     * @throws APIManagementException if failed to get Subscribed APIs
+     */
+    public APISubscriptionInfoDTO[] getSubscribedAPIsOfUserWithSubscriptionInfo(String userId) throws APIManagementException {
+        List<APISubscriptionInfoDTO> apiSubscriptionInfoDTOS = new ArrayList<APISubscriptionInfoDTO>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        //identify logged in user
+        String loginUserName = getLoginUserName(userId);
+        int tenantId = APIUtil.getTenantId(loginUserName);
+
+        String sqlQuery = SQLConstants.GET_SUBSCRIBED_APIS_OF_USER_SQL;
+        if (forceCaseInsensitiveComparisons) {
+            sqlQuery = SQLConstants.GET_SUBSCRIBED_APIS_OF_USER_CASE_INSENSITIVE_SQL;
+        }
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, userId);
+            ps.setInt(2, tenantId);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                APISubscriptionInfoDTO infoDTO = new APISubscriptionInfoDTO();
+                infoDTO.setProviderId(APIUtil.replaceEmailDomain(rs.getString("API_PROVIDER")));
+                infoDTO.setApiName(rs.getString("API_NAME"));
+                infoDTO.setContext(rs.getString("API_CONTEXT"));
+                infoDTO.setVersion(rs.getString("API_VERSION"));
+                infoDTO.setSubscriptionTier(rs.getString("SP_TIER_ID"));
+                apiSubscriptionInfoDTOS.add(infoDTO);
+            }
+        } catch (SQLException e) {
+            handleException("Error while executing SQL", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return apiSubscriptionInfoDTOS.toArray(new APISubscriptionInfoDTO[apiSubscriptionInfoDTOS.size()]);
     }
 }
