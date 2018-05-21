@@ -11275,25 +11275,32 @@ public class ApiMgtDAO {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_LABEL_BY_TENANT)) {
-            connection.setAutoCommit(false);
-            statement.setString(1, tenantDomain);
-            try (ResultSet rs = statement.executeQuery()) {
-                while (rs.next()) {
-                    String labelId = rs.getString(1);
-                    String labelName = rs.getString(2);
-                    String description = rs.getString(3);
+            try {
+                connection.setAutoCommit(false);
+                statement.setString(1, tenantDomain);
+                try (ResultSet rs = statement.executeQuery()) {
+                    while (rs.next()) {
+                        String labelId = rs.getString("LABEL_ID");
+                        String labelName = rs.getString("NAME");
+                        String description = rs.getString("DESCRIPTION");
 
-                    Label label = new Label();
-                    label.setLabelId(labelId);
-                    label.setName(labelName);
-                    label.setDescription(description);
-                    label.setAccessUrls(getAccessUrlList(labelId));
-                    labelList.add(label);
+                        Label label = new Label();
+                        label.setLabelId(labelId);
+                        label.setName(labelName);
+                        label.setDescription(description);
+                        label.setAccessUrls(getAccessUrlList(connection, labelId));
+                        labelList.add(label);
+                    }
                 }
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to get Labels of " + tenantDomain, e);
+            } finally {
+                connection.setAutoCommit(true);
             }
-            connection.commit();
         } catch (SQLException e) {
-            handleException("Failed to get Labels : " + tenantDomain, e);
+            handleException("Failed to get Labels of " + tenantDomain, e);
         }
         return labelList;
     }
@@ -11304,21 +11311,17 @@ public class ApiMgtDAO {
      * @param labelId label id.
      * @return List of string.
      */
-    private List<String> getAccessUrlList(String labelId) throws APIManagementException {
+    private List<String> getAccessUrlList(Connection connection, String labelId) throws APIManagementException {
         List<String> hostList = new ArrayList<>();
 
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_URL_BY_LABEL_ID)) {
-            connection.setAutoCommit(false);
+        try (PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_URL_BY_LABEL_ID)) {
             statement.setString(1, labelId);
-
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
-                    String host = rs.getString(2);
+                    String host = rs.getString("ACCESS_URL");
                     hostList.add(host);
                 }
             }
-            connection.commit();
         } catch (SQLException e) {
             handleException("Failed to get label list: " , e);
         }
@@ -11337,16 +11340,23 @@ public class ApiMgtDAO {
         label.setLabelId(uuid);
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_LABEL_SQL)) {
-            connection.setAutoCommit(false);
+            try {
+                connection.setAutoCommit(false);
 
-            statement.setString(1, uuid);
-            statement.setString(2, label.getName());
-            statement.setString(3, label.getDescription());
-            statement.setString(4, tenantDomain);
-            statement.executeUpdate();
-            connection.commit();
-            if (!label.getAccessUrls().isEmpty()) {
-                insertAccessUrlMappings(uuid, label.getAccessUrls());
+                statement.setString(1, uuid);
+                statement.setString(2, label.getName());
+                statement.setString(3, label.getDescription());
+                statement.setString(4, tenantDomain);
+                statement.executeUpdate();
+                connection.commit();
+                if (!label.getAccessUrls().isEmpty()) {
+                    insertAccessUrlMappings(connection, uuid, label.getAccessUrls());
+                }
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to add label: " + uuid, e);
+            } finally {
+                connection.setAutoCommit(true);
             }
         } catch (SQLException e) {
             handleException("Failed to add label: " + uuid, e);
@@ -11361,17 +11371,15 @@ public class ApiMgtDAO {
      * @param urlList The list of url.
      * @throws APIManagementException
      */
-    private void insertAccessUrlMappings(String uuid, List<String> urlList) throws APIManagementException {
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_LABEL_URL_MAPPING_SQL)) {
-            connection.setAutoCommit(false);
+    private void insertAccessUrlMappings(Connection connection, String uuid, List<String> urlList) throws
+            APIManagementException {
+        try (PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_LABEL_URL_MAPPING_SQL)) {
             for (String accessUrl : urlList) {
                 statement.setString(1, uuid);
                 statement.setString(2, accessUrl);
                 statement.addBatch();
             }
             statement.executeBatch();
-            connection.commit();
         } catch (SQLException e) {
             handleException("Failed to add label url : " + uuid, e);
         }
@@ -11387,10 +11395,17 @@ public class ApiMgtDAO {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQLConstants.DELETE_LABEL_SQL)) {
-            connection.setAutoCommit(false);
-            statement.setString(1, labelUUID);
-            statement.executeUpdate();
-            connection.commit();
+            try {
+                connection.setAutoCommit(false);
+                statement.setString(1, labelUUID);
+                statement.executeUpdate();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to delete label : " + labelUUID, e);
+            } finally {
+                connection.setAutoCommit(true);
+            }
         } catch (SQLException e) {
             handleException("Failed to delete label : " + labelUUID, e);
         }
@@ -11402,13 +11417,10 @@ public class ApiMgtDAO {
      * @param labelUUID label id.
      * @throws APIManagementException
      */
-    private void deleteAccessUrlMappings(String labelUUID) throws APIManagementException {
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.DELETE_LABEL_URL_MAPPING_SQL)) {
-            connection.setAutoCommit(false);
+    private void deleteAccessUrlMappings(Connection connection, String labelUUID) throws APIManagementException {
+        try (PreparedStatement statement = connection.prepareStatement(SQLConstants.DELETE_LABEL_URL_MAPPING_SQL)) {
             statement.setString(1, labelUUID);
             statement.executeUpdate();
-            connection.commit();
         } catch (SQLException e) {
             handleException("Failed to delete label url : ", e);
         }
@@ -11424,15 +11436,22 @@ public class ApiMgtDAO {
         List<String> accessURLs = label.getAccessUrls();
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQLConstants.UPDATE_LABEL_SQL)) {
-            connection.setAutoCommit(false);
-            statement.setString(1, label.getName());
-            statement.setString(2, label.getDescription());
-            statement.setString(3, label.getLabelId());
-            statement.executeUpdate();
-            connection.commit();
-            deleteAccessUrlMappings(label.getLabelId());
-            insertAccessUrlMappings(label.getLabelId(), accessURLs);
+            try {
+                connection.setAutoCommit(false);
+                statement.setString(1, label.getName());
+                statement.setString(2, label.getDescription());
+                statement.setString(3, label.getLabelId());
 
+                deleteAccessUrlMappings(connection, label.getLabelId());
+                insertAccessUrlMappings(connection, label.getLabelId(), accessURLs);
+                statement.executeUpdate();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to update label : ", e);
+            } finally {
+                connection.setAutoCommit(true);
+            }
         } catch (SQLException e) {
             handleException("Failed to update label : ", e);
         }
