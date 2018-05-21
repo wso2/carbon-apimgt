@@ -23,13 +23,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
-import org.wso2.carbon.apimgt.impl.dto.SubscriptionPolicyDTO;
 import org.wso2.carbon.apimgt.keymgt.token.APIMJWTGenerator;
-import org.wso2.carbon.apimgt.keymgt.token.JWTGenerator;
+import org.wso2.carbon.apimgt.keymgt.util.APIMTokenIssuerUtil;
 import org.wso2.carbon.identity.application.common.IdentityApplicationManagementException;
 import org.wso2.carbon.identity.application.common.model.ServiceProvider;
 import org.wso2.carbon.identity.application.common.model.ServiceProviderProperty;
@@ -41,11 +37,6 @@ import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 import org.wso2.carbon.identity.oauth2.token.OauthTokenIssuerImpl;
 import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 public class APIMTokenIssuer extends OauthTokenIssuerImpl {
 
     private static final Log log = LogFactory.getLog(APIMTokenIssuer.class);
@@ -56,8 +47,8 @@ public class APIMTokenIssuer extends OauthTokenIssuerImpl {
         try {
             OAuthAppDO oAuthAppDO = OAuth2Util.getAppInformationByClientId(clientId);
             String tenantDomain = OAuth2Util.getTenantDomainOfOauthApp(oAuthAppDO);
-            String userName = oAuthAppDO.getUser().getUserName();
             ApplicationManagementService applicationManagementService = ApplicationManagementService.getInstance();
+
             ServiceProvider serviceProvider = applicationManagementService
                     .getServiceProvider(oAuthAppDO.getApplicationName(), tenantDomain);
             ServiceProviderProperty[] spProperties = serviceProvider.getSpProperties();
@@ -67,47 +58,8 @@ public class APIMTokenIssuer extends OauthTokenIssuerImpl {
                     if (log.isDebugEnabled()) {
                         log.debug("Generating the JWT from API Manager");
                     }
-                    String tenantedUserName = userName + "@" + tenantDomain;
-                    APISubscriptionInfoDTO[] apis = ApiMgtDAO.getInstance()
-                            .getSubscribedAPIsOfUserWithSubscriptionInfo(tenantedUserName);
 
-                    JwtTokenInfoDTO jwtTokenInfoDTO = new JwtTokenInfoDTO();
-                    jwtTokenInfoDTO.setSubscriber("sub");
-                    jwtTokenInfoDTO.setIssuedTime(13123131);
-                    jwtTokenInfoDTO.setExpirationTime(12312311);
-                    jwtTokenInfoDTO.setEndUserName(userName);
-                    jwtTokenInfoDTO.setContentAware(true);
-
-                    List<SubscribedApiDTO> subscribedApiDTOList = new ArrayList<SubscribedApiDTO>();
-                    for (APISubscriptionInfoDTO api : apis) {
-                        SubscribedApiDTO subscribedApiDTO = new SubscribedApiDTO();
-                        subscribedApiDTO.setName(api.getApiName());
-                        subscribedApiDTO.setContext(api.getContext());
-                        subscribedApiDTO.setVersion(api.getVersion());
-                        subscribedApiDTO.setPublisher("publisher");
-                        subscribedApiDTO.setSubscriber("subscriber");
-                        subscribedApiDTO.setSubscriptionTier(api.getSubscriptionTier());
-                        subscribedApiDTO.setSubscriberTenantDomain(tenantDomain);
-                        subscribedApiDTOList.add(subscribedApiDTO);
-                    }
-                    jwtTokenInfoDTO.setSubscribedApiDTOList(subscribedApiDTOList);
-
-
-                    Map<String, SubscriptionPolicyDTO> subscriptionPolicyDTOList = new HashMap<String, SubscriptionPolicyDTO>();
-
-                    SubscriptionPolicyDTO subscriptionPolicyDTO1 = new SubscriptionPolicyDTO();
-                    subscriptionPolicyDTO1.setSpikeArrestLimit("spike");
-                    subscriptionPolicyDTO1.setSpikeArrestUnit("unit");
-                    subscriptionPolicyDTO1.setStopOnQuotaReach(true);
-
-                    subscriptionPolicyDTOList.put("Gold", subscriptionPolicyDTO1);
-                    SubscriptionPolicyDTO subscriptionPolicyDTO2 = new SubscriptionPolicyDTO();
-                    subscriptionPolicyDTO2.setSpikeArrestLimit("spike");
-                    subscriptionPolicyDTO2.setSpikeArrestUnit("unit");
-                    subscriptionPolicyDTO2.setStopOnQuotaReach(true);
-                    subscriptionPolicyDTOList.put("Bronze", subscriptionPolicyDTO1);
-
-                    jwtTokenInfoDTO.setSubscriptionPolicyDTOList(subscriptionPolicyDTOList);
+                    JwtTokenInfoDTO jwtTokenInfoDTO = APIMTokenIssuerUtil.getJwtTokenInfoDTO(oAuthAppDO);
                     APIMJWTGenerator apimjwtGenerator = new APIMJWTGenerator();
                     return apimjwtGenerator.generateJWT(jwtTokenInfoDTO);
                 }

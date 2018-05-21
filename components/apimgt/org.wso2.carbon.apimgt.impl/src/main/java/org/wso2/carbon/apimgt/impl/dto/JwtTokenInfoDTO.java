@@ -31,6 +31,7 @@ public class JwtTokenInfoDTO implements Serializable {
     private long issuedTime;
     private String endUserName;
     private boolean contentAware;
+    private String[] audience;
     private List<SubscribedApiDTO> subscribedApiDTOList = new ArrayList<SubscribedApiDTO>();
     private Map<String, SubscriptionPolicyDTO> subscriptionPolicyDTOList = new HashMap<String, SubscriptionPolicyDTO>();
 
@@ -74,6 +75,14 @@ public class JwtTokenInfoDTO implements Serializable {
         this.contentAware = contentAware;
     }
 
+    public String[] getAudience() {
+        return audience;
+    }
+
+    public void setAudience(String[] audience) {
+        this.audience = audience;
+    }
+
     public List<SubscribedApiDTO> getSubscribedApiDTOList() {
         return subscribedApiDTOList;
     }
@@ -82,7 +91,7 @@ public class JwtTokenInfoDTO implements Serializable {
         this.subscribedApiDTOList = subscribedApiDTOList;
     }
 
-    public Map<String, SubscriptionPolicyDTO> subscriptionPolicyDTOList() {
+    public Map<String, SubscriptionPolicyDTO> getSubscriptionPolicyDTOList() {
         return subscriptionPolicyDTOList;
     }
 

@@ -24,16 +24,16 @@ import java.util.Set;
 /**
  * This class represent the API info DTO.
  */
-public class APISubscriptionInfoDTO implements Serializable{
+public class APISubscriptionInfoDTO implements Serializable {
 
-   private String providerId;
-   private String apiName;
-   private String version;
-   private String context;
+    private String providerId;
+    private String apiName;
+    private String version;
+    private String context;
 
     private String subscriptionTier;
 
-   private Set<ResourceInfoDTO> resources;
+    private Set<ResourceInfoDTO> resources;
 
     public String getProviderId() {
         return providerId;
@@ -85,6 +85,7 @@ public class APISubscriptionInfoDTO implements Serializable{
 
     /**
      * Computes API Identifier using Provider Id, API Name & Version
+     *
      * @return API Identifier as a String
      */
     public String getAPIIdentifier() {

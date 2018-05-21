@@ -18,7 +18,9 @@
 
 package org.wso2.carbon.apimgt.impl.dto;
 
-public class ApplicationDTO {
+import java.io.Serializable;
+
+public class ApplicationDTO implements Serializable{
 
     String name;
     String id;

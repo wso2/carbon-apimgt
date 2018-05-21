@@ -463,7 +463,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
         }
     }
 
-    private String getMultiAttributeSeparator(int tenantId) {
+    protected String getMultiAttributeSeparator(int tenantId) {
         try {
             RealmConfiguration realmConfiguration = null;
             RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
