@@ -43,10 +43,7 @@ public class Application {
     private String groupId;
     private Boolean isBlackListed;
     private String owner;
-
     private Map<String, String> applicationAttributes = new HashMap<String, String>();
-
-
     private String createdTime;
     private String lastUpdatedTime;
 

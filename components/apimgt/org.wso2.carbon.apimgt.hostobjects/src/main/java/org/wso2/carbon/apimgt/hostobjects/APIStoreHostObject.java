@@ -158,7 +158,6 @@ public class APIStoreHostObject extends ScriptableObject {
 
     public static void jsFunction_loadRegistryOfTenant(Context cx,
                                                        Scriptable thisObj, Object[] args, Function funObj) {
-
         if (!isStringArray(args)) {
             return;
         }
@@ -213,29 +212,24 @@ public class APIStoreHostObject extends ScriptableObject {
     }
 
     private static String getUsernameFromObject(Scriptable obj) {
-
         return ((APIStoreHostObject) obj).getUsername();
     }
 
     private static APIConsumer getAPIConsumer(Scriptable thisObj) {
-
         return ((APIStoreHostObject) thisObj).getApiConsumer();
     }
 
     private static void handleException(String msg) throws APIManagementException {
-
         log.error(msg);
         throw new APIManagementException(msg);
     }
 
     private static void handleException(String msg, Throwable t) throws APIManagementException {
-
         log.error(msg, t);
         throw new APIManagementException(msg, t);
     }
 
     private static APIAuthenticationServiceClient getAPIKeyManagementClient() throws APIManagementException {
-
         APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
         String url = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
         if (url == null) {
@@ -257,8 +251,7 @@ public class APIStoreHostObject extends ScriptableObject {
     }
 
     public static NativeArray jsFunction_getProviderAPIUsage(Context cx, Scriptable thisObj,
-                                                             Object[] args, Function funObj)
-            throws APIManagementException {
+                                                 Object[] args, Function funObj) throws APIManagementException {
         return null;
     }
 
@@ -3259,7 +3252,7 @@ public class APIStoreHostObject extends ScriptableObject {
      */
     public static NativeObject jsFunction_getApplicationByName(Context cx, Scriptable thisObj,
                                                                Object[] args, Function funObj)
-            throws ScriptException, APIManagementException,JsonProcessingException {
+            throws ScriptException, APIManagementException {
         if (args != null) {
             String userId = (String) args[0];
             String applicationName = (String) args[1];
@@ -3275,8 +3268,12 @@ public class APIStoreHostObject extends ScriptableObject {
                 row.put("status", row, application.getStatus());
                 row.put("description", row, application.getDescription());
                 row.put("groupId", row, application.getGroupId());
-                row.put("applicationAttributes",row, new ObjectMapper().writeValueAsString(application.getApplicationAttributes()));
-                log.debug("hhhhhh " + application.getApplicationAttributes());
+                try{
+                    row.put("applicationAttributes",row,
+                            new ObjectMapper().writeValueAsString(application.getApplicationAttributes()));
+                } catch (JsonProcessingException e){
+                    handleException("Error in retrieving application attributes of " + applicationName,e);
+                }
                 return row;
             }
         }
