@@ -3259,7 +3259,7 @@ public class APIStoreHostObject extends ScriptableObject {
      */
     public static NativeObject jsFunction_getApplicationByName(Context cx, Scriptable thisObj,
                                                                Object[] args, Function funObj)
-            throws ScriptException, APIManagementException {
+            throws ScriptException, APIManagementException,JsonProcessingException {
         if (args != null) {
             String userId = (String) args[0];
             String applicationName = (String) args[1];
@@ -3284,7 +3284,7 @@ public class APIStoreHostObject extends ScriptableObject {
     }
 
     public static String jsFunction_addApplication(Context cx, Scriptable thisObj, Object[] args, Function funObj)
-            throws ScriptException, APIManagementException {
+            throws ScriptException, APIManagementException, IOException {
 
         String status = null;
         if (args != null && args.length >= 4 && isStringArray(args)) {
@@ -3426,7 +3426,7 @@ public class APIStoreHostObject extends ScriptableObject {
     }
 
     public static boolean jsFunction_updateApplication(Context cx, Scriptable thisObj, Object[] args, Function funObj)
-            throws ScriptException, APIManagementException {
+            throws ScriptException, APIManagementException, IOException {
         if (args != null && args.length > 5 && isStringArray(args)) {
             String newName = (String) args[0];
             String oldName = (String) args[1];
