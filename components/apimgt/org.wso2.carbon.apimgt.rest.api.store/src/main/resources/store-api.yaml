@@ -2176,6 +2176,9 @@ definitions:
         items:
           $ref: '#/definitions/ApplicationKey'
         example: []
+      attributes:
+        type: object
+        example: {}
 
 #-----------------------------------------------------
 # The Application Info resource
@@ -2204,6 +2207,9 @@ definitions:
       groupId:
         type: string
         example: ""
+      attributes:
+        type: object
+        example: {}
 
 #-----------------------------------------------------
 # The Document List resource

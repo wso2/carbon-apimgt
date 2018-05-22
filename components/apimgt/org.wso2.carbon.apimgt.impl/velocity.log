@@ -1,0 +1,22 @@
+2018-05-22 12:10:19,117 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-05-22 12:10:19,117 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-05-22 12:10:19,117 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+2018-05-22 12:10:19,117 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2018-05-22 12:10:19,117 - Do unicode file recognition:  false
+2018-05-22 12:10:19,117 - FileResourceLoader : adding path '.'
+2018-05-22 12:10:19,118 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+2018-05-22 12:10:19,118 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+2018-05-22 12:10:19,118 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+2018-05-22 12:10:19,118 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+2018-05-22 12:10:19,118 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
+2018-05-22 12:10:19,118 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+2018-05-22 12:10:19,119 - Created '20' parsers.
+2018-05-22 12:10:19,119 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+2018-05-22 12:10:19,119 - Velocimacro : Default library not found.
+2018-05-22 12:10:19,119 - Velocimacro : allowInline = true : VMs can be defined inline in templates
+2018-05-22 12:10:19,119 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+2018-05-22 12:10:19,120 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+2018-05-22 12:10:19,120 - Velocimacro : autoload off : VM system will not automatically reload global library macros
+2018-05-22 12:10:19,120 - Velocimacro : added #getKey(  ) : source = src/test/resources/repository/resources/policy_templates/throttle_policy_template_sub.xml
+2018-05-22 12:10:19,120 - Velocimacro : added #getRule(  policy ) : source = src/test/resources/repository/resources/policy_templates/throttle_policy_template_sub.xml
+2018-05-22 12:10:19,122 - ResourceManager : found src/test/resources/repository/resources/policy_templates/throttle_policy_template_sub.xml with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader

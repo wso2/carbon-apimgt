@@ -1190,7 +1190,6 @@ public class SQLConstants {
                     "UUID)" +
             " VALUES (?,?,?,?,?,?,?,?,?,?,?)";
 
-    //----------for application attributes-----------------------------------------------------------------------------
     public static final String ADD_APPLICATION_ATTRIBUTES_SQL =
             " INSERT INTO AM_APPLICATION_ATTRIBUTES (APPLICATION_ID, NAME, VALUE, TENANT_ID) VALUES (?,?,?,?)";
 

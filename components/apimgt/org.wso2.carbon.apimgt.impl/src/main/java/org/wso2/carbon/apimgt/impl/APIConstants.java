@@ -1296,7 +1296,6 @@ public final class APIConstants {
         public static final String ENABLED = "Enabled";
     }
 
-    //------------------------Adding keys of custom attributes ----------------------------------------------
     public static class ApplicationAttributes{
         public static final String APPLICATION_CONFIGURATIONS = "ApplicationConfigs";
         public static final String APPLICATION_ATTRIBUTES = "ApplicationAttributes";
