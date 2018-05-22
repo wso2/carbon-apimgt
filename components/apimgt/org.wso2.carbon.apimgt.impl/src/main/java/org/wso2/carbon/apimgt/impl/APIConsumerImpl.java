@@ -4129,6 +4129,13 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return updatedWSDLContent;
     }
 
+    /**
+     * This method is used to get keys of custom attributes, configured by user
+     *
+     * @param userId user name of logged in user
+     * @return Array of JSONObject, contains keys of attributes
+     * @throws APIManagementException
+     */
     public JSONArray getAppAttributesFromConfig(String userId) throws APIManagementException {
 
         String tenantDomain = MultitenantUtils.getTenantDomain(userId);
@@ -4150,6 +4157,13 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return applicationAttributes;
     }
 
+    /**
+     * This method is used to validate keys of custom attributes, configured by user
+     *
+     * @param application
+     * @param userId user name of logged in user
+     * @throws APIManagementException
+     */
     public void checkAppAttributes(Application application, String userId) throws APIManagementException {
 
         JSONArray applicationAttributesFromConfig = getAppAttributesFromConfig(userId);
@@ -4159,7 +4173,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         for (Object object : applicationAttributesFromConfig) {
             JSONObject attribute = (JSONObject) object;
-            attributeKeys.add(attribute.get("Attribute"));
+            attributeKeys.add(attribute.get(APIConstants.ApplicationAttributes.ATTRIBUTE));
         }
 
         for (Object key : applicationAttributes.keySet()) {

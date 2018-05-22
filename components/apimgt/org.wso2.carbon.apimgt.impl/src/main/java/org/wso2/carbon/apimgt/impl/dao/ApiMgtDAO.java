@@ -3369,7 +3369,6 @@ public class ApiMgtDAO {
 
             //Adding data to AM_APPLICATION_ATTRIBUTES table
             addApplicationAttributes(conn,application.getApplicationAttributes(),applicationId,tenantId);
-
         } catch (SQLException e) {
             handleException("Failed to add Application", e);
         } finally {
@@ -3382,7 +3381,6 @@ public class ApiMgtDAO {
         Connection conn = null;
         PreparedStatement ps = null;
         PreparedStatement preparedStatement = null;
-
         try {
             conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
@@ -3408,7 +3406,6 @@ public class ApiMgtDAO {
                 updateGroupIDMappings(conn, application.getId(), application.getGroupId(),
                         tenantDomain);
             }
-
             Subscriber subscriber = application.getSubscriber();
             String domain = MultitenantUtils.getTenantDomain(subscriber.getName());
             int tenantId = IdentityTenantUtil.getTenantId(domain);
@@ -3417,7 +3414,7 @@ public class ApiMgtDAO {
             preparedStatement.setInt(1,application.getId());
             preparedStatement.execute();
 
-            if(log.isDebugEnabled()){
+            if (log.isDebugEnabled()) {
                 log.debug("Old attributes of application - " + application.getName() + " are removed");
             }
 
@@ -4084,9 +4081,7 @@ public class ApiMgtDAO {
             ArrayList<Application> applicationsList = new ArrayList<Application>();
             Application application;
             Map<String,String> applicationAttributes;
-
             int applicationId = 0;
-
             while (rs.next()) {
                 applicationId = rs.getInt("APPLICATION_ID");
                 application = new Application(rs.getString("NAME"), subscriber);
@@ -4101,7 +4096,6 @@ public class ApiMgtDAO {
                 application.setOwner(rs.getString("CREATED_BY"));
                 applicationAttributes = getApplicationAttributes(connection, applicationId);
                 application.setApplicationAttributes(applicationAttributes);
-
                 if (multiGroupAppSharingEnabled) {
                     setGroupIdInApplication(application);
                 }

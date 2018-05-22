@@ -3268,11 +3268,11 @@ public class APIStoreHostObject extends ScriptableObject {
                 row.put("status", row, application.getStatus());
                 row.put("description", row, application.getDescription());
                 row.put("groupId", row, application.getGroupId());
-                try{
-                    row.put("applicationAttributes",row,
+                try {
+                    row.put("applicationAttributes", row,
                             new ObjectMapper().writeValueAsString(application.getApplicationAttributes()));
-                } catch (JsonProcessingException e){
-                    handleException("Error in retrieving application attributes of " + applicationName,e);
+                } catch (JsonProcessingException e) {
+                    handleException("Error in retrieving application attributes of " + applicationName, e);
                 }
                 return row;
             }
@@ -3281,7 +3281,7 @@ public class APIStoreHostObject extends ScriptableObject {
     }
 
     public static String jsFunction_addApplication(Context cx, Scriptable thisObj, Object[] args, Function funObj)
-            throws ScriptException, APIManagementException, IOException {
+            throws ScriptException, APIManagementException {
 
         String status = null;
         if (args != null && args.length >= 4 && isStringArray(args)) {
@@ -3300,14 +3300,17 @@ public class APIStoreHostObject extends ScriptableObject {
             String description = (String) args[4];
             String groupId = null;
             Map appAttributes = null;
-
             if (args.length > 5 && args[5] != null) {
                 groupId = (String) args[5];
             }
 
-            if (args.length > 6 && args[6] != null) {
-                String applicationAttributeString = (String) args[6];
-                appAttributes = new ObjectMapper().readValue(applicationAttributeString, Map.class);
+            try {
+                if (args.length > 6 && args[6] != null) {
+                    String applicationAttributeString = (String) args[6];
+                    appAttributes = new ObjectMapper().readValue(applicationAttributeString, Map.class);
+                }
+            } catch (IOException e) {
+                handleException("Error in reading application attributes of " + name, e);
             }
 
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
@@ -3324,7 +3327,6 @@ public class APIStoreHostObject extends ScriptableObject {
             if (appAttributes != null) {
                 application.setApplicationAttributes(appAttributes);
             }
-
             int applicationId = apiConsumer.addApplication(application, username);
             status = apiConsumer.getApplicationStatusById(applicationId);
             return status;
@@ -3336,7 +3338,6 @@ public class APIStoreHostObject extends ScriptableObject {
     }
 
     public static boolean jsFunction_sleep(Context cx, Scriptable thisObj, Object[] args, Function funObj) {
-
         if (isStringArray(args)) {
             String millis = (String) args[0];
             try {
@@ -3423,7 +3424,7 @@ public class APIStoreHostObject extends ScriptableObject {
     }
 
     public static boolean jsFunction_updateApplication(Context cx, Scriptable thisObj, Object[] args, Function funObj)
-            throws ScriptException, APIManagementException, IOException {
+            throws ScriptException, APIManagementException {
         if (args != null && args.length > 5 && isStringArray(args)) {
             String newName = (String) args[0];
             String oldName = (String) args[1];
@@ -3433,7 +3434,6 @@ public class APIStoreHostObject extends ScriptableObject {
             String description = (String) args[5];
             String groupingId = null;
             Map appAttributes =  null;
-
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
 
             if (args.length > 6 && args[6] != null) {
@@ -3441,11 +3441,14 @@ public class APIStoreHostObject extends ScriptableObject {
             }
 
             // retrieve new values for application attributes
-            if (args.length > 8 && args[8] != null) {
-                String applicationAttributeString = (String) args[8];
-                appAttributes = new ObjectMapper().readValue(applicationAttributeString, Map.class);
+            try {
+                if (args.length > 8 && args[8] != null) {
+                    String applicationAttributeString = (String) args[8];
+                    appAttributes = new ObjectMapper().readValue(applicationAttributeString, Map.class);
+                }
+            } catch (IOException e) {
+                handleException("Error in reading application attributes of " + oldName, e);
             }
-
             // get application with new name if exists
             Application application = apiConsumer.getApplicationsByName(username, newName, groupingId);
             if (!newName.equals(oldName)) {
@@ -3471,7 +3474,6 @@ public class APIStoreHostObject extends ScriptableObject {
             if (appAttributes != null) {
                 updatedApplication.setApplicationAttributes(appAttributes);
             }
-
             if (APIUtil.isMultiGroupAppSharingEnabled()) {
                 String newGroupId = null;
                 if (args.length > 7 && args[7] != null) {

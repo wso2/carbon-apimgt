@@ -1296,6 +1296,9 @@ public final class APIConstants {
         public static final String ENABLED = "Enabled";
     }
 
+    /**
+     * Parameter for adding custom attributes against application in API Store
+     */
     public static class ApplicationAttributes{
         public static final String APPLICATION_CONFIGURATIONS = "ApplicationConfigs";
         public static final String APPLICATION_ATTRIBUTES = "ApplicationAttributes";
