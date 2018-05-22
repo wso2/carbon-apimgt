@@ -316,8 +316,17 @@ public class APIManagerConfiguration {
                 Iterator iterator = element.getChildrenWithLocalName(APIConstants.ApplicationAttributes.ATTRIBUTE);
                 while (iterator.hasNext()) {
                     OMElement omElement = (OMElement) iterator.next();
+                    Iterator attributes = omElement.getChildElements();
                     JSONObject jsonObject = new JSONObject();
-                    jsonObject.put(omElement.getLocalName(), omElement.getText());
+                    while(attributes.hasNext()){
+                        OMElement attribute = (OMElement) attributes.next();
+                        if(attribute.getLocalName().equals("Name")){
+                            jsonObject.put(APIConstants.ApplicationAttributes.ATTRIBUTE,attribute.getText());
+                        }
+                        else if(attribute.getLocalName().equals("Description")){
+                            jsonObject.put(APIConstants.ApplicationAttributes.DESCRIPTION,attribute.getText());
+                        }
+                    }
                     String isRequired = omElement.getAttributeValue(new QName("required"));
                     if (isRequired != null) {
                         jsonObject.put(APIConstants.ApplicationAttributes.REQUIRED, Boolean.parseBoolean(isRequired));

@@ -39,7 +39,6 @@ public class OAuthApplicationInfo {
     private String appOwner;
     private String jsonString;
     
-    
 
     public void setJsonString(String jsonString) {
         this.jsonString = jsonString;
@@ -96,7 +95,7 @@ public class OAuthApplicationInfo {
             return jsonString;
         } else {
             return JSONObject.toJSONString(parameters);
-        }  
+        }
 
     }
 
