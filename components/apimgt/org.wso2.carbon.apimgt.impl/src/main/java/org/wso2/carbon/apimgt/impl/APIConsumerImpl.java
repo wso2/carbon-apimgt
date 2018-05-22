@@ -77,7 +77,6 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
-import org.wso2.carbon.governance.api.generic.GenericArtifactFilter;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
@@ -828,7 +827,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             Comparator<API> versionComparator = new APIVersionComparator();
             Boolean displayMultipleVersions = APIUtil.isAllowDisplayMultipleVersions();
             String paginationLimit = getAPIManagerConfiguration()
-                                                           .getFirstProperty(APIConstants.API_STORE_APIS_PER_PAGE);
+                    .getFirstProperty(APIConstants.API_STORE_APIS_PER_PAGE);
 
             // If the Config exists use it to set the pagination limit
             final int maxPaginationLimit;
@@ -1931,8 +1930,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         boolean isMore = false;
         String criteria=APIConstants.API_OVERVIEW_NAME;
         try {
-            String paginationLimit = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                    .getAPIManagerConfiguration()
+            String paginationLimit = getAPIManagerConfiguration()
                     .getFirstProperty(APIConstants.API_STORE_APIS_PER_PAGE);
 
             // If the Config exists use it to set the pagination limit
@@ -2749,8 +2747,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
 
         if (!isUserAppOwner) {
-            throw new APIManagementException("user: " + application.getSubscriber().getName() + ", " +
-                    "attempted to remove application owned by: " + username);
+            throw new APIManagementException("user: " + username + ", " +
+                    "attempted to remove application owned by: " + application.getSubscriber().getName());
         }
 
         try {
@@ -3213,7 +3211,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Override
     public Set<SubscribedAPI> getSubscribedIdentifiers(Subscriber subscriber, APIIdentifier identifier, String groupingId)
             throws APIManagementException {
-        Set<SubscribedAPI> subscribedAPISet = new HashSet<SubscribedAPI>();
+        Set<SubscribedAPI> subscribedAPISet = new HashSet<>();
         Set<SubscribedAPI> subscribedAPIs = getSubscribedAPIs(subscriber, groupingId);
         for (SubscribedAPI api : subscribedAPIs) {
             if (api.getApiId().equals(identifier)) {
@@ -3682,8 +3680,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
             String[] roleArr = roleList.toArray(new String[roleList.size()]);
 
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                    .getAPIManagerConfiguration();
+            APIManagerConfiguration config = getAPIManagerConfiguration();
             String serverURL = config.getFirstProperty(APIConstants.AUTH_MANAGER_URL) + "UserAdmin";
             String adminUsername = config.getFirstProperty(APIConstants.AUTH_MANAGER_USERNAME);
             String adminPassword = config.getFirstProperty(APIConstants.AUTH_MANAGER_PASSWORD);
@@ -3838,16 +3835,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         }
         return false;
-    }
-
-    /**
-     * Returns API manager configurations.
-     *
-     * @return APIManagerConfiguration object
-     */
-    protected APIManagerConfiguration getAPIManagerConfiguration() {
-        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration();
     }
 
     /**

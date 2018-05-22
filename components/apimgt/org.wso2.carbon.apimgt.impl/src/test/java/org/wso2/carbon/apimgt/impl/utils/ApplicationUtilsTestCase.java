@@ -17,7 +17,7 @@ package org.wso2.carbon.apimgt.impl.utils;
 
 import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
@@ -45,8 +45,8 @@ public class ApplicationUtilsTestCase {
     private static ApiMgtDAO apiMgtDAO;
     private static ApiMgtDAOMockCreator apiMgtDAOMockCreator;
 
-    @BeforeClass
-    public static void setup() throws UserStoreException, RegistryException {
+    @Before
+    public void setup() throws UserStoreException, RegistryException {
         apiMgtDAOMockCreator = new ApiMgtDAOMockCreator(444);
         apiMgtDAO = apiMgtDAOMockCreator.getMock();
     }

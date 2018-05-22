@@ -41,7 +41,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
 
-import static junit.framework.Assert.fail;
+import static org.junit.Assert.fail;
 
 /**
  * Test class for APIMgtGoogleAnalyticsUtils

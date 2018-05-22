@@ -73,7 +73,7 @@ import java.net.SocketAddress;
 import java.nio.charset.Charset;
 import java.util.concurrent.TimeUnit;
 
-import static junit.framework.Assert.fail;
+import static org.junit.Assert.fail;
 import static org.wso2.carbon.apimgt.impl.APIConstants.API_KEY_VALIDATOR_THRIFT_CLIENT;
 import static org.wso2.carbon.apimgt.impl.APIConstants.API_KEY_VALIDATOR_WS_CLIENT;
 

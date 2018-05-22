@@ -23,7 +23,7 @@ import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
@@ -38,16 +38,16 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.base.MultitenantConstants;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.List;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
 
 /**
  * This method holds test cases for the class CertificateMgtDAO.
@@ -64,8 +64,8 @@ public class CertificateMgtDaoTest {
     private static int TENANT_ID = MultitenantConstants.SUPER_TENANT_ID;
     private static final int TENANT_2 = 1001;
 
-    @BeforeClass
-    public static void setUp() throws APIManagerDatabaseException, APIManagementException, SQLException,
+    @Before
+    public void setUp() throws APIManagerDatabaseException, APIManagementException, SQLException,
             XMLStreamException, IOException, NamingException {
         String dbConfigPath = System.getProperty("APIManagerDBConfigurationPath");
         APIManagerConfiguration config = new APIManagerConfiguration();

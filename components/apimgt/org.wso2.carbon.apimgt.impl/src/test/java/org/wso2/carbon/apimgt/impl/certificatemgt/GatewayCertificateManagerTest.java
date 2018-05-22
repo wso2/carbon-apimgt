@@ -18,7 +18,7 @@
 package org.wso2.carbon.apimgt.impl.certificatemgt;
 
 import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -62,8 +62,8 @@ public class GatewayCertificateManagerTest {
     private static GatewayCertificateManager gatewayCertificateManager;
     private static APIGatewayAdminClient apiGatewayAdminClient;
 
-    @BeforeClass
-    public static void init() {
+    @Before
+    public void init() {
         apiGatewayAdminClient = PowerMockito.mock(APIGatewayAdminClient.class);
         Map<String, Environment> environmentMap = getEnvironments();
 

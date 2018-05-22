@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.BDDMockito;
 import org.mockito.Mockito;
+import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -142,7 +143,6 @@ public class AbstractAPIManagerTestCase {
         registryService = Mockito.mock(RegistryService.class);
         tenantManager = Mockito.mock(TenantManager.class);
         apiDefinitionFromOpenAPISpec = Mockito.mock(APIDefinitionFromOpenAPISpec.class);
-
     }
 
     @Test
@@ -157,7 +157,7 @@ public class AbstractAPIManagerTestCase {
         PowerMockito.whenNew(RegistryAuthorizationManager.class).withAnyArguments()
                 .thenReturn(registryAuthorizationManager);
         PowerMockito.mockStatic(RegistryUtils.class);
-        BDDMockito.when(RegistryUtils.getAbsolutePath((RegistryContext) Mockito.any(), Mockito.anyString()))
+        PowerMockito.when(RegistryUtils.getAbsolutePath((RegistryContext) Mockito.any(), Mockito.anyString()))
                 .thenReturn("/test");
         try {
             new AbstractAPIManager(null) {
@@ -167,17 +167,13 @@ public class AbstractAPIManagerTestCase {
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Error while setting the permissions"));
         }
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManager(null) {
 
-        };
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.doNothing().when(APIUtil.class, "loadTenantRegistry", Mockito.anyInt());
         PowerMockito.mockStatic(MultitenantUtils.class);
-        BDDMockito.when(MultitenantUtils.getTenantDomain(Mockito.anyString())).thenReturn(SAMPLE_TENANT_DOMAIN_1);
+        PowerMockito.when(MultitenantUtils.getTenantDomain(Mockito.anyString())).thenReturn(SAMPLE_TENANT_DOMAIN_1);
         String userName = "admin";
-        abstractAPIManager = new AbstractAPIManager(userName) {
 
-        };
         Mockito.verify(
                 holderMockCreator.getRegistryServiceMockCreator().getMock().getConfigSystemRegistry(Mockito.anyInt()),
                 Mockito.atLeastOnce());
@@ -203,7 +199,7 @@ public class AbstractAPIManagerTestCase {
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Failed to get APIs from the registry"));
         }
-        BDDMockito.when(APIUtil.getAPI((GenericArtifact)Mockito.any())).thenThrow(APIManagementException.class)
+        PowerMockito.when(APIUtil.getAPI((GenericArtifact)Mockito.any())).thenThrow(APIManagementException.class)
                 .thenReturn(api);
         Assert.assertEquals(abstractAPIManager.getAllAPIs().size(),0);
         abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN_1;
@@ -229,9 +225,9 @@ public class AbstractAPIManagerTestCase {
         Mockito.when(tenantManager.getTenantId(Mockito.anyString())).thenThrow(UserStoreException.class)
                 .thenReturn(-1234);
         API sampleAPI = new API(identifier);
-        BDDMockito.when(APIUtil.getAPIForPublishing((GovernanceArtifact) Mockito.any(), (Registry) Mockito.any()))
+        PowerMockito.when(APIUtil.getAPIForPublishing((GovernanceArtifact) Mockito.any(), (Registry) Mockito.any()))
                 .thenReturn(sampleAPI);
-        BDDMockito.when(APIUtil.getAPIPath(identifier)).thenReturn(apiPath);
+        PowerMockito.when(APIUtil.getAPIPath(identifier)).thenReturn(apiPath);
         try {
             abstractAPIManager.getAPI(identifier);
             Assert.fail("Exception not thrown for error scenario");
@@ -266,7 +262,7 @@ public class AbstractAPIManagerTestCase {
         Mockito.when(registryService.getGovernanceUserRegistry(Mockito.anyString(), Mockito.anyInt()))
                 .thenReturn(registry);
         Mockito.when(registry.get(apiPath)).thenReturn(resource);
-        BDDMockito.when(APIUtil.replaceEmailDomainBack(Mockito.anyString())).thenReturn(API_PROVIDER);
+        PowerMockito.when(APIUtil.replaceEmailDomainBack(Mockito.anyString())).thenReturn(API_PROVIDER);
         sampleAPI.setVisibility(null);
         try {
             abstractAPIManager.getAPI(identifier);
@@ -823,6 +819,13 @@ public class AbstractAPIManagerTestCase {
                         + identifier.getVersion() + APIConstants.API_RESOURCE_NAME;
         Mockito.when(registry.getAssociations(apiResourcePath, APIConstants.DOCUMENTATION_ASSOCIATION))
                 .thenThrow(RegistryException.class).thenReturn(associations);
+        PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.when(APIUtil.getAPIPath(identifier)).thenReturn(apiResourcePath);
+
+        Mockito.when(genericArtifact.getPath()).thenReturn("test");
+        String docName = "sample";
+        Documentation documentation = new Documentation(DocumentationType.HOWTO, docName);
+        PowerMockito.when(APIUtil.getDocumentation(genericArtifact)).thenReturn(documentation);
         try {
             abstractAPIManager.getAllDocumentation(identifier);
             Assert.fail("Registry exception not thrown for error scenario");
@@ -991,7 +994,7 @@ public class AbstractAPIManagerTestCase {
         String docName = "sample";
         Documentation documentation = new Documentation(DocumentationType.HOWTO, docName);
         PowerMockito.mockStatic(APIUtil.class);
-        BDDMockito.given(APIUtil.getDocumentation(artifact)).willReturn(documentation);
+        PowerMockito.when(APIUtil.getDocumentation(artifact)).thenReturn(documentation);
 
         ResourceDO resourceDO = new ResourceDO();
         resourceDO.setLastUpdatedOn(234567);
@@ -1111,7 +1114,7 @@ public class AbstractAPIManagerTestCase {
             Assert.assertTrue(e.getMessage().contains("Error while adding the subscriber"));
         }
         PowerMockito.mockStatic(APIUtil.class);
-        BDDMockito.when(APIUtil.isEnabledUnlimitedTier()).thenReturn(true, false);
+        PowerMockito.when(APIUtil.isEnabledUnlimitedTier()).thenReturn(true, false);
         Mockito.doNothing().when(apiMgtDAO).addSubscriber((Subscriber) Mockito.any(), Mockito.anyString());
         abstractAPIManager.addSubscriber(API_PROVIDER, SAMPLE_RESOURCE_ID);
         List<Tier> tierValues = new ArrayList<Tier>();
@@ -1120,8 +1123,8 @@ public class AbstractAPIManagerTestCase {
         Map<String, Tier> tierMap = new HashMap<String, Tier>();
         tierMap.put("Gold", new Tier("Gold"));
         tierMap.put("Silver", new Tier("Silver"));
-        BDDMockito.when(APIUtil.getTiers(Mockito.anyInt(), Mockito.anyString())).thenReturn(tierMap);
-        BDDMockito.when(APIUtil.sortTiers(Mockito.anySet())).thenReturn(tierValues);
+        PowerMockito.when(APIUtil.getTiers(Mockito.anyInt(), Mockito.anyString())).thenReturn(tierMap);
+        PowerMockito.when(APIUtil.sortTiers(Mockito.anySet())).thenReturn(tierValues);
         abstractAPIManager.addSubscriber(API_PROVIDER, SAMPLE_RESOURCE_ID);
         Mockito.verify(apiMgtDAO, Mockito.times(3)).addSubscriber((Subscriber) Mockito.any(), Mockito.anyString());
 
@@ -1214,7 +1217,7 @@ public class AbstractAPIManagerTestCase {
         GenericArtifact artifact = getGenericArtifact(SAMPLE_API_NAME,API_PROVIDER,SAMPLE_API_VERSION,"sample_qname");
         Mockito.when(genericArtifactManager.getGenericArtifact(Mockito.anyString())).thenReturn(artifact);
         PowerMockito.mockStatic(APIUtil.class);
-        BDDMockito.when(APIUtil.getAPI((GovernanceArtifact)Mockito.any(),(Registry)Mockito.any())).thenReturn(new API
+        PowerMockito.when(APIUtil.getAPI((GovernanceArtifact)Mockito.any(),(Registry)Mockito.any())).thenReturn(new API
                 (getAPIIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION)));
         abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN_1;
         Assert.assertEquals(abstractAPIManager.getSubscriberAPIs(subscriber).size(),1);
@@ -1372,7 +1375,7 @@ public class AbstractAPIManagerTestCase {
         }
         resource.setUUID(SAMPLE_RESOURCE_ID);
         PowerMockito.mockStatic(APIUtil.class);
-        BDDMockito.when(APIUtil.getAPI(genericArtifact, registry, null, "/test")).thenReturn(new API(identifier));
+        PowerMockito.when(APIUtil.getAPI(genericArtifact, registry, null, "/test")).thenReturn(new API(identifier));
         Assert.assertEquals(abstractAPIManager.getAPI(identifier, null, "/test").getId().getProviderName(),
                 API_PROVIDER);
     }
@@ -1385,13 +1388,13 @@ public class AbstractAPIManagerTestCase {
         tierMap.put("Gold", tier1);
         tierMap.put("Silver", tier2);
         PowerMockito.mockStatic(APIUtil.class);
-        BDDMockito.when(APIUtil.getAllTiers()).thenReturn(tierMap);
+        PowerMockito.when(APIUtil.getAllTiers()).thenReturn(tierMap);
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(null, null, null, null);
         abstractAPIManager.tenantId = -1;
         Assert.assertEquals(abstractAPIManager.getAllTiers().size(), 2);
         abstractAPIManager.tenantId = -1234;
         abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN_1;
-        BDDMockito.when(APIUtil.getAllTiers(Mockito.anyInt())).thenReturn(tierMap);
+        PowerMockito.when(APIUtil.getAllTiers(Mockito.anyInt())).thenReturn(tierMap);
         Assert.assertEquals(abstractAPIManager.getAllTiers().size(), 2);
     }
 
@@ -1405,10 +1408,10 @@ public class AbstractAPIManagerTestCase {
         tierMap.put("Gold", tier1);
         tierMap.put("Silver", tier2);
         PowerMockito.mockStatic(APIUtil.class);
-        BDDMockito.when(APIUtil.getAllTiers()).thenReturn(tierMap);
+        PowerMockito.when(APIUtil.getAllTiers()).thenReturn(tierMap);
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(null, null, null, null);
         Assert.assertEquals(abstractAPIManager.getAllTiers(SAMPLE_TENANT_DOMAIN_1).size(), 2);
-        BDDMockito.when(APIUtil.getAllTiers(Mockito.anyInt())).thenReturn(tierMap);
+        PowerMockito.when(APIUtil.getAllTiers(Mockito.anyInt())).thenReturn(tierMap);
         Assert.assertEquals(abstractAPIManager.getAllTiers(SAMPLE_TENANT_DOMAIN_1).size(), 2);
         Assert.assertEquals(abstractAPIManager.getAllTiers(SAMPLE_TENANT_DOMAIN_1).size(), 2); // verify the next branch
     }
@@ -1428,15 +1431,15 @@ public class AbstractAPIManagerTestCase {
         tierMap3.put("Silver", tier2);
         tierMap3.put("Platinum", tier3);
         PowerMockito.mockStatic(APIUtil.class);
-        BDDMockito.when(APIUtil.getTiers()).thenReturn(tierMap1);
-        BDDMockito.when(APIUtil.getTiers(Mockito.anyInt())).thenReturn(tierMap2);
-        BDDMockito.when(APIUtil.isAdvanceThrottlingEnabled()).thenReturn(false, false, true);
+        PowerMockito.when(APIUtil.getTiers()).thenReturn(tierMap1);
+        PowerMockito.when(APIUtil.getTiers(Mockito.anyInt())).thenReturn(tierMap2);
+        PowerMockito.when(APIUtil.isAdvanceThrottlingEnabled()).thenReturn(false, false, true);
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(null, null, null, null);
         abstractAPIManager.tenantId = -1;
         Assert.assertEquals(abstractAPIManager.getTiers().size(), 1);
         abstractAPIManager.tenantId = -1234;
         Assert.assertEquals(abstractAPIManager.getTiers().size(), 2);
-        BDDMockito.when(APIUtil.getTiersFromPolicies(Mockito.anyString(), Mockito.anyInt())).thenReturn(tierMap3);
+        PowerMockito.when(APIUtil.getTiersFromPolicies(Mockito.anyString(), Mockito.anyInt())).thenReturn(tierMap3);
         Assert.assertEquals(abstractAPIManager.getTiers().size(), 3);
     }
 
@@ -1456,15 +1459,15 @@ public class AbstractAPIManagerTestCase {
         tierMap3.put("Silver", tier2);
         tierMap3.put("Platinum", tier3);
         PowerMockito.mockStatic(APIUtil.class);
-        BDDMockito.when(APIUtil.getTiers()).thenReturn(tierMap1);
-        BDDMockito.when(APIUtil.getTiers(Mockito.anyInt())).thenReturn(tierMap2);
-        BDDMockito.when(APIUtil.isAdvanceThrottlingEnabled()).thenReturn(false, false, false, true);
+        PowerMockito.when(APIUtil.getTiers()).thenReturn(tierMap1);
+        PowerMockito.when(APIUtil.getTiers(Mockito.anyInt())).thenReturn(tierMap2);
+        PowerMockito.when(APIUtil.isAdvanceThrottlingEnabled()).thenReturn(false, false, false, true);
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(null, null, null, null);
         Assert.assertEquals(abstractAPIManager.getTiers(SAMPLE_TENANT_DOMAIN_1).size(), 1);
         Assert.assertEquals(abstractAPIManager.getTiers(SAMPLE_TENANT_DOMAIN_1).size(), 1); //verify next branch of if
         // condition
         Assert.assertEquals(abstractAPIManager.getTiers(SAMPLE_TENANT_DOMAIN_1).size(), 2);
-        BDDMockito.when(APIUtil.getTiersFromPolicies(Mockito.anyString(), Mockito.anyInt())).thenReturn(tierMap3);
+        PowerMockito.when(APIUtil.getTiersFromPolicies(Mockito.anyString(), Mockito.anyInt())).thenReturn(tierMap3);
         Assert.assertEquals(abstractAPIManager.getTiers(SAMPLE_TENANT_DOMAIN_1).size(), 3);
     }
 
@@ -1483,17 +1486,17 @@ public class AbstractAPIManagerTestCase {
         tierMap3.put("Silver", tier2);
         tierMap3.put("Platinum", tier3);
         PowerMockito.mockStatic(APIUtil.class);
-        BDDMockito.when(APIUtil.getTiers(Mockito.anyInt(), Mockito.anyString())).thenReturn(tierMap1);
-        BDDMockito.when(APIUtil.getTenantId(Mockito.anyString())).thenReturn(-1234);
-        BDDMockito.when(APIUtil.getTiersFromPolicies(Mockito.anyString(), Mockito.anyInt()))
+        PowerMockito.when(APIUtil.getTiers(Mockito.anyInt(), Mockito.anyString())).thenReturn(tierMap1);
+        PowerMockito.when(APIUtil.getTenantId(Mockito.anyString())).thenReturn(-1234);
+        PowerMockito.when(APIUtil.getTiersFromPolicies(Mockito.anyString(), Mockito.anyInt()))
                 .thenReturn(tierMap1, tierMap2, tierMap3);
-        BDDMockito.when(APIUtil.isAdvanceThrottlingEnabled()).thenReturn(false, true, true, true, true);
+        PowerMockito.when(APIUtil.isAdvanceThrottlingEnabled()).thenReturn(false, true, true, true, true);
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(null, null, null, null);
         Assert.assertEquals(abstractAPIManager.getTiers(0, API_PROVIDER).size(), 1);
         Assert.assertEquals(abstractAPIManager.getTiers(0, API_PROVIDER).size(), 1); //verify next branch of if
         // condition
         Assert.assertEquals(abstractAPIManager.getTiers(1, API_PROVIDER).size(), 2);
-        BDDMockito.when(APIUtil.getTiersFromPolicies(Mockito.anyString(), Mockito.anyInt())).thenReturn(tierMap3);
+        PowerMockito.when(APIUtil.getTiersFromPolicies(Mockito.anyString(), Mockito.anyInt())).thenReturn(tierMap3);
         Assert.assertEquals(abstractAPIManager.getTiers(2, API_PROVIDER).size(), 3);
         try {
             abstractAPIManager.getTiers(3, API_PROVIDER);
@@ -1509,7 +1512,7 @@ public class AbstractAPIManagerTestCase {
         domainMappings.put("domain1", SAMPLE_TENANT_DOMAIN);
         domainMappings.put("domain2", SAMPLE_TENANT_DOMAIN);
         PowerMockito.mockStatic(APIUtil.class);
-        BDDMockito.when(APIUtil.getDomainMappings(Mockito.anyString(), Mockito.anyString())).thenReturn(domainMappings);
+        PowerMockito.when(APIUtil.getDomainMappings(Mockito.anyString(), Mockito.anyString())).thenReturn(domainMappings);
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(null, null, null, null);
         Assert.assertEquals(abstractAPIManager.getTenantDomainMappings(SAMPLE_TENANT_DOMAIN, "api").size(), 2);
     }
@@ -1551,13 +1554,15 @@ public class AbstractAPIManagerTestCase {
                 new GlobalPolicy("policy9"), new GlobalPolicy("policy0") };
         PowerMockito.mockStatic(APIUtil.class);
         BDDMockito.when(APIUtil.getTenantId(Mockito.anyString())).thenReturn(-1234);
+        PowerMockito.when(APIUtil.replaceSystemProperty(Mockito.anyString())).thenAnswer((Answer<String>) invocation -> {
+            Object[] args = invocation.getArguments();
+            return (String) args[0];
+        });
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
         Mockito.when(apiMgtDAO.getAPIPolicies(Mockito.anyInt())).thenReturn(policies1);
         Mockito.when(apiMgtDAO.getApplicationPolicies(Mockito.anyInt())).thenReturn(policies2);
         Mockito.when(apiMgtDAO.getSubscriptionPolicies(Mockito.anyInt())).thenReturn(policies3);
         Mockito.when(apiMgtDAO.getGlobalPolicies(Mockito.anyInt())).thenReturn(policies4);
-        Assert.assertEquals(abstractAPIManager.getPolicies(API_PROVIDER, PolicyConstants.POLICY_LEVEL_API).length, 1);
-        Assert.assertEquals(abstractAPIManager.getPolicies(API_PROVIDER, PolicyConstants.POLICY_LEVEL_APP).length, 2);
 
         ServiceReferenceHolder sh = mockRegistryAndUserRealm(-1234);
         APIManagerConfigurationService amConfigService = Mockito.mock(APIManagerConfigurationService.class);
@@ -1567,12 +1572,16 @@ public class AbstractAPIManagerTestCase {
         PowerMockito.when(sh.getAPIManagerConfigurationService()).thenReturn(amConfigService);
         PowerMockito.when(amConfigService.getAPIManagerConfiguration()).thenReturn(amConfig);
         PowerMockito.when(amConfig.getThrottleProperties()).thenReturn(throttleProperties);
+
+        Assert.assertEquals(abstractAPIManager.getPolicies(API_PROVIDER, PolicyConstants.POLICY_LEVEL_API).length, 1);
+        Assert.assertEquals(abstractAPIManager.getPolicies(API_PROVIDER, PolicyConstants.POLICY_LEVEL_APP).length, 2);
+
         PowerMockito.when(throttleProperties.isEnableUnlimitedTier()).thenReturn(false);
 
-        Assert.assertEquals(abstractAPIManager.getPolicies(API_PROVIDER, PolicyConstants.POLICY_LEVEL_SUB).length, 3);
-        Assert.assertEquals(abstractAPIManager.getPolicies(API_PROVIDER, PolicyConstants.POLICY_LEVEL_GLOBAL).length,
-                4);
-        Assert.assertNull(abstractAPIManager.getPolicies(API_PROVIDER, "Test"));
+        Assert.assertEquals(3, abstractAPIManager.getPolicies(API_PROVIDER, PolicyConstants.POLICY_LEVEL_SUB).length);
+        Assert.assertEquals(4, abstractAPIManager.getPolicies(API_PROVIDER,
+                PolicyConstants.POLICY_LEVEL_GLOBAL).length);
+        Assert.assertEquals(0, abstractAPIManager.getPolicies(API_PROVIDER, "Test").length);
     }
 
     @Test
@@ -1586,6 +1595,13 @@ public class AbstractAPIManagerTestCase {
         Mockito.when(tenantManager.getTenantId(Mockito.anyString())).thenReturn(-1234);
         Mockito.when(registryService.getGovernanceUserRegistry(Mockito.anyString(), Mockito.anyInt()))
                 .thenThrow(RegistryException.class).thenReturn(registry);
+
+        PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.when(APIUtil.replaceSystemProperty(Mockito.anyString())).thenAnswer((Answer<String>) invocation -> {
+            Object[] args = invocation.getArguments();
+            return (String) args[0];
+        });
+        
         try {
             abstractAPIManager.searchPaginatedAPIs("search", API_PROVIDER, 0, 5, false);
             Assert.fail("Exception not thrown for error scenario");
@@ -1594,19 +1610,18 @@ public class AbstractAPIManagerTestCase {
         }
         API api = new API(getAPIIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION));
         Documentation documentation = new Documentation(DocumentationType.HOWTO, "DOC1");
-        Map<Documentation, API> documentationAPIMap = new HashMap<Documentation, API>();
-        PowerMockito.mockStatic(APIUtil.class);
+        Map<Documentation, API> documentationAPIMap = new HashMap<>();
         BDDMockito.when(APIUtil
-                .searchAPIsByDoc((Registry) Mockito.any(), Mockito.anyInt(), Mockito.anyString(), Mockito.anyString(),
+                .searchAPIsByDoc(Mockito.any(), Mockito.anyInt(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString())).thenReturn(documentationAPIMap);
         Assert.assertEquals(
                 abstractAPIManager.searchPaginatedAPIs("doc=search", SAMPLE_TENANT_DOMAIN_1, 0, 5, false).get("length"),
                 0);
         documentationAPIMap.put(documentation, api);
         Assert.assertEquals(abstractAPIManager.searchPaginatedAPIs("doc=search", null, 0, 5, false).get("length"), 5);
-        Map<String, Object> contextApis = new HashMap<String, Object>();
+        Map<String, Object> contextApis = new HashMap<>();
         contextApis.put("api2", new Object());
-        BDDMockito.when(APIUtil.searchAPIsByURLPattern((Registry) Mockito.any(), Mockito.anyString(), Mockito.anyInt(),
+        BDDMockito.when(APIUtil.searchAPIsByURLPattern(Mockito.any(), Mockito.anyString(), Mockito.anyInt(),
                 Mockito.anyInt())).thenReturn(contextApis);
         Assert.assertTrue(
                 abstractAPIManager.searchPaginatedAPIs("subcontext=search", null, 0, 5, false).containsKey("api2"));

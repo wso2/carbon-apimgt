@@ -16,25 +16,25 @@
 
 package org.wso2.carbon.apimgt.keymgt.token;
 
-import junit.framework.TestCase;
 import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.junit.Before;
+import org.junit.Test;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
-import org.wso2.carbon.apimgt.keymgt.token.JWTGenerator;
 //import org.wso2.carbon.apimgt.impl.utils.TokenGenUtil;
 
 
-public class TokenGenTest extends TestCase {
+public class TokenGenTest {
     private static final Log log = LogFactory.getLog(TokenGenTest.class);
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         String dbConfigPath = System.getProperty("APIManagerDBConfigurationPath");
         APIManagerConfiguration config = new APIManagerConfiguration();
         config.load(dbConfigPath);
@@ -42,6 +42,7 @@ public class TokenGenTest extends TestCase {
                 new APIManagerConfigurationServiceImpl(config));
     }
 
+    @Test
     public void testAbstractJWTGenerator() throws Exception {
         JWTGenerator jwtGen = new JWTGenerator();
         APIKeyValidationInfoDTO dto=new APIKeyValidationInfoDTO();
@@ -95,7 +96,9 @@ public class TokenGenTest extends TestCase {
         decodedBody = new String(Base64Utils.decode(body));
         System.out.println("Body: " + decodedBody);
     }
+
     //    TODO: Have to convert to work with new JWT generation and signing
+    @Test
     public void testJWTGeneration() throws Exception {
         JWTGenerator jwtGen = new JWTGenerator();
         APIKeyValidationInfoDTO dto=new APIKeyValidationInfoDTO();

@@ -23,7 +23,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
-import static junit.framework.Assert.fail;
+import static org.junit.Assert.fail;
 
 /**
  * Test class for MediationSecurityAdminServiceClient

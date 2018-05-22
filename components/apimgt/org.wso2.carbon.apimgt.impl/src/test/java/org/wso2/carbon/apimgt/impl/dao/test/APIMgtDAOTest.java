@@ -22,7 +22,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.commons.io.FileUtils;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.BDDMockito;
@@ -115,8 +115,8 @@ public class APIMgtDAOTest {
 
     public static ApiMgtDAO apiMgtDAO;
 
-    @BeforeClass
-    public static void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         String dbConfigPath = System.getProperty("APIManagerDBConfigurationPath");
         APIManagerConfiguration config = new APIManagerConfiguration();
         initializeDatabase(dbConfigPath);
@@ -192,16 +192,7 @@ public class APIMgtDAOTest {
         assertNotNull(subscribers);
         assertTrue(subscribers.size() > 0);
     }
-    @Test
-    public void testAccessKeyForAPI() throws Exception {
-        APIInfoDTO apiInfoDTO = new APIInfoDTO();
-        apiInfoDTO.setApiName("API1");
-        apiInfoDTO.setProviderId("SUMEDHA");
-        apiInfoDTO.setVersion("V1.0.0");
-        String accessKey = apiMgtDAO.getAccessKeyForAPI("SUMEDHA", "APPLICATION1", apiInfoDTO, "PRODUCTION");
-        assertNotNull(accessKey);
-        assertTrue(accessKey.length() > 0);
-    }
+
     @Test
     public void testGetSubscribedAPIsOfUser() throws Exception {
         APIInfoDTO[] apis = apiMgtDAO.getSubscribedAPIsOfUser("SUMEDHA");
