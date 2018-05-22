@@ -3275,8 +3275,8 @@ public class APIStoreHostObject extends ScriptableObject {
                 row.put("status", row, application.getStatus());
                 row.put("description", row, application.getDescription());
                 row.put("groupId", row, application.getGroupId());
-                row.put("applicationAttributes",row, new ObjectMapper().
-                        writeValueAsString(application.getApplicationAttributes()));
+                row.put("applicationAttributes",row, new ObjectMapper().writeValueAsString(application.getApplicationAttributes()));
+                log.debug("hhhhhh " + application.getApplicationAttributes());
                 return row;
             }
         }
