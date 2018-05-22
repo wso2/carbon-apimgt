@@ -95,7 +95,7 @@ public type OAuthAuthProvider object {
 
     public function authenticate (APIKeyValidationRequestDto apiKeyValidationRequestDto) returns (APIKeyValidationDto);
 
-    public function doIntrospect (APIKeyValidationRequestDto apiKeyValidationRequestDto) returns (json);
+    public function doKeyValidation(APIKeyValidationRequestDto apiKeyValidationRequestDto) returns (json);
 
 };
 
@@ -106,14 +106,13 @@ public type OAuthAuthProvider object {
 public function OAuthAuthProvider::authenticate (APIKeyValidationRequestDto apiKeyValidationRequestDto) returns
                                                                                                               (APIKeyValidationDto) {
     string cacheKey = getAccessTokenCacheKey(apiKeyValidationRequestDto);
-    io:println("cacheKey " + cacheKey);
     boolean authorized;
     APIKeyValidationDto apiKeyValidationDto;
     match self.gatewayTokenCache.authenticateFromGatewayKeyValidationCache(cacheKey) {
         APIKeyValidationDto apiKeyValidationDtoFromcache => {
         if(isAccessTokenExpired(apiKeyValidationDtoFromcache)) {
             self.gatewayTokenCache.removeFromGatewayKeyValidationCache(cacheKey);
-            self.gatewayTokenCache.addToInvalidTokenCache(apiKeyValidationRequestDto.accessToken, true);
+            self.gatewayTokenCache.addToInvalidTokenCache(cacheKey, true);
             apiKeyValidationDtoFromcache.authorized= "false";
             log:printDebug("Access token " + apiKeyValidationRequestDto.accessToken + " found in cache. But token is
             expired");
@@ -124,7 +123,7 @@ public function OAuthAuthProvider::authenticate (APIKeyValidationRequestDto apiK
         log:printDebug("Access token " + apiKeyValidationRequestDto.accessToken + " found in cache.");
         }
         () => {
-            match self.gatewayTokenCache.retrieveFromInvalidTokenCache(apiKeyValidationRequestDto.accessToken) {
+            match self.gatewayTokenCache.retrieveFromInvalidTokenCache(cacheKey) {
                 boolean cacheAuthorizedValue => {
                     APIKeyValidationDto apiKeyValidationInfoDTO = { authorized: "false", validationStatus:API_AUTH_INVALID_CREDENTIALS };
                     log:printDebug("Access token " + apiKeyValidationRequestDto.accessToken + " found in invalid
@@ -134,7 +133,7 @@ public function OAuthAuthProvider::authenticate (APIKeyValidationRequestDto apiK
                 () => {
                     log:printDebug("Access token " + apiKeyValidationRequestDto.accessToken + " not found in cache.
                     Hence calling the key vaidation service.");
-                    json keyValidationInfoJson = self.doIntrospect(apiKeyValidationRequestDto);
+                    json keyValidationInfoJson = self.doKeyValidation(apiKeyValidationRequestDto);
                     match <string>keyValidationInfoJson.authorized {
                         string authorizeValue => {
                             boolean auth = <boolean>authorizeValue;
@@ -152,7 +151,7 @@ public function OAuthAuthProvider::authenticate (APIKeyValidationRequestDto apiK
                                 authorized = auth;
                                 self.gatewayTokenCache.addToGatewayKeyValidationCache(cacheKey, apiKeyValidationDto);
                             } else {
-                                self.gatewayTokenCache.addToInvalidTokenCache(apiKeyValidationRequestDto.accessToken, true);
+                                self.gatewayTokenCache.addToInvalidTokenCache(cacheKey, true);
                                 apiKeyValidationDto.authorized="false";
                                 apiKeyValidationDto.validationStatus = check <string>keyValidationInfoJson
                                     .validationStatus;
@@ -178,15 +177,16 @@ public function OAuthAuthProvider::authenticate (APIKeyValidationRequestDto apiK
 }
 
 
-public function OAuthAuthProvider::doIntrospect (APIKeyValidationRequestDto apiKeyValidationRequestDto) returns (json) {
+public function OAuthAuthProvider::doKeyValidation (APIKeyValidationRequestDto apiKeyValidationRequestDto)
+                                       returns (json) {
     try {
         string base64Header = getGatewayConfInstance().getKeyManagerConf().credentials.username + ":" +
             getGatewayConfInstance().getKeyManagerConf().credentials.password;
         string encodedBasicAuthHeader = check base64Header.base64Encode();
 
-        http:Request clientRequest1 = new;
+        http:Request keyValidationRequest = new;
 
-        http:Response clientResponse1 = new;
+        http:Response keyValidationResponse = new;
         string xmlString = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"
             xmlns:xsd=\"http://org.apache.axis2/xsd\">
             <soapenv:Header/>
@@ -210,37 +210,43 @@ public function OAuthAuthProvider::doIntrospect (APIKeyValidationRequestDto apiK
             </soapenv:Body>
             </soapenv:Envelope>";
 
-        clientRequest1.setTextPayload(xmlString,contentType="text/xml");
-        clientRequest1.setHeader(CONTENT_TYPE_HEADER, "text/xml");
-        clientRequest1.setHeader(AUTHORIZATION_HEADER, BASIC_PREFIX_WITH_SPACE +
+        keyValidationRequest.setTextPayload(xmlString,contentType="text/xml");
+        keyValidationRequest.setHeader(CONTENT_TYPE_HEADER, "text/xml");
+        keyValidationRequest.setHeader(AUTHORIZATION_HEADER, BASIC_PREFIX_WITH_SPACE +
                 encodedBasicAuthHeader);
-        clientRequest1.setHeader("SOAPAction", "urn:validateKey");
-        var result1 = keyValidationEndpoint -> post("/services/APIKeyValidationService", request=clientRequest1);
+        keyValidationRequest.setHeader("SOAPAction", "urn:validateKey");
+        time:Time time = time:currentTime();
+        int startTimeMills = time.time;
+        var result1 = keyValidationEndpoint -> post("/services/APIKeyValidationService", request= keyValidationRequest);
+        time = time:currentTime();
+        int endTimeMills = time.time;
+        log:printDebug("Total time taken for key validation service call : " + (endTimeMills- startTimeMills) +
+                "ms");
 
         match result1 {
             error err => {
-                io:println("Error occurred while reading locator response",err);
+                log:printError("Error occurred while reading key validation response",err =err);
             }
             http:Response prod => {
-                clientResponse1 = prod;
+                keyValidationResponse = prod;
             }
         }
         xml responsepayload;
-        match clientResponse1.getXmlPayload() {
+        match keyValidationResponse.getXmlPayload() {
             error err => {
-                io:println("Error occurred while getting key validation service response ",err);
+                log:printError("Error occurred while getting key validation service response ",err=err);
                 return {};
             }
             xml responseXml => {
                 responsepayload = responseXml;
             }
         }
-        json j2 = responsepayload.toJSON({attributePrefix: "", preserveNamespaces: false});
-        j2 = j2["Envelope"]["Body"]["validateKeyResponse"]["return"];
-        return(j2);
+        json payloadJson = responsepayload.toJSON({attributePrefix: "", preserveNamespaces: false});
+        payloadJson = payloadJson["Envelope"]["Body"]["validateKeyResponse"]["return"];
+        return(payloadJson);
 
     } catch (error err) {
-        io:println(err);
+        log:printError("Error occurred while validating token",err =err);
         return {};
     }
     return {};
