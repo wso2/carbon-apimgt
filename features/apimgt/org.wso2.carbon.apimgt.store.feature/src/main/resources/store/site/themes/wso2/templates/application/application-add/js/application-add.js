@@ -33,13 +33,29 @@ $(document).ready(function () {
         var description = $("#description").val();
         var groupId = $("#groupId").val();
         var status='';
+
+        var attribute;
+        var attributeKey;
+        var applicationAttributes = {};
+
+        // Create json object with keys and values of custom attributes of an application
+        // Ex : {"External reference id" : "###" , "Billing tier" : "####" }
+
+        var numberOfAttributes = $("#numberOfAttributes").val();
+        for (var i = 0; i < numberOfAttributes; i++) {
+            attributeKey = $("#attributeKey_" + i.toString()).val();
+            attribute = $("#attribute_" + i.toString()).val();
+            applicationAttributes[attributeKey] = attribute;
+        }
+
         jagg.post("/site/blocks/application/application-add/ajax/application-add.jag", {
             action:"addApplication",
             application:application,
             tier:tier,
             callbackUrl:callbackUrl,
             description:description,
-            groupId:groupId
+            groupId:groupId,
+            applicationAttributes:JSON.stringify(applicationAttributes)
         }, function (result) {
             if (result.error == false) {
                 status=result.status;

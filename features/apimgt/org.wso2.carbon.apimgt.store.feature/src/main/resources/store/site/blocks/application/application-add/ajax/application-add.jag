@@ -5,7 +5,7 @@ include("/jagg/jagg.jag");
     var site = require("/site/conf/site.json");
     var ssoEnabled = site.ssoConfiguration.enabled;
     response.contentType = "application/json; charset=UTF-8";
-    var mod, obj, application, result, username, tier, callbackUrl, description,
+    var mod, obj, application, result, username, tier, callbackUrl, description, applicationAttributes
             msg = require("/site/conf/ui-messages.jag"),
             action = request.getParameter("action"),
             user = jagg.getUser();
@@ -52,7 +52,8 @@ include("/jagg/jagg.jag");
         }else{
             callbackUrl = request.getParameter("callbackUrl");
         }        
-        description = request.getParameter("description");       
+        description = request.getParameter("description");
+        applicationAttributes = request.getParameter("applicationAttributes");
         mod = jagg.module("application");
         var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
         var tenantDomain = MultitenantUtils.getTenantDomain(user.username);
@@ -61,7 +62,8 @@ include("/jagg/jagg.jag");
         var applicationTierList = APIUtil.getTiers(applicationTierType, tenantDomain);
 
         if (!applicationTierList.isEmpty() && applicationTierList.containsKey(tier)) {
-            result = mod.addApplication(username, application, tier, callbackUrl, description, groupId);
+            result = mod.addApplication(username, application, tier, callbackUrl, description, groupId,
+                applicationAttributes);
             if (result.error) {
                 obj = {
                     error: true,
