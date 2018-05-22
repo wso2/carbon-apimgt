@@ -45,7 +45,8 @@ public type GlobalThrottleStreamDTO {
     string throttleKey ;
     boolean isThrottled;
     int expiryTimeStamp;
-    string conditions;
+    //TODO add the conditions once ballerina support comes
+    //string conditions;
 };
 
 public type EligibilityStreamDTO {
