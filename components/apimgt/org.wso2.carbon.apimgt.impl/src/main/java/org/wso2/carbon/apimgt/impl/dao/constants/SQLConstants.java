@@ -1190,10 +1190,6 @@ public class SQLConstants {
                     "UUID)" +
             " VALUES (?,?,?,?,?,?,?,?,?,?,?)";
 
-    public static final String ADD_APPLICATION_ATTRIBUTES_SQL =
-            " INSERT INTO AM_APPLICATION_ATTRIBUTES (APPLICATION_ID, NAME, VALUE, TENANT_ID) VALUES (?,?,?,?)";
-
-
     public static final String UPDATE_APPLICATION_SQL =
             " UPDATE " +
             "   AM_APPLICATION" +
@@ -1207,6 +1203,9 @@ public class SQLConstants {
             " WHERE" +
             "   APPLICATION_ID = ?";
 
+    public static final String ADD_APPLICATION_ATTRIBUTES_SQL =
+            " INSERT INTO AM_APPLICATION_ATTRIBUTES (APPLICATION_ID, NAME, VALUE, TENANT_ID) VALUES (?,?,?,?)";
+
     public static final String REMOVE_APPLICATION_ATTRIBUTES_SQL =
             " DELETE FROM " +
                     "   AM_APPLICATION_ATTRIBUTES" +
@@ -1218,7 +1217,6 @@ public class SQLConstants {
                     "   AM_APPLICATION_ATTRIBUTES" +
                     " WHERE" +
                     "   NAME = ? AND APPLICATION_ID = ?";
-
 
     public static final String UPDATE_APPLICATION_STATUS_SQL =
             " UPDATE AM_APPLICATION SET APPLICATION_STATUS = ? WHERE APPLICATION_ID = ?";

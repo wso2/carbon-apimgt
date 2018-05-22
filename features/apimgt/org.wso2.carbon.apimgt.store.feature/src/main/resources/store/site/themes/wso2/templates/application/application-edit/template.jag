@@ -15,8 +15,6 @@
 
  var appConfig = require("/modules/application/application-attributes.jag");
  var attributesFromConfig = appConfig.readApplicationAttributes();
-
-
  var description = "";
  var groupId = "";
  var callbackUrl = "";
@@ -29,21 +27,19 @@ if(app.groupId != null ){
  if(app.callbackUrl != null ){
   callbackUrl = app.callbackUrl; 
  }
-
  if (app.applicationAttributes != null) {
     applicationAttributes = JSON.parse(app.applicationAttributes);
  }
 
-    function isRequiredAttribute(key) {
-        var flag = false;
-        for (var i = 0; i < attributesFromConfig.length; i++) {
-            if (key == attributesFromConfig[i].Attribute && (attributesFromConfig[i].Required || attributesFromConfig[i].required)) {
-                flag = true;
-            }
+ function isRequiredAttribute(key) {
+    var flag = false;
+    for (var i = 0; i < attributesFromConfig.length; i++) {
+        if (key == attributesFromConfig[i].Attribute && (attributesFromConfig[i].Required || attributesFromConfig[i].required)) {
+            flag = true;
         }
-        return flag;
     }
- %>
+    return flag;
+ } %>
  <script>
  var apiViewUrl = '<%= jagg.url('/apis/info') %>';
  </script>
@@ -158,16 +154,13 @@ if(jagg.isMultiGroupEnabled()){
                     <input type="text" class="form-control" id="attribute_<%=count.toString()%>"
                     value=<% if (applicationAttributes[attributeKey]) { %>
                                 "<%=encode.forHtml(applicationAttributes[attributeKey])%>"
-                          <% } else{ %>
-                          ""
-            <% } %>  />
+                          <% } %>  />
                </div>
             <% }
             count += 1; %>
             </div>
         <% } %>
         <input type="hidden" name="numberOfAttributes"  id="numberOfAttributes" value="<%= encode.forHtml(count)%>"/>
-
     <% } %>
 
   <div class="form-group">

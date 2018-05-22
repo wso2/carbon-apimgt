@@ -13,11 +13,10 @@
  var i=0, tiers = outputs.tiers;
  var user = jagg.getUser();
  var app = require("/modules/application/application-attributes.jag");
- var applicationAttributes = app.readApplicationAttributes();
+ var applicationAttributes = app.readApplicationAttributes(); %>
 
-    %>
-    <script>
-    var apiViewUrl = '<%= jagg.url('/apis/info') %>';
+ <script>
+ var apiViewUrl = '<%= jagg.url('/apis/info') %>';
  var urlPrefix = '<%=jagg.getTenantURLPrefix("&") %>';
 
  var isTutorialCompleted = localStorage.getItem("isTutorialCompleted");
@@ -118,8 +117,7 @@
         <textarea id="description"  class="form-control" type="text" rows="3"></textarea>
     </div>
   </div>
-
-    <% if(applicationAttributes!=null) { %>
+    <% if (applicationAttributes!=null) { %>
         <input type="hidden" name="numberOfAttributes"  id="numberOfAttributes" value="<%= encode.forHtml(applicationAttributes.length) %>"/>
         <%
         // Iterate through the keys, read from configuration file
@@ -127,9 +125,7 @@
         for (i = 0; i < applicationAttributes.length; i++) { %>
             <div class="form-group">
                 <label class="col-md-3 col-lg-3 control-label" for="attribute_<%= i%>">
-
                 <%=encode.forHtml(i18n.localize(applicationAttributes[i].Attribute,applicationAttributes[i].Attribute))%>:
-
                 <% if ( Boolean(applicationAttributes[i].required ) || applicationAttributes[i].Required ) { %>
                 <span class="requiredAstrix">*</span>
                 </label>
@@ -137,15 +133,12 @@
                 <input type="hidden" id="attributeKey_<%= i.toString()%>" value="<%= encode.forHtml(applicationAttributes[i].Attribute) %>"/>
                 <input type="text" class="form-control required" name="attribute_<%= i.toString()%>" id="attribute_<%= i.toString()%>"/>
                 </div>
-
                 <% } else { %>
-
                 </label>
                 <div class="col-md-8 col-lg-6">
                 <input type="hidden" id="attributeKey_<%= i.toString()%>" value="<%= encode.forHtml(applicationAttributes[i].Attribute) %>"/>
                 <input type="text" class="form-control" id="attribute_<%= i.toString()%>"/>
                 </div>
-
                 <% } %>
             </div>
         <% }

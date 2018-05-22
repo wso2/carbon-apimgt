@@ -7110,15 +7110,14 @@ public final class APIUtil {
     }
 
     /**
-     * This method is used to get if there any tenant-specific application configurations from the tenant
+     * Get if there any tenant-specific application configurations from the tenant
      * registry
      *
      * @param tenantId The Tenant Id
-     * @return The Application Attributes read from tenant registry or else null
+     * @return JSONObject The Application Attributes read from tenant registry or else null
      * @throws APIManagementException Throws if the registry resource doesn't exist
      * or the content cannot be parsed to JSON
      */
-
     public static JSONObject getAppAttributeKeysFromRegistry(int tenantId) throws APIManagementException {        try {
         Registry registryConfig = ServiceReferenceHolder.getInstance().getRegistryService().getConfigSystemRegistry(tenantId);
         if (registryConfig.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
@@ -7133,12 +7132,12 @@ public final class APIUtil {
             }
         }
 
-    } catch (RegistryException e) {
+    } catch (RegistryException exception) {
         String msg = "Error while retrieving application attributes from tenant registry.";
-        throw new APIManagementException(msg, e);
-    } catch (ParseException pe) {
+        throw new APIManagementException(msg, exception);
+    } catch (ParseException parseExceptione) {
         String msg = "Couldn't create json object from Swagger object for custom application attributes.";
-        throw new APIManagementException(msg, pe);
+        throw new APIManagementException(msg, parseExceptione);
     }
         return null;
     }

@@ -37,7 +37,6 @@ $(document).ready(function () {
         var applicationOld = $("#application-name-old").val();
         var groupIdNew = $("#groupId").val();
         var groupIdOld = $("#groupId-old").val();
-
         var numberOfAttributes = $("#numberOfAttributes").val();
         var applicationAttributesNew = {};
         var attributeNew;
@@ -48,7 +47,6 @@ $(document).ready(function () {
             attributeNew = $("#attribute_" + i.toString()).val();
             applicationAttributesNew[attributeKeyNew] = attributeNew;
         }
-
         jagg.post("/site/blocks/application/application-update/ajax/application-update.jag", {
             action:"updateApplication",
             applicationNew:application,

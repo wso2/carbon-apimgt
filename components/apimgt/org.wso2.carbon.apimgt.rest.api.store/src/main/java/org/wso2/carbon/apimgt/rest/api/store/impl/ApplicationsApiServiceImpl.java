@@ -162,7 +162,6 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                 }
                 keySet.add(key);
             }
-
             body.setAttributes(validateApplicationAttributes(applicationAttributes,keySet));
 
             //subscriber field of the body is not honored. It is taken from the context
@@ -391,7 +390,6 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             Application oldApplication = apiConsumer.getApplicationByUUID(applicationId);
             if (oldApplication != null) {
                 if (RestAPIStoreUtils.isUserOwnerOfApplication(oldApplication)) {
-
                     Object applicationAttributesFromUser = body.getAttributes();
                     Map<String, String> applicationAttributes = new ObjectMapper().convertValue(applicationAttributesFromUser, Map.class);
 
@@ -403,9 +401,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                         String key = (String) jsonObject.get(APIConstants.ApplicationAttributes.ATTRIBUTE);
                         keySet.add(key);
                     }
-
                     body.setAttributes(validateApplicationAttributes(applicationAttributes, keySet));
-
                     //we do not honor the subscriber coming from the request body as we can't change the subscriber of the application
                     Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
                     //groupId of the request body is not honored for now.
@@ -598,5 +594,4 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         }
         return applicationAttributes;
     }
-
 }

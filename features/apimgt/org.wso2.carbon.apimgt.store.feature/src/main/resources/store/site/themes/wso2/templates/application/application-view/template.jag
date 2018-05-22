@@ -75,7 +75,7 @@ for(var i=0;i < outputs.tiers.length; i++){
     </div>
   </div>
 
-    <div class="form-group">
+  <div class="form-group">
   <% var applicationAttributes = parse(application.applicationAttributes);
 
     for (var prop in applicationAttributes) { %>

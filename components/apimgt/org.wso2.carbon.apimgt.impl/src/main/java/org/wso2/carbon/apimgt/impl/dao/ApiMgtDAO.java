@@ -5432,7 +5432,6 @@ public class ApiMgtDAO {
             }
 
             rs = prepStmt.executeQuery();
-
             while (rs.next()) {
                 String subscriberId = rs.getString("SUBSCRIBER_ID");
                 String subscriberName = rs.getString("USER_ID");
@@ -5444,7 +5443,6 @@ public class ApiMgtDAO {
                 application.setDescription(rs.getString("DESCRIPTION"));
                 application.setStatus(rs.getString("APPLICATION_STATUS"));
                 application.setCallbackUrl(rs.getString("CALLBACK_URL"));
-
                 applicationId = rs.getInt("APPLICATION_ID");
                 application.setId(applicationId);
                 application.setTier(rs.getString("APPLICATION_TIER"));
@@ -5455,7 +5453,6 @@ public class ApiMgtDAO {
                 if (multiGroupAppSharingEnabled) {
                     setGroupIdInApplication(application);
                 }
-
                 if (application != null) {
                     Map<String, String> applicationAttributes = getApplicationAttributes(connection, applicationId);
                     application.setApplicationAttributes(applicationAttributes);
@@ -5500,9 +5497,7 @@ public class ApiMgtDAO {
             prepStmt.setInt(1, applicationId);
 
             rs = prepStmt.executeQuery();
-
             if (rs.next()) {
-
                 String applicationName = rs.getString("NAME");
                 String subscriberId = rs.getString("SUBSCRIBER_ID");
                 String subscriberName = rs.getString("USER_ID");
@@ -5520,12 +5515,10 @@ public class ApiMgtDAO {
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
             }
-
             if (application != null) {
                 Map<String,String> applicationAttributes = getApplicationAttributes(connection, applicationId);
                 application.setApplicationAttributes(applicationAttributes);
             }
-
         } catch (SQLException e) {
             handleException("Error while obtaining details of the Application : " + applicationId, e);
         } finally {
@@ -5592,13 +5585,11 @@ public class ApiMgtDAO {
                     application.setLastUpdatedTime(application.getCreatedTime());
                 }
             }
-
             // Get custom attributes of application
             if (application != null) {
                 Map<String, String> applicationAttributes = getApplicationAttributes(connection, applicationId);
                 application.setApplicationAttributes(applicationAttributes);
             }
-
         } catch (SQLException e) {
             handleException("Error while obtaining details of the Application : " + uuid, e);
         } finally {
@@ -11388,6 +11379,13 @@ public class ApiMgtDAO {
         }
     }
 
+    /**
+     * Get all attributes stored against an Application
+     *
+     * @param conn Database connection
+     * @param applicationId
+     * @throws APIManagementException
+     */
     public Map<String, String> getApplicationAttributes(Connection conn, int applicationId) throws APIManagementException {
 
         PreparedStatement ps = null;
@@ -11410,22 +11408,30 @@ public class ApiMgtDAO {
         return applicationAttributes;
     }
 
+    /**
+     * Delete certain attribute stored against an Application
+     *
+     * @param attributeKey User defined key of attribute
+     * @param applicationId
+     * @throws APIManagementException
+     */
     public void deleteApplicationAttributes(String attributeKey, int applicationId) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement ps = null;
 
-        try{
+        try {
             connection = APIMgtDBUtil.getConnection();
             ps = connection.prepareStatement(SQLConstants.REMOVE_APPLICATION_ATTRIBUTES_BY_ATTRIBUTE_NAME_SQL);
-            ps.setString(1,attributeKey);
-            ps.setInt(2,applicationId);
+            ps.setString(1, attributeKey);
+            ps.setInt(2, applicationId);
 
             ps.execute();
             connection.commit();
         } catch (SQLException e) {
             handleException("Error in establishing SQL connection ", e);
         } finally {
-            APIMgtDBUtil.closeAllConnections(ps,connection,null);
+            APIMgtDBUtil.closeAllConnections(ps, connection, null);
         }
     }
 }
