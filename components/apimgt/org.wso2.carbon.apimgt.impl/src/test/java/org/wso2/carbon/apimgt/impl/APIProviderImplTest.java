@@ -182,20 +182,20 @@ public class APIProviderImplTest {
 
         apimgtDAO = Mockito.mock(ApiMgtDAO.class);
         PowerMockito.when(APIUtil.isAPIManagementEnabled()).thenReturn(false);
-        PowerMockito.when(APIUtil.replaceEmailDomainBack(Matchers.anyString())).thenReturn("admin");
-        Mockito.when(APIUtil.replaceEmailDomain(Matchers.anyString())).thenReturn("admin");
+        PowerMockito.when(APIUtil.replaceEmailDomainBack(Mockito.anyString())).thenReturn("admin");
+        Mockito.when(APIUtil.replaceEmailDomain(Mockito.anyString())).thenReturn("admin");
 
         PrivilegedCarbonContext prcontext = Mockito.mock(PrivilegedCarbonContext.class);
         PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(prcontext);
 
-        PowerMockito.doNothing().when(prcontext).setUsername(Matchers.anyString());
-        PowerMockito.doNothing().when(prcontext).setTenantDomain(Matchers.anyString(), Matchers.anyBoolean());
+        PowerMockito.doNothing().when(prcontext).setUsername(Mockito.anyString());
+        PowerMockito.doNothing().when(prcontext).setTenantDomain(Mockito.anyString(), Mockito.anyBoolean());
 
         ThrottlePolicyDeploymentManager manager = Mockito.mock(ThrottlePolicyDeploymentManager.class);
         PowerMockito.when(ThrottlePolicyDeploymentManager.getInstance()).thenReturn(manager);
 
         artifactManager = Mockito.mock(GenericArtifactManager.class);
-        PowerMockito.when(APIUtil.getArtifactManager(Matchers.any(Registry.class), Matchers.anyString()))
+        PowerMockito.when(APIUtil.getArtifactManager(Mockito.any(Registry.class), Mockito.anyString()))
                 .thenReturn(artifactManager);
         artifact = Mockito.mock(GenericArtifact.class);
         gatewayManager = Mockito.mock(APIGatewayManager.class);
@@ -205,6 +205,10 @@ public class APIProviderImplTest {
         TestUtils.mockAPICacheClearence();
         TestUtils.mockAPIMConfiguration();
         mockDocumentationCreation();
+        PowerMockito.when(APIUtil.replaceSystemProperty(Mockito.anyString())).thenAnswer((Answer<String>) invocation -> {
+            Object[] args = invocation.getArguments();
+            return (String) args[0];
+        });
     }
 
     @Test
@@ -1086,12 +1090,12 @@ public class APIProviderImplTest {
         Mockito.when(artifactManager.newGovernanceArtifact(Matchers.any(QName.class))).thenReturn(artifact);
         Mockito.when(APIUtil.createAPIArtifactContent(artifact, api)).thenReturn(artifact);
 
-        Mockito.doThrow(APIManagementException.class).when(apimgtDAO).addAPI(api, -1234);
+        Mockito.doNothing().when(apimgtDAO).addAPI(api, -1234);
 
         try {
             apiProvider.addAPI(api);
-        } catch (APIManagementException e) {
-            Assert.assertEquals("Error in adding API :" + api.getId().getApiName(), e.getMessage());
+        } catch (Exception e) {
+            Assert.fail(e.getMessage());
         }
     }
 
@@ -1111,8 +1115,7 @@ public class APIProviderImplTest {
             apiProvider.addAPI(api);
             Assert.fail("Exception was expected, but wasn't thrown");
         } catch (APIManagementException e) {
-            Assert.assertEquals("Error in adding API :" + api.getId().getApiName(), e.getMessage());
-            Assert.assertTrue(e.getCause().getMessage().contains("API Name contains one or more illegal characters"));
+            Assert.assertTrue(e.getMessage().contains("API Name contains one or more illegal characters"));
         }
     }
 
@@ -1132,8 +1135,7 @@ public class APIProviderImplTest {
             apiProvider.addAPI(api);
             Assert.fail("Exception was expected, but wasn't thrown");
         } catch (APIManagementException e) {
-            Assert.assertEquals("Error in adding API :" + api.getId().getApiName(), e.getMessage());
-            Assert.assertTrue(e.getCause().getMessage().contains("API Version contains one or more illegal characters"));
+            Assert.assertTrue(e.getMessage().contains("API Version contains one or more illegal characters"));
         }
     }
 

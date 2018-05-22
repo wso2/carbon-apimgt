@@ -18,8 +18,8 @@
  */
 package org.wso2.carbon.apimgt.usage.client.test;
 
-import junit.framework.Assert;
-import junit.framework.TestCase;
+import org.junit.Assert;
+import org.junit.Test;
 import org.wso2.carbon.apimgt.usage.client.util.APIUsageClientUtil;
 
 import java.util.Calendar;
@@ -28,8 +28,9 @@ import java.util.GregorianCalendar;
 /**
  * Testing API Last AccessDate.
  */
-public class APILastAccessDateTestCase extends TestCase {
+public class APILastAccessDateTestCase {
 
+    @Test
     public void testAPILastAccessDateFormat(){
 
         Calendar calendar = new GregorianCalendar(2016, 2, 31, 10, 30, 15); //2016-03-31::10:30:15

@@ -47,8 +47,8 @@ public class APIManagerComponentImagePermissionTest {
     private AuthorizationManager authManager;
     private ComponentContext componentContext;
 
-    @BeforeClass
-    public static void setupClass() {
+    @Before
+    public void setupClass() {
         System.setProperty("carbon.home", "");
     }
 

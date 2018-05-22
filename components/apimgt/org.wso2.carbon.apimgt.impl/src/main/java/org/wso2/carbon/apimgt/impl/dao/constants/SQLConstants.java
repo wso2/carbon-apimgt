@@ -34,28 +34,6 @@ public class SQLConstants {
     public static final String GET_VERSIONS_MATCHES_API_NAME_SQL=
             "SELECT API_VERSION FROM AM_API WHERE API_NAME = ? AND API_PROVIDER = ?";
 
-    public static final String GET_ACCESS_KEY_FOR_API_SQL =
-            " SELECT " +
-            "   SKM.ACCESS_TOKEN AS ACCESS_TOKEN " +
-            " FROM " +
-            "   AM_SUBSCRIPTION SP," +
-            "   AM_API API," +
-            "   AM_SUBSCRIBER SB," +
-            "   AM_APPLICATION APP, " +
-            "   AM_SUBSCRIPTION_KEY_MAPPING SKM " +
-            " WHERE " +
-            "   SB.USER_ID=? " +
-            "   AND SB.TENANT_ID=? " +
-            "   AND API.API_PROVIDER=? " +
-            "   AND API.API_NAME=?" +
-            "   AND API.API_VERSION=?" +
-            "   AND APP.NAME=? " +
-            "   AND SKM.KEY_TYPE=? " +
-            "   AND API.API_ID = SP.API_ID" +
-            "   AND SB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
-            "   AND APP.APPLICATION_ID = SP.APPLICATION_ID " +
-            "   AND SP.SUBSCRIPTION_ID = SKM.SUBSCRIPTION_ID ";
-
     public static final String GET_USER_ID_FROM_CONSUMER_KEY_SQL =
             " SELECT " +
             "   SUBS.USER_ID " +
@@ -67,28 +45,6 @@ public class SQLConstants {
             "   APP.SUBSCRIBER_ID   = SUBS.SUBSCRIBER_ID " +
             "   AND MAP.APPLICATION_ID = APP.APPLICATION_ID " +
             "   AND MAP.CONSUMER_KEY   = ? ";
-
-    public static final String GET_ACCESS_KEY_FOR_API_CASE_INSENSITIVE_SQL =
-            " SELECT " +
-            "   SKM.ACCESS_TOKEN AS ACCESS_TOKEN " +
-            " FROM " +
-            "   AM_SUBSCRIPTION SP," +
-            "   AM_API API," +
-            "   AM_SUBSCRIBER SB," +
-            "   AM_APPLICATION APP, " +
-            "   AM_SUBSCRIPTION_KEY_MAPPING SKM " +
-            " WHERE " +
-            "   LOWER(SB.USER_ID)=LOWER(?) " +
-            "   AND SB.TENANT_ID=? " +
-            "   AND API.API_PROVIDER=? " +
-            "   AND API.API_NAME=?" +
-            "   AND API.API_VERSION=?" +
-            "   AND APP.NAME=? " +
-            "   AND SKM.KEY_TYPE=? " +
-            "   AND API.API_ID = SP.API_ID" +
-            "   AND SB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
-            "   AND APP.APPLICATION_ID = SP.APPLICATION_ID " +
-            "   AND SP.SUBSCRIPTION_ID = SKM.SUBSCRIPTION_ID ";
 
     public static final String GET_APPLICATION_REGISTRATION_SQL =
             " SELECT REG_ID FROM AM_APPLICATION_REGISTRATION WHERE SUBSCRIBER_ID = ? AND APP_ID = ? AND TOKEN_TYPE = ?";

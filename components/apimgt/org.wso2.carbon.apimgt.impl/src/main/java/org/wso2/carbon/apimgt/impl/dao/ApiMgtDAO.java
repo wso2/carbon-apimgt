@@ -189,66 +189,6 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Get access token key for given userId and API Identifier
-     *
-     * @param userId          id of the user
-     * @param applicationName name of the Application
-     * @param identifier      APIIdentifier
-     * @param keyType         Type of the key required
-     * @return Access token
-     * @throws APIManagementException if failed to get Access token
-     */
-    public String getAccessKeyForAPI(String userId, String applicationName, APIInfoDTO identifier, String keyType)
-            throws APIManagementException {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        String accessKey = null;
-        String loginUserName = getLoginUserName(userId);
-
-        //get the tenant id for the corresponding domain
-        String tenantAwareUserId = MultitenantUtils.getTenantAwareUsername(loginUserName);
-        int tenantId = APIUtil.getTenantId(loginUserName);
-
-        if (log.isDebugEnabled()) {
-            log.debug("Searching for: " + identifier.getAPIIdentifier() + ", User: " + tenantAwareUserId +
-                    ", ApplicationName: " + applicationName + ", Tenant ID: " + tenantId);
-        }
-
-        String sqlQuery = SQLConstants.GET_ACCESS_KEY_FOR_API_SQL;
-        if (forceCaseInsensitiveComparisons) {
-            sqlQuery = SQLConstants.GET_ACCESS_KEY_FOR_API_CASE_INSENSITIVE_SQL;
-        }
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, tenantAwareUserId);
-            ps.setInt(2, tenantId);
-            ps.setString(3, APIUtil.replaceEmailDomainBack(identifier.getProviderId()));
-            ps.setString(4, identifier.getApiName());
-            ps.setString(5, identifier.getVersion());
-            ps.setString(6, applicationName);
-            ps.setString(7, keyType);
-
-            rs = ps.executeQuery();
-
-            while (rs.next()) {
-                accessKey = APIUtil.decryptToken(rs.getString(APIConstants.SUBSCRIPTION_FIELD_ACCESS_TOKEN));
-            }
-        } catch (SQLException e) {
-            handleException("Error when executing the SQL query to read the access key for user : " + loginUserName +
-                    "of tenant(id) : " + tenantId, e);
-        } catch (CryptoException e) {
-            handleException("Error when decrypting access key for user : " + loginUserName + "of tenant(id) : " +
-                    tenantId, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-        }
-        return accessKey;
-    }
-
-    /**
      * Persist the details of the token generation request (allowed domains & validity period) to be used back
      * when approval has been granted.
      *

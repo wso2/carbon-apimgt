@@ -38,10 +38,9 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.SelfSignUpUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import javax.xml.stream.XMLStreamException;
-
 import java.util.ArrayList;
 import java.util.List;
+import javax.xml.stream.XMLStreamException;
 
 public class UserSignUpWSWorkflowExecutor extends UserSignUpWorkflowExecutor {
     private static final Log log = LogFactory.getLog(UserSignUpWSWorkflowExecutor.class);
@@ -99,7 +98,7 @@ public class UserSignUpWSWorkflowExecutor extends UserSignUpWorkflowExecutor {
             log.debug("User Sign Up [Complete] Workflow Invoked. Workflow ID : " +
                     workflowDTO.getExternalWorkflowReference() + "Workflow State : " +
                     workflowDTO.getStatus());
-        }
+        }               
 
         super.complete(workflowDTO);
 

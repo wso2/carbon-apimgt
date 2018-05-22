@@ -44,8 +44,8 @@ public class APIManagerComponentAddRxtConfigsTest {
     private Resource resource;
     private ComponentContext componentContext;
 
-    @BeforeClass
-    public static void setupClass() {
+    @Before
+    public void setupClass() {
         System.setProperty("carbon.home", "");
     }
 

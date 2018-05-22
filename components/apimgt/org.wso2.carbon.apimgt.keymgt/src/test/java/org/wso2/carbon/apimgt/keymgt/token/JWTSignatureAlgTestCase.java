@@ -18,17 +18,17 @@
  */
 package org.wso2.carbon.apimgt.keymgt.token;
 
-import junit.framework.Assert;
-import junit.framework.TestCase;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.keymgt.token.JWTGenerator;
 
-public class JWTSignatureAlgTestCase extends TestCase {
+public class JWTSignatureAlgTestCase {
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         String dbConfigPath = System.getProperty("APIManagerDBConfigurationPath");
         APIManagerConfiguration config = new APIManagerConfiguration();
         config.load(dbConfigPath);
@@ -36,6 +36,7 @@ public class JWTSignatureAlgTestCase extends TestCase {
                 new APIManagerConfigurationServiceImpl(config));
     }
 
+    @Test
     public void testJwtSignatureAlgorithm(){
 
         JWTGenerator jwtGenerator = new JWTGenerator();
