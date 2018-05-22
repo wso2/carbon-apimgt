@@ -12,9 +12,12 @@
  var httpsUrl= mod.getHTTPsURL();
  var i=0, tiers = outputs.tiers;
  var user = jagg.getUser();
- %>
- <script>
- var apiViewUrl = '<%= jagg.url('/apis/info') %>';
+ var app = require("/modules/application/application-attributes.jag");
+ var applicationAttributes = app.readApplicationAttributes();
+
+    %>
+    <script>
+    var apiViewUrl = '<%= jagg.url('/apis/info') %>';
  var urlPrefix = '<%=jagg.getTenantURLPrefix("&") %>';
 
  var isTutorialCompleted = localStorage.getItem("isTutorialCompleted");
@@ -51,7 +54,7 @@
   <div class="form-group">
     <label class="control-label col-md-3 col-lg-3" for="application-name"><%=i18n.localize("Name")%><span class="requiredAstrix">*</span></label>
     <div class="col-md-9 col-lg-9">
-      <input type="text" class="form-control required validateSpecialChars validName" id="application-name" autofocus="autofocus"/>
+      <input type="text" class="form-control required validateSpecialChars validName" name="application-name" id="application-name" autofocus="autofocus"/>
     </div>
   </div>
 <%
@@ -114,7 +117,40 @@
     <div class="col-md-9 col-lg-9">
         <textarea id="description"  class="form-control" type="text" rows="3"></textarea>
     </div>
-  </div>  
+  </div>
+
+    <% if(applicationAttributes!=null) { %>
+        <input type="hidden" name="numberOfAttributes"  id="numberOfAttributes" value="<%= encode.forHtml(applicationAttributes.length) %>"/>
+        <%
+        // Iterate through the keys, read from configuration file
+        // Ex: [{"Required" : true, "Attribute" : "External Reference Id"}, {"Attribute" : "Billing Tier"}]
+        for (i = 0; i < applicationAttributes.length; i++) { %>
+            <div class="form-group">
+                <label class="col-md-3 col-lg-3 control-label" for="attribute_<%= i%>">
+
+                <%=encode.forHtml(i18n.localize(applicationAttributes[i].Attribute,applicationAttributes[i].Attribute))%>:
+
+                <% if ( Boolean(applicationAttributes[i].required ) || applicationAttributes[i].Required ) { %>
+                <span class="requiredAstrix">*</span>
+                </label>
+                <div class="col-md-8 col-lg-6">
+                <input type="hidden" id="attributeKey_<%= i.toString()%>" value="<%= encode.forHtml(applicationAttributes[i].Attribute) %>"/>
+                <input type="text" class="form-control required" name="attribute_<%= i.toString()%>" id="attribute_<%= i.toString()%>"/>
+                </div>
+
+                <% } else { %>
+
+                </label>
+                <div class="col-md-8 col-lg-6">
+                <input type="hidden" id="attributeKey_<%= i.toString()%>" value="<%= encode.forHtml(applicationAttributes[i].Attribute) %>"/>
+                <input type="text" class="form-control" id="attribute_<%= i.toString()%>"/>
+                </div>
+
+                <% } %>
+            </div>
+        <% }
+    }%>
+
   <div class="form-group">
     <div class="col-sm-offset-3 col-sm-9">
         <input type="submit" id="application-add-button" class="btn btn-primary" onclick="jagg.sessionAwareJS
