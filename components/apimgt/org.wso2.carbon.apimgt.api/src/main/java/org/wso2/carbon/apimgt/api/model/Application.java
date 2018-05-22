@@ -44,6 +44,9 @@ public class Application {
     private Boolean isBlackListed;
     private String owner;
 
+    private Map<String, String> applicationAttributes = new HashMap<String, String>();
+
+
     private String createdTime;
     private String lastUpdatedTime;
 
@@ -128,6 +131,16 @@ public class Application {
 
     public void removeSubscribedAPIs(Set<SubscribedAPI> subscribedAPIs) {
         this.subscribedAPIs.removeAll(subscribedAPIs);
+    }
+
+    public Map<String, String> getApplicationAttributes() {
+
+        return applicationAttributes;
+    }
+
+    public void setApplicationAttributes(Map<String, String> applicationAttributes) {
+
+        this.applicationAttributes = applicationAttributes;
     }
 
     protected Map<String, OAuthApplicationInfo> getOAuthApp() {

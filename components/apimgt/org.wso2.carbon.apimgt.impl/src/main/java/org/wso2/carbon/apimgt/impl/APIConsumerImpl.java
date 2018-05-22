@@ -24,6 +24,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.util.ClientUtils;
+import org.json.JSONException;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -3170,7 +3172,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public Application getApplicationsByName(String userId, String ApplicationName, String groupingId) throws
             APIManagementException {
 
-        Application application = apiMgtDAO.getApplicationWithOAuthApps(ApplicationName, userId, groupingId);
+        Application application = apiMgtDAO.getApplicationByName(ApplicationName, userId,groupingId);
+        checkAppAttributes(application, userId);
 
         if (application != null) {
             Set<APIKey> keys = getApplicationKeys(application.getId());
@@ -3180,6 +3183,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         }
 
+        application = apiMgtDAO.getApplicationWithOAuthApps(ApplicationName, userId, groupingId);
         return application;
     }
 
@@ -3191,6 +3195,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      */
     @Override
     public Application getApplicationById(int id) throws APIManagementException {
+
+        Application application = apiMgtDAO.getApplicationById(id);
+        String userId = application.getSubscriber().getName();
+        checkAppAttributes(application, userId);
         return apiMgtDAO.getApplicationById(id);
     }
 
@@ -4119,6 +4127,47 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         }
         return updatedWSDLContent;
+    }
+
+    public JSONArray getAppAttributesFromConfig(String userId) throws APIManagementException {
+
+        String tenantDomain = MultitenantUtils.getTenantDomain(userId);
+        int tenantId = 0;
+        try {
+            tenantId = getTenantId(tenantDomain);
+        } catch (UserStoreException e) {
+            handleException("Error in getting tenantId of " + tenantDomain, e);
+        }
+        JSONArray applicationAttributes;
+        JSONObject applicationConfig = APIUtil.getAppAttributeKeysFromRegistry(tenantId);
+        if (applicationConfig != null) {
+            applicationAttributes = (JSONArray) applicationConfig.get("Attributes");
+        } else {
+            APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().
+                    getAPIManagerConfigurationService().getAPIManagerConfiguration();
+            applicationAttributes = configuration.getApplicationAttributes();
+        }
+        return applicationAttributes;
+    }
+
+    public void checkAppAttributes(Application application, String userId) throws APIManagementException {
+
+        JSONArray applicationAttributesFromConfig = getAppAttributesFromConfig(userId);
+        Map<String, String> applicationAttributes = application.getApplicationAttributes();
+        List attributeKeys = new ArrayList<String>();
+        int applicationId = application.getId();
+
+        for (Object object : applicationAttributesFromConfig) {
+            JSONObject attribute = (JSONObject) object;
+            attributeKeys.add(attribute.get("Attribute"));
+        }
+
+        for (Object key : applicationAttributes.keySet()) {
+            if (!attributeKeys.contains(key)) {
+                apiMgtDAO.deleteApplicationAttributes((String) key, applicationId);
+                log.debug("Removing " + key + "from application - " + application.getName());
+            }
+        }
     }
 
 }

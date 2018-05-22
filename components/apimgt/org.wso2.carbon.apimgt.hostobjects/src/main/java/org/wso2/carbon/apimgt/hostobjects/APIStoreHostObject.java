@@ -103,6 +103,8 @@ import org.wso2.carbon.user.mgt.stub.UserAdminUserAdminException;
 import org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -123,6 +125,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
+import java.io.IOException;
 
 
 public class APIStoreHostObject extends ScriptableObject {
@@ -144,6 +147,7 @@ public class APIStoreHostObject extends ScriptableObject {
     }
 
     public APIStoreHostObject(String loggedUser) throws APIManagementException {
+
         if (loggedUser != null) {
             this.username = loggedUser;
             apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
@@ -154,6 +158,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
     public static void jsFunction_loadRegistryOfTenant(Context cx,
                                                        Scriptable thisObj, Object[] args, Function funObj) {
+
         if (!isStringArray(args)) {
             return;
         }
@@ -195,8 +200,6 @@ public class APIStoreHostObject extends ScriptableObject {
         }
 
     }
-        			    
-    
 
     public static Scriptable jsConstructor(Context cx, Object[] args, Function Obj,
                                            boolean inNewExpr)
@@ -210,24 +213,29 @@ public class APIStoreHostObject extends ScriptableObject {
     }
 
     private static String getUsernameFromObject(Scriptable obj) {
+
         return ((APIStoreHostObject) obj).getUsername();
     }
 
     private static APIConsumer getAPIConsumer(Scriptable thisObj) {
+
         return ((APIStoreHostObject) thisObj).getApiConsumer();
     }
 
     private static void handleException(String msg) throws APIManagementException {
+
         log.error(msg);
         throw new APIManagementException(msg);
     }
 
     private static void handleException(String msg, Throwable t) throws APIManagementException {
+
         log.error(msg, t);
         throw new APIManagementException(msg, t);
     }
 
     private static APIAuthenticationServiceClient getAPIKeyManagementClient() throws APIManagementException {
+
         APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
         String url = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
         if (url == null) {
@@ -509,8 +517,9 @@ public class APIStoreHostObject extends ScriptableObject {
      * @return NativeObject of key details will return.
      */
     public static NativeObject jsFunction_mapExistingOauthClient(Context cx, Scriptable thisObj, Object[] args,
-            Function funObj)
+                                                                 Function funObj)
             throws ScriptException, APIManagementException, ParseException {
+
         if (args != null && args.length != 0) {
 
             try {
@@ -3266,6 +3275,8 @@ public class APIStoreHostObject extends ScriptableObject {
                 row.put("status", row, application.getStatus());
                 row.put("description", row, application.getDescription());
                 row.put("groupId", row, application.getGroupId());
+                row.put("applicationAttributes",row, new ObjectMapper().
+                        writeValueAsString(application.getApplicationAttributes()));
                 return row;
             }
         }
@@ -3291,8 +3302,15 @@ public class APIStoreHostObject extends ScriptableObject {
             String callbackUrl = (String) args[3];
             String description = (String) args[4];
             String groupId = null;
+            Map appAttributes = null;
+
             if (args.length > 5 && args[5] != null) {
                 groupId = (String) args[5];
+            }
+
+            if (args.length > 6 && args[6] != null) {
+                String applicationAttributeString = (String) args[6];
+                appAttributes = new ObjectMapper().readValue(applicationAttributeString, Map.class);
             }
 
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
@@ -3306,6 +3324,10 @@ public class APIStoreHostObject extends ScriptableObject {
                 application.setGroupId(groupId);
             }
 
+            if (appAttributes != null) {
+                application.setApplicationAttributes(appAttributes);
+            }
+
             int applicationId = apiConsumer.addApplication(application, username);
             status = apiConsumer.getApplicationStatusById(applicationId);
             return status;
@@ -3317,6 +3339,7 @@ public class APIStoreHostObject extends ScriptableObject {
     }
 
     public static boolean jsFunction_sleep(Context cx, Scriptable thisObj, Object[] args, Function funObj) {
+
         if (isStringArray(args)) {
             String millis = (String) args[0];
             try {
@@ -3412,10 +3435,18 @@ public class APIStoreHostObject extends ScriptableObject {
             String callbackUrl = (String) args[4];
             String description = (String) args[5];
             String groupingId = null;
+            Map appAttributes =  null;
+
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
 
             if (args.length > 6 && args[6] != null) {
                 groupingId = (String) args[6];
+            }
+
+            // retrieve new values for application attributes
+            if (args.length > 8 && args[8] != null) {
+                String applicationAttributeString = (String) args[8];
+                appAttributes = new ObjectMapper().readValue(applicationAttributeString, Map.class);
             }
 
             // get application with new name if exists
@@ -3439,6 +3470,10 @@ public class APIStoreHostObject extends ScriptableObject {
             updatedApplication.setTier(tier);
             updatedApplication.setCallbackUrl(callbackUrl);
             updatedApplication.setDescription(description);
+
+            if (appAttributes != null) {
+                updatedApplication.setApplicationAttributes(appAttributes);
+            }
 
             if (APIUtil.isMultiGroupAppSharingEnabled()) {
                 String newGroupId = null;
