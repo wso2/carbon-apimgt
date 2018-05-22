@@ -38,6 +38,7 @@ public class OAuthApplicationInfo {
     private boolean isSaasApplication;
     private String appOwner;
     private String jsonString;
+
     
 
     public void setJsonString(String jsonString) {

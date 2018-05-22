@@ -2753,7 +2753,7 @@ public class ApiMgtDAO {
      * @param state   State of the registration.
      * @param keyType PRODUCTION | SANDBOX
      * @param appId   ID of the Application.
-     * @throws APIManagementException if uzzpdating fails.
+     * @throws APIManagementException if updating fails.
      */
     public void updateApplicationRegistration(String state, String keyType, int appId) throws APIManagementException {
         Connection conn = null;
