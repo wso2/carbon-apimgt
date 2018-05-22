@@ -73,7 +73,29 @@ for(var i=0;i < outputs.tiers.length; i++){
     <div class="col-sm-9">
       <p class="form-control-static"><%if(application.description){%><%=encode.forHtml(application.description) %><% }else{%><%=i18n.localize("Not Given")%><%}%></p>
     </div>
-  </div>  
+  </div>
+
+    <div class="form-group">
+  <% var applicationAttributes = parse(application.applicationAttributes);
+
+    for (var prop in applicationAttributes) { %>
+        <div class="form-group">
+            <label class="control-label col-sm-3" for="attribute_<%=i%>" >
+                <%=encode.forHtml(i18n.localize(prop,prop)) %>
+            </label>
+            <div class="col-sm-6">
+            <p class="form-control-static"><%
+        if (applicationAttributes[prop]) { %>
+                    <%=encode.forHtml(applicationAttributes[prop])%>
+                <% } else { %>
+                    <%=i18n.localize("Not Given") %>
+                <% } %>
+            </p>
+            </div>
+        </div>
+    <% } %>
+  </div>
+
 </form>      
       </div>
       <% if(application.status == "APPROVED"){ %>

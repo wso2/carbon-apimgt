@@ -13,6 +13,10 @@
  var i=0, tiers = outputs.tiers;
  var app = outputs.application;
 
+ var appConfig = require("/modules/application/application-attributes.jag");
+ var attributesFromConfig = appConfig.readApplicationAttributes();
+
+
  var description = "";
  var groupId = "";
  var callbackUrl = "";
@@ -25,6 +29,20 @@ if(app.groupId != null ){
  if(app.callbackUrl != null ){
   callbackUrl = app.callbackUrl; 
  }
+
+ if (app.applicationAttributes != null) {
+    applicationAttributes = JSON.parse(app.applicationAttributes);
+ }
+
+    function isRequiredAttribute(key) {
+        var flag = false;
+        for (var i = 0; i < attributesFromConfig.length; i++) {
+            if (key == attributesFromConfig[i].Attribute && (attributesFromConfig[i].Required || attributesFromConfig[i].required)) {
+                flag = true;
+            }
+        }
+        return flag;
+    }
  %>
  <script>
  var apiViewUrl = '<%= jagg.url('/apis/info') %>';
@@ -49,7 +67,7 @@ if(app.groupId != null ){
   <div class="form-group">
     <label class="control-label col-md-3 col-lg-3" for="application-name"><%=i18n.localize("Name")%><span class="requiredAstrix">*</span></label>
     <div class="col-md-9 col-lg-9">
-      <input type="text" class="form-control required validateSpecialChars validName" id="application-name" autofocus="autofocus" value="<%= encode.forHtmlAttribute(app.name)%>"/>
+      <input type="text" class="form-control required validateSpecialChars validName" name="application-name" id="application-name" autofocus="autofocus" value="<%= encode.forHtmlAttribute(app.name)%>"/>
     </div>
   </div>
   <div class="form-group">
@@ -114,6 +132,44 @@ if(jagg.isMultiGroupEnabled()){
         <textarea id="description"  class="form-control" type="text" rows="3"><%= encode.forHtml(description)%></textarea>
     </div>
   </div>
+
+    <% // variable applicationAttributes is JSON Object
+    // Ex: {"External Reference Id" : "###", "Billing Tier" : "###"}
+    if (applicationAttributes != null) {
+        var count = 0;
+        for (var attributeKey in applicationAttributes) {%>
+            <div class="form-group">
+            <label class="col-md-3 col-lg-3 control-label" for="attribute_<%=count%>">
+            <%=encode.forHtml(i18n.localize(attributeKey,attributeKey))%>:
+            <% // Check whether the attribute is mandatory
+            if (isRequiredAttribute(attributeKey)) { %>
+                <span class="requiredAstrix">*</span>
+                </label>
+                <div class="col-md-8 col-lg-6">
+                    <input type="hidden" id="attributeKey_<%=count.toString()%>" value="<%=encode.forHtml(attributeKey)%>"/>
+                    <input type="text" class="form-control required" name=""attribute_<%=count.toString()%>"
+                    id="attribute_<%=count.toString()%>"
+                    value="<%=encode.forHtml(applicationAttributes[attributeKey])%>" />
+                </div>
+            <% } else { %>
+                </label>
+                <div class="col-md-8 col-lg-6">
+                    <input type="hidden" id="attributeKey_<%=count.toString()%>" value="<%=encode.forHtml(attributeKey)%>"/>
+                    <input type="text" class="form-control" id="attribute_<%=count.toString()%>"
+                    value=<% if (applicationAttributes[attributeKey]) { %>
+                                "<%=encode.forHtml(applicationAttributes[attributeKey])%>"
+                          <% } else{ %>
+                          ""
+            <% } %>  />
+               </div>
+            <% }
+            count += 1; %>
+            </div>
+        <% } %>
+        <input type="hidden" name="numberOfAttributes"  id="numberOfAttributes" value="<%= encode.forHtml(count)%>"/>
+
+    <% } %>
+
   <div class="form-group">
     <div class="col-sm-offset-3 col-sm-9">
         <input type="submit" id="application-edit-button" class="btn btn-primary" onclick="jagg.sessionAwareJS({redirect:'/site/pages/applications.jag'})" value="Update"/>

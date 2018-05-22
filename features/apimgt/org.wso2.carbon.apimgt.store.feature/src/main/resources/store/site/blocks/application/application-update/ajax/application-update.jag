@@ -52,11 +52,13 @@ include("/jagg/jagg.jag");
             callbackUrlNew = request.getParameter("callbackUrlNew");
         }        
         descriptionNew = request.getParameter("descriptionNew");
+        applicationAttributeNew = request.getParameter("applicationAttributeNew");
         tier = request.getParameter("tier");
         username = user.username;
 
         mod = jagg.module("application");
-        result = mod.updateApplication(applicationNew,applicationOld,username,tier,callbackUrlNew,descriptionNew,groupIdOld,groupIdNew);
+        result = mod.updateApplication(applicationNew,applicationOld,username,tier,callbackUrlNew,descriptionNew,
+            groupIdOld,groupIdNew, applicationAttributeNew);
 
         //If name of the selected application is edited,add the new name  to   session
         var selectedApp = session.get("selectedApp");
