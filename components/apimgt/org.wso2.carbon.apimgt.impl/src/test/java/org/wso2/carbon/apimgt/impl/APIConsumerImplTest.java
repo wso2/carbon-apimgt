@@ -679,6 +679,15 @@ public class APIConsumerImplTest {
     }
 
     @Test
+    public void testRenewConsumerSecret() throws APIManagementException {
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
+        String clientId = UUID.randomUUID().toString();
+        Mockito.when(keyManager.getNewApplicationConsumerSecret((AccessTokenRequest) Mockito.anyObject())).thenReturn
+                ("updatedClientSecret");
+        assertNotNull(apiConsumer.renewConsumerSecret(clientId));
+    }
+
+    @Test
     public void testRenewAccessToken() throws APIManagementException {
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
         String args[] = {UUID.randomUUID().toString(), UUID.randomUUID().toString()};
