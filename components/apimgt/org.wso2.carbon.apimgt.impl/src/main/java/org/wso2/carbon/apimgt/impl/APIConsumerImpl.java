@@ -4148,7 +4148,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         JSONArray applicationAttributes;
         JSONObject applicationConfig = APIUtil.getAppAttributeKeysFromRegistry(tenantId);
         if (applicationConfig != null) {
-            applicationAttributes = (JSONArray) applicationConfig.get("Attributes");
+            applicationAttributes = (JSONArray) applicationConfig.get(APIConstants.ApplicationAttributes.ATTRIBUTES);
         } else {
             APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().
                     getAPIManagerConfigurationService().getAPIManagerConfiguration();

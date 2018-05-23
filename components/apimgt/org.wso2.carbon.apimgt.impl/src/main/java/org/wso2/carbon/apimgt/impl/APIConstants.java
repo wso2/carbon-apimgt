@@ -1302,6 +1302,7 @@ public final class APIConstants {
     public static class ApplicationAttributes{
         public static final String APPLICATION_CONFIGURATIONS = "ApplicationConfigs";
         public static final String APPLICATION_ATTRIBUTES = "ApplicationAttributes";
+        public static final String ATTRIBUTES = "Attributes";
         public static final String ATTRIBUTE = "Attribute";
         public static final String REQUIRED = "Required";
         public static final String DESCRIPTION = "Description";
