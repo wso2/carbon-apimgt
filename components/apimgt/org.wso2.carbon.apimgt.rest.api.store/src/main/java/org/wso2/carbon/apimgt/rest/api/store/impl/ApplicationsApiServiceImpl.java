@@ -154,7 +154,10 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
 
             for (Object object : attributeKeysFromConfig) {
                 JSONObject jsonObject = (JSONObject) object;
-                Boolean isRequired = (Boolean) jsonObject.get(APIConstants.ApplicationAttributes.REQUIRED);
+                Boolean isRequired = false;
+                if (jsonObject.get(APIConstants.ApplicationAttributes.REQUIRED) != null) {
+                    isRequired = (Boolean) jsonObject.get(APIConstants.ApplicationAttributes.REQUIRED);
+                }
                 String key = (String) jsonObject.get(APIConstants.ApplicationAttributes.ATTRIBUTE);
 
                 if (isRequired && !attributeKeysFromUSer.contains(key)) {
