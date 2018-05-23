@@ -4179,7 +4179,9 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         for (Object key : applicationAttributes.keySet()) {
             if (!attributeKeys.contains(key)) {
                 apiMgtDAO.deleteApplicationAttributes((String) key, applicationId);
-                log.debug("Removing " + key + "from application - " + application.getName());
+                if (log.isDebugEnabled()) {
+                    log.debug("Removing " + key + "from application - " + application.getName());
+                }
             }
         }
     }

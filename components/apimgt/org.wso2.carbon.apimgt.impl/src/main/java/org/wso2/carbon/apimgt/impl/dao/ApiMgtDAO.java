@@ -11373,7 +11373,7 @@ public class ApiMgtDAO {
             }
             int[] update = ps.executeBatch();
         } catch (SQLException e) {
-            handleException("err", e);
+            handleException("Error in adding attributes of application with id: " + applicationId , e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, null, rs);
         }
