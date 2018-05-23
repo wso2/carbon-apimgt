@@ -13,24 +13,21 @@ import javax.validation.constraints.NotNull;
 
 
 @ApiModel(description = "")
-public class ScopeInfoDTO  {
+public class LabelDTO  {
   
   
-  
-  private String key = null;
-  
-  
+  @NotNull
   private String name = null;
   
   
-  private List<String> roles = new ArrayList<String>();
+  private List<String> accessUrls = new ArrayList<String>();
 
   private String lastUpdatedTime = null;
 
   private String createdTime = null;
 
   /**
-  * gets and sets the lastUpdatedTime for ScopeInfoDTO
+  * gets and sets the lastUpdatedTime for LabelDTO
   **/
   @JsonIgnore
   public String getLastUpdatedTime(){
@@ -41,7 +38,7 @@ public class ScopeInfoDTO  {
   }
 
   /**
-  * gets and sets the createdTime for a ScopeInfoDTO
+  * gets and sets the createdTime for a LabelDTO
   **/
 
   @JsonIgnore
@@ -55,19 +52,7 @@ public class ScopeInfoDTO  {
   
   /**
    **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("key")
-  public String getKey() {
-    return key;
-  }
-  public void setKey(String key) {
-    this.key = key;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("name")
   public String getName() {
     return name;
@@ -78,15 +63,14 @@ public class ScopeInfoDTO  {
 
   
   /**
-   * Allowed roles for the scope
    **/
-  @ApiModelProperty(value = "Allowed roles for the scope")
-  @JsonProperty("roles")
-  public List<String> getRoles() {
-    return roles;
+  @ApiModelProperty(value = "")
+  @JsonProperty("accessUrls")
+  public List<String> getAccessUrls() {
+    return accessUrls;
   }
-  public void setRoles(List<String> roles) {
-    this.roles = roles;
+  public void setAccessUrls(List<String> accessUrls) {
+    this.accessUrls = accessUrls;
   }
 
   
@@ -94,11 +78,10 @@ public class ScopeInfoDTO  {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ScopeInfoDTO {\n");
+    sb.append("class LabelDTO {\n");
     
-    sb.append("  key: ").append(key).append("\n");
     sb.append("  name: ").append(name).append("\n");
-    sb.append("  roles: ").append(roles).append("\n");
+    sb.append("  accessUrls: ").append(accessUrls).append("\n");
     sb.append("}\n");
     return sb.toString();
   }
