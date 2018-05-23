@@ -61,6 +61,9 @@ jagg.module("api", {
     setCheckListItemVal:function () {
             return jagg.require(jagg.getModulesDir() + "api/life-cycles.jag").setCheckListItemVal.apply(this, arguments);
         },
+    getLabels:function () {
+        return jagg.require(jagg.getModulesDir() + "api/add.jag").getLabels.apply(this, arguments);
+    },
     getTiers:function () {
         return jagg.require(jagg.getModulesDir() + "api/add.jag").getTiers.apply(this, arguments);
     },
