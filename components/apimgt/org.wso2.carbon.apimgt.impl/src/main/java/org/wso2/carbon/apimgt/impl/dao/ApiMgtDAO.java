@@ -137,6 +137,7 @@ public class ApiMgtDAO {
 
     private boolean forceCaseInsensitiveComparisons = false;
     private boolean multiGroupAppSharingEnabled = false;
+    private static boolean initialAutoCommit = false;
 
     private ApiMgtDAO() {
         APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
@@ -11341,6 +11342,7 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_LABEL_SQL)) {
             try {
+                initialAutoCommit = connection.getAutoCommit();
                 connection.setAutoCommit(false);
 
                 statement.setString(1, uuid);
@@ -11348,15 +11350,15 @@ public class ApiMgtDAO {
                 statement.setString(3, label.getDescription());
                 statement.setString(4, tenantDomain);
                 statement.executeUpdate();
-                connection.commit();
                 if (!label.getAccessUrls().isEmpty()) {
                     insertAccessUrlMappings(connection, uuid, label.getAccessUrls());
                 }
+                connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
                 handleException("Failed to add label: " + uuid, e);
             } finally {
-                connection.setAutoCommit(true);
+                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }
         } catch (SQLException e) {
             handleException("Failed to add label: " + uuid, e);
@@ -11396,6 +11398,7 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQLConstants.DELETE_LABEL_SQL)) {
             try {
+                initialAutoCommit = connection.getAutoCommit();
                 connection.setAutoCommit(false);
                 statement.setString(1, labelUUID);
                 statement.executeUpdate();
@@ -11404,7 +11407,7 @@ public class ApiMgtDAO {
                 connection.rollback();
                 handleException("Failed to delete label : " + labelUUID, e);
             } finally {
-                connection.setAutoCommit(true);
+                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }
         } catch (SQLException e) {
             handleException("Failed to delete label : " + labelUUID, e);
@@ -11437,6 +11440,7 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQLConstants.UPDATE_LABEL_SQL)) {
             try {
+                initialAutoCommit = connection.getAutoCommit();
                 connection.setAutoCommit(false);
                 statement.setString(1, label.getName());
                 statement.setString(2, label.getDescription());
@@ -11450,7 +11454,7 @@ public class ApiMgtDAO {
                 connection.rollback();
                 handleException("Failed to update label : ", e);
             } finally {
-                connection.setAutoCommit(true);
+                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }
         } catch (SQLException e) {
             handleException("Failed to update label : ", e);
