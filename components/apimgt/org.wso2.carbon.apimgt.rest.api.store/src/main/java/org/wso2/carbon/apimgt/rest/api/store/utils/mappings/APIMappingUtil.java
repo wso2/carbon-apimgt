@@ -135,6 +135,23 @@ public class APIMappingUtil {
             dto.setAdditionalProperties(additionalPropertiesMap);
         }
         dto.setWsdlUri(model.getWsdlUrl());
+
+        //setting micro-gateway labels if there are any
+        if (model.getGatewayLabels() != null) {
+            List<LabelDTO> labels = new ArrayList<>();
+            List<String> gatewayLabels = model.getGatewayLabels();
+            for (String labelName : gatewayLabels) {
+                LabelDTO labelDTO = new LabelDTO();
+                labelDTO.setName(labelName);
+                List<String> accessURLList = new ArrayList<>();
+                accessURLList.add(labelName);
+                accessURLList.add(labelName);
+                labelDTO.setAccessUrls(accessURLList);
+                labels.add(labelDTO);
+            }
+            dto.setLabels(labels);
+        }
+
         return dto;
     }
 
