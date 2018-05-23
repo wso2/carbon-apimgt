@@ -23,7 +23,7 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.api.mockito.PowerMockito;
@@ -37,8 +37,8 @@ public class TenantLoadMessageTest {
 
     private static TenantLoadMessage tenantLoadMessage;
 
-    @BeforeClass
-    public static void setUp() {
+    @Before
+    public void setUp() {
         tenantLoadMessage = new TenantLoadMessage(1, "a.com");
     }
 

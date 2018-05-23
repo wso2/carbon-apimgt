@@ -35,7 +35,7 @@ import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.keymgt.stub.validator.APIKeyValidationServiceStub;
 import org.wso2.carbon.utils.CarbonUtils;
 
-import static junit.framework.Assert.fail;
+import static org.junit.Assert.fail;
 
 /**
  * Test class for WebsocketWSClient

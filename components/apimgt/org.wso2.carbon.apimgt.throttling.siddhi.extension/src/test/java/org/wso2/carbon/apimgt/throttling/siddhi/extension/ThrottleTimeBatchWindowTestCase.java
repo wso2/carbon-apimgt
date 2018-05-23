@@ -17,7 +17,7 @@
  */
 package org.wso2.carbon.apimgt.throttling.siddhi.extension;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;

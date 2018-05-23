@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>oidc-authenticator</artifactId>
-        <version>6.2.240-SNAPSHOT</version>
+        <version>6.3.7-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -64,7 +64,11 @@
             <artifactId>gson</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.nimbusds.wso2</groupId>
+            <groupId>net.minidev</groupId>
+            <artifactId>json-smart</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.nimbusds</groupId>
             <artifactId>nimbus-jose-jwt</artifactId>
         </dependency>
 
@@ -88,7 +92,7 @@
                             org.wso2.carbon.apimgt.hostobjects.oidc.*;
                         </Export-Package>
                         <Import-Package>
-                            com.nimbusds.*; version="[0.0.0,3.0.0)",
+                            com.nimbusds.*; version="[5.0.0,6.0.0)",
                             *;resolution:=optional
                         </Import-Package>
                     </instructions>

@@ -183,6 +183,7 @@ import java.rmi.RemoteException;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
@@ -4507,6 +4508,11 @@ public final class APIUtil {
         if (Boolean.parseBoolean(config.getFirstProperty(APIConstants.ENCRYPT_TOKENS_ON_PERSISTENCE))) {
             return new String(CryptoUtil.getDefaultCryptoUtil().base64DecodeAndDecrypt(token), Charset.defaultCharset());
         }
+
+        String enableTokenHashMode = config.getFirstProperty(APIConstants.HASH_TOKENS_ON_PERSISTENCE);
+        if (enableTokenHashMode != null && Boolean.parseBoolean(enableTokenHashMode)) {
+            return null;
+        }
         return token;
     }
 
@@ -4514,14 +4520,65 @@ public final class APIUtil {
      * @param token
      * @return
      */
-    public static String encryptToken(String token) throws CryptoException {
+    public static String encryptToken(String token) throws CryptoException, APIManagementException {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
         if (Boolean.parseBoolean(config.getFirstProperty(APIConstants.ENCRYPT_TOKENS_ON_PERSISTENCE))) {
             return CryptoUtil.getDefaultCryptoUtil().encryptAndBase64Encode(token.getBytes(Charset.defaultCharset()));
         }
+
+        String enableTokenHashMode = config.getFirstProperty(APIConstants.HASH_TOKENS_ON_PERSISTENCE);
+        if (enableTokenHashMode != null && Boolean.parseBoolean(enableTokenHashMode)) {
+            return hash(token);
+        }
         return token;
+    }
+
+    /**
+     * Method to generate hash value.
+     *
+     * @param plainText Plain text value.
+     * @return hashed value.
+     */
+    private static String hash(String plainText) throws APIManagementException {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Hashing the token for " + plainText);
+        }
+
+        if (StringUtils.isEmpty(plainText)) {
+            throw new APIManagementException("plainText value is null or empty to be hash.");
+        }
+
+        MessageDigest messageDigest = null;
+        byte[] hash = null;
+        String hashAlgorithm = OAuthServerConfiguration.getInstance().getHashAlgorithm();
+        if (log.isDebugEnabled()) {
+            log.debug("Getting the hash algorithm from the configuration: " + hashAlgorithm);
+        }
+        try {
+            messageDigest = MessageDigest.getInstance(hashAlgorithm);
+            messageDigest.update(plainText.getBytes());
+            hash = messageDigest.digest();
+        } catch (NoSuchAlgorithmException e) {
+            throw new APIManagementException(
+                    "Error while retrieving MessageDigest for the provided hash algorithm: " + hashAlgorithm, e);
+        }
+        JSONObject object = new JSONObject();
+        object.put("algorithm", hashAlgorithm);
+        object.put("hash", bytesToHex(hash));
+
+        return object.toString();
+    }
+
+    private static String bytesToHex(byte[] bytes) {
+
+        StringBuilder result = new StringBuilder();
+        for (byte byt : bytes) {
+            result.append(Integer.toString((byt & 0xff) + 0x100, 16).substring(1));
+        }
+        return result.toString();
     }
 
     public static void loadTenantRegistry(int tenantId) throws RegistryException {

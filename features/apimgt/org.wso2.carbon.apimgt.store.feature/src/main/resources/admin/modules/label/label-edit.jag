@@ -1,0 +1,50 @@
+<%
+var log = new Log();
+
+var addLabel = function (action, labelId, labelName, description, attributes) {
+    try {
+        var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+        var tenantDomain = MultitenantUtils.getTenantDomain(jagg.getUser().username);
+        var UUID = Packages.java.util.UUID;
+        var APIAdminImpl = Packages.org.wso2.carbon.apimgt.impl.APIAdminImpl;
+        var apiAdmin = new APIAdminImpl();
+       
+        if (action == "labelAction") {
+            var label = constructLabelObject(UUID.randomUUID(), labelName, description, attributes);
+            apiAdmin.addLabel(tenantDomain, label);
+        } else if (action == "update") {
+            var label = constructLabelObject(labelId, labelName, description, attributes);
+            apiAdmin.updateLabel(label);
+        }
+        return {
+            error: false
+        };
+    } catch (ex) {
+        var errorMessage = "Error occurred while saving label (Cause:" + ex.message + ")";
+        log.error(errorMessage);
+        return {
+            error: true,
+            message: errorMessage
+        };
+    }
+};
+
+var constructLabelObject  = function(labelId, labelName, description, attributes){
+    var Label = Packages.org.wso2.carbon.apimgt.api.model.Label;
+    var ArrayList = Packages.java.util.ArrayList;
+    var label = new Label();
+    var labelURLs = new ArrayList();
+
+    label.setLabelId(labelId);
+    label.setName(labelName);
+    label.setDescription(description);
+    
+    for(var i in attributes){
+        var attribute = attributes[i];
+        var labelType= attribute.value;
+        labelURLs.add(labelType);
+    }
+    label.setAccessUrls(labelURLs);
+    return label;
+}  
+%>

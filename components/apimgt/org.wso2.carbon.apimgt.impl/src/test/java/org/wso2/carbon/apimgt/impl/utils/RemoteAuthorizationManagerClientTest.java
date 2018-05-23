@@ -15,7 +15,7 @@
 */
 package org.wso2.carbon.apimgt.impl.utils;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.OperationContext;

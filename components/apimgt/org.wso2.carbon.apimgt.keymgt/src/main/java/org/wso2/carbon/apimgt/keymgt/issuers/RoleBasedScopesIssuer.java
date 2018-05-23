@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.keymgt.issuers;
 
+import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opensaml.saml2.core.Assertion;
@@ -49,6 +50,7 @@ public class RoleBasedScopesIssuer extends AbstractScopesIssuer {
 
     private static Log log = LogFactory.getLog(RoleBasedScopesIssuer.class);
     private static final String DEFAULT_SCOPE_NAME = "default";
+    private static final String PRESERVED_CASE_SENSITIVE_VARIABLE = "preservedCaseSensitive";
 
     // set role based scopes issuer as the default
     private static final String ISSUER_PREFIX = "default";
@@ -145,7 +147,17 @@ public class RoleBasedScopesIssuer extends AbstractScopesIssuer {
             }
 
             List<String> authorizedScopes = new ArrayList<String>();
-            List<String> userRoleList = new ArrayList<String>(Arrays.asList(userRoles));
+            String preservedCaseSensitiveValue = System.getProperty(PRESERVED_CASE_SENSITIVE_VARIABLE);
+            boolean preservedCaseSensitive = JavaUtils.isTrueExplicitly(preservedCaseSensitiveValue);
+            List<String> userRoleList;
+            if (preservedCaseSensitive) {
+                userRoleList = Arrays.asList(userRoles);
+            } else {
+                userRoleList = new ArrayList<String>();
+                for (String aRole : userRoles) {
+                    userRoleList.add(aRole.toLowerCase());
+                }
+            }
 
             //Iterate the requested scopes list.
             for (String scope : requestedScopes) {
@@ -153,7 +165,14 @@ public class RoleBasedScopesIssuer extends AbstractScopesIssuer {
                 String roles = appScopes.get(scope);
                 //If the scope has been defined in the context of the App and if roles have been defined for the scope
                 if (roles != null && roles.length() != 0) {
-                    List<String> roleList = new ArrayList<String>(Arrays.asList(roles.replaceAll(" ", "").split(",")));
+                    List<String> roleList = new ArrayList<String>();
+                    for (String aRole : roles.split(",")) {
+                        if (preservedCaseSensitive) {
+                            roleList.add(aRole.trim());
+                        } else {
+                            roleList.add(aRole.trim().toLowerCase());
+                        }
+                    }
                     //Check if user has at least one of the roles associated with the scope
                     roleList.retainAll(userRoleList);
                     if (!roleList.isEmpty()) {

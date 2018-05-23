@@ -19,7 +19,6 @@ package org.wso2.carbon.apimgt.hostobjects;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jaggeryjs.scriptengine.exceptions.ScriptException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,7 +43,7 @@ public class APIStoreHostObjectTest {
 
     public void testAPIStore() {
         //These are some test 
-		/*       Testcode goes in here
+        /*       Testcode goes in here
         */
     }
 

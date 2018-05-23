@@ -73,6 +73,10 @@ public class CertificateMgtUtils {
             //Decode base64 encoded certificate.
             byte[] cert = (Base64.decodeBase64(base64Cert.getBytes("UTF-8")));
             serverCert = new ByteArrayInputStream(cert);
+            if (serverCert.available() == 0) {
+                log.error("Certificate is empty for the provided alias " + alias);
+                return ResponseCode.INTERNAL_SERVER_ERROR;
+            }
 
             //Read the client-truststore.jks into a KeyStore.
             File trustStoreFile = new File(TRUST_STORE);

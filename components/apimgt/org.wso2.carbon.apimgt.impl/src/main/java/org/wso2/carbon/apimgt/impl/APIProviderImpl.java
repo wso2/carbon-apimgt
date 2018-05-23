@@ -908,8 +908,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     if (!api.isDefaultVersion()) {// default api tick is removed
                         // todo: if it is ok, these two variables can be put to the top of the function to remove
                         // duplication
-                        String gatewayType = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-                                getAPIManagerConfiguration().getFirstProperty(APIConstants.API_GATEWAY_TYPE);
+                        String gatewayType = getAPIManagerConfiguration()
+                                .getFirstProperty(APIConstants.API_GATEWAY_TYPE);
                         if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType)) {
                             removeDefaultAPIFromGateway(api);
                         }
@@ -964,9 +964,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
                     APIConstants.AuditLogConstants.UPDATED, this.username);
 
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                    getAPIManagerConfigurationService().getAPIManagerConfiguration();
-            boolean gatewayExists = config.getApiGatewayEnvironments().size() > 0;
+            APIManagerConfiguration config = getAPIManagerConfiguration();
+            boolean gatewayExists = !config.getApiGatewayEnvironments().isEmpty();
             String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
             boolean isAPIPublished = false;
             // gatewayType check is required when API Management is deployed on other servers to avoid synapse
@@ -1010,10 +1009,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         failedGateways.put("PUBLISHED", failedToPublishEnvironments);
                     } else if (api.getStatus() != APIStatus.CREATED && api.getStatus() != APIStatus.RETIRED) {
                         if ("INLINE".equals(api.getImplementation()) && api.getEnvironments().isEmpty()) {
-                            api.setEnvironments(
-                                    ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                                            .getAPIManagerConfiguration().getApiGatewayEnvironments()
-                                            .keySet());
+                            api.setEnvironments(getAPIManagerConfiguration().getApiGatewayEnvironments()
+                                    .keySet());
                         }
                         Map<String, String> failedToPublishEnvironments = publishToGateway(api);
                         if (!failedToPublishEnvironments.isEmpty()) {
@@ -1201,8 +1198,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             registry.commitTransaction();
             transactionCommitted = true;
             if (updatePermissions) {
-                APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                        getAPIManagerConfigurationService().getAPIManagerConfiguration();
+                APIManagerConfiguration config = getAPIManagerConfiguration();
                 boolean isSetDocLevelPermissions = Boolean.parseBoolean(
                         config.getFirstProperty(APIConstants.API_PUBLISHER_ENABLE_API_DOC_VISIBILITY_LEVELS));
                 String docRootPath = APIUtil.getAPIDocPath(api.getId());
@@ -1335,8 +1331,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
                         .getCache(APIConstants.RECENTLY_ADDED_API_CACHE_NAME).removeAll();
 
-                APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
-                        .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+                APIManagerConfiguration config = getAPIManagerConfiguration();
                 String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
 
                 api.setAsPublishedDefaultVersion(
@@ -1417,8 +1412,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 if (!currentStatus.equals(newStatus)) {
                     api.setStatus(newStatus);
 
-                    APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
-                            .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+                    APIManagerConfiguration config = getAPIManagerConfiguration();
                     String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
 
                     api.setAsPublishedDefaultVersion(api.getId().getVersion()
@@ -2849,9 +2843,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 registry.delete(apiDefinitionFilePath);
             }
 
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                    .getAPIManagerConfiguration();
-            boolean gatewayExists = config.getApiGatewayEnvironments().size() > 0;
+            APIManagerConfiguration config = getAPIManagerConfiguration();
+            boolean gatewayExists = !config.getApiGatewayEnvironments().isEmpty();
             String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
 
             API api = new API(identifier);
@@ -4034,8 +4027,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
 
-            Map<String, Environment> gatewayEnvironments = ServiceReferenceHolder.getInstance().
-                    getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiGatewayEnvironments();
+            Map<String, Environment> gatewayEnvironments = getAPIManagerConfiguration().getApiGatewayEnvironments();
 
             Set gatewayEntries = gatewayEnvironments.entrySet();
             Iterator<Map.Entry<String, Environment>> gatewayIterator = gatewayEntries.iterator();
@@ -4085,8 +4077,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public boolean isSynapseGateway() throws APIManagementException {
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        APIManagerConfiguration config = getAPIManagerConfiguration();
         String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
         return APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType);
     }
@@ -4146,8 +4137,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 if (!WorkflowStatus.CREATED.equals(apiWFState)) {
 
                     try {
-                        WorkflowProperties workflowProperties = ServiceReferenceHolder.getInstance()
-                                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getWorkflowProperties();
+                        WorkflowProperties workflowProperties = getAPIManagerConfiguration().getWorkflowProperties();
                         WorkflowExecutor apiStateWFExecutor = WorkflowExecutorFactory.getInstance()
                                 .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_STATE);
                         APIStateWorkflowDTO apiStateWorkflow = new APIStateWorkflowDTO();
@@ -4471,8 +4461,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         boolean isTenantFlowStarted = false;
 
         try {
-            String paginationLimit = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                    .getAPIManagerConfiguration()
+            String paginationLimit = getAPIManagerConfiguration()
                     .getFirstProperty(APIConstants.API_PUBLISHER_APIS_PER_PAGE);
 
             // If the Config exists use it to set the pagination limit
@@ -4727,8 +4716,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
                 policyLevel = PolicyConstants.POLICY_LEVEL_API;
 
-                APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
-                        .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+                APIManagerConfiguration config = getAPIManagerConfiguration();
                 Map<String, Environment> gatewayEns = config.getApiGatewayEnvironments();
                 for (Environment environment : gatewayEns.values()) {
                     try {
@@ -4976,13 +4964,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (APIConstants.BLOCKING_CONDITIONS_IP.equals(conditionType)) {
             conditionValue = tenantDomain + ":" + conditionValue.trim();
         }
+        if (APIConstants.BLOCKING_CONDITIONS_USER.equals(conditionType)) {
+            conditionValue = MultitenantUtils.getTenantAwareUsername(conditionValue);
+            conditionValue = conditionValue + "@" + tenantDomain;
+        }
         String uuid = apiMgtDAO.addBlockConditions(conditionType, conditionValue, tenantDomain);
 
         if (uuid != null) {
-            if (APIConstants.BLOCKING_CONDITIONS_USER.equals(conditionType)) {
-                conditionValue = MultitenantUtils.getTenantAwareUsername(conditionValue);
-                conditionValue = conditionValue + "@" + tenantDomain;
-            }
             publishBlockingEvent(conditionType, conditionValue, "true");
         }
 
@@ -5115,8 +5103,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Object[] objects = new Object[]{conditionType,conditionValue,state,tenantDomain};
         Event blockingMessage = new Event(APIConstants.BLOCKING_CONDITIONS_STREAM_ID, System.currentTimeMillis(),
                 null, null, objects);
-        ThrottleProperties throttleProperties = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getThrottleProperties();
+        ThrottleProperties throttleProperties = getAPIManagerConfiguration().getThrottleProperties();
 
         if (throttleProperties.getDataPublisher() != null && throttleProperties.getDataPublisher().isEnabled()) {
             eventAdapterService.publish(APIConstants.BLOCKING_EVENT_PUBLISHER, Collections.EMPTY_MAP, blockingMessage);
@@ -5129,8 +5116,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Event keyTemplateMessage = new Event(APIConstants.KEY_TEMPLATE_STREM_ID, System.currentTimeMillis(),
                 null, null, objects);
 
-        ThrottleProperties throttleProperties = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getThrottleProperties();
+        ThrottleProperties throttleProperties = getAPIManagerConfiguration().getThrottleProperties();
 
 
         if (throttleProperties.getDataPublisher() != null && throttleProperties.getDataPublisher().isEnabled()) {

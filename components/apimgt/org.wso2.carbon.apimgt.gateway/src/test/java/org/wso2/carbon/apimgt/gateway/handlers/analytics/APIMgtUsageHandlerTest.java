@@ -15,7 +15,7 @@
  */
 package org.wso2.carbon.apimgt.gateway.handlers.analytics;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;

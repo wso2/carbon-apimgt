@@ -52,7 +52,10 @@ import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClientPool;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.identity.core.util.IdentityConfigParser;
 import org.wso2.carbon.identity.core.util.IdentityCoreConstants;
+import org.wso2.carbon.identity.oauth.IdentityOAuthAdminException;
+import org.wso2.carbon.identity.oauth.OAuthAdminService;
 import org.wso2.carbon.identity.oauth.common.OAuthConstants;
+import org.wso2.carbon.identity.oauth.dto.OAuthConsumerAppDTO;
 import org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2ClientApplicationDTO;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationRequestDTO;
@@ -376,6 +379,21 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         }
 
         return tokenInfo;
+    }
+
+    @Override
+    public String getNewApplicationConsumerSecret(AccessTokenRequest tokenRequest) throws APIManagementException {
+        OAuthAdminService oauthAdminService = new OAuthAdminService();
+        OAuthConsumerAppDTO appDTO;
+        try {
+            if (oauthAdminService != null) {
+                appDTO = oauthAdminService.updateAndRetrieveOauthSecretKey(tokenRequest.getClientId());
+                return appDTO.getOauthConsumerSecret();
+            }
+        } catch (IdentityOAuthAdminException e) {
+            handleException("Error while generating new consumer secret", e);
+        }
+        return null;
     }
 
     @Override

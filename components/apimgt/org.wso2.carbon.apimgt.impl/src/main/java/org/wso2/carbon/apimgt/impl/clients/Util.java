@@ -64,9 +64,9 @@ public class Util {
         try {
             keyStoreManager.getDefaultPrimaryCertificate();
             JWSSigner signer = new RSASSASigner((RSAPrivateKey) keyStoreManager.getDefaultPrivateKey());
-            JWTClaimsSet claimsSet = new JWTClaimsSet();
-            claimsSet.setClaim("Username", username);
-            SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.RS512), claimsSet);
+            JWTClaimsSet.Builder jwtClaimsSetBuilder = new JWTClaimsSet.Builder();
+            jwtClaimsSetBuilder.claim("Username", username);
+            SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.RS512), jwtClaimsSetBuilder.build());
             signedJWT.sign(signer);
 
             // generate authorization header value
