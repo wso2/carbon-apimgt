@@ -142,6 +142,17 @@
     </p>
         <% } %>
 
+    <!-- Start of Micro Gateway Labels Section -->
+    <% if(api.labels != null){ %>
+        <h4 class="add-margin-top-5x"><%=i18n.localize("Micro Gateway Labels")%></h4>
+        <% for (var label in api.labels ) { %>
+            <div class="endpoint-copybtn well well-sm add-margin-bottom-1x">
+                <p><%= api.labels[label].labelName %> : Access URL goes here </p>
+            </div>
+        <% } %>
+    <% } %>
+    <!-- End of Micro Gateway Labels Section -->
+
 	 <% if((api.bizOwner && api.bizOwner != "") || (api.techOwner && api.techOwner != "")){ %>
 	 		<h4 class="add-margin-top-5x"><%=i18n.localize("Business Information")%></h4>
 		    <% if(api.bizOwner&& api.bizOwner != ""){ %>
