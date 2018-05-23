@@ -124,6 +124,7 @@
         // Ex: [{"Required" : true, "Attribute" : "External Reference Id"}, {"Attribute" : "Billing Tier"}]
         for (i = 0; i < applicationAttributes.length; i++) { %>
             <div class="form-group">
+            <% if (applicationAttributes[i].Attribute) { %>
                 <label class="col-md-3 col-lg-3 control-label" for="attribute_<%= i%>">
                 <%=encode.forHtml(i18n.localize(applicationAttributes[i].Attribute,applicationAttributes[i].Attribute))%>:
                 <% if ( Boolean(applicationAttributes[i].required ) || applicationAttributes[i].Required ) { %>
@@ -139,7 +140,8 @@
                 <input type="hidden" id="attributeKey_<%= i.toString()%>" value="<%= encode.forHtml(applicationAttributes[i].Attribute) %>"/>
                 <input type="text" class="form-control" id="attribute_<%= i.toString()%>"/>
                 </div>
-                <% } %>
+                <% }
+            } %>
             </div>
         <% }
     }%>
