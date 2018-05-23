@@ -2,7 +2,6 @@
 include("/jagg/jagg.jag");
 include("/jagg/constants.jag");
 
-var cloudConfig = jagg.module("util").getJsonFromFile(CLOUD_MGT_CONFIG_FILE);
 /**
  * Returns boolean value of isEmailUserNameEnabled
  * @return boolean isEmailUserNameEnabled
@@ -11,6 +10,7 @@ var isEmailUserNameEnabled = function () {
     if (application.get("isEmailUserNameEnabled") != null) {
         return Boolean(application.get("isEmailUserNameEnabled"));
     }
+    var cloudConfig = jagg.module("util").getJsonFromFile(CLOUD_MGT_CONFIG_FILE);
     application.put("isEmailUserNameEnabled", cloudConfig.isEmailUserNameEnabled);
     return Boolean(application.get("isEmailUserNameEnabled"));
 };
