@@ -43,6 +43,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIEndpointSecurityDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIMaxTpsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SequenceDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -313,6 +314,19 @@ public class APIMappingUtil {
         dto.setWsdlUri(model.getWsdlUrl());
         setEndpointSecurityFromModelToApiDTO(model, dto);
         setMaxTpsFromModelToApiDTO(model, dto);
+
+        //setting micro-gateway labels if there are any
+        if (model.getGatewayLabels() != null) {
+            List<LabelDTO> labels = new ArrayList<>();
+            List<String> gatewayLabels = model.getGatewayLabels();
+            for (String labelName : gatewayLabels) {
+                LabelDTO labelDTO = new LabelDTO();
+                labelDTO.setName(labelName);
+                labelDTO.setDescription(labelName);
+                labels.add(labelDTO);
+            }
+            dto.setLabels(labels);
+        }
 
         return dto;
     }
