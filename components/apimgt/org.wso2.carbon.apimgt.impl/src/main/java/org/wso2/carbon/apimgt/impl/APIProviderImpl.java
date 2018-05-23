@@ -2560,6 +2560,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.error(errorMessage);
             throw new APIManagementException(errorMessage);
         }
+
+
+
+
         //Validate Transports
         validateAndSetTransports(api);
         boolean transactionCommitted = false;
@@ -2594,6 +2598,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     artifactManager.updateGenericArtifact(artifact); //update the  artifact
                 }
             }
+
+            //attaching micro-gateway labels to the API
+            APIUtil.attachLabelsToAPIArtifact(artifact, api, tenantDomain);
 
             //write API Status to a separate property. This is done to support querying APIs using custom query (SQL)
             //to gain performance

@@ -650,6 +650,12 @@ public final class APIUtil {
             api.setEnvironments(extractEnvironmentsForAPI(environments));
             api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
             api.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
+            //get labels from the artifact and set to API object
+            String[] labelArray = artifact.getAttributes(APIConstants.API_LABELS_GATEWAY_LABELS);
+            if (labelArray != null && labelArray.length > 0) {
+                api.setGatewayLabels(Arrays.asList(labelArray));
+            }
+
         } catch (GovernanceException e) {
             String msg = "Failed to get API for artifact ";
             throw new APIManagementException(msg, e);
@@ -959,12 +965,60 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_CORS_CONFIGURATION,
                     APIUtil.getCorsConfigurationJsonFromDto(api.getCorsConfiguration()));
 
+            //attaching micro-gateway labels to the API
+            attachLabelsToAPIArtifact(artifact, api, tenantDomain);
+
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + api.getId().getApiName();
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
         return artifact;
+    }
+
+    /**
+     * This method is used to attach micro-gateway labels to the given API
+     *
+     * @param artifact genereic artifact
+     * @param api API
+     * @param tenantDomain domain name of the tenant
+     * @throws APIManagementException if failed to attach micro-gateway labels
+     */
+    public static void attachLabelsToAPIArtifact(GenericArtifact artifact, API api, String tenantDomain)
+            throws APIManagementException {
+
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+        //get all labels in the tenant
+        List<String> gatewayLabelList = apiMgtDAO.getLabels(tenantDomain);
+        //validation is performed here to cover all actions related to API artifact updates
+        if (!gatewayLabelList.isEmpty()) {
+            try {
+                //clear all the existing labels first
+                artifact.removeAttribute(APIConstants.API_LABELS_GATEWAY_LABELS);
+                //if there are labels attached to the API object, add them to the artifact
+                if (api.getGatewayLabels() != null) {
+                    //validate and add each label to the artifact
+                    List<String> candidateLabelsList = api.getGatewayLabels();
+                    for (String label : candidateLabelsList) {
+                        //validation step, add the label only if it exists in the database
+                        if (gatewayLabelList.contains(label)) {
+                            artifact.addAttribute(APIConstants.API_LABELS_GATEWAY_LABELS, label);
+                        } else {
+                            log.warn("Label name : " + label + " does not exist in the database, hence skipping it.");
+                        }
+                    }
+                }
+            } catch (GovernanceException e) {
+                String msg = "Failed to add labels for API : " + api.getId().getApiName();
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            }
+
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("No predefined labels in the tenant : " + tenantDomain + " . Skipped adding all labels");
+            }
+        }
     }
 
     /**
@@ -6483,6 +6537,17 @@ public final class APIUtil {
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration()
                 .getThrottleProperties();
         return throttleProperties.isEnabledSubscriptionLevelSpikeArrest();
+    }
+
+    /**
+     * This method is used to get the labels in a given tenant space
+     *
+     * @param tenantId tenant ID
+     * @return
+     */
+    public static List<String> getAllLabels(int tenantId){
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+        return apiMgtDAO.getLabels("test");
     }
 
     public static Map<String, Tier> getTiersFromPolicies(String policyLevel, int tenantId) throws APIManagementException {

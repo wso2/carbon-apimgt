@@ -475,6 +475,10 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setCacheTimeout(cacheTimeOut);
         api.setAsDefaultVersion("default_version".equals(defaultVersion));
 
+        //get the label list from UI and set it here
+        String gatewayLabels = (String) apiData.get("gatewayLabels", apiData);
+        attachLabelsToAPI(api, gatewayLabels);
+
         String productionTps = (String) apiData.get("productionTps", apiData);
         String sandboxTps = (String) apiData.get("sandboxTps", apiData);
 
@@ -2038,6 +2042,11 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setContextTemplate(contextTemplate);
         api.setVisibility(visibility);
         api.setVisibleRoles(visibleRoles != null ? visibleRoles.trim() : null);
+
+        //get the label list from UI and set it here
+        String gatewayLabels = (String) apiData.get("gatewayLabels", apiData);
+        attachLabelsToAPI(api,gatewayLabels);
+
         api.setVisibleTenants(visibleTenants != null ? visibleTenants.trim() : null);
         api.setAccessControl(publisherAccessControl);
         api.setAccessControlRoles(publisherAccessControlRoles);
@@ -2194,6 +2203,22 @@ public class APIProviderHostObject extends ScriptableObject {
         }
 
         return success;
+    }
+
+    /**
+     * This method is used to attach labels to a given API
+     *
+     * @param api API
+     * @param gatewayLabels label as a comma separated text sent from the UI
+     */
+    private static void attachLabelsToAPI(API api, String gatewayLabels){
+
+        if (!StringUtils.isEmpty(gatewayLabels)) {
+            List<String> gatewayLabelList = new ArrayList<String>();
+            String[] labels = gatewayLabels.split(",");
+            gatewayLabelList.addAll(Arrays.asList(labels));
+            api.setGatewayLabels(gatewayLabelList);
+        }
     }
 
     private static String updateContextWithVersion(String version, String contextVal, String context) {
@@ -2809,6 +2834,20 @@ public class APIProviderHostObject extends ScriptableObject {
                 myn.put(54, myn, checkValue((api.getAccessControlRoles())));
                 myn.put(55, myn, checkValue(api.getAdditionalProperties().toJSONString()));
                 myn.put(56, myn, checkValue(api.getAuthorizationHeader()));
+
+                //put the labels to the native array which represents the API
+                List<String> labelList = api.getGatewayLabels();
+                if (labelList != null && labelList.size() > 0) {
+                    NativeArray apiLabelsArray = new NativeArray(labelList.size());
+                    int i = 0;
+                    for (String labelName : labelList) {
+                        NativeObject labelObject = new NativeObject();
+                        labelObject.put("labelName", labelObject, labelName);
+                        apiLabelsArray.put(i, apiLabelsArray, labelObject);
+                        i++;
+                    }
+                    myn.put(57, myn, apiLabelsArray);
+                }
             } else {
                 handleException("Cannot find the requested API- " + apiName +
                         "-" + version);

@@ -2039,6 +2039,21 @@ public class APIStoreHostObject extends ScriptableObject {
                         row.put("type", row, api.getType());
                         row.put("additionalProperties", row, api.getAdditionalProperties().toJSONString());
                         row.put("authorizationHeader", row, api.getAuthorizationHeader());
+
+                        //put the labels to the native array which represents the API
+                        List<String> labelList = api.getGatewayLabels();
+                        if (labelList != null && labelList.size() > 0) {
+                            NativeArray apiLabelsArray = new NativeArray(labelList.size());
+                            int i = 0;
+                            for (String labelName : labelList) {
+                                NativeObject labelObject = new NativeObject();
+                                labelObject.put("labelName", labelObject, labelName);
+                                apiLabelsArray.put(i, apiLabelsArray, labelObject);
+                                i++;
+                            }
+                            row.put("labels", row, apiLabelsArray);
+                        }
+
                         myn.put(0, myn, row);
 
                     } else {
