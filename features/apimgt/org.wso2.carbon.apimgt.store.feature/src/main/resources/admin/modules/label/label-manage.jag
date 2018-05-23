@@ -1,0 +1,45 @@
+<%
+var log = new Log();
+
+var getAllLabels = function(){
+    try{
+        var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+        var tenantDomain = MultitenantUtils.getTenantDomain(jagg.getUser().username);
+        var APIAdminImpl = Packages.org.wso2.carbon.apimgt.impl.APIAdminImpl;
+        var apiAdmin = new APIAdminImpl();
+    
+        var labelList = apiAdmin.getAllLabels(tenantDomain);
+        return {
+            error: false,
+            labelList:labelList
+        };
+    } catch (ex) {
+        var errorMessage = "Error occurred while getting labels (Cause:" + ex.message + ")";
+        log.error(errorMessage);
+        return {
+            error: true,
+            message: errorMessage
+        };
+    }
+};
+
+var deleteLabel = function (uuid) {
+    try {
+        var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+        var tenantDomain = MultitenantUtils.getTenantDomain(jagg.getUser().username);
+        var APIAdminImpl = Packages.org.wso2.carbon.apimgt.impl.APIAdminImpl;
+        var apiAdmin = new APIAdminImpl();
+        apiAdmin.deleteLabel(uuid);
+        log.debug("Deletion Success");
+        return {
+            error: false
+        };
+    } catch (ex) {
+        return {
+            error: true,
+            message: ex.message.split(":")[1]
+        };
+    }
+};
+
+%>

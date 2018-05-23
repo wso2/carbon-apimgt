@@ -1,0 +1,45 @@
+<%
+include("/jagg/jagg.jag");
+
+(function () {
+    response.contentType = "application/json; charset=UTF-8";
+    var mod, result, obj, permissionResult,
+    action = request.getParameter("action"),
+    uuid = request.getParameter("uuid"),
+    site = require("/site/conf/site.json"),
+    msg = require("/site/conf/ui-messages.jag");
+
+    if(uuid == null){
+        uuid = -1;
+    }
+    if(jagg.getUser() == null){
+        print({
+            error:true,
+            message:'timeout'
+        });
+    } else if (request.getMethod() == 'POST') {
+        if (action == "labelAction" || action == "update" ) {
+            var labelName =  request.getParameter("labelName", "UTF-8");
+            var description =  request.getParameter("description", "UTF-8");
+            var attributes =  parse(request.getParameter("attributes", "UTF-8"));
+
+            mod = jagg.module("label");
+
+            result = mod.addLabel(action, uuid, labelName, description, attributes);
+        	
+            if (result.error) {
+                obj = {
+                    error:true,
+                    message:msg.error.backendError(action)
+                };             
+            } else {
+                obj = {
+                    error:false,
+                    response:result.valid
+                }
+            }
+            print(obj);
+        }
+    }
+ }());
+%>

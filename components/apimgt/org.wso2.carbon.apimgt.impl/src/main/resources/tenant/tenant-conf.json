@@ -63,6 +63,14 @@
       {
         "Name": "apim:app_import_export",
         "Roles": "admin"
+      },
+      {
+        "Name": "apim:label_manage",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim:label_read",
+        "Roles": "admin"
       }
     ]
   },
