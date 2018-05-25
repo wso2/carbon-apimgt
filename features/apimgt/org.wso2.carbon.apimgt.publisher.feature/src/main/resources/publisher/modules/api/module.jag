@@ -14,6 +14,9 @@ jagg.module("api", {
     isApiNameExist:function () {
         return jagg.require(jagg.getModulesDir() + "api/add.jag").isApiNameExist.apply(this, arguments);
     },
+    isApiNameWithDifferentCaseExist:function () {
+        return jagg.require(jagg.getModulesDir() + "api/add.jag").isApiNameWithDifferentCaseExist.apply(this, arguments);
+    },
     isURLValid:function () {
         return jagg.require(jagg.getModulesDir() + "api/add.jag").isURLValid.apply(this, arguments);
     },
