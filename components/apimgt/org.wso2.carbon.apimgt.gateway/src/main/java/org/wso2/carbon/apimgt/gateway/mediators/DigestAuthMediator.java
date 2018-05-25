@@ -385,7 +385,7 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
                 log.debug("WWW-Authentication header is :" + wwwHeader);
             }
             //This step can throw a NullPointerException if a WWW-Authenticate header is not received.
-            String[] wwwHeaderSplits = wwwHeader.split("Digest");
+            String[] wwwHeaderSplits = wwwHeader.split("Digest", 2);
 
             //Happens only if the WWW-Authenticate header supports digest authentication.
             if (wwwHeaderSplits.length > 1 && wwwHeaderSplits[1] != null) {
