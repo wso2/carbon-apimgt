@@ -8994,19 +8994,6 @@ public class ApiMgtDAO {
     }
 
 
-    public List<String> getLabels(String tenantDomain) {
-        //this is a dummy method
-        //actual DB Call goes here, this is a test value
-        List<String> testList = new ArrayList<>();
-        testList.add("LabelOne");
-        testList.add("LabelTwo");
-        testList.add("LabelThree");
-        testList.add("LabelFour");
-        testList.add("LabelFive");
-        testList.add("LabelSix");
-        return testList;
-    }
-
     /**
      * Get all subscription level policeis belongs to specific tenant
      *
