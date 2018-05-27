@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -139,14 +140,11 @@ public class APIMappingUtil {
         //setting micro-gateway labels if there are any
         if (model.getGatewayLabels() != null) {
             List<LabelDTO> labels = new ArrayList<>();
-            List<String> gatewayLabels = model.getGatewayLabels();
-            for (String labelName : gatewayLabels) {
+            List<Label> gatewayLabels = model.getGatewayLabels();
+            for (Label label : gatewayLabels) {
                 LabelDTO labelDTO = new LabelDTO();
-                labelDTO.setName(labelName);
-                List<String> accessURLList = new ArrayList<>();
-                accessURLList.add(labelName);
-                accessURLList.add(labelName);
-                labelDTO.setAccessUrls(accessURLList);
+                labelDTO.setName(label.getName());
+                labelDTO.setAccessUrls(label.getAccessUrls());
                 labels.add(labelDTO);
             }
             dto.setLabels(labels);
