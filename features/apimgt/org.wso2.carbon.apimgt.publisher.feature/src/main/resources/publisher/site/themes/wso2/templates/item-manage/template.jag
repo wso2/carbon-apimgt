@@ -661,64 +661,6 @@
                     </div>
                 </div>
 
-
-            <!-- Micro-gateway labels section -->
-            <% if ( labels != null && labels.length > 0 ) { %>
-                <div class="panel-group accordion add-margin-bottom-2x" role="tablist" aria-multiselectable="true">
-                    <div class="panel panel-default">
-                    <div class="panel-heading" role="tab" id="labelHeading" data-toggle="collapse" data-parent=".accordion" href="#accordion-collapse" aria-controls="accordion-collapse">
-                        <h4 class="panel-title">
-                    <div>
-                    <div class="heading no-description"><%=i18n.localize("Micro Gateway Labels")%></div>
-                        <div class="status">
-                            <i class="fw fw-down"></i>
-                        </div>
-                    </div>
-                    <div class="clearfix"></div>
-                    </h4>
-                </div>
-
-                <div id="accordion-collapse" class="panel-collapse collapse" role="tabpanel" aria-labelledby="labelHeading">
-                    <div class="panel-body">
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="gateway-labels"> <%=i18n.localize("Micro Gateway Labels")%> :
-                            <a class="help_popup" help_data="label_help" data-trigger="hover" data-placement="bottom" title="control_help">
-                                <span class="icon fw-stack fw-lg" style="font-size:6px">
-                                    <i class="fw fw-circle fw-stack-2x"></i>
-                                    <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
-                                </span>
-                            </a>
-                            <p id="label_help" class="hide"><%=i18n.localize("Specify the labels of the micro gateways here. This API will be deployed on the specified micro gateways.")%></p>
-                        </label>
-                        <div class="col-sm-4">
-                            <select multiple class="select  form-control" id="gatewayLabelList" name="gatewayLabelList">
-                                <% var currentLabels = "";
-                                for (var i in labels) {
-                                    var isLabelAttached = false;
-                                    if (attachedLabels != null) {
-                                        var attachedLabelObj = parse(stringify(attachedLabels));
-                                        for (var j=0; j< attachedLabelObj.length; j++){
-                                            if (labels[i].name == attachedLabelObj[j].labelName){
-                                                currentLabels += labels[i].name + ",";
-                                                isLabelAttached = true;
-                                                break;
-                                            }
-                                        }
-                                    }%>
-                                    <option <% if(isLabelAttached) { %> selected="selected" <%}%> value="<%=encode.forHtml("" + (labels[i].name))%>"><%=encode.forHtml("" + (labels[i].name))%></option>
-                                <%}%>
-                            </select>
-                            <% if (currentLabels.length > 1) {
-                                currentLabels = currentLabels.substring(0, currentLabels.length-1);
-                            }%>
-                            <input type="hidden" id="gatewayLabels" name="gatewayLabels" value="<%=encode.forHtml("" + currentLabels)%>"/>
-                        </div>
-                        </div>
-                    </div>
-                   </div>
-                </div>
-            <% } %><!-- Micro-gateway labels section -->
-
         <div class="panel-group accordion add-margin-bottom-2x" role="tablist" aria-multiselectable="true">
             <div class="panel panel-default">
                 <div class="panel-heading" role="tab" id="headingOne" data-toggle="collapse" data-parent=".accordion" href="#accordion1-collapse1" aria-controls="accordion1-collapse1">
@@ -801,6 +743,53 @@
                                    <%}}}%>
                             </tbody>
                        </table>
+
+                        <!-- Micro-gateway labels section -->
+                        <% if ( labels != null && labels.length > 0 ) { %>
+                            <div class="panel-body">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label" for="gateway-labels"><%=i18n.localize("Micro Gateway Labels")%> :
+                                    <a class="help_popup" help_data="label_help" data-trigger="hover" data-placement="bottom" title="control_help">
+                                        <span class="icon fw-stack fw-lg" style="font-size:6px">
+                                            <i class="fw fw-circle fw-stack-2x"></i>
+                                            <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+                                        </span>
+                                    </a>
+                                    <p id="label_help" class="hide"><%=i18n.localize("Specify the labels of the micro gateways here. This API will be deployed on the specified micro gateways.")%></p>
+                                </label>
+                                <div class="col-sm-4">
+                                    <select multiple class="select  form-control" id="gatewayLabelList" name="gatewayLabelList" onchange="appendLabels()">
+                                        <% var currentLabels = "";
+                                            for (var i in labels) {
+                                                var isLabelAttached = false;
+                                                if (attachedLabels != null) {
+                                                    var attachedLabelObj = parse(stringify(attachedLabels));
+                                                    for (var j=0; j< attachedLabelObj.length; j++){
+                                                        if (labels[i].name == attachedLabelObj[j].labelName){
+                                                            currentLabels += labels[i].name + ",";
+                                                            isLabelAttached = true;
+                                                            break;
+                                                        }
+                                                    }
+                                                }%>
+                                                <option <% if(isLabelAttached) { %> selected="selected" <%}%> value="<%=encode.forHtml("" + (labels[i].name))%>"> <%=encode.forHtml("" + (labels[i].name) + " " + (labels[i].description))%> </option>
+                                            <%}%>
+                                    </select>
+                                    <% if (currentLabels.length > 1) {
+                                        currentLabels = currentLabels.substring(0, currentLabels.length-1);
+                                    }%>
+                                    <input type="hidden" id="gatewayLabels" name="gatewayLabels" value="<%=encode.forHtml("" + currentLabels)%>"/>
+                                    <script type="text/javascript">
+                                        function appendLabels() {
+                                            var selectedLabelSet = $("#gatewayLabelList").val();
+                                            $("#gatewayLabels").val(selectedLabelSet);
+                                        }
+                                    </script>
+                                </div>
+                            </div>
+                            </div>
+                        <%}%><!-- Micro-gateway labels section -->
+
                         <script>
                         $('input').on('change', function() {
                             var values = $('input:checked.env').map(function() {

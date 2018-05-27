@@ -346,16 +346,17 @@ var isConfigured = function () {
 //get all labels in the given tenant space
 var getLabels = function () {
     var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-    var username = MultitenantUtils.getTenantAwareUsername(session.get("logged.user").username);
+    var tenantDomain = MultitenantUtils.getTenantDomain(jagg.getUser().username);
     var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
     var tenantId = APIUtil.getTenantId(session.get("logged.user").username);
     var labelArray = [];
     var labels, log = new Log();
     try {
-        var labelList = APIUtil.getAllLabels(tenantId);
+        var labelList = APIUtil.getAllLabels(tenantDomain);
         for(i = 0; i < labelList.size(); i++) {
             label = {};
-            label.name = labelList.get(i);
+            label.name = labelList.get(i).getName();
+            label.description = labelList.get(i).getDescription();
             labelArray[i] = label;
         }
         return {
