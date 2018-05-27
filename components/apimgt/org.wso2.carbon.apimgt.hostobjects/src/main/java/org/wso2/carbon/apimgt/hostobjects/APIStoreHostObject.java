@@ -52,6 +52,7 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
+import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
@@ -2041,13 +2042,15 @@ public class APIStoreHostObject extends ScriptableObject {
                         row.put("authorizationHeader", row, api.getAuthorizationHeader());
 
                         //put the labels to the native array which represents the API
-                        List<String> labelList = api.getGatewayLabels();
+                        List<Label> labelList = api.getGatewayLabels();
                         if (labelList != null && labelList.size() > 0) {
                             NativeArray apiLabelsArray = new NativeArray(labelList.size());
                             int i = 0;
-                            for (String labelName : labelList) {
+                            for (Label label : labelList) {
                                 NativeObject labelObject = new NativeObject();
-                                labelObject.put("labelName", labelObject, labelName);
+                                labelObject.put("labelName", labelObject, label.getName());
+                                labelObject.put("labelDescription", labelObject, label.getDescription());
+                                labelObject.put("accessURLs", labelObject, StringUtils.join(label.getAccessUrls(), ", "));
                                 apiLabelsArray.put(i, apiLabelsArray, labelObject);
                                 i++;
                             }
