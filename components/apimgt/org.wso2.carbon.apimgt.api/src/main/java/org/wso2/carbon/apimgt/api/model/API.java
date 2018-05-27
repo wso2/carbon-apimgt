@@ -77,7 +77,7 @@ public class API implements Serializable {
     private String visibleRoles;
     private String visibleTenants;
 
-    private List<String> gatewayLabels;
+    private List<Label> gatewayLabels;
 
     private boolean endpointSecured = false;
     private boolean endpointAuthDigest = false;
@@ -500,11 +500,11 @@ public class API implements Serializable {
         this.visibleTenants = visibleTenants;
     }
 
-    public List<String> getGatewayLabels() {
+    public List<Label> getGatewayLabels() {
         return gatewayLabels;
     }
 
-    public void setGatewayLabels(List<String> gatewayLabels) {
+    public void setGatewayLabels(List<Label> gatewayLabels) {
         this.gatewayLabels = gatewayLabels;
     }
 

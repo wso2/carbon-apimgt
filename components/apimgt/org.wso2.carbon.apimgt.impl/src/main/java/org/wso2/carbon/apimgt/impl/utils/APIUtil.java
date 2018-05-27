@@ -75,6 +75,7 @@ import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
+import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
@@ -654,7 +655,24 @@ public final class APIUtil {
             //get labels from the artifact and set to API object
             String[] labelArray = artifact.getAttributes(APIConstants.API_LABELS_GATEWAY_LABELS);
             if (labelArray != null && labelArray.length > 0) {
-                api.setGatewayLabels(Arrays.asList(labelArray));
+                String tenantDomain = MultitenantUtils.getTenantDomain
+                        (replaceEmailDomainBack(api.getId().getProviderName()));
+                List<Label> allLabelList = APIUtil.getAllLabels(tenantDomain);
+                List<Label> gatewayLabelListForAPI = new ArrayList<>();
+                for (String labelName : labelArray) {
+                    Label label = new Label();
+                    //set the name
+                    label.setName(labelName);
+                    //set the description and access URLs
+                    for (Label currentLabel : allLabelList) {
+                        if (labelName.equalsIgnoreCase(currentLabel.getName())) {
+                            label.setDescription(currentLabel.getDescription());
+                            label.setAccessUrls(currentLabel.getAccessUrls());
+                        }
+                    }
+                    gatewayLabelListForAPI.add(label);
+                }
+                api.setGatewayLabels(gatewayLabelListForAPI);
             }
 
         } catch (GovernanceException e) {
@@ -990,22 +1008,29 @@ public final class APIUtil {
 
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         //get all labels in the tenant
-        List<String> gatewayLabelList = apiMgtDAO.getLabels(tenantDomain);
+        List<Label> gatewayLabelList = apiMgtDAO.getAllLabels(tenantDomain);
         //validation is performed here to cover all actions related to API artifact updates
         if (!gatewayLabelList.isEmpty()) {
+            //put available gateway labels to a list for validation purpose
+            List<String> availableGatewayLabelListNames = new ArrayList<>();
+            for (Label x : gatewayLabelList) {
+                availableGatewayLabelListNames.add(x.getName());
+            }
             try {
                 //clear all the existing labels first
                 artifact.removeAttribute(APIConstants.API_LABELS_GATEWAY_LABELS);
                 //if there are labels attached to the API object, add them to the artifact
                 if (api.getGatewayLabels() != null) {
                     //validate and add each label to the artifact
-                    List<String> candidateLabelsList = api.getGatewayLabels();
-                    for (String label : candidateLabelsList) {
-                        //validation step, add the label only if it exists in the database
-                        if (gatewayLabelList.contains(label)) {
-                            artifact.addAttribute(APIConstants.API_LABELS_GATEWAY_LABELS, label);
+                    List<Label> candidateLabelsList = api.getGatewayLabels();
+                    for (Label label : candidateLabelsList) {
+                        String candidateLabel = label.getName();
+                        //validation step, add the label only if it exists in the available gateway labels
+                        if (availableGatewayLabelListNames.contains(candidateLabel)) {
+                            artifact.addAttribute(APIConstants.API_LABELS_GATEWAY_LABELS, candidateLabel);
                         } else {
-                            log.warn("Label name : " + label + " does not exist in the database, hence skipping it.");
+                            log.warn("Label name : " + candidateLabel + " does not exist in the tenant : " +
+                                    tenantDomain + ", hence skipping it.");
                         }
                     }
                 }
@@ -6599,12 +6624,13 @@ public final class APIUtil {
     /**
      * This method is used to get the labels in a given tenant space
      *
-     * @param tenantId tenant ID
-     * @return
+     * @param tenantDomain tenant domain name
+     * @return micro gateway labels in a given tenant space
+     * @throws APIManagementException if failed to fetch micro gateway labels
      */
-    public static List<String> getAllLabels(int tenantId){
+    public static List<Label> getAllLabels(String tenantDomain) throws APIManagementException {
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
-        return apiMgtDAO.getLabels("test");
+        return apiMgtDAO.getAllLabels(tenantDomain);
     }
 
     public static Map<String, Tier> getTiersFromPolicies(String policyLevel, int tenantId) throws APIManagementException {
