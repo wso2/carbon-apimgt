@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -864,14 +865,23 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
 
-
+    /**
+     * This method is used to assign micro gateway labels to the DTO
+     *
+     * @param apiDTO API DTO
+     * @param api the API object
+     * @return the API object with labels
+     */
     private API assignLabelsToDTO(APIDTO apiDTO, API api) {
 
         if (apiDTO.getLabels() != null) {
             List<LabelDTO> dtoLabels = apiDTO.getLabels();
-            List<String> labelList = new ArrayList<>();
+            List<Label> labelList = new ArrayList<>();
             for (LabelDTO labelDTO : dtoLabels) {
-                labelList.add(labelDTO.getName());
+                Label label = new Label();
+                label.setName(labelDTO.getName());
+                label.setDescription(labelDTO.getDescription());
+                labelList.add(label);
             }
             api.setGatewayLabels(labelList);
         }
