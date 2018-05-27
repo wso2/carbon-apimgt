@@ -147,7 +147,10 @@
         <h4 class="add-margin-top-5x"><%=i18n.localize("Micro Gateway Labels")%></h4>
         <% for (var label in api.labels ) { %>
             <div class="endpoint-copybtn well well-sm add-margin-bottom-1x">
-                <p><%= api.labels[label].labelName %> : Access URL goes here </p>
+                <p><%= api.labels[label].labelName %></p>
+                <% if (api.labels[label].accessURLs != null && api.labels[label].accessURLs.length > 0){ %>
+                    <p>Access URLs : <%= api.labels[label].accessURLs %></p>
+                <% } %>
             </div>
         <% } %>
     <% } %>
