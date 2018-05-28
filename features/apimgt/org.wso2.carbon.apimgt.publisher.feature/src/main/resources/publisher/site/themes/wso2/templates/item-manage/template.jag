@@ -758,7 +758,7 @@
                                     <p id="label_help" class="hide"><%=i18n.localize("Specify the labels of the micro gateways here. This API will be deployed on the specified micro gateways.")%></p>
                                 </label>
                                 <div class="col-sm-4">
-                                    <select multiple class="select  form-control" id="gatewayLabelList" name="gatewayLabelList" onchange="appendLabels()">
+                                    <select multiple class="selectpicker select  form-control" id="gatewayLabelList" name="gatewayLabelList" onchange="appendLabels()">
                                         <% var currentLabels = "";
                                             for (var i in labels) {
                                                 var isLabelAttached = false;
@@ -785,6 +785,11 @@
                                             $("#gatewayLabels").val(selectedLabelSet);
                                         }
                                     </script>
+                                    <style>
+                                        span.glyphicon.glyphicon-ok::after {
+                                            content: "\2714";
+                                        }
+                                    </style>
                                 </div>
                             </div>
                             </div>
