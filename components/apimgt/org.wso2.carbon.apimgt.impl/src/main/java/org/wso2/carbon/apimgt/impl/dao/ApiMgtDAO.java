@@ -8993,7 +8993,6 @@ public class ApiMgtDAO {
         return policies.toArray(new ApplicationPolicy[policies.size()]);
     }
 
-
     /**
      * Get all subscription level policeis belongs to specific tenant
      *
