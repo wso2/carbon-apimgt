@@ -48,6 +48,7 @@ import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
+import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
@@ -1072,7 +1073,11 @@ public class APIUtilTest {
             API api = getUniqueAPI();
             Mockito.when(genericArtifact.getAttributeKeys()).thenReturn(new String[] {"URITemplate"}).thenThrow
                     (GovernanceException.class);
-
+            ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
+            PowerMockito.mockStatic(ApiMgtDAO.class);
+            Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
+            Mockito.when(apiMgtDAO.getAllLabels(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME))
+                    .thenReturn(new ArrayList<Label>());
             APIUtil.createAPIArtifactContent(genericArtifact, api);
             Assert.assertTrue(true);
             APIUtil.createAPIArtifactContent(genericArtifact, api);
@@ -1323,6 +1328,9 @@ public class APIUtilTest {
         final String provider = expectedAPI.getId().getProviderName();
         final String tenantDomain = org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         final int tenantId = -1234;
+
+
+
 
         GovernanceArtifact artifact = Mockito.mock(GovernanceArtifact.class);
         Registry registry = Mockito.mock(Registry.class);
