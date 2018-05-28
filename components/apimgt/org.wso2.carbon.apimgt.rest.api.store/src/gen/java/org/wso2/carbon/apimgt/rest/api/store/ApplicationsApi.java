@@ -11,6 +11,8 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyReGenerateRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyReGenerateResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ScopeListDTO;
 
 import java.util.List;
@@ -233,6 +235,30 @@ public class ApplicationsApi  {
     public String applicationsPostGetLastUpdatedTime(ApplicationDTO body,String contentType)
     {
         return delegate.applicationsPostGetLastUpdatedTime(body,contentType);
+    }
+    @POST
+    @Path("/regenerate-consumersecret")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Re generate consumer secret for an application\n", notes = "This operation can be used to re generate consumer secret for an application\n", response = ApplicationKeyReGenerateResponseDTO.class)
+    @io.swagger.annotations.ApiResponses(value = {
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nKeys are re generated.\n"),
+
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nInvalid request or validation error\n"),
+
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nThe resource to be updated does not exist.\n"),
+
+        @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met (Will be supported in future).\n") })
+
+    public Response applicationsRegenerateConsumersecretPost(@ApiParam(value = "The consumer key associated with the application\n" ,required=true ) ApplicationKeyReGenerateRequestDTO body,
+    @ApiParam(value = "Media type of the entity in the body. Default is application/json.\n" ,required=true , defaultValue="application/json")@HeaderParam("Content-Type") String contentType)
+    {
+    return delegate.applicationsRegenerateConsumersecretPost(body,contentType);
+    }
+
+    public String applicationsRegenerateConsumersecretPostGetLastUpdatedTime(ApplicationKeyReGenerateRequestDTO body,String contentType)
+    {
+        return delegate.applicationsRegenerateConsumersecretPostGetLastUpdatedTime(body,contentType);
     }
     @GET
     @Path("/scopes/{applicationId}")

@@ -8,6 +8,8 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyReGenerateRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyReGenerateResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ScopeListDTO;
 
 import java.util.List;
@@ -26,6 +28,7 @@ public abstract class ApplicationsApiService {
     public abstract Response applicationsGenerateKeysPost(String applicationId,ApplicationKeyGenerateRequestDTO body,String contentType,String ifMatch,String ifUnmodifiedSince);
     public abstract Response applicationsGet(String groupId,String query,Integer limit,Integer offset,String accept,String ifNoneMatch);
     public abstract Response applicationsPost(ApplicationDTO body,String contentType);
+    public abstract Response applicationsRegenerateConsumersecretPost(ApplicationKeyReGenerateRequestDTO body,String contentType);
     public abstract Response applicationsScopesApplicationIdGet(String applicationId,Boolean filterByUserRoles,String ifNoneMatch,String ifModifiedSince);
 
     public abstract String applicationsApplicationIdDeleteGetLastUpdatedTime(String applicationId,String ifMatch,String ifUnmodifiedSince);
@@ -36,6 +39,7 @@ public abstract class ApplicationsApiService {
     public abstract String applicationsGenerateKeysPostGetLastUpdatedTime(String applicationId,ApplicationKeyGenerateRequestDTO body,String contentType,String ifMatch,String ifUnmodifiedSince);
     public abstract String applicationsGetGetLastUpdatedTime(String groupId,String query,Integer limit,Integer offset,String accept,String ifNoneMatch);
     public abstract String applicationsPostGetLastUpdatedTime(ApplicationDTO body,String contentType);
+    public abstract String applicationsRegenerateConsumersecretPostGetLastUpdatedTime(ApplicationKeyReGenerateRequestDTO body,String contentType);
     public abstract String applicationsScopesApplicationIdGetGetLastUpdatedTime(String applicationId,Boolean filterByUserRoles,String ifNoneMatch,String ifModifiedSince);
 }
 

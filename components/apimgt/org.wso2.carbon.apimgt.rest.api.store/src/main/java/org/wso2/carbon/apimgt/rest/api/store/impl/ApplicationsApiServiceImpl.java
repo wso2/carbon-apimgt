@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.rest.api.store.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyGenerateRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyReGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ScopeListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils;
@@ -165,6 +166,34 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                 RestApiUtil.handleInternalServerError("Error while adding a new application for the user " + username,
                         e, log);
             }
+        }
+        return null;
+    }
+
+    /**
+     * Re generate consumer secret.
+     *
+     * @param body Request body containing application details.
+     * @param contentType Content-Type header value.
+     * @return A response object containing application keys.
+     */
+    @Override
+    public Response applicationsRegenerateConsumersecretPost(ApplicationKeyReGenerateRequestDTO body,
+                                                             String contentType) {
+
+        String username = RestApiUtil.getLoggedInUsername();
+        String clientId = body.getConsumerKey();
+        try {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            String clientSecret = apiConsumer.renewConsumerSecret(clientId);
+
+            ApplicationKeyDTO applicationKeyDTO = new ApplicationKeyDTO();
+            applicationKeyDTO.setConsumerKey(clientId);
+            applicationKeyDTO.setConsumerSecret(clientSecret);
+
+            return Response.ok().entity(applicationKeyDTO).build();
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while re generating the consumer secret ", e, log);
         }
         return null;
     }
@@ -532,6 +561,13 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
 
     @Override
     public String applicationsPostGetLastUpdatedTime(ApplicationDTO body, String contentType) {
+        return null;
+    }
+
+    @Override
+    public String applicationsRegenerateConsumersecretPostGetLastUpdatedTime(ApplicationKeyReGenerateRequestDTO body,
+                                                                             String contentType) {
+
         return null;
     }
 
