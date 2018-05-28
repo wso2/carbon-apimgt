@@ -2234,6 +2234,9 @@ public class APIProviderHostObject extends ScriptableObject {
                 gatewayLabelList.add(label);
             }
             api.setGatewayLabels(gatewayLabelList);
+        } else {
+            //clear the labels
+            api.setGatewayLabels(null);
         }
     }
 
