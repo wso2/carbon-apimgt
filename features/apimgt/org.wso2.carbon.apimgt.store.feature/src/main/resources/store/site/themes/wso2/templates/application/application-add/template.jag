@@ -1,22 +1,23 @@
 <% jagg.template("application/application-add", function(inputs, outputs, jagg) {
- var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
- var apiPath = "";
- var goBack = "";
- if(session.get('apiPath') != null){
+    var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+    var apiPath = "";
+    var goBack = "";
+    if(session.get('apiPath') != null){
         apiPath = session.get('apiPath');
- }
- if(request.getParameter('goBack') != null){
+    }
+    if(request.getParameter('goBack') != null){
         goBack = request.getParameter('goBack');
- }
- var mod = jagg.module("manager");
- var httpsUrl= mod.getHTTPsURL();
- var i=0, tiers = outputs.tiers;
- var user = jagg.getUser();
- var app = require("/modules/application/application-attributes.jag");
- var applicationAttributes = app.readApplicationAttributes(); %>
+    }
+    var mod = jagg.module("manager");
+    var httpsUrl= mod.getHTTPsURL();
+    var i=0, tiers = outputs.tiers;
+    var user = jagg.getUser();
+    var app = require("/modules/application/application-attributes.jag");
+    var applicationAttributes = app.readApplicationAttributes();
 
- <script>
- var apiViewUrl = '<%= jagg.url('/apis/info') %>';
+    %>
+    <script>
+    var apiViewUrl = '<%= jagg.url('/apis/info') %>';
  var urlPrefix = '<%=jagg.getTenantURLPrefix("&") %>';
 
  var isTutorialCompleted = localStorage.getItem("isTutorialCompleted");
@@ -35,7 +36,7 @@
     <h2><%=i18n.localize("Add Application")%></h2>
 </div>
 <p><%=i18n.localize("An application is a logical collection of APIs. Applications allow you to use a single access token to invoke a collection of APIs and to subscribe to one API multiple times with different SLA levels. The DefaultApplication is pre-created and allows unlimited access by default.")%></p>
-          
+
   <div class="alert alert-success" id="appAddMessage" style="display:none">
           <button type="button" class="close" data-dismiss="alert">&times;</button>
           <strong><%=i18n.localize("Application")%> "<span id="applicationShowName"></span>" <%=i18n.localize("Successfully added!")%></strong>
@@ -43,7 +44,7 @@
   <div class="alert alert-success" id="appAddPendingMessage" style="display:none">
           <button type="button" class="close" data-dismiss="alert">&times;</button>
           <strong><%=i18n.localize("Congratulations! Your application creation request for - ")%> "<span id="applicationPendingShowName"></span>" <%=i18n.localize(" has been submitted and is now awaiting approval.")%></strong>
-  </div>   
+  </div>
 
   <br />
 <div class="white-wrapper add-padding-5x">
@@ -57,10 +58,10 @@
     </div>
   </div>
 <%
- if(jagg.isMultiGroupEnabled()){
-%>
-  <div class="form-group">
-        <label class="col-sm-3 control-label" for="groups"><%=i18n.localize("Groups")%>
+    if(jagg.isMultiGroupEnabled()){
+        %>
+          <div class="form-group">
+                <label class="col-sm-3 control-label" for="groups"><%=i18n.localize("Groups")%>
         </label>
         <div class="col-sm-9 tagContainer">
             <input type="text" style="width: 100%" placeholder="Add groups"
@@ -85,30 +86,30 @@
     <div class="col-md-9 col-lg-9">
         <select id="appTier" name="appTier" onChange="tierChanged(this)">
           <%
-          var tierDescriptions = "";
-          var unlimitedTierDesc = "";
-          for(i=0; i<tiers.length; i++){
-            if(tierDescriptions == ""){
-                tierDescriptions = tierDescriptions + tiers[i].tierDescription;
-            }
-            else{
-                tierDescriptions = tierDescriptions + "," + tiers[i].tierDescription;
-            }
+    var tierDescriptions = "";
+    var unlimitedTierDesc = "";
+    for(i=0; i<tiers.length; i++){
+        if(tierDescriptions == ""){
+            tierDescriptions = tierDescriptions + tiers[i].tierDescription;
+        }
+        else{
+            tierDescriptions = tierDescriptions + "," + tiers[i].tierDescription;
+        }
 
-            if(tiers[i].tierName == "Unlimited"){
-                unlimitedTierDesc = tiers[i].tierDescription;
-            }
-          %>
-          <option  title="<%= encode.forHtmlAttribute(tiers[i].tierDisplayName+"") %>" data-content="<span><strong><%=encode.forHtml(tiers[i].tierDisplayName+"")%></strong><br /><%=encode.forHtml(tiers[i].tierDescription+"")%></span>" value="<%=encode.forHtmlAttribute(tiers[i].tierName+"")%>" <%if(tiers[i].defaultTier){print("selected=\"selected\"")}%>>          
+        if(tiers[i].tierName == "Unlimited"){
+            unlimitedTierDesc = tiers[i].tierDescription;
+        }
+        %>
+        <option  title="<%= encode.forHtmlAttribute(tiers[i].tierDisplayName+"") %>" data-content="<span><strong><%=encode.forHtml(tiers[i].tierDisplayName+"")%></strong><br /><%=encode.forHtml(tiers[i].tierDescription+"")%></span>" value="<%=encode.forHtmlAttribute(tiers[i].tierName+"")%>" <%if(tiers[i].defaultTier){print("selected=\"selected\"")}%>>
             <%=encode.forHtml(tiers[i].tierDisplayName+"")%>
           </option>
           <%}%>
-          </select>    
+          </select>
           <div id="tierHelpStr" class="help-block" style="padding-left: 10px; display: inline;">
             <em><%=encode.forHtml(unlimitedTierDesc+"")%></em>
-          </div>          
+          </div>
           <div class="help-block"> <%=i18n.localize("This feature allows you to assign an API request quota per access token. Allocated quota will be shared among all the subscribed APIs of the application.")%>  </div>
-          <input type="hidden"  id="tierDescriptions" name="tierDescriptions" value="<%=encode.forHtmlAttribute(tierDescriptions+"")%>"/>  
+          <input type="hidden"  id="tierDescriptions" name="tierDescriptions" value="<%=encode.forHtmlAttribute(tierDescriptions+"")%>"/>
     </div>
   </div>
   <div class="form-group">
@@ -117,7 +118,8 @@
         <textarea id="description"  class="form-control" type="text" rows="3"></textarea>
     </div>
   </div>
-    <% if (applicationAttributes!=null) { %>
+
+    <% if(applicationAttributes!=null) { %>
         <input type="hidden" name="numberOfAttributes"  id="numberOfAttributes" value="<%= encode.forHtml(applicationAttributes.length) %>"/>
         <%
         // Iterate through the keys, read from configuration file
@@ -127,22 +129,32 @@
             <% if (applicationAttributes[i].Attribute) { %>
                 <label class="col-md-3 col-lg-3 control-label" for="attribute_<%= i%>">
                 <%=encode.forHtml(i18n.localize(applicationAttributes[i].Attribute,applicationAttributes[i].Attribute))%>:
+
                 <% if ( Boolean(applicationAttributes[i].required ) || applicationAttributes[i].Required ) { %>
                 <span class="requiredAstrix">*</span>
                 </label>
                 <div class="col-md-8 col-lg-6">
                 <input type="hidden" id="attributeKey_<%= i.toString()%>" value="<%= encode.forHtml(applicationAttributes[i].Attribute) %>"/>
+                <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="<% if (applicationAttributes[i].Description) { %>
+                    <%= applicationAttributes[i].Description%> <%} %>">
                 <input type="text" class="form-control required" name="attribute_<%= i.toString()%>" id="attribute_<%= i.toString()%>"/>
+                </span>
                 </div>
+
                 <% } else { %>
+
                 </label>
                 <div class="col-md-8 col-lg-6">
                 <input type="hidden" id="attributeKey_<%= i.toString()%>" value="<%= encode.forHtml(applicationAttributes[i].Attribute) %>"/>
+                <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="<% if (applicationAttributes[i].Description) { %>
+                    <%= applicationAttributes[i].Description%> <%} %>">
                 <input type="text" class="form-control" id="attribute_<%= i.toString()%>"/>
+                </span>
                 </div>
+
                 <% }
-            } %>
-            </div>
+        }%>
+        </div>
         <% }
     }%>
 

@@ -38,8 +38,9 @@ public class OAuthApplicationInfo {
     private boolean isSaasApplication;
     private String appOwner;
     private String jsonString;
+    private Map<String, String> appAttributes = new HashMap<>();
+    private String jsonAppAttribute;
 
-    
 
     public void setJsonString(String jsonString) {
         this.jsonString = jsonString;
@@ -131,5 +132,50 @@ public class OAuthApplicationInfo {
     public void setAppOwner(String appOwner) {
         this.appOwner = appOwner;
     }
+
+    /**
+     * Get custom attributes of OAuthApplication.
+     * @param key
+     *
+     * @return appAttribute.get(value)
+     */
+    public String getAppAttribute(String key) {
+
+        return (String) appAttributes.get(key);
+    }
+
+    /**
+     * Set all custom attributes of OAuthApplication.
+     * @param appAttributes
+     */
+    public void putAllAppAttributes(Map<String,String> appAttributes) {
+
+        this.appAttributes.putAll(appAttributes);
+    }
+
+    /**
+     * Set a custom attribute of OAuthApplication.
+     * @param key
+     * @param value
+     */
+    public void addAppAttribute(String key, String value) {
+
+        appAttributes.put(key, value);
+    }
+
+    public void setJsonAppAttribute (String jsonAppAttribute) {
+
+        this.jsonAppAttribute = jsonAppAttribute;
+    }
+
+    public String getJsonAppAttribute () {
+
+        if(jsonAppAttribute != null){
+            return jsonAppAttribute;
+        } else {
+            return JSONObject.toJSONString(appAttributes);
+        }
+    }
+
 
 }

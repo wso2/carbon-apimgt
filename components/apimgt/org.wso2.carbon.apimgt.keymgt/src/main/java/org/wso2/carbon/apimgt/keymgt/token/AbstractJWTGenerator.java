@@ -80,6 +80,8 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
 
     private String userAttributeSeparator = APIConstants.MULTI_ATTRIBUTE_SEPARATOR_DEFAULT;
 
+//    Map<String, String> applicationAttribtues = new HashMap<String, String>();
+
     public AbstractJWTGenerator() {
 
         dialectURI = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().

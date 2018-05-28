@@ -3174,6 +3174,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         Application application = apiMgtDAO.getApplicationByName(ApplicationName, userId,groupingId);
         checkAppAttributes(application, userId);
+        application = apiMgtDAO.getApplicationWithOAuthApps(ApplicationName, userId, groupingId);
 
         if (application != null) {
             Set<APIKey> keys = getApplicationKeys(application.getId());
@@ -3183,7 +3184,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         }
 
-        application = apiMgtDAO.getApplicationWithOAuthApps(ApplicationName, userId, groupingId);
         return application;
     }
 

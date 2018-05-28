@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.impl.dto;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -59,6 +60,8 @@ public class APIKeyValidationInfoDTO implements Serializable {
     private String subscriberTenantDomain;
     private String spikeArrestUnit;
     private boolean stopOnQuotaReach;
+    private Map<String, String> applicationAttributes = new HashMap<>();
+
     public List<String> getThrottlingDataList() {
         return throttlingDataList;
     }
@@ -313,5 +316,6 @@ public class APIKeyValidationInfoDTO implements Serializable {
     public void setSubscriberTenantDomain(String subscriberTenantDomain) {
         this.subscriberTenantDomain = subscriberTenantDomain;
     }
+
 }
 

@@ -36,13 +36,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -188,7 +188,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             if (log.isDebugEnabled() && applicationName != null) {
                 log.debug("Client Name : " + applicationName);
             }
-            org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo applicationInfo = updateOAuthApplication(userId, 
+            org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo applicationInfo = updateOAuthApplication(userId,
                             applicationName, oAuthApplicationInfo.getCallBackURL(),oAuthApplicationInfo.getClientId(), 
                             grantTypes);
             OAuthApplicationInfo newAppInfo = new OAuthApplicationInfo();
