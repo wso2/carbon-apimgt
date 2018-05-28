@@ -587,3 +587,15 @@ a.remove_rating:hover{
 .global-server-container {
     display: none;
 }
+
+.scope-selection-form span.filter-option.pull-left{
+    white-space: normal;
+}
+
+.scope-selection-form {
+    padding-bottom: 10px;
+}
+
+.scope-selection-form div.btn-group.scope_select{
+    height: auto;
+}
