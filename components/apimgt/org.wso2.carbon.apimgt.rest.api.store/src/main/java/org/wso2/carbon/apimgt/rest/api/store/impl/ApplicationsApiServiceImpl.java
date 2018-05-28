@@ -567,7 +567,8 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     @Override
     public String applicationsRegenerateConsumersecretPostGetLastUpdatedTime(ApplicationKeyReGenerateRequestDTO body,
                                                                              String contentType) {
-
+        /* The generated oauth keys are stored in the Key Manager side, implementing this method will be different
+         from Key Manager to Key Manager. */
         return null;
     }
 
