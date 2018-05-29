@@ -1991,9 +1991,6 @@ definitions:
 # The API resource
 #-----------------------------------------------------
   API:
-
-
-
     title: API object
     required:
       - name
