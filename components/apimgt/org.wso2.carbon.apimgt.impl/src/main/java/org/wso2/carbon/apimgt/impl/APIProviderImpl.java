@@ -2554,7 +2554,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.error(errorMessage);
             throw new APIManagementException(errorMessage);
         }
-
         //Validate Transports
         validateAndSetTransports(api);
         boolean transactionCommitted = false;

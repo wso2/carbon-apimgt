@@ -1328,7 +1328,7 @@ public class APIUtilTest {
         final String provider = expectedAPI.getId().getProviderName();
         final String tenantDomain = org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         final int tenantId = -1234;
-        
+
         GovernanceArtifact artifact = Mockito.mock(GovernanceArtifact.class);
         Registry registry = Mockito.mock(Registry.class);
         ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);

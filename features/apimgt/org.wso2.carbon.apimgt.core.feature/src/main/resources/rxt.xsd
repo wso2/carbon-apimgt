@@ -84,7 +84,6 @@
         </xs:sequence>
         <xs:attribute name="columns" type="xs:integer"/>
         <xs:attribute name="name" use="required"/>
-        <xs:attribute name="maxoccurs" type="xs:NCName" fixed="unbounded"/>
     </xs:complexType>
 
     <xs:complexType name="subheadingType">
