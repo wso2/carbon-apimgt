@@ -2048,9 +2048,10 @@ public class APIStoreHostObject extends ScriptableObject {
                             int i = 0;
                             for (Label label : labelList) {
                                 NativeObject labelObject = new NativeObject();
-                                labelObject.put("labelName", labelObject, label.getName());
-                                labelObject.put("labelDescription", labelObject, label.getDescription());
-                                labelObject.put("accessURLs", labelObject, StringUtils.join(label.getAccessUrls(), ", "));
+                                labelObject.put(APIConstants.LABEL_NAME, labelObject, label.getName());
+                                labelObject.put(APIConstants.LABEL_DESCRIPTION, labelObject, label.getDescription());
+                                labelObject.put(APIConstants.LABEL_ACCESS_URLS, labelObject,
+                                        StringUtils.join(label.getAccessUrls(), ", "));
                                 apiLabelsArray.put(i, apiLabelsArray, labelObject);
                                 i++;
                             }

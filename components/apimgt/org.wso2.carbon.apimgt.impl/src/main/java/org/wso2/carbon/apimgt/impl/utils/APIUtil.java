@@ -1006,9 +1006,8 @@ public final class APIUtil {
     public static void attachLabelsToAPIArtifact(GenericArtifact artifact, API api, String tenantDomain)
             throws APIManagementException {
 
-        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         //get all labels in the tenant
-        List<Label> gatewayLabelList = apiMgtDAO.getAllLabels(tenantDomain);
+        List<Label> gatewayLabelList = APIUtil.getAllLabels(tenantDomain);
         //validation is performed here to cover all actions related to API artifact updates
         if (!gatewayLabelList.isEmpty()) {
             //put available gateway labels to a list for validation purpose
