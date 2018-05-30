@@ -1038,7 +1038,6 @@ public final class APIUtil {
                 log.error(msg, e);
                 throw new APIManagementException(msg, e);
             }
-
         } else {
             if (log.isDebugEnabled()) {
                 log.debug("No predefined labels in the tenant : " + tenantDomain + " . Skipped adding all labels");
