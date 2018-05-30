@@ -193,7 +193,6 @@ paths:
           schema:
             $ref: '#/definitions/API'
         - $ref: '#/parameters/Content-Type'
-        - $ref: '#/parameters/Authorization'
       tags:
         - API (Individual)
       responses:
@@ -3037,6 +3036,10 @@ definitions:
         items:
           type: string
         example: []
+      visibleTenants:
+        type: array
+        items:
+          type: string
       endpointConfig:
         type: string
         example: "{\"production_endpoints\":{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/\",\"config\":{\"suspendErrorCode\":\"101000\",\"suspendDuration\":\"2000\",\"suspendMaxDuration\":\"3\",\"factor\":\"2\",\"retryErroCode\":\"101000\",\"retryTimeOut\":\"4\",\"retryDelay\":\"1000\",\"actionSelect\":\"fault\",\"actionDuration\":\"3000\"}},\"sandbox_endpoints\":{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/\",\"config\":null},\"endpoint_type\":\"http\"}"
@@ -3060,6 +3063,12 @@ definitions:
           Comma separated list of gateway environments.
         type: string
         example: Production and Sandbox
+      labels:
+        description: |
+          Labels of micro-gateway environments attached to the API.
+        type: array
+        items:
+          $ref: '#/definitions/Label'
       sequences:
         type: array
         items:
@@ -3085,6 +3094,8 @@ definitions:
         example: ["tenant1", "tenant2"]
       additionalProperties:
         type: object
+        additionalProperties:
+            type: string
         description : Map of custom properties of API
       accessControl:
         type: string
@@ -3092,7 +3103,8 @@ definitions:
           Is the API is restricted to certain set of publishers or creators or is it visible to all the
           publishers and creators. If the accessControl restriction is none, this API can be modified by all the
           publishers and creators, if not it can only be viewable/modifiable by certain set of publishers and creators,
-           based on the restriction.        enum:
+           based on the restriction.
+        enum:
           - NONE
           - RESTRICTED
       accessControlRoles:
@@ -3545,6 +3557,21 @@ definitions:
       shared:
         type: boolean
         example: true
+
+#-----------------------------------------------------
+# The Label resource
+#-----------------------------------------------------
+  Label:
+    title: Label
+    required:
+      - name
+    properties:
+      name:
+        type: string
+        example: Development
+      description:
+        type: string
+        example: Explanation about the micro gateway.
 
 #-----------------------------------------------------
 # The Error resource

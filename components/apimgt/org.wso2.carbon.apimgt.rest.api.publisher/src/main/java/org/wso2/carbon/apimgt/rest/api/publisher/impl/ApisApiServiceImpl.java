@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -59,6 +60,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListPaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.MediationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.MediationListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.WsdlDTO;
@@ -276,6 +278,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             //we are setting the api owner as the logged in user until we support checking admin privileges and assigning
             //  the owner as a different user
             apiToAdd.setApiOwner(provider);
+
+            //attach micro-geteway labels
+            apiToAdd = assignLabelsToDTO(body,apiToAdd);
 
             //adding the api
             apiProvider.addAPI(apiToAdd);
@@ -829,6 +834,10 @@ public class ApisApiServiceImpl extends ApisApiService {
                 }
             }
             API apiToUpdate = APIMappingUtil.fromDTOtoAPI(body, apiIdentifier.getProviderName());
+
+            //attach micro-geteway labels
+            apiToUpdate = assignLabelsToDTO(body,apiToUpdate);
+            
             apiProvider.updateAPI(apiToUpdate);
 
             if (!isWSAPI) {
@@ -853,6 +862,30 @@ public class ApisApiServiceImpl extends ApisApiService {
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
+    }
+
+
+    /**
+     * This method is used to assign micro gateway labels to the DTO
+     *
+     * @param apiDTO API DTO
+     * @param api the API object
+     * @return the API object with labels
+     */
+    private API assignLabelsToDTO(APIDTO apiDTO, API api) {
+
+        if (apiDTO.getLabels() != null) {
+            List<LabelDTO> dtoLabels = apiDTO.getLabels();
+            List<Label> labelList = new ArrayList<>();
+            for (LabelDTO labelDTO : dtoLabels) {
+                Label label = new Label();
+                label.setName(labelDTO.getName());
+                label.setDescription(labelDTO.getDescription());
+                labelList.add(label);
+            }
+            api.setGatewayLabels(labelList);
+        }
+        return api;
     }
 
     /**

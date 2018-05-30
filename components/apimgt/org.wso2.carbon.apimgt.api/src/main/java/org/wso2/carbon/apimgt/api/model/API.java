@@ -24,6 +24,7 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -75,6 +76,8 @@ public class API implements Serializable {
     private String visibility;
     private String visibleRoles;
     private String visibleTenants;
+
+    private List<Label> gatewayLabels;
 
     private boolean endpointSecured = false;
     private boolean endpointAuthDigest = false;
@@ -495,6 +498,14 @@ public class API implements Serializable {
 
     public void setVisibleTenants(String visibleTenants) {
         this.visibleTenants = visibleTenants;
+    }
+
+    public List<Label> getGatewayLabels() {
+        return gatewayLabels;
+    }
+
+    public void setGatewayLabels(List<Label> gatewayLabels) {
+        this.gatewayLabels = gatewayLabels;
     }
 
     public boolean isApiHeaderChanged() {

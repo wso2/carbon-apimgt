@@ -52,6 +52,7 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
+import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
@@ -2039,6 +2040,24 @@ public class APIStoreHostObject extends ScriptableObject {
                         row.put("type", row, api.getType());
                         row.put("additionalProperties", row, api.getAdditionalProperties().toJSONString());
                         row.put("authorizationHeader", row, api.getAuthorizationHeader());
+
+                        //put the labels to the native array which represents the API
+                        List<Label> labelList = api.getGatewayLabels();
+                        if (labelList != null && labelList.size() > 0) {
+                            NativeArray apiLabelsArray = new NativeArray(labelList.size());
+                            int i = 0;
+                            for (Label label : labelList) {
+                                NativeObject labelObject = new NativeObject();
+                                labelObject.put(APIConstants.LABEL_NAME, labelObject, label.getName());
+                                labelObject.put(APIConstants.LABEL_DESCRIPTION, labelObject, label.getDescription());
+                                labelObject.put(APIConstants.LABEL_ACCESS_URLS, labelObject,
+                                        StringUtils.join(label.getAccessUrls(), ", "));
+                                apiLabelsArray.put(i, apiLabelsArray, labelObject);
+                                i++;
+                            }
+                            row.put("labels", row, apiLabelsArray);
+                        }
+
                         myn.put(0, myn, row);
 
                     } else {
