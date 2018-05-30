@@ -710,6 +710,7 @@ public class APIMappingUtil {
         }
     }
 
+
     private static String mapVisibilityFromDTOtoAPI(APIDetailedDTO.VisibilityEnum visibility) {
         switch (visibility) {
             case PUBLIC:

@@ -1184,7 +1184,7 @@ public final class APIUtil {
         String state = (artifact.getLifecycleState() != null) ?
                 artifact.getLifecycleState() :
                 artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
-        return (state != null) ? state.toUpperCase() : state;
+        return (state != null) ? state.toUpperCase() : null;
     }
 
 
