@@ -60,7 +60,6 @@ public class APIKeyValidationInfoDTO implements Serializable {
     private String subscriberTenantDomain;
     private String spikeArrestUnit;
     private boolean stopOnQuotaReach;
-    private Map<String, String> applicationAttributes = new HashMap<>();
 
     public List<String> getThrottlingDataList() {
         return throttlingDataList;

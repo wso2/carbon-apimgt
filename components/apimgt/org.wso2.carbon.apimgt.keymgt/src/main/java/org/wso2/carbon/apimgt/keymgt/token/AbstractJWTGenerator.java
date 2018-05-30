@@ -26,8 +26,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
@@ -77,10 +79,9 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
 
     private static ConcurrentHashMap<Integer, Key> privateKeys = new ConcurrentHashMap<Integer, Key>();
     private static ConcurrentHashMap<Integer, Certificate> publicCerts = new ConcurrentHashMap<Integer, Certificate>();
+    private ApiMgtDAO dao = ApiMgtDAO.getInstance();
 
     private String userAttributeSeparator = APIConstants.MULTI_ATTRIBUTE_SEPARATOR_DEFAULT;
-
-//    Map<String, String> applicationAttribtues = new HashMap<String, String>();
 
     public AbstractJWTGenerator() {
 
@@ -485,5 +486,18 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
                       "returned", e);
         }
         return null;
+    }
+
+    public Map<String, String> getApplicationAttributes(int applicationId) {
+
+        Map<String, String> applicationAttributes;
+        try {
+            Application application = dao.getApplicationById(applicationId);
+            applicationAttributes = application.getApplicationAttributes();
+            return applicationAttributes;
+        } catch (APIManagementException e) {
+            log.error("Error in retrieving application attributes of application with id: " + applicationId);
+            return null;
+        }
     }
 }
