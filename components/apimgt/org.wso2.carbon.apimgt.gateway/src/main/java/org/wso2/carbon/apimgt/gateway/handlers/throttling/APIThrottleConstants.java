@@ -54,6 +54,7 @@ public class APIThrottleConstants {
     public static final String IS_THROTTLED = "isThrottled";
     public static final String THROTTLE_KEY = "throttleKey";
     public static final String EXPIRY_TIMESTAMP = "expiryTimeStamp";
+    public static final String EVALUATED_CONDITIONS = "evaluatedConditions";
     public static final String IP = "ip";
     public static final String CONTENT_LENGTH = "Content-Length";
     public static final String MESSAGE_SIZE = "messageSize";

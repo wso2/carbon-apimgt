@@ -31,6 +31,7 @@ import org.apache.juddi.v3.error.RegistryException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -61,6 +62,7 @@ import org.wso2.carbon.apimgt.impl.ServiceReferenceHolderMockCreator;
 import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
 import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
@@ -100,6 +102,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -1848,5 +1851,93 @@ public class APIUtilTest {
         Mockito.when(apiManagerConfiguration.getApiGatewayEnvironments()).thenReturn(environmentMap);
         String gatewayEndpoint = APIUtil.getGatewayEndpoint("http,https", "Production", "Production");
         Assert.assertEquals("https://localhost:8243", gatewayEndpoint);
+    }
+    @Test
+    public void testGetConditionDtoListWithHavingIPSpecificConditionOnly() throws ParseException {
+        String base64EncodedString = "W3siaXBzcGVjaWZpYyI6eyJzcGVjaWZpY0lwIjoxNjg0MzAwOTAsImludmVydCI6ZmFsc2V9fV0=";
+        List<ConditionDto> conditionDtoList = APIUtil.extractConditionDto(base64EncodedString);
+        Assert.assertEquals(conditionDtoList.size(),1);
+        ConditionDto conditionDto = conditionDtoList.get(0);
+        Assert.assertNotNull(conditionDto.getIpCondition());
+    }
+    @Test
+    public void testGetConditionDtoListWithHavingIPRangeConditionOnly() throws ParseException {
+        String base64EncodedString =
+                "W3siaXByYW5nZSI6eyJzdGFydGluZ0lwIjoxNjg0MzAwOTAsImVuZGluZ0lwIjoxNjg0MzAwOTEsImludmVydCI6dHJ1ZX19XQ==";
+        List<ConditionDto> conditionDtoList = APIUtil.extractConditionDto(base64EncodedString);
+        Assert.assertEquals(conditionDtoList.size(),1);
+        ConditionDto conditionDto = conditionDtoList.get(0);
+        Assert.assertNotNull(conditionDto.getIpRangeCondition());
+        Assert.assertTrue(conditionDto.getIpRangeCondition().isInvert());
+    }
+    @Test
+    public void testGetConditionDtoListWithHavingHeaderConditionOnly() throws ParseException {
+        String base64EncodedString = "W3siaGVhZGVyIjp7ImludmVydCI6ZmFsc2UsInZhbHVlcyI6eyJhYmMiOiJkZWYifX19XQo=";
+        List<ConditionDto> conditionDtoList = APIUtil.extractConditionDto(base64EncodedString);
+        Assert.assertEquals(conditionDtoList.size(),1);
+        ConditionDto conditionDto = conditionDtoList.get(0);
+        Assert.assertNotNull(conditionDto.getHeaderConditions());
+        Assert.assertEquals(conditionDto.getHeaderConditions().getValues().size(),1);
+    }
+    @Test
+    public void testGetConditionDtoListWithHavingJWTClaimConditionOnly() throws ParseException {
+        String base64EncodedString = "W3siand0Y2xhaW1zIjp7ImludmVydCI6ZmFsc2UsInZhbHVlcyI6eyJhYmMiOiJkZWYifX19XQo=";
+        List<ConditionDto> conditionDtoList = APIUtil.extractConditionDto(base64EncodedString);
+        Assert.assertEquals(conditionDtoList.size(),1);
+        ConditionDto conditionDto = conditionDtoList.get(0);
+        Assert.assertNotNull(conditionDto.getJwtClaimConditions());
+        Assert.assertEquals(conditionDto.getJwtClaimConditions().getValues().size(),1);
+    }
+    @Test
+    public void testGetConditionDtoListWithHavingQueryParamConditionOnly() throws ParseException {
+        String base64EncodedString =
+                "W3sicXVlcnlwYXJhbWV0ZXJ0eXBlIjp7ImludmVydCI6ZmFsc2UsInZhbHVlcyI6eyJhYmMiOiJkZWYifX19XQo=";
+        List<ConditionDto> conditionDtoList = APIUtil.extractConditionDto(base64EncodedString);
+        Assert.assertEquals(conditionDtoList.size(),1);
+        ConditionDto conditionDto = conditionDtoList.get(0);
+        Assert.assertNotNull(conditionDto.getQueryParameterConditions());
+        Assert.assertEquals(conditionDto.getQueryParameterConditions().getValues().size(),1);
+    }
+    @Test
+    public void testGetConditionDtoListWithHavingMultipleConditionTypes() throws ParseException {
+        String base64EncodedString = "W3siaXBzcGVjaWZpYyI6eyJzcGVjaWZpY0lwIjoxNzQzMjcxODksImludmVydCI6ZmFsc2V9LCJoZW" +
+                "FkZXIiOnsiaW52ZXJ0IjpmYWxzZSwidmFsdWVzIjp7ImFiYyI6ImRlZiJ9fSwiand0Y2xhaW1zIjp7ImludmVydCI6ZmFsc2UsI" +
+                "nZhbHVlcyI6eyJhYmMiOiJkZWYifX19XQo=";
+        List<ConditionDto> conditionDtoList = APIUtil.extractConditionDto(base64EncodedString);
+        Assert.assertEquals(conditionDtoList.size(),1);
+        ConditionDto conditionDto = conditionDtoList.get(0);
+        Assert.assertNotNull(conditionDto.getIpCondition());
+        Assert.assertNotNull(conditionDto.getHeaderConditions());
+        Assert.assertNotNull(conditionDto.getJwtClaimConditions());
+        Assert.assertEquals(conditionDto.getHeaderConditions().getValues().size(),1);
+        Assert.assertEquals(conditionDto.getJwtClaimConditions().getValues().size(),1);
+    }
+    @Test
+    public void testGetConditionDtoListWithHavingMultiplePipelines() throws ParseException {
+        String base64EncodedString = "W3siaGVhZGVyIjp7ImludmVydCI6ZmFsc2UsInZhbHVlcyI6eyJhYmMiOiJkZWYifX19LHsiaXBzcG" +
+                "VjaWZpYyI6eyJzcGVjaWZpY0lwIjoxNjg0MzAwOTAsImludmVydCI6ZmFsc2V9fV0=";
+        List<ConditionDto> conditionDtoList = APIUtil.extractConditionDto(base64EncodedString);
+        Assert.assertEquals(conditionDtoList.size(),2);
+        Assert.assertNotNull(conditionDtoList.get(0).getIpCondition());
+        Assert.assertNotNull(conditionDtoList.get(1).getHeaderConditions());
+
+    }
+    @Test
+    public void testGetConditionDtoListWithHavingMultiplePipelinesWithVariousConditions() throws ParseException {
+        String base64EncodedString = "W3siaGVhZGVyIjp7ImludmVydCI6ZmFsc2UsInZhbHVlcyI6eyJhYmMiOiJkZWYifX19LHsiaXBzcGV" +
+                "jaWZpYyI6eyJzcGVjaWZpY0lwIjoxNzQzMjcxODksImludmVydCI6ZmFsc2V9LCJoZWFkZXIiOnsiaW52ZXJ0IjpmYWxzZSwidmF" +
+                "sdWVzIjp7ImFiYyI6ImRlZiJ9fX0seyJqd3RjbGFpbXMiOnsiaW52ZXJ0IjpmYWxzZSwidmFsdWVzIjp7ImFiYyI6ImRlZiJ9fX0" +
+                "seyJpcHNwZWNpZmljIjp7InNwZWNpZmljSXAiOjE3NDMyNzE4OSwiaW52ZXJ0IjpmYWxzZX0sImp3dGNsYWltcyI6eyJpbnZlcnQ" +
+                "iOmZhbHNlLCJ2YWx1ZXMiOnsiYWJjIjoiZGVmIn19fSx7ImlwcmFuZ2UiOnsic3RhcnRpbmdJcCI6MTc0MzI3MTg5LCJlbmRpbmd" +
+                "JcCI6MTc0MzI3MjAwLCJpbnZlcnQiOmZhbHNlfX1d";
+        List<ConditionDto> conditionDtoList = APIUtil.extractConditionDto(base64EncodedString);
+        Assert.assertEquals(conditionDtoList.size(),5);
+        Assert.assertNotNull(conditionDtoList.get(0).getIpCondition());
+        Assert.assertNotNull(conditionDtoList.get(0).getHeaderConditions());
+        Assert.assertNotNull(conditionDtoList.get(1).getIpCondition());
+        Assert.assertNotNull(conditionDtoList.get(1).getJwtClaimConditions());
+        Assert.assertNotNull(conditionDtoList.get(2).getIpRangeCondition());
+        Assert.assertNotNull(conditionDtoList.get(3).getHeaderConditions());
+        Assert.assertNotNull(conditionDtoList.get(4).getJwtClaimConditions());
     }
 }

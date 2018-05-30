@@ -32,9 +32,9 @@ public class ThrottleProperties {
     private String throttleDataSourceName;
     private PolicyDeployer policyDeployer;
     private BlockCondition blockCondition;
-    private boolean enableHeaderConditions;
-    private boolean enableJwtConditions;
-    private boolean enableQueryParamConditions;
+    private boolean enableHeaderConditions = false;
+    private boolean enableJwtConditions = false;
+    private boolean enableQueryParamConditions =false;
     private Map<String, Long> defaultThrottleTierLimits = new HashMap<String, Long>();
     private TrafficManager trafficManager;
     public boolean isEnabledSubscriptionLevelSpikeArrest() {

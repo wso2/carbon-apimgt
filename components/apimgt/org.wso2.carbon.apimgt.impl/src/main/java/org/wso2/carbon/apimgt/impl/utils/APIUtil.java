@@ -98,6 +98,7 @@ import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.clients.UserInformationRecoveryClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
@@ -190,6 +191,7 @@ import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -7164,5 +7166,91 @@ public final class APIUtil {
             return Integer.parseInt(paginationLimit);
         }
         return 0;
+    }
+
+    public static List<ConditionDto> extractConditionDto(String base64EncodedString) throws ParseException {
+
+        List<ConditionDto> conditionDtoList = new ArrayList<>();
+        String base64Decoded = new String(Base64.decodeBase64(base64EncodedString));
+        JSONArray conditionJsonArray = (JSONArray) new JSONParser().parse(base64Decoded);
+        for (Object conditionJson : conditionJsonArray) {
+            ConditionDto conditionDto = new ConditionDto();
+            JSONObject conditionJsonObject = (JSONObject) conditionJson;
+            if (conditionJsonObject.containsKey(PolicyConstants.IP_SPECIFIC_TYPE.toLowerCase())) {
+                JSONObject ipSpecificCondition = (JSONObject) conditionJsonObject.get(PolicyConstants.IP_SPECIFIC_TYPE
+                        .toLowerCase());
+                ConditionDto.IPCondition ipCondition = new Gson().fromJson(ipSpecificCondition.toJSONString(),
+                        ConditionDto.IPCondition.class);
+                conditionDto.setIpCondition(ipCondition);
+            } else if (conditionJsonObject.containsKey(PolicyConstants.IP_RANGE_TYPE.toLowerCase())) {
+                JSONObject ipRangeCondition = (JSONObject) conditionJsonObject.get(PolicyConstants.IP_RANGE_TYPE
+                        .toLowerCase());
+                ConditionDto.IPCondition ipCondition = new Gson().fromJson(ipRangeCondition.toJSONString(),
+                        ConditionDto.IPCondition.class);
+                conditionDto.setIpRangeCondition(ipCondition);
+            }
+            if (conditionJsonObject.containsKey(PolicyConstants.JWT_CLAIMS_TYPE.toLowerCase())) {
+                JSONObject jwtClaimConditions = (JSONObject) conditionJsonObject.get(PolicyConstants.JWT_CLAIMS_TYPE
+                        .toLowerCase());
+                ConditionDto.JWTClaimConditions jwtClaimCondition = new Gson().fromJson(jwtClaimConditions
+                        .toJSONString(), ConditionDto.JWTClaimConditions.class);
+                conditionDto.setJwtClaimConditions(jwtClaimCondition);
+            }
+            if (conditionJsonObject.containsKey(PolicyConstants.HEADER_TYPE.toLowerCase())) {
+                JSONObject headerConditionJson = (JSONObject) conditionJsonObject.get(PolicyConstants.HEADER_TYPE
+                        .toLowerCase());
+                ConditionDto.HeaderConditions headerConditions = new Gson().fromJson(headerConditionJson
+                        .toJSONString(), ConditionDto.HeaderConditions.class);
+                conditionDto.setHeaderConditions(headerConditions);
+            }
+
+            if (conditionJsonObject.containsKey(PolicyConstants.QUERY_PARAMETER_TYPE.toLowerCase())) {
+                JSONObject queryParamConditionJson = (JSONObject) conditionJsonObject.get(PolicyConstants
+                        .QUERY_PARAMETER_TYPE.toLowerCase());
+                ConditionDto.QueryParamConditions queryParamCondition = new Gson().fromJson(queryParamConditionJson
+                        .toJSONString(), ConditionDto.QueryParamConditions.class);
+                conditionDto.setQueryParameterConditions(queryParamCondition);
+            }
+            conditionDtoList.add(conditionDto);
+        }
+        conditionDtoList.sort(new Comparator<ConditionDto>() {
+            @Override
+            public int compare(ConditionDto o1, ConditionDto o2) {
+
+                if (o1.getIpCondition() != null && o2.getIpCondition() == null) {
+                    return -1;
+                } else if (o1.getIpCondition() == null && o2.getIpCondition() != null) {
+                    return 1;
+                } else {
+                    if (o1.getIpRangeCondition() != null && o2.getIpRangeCondition() == null) {
+                        return -1;
+                    } else if (o1.getIpRangeCondition() == null && o2.getIpRangeCondition() != null) {
+                        return 1;
+                    } else {
+                        if (o1.getHeaderConditions() != null && o2.getHeaderConditions() == null) {
+                            return -1;
+                        } else if (o1.getHeaderConditions() == null && o2.getHeaderConditions() != null) {
+                            return 1;
+                        } else {
+                            if (o1.getQueryParameterConditions() != null && o2.getQueryParameterConditions() == null) {
+                                return -1;
+                            } else if (o1.getQueryParameterConditions() == null && o2.getQueryParameterConditions()
+                                    != null) {
+                                return 1;
+                            } else {
+                                if (o1.getJwtClaimConditions() != null && o2.getJwtClaimConditions() == null) {
+                                    return -1;
+                                } else if (o1.getJwtClaimConditions() == null && o2.getJwtClaimConditions() != null) {
+                                    return 1;
+                                }
+                            }
+                        }
+                    }
+                }
+                return 0;
+            }
+        });
+
+        return conditionDtoList;
     }
 }
