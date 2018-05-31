@@ -2695,26 +2695,27 @@
                 }
             }
         },
-        "ApplicationScope" : {
-            "properties" : {
-                "key" : {
-                    "type" : "string",
-                    "example" : "apim:fileread",
-                    "description" : "Key of scope"
+        "ScopeInfo": {
+            "title": "API Scope info object with scope details",
+            "properties": {
+                "key": {
+                    "type": "string",
+                    "example": "admin_scope"
                 },
-                "name" : {
-                    "type" : "string",
-                    "example" : "apim file read",
-                    "description" : "Name of the scope"
+                "name": {
+                    "type": "string",
+                    "example": "admin scope"
                 },
-                "roles" : {
-                    "type" : "string",
-                    "example" : "admin, role1",
-                    "description" : "Roles scope is bounded to"
-                },
-                "description" : {
-                    "type" : "string",
-                    "description" : "Description of the scope"
+                "roles": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Allowed roles for the scope",
+                    "example": [
+                        "manager",
+                        "developer"
+                    ]
                 }
             }
         },
