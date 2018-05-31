@@ -476,9 +476,11 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setCacheTimeout(cacheTimeOut);
         api.setAsDefaultVersion("default_version".equals(defaultVersion));
 
-        //get the label list from UI and set it here
-        String gatewayLabels = (String) apiData.get("gatewayLabels", apiData);
-        attachLabelsToAPI(api, gatewayLabels, provider);
+        if (apiData.keySet().contains("gatewayLabels")) {
+            //get the label list from UI and set it here
+            String gatewayLabels = (String) apiData.get("gatewayLabels", apiData);
+            attachLabelsToAPI(api, gatewayLabels, provider);
+        }
 
         String productionTps = (String) apiData.get("productionTps", apiData);
         String sandboxTps = (String) apiData.get("sandboxTps", apiData);
@@ -2044,9 +2046,11 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setVisibility(visibility);
         api.setVisibleRoles(visibleRoles != null ? visibleRoles.trim() : null);
 
-        //get the label list from UI and set it here
-        String gatewayLabels = (String) apiData.get("gatewayLabels", apiData);
-        attachLabelsToAPI(api,gatewayLabels,provider);
+        if (apiData.keySet().contains("gatewayLabels")) {
+            //get the label list and set it here
+            String gatewayLabels = (String) apiData.get("gatewayLabels", apiData);
+            attachLabelsToAPI(api, gatewayLabels, provider);
+        }
 
         api.setVisibleTenants(visibleTenants != null ? visibleTenants.trim() : null);
         api.setAccessControl(publisherAccessControl);
