@@ -1224,11 +1224,7 @@ APIDesigner.prototype.update_swagger = function () {
     } catch (e) {
         jagg.message({content: i18n.t("API swagger definition is invalid"), type: "error"});
     }
-
 };
-
-
-
 
 $(document).ready(function(){
     $.fn.editable.defaults.mode = 'inline';
