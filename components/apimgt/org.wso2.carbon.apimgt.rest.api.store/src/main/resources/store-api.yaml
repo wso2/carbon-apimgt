@@ -2173,6 +2173,29 @@ definitions:
           technicalOwnerEmail:
             type: string
             example: technicalowner@wso2.com
+      labels:
+        description: |
+          Labels of micro-gateway environments attached to the API.
+        type: array
+        items:
+          $ref: '#/definitions/Label'
+
+#-----------------------------------------------------
+# The Label resource
+#-----------------------------------------------------
+  Label:
+    title: Label
+    required:
+    - name
+    properties:
+      name:
+        type: string
+        example: "Public"
+      accessUrls:
+        type: array
+        items:
+          type: string
+          example: "http://localhost:9443/"
 
 #-----------------------------------------------------
 # The Application List resource

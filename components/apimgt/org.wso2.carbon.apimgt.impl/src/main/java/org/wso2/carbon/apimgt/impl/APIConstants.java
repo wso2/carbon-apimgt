@@ -284,6 +284,11 @@ public final class APIConstants {
     public static final String PROVIDER_OVERVIEW_EMAIL = "overview_email";
     public static final String PROVIDER_OVERVIEW_DESCRIPTION = "overview_description";
 
+    public static final String API_LABELS_GATEWAY_LABELS = "labels_labelName";
+    public static final String LABEL_NAME = "labelName";
+    public static final String LABEL_DESCRIPTION = "labelDescription";
+    public static final String LABEL_ACCESS_URLS = "accessURLs";
+
     //database columns for Subscriber
     public static final String SUBSCRIBER_FIELD_EMAIL_ADDRESS = "EMAIL_ADDRESS";
     public static final String SUBSCRIBER_FIELD_USER_ID = "USER_ID";

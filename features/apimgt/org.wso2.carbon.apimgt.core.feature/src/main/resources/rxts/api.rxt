@@ -256,6 +256,14 @@
                 <name>Mediation Script5</name>
             </field>
         </table>
+        <table name="Labels" columns="1"  maxoccurs="unbounded">
+            <subheading>
+                <heading>Label Name</heading>
+            </subheading>
+            <field type="text">
+                <name label="Label Name">labelName</name>
+            </field>
+        </table>
 </content>
 
 </artifactType>

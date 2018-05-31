@@ -40,8 +40,9 @@ public class APIEndpointSecurityDTO  {
 
   
   /**
+   * Accepts one of the following, basic or digest.
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "Accepts one of the following, basic or digest.")
   @JsonProperty("type")
   public TypeEnum getType() {
     return type;

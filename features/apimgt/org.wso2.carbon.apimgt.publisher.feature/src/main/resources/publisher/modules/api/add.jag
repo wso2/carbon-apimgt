@@ -343,6 +343,35 @@ var isConfigured = function () {
     }
 }
 
+//get all labels in the given tenant space
+var getLabels = function () {
+    var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+    var tenantDomain = MultitenantUtils.getTenantDomain(jagg.getUser().username);
+    var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+    var tenantId = APIUtil.getTenantId(session.get("logged.user").username);
+    var labelArray = [];
+    var labels, log = new Log();
+    try {
+        var labelList = APIUtil.getAllLabels(tenantDomain);
+        for(i = 0; i < labelList.size(); i++) {
+            label = {};
+            label.name = labelList.get(i).getName();
+            label.description = labelList.get(i).getDescription();
+            labelArray[i] = label;
+        }
+        return {
+            error:false,
+            labels:labelArray
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            labels:null
+        };
+    }
+};
+
 var getTiers = function () {
     var tier,tiers,list=[],log = new Log();
     var tier;

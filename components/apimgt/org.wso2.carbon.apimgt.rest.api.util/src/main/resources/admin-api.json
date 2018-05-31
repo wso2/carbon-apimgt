@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "version": "0.11.0",
+    "version": "0.12.0",
     "title": "WSO2 API Manager - Admin",
     "description": "This document specifies a **RESTful API** for WSO2 **API Manager** - Admin Portal.\nPlease see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.1.66/components/apimgt/org.wso2.carbon.apimgt.rest.api.admin/src/main/resources/admin-api.yaml) of the API which is written using [swagger 2.0](http://swagger.io/) specification.\n",
     "contact": {
@@ -75,6 +75,18 @@
           "roles": "admin",
           "name": "apim:app_import_export",
           "key": "apim:app_import_export"
+        },
+        {
+          "description": "",
+          "roles": "admin",
+          "name": "apim:label_manage",
+          "key": "apim:label_manage"
+        },
+        {
+          "description": "",
+          "roles": "admin",
+          "name": "apim:label_read",
+          "key": "apim:label_read"
         }
       ]
     }
@@ -1778,8 +1790,8 @@
     "/applications": {
       "get": {
         "x-scope": "apim:app_owner_change",
-        "x-wso2-request": "GET https://localhost:9443/api/am/store/v0.12/applications\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
-        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/store/v0.12/applications\"",
+        "x-wso2-request": "GET https://localhost:9443/api/am/admin/v0.12/applications\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/admin/v0.12/applications\"",
         "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"groupId\": \"\",\n         \"owner\": \"admin\",\n           \"applicationId\": \"367a2361-8db5-4140-8133-c6c8dc7fa0c4\",\n         \"status\": \"APPROVED\",\n         \"name\": \"app1\"\n      },\n            {\n         \"groupId\": \"\",\n         \"owner\": \"admin\",\n             \"applicationId\": \"896658a0-b4ee-4535-bbfa-806c894a4015\",\n          \"status\": \"APPROVED\",\n         \"name\": \"DefaultApplication\"\n      }\n   ],\n   \"count\": 2,\n   \"next\": \"\"\n}",
         "summary": "Retrieve/Search applications\n",
         "description": "This operation can be used to retrieve list of applications that is belonged to the given user, If no user\nis provided then the application for the user associated with the provided access token will be returned.\n",
@@ -1837,8 +1849,8 @@
     "/applications/{applicationId}/change-owner": {
       "post": {
         "x-scope": "apim:app_owner_change",
-        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X POST \"https://localhost:9443/api/am/publisher/v0.12/applications/890a4f4d-09eb-4877-a323-57f6ce2ed79b/change-owner?owner=admin\"",
-        "x-wso2-request": "POST https://localhost:9443/api/am/publisher/v0.12/apis/change-owner?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X POST \"https://localhost:9443/api/am/admin/v0.12/applications/890a4f4d-09eb-4877-a323-57f6ce2ed79b/change-owner?owner=admin\"",
+        "x-wso2-request": "POST https://localhost:9443/api/am/admin/v0.12/apis/change-owner?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
         "x-wso2-response": "HTTP/1.1 200 OK",
         "summary": "Change Application Owner",
         "description": "This operation is used to change the owner of an Application.\nIn order to change the owner of an application, we need to pass the new application owner as a query parameter\n",
@@ -1889,7 +1901,7 @@
           "application/zip"
         ],
         "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X GET https://localhost:9443/api/am/admin/v0.12/export/applications?appName=sampleApp&appOwner=admin > admin_sampleApp.zip",
-        "x-wso2-request": "GET https://localhost:9443/api/am/store/v0.12/export/applications?appName=sampleApp&appOwner=admin\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-request": "GET https://localhost:9443/api/am/admin/v0.12/export/applications?appName=sampleApp&appOwner=admin\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
         "x-wso2-response": "HTTP/1.1 200 OK\n Connection: keep-alive\n  Content-Disposition: attachment; filename=\"exported-application.zip\"\n  Content-Type: application/zip",
         "summary": "Export an Application",
         "description": "This operation can be used to export the details of a particular Application as a zip file.\n",
@@ -1953,8 +1965,8 @@
           "multipart/form-data"
         ],
         "x-wso2-curl": "curl -k -F \"file=@exported.zip\" -X POST -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/admin/v0.12/import/applications",
-        "x-wso2-request": "POST https://localhost:9443/api/am/store/v0.12/import/applications\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
-        "x-wso2-response": "HTTP/1.1 201 Created\nLocation: https://localhost:9443/api/am/admin/v0.12/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524\nContent-Type: application/json\n\n{\n   \"groupId\": null,\n   \"callbackUrl\": \"http://my.server.com/callback\",\n   \"owner\": \"admin\",\n   \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\",\n   \"status\": \"APPROVED\",\n   \"name\": \"sampleapp\" \n}",
+        "x-wso2-request": "POST https://localhost:9443/api/am/admin/v0.12/import/applications\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-response": "HTTP/1.1 201 Created\nLocation: https://localhost:9443/api/am/admin/v0.12/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524\nContent-Type: application/json\n\n{\n   \"groupId\": \"\",\n   \"callbackUrl\": \"http://my.server.com/callback\",\n   \"owner\": \"admin\",\n   \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\",\n   \"status\": \"APPROVED\",\n   \"name\": \"sampleapp\" \n}",
         "summary": "Import an Application",
         "description": "This operation can be used to import an Application.\n",
         "parameters": [
@@ -2022,9 +2034,145 @@
           }
         }
       }
+    },
+    "/labels": {
+      "get": {
+        "x-scope": "apim:label_view",
+        "x-wso2-response": "HTTP/1.1 200 OK",
+        "summary": "Get all registered Labels",
+        "description": "Get all registered Labels\n",
+        "tags": [
+          "Label Collection"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nLabels returned\n",
+            "schema": {
+              "$ref": "#/definitions/LabelList"
+            }
+          }
+        }
+      },
+      "post": {
+        "x-scope": "apim:label_manage",
+        "x-wso2-response": "HTTP/1.1 200 OK",
+        "summary": "Add a Label",
+        "description": "Add a new gateway Label\n",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Label object that should to be added\n",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Label"
+            }
+          }
+        ],
+        "tags": [
+          "Label"
+        ],
+        "responses": {
+          "201": {
+            "description": "Created.\nSuccessful response with the newly created object as entity in the body.\n",
+            "schema": {
+              "$ref": "#/definitions/Label"
+            }
+          },
+          "400": {
+            "description": "Bad Request.\nInvalid request or validation error\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/labels/{labelId}": {
+      "put": {
+        "x-scope": "apim:label_manage",
+        "x-wso2-response": "HTTP/1.1 200 OK",
+        "summary": "Update a Label",
+        "description": "Update a Label by label Id\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/labelId"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Label object with updated information\n",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Label"
+            }
+          }
+        ],
+        "tags": [
+          "Label"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nLabel updated.\n",
+            "schema": {
+              "$ref": "#/definitions/Label"
+            }
+          },
+          "400": {
+            "description": "Bad Request.\nInvalid request or validation error.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found.\nThe resource to be updated does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "delete": {
+        "x-scope": "apim:label_manage",
+        "x-wso2-response": "HTTP/1.1 200 OK",
+        "summary": "Delete a Label",
+        "description": "Delete a Label by label Id\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/labelId"
+          },
+          {
+            "$ref": "#/parameters/If-Match"
+          },
+          {
+            "$ref": "#/parameters/If-Unmodified-Since"
+          }
+        ],
+        "tags": [
+          "Label"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nLabel successfully deleted.\n"
+          },
+          "404": {
+            "description": "Not Found.\nLabel to be deleted does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
     }
   },
   "parameters": {
+    "labelId": {
+      "name": "labelId",
+      "in": "path",
+      "description": "Label UUID\n",
+      "type": "string",
+      "required": true
+    },
     "policyId": {
       "name": "policyId",
       "in": "path",
@@ -2237,6 +2385,7 @@
             },
             "conditionalGroups": {
               "type": "array",
+              "description": "Group of conditions which allow adding different parameter conditions to the throttling limit.\n",
               "items": {
                 "$ref": "#/definitions/ConditionalGroup"
               }
@@ -2452,7 +2601,7 @@
         "invertCondition": {
           "type": "boolean",
           "default": false,
-          "description": "Specifies whether inversion of the condition to be matched against the request"
+          "description": "Specifies whether inversion of the condition to be matched against the request.\n\n**Note:** When you add conditional groups for advanced throttling policies, this paramater should have the same value (`true` or `false`)\nfor the same type of conditional group.\n"
         }
       }
     },
@@ -2871,6 +3020,49 @@
           "type": "string",
           "description": "The provider of the API",
           "example": "admin"
+        }
+      }
+    },
+    "Label": {
+      "title": "Label",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "example": "This is not mandatory.Auto generate by code"
+        },
+        "name": {
+          "type": "string",
+          "example": "Public"
+        },
+        "description": {
+          "type": "string",
+          "example": "Label to use for public Gateway"
+        },
+        "accessUrls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "example": "http://localhost:9443/"
+          }
+        }
+      }
+    },
+    "LabelList": {
+      "title": "Label List",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "description": "Number of Labels returned.\n",
+          "example": 1
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Label"
+          }
         }
       }
     }

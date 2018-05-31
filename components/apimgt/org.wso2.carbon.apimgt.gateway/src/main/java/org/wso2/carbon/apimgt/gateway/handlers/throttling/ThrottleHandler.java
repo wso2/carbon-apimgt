@@ -58,18 +58,19 @@ import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.metrics.manager.Level;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 
-import javax.xml.stream.XMLStreamException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import javax.xml.stream.XMLStreamException;
 
 
 /**
@@ -270,33 +271,67 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                         // going to check it only if the API/Resource is throttled out.
                         if (getThrottleDataHolder().isAPIThrottled
                                 (resourceLevelThrottleKey)) {
-
-                            if (log.isDebugEnabled()) {
-                                log.debug("Evaluating Conditional Groups");
-                            }
-                            //Then we will apply resource level throttling
-                            List<ConditionGroupDTO> applicableConditions = getThrottleConditionEvaluator()
-                                    .getApplicableConditions(synCtx, authContext, conditionGroupDTOs);
-                            for (ConditionGroupDTO conditionGroup : applicableConditions) {
-                                String combinedResourceLevelThrottleKey = resourceLevelThrottleKey + conditionGroup.getConditionGroupId();
-
+                            if (getThrottleDataHolder().isConditionsAvailable(resourceLevelThrottleKey)) {
+                                Map<String, List<ConditionDto>> conditionDtoMap = getThrottleDataHolder()
+                                        .getConditionDtoMap(resourceLevelThrottleKey);
                                 if (log.isDebugEnabled()) {
-                                    log.debug("Checking condition : " + combinedResourceLevelThrottleKey);
+                                    log.debug("conditions available" + conditionDtoMap.size());
                                 }
-
-                                if (getThrottleDataHolder().
-                                        isThrottled(combinedResourceLevelThrottleKey)) {
-                                    if (!apiLevelThrottledTriggered) {
-                                        isResourceLevelThrottled = isThrottled = true;
-                                    } else {
-                                        isApiLevelThrottled = isThrottled = true;
+                                String throttledCondition = getThrottleConditionEvaluator().getThrottledInCondition
+                                        (synCtx, authContext, conditionDtoMap);
+                                if (StringUtils.isNotEmpty(throttledCondition)) {
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("Throttled with Condition :" + throttledCondition);
                                     }
-                                    long timestamp = getThrottleDataHolder().
-                                            getThrottleNextAccessTimestamp(combinedResourceLevelThrottleKey);
-                                    synCtx.setProperty(APIThrottleConstants.THROTTLED_NEXT_ACCESS_TIMESTAMP, timestamp);
-                                    break;
+                                    String combinedResourceLevelThrottleKey = resourceLevelThrottleKey + "_" +
+                                            throttledCondition;
+
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("Checking condition : " + combinedResourceLevelThrottleKey);
+                                    }
+
+                                    if (getThrottleDataHolder().
+                                            isThrottled(combinedResourceLevelThrottleKey)) {
+                                        if (!apiLevelThrottledTriggered) {
+                                            isResourceLevelThrottled = isThrottled = true;
+                                        } else {
+                                            isApiLevelThrottled = isThrottled = true;
+                                        }
+                                        long timestamp = getThrottleDataHolder().
+                                                getThrottleNextAccessTimestamp(combinedResourceLevelThrottleKey);
+                                        synCtx.setProperty(APIThrottleConstants.THROTTLED_NEXT_ACCESS_TIMESTAMP,
+                                                timestamp);
+                                    }
+                                }
+                            }else{
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Evaluating Conditional Groups");
+                                }
+                                //Then we will apply resource level throttling
+                                List<ConditionGroupDTO> applicableConditions = getThrottleConditionEvaluator()
+                                        .getApplicableConditions(synCtx, authContext, conditionGroupDTOs);
+                                for (ConditionGroupDTO conditionGroup : applicableConditions) {
+                                    String combinedResourceLevelThrottleKey = resourceLevelThrottleKey + conditionGroup.getConditionGroupId();
+
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("Checking condition : " + combinedResourceLevelThrottleKey);
+                                    }
+
+                                    if (getThrottleDataHolder().
+                                            isThrottled(combinedResourceLevelThrottleKey)) {
+                                        if (!apiLevelThrottledTriggered) {
+                                            isResourceLevelThrottled = isThrottled = true;
+                                        } else {
+                                            isApiLevelThrottled = isThrottled = true;
+                                        }
+                                        long timestamp = getThrottleDataHolder().
+                                                getThrottleNextAccessTimestamp(combinedResourceLevelThrottleKey);
+                                        synCtx.setProperty(APIThrottleConstants.THROTTLED_NEXT_ACCESS_TIMESTAMP, timestamp);
+                                        break;
+                                    }
                                 }
                             }
+
                         }
 
                     } else {

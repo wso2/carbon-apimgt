@@ -1,0 +1,9 @@
+<%
+jagg.initializer("label/label-add", {
+
+      preInitialize:function () {
+        jagg.addHeaderJS("label/label-add", "jagg", "templates/label/label-add/js/edit.js");
+    }
+});
+%>
+

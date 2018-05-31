@@ -75,6 +75,7 @@ import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
+import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
@@ -98,6 +99,7 @@ import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.clients.UserInformationRecoveryClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
@@ -190,6 +192,7 @@ import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -651,6 +654,29 @@ public final class APIUtil {
             api.setEnvironments(extractEnvironmentsForAPI(environments));
             api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
             api.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
+            //get labels from the artifact and set to API object
+            String[] labelArray = artifact.getAttributes(APIConstants.API_LABELS_GATEWAY_LABELS);
+            if (labelArray != null && labelArray.length > 0) {
+                String tenantDomain = MultitenantUtils.getTenantDomain
+                        (replaceEmailDomainBack(api.getId().getProviderName()));
+                List<Label> allLabelList = APIUtil.getAllLabels(tenantDomain);
+                List<Label> gatewayLabelListForAPI = new ArrayList<>();
+                for (String labelName : labelArray) {
+                    Label label = new Label();
+                    //set the name
+                    label.setName(labelName);
+                    //set the description and access URLs
+                    for (Label currentLabel : allLabelList) {
+                        if (labelName.equalsIgnoreCase(currentLabel.getName())) {
+                            label.setDescription(currentLabel.getDescription());
+                            label.setAccessUrls(currentLabel.getAccessUrls());
+                        }
+                    }
+                    gatewayLabelListForAPI.add(label);
+                }
+                api.setGatewayLabels(gatewayLabelListForAPI);
+            }
+
         } catch (GovernanceException e) {
             String msg = "Failed to get API for artifact ";
             throw new APIManagementException(msg, e);
@@ -960,12 +986,65 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_CORS_CONFIGURATION,
                     APIUtil.getCorsConfigurationJsonFromDto(api.getCorsConfiguration()));
 
+            //attaching micro-gateway labels to the API
+            attachLabelsToAPIArtifact(artifact, api, tenantDomain);
+
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + api.getId().getApiName();
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
         return artifact;
+    }
+
+    /**
+     * This method is used to attach micro-gateway labels to the given API
+     *
+     * @param artifact genereic artifact
+     * @param api API
+     * @param tenantDomain domain name of the tenant
+     * @throws APIManagementException if failed to attach micro-gateway labels
+     */
+    public static void attachLabelsToAPIArtifact(GenericArtifact artifact, API api, String tenantDomain)
+            throws APIManagementException {
+
+        //get all labels in the tenant
+        List<Label> gatewayLabelList = APIUtil.getAllLabels(tenantDomain);
+        //validation is performed here to cover all actions related to API artifact updates
+        if (!gatewayLabelList.isEmpty()) {
+            //put available gateway labels to a list for validation purpose
+            List<String> availableGatewayLabelListNames = new ArrayList<>();
+            for (Label x : gatewayLabelList) {
+                availableGatewayLabelListNames.add(x.getName());
+            }
+            try {
+                //clear all the existing labels first
+                artifact.removeAttribute(APIConstants.API_LABELS_GATEWAY_LABELS);
+                //if there are labels attached to the API object, add them to the artifact
+                if (api.getGatewayLabels() != null) {
+                    //validate and add each label to the artifact
+                    List<Label> candidateLabelsList = api.getGatewayLabels();
+                    for (Label label : candidateLabelsList) {
+                        String candidateLabel = label.getName();
+                        //validation step, add the label only if it exists in the available gateway labels
+                        if (availableGatewayLabelListNames.contains(candidateLabel)) {
+                            artifact.addAttribute(APIConstants.API_LABELS_GATEWAY_LABELS, candidateLabel);
+                        } else {
+                            log.warn("Label name : " + candidateLabel + " does not exist in the tenant : " +
+                                    tenantDomain + ", hence skipping it.");
+                        }
+                    }
+                }
+            } catch (GovernanceException e) {
+                String msg = "Failed to add labels for API : " + api.getId().getApiName();
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            }
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("No predefined labels in the tenant : " + tenantDomain + " . Skipped adding all labels");
+            }
+        }
     }
 
     /**
@@ -6542,6 +6621,18 @@ public final class APIUtil {
         return throttleProperties.isEnabledSubscriptionLevelSpikeArrest();
     }
 
+    /**
+     * This method is used to get the labels in a given tenant space
+     *
+     * @param tenantDomain tenant domain name
+     * @return micro gateway labels in a given tenant space
+     * @throws APIManagementException if failed to fetch micro gateway labels
+     */
+    public static List<Label> getAllLabels(String tenantDomain) throws APIManagementException {
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+        return apiMgtDAO.getAllLabels(tenantDomain);
+    }
+
     public static Map<String, Tier> getTiersFromPolicies(String policyLevel, int tenantId) throws APIManagementException {
         Map<String, Tier> tierMap = new HashMap<String, Tier>();
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
@@ -7164,5 +7255,91 @@ public final class APIUtil {
             return Integer.parseInt(paginationLimit);
         }
         return 0;
+    }
+
+    public static List<ConditionDto> extractConditionDto(String base64EncodedString) throws ParseException {
+
+        List<ConditionDto> conditionDtoList = new ArrayList<>();
+        String base64Decoded = new String(Base64.decodeBase64(base64EncodedString));
+        JSONArray conditionJsonArray = (JSONArray) new JSONParser().parse(base64Decoded);
+        for (Object conditionJson : conditionJsonArray) {
+            ConditionDto conditionDto = new ConditionDto();
+            JSONObject conditionJsonObject = (JSONObject) conditionJson;
+            if (conditionJsonObject.containsKey(PolicyConstants.IP_SPECIFIC_TYPE.toLowerCase())) {
+                JSONObject ipSpecificCondition = (JSONObject) conditionJsonObject.get(PolicyConstants.IP_SPECIFIC_TYPE
+                        .toLowerCase());
+                ConditionDto.IPCondition ipCondition = new Gson().fromJson(ipSpecificCondition.toJSONString(),
+                        ConditionDto.IPCondition.class);
+                conditionDto.setIpCondition(ipCondition);
+            } else if (conditionJsonObject.containsKey(PolicyConstants.IP_RANGE_TYPE.toLowerCase())) {
+                JSONObject ipRangeCondition = (JSONObject) conditionJsonObject.get(PolicyConstants.IP_RANGE_TYPE
+                        .toLowerCase());
+                ConditionDto.IPCondition ipCondition = new Gson().fromJson(ipRangeCondition.toJSONString(),
+                        ConditionDto.IPCondition.class);
+                conditionDto.setIpRangeCondition(ipCondition);
+            }
+            if (conditionJsonObject.containsKey(PolicyConstants.JWT_CLAIMS_TYPE.toLowerCase())) {
+                JSONObject jwtClaimConditions = (JSONObject) conditionJsonObject.get(PolicyConstants.JWT_CLAIMS_TYPE
+                        .toLowerCase());
+                ConditionDto.JWTClaimConditions jwtClaimCondition = new Gson().fromJson(jwtClaimConditions
+                        .toJSONString(), ConditionDto.JWTClaimConditions.class);
+                conditionDto.setJwtClaimConditions(jwtClaimCondition);
+            }
+            if (conditionJsonObject.containsKey(PolicyConstants.HEADER_TYPE.toLowerCase())) {
+                JSONObject headerConditionJson = (JSONObject) conditionJsonObject.get(PolicyConstants.HEADER_TYPE
+                        .toLowerCase());
+                ConditionDto.HeaderConditions headerConditions = new Gson().fromJson(headerConditionJson
+                        .toJSONString(), ConditionDto.HeaderConditions.class);
+                conditionDto.setHeaderConditions(headerConditions);
+            }
+
+            if (conditionJsonObject.containsKey(PolicyConstants.QUERY_PARAMETER_TYPE.toLowerCase())) {
+                JSONObject queryParamConditionJson = (JSONObject) conditionJsonObject.get(PolicyConstants
+                        .QUERY_PARAMETER_TYPE.toLowerCase());
+                ConditionDto.QueryParamConditions queryParamCondition = new Gson().fromJson(queryParamConditionJson
+                        .toJSONString(), ConditionDto.QueryParamConditions.class);
+                conditionDto.setQueryParameterConditions(queryParamCondition);
+            }
+            conditionDtoList.add(conditionDto);
+        }
+        conditionDtoList.sort(new Comparator<ConditionDto>() {
+            @Override
+            public int compare(ConditionDto o1, ConditionDto o2) {
+
+                if (o1.getIpCondition() != null && o2.getIpCondition() == null) {
+                    return -1;
+                } else if (o1.getIpCondition() == null && o2.getIpCondition() != null) {
+                    return 1;
+                } else {
+                    if (o1.getIpRangeCondition() != null && o2.getIpRangeCondition() == null) {
+                        return -1;
+                    } else if (o1.getIpRangeCondition() == null && o2.getIpRangeCondition() != null) {
+                        return 1;
+                    } else {
+                        if (o1.getHeaderConditions() != null && o2.getHeaderConditions() == null) {
+                            return -1;
+                        } else if (o1.getHeaderConditions() == null && o2.getHeaderConditions() != null) {
+                            return 1;
+                        } else {
+                            if (o1.getQueryParameterConditions() != null && o2.getQueryParameterConditions() == null) {
+                                return -1;
+                            } else if (o1.getQueryParameterConditions() == null && o2.getQueryParameterConditions()
+                                    != null) {
+                                return 1;
+                            } else {
+                                if (o1.getJwtClaimConditions() != null && o2.getJwtClaimConditions() == null) {
+                                    return -1;
+                                } else if (o1.getJwtClaimConditions() == null && o2.getJwtClaimConditions() != null) {
+                                    return 1;
+                                }
+                            }
+                        }
+                    }
+                }
+                return 0;
+            }
+        });
+
+        return conditionDtoList;
     }
 }

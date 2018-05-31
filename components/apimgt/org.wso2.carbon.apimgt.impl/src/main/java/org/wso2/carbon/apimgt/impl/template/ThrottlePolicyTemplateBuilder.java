@@ -18,6 +18,7 @@
 */
 package org.wso2.carbon.apimgt.impl.template;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,12 +26,19 @@ import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Condition;
 import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.HeaderCondition;
+import org.wso2.carbon.apimgt.api.model.policy.IPCondition;
+import org.wso2.carbon.apimgt.api.model.policy.IPRangeCondition;
+import org.wso2.carbon.apimgt.api.model.policy.JWTClaimsCondition;
 import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.api.model.policy.QueryParameterCondition;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
@@ -38,7 +46,6 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 import java.io.File;
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -112,9 +119,14 @@ public class ThrottlePolicyTemplateBuilder {
                     context.put("pipeline", "condition_" + pipeline.getId());
 
                     String conditionString = getPolicyCondition(pipeline.getConditions());
+
+                    JSONArray conditions = new JSONArray();
+                    conditions.add(getPolicyConditionJson(pipeline.getConditions()));
                     conditionsSet.add(conditionString);
 
                     context.put("condition", " AND " + conditionString);
+                    context.put("evaluatedConditions", new String(Base64.encodeBase64(conditions.toJSONString()
+                                                                                              .getBytes())));
                     writer = new StringWriter();
                     template.merge(context, writer);
                     if (log.isDebugEnabled()) {
@@ -167,9 +179,10 @@ public class ThrottlePolicyTemplateBuilder {
             VelocityContext context;
 
             List<Pipeline> pipelines = policy.getPipelines();
-
+            JSONArray policyConditionJson = new JSONArray();
             if (pipelines != null) {
                 for (Pipeline pipeline : pipelines) {
+                    policyConditionJson.add(getPolicyConditionJson(pipeline.getConditions()));
                     String conditionString = getPolicyConditionForDefault(pipeline.getConditions());
                     if(!StringUtils.isEmpty(conditionString)) {
                         conditionsSet.add(conditionString);
@@ -186,6 +199,7 @@ public class ThrottlePolicyTemplateBuilder {
             context.put("policy", policy);
 
             context.put("quotaPolicy", policy.getDefaultQuotaPolicy());
+            context.put("evaluatedConditions", new String(Base64.encodeBase64(policyConditionJson.toJSONString().getBytes())));
             String conditionSetString = getConditionForDefault(conditionsSet);
             if(!StringUtils.isEmpty(conditionSetString)) {
                 context.put("condition", " AND " + conditionSetString);
@@ -394,6 +408,67 @@ public class ThrottlePolicyTemplateBuilder {
         return conditionString;
     }
 
+
+    /**
+     * Produces final condition inside a pipeline
+     *
+     * @param conditions
+     * @return
+     */
+    private static JSONObject getPolicyConditionJson(List<Condition> conditions) {
+        JSONObject tempCondition = new JSONObject();
+        int i = 0;
+        for (Condition condition : conditions) {
+            JSONObject conditionJson;
+            if (tempCondition.containsKey(condition.getType().toLowerCase())) {
+                conditionJson = (JSONObject) tempCondition.get(condition.getType().toLowerCase());
+            } else {
+                conditionJson = new JSONObject();
+            }
+            tempCondition.put(condition.getType().toLowerCase(), conditionJson);
+            if (condition instanceof IPCondition) {
+                IPCondition ipCondition = (IPCondition) condition;
+                conditionJson.put("specificIp", ipCondition.ipToLong(ipCondition.getSpecificIP()));
+            } else if (condition instanceof IPRangeCondition) {
+                IPRangeCondition ipRangeCondition = (IPRangeCondition) condition;
+                conditionJson.put("startingIp", ipRangeCondition.ipToLong(ipRangeCondition.getStartingIP()));
+                conditionJson.put("endingIp", ipRangeCondition.ipToLong(ipRangeCondition.getEndingIP()));
+            } else if (condition instanceof QueryParameterCondition) {
+                QueryParameterCondition queryParameterCondition = (QueryParameterCondition) condition;
+                JSONObject values;
+                if (conditionJson.containsKey("values")) {
+                    values = (JSONObject) conditionJson.get("values");
+                } else {
+                    values = new JSONObject();
+                    conditionJson.put("values",values);
+                }
+                values.put(queryParameterCondition.getParameter(), queryParameterCondition.getValue());
+            } else if (condition instanceof HeaderCondition) {
+                HeaderCondition headerCondition = (HeaderCondition) condition;
+                JSONObject values;
+                if (conditionJson.containsKey("values")) {
+                    values = (JSONObject) conditionJson.get("values");
+                } else {
+                    values = new JSONObject();
+                    conditionJson.put("values",values);
+                }
+                values.put(headerCondition.getHeaderName(), headerCondition.getValue());
+            } else if (condition instanceof JWTClaimsCondition) {
+                JWTClaimsCondition jwtClaimsCondition = (JWTClaimsCondition) condition;
+                JSONObject values;
+                if (conditionJson.containsKey("values")) {
+                    values = (JSONObject) conditionJson.get("values");
+                } else {
+                    values = new JSONObject();
+                    conditionJson.put("values",values);
+                }
+                values.put(jwtClaimsCondition.getClaimUrl(), jwtClaimsCondition.getAttribute());
+            }
+            conditionJson.put("invert", condition.isInvertCondition());
+        }
+        return tempCondition;
+    }
+
     /**
      * Produces final condition inside a pipeline for default policy with null string
      * @param conditions
@@ -442,7 +517,7 @@ public class ThrottlePolicyTemplateBuilder {
     
     private static void setConstantContext(VelocityContext context){
         context.put("ACROSS_ALL",PolicyConstants.ACROSS_ALL);
-        context.put("PER_USER",PolicyConstants.PER_USER);        
+        context.put("PER_USER",PolicyConstants.PER_USER);
         context.put("POLICY_LEVEL_API",PolicyConstants.POLICY_LEVEL_API);
         context.put("POLICY_LEVEL_APP",PolicyConstants.POLICY_LEVEL_APP);
         context.put("POLICY_LEVEL_SUB",PolicyConstants.POLICY_LEVEL_SUB);
