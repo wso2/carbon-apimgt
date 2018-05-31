@@ -26,7 +26,7 @@ public class SubscribedApiDTO implements Serializable {
     private String context;
     private String version;
     private String publisher;
-    private String subscriber;
+
     private String subscriptionTier;
     private String subscriberTenantDomain;
 
@@ -60,14 +60,6 @@ public class SubscribedApiDTO implements Serializable {
 
     public void setPublisher(String publisher) {
         this.publisher = publisher;
-    }
-
-    public String getSubscriber() {
-        return subscriber;
-    }
-
-    public void setSubscriber(String subscriber) {
-        this.subscriber = subscriber;
     }
 
     public String getSubscriptionTier() {

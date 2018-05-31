@@ -11375,4 +11375,50 @@ public class ApiMgtDAO {
         }
         return apiSubscriptionInfoDTOS.toArray(new APISubscriptionInfoDTO[apiSubscriptionInfoDTOS.size()]);
     }
+
+
+    public Application getApplicationByClientId(String clientId) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+
+        Application application = null;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            String query = SQLConstants.GET_APPLICATION_BY_CLIENT_ID_SQL;
+
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setString(1, clientId);
+
+            rs = prepStmt.executeQuery();
+            if (rs.next()) {
+                String applicationId = rs.getString("APPLICATION_ID");
+                String applicationName = rs.getString("NAME");
+                String applicationOwner = rs.getString("CREATED_BY");
+
+                application = new Application(applicationId);
+                application.setName(applicationName);
+                application.setOwner(applicationOwner);
+                application.setDescription(rs.getString("DESCRIPTION"));
+                application.setStatus(rs.getString("APPLICATION_STATUS"));
+                application.setCallbackUrl(rs.getString("CALLBACK_URL"));
+                application.setId(rs.getInt("APPLICATION_ID"));
+                application.setGroupId(rs.getString("GROUP_ID"));
+                application.setUUID(rs.getString("UUID"));
+                application.setTier(rs.getString("APPLICATION_TIER"));
+                application.setTokenType(rs.getString("TOKEN_TYPE"));
+
+                if (multiGroupAppSharingEnabled) {
+                    if (application.getGroupId().isEmpty()) {
+                        application.setGroupId(getGroupId(application.getId()));
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while obtaining details of the Application foe client id " + clientId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+        return application;
+    }
 }

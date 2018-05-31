@@ -143,26 +143,18 @@ public class APIMJWTGenerator extends JWTGenerator {
         String endUserName = jwtTokenInfoDTO.getEndUserName();
 
         Map<String, Object> claims = new LinkedHashMap<String, Object>(20);
-        List<SubscribedApiDTO> subscribedApiDTOList = new ArrayList<SubscribedApiDTO>();
-        subscribedApiDTOList.add(jwtTokenInfoDTO.getSubscribedApiDTOList().get(0));
-        subscribedApiDTOList.add(jwtTokenInfoDTO.getSubscribedApiDTOList().get(1));
 
-        Map<String, SubscriptionPolicyDTO> subscriptionPolicyDTOList = new HashMap<String, SubscriptionPolicyDTO>();
-        subscriptionPolicyDTOList.put("Gold", jwtTokenInfoDTO.getSubscriptionPolicyDTOList().get("Gold"));
-        subscriptionPolicyDTOList.put("Bronze", jwtTokenInfoDTO.getSubscriptionPolicyDTOList().get("Bronze"));
 
         KeyManagerConfiguration configuration = KeyManagerHolder.getKeyManagerInstance().getKeyManagerConfiguration();
         String serverURL = configuration.getParameter(APIConstants.TOKEN_URL);
 
 
-        claims.put("jti", UUID.randomUUID());
+        claims.put("jti", UUID.randomUUID().toString());
         claims.put("iss", serverURL);
         claims.put("aud", jwtTokenInfoDTO.getAudience());
         claims.put("exp", String.valueOf(expireIn));
         claims.put("enduser", endUserName);
-        claims.put("subscribedAPIs", subscribedApiDTOList);
-        claims.put("subscriptionPolicies", subscriptionPolicyDTOList);
-        claims.put("subscriptionPolicies", subscriptionPolicyDTOList);
+        claims.put("subscribedAPIs", jwtTokenInfoDTO.getSubscribedApiDTOList());
 
         return claims;
     }

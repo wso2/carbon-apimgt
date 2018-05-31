@@ -143,16 +143,11 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             ServiceProvider serviceProvider = new ServiceProvider();
             serviceProvider.setApplicationName(applicationName);
             serviceProvider.setDescription("Service Provider for application " + applicationName);
-            ServiceProviderProperty[] serviceProviderProperties = new ServiceProviderProperty[2];
+            ServiceProviderProperty[] serviceProviderProperties = new ServiceProviderProperty[1];
             ServiceProviderProperty serviceProviderProperty = new ServiceProviderProperty();
             serviceProviderProperty.setName(APIConstants.APP_DISPLAY_NAME);
             serviceProviderProperty.setValue(displayName);
-            //Set token Type service provider property
-            ServiceProviderProperty tokenTypeSpProperty = new ServiceProviderProperty();
-            tokenTypeSpProperty.setName(APIConstants.APP_TOKEN_TYPE);
-            tokenTypeSpProperty.setValue(oauthApplicationInfo.getTokenType());
             serviceProviderProperties[0] = serviceProviderProperty;
-            serviceProviderProperties[1] = tokenTypeSpProperty;
             serviceProvider.setSpProperties(serviceProviderProperties);
             ApplicationManagementService appMgtService = ApplicationManagementService.getInstance();
             appMgtService.createApplication(serviceProvider, tenantDomain, userName);

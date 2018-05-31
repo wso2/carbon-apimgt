@@ -19,12 +19,14 @@ package org.wso2.carbon.apimgt.keymgt.util;
 
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionPolicyDTO;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.dao.OAuthAppDO;
 import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
 
@@ -35,10 +37,10 @@ import java.util.Map;
 
 public class APIMTokenIssuerUtil {
 
-    public static JwtTokenInfoDTO getJwtTokenInfoDTO(OAuthAppDO oAuthAppDO) {
+    public static JwtTokenInfoDTO getJwtTokenInfoDTO(Application application) {
 
-        String tenantDomain = OAuth2Util.getTenantDomainOfOauthApp(oAuthAppDO);
-        String userName = oAuthAppDO.getUser().getUserName();
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String userName = application.getOwner();
 
         String tenantedUserName;
         if (StringUtils.isEmpty(tenantDomain) || tenantDomain.equals("carbon.super")) {
@@ -56,11 +58,8 @@ public class APIMTokenIssuerUtil {
 
         JwtTokenInfoDTO jwtTokenInfoDTO = new JwtTokenInfoDTO();
         jwtTokenInfoDTO.setSubscriber("sub");
-        jwtTokenInfoDTO.setIssuedTime(13123131);
-        jwtTokenInfoDTO.setExpirationTime(12312311);
         jwtTokenInfoDTO.setEndUserName(userName);
         jwtTokenInfoDTO.setContentAware(true);
-        jwtTokenInfoDTO.setAudience(oAuthAppDO.getAudiences());
 
         List<SubscribedApiDTO> subscribedApiDTOList = new ArrayList<SubscribedApiDTO>();
         for (APISubscriptionInfoDTO api : apis)
@@ -70,29 +69,13 @@ public class APIMTokenIssuerUtil {
             subscribedApiDTO.setName(api.getApiName());
             subscribedApiDTO.setContext(api.getContext());
             subscribedApiDTO.setVersion(api.getVersion());
-            subscribedApiDTO.setPublisher("publisher");
-            subscribedApiDTO.setSubscriber("subscriber");
+            subscribedApiDTO.setPublisher(userName);
             subscribedApiDTO.setSubscriptionTier(api.getSubscriptionTier());
             subscribedApiDTO.setSubscriberTenantDomain(tenantDomain);
             subscribedApiDTOList.add(subscribedApiDTO);
         }
         jwtTokenInfoDTO.setSubscribedApiDTOList(subscribedApiDTOList);
 
-        Map<String, SubscriptionPolicyDTO> subscriptionPolicyDTOList = new HashMap<String, SubscriptionPolicyDTO>();
-
-        SubscriptionPolicyDTO subscriptionPolicyDTO1 = new SubscriptionPolicyDTO();
-        subscriptionPolicyDTO1.setSpikeArrestLimit("spike");
-        subscriptionPolicyDTO1.setSpikeArrestUnit("unit");
-        subscriptionPolicyDTO1.setStopOnQuotaReach(true);
-
-        subscriptionPolicyDTOList.put("Gold", subscriptionPolicyDTO1);
-        SubscriptionPolicyDTO subscriptionPolicyDTO2 = new SubscriptionPolicyDTO();
-        subscriptionPolicyDTO2.setSpikeArrestLimit("spike");
-        subscriptionPolicyDTO2.setSpikeArrestUnit("unit");
-        subscriptionPolicyDTO2.setStopOnQuotaReach(true);
-        subscriptionPolicyDTOList.put("Bronze", subscriptionPolicyDTO1);
-
-        jwtTokenInfoDTO.setSubscriptionPolicyDTOList(subscriptionPolicyDTOList);
         return jwtTokenInfoDTO;
     }
 }

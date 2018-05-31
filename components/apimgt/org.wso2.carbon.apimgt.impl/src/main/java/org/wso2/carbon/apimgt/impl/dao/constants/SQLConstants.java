@@ -1655,6 +1655,29 @@ public class SQLConstants {
             "   APP.UUID = ? " +
             "   AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID";
 
+    public static final String GET_APPLICATION_BY_CLIENT_ID_SQL =
+            " SELECT " +
+                    "   APP.APPLICATION_ID," +
+                    "   APP.NAME," +
+                    "   APP.SUBSCRIBER_ID," +
+                    "   APP.APPLICATION_TIER," +
+                    "   APP.CALLBACK_URL," +
+                    "   APP.DESCRIPTION, " +
+                    "   APP.SUBSCRIBER_ID," +
+                    "   APP.APPLICATION_STATUS, " +
+                    "   APP.GROUP_ID, " +
+                    "   APP.UPDATED_TIME, "+
+                    "   APP.CREATED_TIME, "+
+                    "   APP.UUID," +
+                    "   APP.CREATED_BY," +
+                    "   APP.TOKEN_TYPE" +
+                    " FROM " +
+                    "   AM_APPLICATION_KEY_MAPPING AM_APP_MAP," +
+                    "   AM_APPLICATION APP " +
+                    " WHERE " +
+                    "   AM_APP_MAP.CONSUMER_KEY = ? " +
+                    "   AND APP.APPLICATION_ID = AM_APP_MAP.APPLICATION_ID";
+
     public static final String REMOVE_FROM_URI_TEMPLATES_SQL =
             "DELETE FROM AM_API_URL_MAPPING WHERE API_ID = ?";
 
