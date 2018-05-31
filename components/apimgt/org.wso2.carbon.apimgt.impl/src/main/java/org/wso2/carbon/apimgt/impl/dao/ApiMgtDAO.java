@@ -3401,7 +3401,8 @@ public class ApiMgtDAO {
             //TODO need to find the proper user who updates this application.
             ps.setString(5, null);
             ps.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
-            ps.setInt(7, application.getId());
+            ps.setString(7, application.getTokenType());
+            ps.setInt(8, application.getId());
 
             ps.executeUpdate();
 

@@ -52,7 +52,8 @@ include("/jagg/jagg.jag");
         }else{
             callbackUrl = request.getParameter("callbackUrl");
         }        
-        description = request.getParameter("description");       
+        description = request.getParameter("description"); 
+        tokenType = request.getParameter("tokenType");       
         mod = jagg.module("application");
         var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
         var tenantDomain = MultitenantUtils.getTenantDomain(user.username);
@@ -61,7 +62,7 @@ include("/jagg/jagg.jag");
         var applicationTierList = APIUtil.getTiers(applicationTierType, tenantDomain);
 
         if (!applicationTierList.isEmpty() && applicationTierList.containsKey(tier)) {
-            result = mod.addApplication(username, application, tier, callbackUrl, description, groupId);
+            result = mod.addApplication(username, application, tier, callbackUrl, description, groupId,tokenType);
             if (result.error) {
                 obj = {
                     error: true,

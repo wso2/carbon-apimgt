@@ -14,15 +14,7 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
-import java.util.TreeSet;
+import java.util.*;
 
 public class APIMJWTGenerator extends JWTGenerator {
 
@@ -163,6 +155,7 @@ public class APIMJWTGenerator extends JWTGenerator {
         String serverURL = configuration.getParameter(APIConstants.TOKEN_URL);
 
 
+        claims.put("jti", UUID.randomUUID());
         claims.put("iss", serverURL);
         claims.put("aud", jwtTokenInfoDTO.getAudience());
         claims.put("exp", String.valueOf(expireIn));

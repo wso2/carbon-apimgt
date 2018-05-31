@@ -1203,7 +1203,8 @@ public class SQLConstants {
             "   CALLBACK_URL = ?, " +
             "   DESCRIPTION = ?, " +
             "   UPDATED_BY = ?, " +
-            "   UPDATED_TIME = ? " +
+            "   UPDATED_TIME = ?, " +
+            "   TOKEN_TYPE = ? " +
             " WHERE" +
             "   APPLICATION_ID = ?";
 

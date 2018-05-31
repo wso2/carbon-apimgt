@@ -32,6 +32,7 @@ $(document).ready(function () {
         var goBack = $("#goBack").val();
         var description = $("#description").val();
         var groupId = $("#groupId").val();
+        var tokenType = $("#tokenType").val();
         var status='';
         jagg.post("/site/blocks/application/application-add/ajax/application-add.jag", {
             action:"addApplication",
@@ -39,7 +40,8 @@ $(document).ready(function () {
             tier:tier,
             callbackUrl:callbackUrl,
             description:description,
-            groupId:groupId
+            groupId:groupId,
+            tokenType:tokenType
         }, function (result) {
             if (result.error == false) {
                 status=result.status;

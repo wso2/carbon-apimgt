@@ -37,6 +37,7 @@ $(document).ready(function () {
         var applicationOld = $("#application-name-old").val();
         var groupIdNew = $("#groupId").val();
         var groupIdOld = $("#groupId-old").val();
+        var tokenType = $("#tokenType").val();
         jagg.post("/site/blocks/application/application-update/ajax/application-update.jag", {
             action:"updateApplication",
             applicationNew:application,
@@ -44,7 +45,8 @@ $(document).ready(function () {
             tier:tier,
             descriptionNew:description,
             groupIdOld:groupIdOld,
-            groupIdNew:groupIdNew
+            groupIdNew:groupIdNew,
+            tokenType:tokenType
         }, function (result) {
             if (result.error == false) {                
                 window.location = jagg.url("/site/pages/application.jag?name="+application);

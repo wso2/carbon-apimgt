@@ -133,7 +133,7 @@ public class APIStoreHostObject extends ScriptableObject {
     private static final String httpPort = "mgt.transport.http.port";
     private static final String httpsPort = "mgt.transport.https.port";
     private static final String hostName = "carbon.local.ip";
-    private static final String DEFAULT_TOKEN_TYPE = "default";
+    private static final String DEFAULT_TOKEN_TYPE = "DEFAULT";
 
     private APIConsumer apiConsumer;
 
@@ -527,7 +527,8 @@ public class APIStoreHostObject extends ScriptableObject {
                 String applicationName = (String) apiData.get("applicationName", apiData);
 
                 String keyType = (String) apiData.get("keytype", apiData);
-                Map<String, Object> keyDetails = getAPIConsumer(thisObj).mapExistingOAuthClient(jsonString, userName, clientId, applicationName, keyType);
+                String tokenType = "DEFAULT";
+                Map<String, Object> keyDetails = getAPIConsumer(thisObj).mapExistingOAuthClient(jsonString, userName, clientId, applicationName, keyType, tokenType);
                 NativeObject row = new NativeObject();
                 Set<Map.Entry<String, Object>> entries = keyDetails.entrySet();
                 for (Map.Entry<String, Object> entry : entries) {
@@ -3190,6 +3191,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     row.put("isBlacklisted", row, application.getIsBlackListed());
                     row.put("totalCount", row, applicationCount);
                     row.put("owner", row, application.getOwner());
+                    row.put("tokenType", row, application.getTokenType());
                     myn.put(i++, myn, row);
                 }
 
@@ -3267,6 +3269,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 row.put("status", row, application.getStatus());
                 row.put("description", row, application.getDescription());
                 row.put("groupId", row, application.getGroupId());
+                row.put("tokenType", row, application.getTokenType());
                 return row;
             }
         }
@@ -3422,6 +3425,7 @@ public class APIStoreHostObject extends ScriptableObject {
             String tier = (String) args[3];
             String callbackUrl = (String) args[4];
             String description = (String) args[5];
+            String tokenType = (String) args[8];
             String groupingId = null;
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
 
@@ -3450,6 +3454,7 @@ public class APIStoreHostObject extends ScriptableObject {
             updatedApplication.setTier(tier);
             updatedApplication.setCallbackUrl(callbackUrl);
             updatedApplication.setDescription(description);
+            updatedApplication.setTokenType(tokenType);
 
             if (APIUtil.isMultiGroupAppSharingEnabled()) {
                 String newGroupId = null;
