@@ -299,7 +299,6 @@
                             org.apache.synapse.mediators.base,
                             org.apache.axis2.transport.base,
                             org.wso2.carbon.core; version="${carbon.platform.package.import.version.range}",
-                            org.wso2.carbon.registry.core.service; version="${carbon.registry.imp.pkg.version}",
                             org.wso2.carbon.registry.api; version="${carbon.registry.imp.pkg.version}",
                             org.wso2.carbon.apimgt.impl.*; version="${carbon.apimgt.imp.pkg.version}",
                             javax.xml.soap; version="${javax.xml.soap.imp.pkg.version}",
