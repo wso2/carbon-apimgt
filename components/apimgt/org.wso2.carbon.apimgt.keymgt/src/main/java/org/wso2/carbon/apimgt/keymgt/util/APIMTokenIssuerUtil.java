@@ -46,13 +46,11 @@ public class APIMTokenIssuerUtil {
         if (StringUtils.isEmpty(tenantDomain) || tenantDomain.equals("carbon.super")) {
             tenantedUserName = userName;
         } else {
-
             tenantedUserName = userName + "@" + tenantDomain;
         }
 
         APISubscriptionInfoDTO[] apis = ApiMgtDAO.getInstance().getSubscribedAPIsOfUserWithSubscriptionInfo(tenantedUserName);
-
-
+        
         JwtTokenInfoDTO jwtTokenInfoDTO = new JwtTokenInfoDTO();
         jwtTokenInfoDTO.setSubscriber("sub");
         jwtTokenInfoDTO.setEndUserName(userName);

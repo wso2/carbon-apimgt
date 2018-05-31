@@ -117,8 +117,8 @@ public class APIMJWTGenerator extends JWTGenerator {
                             }
                         }
                         jwtClaimsSetBuilder.claim(claimURI, claimList.toArray(new String[claimList.size()]));
-                    } else if ("exp".equals(claimURI)) {
-                        jwtClaimsSetBuilder.claim("exp", new Date(Long.valueOf((String) standardClaims.get(claimURI))));
+                    } else if (APIConstants.EXP.equals(claimURI)) {
+                        jwtClaimsSetBuilder.claim(APIConstants.EXP, new Date(Long.valueOf((String) standardClaims.get(claimURI))));
                     } else {
                         jwtClaimsSetBuilder.claim(claimURI, claimVal);
                     }

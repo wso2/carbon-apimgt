@@ -323,6 +323,7 @@ public final class APIConstants {
     public static final String IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD = "VALIDITY_PERIOD";
     public static final String IDENTITY_OAUTH2_FIELD_USER_DOMAIN = "USER_DOMAIN";
 
+    public static final String EXP = "exp";
     public static final String JWT = "JWT";
     public static final String JWT_CONFIGS = "JWTConfiguration.";
     public static final String JWT_HEADER = JWT_CONFIGS + "JWTHeader";
