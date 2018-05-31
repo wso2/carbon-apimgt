@@ -525,6 +525,10 @@
 <div id="swaggerEditer" class="modal" editor-url="<%= jagg.getAbsoluteUrl("/site/themes/wso2/libs/swagger-editor/#/")%>" style="display:none; z-index:9000; top:0; left:0; height:100%; width:100%;background:white">
     <div class="swagger_editer_header">
     <button class="btn btn-primary" id="update_swagger">
+        <form method="POST" id="update_swagger_form" enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag") %>">
+            <input type="hidden" value="validateSwagger" name="action"/>
+            <input type="hidden" id="swaggerDefinition" name="swaggerDefinition" value="" />
+        </form>
 		<span class="fw-stack fw-lg" style="font-size:1em"> 
 			<i class="fw fw-circle-outline fw-stack-2x"></i> 
 			<i class="fw fw-save fw-stack-1x"></i> 
