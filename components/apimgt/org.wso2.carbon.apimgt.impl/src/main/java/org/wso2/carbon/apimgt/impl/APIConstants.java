@@ -1391,6 +1391,8 @@ public final class APIConstants {
             API_STATUS.toLowerCase() };
     // Prefix for registry attributes.
     public static final String OVERVIEW_PREFIX = "overview_";
+    public static final String LABEL_PREFIX = "labels_";
+    public static final String LABELNAME = "labelName";
     /**
      * Parameter for enabling tenant load notifications to members in the same HZ cluster
      */
@@ -1411,4 +1413,7 @@ public final class APIConstants {
     public static final String USER = "user";
     public static final String IS_SUPER_TENANT = "isSuperTenant";
     public static final String NULL_GROUPID_LIST = "null";
+
+    public static final String APPLICATION_GZIP = "application/gzip";
+    public static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
 }

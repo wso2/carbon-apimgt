@@ -261,7 +261,7 @@ public class APIMappingUtil {
             dto.setType(APIDTO.TypeEnum.valueOf(model.getType()));
         }
 
-        if (!model.getType().equals(APIConstants.APIType.WS)) {
+        if (!APIConstants.APIType.WS.equals(model.getType())) {
             dto.setTransport(Arrays.asList(model.getTransports().split(",")));
         }
         dto.setVisibility(mapVisibilityFromAPItoDTO(model.getVisibility()));
@@ -577,14 +577,19 @@ public class APIMappingUtil {
      * Converts a List object of APIs into a DTO
      *
      * @param apiList List of APIs
+     * @param expand defines whether APIListDTO should contain APIINFODTOs or APIDTOs
      * @return APIListDTO object containing APIDTOs
      */
-    public static APIListDTO fromAPIListToDTO(List<API> apiList) {
+    public static APIListDTO fromAPIListToDTO(List<API> apiList, boolean expand) throws APIManagementException {
         APIListDTO apiListDTO = new APIListDTO();
         List<APIInfoDTO> apiInfoDTOs = apiListDTO.getList();
-        if (apiList != null) {
+        if (apiList != null && !expand) {
             for (API api : apiList) {
                 apiInfoDTOs.add(fromAPIToInfoDTO(api));
+            }
+        } else if (apiList != null && expand) {
+            for (API api : apiList) {
+                apiInfoDTOs.add(fromAPItoDTO(api));
             }
         }
         apiListDTO.setCount(apiInfoDTOs.size());

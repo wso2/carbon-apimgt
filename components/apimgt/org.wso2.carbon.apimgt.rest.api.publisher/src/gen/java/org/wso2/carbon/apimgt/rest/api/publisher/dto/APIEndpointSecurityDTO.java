@@ -14,9 +14,6 @@ import javax.validation.constraints.NotNull;
 public class APIEndpointSecurityDTO  {
   
   
-  
-  private String password = null;
-  
   public enum TypeEnum {
      basic,  digest, 
   };
@@ -25,18 +22,9 @@ public class APIEndpointSecurityDTO  {
   
   
   private String username = null;
-
   
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("password")
-  public String getPassword() {
-    return password;
-  }
-  public void setPassword(String password) {
-    this.password = password;
-  }
+  
+  private String password = null;
 
   
   /**
@@ -64,15 +52,27 @@ public class APIEndpointSecurityDTO  {
   }
 
   
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("password")
+  public String getPassword() {
+    return password;
+  }
+  public void setPassword(String password) {
+    this.password = password;
+  }
+
+  
 
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIEndpointSecurityDTO {\n");
     
-    sb.append("  password: ").append(password).append("\n");
     sb.append("  type: ").append(type).append("\n");
     sb.append("  username: ").append(username).append("\n");
+    sb.append("  password: ").append(password).append("\n");
     sb.append("}\n");
     return sb.toString();
   }
