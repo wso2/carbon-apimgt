@@ -66,6 +66,7 @@ public class APIKeyMgtSubscriberServiceTest {
     private final String APPLICATION_NAME = "foo_PRODUCTION";
     private final String APPLICATION_NAME_1 = "sample_app";
     private final String CALLBACK_URL = "http://localhost";
+    private final String TOKEN_TYPE = "DEFAULT";
     private final String CONSUMER_KEY = "Har2MjbxeMg3ysWEudjOKnXb3pAa";
     private final String CONSUMER_SECRET = "Ha52MfbxeFg3HJKEud156Y5GnAa";
     private final String[] GRANT_TYPES = { "password" };
@@ -205,7 +206,7 @@ public class APIKeyMgtSubscriberServiceTest {
         PowerMockito.whenNew(OAuthApplicationInfo.class).withNoArguments().thenReturn(oauthApplicationInfo);
 
         //Invoke createOAuthApplicationByApplicationInfo method
-        apiKeyMgtSubscriberService.createOAuthApplication(USER_NAME, APPLICATION_NAME, CALLBACK_URL);
+        apiKeyMgtSubscriberService.createOAuthApplication(USER_NAME, APPLICATION_NAME, CALLBACK_URL, TOKEN_TYPE);
         Mockito.reset(oauthApplicationInfo);
     }
 

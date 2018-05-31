@@ -182,6 +182,8 @@
     "Password did not match": "Password did not match",
     "Password Reset": "Password Reset",
     "Per Token Quota": "Per Token Quota",
+    "Token Type": "Token Type",
+    "isMicroGateway": "isMicroGateway",
     "Please enable statistics to see this page": "Please configure API Manager Analytics to enable alerts.",
     "Please enter a valid email.": "Please enter a valid email.",
     "Please enter at lease 5 characters": "Please enter at lease 5 characters",

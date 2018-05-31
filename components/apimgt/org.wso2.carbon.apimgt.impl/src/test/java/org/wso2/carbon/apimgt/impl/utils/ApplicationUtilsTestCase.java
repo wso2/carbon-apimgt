@@ -125,7 +125,8 @@ public class ApplicationUtilsTestCase {
     public void testCrateOauthAppRequest() throws APIManagementException {
         PowerMockito.mockStatic(KeyManagerHolder.class);
         PowerMockito.when(KeyManagerHolder.getKeyManagerInstance()).thenReturn(keyManager);
-        OAuthAppRequest oAuthAppRequest = ApplicationUtils.createOauthAppRequest("client1", "clientId", "http://foo.com", "subscribe", "details");
+        OAuthAppRequest oAuthAppRequest = ApplicationUtils
+                .createOauthAppRequest("client1", "clientId", "http://foo.com", "subscribe", "details", "DEFAULT");
         Assert.assertNotNull(oAuthAppRequest);
     }
 

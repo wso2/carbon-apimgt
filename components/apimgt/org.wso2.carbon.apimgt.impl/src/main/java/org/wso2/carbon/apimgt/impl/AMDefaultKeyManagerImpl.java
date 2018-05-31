@@ -121,6 +121,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             applicationToCreate.setClientName(applicationName);
             applicationToCreate.setAppOwner(userId);
             applicationToCreate.setJsonString(oAuthApplicationInfo.getJsonString());
+            applicationToCreate.setTokenType(oAuthApplicationInfo.getTokenType());
             info = createOAuthApplicationbyApplicationInfo(applicationToCreate);
         } catch (Exception e) {
             handleException("Can not create OAuth application  : " + applicationName, e);

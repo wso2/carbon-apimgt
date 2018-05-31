@@ -74,7 +74,9 @@ public class SQLConstants {
             " SELECT " +
             "   API.API_PROVIDER AS API_PROVIDER," +
             "   API.API_NAME AS API_NAME," +
-            "   API.API_VERSION AS API_VERSION " +
+            "   API.CONTEXT AS API_CONTEXT, " +
+            "   API.API_VERSION AS API_VERSION, " +
+            "   SP.TIER_ID AS SP_TIER_ID " +
             " FROM " +
             "   AM_SUBSCRIPTION SP, " +
             "   AM_API API," +
@@ -92,7 +94,9 @@ public class SQLConstants {
             " SELECT " +
             "   API.API_PROVIDER AS API_PROVIDER," +
             "   API.API_NAME AS API_NAME," +
-            "   API.API_VERSION AS API_VERSION " +
+            "   API.CONTEXT AS API_CONTEXT," +
+            "   API.API_VERSION AS API_VERSION, " +
+            "   SP.TIER_ID AS SP_TIER_ID " +
             " FROM " +
             "   AM_SUBSCRIPTION SP, " +
             "   AM_API API," +
@@ -1143,8 +1147,8 @@ public class SQLConstants {
     public static final String APP_APPLICATION_SQL =
             " INSERT INTO AM_APPLICATION (NAME, SUBSCRIBER_ID, APPLICATION_TIER, " +
             "   CALLBACK_URL, DESCRIPTION, APPLICATION_STATUS, GROUP_ID, CREATED_BY, CREATED_TIME, UPDATED_TIME, " +
-                    "UUID)" +
-            " VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+                    "UUID, TOKEN_TYPE)" +
+            " VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String UPDATE_APPLICATION_SQL =
             " UPDATE " +
@@ -1155,7 +1159,8 @@ public class SQLConstants {
             "   CALLBACK_URL = ?, " +
             "   DESCRIPTION = ?, " +
             "   UPDATED_BY = ?, " +
-            "   UPDATED_TIME = ? " +
+            "   UPDATED_TIME = ?, " +
+            "   TOKEN_TYPE = ? " +
             " WHERE" +
             "   APPLICATION_ID = ?";
 
@@ -1556,6 +1561,7 @@ public class SQLConstants {
             "   APP.GROUP_ID," +
             "   APP.UUID," +
             "   APP.CREATED_BY," +
+            "   APP.TOKEN_TYPE," +
             "   SUB.USER_ID" +
             " FROM " +
             "   AM_SUBSCRIBER SUB," +
@@ -1573,7 +1579,8 @@ public class SQLConstants {
             "   APP.APPLICATION_STATUS, " +
             "   SUB.USER_ID, " +
             "   APP.GROUP_ID," +
-            "   APP.UUID " +
+            "   APP.UUID, " +
+            "   APP.TOKEN_TYPE " +
             " FROM " +
             "   AM_SUBSCRIBER SUB," +
             "   AM_APPLICATION APP " +
@@ -1595,6 +1602,7 @@ public class SQLConstants {
             "   APP.UPDATED_TIME, "+
             "   APP.CREATED_TIME, "+
             "   APP.UUID," +
+            "   APP.TOKEN_TYPE," +
             "   SUB.USER_ID " +
             " FROM " +
             "   AM_SUBSCRIBER SUB," +
@@ -1602,6 +1610,29 @@ public class SQLConstants {
             " WHERE " +
             "   APP.UUID = ? " +
             "   AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID";
+
+    public static final String GET_APPLICATION_BY_CLIENT_ID_SQL =
+            " SELECT " +
+                    "   APP.APPLICATION_ID," +
+                    "   APP.NAME," +
+                    "   APP.SUBSCRIBER_ID," +
+                    "   APP.APPLICATION_TIER," +
+                    "   APP.CALLBACK_URL," +
+                    "   APP.DESCRIPTION, " +
+                    "   APP.SUBSCRIBER_ID," +
+                    "   APP.APPLICATION_STATUS, " +
+                    "   APP.GROUP_ID, " +
+                    "   APP.UPDATED_TIME, "+
+                    "   APP.CREATED_TIME, "+
+                    "   APP.UUID," +
+                    "   APP.CREATED_BY," +
+                    "   APP.TOKEN_TYPE" +
+                    " FROM " +
+                    "   AM_APPLICATION_KEY_MAPPING AM_APP_MAP," +
+                    "   AM_APPLICATION APP " +
+                    " WHERE " +
+                    "   AM_APP_MAP.CONSUMER_KEY = ? " +
+                    "   AND APP.APPLICATION_ID = AM_APP_MAP.APPLICATION_ID";
 
     public static final String REMOVE_FROM_URI_TEMPLATES_SQL =
             "DELETE FROM AM_API_URL_MAPPING WHERE API_ID = ?";

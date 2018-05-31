@@ -126,10 +126,17 @@ public class RegistrationServiceImpl implements RegistrationService {
                         }
                     }
                 }
+
+                String tokenType = APIConstants.APPLICATION_TOKEN_TYPE;
+                String profileTokenType = profile.getTokenType();
+                if (StringUtils.isNotEmpty(profileTokenType)) {
+                    tokenType = profileTokenType;
+                }
                 oauthApplicationInfo.addParameter(OAUTH_CLIENT_USERNAME, owner);
                 oauthApplicationInfo.setClientId("");
                 oauthApplicationInfo.setClientSecret("");
                 oauthApplicationInfo.setIsSaasApplication(profile.isSaasApp());
+                oauthApplicationInfo.setTokenType(tokenType);
                 appRequest.setOAuthApplicationInfo(oauthApplicationInfo);
 
                 loggedInUserTenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -322,11 +329,15 @@ public class RegistrationServiceImpl implements RegistrationService {
             serviceProvider.setApplicationName(applicationName);
             serviceProvider.setDescription("Service Provider for application " + appName);
             serviceProvider.setSaasApp(applicationInfo.getIsSaasApplication());
-            ServiceProviderProperty[] serviceProviderProperties = new ServiceProviderProperty[1];
+            ServiceProviderProperty[] serviceProviderProperties = new ServiceProviderProperty[2];
             ServiceProviderProperty serviceProviderProperty = new ServiceProviderProperty();
             serviceProviderProperty.setName(APP_DISPLAY_NAME);
             serviceProviderProperty.setValue(applicationName);
             serviceProviderProperties[0] = serviceProviderProperty;
+            ServiceProviderProperty tokenTypeProviderProperty = new ServiceProviderProperty();
+            tokenTypeProviderProperty.setName(APIConstants.APP_TOKEN_TYPE);
+            tokenTypeProviderProperty.setValue(applicationInfo.getTokenType());
+            serviceProviderProperties[1] = tokenTypeProviderProperty;
             serviceProvider.setSpProperties(serviceProviderProperties);
             ApplicationManagementService appMgtService = ApplicationManagementService.getInstance();
             appMgtService.createApplication(serviceProvider, tenantDomain, userName);

@@ -7257,6 +7257,19 @@ public final class APIUtil {
         return 0;
     }
 
+
+    /**
+     * This method is used to get application from client id.
+     *
+     * @param clientId  client id
+     * @return application object.
+     * @throws APIManagementException
+     */
+    public static Application getApplicationByClientId(String clientId) throws APIManagementException {
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+        return apiMgtDAO.getApplicationByClientId(clientId);
+    }
+
     public static List<ConditionDto> extractConditionDto(String base64EncodedString) throws ParseException {
 
         List<ConditionDto> conditionDtoList = new ArrayList<>();

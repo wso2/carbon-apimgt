@@ -42,6 +42,7 @@ public class RegistrationProfile {
     private String grantType;
     private boolean saasApp;
     private String audience;
+    private String tokenType;
 
     public String getRecepientValidationURL() {
         return recepientValidationURL;
@@ -205,4 +206,13 @@ public class RegistrationProfile {
     public void setGrantType(String grantType) {
         this.grantType = grantType;
     }
+
+    public String getTokenType() {
+        return tokenType;
+    }
+
+    public void setTokenType(String tokenType) {
+        this.tokenType = tokenType;
+    }
+
 }

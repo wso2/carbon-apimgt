@@ -344,7 +344,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
      * @param endUserName - The end user name
      * @throws APIManagementException
      */
-    private String addCertToHeader(String endUserName) throws APIManagementException {
+    protected String addCertToHeader(String endUserName) throws APIManagementException {
 
         try {
             //get tenant domain
@@ -460,7 +460,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
         }
     }
 
-    private String getMultiAttributeSeparator(int tenantId) {
+    protected String getMultiAttributeSeparator(int tenantId) {
         try {
             RealmConfiguration realmConfiguration = null;
             RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();

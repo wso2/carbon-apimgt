@@ -285,13 +285,14 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
      * @throws APIKeyMgtException
      * @throws APIManagementException
      */
-    public OAuthApplicationInfo createOAuthApplication(String userId, String applicationName, String callbackUrl)
-            throws APIKeyMgtException, APIManagementException {
+    public OAuthApplicationInfo createOAuthApplication(String userId, String applicationName, String callbackUrl,
+            String tokenType) throws APIKeyMgtException, APIManagementException {
 
         OAuthApplicationInfo oauthApplicationInfo = new OAuthApplicationInfo();
         oauthApplicationInfo.setClientName(applicationName);
         oauthApplicationInfo.setCallBackURL(callbackUrl);
         oauthApplicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME, userId);
+        oauthApplicationInfo.setTokenType(tokenType);
         return createOAuthApplicationByApplicationInfo(oauthApplicationInfo);
     }
 

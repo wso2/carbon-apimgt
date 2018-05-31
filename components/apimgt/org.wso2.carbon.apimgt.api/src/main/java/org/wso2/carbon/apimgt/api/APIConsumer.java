@@ -182,11 +182,12 @@ public interface APIConsumer extends APIManager {
      * @param clientId this is the consumer key of oAuthApplication
      * @param applicationName this is the APIM appication name.
      * @param keyType
+     * @param tokenType this is theApplication Token Type. This can be either default or jwt.
      * @return
      * @throws APIManagementException
      */
-    Map<String,Object> mapExistingOAuthClient(String jsonString, String userName, String clientId,
-                                                     String applicationName, String keyType) throws APIManagementException;
+    Map<String, Object> mapExistingOAuthClient(String jsonString, String userName, String clientId,
+            String applicationName, String keyType, String tokenType) throws APIManagementException;
 
     /**
      *This method will delete from application key mapping table and application registration table.

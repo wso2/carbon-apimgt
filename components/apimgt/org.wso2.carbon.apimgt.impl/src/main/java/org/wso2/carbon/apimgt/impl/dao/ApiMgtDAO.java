@@ -72,7 +72,9 @@ import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
@@ -88,9 +90,11 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.core.util.CryptoException;
+import org.wso2.carbon.event.stub.service.dto.SubscriptionDTO;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.oauth.IdentityOAuthAdminException;
+import org.wso2.carbon.registry.common.beans.SubscriptionBean;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.DBUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -3301,6 +3305,7 @@ public class ApiMgtDAO {
             ps.setTimestamp(9, timestamp);
             ps.setTimestamp(10, timestamp);
             ps.setString(11, UUID.randomUUID().toString());
+            ps.setString(12, String.valueOf(application.getTokenType()));
             ps.executeUpdate();
 
             rs = ps.getGeneratedKeys();
@@ -3336,7 +3341,8 @@ public class ApiMgtDAO {
             //TODO need to find the proper user who updates this application.
             ps.setString(5, null);
             ps.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
-            ps.setInt(7, application.getId());
+            ps.setString(7, application.getTokenType());
+            ps.setInt(8, application.getId());
 
             ps.executeUpdate();
 
@@ -5371,6 +5377,7 @@ public class ApiMgtDAO {
                 application.setUUID(rs.getString("UUID"));
                 application.setGroupId(rs.getString("GROUP_ID"));
                 application.setOwner(rs.getString("CREATED_BY"));
+                application.setTokenType(rs.getString("TOKEN_TYPE"));
 
                 if (multiGroupAppSharingEnabled) {
                     setGroupIdInApplication(application);
@@ -6361,7 +6368,7 @@ public class ApiMgtDAO {
                 OAuthAppRequest request = ApplicationUtils.createOauthAppRequest(application.getName(), null,
                         application.getCallbackUrl(), rs
                                 .getString("TOKEN_SCOPE"),
-                        rs.getString("INPUTS"));
+                        rs.getString("INPUTS"), application.getTokenType());
                 workflowDTO.setAppInfoDTO(request);
             }
         } catch (SQLException e) {
@@ -11266,6 +11273,97 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Get Subscribed APIs for given userId
+     *
+     * @param userId id of the user
+     * @return APISubscriptionInfoDTO[]
+     * @throws APIManagementException if failed to get Subscribed APIs
+     */
+    public APISubscriptionInfoDTO[] getSubscribedAPIsOfUserWithSubscriptionInfo(String userId) throws APIManagementException {
+        List<APISubscriptionInfoDTO> apiSubscriptionInfoDTOS = new ArrayList<APISubscriptionInfoDTO>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        //identify logged in user
+        String loginUserName = getLoginUserName(userId);
+        int tenantId = APIUtil.getTenantId(loginUserName);
+
+        String sqlQuery = SQLConstants.GET_SUBSCRIBED_APIS_OF_USER_SQL;
+        if (forceCaseInsensitiveComparisons) {
+            sqlQuery = SQLConstants.GET_SUBSCRIBED_APIS_OF_USER_CASE_INSENSITIVE_SQL;
+        }
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, userId);
+            ps.setInt(2, tenantId);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                APISubscriptionInfoDTO infoDTO = new APISubscriptionInfoDTO();
+                infoDTO.setProviderId(APIUtil.replaceEmailDomain(rs.getString("API_PROVIDER")));
+                infoDTO.setApiName(rs.getString("API_NAME"));
+                infoDTO.setContext(rs.getString("API_CONTEXT"));
+                infoDTO.setVersion(rs.getString("API_VERSION"));
+                infoDTO.setSubscriptionTier(rs.getString("SP_TIER_ID"));
+                apiSubscriptionInfoDTOS.add(infoDTO);
+            }
+        } catch (SQLException e) {
+            handleException("Error while executing SQL", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return apiSubscriptionInfoDTOS.toArray(new APISubscriptionInfoDTO[apiSubscriptionInfoDTOS.size()]);
+    }
+
+
+    public Application getApplicationByClientId(String clientId) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+
+        Application application = null;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            String query = SQLConstants.GET_APPLICATION_BY_CLIENT_ID_SQL;
+
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setString(1, clientId);
+
+            rs = prepStmt.executeQuery();
+            if (rs.next()) {
+                String applicationId = rs.getString("APPLICATION_ID");
+                String applicationName = rs.getString("NAME");
+                String applicationOwner = rs.getString("CREATED_BY");
+
+                application = new Application(applicationId);
+                application.setName(applicationName);
+                application.setOwner(applicationOwner);
+                application.setDescription(rs.getString("DESCRIPTION"));
+                application.setStatus(rs.getString("APPLICATION_STATUS"));
+                application.setCallbackUrl(rs.getString("CALLBACK_URL"));
+                application.setId(rs.getInt("APPLICATION_ID"));
+                application.setGroupId(rs.getString("GROUP_ID"));
+                application.setUUID(rs.getString("UUID"));
+                application.setTier(rs.getString("APPLICATION_TIER"));
+                application.setTokenType(rs.getString("TOKEN_TYPE"));
+
+                if (multiGroupAppSharingEnabled) {
+                    if (application.getGroupId().isEmpty()) {
+                        application.setGroupId(getGroupId(application.getId()));
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while obtaining details of the Application foe client id " + clientId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+        return application;
+    }
+
+    /**
      * Returns the Label List for the TenantId.
      *
      * @param tenantDomain The tenant domain.
@@ -11461,6 +11559,4 @@ public class ApiMgtDAO {
         }
         return label;
     }
-
-
 }
