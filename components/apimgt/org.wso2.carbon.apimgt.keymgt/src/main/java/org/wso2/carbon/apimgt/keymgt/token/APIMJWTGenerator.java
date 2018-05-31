@@ -91,8 +91,7 @@ public class APIMJWTGenerator extends JWTGenerator {
         }
 
         if (standardClaims != null) {
-            Map<String, Object> claims = new HashMap<String, Object>();
-            JWTClaimsSet claimsSet = new JWTClaimsSet();
+            JWTClaimsSet.Builder jwtClaimsSetBuilder = new JWTClaimsSet.Builder();
 
             Iterator<String> it = new TreeSet(standardClaims.keySet()).iterator();
             while (it.hasNext()) {
@@ -102,7 +101,7 @@ public class APIMJWTGenerator extends JWTGenerator {
                 if (claimValObj instanceof String) {
                     String claimVal = (String) claimValObj;
                     List<String> claimList = new ArrayList<String>();
-                    if (userAttributeSeparator != null && claimVal != null && claimVal
+                    if (userAttributeSeparator != null && claimVal
                             .contains(userAttributeSeparator)) {
                         StringTokenizer st = new StringTokenizer(claimVal, userAttributeSeparator);
                         while (st.hasMoreElements()) {
@@ -111,25 +110,16 @@ public class APIMJWTGenerator extends JWTGenerator {
                                 claimList.add(attValue);
                             }
                         }
-                        claims.put(claimURI, claimList.toArray(new String[claimList.size()]));
+                        jwtClaimsSetBuilder.claim(claimURI, claimList.toArray(new String[claimList.size()]));
                     } else if ("exp".equals(claimURI)) {
-                        claims.put("exp", new Date(Long.valueOf((String) standardClaims.get(claimURI))));
+                        jwtClaimsSetBuilder.claim("exp", new Date(Long.valueOf((String) standardClaims.get(claimURI))));
                     } else {
-                        claims.put(claimURI, claimVal);
+                        jwtClaimsSetBuilder.claim(claimURI, claimVal);
                     }
-                } else if (claimValObj instanceof ArrayList) {
-                    List<SubscribedApiDTO> claimArray = (List<SubscribedApiDTO>) standardClaims.get(claimURI);
-                    claims.put(claimURI, claimArray);
-
-                } else if (claimValObj instanceof HashMap) {
-                    Map<String, SubscriptionPolicyDTO> claimMap = (Map<String, SubscriptionPolicyDTO>) standardClaims
-                            .get(claimURI);
-                    claims.put(claimURI, claimMap);
                 }
             }
 
-            claimsSet.setAllClaims(claims);
-            return claimsSet.toJSONObject().toJSONString();
+            return jwtClaimsSetBuilder.build().toJSONObject().toJSONString();
         }
         return null;
     }
