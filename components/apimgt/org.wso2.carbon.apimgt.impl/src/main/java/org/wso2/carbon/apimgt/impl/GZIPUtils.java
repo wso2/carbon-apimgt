@@ -47,13 +47,13 @@ public class GZIPUtils {
             gzipOutputStream = new GZIPOutputStream(fileOutputStream);
             fileInputStream = new FileInputStream(sourcePath);
 
-            int length;
+            int length = 0;
             while ((length = fileInputStream.read(buffer)) > 0) {
                 gzipOutputStream.write(buffer, 0, length);
             }
             gzipOutputStream.finish();
         } catch (IOException e) {
-            throw new APIManagementException("Error while compressing file at" + sourcePath + "to" + destinationPath, e);
+            throw new APIManagementException("Error while compressing file at " + sourcePath + " to" + destinationPath, e);
         } finally {
             IOUtils.closeQuietly(fileInputStream);
             IOUtils.closeQuietly(fileOutputStream);
@@ -62,14 +62,14 @@ public class GZIPUtils {
     }
 
     public static File constructZippedResponse(Object data) throws APIManagementException {
-        String tmpSourceFileName = System.currentTimeMillis() + ".json";
-        String tmpDestinationFileName = System.currentTimeMillis() + ".json.gz";
+        String tmpSourceFileName = System.currentTimeMillis() + APIConstants.JSON_FILE_EXTENSION;
+        String tmpDestinationFileName = System.currentTimeMillis() + APIConstants.JSON_GZIP_FILENAME_EXTENSION;
         String sourcePath = System.getProperty(APIConstants.JAVA_IO_TMPDIR) + File.separator  + tmpSourceFileName;
         String destinationPath = System.getProperty(APIConstants.JAVA_IO_TMPDIR) + File.separator + tmpDestinationFileName;
         File zippedResponse;
 
         File file = new File(sourcePath);
-        FileWriter fileWriter;
+        FileWriter fileWriter = null;
         try {
             file.createNewFile();
             fileWriter = new FileWriter(file);
@@ -79,6 +79,8 @@ public class GZIPUtils {
             zippedResponse = new File(destinationPath);
         } catch (IOException e) {
             throw new APIManagementException("Error while constructing zipped response..", e);
+        } finally {
+            IOUtils.closeQuietly(fileWriter);
         }
         return zippedResponse;
     }
