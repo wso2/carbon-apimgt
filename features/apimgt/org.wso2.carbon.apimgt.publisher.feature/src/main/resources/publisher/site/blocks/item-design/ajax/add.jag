@@ -917,7 +917,7 @@ if(jagg.isCSRFTokenValid())
             var apiDefinitionVersion = session.get("apiDefinitionVersion");
             session.put("apiDefinitionVersion", null);
             print(apiDefinitionVersion);
-        } else if (request.getMethod() == 'POST' && action === 'validateSwagger') {
+        } else if (request.getMethod() === 'POST' && action === 'validateSwagger') {
             var swagger = request.getParameter("swaggerDefinition");
             var swaggerDeserializationResult = parser.readWithInfo(swagger);
             var swaggerObj = swaggerDeserializationResult.getSwagger();
