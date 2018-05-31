@@ -528,7 +528,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 String applicationName = (String) apiData.get("applicationName", apiData);
 
                 String keyType = (String) apiData.get("keytype", apiData);
-                String tokenType = "DEFAULT";
+                String tokenType = APIConstants.APPLICATION_TOKEN_TYPE;
                 Map<String, Object> keyDetails = getAPIConsumer(thisObj).mapExistingOAuthClient(jsonString, userName, clientId, applicationName, keyType, tokenType);
                 NativeObject row = new NativeObject();
                 Set<Map.Entry<String, Object>> entries = keyDetails.entrySet();
