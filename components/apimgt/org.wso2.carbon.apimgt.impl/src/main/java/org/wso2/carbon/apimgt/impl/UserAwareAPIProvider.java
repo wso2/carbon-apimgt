@@ -158,6 +158,12 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
+    public void changeAPIStatus(API api, APIStatus status, String userId,
+            boolean updateGatewayConfig) throws APIManagementException, FaultGatewaysException {
+        changeAPIStatus(api, status.getStatus(), userId, updateGatewayConfig);
+    }
+
+    @Override
     public Map<String, String> propergateAPIStatusChangeToGateways(APIIdentifier identifier, String newStatus)
             throws APIManagementException {
         checkAccessControlPermission(identifier);
@@ -165,10 +171,22 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
+    public Map<String, String> propergateAPIStatusChangeToGateways(APIIdentifier identifier, APIStatus newStatus)
+            throws APIManagementException {
+        return propergateAPIStatusChangeToGateways(identifier, newStatus.getStatus());
+    }
+
+    @Override
     public boolean updateAPIforStateChange(APIIdentifier identifier, String newStatus,
             Map<String, String> failedGatewaysMap) throws APIManagementException, FaultGatewaysException {
         checkAccessControlPermission(identifier);
         return super.updateAPIforStateChange(identifier, newStatus, failedGatewaysMap);
+    }
+
+    @Override
+    public boolean updateAPIforStateChange(APIIdentifier identifier, APIStatus newStatus,
+            Map<String, String> failedGatewaysMap) throws APIManagementException, FaultGatewaysException {
+        return updateAPIforStateChange(identifier, newStatus.getStatus(), failedGatewaysMap);
     }
 
     @Override
