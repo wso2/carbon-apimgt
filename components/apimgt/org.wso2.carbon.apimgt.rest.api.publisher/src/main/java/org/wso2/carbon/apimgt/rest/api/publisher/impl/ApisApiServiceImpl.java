@@ -50,6 +50,7 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -76,6 +77,7 @@ import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -110,7 +112,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return matched APIs for the given search condition
      */
     @Override
-    public Response apisGet(Integer limit, Integer offset, String query, String accept, String ifNoneMatch) {
+    public Response apisGet(Integer limit, Integer offset, String query, String accept, String ifNoneMatch, Boolean expand) {
         List<API> allMatchedApis = new ArrayList<>();
         APIListDTO apiListDTO;
 
@@ -119,6 +121,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         query = query == null ? "" : query;
+        expand = (expand != null && expand) ? true : false;
         try {
             String newSearchQuery = APIUtil.constructNewSearchQuery(query);
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -132,7 +135,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             Set<API> apis = (Set<API>) result.get("apis");
             allMatchedApis.addAll(apis);
 
-            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis);
+            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis, expand);
             APIMappingUtil.setPaginationParams(apiListDTO, query, offset, limit, allMatchedApis.size());
 
             //Add pagination section in the response
@@ -147,7 +150,18 @@ public class ApisApiServiceImpl extends ApisApiService {
             paginationDTO.setTotal(length);
             apiListDTO.setPagination(paginationDTO);
 
-            return Response.ok().entity(apiListDTO).build();
+            if (APIConstants.APPLICATION_GZIP.equals(accept)) {
+                try {
+                    File zippedResponse = GZIPUtils.constructZippedResponse(apiListDTO);
+                    return Response.ok().entity(zippedResponse)
+                            .header("Content-Disposition", "attachment").
+                                    header("Content-Encoding", "gzip").build();
+                } catch (APIManagementException e) {
+                    RestApiUtil.handleInternalServerError(e.getMessage(), e, log);
+                }
+            } else {
+                return Response.ok().entity(apiListDTO).build();
+            }
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving APIs";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);

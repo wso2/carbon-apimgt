@@ -1908,7 +1908,17 @@ public abstract class AbstractAPIManager implements APIManager {
             // If the query does not contains "=" then it is an errornous scenario.
             if (query.contains("=")) {
                 String[] searchKeys = query.split("=");
-                if (!Arrays.asList(APIConstants.API_SEARCH_PREFIXES).contains(searchKeys[0].toLowerCase())) {
+
+                //prevent api-meta. getting prefixed to labelName and restrict label serach to exact match only
+                if (APIConstants.LABELNAME.equals(searchKeys[0])) {
+                    searchKeys[0] = APIConstants.LABEL_PREFIX + searchKeys[0];
+                    if (searchKeys[1].startsWith("*")) {
+                        searchKeys[1] = searchKeys[1].substring(1, searchKeys[1].length());
+                    }
+                    if (searchKeys[1].endsWith("*")) {
+                        searchKeys[1] = searchKeys[1].substring(0, searchKeys[1].length() - 1);
+                    }
+                } else if (!Arrays.asList(APIConstants.API_SEARCH_PREFIXES).contains(searchKeys[0].toLowerCase())) {
                     if (log.isDebugEnabled()) {
                         log.debug(searchKeys[0] + " does not match with any of the reserved key words. Hence"
                                 + " appending " + APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX + " as prefix");

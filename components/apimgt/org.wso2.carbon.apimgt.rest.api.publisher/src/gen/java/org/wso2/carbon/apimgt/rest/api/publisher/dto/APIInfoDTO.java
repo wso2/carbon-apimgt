@@ -40,8 +40,9 @@ public class APIInfoDTO  {
 
   
   /**
+   * UUID of the api registry artifact\n
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "UUID of the api registry artifact\n")
   @JsonProperty("id")
   public String getId() {
     return id;
@@ -52,8 +53,9 @@ public class APIInfoDTO  {
 
   
   /**
+   * Name of the API
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "Name of the API")
   @JsonProperty("name")
   public String getName() {
     return name;
@@ -64,8 +66,9 @@ public class APIInfoDTO  {
 
   
   /**
+   * A brief description about the API
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "A brief description about the API")
   @JsonProperty("description")
   public String getDescription() {
     return description;
@@ -76,8 +79,9 @@ public class APIInfoDTO  {
 
   
   /**
+   * A string that represents the context of the user's request
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "A string that represents the context of the user's request")
   @JsonProperty("context")
   public String getContext() {
     return context;
@@ -88,8 +92,9 @@ public class APIInfoDTO  {
 
   
   /**
+   * The version of the API
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "The version of the API")
   @JsonProperty("version")
   public String getVersion() {
     return version;
@@ -113,8 +118,9 @@ public class APIInfoDTO  {
 
   
   /**
+   * This describes in which status of the lifecycle the API is
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "This describes in which status of the lifecycle the API is")
   @JsonProperty("status")
   public String getStatus() {
     return status;
