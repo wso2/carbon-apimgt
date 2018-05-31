@@ -54,6 +54,7 @@
                 value='<%=i18n.localize("Name contains one or more illegal characters")%> ( [ ~ ! & @ # ; % ^ & * + = { } | <> \"  , ] ). '/>
     <input type="hidden" id="uuid" name="uuid" value="<%=uuid%>" />
     <input type="hidden" id="action" name="action" value="<%=encode.forHtmlAttribute(action)%>"/>
+    <input type='hidden' id='errorMessageSpaces' name='errorMessageSpaces' value='<%=i18n.localize("Name contains spaces")%>'/>
     <div class="page-header">
 	    <h2><br></h2>
 	    <p class="lead"><%=i18n.localize("General Details")%></p>
@@ -67,8 +68,7 @@
     <div class="form-group">
 		<label class="control-label col-sm-3"><%=i18n.localize("Description")%></label>
 		<div class="col-md-9">
-			<textarea class="form-control" id="description" class="text" name="description" >
-			</textarea>
+			<textarea class="form-control" id="description" class="text" name="description" ></textarea>
 		</div>
 	</div>
     <div class="page-header">
