@@ -1131,6 +1131,73 @@
                 }
             }
         },
+        "/applications/regenerate-consumersecret": {
+            "post": {
+                "x-scope": "apim:subscribe",
+                "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json  \"https://localhost:9443/api/am/store/v0.12/applications/regenerate-consumersecret\"",
+                "x-wso2-request": "POST https://localhost:9443/api/am/store/v0.12/applications/regenerate-consumersecret\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{\n  \"consumerKey\": \"AVoREWiB16kY_GTIzscl40GYYZQa\"\n}",
+                "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"consumerSecret\": \"8V7DDKtKGtuG_9GDjaOJ5sijdX0a\",\n   \"consumerKey\": \"LOFL8He72MSGVil4SS_bsh9O8MQa\"\n}",
+                "summary": "Re generate consumer secret for an application\n",
+                "description": "This operation can be used to re generate consumer secret for an application\n",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "The consumer key associated with the application\n",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ApplicationKeyReGenerateRequest"
+                        }
+                    },
+                    {
+                        "$ref": "#/parameters/Content-Type"
+                    }
+                ],
+                "tags": [
+                    "Application (Individual)"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK.\nKeys are re generated.\n",
+                        "schema": {
+                            "$ref": "#/definitions/ApplicationKeyReGenerateResponse"
+                        },
+                        "headers": {
+                            "Content-Type": {
+                                "description": "The content type of the body.\n",
+                                "type": "string"
+                            },
+                            "ETag": {
+                                "description": "Entity Tag of the response resource.\nUsed by caches, or in conditional requests (Will be supported in future).\n",
+                                "type": "string"
+                            },
+                            "Last-Modified": {
+                                "description": "Date and time the resource has been modifed the last time.\nUsed by caches, or in conditional requests (Will be supported in future).‚\n",
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request.\nInvalid request or validation error\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found.\nThe resource to be updated does not exist.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "412": {
+                        "description": "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met (Will be supported in future).\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
         "/subscriptions": {
             "get": {
                 "x-scope": "apim:subscribe",
@@ -2541,6 +2608,21 @@
                 }
             }
         },
+        "ApplicationKeyReGenerateResponse": {
+            "title": "Application key details after re generating consumer secret",
+            "properties": {
+                "consumerKey": {
+                    "type": "string",
+                    "description": "The consumer key associated with the application and identifying the client",
+                    "example": "vYDoc9s7IgAFdkSyNDaswBX7ejoa"
+                },
+                "consumerSecret": {
+                    "type": "string",
+                    "description": "The client secret that is used to authenticate the client with the authentication server",
+                    "example": "TIDlOFkpzB7WjufO3OJUhy1fsvAa"
+                }
+            }
+        },
         "ApplicationKeyGenerateRequest": {
             "title": "Application key generation request object",
             "required": [
@@ -2597,6 +2679,19 @@
                         "am_application_scope",
                         "default"
                     ]
+                }
+            }
+        },
+        "ApplicationKeyReGenerateRequest": {
+            "title": "Application key re generation request object",
+            "required": [
+                "consumerKey"
+            ],
+            "properties": {
+                "consumerKey": {
+                    "type": "string",
+                    "description": "The consumer key associated with the application and identifying the client",
+                    "example": "vYDoc9s7IgAFdkSyNDaswBX7ejoa"
                 }
             }
         },
