@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APICorsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIEndpointSecurityDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIMaxTpsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SequenceDTO;
 
 import io.swagger.annotations.*;
@@ -95,14 +95,7 @@ public class APIDTO  {
   
   
   private List<String> visibleRoles = new ArrayList<String>();
-
-  public enum AccessControlEnum {
-    NONE,  RESTRICTED
-  };
-
-  private AccessControlEnum accessControl = null;
-
-  private List<String> accessControlRoles = new ArrayList<String>();
+  
   
   private List<String> visibleTenants = new ArrayList<String>();
   
@@ -114,6 +107,9 @@ public class APIDTO  {
   
   
   private String gatewayEnvironments = null;
+  
+  
+  private List<LabelDTO> labels = new ArrayList<LabelDTO>();
   
   
   private List<SequenceDTO> sequences = new ArrayList<SequenceDTO>();
@@ -128,12 +124,23 @@ public class APIDTO  {
   private List<String> subscriptionAvailableTenants = new ArrayList<String>();
   
   
+  private Map<String, String> additionalProperties = new HashMap<String, String>();
+  
+  public enum AccessControlEnum {
+     NONE,  RESTRICTED, 
+  };
+  
+  private AccessControlEnum accessControl = null;
+  
+  
+  private List<String> accessControlRoles = new ArrayList<String>();
+  
+  
   private APIBusinessInformationDTO businessInformation = null;
   
   
   private APICorsConfigurationDTO corsConfiguration = null;
 
-  private Map<String, String> additionalProperties = new HashMap<>();
   
   /**
    * UUID of the api registry artifact\n
@@ -301,8 +308,9 @@ public class APIDTO  {
 
   
   /**
+   * The transport to be set. Accepted values are HTTP, WS
    **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(required = true, value = "The transport to be set. Accepted values are HTTP, WS")
   @JsonProperty("type")
   public TypeEnum getType() {
     return type;
@@ -389,8 +397,9 @@ public class APIDTO  {
 
   
   /**
+   * The visibility level of the API. Accepts one of the following. PUBLIC, PRIVATE, RESTRICTED OR CONTROLLED.
    **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(required = true, value = "The visibility level of the API. Accepts one of the following. PUBLIC, PRIVATE, RESTRICTED OR CONTROLLED.")
   @JsonProperty("visibility")
   public VisibilityEnum getVisibility() {
     return visibility;
@@ -412,29 +421,7 @@ public class APIDTO  {
     this.visibleRoles = visibleRoles;
   }
 
-  /**
-   * Publisher access control related parameters getters and setters.
-   *
-   */
-  @ApiModelProperty(value = "AccessControl")
-  @JsonProperty("accessControl")
-  public AccessControlEnum getAccessControl() {
-    return accessControl;
-  }
-
-  public void setAccessControl(AccessControlEnum accessControl) {
-    this.accessControl = accessControl;
-  }
-
-  @ApiModelProperty(value = "The user roles that are able to access the API in publisher")
-  @JsonProperty("accessControlRoles")
-  public List<String> getAccessControlRoles() {
-    return accessControlRoles;
-  }
-  public void setAccessControlRoles(List<String> accessControlRoles) {
-    this.accessControlRoles = accessControlRoles;
-  }
-
+  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -485,6 +472,19 @@ public class APIDTO  {
 
   
   /**
+   * Labels of micro-gateway environments attached to the API.\n
+   **/
+  @ApiModelProperty(value = "Labels of micro-gateway environments attached to the API.\n")
+  @JsonProperty("labels")
+  public List<LabelDTO> getLabels() {
+    return labels;
+  }
+  public void setLabels(List<LabelDTO> labels) {
+    this.labels = labels;
+  }
+
+  
+  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("sequences")
@@ -497,8 +497,9 @@ public class APIDTO  {
 
   
   /**
+   * The subscription availability. Accepts one of the following. current_tenant, all_tenants or specific_tenants.
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "The subscription availability. Accepts one of the following. current_tenant, all_tenants or specific_tenants.")
   @JsonProperty("subscriptionAvailability")
   public SubscriptionAvailabilityEnum getSubscriptionAvailability() {
     return subscriptionAvailability;
@@ -517,6 +518,45 @@ public class APIDTO  {
   }
   public void setSubscriptionAvailableTenants(List<String> subscriptionAvailableTenants) {
     this.subscriptionAvailableTenants = subscriptionAvailableTenants;
+  }
+
+  
+  /**
+   * Map of custom properties of API
+   **/
+  @ApiModelProperty(value = "Map of custom properties of API")
+  @JsonProperty("additionalProperties")
+  public Map<String, String> getAdditionalProperties() {
+    return additionalProperties;
+  }
+  public void setAdditionalProperties(Map<String, String> additionalProperties) {
+    this.additionalProperties = additionalProperties;
+  }
+
+  
+  /**
+   * Is the API is restricted to certain set of publishers or creators or is it visible to all the\npublishers and creators. If the accessControl restriction is none, this API can be modified by all the\npublishers and creators, if not it can only be viewable/modifiable by certain set of publishers and creators,\n based on the restriction.\n
+   **/
+  @ApiModelProperty(value = "Is the API is restricted to certain set of publishers or creators or is it visible to all the\npublishers and creators. If the accessControl restriction is none, this API can be modified by all the\npublishers and creators, if not it can only be viewable/modifiable by certain set of publishers and creators,\n based on the restriction.\n")
+  @JsonProperty("accessControl")
+  public AccessControlEnum getAccessControl() {
+    return accessControl;
+  }
+  public void setAccessControl(AccessControlEnum accessControl) {
+    this.accessControl = accessControl;
+  }
+
+  
+  /**
+   * The user roles that are able to view/modify as API publisher or creator.
+   **/
+  @ApiModelProperty(value = "The user roles that are able to view/modify as API publisher or creator.")
+  @JsonProperty("accessControlRoles")
+  public List<String> getAccessControlRoles() {
+    return accessControlRoles;
+  }
+  public void setAccessControlRoles(List<String> accessControlRoles) {
+    this.accessControlRoles = accessControlRoles;
   }
 
   
@@ -543,18 +583,7 @@ public class APIDTO  {
     this.corsConfiguration = corsConfiguration;
   }
 
-  /**
-   * Custom properties for the API
-   **/
-  @ApiModelProperty(value = "Custom properties for the API")
-  @JsonProperty("additionalProperties")
-  public Map<String, String> getAdditionalProperties() {
-    return additionalProperties;
-  }
-  public void setAdditionalProperties(Map<String, String> additionalProperties) {
-    this.additionalProperties = additionalProperties;
-  }
-
+  
 
   @Override
   public String toString()  {
@@ -587,9 +616,13 @@ public class APIDTO  {
     sb.append("  endpointConfig: ").append(endpointConfig).append("\n");
     sb.append("  endpointSecurity: ").append(endpointSecurity).append("\n");
     sb.append("  gatewayEnvironments: ").append(gatewayEnvironments).append("\n");
+    sb.append("  labels: ").append(labels).append("\n");
     sb.append("  sequences: ").append(sequences).append("\n");
     sb.append("  subscriptionAvailability: ").append(subscriptionAvailability).append("\n");
     sb.append("  subscriptionAvailableTenants: ").append(subscriptionAvailableTenants).append("\n");
+    sb.append("  additionalProperties: ").append(additionalProperties).append("\n");
+    sb.append("  accessControl: ").append(accessControl).append("\n");
+    sb.append("  accessControlRoles: ").append(accessControlRoles).append("\n");
     sb.append("  businessInformation: ").append(businessInformation).append("\n");
     sb.append("  corsConfiguration: ").append(corsConfiguration).append("\n");
     sb.append("}\n");

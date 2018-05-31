@@ -20,8 +20,9 @@ package org.wso2.carbon.apimgt.gateway.throttling;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.databridge.agent.DataPublisher;
+import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -43,7 +44,7 @@ public class ThrottleDataHolder {
     private boolean isKeyTemplatesPresent = false;
     private Map<String, Long> throttleDataMap = new ConcurrentHashMap<String, Long>();
     private Map<String,Long> throttledAPIKeysMap = new ConcurrentHashMap<String, Long>();
-
+    private Map<String, Map<String, List<ConditionDto>>> conditionDtoMap = new ConcurrentHashMap<>();
     public void addThrottleData(String key, Long value) {
         throttleDataMap.put(key, value);
     }
@@ -54,6 +55,30 @@ public class ThrottleDataHolder {
 
     public void addThrottledAPIKey(String key, Long value){
         throttledAPIKeysMap.put(key,value);
+    }
+
+    public void addThrottledApiConditions(String key, String conditionKey, List<ConditionDto> conditionValue) {
+
+        Map<String, List<ConditionDto>> conditionMap;
+        if (conditionDtoMap.containsKey(key)) {
+            conditionMap = conditionDtoMap.get(key);
+        } else {
+            conditionMap = new ConcurrentHashMap<>();
+            conditionDtoMap.put(key, conditionMap);
+        }
+        if (!conditionMap.containsKey(conditionKey)) {
+            conditionMap.put(conditionKey, conditionValue);
+        }
+    }
+
+    public void removeThrottledApiConditions(String key, String conditionKey) {
+        if (conditionDtoMap.containsKey(key)) {
+            Map<String, List<ConditionDto>> conditionMap = conditionDtoMap.get(key);
+            conditionMap.remove(conditionKey);
+            if (conditionMap.isEmpty()) {
+                conditionDtoMap.remove(key);
+            }
+        }
     }
 
     public void removeThrottledAPIKey(String key){
@@ -69,11 +94,20 @@ public class ThrottleDataHolder {
                 return isThrottled;
             } else {
                 this.throttledAPIKeysMap.remove(apiKey);
+                this.conditionDtoMap.remove(apiKey);
                 return false;
             }
         } else {
             return isThrottled;
         }
+    }
+
+    public boolean isConditionsAvailable(String key) {
+        return conditionDtoMap.containsKey(key);
+    }
+
+    public Map<String,List<ConditionDto>> getConditionDtoMap(String key){
+        return conditionDtoMap.get(key);
     }
 
     public void removeThrottleData(String key) {

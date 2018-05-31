@@ -36,7 +36,7 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import java.util.TreeMap;
 
-import static junit.framework.Assert.fail;
+import static org.junit.Assert.fail;
 
 /**
  * Test class for APIMgtGoogleAnalyticsTrackingHandler

@@ -13,6 +13,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.BDDMockito;
 import org.mockito.Matchers;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -48,13 +49,15 @@ import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.*;
 
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.when;
 import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ PrivilegedCarbonContext.class, OAuthApplicationInfo.class, ApplicationManagementService.class,
         APIKeyMgtSubscriberService.class, ApiMgtDAO.class, OAuthServerConfiguration.class, OAuthCache.class,
         ServiceReferenceHolder.class, CarbonUtils.class, ServerConfiguration.class, APIUtil.class,
-        APIKeyMgtUtil.class })
+        APIKeyMgtUtil.class, OAuthServerConfiguration.class })
 public class APIKeyMgtSubscriberServiceTest {
     private final int TENANT_ID = 1234;
     private final String TENANT_DOMAIN = "foo.com";
@@ -71,6 +74,9 @@ public class APIKeyMgtSubscriberServiceTest {
     private final String IMPLICIT_GRANT_TYPE = "implicit";
     private final String ACCESS_TOKEN = "ca19a540f544777860e44e75f605d927";
     private APIKeyMgtSubscriberService apiKeyMgtSubscriberService = new APIKeyMgtSubscriberService();
+
+    @Mock
+    private OAuthServerConfiguration mockOAuthServerConfiguration;
 
     @Test
     public void createOAuthApplicationByApplicationInfo() throws Exception {
@@ -105,6 +111,10 @@ public class APIKeyMgtSubscriberServiceTest {
         Mockito.when(oAuthAdminService.getAllowedGrantTypes()).thenReturn(GRANT_TYPES);
         Mockito.when(oAuthAdminService.getOAuthApplicationDataByAppName(Mockito.anyString()))
                 .thenReturn(oAuthConsumerAppDTO);
+
+        mockStatic(OAuthServerConfiguration.class);
+        when(OAuthServerConfiguration.getInstance()).thenReturn(mockOAuthServerConfiguration);
+        when(mockOAuthServerConfiguration.isClientSecretHashEnabled()).thenReturn(false);
 
         //Invoke createOAuthApplicationByApplicationInfo method
         apiKeyMgtSubscriberService.createOAuthApplicationByApplicationInfo(oauthApplicationInfo);

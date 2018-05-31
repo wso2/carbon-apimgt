@@ -18,19 +18,21 @@
  */
 package org.wso2.carbon.apimgt.jms.listener.utils;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.util.Hashtable;
 
-import junit.framework.TestCase;
+public class JMSUtilsTestCase {
 
-public class JMSUtilsTestCase extends TestCase {
-
+	@Test
 	public void testMaskAxis2ConfigSensitiveParameters() {
 		Hashtable<String, String> sensitiveParamsTable = new Hashtable<String, String>();
 		sensitiveParamsTable.put("connectionfactory.TopicConnectionFactory",
 				"amqp://admin:admin@clientid/carbon?brokerlist='tcp://localhost:5672'");
 
 		Hashtable<String, String> maskedParamTable = JMSUtils.maskAxis2ConfigSensitiveParameters(sensitiveParamsTable);
-		assertEquals("amqp://***:***@clientid/carbon?brokerlist='tcp://localhost:5672'",
+		Assert.assertEquals("amqp://***:***@clientid/carbon?brokerlist='tcp://localhost:5672'",
 				maskedParamTable.get("connectionfactory.TopicConnectionFactory"));
 	}
 }

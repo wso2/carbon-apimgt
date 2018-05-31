@@ -25,7 +25,7 @@ import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.JWT;
-import com.nimbusds.jwt.ReadOnlyJWTClaimsSet;
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -52,7 +52,7 @@ public class Util {
 
 
     public static boolean verifySignature(SignedJWT signedIdToken, ServerConfiguration serverConfiguration)
-            throws IOException, ParseException, NoSuchAlgorithmException, InvalidKeySpecException {
+            throws IOException, ParseException, JOSEException {
 
         boolean isSigValid = false;
         HttpClient httpClient = new DefaultHttpClient();
@@ -115,7 +115,7 @@ public class Util {
 
     public static boolean validateIdClaims(ServerConfiguration serverConfiguration, AuthClient authClient,
                                            JWT idToken, String nonce,
-                                           ReadOnlyJWTClaimsSet idClaims) throws Exception {
+                                           JWTClaimsSet idClaims) throws Exception {
 
         boolean isValid = true;
         String clientId = authClient.getClientId();

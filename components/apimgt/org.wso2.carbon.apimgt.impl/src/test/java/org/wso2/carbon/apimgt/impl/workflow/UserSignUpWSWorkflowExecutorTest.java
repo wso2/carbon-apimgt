@@ -53,17 +53,17 @@ import org.wso2.carbon.user.mgt.stub.UserAdminStub;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
-import javax.xml.stream.XMLStreamException;
 import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Map;
+import javax.xml.stream.XMLStreamException;
 
 /**
  * UserSignUpWSWorkflowExecutor test cases
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ServiceReferenceHolder.class, UserSignUpWSWorkflowExecutor.class, ApiMgtDAO.class, APIUtil.class,
-        AXIOMUtil.class, SelfSignUpUtil.class, CarbonUtils.class})
+        AXIOMUtil.class, SelfSignUpUtil.class, CarbonUtils.class, APIMgtWorkflowDataPublisher.class})
 public class UserSignUpWSWorkflowExecutorTest {
 
     private UserSignUpWSWorkflowExecutor userSignUpWSWorkflowExecutor;
@@ -101,7 +101,7 @@ public class UserSignUpWSWorkflowExecutorTest {
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.isAnalyticsEnabled()).thenReturn(true);
         PowerMockito.doNothing().when(CarbonUtils.class, "setBasicAccessSecurityHeaders", Mockito.anyString(),
-                Mockito.anyString(), Mockito.anyBoolean(), (ServiceClient) Mockito.anyObject());
+                Mockito.anyString(), Mockito.anyBoolean(), Mockito.any());
         PowerMockito.when(serviceReferenceHolder.getContextService()).thenReturn(configurationContextService);
         PowerMockito.when(configurationContextService.getClientConfigContext()).thenReturn(configurationContext);
         PowerMockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn
@@ -114,8 +114,7 @@ public class UserSignUpWSWorkflowExecutorTest {
         Mockito.when(realmService.getTenantUserRealm(tenantID)).thenReturn(userRealm);
         Mockito.when(userRealm.getUserStoreManager()).thenReturn(userStoreManager);
         APIMgtWorkflowDataPublisher apiMgtWorkflowDataPublisher = Mockito.mock(APIMgtWorkflowDataPublisher.class);
-        PowerMockito.whenNew(APIMgtWorkflowDataPublisher.class).withNoArguments().thenReturn
-                (apiMgtWorkflowDataPublisher);
+        Mockito.when(serviceReferenceHolder.getApiMgtWorkflowDataPublisher()).thenReturn(apiMgtWorkflowDataPublisher);
         PowerMockito.whenNew(UserAdminStub.class).withAnyArguments().thenReturn(userAdminStub);
         apiMgtDAO = TestUtils.getApiMgtDAO();
         userSignUpWSWorkflowExecutor = new UserSignUpWSWorkflowExecutor();

@@ -1129,7 +1129,7 @@
 <script id="designer-resources-template" type="text/x-handlebars-template">
 <fieldset class="<%= hide_impl %> implementation_method_inline implementation_method">
 <legend><%=i18n.localize("Resources")%></legend>
-<table style="width:100%">
+<table style="width:100%; table-layout:fixed">
 {{#each doc.paths}}
     {{# each this}}
         <tr class="resource_container" data-path="$.paths.{{ path }}.{{@key}}">

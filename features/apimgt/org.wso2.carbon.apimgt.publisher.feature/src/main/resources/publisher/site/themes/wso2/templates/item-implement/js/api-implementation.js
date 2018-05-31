@@ -497,6 +497,8 @@ function loadInSequences() {
 
                           for ( var i = 0; i < arr.length; i++) {
                               if(arr[i] == insequence){
+                                  $('#inSequenceExistingOptGroup option[value="none"]').removeAttr('selected');
+                                  $('#inSequenceUserAddedOptGroup option[value="none"]').removeAttr('selected');
                                   $('#inSequenceExistingOptGroup').append('<option value="'+arr[i]+'" selected="selected">'+arr[i]+'</option>');
                               }else{
                                   $('#inSequenceExistingOptGroup').append('<option value="'+arr[i]+'">'+arr[i]+'</option>');
@@ -512,6 +514,8 @@ function loadInSequences() {
 
                           for ( var i = 0; i < arrUserDefined.length; i++) {
                               if(arrUserDefined[i] == insequence){
+                                  $('#inSequenceExistingOptGroup option[value="none"]').removeAttr('selected');
+                                  $('#inSequenceUserAddedOptGroup option[value="none"]').removeAttr('selected');
                                   $('#inSequenceUserAddedOptGroup').append('<option value="'+arrUserDefined[i]+'" selected="selected">'+arrUserDefined[i]+'</option>');
                               }else{
                                   $('#inSequenceUserAddedOptGroup').append('<option value="'+arrUserDefined[i]+'">'+arrUserDefined[i]+'</option>');
@@ -567,6 +571,8 @@ function loadOutSequences() {
 
                           for ( var i = 0; i < arr.length; i++) {
                               if(arr[i] == outsequence){
+                                  $('#outSequenceExistingOptGroup option[value="none"]').removeAttr('selected');
+                                  $('#outSequenceUserAddedOptGroup option[value="none"]').removeAttr('selected');
                                   $('#outSequenceExistingOptGroup').append('<option value="'+arr[i]+'" selected="selected">'+arr[i]+'</option>');
                               }else{
                                   $('#outSequenceExistingOptGroup').append('<option value="'+arr[i]+'">'+arr[i]+'</option>');
@@ -583,6 +589,8 @@ function loadOutSequences() {
                           for ( var i = 0; i < arrUserDefined.length; i++) {
                               if(arrUserDefined[i] == outsequence){
                                   $('#outSequenceUserAddedOptGroup').append('<option value="'+arrUserDefined[i]+'" selected="selected">'+arrUserDefined[i]+'</option>');
+                                  $('#outSequenceExistingOptGroup option[value="none"]').removeAttr('selected');
+                                  $('#outSequenceUserAddedOptGroup option[value="none"]').removeAttr('selected');
                               }else{
                                   $('#outSequenceUserAddedOptGroup').append('<option value="'+arrUserDefined[i]+'">'+arrUserDefined[i]+'</option>');
                               }
@@ -637,6 +645,8 @@ function loadFaultSequences() {
 
                           for ( var i = 0; i < arr.length; i++) {
                               if(arr[i] == faultsequence){
+                                  $('#faultSequenceExistingOptGroup option[value="none"]').removeAttr('selected');
+                                  $('#faultSequenceUserAddedOptGroup option[value="none"]').removeAttr('selected');
                                   $('#faultSequenceExistingOptGroup').append('<option value="'+arr[i]+'" selected="selected">'+arr[i]+'</option>');
                               }else{
                                   $('#faultSequenceExistingOptGroup').append('<option value="'+arr[i]+'">'+arr[i]+'</option>');
@@ -652,6 +662,8 @@ function loadFaultSequences() {
 
                           for ( var i = 0; i < arrUserDefined.length; i++) {
                               if(arrUserDefined[i] == faultsequence){
+                                  $('#faultSequenceExistingOptGroup option[value="none"]').removeAttr('selected');
+                                  $('#faultSequenceUserAddedOptGroup option[value="none"]').removeAttr('selected');
                                   $('#faultSequenceUserAddedOptGroup').append('<option value="'+arrUserDefined[i]+'" selected="selected">'+arrUserDefined[i]+'</option>');
                               }else{
                                   $('#faultSequenceUserAddedOptGroup').append('<option value="'+arrUserDefined[i]+'">'+arrUserDefined[i]+'</option>');

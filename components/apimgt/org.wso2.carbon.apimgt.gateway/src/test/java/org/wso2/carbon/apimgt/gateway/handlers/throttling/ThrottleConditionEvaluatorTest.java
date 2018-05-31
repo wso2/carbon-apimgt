@@ -27,7 +27,14 @@ import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.gateway.TestUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import scala.actors.threadpool.Arrays;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -48,6 +55,7 @@ public class ThrottleConditionEvaluatorTest {
 
     @Before
     public void init() {
+
         defaultConditionGroupDTO = new ConditionGroupDTO();
         defaultConditionGroupDTO.setConditionGroupId(THROTTLE_POLICY_DEFAULT);
         throttleConditionEvaluator = ThrottleConditionEvaluator.getInstance();
@@ -358,7 +366,7 @@ public class ThrottleConditionEvaluatorTest {
 
         MessageContext messageContext = TestUtils.getMessageContext(apiContext, apiVersion);
         Map map = new TreeMap();
-        map.put("host","org.wso2.com");
+        map.put("host", "org.wso2.com");
         ((Axis2MessageContext) messageContext).getAxis2MessageContext()
                 .setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, map);
         List<ConditionGroupDTO> matchingConditionGroups = throttleConditionEvaluator.getApplicableConditions
@@ -386,11 +394,527 @@ public class ThrottleConditionEvaluatorTest {
 
         MessageContext messageContext = TestUtils.getMessageContext(apiContext, apiVersion);
         Map map = new TreeMap();
-        map.put("host","org.wso2.com");
+        map.put("host", "org.wso2.com");
         ((Axis2MessageContext) messageContext).getAxis2MessageContext()
                 .setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, map);
         List<ConditionGroupDTO> matchingConditionGroups = throttleConditionEvaluator.getApplicableConditions
                 (messageContext, authenticationContext, conditionGroupDTOS);
         Assert.assertNull(matchingConditionGroups.get(0));
     }
+
+    @Test
+    public void testGetThrottledInCondition() {
+
+        MessageContext messageContext = TestUtils.getMessageContext(apiContext, apiVersion);
+        Map<String, List<ConditionDto>> conditionMap = new HashMap<>();
+        conditionMap.put("default", Collections.EMPTY_LIST);
+        String condition = throttleConditionEvaluator.getThrottledInCondition(messageContext, null, conditionMap);
+        Assert.assertEquals(condition, "default");
+    }
+
+    @Test
+    public void testGetThrottledInConditionWithIPCondition() {
+
+        MessageContext messageContext = TestUtils.getMessageContext(apiContext, apiVersion);
+        Map map = new TreeMap();
+        map.put("X-Forwarded-For", "127.0.0.1");
+        ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                .setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, map);
+        Map<String, List<ConditionDto>> conditionMap = new HashMap<>();
+        conditionMap.put("condition1", Arrays.asList(new ConditionDto[]{getIPCondition(false)}));
+        conditionMap.put("default", Arrays.asList(new ConditionDto[]{getIPCondition(false)}));
+        String condition = throttleConditionEvaluator.getThrottledInCondition(messageContext, null, conditionMap);
+        Assert.assertEquals(condition, "condition1");
+    }
+
+    @Test
+    public void testGetThrottledInConditionWithIPConditionWithDefault() {
+
+        MessageContext messageContext = TestUtils.getMessageContext(apiContext, apiVersion);
+        Map map = new TreeMap();
+        map.put("X-Forwarded-For", "127.0.0.2");
+        ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                .setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, map);
+        Map<String, List<ConditionDto>> conditionMap = new HashMap<>();
+        conditionMap.put("condition1", Arrays.asList(new ConditionDto[]{getIPCondition(false)}));
+        conditionMap.put("default", Arrays.asList(new ConditionDto[]{getIPCondition(false)}));
+        String condition = throttleConditionEvaluator.getThrottledInCondition(messageContext, null, conditionMap);
+        Assert.assertEquals(condition, "default");
+    }
+
+    @Test
+    public void testGetThrottledInConditionWithIPConditionWithDefaultWithInvert() {
+
+        MessageContext messageContext = TestUtils.getMessageContext(apiContext, apiVersion);
+        Map map = new TreeMap();
+        map.put("X-Forwarded-For", "127.0.0.2");
+        ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                .setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, map);
+        Map<String, List<ConditionDto>> conditionMap = new HashMap<>();
+        conditionMap.put("condition1", Arrays.asList(new ConditionDto[]{getIPCondition(true)}));
+        conditionMap.put("default", Arrays.asList(new ConditionDto[]{getIPCondition(true)}));
+        String condition = throttleConditionEvaluator.getThrottledInCondition(messageContext, null, conditionMap);
+        Assert.assertEquals(condition, "condition1");
+    }
+
+    @Test
+    public void testGetThrottledInConditionWithIPConditionWithDefaultWithInvertNegative() {
+
+        MessageContext messageContext = TestUtils.getMessageContext(apiContext, apiVersion);
+        Map map = new TreeMap();
+        map.put("X-Forwarded-For", "127.0.0.1");
+        ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                .setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, map);
+        Map<String, List<ConditionDto>> conditionMap = new HashMap<>();
+        conditionMap.put("condition1", Arrays.asList(new ConditionDto[]{getIPCondition(true)}));
+        conditionMap.put("default", Arrays.asList(new ConditionDto[]{getIPCondition(true)}));
+        String condition = throttleConditionEvaluator.getThrottledInCondition(messageContext, null, conditionMap);
+        Assert.assertEquals(condition, "default");
+    }
+
+    @Test
+    public void testGetThrottledInConditionWithIPRangeConditionWithDefault() {
+
+        MessageContext messageContext = TestUtils.getMessageContext(apiContext, apiVersion);
+        Map map = new TreeMap();
+        map.put("X-Forwarded-For", "192.168.0.5");
+        ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                .setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, map);
+        Map<String, List<ConditionDto>> conditionMap = new HashMap<>();
+        conditionMap.put("condition1", Arrays.asList(new ConditionDto[]{getIpRangeCondition(false)}));
+        conditionMap.put("default", Arrays.asList(new ConditionDto[]{getIpRangeCondition(false)}));
+        String condition = throttleConditionEvaluator.getThrottledInCondition(messageContext, null, conditionMap);
+        Assert.assertEquals(condition, "condition1");
+    }
+
+    @Test
+    public void testGetThrottledInConditionWithIPRangeConditionWithDefaultIpNotInRange() {
+
+        MessageContext messageContext = TestUtils.getMessageContext(apiContext, apiVersion);
+        Map map = new TreeMap();
+        map.put("X-Forwarded-For", "192.168.0.12");
+        ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                .setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, map);
+        Map<String, List<ConditionDto>> conditionMap = new HashMap<>();
+        conditionMap.put("condition1", Arrays.asList(new ConditionDto[]{getIpRangeCondition(false)}));
+        conditionMap.put("default", Arrays.asList(new ConditionDto[]{getIpRangeCondition(false)}));
+        String condition = throttleConditionEvaluator.getThrottledInCondition(messageContext, null, conditionMap);
+        Assert.assertEquals(condition, "default");
+    }
+
+    @Test
+    public void testGetThrottledInConditionWithIPRangeConditionWithDefaultInvert() {
+
+        MessageContext messageContext = TestUtils.getMessageContext(apiContext, apiVersion);
+        Map map = new TreeMap();
+        map.put("X-Forwarded-For", "192.168.0.5");
+        ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                .setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, map);
+        Map<String, List<ConditionDto>> conditionMap = new HashMap<>();
+        conditionMap.put("condition1", Arrays.asList(new ConditionDto[]{getIpRangeCondition(true)}));
+        conditionMap.put("default", Arrays.asList(new ConditionDto[]{getIpRangeCondition(true)}));
+        String condition = throttleConditionEvaluator.getThrottledInCondition(messageContext, null, conditionMap);
+        Assert.assertEquals(condition, "default");
+    }
+
+    @Test
+    public void testGetThrottledInConditionWithIPRangeConditionWithDefaultIpNotInRangeInvert() {
+
+        MessageContext messageContext = TestUtils.getMessageContext(apiContext, apiVersion);
+        Map map = new TreeMap();
+        map.put("X-Forwarded-For", "192.168.0.12");
+        ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                .setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, map);
+        Map<String, List<ConditionDto>> conditionMap = new HashMap<>();
+        conditionMap.put("condition1", Arrays.asList(new ConditionDto[]{getIpRangeCondition(true)}));
+        conditionMap.put("default", Arrays.asList(new ConditionDto[]{getIpRangeCondition(true)}));
+        String condition = throttleConditionEvaluator.getThrottledInCondition(messageContext, null, conditionMap);
+        Assert.assertEquals(condition, "condition1");
+    }
+
+    @Test
+    public void testGetThrottledInConditionWithHeaderCondition() {
+
+        ThrottleProperties throttleProperties = new ThrottleProperties();
+        throttleProperties.setEnableHeaderConditions(true);
+        ServiceReferenceHolder.getInstance().setThrottleProperties(throttleProperties);
+        MessageContext messageContext = TestUtils.getMessageContext(apiContext, apiVersion);
+        Map map = new TreeMap();
+        map.put("abc", "cde");
+        map.put("bcd", "xyz");
+        ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                .setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, map);
+        Map<String, List<ConditionDto>> conditionMap = new HashMap<>();
+        conditionMap.put("condition1", Arrays.asList(new ConditionDto[]{getHeaderCondition(false)}));
+        conditionMap.put("default", Arrays.asList(new ConditionDto[]{getHeaderCondition(false)}));
+        String condition = throttleConditionEvaluator.getThrottledInCondition(messageContext, null, conditionMap);
+        Assert.assertEquals(condition, "condition1");
+    }
+
+    @Test
+    public void testGetThrottledInConditionWithHeaderConditionNegative() {
+
+        ThrottleProperties throttleProperties = new ThrottleProperties();
+        throttleProperties.setEnableHeaderConditions(true);
+        ServiceReferenceHolder.getInstance().setThrottleProperties(throttleProperties);
+        MessageContext messageContext = TestUtils.getMessageContext(apiContext, apiVersion);
+        Map map = new TreeMap();
+        map.put("abc", "cd1");
+        map.put("bcd", "xyz");
+        ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                .setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, map);
+        Map<String, List<ConditionDto>> conditionMap = new HashMap<>();
+        conditionMap.put("condition1", Arrays.asList(new ConditionDto[]{getHeaderCondition(false)}));
+        conditionMap.put("default", Arrays.asList(new ConditionDto[]{getHeaderCondition(false)}));
+        String condition = throttleConditionEvaluator.getThrottledInCondition(messageContext, null, conditionMap);
+        Assert.assertEquals(condition, "default");
+    }
+
+    @Test
+    public void testGetThrottledInConditionWithHeaderConditionInvert() {
+
+        ThrottleProperties throttleProperties = new ThrottleProperties();
+        throttleProperties.setEnableHeaderConditions(true);
+        ServiceReferenceHolder.getInstance().setThrottleProperties(throttleProperties);
+        MessageContext messageContext = TestUtils.getMessageContext(apiContext, apiVersion);
+        Map map = new TreeMap();
+        map.put("abc", "cde");
+        map.put("bcd", "xyz");
+        ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                .setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, map);
+        Map<String, List<ConditionDto>> conditionMap = new HashMap<>();
+        conditionMap.put("condition1", Arrays.asList(new ConditionDto[]{getHeaderCondition(true)}));
+        conditionMap.put("default", Arrays.asList(new ConditionDto[]{getHeaderCondition(true)}));
+        String condition = throttleConditionEvaluator.getThrottledInCondition(messageContext, null, conditionMap);
+        Assert.assertEquals(condition, "default");
+    }
+
+    @Test
+    public void testGetThrottledInConditionWithHeaderConditionNegativeInvert() {
+
+        ThrottleProperties throttleProperties = new ThrottleProperties();
+        throttleProperties.setEnableHeaderConditions(true);
+        ServiceReferenceHolder.getInstance().setThrottleProperties(throttleProperties);
+        MessageContext messageContext = TestUtils.getMessageContext(apiContext, apiVersion);
+        Map map = new TreeMap();
+        map.put("abc", "cd1");
+        map.put("bcd", "xyz");
+        ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                .setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, map);
+        Map<String, List<ConditionDto>> conditionMap = new HashMap<>();
+        conditionMap.put("condition1", Arrays.asList(new ConditionDto[]{getHeaderCondition(true)}));
+        conditionMap.put("default", Arrays.asList(new ConditionDto[]{getHeaderCondition(true)}));
+        String condition = throttleConditionEvaluator.getThrottledInCondition(messageContext, null, conditionMap);
+        Assert.assertEquals(condition, "condition1");
+    }
+
+    @Test
+    public void testGetThrottledInConditionWithJWTCondition() {
+
+        ThrottleProperties throttleProperties = new ThrottleProperties();
+        throttleProperties.setEnableJwtConditions(true);
+        String jwt =
+                "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ3c28yLm9yZy9wcm9kdWN0cy9hbSIsImV4cCI6MTM0NTE4MzQ5MjE4MSwiaHR0cDov" +
+                        "L3dzbzIub3JnL2NsYWltcy9hYmMiOiJjZGUiLCJodHRwOi8vd3NvMi5vcmcvY2xhaW1zL2JjZCI6Inh5eiJ9.9zGU062DJ5mQ5hne" +
+                        "41h4IRpLbaY_b5thRxb3feebOcA";
+        AuthenticationContext authenticationContext = new AuthenticationContext();
+        authenticationContext.setCallerToken(jwt);
+        ServiceReferenceHolder.getInstance().setThrottleProperties(throttleProperties);
+        MessageContext messageContext = TestUtils.getMessageContext(apiContext, apiVersion);
+
+        Map<String, List<ConditionDto>> conditionMap = new HashMap<>();
+        conditionMap.put("condition1", Arrays.asList(new ConditionDto[]{getJWTCondition(false)}));
+        conditionMap.put("default", Arrays.asList(new ConditionDto[]{getJWTCondition(false)}));
+        String condition = throttleConditionEvaluator.getThrottledInCondition(messageContext, authenticationContext,
+                conditionMap);
+        Assert.assertEquals(condition, "condition1");
+    }
+
+    @Test
+    public void testGetThrottledInConditionWithJWTConditionNegative() {
+
+        ThrottleProperties throttleProperties = new ThrottleProperties();
+        throttleProperties.setEnableJwtConditions(true);
+        ServiceReferenceHolder.getInstance().setThrottleProperties(throttleProperties);
+        MessageContext messageContext = TestUtils.getMessageContext(apiContext, apiVersion);
+        String jwt = "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ3c28yLm9yZy9wcm9kdWN0cy9hbSIsImV4cCI6MTM0NTE4MzQ5MjE4MSwiaHR0cD" +
+                "ovL3dzbzIub3JnL2NsYWltcy9hYmMiOiJjZCIsImh0dHA6Ly93c28yLm9yZy9jbGFpbXMvYmNkIjoieHl6In0=.yg-FAt9-h7CR" +
+                "p7DCM6m4x5xWGxwj4mwXHH4b4sUP9h0";
+        AuthenticationContext authenticationContext = new AuthenticationContext();
+        authenticationContext.setCallerToken(jwt);
+        Map<String, List<ConditionDto>> conditionMap = new HashMap<>();
+        conditionMap.put("condition1", Arrays.asList(new ConditionDto[]{getJWTCondition(false)}));
+        conditionMap.put("default", Arrays.asList(new ConditionDto[]{getJWTCondition(false)}));
+        String condition = throttleConditionEvaluator.getThrottledInCondition(messageContext, authenticationContext,
+                conditionMap);
+        Assert.assertEquals(condition, "default");
+    }
+
+    @Test
+    public void testGetThrottledInConditionWithJWTConditionInvert() {
+
+        ThrottleProperties throttleProperties = new ThrottleProperties();
+        throttleProperties.setEnableJwtConditions(true);
+        String jwt =
+                "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ3c28yLm9yZy9wcm9kdWN0cy9hbSIsImV4cCI6MTM0NTE4MzQ5MjE4MSwiaHR0cDov" +
+                        "L3dzbzIub3JnL2NsYWltcy9hYmMiOiJjZGUiLCJodHRwOi8vd3NvMi5vcmcvY2xhaW1zL2JjZCI6Inh5eiJ9.9zGU062DJ5mQ5hne" +
+                        "41h4IRpLbaY_b5thRxb3feebOcA";
+        AuthenticationContext authenticationContext = new AuthenticationContext();
+        authenticationContext.setCallerToken(jwt);
+        ServiceReferenceHolder.getInstance().setThrottleProperties(throttleProperties);
+        MessageContext messageContext = TestUtils.getMessageContext(apiContext, apiVersion);
+
+        Map<String, List<ConditionDto>> conditionMap = new HashMap<>();
+        conditionMap.put("condition1", Arrays.asList(new ConditionDto[]{getJWTCondition(true)}));
+        conditionMap.put("default", Arrays.asList(new ConditionDto[]{getJWTCondition(true)}));
+        String condition = throttleConditionEvaluator.getThrottledInCondition(messageContext, authenticationContext,
+                conditionMap);
+        Assert.assertEquals(condition, "default");
+    }
+
+    @Test
+    public void testGetThrottledInConditionWithJWTConditionNegativeInvert() {
+
+        ThrottleProperties throttleProperties = new ThrottleProperties();
+        throttleProperties.setEnableJwtConditions(true);
+        ServiceReferenceHolder.getInstance().setThrottleProperties(throttleProperties);
+        MessageContext messageContext = TestUtils.getMessageContext(apiContext, apiVersion);
+        String jwt = "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ3c28yLm9yZy9wcm9kdWN0cy9hbSIsImV4cCI6MTM0NTE4MzQ5MjE4MSwiaHR0cD" +
+                "ovL3dzbzIub3JnL2NsYWltcy9hYmMiOiJjZCIsImh0dHA6Ly93c28yLm9yZy9jbGFpbXMvYmNkIjoieHl6In0=.yg-FAt9-h7CR" +
+                "p7DCM6m4x5xWGxwj4mwXHH4b4sUP9h0";
+        AuthenticationContext authenticationContext = new AuthenticationContext();
+        authenticationContext.setCallerToken(jwt);
+        Map<String, List<ConditionDto>> conditionMap = new HashMap<>();
+        conditionMap.put("condition1", Arrays.asList(new ConditionDto[]{getJWTCondition(true)}));
+        conditionMap.put("default", Arrays.asList(new ConditionDto[]{getJWTCondition(true)}));
+        String condition = throttleConditionEvaluator.getThrottledInCondition(messageContext, authenticationContext,
+                conditionMap);
+        Assert.assertEquals(condition, "condition1");
+    }
+
+    @Test
+    public void testGetThrottledInConditionWithQueryCondition() {
+
+        ThrottleProperties throttleProperties = new ThrottleProperties();
+        throttleProperties.setEnableQueryParamConditions(true);
+        ServiceReferenceHolder.getInstance().setThrottleProperties(throttleProperties);
+        MessageContext messageContext = TestUtils.getMessageContext(apiContext, apiVersion);
+        ((Axis2MessageContext) messageContext).getAxis2MessageContext().setProperty("REST_URL_POSTFIX",
+                "/temperature?abc=cde&bcd=xyz");
+        Map<String, List<ConditionDto>> conditionMap = new HashMap<>();
+        conditionMap.put("condition1", Arrays.asList(new ConditionDto[]{getQueryParamCondition(false)}));
+        conditionMap.put("default", Arrays.asList(new ConditionDto[]{getQueryParamCondition(false)}));
+        String condition = throttleConditionEvaluator.getThrottledInCondition(messageContext, null, conditionMap);
+        Assert.assertEquals(condition, "condition1");
+    }
+
+    @Test
+    public void testGetThrottledInConditionWithQueryConditionNegative() {
+
+        ThrottleProperties throttleProperties = new ThrottleProperties();
+        throttleProperties.setEnableQueryParamConditions(true);
+        ServiceReferenceHolder.getInstance().setThrottleProperties(throttleProperties);
+        MessageContext messageContext = TestUtils.getMessageContext(apiContext, apiVersion);
+        ((Axis2MessageContext) messageContext).getAxis2MessageContext().setProperty("REST_URL_POSTFIX",
+                "/temperature?abc=cd&bcd=xyz");
+        Map<String, List<ConditionDto>> conditionMap = new HashMap<>();
+        conditionMap.put("condition1", Arrays.asList(new ConditionDto[]{getQueryParamCondition(false)}));
+        conditionMap.put("default", Arrays.asList(new ConditionDto[]{getQueryParamCondition(false)}));
+        String condition = throttleConditionEvaluator.getThrottledInCondition(messageContext, null, conditionMap);
+        Assert.assertEquals(condition, "default");
+    }
+
+    @Test
+    public void testGetThrottledInConditionWithQueryConditionInvert() {
+
+        ThrottleProperties throttleProperties = new ThrottleProperties();
+        throttleProperties.setEnableQueryParamConditions(true);
+        ServiceReferenceHolder.getInstance().setThrottleProperties(throttleProperties);
+        MessageContext messageContext = TestUtils.getMessageContext(apiContext, apiVersion);
+        ((Axis2MessageContext) messageContext).getAxis2MessageContext().setProperty("REST_URL_POSTFIX",
+                "/temperature?abc=cde&bcd=xyz");
+        Map<String, List<ConditionDto>> conditionMap = new HashMap<>();
+        conditionMap.put("condition1", Arrays.asList(new ConditionDto[]{getQueryParamCondition(true)}));
+        conditionMap.put("default", Arrays.asList(new ConditionDto[]{getQueryParamCondition(true)}));
+        String condition = throttleConditionEvaluator.getThrottledInCondition(messageContext, null, conditionMap);
+        Assert.assertEquals(condition, "default");
+    }
+
+    @Test
+    public void testGetThrottledInConditionWithComplexConditionNegative() {
+
+        ThrottleProperties throttleProperties = new ThrottleProperties();
+        throttleProperties.setEnableHeaderConditions(true);
+        ServiceReferenceHolder.getInstance().setThrottleProperties(throttleProperties);
+        MessageContext messageContext = TestUtils.getMessageContext(apiContext, apiVersion);
+        ((Axis2MessageContext) messageContext).getAxis2MessageContext().setProperty("REST_URL_POSTFIX",
+                "/temperature?abc=cde&bcd=xyz");
+        Map<String, List<ConditionDto>> conditionMap = new HashMap<>();
+        conditionMap.put("condition1", Arrays.asList(new ConditionDto[]{getComplexCondition1()}));
+        conditionMap.put("default", Arrays.asList(new ConditionDto[]{getComplexCondition1(), getComplexCondition2()}));
+        String condition = throttleConditionEvaluator.getThrottledInCondition(messageContext, null, conditionMap);
+        Assert.assertEquals(condition, "default");
+    }
+
+    @Test
+    public void testGetThrottledInConditionWithQueryConditionNegativeInvert() {
+
+        ThrottleProperties throttleProperties = new ThrottleProperties();
+        throttleProperties.setEnableQueryParamConditions(true);
+        ServiceReferenceHolder.getInstance().setThrottleProperties(throttleProperties);
+        MessageContext messageContext = TestUtils.getMessageContext(apiContext, apiVersion);
+        ((Axis2MessageContext) messageContext).getAxis2MessageContext().setProperty("REST_URL_POSTFIX",
+                "/temperature?abc=cd&bcd=xyz");
+        Map<String, List<ConditionDto>> conditionMap = new HashMap<>();
+        conditionMap.put("condition1", Arrays.asList(new ConditionDto[]{getQueryParamCondition(true)}));
+        conditionMap.put("default", Arrays.asList(new ConditionDto[]{getQueryParamCondition(true)}));
+        String condition = throttleConditionEvaluator.getThrottledInCondition(messageContext, null, conditionMap);
+        Assert.assertEquals(condition, "condition1");
+    }
+
+    @Test
+    public void testGetThrottledInConditionWithComplexConditionWithLowerProperties() {
+
+        ThrottleProperties throttleProperties = new ThrottleProperties();
+        throttleProperties.setEnableHeaderConditions(true);
+        ServiceReferenceHolder.getInstance().setThrottleProperties(throttleProperties);
+        MessageContext messageContext = TestUtils.getMessageContext(apiContext, apiVersion);
+        ((Axis2MessageContext) messageContext).getAxis2MessageContext().setProperty("REST_URL_POSTFIX",
+                "/temperature?abc=cde&bcd=xyz");
+        Map map = new TreeMap();
+        map.put("X-Forwarded-For", "127.0.0.1");
+        ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                .setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, map);
+        Map<String, List<ConditionDto>> conditionMap = new HashMap<>();
+        conditionMap.put("condition1", Arrays.asList(new ConditionDto[]{getComplexCondition1()}));
+        conditionMap.put("default", Arrays.asList(new ConditionDto[]{getComplexCondition1(), getComplexCondition2()}));
+        String condition = throttleConditionEvaluator.getThrottledInCondition(messageContext, null, conditionMap);
+        Assert.assertEquals(condition, "default");
+    }
+
+    @Test
+    public void testGetThrottledInConditionWithComplexCondition() {
+
+        ThrottleProperties throttleProperties = new ThrottleProperties();
+        throttleProperties.setEnableHeaderConditions(true);
+        ServiceReferenceHolder.getInstance().setThrottleProperties(throttleProperties);
+        MessageContext messageContext = TestUtils.getMessageContext(apiContext, apiVersion);
+        ((Axis2MessageContext) messageContext).getAxis2MessageContext().setProperty("REST_URL_POSTFIX",
+                "/temperature?abc=cde&bcd=xyz");
+        Map map = new TreeMap();
+        map.put("X-Forwarded-For", "127.0.0.1");
+        map.put("abc", "cde");
+        map.put("bcd", "xyz");
+        ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                .setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, map);
+        Map<String, List<ConditionDto>> conditionMap = new HashMap<>();
+        conditionMap.put("condition1", Arrays.asList(new ConditionDto[]{getComplexCondition1()}));
+        conditionMap.put("default", Arrays.asList(new ConditionDto[]{getComplexCondition1(), getComplexCondition2()}));
+        String condition = throttleConditionEvaluator.getThrottledInCondition(messageContext, null, conditionMap);
+        Assert.assertEquals(condition, "condition1");
+    }
+
+    @Test
+    public void testGetThrottledInConditionWithComplexCondition2() {
+
+        ThrottleProperties throttleProperties = new ThrottleProperties();
+        throttleProperties.setEnableHeaderConditions(true);
+        ServiceReferenceHolder.getInstance().setThrottleProperties(throttleProperties);
+        MessageContext messageContext = TestUtils.getMessageContext(apiContext, apiVersion);
+        Map map = new TreeMap();
+        map.put("abc", "cde");
+        map.put("bcd", "xyz");
+        map.put("X-Forwarded-For", "127.0.0.2");
+        ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                .setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, map);
+        Map<String, List<ConditionDto>> conditionMap = new HashMap<>();
+        conditionMap.put("condition1", Arrays.asList(new ConditionDto[]{getHeaderCondition(false)}));
+        conditionMap.put("default", Arrays.asList(new ConditionDto[]{getIPCondition(false), getHeaderCondition(false)
+        }));
+        String condition = throttleConditionEvaluator.getThrottledInCondition(messageContext, null, conditionMap);
+        Assert.assertEquals(condition, "condition1");
+    }
+
+    private ConditionDto getIPCondition(boolean invert) {
+
+        ConditionDto conditionDto = new ConditionDto();
+        conditionDto.setIpCondition(new ConditionDto.IPCondition(APIUtil.ipToLong("127.0.0.1"), invert));
+        return conditionDto;
+    }
+
+    private ConditionDto getIpRangeCondition(boolean invert) {
+
+        ConditionDto conditionDto = new ConditionDto();
+        conditionDto.setIpRangeCondition(new ConditionDto.IPCondition(APIUtil.ipToLong("192.168.0.0"), APIUtil
+                .ipToLong("192.168.0.10"), invert));
+        return conditionDto;
+    }
+
+    private ConditionDto getHeaderCondition(boolean invert) {
+
+        ConditionDto conditionDto = new ConditionDto();
+        ConditionDto.HeaderConditions headerConditions = new ConditionDto.HeaderConditions();
+        Map map = new HashMap();
+        map.put("abc", "cde");
+        map.put("bcd", "xyz");
+        headerConditions.setValues(map);
+        headerConditions.setInvert(invert);
+        conditionDto.setHeaderConditions(headerConditions);
+        return conditionDto;
+    }
+
+    private ConditionDto getQueryParamCondition(boolean invert) {
+
+        ConditionDto conditionDto = new ConditionDto();
+        ConditionDto.QueryParamConditions queryParamConditions = new ConditionDto.QueryParamConditions();
+        Map map = new HashMap();
+        map.put("abc", "cde");
+        map.put("bcd", "xyz");
+        queryParamConditions.setValues(map);
+        queryParamConditions.setInvert(invert);
+        conditionDto.setQueryParameterConditions(queryParamConditions);
+        return conditionDto;
+    }
+
+    private ConditionDto getJWTCondition(boolean invert) {
+
+        ConditionDto conditionDto = new ConditionDto();
+        ConditionDto.JWTClaimConditions jwtClaimConditions = new ConditionDto.JWTClaimConditions();
+        Map map = new HashMap();
+        map.put("http://wso2.org/claims/abc", "cde");
+        map.put("http://wso2.org/claims/bcd", "xyz");
+        jwtClaimConditions.setValues(map);
+        jwtClaimConditions.setInvert(invert);
+        conditionDto.setJwtClaimConditions(jwtClaimConditions);
+        return conditionDto;
+    }
+
+    private ConditionDto getComplexCondition1() {
+
+        ConditionDto conditionDto = new ConditionDto();
+        ConditionDto.IPCondition ipCondition = new ConditionDto.IPCondition(APIUtil.ipToLong("127.0.0.1"), false);
+        conditionDto.setIpCondition(ipCondition);
+        ConditionDto.HeaderConditions headerConditions = new ConditionDto.HeaderConditions();
+        Map map = new HashMap();
+        map.put("abc", "cde");
+        map.put("bcd", "xyz");
+        headerConditions.setValues(map);
+        conditionDto.setHeaderConditions(headerConditions);
+        return conditionDto;
+    }
+
+    private ConditionDto getComplexCondition2() {
+
+        ConditionDto conditionDto = new ConditionDto();
+        ConditionDto.IPCondition ipCondition = new ConditionDto.IPCondition(APIUtil.ipToLong("127.0.0.1"), false);
+        conditionDto.setIpCondition(ipCondition);
+        ConditionDto.QueryParamConditions queryParamConditions = new ConditionDto.QueryParamConditions();
+        Map map = new HashMap();
+        map.put("abc", "cde");
+        map.put("bcd", "xyz");
+        queryParamConditions.setValues(map);
+        conditionDto.setQueryParameterConditions(queryParamConditions);
+        return conditionDto;
+    }
+
 }

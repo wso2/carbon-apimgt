@@ -6,6 +6,11 @@ import java.util.List;
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
 
+import javax.validation.constraints.NotNull;
+
+
+
+
 
 @ApiModel(description = "")
 public class ScopeInfoDTO  {
@@ -14,7 +19,9 @@ public class ScopeInfoDTO  {
   
   private String key = null;
   
+  
   private String name = null;
+  
   
   private List<String> roles = new ArrayList<String>();
 

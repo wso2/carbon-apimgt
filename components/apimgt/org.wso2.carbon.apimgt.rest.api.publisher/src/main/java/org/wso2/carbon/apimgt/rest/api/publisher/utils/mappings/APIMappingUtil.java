@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
+import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -43,6 +44,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIEndpointSecurityDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIMaxTpsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SequenceDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -313,6 +315,19 @@ public class APIMappingUtil {
         dto.setWsdlUri(model.getWsdlUrl());
         setEndpointSecurityFromModelToApiDTO(model, dto);
         setMaxTpsFromModelToApiDTO(model, dto);
+
+        //setting micro-gateway labels if there are any
+        if (model.getGatewayLabels() != null) {
+            List<LabelDTO> labels = new ArrayList<>();
+            List<Label> gatewayLabels = model.getGatewayLabels();
+            for (Label label : gatewayLabels) {
+                LabelDTO labelDTO = new LabelDTO();
+                labelDTO.setName(label.getName());
+                labelDTO.setDescription(label.getDescription());
+                labels.add(labelDTO);
+            }
+            dto.setLabels(labels);
+        }
 
         return dto;
     }

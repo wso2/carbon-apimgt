@@ -25,7 +25,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.wso2.carbon.sequences.stub.types.SequenceAdminServiceStub;
 
-import static junit.framework.Assert.fail;
+import static org.junit.Assert.fail;
 
 /**
  * Test class for SequenceAdminServiceClient

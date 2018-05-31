@@ -18,7 +18,7 @@
 package org.wso2.carbon.apimgt.hostobjects.internal;
 
 import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
@@ -33,8 +33,8 @@ public class ServiceReferenceHolderTest {
 
     private ServiceReferenceHolder serviceReferenceHolder = ServiceReferenceHolder.getInstance();
 
-    @BeforeClass
-    public static void setUp() {
+    @Before
+    public void setUp() {
         registryService = Mockito.mock(RegistryService.class);
         amConfigurationService = Mockito.mock(APIManagerConfigurationService.class);
         realmService = Mockito.mock(RealmService.class);

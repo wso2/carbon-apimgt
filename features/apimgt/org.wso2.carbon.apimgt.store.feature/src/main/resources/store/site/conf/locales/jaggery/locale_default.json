@@ -192,6 +192,7 @@
     "Production Endpoints": "Production Endpoints",
     "Production Keys": "Production Keys",
     "Production and Sandbox Endpoints": "Production and Sandbox Endpoints",
+    "Micro Gateway Labels": "Micro Gateway Labels",
     "Prototyped": "Prototyped",
     "Prototyped APIs": "Prototyped APIs",
     "Provide Keys": "Provide Keys",
@@ -362,5 +363,8 @@
     "request.to.update.or.delete.user.profile": "To update other profile information or to delete your account, please contact the system administrators.",
     "have.read.and.understood": "I hereby confirm that I have read and understood the",
     "need.consent": "We need your consent on the attributes to use for the following purposes.",
-    "need.consent.sub.info": "By selecting a preferred attribute, you will be providing consent to use your personal information."
+    "need.consent.sub.info": "By selecting a preferred attribute, you will be providing consent to use your personal information.",
+    "Application Details Title" : "OAuth Application Credentials",
+    "Note" : "Please make a note of this consumer secret and access token values as it will be displayed only once. If you lose the consumer secret, you can regenerate it.",
+    "Note2" : "Please make a note of this regenerated consumer secret value as it will be displayed only once. If you are using old client secret in your application, update it with regenerated client secret."
 }

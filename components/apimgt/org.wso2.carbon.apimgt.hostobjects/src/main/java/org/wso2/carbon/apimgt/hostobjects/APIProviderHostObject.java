@@ -72,6 +72,7 @@ import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -474,6 +475,12 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setResponseCache(responseCache);
         api.setCacheTimeout(cacheTimeOut);
         api.setAsDefaultVersion("default_version".equals(defaultVersion));
+
+        if (apiData.keySet().contains("gatewayLabels")) {
+            //get the label list from UI and set it here
+            String gatewayLabels = (String) apiData.get("gatewayLabels", apiData);
+            attachLabelsToAPI(api, gatewayLabels, provider);
+        }
 
         String productionTps = (String) apiData.get("productionTps", apiData);
         String sandboxTps = (String) apiData.get("sandboxTps", apiData);
@@ -2038,6 +2045,13 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setContextTemplate(contextTemplate);
         api.setVisibility(visibility);
         api.setVisibleRoles(visibleRoles != null ? visibleRoles.trim() : null);
+
+        if (apiData.keySet().contains("gatewayLabels")) {
+            //get the label list and set it here
+            String gatewayLabels = (String) apiData.get("gatewayLabels", apiData);
+            attachLabelsToAPI(api, gatewayLabels, provider);
+        }
+
         api.setVisibleTenants(visibleTenants != null ? visibleTenants.trim() : null);
         api.setAccessControl(publisherAccessControl);
         api.setAccessControlRoles(publisherAccessControlRoles);
@@ -2194,6 +2208,40 @@ public class APIProviderHostObject extends ScriptableObject {
         }
 
         return success;
+    }
+
+    /**
+     * This method is used to attach labels to a given API
+     *
+     * @param api API
+     * @param gatewayLabels label as a comma separated text sent from the UI
+     * @param provider API provider
+     * @throws APIManagementException if failed to attach labels to the API
+     */
+    private static void attachLabelsToAPI(API api, String gatewayLabels, String provider) throws APIManagementException {
+
+        if (!StringUtils.isEmpty(gatewayLabels)) {
+            List<Label> gatewayLabelList = new ArrayList<Label>();
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
+            List<Label> allLabelList = APIUtil.getAllLabels(tenantDomain);
+            String[] labels = gatewayLabels.split(",");
+            for (String currentLabelName : labels) {
+                Label label = new Label();
+                label.setName(currentLabelName);
+                //set the description and access URLs
+                for (Label currentLabel : allLabelList) {
+                    if (currentLabelName.equalsIgnoreCase(currentLabel.getName())) {
+                        label.setDescription(currentLabel.getDescription());
+                        label.setAccessUrls(currentLabel.getAccessUrls());
+                    }
+                }
+                gatewayLabelList.add(label);
+            }
+            api.setGatewayLabels(gatewayLabelList);
+        } else {
+            //clear the labels
+            api.setGatewayLabels(null);
+        }
     }
 
     private static String updateContextWithVersion(String version, String contextVal, String context) {
@@ -2809,6 +2857,21 @@ public class APIProviderHostObject extends ScriptableObject {
                 myn.put(54, myn, checkValue((api.getAccessControlRoles())));
                 myn.put(55, myn, checkValue(api.getAdditionalProperties().toJSONString()));
                 myn.put(56, myn, checkValue(api.getAuthorizationHeader()));
+
+                //put the labels to the native array which represents the API
+                List<Label> labelList = api.getGatewayLabels();
+                if (labelList != null && labelList.size() > 0) {
+                    NativeArray apiLabelsArray = new NativeArray(labelList.size());
+                    int i = 0;
+                    for (Label label : labelList) {
+                        NativeObject labelObject = new NativeObject();
+                        labelObject.put(APIConstants.LABEL_NAME, labelObject, label.getName());
+                        labelObject.put(APIConstants.LABEL_DESCRIPTION, labelObject, label.getDescription());
+                        apiLabelsArray.put(i, apiLabelsArray, labelObject);
+                        i++;
+                    }
+                    myn.put(57, myn, apiLabelsArray);
+                }
             } else {
                 handleException("Cannot find the requested API- " + apiName +
                         "-" + version);

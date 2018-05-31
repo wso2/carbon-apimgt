@@ -49,8 +49,8 @@ import java.io.FileNotFoundException;
                         SQLConstantManagerFactory.class })
 public class APIManagerComponentTest {
 
-    @BeforeClass
-    public static void setup() {
+    @Before
+    public void setup() {
         System.setProperty("carbon.home", "");
     }
 

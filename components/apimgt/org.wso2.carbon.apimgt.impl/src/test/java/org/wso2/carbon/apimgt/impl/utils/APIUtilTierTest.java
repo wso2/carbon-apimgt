@@ -25,7 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -78,8 +78,8 @@ public class APIUtilTierTest {
     private final String[] validTierNames = {"Gold", "Silver", "Bronze", "Platinum", "Medium", "100PerMinute", "50PerMinute", APIConstants.UNLIMITED_TIER};
     private final String[] tiersReturned = {"policy1", "gold", APIConstants.UNLIMITED_TIER};
 
-    @BeforeClass
-    public static void setup() throws IOException {
+    @Before
+    public void setup() throws IOException {
         System.setProperty("carbon.home", "");
 
         File siteConfFile = new File(Thread.currentThread().getContextClassLoader().

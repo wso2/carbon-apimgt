@@ -284,6 +284,11 @@ public final class APIConstants {
     public static final String PROVIDER_OVERVIEW_EMAIL = "overview_email";
     public static final String PROVIDER_OVERVIEW_DESCRIPTION = "overview_description";
 
+    public static final String API_LABELS_GATEWAY_LABELS = "labels_labelName";
+    public static final String LABEL_NAME = "labelName";
+    public static final String LABEL_DESCRIPTION = "labelDescription";
+    public static final String LABEL_ACCESS_URLS = "accessURLs";
+
     //database columns for Subscriber
     public static final String SUBSCRIBER_FIELD_EMAIL_ADDRESS = "EMAIL_ADDRESS";
     public static final String SUBSCRIBER_FIELD_USER_ID = "USER_ID";
@@ -336,6 +341,7 @@ public final class APIConstants {
     public static final String TOKEN_ENDPOINT_NAME = OAUTH_CONFIGS + "TokenEndPointName";
     public static final String REVOKE_API_URL = OAUTH_CONFIGS + "RevokeAPIURL";
     public static final String ENCRYPT_TOKENS_ON_PERSISTENCE = OAUTH_CONFIGS + "EncryptPersistedTokens";
+    public static final String HASH_TOKENS_ON_PERSISTENCE = OAUTH_CONFIGS + "EnableTokenHashMode";
 
     public static final String DEFAULT_MODIFIED_ENDPOINT_PASSWORD = "*****"; //5 stars
     public static final String REGISTRY_HIDDEN_ENDPOINT_PROPERTY = "registry.HiddenEpProperty";

@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.io.File;
 
@@ -83,8 +84,31 @@ public class APIProviderHostObjectTest {
         System.setProperty("javax.net.ssl.keyStorePassword", "wso2carbon");
         System.setProperty("javax.net.ssl.trustStore", TRUSTSTORE_FILE_PATH_CLIENT);
         System.setProperty("javax.net.ssl.trustStorePassword", "wso2carbon");
+        //Success case
         org.mozilla.javascript.NativeObject obj =
                 HostObjectUtils.sendHttpHEADRequest("https://localhost:18081/test",
+                        "404");
+        Assert.assertEquals("success", obj.get("response"));
+        //Non available path
+        org.mozilla.javascript.NativeObject objError =
+                HostObjectUtils.sendHttpHEADRequest("https://localhost:18081/best",
+                        "404");
+        Assert.assertNotEquals("success", objError.get("response"));
+        //Error Port
+        org.mozilla.javascript.NativeObject objErrorPort =
+                HostObjectUtils.sendHttpHEADRequest("https://localhost:8082/best",
+                        "404");
+        Assert.assertNotEquals("success", objErrorPort.get("response"));
+        //Invalid credentials
+        System.setProperty("javax.net.ssl.trustStorePassword", "Wrong-Password");
+        org.mozilla.javascript.NativeObject objErrorSSL =
+                HostObjectUtils.sendHttpHEADRequest("https://localhost:18081/best",
+                        "404");
+        Assert.assertNotEquals("success", objErrorSSL.get("response"));
+        //With Proxy host and port
+        System.setProperty(APIConstants.HTTP_PROXY_HOST, "localhost");
+        System.setProperty(APIConstants.HTTP_PROXY_PORT, "18081");
+        obj = HostObjectUtils.sendHttpHEADRequest("https://localhost:18081/test",
                         "404");
         Assert.assertEquals("success", obj.get("response"));
         wireMockRule.resetAll();

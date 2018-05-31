@@ -202,8 +202,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
                 standardClaims.putAll(customClaims);
             }
 
-            Map<String, Object> claims = new HashMap<String, Object>();
-            JWTClaimsSet claimsSet = new JWTClaimsSet();
+            JWTClaimsSet.Builder jwtClaimsSetBuilder = new JWTClaimsSet.Builder();
 
             if(standardClaims != null) {
                 Iterator<String> it = new TreeSet(standardClaims.keySet()).iterator();
@@ -219,17 +218,15 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
                                 claimList.add(attValue);
                             }
                         }
-                        claims.put(claimURI, claimList.toArray(new String[claimList.size()]));
+                        jwtClaimsSetBuilder.claim(claimURI, claimList);
                     } else if ("exp".equals(claimURI)) {
-                        claims.put("exp", new Date(Long.valueOf(standardClaims.get(claimURI))));
+                        jwtClaimsSetBuilder.expirationTime(new Date(Long.valueOf(standardClaims.get(claimURI))));
                     } else {
-                        claims.put(claimURI, claimVal);
+                        jwtClaimsSetBuilder.claim(claimURI, claimVal);
                     }
                 }
             }
-
-            claimsSet.setAllClaims(claims);
-            return claimsSet.toJSONObject().toJSONString();
+            return jwtClaimsSetBuilder.build().toJSONObject().toJSONString();
         }
         return null;
     }

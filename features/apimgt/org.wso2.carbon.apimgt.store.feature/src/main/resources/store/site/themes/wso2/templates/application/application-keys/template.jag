@@ -24,8 +24,21 @@
     if (!result.getSubscriber().getName().equalsIgnoreCase(user)) {
         isOwner = false;
     }
+
+    var OAuthServerConfiguration = Packages.org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
+    var isHashEnabled = OAuthServerConfiguration.getInstance().isClientSecretHashEnabled();
+    var consumerSecretBtnStyle;
+    var style;
+    if (isHashEnabled) {
+        style = "display: none;";
+    } else {
+        consumerSecretBtnStyle = "display: none;";
+    }
 %>
 
+<script>
+    var isHashEnabled = '<%=isHashEnabled%>';
+</script>
 
 <script id="keys-template" type="text/x-handlebars-template">
 	{{#*inline "callback_url" }}
@@ -60,6 +73,7 @@
 	    <div class="add-margin-bottom-4x">
 	  	    <button type="button" class="btn btn-secondary show_keys">{{# if show_keys }}<%=i18n.localize("Hide Keys")%>{{else}}<%=i18n.localize("Show Keys")%>{{/if}}</button>
 	  	</div>
+	  	<form class="add-margin-top-5x well">
 		  <div class="form-group">
 		    <label class="" for="ConsumerKey"><%=i18n.localize("Consumer Key")%></label>
 		    <div class="input-group">
@@ -75,8 +89,8 @@
 
 		  <div class="form-group">
 		    <label class="" for="ConsumerSecret"><%=i18n.localize("Consumer Secret")%></label>
-		    <div class="input-group">
-		      <input type="{{# if show_keys }}text{{else}}password{{/if}}" readonly="readonly" class="form-control" title="<%=i18n.localize("Consumer Secret")%>" id="ConsumerSecret" placeholder="<%=i18n.localize("Consumer Secret")%>" value="{{ConsumerSecret}}">
+		    <div class="input-group" style="<%=style%>">
+		      <input type="{{# if show_keys }}text{{else}}password{{/if}}" readonly="readonly" class="form-control consumer_secret" title="<%=i18n.localize("Consumer Secret")%>" id="ConsumerSecret" placeholder="<%=i18n.localize("Consumer Secret")%>" value="{{ConsumerSecret}}">
 		      <div class="input-group-btn">
 		      	<button class="btn btn-default copy-button" data-clipboard-text="{{ConsumerSecret}}"
 		      	        type="button" title="<%=i18n.localize("Copy")%>">
@@ -85,12 +99,16 @@
 		      </div>
 		    </div>
 		  </div>
+		  <button style="<%=consumerSecretBtnStyle%>" class="btn btn-primary regenerate_consumer_secret" data-load-text="<%= i18n.localize("Generating") %>"><%=i18n.localize("Re-generate")%></button>
+        </form>
 
+        <div style="<%=style%>">
 		  {{> grants this}}
 		  {{> callback_url this}}
 		  <% if (isOwner == true) { %>
 		  <button class=" btn btn-primary update_grants"><%=i18n.localize("Update")%></button>
 		  <%}%>
+		</div>
 
 		<div class="row add-margin-top-5x">
 		  <div class="col-md-12">
@@ -109,7 +127,7 @@
 	        </div>        
 		  </div>
 		</div>
-		  <div class="form-group add-margin-top-5x">
+		  <div class="form-group add-margin-top-5x" style="<%=style%>">
 		    <h4><%=i18n.localize("Generate a Test Access Token")%></h4>
 		    <label class="" for="<%=type%>ConsumerKey"><%=i18n.localize("Access Token")%></label>
 		    <div class="input-group">
@@ -121,7 +139,7 @@
 		      </div>
 		    </div>
 		  </div>
-		  <p>
+		  <p style="<%=style%>">
 		  {{#if Key}}
 			{{#ifCond Key ''}}
 				<%=i18n.localize("Enable Client-Credentials grant type to generate test access tokens.")%>
@@ -135,7 +153,7 @@
 			<%=i18n.localize("Enable Client-Credentials grant type to generate test access tokens.")%>
 		  {{/if}}
 		  </p>
-	  	<form class="add-margin-top-5x well">
+	  	<form class="add-margin-top-5x well scope-selection-form" style="<%=style%>">
 	  	    <div class="form-group">
                 <label for="" class="control-label"><%=i18n.localize("Scopes")%></label>
                   <select class="selectpicker scope_select dropup form-control"  multiple title="{{#if Scopes}}Select..{{else}}No Scopes Found..{{/if}}" {{#if Scopes}}{{else}}disabled{{/if}}>
@@ -205,7 +223,7 @@
 		  <div class="col-md-12 col-lg-9">
 		  	  {{> grants this}}
 		  	  {{> callback_url this}}
-			  <form class="add-margin-top-5x well">
+			  <form class="add-margin-top-5x well scope-selection-form">
 				<div class="form-group">
 				    <label for="" class="control-label"><%=i18n.localize("Scopes")%></label>
 				    <select id="scopes" class="selectpicker scope_select dropup form-control"  multiple title="{{#if Scopes}}Select..{{else}}No Scopes Found..{{/if}}" {{#if Scopes}}{{else}}disabled{{/if}}>
@@ -258,6 +276,79 @@
 		{{/if}}
 	  {{/if}}
   {{/if}}
+
+  <!-- Modal regenerate key-->
+    <div class="modal fade" id="regenerateModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header" style="background-color:#e6e6e6;">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel"><b><%=i18n.localize("Application Details Title")%></b></h4>
+          </div>
+          <div class="modal-body">
+            <div style="margin-top:5px;background-color: #f4f4f4; border-left: 6px solid #cccccc;height:60px;width:90%;">
+              <p style="margin: 10px;padding-top:10px;display:block;"><strong>Note : <font color="red"> <%=i18n.localize("Note2")%> </font></strong></p>
+            </div>
+            <div class="form-group">
+                <label style="padding-top:20px;" for="ConsumerSecret"><%=i18n.localize("Consumer Secret")%></label>
+                <div class="input-group">
+                  <label style="font-weight: normal;background-color:#f5f5f5;" class="form-control consumer_secret" title="<%=i18n.localize("Consumer Secret")%>" id="ConsumerSecret">{{ConsumerSecret}}</label>
+                  <div class="input-group-btn">
+                    <button type="button" data-clipboard-text="{{ConsumerSecret}}" class="btn btn-default copy-btn" title="<%=i18n.localize("Copy")%>">
+                      <i class="fw fw-copy"></i>
+                    </button>
+                  </div>
+                </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal generate keys-->
+    <div class="modal fade" id="generateModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header" style="background-color:#e6e6e6;">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel"><b><%=i18n.localize("Application Details Title")%></b></h4>
+          </div>
+          <div class="modal-body">
+            <div style="margin-top:5px;background-color: #f4f4f4; border-left: 6px solid #cccccc;height:60px;width:90%;">
+              <p style="margin: 10px;padding-top:10px;display:block;"><strong>Note : <font color="red"> <%=i18n.localize("Note")%> </font></strong></p>
+            </div>
+            <div class="form-group">
+                <label style="padding-top:20px;" for="ConsumerSecret"><%=i18n.localize("Consumer Secret")%></label>
+                <div class="input-group">
+                  <label style="font-weight: normal;background-color:#f5f5f5;" class="form-control consumer_secret" title="<%=i18n.localize("Consumer Secret")%>" id="ConsumerSecret">{{ConsumerSecret}}</label>
+                  <div class="input-group-btn">
+                    <button type="button" data-clipboard-text="{{ConsumerSecret}}" class="btn btn-default copy-btn" title="<%=i18n.localize("Copy")%>">
+                      <i class="fw fw-copy"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <label style="padding-top:20px;" for="<%=type%>ConsumerKey"><%=i18n.localize("Access Token")%></label>
+                <div class="input-group">
+                  <label style="font-weight: normal;background-color:#f5f5f5;" title="<%=i18n.localize("Access Token")%>" class="form-control access_token" id="<%=type%>Key">{{Key}}</label>
+                  <div class="input-group-btn">
+                    <button type="button" data-clipboard-text="{{Key}}" class="btn btn-default copy-btn" title="<%=i18n.localize("Copy")%>">
+                      <i class="fw fw-copy"></i>
+                    </button>
+                  </div>
+                </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
 </script>
 
 <% }); %>

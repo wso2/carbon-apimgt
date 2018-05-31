@@ -20,23 +20,25 @@ package org.wso2.carbon.apimgt.jms.listener.utils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.jms.listener.internal.ServiceReferenceHolder;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.util.ThrottleConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.jms.listener.APICondition;
+import org.wso2.carbon.apimgt.jms.listener.internal.ServiceReferenceHolder;
 
-
-import javax.jms.JMSException;
-import javax.jms.MapMessage;
-import javax.jms.Message;
-import javax.jms.MessageListener;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.jms.JMSException;
+import javax.jms.MapMessage;
+import javax.jms.Message;
+import javax.jms.MessageListener;
 
 public class JMSMessageListener implements MessageListener {
 
@@ -50,7 +52,8 @@ public class JMSMessageListener implements MessageListener {
     private Pattern resourcePattern = Pattern.compile("/.*/(.*)/\\1(.*)?:[A-Z]{0,5}_(condition_(\\d*)|default)");
     public static final int RESOURCE_PATTERN_GROUPS = 4;
     public static final int RESOURCE_PATTERN_CONDITION_INDEX = 3;
-
+    public static final String CONDITION_KEY = "condition";
+    public static final String RESOURCE_KEY = "key";
     public JMSMessageListener(ThrottleDataHolder throttleDataHolder) {
     }
 
@@ -77,7 +80,10 @@ public class JMSMessageListener implements MessageListener {
                          * throttleKey - Key of particular throttling level
                          * isThrottled - Whether message has throttled or not
                          * expiryTimeStamp - When the throttling time window will expires
+
+
                          */
+
                         handleThrottleUpdateMessage(map);
                     } else if (map.get(APIConstants.BLOCKING_CONDITION_KEY) != null) {
                         /**
@@ -104,14 +110,18 @@ public class JMSMessageListener implements MessageListener {
             }
         } catch (JMSException e) {
             log.error("JMSException occurred when processing the received message ", e);
+        } catch (ParseException e) {
+            log.error("Error while processing evaluatedConditions", e);
         }
     }
 
-    private void handleThrottleUpdateMessage(Map<String, Object> map) {
+    private void handleThrottleUpdateMessage(Map<String, Object> map) throws ParseException {
+
 
         String throttleKey = map.get(APIThrottleConstants.THROTTLE_KEY).toString();
         String throttleState = map.get(APIThrottleConstants.IS_THROTTLED).toString();
         Long timeStamp = Long.parseLong(map.get(APIThrottleConstants.EXPIRY_TIMESTAMP).toString());
+        Object evaluatedConditionObject = map.get(APIThrottleConstants.EVALUATED_CONDITIONS);
 
         if (log.isDebugEnabled()) {
             log.debug("Received Key -  throttleKey : " + throttleKey + " , " +
@@ -122,10 +132,18 @@ public class JMSMessageListener implements MessageListener {
             ServiceReferenceHolder.getInstance().getThrottleDataHolder().
                     addThrottleData(throttleKey, timeStamp);
 
-            String extractedKey = extractAPIorResourceKey(throttleKey);
+            APICondition extractedKey = extractAPIorResourceKey(throttleKey);
+
             if (extractedKey != null) {
-                if(!ServiceReferenceHolder.getInstance().getThrottleDataHolder().isAPIThrottled(extractedKey)){
-                    ServiceReferenceHolder.getInstance().getThrottleDataHolder().addThrottledAPIKey(extractedKey, timeStamp);
+                if (evaluatedConditionObject != null) {
+                    ServiceReferenceHolder.getInstance().getThrottleDataHolder().addThrottledApiConditions
+                            (extractedKey.getResourceKey(), extractedKey.getName(), APIUtil.extractConditionDto(
+                                    (String) evaluatedConditionObject));
+                }
+                if (!ServiceReferenceHolder.getInstance().getThrottleDataHolder().isAPIThrottled(extractedKey
+                        .getResourceKey())) {
+                    ServiceReferenceHolder.getInstance().getThrottleDataHolder().addThrottledAPIKey(extractedKey
+                            .getResourceKey(), timeStamp);
                     if (log.isDebugEnabled()) {
                         log.debug("Adding throttling key : " + extractedKey);
                     }
@@ -135,12 +153,14 @@ public class JMSMessageListener implements MessageListener {
         } else {
             ServiceReferenceHolder.getInstance().getThrottleDataHolder().
                     removeThrottleData(throttleKey);
-            String extractedKey = extractAPIorResourceKey(throttleKey);
+            APICondition extractedKey = extractAPIorResourceKey(throttleKey);
             if (extractedKey != null) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Removing throttling key : " + extractedKey);
+                    log.debug("Removing throttling key : " + extractedKey.getResourceKey());
                 }
-                ServiceReferenceHolder.getInstance().getThrottleDataHolder().removeThrottledAPIKey(extractedKey);
+
+                ServiceReferenceHolder.getInstance().getThrottleDataHolder().removeThrottledAPIKey(extractedKey.getResourceKey());
+                ServiceReferenceHolder.getInstance().getThrottleDataHolder().removeThrottledApiConditions(extractedKey.getResourceKey(),extractedKey.getName());
             }
         }
     }
@@ -185,13 +205,13 @@ public class JMSMessageListener implements MessageListener {
         }
     }
 
-    private String extractAPIorResourceKey(String throttleKey) {
+    private APICondition extractAPIorResourceKey(String throttleKey) {
         Matcher m = resourcePattern.matcher(throttleKey);
         if (m.matches()) {
             if (m.groupCount() == RESOURCE_PATTERN_GROUPS) {
                 String condition = m.group(RESOURCE_PATTERN_CONDITION_INDEX);
                 String resourceKey = throttleKey.substring(0, throttleKey.indexOf("_" + condition));
-                return resourceKey;
+                return new APICondition(resourceKey, condition);
             }
         } else {
             m = apiPattern.matcher(throttleKey);
@@ -199,7 +219,7 @@ public class JMSMessageListener implements MessageListener {
                 if (m.groupCount() == API_PATTERN_GROUPS) {
                     String condition = m.group(API_PATTERN_CONDITION_INDEX);
                     String resourceKey = throttleKey.substring(0, throttleKey.indexOf("_" + condition));
-                    return resourceKey;
+                    return new APICondition(resourceKey, condition);
                 }
             }
         }
