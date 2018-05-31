@@ -3657,6 +3657,9 @@ definitions:
         type: string
         example: "Approve workflow request."
 
+#-----------------------------------------------------
+# API maxTPs resource
+#-----------------------------------------------------
   APIMaxTps:
     properties:
       production:
@@ -3668,6 +3671,9 @@ definitions:
         format: int64
         example: 1000
 
+#-----------------------------------------------------
+# API Endpoint Security resource
+#-----------------------------------------------------
   APIEndpointSecurity:
     properties:
       type:
@@ -3684,6 +3690,9 @@ definitions:
         type: string
         example: password
 
+#-----------------------------------------------------
+# API Business Information resource
+#-----------------------------------------------------
   APIBusinessInformation:
     properties:
       businessOwner:
@@ -3699,6 +3708,9 @@ definitions:
         type: string
         example: technicalowner@wso2.com
 
+#-----------------------------------------------------
+# API CORS configuration resource
+#-----------------------------------------------------
   APICorsConfiguration:
     description: |
       CORS configuration for the API
