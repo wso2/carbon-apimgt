@@ -22,13 +22,13 @@
  var tokenTypeDefault = "";
  var tokenTypeJWT = "";
  if(app.description != null ){
-  description = app.description; 
+  description = app.description;
  }
 if(app.groupId != null ){
     groupId = app.groupId;
 }
  if(app.callbackUrl != null ){
-  callbackUrl = app.callbackUrl; 
+  callbackUrl = app.callbackUrl;
  }
  if (app.applicationAttributes != null) {
     applicationAttributes = JSON.parse(app.applicationAttributes);
@@ -42,7 +42,7 @@ if(app.groupId != null ){
         }
     }
     return flag;
- } %>
+ }
 if(app.tokenType != null ){
   tokenType = app.tokenType;
   if(tokenType == "JWT"){
@@ -66,7 +66,7 @@ if(app.tokenType != null ){
 <div class="alert alert-success" id="appAddPendingMessage" style="display:none">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
         <strong><%=i18n.localize("Congratulations! Your application creation request for -")%> "<span id="applicationPendingShowName"></span>" <%=i18n.localize("has been submitted and is now awaiting approval.")%></strong>
-</div>        
+</div>
 <br />
 <div class="white-wrapper add-padding-5x">
 <form class="form-horizontal" id="appAddForm">
@@ -103,16 +103,16 @@ if(app.tokenType != null ){
                 unlimitedTierDesc = tiers[i].tierDescription;
             }
           %>
-          <option  title="<%= encode.forHtmlAttribute(tiers[i].tierDisplayName+"") %>" data-content="<span><strong><%=encode.forHtml(tiers[i].tierDisplayName+"")%></strong><br /><%=encode.forHtml(tiers[i].tierDescription+"")%></span>" value="<%=encode.forHtmlAttribute(tiers[i].tierName+"")%>"  <%if(tiers[i].tierName == app.tier ){print("selected=\"selected\"")}%>>          
+          <option  title="<%= encode.forHtmlAttribute(tiers[i].tierDisplayName+"") %>" data-content="<span><strong><%=encode.forHtml(tiers[i].tierDisplayName+"")%></strong><br /><%=encode.forHtml(tiers[i].tierDescription+"")%></span>" value="<%=encode.forHtmlAttribute(tiers[i].tierName+"")%>"  <%if(tiers[i].tierName == app.tier ){print("selected=\"selected\"")}%>>
             <%=encode.forHtml(tiers[i].tierDisplayName+"")%>
-          </option>          
+          </option>
           <%}%>
-          </select>   
+          </select>
           <div id="tierHelpStr" class="help-block" style="padding-left: 10px; display: inline;">
             <em><%=encode.forHtml(unlimitedTierDesc+"")%></em>
-          </div>          
+          </div>
           <div class="help-block"><%=i18n.localize("This feature allows you to assign an API request quota per access token. Allocated quota will be shared among all the subscribed APIs of the application.")%> </div>
-          <input type="hidden"  id="tierDescriptions" name="tierDescriptions" value="<%=encode.forHtmlAttribute(tierDescriptions+"")%>"/>  
+          <input type="hidden"  id="tierDescriptions" name="tierDescriptions" value="<%=encode.forHtmlAttribute(tierDescriptions+"")%>"/>
     </div>
   </div>
 
@@ -182,6 +182,7 @@ if(jagg.isMultiGroupEnabled()){
           <option title="DEFAULT" <%= encode.forHtml(tokenTypeDefault) %>>DEFAULT</option>
           <option title="JWT" <%= encode.forHtml(tokenTypeJWT) %>>JWT</option>
         </select>
+    </div>
     </div>
 
   <div class="form-group">

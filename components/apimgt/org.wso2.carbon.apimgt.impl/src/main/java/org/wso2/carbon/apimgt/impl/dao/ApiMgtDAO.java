@@ -3313,7 +3313,9 @@ public class ApiMgtDAO {
             }
 
             //Adding data to AM_APPLICATION_ATTRIBUTES table
-            addApplicationAttributes(conn,application.getApplicationAttributes(),applicationId,tenantId);
+            if( application.getApplicationAttributes() != null) {
+                addApplicationAttributes(conn, application.getApplicationAttributes(), applicationId, tenantId);
+            }
         } catch (SQLException e) {
             handleException("Failed to add Application", e);
         } finally {
@@ -3364,7 +3366,9 @@ public class ApiMgtDAO {
                 log.debug("Old attributes of application - " + application.getName() + " are removed");
             }
 
-            addApplicationAttributes(conn,application.getApplicationAttributes(),application.getId(),tenantId);
+            if (!application.getApplicationAttributes().isEmpty()) {
+                addApplicationAttributes(conn, application.getApplicationAttributes(), application.getId(), tenantId);
+            }
             conn.commit();
             updateOAuthConsumerApp(application.getName(), application.getCallbackUrl());
         } catch (SQLException e) {

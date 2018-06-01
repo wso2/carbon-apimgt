@@ -3193,7 +3193,9 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             APIManagementException {
 
         Application application = apiMgtDAO.getApplicationByName(ApplicationName, userId,groupingId);
-        checkAppAttributes(application, userId);
+        if (application != null) {
+            checkAppAttributes(application, userId);
+        }
         application = apiMgtDAO.getApplicationWithOAuthApps(ApplicationName, userId, groupingId);
 
         if (application != null) {
@@ -4154,14 +4156,17 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } catch (UserStoreException e) {
             handleException("Error in getting tenantId of " + tenantDomain, e);
         }
-        JSONArray applicationAttributes;
+        JSONArray applicationAttributes = null;
         JSONObject applicationConfig = APIUtil.getAppAttributeKeysFromRegistry(tenantId);
-        if (applicationConfig != null) {
-            applicationAttributes = (JSONArray) applicationConfig.get(APIConstants.ApplicationAttributes.ATTRIBUTES);
-        } else {
-            APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().
-                    getAPIManagerConfigurationService().getAPIManagerConfiguration();
-            applicationAttributes = configuration.getApplicationAttributes();
+        try {
+            if (applicationConfig != null) {
+                applicationAttributes = (JSONArray) applicationConfig.get(APIConstants.ApplicationAttributes.ATTRIBUTES);
+            } else {
+                APIManagerConfiguration configuration = getAPIManagerConfiguration();
+                applicationAttributes = configuration.getApplicationAttributes();
+            }
+        } catch (NullPointerException e){
+            handleException("Error in reading configuration " + e.getMessage(), e);
         }
         return applicationAttributes;
     }

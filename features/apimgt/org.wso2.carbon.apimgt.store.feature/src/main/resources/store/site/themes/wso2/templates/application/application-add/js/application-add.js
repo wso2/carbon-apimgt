@@ -53,7 +53,7 @@ $(document).ready(function () {
             callbackUrl:callbackUrl,
             description:description,
             groupId:groupId,
-            tokenType:tokenType
+            tokenType:tokenType,
             groupId:groupId,
             applicationAttributes:JSON.stringify(applicationAttributes)
         }, function (result) {

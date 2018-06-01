@@ -56,7 +56,7 @@ $(document).ready(function () {
             descriptionNew:description,
             groupIdOld:groupIdOld,
             groupIdNew:groupIdNew,
-            applicationAttributeNew:JSON.stringify(applicationAttributesNew)
+            applicationAttributeNew:JSON.stringify(applicationAttributesNew),
             groupIdNew:groupIdNew,
             tokenType:tokenType
         }, function (result) {
