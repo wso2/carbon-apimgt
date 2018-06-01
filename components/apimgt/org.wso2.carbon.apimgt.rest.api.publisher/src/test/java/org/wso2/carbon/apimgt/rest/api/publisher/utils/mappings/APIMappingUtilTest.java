@@ -32,7 +32,7 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDetailedDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.HashMap;
@@ -69,14 +69,14 @@ public class APIMappingUtilTest {
     @Test
     public void testFromAPItoDTO() throws APIManagementException {
         API api = getSampleAPI();
-        APIDTO apidto = APIMappingUtil.fromAPItoDTO(api);
-        Assert.assertNotNull("Conversion from API to dto failed without additional properties", apidto);
+        APIDetailedDTO apiDetailedDTO = APIMappingUtil.fromAPItoDTO(api);
+        Assert.assertNotNull("Conversion from API to dto failed without additional properties", apiDetailedDTO);
 
         api.addProperty("test", "test");
-        apidto = APIMappingUtil.fromAPItoDTO(api);
-        Assert.assertNotNull("Conversion from API to dto failed with additional properties", apidto);
-        Assert.assertEquals("Additional properties added in the API is not preserved after converting to APIDTO",
-                "test", apidto.getAdditionalProperties().get("test"));
+        apiDetailedDTO = APIMappingUtil.fromAPItoDTO(api);
+        Assert.assertNotNull("Conversion from API to dto failed with additional properties", apiDetailedDTO);
+        Assert.assertEquals("Additional properties added in the API is not preserved after converting to APIDetailedDTO",
+                "test", apiDetailedDTO.getAdditionalProperties().get("test"));
     }
     /**
      * This method tests the behaviour of the fromAPItoDTO method.
@@ -86,14 +86,14 @@ public class APIMappingUtilTest {
 
     @Test
     public void testFromDTOtoAPI() throws APIManagementException {
-        APIDTO apidto = APIMappingUtil.fromAPItoDTO(getSampleAPI());
-        API api = APIMappingUtil.fromDTOtoAPI(apidto, "admin");
+        APIDetailedDTO apiDetailedDTO = APIMappingUtil.fromAPItoDTO(getSampleAPI());
+        API api = APIMappingUtil.fromDTOtoAPI(apiDetailedDTO, "admin");
         Assert.assertNotNull("Conversion from DTO to API failed without properties", api);
 
-        apidto.setAdditionalProperties(new HashMap<String, String>() {{
+        apiDetailedDTO.setAdditionalProperties(new HashMap<String, String>() {{
             put("secured", "false");
         }});
-        api = APIMappingUtil.fromDTOtoAPI(apidto, "admin");
+        api = APIMappingUtil.fromDTOtoAPI(apiDetailedDTO, "admin");
         Assert.assertNotNull("Conversion from DTO to API failed with properties", api);
         Assert.assertEquals("Conversion produces different DTO object that does not match with orginal API passed",
                 "false", api.getAdditionalProperties().get("secured"));

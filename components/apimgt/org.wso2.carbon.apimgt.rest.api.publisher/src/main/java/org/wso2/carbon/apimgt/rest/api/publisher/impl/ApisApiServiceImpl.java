@@ -55,16 +55,8 @@ import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApisApiService;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListPaginationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.MediationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.MediationListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.WsdlDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDetailedDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.DocumentationMappingUtil;
@@ -177,13 +169,13 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return created API
      */
     @Override
-    public Response apisPost(APIDTO body,String contentType){
+    public Response apisPost(APIDetailedDTO body, String contentType){
         URI createdApiUri;
-        APIDTO createdApiDTO;
+        APIDetailedDTO createdApiDTO;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String username = RestApiUtil.getLoggedInUsername();
-            boolean isWSAPI = APIDTO.TypeEnum.WS == body.getType();
+            boolean isWSAPI = APIDetailedDTO.TypeEnum.WS == body.getType();
 
             // validate web socket api endpoint configurations
             if (isWSAPI) {
@@ -391,7 +383,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisCopyApiPost(String newVersion, String apiId) {
         URI newVersionedApiUri;
-        APIDTO newVersionedApi;
+        APIDetailedDTO newVersionedApi;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -440,7 +432,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisApiIdGet(String apiId, String accept, String ifNoneMatch, String ifModifiedSince) {
-        APIDTO apiToReturn;
+        APIDetailedDTO apiToReturn;
         try {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             API api = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, tenantDomain);
@@ -797,9 +789,9 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return Updated API
      */
     @Override
-    public Response apisApiIdPut(String apiId, APIDTO body, String contentType, String ifMatch,
+    public Response apisApiIdPut(String apiId, APIDetailedDTO body, String contentType, String ifMatch,
                                  String ifUnmodifiedSince) {
-        APIDTO updatedApiDTO;
+        APIDetailedDTO updatedApiDTO;
         try {
             String username = RestApiUtil.getLoggedInUsername();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -814,7 +806,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             body.setProvider(apiIdentifier.getProviderName());
             body.setContext(apiInfo.getContextTemplate());
             body.setStatus(apiInfo.getStatus().getStatus());
-            body.setType(APIDTO.TypeEnum.valueOf(apiInfo.getType()));
+            body.setType(APIDetailedDTO.TypeEnum.valueOf(apiInfo.getType()));
             //Since there is separate API to change the thumbnail, set the existing thumbnail URL
             //If user needs to remove the thumbnail url, this will give the flexibility to do it via an empty string value
             String thumbnailUrl = body.getThumbnailUri();
@@ -886,7 +878,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param api the API object
      * @return the API object with labels
      */
-    private API assignLabelsToDTO(APIDTO apiDTO, API api) {
+    private API assignLabelsToDTO(APIDetailedDTO apiDTO, API api) {
 
         if (apiDTO.getLabels() != null) {
             List<LabelDTO> dtoLabels = apiDTO.getLabels();
