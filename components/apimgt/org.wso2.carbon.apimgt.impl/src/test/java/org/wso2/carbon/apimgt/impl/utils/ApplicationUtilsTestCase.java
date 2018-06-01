@@ -17,7 +17,7 @@ package org.wso2.carbon.apimgt.impl.utils;
 
 import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
@@ -27,9 +27,11 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
+import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.ApiMgtDAOMockCreator;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
@@ -45,8 +47,8 @@ public class ApplicationUtilsTestCase {
     private static ApiMgtDAO apiMgtDAO;
     private static ApiMgtDAOMockCreator apiMgtDAOMockCreator;
 
-    @BeforeClass
-    public static void setup() throws UserStoreException, RegistryException {
+    @Before
+    public void setup() throws UserStoreException, RegistryException {
         apiMgtDAOMockCreator = new ApiMgtDAOMockCreator(444);
         apiMgtDAO = apiMgtDAOMockCreator.getMock();
     }
@@ -123,19 +125,31 @@ public class ApplicationUtilsTestCase {
     public void testCrateOauthAppRequest() throws APIManagementException {
         PowerMockito.mockStatic(KeyManagerHolder.class);
         PowerMockito.when(KeyManagerHolder.getKeyManagerInstance()).thenReturn(keyManager);
-        OAuthAppRequest oAuthAppRequest = ApplicationUtils.createOauthAppRequest("client1", "clientId", "http://foo.com", "subscribe", "details");
+        OAuthAppRequest oAuthAppRequest = ApplicationUtils
+                .createOauthAppRequest("client1", "clientId", "http://foo.com", "subscribe", "details", "DEFAULT");
         Assert.assertNotNull(oAuthAppRequest);
     }
 
     @Test
-    public void testPopulateApplication() throws Exception {
-        ApplicationUtils.populateApplication("");
-        Mockito.verify(apiMgtDAO, Mockito.times(1)).getApplicationById(Matchers.anyInt());
-    }
-
-    @Test
     public void testRetrieveApplication() throws Exception {
-        ApplicationUtils.retrieveApplication("myapp", "john", "foo.com");
-        Mockito.verify(apiMgtDAO, Mockito.times(1)).getApplicationByName("myapp","john","foo.com");
+        String appName = "NewApp";
+        String owner = "DevX";
+        String tenant = "wso2.com";
+        Subscriber subscriber = new Subscriber(owner);
+        Application newApp = new Application(appName, subscriber);
+        newApp.setId(3);
+        newApp.setTier("Gold");
+        newApp.setDescription("This is a new app");
+        newApp.setOwner(owner);
+        newApp.setGroupId("group1");
+        Mockito.when(apiMgtDAO.getApplicationByName(appName, owner, tenant)).thenReturn(newApp);
+
+        Application app = ApplicationUtils.retrieveApplication(appName, owner, tenant);
+
+        Assert.assertEquals(newApp, app);
+        Assert.assertEquals(newApp.getDescription(), app.getDescription());
+        Assert.assertEquals(newApp.getOwner(), app.getOwner());
+        Assert.assertEquals(newApp.getGroupId(), app.getGroupId());
+        Assert.assertEquals(newApp.getTier(), app.getTier());
     }
 }

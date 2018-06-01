@@ -44,19 +44,19 @@ import org.wso2.carbon.apimgt.api.PolicyNotFoundException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.Mediation;
+import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
+import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.Wsdl;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
-import org.wso2.carbon.apimgt.api.model.KeyManager;
-import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -108,8 +108,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
-
-import static org.wso2.carbon.apimgt.impl.APIConstants.UN_AUTHORIZED_ERROR_MESSAGE;
 
 /**
  * The basic abstract implementation of the core APIManager interface. This implementation uses
@@ -165,8 +163,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 APIUtil.loadTenantAPIPolicy(tenantUserName, tenantId);
 
                 //Check whether GatewayType is "Synapse" before attempting to load Custom-Sequences into registry
-                APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
-                        .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+                APIManagerConfiguration configuration = getAPIManagerConfiguration();
 
                 String gatewayType = configuration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
 
@@ -1456,6 +1453,7 @@ public abstract class AbstractAPIManager implements APIManager {
         }
         //application will not be shared within the group
         defaultApp.setGroupId("");
+        defaultApp.setTokenType(APIConstants.APPLICATION_TOKEN_TYPE);
         apiMgtDAO.addApplication(defaultApp, subscriber.getName());
     }
 
@@ -1911,7 +1909,17 @@ public abstract class AbstractAPIManager implements APIManager {
             // If the query does not contains "=" then it is an errornous scenario.
             if (query.contains("=")) {
                 String[] searchKeys = query.split("=");
-                if (!Arrays.asList(APIConstants.API_SEARCH_PREFIXES).contains(searchKeys[0].toLowerCase())) {
+
+                //prevent api-meta. getting prefixed to labelName and restrict label serach to exact match only
+                if (APIConstants.LABELNAME.equals(searchKeys[0])) {
+                    searchKeys[0] = APIConstants.LABEL_PREFIX + searchKeys[0];
+                    if (searchKeys[1].startsWith("*")) {
+                        searchKeys[1] = searchKeys[1].substring(1, searchKeys[1].length());
+                    }
+                    if (searchKeys[1].endsWith("*")) {
+                        searchKeys[1] = searchKeys[1].substring(0, searchKeys[1].length() - 1);
+                    }
+                } else if (!Arrays.asList(APIConstants.API_SEARCH_PREFIXES).contains(searchKeys[0].toLowerCase())) {
                     if (log.isDebugEnabled()) {
                         log.debug(searchKeys[0] + " does not match with any of the reserved key words. Hence"
                                 + " appending " + APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX + " as prefix");
@@ -2377,8 +2385,7 @@ public abstract class AbstractAPIManager implements APIManager {
         int totalLength = 0;
         boolean isMore = false;
         try {
-            String paginationLimit = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                    .getAPIManagerConfiguration()
+            String paginationLimit = getAPIManagerConfiguration()
                     .getFirstProperty(APIConstants.API_STORE_APIS_PER_PAGE);
 
             // If the Config exists use it to set the pagination limit
@@ -2576,6 +2583,16 @@ public abstract class AbstractAPIManager implements APIManager {
     public Map<Documentation, API> searchAPIDoc(Registry registry, int tenantID, String username,
             String searchTerm) throws APIManagementException {
         return APIUtil.searchAPIsByDoc(registry, tenantID, username, searchTerm, APIConstants.STORE_CLIENT);
+    }
+
+    /**
+     * Returns API manager configurations.
+     *
+     * @return APIManagerConfiguration object
+     */
+    protected APIManagerConfiguration getAPIManagerConfiguration() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
     }
 
     /**

@@ -69,6 +69,7 @@ import org.wso2.carbon.identity.oauth.cache.OAuthCacheKey;
 import org.wso2.carbon.identity.oauth.common.OAuthConstants;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.oauth.dto.OAuthConsumerAppDTO;
+import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -208,12 +209,18 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 
             oAuthConsumerAppDTO.setOAuthVersion(OAuthConstants.OAuthVersions.VERSION_2);
             log.debug("Creating OAuth App " + applicationName);
-            oAuthAdminService.registerOAuthApplicationData(oAuthConsumerAppDTO);
+            OAuthConsumerAppDTO createdApp;
+            boolean isHashingDiabled = OAuth2Util.isHashDisabled();
+            if (isHashingDiabled) {
+                oAuthAdminService.registerOAuthApplicationData(oAuthConsumerAppDTO);
+                createdApp = oAuthAdminService.getOAuthApplicationDataByAppName(oAuthConsumerAppDTO
+                        .getApplicationName());
+            } else {
+                createdApp = oAuthAdminService.registerAndRetrieveOAuthApplicationData(oAuthConsumerAppDTO);
+            }
             // === Finished Creating OAuth App ===
 
             log.debug("Created OAuth App " + applicationName);
-            OAuthConsumerAppDTO createdApp = oAuthAdminService.getOAuthApplicationDataByAppName(oAuthConsumerAppDTO
-                    .getApplicationName());
             log.debug("Retrieved Details for OAuth App " + createdApp.getApplicationName());
 
             // Set the OAuthApp in InboundAuthenticationConfig
@@ -278,13 +285,14 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
      * @throws APIKeyMgtException
      * @throws APIManagementException
      */
-    public OAuthApplicationInfo createOAuthApplication(String userId, String applicationName, String callbackUrl)
-            throws APIKeyMgtException, APIManagementException {
+    public OAuthApplicationInfo createOAuthApplication(String userId, String applicationName, String callbackUrl,
+            String tokenType) throws APIKeyMgtException, APIManagementException {
 
         OAuthApplicationInfo oauthApplicationInfo = new OAuthApplicationInfo();
         oauthApplicationInfo.setClientName(applicationName);
         oauthApplicationInfo.setCallBackURL(callbackUrl);
         oauthApplicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME, userId);
+        oauthApplicationInfo.setTokenType(tokenType);
         return createOAuthApplicationByApplicationInfo(oauthApplicationInfo);
     }
 

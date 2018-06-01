@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
@@ -74,7 +75,9 @@ import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
@@ -90,9 +93,11 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.core.util.CryptoException;
+import org.wso2.carbon.event.stub.service.dto.SubscriptionDTO;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.oauth.IdentityOAuthAdminException;
+import org.wso2.carbon.registry.common.beans.SubscriptionBean;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.DBUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -139,6 +144,7 @@ public class ApiMgtDAO {
 
     private boolean forceCaseInsensitiveComparisons = false;
     private boolean multiGroupAppSharingEnabled = false;
+    private static boolean initialAutoCommit = false;
 
     private ApiMgtDAO() {
         APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
@@ -153,7 +159,7 @@ public class ApiMgtDAO {
         multiGroupAppSharingEnabled = APIUtil.isMultiGroupAppSharingEnabled();
     }
 
-    public List<String> getAPIVersionsMatchingApiName(String apiName,String username) throws APIManagementException {
+    public List<String> getAPIVersionsMatchingApiName(String apiName, String username) throws APIManagementException {
         Connection conn = null;
         PreparedStatement ps = null;
         List<String> versionList = new ArrayList<String>();
@@ -164,7 +170,7 @@ public class ApiMgtDAO {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, apiName);
-            ps.setString(2,username);
+            ps.setString(2, username);
             resultSet = ps.executeQuery();
             while (resultSet.next()) {
                 versionList.add(resultSet.getString("API_VERSION"));
@@ -189,66 +195,6 @@ public class ApiMgtDAO {
         }
 
         return INSTANCE;
-    }
-
-    /**
-     * Get access token key for given userId and API Identifier
-     *
-     * @param userId          id of the user
-     * @param applicationName name of the Application
-     * @param identifier      APIIdentifier
-     * @param keyType         Type of the key required
-     * @return Access token
-     * @throws APIManagementException if failed to get Access token
-     */
-    public String getAccessKeyForAPI(String userId, String applicationName, APIInfoDTO identifier, String keyType)
-            throws APIManagementException {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        String accessKey = null;
-        String loginUserName = getLoginUserName(userId);
-
-        //get the tenant id for the corresponding domain
-        String tenantAwareUserId = MultitenantUtils.getTenantAwareUsername(loginUserName);
-        int tenantId = APIUtil.getTenantId(loginUserName);
-
-        if (log.isDebugEnabled()) {
-            log.debug("Searching for: " + identifier.getAPIIdentifier() + ", User: " + tenantAwareUserId +
-                    ", ApplicationName: " + applicationName + ", Tenant ID: " + tenantId);
-        }
-
-        String sqlQuery = SQLConstants.GET_ACCESS_KEY_FOR_API_SQL;
-        if (forceCaseInsensitiveComparisons) {
-            sqlQuery = SQLConstants.GET_ACCESS_KEY_FOR_API_CASE_INSENSITIVE_SQL;
-        }
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, tenantAwareUserId);
-            ps.setInt(2, tenantId);
-            ps.setString(3, APIUtil.replaceEmailDomainBack(identifier.getProviderId()));
-            ps.setString(4, identifier.getApiName());
-            ps.setString(5, identifier.getVersion());
-            ps.setString(6, applicationName);
-            ps.setString(7, keyType);
-
-            rs = ps.executeQuery();
-
-            while (rs.next()) {
-                accessKey = APIUtil.decryptToken(rs.getString(APIConstants.SUBSCRIPTION_FIELD_ACCESS_TOKEN));
-            }
-        } catch (SQLException e) {
-            handleException("Error when executing the SQL query to read the access key for user : " + loginUserName +
-                    "of tenant(id) : " + tenantId, e);
-        } catch (CryptoException e) {
-            handleException("Error when decrypting access key for user : " + loginUserName + "of tenant(id) : " +
-                    tenantId, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-        }
-        return accessKey;
     }
 
     /**
@@ -2884,8 +2830,6 @@ public class ApiMgtDAO {
     }
 
 
-
-
     private void updateOAuthConsumerApp(String appName, String callbackUrl)
             throws IdentityOAuthAdminException, APIManagementException {
         Connection connection = null;
@@ -3360,6 +3304,7 @@ public class ApiMgtDAO {
             ps.setTimestamp(9, timestamp);
             ps.setTimestamp(10, timestamp);
             ps.setString(11, UUID.randomUUID().toString());
+            ps.setString(12, String.valueOf(application.getTokenType()));
             ps.executeUpdate();
 
             rs = ps.getGeneratedKeys();
@@ -3396,7 +3341,8 @@ public class ApiMgtDAO {
             //TODO need to find the proper user who updates this application.
             ps.setString(5, null);
             ps.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
-            ps.setInt(7, application.getId());
+            ps.setString(7, application.getTokenType());
+            ps.setInt(8, application.getId());
 
             ps.executeUpdate();
 
@@ -3770,6 +3716,7 @@ public class ApiMgtDAO {
 
     /**
      * Returns all applications created by given user Id
+     *
      * @param userId
      * @return
      * @throws APIManagementException
@@ -3858,10 +3805,10 @@ public class ApiMgtDAO {
      *
      * @param subscriber The subscriber.
      * @param groupingId The groupId to which the applications must belong.
-     * @param start The start index.
-     * @param offset The offset.
-     * @param search The search string.
-     * @param sortOrder The sort order.
+     * @param start      The start index.
+     * @param offset     The offset.
+     * @param search     The search string.
+     * @param sortOrder  The sort order.
      * @param sortColumn The sort column.
      * @return Application[] The array of applications.
      * @throws APIManagementException
@@ -3949,7 +3896,7 @@ public class ApiMgtDAO {
                 application.setIsBlackListed(rs.getBoolean("ENABLED"));
                 application.setOwner(rs.getString("CREATED_BY"));
 
-                if(multiGroupAppSharingEnabled) {
+                if (multiGroupAppSharingEnabled) {
                     setGroupIdInApplication(application);
                 }
 
@@ -4193,7 +4140,7 @@ public class ApiMgtDAO {
             rs = prepStmt.executeQuery();
 
             if (multiGroupAppSharingEnabled) {
-                transactionCompleted = updateGroupIDMappings(connection, application.getId(), null,null);
+                transactionCompleted = updateGroupIDMappings(connection, application.getId(), null, null);
             }
 
             List<Integer> subscriptions = new ArrayList<Integer>();
@@ -4274,7 +4221,7 @@ public class ApiMgtDAO {
                 log.debug("Application " + application.getName() + " is deleted successfully.");
             }
 
-            if(transactionCompleted){
+            if (transactionCompleted) {
                 connection.commit();
             }
 
@@ -5295,8 +5242,8 @@ public class ApiMgtDAO {
      * Checks whether application is accessible to the specified user
      *
      * @param applicationID ID of the Application
-     * @param userId          Name of the User.
-     * @param groupId         Group IDs
+     * @param userId        Name of the User.
+     * @param groupId       Group IDs
      * @throws APIManagementException
      */
     public boolean isAppAllowed(int applicationID, String userId, String groupId)
@@ -5449,6 +5396,7 @@ public class ApiMgtDAO {
                 application.setUUID(rs.getString("UUID"));
                 application.setGroupId(rs.getString("GROUP_ID"));
                 application.setOwner(rs.getString("CREATED_BY"));
+                application.setTokenType(rs.getString("TOKEN_TYPE"));
 
                 if (multiGroupAppSharingEnabled) {
                     setGroupIdInApplication(application);
@@ -6059,7 +6007,6 @@ public class ApiMgtDAO {
     }
 
 
-
     /**
      * Get all applications associated with given tier
      *
@@ -6455,7 +6402,7 @@ public class ApiMgtDAO {
                 OAuthAppRequest request = ApplicationUtils.createOauthAppRequest(application.getName(), null,
                         application.getCallbackUrl(), rs
                                 .getString("TOKEN_SCOPE"),
-                        rs.getString("INPUTS"));
+                        rs.getString("INPUTS"), application.getTokenType());
                 workflowDTO.setAppInfoDTO(request);
             }
         } catch (SQLException e) {
@@ -7325,6 +7272,7 @@ public class ApiMgtDAO {
 
     /**
      * Check a given scope key already exist for a tenant
+     *
      * @param scopeKey Scope Key
      * @param tenantId Tenant ID
      * @return true if scope already exists
@@ -7688,7 +7636,7 @@ public class ApiMgtDAO {
                 if (scopes.containsKey(resultSet.getString(1))) {
                     // Role for the scope exists. Append the new role.
                     String roles = scopes.get(resultSet.getString(1));
-                    roles += ","+resultSet.getString(2);
+                    roles += "," + resultSet.getString(2);
                     scopes.put(resultSet.getString(1), roles);
                 } else {
                     scopes.put(resultSet.getString(1), resultSet.getString(2));
@@ -7979,6 +7927,7 @@ public class ApiMgtDAO {
 
     /**
      * retrieve list of API names which matches given context
+     *
      * @param contextTemplate context template
      * @return list of API names
      * @throws APIManagementException
@@ -7987,7 +7936,7 @@ public class ApiMgtDAO {
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
-        List<String> nameList=new ArrayList<String>();
+        List<String> nameList = new ArrayList<String>();
 
         String sqlQuery = SQLConstants.GET_API_NAMES_MATCHES_CONTEXT;
         try {
@@ -7996,7 +7945,7 @@ public class ApiMgtDAO {
             ps.setString(1, contextTemplate);
 
             resultSet = ps.executeQuery();
-            while(resultSet.next()){
+            while (resultSet.next()) {
                 nameList.add(resultSet.getString("API_NAME"));
             }
         } catch (SQLException e) {
@@ -8616,7 +8565,7 @@ public class ApiMgtDAO {
         try {
             String dbProductName = conn.getMetaData().getDatabaseProductName();
             policyStatement = conn.prepareStatement(addQuery,
-                    new String[] { DBUtils.getConvertedAutoGeneratedColumnName(dbProductName, "POLICY_ID") });
+                    new String[]{DBUtils.getConvertedAutoGeneratedColumnName(dbProductName, "POLICY_ID")});
             setCommonParametersForPolicy(policyStatement, policy);
             policyStatement.setString(12, policy.getUserLevel());
             policyStatement.executeUpdate();
@@ -8665,7 +8614,7 @@ public class ApiMgtDAO {
             }
             String dbProductName = conn.getMetaData().getDatabaseProductName();
             policyStatement = conn.prepareStatement(addQuery,
-                    new String[] { DBUtils.getConvertedAutoGeneratedColumnName(dbProductName, "POLICY_ID") });
+                    new String[]{DBUtils.getConvertedAutoGeneratedColumnName(dbProductName, "POLICY_ID")});
             setCommonParametersForPolicy(policyStatement, policy);
             policyStatement.setString(12, policy.getUserLevel());
             policyStatement.setBoolean(10, true);
@@ -10828,7 +10777,7 @@ public class ApiMgtDAO {
         ResultSet checkIsResultSet = null;
         boolean status = false;
         try {
-        	 /*String apiProvider = tenantId;*/
+             /*String apiProvider = tenantId;*/
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(true);
             String isExistQuery = SQLConstants.ThrottleSQLConstants.TIER_HAS_SUBSCRIPTION;
@@ -11331,7 +11280,7 @@ public class ApiMgtDAO {
      * @param consumerKey The consumer key.
      * @return String The user id.
      */
-    private String getUserIdFromConsumerKey (String consumerKey) throws APIManagementException {
+    private String getUserIdFromConsumerKey(String consumerKey) throws APIManagementException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
@@ -11355,6 +11304,294 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
         return userId;
+    }
+
+    /**
+     * Get Subscribed APIs for given userId
+     *
+     * @param userId id of the user
+     * @return APISubscriptionInfoDTO[]
+     * @throws APIManagementException if failed to get Subscribed APIs
+     */
+    public APISubscriptionInfoDTO[] getSubscribedAPIsOfUserWithSubscriptionInfo(String userId) throws APIManagementException {
+        List<APISubscriptionInfoDTO> apiSubscriptionInfoDTOS = new ArrayList<APISubscriptionInfoDTO>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        //identify logged in user
+        String loginUserName = getLoginUserName(userId);
+        int tenantId = APIUtil.getTenantId(loginUserName);
+
+        String sqlQuery = SQLConstants.GET_SUBSCRIBED_APIS_OF_USER_SQL;
+        if (forceCaseInsensitiveComparisons) {
+            sqlQuery = SQLConstants.GET_SUBSCRIBED_APIS_OF_USER_CASE_INSENSITIVE_SQL;
+        }
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, userId);
+            ps.setInt(2, tenantId);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                APISubscriptionInfoDTO infoDTO = new APISubscriptionInfoDTO();
+                infoDTO.setProviderId(APIUtil.replaceEmailDomain(rs.getString("API_PROVIDER")));
+                infoDTO.setApiName(rs.getString("API_NAME"));
+                infoDTO.setContext(rs.getString("API_CONTEXT"));
+                infoDTO.setVersion(rs.getString("API_VERSION"));
+                infoDTO.setSubscriptionTier(rs.getString("SP_TIER_ID"));
+                apiSubscriptionInfoDTOS.add(infoDTO);
+            }
+        } catch (SQLException e) {
+            handleException("Error while executing SQL", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return apiSubscriptionInfoDTOS.toArray(new APISubscriptionInfoDTO[apiSubscriptionInfoDTOS.size()]);
+    }
+
+
+    public Application getApplicationByClientId(String clientId) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+
+        Application application = null;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            String query = SQLConstants.GET_APPLICATION_BY_CLIENT_ID_SQL;
+
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setString(1, clientId);
+
+            rs = prepStmt.executeQuery();
+            if (rs.next()) {
+                String applicationId = rs.getString("APPLICATION_ID");
+                String applicationName = rs.getString("NAME");
+                String applicationOwner = rs.getString("CREATED_BY");
+
+                application = new Application(applicationId);
+                application.setName(applicationName);
+                application.setOwner(applicationOwner);
+                application.setDescription(rs.getString("DESCRIPTION"));
+                application.setStatus(rs.getString("APPLICATION_STATUS"));
+                application.setCallbackUrl(rs.getString("CALLBACK_URL"));
+                application.setId(rs.getInt("APPLICATION_ID"));
+                application.setGroupId(rs.getString("GROUP_ID"));
+                application.setUUID(rs.getString("UUID"));
+                application.setTier(rs.getString("APPLICATION_TIER"));
+                application.setTokenType(rs.getString("TOKEN_TYPE"));
+
+                if (multiGroupAppSharingEnabled) {
+                    if (application.getGroupId().isEmpty()) {
+                        application.setGroupId(getGroupId(application.getId()));
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while obtaining details of the Application foe client id " + clientId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+        return application;
+    }
+
+    /**
+     * Returns the Label List for the TenantId.
+     *
+     * @param tenantDomain The tenant domain.
+     * @return List of labels.
+     */
+    public List<Label> getAllLabels(String tenantDomain) throws APIManagementException {
+        List<Label> labelList = new ArrayList<>();
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_LABEL_BY_TENANT)) {
+            try {
+                connection.setAutoCommit(false);
+                statement.setString(1, tenantDomain);
+                try (ResultSet rs = statement.executeQuery()) {
+                    while (rs.next()) {
+                        String labelId = rs.getString("LABEL_ID");
+                        String labelName = rs.getString("NAME");
+                        String description = rs.getString("DESCRIPTION");
+
+                        Label label = new Label();
+                        label.setLabelId(labelId);
+                        label.setName(labelName);
+                        label.setDescription(description);
+                        label.setAccessUrls(getAccessUrlList(connection, labelId));
+                        labelList.add(label);
+                    }
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to get Labels of " + tenantDomain, e);
+            } finally {
+                connection.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get Labels of " + tenantDomain, e);
+        }
+        return labelList;
+    }
+
+    /**
+     * Returns the URL list for label id.
+     *
+     * @param labelId label id.
+     * @return List of string.
+     */
+    private List<String> getAccessUrlList(Connection connection, String labelId) throws APIManagementException {
+        List<String> hostList = new ArrayList<>();
+
+        try (PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_URL_BY_LABEL_ID)) {
+            statement.setString(1, labelId);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    String host = rs.getString("ACCESS_URL");
+                    hostList.add(host);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get label list: " , e);
+        }
+        return hostList;
+    }
+
+    /**
+     * Returns the Label.
+     *
+     * @param tenantDomain The tenant domain.
+     * @param label        label object.
+     * @return label.
+     */
+    public Label addLabel(String tenantDomain, Label label) throws APIManagementException {
+        String uuid = UUID.randomUUID().toString();
+        label.setLabelId(uuid);
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_LABEL_SQL)) {
+            try {
+                initialAutoCommit = connection.getAutoCommit();
+                connection.setAutoCommit(false);
+
+                statement.setString(1, uuid);
+                statement.setString(2, label.getName());
+                statement.setString(3, label.getDescription());
+                statement.setString(4, tenantDomain);
+                statement.executeUpdate();
+                if (!label.getAccessUrls().isEmpty()) {
+                    insertAccessUrlMappings(connection, uuid, label.getAccessUrls());
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to add label: " + uuid, e);
+            } finally {
+                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to add label: " + uuid, e);
+        }
+        return label;
+    }
+
+    /**
+     * Insert URL to the URL table
+     *
+     * @param uuid    label id.
+     * @param urlList The list of url.
+     * @throws APIManagementException
+     */
+    private void insertAccessUrlMappings(Connection connection, String uuid, List<String> urlList) throws
+            APIManagementException {
+        try (PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_LABEL_URL_MAPPING_SQL)) {
+            for (String accessUrl : urlList) {
+                statement.setString(1, uuid);
+                statement.setString(2, accessUrl);
+                statement.addBatch();
+            }
+            statement.executeBatch();
+        } catch (SQLException e) {
+            handleException("Failed to add label url : " + uuid, e);
+        }
+    }
+
+    /**
+     * Delete  label.
+     *
+     * @param labelUUID label id.
+     * @throws APIManagementException
+     */
+    public void deleteLabel(String labelUUID) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.DELETE_LABEL_SQL)) {
+            try {
+                initialAutoCommit = connection.getAutoCommit();
+                connection.setAutoCommit(false);
+                statement.setString(1, labelUUID);
+                statement.executeUpdate();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to delete label : " + labelUUID, e);
+            } finally {
+                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to delete label : " + labelUUID, e);
+        }
+    }
+
+    /**
+     * Delete label URL
+     *
+     * @param labelUUID label id.
+     * @throws APIManagementException
+     */
+    private void deleteAccessUrlMappings(Connection connection, String labelUUID) throws APIManagementException {
+        try (PreparedStatement statement = connection.prepareStatement(SQLConstants.DELETE_LABEL_URL_MAPPING_SQL)) {
+            statement.setString(1, labelUUID);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            handleException("Failed to delete label url : ", e);
+        }
+    }
+
+    /**
+     * Update the label.
+     *
+     * @param label label object.
+     * @return labels.
+     */
+    public Label updateLabel(Label label) throws APIManagementException {
+        List<String> accessURLs = label.getAccessUrls();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.UPDATE_LABEL_SQL)) {
+            try {
+                initialAutoCommit = connection.getAutoCommit();
+                connection.setAutoCommit(false);
+                statement.setString(1, label.getName());
+                statement.setString(2, label.getDescription());
+                statement.setString(3, label.getLabelId());
+
+                deleteAccessUrlMappings(connection, label.getLabelId());
+                insertAccessUrlMappings(connection, label.getLabelId(), accessURLs);
+                statement.executeUpdate();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to update label : ", e);
+            } finally {
+                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to update label : ", e);
+        }
+        return label;
     }
 
     private void addApplicationAttributes(Connection conn, Map<String, String> attributes, int applicationId, int tenantId)

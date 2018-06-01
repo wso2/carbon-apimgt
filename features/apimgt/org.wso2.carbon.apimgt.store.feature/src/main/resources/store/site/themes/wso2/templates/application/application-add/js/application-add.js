@@ -32,6 +32,7 @@ $(document).ready(function () {
         var goBack = $("#goBack").val();
         var description = $("#description").val();
         var groupId = $("#groupId").val();
+        var tokenType = $("#tokenType").val();
         var status='';
         var attribute;
         var attributeKey;
@@ -51,6 +52,8 @@ $(document).ready(function () {
             tier:tier,
             callbackUrl:callbackUrl,
             description:description,
+            groupId:groupId,
+            tokenType:tokenType
             groupId:groupId,
             applicationAttributes:JSON.stringify(applicationAttributes)
         }, function (result) {

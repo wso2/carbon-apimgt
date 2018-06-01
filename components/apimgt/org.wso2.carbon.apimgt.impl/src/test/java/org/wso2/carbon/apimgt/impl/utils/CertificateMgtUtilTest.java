@@ -18,7 +18,7 @@
 package org.wso2.carbon.apimgt.impl.utils;
 
 import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
@@ -85,8 +85,8 @@ public class CertificateMgtUtilTest {
                     "2/Qh4Zy17IIUltCQEOIpVsS07wf/sU16c4v6xZQogxKvBLMTLKW2NzLIxA2/3xV5v1loyY/vVQ85\n" +
                     "Q877zXfwTUGO5ZN3QCGncCpCEfWbnj6pxAM=";
 
-    @BeforeClass
-    public static void init() {
+    @Before
+    public void init() {
         System.setProperty("javax.net.ssl.trustStorePassword", "wso2carbon");
         System.setProperty("javax.net.ssl.trustStore", CERT_PATH.getPath());
         certificateMgtUtils = new CertificateMgtUtils();

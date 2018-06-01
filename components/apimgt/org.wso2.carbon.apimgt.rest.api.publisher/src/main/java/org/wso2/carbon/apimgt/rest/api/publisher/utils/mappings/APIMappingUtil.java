@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
+import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -43,6 +44,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIEndpointSecurityDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIMaxTpsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SequenceDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -259,7 +261,7 @@ public class APIMappingUtil {
             dto.setType(APIDTO.TypeEnum.valueOf(model.getType()));
         }
 
-        if (!model.getType().equals(APIConstants.APIType.WS)) {
+        if (!APIConstants.APIType.WS.equals(model.getType())) {
             dto.setTransport(Arrays.asList(model.getTransports().split(",")));
         }
         dto.setVisibility(mapVisibilityFromAPItoDTO(model.getVisibility()));
@@ -313,6 +315,19 @@ public class APIMappingUtil {
         dto.setWsdlUri(model.getWsdlUrl());
         setEndpointSecurityFromModelToApiDTO(model, dto);
         setMaxTpsFromModelToApiDTO(model, dto);
+
+        //setting micro-gateway labels if there are any
+        if (model.getGatewayLabels() != null) {
+            List<LabelDTO> labels = new ArrayList<>();
+            List<Label> gatewayLabels = model.getGatewayLabels();
+            for (Label label : gatewayLabels) {
+                LabelDTO labelDTO = new LabelDTO();
+                labelDTO.setName(label.getName());
+                labelDTO.setDescription(label.getDescription());
+                labels.add(labelDTO);
+            }
+            dto.setLabels(labels);
+        }
 
         return dto;
     }
@@ -562,14 +577,19 @@ public class APIMappingUtil {
      * Converts a List object of APIs into a DTO
      *
      * @param apiList List of APIs
+     * @param expand defines whether APIListDTO should contain APIINFODTOs or APIDTOs
      * @return APIListDTO object containing APIDTOs
      */
-    public static APIListDTO fromAPIListToDTO(List<API> apiList) {
+    public static APIListDTO fromAPIListToDTO(List<API> apiList, boolean expand) throws APIManagementException {
         APIListDTO apiListDTO = new APIListDTO();
         List<APIInfoDTO> apiInfoDTOs = apiListDTO.getList();
-        if (apiList != null) {
+        if (apiList != null && !expand) {
             for (API api : apiList) {
                 apiInfoDTOs.add(fromAPIToInfoDTO(api));
+            }
+        } else if (apiList != null && expand) {
+            for (API api : apiList) {
+                apiInfoDTOs.add(fromAPItoDTO(api));
             }
         }
         apiListDTO.setCount(apiInfoDTOs.size());

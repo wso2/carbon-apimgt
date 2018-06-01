@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -49,6 +50,7 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -59,6 +61,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListPaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.MediationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.MediationListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.WsdlDTO;
@@ -74,6 +77,7 @@ import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -108,7 +112,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return matched APIs for the given search condition
      */
     @Override
-    public Response apisGet(Integer limit, Integer offset, String query, String accept, String ifNoneMatch) {
+    public Response apisGet(Integer limit, Integer offset, String query, String accept, String ifNoneMatch, Boolean expand) {
         List<API> allMatchedApis = new ArrayList<>();
         APIListDTO apiListDTO;
 
@@ -117,6 +121,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         query = query == null ? "" : query;
+        expand = (expand != null && expand) ? true : false;
         try {
             String newSearchQuery = APIUtil.constructNewSearchQuery(query);
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -130,7 +135,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             Set<API> apis = (Set<API>) result.get("apis");
             allMatchedApis.addAll(apis);
 
-            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis);
+            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis, expand);
             APIMappingUtil.setPaginationParams(apiListDTO, query, offset, limit, allMatchedApis.size());
 
             //Add pagination section in the response
@@ -145,7 +150,18 @@ public class ApisApiServiceImpl extends ApisApiService {
             paginationDTO.setTotal(length);
             apiListDTO.setPagination(paginationDTO);
 
-            return Response.ok().entity(apiListDTO).build();
+            if (APIConstants.APPLICATION_GZIP.equals(accept)) {
+                try {
+                    File zippedResponse = GZIPUtils.constructZippedResponse(apiListDTO);
+                    return Response.ok().entity(zippedResponse)
+                            .header("Content-Disposition", "attachment").
+                                    header("Content-Encoding", "gzip").build();
+                } catch (APIManagementException e) {
+                    RestApiUtil.handleInternalServerError(e.getMessage(), e, log);
+                }
+            } else {
+                return Response.ok().entity(apiListDTO).build();
+            }
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving APIs";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -276,6 +292,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             //we are setting the api owner as the logged in user until we support checking admin privileges and assigning
             //  the owner as a different user
             apiToAdd.setApiOwner(provider);
+
+            //attach micro-geteway labels
+            apiToAdd = assignLabelsToDTO(body,apiToAdd);
 
             //adding the api
             apiProvider.addAPI(apiToAdd);
@@ -829,6 +848,10 @@ public class ApisApiServiceImpl extends ApisApiService {
                 }
             }
             API apiToUpdate = APIMappingUtil.fromDTOtoAPI(body, apiIdentifier.getProviderName());
+
+            //attach micro-geteway labels
+            apiToUpdate = assignLabelsToDTO(body,apiToUpdate);
+            
             apiProvider.updateAPI(apiToUpdate);
 
             if (!isWSAPI) {
@@ -853,6 +876,30 @@ public class ApisApiServiceImpl extends ApisApiService {
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
+    }
+
+
+    /**
+     * This method is used to assign micro gateway labels to the DTO
+     *
+     * @param apiDTO API DTO
+     * @param api the API object
+     * @return the API object with labels
+     */
+    private API assignLabelsToDTO(APIDTO apiDTO, API api) {
+
+        if (apiDTO.getLabels() != null) {
+            List<LabelDTO> dtoLabels = apiDTO.getLabels();
+            List<Label> labelList = new ArrayList<>();
+            for (LabelDTO labelDTO : dtoLabels) {
+                Label label = new Label();
+                label.setName(labelDTO.getName());
+                label.setDescription(labelDTO.getDescription());
+                labelList.add(label);
+            }
+            api.setGatewayLabels(labelList);
+        }
+        return api;
     }
 
     /**

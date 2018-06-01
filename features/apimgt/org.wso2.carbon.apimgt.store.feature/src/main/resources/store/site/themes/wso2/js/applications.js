@@ -145,12 +145,26 @@ GrantTypes.prototype.getMap = function(selected){
             this.element.on( "click", ".generateAgainBtn", $.proxy(this.generateAgainBtn, this));
             this.element.on( "click", ".update_grants", $.proxy(this.updateGrants, this));
             this.element.on( "change", ".callback_url", $.proxy(this.change_callback_url, this));
+            this.element.on( "click", ".regenerate_consumer_secret", $.proxy(this.regenerateConsumerSecret, this));
+            this.element.on( "click", ".copy-btn", $.proxy(this.copyText, this));
         },
 
         change_callback_url: function(e){
             this.app.callbackUrl = $(e.currentTarget).val();
             this.selectDefaultGrants();
             this.render();
+        },
+
+        copyText: function(e) {
+            var text = $(e.currentTarget).attr("data-clipboard-text");
+            function handler (e) {
+                e.clipboardData.setData('text/plain', text);
+                e.preventDefault();
+                document.removeEventListener('copy', handler, true);
+            }
+
+            document.addEventListener('copy', handler, true);
+            document.execCommand('copy');
         },
 
         toggle_regenerate_button: function(e){
@@ -302,6 +316,9 @@ GrantTypes.prototype.getMap = function(selected){
                     }
                     this.app.keyState = result.data.key.keyState;
                     this.render();
+                    if (isHashEnabled == 'true') {
+                        $('#generateModal').modal('show');
+                    }
                     this.toggle_regenerate_button();
                 } else {
                     jagg.message({content: result.message, type: "error"});
@@ -348,6 +365,28 @@ GrantTypes.prototype.getMap = function(selected){
                     this.element.find('input.access_token').animate({ opacity: 0.1 }, 500).animate({ opacity: 1 }, 500);
                 } else {
                     jagg.message({content:result.message,type:"error"});
+                }
+
+            }, this), "json");
+            return false;
+        },
+
+        regenerateConsumerSecret: function() {
+            var validity_time = this.element.find(".validity_time").val();
+            this.element.find('.regenerate_consumer_secret').buttonLoader('start');
+            jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
+                action:"regenerateConsumerSecret",
+                clientId:this.app.ConsumerKey
+            }, $.proxy(function (result) {
+                this.element.find('.regenerate_consumer_secret').buttonLoader('stop');
+                if (!result.error) {
+                    this.app.ConsumerSecret = result.data.key,
+                    this.render();
+                    if (isHashEnabled == 'true') {
+                        $('#regenerateModal').modal('show');
+                    }
+                } else {
+                    jagg.message({content:result.data, type:"error"});
                 }
 
             }, this), "json");

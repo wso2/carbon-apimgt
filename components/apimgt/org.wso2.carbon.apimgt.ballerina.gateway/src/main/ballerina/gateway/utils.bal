@@ -8,8 +8,7 @@ import ballerina/io;
 import ballerina/reflect;
 
 public function isResourceSecured(http:ListenerAuthConfig? resourceLevelAuthAnn, http:ListenerAuthConfig?
-    serviceLevelAuthAnn)
-                    returns boolean {
+    serviceLevelAuthAnn) returns boolean {
     boolean isSecured;
     match resourceLevelAuthAnn.authentication {
         http:Authentication authn => {
@@ -154,7 +153,6 @@ public function getKeyValidationRequestObject(http:FilterContext context) return
     apiKeyValidationRequest.context = httpServiceConfig.basePath;
     apiKeyValidationRequest.apiVersion = getVersionFromServiceAnnotation(reflect:getServiceAnnotations
         (context.serviceType)).apiVersion;
-    // TODO set correct version
     apiKeyValidationRequest.requiredAuthenticationLevel = "Any";
     apiKeyValidationRequest.clientDomain = "*";
     apiKeyValidationRequest.matchingResource = httpResourceConfig.path;
@@ -247,7 +245,6 @@ public function getClientIp(http:Request request) returns (string) {
     string[] headerNames = request.getHeaderNames();
     foreach headerName in headerNames {
         string headerValue = untaint request.getHeader(headerName);
-        io:println(headerName + "Header : " + headerValue);
     }
     if(request.hasHeader(X_FORWARD_FOR_HEADER)) {
         header = request.getHeader(X_FORWARD_FOR_HEADER);

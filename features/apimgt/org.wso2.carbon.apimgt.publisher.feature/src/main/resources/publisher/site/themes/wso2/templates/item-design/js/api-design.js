@@ -1196,19 +1196,35 @@ APIDesigner.prototype.close_swagger_editor = function(){
 
 };
 
-APIDesigner.prototype.update_swagger = function(){
-    $("body").removeClass("modal-open");
-    $("#se-iframe").remove();
-    $(".wizard").show();
-    $('#swaggerEditer').append($('.swagger_editer_header'));
-    $('.tempNav').remove();
-    $("#swaggerEditer").fadeOut("fast");
-    var designer =  APIDesigner();
-    var json = jsyaml.safeLoad(window.localStorage.getItem(SWAGGER_CONTENT));
-    designer.load_api_document(json);
+APIDesigner.prototype.update_swagger = function () {
+    try {
+        var designer = APIDesigner();
+        var json = jsyaml.safeLoad(window.localStorage.getItem(SWAGGER_CONTENT));
+        $('#swaggerDefinition').val(JSON.stringify(json));
+        $('#update_swagger_form').ajaxSubmit({
+            success: function (result) {
+                if (!result.error) {
+                    designer.load_api_document(json);
+                    $("body").removeClass("modal-open");
+                    $("#se-iframe").remove();
+                    $(".wizard").show();
+                    $('#swaggerEditer').append($('.swagger_editer_header'));
+                    $('.tempNav').remove();
+                    $("#swaggerEditer").fadeOut("fast");
+                } else {
+                    jagg.message({content: result.message, type: "error"});
+                }
+            },
+            error: function() {
+                jagg.message({content: i18n.t("Error while updating API swagger definition"), type: "error"});
+            },
+            dataType: 'json'
+        });
+
+    } catch (e) {
+        jagg.message({content: i18n.t("API swagger definition is invalid"), type: "error"});
+    }
 };
-
-
 
 $(document).ready(function(){
     $.fn.editable.defaults.mode = 'inline';

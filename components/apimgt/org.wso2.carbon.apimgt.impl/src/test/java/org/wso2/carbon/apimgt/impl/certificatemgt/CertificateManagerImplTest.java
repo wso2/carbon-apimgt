@@ -18,7 +18,7 @@
 package org.wso2.carbon.apimgt.impl.certificatemgt;
 
 import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -73,8 +73,8 @@ public class CertificateManagerImplTest {
                     "XUHI2Xu3P3ZLhKMhMB8wHQYDVR0OBBYEFOKUFMb/vRAyLr86vxJl0hwmy+jqMAsGByqGSM44BAMF\r\n" +
                     "AAMvADAsAhQW0OvWKXAO5V+37VtaAEX0yAYhgQIUG0q66Btv7Pk/HGGwBnYiHjCpuL4=\r\n";
 
-    @BeforeClass
-    public static void init() {
+    @Before
+    public void init() {
         System.setProperty(JAVAX_NET_SSL_TRUST_STORE_PASSWORD_PROPERTY, JAVAX_SSL_TRUST_STORE_PASSWORD);
         MockitoAnnotations.initMocks(CertificateManagerImplTest.class);
         PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "deleteCertificate"))

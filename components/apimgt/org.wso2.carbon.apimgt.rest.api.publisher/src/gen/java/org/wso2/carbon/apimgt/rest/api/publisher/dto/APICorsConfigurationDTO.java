@@ -21,19 +21,31 @@ public class APICorsConfigurationDTO  {
   
   
   
+  private Boolean corsConfigurationEnabled = false;
+  
+  
   private List<String> accessControlAllowOrigins = new ArrayList<String>();
   
   
   private Boolean accessControlAllowCredentials = false;
   
   
-  private Boolean corsConfigurationEnabled = false;
-  
-  
   private List<String> accessControlAllowHeaders = new ArrayList<String>();
   
   
   private List<String> accessControlAllowMethods = new ArrayList<String>();
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("corsConfigurationEnabled")
+  public Boolean getCorsConfigurationEnabled() {
+    return corsConfigurationEnabled;
+  }
+  public void setCorsConfigurationEnabled(Boolean corsConfigurationEnabled) {
+    this.corsConfigurationEnabled = corsConfigurationEnabled;
+  }
 
   
   /**
@@ -57,18 +69,6 @@ public class APICorsConfigurationDTO  {
   }
   public void setAccessControlAllowCredentials(Boolean accessControlAllowCredentials) {
     this.accessControlAllowCredentials = accessControlAllowCredentials;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("corsConfigurationEnabled")
-  public Boolean getCorsConfigurationEnabled() {
-    return corsConfigurationEnabled;
-  }
-  public void setCorsConfigurationEnabled(Boolean corsConfigurationEnabled) {
-    this.corsConfigurationEnabled = corsConfigurationEnabled;
   }
 
   
@@ -102,9 +102,9 @@ public class APICorsConfigurationDTO  {
     StringBuilder sb = new StringBuilder();
     sb.append("class APICorsConfigurationDTO {\n");
     
+    sb.append("  corsConfigurationEnabled: ").append(corsConfigurationEnabled).append("\n");
     sb.append("  accessControlAllowOrigins: ").append(accessControlAllowOrigins).append("\n");
     sb.append("  accessControlAllowCredentials: ").append(accessControlAllowCredentials).append("\n");
-    sb.append("  corsConfigurationEnabled: ").append(corsConfigurationEnabled).append("\n");
     sb.append("  accessControlAllowHeaders: ").append(accessControlAllowHeaders).append("\n");
     sb.append("  accessControlAllowMethods: ").append(accessControlAllowMethods).append("\n");
     sb.append("}\n");

@@ -45,6 +45,7 @@ import org.wso2.carbon.identity.oauth.IdentityOAuthAdminException;
 import org.wso2.carbon.identity.oauth.OAuthAdminService;
 import org.wso2.carbon.identity.oauth.common.OAuthConstants;
 import org.wso2.carbon.identity.oauth.dto.OAuthConsumerAppDTO;
+import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -125,10 +126,17 @@ public class RegistrationServiceImpl implements RegistrationService {
                         }
                     }
                 }
+
+                String tokenType = APIConstants.APPLICATION_TOKEN_TYPE;
+                String profileTokenType = profile.getTokenType();
+                if (StringUtils.isNotEmpty(profileTokenType)) {
+                    tokenType = profileTokenType;
+                }
                 oauthApplicationInfo.addParameter(OAUTH_CLIENT_USERNAME, owner);
                 oauthApplicationInfo.setClientId("");
                 oauthApplicationInfo.setClientSecret("");
                 oauthApplicationInfo.setIsSaasApplication(profile.isSaasApp());
+                oauthApplicationInfo.setTokenType(tokenType);
                 appRequest.setOAuthApplicationInfo(oauthApplicationInfo);
 
                 loggedInUserTenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -321,11 +329,15 @@ public class RegistrationServiceImpl implements RegistrationService {
             serviceProvider.setApplicationName(applicationName);
             serviceProvider.setDescription("Service Provider for application " + appName);
             serviceProvider.setSaasApp(applicationInfo.getIsSaasApplication());
-            ServiceProviderProperty[] serviceProviderProperties = new ServiceProviderProperty[1];
+            ServiceProviderProperty[] serviceProviderProperties = new ServiceProviderProperty[2];
             ServiceProviderProperty serviceProviderProperty = new ServiceProviderProperty();
             serviceProviderProperty.setName(APP_DISPLAY_NAME);
             serviceProviderProperty.setValue(applicationName);
             serviceProviderProperties[0] = serviceProviderProperty;
+            ServiceProviderProperty tokenTypeProviderProperty = new ServiceProviderProperty();
+            tokenTypeProviderProperty.setName(APIConstants.APP_TOKEN_TYPE);
+            tokenTypeProviderProperty.setValue(applicationInfo.getTokenType());
+            serviceProviderProperties[1] = tokenTypeProviderProperty;
             serviceProvider.setSpProperties(serviceProviderProperties);
             ApplicationManagementService appMgtService = ApplicationManagementService.getInstance();
             appMgtService.createApplication(serviceProvider, tenantDomain, userName);
@@ -413,12 +425,17 @@ public class RegistrationServiceImpl implements RegistrationService {
         oauthConsumerAppDTO.setOAuthVersion(OAuthConstants.OAuthVersions.VERSION_2);
         oauthConsumerAppDTO.setGrantTypes(grantTypes.trim());
         try {
-            //Creating the Oauth app
-            oauthAdminService.registerOAuthApplicationData(oauthConsumerAppDTO);
+            boolean isHashDisabled = OAuth2Util.isHashDisabled();
+            if (isHashDisabled) {
+                //Creating the Oauth app
+                oauthAdminService.registerOAuthApplicationData(oauthConsumerAppDTO);
 
-            //Retrieving the created OAuth application
-            createdApp = oauthAdminService.getOAuthApplicationDataByAppName
-                    (oauthConsumerAppDTO.getApplicationName());
+                //Retrieving the created OAuth application
+                createdApp = oauthAdminService.getOAuthApplicationDataByAppName
+                        (oauthConsumerAppDTO.getApplicationName());
+            } else {
+                createdApp = oauthAdminService.registerAndRetrieveOAuthApplicationData(oauthConsumerAppDTO);
+            }
         } catch (IdentityOAuthAdminException e) {
             log.error("Error occurred while creating the OAuth app", e);
         }

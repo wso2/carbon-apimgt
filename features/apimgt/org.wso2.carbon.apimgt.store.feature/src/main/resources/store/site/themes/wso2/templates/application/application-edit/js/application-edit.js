@@ -47,6 +47,7 @@ $(document).ready(function () {
             attributeNew = $("#attribute_" + i.toString()).val();
             applicationAttributesNew[attributeKeyNew] = attributeNew;
         }
+        var tokenType = $("#tokenType").val();
         jagg.post("/site/blocks/application/application-update/ajax/application-update.jag", {
             action:"updateApplication",
             applicationNew:application,
@@ -56,6 +57,8 @@ $(document).ready(function () {
             groupIdOld:groupIdOld,
             groupIdNew:groupIdNew,
             applicationAttributeNew:JSON.stringify(applicationAttributesNew)
+            groupIdNew:groupIdNew,
+            tokenType:tokenType
         }, function (result) {
             if (result.error == false) {                
                 window.location = jagg.url("/site/pages/application.jag?name="+application);

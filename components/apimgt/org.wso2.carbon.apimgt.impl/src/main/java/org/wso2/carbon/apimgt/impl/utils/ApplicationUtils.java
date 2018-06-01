@@ -36,8 +36,6 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
  */
 public class ApplicationUtils {
 
-    private static ApiMgtDAO dao = ApiMgtDAO.getInstance();
-
     private static Log log = LogFactory.getLog(ApplicationUtils.class);
 
 
@@ -47,24 +45,10 @@ public class ApplicationUtils {
      * @param userId logged in userID
      * @return APIM application object will return.
      */
-    public static Application retrieveApplication(String appName, String userId, String groupingId) throws APIManagementException {
-
-        return dao.getApplicationByName(appName, userId, groupingId);
-
-    }
-
-    /**
-     * Get details of an Application referred by an Application Registration workflow.
-     * @param workflowReference Reference ID for an Application Registration Workflow
-     * @return {@code Application} Details of the Application.
-     * @throws APIManagementException
-     */
-    public static Application populateApplication(String workflowReference)
+    public static Application retrieveApplication(String appName, String userId, String groupingId)
             throws APIManagementException {
-        int appId = dao.getApplicationIdForAppRegistration(workflowReference);
-        return dao.getApplicationById(appId);
+        return ApiMgtDAO.getInstance().getApplicationByName(appName, userId, groupingId);
     }
-
 
     /**
      * This method will parse json String and set properties in  OAuthApplicationInfo object.
@@ -78,7 +62,7 @@ public class ApplicationUtils {
      * @throws APIManagementException
      */
     public static OAuthAppRequest createOauthAppRequest(String clientName, String clientId, String callbackURL,
-            String tokenScope, String clientDetails)
+            String tokenScope, String clientDetails, String tokenType)
             throws
             APIManagementException {
 
@@ -89,6 +73,7 @@ public class ApplicationUtils {
         authApplicationInfo.setCallBackURL(callbackURL);
         authApplicationInfo.addParameter("tokenScope",tokenScope);
         authApplicationInfo.setClientId(clientId);
+        authApplicationInfo.setTokenType(tokenType);
 
         if (clientDetails != null) {
             //parse json string and set applicationInfo parameters.
@@ -148,6 +133,6 @@ public class ApplicationUtils {
     public static void updateOAuthAppAssociation(Application application, String keyType,
                                                  OAuthApplicationInfo oAuthApplication) throws APIManagementException {
         application.addOAuthApp(keyType,oAuthApplication);
-        dao.updateApplicationKeyTypeMapping(application,keyType);
+        ApiMgtDAO.getInstance().updateApplicationKeyTypeMapping(application,keyType);
     }
 }

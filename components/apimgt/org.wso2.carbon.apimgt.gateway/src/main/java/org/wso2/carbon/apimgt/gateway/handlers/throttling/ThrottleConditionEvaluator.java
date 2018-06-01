@@ -20,15 +20,18 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.throttling;
 
-
 import org.apache.axis2.context.MessageContext;
+import org.apache.commons.lang.StringUtils;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.util.ArrayList;
@@ -47,7 +50,6 @@ import java.util.regex.Pattern;
  * Mozilla. Decision Engine keeps a track of which attributes are present in the request and which keys have been
  * throttled out. In order to see if those keys are applicable for the request, GW too should run some checks by
  * going through the attributes used for those conditions. What this class does is performing those checks.
- *
  */
 public class ThrottleConditionEvaluator {
 
@@ -56,18 +58,21 @@ public class ThrottleConditionEvaluator {
     }
 
     private static class ThrottleEvaluatorHolder {
+
         private static ThrottleConditionEvaluator evaluator = new ThrottleConditionEvaluator();
     }
 
     public static ThrottleConditionEvaluator getInstance() {
+
         return ThrottleEvaluatorHolder.evaluator;
     }
 
     /**
      * When called, provides a list of Applicable Condition Groups for the current request.
-     * @param synapseContext Message Context of the incoming request.
+     *
+     * @param synapseContext        Message Context of the incoming request.
      * @param authenticationContext AuthenticationContext populated by {@code APIAuthenticationHandler}
-     * @param inputConditionGroups All Condition Groups Attached with the resource/API being invoked.
+     * @param inputConditionGroups  All Condition Groups Attached with the resource/API being invoked.
      * @return List of ConditionGroups applicable for the current request.
      */
     public List<ConditionGroupDTO> getApplicableConditions(org.apache.synapse.MessageContext synapseContext,
@@ -96,6 +101,7 @@ public class ThrottleConditionEvaluator {
     private boolean isConditionGroupApplicable(org.apache.synapse.MessageContext synapseContext,
                                                AuthenticationContext authenticationContext,
                                                ConditionGroupDTO conditionGroup) {
+
         ConditionDTO[] conditions = conditionGroup.getConditions();
 
         boolean evaluationState = true;
@@ -104,13 +110,12 @@ public class ThrottleConditionEvaluator {
             evaluationState = false;
         }
 
-
         // When multiple conditions have been specified, all the conditions should occur.
         for (ConditionDTO condition : conditions) {
             evaluationState = evaluationState & isConditionApplicable(synapseContext, authenticationContext, condition);
 
             // If one of the conditions are false, rest will evaluate to false. So no need to check the rest.
-            if(!evaluationState){
+            if (!evaluationState) {
                 return false;
             }
         }
@@ -121,8 +126,8 @@ public class ThrottleConditionEvaluator {
                                           AuthenticationContext authenticationContext,
                                           ConditionDTO condition) {
 
-
-        org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) synapseContext).getAxis2MessageContext();
+        org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) synapseContext)
+                .getAxis2MessageContext();
 
         boolean state = false;
         switch (condition.getConditionType()) {
@@ -142,8 +147,8 @@ public class ThrottleConditionEvaluator {
                 state = isJWTClaimPresent(authenticationContext, condition);
                 break;
             }
-            case PolicyConstants.HEADER_TYPE:{
-                state = isHeaderPresent(axis2MessageContext,condition);
+            case PolicyConstants.HEADER_TYPE: {
+                state = isHeaderPresent(axis2MessageContext, condition);
                 break;
             }
         }
@@ -156,11 +161,12 @@ public class ThrottleConditionEvaluator {
     }
 
     private boolean isHeaderPresent(MessageContext messageContext, ConditionDTO condition) {
+
         TreeMap<String, String> transportHeaderMap = (TreeMap<String, String>) messageContext
                 .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-        if(transportHeaderMap != null){
+        if (transportHeaderMap != null) {
             String value = transportHeaderMap.get(condition.getConditionName());
-            if(value == null){
+            if (value == null) {
                 return false;
             }
             Pattern pattern = Pattern.compile(condition.getConditionValue());
@@ -170,17 +176,90 @@ public class ThrottleConditionEvaluator {
         return false;
     }
 
+    private boolean isHeaderPresent(MessageContext messageContext, ConditionDto.HeaderConditions condition) {
+
+        TreeMap<String, String> transportHeaderMap = (TreeMap<String, String>) messageContext
+                .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        boolean status = true;
+        for (Map.Entry<String, String> headerEntry : condition.getValues().entrySet()) {
+            if (transportHeaderMap != null) {
+                String value = transportHeaderMap.get(headerEntry.getKey());
+                if (StringUtils.isEmpty(value)) {
+                    status = false;
+                    break;
+                } else {
+                    Pattern pattern = Pattern.compile(headerEntry.getValue());
+                    Matcher matcher = pattern.matcher(value);
+                    status = status && matcher.find();
+                }
+            }
+        }
+
+        if (condition.isInvert()) {
+            return !status;
+        } else {
+            return status;
+        }
+    }
+
     private boolean isJWTClaimPresent(AuthenticationContext authenticationContext, ConditionDTO condition) {
+
         Map assertions = GatewayUtils.getJWTClaims(authenticationContext);
 
         Object value = assertions.get(condition.getConditionName());
         if (value == null) {
             return false;
-        } else if(value instanceof String) {
+        } else if (value instanceof String) {
             String valueString = (String) value;
             return valueString.matches(condition.getConditionValue());
         } else {
             return false;
+        }
+    }
+
+    private boolean isJWTClaimPresent(AuthenticationContext authenticationContext, ConditionDto.JWTClaimConditions
+            condition) {
+
+        Map assertions = GatewayUtils.getJWTClaims(authenticationContext);
+        boolean status = true;
+
+        for (Map.Entry<String, String> jwtClaim : condition.getValues().entrySet()) {
+            Object value = assertions.get(jwtClaim.getKey());
+            if (value == null) {
+                status = false;
+                break;
+            } else if (value instanceof String) {
+                String valueString = (String) value;
+                status = status && valueString.matches(jwtClaim.getValue());
+            } else {
+                status = false;
+            }
+        }
+        if (condition.isInvert()) {
+            return !status;
+        } else {
+            return status;
+        }
+    }
+
+    private boolean isQueryParamPresent(MessageContext messageContext, ConditionDto.QueryParamConditions condition) {
+
+        Map<String, String> queryParamMap = GatewayUtils.getQueryParams(messageContext);
+        boolean status = true;
+
+        for (Map.Entry<String, String> queryParam : condition.getValues().entrySet()) {
+            String value = queryParamMap.get(queryParam.getKey());
+            if (value == null) {
+                status = false;
+                break;
+            } else {
+                status = status && value.matches(queryParam.getValue());
+            }
+        }
+        if (condition.isInvert()) {
+            return !status;
+        } else {
+            return status;
         }
     }
 
@@ -197,6 +276,7 @@ public class ThrottleConditionEvaluator {
     }
 
     private boolean isMatchingIP(MessageContext messageContext, ConditionDTO condition) {
+
         String currentIpString = GatewayUtils.getIp(messageContext);
         return currentIpString.equals(condition.getConditionValue());
     }
@@ -215,4 +295,107 @@ public class ThrottleConditionEvaluator {
         return false;
     }
 
+    private boolean isWithinIP(MessageContext messageContext, ConditionDto.IPCondition ipCondition) {
+
+        String currentIpString = GatewayUtils.getIp(messageContext);
+        boolean status;
+        if (StringUtils.isNotEmpty(currentIpString)) {
+            long currentIp = APIUtil.ipToLong(currentIpString);
+            status = ipCondition.getStartingIp() <= currentIp && ipCondition.getEndingIp() >= currentIp;
+        } else {
+            return false;
+        }
+        if (ipCondition.isInvert()) {
+            return !status;
+        } else {
+            return status;
+        }
+    }
+
+    private boolean isMatchingIP(MessageContext messageContext, ConditionDto.IPCondition ipCondition) {
+
+        String currentIpString = GatewayUtils.getIp(messageContext);
+        long longValueOfIp = APIUtil.ipToLong(currentIpString);
+
+        if (ipCondition.isInvert()) {
+            return longValueOfIp != ipCondition.getSpecificIp();
+        }
+        return longValueOfIp == ipCondition.getSpecificIp();
+    }
+
+    public String getThrottledInCondition(org.apache.synapse.MessageContext synCtx, AuthenticationContext authContext,
+                                          Map<String, List<ConditionDto>> conditionDtoMap) {
+
+        org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) synCtx)
+                .getAxis2MessageContext();
+        String condition = null;
+        for (Map.Entry<String, List<ConditionDto>> conditionList : conditionDtoMap.entrySet()) {
+            if (!"default".equals(conditionList.getKey())) {
+                boolean pipeLineStatus = isThrottledWithinCondition(axis2MessageContext, authContext, conditionList
+                        .getValue());
+                if (pipeLineStatus) {
+                    condition = conditionList.getKey();
+                    break;
+                }
+            }
+        }
+        if (StringUtils.isEmpty(condition)) {
+            if (conditionDtoMap.containsKey("default")) {
+                List<ConditionDto> conditionDtoList = conditionDtoMap.get("default");
+                if (conditionDtoList != null && !conditionDtoList.isEmpty()) {
+                    boolean pipeLineStatus = isThrottledWithinCondition(axis2MessageContext, authContext,
+                            conditionDtoList);
+                    if (!pipeLineStatus) {
+                        condition = "default";
+                    }
+                } else {
+                    condition = "default";
+                }
+            }
+        }
+        return condition;
+    }
+
+    private boolean isThrottledWithinCondition(MessageContext axis2MessageContext, AuthenticationContext authContext,
+                                               List<ConditionDto> conditionDtoList) {
+
+        ThrottleProperties throttleProperties = ServiceReferenceHolder.getInstance().getThrottleProperties();
+        boolean status = true;
+        for (ConditionDto condition : conditionDtoList) {
+            if (condition.getIpCondition() != null) {
+                if (!isMatchingIP(axis2MessageContext, condition.getIpCondition())) {
+                    status = false;
+                    break;
+                }
+            } else if (condition.getIpRangeCondition() != null) {
+                if (!isWithinIP(axis2MessageContext, condition.getIpRangeCondition())) {
+                    status = false;
+                    break;
+                }
+            }
+            if (condition.getHeaderConditions() != null && throttleProperties.isEnableHeaderConditions() &&
+                    !condition.getHeaderConditions().getValues().isEmpty()) {
+                if (!isHeaderPresent(axis2MessageContext, condition.getHeaderConditions())) {
+                    status = false;
+                    break;
+                }
+            }
+            if (condition.getJwtClaimConditions() != null && throttleProperties.isEnableJwtConditions() &&
+                    !condition.getJwtClaimConditions().getValues().isEmpty()) {
+                if (!isJWTClaimPresent(authContext, condition.getJwtClaimConditions())) {
+                    status = false;
+                    break;
+                }
+            }
+            if (condition.getQueryParameterConditions() != null && throttleProperties.isEnableQueryParamConditions() &&
+                    !condition.getQueryParameterConditions().getValues().isEmpty()) {
+                if (!isQueryParamPresent(axis2MessageContext, condition.getQueryParameterConditions())) {
+                    status = false;
+                    break;
+                }
+            }
+
+        }
+        return status;
+    }
 }

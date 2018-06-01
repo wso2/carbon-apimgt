@@ -52,6 +52,7 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
+import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
@@ -136,6 +137,7 @@ public class APIStoreHostObject extends ScriptableObject {
     private static final String httpPort = "mgt.transport.http.port";
     private static final String httpsPort = "mgt.transport.https.port";
     private static final String hostName = "carbon.local.ip";
+    private static final String DEFAULT_TOKEN_TYPE = "DEFAULT";
 
     private APIConsumer apiConsumer;
 
@@ -528,7 +530,8 @@ public class APIStoreHostObject extends ScriptableObject {
                 String applicationName = (String) apiData.get("applicationName", apiData);
 
                 String keyType = (String) apiData.get("keytype", apiData);
-                Map<String, Object> keyDetails = getAPIConsumer(thisObj).mapExistingOAuthClient(jsonString, userName, clientId, applicationName, keyType);
+                String tokenType = APIConstants.APPLICATION_TOKEN_TYPE;
+                Map<String, Object> keyDetails = getAPIConsumer(thisObj).mapExistingOAuthClient(jsonString, userName, clientId, applicationName, keyType, tokenType);
                 NativeObject row = new NativeObject();
                 Set<Map.Entry<String, Object>> entries = keyDetails.entrySet();
                 for (Map.Entry<String, Object> entry : entries) {
@@ -2041,6 +2044,24 @@ public class APIStoreHostObject extends ScriptableObject {
                         row.put("type", row, api.getType());
                         row.put("additionalProperties", row, api.getAdditionalProperties().toJSONString());
                         row.put("authorizationHeader", row, api.getAuthorizationHeader());
+
+                        //put the labels to the native array which represents the API
+                        List<Label> labelList = api.getGatewayLabels();
+                        if (labelList != null && labelList.size() > 0) {
+                            NativeArray apiLabelsArray = new NativeArray(labelList.size());
+                            int i = 0;
+                            for (Label label : labelList) {
+                                NativeObject labelObject = new NativeObject();
+                                labelObject.put(APIConstants.LABEL_NAME, labelObject, label.getName());
+                                labelObject.put(APIConstants.LABEL_DESCRIPTION, labelObject, label.getDescription());
+                                labelObject.put(APIConstants.LABEL_ACCESS_URLS, labelObject,
+                                        StringUtils.join(label.getAccessUrls(), ", "));
+                                apiLabelsArray.put(i, apiLabelsArray, labelObject);
+                                i++;
+                            }
+                            row.put("labels", row, apiLabelsArray);
+                        }
+
                         myn.put(0, myn, row);
 
                     } else {
@@ -3191,6 +3212,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     row.put("isBlacklisted", row, application.getIsBlackListed());
                     row.put("totalCount", row, applicationCount);
                     row.put("owner", row, application.getOwner());
+                    row.put("tokenType", row, application.getTokenType());
                     myn.put(i++, myn, row);
                 }
 
@@ -3268,6 +3290,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 row.put("status", row, application.getStatus());
                 row.put("description", row, application.getDescription());
                 row.put("groupId", row, application.getGroupId());
+                row.put("tokenType", row, application.getTokenType());
                 try {
                     row.put("applicationAttributes", row,
                             new ObjectMapper().writeValueAsString(application.getApplicationAttributes()));
@@ -3304,9 +3327,17 @@ public class APIStoreHostObject extends ScriptableObject {
                 groupId = (String) args[5];
             }
 
+            String tokenType;
+            if (args.length > 6 && args[6] != null) {
+                tokenType = (String) args[6];
+            } else {
+                tokenType = DEFAULT_TOKEN_TYPE;
+            }
+
+
             try {
-                if (args.length > 6 && args[6] != null) {
-                    String applicationAttributeString = (String) args[6];
+                if (args.length > 7 && args[7] != null) {
+                    String applicationAttributeString = (String) args[7];
                     appAttributes = new ObjectMapper().readValue(applicationAttributeString, Map.class);
                 }
             } catch (IOException e) {
@@ -3320,6 +3351,8 @@ public class APIStoreHostObject extends ScriptableObject {
             application.setTier(tier);
             application.setCallbackUrl(callbackUrl);
             application.setDescription(description);
+            application.setTokenType(tokenType);
+
             if (groupId != null) {
                 application.setGroupId(groupId);
             }
@@ -3432,6 +3465,7 @@ public class APIStoreHostObject extends ScriptableObject {
             String tier = (String) args[3];
             String callbackUrl = (String) args[4];
             String description = (String) args[5];
+            String tokenType = (String) args[8];
             String groupingId = null;
             Map appAttributes =  null;
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
@@ -3442,8 +3476,8 @@ public class APIStoreHostObject extends ScriptableObject {
 
             // retrieve new values for application attributes
             try {
-                if (args.length > 8 && args[8] != null) {
-                    String applicationAttributeString = (String) args[8];
+                if (args.length > 9 && args[9] != null) {
+                    String applicationAttributeString = (String) args[9];
                     appAttributes = new ObjectMapper().readValue(applicationAttributeString, Map.class);
                 }
             } catch (IOException e) {
@@ -3470,6 +3504,7 @@ public class APIStoreHostObject extends ScriptableObject {
             updatedApplication.setTier(tier);
             updatedApplication.setCallbackUrl(callbackUrl);
             updatedApplication.setDescription(description);
+            updatedApplication.setTokenType(tokenType);
 
             if (appAttributes != null) {
                 updatedApplication.setApplicationAttributes(appAttributes);

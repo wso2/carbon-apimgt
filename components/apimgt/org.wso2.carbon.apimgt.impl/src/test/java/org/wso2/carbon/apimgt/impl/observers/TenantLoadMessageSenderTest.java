@@ -27,7 +27,7 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
@@ -50,8 +50,8 @@ public class TenantLoadMessageSenderTest {
 
     private static TenantLoadMessageSender tenantLoadMessageSender;
 
-    @BeforeClass
-    public static void setUp() throws AxisFault {
+    @Before
+    public void setUp() throws AxisFault {
         tenantLoadMessageSender = new TenantLoadMessageSender();
         System.setProperty(CARBON_HOME, "");
     }

@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.gateway.mediators;
 
-import junit.framework.TestCase;
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -30,11 +29,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
-public class DigestAuthMediatorTest extends TestCase {
+public class DigestAuthMediatorTest {
 
     DigestAuthMediator mediator;
 
+    @Test
     public void testSplitDigestHeader() throws Exception {
         String[] wwwHeaderSplits = { "",
                 "realm=\"Vcreate\", qop=\"auth\", nonce=\"PwQ0MxY3OPW3MDI3NTo1NmU2M09hNzJmDsI1NWFlZik5ZWRwMjdjYWViZjcxZQ==\"" };
@@ -45,6 +46,7 @@ public class DigestAuthMediatorTest extends TestCase {
         assertArrayEquals(expectedArray, afterSplit);
     }
 
+    @Test
     public void testSplitDigestHeaderQopNull() throws Exception {
         String[] wwwHeaderSplits = { "",
                 "realm=\"Vcreate\", nonce=\"PwQ0MxY3OPW3MDI3NTo1NmU2M09hNzJmDsI1NWFlZik5ZWRwMjdjYWViZjcxZQ==\"" };
@@ -55,6 +57,7 @@ public class DigestAuthMediatorTest extends TestCase {
         assertArrayEquals(expectedArray, afterSplit);
     }
 
+    @Test
     public void testSplitDigestHeaderWithQopMultiple() throws Exception {
         String[] wwwHeaderSplits = { "",
                 "realm=\"Vcreate\", qop=\"auth,auth-int\", nonce=\"PwQ0MxY3OPW3MDI3NTo1NmU2M09hNzJmDsI1NWFlZik5ZWRwMjdjYWViZjcxZQ==\"" };
@@ -65,6 +68,7 @@ public class DigestAuthMediatorTest extends TestCase {
         assertArrayEquals(expectedArray, afterSplit);
     }
 
+    @Test
     public void testSplitDigestHeaderWithAlgorithmMultiple() throws Exception {
         String[] wwwHeaderSplits = { "",
                 "realm=\"Vcreate\", qop=\"auth-int\", nonce=\"PwQ0MxY3OPW3MDI3NTo1NmU2M09hNzJmDsI1NWFlZik5ZWRwMjdjYWViZjcxZQ==\", algorithm=\"MD5,MD5-sess\"" };
@@ -75,6 +79,7 @@ public class DigestAuthMediatorTest extends TestCase {
         assertArrayEquals(expectedArray, afterSplit);
     }
 
+    @Test
     public void testCalculateHA1AlgoMD5() throws Exception {
         String username = "GarryL";
         String realm = "Vcreate";
@@ -88,6 +93,7 @@ public class DigestAuthMediatorTest extends TestCase {
         assertEquals(expectedHa1, ha1);
     }
 
+    @Test
     public void testCalculateHA1AlgoMD5sess() throws Exception {
         String username = "GarryL";
         String realm = "Vcreate";
@@ -101,6 +107,7 @@ public class DigestAuthMediatorTest extends TestCase {
         assertEquals(expectedHa1, ha1);
     }
 
+    @Test
     public void testCalculateHA1AlgoNone() throws Exception {
         String username = "GarryL";
         String realm = "Vcreate";
@@ -114,6 +121,7 @@ public class DigestAuthMediatorTest extends TestCase {
         assertEquals(expectedHa1, ha1);
     }
 
+    @Test
     public void testIncrementNonceCount() throws Exception {
         String prevNonceCount = "00000001";
         mediator = new DigestAuthMediator();
@@ -122,6 +130,7 @@ public class DigestAuthMediatorTest extends TestCase {
         assertEquals(expectedNonceCount, currNonceCount);
     }
 
+    @Test
     public void testGenerateResponseHashWhenQopNotnull() throws Exception {
         String ha1 = "7eb542ec2f370e063dceca936023bb88";
         String ha2 = "23b5493f4f370e063dc34r936023wb65";
@@ -136,6 +145,7 @@ public class DigestAuthMediatorTest extends TestCase {
         assertArrayEquals(expectedHashWithNonceCount, finalHashWithNonceCount);
     }
 
+    @Test
     public void testGenerateResponseHashWhenQopNull() throws Exception {
         String ha1 = "7eb542ec2f370e063dceca936023bb88";
         String ha2 = "23b5493f4f370e063dc34r936023wb65";
@@ -149,6 +159,7 @@ public class DigestAuthMediatorTest extends TestCase {
         assertArrayEquals(expectedHash, finalHash);
     }
 
+    @Test
     public void testConstructAuthHeaderWhenQopNull() throws Exception {
         String[] serverResponseArray = { "c42047191b9d53a208cd615b23797b15" };
         String username = "GarryL";
@@ -168,6 +179,7 @@ public class DigestAuthMediatorTest extends TestCase {
         assertEquals(expectedHeader, AuthHeader);
     }
 
+    @Test
     public void testConstructAuthHeaderWhenQopNotNull() throws Exception {
         String[] serverResponseArray = { "c42047191b9d53a208cd615b23797b15", "00000001" };
         String username = "GarryL";
@@ -187,6 +199,7 @@ public class DigestAuthMediatorTest extends TestCase {
         assertEquals(expectedHeader, AuthHeader);
     }
 
+    @Test
     public void testConstructAuthHeaderWhenAlgoNull() throws Exception {
         String[] serverResponseArray = { "c42047191b9d53a208cd615b23797b15", "00000001" };
         String username = "GarryL";

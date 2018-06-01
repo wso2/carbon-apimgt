@@ -18,6 +18,9 @@
  var description = "";
  var groupId = "";
  var callbackUrl = "";
+ var tokenType = "";
+ var tokenTypeDefault = "";
+ var tokenTypeJWT = "";
  if(app.description != null ){
   description = app.description; 
  }
@@ -40,6 +43,15 @@ if(app.groupId != null ){
     }
     return flag;
  } %>
+if(app.tokenType != null ){
+  tokenType = app.tokenType;
+  if(tokenType == "JWT"){
+    tokenTypeJWT = "Selected";
+  } else {
+    tokenTypeDefault = "Selected";
+  }
+}
+%>
  <script>
  var apiViewUrl = '<%= jagg.url('/apis/info') %>';
  </script>
@@ -162,6 +174,15 @@ if(jagg.isMultiGroupEnabled()){
         <% } %>
         <input type="hidden" name="numberOfAttributes"  id="numberOfAttributes" value="<%= encode.forHtml(count)%>"/>
     <% } %>
+
+<div class="form-group">
+    <label for="tokenType" class="col-md-3 col-lg-3 control-label"><%= i18n.localize("Token Type")%></label>
+    <div class="col-md-9 col-lg-9">
+        <select id="tokenType" name="tokenType">
+          <option title="DEFAULT" <%= encode.forHtml(tokenTypeDefault) %>>DEFAULT</option>
+          <option title="JWT" <%= encode.forHtml(tokenTypeJWT) %>>JWT</option>
+        </select>
+    </div>
 
   <div class="form-group">
     <div class="col-sm-offset-3 col-sm-9">

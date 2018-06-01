@@ -15,19 +15,19 @@ ${policy.getTenantDomain()}_resource_${policy.getPolicyName()}_default##
 @Import('org.wso2.throttle.processed.request.stream:1.0.0')
 define stream RequestStream (messageID string, appKey string, appTier string, subscriptionKey string, apiKey string, apiTier string, subscriptionTier string, resourceKey string, resourceTier string, userId string,  apiContext string, apiVersion string, appTenant string, apiTenant string, appId string, apiName string, propertiesMap string);
 
-@Export('org.wso2.throttle.globalThrottle.stream:1.0.0')
-define stream GlobalThrottleStream (throttleKey string, isThrottled bool, expiryTimeStamp long);
+@Export('org.wso2.throttle.globalThrottle.stream:1.1.0')
+define stream GlobalThrottleStream (throttleKey string, isThrottled bool, expiryTimeStamp long,evaluatedConditions string);
 
 FROM RequestStream
-SELECT messageID, (apiTenant == '$policy.getTenantDomain()' and resourceTier == '${policy.getPolicyName()}'$condition) AS isEligible, #getKey() AS throttleKey, propertiesMap
+SELECT messageID, (apiTenant == '$policy.getTenantDomain()' and resourceTier == '${policy.getPolicyName()}'$condition) AS isEligible, #getKey() AS throttleKey, propertiesMap,"$evaluatedConditions" as evaluatedConditions
 INSERT INTO EligibilityStream;
 
 #if($quotaPolicy != "")
 FROM EligibilityStream[isEligible==true]#throttler:timeBatch($quotaPolicy.getLimit().getUnitTime() $quotaPolicy.getLimit().getTimeUnit(), 0)
 #if($quotaPolicy.getType() == $REQUEST_COUNT_TYPE)
-select throttleKey, (count(messageID) >= $quotaPolicy.getLimit().getRequestCount()) as isThrottled, expiryTimeStamp group by throttleKey
+select throttleKey, (count(messageID) >= $quotaPolicy.getLimit().getRequestCount()) as isThrottled, expiryTimeStamp,evaluatedConditions group by throttleKey
 #else
-select throttleKey, (sum(cast(map:get(propertiesMap,'messageSize'),'long')) >= $quotaPolicy.getLimit().getStandardDataAmount()) as isThrottled, expiryTimeStamp group by throttleKey
+select throttleKey, (sum(cast(map:get(propertiesMap,'messageSize'),'long')) >= $quotaPolicy.getLimit().getStandardDataAmount()) as isThrottled, expiryTimeStamp,evaluatedConditions group by throttleKey
 #end
 INSERT ALL EVENTS into ResultStream;
 #end

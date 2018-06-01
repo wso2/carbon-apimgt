@@ -284,6 +284,11 @@ public final class APIConstants {
     public static final String PROVIDER_OVERVIEW_EMAIL = "overview_email";
     public static final String PROVIDER_OVERVIEW_DESCRIPTION = "overview_description";
 
+    public static final String API_LABELS_GATEWAY_LABELS = "labels_labelName";
+    public static final String LABEL_NAME = "labelName";
+    public static final String LABEL_DESCRIPTION = "labelDescription";
+    public static final String LABEL_ACCESS_URLS = "accessURLs";
+
     //database columns for Subscriber
     public static final String SUBSCRIBER_FIELD_EMAIL_ADDRESS = "EMAIL_ADDRESS";
     public static final String SUBSCRIBER_FIELD_USER_ID = "USER_ID";
@@ -318,6 +323,8 @@ public final class APIConstants {
     public static final String IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD = "VALIDITY_PERIOD";
     public static final String IDENTITY_OAUTH2_FIELD_USER_DOMAIN = "USER_DOMAIN";
 
+    public static final String EXP = "exp";
+    public static final String JWT = "JWT";
     public static final String JWT_CONFIGS = "JWTConfiguration.";
     public static final String JWT_HEADER = JWT_CONFIGS + "JWTHeader";
     public static final String TOKEN_GENERATOR_IMPL = JWT_CONFIGS + "JWTGeneratorImpl";
@@ -335,6 +342,7 @@ public final class APIConstants {
     public static final String TOKEN_ENDPOINT_NAME = OAUTH_CONFIGS + "TokenEndPointName";
     public static final String REVOKE_API_URL = OAUTH_CONFIGS + "RevokeAPIURL";
     public static final String ENCRYPT_TOKENS_ON_PERSISTENCE = OAUTH_CONFIGS + "EncryptPersistedTokens";
+    public static final String HASH_TOKENS_ON_PERSISTENCE = OAUTH_CONFIGS + "EnableTokenHashMode";
 
     public static final String DEFAULT_MODIFIED_ENDPOINT_PASSWORD = "*****"; //5 stars
     public static final String REGISTRY_HIDDEN_ENDPOINT_PROPERTY = "registry.HiddenEpProperty";
@@ -386,6 +394,7 @@ public final class APIConstants {
     public static final String OAUTH_RESPONSE_TOKEN_SCOPE = "scope";
     public static final String OAUTH_RESPONSE_EXPIRY_TIME = "expires_in";
     public static final String APP_DISPLAY_NAME = "DisplayName";
+    public static final String APP_TOKEN_TYPE = "TokenType";
     public static final String RECEIVER_URL = "receiverURL";
     public static final String AUTHENTICATOR_URL = "authenticatorURL";
     public static final String USERNAME = "username";
@@ -405,6 +414,7 @@ public final class APIConstants {
     public static final String SAML2_SSO_AUTHENTICATOR_NAME = "SAML2SSOAuthenticator";
     public static final String ORGANIZATION_CLAIM_ATTRIBUTE = "OrganizationClaimAttribute";
     public static final String DEFAULT_ORGANIZATION_CLAIM_NAME = "http://wso2.org/claims/organization";
+    public static final String APPLICATION_TOKEN_TYPE = "DEFAULT";
 
     public static class TokenStatus {
         public static final String ACTIVE = "ACTIVE";
@@ -1397,6 +1407,8 @@ public final class APIConstants {
             API_STATUS.toLowerCase() };
     // Prefix for registry attributes.
     public static final String OVERVIEW_PREFIX = "overview_";
+    public static final String LABEL_PREFIX = "labels_";
+    public static final String LABELNAME = "labelName";
     /**
      * Parameter for enabling tenant load notifications to members in the same HZ cluster
      */
@@ -1417,4 +1429,9 @@ public final class APIConstants {
     public static final String USER = "user";
     public static final String IS_SUPER_TENANT = "isSuperTenant";
     public static final String NULL_GROUPID_LIST = "null";
+
+    public static final String APPLICATION_GZIP = "application/gzip";
+    public static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
+    public static final String JSON_FILENAME_EXTENSION = ".json";
+    public static final String JSON_GZIP_FILENAME_EXTENSION = ".json.gz";
 }

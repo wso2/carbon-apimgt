@@ -57,8 +57,9 @@ include("/jagg/jagg.jag");
         username = user.username;
 
         mod = jagg.module("application");
-        result = mod.updateApplication(applicationNew,applicationOld,username,tier,callbackUrlNew,descriptionNew,
-            groupIdOld,groupIdNew, applicationAttributeNew);
+        tokenType = request.getParameter("tokenType");
+
+        result = mod.updateApplication(applicationNew,applicationOld,username,tier,callbackUrlNew,descriptionNew,groupIdOld,groupIdNew,tokenType,applicationAttributeNew);
 
         //If name of the selected application is edited,add the new name  to   session
         var selectedApp = session.get("selectedApp");

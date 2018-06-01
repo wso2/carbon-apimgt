@@ -41,6 +41,9 @@ public class OAuthApplicationInfo {
     private Map<String, String> appAttributes = new HashMap<>();
     private String jsonAppAttribute;
 
+    private String tokenType;
+
+
 
     public void setJsonString(String jsonString) {
         this.jsonString = jsonString;
@@ -177,5 +180,13 @@ public class OAuthApplicationInfo {
         }
     }
 
+
+    public String getTokenType() {
+        return tokenType;
+    }
+
+    public void setTokenType(String tokenType) {
+        this.tokenType = tokenType;
+    }
 
 }

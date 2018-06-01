@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>forum</artifactId>
-        <version>6.3.2-SNAPSHOT</version>
+        <version>6.3.21-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -44,6 +44,10 @@
                         <Export-Package>
                             org.wso2.carbon.forum.*;
                         </Export-Package>
+                        <Import-Package>
+                            org.apache.axis2.context.*; version="${imp.pkg.version.axis2}",
+                            *;resolution:=optional
+                        </Import-Package>
                     </instructions>
                 </configuration>
             </plugin>

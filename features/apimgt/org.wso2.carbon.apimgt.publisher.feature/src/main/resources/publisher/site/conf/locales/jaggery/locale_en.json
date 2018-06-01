@@ -240,6 +240,8 @@
     "Filter APIs": "Filter APIs",
     "FrequentTierHittingAlert_Desc": "This alert type gets triggered if at least one of the two cases below are satisfied; if a particular application gets throttled out for hitting the subscribed tier limit of that application more than 10 times (by default) within a day (by default), or if a particular user of an application gets throttled out for hitting the subscribed tier limit of a particular API more than 10 times (by default) within a day (by default)",
     "Gateway Environments": "Gateway Environments",
+    "Micro Gateway Labels": "Micro Gateway Labels",
+    "Specify the labels of the micro gateways here. This API will be deployed on the specified micro gateways.": "Specify the labels of the micro gateways here. This API will be deployed on the specified micro gateways.",
     "Gateway Failures": "Gateway Failures",
     "Gateway URLs": "Gateway URLs",
     "Gateways Unchecked": "Since a Gateway environment is not selected, changes will not be done to the Gateways. Do you want to proceed?",
@@ -604,5 +606,7 @@
     "Here a custom authorization header can be defined as a replacement to the default <strong>Authorization</strong> header used to send a request. If a value is specified here, that will be used as the header field to send the access token in a request to consume the API": "A custom authorization header can be defined as a replacement to the default <strong>Authorization</strong> header used to send a request. If a value is specified here, it will be used as the header field to send the access token in a request to consume the API",
     "Number of API Subscriptions" : "Number of API Subscriptions",
     "You must select a mediation policy to download": "You must select a mediation policy to download.",
-    "Error while retrieving the selected mediation policy": "Error while retrieving the selected mediation policy."
+    "Error while retrieving the selected mediation policy": "Error while retrieving the selected mediation policy.",
+    "API swagger definition is invalid" : "API swagger definition is invalid",
+    "Error while updating API swagger definition" : "Error while updating API swagger definition"
 }

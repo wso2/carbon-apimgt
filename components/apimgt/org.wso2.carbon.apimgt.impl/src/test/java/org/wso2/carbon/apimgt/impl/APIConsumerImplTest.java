@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.BDDMockito;
 import org.mockito.Mockito;
+import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
@@ -37,6 +38,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIRating;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
 import org.wso2.carbon.apimgt.api.model.Application;
@@ -65,7 +67,6 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
-import org.wso2.carbon.governance.api.generic.GenericArtifactFilter;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifactImpl;
@@ -76,7 +77,6 @@ import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.ResourceImpl;
 import org.wso2.carbon.registry.core.Tag;
-import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.dataobjects.ResourceDO;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -105,10 +105,11 @@ import javax.cache.CacheManager;
 import javax.cache.Caching;
 import javax.xml.namespace.QName;
 
-import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 
@@ -172,6 +173,11 @@ public class APIConsumerImplTest {
         Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
         Mockito.when(registryService.getGovernanceSystemRegistry(Mockito.anyInt())).thenReturn(userRegistry);
         Mockito.when(userRealm.getAuthorizationManager()).thenReturn(authorizationManager);
+
+        PowerMockito.when(APIUtil.replaceSystemProperty(anyString())).thenAnswer((Answer<String>) invocation -> {
+            Object[] args = invocation.getArguments();
+            return (String) args[0];
+        });
     }
 
     @Test
@@ -673,6 +679,15 @@ public class APIConsumerImplTest {
     }
 
     @Test
+    public void testRenewConsumerSecret() throws APIManagementException {
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
+        String clientId = UUID.randomUUID().toString();
+        Mockito.when(keyManager.getNewApplicationConsumerSecret((AccessTokenRequest) Mockito.anyObject())).thenReturn
+                ("updatedClientSecret");
+        assertNotNull(apiConsumer.renewConsumerSecret(clientId));
+    }
+
+    @Test
     public void testRenewAccessToken() throws APIManagementException {
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
         String args[] = {UUID.randomUUID().toString(), UUID.randomUUID().toString()};
@@ -730,9 +745,8 @@ public class APIConsumerImplTest {
 
     @Test
     public void testGetSubscribedIdentifiers() throws APIManagementException {
-        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
-        apiConsumer.apiMgtDAO = apiMgtDAO;
-        Set<SubscribedAPI> originalSubscribedAPIs = new HashSet<SubscribedAPI>();
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
+        Set<SubscribedAPI> originalSubscribedAPIs = new HashSet<>();
         SubscribedAPI subscribedAPI = Mockito.mock(SubscribedAPI.class);
         originalSubscribedAPIs.add(subscribedAPI);
         Subscriber subscriber = new Subscriber("Subscriber");
@@ -743,6 +757,19 @@ public class APIConsumerImplTest {
         when(subscribedAPI.getTier()).thenReturn(tier);
         when(tier.getName()).thenReturn("tier");
         when(subscribedAPI.getApiId()).thenReturn(apiId1);
+        Application app = Mockito.mock(Application.class);
+        when(app.getId()).thenReturn(1);
+        when(subscribedAPI.getApplication()).thenReturn(app);
+
+        Mockito.when(apiMgtDAO.getConsumerkeyByApplicationIdAndKeyType(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn("xxx");
+        Mockito.when(apiMgtDAO.getKeyStatusOfApplication(Mockito.anyString(), Mockito.anyInt()))
+                .thenReturn(new APIKey());
+
+        AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
+        accessTokenInfo.setAccessToken(UUID.randomUUID().toString());
+        Mockito.when(keyManager.getAccessTokenByConsumerKey(Mockito.anyString())).thenReturn(accessTokenInfo);
+
         assertNotNull(apiConsumer.getSubscribedIdentifiers(subscriber, apiId1,"testID"));
     }
 
@@ -806,9 +833,9 @@ public class APIConsumerImplTest {
 
     @Test
     public void testAddApplication() throws APIManagementException, UserStoreException {
-        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
-        apiConsumer.apiMgtDAO = apiMgtDAO;
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         Application application = Mockito.mock(Application.class);
+        Mockito.when(application.getName()).thenReturn("app");
         PowerMockito.when(APIUtil.isApplicationExist("userID", "app", "1")).
                 thenReturn(false);
         Mockito.when(apiMgtDAO.addApplication(application, "userID")).thenReturn(1);
@@ -817,10 +844,9 @@ public class APIConsumerImplTest {
 
     @Test
     public void testGetScopesBySubscribedAPIs() throws APIManagementException {
-        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
-        apiConsumer.apiMgtDAO = apiMgtDAO;
-        List<APIIdentifier> identifiers = new ArrayList<APIIdentifier>();
-        Set<Scope> scopes = new HashSet<Scope>();
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
+        List<APIIdentifier> identifiers = new ArrayList<>();
+        Set<Scope> scopes = new HashSet<>();
         when(apiMgtDAO.getScopesBySubscribedAPIs(identifiers)).thenReturn(scopes);
         assertEquals(scopes, apiConsumer.getScopesBySubscribedAPIs(identifiers));
     }
@@ -828,17 +854,15 @@ public class APIConsumerImplTest {
 
     @Test
     public void testGetScopesByScopeKeys() throws APIManagementException {
-        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
-        apiConsumer.apiMgtDAO = apiMgtDAO;
-        Set<Scope> scopes = new HashSet<Scope>();
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
+        Set<Scope> scopes = new HashSet<>();
         when(apiMgtDAO.getScopesByScopeKeys("testKey", 1234)).thenReturn(scopes);
         assertEquals(scopes, apiConsumer.getScopesByScopeKeys("testKey", 1234));
     }
 
     @Test
     public void testAddComment() throws APIManagementException {
-        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
-        apiConsumer.apiMgtDAO = apiMgtDAO;
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         APIIdentifier apiIdentifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
         Mockito.when(apiMgtDAO.addComment(apiIdentifier, "testComment", "testUser")).thenReturn(1111);
         apiConsumer.addComment(apiIdentifier, "testComment", "testUser");
@@ -848,8 +872,7 @@ public class APIConsumerImplTest {
 
     @Test
     public void testGetSubscribedAPIsWithApp() throws APIManagementException {
-        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
-        apiConsumer.apiMgtDAO = apiMgtDAO;
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         Set<SubscribedAPI> originalSubscribedAPIs = new HashSet<SubscribedAPI>();
         SubscribedAPI subscribedAPI = Mockito.mock(SubscribedAPI.class);
         originalSubscribedAPIs.add(subscribedAPI);
@@ -864,8 +887,7 @@ public class APIConsumerImplTest {
 
     @Test
     public void testDeleteOAuthApplication() throws APIManagementException {
-        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
-        apiConsumer.apiMgtDAO = apiMgtDAO;
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         Map<String, String> applicationIdAndTokenTypeMap =new HashMap<String, String>();
         applicationIdAndTokenTypeMap.put("application_id", "testId");
         applicationIdAndTokenTypeMap.put("token_type", "testType");
@@ -877,20 +899,19 @@ public class APIConsumerImplTest {
 
     @Test
     public void testGetApplicationsByName() throws APIManagementException {
-        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
-        apiConsumer.apiMgtDAO = apiMgtDAO;
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         Subscriber subscriber = new Subscriber("subscriber");
         Application application = new Application("testApp", subscriber);
-        Mockito.when(apiMgtDAO.getApplicationByName("testApp", "testId", "testGroup")).
+        Mockito.when(apiMgtDAO.getApplicationWithOAuthApps("testApp", "testId", "testGroup")).
                 thenReturn(application);
+        Mockito.when(apiMgtDAO.getApplicationKeys(Mockito.anyInt())).thenReturn(new HashSet<>());
         assertEquals(application, apiConsumer.
                 getApplicationsByName("testId", "testApp", "testGroup"));
-
     }
 
     @Test
     public void testGetApplicationById() throws APIManagementException {
-        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         apiConsumer.apiMgtDAO = apiMgtDAO;
         Application application = new Application("testID");
         Mockito.when(apiMgtDAO.getApplicationById(1111)).
@@ -900,8 +921,7 @@ public class APIConsumerImplTest {
 
     @Test
     public void testGetApplicationStatusById() throws APIManagementException {
-        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
-        apiConsumer.apiMgtDAO = apiMgtDAO;
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         Mockito.when(apiMgtDAO.getApplicationStatusById(1111)).
                 thenReturn("testStatus");
         assertEquals("testStatus", apiConsumer.getApplicationStatusById(1111));
@@ -909,8 +929,7 @@ public class APIConsumerImplTest {
 
     @Test
     public void testCompleteApplicationRegistration() throws APIManagementException {
-        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
-        apiConsumer.apiMgtDAO = apiMgtDAO;
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         Subscriber subscriber = new Subscriber("testId");
         Application application = new Application("testApp", subscriber);
         Mockito.when(apiMgtDAO.getApplicationByName("testApp", "testId", "testGroup")).
@@ -937,8 +956,7 @@ public class APIConsumerImplTest {
 
     @Test
     public void testRemoveApplication() throws APIManagementException {
-        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
-        apiConsumer.apiMgtDAO = apiMgtDAO;
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         Subscriber subscriber = new Subscriber("subscriber");
         Application application = new Application("testID", subscriber);
         application.setId(1111);
@@ -949,11 +967,36 @@ public class APIConsumerImplTest {
         Mockito.when(apiMgtDAO.getPendingSubscriptionsByApplicationId(1111)).thenReturn(pendingSubscriptions);
         Mockito.when(apiMgtDAO.getRegistrationApprovalState(1111, APIConstants.API_KEY_TYPE_PRODUCTION)).
                 thenReturn("CREATED");
-        apiConsumer.removeApplication(application, apiConsumer.username);
+
+        String unauthorizedUser = "unauthorized_user";
+
+        //remove as unauthorized user
+        try {
+            apiConsumer.removeApplication(application, unauthorizedUser);
+        } catch (Exception ex){
+            Assert.assertTrue(ex instanceof APIManagementException);
+            Assert.assertEquals("user: " + unauthorizedUser + ", " +
+                    "attempted to remove application owned by: " + subscriber.getName(), ex.getMessage());
+        }
+
+        //remove as application owner
+        apiConsumer.removeApplication(application, subscriber.getName());
 
         Mockito.when(apiMgtDAO.getRegistrationApprovalState(1111, APIConstants.API_KEY_TYPE_SANDBOX)).
                 thenReturn("CREATED");
-        apiConsumer.removeApplication(application, apiConsumer.username);
+
+        //remove as unauthorized user
+        try {
+            apiConsumer.removeApplication(application, unauthorizedUser);
+        } catch (Exception ex){
+            Assert.assertTrue(ex instanceof APIManagementException);
+            Assert.assertEquals("user: " + unauthorizedUser + ", " +
+                    "attempted to remove application owned by: " + subscriber.getName(), ex.getMessage());
+        }
+
+        //remove as application owner
+        apiConsumer.removeApplication(application, subscriber.getName());
+
         Mockito.verify(apiMgtDAO, Mockito.times(2)).getPendingSubscriptionsByApplicationId(1111);
     }
 
@@ -965,7 +1008,7 @@ public class APIConsumerImplTest {
         oAuthAppRequest.setOAuthApplicationInfo(oAuthApplicationInfo);
         BDDMockito.when(ApplicationUtils
                 .createOauthAppRequest(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                        Mockito.anyString(), Mockito.anyString())).thenReturn(oAuthAppRequest);
+                        Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(oAuthAppRequest);
         Mockito.when(apiMgtDAO
                 .getConsumerKeyForApplicationKeyType(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString())).thenReturn(consumerKey);
@@ -1181,7 +1224,7 @@ public class APIConsumerImplTest {
         application = new Application("app1", new Subscriber("1"));
         BDDMockito.when(ApplicationUtils
                 .createOauthAppRequest(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                        Mockito.anyString(), Mockito.anyString())).thenReturn(oAuthAppRequest);
+                        Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(oAuthAppRequest);
         BDDMockito.when(ApplicationUtils
                 .retrieveApplication(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
                 .thenReturn(application);
@@ -1254,6 +1297,8 @@ public class APIConsumerImplTest {
         SubscribedAPI subscribedAPIOld = new SubscribedAPI(subscriber, identifier);
         subscribedAPIOld.setApplication(application);
         Mockito.when(apiMgtDAO.getSubscriptionByUUID(uuid)).thenReturn(null, subscribedAPIOld);
+        Mockito.when(apiMgtDAO.isAppAllowed(Mockito.anyInt(), Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(true);
         SubscribedAPI subscribedAPINew = new SubscribedAPI(uuid);
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         try {
@@ -1295,13 +1340,16 @@ public class APIConsumerImplTest {
     @Test
     public void testAddSubscription() throws APIManagementException {
         APIIdentifier identifier = new APIIdentifier(API_PROVIDER, "published_api", SAMPLE_API_VERSION);
-        Mockito.when(apiMgtDAO.addSubscription((APIIdentifier) Mockito.any(), Mockito.anyString(), Mockito.anyInt(),
+        Mockito.when(apiMgtDAO.addSubscription(Mockito.any(), Mockito.anyString(), Mockito.anyInt(),
                 Mockito.anyString(), Mockito.anyString())).thenReturn(1);
+        Mockito.when(apiMgtDAO.isAppAllowed(Mockito.anyInt(), Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(true);
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         SubscribedAPI subscribedAPI = new SubscribedAPI("api1");
-        Mockito.when(apiConsumer.getSubscriptionById(Mockito.anyInt())).thenReturn(subscribedAPI);
+        Mockito.when(apiMgtDAO.getSubscriptionById(Mockito.anyInt())).thenReturn(subscribedAPI);
         apiConsumer.tenantDomain = SAMPLE_TENANT_DOMAIN_1;
-        Assert.assertEquals(apiConsumer.addSubscription(identifier, "sub1", 1).getSubscriptionUUID(),"api1");
+        Assert.assertEquals(apiConsumer.addSubscription(identifier, "sub1", 1).getSubscriptionUUID()
+                ,"api1");
         identifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
         try {
             apiConsumer.addSubscription(identifier, "sub1", 1);
@@ -1314,6 +1362,7 @@ public class APIConsumerImplTest {
 
     @Test
     public void testGetPaginatedSubscribedAPIs() throws APIManagementException {
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         Subscriber subscriber = new Subscriber("sub1");
         Application application = new Application("app1", subscriber);
         application.setId(1);
@@ -1329,7 +1378,6 @@ public class APIConsumerImplTest {
         tierMap.put("tier1", new Tier("Platinum"));
         PowerMockito.when(APIUtil.getTiers(Mockito.anyInt())).thenThrow(APIManagementException.class)
                 .thenReturn(tierMap);
-        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         Mockito.when(apiMgtDAO.getPaginatedSubscribedAPIs(subscriber, "app1", 0, 5, "group_id_1"))
                 .thenReturn(subscribedAPIs, null, subscribedAPIs);
         try {
@@ -1345,12 +1393,13 @@ public class APIConsumerImplTest {
 
     @Test
     public void testMapExistingOAuthClient() throws APIManagementException {
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
         OAuthAppRequest oAuthAppRequest = new OAuthAppRequest();
         oAuthAppRequest.setOAuthApplicationInfo(oAuthApplicationInfo);
         BDDMockito.when(ApplicationUtils
                 .createOauthAppRequest(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                        Mockito.anyString(), Mockito.anyString())).thenReturn(oAuthAppRequest);
+                        Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(oAuthAppRequest);
         Mockito.when(apiMgtDAO.isMappingExistsforConsumerKey(Mockito.anyString())).thenReturn(true, false);
         Mockito.when(keyManager.mapOAuthApplication((OAuthAppRequest) Mockito.any())).thenReturn(oAuthApplicationInfo);
         Mockito.doNothing().when(apiMgtDAO).createApplicationKeyTypeMappingForManualClients(Mockito.anyString(),
@@ -1360,15 +1409,14 @@ public class APIConsumerImplTest {
         BDDMockito.when(ApplicationUtils.createAccessTokenRequest(oAuthApplicationInfo, null)).thenReturn
                 (accessTokenRequest);
         Mockito.when(keyManager.getNewApplicationAccessToken(accessTokenRequest)).thenReturn(accessTokenInfo);
-        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         try {
-            apiConsumer.mapExistingOAuthClient("", "admin", "1", "app1", "refresh");
+            apiConsumer.mapExistingOAuthClient("", "admin", "1", "app1", "refresh", "DEFAULT");
             Assert.fail("Exception is not thrown when client id is already mapped to an application");
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("is used for another Application"));
         }
         Assert.assertEquals(6, apiConsumer.mapExistingOAuthClient("", "admin", "1",
-                "app1", "refresh").size());
+                "app1", "refresh", "DEFAULT").size());
     }
 
     @Test
@@ -1385,6 +1433,7 @@ public class APIConsumerImplTest {
     @Test
     public void testGetPublishedAPIsByProvider1()
             throws APIManagementException, RegistryException, org.wso2.carbon.user.core.UserStoreException {
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(userRegistry, apiMgtDAO);
         String providerId = "1";
         API api = new API(new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION));
         API api1 = new API(new APIIdentifier(API_PROVIDER, "pizza_api", "2.0.0"));
@@ -1392,21 +1441,21 @@ public class APIConsumerImplTest {
         PowerMockito.when(APIUtil.isAllowDisplayAPIsWithMultipleStatus()).thenReturn(true, false);
         PowerMockito.when(APIUtil.getArtifactManager(userRegistry, APIConstants.API_KEY))
                 .thenReturn(genericArtifactManager);
-        PowerMockito.when(APIUtil.getMountedPath((RegistryContext) Mockito.any(), Mockito.anyString()))
-                .thenReturn("system/governance");
-        PowerMockito.when(APIUtil.getAPI((GenericArtifact) Mockito.any())).thenReturn(api);
+        PowerMockito.when(APIUtil.getMountedPath(Mockito.any(), Mockito.anyString())).thenReturn("system/governance");
+        PowerMockito.when(APIUtil.getAPI(Mockito.any())).thenReturn(api);
         PowerMockito.when(APIUtil.replaceEmailDomainBack(Mockito.anyString())).thenReturn(providerId);
+        System.setProperty(CARBON_HOME, "");
+        PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
+        PowerMockito.mockStatic(PrivilegedCarbonContext.class);
+        PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
         GenericArtifact genericArtifact1 = new GenericArtifactImpl(new QName("local"), "artifact1");
         GenericArtifact genericArtifact2 = new GenericArtifactImpl(new QName("local"), "artifact2");
         GenericArtifact[] genericArtifacts = new GenericArtifact[] { genericArtifact1, genericArtifact2 };
-        Mockito.when(genericArtifactManager.findGenericArtifacts((GenericArtifactFilter) Mockito.any()))
+        Mockito.when(genericArtifactManager.findGenericArtifacts((Map<String, List<String>>) Mockito.any()))
                 .thenThrow(GovernanceException.class).thenReturn(genericArtifacts);
-        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(userRegistry, apiMgtDAO);
         PowerMockito.mockStatic(GovernanceUtils.class);
-        PowerMockito.when(GovernanceUtils.getArtifactPath((Registry) Mockito.any(), Mockito.anyString()))
-                .thenReturn("/path1");
-        PowerMockito.when(RegistryUtils.getAbsolutePath((RegistryContext) Mockito.any(), Mockito.anyString()))
-                .thenReturn("/path1");
+        PowerMockito.when(GovernanceUtils.getArtifactPath(Mockito.any(), Mockito.anyString())).thenReturn("/path1");
+        PowerMockito.when(RegistryUtils.getAbsolutePath(Mockito.any(), Mockito.anyString())).thenReturn("/path1");
         Assert.assertNull(apiConsumer.getPublishedAPIsByProvider("1", "test_user", 5, API_PROVIDER, "John"));
         Assert.assertEquals(0,
                 apiConsumer.getPublishedAPIsByProvider("1", "test_user", 5, API_PROVIDER, "John").size());
@@ -1416,8 +1465,8 @@ public class APIConsumerImplTest {
         Resource resource = new ResourceImpl();
         resource.setUUID(UUID.randomUUID().toString());
         Mockito.when(userRegistry.get(Mockito.anyString())).thenReturn(resource);
-        GenericArtifact genericArtifact = new GenericArtifactImpl(new QName("local"), "artifact");
-        genericArtifact.setAttribute(APIConstants.API_OVERVIEW_STATUS, APIConstants.PUBLISHED);
+        PowerMockito.when(APIUtil.getApiStatus(Mockito.anyString())).thenReturn(APIStatus.PUBLISHED);
+        GenericArtifact genericArtifact = Mockito.mock(GenericArtifactImpl.class);
         Mockito.when(genericArtifactManager.getGenericArtifact(Mockito.anyString())).thenReturn(genericArtifact);
         Assert.assertEquals(1,
                 apiConsumer.getPublishedAPIsByProvider("1", "test_user", 1, API_PROVIDER, "John").size());
@@ -1437,28 +1486,31 @@ public class APIConsumerImplTest {
     @Test
     public void testGetPublishedAPIsByProvider2()
             throws APIManagementException, RegistryException, org.wso2.carbon.user.core.UserStoreException {
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(userRegistry, apiMgtDAO);
         String providerId = "2";
         API api = new API(new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION));
         API api1 = new API(new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, "2.0.0"));
+        PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.isAllowDisplayMultipleVersions()).thenReturn(true, false);
         PowerMockito.when(APIUtil.isAllowDisplayAPIsWithMultipleStatus()).thenReturn(true, false);
         PowerMockito.when(APIUtil.getArtifactManager(userRegistry, APIConstants.API_KEY))
                 .thenReturn(genericArtifactManager);
-        PowerMockito.when(APIUtil.getMountedPath((RegistryContext) Mockito.any(), Mockito.anyString()))
-                .thenReturn("system/governance");
-        PowerMockito.when(APIUtil.getAPI((GenericArtifact) Mockito.any())).thenReturn(api);
+        PowerMockito.when(APIUtil.getMountedPath(Mockito.any(), Mockito.anyString())).thenReturn("system/governance");
+        PowerMockito.when(APIUtil.getAPI(Mockito.any())).thenReturn(api);
         PowerMockito.when(APIUtil.replaceEmailDomainBack(Mockito.anyString())).thenReturn(providerId);
+        PowerMockito.when(APIUtil.getApiStatus(Mockito.anyString())).thenReturn(APIStatus.PUBLISHED);   
+        System.setProperty(CARBON_HOME, "");
+        PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
+        PowerMockito.mockStatic(PrivilegedCarbonContext.class);
+        PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
         GenericArtifact genericArtifact1 = new GenericArtifactImpl(new QName("local"), "artifact1");
         GenericArtifact genericArtifact2 = new GenericArtifactImpl(new QName("local"), "artifact2");
         GenericArtifact[] genericArtifacts = new GenericArtifact[] { genericArtifact1, genericArtifact2 };
-        Mockito.when(genericArtifactManager.findGenericArtifacts((GenericArtifactFilter) Mockito.any()))
+        Mockito.when(genericArtifactManager.findGenericArtifacts((Map<String, List<String>>) Mockito.any()))
                 .thenReturn(genericArtifacts);
-        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(userRegistry, apiMgtDAO);
         PowerMockito.mockStatic(GovernanceUtils.class);
-        PowerMockito.when(GovernanceUtils.getArtifactPath((Registry) Mockito.any(), Mockito.anyString()))
-                .thenReturn("/path1");
-        PowerMockito.when(RegistryUtils.getAbsolutePath((RegistryContext) Mockito.any(), Mockito.anyString()))
-                .thenReturn("/path1");
+        PowerMockito.when(GovernanceUtils.getArtifactPath(Mockito.any(), Mockito.anyString())).thenReturn("/path1");
+        PowerMockito.when(RegistryUtils.getAbsolutePath(Mockito.any(), Mockito.anyString())).thenReturn("/path1");
         Association association = new Association();
         association.setDestinationPath("/destPath1");
         Association association2 = new Association();
@@ -1492,12 +1544,11 @@ public class APIConsumerImplTest {
         Resource resource = new ResourceImpl();
         resource.setUUID(UUID.randomUUID().toString());
         Mockito.when(userRegistry.get(Mockito.anyString())).thenReturn(resource);
-        GenericArtifact genericArtifact = new GenericArtifactImpl(new QName("local"), "artifact");
-        genericArtifact.setAttribute(APIConstants.API_OVERVIEW_STATUS, APIConstants.PUBLISHED);
+        GenericArtifact genericArtifact = Mockito.mock(GenericArtifactImpl.class);
+        Mockito.when(genericArtifact.getLifecycleState(Mockito.anyString())).thenReturn(APIConstants.PUBLISHED);
         Mockito.when(genericArtifactManager.getGenericArtifact(Mockito.anyString())).thenReturn(genericArtifact);
         Assert.assertEquals(1, apiConsumer.getPublishedAPIsByProvider("1", "test_user", 1, API_PROVIDER, "").size());
         PowerMockito.when(APIUtil.getAPI((GenericArtifact) Mockito.any())).thenReturn(api, api1);
-
         Assert.assertEquals(1, apiConsumer.getPublishedAPIsByProvider("1", "test_user", 5, API_PROVIDER, "").size());
         PowerMockito.when(APIUtil.isAllowDisplayAPIsWithMultipleStatus()).thenReturn(true);
         Set<API> apiSet = apiConsumer.getPublishedAPIsByProvider("1", "test_user", 5, API_PROVIDER, "");

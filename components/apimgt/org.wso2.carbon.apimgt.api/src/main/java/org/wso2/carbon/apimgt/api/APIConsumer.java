@@ -183,11 +183,12 @@ public interface APIConsumer extends APIManager {
      * @param clientId this is the consumer key of oAuthApplication
      * @param applicationName this is the APIM appication name.
      * @param keyType
+     * @param tokenType this is theApplication Token Type. This can be either default or jwt.
      * @return
      * @throws APIManagementException
      */
-    Map<String,Object> mapExistingOAuthClient(String jsonString, String userName, String clientId,
-                                                     String applicationName, String keyType) throws APIManagementException;
+    Map<String, Object> mapExistingOAuthClient(String jsonString, String userName, String clientId,
+            String applicationName, String keyType, String tokenType) throws APIManagementException;
 
     /**
      *This method will delete from application key mapping table and application registration table.
@@ -607,6 +608,15 @@ public interface APIConsumer extends APIManager {
     AccessTokenInfo renewAccessToken(String oldAccessToken, String clientId, String clientSecret, String validityTime,
                                      String[] requestedScopes, String jsonInput) throws
             APIManagementException;
+
+    /**
+     * Regenerate new consumer secret.
+     *
+     * @param clientId For which consumer key we need to regenerate consumer secret.
+     * @return New consumer secret.
+     * @throws APIManagementException This is the custom exception class for API management.
+     */
+    String renewConsumerSecret(String clientId) throws APIManagementException;
 
 	/**
 	 * Returns a set of scopes associated with a list of API identifiers.

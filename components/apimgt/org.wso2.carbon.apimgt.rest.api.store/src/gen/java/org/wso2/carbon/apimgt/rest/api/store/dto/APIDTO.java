@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIEndpointURLsDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.LabelDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -70,6 +71,9 @@ public class APIDTO  {
   
   
   private APIBusinessInformationDTO businessInformation = null;
+  
+  
+  private List<LabelDTO> labels = new ArrayList<LabelDTO>();
 
   private String lastUpdatedTime = null;
 
@@ -315,6 +319,19 @@ public class APIDTO  {
   }
 
   
+  /**
+   * Labels of micro-gateway environments attached to the API.\n
+   **/
+  @ApiModelProperty(value = "Labels of micro-gateway environments attached to the API.\n")
+  @JsonProperty("labels")
+  public List<LabelDTO> getLabels() {
+    return labels;
+  }
+  public void setLabels(List<LabelDTO> labels) {
+    this.labels = labels;
+  }
+
+  
 
   @Override
   public String toString()  {
@@ -338,6 +355,7 @@ public class APIDTO  {
     sb.append("  additionalProperties: ").append(additionalProperties).append("\n");
     sb.append("  endpointURLs: ").append(endpointURLs).append("\n");
     sb.append("  businessInformation: ").append(businessInformation).append("\n");
+    sb.append("  labels: ").append(labels).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

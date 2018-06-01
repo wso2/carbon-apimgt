@@ -96,7 +96,14 @@ for(var i=0;i < outputs.tiers.length; i++){
     <% } %>
   </div>
 
-</form>      
+    <div class="form-group">
+    <label class="col-sm-3 control-label"><%=i18n.localize("Token Type")%></label>
+    <div class="col-sm-9">
+      <p class="form-control-static"><%if(application.tokenType){%><%=encode.forHtml(application.tokenType) %><% }else{%><%=i18n.localize("DEFAULT")%><%}%></p>
+    </div>
+  </div>
+
+</form>
       </div>
       <% if(application.status == "APPROVED"){ %>
       <div role="tabpanel" class="tab-pane fade production-keys" id="production">

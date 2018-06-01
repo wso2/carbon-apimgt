@@ -1,4 +1,18 @@
-
+// Copyright (c)  WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+//
+// WSO2 Inc. licenses this file to you under the Apache License,
+// Version 2.0 (the "License"); you may not use this file except
+// in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 
 import ballerina/http;
 import ballerina/log;
@@ -80,14 +94,19 @@ public function APIGatewayListener::init (EndpointConfiguration config) {
 @Description {value:"Add authn and authz filters"}
 @Param {value:"config: EndpointConfiguration instance"}
 function addAuthFiltersForAPIGatewayListener (EndpointConfiguration config) {
-    // add authentication and authorization filters as the first two filters.
-    // if there are any other filters specified, those should be added after the authn and authz filters.
+    // add wso2 gateway related filters  as the first set of filters.
+    // if there are any other filters specified, those should be added after the gateway filters.
     if (config.filters == null) {
         // can add authn and authz filters directly
         config.filters = createAuthFiltersForSecureListener(config);
     } else {
         http:Filter[] newFilters = createAuthFiltersForSecureListener(config);
-        // add existing filters next
+        // add existing filters next. WSO2 retaled ballerina services by default does not contain additional filters.
+        // But custom filters cab be plugeed in while initiating the listener as an endpoint.
+        // for ex:
+        //    endpoint gateway:APIGatewayListener listener {
+        //    filters:[customFilter]
+        //    };
         int i = 0;
         while (i < lengthof config.filters) {
             newFilters[i + (lengthof newFilters)] = config.filters[i];
@@ -117,7 +136,7 @@ function createAuthFiltersForSecureListener (EndpointConfiguration config) retur
         }
         () => {
             // if no auth providers are specified, add basic authn handler with config based auth provider
-            log:printInfo("No Authenticator found");
+            log:printDebug("No Authenticator found");
         }
 
     }

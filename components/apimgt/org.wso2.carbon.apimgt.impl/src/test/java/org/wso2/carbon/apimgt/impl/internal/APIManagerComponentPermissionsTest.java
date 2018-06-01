@@ -42,8 +42,8 @@ public class APIManagerComponentPermissionsTest {
     private UserRealm realm;
     private final String USER_NAME = "admin";
 
-    @BeforeClass
-    public static void setupClass() {
+    @Before
+    public void setupClass() {
         System.setProperty("carbon.home", "");
     }
 

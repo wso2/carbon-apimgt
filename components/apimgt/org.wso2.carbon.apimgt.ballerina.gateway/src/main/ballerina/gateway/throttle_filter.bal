@@ -201,15 +201,25 @@ function ipToLong(string ipAddress) returns (int) {
     int result = 0;
     string[] ipAddressInArray = ipAddress.split("\\.");
     int i = 3;
-    while (i >= 0) {
-        int ip = check <int>ipAddressInArray[3 - i];
-        //left shifting 24,16,8,0 and bitwise OR
-        //1. 192 << 24
-        //1. 168 << 16
-        //1. 1   << 8
-        //1. 2   << 0
-        result = result + shiftLeft(ip, i * 8);
-        i = i - 1;
+    while (i >= 0 && (3-i) < lengthof ipAddressInArray) {
+        io:println(ipAddressInArray[3 - i]);
+        match <int>ipAddressInArray[3 - i] {
+            int ip => {
+                result = result + shiftLeft(ip, i * 8);
+                i = i - 1;
+                //left shifting 24,16,8,0 and bitwise OR
+                //1. 192 << 24
+                //1. 168 << 16
+                //1. 1   << 8
+                //1. 2   << 0
+            }
+            error e => {
+                log:printError("Error while converting Ip address to long");
+                i = i - 1;
+            }
+        }
+
+
     }
     return result;
 }
