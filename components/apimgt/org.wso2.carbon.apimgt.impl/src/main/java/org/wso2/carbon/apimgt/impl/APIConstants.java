@@ -288,6 +288,7 @@ public final class APIConstants {
     public static final String LABEL_NAME = "labelName";
     public static final String LABEL_DESCRIPTION = "labelDescription";
     public static final String LABEL_ACCESS_URLS = "accessURLs";
+    public static final String LABEL = "label";
 
     //database columns for Subscriber
     public static final String SUBSCRIBER_FIELD_EMAIL_ADDRESS = "EMAIL_ADDRESS";
@@ -1395,8 +1396,6 @@ public final class APIConstants {
             API_STATUS.toLowerCase() };
     // Prefix for registry attributes.
     public static final String OVERVIEW_PREFIX = "overview_";
-    public static final String LABEL_PREFIX = "labels_";
-    public static final String LABELNAME = "labelName";
     /**
      * Parameter for enabling tenant load notifications to members in the same HZ cluster
      */

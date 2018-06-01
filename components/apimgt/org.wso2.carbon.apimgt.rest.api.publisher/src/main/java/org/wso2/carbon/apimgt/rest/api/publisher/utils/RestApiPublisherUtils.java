@@ -34,7 +34,7 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDetailedDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.TierDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
@@ -138,13 +138,13 @@ public class RestApiPublisherUtils {
     }
 
     /**
-     * Validate endpoint configurations of {@link APIDTO} for web socket endpoints
+     * Validate endpoint configurations of {@link APIDetailedDTO} for web socket endpoints
      *
      * @param api api model
      * @return validity of the web socket api
      * @throws JSONException
      */
-    public static boolean isValidWSAPI(APIDTO api) throws JSONException {
+    public static boolean isValidWSAPI(APIDetailedDTO api) throws JSONException {
         boolean isValid = false;
 
         if (api.getEndpointConfig() != null) {

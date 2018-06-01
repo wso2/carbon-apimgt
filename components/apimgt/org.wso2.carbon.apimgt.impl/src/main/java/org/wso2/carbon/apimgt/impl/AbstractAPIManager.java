@@ -1911,8 +1911,8 @@ public abstract class AbstractAPIManager implements APIManager {
                 String[] searchKeys = query.split("=");
 
                 //prevent api-meta. getting prefixed to labelName and restrict label serach to exact match only
-                if (APIConstants.LABELNAME.equals(searchKeys[0])) {
-                    searchKeys[0] = APIConstants.LABEL_PREFIX + searchKeys[0];
+                if (APIConstants.LABEL.equals(searchKeys[0])) {
+                    searchKeys[0] = APIConstants.API_LABELS_GATEWAY_LABELS;
                     if (searchKeys[1].startsWith("*")) {
                         searchKeys[1] = searchKeys[1].substring(1, searchKeys[1].length());
                     }
