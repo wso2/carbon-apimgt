@@ -2099,23 +2099,29 @@ public class APIStoreHostObject extends ScriptableObject {
     	NativeArray myn = new NativeArray(0);
     	
     	APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
-        Map<String, Environment> environments = config.getApiGatewayEnvironments();
-        
-        int index = 0;
-        for (Environment environment : environments.values()) {
-        	String apiGatewayEndpoints = environment.getApiGatewayEndpoint();
+        String tokenEndpointURLPrefix = config.getFirstProperty(APIConstants.TOKEN_ENDPOINT_URL_PREFIX);
+        //If the <TokenEndpointURLPrefix> parameter is specified, we give it the highest priority, when displaying the
+        //cURL command in API Store application page.
+        if (tokenEndpointURLPrefix != null && tokenEndpointURLPrefix.length() > 0) {
+            myn.put(0, myn, tokenEndpointURLPrefix);
+        } else {
+            Map<String, Environment> environments = config.getApiGatewayEnvironments();
+            int index = 0;
+            for (Environment environment : environments.values()) {
+                String apiGatewayEndpoints = environment.getApiGatewayEndpoint();
 
-        	List<String> urlsList = new ArrayList<String>();
-        	urlsList.addAll(Arrays.asList(apiGatewayEndpoints.split(",")));
-        	ListIterator<String> it = urlsList.listIterator();
-        	
-        	while (it.hasNext()) {
-        		String url = it.next();
-                if (url != null && url.startsWith("https:")) {
-                	myn.put(index, myn, url);
-                	index ++;
+                List<String> urlsList = new ArrayList<String>();
+                urlsList.addAll(Arrays.asList(apiGatewayEndpoints.split(",")));
+                ListIterator<String> it = urlsList.listIterator();
+
+                while (it.hasNext()) {
+                    String url = it.next();
+                    if (url != null && url.startsWith("https:")) {
+                        myn.put(index, myn, url);
+                        index++;
+                    }
                 }
-        	}
+            }
         }
         
         return myn;

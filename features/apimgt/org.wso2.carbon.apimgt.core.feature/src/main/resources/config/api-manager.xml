@@ -331,6 +331,12 @@
 
         <!--set isStoreForumEnabled to false for disable forum in store-->
         <!--isStoreForumEnabled>false</isStoreForumEnabled-->
+
+        <!--
+        This is an optional parameter. If this parameter has a value, it will be shown in the token generation
+        cURL command under subscriptions section in API Store.
+        -->
+        <!--TokenEndpointURLPrefix>https://${carbon.local.ip}:${https.nio.port}</TokenEndpointURLPrefix-->
     </APIStore>
 
     <APIPublisher>

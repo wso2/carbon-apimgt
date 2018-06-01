@@ -567,6 +567,7 @@ public final class APIConstants {
     public static final String API_STORE_DISPLAY_MULTIPLE_VERSIONS = API_STORE + "DisplayMultipleVersions";
     public static final String API_STORE_DISPLAY_COMMENTS = API_STORE + "DisplayComments";
     public static final String API_STORE_DISPLAY_RATINGS = API_STORE + "DisplayRatings";
+    public static final String TOKEN_ENDPOINT_URL_PREFIX = API_STORE + "TokenEndpointURLPrefix";
     public static final String API_STORE_FORCE_CI_COMPARISIONS = API_STORE + "CompareCaseInsensitively";
     public static final String API_STORE_DISABLE_PERMISSION_CHECK = API_STORE + "DisablePermissionCheck";
     public static final String API_STORE_APIS_PER_PAGE = API_STORE + "APIsPerPage";
