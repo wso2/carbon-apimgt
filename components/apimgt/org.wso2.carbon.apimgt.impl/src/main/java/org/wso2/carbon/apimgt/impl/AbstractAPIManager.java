@@ -1453,6 +1453,7 @@ public abstract class AbstractAPIManager implements APIManager {
         }
         //application will not be shared within the group
         defaultApp.setGroupId("");
+        defaultApp.setTokenType(APIConstants.APPLICATION_TOKEN_TYPE);
         apiMgtDAO.addApplication(defaultApp, subscriber.getName());
     }
 

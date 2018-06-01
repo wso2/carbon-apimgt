@@ -122,6 +122,10 @@ public class APIMJWTGenerator extends JWTGenerator {
                     } else {
                         jwtClaimsSetBuilder.claim(claimURI, claimVal);
                     }
+                } else {
+                    if (claimValObj != null) {
+                        jwtClaimsSetBuilder.claim(claimURI, claimValObj);
+                    }
                 }
             }
 
