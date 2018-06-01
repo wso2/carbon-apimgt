@@ -11363,15 +11363,17 @@ public class ApiMgtDAO {
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-            ps = conn.prepareStatement(SQLConstants.ADD_APPLICATION_ATTRIBUTES_SQL);
-            for (String key : attributes.keySet()) {
-                ps.setInt(1, applicationId);
-                ps.setString(2, key);
-                ps.setString(3, attributes.get(key));
-                ps.setInt(4, tenantId);
-                ps.addBatch();
+            if(attributes != null) {
+                ps = conn.prepareStatement(SQLConstants.ADD_APPLICATION_ATTRIBUTES_SQL);
+                for (String key : attributes.keySet()) {
+                    ps.setInt(1, applicationId);
+                    ps.setString(2, key);
+                    ps.setString(3, attributes.get(key));
+                    ps.setInt(4, tenantId);
+                    ps.addBatch();
+                }
+                int[] update = ps.executeBatch();
             }
-            int[] update = ps.executeBatch();
         } catch (SQLException e) {
             handleException("Error in adding attributes of application with id: " + applicationId , e);
         } finally {

@@ -146,26 +146,29 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             }
 
             Object applicationAttributesFromUser = body.getAttributes();
-            Map<String, String> applicationAttributes = new ObjectMapper().convertValue(applicationAttributesFromUser,Map.class);
+            Map<String, String> applicationAttributes =
+                    new ObjectMapper().convertValue(applicationAttributesFromUser,Map.class);
 
-            JSONArray attributeKeysFromConfig = apiConsumer.getAppAttributesFromConfig(username);
-            Set<String> keySet = new HashSet<>();
-            Set attributeKeysFromUSer = applicationAttributes.keySet();
+            if (applicationAttributes!=null) {
+                JSONArray attributeKeysFromConfig = apiConsumer.getAppAttributesFromConfig(username);
+                Set<String> keySet = new HashSet<>();
+                Set attributeKeysFromUSer = applicationAttributes.keySet();
 
-            for (Object object : attributeKeysFromConfig) {
-                JSONObject jsonObject = (JSONObject) object;
-                Boolean isRequired = false;
-                if (jsonObject.get(APIConstants.ApplicationAttributes.REQUIRED) != null) {
-                    isRequired = (Boolean) jsonObject.get(APIConstants.ApplicationAttributes.REQUIRED);
+                for (Object object : attributeKeysFromConfig) {
+                    JSONObject jsonObject = (JSONObject) object;
+                    Boolean isRequired = false;
+                    if (jsonObject.get(APIConstants.ApplicationAttributes.REQUIRED) != null) {
+                        isRequired = (Boolean) jsonObject.get(APIConstants.ApplicationAttributes.REQUIRED);
+                    }
+                    String key = (String) jsonObject.get(APIConstants.ApplicationAttributes.ATTRIBUTE);
+
+                    if (isRequired && !attributeKeysFromUSer.contains(key)) {
+                        RestApiUtil.handleBadRequest(key + " should be specified", log);
+                    }
+                    keySet.add(key);
                 }
-                String key = (String) jsonObject.get(APIConstants.ApplicationAttributes.ATTRIBUTE);
-
-                if (isRequired && !attributeKeysFromUSer.contains(key)) {
-                    RestApiUtil.handleBadRequest(key + " should be specified", log);
-                }
-                keySet.add(key);
+                body.setAttributes(validateApplicationAttributes(applicationAttributes, keySet));
             }
-            body.setAttributes(validateApplicationAttributes(applicationAttributes,keySet));
 
             //subscriber field of the body is not honored. It is taken from the context
             Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
