@@ -2109,7 +2109,6 @@ public class APIStoreHostObject extends ScriptableObject {
             int index = 0;
             for (Environment environment : environments.values()) {
                 String apiGatewayEndpoints = environment.getApiGatewayEndpoint();
-
                 List<String> urlsList = new ArrayList<String>();
                 urlsList.addAll(Arrays.asList(apiGatewayEndpoints.split(",")));
                 ListIterator<String> it = urlsList.listIterator();
