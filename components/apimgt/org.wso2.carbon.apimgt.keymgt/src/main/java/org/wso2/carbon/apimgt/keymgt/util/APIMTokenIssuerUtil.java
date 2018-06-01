@@ -62,7 +62,7 @@ public class APIMTokenIssuerUtil {
             subscribedApiDTO.setName(api.getApiName());
             subscribedApiDTO.setContext(api.getContext());
             subscribedApiDTO.setVersion(api.getVersion());
-            subscribedApiDTO.setPublisher(userName);
+            subscribedApiDTO.setPublisher(api.getProviderId());
             subscribedApiDTO.setSubscriptionTier(api.getSubscriptionTier());
             subscribedApiDTO.setSubscriberTenantDomain(tenantDomain);
             subscribedApiDTOList.add(subscribedApiDTO);
