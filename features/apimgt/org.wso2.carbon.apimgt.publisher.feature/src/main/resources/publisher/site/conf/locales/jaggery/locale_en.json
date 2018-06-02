@@ -102,6 +102,7 @@
     "By Documentation Content [Syntax - doc:xxxx ] ": "By Documentation Content [Syntax - doc:xxxx ] ",
     "By Status [Syntax - status:xxxx ] or ": "By Status [Syntax - status:xxxx ] or ",
     "By Subcontext [Syntax - subcontext:xxxx ] ": "By Subcontext [Syntax - subcontext:xxxx ] ",
+    "By Microgateway Label [ Syntax - label:xxxx ]": "By Microgateway Label [ Syntax - label:xxxx ]",
     "CORS configuration": "CORS configuration",
     "Cache Timeout (seconds)": "Cache Timeout (seconds)",
     "Cancel": "Cancel",

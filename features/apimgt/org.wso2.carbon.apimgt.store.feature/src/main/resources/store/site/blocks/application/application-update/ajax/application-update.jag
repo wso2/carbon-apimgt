@@ -57,7 +57,10 @@ include("/jagg/jagg.jag");
 
         mod = jagg.module("application");
         tokenType = request.getParameter("tokenType");
-        
+
+        if (tokenType == null) {
+            tokenType = "DEFAULT";
+        }
         result = mod.updateApplication(applicationNew,applicationOld,username,tier,callbackUrlNew,descriptionNew,groupIdOld,groupIdNew,tokenType);
 
         //If name of the selected application is edited,add the new name  to   session

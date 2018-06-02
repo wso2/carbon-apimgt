@@ -22,7 +22,7 @@ import javax.validation.constraints.NotNull;
 
 
 @ApiModel(description = "")
-public class APIDTO extends APIInfoDTO {
+public class APIDetailedDTO extends APIInfoDTO {
   
   
   
@@ -462,7 +462,7 @@ public class APIDTO extends APIInfoDTO {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class APIDTO {\n");
+    sb.append("class APIDetailedDTO {\n");
     sb.append("  " + super.toString()).append("\n");
     sb.append("  apiDefinition: ").append(apiDefinition).append("\n");
     sb.append("  wsdlUri: ").append(wsdlUri).append("\n");
