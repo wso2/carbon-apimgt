@@ -2099,11 +2099,11 @@ public class APIStoreHostObject extends ScriptableObject {
     	NativeArray myn = new NativeArray(0);
     	
     	APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
-        String tokenEndpointURLPrefix = config.getFirstProperty(APIConstants.TOKEN_ENDPOINT_URL_PREFIX);
-        //If the <TokenEndpointURLPrefix> parameter is specified, we give it the highest priority, when displaying the
+        String storeTokenDisplayURL = config.getFirstProperty(APIConstants.STORE_TOKEN_DISPLAY_URL);
+        //If the <StoreTokenDisplayURL> parameter is specified, we give it the highest priority, when displaying the
         //cURL command in API Store application page.
-        if (tokenEndpointURLPrefix != null && tokenEndpointURLPrefix.length() > 0) {
-            myn.put(0, myn, tokenEndpointURLPrefix);
+        if (storeTokenDisplayURL != null && storeTokenDisplayURL.length() > 0) {
+            myn.put(0, myn, storeTokenDisplayURL);
         } else {
             Map<String, Environment> environments = config.getApiGatewayEnvironments();
             int index = 0;
