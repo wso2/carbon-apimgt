@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.keymgt.issuers;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
@@ -81,7 +82,7 @@ public class APIMTokenIssuer extends JWTTokenIssuer {
 
     @Override
     public String getAccessTokenHash(String accessToken) throws OAuthSystemException {
-        if (accessToken.contains(APIConstants.DOT)) {
+        if (StringUtils.isNotEmpty(accessToken) && accessToken.contains(APIConstants.DOT)) {
             return super.getAccessTokenHash(accessToken);
         } else {
             return accessToken;

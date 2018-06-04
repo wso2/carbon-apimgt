@@ -323,8 +323,7 @@ public final class APIConstants {
     public static final String IDENTITY_OAUTH2_FIELD_TIME_CREATED = "TIME_CREATED";
     public static final String IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD = "VALIDITY_PERIOD";
     public static final String IDENTITY_OAUTH2_FIELD_USER_DOMAIN = "USER_DOMAIN";
-
-
+    
     public static final String DOT = ".";
     public static final String EXP = "exp";
     public static final String JWT = "JWT";
@@ -1422,5 +1421,5 @@ public final class APIConstants {
     public static final String APPLICATION_GZIP = "application/gzip";
     public static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
     public static final String JSON_FILENAME_EXTENSION = ".json";
-    public static final String JSON_GZIP_FILENAME_EXTENSION = ".json.gz";
+    public static    final String JSON_GZIP_FILENAME_EXTENSION = ".json.gz";
 }
