@@ -324,6 +324,8 @@ public final class APIConstants {
     public static final String IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD = "VALIDITY_PERIOD";
     public static final String IDENTITY_OAUTH2_FIELD_USER_DOMAIN = "USER_DOMAIN";
 
+
+    public static final String DOT = ".";
     public static final String EXP = "exp";
     public static final String JWT = "JWT";
     public static final String JWT_CONFIGS = "JWTConfiguration.";
@@ -415,7 +417,7 @@ public final class APIConstants {
     public static final String SAML2_SSO_AUTHENTICATOR_NAME = "SAML2SSOAuthenticator";
     public static final String ORGANIZATION_CLAIM_ATTRIBUTE = "OrganizationClaimAttribute";
     public static final String DEFAULT_ORGANIZATION_CLAIM_NAME = "http://wso2.org/claims/organization";
-    public static final String APPLICATION_TOKEN_TYPE = "DEFAULT";
+    public static final String DEFAULT_TOKEN_TYPE = "DEFAULT";
 
     public static class TokenStatus {
         public static final String ACTIVE = "ACTIVE";
