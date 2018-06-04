@@ -36,6 +36,7 @@ var query=request.getParameter("query");
                 <li><%=i18n.localize("By Description [Syntax - description:xxxx ] or")%></li>
                 <li><%=i18n.localize("By Subcontext [Syntax - subcontext:xxxx ] ")%></li>
                 <li><%=i18n.localize("By Documentation Content [Syntax - doc:xxxx ] ")%></li>
+                <li><%=i18n.localize("By Microgateway Label [ Syntax - label:xxxx ]")%></li>
                 <li><%=i18n.localize("By API Properties [Syntax - {property name}:{property value}]")%></li>
                 </ol>
             </div>

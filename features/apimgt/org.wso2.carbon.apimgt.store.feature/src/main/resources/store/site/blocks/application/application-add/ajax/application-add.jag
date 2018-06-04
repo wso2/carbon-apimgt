@@ -55,7 +55,12 @@ include("/jagg/jagg.jag");
         description = request.getParameter("description");
         applicationAttributes = request.getParameter("applicationAttributes");
         description = request.getParameter("description");
+
         tokenType = request.getParameter("tokenType");
+        if (tokenType == null) {
+            tokenType = "DEFAULT";
+        }
+
         mod = jagg.module("application");
         var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
         var tenantDomain = MultitenantUtils.getTenantDomain(user.username);
