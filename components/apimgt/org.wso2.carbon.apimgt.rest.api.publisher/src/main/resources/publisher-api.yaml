@@ -4,7 +4,7 @@ swagger: '2.0'
 # Prolog
 ######################################################
 info:
-  version: "0.12.0"
+  version: "0.13.0"
   title: "WSO2 API Manager - Publisher API"
   description: |
     This specifies a **RESTful API** for WSO2 **API Manager** - Publisher.
@@ -33,7 +33,7 @@ host: apis.wso2.com
 
 # The base path of the API.
 # Will be prefixed to all paths.
-basePath: /api/am/publisher/v0.12
+basePath: /api/am/publisher/v0.13
 
 # The following media types can be passed as input in message bodies of the API.
 # The actual media type must be specified in the Content-Type header field of the request.

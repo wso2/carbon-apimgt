@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "version": "0.12.0",
+        "version": "0.13.0",
         "title": "WSO2 API Manager - Publisher API",
         "description": "This specifies a **RESTful API** for WSO2 **API Manager** - Publisher.\n\nPlease see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.1.66/components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher/src/main/resources/publisher-api.yaml) of the API which is written using [swagger 2.0](http://swagger.io/) specification.\n",
         "contact": {
@@ -18,7 +18,7 @@
         "https"
     ],
     "host": "apis.wso2.com",
-    "basePath": "/api/am/publisher/v0.12",
+    "basePath": "/api/am/publisher/v0.13",
     "consumes": [
         "application/json"
     ],
@@ -89,6 +89,10 @@
         "/apis": {
             "get": {
                 "x-scope": "apim:api_view",
+                "produces": [
+                    "application/json",
+                    "application/gzip"
+                ],
                 "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/publisher/v0.12/apis",
                 "x-wso2-request": "GET https://localhost:9443/api/am/publisher/v0.12/apis\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
                 "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"provider\": \"admin\",\n         \"version\": \"1.0.0\",\n         \"description\": \"This sample API provides Account Status Validation\",\n         \"name\": \"AccountVal\",\n         \"context\": \"/account\",\n         \"id\": \"2e81f147-c8a8-4f68-b4f0-69e0e7510b01\",\n         \"status\": \"PUBLISHED\"\n      },\n            {\n         \"provider\": \"admin\",\n         \"version\": \"1.0.0\",\n         \"description\": null,\n         \"name\": \"api1\",\n         \"context\": \"/api1\",\n         \"id\": \"3e22d2fb-277a-4e9e-8c7e-1c0f7f73960e\",\n         \"status\": \"PUBLISHED\"\n      }\n   ],\n   \"next\": \"\",\n   \"count\": 2\n}",
@@ -112,6 +116,9 @@
                     },
                     {
                         "$ref": "#/parameters/If-None-Match"
+                    },
+                    {
+                        "$ref": "#/parameters/expand"
                     }
                 ],
                 "tags": [
@@ -159,7 +166,7 @@
                         "description": "API object that needs to be added\n",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/API"
+                            "$ref": "#/definitions/APIDetailed"
                         }
                     },
                     {
@@ -173,7 +180,7 @@
                     "201": {
                         "description": "Created.\nSuccessful response with the newly created object as entity in the body.\nLocation header contains URL of newly created entity.\n",
                         "schema": {
-                            "$ref": "#/definitions/API"
+                            "$ref": "#/definitions/APIDetailed"
                         },
                         "headers": {
                             "Location": {
@@ -252,7 +259,7 @@
                             }
                         },
                         "schema": {
-                            "$ref": "#/definitions/API"
+                            "$ref": "#/definitions/APIDetailed"
                         }
                     },
                     "304": {
@@ -289,7 +296,7 @@
                         "description": "API object that needs to be added\n",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/API"
+                            "$ref": "#/definitions/APIDetailed"
                         }
                     },
                     {
@@ -309,7 +316,7 @@
                     "200": {
                         "description": "OK.\nSuccessful response with updated API object\n",
                         "schema": {
-                            "$ref": "#/definitions/API"
+                            "$ref": "#/definitions/APIDetailed"
                         },
                         "headers": {
                             "Location": {
@@ -2792,6 +2799,12 @@
             "description": "Workflow reference id\n",
             "required": true,
             "type": "string"
+        },
+        "expand": {
+            "name": "expand",
+            "in": "query",
+            "description": "Whether the returned response should contain full details of API\n",
+            "type": "boolean"
         }
     },
     "definitions": {
@@ -2842,55 +2855,6 @@
             "properties": {
                 "id": {
                     "type": "string",
-                    "example": "01234567-0123-0123-0123-012345678901"
-                },
-                "name": {
-                    "type": "string",
-                    "example": "CalculatorAPI"
-                },
-                "description": {
-                    "type": "string",
-                    "example": "A calculator API that supports basic operations"
-                },
-                "context": {
-                    "type": "string",
-                    "example": "CalculatorAPI"
-                },
-                "version": {
-                    "type": "string",
-                    "example": "1.0.0"
-                },
-                "provider": {
-                    "description": "If the provider value is not given, the user invoking the API will be used as the provider.\n",
-                    "type": "string",
-                    "example": "admin"
-                },
-                "status": {
-                    "type": "string",
-                    "example": "CREATED"
-                },
-                "thumbnailUri": {
-                    "type": "string",
-                    "example": "/apis/01234567-0123-0123-0123-012345678901/thumbnail"
-                }
-            }
-        },
-        "API": {
-            "title": "API object",
-            "required": [
-                "name",
-                "context",
-                "version",
-                "tiers",
-                "isDefaultVersion",
-                "transport",
-                "endpointConfig",
-                "visibility",
-                "type"
-            ],
-            "properties": {
-                "id": {
-                    "type": "string",
                     "description": "UUID of the api registry artifact\n",
                     "example": "01234567-0123-0123-0123-012345678901"
                 },
@@ -2915,272 +2879,221 @@
                     "example": "1.0.0"
                 },
                 "provider": {
-                    "description": "If the provider value is not given user invoking the api will be used as the provider.\n",
+                    "description": "If the provider value is not given, the user invoking the API will be used as the provider.\n",
                     "type": "string",
                     "example": "admin"
-                },
-                "apiDefinition": {
-                    "description": "Swagger definition of the API which contains details about URI templates and scopes\n",
-                    "type": "string",
-                    "example": "{\"paths\":{\"/substract\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\",\"parameters\":[{\"name\":\"x\",\"required\":true,\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}},\"/add\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\",\"parameters\":[{\"name\":\"x\",\"required\":true,\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}}},\"swagger\":\"2.0\",\"info\":{\"title\":\"CalculatorAPI\",\"version\":\"1.0.0\"}}"
-                },
-                "wsdlUri": {
-                    "description": "WSDL URL if the API is based on a WSDL endpoint\n",
-                    "type": "string",
-                    "example": "http://www.webservicex.com/globalweather.asmx?wsdl"
                 },
                 "status": {
                     "type": "string",
                     "description": "This describes in which status of the lifecycle the API is",
                     "example": "CREATED"
                 },
-                "responseCaching": {
-                    "type": "string",
-                    "example": "Disabled"
-                },
-                "cacheTimeout": {
-                    "type": "integer",
-                    "example": 300
-                },
-                "destinationStatsEnabled": {
-                    "type": "string",
-                    "example": "Disabled"
-                },
-                "isDefaultVersion": {
-                    "type": "boolean",
-                    "example": false
-                },
-                "type": {
-                    "type": "string",
-                    "description": "The transport to be set. Accepted values are HTTP, WS",
-                    "enum": [
-                        "HTTP",
-                        "WS"
-                    ],
-                    "example": "HTTP",
-                    "default": "HTTP"
-                },
-                "transport": {
-                    "description": "Supported transports for the API (http and/or https).\n",
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    },
-                    "example": [
-                        "http",
-                        "https"
-                    ]
-                },
-                "tags": {
-                    "type": "array",
-                    "description": "Search keywords related to the API",
-                    "items": {
-                        "type": "string"
-                    },
-                    "example": [
-                        "substract",
-                        "add"
-                    ]
-                },
-                "tiers": {
-                    "type": "array",
-                    "description": "The subscription tiers selected for the particular API",
-                    "items": {
-                        "type": "string"
-                    },
-                    "example": [
-                        "Unlimited"
-                    ]
-                },
-                "apiLevelPolicy": {
-                    "description": "The policy selected for the particular API",
-                    "type": "string",
-                    "example": "Unlimited"
-                },
-                "maxTps": {
-                    "properties": {
-                        "production": {
-                            "type": "integer",
-                            "format": "int64",
-                            "example": 1000
-                        },
-                        "sandbox": {
-                            "type": "integer",
-                            "format": "int64",
-                            "example": 1000
-                        }
-                    }
-                },
                 "thumbnailUri": {
                     "type": "string",
                     "example": "/apis/01234567-0123-0123-0123-012345678901/thumbnail"
+                }
+            }
+        },
+        "APIDetailed": {
+            "title": "API object",
+            "required": [
+                "name",
+                "context",
+                "version",
+                "tiers",
+                "isDefaultVersion",
+                "transport",
+                "endpointConfig",
+                "visibility",
+                "type"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/definitions/APIInfo"
                 },
-                "visibility": {
-                    "type": "string",
-                    "description": "The visibility level of the API. Accepts one of the following. PUBLIC, PRIVATE, RESTRICTED OR CONTROLLED.",
-                    "enum": [
-                        "PUBLIC",
-                        "PRIVATE",
-                        "RESTRICTED",
-                        "CONTROLLED"
-                    ],
-                    "example": "PUBLIC"
-                },
-                "visibleRoles": {
-                    "type": "array",
-                    "description": "The user roles that are able to access the API",
-                    "items": {
-                        "type": "string"
-                    },
-                    "example": []
-                },
-                "visibleTenants": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "endpointConfig": {
-                    "type": "string",
-                    "example": "{\"production_endpoints\":{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/\",\"config\":{\"suspendErrorCode\":\"101000\",\"suspendDuration\":\"2000\",\"suspendMaxDuration\":\"3\",\"factor\":\"2\",\"retryErroCode\":\"101000\",\"retryTimeOut\":\"4\",\"retryDelay\":\"1000\",\"actionSelect\":\"fault\",\"actionDuration\":\"3000\"}},\"sandbox_endpoints\":{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/\",\"config\":null},\"endpoint_type\":\"http\"}"
-                },
-                "endpointSecurity": {
+                {
                     "properties": {
+                        "apiDefinition": {
+                            "description": "Swagger definition of the API which contains details about URI templates and scopes\n",
+                            "type": "string",
+                            "example": "{\"paths\":{\"/substract\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\",\"parameters\":[{\"name\":\"x\",\"required\":true,\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}},\"/add\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\",\"parameters\":[{\"name\":\"x\",\"required\":true,\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}}},\"swagger\":\"2.0\",\"info\":{\"title\":\"CalculatorAPI\",\"version\":\"1.0.0\"}}"
+                        },
+                        "wsdlUri": {
+                            "description": "WSDL URL if the API is based on a WSDL endpoint\n",
+                            "type": "string",
+                            "example": "http://www.webservicex.com/globalweather.asmx?wsdl"
+                        },
+                        "responseCaching": {
+                            "type": "string",
+                            "example": "Disabled"
+                        },
+                        "cacheTimeout": {
+                            "type": "integer",
+                            "example": 300
+                        },
+                        "destinationStatsEnabled": {
+                            "type": "string",
+                            "example": "Disabled"
+                        },
+                        "isDefaultVersion": {
+                            "type": "boolean",
+                            "example": false
+                        },
                         "type": {
                             "type": "string",
-                            "example": "basic",
-                            "description": "Accepts one of the following, basic or digest.",
+                            "description": "The transport to be set. Accepted values are HTTP, WS",
                             "enum": [
-                                "basic",
-                                "digest"
+                                "HTTP",
+                                "WS"
+                            ],
+                            "example": "HTTP",
+                            "default": "HTTP"
+                        },
+                        "transport": {
+                            "description": "Supported transports for the API (http and/or https).\n",
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            },
+                            "example": [
+                                "http",
+                                "https"
                             ]
                         },
-                        "username": {
-                            "type": "string",
-                            "example": "admin"
+                        "tags": {
+                            "type": "array",
+                            "description": "Search keywords related to the API",
+                            "items": {
+                                "type": "string"
+                            },
+                            "example": [
+                                "substract",
+                                "add"
+                            ]
                         },
-                        "password": {
-                            "type": "string",
-                            "example": "password"
-                        }
-                    }
-                },
-                "gatewayEnvironments": {
-                    "description": "Comma separated list of gateway environments.\n",
-                    "type": "string",
-                    "example": "Production and Sandbox"
-                },
-                "labels": {
-                    "description": "Labels of micro-gateway environments attached to the API.\n",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Label"
-                    }
-                },
-                "sequences": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Sequence"
-                    },
-                    "example": "\"sequences\": [ {\"name\": \"json_to_xml_in_message\",\"config\": null,\"type\": \"in\"}, {\"name\": \"xml_to_json_out_message\",\"config\": null,\"type\": \"out\"}, {\"name\": \"json_fault\",\"config\": null,\"type\": \"fault\"} ],"
-                },
-                "subscriptionAvailability": {
-                    "type": "string",
-                    "description": "The subscription availability. Accepts one of the following. current_tenant, all_tenants or specific_tenants.",
-                    "enum": [
-                        "current_tenant",
-                        "all_tenants",
-                        "specific_tenants"
-                    ],
-                    "example": "current_tenant"
-                },
-                "subscriptionAvailableTenants": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    },
-                    "example": [
-                        "tenant1",
-                        "tenant2"
-                    ]
-                },
-                "additionalProperties": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    },
-                    "description": "Map of custom properties of API"
-                },
-                "accessControl": {
-                    "type": "string",
-                    "description": "Is the API is restricted to certain set of publishers or creators or is it visible to all the\npublishers and creators. If the accessControl restriction is none, this API can be modified by all the\npublishers and creators, if not it can only be viewable/modifiable by certain set of publishers and creators,\n based on the restriction.\n",
-                    "enum": [
-                        "NONE",
-                        "RESTRICTED"
-                    ]
-                },
-                "accessControlRoles": {
-                    "type": "array",
-                    "description": "The user roles that are able to view/modify as API publisher or creator.",
-                    "items": {
-                        "type": "string"
-                    },
-                    "example": [
-                        "admin"
-                    ]
-                },
-                "businessInformation": {
-                    "properties": {
-                        "businessOwner": {
-                            "type": "string",
-                            "example": "businessowner"
+                        "tiers": {
+                            "type": "array",
+                            "description": "The subscription tiers selected for the particular API",
+                            "items": {
+                                "type": "string"
+                            },
+                            "example": [
+                                "Unlimited"
+                            ]
                         },
-                        "businessOwnerEmail": {
+                        "apiLevelPolicy": {
+                            "description": "The policy selected for the particular API",
                             "type": "string",
-                            "example": "businessowner@wso2.com"
+                            "example": "Unlimited"
                         },
-                        "technicalOwner": {
+                        "maxTps": {
+                            "$ref": "#/definitions/APIMaxTps"
+                        },
+                        "visibility": {
                             "type": "string",
-                            "example": "technicalowner"
+                            "description": "The visibility level of the API. Accepts one of the following. PUBLIC, PRIVATE, RESTRICTED OR CONTROLLED.",
+                            "enum": [
+                                "PUBLIC",
+                                "PRIVATE",
+                                "RESTRICTED",
+                                "CONTROLLED"
+                            ],
+                            "example": "PUBLIC"
                         },
-                        "technicalOwnerEmail": {
-                            "type": "string",
-                            "example": "technicalowner@wso2.com"
-                        }
-                    }
-                },
-                "corsConfiguration": {
-                    "description": "CORS configuration for the API\n",
-                    "properties": {
-                        "corsConfigurationEnabled": {
-                            "type": "boolean",
-                            "default": false
+                        "visibleRoles": {
+                            "type": "array",
+                            "description": "The user roles that are able to access the API",
+                            "items": {
+                                "type": "string"
+                            },
+                            "example": []
                         },
-                        "accessControlAllowOrigins": {
+                        "visibleTenants": {
                             "type": "array",
                             "items": {
                                 "type": "string"
                             }
                         },
-                        "accessControlAllowCredentials": {
-                            "type": "boolean",
-                            "default": false
+                        "endpointConfig": {
+                            "type": "string",
+                            "example": "{\"production_endpoints\":{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/\",\"config\":{\"suspendErrorCode\":\"101000\",\"suspendDuration\":\"2000\",\"suspendMaxDuration\":\"3\",\"factor\":\"2\",\"retryErroCode\":\"101000\",\"retryTimeOut\":\"4\",\"retryDelay\":\"1000\",\"actionSelect\":\"fault\",\"actionDuration\":\"3000\"}},\"sandbox_endpoints\":{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/\",\"config\":null},\"endpoint_type\":\"http\"}"
                         },
-                        "accessControlAllowHeaders": {
+                        "endpointSecurity": {
+                            "$ref": "#/definitions/APIEndpointSecurity"
+                        },
+                        "gatewayEnvironments": {
+                            "description": "Comma separated list of gateway environments.\n",
+                            "type": "string",
+                            "example": "Production and Sandbox"
+                        },
+                        "labels": {
+                            "description": "Labels of micro-gateway environments attached to the API.\n",
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Label"
+                            }
+                        },
+                        "sequences": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Sequence"
+                            },
+                            "example": "\"sequences\": [ {\"name\": \"json_to_xml_in_message\",\"config\": null,\"type\": \"in\"}, {\"name\": \"xml_to_json_out_message\",\"config\": null,\"type\": \"out\"}, {\"name\": \"json_fault\",\"config\": null,\"type\": \"fault\"} ],"
+                        },
+                        "subscriptionAvailability": {
+                            "type": "string",
+                            "description": "The subscription availability. Accepts one of the following. current_tenant, all_tenants or specific_tenants.",
+                            "enum": [
+                                "current_tenant",
+                                "all_tenants",
+                                "specific_tenants"
+                            ],
+                            "example": "current_tenant"
+                        },
+                        "subscriptionAvailableTenants": {
                             "type": "array",
                             "items": {
                                 "type": "string"
-                            }
+                            },
+                            "example": [
+                                "tenant1",
+                                "tenant2"
+                            ]
                         },
-                        "accessControlAllowMethods": {
+                        "additionalProperties": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            },
+                            "description": "Map of custom properties of API"
+                        },
+                        "accessControl": {
+                            "type": "string",
+                            "description": "Is the API is restricted to certain set of publishers or creators or is it visible to all the\npublishers and creators. If the accessControl restriction is none, this API can be modified by all the\npublishers and creators, if not it can only be viewable/modifiable by certain set of publishers and creators,\n based on the restriction.\n",
+                            "enum": [
+                                "NONE",
+                                "RESTRICTED"
+                            ]
+                        },
+                        "accessControlRoles": {
                             "type": "array",
+                            "description": "The user roles that are able to view/modify as API publisher or creator.",
                             "items": {
                                 "type": "string"
-                            }
+                            },
+                            "example": [
+                                "admin"
+                            ]
+                        },
+                        "businessInformation": {
+                            "$ref": "#/definitions/APIBusinessInformation"
+                        },
+                        "corsConfiguration": {
+                            "$ref": "#/definitions/APICorsConfiguration"
                         }
                     }
                 }
-            }
+            ]
         },
         "Application": {
             "title": "Application",
@@ -3793,6 +3706,92 @@
                 "description": {
                     "type": "string",
                     "example": "Approve workflow request."
+                }
+            }
+        },
+        "APIMaxTps": {
+            "properties": {
+                "production": {
+                    "type": "integer",
+                    "format": "int64",
+                    "example": 1000
+                },
+                "sandbox": {
+                    "type": "integer",
+                    "format": "int64",
+                    "example": 1000
+                }
+            }
+        },
+        "APIEndpointSecurity": {
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "example": "basic",
+                    "description": "Accepts one of the following, basic or digest.",
+                    "enum": [
+                        "basic",
+                        "digest"
+                    ]
+                },
+                "username": {
+                    "type": "string",
+                    "example": "admin"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "password"
+                }
+            }
+        },
+        "APIBusinessInformation": {
+            "properties": {
+                "businessOwner": {
+                    "type": "string",
+                    "example": "businessowner"
+                },
+                "businessOwnerEmail": {
+                    "type": "string",
+                    "example": "businessowner@wso2.com"
+                },
+                "technicalOwner": {
+                    "type": "string",
+                    "example": "technicalowner"
+                },
+                "technicalOwnerEmail": {
+                    "type": "string",
+                    "example": "technicalowner@wso2.com"
+                }
+            }
+        },
+        "APICorsConfiguration": {
+            "description": "CORS configuration for the API\n",
+            "properties": {
+                "corsConfigurationEnabled": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "accessControlAllowOrigins": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "accessControlAllowCredentials": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "accessControlAllowHeaders": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "accessControlAllowMethods": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         }
