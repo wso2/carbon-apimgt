@@ -83,9 +83,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.wso2.carbon.apimgt.impl.APIConstants.API_KEY_VALIDATOR;
-import static org.wso2.carbon.apimgt.impl.APIConstants.API_KEY_VALIDATOR_URL;
-
 /**
  * This service class exposes the functionality required by the application developers who will be
  * consuming the APIs published in the API Store.
