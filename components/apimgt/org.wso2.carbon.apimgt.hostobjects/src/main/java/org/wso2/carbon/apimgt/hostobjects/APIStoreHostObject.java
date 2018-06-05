@@ -3338,7 +3338,9 @@ public class APIStoreHostObject extends ScriptableObject {
             try {
                 if (args.length > 7 && args[7] != null) {
                     String applicationAttributeString = (String) args[7];
-                    appAttributes = new ObjectMapper().readValue(applicationAttributeString, Map.class);
+                    if (!applicationAttributeString.isEmpty()) {
+                        appAttributes = new ObjectMapper().readValue(applicationAttributeString, Map.class);
+                    }
                 }
             } catch (IOException e) {
                 handleException("Error in reading application attributes of " + name, e);
@@ -3478,7 +3480,9 @@ public class APIStoreHostObject extends ScriptableObject {
             try {
                 if (args.length > 9 && args[9] != null) {
                     String applicationAttributeString = (String) args[9];
-                    appAttributes = new ObjectMapper().readValue(applicationAttributeString, Map.class);
+                    if (!applicationAttributeString.isEmpty()) {
+                        appAttributes = new ObjectMapper().readValue(applicationAttributeString, Map.class);
+                    }
                 }
             } catch (IOException e) {
                 handleException("Error in reading application attributes of " + oldName, e);

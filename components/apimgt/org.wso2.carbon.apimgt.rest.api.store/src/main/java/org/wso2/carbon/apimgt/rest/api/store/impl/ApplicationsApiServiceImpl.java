@@ -436,7 +436,9 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                         String key = (String) jsonObject.get(APIConstants.ApplicationAttributes.ATTRIBUTE);
                         keySet.add(key);
                     }
-                    body.setAttributes(validateApplicationAttributes(applicationAttributes, keySet));
+                    if (applicationAttributes != null) {
+                        body.setAttributes(validateApplicationAttributes(applicationAttributes, keySet));
+                    }
                     //we do not honor the subscriber coming from the request body as we can't change the subscriber of the application
                     Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
                     //groupId of the request body is not honored for now.

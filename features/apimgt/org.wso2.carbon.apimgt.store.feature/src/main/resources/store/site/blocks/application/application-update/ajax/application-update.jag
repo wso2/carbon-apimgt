@@ -52,7 +52,11 @@ include("/jagg/jagg.jag");
             callbackUrlNew = request.getParameter("callbackUrlNew");
         }        
         descriptionNew = request.getParameter("descriptionNew");
-        applicationAttributeNew = request.getParameter("applicationAttributeNew");
+        if (request.getParameter("applicationAttributeNew") == null) {
+            applicationAttributeNew = "";
+        }else {
+            applicationAttributeNew = request.getParameter("applicationAttributeNew");
+        }
         tier = request.getParameter("tier");
         username = user.username;
 
