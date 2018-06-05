@@ -327,6 +327,7 @@ public final class APIConstants {
     public static final String DOT = ".";
     public static final String EXP = "exp";
     public static final String JWT = "JWT";
+    public static final String JWT_DEFAULT_AUDIENCE = "http://org.wso2.apimgt/gateway";
     public static final String JWT_CONFIGS = "JWTConfiguration.";
     public static final String JWT_HEADER = JWT_CONFIGS + "JWTHeader";
     public static final String TOKEN_GENERATOR_IMPL = JWT_CONFIGS + "JWTGeneratorImpl";
