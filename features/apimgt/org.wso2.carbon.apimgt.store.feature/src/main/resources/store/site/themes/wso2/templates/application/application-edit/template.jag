@@ -164,8 +164,8 @@ if(jagg.isMultiGroupEnabled()){
                 <div class="col-md-8 col-lg-6">
                     <input type="hidden" id="attributeKey_<%=count.toString()%>" value="<%=encode.forHtml(attributeKey)%>"/>
                     <input type="text" class="form-control" id="attribute_<%=count.toString()%>"
-                    value=<% if (applicationAttributes[attributeKey]) { %>
-                                "<%=encode.forHtml(applicationAttributes[attributeKey])%>"
+                    <% if (applicationAttributes[attributeKey]) { %>
+                                value="<%=encode.forHtml(applicationAttributes[attributeKey])%>"
                           <% } %>  />
                </div>
             <% }
