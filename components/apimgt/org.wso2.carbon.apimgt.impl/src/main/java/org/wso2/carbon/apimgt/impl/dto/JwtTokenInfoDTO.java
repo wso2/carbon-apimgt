@@ -26,15 +26,24 @@ import java.util.Map;
 
 public class JwtTokenInfoDTO implements Serializable {
 
+    private String subject;
     private String subscriber;
     private long expirationTime;
     private long issuedTime;
     private String endUserName;
     private boolean contentAware;
-    private String[] audience;
-    private String[] scopes;
+    private List<String> audience;
+    private String scopes;
     private List<SubscribedApiDTO> subscribedApiDTOList = new ArrayList<SubscribedApiDTO>();
     private Map<String, SubscriptionPolicyDTO> subscriptionPolicyDTOList = new HashMap<String, SubscriptionPolicyDTO>();
+
+    public String getSubject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
 
     public String getSubscriber() {
         return subscriber;
@@ -76,19 +85,19 @@ public class JwtTokenInfoDTO implements Serializable {
         this.contentAware = contentAware;
     }
 
-    public String[] getAudience() {
+    public List<String> getAudience() {
         return audience;
     }
 
-    public String[] getScopes() {
+    public String getScopes() {
         return scopes;
     }
 
-    public void setScopes(String[] scopes) {
+    public void setScopes(String scopes) {
         this.scopes = scopes;
     }
 
-    public void setAudience(String[] audience) {
+    public void setAudience(List<String> audience) {
         this.audience = audience;
     }
 

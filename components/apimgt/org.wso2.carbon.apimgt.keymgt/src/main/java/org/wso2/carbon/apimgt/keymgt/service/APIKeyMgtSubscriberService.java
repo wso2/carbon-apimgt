@@ -83,6 +83,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.wso2.carbon.apimgt.impl.APIConstants.API_KEY_VALIDATOR;
+import static org.wso2.carbon.apimgt.impl.APIConstants.API_KEY_VALIDATOR_URL;
+
 /**
  * This service class exposes the functionality required by the application developers who will be
  * consuming the APIs published in the API Store.
@@ -166,6 +169,16 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             oAuthConsumerAppDTO.setCallbackUrl(callbackUrl);
             //set username to avoid issues with email user name login
             oAuthConsumerAppDTO.setUsername(userName);
+            Map<String, Environment> apiGatewayEnvironments = ServiceReferenceHolder.getInstance()
+                    .getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiGatewayEnvironments();
+
+            String[] audienceStringArray = new String[apiGatewayEnvironments.size()];
+            int i = 0;
+            for (Map.Entry<String, Environment> entry : apiGatewayEnvironments.entrySet()) {
+                audienceStringArray[i] = entry.getValue().getServerURL();
+                i++;
+            }
+            oAuthConsumerAppDTO.setAudiences(audienceStringArray);
 
             //check whether grant types are provided
             String[] allowedGrantTypes = null;

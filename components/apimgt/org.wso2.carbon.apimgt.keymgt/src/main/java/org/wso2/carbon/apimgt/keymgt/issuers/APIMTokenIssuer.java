@@ -29,10 +29,16 @@ import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.token.APIMJWTGenerator;
 import org.wso2.carbon.apimgt.keymgt.util.APIMTokenIssuerUtil;
+import org.wso2.carbon.identity.oauth.common.exception.InvalidOAuthClientException;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
+import org.wso2.carbon.identity.oauth.dao.OAuthAppDO;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.token.JWTTokenIssuer;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
+import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class APIMTokenIssuer extends JWTTokenIssuer {
 
@@ -59,22 +65,40 @@ public class APIMTokenIssuer extends JWTTokenIssuer {
             if (application != null) {
                 String tokenType = application.getTokenType();
                 if (APIConstants.JWT.equals(tokenType)) {
+                    OAuthAppDO oAuthAppDO = OAuth2Util.getAppInformationByClientId(clientId);
+                    String[] audience = oAuthAppDO.getAudiences();
+                    List<String> audienceList = Arrays.asList(audience);
                     String[] scopes = tokReqMsgCtx.getScope();
+                    StringBuilder scopeString = new StringBuilder();
+                    for (String scope : scopes) {
+                        scopeString.append(scope).append(" ");
+                    }
+
                     JwtTokenInfoDTO jwtTokenInfoDTO = APIMTokenIssuerUtil.getJwtTokenInfoDTO(application);
-                    jwtTokenInfoDTO.setScopes(scopes);
+                    jwtTokenInfoDTO.setScopes(scopeString.toString().trim());
+                    jwtTokenInfoDTO.setAudience(audienceList);
                     jwtTokenInfoDTO.setExpirationTime(tokReqMsgCtx.getValidityPeriod());
                     APIMJWTGenerator apimjwtGenerator = new APIMJWTGenerator();
+                    String accessToken = apimjwtGenerator.generateJWT(jwtTokenInfoDTO);
                     if (log.isDebugEnabled()) {
                         long end_time_2 = System.nanoTime();
                         long output = end_time_2 - start_time;
                         log.debug("Time taken to generate the JWG in milliseconds : " + output / 1000000);
                     }
-                    return apimjwtGenerator.generateJWT(jwtTokenInfoDTO);
+                    return accessToken;
                 }
             }
 
         } catch (APIManagementException e) {
             log.error("Error occurred while getting JWT Token client ID : " + clientId, e);
+            throw new OAuthSystemException("Error occurred while getting JWT Token client ID : " + clientId, e);
+        } catch (InvalidOAuthClientException e) {
+            log.error("Error occurred while getting JWT Token client ID : " + clientId + " when getting oAuth App " +
+                    "information", e);
+            throw new OAuthSystemException("Error occurred while getting JWT Token client ID : " + clientId, e);
+        } catch (IdentityOAuth2Exception e) {
+            log.error("Error occurred while getting JWT Token client ID : " + clientId + " when getting oAuth App " +
+                    "information", e);
             throw new OAuthSystemException("Error occurred while getting JWT Token client ID : " + clientId, e);
         }
         return OAuthServerConfiguration.getInstance().getOAuthTokenGenerator().accessToken();

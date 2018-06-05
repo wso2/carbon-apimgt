@@ -13,6 +13,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -38,13 +39,13 @@ public class APIMJWTGenerator extends JWTGenerator {
 
         String base64UrlEncodedHeader = "";
         if (jwtHeader != null) {
-            base64UrlEncodedHeader = encode(jwtHeader.getBytes(Charset.defaultCharset()));
+            base64UrlEncodedHeader = Base64.getUrlEncoder().encodeToString(jwtHeader.getBytes(Charset.defaultCharset()));
         }
 
         String jwtBody = buildBody(jwtTokenInfoDTO);
         String base64UrlEncodedBody = "";
         if (jwtBody != null) {
-            base64UrlEncodedBody = encode(jwtBody.getBytes());
+            base64UrlEncodedBody = Base64.getUrlEncoder().encodeToString(jwtBody.getBytes());
         }
 
         if (SHA256_WITH_RSA.equals(signatureAlgorithm)) {
@@ -56,7 +57,7 @@ public class APIMJWTGenerator extends JWTGenerator {
             if (log.isDebugEnabled()) {
                 log.debug("signed assertion value : " + new String(signedAssertion, Charset.defaultCharset()));
             }
-            String base64UrlEncodedAssertion = encode(signedAssertion);
+            String base64UrlEncodedAssertion = Base64.getUrlEncoder().encodeToString(signedAssertion);
 
             return base64UrlEncodedHeader + '.' + base64UrlEncodedBody + '.' + base64UrlEncodedAssertion;
         } else {
@@ -149,12 +150,14 @@ public class APIMJWTGenerator extends JWTGenerator {
         String serverURL = configuration.getParameter(APIConstants.TOKEN_URL);
 
 
+        claims.put("sub", endUserName);
         claims.put("jti", UUID.randomUUID().toString());
         claims.put("iss", serverURL);
         claims.put("aud", jwtTokenInfoDTO.getAudience());
-        claims.put("exp", String.valueOf(expireIn));
+        claims.put("iat", currentTime);
+        claims.put("exp", expireIn);
         claims.put("enduser", endUserName);
-        claims.put("scopes", jwtTokenInfoDTO.getScopes());
+        claims.put("scope", jwtTokenInfoDTO.getScopes());
         claims.put("subscribedAPIs", jwtTokenInfoDTO.getSubscribedApiDTOList());
 
         return claims;
