@@ -214,14 +214,10 @@ public class ApisApiServiceImpl extends ApisApiService {
                 RestApiUtil.handleBadRequest("Context cannot end with '/' character", log);
             }
 
-            //The UI validation is added to prevent creating apis with same name to solve APIMANAGER-3226.
-            // But logically we should allow to create api with same name and different version using the api post of
-            // publisher rest api. Hence commenting out the validation for name already exist until we find a proper
-            // solution. UI validation will be remained as it is to prevent creating apis with same name.
-            /*if(apiProvider.isApiNameExist(body.getName())) {
-                RestApiUtil.handleBadRequest("Error occurred while adding API. API with name " +
-                        body.getName() + " already exists." , log);
-            }*/
+            if (apiProvider.isApiNameWithDifferentCaseExist(body.getName())) {
+                RestApiUtil.handleBadRequest("Error occurred while adding API. API with name " + body.getName()
+                        + " already exists.", log);
+            }
 
             //Get all existing versions of  api been adding
             List<String> apiVersions = apiProvider.getApiVersionsMatchingApiName(body.getName(), username);
@@ -851,7 +847,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             //attach micro-geteway labels
             apiToUpdate = assignLabelsToDTO(body,apiToUpdate);
-            
+
             apiProvider.updateAPI(apiToUpdate);
 
             if (!isWSAPI) {
