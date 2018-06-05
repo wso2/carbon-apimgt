@@ -3669,6 +3669,25 @@ public class APIProviderHostObject extends ScriptableObject {
         return apiExist.toString();
     }
 
+    public static String jsFunction_isApiNameWithDifferentCaseExist(Context cx, Scriptable thisObj, Object[] args,
+            Function funObj) throws APIManagementException {
+        Boolean apiWithDifferentCaseExist = false;
+        if (args != null && isStringValues(args)) {
+            String apiName = (String) args[0];
+            APIProvider apiProvider = getAPIProvider(thisObj);
+            try {
+                apiWithDifferentCaseExist = apiProvider.isApiNameWithDifferentCaseExist(apiName);
+            } catch (APIManagementException e) {
+                handleException(
+                        "Error from registry while checking whether a different letter case api name already exists",
+                        e);
+            }
+        } else {
+            handleException("Input api name value is null");
+        }
+        return apiWithDifferentCaseExist.toString();
+    }
+
     private static DocumentationType getDocType(String docType) {
         DocumentationType docsType = null;
         for (DocumentationType type : DocumentationType.values()) {

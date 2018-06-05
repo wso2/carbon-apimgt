@@ -126,9 +126,18 @@ public interface APIManager {
      *
      * @param apiName A String representing an API name
      * @return true if the api name already exists and false otherwise
-     * @throws APIManagementException if failed to check the context availability
+     * @throws APIManagementException if failed to check the api name availability
      */
     boolean isApiNameExist(String apiName) throws APIManagementException;
+
+    /**
+     * Checks whether a different letter case of the given API name is already registered in the system
+     *
+     * @param apiName A String representing an API name
+     * @return true if a different letter case of the api name already exists and false otherwise
+     * @throws APIManagementException if failed to check the different letter case api name availability
+     */
+    boolean isApiNameWithDifferentCaseExist(String apiName) throws APIManagementException;
 
     /**
      * Returns a set of API versions for the given provider and API name

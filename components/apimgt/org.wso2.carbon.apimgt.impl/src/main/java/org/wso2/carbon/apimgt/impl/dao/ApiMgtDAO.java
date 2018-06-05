@@ -7716,7 +7716,7 @@ public class ApiMgtDAO {
             connection = APIMgtDBUtil.getConnection();
 
             prepStmt = connection.prepareStatement(query);
-            prepStmt.setString(1, apiName.toLowerCase());
+            prepStmt.setString(1, apiName);
             prepStmt.setString(2, contextParam + '%');
             resultSet = prepStmt.executeQuery();
 
@@ -7731,6 +7731,53 @@ public class ApiMgtDAO {
             }
         } catch (SQLException e) {
             handleException("Failed to check api Name availability : " + apiName, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
+        }
+        return false;
+    }
+
+    /**
+     * Check whether another API with a different letter case of the given api name is already available in the api
+     * table under the given tenant domain
+     *
+     * @param apiName      candidate api name
+     * @param tenantDomain tenant domain name
+     * @return true if a different letter case name is already available
+     * @throws APIManagementException If failed to check different letter case api name availability
+     */
+    public boolean isApiNameWithDifferentCaseExist(String apiName, String tenantDomain) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet resultSet = null;
+        String contextParam = "/t/";
+
+        String query = SQLConstants.GET_API_NAME_DIFF_CASE_NOT_MATCHING_CONTEXT_SQL;
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            query = SQLConstants.GET_API_NAME_DIFF_CASE_MATCHING_CONTEXT_SQL;
+            contextParam += tenantDomain + '/';
+        }
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setString(1, apiName);
+            prepStmt.setString(2, contextParam + '%');
+            prepStmt.setString(3, apiName);
+            resultSet = prepStmt.executeQuery();
+
+            int apiCount = 0;
+            if (resultSet != null) {
+                while (resultSet.next()) {
+                    apiCount = resultSet.getInt("API_COUNT");
+                }
+            }
+            if (apiCount > 0) {
+                return true;
+            }
+        } catch (SQLException e) {
+            handleException("Failed to check different letter case api name availability : " + apiName, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
         }
