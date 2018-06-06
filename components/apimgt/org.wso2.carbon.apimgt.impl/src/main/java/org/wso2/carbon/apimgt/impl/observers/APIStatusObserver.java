@@ -17,7 +17,6 @@
 package org.wso2.carbon.apimgt.impl.observers;
 
 import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
 
 /**
  * One or more implementations of this interface can be registered with the APIProvider
@@ -41,6 +40,6 @@ public interface APIStatusObserver {
      *         notifying other observers
      *
      */
-    public boolean statusChanged(APIStatus previous, APIStatus current, API api);
+    public boolean statusChanged(String previous, String current, API api);
 
 }

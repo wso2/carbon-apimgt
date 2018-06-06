@@ -20,7 +20,6 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 
@@ -46,7 +45,7 @@ public class APIStatusObserverListTestCase {
         String API_VERSION = "1.0.0";
         Mockito.when(apiIdentifier.getApiName()).thenReturn(API_NAME);
         Mockito.when(apiIdentifier.getVersion()).thenReturn(API_VERSION);
-        apiStatusObserverList.notifyObservers(APIStatus.CREATED, APIStatus.PUBLISHED, api);
+        apiStatusObserverList.notifyObservers(APIConstants.CREATED, APIConstants.PUBLISHED, api);
 
         //try initializing again
         apiStatusObserverList.init(apiManagerConfiguration);

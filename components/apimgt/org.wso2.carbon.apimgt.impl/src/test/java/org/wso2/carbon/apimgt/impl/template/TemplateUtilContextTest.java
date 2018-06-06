@@ -22,14 +22,14 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 
 public class TemplateUtilContextTest {
 
     @Test
     public void testTemplateUtilContext() throws Exception {
         API api = new API(new APIIdentifier("admin", "TestAPI", "1.0.0"));
-        api.setStatus(APIStatus.CREATED);
+        api.setStatus(APIConstants.CREATED);
         api.setContextTemplate("/");
         ConfigContext configcontext = new APIConfigContext(api);
         TemplateUtilContext templateUtilContext = new TemplateUtilContext(configcontext);
