@@ -26,7 +26,6 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
@@ -84,7 +83,7 @@ public class APIMappingUtil {
             // PROTOTYPED APIs need to be created in CREATED state if they are to be deployed as prototypes
             // to the gateway (This is the same with PUBLISHED APIs; they are created in CREATED state before getting
             // published to the gateway)
-            apiToAdd.setStatus(APIStatus.CREATED);
+            apiToAdd.setStatus(APIConstants.CREATED);
 
             // Adding the api
             apiProvider.addAPI(apiToAdd);
@@ -93,11 +92,11 @@ public class APIMappingUtil {
             }
             log.info("Successfully created API " + apiId);
             // Publishing the API
-            if (APIStatus.PUBLISHED.toString().equals(initialState)) {
+            if (APIConstants.PUBLISHED.toString().equals(initialState)) {
                 apiProvider.changeLifeCycleStatus(apiToAdd.getId(), "Publish");
                 log.info("Successfully published API with identifier " + apiId);
             }
-            if (APIStatus.PROTOTYPED.toString().equals(initialState)) {
+            if (APIConstants.PROTOTYPED.toString().equals(initialState)) {
                 apiProvider.changeLifeCycleStatus(apiToAdd.getId(), "Deploy as a Prototype");
                 log.info("Successfully published API with identifier " + apiId);
             }
@@ -155,7 +154,7 @@ public class APIMappingUtil {
         model.setThumbnailUrl(dto.getThumbnailUri());
 
         if (dto.getStatus() != null) {
-            model.setStatus(mapStatusFromDTOToAPI(dto.getStatus()));
+            model.setStatus((dto.getStatus() != null) ? dto.getStatus().toUpperCase() : null);
         }
         model.setAsDefaultVersion(dto.getIsDefaultVersion());
         model.setResponseCache(dto.getResponseCaching());
@@ -257,30 +256,6 @@ public class APIMappingUtil {
             if (maxTpsDTO.getSandbox() != null) {
                 api.setSandboxMaxTps(maxTpsDTO.getSandbox().toString());
             }
-        }
-    }
-
-    /**
-     * Method to map status From APIDTO To API Model
-     *
-     * @param apiStatus API status
-     * @return API status
-     */
-    private static APIStatus mapStatusFromDTOToAPI(String apiStatus) {
-        // switch case statements are not working as APIStatus.<STATUS>.toString() or APIStatus.<STATUS>.getStatus()
-        //  is not a constant
-        if (apiStatus.equals(APIStatus.BLOCKED.toString())) {
-            return APIStatus.BLOCKED;
-        } else if (apiStatus.equals(APIStatus.CREATED.toString())) {
-            return APIStatus.CREATED;
-        } else if (apiStatus.equals(APIStatus.PUBLISHED.toString())) {
-            return APIStatus.PUBLISHED;
-        } else if (apiStatus.equals(APIStatus.DEPRECATED.toString())) {
-            return APIStatus.DEPRECATED;
-        } else if (apiStatus.equals(APIStatus.PROTOTYPED.toString())) {
-            return APIStatus.PROTOTYPED;
-        } else {
-            return null;
         }
     }
 

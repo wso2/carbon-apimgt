@@ -24,7 +24,6 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
@@ -175,7 +174,7 @@ public class UsageClient {
                 //iterate over apis
                 for (API api : apiSet) {
                     //ignore created apis
-                    if (api.getStatus() == APIStatus.CREATED) {
+                    if (APIConstants.CREATED.equals(api.getStatus())) {
                         continue;
                     }
                     //ignore 0 counts

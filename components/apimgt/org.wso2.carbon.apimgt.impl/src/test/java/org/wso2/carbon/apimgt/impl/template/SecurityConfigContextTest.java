@@ -26,7 +26,6 @@ import org.mockito.Mockito;
 import org.junit.Test;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 
@@ -38,7 +37,7 @@ public class SecurityConfigContextTest {
     public void testSecurityConfigContext() throws Exception {
 
         API api = new API(new APIIdentifier("admin", "TestAPI", "1.0.0"));
-        api.setStatus(APIStatus.CREATED);
+        api.setStatus(APIConstants.CREATED);
         api.setContextTemplate("/");
         api.setTransports(Constants.TRANSPORT_HTTP);
         api.setEndpointUTUsername("admin");

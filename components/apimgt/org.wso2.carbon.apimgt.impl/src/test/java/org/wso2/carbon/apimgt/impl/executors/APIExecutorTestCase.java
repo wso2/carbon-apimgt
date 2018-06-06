@@ -27,7 +27,6 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
@@ -99,9 +98,9 @@ public class APIExecutorTestCase {
         Mockito.when(genericArtifactManager.getGenericArtifact(ARTIFACT_ID)).thenReturn(genericArtifact);
         Mockito.when(genericArtifact.getLifecycleState()).thenReturn("CREATED");
 
-        Mockito.when(apiProvider.propergateAPIStatusChangeToGateways(apiIdentifier, APIStatus.PUBLISHED))
+        Mockito.when(apiProvider.propergateAPIStatusChangeToGateways(apiIdentifier, APIConstants.PUBLISHED))
                 .thenReturn(null);
-        Mockito.when(apiProvider.updateAPIforStateChange(apiIdentifier, APIStatus.PUBLISHED, null)).thenReturn(true);
+        Mockito.when(apiProvider.updateAPIforStateChange(apiIdentifier, APIConstants.PUBLISHED, null)).thenReturn(true);
         Mockito.when(userRegistry.get("/apimgt/applicationdata/provider/john/pizza-shack/2.0.0/api"))
                 .thenReturn(resource);
 
@@ -121,9 +120,8 @@ public class APIExecutorTestCase {
 
         PowerMockito.when(APIUtil.replaceEmailDomainBack(USER_NAME+'@'+TENANT_DOMAIN)).thenCallRealMethod();
         PowerMockito.when(APIUtil.replaceEmailDomain(USER_NAME)).thenCallRealMethod();
-        PowerMockito.when(APIUtil.getApiStatus("CREATED")).thenCallRealMethod();
-        PowerMockito.when(APIUtil.getApiStatus("PUBLISHED")).thenCallRealMethod();
         PowerMockito.when(APIUtil.getAPIPath(apiIdentifier)).thenCallRealMethod();
+        PowerMockito.when(APIUtil.getLcStateFromArtifact(genericArtifact)).thenReturn("CREATED");
 
         Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
         Mockito.when(registryService.getGovernanceUserRegistry(USER_NAME,TENANT_ID)).thenReturn(userRegistry);
@@ -192,7 +190,8 @@ public class APIExecutorTestCase {
     @Test
     public void testExecuteWhenFaultGatewayException() throws Exception {
         APIExecutor apiExecutor = new APIExecutor();
-        PowerMockito.doThrow(new FaultGatewaysException(null)).when(apiProvider).updateAPIforStateChange(apiIdentifier, APIStatus.PUBLISHED, null);
+        PowerMockito.doThrow(new FaultGatewaysException(null)).when(apiProvider).updateAPIforStateChange
+                (apiIdentifier, APIConstants.PUBLISHED, null);
         boolean isExecuted = apiExecutor.execute(requestContext, "CREATED", "PUBLISHED");
         Assert.assertFalse(isExecuted);
     }
@@ -200,7 +199,8 @@ public class APIExecutorTestCase {
     @Test
     public void testExecuteWhenUserStoreException() throws Exception {
         APIExecutor apiExecutor = new APIExecutor();
-        PowerMockito.doThrow(new FaultGatewaysException(null)).when(apiProvider).updateAPIforStateChange(apiIdentifier, APIStatus.PUBLISHED, null);
+        PowerMockito.doThrow(new FaultGatewaysException(null)).when(apiProvider).updateAPIforStateChange
+                (apiIdentifier, APIConstants.PUBLISHED, null);
         boolean isExecuted = apiExecutor.execute(requestContext, "CREATED", "PUBLISHED");
         Assert.assertFalse(isExecuted);
     }
@@ -217,7 +217,7 @@ public class APIExecutorTestCase {
         Mockito.when(apiIdTemp.getApiName()).thenReturn(API_NAME);
         API apiTemp = new API(apiIdTemp);
 
-        apiTemp.setStatus(APIStatus.PUBLISHED);
+        apiTemp.setStatus(APIConstants.PUBLISHED);
         apiList.add(apiTemp);
         Mockito.when(apiProvider.getAPIsByProvider(USER_NAME)).thenReturn(apiList);
 

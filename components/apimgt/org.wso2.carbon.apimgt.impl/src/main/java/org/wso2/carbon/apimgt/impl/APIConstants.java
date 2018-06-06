@@ -372,6 +372,8 @@ public final class APIConstants {
     public static final String CREATED = "CREATED";
     public static final String DEPRECATED = "DEPRECATED";
     public static final String PROTOTYPED = "PROTOTYPED";
+    public static final String RETIRED = "RETIRED";
+    public static final String BLOCKED = "BLOCKED";
     public static final String VERB_INFO_DTO = "VERB_INFO";
 
     //Overview constants for CORS configuration

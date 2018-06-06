@@ -4569,7 +4569,7 @@ public class ApiMgtDAO {
 
         int apiId = -1;
 
-        if (oldStatus == null && !newStatus.equals(APIStatus.CREATED.toString())) {
+        if (oldStatus == null && !newStatus.equals(APIConstants.CREATED)) {
             String msg = "Invalid old and new state combination";
             log.error(msg);
             throw new APIManagementException(msg);
@@ -4630,7 +4630,7 @@ public class ApiMgtDAO {
         }
     }
 
-    public void updateDefaultAPIPublishedVersion(APIIdentifier identifier, APIStatus oldStatus, APIStatus newStatus)
+    public void updateDefaultAPIPublishedVersion(APIIdentifier identifier, String oldStatus, String newStatus)
             throws APIManagementException {
 
         Connection conn = null;
@@ -4639,11 +4639,12 @@ public class ApiMgtDAO {
             conn.setAutoCommit(false);
 
             if (!oldStatus.equals(newStatus)) {
-                if ((newStatus.equals(APIStatus.CREATED) || newStatus.equals(APIStatus.RETIRED)) && (oldStatus.equals
-                        (APIStatus.PUBLISHED) || oldStatus.equals(APIStatus.DEPRECATED) || oldStatus.equals(APIStatus.BLOCKED))) {
+                if ((APIConstants.CREATED.equals(newStatus) || APIConstants.RETIRED.equals(newStatus)) && (
+                        APIConstants.PUBLISHED.equals(oldStatus) || APIConstants.DEPRECATED.equals(oldStatus)
+                                || APIConstants.BLOCKED.equals(oldStatus))) {
                     setPublishedDefVersion(identifier, conn, null);
-                } else if (newStatus.equals(APIStatus.PUBLISHED) || newStatus.equals(APIStatus.DEPRECATED) ||
-                        newStatus.equals(APIStatus.BLOCKED)) {
+                } else if (APIConstants.PUBLISHED.equals(newStatus) || APIConstants.DEPRECATED.equals(newStatus)
+                        || APIConstants.BLOCKED.equals(newStatus)) {
                     setPublishedDefVersion(identifier, conn, identifier.getVersion());
                 }
             }
@@ -5116,9 +5117,9 @@ public class ApiMgtDAO {
             prepStmtDefVersionAdd.setString(1, api.getId().getApiName());
             prepStmtDefVersionAdd.setString(2, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
             prepStmtDefVersionAdd.setString(3, api.getId().getVersion());
-            APIStatus apistatus = api.getStatus();
-            if (apistatus.equals(APIStatus.PUBLISHED) || apistatus.equals(APIStatus.DEPRECATED) || apistatus.equals
-                    (APIStatus.BLOCKED)) {
+            String apistatus = api.getStatus();
+            if (APIConstants.PUBLISHED.equals(apistatus) || APIConstants.DEPRECATED.equals(apistatus) || APIConstants
+                    .BLOCKED.equals(apistatus)) {
                 prepStmtDefVersionAdd.setString(4, api.getId().getVersion());
             } else {
                 prepStmtDefVersionAdd.setString(4, publishedDefaultVersion);

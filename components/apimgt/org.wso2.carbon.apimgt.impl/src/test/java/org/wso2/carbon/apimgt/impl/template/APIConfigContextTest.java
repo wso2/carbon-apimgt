@@ -22,13 +22,13 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 
 public class APIConfigContextTest {
     @Test
     public void testGetContext() throws Exception {
         API api = new API(new APIIdentifier("admin", "TestAPI", "1.0.0"));
-        api.setStatus(APIStatus.BLOCKED);
+        api.setStatus(APIConstants.BLOCKED);
         api.setContextTemplate("/");
         APIConfigContext configContext = new APIConfigContext(api);
         boolean isBlocked = (Boolean) configContext.getContext().get("apiIsBlocked");
