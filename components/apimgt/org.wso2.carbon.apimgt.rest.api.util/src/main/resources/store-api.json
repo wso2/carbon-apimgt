@@ -2168,6 +2168,10 @@
                         "$ref": "#/definitions/ApplicationKey"
                     },
                     "example": []
+                },
+                "attributes": {
+                  "type": "object",
+                  "example": {}
                 }
             }
         },
@@ -2201,6 +2205,10 @@
                 "groupId": {
                     "type": "string",
                     "example": ""
+                },
+                "attributes": {
+                  "type": "object",
+                  "example": {}
                 }
             }
         },

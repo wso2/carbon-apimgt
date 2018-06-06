@@ -107,6 +107,7 @@ import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
+import org.apache.xerces.util.SecurityManager;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
@@ -7354,5 +7355,38 @@ public final class APIUtil {
         });
 
         return conditionDtoList;
+    }
+
+    /**
+     * Get if there any tenant-specific application configurations from the tenant
+     * registry
+     *
+     * @param tenantId The Tenant Id
+     * @return JSONObject The Application Attributes read from tenant registry or else null
+     * @throws APIManagementException Throws if the registry resource doesn't exist
+     * or the content cannot be parsed to JSON
+     */
+    public static JSONObject getAppAttributeKeysFromRegistry(int tenantId) throws APIManagementException {        try {
+        Registry registryConfig = ServiceReferenceHolder.getInstance().getRegistryService().getConfigSystemRegistry(tenantId);
+        if (registryConfig.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
+            Resource resource = registryConfig.get(APIConstants.API_TENANT_CONF_LOCATION);
+            String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
+            if (content != null) {
+                JSONObject tenantConfigs = (JSONObject) new JSONParser().parse(content);
+                String property = APIConstants.ApplicationAttributes.APPLICATION_CONFIGURATIONS;
+                if (tenantConfigs.keySet().contains(property)) {
+                    return (JSONObject) tenantConfigs.get(APIConstants.ApplicationAttributes.APPLICATION_CONFIGURATIONS);
+                }
+            }
+        }
+
+    } catch (RegistryException exception) {
+        String msg = "Error while retrieving application attributes from tenant registry.";
+        throw new APIManagementException(msg, exception);
+    } catch (ParseException parseExceptione) {
+        String msg = "Couldn't create json object from Swagger object for custom application attributes.";
+        throw new APIManagementException(msg, parseExceptione);
+    }
+        return null;
     }
 }

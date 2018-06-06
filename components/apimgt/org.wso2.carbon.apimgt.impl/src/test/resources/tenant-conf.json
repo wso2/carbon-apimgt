@@ -82,5 +82,16 @@
       "CreateOnTenantLoad" : true
     }
   },
-  "AuthorizationHeader":"TENANT_AUTH"
+  "AuthorizationHeader":"TENANT_AUTH",
+  "ApplicationConfigs": {
+    "Attributes" : [
+      {
+        "Attribute" : "External Reference Number",
+        "Required" : true
+      },
+      {
+        "Attribute" : "Tenant Billing tier"
+      }
+    ]
+  }
 }

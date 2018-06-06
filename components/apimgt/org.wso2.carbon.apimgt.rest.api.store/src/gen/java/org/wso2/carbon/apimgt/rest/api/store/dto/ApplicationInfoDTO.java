@@ -35,6 +35,8 @@ public class ApplicationInfoDTO  {
   
   private String groupId = null;
 
+  private Object attributes = null;
+
   private String lastUpdatedTime = null;
 
   private String createdTime = null;
@@ -146,6 +148,17 @@ public class ApplicationInfoDTO  {
     this.groupId = groupId;
   }
 
+
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("attributes")
+  public Object getAttributes() {
+    return attributes;
+  }
+  public void setAttributes(Object attributes) {
+    this.attributes = attributes;
+  }
   
 
   @Override
@@ -160,6 +173,7 @@ public class ApplicationInfoDTO  {
     sb.append("  description: ").append(description).append("\n");
     sb.append("  status: ").append(status).append("\n");
     sb.append("  groupId: ").append(groupId).append("\n");
+    sb.append("  attributes: ").append(attributes).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

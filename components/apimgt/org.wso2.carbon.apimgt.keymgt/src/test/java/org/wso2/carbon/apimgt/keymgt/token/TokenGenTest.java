@@ -154,7 +154,7 @@ public class TokenGenTest {
 
 
         //we can not do assert eaquals because body includes expiration time.
-        
+
         /*String expectedHeader = "{\"typ\":\"JWT\"}";
         String expectedBody = "{\"iss\":\"wso2.org/products/am\", \"exp\":1349270811075, " +
                               "\"http://wso2.org/claims/subscriber\":\"sastry\", " +

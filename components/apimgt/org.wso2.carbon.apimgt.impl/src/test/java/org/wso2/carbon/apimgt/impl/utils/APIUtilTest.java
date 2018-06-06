@@ -1945,4 +1945,30 @@ public class APIUtilTest {
         Assert.assertNotNull(conditionDtoList.get(3).getHeaderConditions());
         Assert.assertNotNull(conditionDtoList.get(4).getJwtClaimConditions());
     }
+
+    @Test
+    public void testGetAppAttributeKeysFromRegistry() throws Exception {
+        final int tenantId = -1234;
+        final String property = APIConstants.ApplicationAttributes.APPLICATION_CONFIGURATIONS;
+
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        RegistryService registryService = Mockito.mock(RegistryService.class);
+        UserRegistry userRegistry = Mockito.mock(UserRegistry.class);
+        Resource resource = Mockito.mock(Resource.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
+        Mockito.when(registryService.getConfigSystemRegistry(tenantId)).thenReturn(userRegistry);
+        Mockito.when(userRegistry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(true);
+        Mockito.when(userRegistry.get(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(resource);
+        File siteConfFile = new File(Thread.currentThread().getContextClassLoader().
+                getResource("tenant-conf.json").getFile());
+        String tenantConfValue = FileUtils.readFileToString(siteConfFile);
+        Mockito.when(resource.getContent()).thenReturn(tenantConfValue.getBytes());
+        JSONParser parser = new JSONParser();
+        JSONObject json = (JSONObject) parser.parse(tenantConfValue);
+        JSONObject applicationAttributes = (JSONObject) json.get(property);
+        JSONObject appAttributes = APIUtil.getAppAttributeKeysFromRegistry(tenantId);
+        Assert.assertEquals(applicationAttributes, appAttributes);
+    }
 }

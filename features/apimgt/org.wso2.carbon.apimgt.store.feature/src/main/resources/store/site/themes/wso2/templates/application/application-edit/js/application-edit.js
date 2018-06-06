@@ -37,6 +37,16 @@ $(document).ready(function () {
         var applicationOld = $("#application-name-old").val();
         var groupIdNew = $("#groupId").val();
         var groupIdOld = $("#groupId-old").val();
+        var numberOfAttributes = $("#numberOfAttributes").val();
+        var applicationAttributesNew = {};
+        var attributeNew;
+        var attributeKeyNew;
+
+        for (var i = 0; i < parseInt(numberOfAttributes); i++) {
+            attributeKeyNew = $("#attributeKey_" + i.toString()).val();
+            attributeNew = $("#attribute_" + i.toString()).val();
+            applicationAttributesNew[attributeKeyNew] = attributeNew;
+        }
         var tokenType = $("#tokenType").val();
         jagg.post("/site/blocks/application/application-update/ajax/application-update.jag", {
             action:"updateApplication",
@@ -45,6 +55,8 @@ $(document).ready(function () {
             tier:tier,
             descriptionNew:description,
             groupIdOld:groupIdOld,
+            groupIdNew:groupIdNew,
+            applicationAttributeNew:JSON.stringify(applicationAttributesNew),
             groupIdNew:groupIdNew,
             tokenType:tokenType
         }, function (result) {

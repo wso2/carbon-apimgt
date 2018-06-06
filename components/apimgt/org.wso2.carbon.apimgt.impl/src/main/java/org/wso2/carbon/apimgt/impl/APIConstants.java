@@ -1310,6 +1310,18 @@ public final class APIConstants {
         public static final String ENABLED = "Enabled";
     }
 
+    /**
+     * Parameter for adding custom attributes against application in API Store
+     */
+    public static class ApplicationAttributes{
+        public static final String APPLICATION_CONFIGURATIONS = "ApplicationConfigs";
+        public static final String APPLICATION_ATTRIBUTES = "ApplicationAttributes";
+        public static final String ATTRIBUTES = "Attributes";
+        public static final String ATTRIBUTE = "Attribute";
+        public static final String REQUIRED = "Required";
+        public static final String DESCRIPTION = "Description";
+    }
+
     public static final String REGISTRY_ARTIFACT_SEARCH_DESC_ORDER = "DES";
     public static final String REGISTRY_ARTIFACT_SORT_BY_CREATED_TIME = "meta_created_date";
 

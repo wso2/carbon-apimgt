@@ -74,13 +74,36 @@ for(var i=0;i < outputs.tiers.length; i++){
       <p class="form-control-static"><%if(application.description){%><%=encode.forHtml(application.description) %><% }else{%><%=i18n.localize("Not Given")%><%}%></p>
     </div>
   </div>
+
+  <div class="form-group">
+  <% var applicationAttributes = parse(application.applicationAttributes);
+
+    for (var prop in applicationAttributes) { %>
+        <div class="form-group">
+            <label class="control-label col-sm-3" for="attribute_<%=i%>" >
+                <%=encode.forHtml(i18n.localize(prop,prop)) %>
+            </label>
+            <div class="col-sm-6">
+            <p class="form-control-static"><%
+        if (applicationAttributes[prop]) { %>
+                    <%=encode.forHtml(applicationAttributes[prop])%>
+                <% } else { %>
+                    <%=i18n.localize("Not Given") %>
+                <% } %>
+            </p>
+            </div>
+        </div>
+    <% } %>
+  </div>
+
     <div class="form-group">
     <label class="col-sm-3 control-label"><%=i18n.localize("Token Type")%></label>
     <div class="col-sm-9">
       <p class="form-control-static"><%if(application.tokenType){%><%=encode.forHtml(application.tokenType) %><% }else{%><%=i18n.localize("DEFAULT")%><%}%></p>
     </div>
-  </div>  
-</form>      
+  </div>
+
+</form>
       </div>
       <% if(application.status == "APPROVED"){ %>
       <div role="tabpanel" class="tab-pane fade production-keys" id="production">

@@ -1,5 +1,5 @@
 <%
-var addApplication = function (username, application, tier, callbackUrl,descriptionNew,groupId,tokenType) {
+var addApplication = function (username, application, tier, callbackUrl,descriptionNew,groupId, tokenType,applicationAttributes) {
     var log = new Log(),
             store = jagg.module("manager").getAPIStoreObj();
 
@@ -8,7 +8,7 @@ var addApplication = function (username, application, tier, callbackUrl,descript
             groupId = session.get("groupId");
         }
 
-        var status=store.addApplication(application, username, tier, callbackUrl,descriptionNew,groupId,tokenType);
+        var status=store.addApplication(application, username, tier, callbackUrl,descriptionNew,groupId, tokenType, applicationAttributes);
         if (log.isDebugEnabled()) {
             log.debug("addApplication");
         }

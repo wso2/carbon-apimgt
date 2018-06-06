@@ -17,6 +17,8 @@
 */
 package org.wso2.carbon.apimgt.keymgt.token;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -58,6 +60,7 @@ public class JWTGenerator extends AbstractJWTGenerator {
         String userType = validationContext.getValidationInfoDTO().getUserType();
         String applicationTier = validationContext.getValidationInfoDTO().getApplicationTier();
         String enduserTenantId = String.valueOf(APIUtil.getTenantId(endUserName));
+        Map<String, String> appAttributes = getApplicationAttributes(Integer.parseInt(applicationId));
 
         Map<String, String> claims = new LinkedHashMap<String, String>(20);
 
@@ -74,6 +77,15 @@ public class JWTGenerator extends AbstractJWTGenerator {
         claims.put(dialect + "/usertype", userType);
         claims.put(dialect + "/enduser", APIUtil.getUserNameWithTenantSuffix(endUserName));
         claims.put(dialect + "/enduserTenantId", enduserTenantId);
+        try {
+            if (appAttributes != null && !appAttributes.isEmpty()) {
+                String stringAppAttributes = new ObjectMapper().writeValueAsString(appAttributes);
+                claims.put(dialect + "/applicationAttributes", stringAppAttributes);
+            }
+
+        } catch (JsonProcessingException e) {
+            log.error("Error in converting Map to String");
+        }
 
         return claims;
     }

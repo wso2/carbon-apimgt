@@ -24,6 +24,9 @@ import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.BlockConditionAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
@@ -2876,7 +2879,6 @@ public class ApiMgtDAO {
     public int addApplication(Application application, String userId) throws APIManagementException {
         Connection conn = null;
         int applicationId = 0;
-        boolean groupIdMappingUpdated = true;
         String loginUserName = getLoginUserName(userId);
         try {
             conn = APIMgtDBUtil.getConnection();
@@ -2886,12 +2888,10 @@ public class ApiMgtDAO {
             if (multiGroupAppSharingEnabled) {
                 Subscriber subscriber = getSubscriber(userId);
                 String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
-                groupIdMappingUpdated = updateGroupIDMappings(conn, applicationId, application.getGroupId(),
+                updateGroupIDMappings(conn, applicationId, application.getGroupId(),
                         tenantDomain);
             }
-            if (groupIdMappingUpdated) {
-                conn.commit();
-            }
+            conn.commit();
         } catch (SQLException e) {
             if (conn != null) {
                 try {
@@ -3262,8 +3262,7 @@ public class ApiMgtDAO {
 
         int applicationId = 0;
         try {
-            int tenantId;
-            tenantId = APIUtil.getTenantId(userId);
+            int tenantId = APIUtil.getTenantId(userId);
 
             //Get subscriber Id
             Subscriber subscriber = getSubscriber(userId, tenantId, conn);
@@ -3313,7 +3312,10 @@ public class ApiMgtDAO {
                 applicationId = Integer.parseInt(rs.getString(1));
             }
 
-            conn.commit();
+            //Adding data to AM_APPLICATION_ATTRIBUTES table
+            if( application.getApplicationAttributes() != null) {
+                addApplicationAttributes(conn, application.getApplicationAttributes(), applicationId, tenantId);
+            }
         } catch (SQLException e) {
             handleException("Failed to add Application", e);
         } finally {
@@ -3325,7 +3327,7 @@ public class ApiMgtDAO {
     public void updateApplication(Application application) throws APIManagementException {
         Connection conn = null;
         PreparedStatement ps = null;
-        boolean transactionCompleted = true;
+        PreparedStatement preparedStatement = null;
         try {
             conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
@@ -3349,12 +3351,25 @@ public class ApiMgtDAO {
             if (multiGroupAppSharingEnabled) {
                 Subscriber subscriber = application.getSubscriber();
                 String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
-                transactionCompleted = updateGroupIDMappings(conn, application.getId(), application.getGroupId(),
+                updateGroupIDMappings(conn, application.getId(), application.getGroupId(),
                         tenantDomain);
             }
-            if (transactionCompleted) {
-                conn.commit();
+            Subscriber subscriber = application.getSubscriber();
+            String domain = MultitenantUtils.getTenantDomain(subscriber.getName());
+            int tenantId = IdentityTenantUtil.getTenantId(domain);
+
+            preparedStatement = conn.prepareStatement(SQLConstants.REMOVE_APPLICATION_ATTRIBUTES_SQL);
+            preparedStatement.setInt(1,application.getId());
+            preparedStatement.execute();
+
+            if (log.isDebugEnabled()) {
+                log.debug("Old attributes of application - " + application.getName() + " are removed");
             }
+
+            if (application.getApplicationAttributes() != null && !application.getApplicationAttributes().isEmpty()) {
+                addApplicationAttributes(conn, application.getApplicationAttributes(), application.getId(), tenantId);
+            }
+            conn.commit();
             updateOAuthConsumerApp(application.getName(), application.getCallbackUrl());
         } catch (SQLException e) {
             if (conn != null) {
@@ -3368,7 +3383,8 @@ public class ApiMgtDAO {
         } catch (IdentityOAuthAdminException e) {
             handleException("Failed to update OAuth Consumer Application", e);
         } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, null);
+            APIMgtDBUtil.closeAllConnections(ps, null, null);
+            APIMgtDBUtil.closeAllConnections(preparedStatement,conn,null);
         }
     }
 
@@ -4015,9 +4031,12 @@ public class ApiMgtDAO {
             rs = prepStmt.executeQuery();
             ArrayList<Application> applicationsList = new ArrayList<Application>();
             Application application;
+            Map<String,String> applicationAttributes;
+            int applicationId = 0;
             while (rs.next()) {
+                applicationId = rs.getInt("APPLICATION_ID");
                 application = new Application(rs.getString("NAME"), subscriber);
-                application.setId(rs.getInt("APPLICATION_ID"));
+                application.setId(applicationId);
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 application.setCallbackUrl(rs.getString("CALLBACK_URL"));
                 application.setDescription(rs.getString("DESCRIPTION"));
@@ -4026,6 +4045,8 @@ public class ApiMgtDAO {
                 application.setUUID(rs.getString("UUID"));
                 application.setIsBlackListed(rs.getBoolean("ENABLED"));
                 application.setOwner(rs.getString("CREATED_BY"));
+                applicationAttributes = getApplicationAttributes(connection, applicationId);
+                application.setApplicationAttributes(applicationAttributes);
                 if (multiGroupAppSharingEnabled) {
                     setGroupIdInApplication(application);
                 }
@@ -5313,6 +5334,7 @@ public class ApiMgtDAO {
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
 
+        int applicationId = 0;
         Application application = null;
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -5372,7 +5394,8 @@ public class ApiMgtDAO {
                 application.setDescription(rs.getString("DESCRIPTION"));
                 application.setStatus(rs.getString("APPLICATION_STATUS"));
                 application.setCallbackUrl(rs.getString("CALLBACK_URL"));
-                application.setId(rs.getInt("APPLICATION_ID"));
+                applicationId = rs.getInt("APPLICATION_ID");
+                application.setId(applicationId);
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 application.setUUID(rs.getString("UUID"));
                 application.setGroupId(rs.getString("GROUP_ID"));
@@ -5381,6 +5404,10 @@ public class ApiMgtDAO {
 
                 if (multiGroupAppSharingEnabled) {
                     setGroupIdInApplication(application);
+                }
+                if (application != null) {
+                    Map<String, String> applicationAttributes = getApplicationAttributes(connection, applicationId);
+                    application.setApplicationAttributes(applicationAttributes);
                 }
             }
         } catch (SQLException e) {
@@ -5440,6 +5467,10 @@ public class ApiMgtDAO {
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
             }
+            if (application != null) {
+                Map<String,String> applicationAttributes = getApplicationAttributes(connection, applicationId);
+                application.setApplicationAttributes(applicationAttributes);
+            }
         } catch (SQLException e) {
             handleException("Error while obtaining details of the Application : " + applicationId, e);
         } finally {
@@ -5459,6 +5490,7 @@ public class ApiMgtDAO {
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
+        int applicationId = 0;
 
         Application application = null;
         try {
@@ -5481,7 +5513,8 @@ public class ApiMgtDAO {
                 application.setDescription(rs.getString("DESCRIPTION"));
                 application.setStatus(rs.getString("APPLICATION_STATUS"));
                 application.setCallbackUrl(rs.getString("CALLBACK_URL"));
-                application.setId(rs.getInt("APPLICATION_ID"));
+                applicationId = rs.getInt("APPLICATION_ID");
+                application.setId(applicationId);
                 application.setGroupId(rs.getString("GROUP_ID"));
                 application.setUUID(rs.getString("UUID"));
                 application.setTier(rs.getString("APPLICATION_TIER"));
@@ -5503,6 +5536,11 @@ public class ApiMgtDAO {
                     // fixing Timestamp issue with default value '0000-00-00 00:00:00'for existing applications created
                     application.setLastUpdatedTime(application.getCreatedTime());
                 }
+            }
+            // Get custom attributes of application
+            if (application != null) {
+                Map<String, String> applicationAttributes = getApplicationAttributes(connection, applicationId);
+                application.setApplicationAttributes(applicationAttributes);
             }
         } catch (SQLException e) {
             handleException("Error while obtaining details of the Application : " + uuid, e);
@@ -11605,5 +11643,85 @@ public class ApiMgtDAO {
             handleException("Failed to update label : ", e);
         }
         return label;
+    }
+
+    private void addApplicationAttributes(Connection conn, Map<String, String> attributes, int applicationId, int tenantId)
+            throws APIManagementException {
+
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            if(attributes != null) {
+                ps = conn.prepareStatement(SQLConstants.ADD_APPLICATION_ATTRIBUTES_SQL);
+                for (String key : attributes.keySet()) {
+                    ps.setInt(1, applicationId);
+                    ps.setString(2, key);
+                    ps.setString(3, attributes.get(key));
+                    ps.setInt(4, tenantId);
+                    ps.addBatch();
+                }
+                int[] update = ps.executeBatch();
+            }
+        } catch (SQLException e) {
+            handleException("Error in adding attributes of application with id: " + applicationId , e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, null, rs);
+        }
+    }
+
+    /**
+     * Get all attributes stored against an Application
+     *
+     * @param conn Database connection
+     * @param applicationId
+     * @throws APIManagementException
+     */
+    public Map<String, String> getApplicationAttributes(Connection conn, int applicationId) throws APIManagementException {
+
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        Map<String, String> applicationAttributes = new HashMap<>();
+        try {
+            ps = conn.prepareStatement(SQLConstants.GET_APPLICATION_ATTRIBUTES_BY_APPLICATION_ID);
+            ps.setInt(1, applicationId);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                applicationAttributes.put(rs.getString("NAME"),
+                        rs.getString("VALUE"));
+            }
+
+        } catch (SQLException e) {
+            handleException("Error when reading attributes of application with id: " + applicationId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, null, rs);
+        }
+        return applicationAttributes;
+    }
+
+    /**
+     * Delete certain attribute stored against an Application
+     *
+     * @param attributeKey User defined key of attribute
+     * @param applicationId
+     * @throws APIManagementException
+     */
+    public void deleteApplicationAttributes(String attributeKey, int applicationId) throws APIManagementException {
+
+        Connection connection = null;
+        PreparedStatement ps = null;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            ps = connection.prepareStatement(SQLConstants.REMOVE_APPLICATION_ATTRIBUTES_BY_ATTRIBUTE_NAME_SQL);
+            ps.setString(1, attributeKey);
+            ps.setInt(2, applicationId);
+
+            ps.execute();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error in establishing SQL connection ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, connection, null);
+        }
     }
 }

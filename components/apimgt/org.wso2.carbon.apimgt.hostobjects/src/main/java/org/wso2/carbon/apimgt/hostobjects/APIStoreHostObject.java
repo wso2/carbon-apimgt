@@ -104,6 +104,8 @@ import org.wso2.carbon.user.mgt.stub.UserAdminUserAdminException;
 import org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -124,6 +126,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
+import java.io.IOException;
 
 
 public class APIStoreHostObject extends ScriptableObject {
@@ -146,6 +149,7 @@ public class APIStoreHostObject extends ScriptableObject {
     }
 
     public APIStoreHostObject(String loggedUser) throws APIManagementException {
+
         if (loggedUser != null) {
             this.username = loggedUser;
             apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
@@ -197,8 +201,6 @@ public class APIStoreHostObject extends ScriptableObject {
         }
 
     }
-        			    
-    
 
     public static Scriptable jsConstructor(Context cx, Object[] args, Function Obj,
                                            boolean inNewExpr)
@@ -251,8 +253,7 @@ public class APIStoreHostObject extends ScriptableObject {
     }
 
     public static NativeArray jsFunction_getProviderAPIUsage(Context cx, Scriptable thisObj,
-                                                             Object[] args, Function funObj)
-            throws APIManagementException {
+                                                 Object[] args, Function funObj) throws APIManagementException {
         return null;
     }
 
@@ -511,8 +512,9 @@ public class APIStoreHostObject extends ScriptableObject {
      * @return NativeObject of key details will return.
      */
     public static NativeObject jsFunction_mapExistingOauthClient(Context cx, Scriptable thisObj, Object[] args,
-            Function funObj)
+                                                                 Function funObj)
             throws ScriptException, APIManagementException, ParseException {
+
         if (args != null && args.length != 0) {
 
             try {
@@ -3294,6 +3296,12 @@ public class APIStoreHostObject extends ScriptableObject {
                 row.put("description", row, application.getDescription());
                 row.put("groupId", row, application.getGroupId());
                 row.put("tokenType", row, application.getTokenType());
+                try {
+                    row.put("applicationAttributes", row,
+                            new ObjectMapper().writeValueAsString(application.getApplicationAttributes()));
+                } catch (JsonProcessingException e) {
+                    handleException("Error in retrieving application attributes of " + applicationName, e);
+                }
                 return row;
             }
         }
@@ -3319,6 +3327,7 @@ public class APIStoreHostObject extends ScriptableObject {
             String callbackUrl = (String) args[3];
             String description = (String) args[4];
             String groupId = null;
+            Map appAttributes = null;
             if (args.length > 5 && args[5] != null) {
                 groupId = (String) args[5];
             }
@@ -3330,6 +3339,17 @@ public class APIStoreHostObject extends ScriptableObject {
                 tokenType = DEFAULT_TOKEN_TYPE;
             }
 
+
+            try {
+                if (args.length > 7 && args[7] != null) {
+                    String applicationAttributeString = (String) args[7];
+                    if (!applicationAttributeString.isEmpty()) {
+                        appAttributes = new ObjectMapper().readValue(applicationAttributeString, Map.class);
+                    }
+                }
+            } catch (IOException e) {
+                handleException("Error in reading application attributes of " + name, e);
+            }
 
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
             Subscriber subscriber = new Subscriber(username);
@@ -3344,6 +3364,9 @@ public class APIStoreHostObject extends ScriptableObject {
                 application.setGroupId(groupId);
             }
 
+            if (appAttributes != null) {
+                application.setApplicationAttributes(appAttributes);
+            }
             int applicationId = apiConsumer.addApplication(application, username);
             status = apiConsumer.getApplicationStatusById(applicationId);
             return status;
@@ -3451,12 +3474,24 @@ public class APIStoreHostObject extends ScriptableObject {
             String description = (String) args[5];
             String tokenType = (String) args[8];
             String groupingId = null;
+            Map appAttributes =  null;
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
 
             if (args.length > 6 && args[6] != null) {
                 groupingId = (String) args[6];
             }
 
+            // retrieve new values for application attributes
+            try {
+                if (args.length > 9 && args[9] != null) {
+                    String applicationAttributeString = (String) args[9];
+                    if (!applicationAttributeString.isEmpty()) {
+                        appAttributes = new ObjectMapper().readValue(applicationAttributeString, Map.class);
+                    }
+                }
+            } catch (IOException e) {
+                handleException("Error in reading application attributes of " + oldName, e);
+            }
             // get application with new name if exists
             Application application = apiConsumer.getApplicationsByName(username, newName, groupingId);
             if (!newName.equals(oldName)) {
@@ -3480,6 +3515,9 @@ public class APIStoreHostObject extends ScriptableObject {
             updatedApplication.setDescription(description);
             updatedApplication.setTokenType(tokenType);
 
+            if (appAttributes != null) {
+                updatedApplication.setApplicationAttributes(appAttributes);
+            }
             if (APIUtil.isMultiGroupAppSharingEnabled()) {
                 String newGroupId = null;
                 if (args.length > 7 && args[7] != null) {
