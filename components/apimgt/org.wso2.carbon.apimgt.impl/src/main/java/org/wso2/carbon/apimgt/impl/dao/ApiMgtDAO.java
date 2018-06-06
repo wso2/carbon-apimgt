@@ -3366,7 +3366,7 @@ public class ApiMgtDAO {
                 log.debug("Old attributes of application - " + application.getName() + " are removed");
             }
 
-            if (!application.getApplicationAttributes().isEmpty()) {
+            if (application.getApplicationAttributes() != null && !application.getApplicationAttributes().isEmpty()) {
                 addApplicationAttributes(conn, application.getApplicationAttributes(), application.getId(), tenantId);
             }
             conn.commit();
