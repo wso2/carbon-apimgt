@@ -62,7 +62,7 @@ public class API implements Serializable {
     private boolean apiHeaderChanged;
     private boolean apiResourcePatternsChanged;
 
-    private APIStatus status;
+    private String status;
 
     private String technicalOwner;
     private String technicalOwnerEmail;
@@ -433,11 +433,11 @@ public class API implements Serializable {
         this.uriTemplates = uriTemplates;
     }
 
-    public APIStatus getStatus() {
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(APIStatus status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 

@@ -84,7 +84,7 @@ public class APIMappingUtil {
             // PROTOTYPED APIs need to be created in CREATED state if they are to be deployed as prototypes
             // to the gateway (This is the same with PUBLISHED APIs; they are created in CREATED state before getting
             // published to the gateway)
-            apiToAdd.setStatus(APIStatus.CREATED);
+            apiToAdd.setStatus(APIConstants.CREATED);
 
             // Adding the api
             apiProvider.addAPI(apiToAdd);
@@ -266,19 +266,19 @@ public class APIMappingUtil {
      * @param apiStatus API status
      * @return API status
      */
-    private static APIStatus mapStatusFromDTOToAPI(String apiStatus) {
+    private static String mapStatusFromDTOToAPI(String apiStatus) {
         // switch case statements are not working as APIStatus.<STATUS>.toString() or APIStatus.<STATUS>.getStatus()
         //  is not a constant
         if (apiStatus.equals(APIStatus.BLOCKED.toString())) {
-            return APIStatus.BLOCKED;
+            return APIConstants.BLOCKED;
         } else if (apiStatus.equals(APIStatus.CREATED.toString())) {
-            return APIStatus.CREATED;
+            return APIConstants.CREATED;
         } else if (apiStatus.equals(APIStatus.PUBLISHED.toString())) {
-            return APIStatus.PUBLISHED;
+            return APIConstants.PUBLISHED;
         } else if (apiStatus.equals(APIStatus.DEPRECATED.toString())) {
-            return APIStatus.DEPRECATED;
+            return APIConstants.DEPRECATED;
         } else if (apiStatus.equals(APIStatus.PROTOTYPED.toString())) {
-            return APIStatus.PROTOTYPED;
+            return APIConstants.PROTOTYPED;
         } else {
             return null;
         }

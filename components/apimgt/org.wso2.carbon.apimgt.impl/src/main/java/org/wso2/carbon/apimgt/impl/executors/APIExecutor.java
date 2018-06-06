@@ -24,7 +24,6 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
@@ -111,14 +110,14 @@ public class APIExecutor implements Execution {
             API api = APIUtil.getAPI(apiArtifact);
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(userWithDomain);
 
-            APIStatus oldStatus = APIUtil.getApiStatus(apiArtifact.getLifecycleState());
-            APIStatus newStatus = APIUtil.getApiStatus(targetState);
+            String oldStatus = APIUtil.getLcStateFromArtifact(apiArtifact);
+            String newStatus = (targetState != null)? targetState.toUpperCase(): targetState;
 
             if(newStatus != null){ //only allow the executor to be used with default LC states transition
                                    //check only the newStatus so this executor can be used for LC state change from 
                                    //custom state to default api state
-                if ((APIStatus.CREATED.equals(oldStatus) || APIStatus.PROTOTYPED.equals(oldStatus))
-                        && APIStatus.PUBLISHED.equals(newStatus)) {
+                if ((APIConstants.CREATED.equals(oldStatus) || APIConstants.PROTOTYPED.equals(oldStatus))
+                        && APIConstants.PUBLISHED.equals(newStatus)) {
                     Set<Tier> tiers = api.getAvailableTiers();
                     String endPoint = api.getEndpointConfig();
                     if (endPoint != null && endPoint.trim().length() > 0) {
@@ -166,13 +165,13 @@ public class APIExecutor implements Execution {
             boolean deprecateOldVersions = false;
             boolean makeKeysForwardCompatible = false;
             //If the API status is CREATED/PROTOTYPED ,check for check list items of lifecycle
-            if (APIStatus.CREATED.equals(oldStatus)|| APIStatus.PROTOTYPED.equals(oldStatus)) {
+            if (APIConstants.CREATED.equals(oldStatus)|| APIConstants.PROTOTYPED.equals(oldStatus)) {
                 deprecateOldVersions = apiArtifact.isLCItemChecked(0, APIConstants.API_LIFE_CYCLE);
                 makeKeysForwardCompatible = !(apiArtifact.isLCItemChecked(1, APIConstants.API_LIFE_CYCLE));
             }
             
-            if ((APIStatus.CREATED.equals(oldStatus) || APIStatus.PROTOTYPED.equals(oldStatus))
-                    && APIStatus.PUBLISHED.equals(newStatus)) {
+            if ((APIConstants.CREATED.equals(oldStatus) || APIConstants.PROTOTYPED.equals(oldStatus))
+                    && APIConstants.PUBLISHED.equals(newStatus)) {
                 if (makeKeysForwardCompatible) {
                     apiProvider.makeAPIKeysForwardCompatible(api);
                 }                
@@ -184,7 +183,7 @@ public class APIExecutor implements Execution {
                     for (API oldAPI : apiList) {
                         if (oldAPI.getId().getApiName().equals(api.getId().getApiName()) &&
                                 versionComparator.compare(oldAPI, api) < 0 &&
-                                (oldAPI.getStatus().equals(APIStatus.PUBLISHED))) {
+                                (APIConstants.PUBLISHED.equals(oldAPI.getStatus()))) {
                             apiProvider.changeLifeCycleStatus(oldAPI.getId(), APIConstants.API_LC_ACTION_DEPRECATE);
                             
                         }

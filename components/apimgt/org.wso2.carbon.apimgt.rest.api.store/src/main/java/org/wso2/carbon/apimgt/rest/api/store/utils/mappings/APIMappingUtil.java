@@ -90,7 +90,7 @@ public class APIMappingUtil {
         dto.setContext(model.getContext());
         dto.setDescription(model.getDescription());
         dto.setIsDefaultVersion(model.isDefaultVersion());
-        dto.setStatus(model.getStatus().getStatus());
+        dto.setStatus(model.getStatus());
 
         //Get Swagger definition which has URL templates, scopes and resource details
         String apiSwaggerDefinition = null;
@@ -262,7 +262,7 @@ public class APIMappingUtil {
         apiInfoDTO.setName(apiId.getApiName());
         apiInfoDTO.setVersion(apiId.getVersion());
         apiInfoDTO.setProvider(apiId.getProviderName());
-        apiInfoDTO.setStatus(api.getStatus().toString());
+        apiInfoDTO.setStatus(api.getStatus());
         String providerName = api.getId().getProviderName();
         apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
         if (api.getScopes() != null) {

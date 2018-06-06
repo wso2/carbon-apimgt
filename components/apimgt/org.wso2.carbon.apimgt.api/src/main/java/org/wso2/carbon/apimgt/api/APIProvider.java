@@ -272,7 +272,7 @@ public interface APIProvider extends APIManager {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException on error
      * @throws org.wso2.carbon.apimgt.api.FaultGatewaysException on Gateway Failure
      * */
-    void changeAPIStatus(API api, APIStatus status, String userId, boolean updateGatewayConfig)
+    void changeAPIStatus(API api, String status, String userId, boolean updateGatewayConfig)
             throws APIManagementException, FaultGatewaysException;
 
 
@@ -685,7 +685,7 @@ public interface APIProvider extends APIManager {
       * @return collection of failed gateways. Map contains gateway name as the key and the error as the value
       * @throws APIManagementException
       */
-     Map<String, String> propergateAPIStatusChangeToGateways(APIIdentifier identifier, APIStatus newStatus) 
+     Map<String, String> propergateAPIStatusChangeToGateways(APIIdentifier identifier, String newStatus)
              throws APIManagementException;
      
      /**
@@ -698,7 +698,7 @@ public interface APIProvider extends APIManager {
       * @throws APIManagementException
       * @throws FaultGatewaysException
       */
-     boolean updateAPIforStateChange(APIIdentifier identifier, APIStatus newStatus, 
+     boolean updateAPIforStateChange(APIIdentifier identifier, String newStatus,
              Map<String, String> failedGatewaysMap) throws APIManagementException, FaultGatewaysException;
      
      /**

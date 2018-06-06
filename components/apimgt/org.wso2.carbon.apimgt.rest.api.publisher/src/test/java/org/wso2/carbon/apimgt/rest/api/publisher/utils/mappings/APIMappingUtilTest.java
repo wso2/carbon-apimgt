@@ -29,8 +29,8 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDetailedDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -107,7 +107,7 @@ public class APIMappingUtilTest {
     private API getSampleAPI() {
         APIIdentifier apiIdentifier = new APIIdentifier("admin", "dtoTest", "v1.0.0");
         API api = new API(apiIdentifier);
-        api.setStatus(APIStatus.CREATED);
+        api.setStatus(APIConstants.CREATED);
         api.setTransports("https,http");
         api.setEnvironments(new HashSet<String>() {{
             add("SANDBOX");

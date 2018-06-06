@@ -27,7 +27,6 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -223,7 +222,7 @@ public class APIMappingUtil {
 
         dto.setSequences(sequences);
 
-        dto.setStatus(model.getStatus().getStatus());
+        dto.setStatus(model.getStatus());
 
         String subscriptionAvailability = model.getSubscriptionAvailability();
         if (subscriptionAvailability != null) {
@@ -711,19 +710,19 @@ public class APIMappingUtil {
         }
     }
 
-    private static APIStatus mapStatusFromDTOToAPI(String apiStatus) {
+    private static String mapStatusFromDTOToAPI(String apiStatus) {
         // switch case statements are not working as APIStatus.<STATUS>.toString() or APIStatus.<STATUS>.getStatus()
         //  is not a constant
-        if (apiStatus.equals(APIStatus.BLOCKED.toString())) {
-            return APIStatus.BLOCKED;
-        } else if (apiStatus.equals(APIStatus.CREATED.toString())) {
-            return APIStatus.CREATED;
-        } else if (apiStatus.equals(APIStatus.PUBLISHED.toString())) {
-            return APIStatus.PUBLISHED;
-        } else if (apiStatus.equals(APIStatus.DEPRECATED.toString())) {
-            return APIStatus.DEPRECATED;
-        } else if (apiStatus.equals(APIStatus.PROTOTYPED.toString())) {
-            return APIStatus.PROTOTYPED;
+        if (APIConstants.BLOCKED.equals(apiStatus)) {
+            return APIConstants.BLOCKED;
+        } else if (APIConstants.CREATED.equals(apiStatus)) {
+            return APIConstants.CREATED;
+        } else if (APIConstants.PUBLISHED.equals(apiStatus)) {
+            return APIConstants.PUBLISHED;
+        } else if (APIConstants.DEPRECATED.equals(apiStatus)) {
+            return APIConstants.DEPRECATED;
+        } else if (APIConstants.PROTOTYPED.equals(apiStatus)) {
+            return APIConstants.PROTOTYPED;
         } else {
             return null; // how to handle this?
         }

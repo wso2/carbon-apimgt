@@ -19,7 +19,6 @@ package org.wso2.carbon.apimgt.impl.observers;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 
@@ -75,7 +74,7 @@ public class APIStatusObserverList {
         }
     }
 
-    public void notifyObservers(APIStatus previous, APIStatus current, API api) {
+    public void notifyObservers(String previous, String current, API api) {
         for (APIStatusObserver observer : observers) {
             boolean proceed = observer.statusChanged(previous, current, api);
             if (!proceed) {

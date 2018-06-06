@@ -20,7 +20,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 
 public class SimpleLoggingObserverTestCase {
 
@@ -33,8 +33,8 @@ public class SimpleLoggingObserverTestCase {
         API api = Mockito.mock(API.class);
         APIIdentifier apiIdentifier = Mockito.mock(APIIdentifier.class);
 
-        APIStatus previousStatus = APIStatus.CREATED;
-        APIStatus currentStatus = APIStatus.PUBLISHED;
+        String previousStatus = APIConstants.CREATED;
+        String currentStatus = APIConstants.PUBLISHED;
 
         Mockito.when(api.getId()).thenReturn(apiIdentifier);
         Mockito.when(apiIdentifier.getApiName()).thenReturn(API_NAME);
