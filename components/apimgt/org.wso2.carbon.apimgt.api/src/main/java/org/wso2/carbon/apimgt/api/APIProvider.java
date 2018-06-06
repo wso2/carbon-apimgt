@@ -712,17 +712,6 @@ public interface APIProvider extends APIManager {
     Map<String, String> propergateAPIStatusChangeToGateways(APIIdentifier identifier, APIStatus newStatus)
             throws APIManagementException;
      
-    /**
-     * Push api related state changes to the gateway. Api related configurations will be deployed or destroyed
-     * according to the new state.
-     * @param identifier Api identifier
-     * @param newStatus new state of the lifecycle
-     * @return collection of failed gateways. Map contains gateway name as the key and the error as the value
-     * @throws APIManagementException
-     */
-    Map<String, String> propergateAPIStatusChangeToGateways(APIIdentifier identifier, APIStatus newStatus)
-            throws APIManagementException;
-
      /**
       * Update api related information such as database entries, registry updates for state change.
       * @param identifier
@@ -736,19 +725,6 @@ public interface APIProvider extends APIManager {
      boolean updateAPIforStateChange(APIIdentifier identifier, String newStatus,
              Map<String, String> failedGatewaysMap) throws APIManagementException, FaultGatewaysException;
 
-    /**
-     * Update api related information such as database entries, registry updates for state change.
-     * @param identifier
-     * @param newStatus
-     * @param failedGatewaysMap Map of failed gateways. Gateway name is the key and error message is value. Null is
-     * accepted if changes are not pushed to a gateway
-     * @return boolean value representing success not not
-     * @throws APIManagementException
-     * @throws FaultGatewaysException
-     */
-    boolean updateAPIforStateChange(APIIdentifier identifier, APIStatus newStatus,
-            Map<String, String> failedGatewaysMap) throws APIManagementException, FaultGatewaysException;
-     
     /**
      * Update api related information such as database entries, registry updates for state change.
      * @param identifier
