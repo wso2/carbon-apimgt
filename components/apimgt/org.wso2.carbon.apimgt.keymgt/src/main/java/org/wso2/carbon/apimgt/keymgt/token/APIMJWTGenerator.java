@@ -157,7 +157,8 @@ public class APIMJWTGenerator extends JWTGenerator {
 
         //generating expiring timestamp
         long currentTime = System.currentTimeMillis();
-        long expireIn = currentTime + getTTL() * 1000 + jwtTokenInfoDTO.getExpirationTime() * 1000;
+        // jwtTokenInfoDTO.getExpirationTime() gives the token validity time given when the token is generated.
+        long expireIn = currentTime + jwtTokenInfoDTO.getExpirationTime() * 1000;
 
         String endUserName = jwtTokenInfoDTO.getEndUserName();
 
@@ -174,7 +175,6 @@ public class APIMJWTGenerator extends JWTGenerator {
         claims.put("aud", jwtTokenInfoDTO.getAudience());
         claims.put("iat", currentTime);
         claims.put("exp", expireIn);
-//        claims.put("enduser", endUserName);
         claims.put("scope", jwtTokenInfoDTO.getScopes());
         claims.put("subscribedAPIs", jwtTokenInfoDTO.getSubscribedApiDTOList());
 
