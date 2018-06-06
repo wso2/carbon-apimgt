@@ -1,7 +1,0 @@
-instructions.configure = \
-org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.micro.gateway_${feature.version}/conf/gateway-config-tool.properties/,target:${installFolder}/../../conf/gateway-config-tool.properties,overwrite:true);\
-org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.micro.gateway_${feature.version}/conf/on-premise-gateway.properties/,target:${installFolder}/../../conf/on-premise-gateway.properties,overwrite:true);\
-org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.micro.gateway_${feature.version}/cloud/on-premise-gateway.properties/,target:${installFolder}/../../../resources/wso2-cloud/on-premise-gateway.properties,overwrite:true);\
-org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.micro.gateway_${feature.version}/cloud/cloud-on-premise-gateway.properties/,target:${installFolder}/../../../resources/wso2-cloud/cloud-on-premise-gateway.properties,overwrite:true);\
-org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.micro.gateway_${feature.version}/bin/cloud-init.bat/,target:${installFolder}/../../../bin/cloud-init.bat,overwrite:true);\
-org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.micro.gateway_${feature.version}/bin/cloud-init.sh/,target:${installFolder}/../../../bin/cloud-init.sh,overwrite:true);\
