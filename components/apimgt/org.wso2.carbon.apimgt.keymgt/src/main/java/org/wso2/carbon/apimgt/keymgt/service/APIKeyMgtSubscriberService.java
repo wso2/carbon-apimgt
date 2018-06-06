@@ -166,6 +166,9 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             oAuthConsumerAppDTO.setCallbackUrl(callbackUrl);
             //set username to avoid issues with email user name login
             oAuthConsumerAppDTO.setUsername(userName);
+            String[] audienceStringArray = new String[1];
+            audienceStringArray[0] = APIConstants.JWT_DEFAULT_AUDIENCE;
+            oAuthConsumerAppDTO.setAudiences(audienceStringArray);
 
             //check whether grant types are provided
             String[] allowedGrantTypes = null;

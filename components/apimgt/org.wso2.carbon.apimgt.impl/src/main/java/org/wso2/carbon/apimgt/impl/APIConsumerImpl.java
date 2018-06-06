@@ -3004,7 +3004,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
             String applicationTokenType = application.getTokenType();
             if (StringUtils.isEmpty(application.getTokenType())) {
-                applicationTokenType = APIConstants.APPLICATION_TOKEN_TYPE;
+                applicationTokenType = APIConstants.DEFAULT_TOKEN_TYPE;
             }
             // Build key manager instance and create oAuthAppRequest by jsonString.
             OAuthAppRequest request =
