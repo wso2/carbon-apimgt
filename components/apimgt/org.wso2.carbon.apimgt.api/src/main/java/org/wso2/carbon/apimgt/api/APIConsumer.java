@@ -292,7 +292,6 @@ public interface APIConsumer extends APIManager {
     void removeSubscription(APIIdentifier identifier, String userId, int applicationId,String groupId) throws
             APIManagementException;
 
-
     /** Removes a subscription specified by SubscribedAPI object
      * 
      * @param subscription SubscribedAPI object which contains the subscription information
