@@ -62,7 +62,7 @@ import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ PrivilegedCarbonContext.class, ServiceReferenceHolder.class, ApiMgtDAO.class,
         APIManagerConfiguration.class, ApiMgtDAO.class,
-        org.wso2.carbon.metrics.manager.internal.ServiceReferenceHolder.class, APIKeyMgtUtil.class,
+        org.wso2.carbon.metrics.manager.ServiceReferenceHolder.class, APIKeyMgtUtil.class,
         MessageContext.class, APIKeyMgtDataHolder.class, KeyValidationHandler.class, KeyManagerHolder.class,
         OAuthServerConfiguration.class, APIUtil.class })
 public class APIKeyValidationServiceTest {
@@ -100,8 +100,8 @@ public class APIKeyValidationServiceTest {
         apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
         apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
         metricService = Mockito.mock(MetricService.class);
-        org.wso2.carbon.metrics.manager.internal.ServiceReferenceHolder serviceReferenceHolder1 = Mockito
-                .mock(org.wso2.carbon.metrics.manager.internal.ServiceReferenceHolder.class);
+        org.wso2.carbon.metrics.manager.ServiceReferenceHolder serviceReferenceHolder1 = Mockito
+                .mock(org.wso2.carbon.metrics.manager.ServiceReferenceHolder.class);
         Timer timer = Mockito.mock(Timer.class);
         Timer.Context timerContext = Mockito.mock(Timer.Context.class);
         MessageContext messageContext = Mockito.mock(MessageContext.class);
@@ -111,7 +111,7 @@ public class APIKeyValidationServiceTest {
         PowerMockito.mockStatic(PrivilegedCarbonContext.class);
         PowerMockito.mockStatic(ApiMgtDAO.class);
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
-        PowerMockito.mockStatic(org.wso2.carbon.metrics.manager.internal.ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(org.wso2.carbon.metrics.manager.ServiceReferenceHolder.class);
         PowerMockito.mockStatic(APIKeyMgtUtil.class);
         PowerMockito.mockStatic(MessageContext.class);
         PowerMockito.mockStatic(APIKeyMgtDataHolder.class);
@@ -128,11 +128,11 @@ public class APIKeyValidationServiceTest {
                 .thenReturn(apiManagerConfigurationService);
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_MANGER_VALIDATIONHANDLER_CLASS_NAME))
                 .thenReturn(API_KEY_MANGER_VALIDATION_HANDLER_CLASS_NAME);
-        Mockito.when(org.wso2.carbon.metrics.manager.internal.ServiceReferenceHolder.getInstance())
+        Mockito.when(org.wso2.carbon.metrics.manager.ServiceReferenceHolder.getInstance())
                 .thenReturn(serviceReferenceHolder1);
         Mockito.when(serviceReferenceHolder1.getMetricService()).thenReturn(metricService);
         Mockito.when(timer.start()).thenReturn(timerContext);
-        Mockito.when(metricService.timer(Mockito.any(org.wso2.carbon.metrics.manager.Level.class), Mockito.anyString()))
+        Mockito.when(metricService.timer(Mockito.anyString(), Mockito.any(org.wso2.carbon.metrics.manager.Level.class)))
                 .thenReturn(timer);
 
         Mockito.when(messageContext.getOperationContext()).thenReturn(operationContext);
@@ -195,7 +195,7 @@ public class APIKeyValidationServiceTest {
         PowerMockito.mockStatic(OAuthServerConfiguration.class);
         OAuthServerConfiguration oAuthServerConfiguration = Mockito.mock(OAuthServerConfiguration.class);
         PowerMockito.when(OAuthServerConfiguration.getInstance()).thenReturn(oAuthServerConfiguration);
-        PowerMockito.when(OAuthServerConfiguration.getInstance().getTimeStampSkewInSeconds())
+        PowerMockito.when(oAuthServerConfiguration.getTimeStampSkewInSeconds())
                 .thenReturn(System.currentTimeMillis());
 
         APIKeyValidationInfoDTO validateKey = apiKeyValidationService
