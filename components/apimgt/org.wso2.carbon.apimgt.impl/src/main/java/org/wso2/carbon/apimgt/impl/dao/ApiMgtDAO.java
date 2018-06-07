@@ -11362,10 +11362,12 @@ public class ApiMgtDAO {
      * Get Subscribed APIs for given userId
      *
      * @param userId id of the user
+     * @param applicationName id of the application name
      * @return APISubscriptionInfoDTO[]
      * @throws APIManagementException if failed to get Subscribed APIs
      */
-    public APISubscriptionInfoDTO[] getSubscribedAPIsOfUserWithSubscriptionInfo(String userId) throws APIManagementException {
+    public APISubscriptionInfoDTO[] getSubscribedAPIsOfUserByApp(String userId, String applicationName) throws
+            APIManagementException {
         List<APISubscriptionInfoDTO> apiSubscriptionInfoDTOS = new ArrayList<APISubscriptionInfoDTO>();
         Connection conn = null;
         PreparedStatement ps = null;
@@ -11375,9 +11377,9 @@ public class ApiMgtDAO {
         String loginUserName = getLoginUserName(userId);
         int tenantId = APIUtil.getTenantId(loginUserName);
 
-        String sqlQuery = SQLConstants.GET_SUBSCRIBED_APIS_OF_USER_SQL;
+        String sqlQuery = SQLConstants.GET_SUBSCRIBED_APIS_OF_USER_BY_APP_SQL;
         if (forceCaseInsensitiveComparisons) {
-            sqlQuery = SQLConstants.GET_SUBSCRIBED_APIS_OF_USER_CASE_INSENSITIVE_SQL;
+            sqlQuery = SQLConstants.GET_SUBSCRIBED_APIS_OF_USER_BY_APP_CASE_INSENSITIVE_SQL;
         }
 
         try {
@@ -11385,6 +11387,7 @@ public class ApiMgtDAO {
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, userId);
             ps.setInt(2, tenantId);
+            ps.setString(3, applicationName);
             rs = ps.executeQuery();
             while (rs.next()) {
                 APISubscriptionInfoDTO infoDTO = new APISubscriptionInfoDTO();
@@ -11434,6 +11437,7 @@ public class ApiMgtDAO {
                 application.setUUID(rs.getString("UUID"));
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 application.setTokenType(rs.getString("TOKEN_TYPE"));
+                application.setKeyType(rs.getString("KEY_TYPE"));
 
                 if (multiGroupAppSharingEnabled) {
                     if (application.getGroupId().isEmpty()) {
