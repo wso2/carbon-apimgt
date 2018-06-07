@@ -1400,7 +1400,7 @@
 
         <carbon.commons.version>4.6.33</carbon.commons.version>
         <carbon.registry.version>4.6.34</carbon.registry.version>
-        <carbon.mediation.version>4.6.79</carbon.mediation.version>
+        <carbon.mediation.version>4.6.83</carbon.mediation.version>
 
         <!-- Carbon Identity versions -->
         <carbon.identity.version>5.11.245</carbon.identity.version>
@@ -1498,7 +1498,7 @@
         <rhino.js.version>1.7.0.R4.wso2v1</rhino.js.version>
         <owasp.encoder.version>1.2</owasp.encoder.version>
 
-        <httpclient.version>4.3.1.wso2v2</httpclient.version>
+        <httpclient.version>4.3.6.wso2v2</httpclient.version>
         <wss4j.version>1.5.11.wso2v11</wss4j.version>
         <commons-logging.version>1.1.1</commons-logging.version>
         <commons-io.version>2.4.0.wso2v1</commons-io.version>
