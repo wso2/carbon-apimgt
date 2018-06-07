@@ -2311,6 +2311,10 @@ public class APIStoreHostObject extends ScriptableObject {
         String tier = (String) args[3];
         int applicationId = ((Number) args[4]).intValue();
         String userId = (String) args[5];
+        String groupId = null;
+        if (args.length > 6 && args[6] != null) {
+            groupId = (String) args[6];
+        }
         APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, version);
 
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
@@ -2401,7 +2405,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 throw new APIManagementException("Subscription is not allowed for " + userDomain);
             }
             apiIdentifier.setTier(tier);
-            addSubscriptionResponse = apiConsumer.addSubscription(apiIdentifier, userId, applicationId);
+            addSubscriptionResponse = apiConsumer.addSubscription(apiIdentifier, userId, applicationId, groupId);
         } catch (APIManagementException e) {
 
             if (e.getMessage() != null && e.getMessage().contains("was blocked")) {
@@ -2436,6 +2440,10 @@ public class APIStoreHostObject extends ScriptableObject {
         String tier = args[3].toString();
         String applicationName = ((String) args[4]);
         String userId = args[5].toString();
+        String groupId = null;
+        if (args.length > 6 && args[6] != null) {
+            groupId = (String) args[6];
+        }
         APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, version);
 
         //Check whether tier is denied or not before adding
@@ -2444,7 +2452,7 @@ public class APIStoreHostObject extends ScriptableObject {
             apiIdentifier.setTier(tier);
             try {
                 int applicationId = APIUtil.getApplicationId(applicationName, userId);
-                addSubscriptionResponse = apiConsumer.addSubscription(apiIdentifier, userId, applicationId);
+                addSubscriptionResponse = apiConsumer.addSubscription(apiIdentifier, userId, applicationId, groupId);
             } catch (APIManagementException e) {
                 handleException("Error while adding the subscription for user: " + userId, e);
             }
@@ -4100,6 +4108,10 @@ public class APIStoreHostObject extends ScriptableObject {
         String provider = APIUtil.replaceEmailDomain((String) apiData.get("provider", apiData));
         String name = (String) apiData.get("apiName", apiData);
         String version = (String) apiData.get("version", apiData);
+        String groupId = null;
+        if (args.length > 3 && args[3] != null) {
+            groupId = (String) args[3];
+        }
         APIIdentifier apiId = new APIIdentifier(provider, name, version);
 
         APIConsumer apiConsumer = getAPIConsumer(thisObj);
@@ -4112,7 +4124,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
-            apiConsumer.removeSubscription(apiId, username, applicationId);
+            apiConsumer.removeSubscription(apiId, username, applicationId, groupId);
             return true;
         } catch (APIManagementException e) {
             handleException("Error while removing the subscription of" + name + "-" + version, e);
