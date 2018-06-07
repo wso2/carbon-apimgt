@@ -88,8 +88,7 @@ public class SQLConstants {
             "   AND SB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
             "   AND APP.APPLICATION_ID=SP.APPLICATION_ID " +
             "   AND API.API_ID = SP.API_ID" +
-            "   AND SP.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'" +
-            "   AND APP.NAME = ?";
+            "   AND SP.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
 
     public static final String GET_SUBSCRIBED_APIS_OF_USER_CASE_INSENSITIVE_SQL =
             " SELECT " +
@@ -109,8 +108,49 @@ public class SQLConstants {
             "   AND SB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
             "   AND APP.APPLICATION_ID=SP.APPLICATION_ID " +
             "   AND API.API_ID = SP.API_ID" +
-            "   AND SP.SUBS_CREATE_STATE = '" +APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'" +
-            "   AND APP.NAME = ?";
+            "   AND SP.SUBS_CREATE_STATE = '" +APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
+
+    public static final String GET_SUBSCRIBED_APIS_OF_USER_BY_APP_SQL =
+            " SELECT " +
+                    "   API.API_PROVIDER AS API_PROVIDER," +
+                    "   API.API_NAME AS API_NAME," +
+                    "   API.CONTEXT AS API_CONTEXT, " +
+                    "   API.API_VERSION AS API_VERSION, " +
+                    "   SP.TIER_ID AS SP_TIER_ID " +
+                    " FROM " +
+                    "   AM_SUBSCRIPTION SP, " +
+                    "   AM_API API," +
+                    "   AM_SUBSCRIBER SB, " +
+                    "   AM_APPLICATION APP " +
+                    " WHERE " +
+                    "   SB.USER_ID = ? " +
+                    "   AND SB.TENANT_ID = ? " +
+                    "   AND SB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
+                    "   AND APP.APPLICATION_ID=SP.APPLICATION_ID " +
+                    "   AND API.API_ID = SP.API_ID" +
+                    "   AND SP.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'" +
+                    "   AND APP.NAME = ?";
+
+    public static final String GET_SUBSCRIBED_APIS_OF_USER_BY_APP_CASE_INSENSITIVE_SQL =
+            " SELECT " +
+                    "   API.API_PROVIDER AS API_PROVIDER," +
+                    "   API.API_NAME AS API_NAME," +
+                    "   API.CONTEXT AS API_CONTEXT," +
+                    "   API.API_VERSION AS API_VERSION, " +
+                    "   SP.TIER_ID AS SP_TIER_ID " +
+                    " FROM " +
+                    "   AM_SUBSCRIPTION SP, " +
+                    "   AM_API API," +
+                    "   AM_SUBSCRIBER SB, " +
+                    "   AM_APPLICATION APP " +
+                    " WHERE " +
+                    "   LOWER(SB.USER_ID) = LOWER(?) " +
+                    "   AND SB.TENANT_ID = ? " +
+                    "   AND SB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
+                    "   AND APP.APPLICATION_ID=SP.APPLICATION_ID " +
+                    "   AND API.API_ID = SP.API_ID" +
+                    "   AND SP.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'" +
+                    "   AND APP.NAME = ?";
 
     public static final String GET_SUBSCRIBED_USERS_FOR_API_SQL =
             " SELECT " +
