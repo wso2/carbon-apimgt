@@ -1007,7 +1007,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             failedGateways.clear();
                             failedGateways.put("UNPUBLISHED", failedToRemoveEnvironments);
                             failedGateways.put("PUBLISHED", failedToPublishEnvironments);
-                        } else if (api.getStatus() != APIConstants.CREATED && api.getStatus() != APIConstants.RETIRED) {
+                        } else if (!APIConstants.CREATED.equals(api.getStatus()) && !APIConstants.RETIRED.equals(api.getStatus())) {
                             if ("INLINE".equals(api.getImplementation()) && api.getEnvironments().isEmpty()){
                                 api.setEnvironments(
                                         ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
