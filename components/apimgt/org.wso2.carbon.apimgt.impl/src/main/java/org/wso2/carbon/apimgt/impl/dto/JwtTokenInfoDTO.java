@@ -34,6 +34,8 @@ public class JwtTokenInfoDTO implements Serializable {
     private boolean contentAware;
     private List<String> audience;
     private String scopes;
+    private String keyType;
+    private ApplicationDTO application;
     private List<SubscribedApiDTO> subscribedApiDTOList = new ArrayList<SubscribedApiDTO>();
     private Map<String, SubscriptionPolicyDTO> subscriptionPolicyDTOList = new HashMap<String, SubscriptionPolicyDTO>();
 
@@ -99,6 +101,22 @@ public class JwtTokenInfoDTO implements Serializable {
 
     public void setAudience(List<String> audience) {
         this.audience = audience;
+    }
+
+    public ApplicationDTO getApplication() {
+        return application;
+    }
+
+    public void setApplication(ApplicationDTO application) {
+        this.application = application;
+    }
+
+    public String getKeyType() {
+        return keyType;
+    }
+
+    public void setKeyType(String keyType) {
+        this.keyType = keyType;
     }
 
     public List<SubscribedApiDTO> getSubscribedApiDTOList() {

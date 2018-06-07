@@ -25,6 +25,7 @@ import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.token.APIMJWTGenerator;
@@ -74,10 +75,17 @@ public class APIMTokenIssuer extends JWTTokenIssuer {
                         scopeString.append(scope).append(" ");
                     }
 
+                    ApplicationDTO applicationDTO = new ApplicationDTO();
+                    applicationDTO.setId(application.getId());
+                    applicationDTO.setName(application.getName());
+                    applicationDTO.setTier(application.getTier());
+
                     JwtTokenInfoDTO jwtTokenInfoDTO = APIMTokenIssuerUtil.getJwtTokenInfoDTO(application);
                     jwtTokenInfoDTO.setScopes(scopeString.toString().trim());
                     jwtTokenInfoDTO.setAudience(audienceList);
                     jwtTokenInfoDTO.setExpirationTime(tokReqMsgCtx.getValidityPeriod());
+                    jwtTokenInfoDTO.setApplication(applicationDTO);
+                    jwtTokenInfoDTO.setKeyType(application.getKeyType());
                     APIMJWTGenerator apimjwtGenerator = new APIMJWTGenerator();
                     String accessToken = apimjwtGenerator.generateJWT(jwtTokenInfoDTO);
                     if (log.isDebugEnabled()) {
