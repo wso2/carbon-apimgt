@@ -441,6 +441,10 @@ public class API implements Serializable {
         this.status = status;
     }
 
+    public void setStatus(APIStatus status) {
+        this.status = status.getStatus();
+    }
+
     public float getRating() {
         return rating;
     }
