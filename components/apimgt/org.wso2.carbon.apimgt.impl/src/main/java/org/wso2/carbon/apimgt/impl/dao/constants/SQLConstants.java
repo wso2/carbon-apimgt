@@ -88,7 +88,8 @@ public class SQLConstants {
             "   AND SB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
             "   AND APP.APPLICATION_ID=SP.APPLICATION_ID " +
             "   AND API.API_ID = SP.API_ID" +
-            "   AND SP.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
+            "   AND SP.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'" +
+            "   AND APP.NAME = ?";
 
     public static final String GET_SUBSCRIBED_APIS_OF_USER_CASE_INSENSITIVE_SQL =
             " SELECT " +
@@ -108,7 +109,8 @@ public class SQLConstants {
             "   AND SB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
             "   AND APP.APPLICATION_ID=SP.APPLICATION_ID " +
             "   AND API.API_ID = SP.API_ID" +
-            "   AND SP.SUBS_CREATE_STATE = '" +APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
+            "   AND SP.SUBS_CREATE_STATE = '" +APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'" +
+            "   AND APP.NAME = ?";
 
     public static final String GET_SUBSCRIBED_USERS_FOR_API_SQL =
             " SELECT " +
@@ -1649,7 +1651,8 @@ public class SQLConstants {
                     "   APP.CREATED_TIME, "+
                     "   APP.UUID," +
                     "   APP.CREATED_BY," +
-                    "   APP.TOKEN_TYPE" +
+                    "   APP.TOKEN_TYPE," +
+                    "   AM_APP_MAP.KEY_TYPE" +
                     " FROM " +
                     "   AM_APPLICATION_KEY_MAPPING AM_APP_MAP," +
                     "   AM_APPLICATION APP " +

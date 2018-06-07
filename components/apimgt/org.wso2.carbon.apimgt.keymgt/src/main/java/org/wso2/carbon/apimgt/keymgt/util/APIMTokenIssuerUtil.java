@@ -41,6 +41,7 @@ public class APIMTokenIssuerUtil {
 
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         String userName = application.getOwner();
+        String applicationName = application.getName();
 
         String tenantedUserName;
         if (StringUtils.isEmpty(tenantDomain) || tenantDomain.equals("carbon.super")) {
@@ -49,7 +50,8 @@ public class APIMTokenIssuerUtil {
             tenantedUserName = userName + "@" + tenantDomain;
         }
 
-        APISubscriptionInfoDTO[] apis = ApiMgtDAO.getInstance().getSubscribedAPIsOfUserWithSubscriptionInfo(tenantedUserName);
+        APISubscriptionInfoDTO[] apis = ApiMgtDAO.getInstance()
+                .getSubscribedAPIsOfUserByApp(tenantedUserName, applicationName);
         
         JwtTokenInfoDTO jwtTokenInfoDTO = new JwtTokenInfoDTO();
         jwtTokenInfoDTO.setSubscriber("sub");
