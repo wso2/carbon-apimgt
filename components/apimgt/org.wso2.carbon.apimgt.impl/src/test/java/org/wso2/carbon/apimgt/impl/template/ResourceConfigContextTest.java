@@ -23,8 +23,8 @@ import org.junit.Test;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -35,7 +35,7 @@ public class ResourceConfigContextTest {
     public void testResourceConfigContext() throws Exception {
 
         API api = new API(new APIIdentifier("admin", "TestAPI", "1.0.0"));
-        api.setStatus(APIStatus.CREATED);
+        api.setStatus(APIConstants.CREATED);
         api.setContextTemplate("/");
         api.setUriTemplates(setAPIUriTemplates());
         ConfigContext configcontext = new APIConfigContext(api);

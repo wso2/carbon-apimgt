@@ -38,7 +38,6 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIRating;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
 import org.wso2.carbon.apimgt.api.model.Application;
@@ -1444,10 +1443,8 @@ public class APIConsumerImplTest {
         PowerMockito.when(APIUtil.getMountedPath(Mockito.any(), Mockito.anyString())).thenReturn("system/governance");
         PowerMockito.when(APIUtil.getAPI(Mockito.any())).thenReturn(api);
         PowerMockito.when(APIUtil.replaceEmailDomainBack(Mockito.anyString())).thenReturn(providerId);
-        System.setProperty(CARBON_HOME, "");
-        PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
-        PowerMockito.mockStatic(PrivilegedCarbonContext.class);
-        PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
+        PowerMockito.when(APIUtil.getLcStateFromArtifact((GovernanceArtifact) Mockito.any()))
+                .thenReturn(APIConstants.PUBLISHED);
         GenericArtifact genericArtifact1 = new GenericArtifactImpl(new QName("local"), "artifact1");
         GenericArtifact genericArtifact2 = new GenericArtifactImpl(new QName("local"), "artifact2");
         GenericArtifact[] genericArtifacts = new GenericArtifact[] { genericArtifact1, genericArtifact2 };
@@ -1465,7 +1462,6 @@ public class APIConsumerImplTest {
         Resource resource = new ResourceImpl();
         resource.setUUID(UUID.randomUUID().toString());
         Mockito.when(userRegistry.get(Mockito.anyString())).thenReturn(resource);
-        PowerMockito.when(APIUtil.getApiStatus(Mockito.anyString())).thenReturn(APIStatus.PUBLISHED);
         GenericArtifact genericArtifact = Mockito.mock(GenericArtifactImpl.class);
         Mockito.when(genericArtifactManager.getGenericArtifact(Mockito.anyString())).thenReturn(genericArtifact);
         Assert.assertEquals(1,
@@ -1498,11 +1494,8 @@ public class APIConsumerImplTest {
         PowerMockito.when(APIUtil.getMountedPath(Mockito.any(), Mockito.anyString())).thenReturn("system/governance");
         PowerMockito.when(APIUtil.getAPI(Mockito.any())).thenReturn(api);
         PowerMockito.when(APIUtil.replaceEmailDomainBack(Mockito.anyString())).thenReturn(providerId);
-        PowerMockito.when(APIUtil.getApiStatus(Mockito.anyString())).thenReturn(APIStatus.PUBLISHED);   
-        System.setProperty(CARBON_HOME, "");
-        PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
-        PowerMockito.mockStatic(PrivilegedCarbonContext.class);
-        PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
+        PowerMockito.when(APIUtil.getLcStateFromArtifact((GovernanceArtifact) Mockito.any()))
+                .thenReturn(APIConstants.PUBLISHED);
         GenericArtifact genericArtifact1 = new GenericArtifactImpl(new QName("local"), "artifact1");
         GenericArtifact genericArtifact2 = new GenericArtifactImpl(new QName("local"), "artifact2");
         GenericArtifact[] genericArtifacts = new GenericArtifact[] { genericArtifact1, genericArtifact2 };
