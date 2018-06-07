@@ -154,7 +154,7 @@ public class APIMappingUtilTestCase {
     private API getSampleAPI() {
         APIIdentifier apiIdentifier = new APIIdentifier("admin", "dtoTest", "v1.0.0");
         API api = new API(apiIdentifier);
-        api.setStatus(APIStatus.CREATED);
+        api.setStatus(APIConstants.CREATED);
         api.setTransports("https");
         api.setEnvironments(new HashSet<String>() {{
             add("SANDBOX");
