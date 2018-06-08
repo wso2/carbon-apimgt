@@ -153,7 +153,8 @@ public class TenantManagerHostObject extends ScriptableObject {
 
                         fos.close();
                     } else {
-                        log.warn("Unsupported file is uploaded with tenant theme by " + tenant + " : file name : "+ ze.getName());
+                        log.warn("Unsupported file is uploaded with tenant theme by " + tenant + " : file name : "
+                                + ze.getName());
                         success = false;
                     }
 
