@@ -125,7 +125,6 @@ public class TenantManagerHostObject extends ScriptableObject {
 
                 String fileName = ze.getName();
                 File newFile = new File(outputFolder + File.separator + fileName);
-
                 String canonicalizedNewFilePath = newFile.getCanonicalPath();
                 String canonicalizedDestinationPath = new File(outputFolder).getCanonicalPath();
                 if (!canonicalizedNewFilePath.startsWith(canonicalizedDestinationPath)) {
