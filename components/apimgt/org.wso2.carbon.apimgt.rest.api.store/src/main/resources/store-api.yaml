@@ -2268,7 +2268,7 @@ definitions:
         example: []
       attributes:
         type: object
-        example: {}
+        example: External Reference ID, Billing Tier
 
 #-----------------------------------------------------
 # The Application Info resource
@@ -2299,7 +2299,7 @@ definitions:
         example: ""
       attributes:
         type: object
-        example: {}
+        example: External Reference ID, Billing Tier
 
 #-----------------------------------------------------
 # The Document List resource
