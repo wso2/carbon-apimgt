@@ -371,7 +371,6 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
                 }
                 File destinationFile = new File(destination, currentEntry);
                 File destinationParent = destinationFile.getParentFile();
-
                 String canonicalizedDestinationFilePath = destinationFile.getCanonicalPath();
                 String canonicalizedDestinationFolderPath = new File(destination).getCanonicalPath();
                 if (!canonicalizedDestinationFilePath.startsWith(canonicalizedDestinationFolderPath)) {
