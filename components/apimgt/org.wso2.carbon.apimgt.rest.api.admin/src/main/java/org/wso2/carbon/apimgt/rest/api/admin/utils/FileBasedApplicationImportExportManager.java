@@ -374,7 +374,8 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
                 String canonicalizedDestinationFilePath = destinationFile.getCanonicalPath();
                 String canonicalizedDestinationFolderPath = new File(destination).getCanonicalPath();
                 if (!canonicalizedDestinationFilePath.startsWith(canonicalizedDestinationFolderPath)) {
-                    String errorMessage ="Entry is outside of the target dir: " + currentEntry;
+                    String errorMessage ="Attempt to upload invalid zip archive with file at " + currentEntry +
+                            ". File path is outside target directory.";
                     log.error(errorMessage);
                     throw new APIManagementException(errorMessage);
                 }
