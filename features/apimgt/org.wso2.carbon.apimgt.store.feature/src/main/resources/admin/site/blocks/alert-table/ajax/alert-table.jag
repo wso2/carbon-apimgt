@@ -105,8 +105,6 @@ i18n.init(request,localeResourcesBasePath);
                     type = "Abnormal Response Time";
                 } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ALERT_ABNORMALTIERUSAGEALERT") {
                     type = "Abnormal API Usage";
-                } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ALERT_ABNORMALTOKENREFRESH") {
-                    type = "Abnormal Renewal of Access Tokens";
                 } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_TIERLIMITHITTINGALERT") {
                     type = "Tier Crossing";
                 } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ABNORMALBACKENDTIMEALERTSTREAM") {
