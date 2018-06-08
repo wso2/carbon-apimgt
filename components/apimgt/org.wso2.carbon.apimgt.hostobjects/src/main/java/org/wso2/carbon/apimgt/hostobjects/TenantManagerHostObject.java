@@ -128,7 +128,7 @@ public class TenantManagerHostObject extends ScriptableObject {
                 String canonicalizedNewFilePath = newFile.getCanonicalPath();
                 String canonicalizedDestinationPath = new File(outputFolder).getCanonicalPath();
                 if (!canonicalizedNewFilePath.startsWith(canonicalizedDestinationPath)) {
-                    handleException("Attempt to upload invalid zip archive with file at" + fileName + ". File path is " +
+                    handleException("Attempt to upload invalid zip archive with file at " + fileName + ". File path is " +
                             "outside target directory");
                 }
 
