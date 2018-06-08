@@ -125,17 +125,23 @@ public class TenantManagerHostObject extends ScriptableObject {
 
                 String fileName = ze.getName();
                 File newFile = new File(outputFolder + File.separator + fileName);
-                if(ze.isDirectory()){
+
+                String canonicalizedNewFilePath = newFile.getCanonicalPath();
+                String canonicalizedDestinationPath = new File(outputFolder).getCanonicalPath();
+                if (!canonicalizedNewFilePath.startsWith(canonicalizedDestinationPath)) {
+                    handleException("Entry is outside of the target dir: " + fileName);
+                }
+
+                if (ze.isDirectory()) {
                     if(!newFile.exists()){
                          boolean status = newFile.mkdir();
                          if(status){
                             //todo handle exception
                          }
                     }
-                }
-                else{
+                } else {
                     ext = FilenameUtils.getExtension(ze.getName());
-                    if(TenantManagerHostObject.EXTENTION_WHITELIST.contains(ext)){
+                    if (TenantManagerHostObject.EXTENTION_WHITELIST.contains(ext)) {
                         //create all non exists folders
                         //else you will hit FileNotFoundException for compressed folder
                         new File(newFile.getParent()).mkdirs();
@@ -147,7 +153,7 @@ public class TenantManagerHostObject extends ScriptableObject {
                         }
 
                         fos.close();
-                    }else{
+                    } else {
                         log.warn("Unsupported file is uploaded with tenant theme by " + tenant + " : file name : "+ ze.getName());
                         success = false;
                     }
