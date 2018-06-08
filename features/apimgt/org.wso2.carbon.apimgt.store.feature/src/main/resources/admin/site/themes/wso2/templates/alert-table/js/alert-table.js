@@ -90,16 +90,14 @@ $( document ).ready(function() {
                 $('#alertSelected').val(4).change();
             } else if(alertType == "Abnormal API Usage"){
                 $('#alertSelected').val(5).change();
-            } else if(alertType == "Abnormal Renewal of Access Tokens"){
-                $('#alertSelected').val(6).change();
             } else if(alertType == "Tier Crossing"){
-                $('#alertSelected').val(7).change();
+                $('#alertSelected').val(6).change();
             } else if(alertType == "Abnormal Backend Time"){
-                $('#alertSelected').val(8).change();
+                $('#alertSelected').val(7).change();
             } else if(alertType == "Health Availability"){
-                $('#alertSelected').val(9).change();
+                $('#alertSelected').val(8).change();
             } else if(alertType == "Abnormal Resource Access"){
-                $('#alertSelected').val(10).change();
+                $('#alertSelected').val(9).change();
             }
         }
     }
