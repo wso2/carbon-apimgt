@@ -11,14 +11,16 @@
                <xs:element minOccurs="0" name="clientName" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="clientSecret" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="isSaasApplication" type="xs:boolean"/>
-               <xs:element minOccurs="0" name="jsonString" nillable="true" type="xs:string"/>
+                <xs:element minOccurs="0" name="jsonAppAttribute" nillable="true" type="xs:string"/>
+                <xs:element minOccurs="0" name="jsonString" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="tokenType" nillable="true" type="xs:string"/>
             </xs:sequence>
          </xs:complexType>
          <xs:complexType name="Application">
             <xs:sequence>
                <xs:element minOccurs="0" name="UUID" nillable="true" type="xs:string"/>
-               <xs:element minOccurs="0" name="applicationWorkFlowStatus" nillable="true" type="xs:string"/>
+                <xs:element maxOccurs="unbounded" minOccurs="0" name="applicationAttributes" nillable="true" type="xs:string"/>
+                <xs:element minOccurs="0" name="applicationWorkFlowStatus" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="callbackUrl" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="createdTime" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="description" nillable="true" type="xs:string"/>

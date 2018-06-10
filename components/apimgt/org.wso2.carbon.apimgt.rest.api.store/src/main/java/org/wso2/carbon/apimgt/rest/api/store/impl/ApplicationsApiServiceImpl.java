@@ -23,6 +23,7 @@ import com.google.gson.JsonObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -33,7 +34,9 @@ import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
@@ -47,11 +50,18 @@ import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.ApplicationKeyMappin
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.wso2.carbon.user.api.UserStoreException;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Iterator;
+import java.util.Set;
 import javax.ws.rs.core.Response;
 
 /**
@@ -134,6 +144,31 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                 }
             } else {
                 RestApiUtil.handleBadRequest("Throttling tier cannot be null", log);
+            }
+
+            Object applicationAttributesFromUser = body.getAttributes();
+            Map<String, String> applicationAttributes =
+                    new ObjectMapper().convertValue(applicationAttributesFromUser,Map.class);
+
+            if (applicationAttributes!=null) {
+                JSONArray attributeKeysFromConfig = apiConsumer.getAppAttributesFromConfig(username);
+                Set<String> keySet = new HashSet<>();
+                Set attributeKeysFromUSer = applicationAttributes.keySet();
+
+                for (Object object : attributeKeysFromConfig) {
+                    JSONObject jsonObject = (JSONObject) object;
+                    Boolean isRequired = false;
+                    if (jsonObject.get(APIConstants.ApplicationAttributes.REQUIRED) != null) {
+                        isRequired = (Boolean) jsonObject.get(APIConstants.ApplicationAttributes.REQUIRED);
+                    }
+                    String key = (String) jsonObject.get(APIConstants.ApplicationAttributes.ATTRIBUTE);
+
+                    if (isRequired && !attributeKeysFromUSer.contains(key)) {
+                        RestApiUtil.handleBadRequest(key + " should be specified", log);
+                    }
+                    keySet.add(key);
+                }
+                body.setAttributes(validateApplicationAttributes(applicationAttributes, keySet));
             }
 
             //subscriber field of the body is not honored. It is taken from the context
@@ -390,6 +425,20 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             Application oldApplication = apiConsumer.getApplicationByUUID(applicationId);
             if (oldApplication != null) {
                 if (RestAPIStoreUtils.isUserOwnerOfApplication(oldApplication)) {
+                    Object applicationAttributesFromUser = body.getAttributes();
+                    Map<String, String> applicationAttributes = new ObjectMapper().convertValue(applicationAttributesFromUser, Map.class);
+
+                    JSONArray attributeKeysFromConfig = apiConsumer.getAppAttributesFromConfig(username);
+                    Set<String> keySet = new HashSet<>();
+
+                    for (Object object : attributeKeysFromConfig) {
+                        JSONObject jsonObject = (JSONObject) object;
+                        String key = (String) jsonObject.get(APIConstants.ApplicationAttributes.ATTRIBUTE);
+                        keySet.add(key);
+                    }
+                    if (applicationAttributes != null) {
+                        body.setAttributes(validateApplicationAttributes(applicationAttributes, keySet));
+                    }
                     //we do not honor the subscriber coming from the request body as we can't change the subscriber of the application
                     Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
                     //groupId of the request body is not honored for now.
@@ -578,4 +627,16 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         return null;
     }
 
+    private Map<String, String> validateApplicationAttributes(Map<String, String> applicationAttributes, Set keys) {
+
+        Iterator iterator = applicationAttributes.keySet().iterator();
+        while (iterator.hasNext()) {
+            String key = (String) iterator.next();
+            if (!keys.contains(key)) {
+                iterator.remove();
+                applicationAttributes.remove(key);
+            }
+        }
+        return applicationAttributes;
+    }
 }

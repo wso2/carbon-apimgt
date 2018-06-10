@@ -65,7 +65,7 @@ public class OnPremiseGatewayConstants {
     public static final String API_VERSION_PARAM = "{version}";
     public static final String CLOUD_API = "cloud";
     public static final String API_VERSION_PROPERTY = "rest.api.version";
-    public static final String API_DEFAULT_VERSION = "v0.12";
+    public static final String API_DEFAULT_VERSION = "v0.13";
     public static final String URL_PATH_SEPARATOR = "/";
     public static final String USERNAME_SEPARATOR = "@";
     public static final String UNIQUE_IDENTIFIER_HOLDER = "$token";

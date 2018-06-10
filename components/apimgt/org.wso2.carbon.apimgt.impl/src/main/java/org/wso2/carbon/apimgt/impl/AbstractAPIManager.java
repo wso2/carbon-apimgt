@@ -1405,6 +1405,14 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiMgtDAO.isApiNameExist(apiName, tenantName);
     }
 
+    public boolean isApiNameWithDifferentCaseExist(String apiName) throws APIManagementException {
+        String tenantName = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            tenantName = tenantDomain;
+        }
+        return apiMgtDAO.isApiNameWithDifferentCaseExist(apiName, tenantName);
+    }
+
     public void addSubscriber(String username, String groupingId)
             throws APIManagementException {
 
@@ -1453,7 +1461,7 @@ public abstract class AbstractAPIManager implements APIManager {
         }
         //application will not be shared within the group
         defaultApp.setGroupId("");
-        defaultApp.setTokenType(APIConstants.APPLICATION_TOKEN_TYPE);
+        defaultApp.setTokenType(APIConstants.DEFAULT_TOKEN_TYPE);
         apiMgtDAO.addApplication(defaultApp, subscriber.getName());
     }
 

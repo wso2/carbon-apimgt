@@ -1,0 +1,22 @@
+<%
+/**
+ * Function to read attributes from configuration
+ */
+
+var readApplicationAttributes = function () {
+    var log = new Log();
+    var userName = jagg.getUser().username;
+
+    try {
+        var APIConsumerImpl = Packages.org.wso2.carbon.apimgt.impl.APIConsumerImpl;
+        var apiConsumerImpl = new APIConsumerImpl();
+        var appConfig = apiConsumerImpl.getAppAttributesFromConfig(userName);
+        return JSON.parse(appConfig);
+    }
+    catch (error) {
+        log.error("Error occurred in reading application attributes from config");
+        return null;
+    }
+
+}
+%>

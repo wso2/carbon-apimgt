@@ -1,7 +1,7 @@
 <%
 include("/jagg/jagg.jag");
 
-var updateApplication = function (applicationNew,applicationOld,username,tier,callbackUrlNew,descriptionNew,groupIdOld,groupIdNew,tokenType) {
+var updateApplication = function (applicationNew,applicationOld,username,tier,callbackUrlNew,descriptionNew,groupIdOld,groupIdNew,tokenType, applicationAttributesNew) {
     var log = new Log(),
             store = jagg.module("manager").getAPIStoreObj();
 
@@ -16,7 +16,7 @@ var updateApplication = function (applicationNew,applicationOld,username,tier,ca
             groupIdNew = " ";
         }
 
-        var status = store.updateApplication(applicationNew,applicationOld,username,tier,callbackUrlNew,descriptionNew,groupId,groupIdNew,tokenType);
+        var status = store.updateApplication(applicationNew,applicationOld,username,tier,callbackUrlNew,descriptionNew,groupId,groupIdNew,tokenType, applicationAttributesNew);
         if (log.isDebugEnabled()) {
             log.debug("updateApplication");
         }

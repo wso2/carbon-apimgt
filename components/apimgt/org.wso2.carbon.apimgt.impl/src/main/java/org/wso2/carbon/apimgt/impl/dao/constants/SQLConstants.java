@@ -110,6 +110,48 @@ public class SQLConstants {
             "   AND API.API_ID = SP.API_ID" +
             "   AND SP.SUBS_CREATE_STATE = '" +APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
 
+    public static final String GET_SUBSCRIBED_APIS_OF_USER_BY_APP_SQL =
+            " SELECT " +
+                    "   API.API_PROVIDER AS API_PROVIDER," +
+                    "   API.API_NAME AS API_NAME," +
+                    "   API.CONTEXT AS API_CONTEXT, " +
+                    "   API.API_VERSION AS API_VERSION, " +
+                    "   SP.TIER_ID AS SP_TIER_ID " +
+                    " FROM " +
+                    "   AM_SUBSCRIPTION SP, " +
+                    "   AM_API API," +
+                    "   AM_SUBSCRIBER SB, " +
+                    "   AM_APPLICATION APP " +
+                    " WHERE " +
+                    "   SB.USER_ID = ? " +
+                    "   AND SB.TENANT_ID = ? " +
+                    "   AND SB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
+                    "   AND APP.APPLICATION_ID=SP.APPLICATION_ID " +
+                    "   AND API.API_ID = SP.API_ID" +
+                    "   AND SP.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'" +
+                    "   AND APP.NAME = ?";
+
+    public static final String GET_SUBSCRIBED_APIS_OF_USER_BY_APP_CASE_INSENSITIVE_SQL =
+            " SELECT " +
+                    "   API.API_PROVIDER AS API_PROVIDER," +
+                    "   API.API_NAME AS API_NAME," +
+                    "   API.CONTEXT AS API_CONTEXT," +
+                    "   API.API_VERSION AS API_VERSION, " +
+                    "   SP.TIER_ID AS SP_TIER_ID " +
+                    " FROM " +
+                    "   AM_SUBSCRIPTION SP, " +
+                    "   AM_API API," +
+                    "   AM_SUBSCRIBER SB, " +
+                    "   AM_APPLICATION APP " +
+                    " WHERE " +
+                    "   LOWER(SB.USER_ID) = LOWER(?) " +
+                    "   AND SB.TENANT_ID = ? " +
+                    "   AND SB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
+                    "   AND APP.APPLICATION_ID=SP.APPLICATION_ID " +
+                    "   AND API.API_ID = SP.API_ID" +
+                    "   AND SP.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'" +
+                    "   AND APP.NAME = ?";
+
     public static final String GET_SUBSCRIBED_USERS_FOR_API_SQL =
             " SELECT " +
             "   SB.USER_ID, " +
@@ -1164,6 +1206,21 @@ public class SQLConstants {
             " WHERE" +
             "   APPLICATION_ID = ?";
 
+    public static final String ADD_APPLICATION_ATTRIBUTES_SQL =
+            " INSERT INTO AM_APPLICATION_ATTRIBUTES (APPLICATION_ID, NAME, VALUE, TENANT_ID) VALUES (?,?,?,?)";
+
+    public static final String REMOVE_APPLICATION_ATTRIBUTES_SQL =
+            " DELETE FROM " +
+                    "   AM_APPLICATION_ATTRIBUTES" +
+                    " WHERE" +
+                    "   APPLICATION_ID = ?";
+
+    public static final String REMOVE_APPLICATION_ATTRIBUTES_BY_ATTRIBUTE_NAME_SQL =
+            " DELETE FROM " +
+                    "   AM_APPLICATION_ATTRIBUTES" +
+                    " WHERE" +
+                    "   NAME = ? AND APPLICATION_ID = ?";
+
     public static final String UPDATE_APPLICATION_STATUS_SQL =
             " UPDATE AM_APPLICATION SET APPLICATION_STATUS = ? WHERE APPLICATION_ID = ?";
 
@@ -1567,6 +1624,14 @@ public class SQLConstants {
             "   AM_SUBSCRIBER SUB," +
             "   AM_APPLICATION APP";
 
+    public static final String GET_APPLICATION_ATTRIBUTES_BY_APPLICATION_ID =
+            " SELECT " +
+                    "   APP.APPLICATION_ID," +
+                    "   APP.NAME," +
+                    "   APP.VALUE" +
+                    " FROM " +
+                    "   AM_APPLICATION_ATTRIBUTES APP WHERE APPLICATION_ID = ?";
+
     public static final String GET_APPLICATION_BY_ID_SQL =
             " SELECT " +
             "   APP.APPLICATION_ID," +
@@ -1626,7 +1691,8 @@ public class SQLConstants {
                     "   APP.CREATED_TIME, "+
                     "   APP.UUID," +
                     "   APP.CREATED_BY," +
-                    "   APP.TOKEN_TYPE" +
+                    "   APP.TOKEN_TYPE," +
+                    "   AM_APP_MAP.KEY_TYPE" +
                     " FROM " +
                     "   AM_APPLICATION_KEY_MAPPING AM_APP_MAP," +
                     "   AM_APPLICATION APP " +
@@ -2124,6 +2190,12 @@ public class SQLConstants {
 
     public static final String GET_API_NAME_MATCHING_CONTEXT_SQL =
             "SELECT COUNT(API_ID) AS API_COUNT FROM AM_API WHERE LOWER(API_NAME) = LOWER(?) AND CONTEXT LIKE ?";
+
+    public static final String GET_API_NAME_DIFF_CASE_NOT_MATCHING_CONTEXT_SQL =
+            "SELECT COUNT(API_ID) AS API_COUNT FROM AM_API WHERE LOWER(API_NAME) = LOWER(?) AND CONTEXT NOT LIKE ? AND NOT (API_NAME = ?)";
+
+    public static final String GET_API_NAME_DIFF_CASE_MATCHING_CONTEXT_SQL =
+            "SELECT COUNT(API_ID) AS API_COUNT FROM AM_API WHERE LOWER(API_NAME) = LOWER(?) AND CONTEXT LIKE ? AND NOT (API_NAME = ?)";
 
     public static final String GET_ACTIVE_TOKEN_OF_CONSUMER_KEY_SQL =
             " SELECT " +

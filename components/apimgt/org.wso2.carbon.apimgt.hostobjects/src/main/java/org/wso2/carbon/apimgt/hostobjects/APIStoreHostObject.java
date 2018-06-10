@@ -46,7 +46,6 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIRating;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Comment;
@@ -104,6 +103,8 @@ import org.wso2.carbon.user.mgt.stub.UserAdminUserAdminException;
 import org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -124,6 +125,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
+import java.io.IOException;
 
 
 public class APIStoreHostObject extends ScriptableObject {
@@ -146,6 +148,7 @@ public class APIStoreHostObject extends ScriptableObject {
     }
 
     public APIStoreHostObject(String loggedUser) throws APIManagementException {
+
         if (loggedUser != null) {
             this.username = loggedUser;
             apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
@@ -175,10 +178,10 @@ public class APIStoreHostObject extends ScriptableObject {
         }
 
     }
-    
+
 	/**
 	 * load axis configuration for the tenant
-	 * 
+	 *
 	 * @param cx
 	 * @param thisObj
 	 * @param args
@@ -197,8 +200,6 @@ public class APIStoreHostObject extends ScriptableObject {
         }
 
     }
-        			    
-    
 
     public static Scriptable jsConstructor(Context cx, Object[] args, Function Obj,
                                            boolean inNewExpr)
@@ -251,8 +252,7 @@ public class APIStoreHostObject extends ScriptableObject {
     }
 
     public static NativeArray jsFunction_getProviderAPIUsage(Context cx, Scriptable thisObj,
-                                                             Object[] args, Function funObj)
-            throws APIManagementException {
+                                                 Object[] args, Function funObj) throws APIManagementException {
         return null;
     }
 
@@ -511,8 +511,9 @@ public class APIStoreHostObject extends ScriptableObject {
      * @return NativeObject of key details will return.
      */
     public static NativeObject jsFunction_mapExistingOauthClient(Context cx, Scriptable thisObj, Object[] args,
-            Function funObj)
+                                                                 Function funObj)
             throws ScriptException, APIManagementException, ParseException {
+
         if (args != null && args.length != 0) {
 
             try {
@@ -528,7 +529,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 String applicationName = (String) apiData.get("applicationName", apiData);
 
                 String keyType = (String) apiData.get("keytype", apiData);
-                String tokenType = APIConstants.APPLICATION_TOKEN_TYPE;
+                String tokenType = APIConstants.DEFAULT_TOKEN_TYPE;
                 Map<String, Object> keyDetails = getAPIConsumer(thisObj).mapExistingOAuthClient(jsonString, userName, clientId, applicationName, keyType, tokenType);
                 NativeObject row = new NativeObject();
                 Set<Map.Entry<String, Object>> entries = keyDetails.entrySet();
@@ -756,7 +757,7 @@ public class APIStoreHostObject extends ScriptableObject {
         try {
 
             Boolean authStatus = true;
-          
+
             APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
             String url = config.getFirstProperty(APIConstants.AUTH_MANAGER_URL);
             if (url == null) {
@@ -780,7 +781,7 @@ public class APIStoreHostObject extends ScriptableObject {
             }
 
             String usernameWithDomain = APIUtil.setDomainNameToUppercase(username);
-         
+
             boolean authorized = APIUtil.checkPermissionQuietly(usernameWithDomain, APIConstants.Permissions.API_WORKFLOWADMIN);
 
             if (authorized) {
@@ -907,8 +908,8 @@ public class APIStoreHostObject extends ScriptableObject {
         }// end of the if
         return apiArray;
     }
-    
- 
+
+
     public static NativeObject jsFunction_searchPaginatedAPIs(Context cx, Scriptable thisObj, Object[] args,
                                                               Function funObj) throws ScriptException,
                                                                               APIManagementException {
@@ -1011,7 +1012,7 @@ public class APIStoreHostObject extends ScriptableObject {
                                        APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
                         currentApi.put("version", currentApi, apiIdentifier.getVersion());
                         currentApi.put("description", currentApi, api.getDescription());
-                        currentApi.put("status", currentApi, api.getStatus().toString());
+                        currentApi.put("status", currentApi, api.getStatus());
                         currentApi.put("rates", currentApi, api.getRating());
                         currentApi.put("description", currentApi, api.getDescription());
                         currentApi.put("endpoint", currentApi, api.getUrl());
@@ -1052,7 +1053,7 @@ public class APIStoreHostObject extends ScriptableObject {
                                        APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
                         currentApi.put("version", currentApi, apiIdentifier.getVersion());
                         currentApi.put("description", currentApi, api.getDescription());
-                        currentApi.put("status", currentApi, api.getStatus().toString());
+                        currentApi.put("status", currentApi, api.getStatus());
                         currentApi.put("rates", currentApi, api.getRating());
                         currentApi.put("description", currentApi, api.getDescription());
                         currentApi.put("endpoint", currentApi, api.getUrl());
@@ -1082,7 +1083,7 @@ public class APIStoreHostObject extends ScriptableObject {
         return resultObj;
     }
 
-    
+
     @Deprecated
     public static NativeObject jsFunction_searchPaginatedAPIsByType(Context cx,
                                                                     Scriptable thisObj, Object[] args, Function funObj)
@@ -1234,10 +1235,10 @@ public class APIStoreHostObject extends ScriptableObject {
         APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
         return Boolean.parseBoolean(config.getFirstProperty(APIConstants.SELF_SIGN_UP_ENABLED));
     }
-    
+
     public static boolean jsFunction_isSelfSignupEnabledForTenant(Context cx,
         Scriptable thisObj, Object[] args, Function funObj) {
-    	
+
     	boolean status = false;
     	if (!isStringArray(args)) {
             return status;
@@ -1253,9 +1254,9 @@ public class APIStoreHostObject extends ScriptableObject {
         } catch (APIManagementException e) {
 	       log.error("error while loading configuration from registry", e);
         }
-    	
+
 		return status;
-    	
+
     }
 
     public static NativeArray jsFunction_getAPIsWithTag(Context cx, Scriptable thisObj, Object[] args, Function funObj)
@@ -1361,7 +1362,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     currentApi.put("version", currentApi,
                             apiIdentifier.getVersion());
                     currentApi.put("description", currentApi, api.getDescription());
-                    currentApi.put("status", currentApi, api.getStatus().toString());
+                    currentApi.put("status", currentApi, api.getStatus());
                     currentApi.put("rates", currentApi, api.getRating());
                     if (api.getThumbnailUrl() == null) {
                         currentApi.put("thumbnailurl", currentApi,
@@ -1577,7 +1578,7 @@ public class APIStoreHostObject extends ScriptableObject {
         }
         return myn;
     }
-    
+
     public static NativeObject jsFunction_getAllPaginatedAPIs(Context cx, Scriptable thisObj,
                                                                         Object[] args, Function funObj)
                                                     throws ScriptException, APIManagementException {
@@ -1585,19 +1586,19 @@ public class APIStoreHostObject extends ScriptableObject {
         String tenantDomain;
         boolean retuenAPItags = false;
         String state = null;
-        
+
         Boolean displayAPIsWithMultipleStatus = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
-               
-        
+
+
         if (args[0] != null) {
             tenantDomain = (String) args[0];
         } else {
             tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
-            
+
         int start = Integer.parseInt((String) args[1]);
         int end = Integer.parseInt((String) args[2]);
-        
+
         if (args.length > 3 && args[3] != null) {
             retuenAPItags = Boolean.parseBoolean((String) args[3]);
         }
@@ -1624,39 +1625,39 @@ public class APIStoreHostObject extends ScriptableObject {
 
         return getPaginatedAPIsByStatus(apiConsumer, tenantDomain, start, end, statusList, retuenAPItags);
     }
-    
+
     public static NativeObject jsFunction_getAllPaginatedPrototypedAPIs(Context cx, Scriptable thisObj,
                                                                         Object[] args, Function funObj)
             										throws ScriptException, APIManagementException {
     	APIConsumer apiConsumer = getAPIConsumer(thisObj);
     	String tenantDomain;
     	boolean retuenAPItags = false;
-    	String [] statusList = {APIConstants.PROTOTYPED}; 
+    	String [] statusList = {APIConstants.PROTOTYPED};
         if (args[0] != null) {
         	tenantDomain = (String) args[0];
         } else {
         	tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
-            
+
         int start = Integer.parseInt((String) args[1]);
         int end = Integer.parseInt((String) args[2]);
-        
+
         if (args.length > 3 && args[3] != null) {
             retuenAPItags = Boolean.parseBoolean((String) args[3]);
         }
-            
+
         return getPaginatedAPIsByStatus(apiConsumer, tenantDomain, start, end, statusList, retuenAPItags);
-    	
+
     }
 
     public static NativeObject jsFunction_getAllPaginatedPublishedAPIs(Context cx, Scriptable thisObj,
                                                                        Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
-    	
+
     	APIConsumer apiConsumer = getAPIConsumer(thisObj);
     	String tenantDomain;
     	boolean returnAPItags = false;
-    	String [] statusList = {APIConstants.PUBLISHED}; 
+    	String [] statusList = {APIConstants.PUBLISHED};
         if (args[0] != null) {
         	tenantDomain = (String) args[0];
         } else {
@@ -1665,24 +1666,24 @@ public class APIStoreHostObject extends ScriptableObject {
 
         int start = Integer.parseInt((String) args[1]);
         int end = Integer.parseInt((String) args[2]);
-        
+
         if (args.length > 3 && args[3] != null) {
             returnAPItags = Boolean.parseBoolean((String) args[3]);
         }
-            
+
         return getPaginatedAPIsByStatus(apiConsumer, tenantDomain, start, end, statusList, returnAPItags);
-            
-            
+
+
     }
-    
+
     private static NativeObject getPaginatedAPIsByStatus(APIConsumer apiConsumer, String tenantDomain, int start,
                                                          int end, String[] status, boolean returnAPItags) {
-    	
+
     	Set<API> apiSet;
         Map<String, Object> resultMap;
         NativeArray myn = new NativeArray(0);
         NativeObject result = new NativeObject();
-        
+
         try {
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 PrivilegedCarbonContext.startTenantFlow();
@@ -1719,7 +1720,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     row.put("provider", row, APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
                     row.put("version", row, apiIdentifier.getVersion());
                     row.put("context", row, api.getContext());
-                    row.put("status", row, api.getStatus().toString()); // api.getStatus().toString()
+                    row.put("status", row, api.getStatus()); // api.getStatus().toString()
                     if (api.getThumbnailUrl() == null) {
                         row.put("thumbnailurl", row, "images/api-default.png");
                     } else {
@@ -1736,7 +1737,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     row.put("isAdvertiseOnly", row, api.isAdvertiseOnly());
                     row.put("apiBusinessOwner", row, api.getBusinessOwner());
                     row.put("rates", row, api.getRating());
-                    
+
                     NativeArray tierArr = new NativeArray(0);
                     Set<Tier> tierSet = api.getAvailableTiers();
                     if (tierSet != null) {
@@ -1752,7 +1753,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     row.put("tiers", row, tierArr);
                     row.put("monetizationCategory", row, api.getMonetizationCategory());
 
-                    if (returnAPItags) {                    
+                    if (returnAPItags) {
                         StringBuilder tagsSet = new StringBuilder("");
                         for (int k = 0; k < api.getTags().toArray().length; k++) {
                             tagsSet.append(api.getTags().toArray()[k].toString());
@@ -1772,10 +1773,10 @@ public class APIStoreHostObject extends ScriptableObject {
         }
         return result;
     }
-    
+
     /**
      * Returns all the Gateway Endpoint URLs of a given API
-     * 
+     *
      * @param cx
      * @param thisObj
      * @param args
@@ -1892,8 +1893,8 @@ public class APIStoreHostObject extends ScriptableObject {
                 }
 
                 if (api != null) {
-                    if(api.getStatus() == APIStatus.PUBLISHED || api.getStatus() == APIStatus.PROTOTYPED ||
-                            api.getStatus() == APIStatus.DEPRECATED){
+                    if (APIConstants.PUBLISHED.equals(api.getStatus()) || APIConstants.PROTOTYPED
+                            .equals(api.getStatus()) || APIConstants.DEPRECATED.equals(api.getStatus())) {
 
                         NativeObject row = new NativeObject();
                         apiIdentifier = api.getId();
@@ -1909,7 +1910,7 @@ public class APIStoreHostObject extends ScriptableObject {
                         String dateFormatted = dateFormat.format(api.getLastUpdated());
                         row.put("updatedDate", row, dateFormatted);
                         row.put("context", row, api.getContext());
-                        row.put("status", row, api.getStatus().getStatus());
+                        row.put("status", row, api.getStatus());
                         row.put("isOpenAPI3APIDefinition", row, isOpenAPI3APIDefinition);
 
                         String user = getUsernameFromObject(thisObj);
@@ -2082,7 +2083,7 @@ public class APIStoreHostObject extends ScriptableObject {
         }
         return myn;
     }
-    
+
     /**
      * Returns all the HTTPs Gateway Endpoint URLs of all the Gateway Endpoints
      * @param cx
@@ -2097,7 +2098,7 @@ public class APIStoreHostObject extends ScriptableObject {
                                                                      Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
     	NativeArray myn = new NativeArray(0);
-    	
+
     	APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
         String storeTokenDisplayURL = config.getFirstProperty(APIConstants.STORE_TOKEN_DISPLAY_URL);
         //If the <StoreTokenDisplayURL> parameter is specified, we give it the highest priority, when displaying the
@@ -2122,7 +2123,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 }
             }
         }
-        
+
         return myn;
     }
 
@@ -2311,11 +2312,11 @@ public class APIStoreHostObject extends ScriptableObject {
         int applicationId = ((Number) args[4]).intValue();
         String userId = (String) args[5];
         APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, version);
-        
+
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
         boolean isGlobalThrottlingEnabled = APIUtil.isAdvanceThrottlingEnabled();
-        
+
         boolean isTenantFlowStarted = false;
         try {
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
@@ -2327,7 +2328,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
 	        /* Validation for allowed throttling tiers*/
             API api = apiConsumer.getAPI(apiIdentifier);
-            
+
             if(isGlobalThrottlingEnabled){
                 Set<Tier> policies = api.getAvailableTiers();
                 Iterator<Tier> iterator = policies.iterator();
@@ -2664,14 +2665,14 @@ public class APIStoreHostObject extends ScriptableObject {
             throws ScriptException, APIManagementException {
         if (args != null && args.length > 7) {
             try {
-              
+
                 String userId = (String) args[0];
                 String applicationName =(String) args[1];
                 String tokenType = (String) args[2];
                 String tokenScope = (String) args[6];
                 String groupingId = (String) args[7];
 
-                Map<String, String> keyDetails = getAPIConsumer(thisObj).completeApplicationRegistration(userId, 
+                Map<String, String> keyDetails = getAPIConsumer(thisObj).completeApplicationRegistration(userId,
                                                                    applicationName, tokenType, tokenScope, groupingId);
                 NativeObject object = new NativeObject();
 
@@ -3048,7 +3049,7 @@ public class APIStoreHostObject extends ScriptableObject {
             apiObj.put("name", apiObj, subscribedAPI.getApiId().getApiName());
             apiObj.put("provider", apiObj, APIUtil.replaceEmailDomainBack(subscribedAPI.getApiId().getProviderName()));
             apiObj.put("version", apiObj, subscribedAPI.getApiId().getVersion());
-            apiObj.put("status", apiObj, api.getStatus().toString());
+            apiObj.put("status", apiObj, api.getStatus());
             apiObj.put("tier", apiObj, subscribedAPI.getTier().getDisplayName());
             apiObj.put("subStatus", apiObj, subscribedAPI.getSubStatus());
             apiObj.put("thumburl", apiObj, APIUtil.prependWebContextRoot(api.getThumbnailUrl()));
@@ -3294,6 +3295,12 @@ public class APIStoreHostObject extends ScriptableObject {
                 row.put("description", row, application.getDescription());
                 row.put("groupId", row, application.getGroupId());
                 row.put("tokenType", row, application.getTokenType());
+                try {
+                    row.put("applicationAttributes", row,
+                            new ObjectMapper().writeValueAsString(application.getApplicationAttributes()));
+                } catch (JsonProcessingException e) {
+                    handleException("Error in retrieving application attributes of " + applicationName, e);
+                }
                 return row;
             }
         }
@@ -3319,6 +3326,7 @@ public class APIStoreHostObject extends ScriptableObject {
             String callbackUrl = (String) args[3];
             String description = (String) args[4];
             String groupId = null;
+            Map appAttributes = null;
             if (args.length > 5 && args[5] != null) {
                 groupId = (String) args[5];
             }
@@ -3330,6 +3338,17 @@ public class APIStoreHostObject extends ScriptableObject {
                 tokenType = DEFAULT_TOKEN_TYPE;
             }
 
+
+            try {
+                if (args.length > 7 && args[7] != null) {
+                    String applicationAttributeString = (String) args[7];
+                    if (!applicationAttributeString.isEmpty()) {
+                        appAttributes = new ObjectMapper().readValue(applicationAttributeString, Map.class);
+                    }
+                }
+            } catch (IOException e) {
+                handleException("Error in reading application attributes of " + name, e);
+            }
 
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
             Subscriber subscriber = new Subscriber(username);
@@ -3344,6 +3363,9 @@ public class APIStoreHostObject extends ScriptableObject {
                 application.setGroupId(groupId);
             }
 
+            if (appAttributes != null) {
+                application.setApplicationAttributes(appAttributes);
+            }
             int applicationId = apiConsumer.addApplication(application, username);
             status = apiConsumer.getApplicationStatusById(applicationId);
             return status;
@@ -3425,7 +3447,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     row.put("apiProvider", row, APIUtil.replaceEmailDomainBack(subscribedAPI.getApiId().getProviderName()));
                     row.put("description", row, api.getDescription());
                     row.put("subscribedTier", row, subscribedAPI.getTier().getName());
-                    row.put("status", row, api.getStatus().getStatus());
+                    row.put("status", row, api.getStatus());
                     row.put("subStatus", row, subscribedAPI.getSubStatus());
                     row.put("thumburl", row, APIUtil.prependWebContextRoot(api.getThumbnailUrl()));
                     myn.put(i, myn, row);
@@ -3451,12 +3473,24 @@ public class APIStoreHostObject extends ScriptableObject {
             String description = (String) args[5];
             String tokenType = (String) args[8];
             String groupingId = null;
+            Map appAttributes =  null;
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
 
             if (args.length > 6 && args[6] != null) {
                 groupingId = (String) args[6];
             }
 
+            // retrieve new values for application attributes
+            try {
+                if (args.length > 9 && args[9] != null) {
+                    String applicationAttributeString = (String) args[9];
+                    if (!applicationAttributeString.isEmpty()) {
+                        appAttributes = new ObjectMapper().readValue(applicationAttributeString, Map.class);
+                    }
+                }
+            } catch (IOException e) {
+                handleException("Error in reading application attributes of " + oldName, e);
+            }
             // get application with new name if exists
             Application application = apiConsumer.getApplicationsByName(username, newName, groupingId);
             if (!newName.equals(oldName)) {
@@ -3480,6 +3514,9 @@ public class APIStoreHostObject extends ScriptableObject {
             updatedApplication.setDescription(description);
             updatedApplication.setTokenType(tokenType);
 
+            if (appAttributes != null) {
+                updatedApplication.setApplicationAttributes(appAttributes);
+            }
             if (APIUtil.isMultiGroupAppSharingEnabled()) {
                 String newGroupId = null;
                 if (args.length > 7 && args[7] != null) {
@@ -3603,7 +3640,7 @@ public class APIStoreHostObject extends ScriptableObject {
             	providerName = APIUtil.replaceEmailDomain(URLDecoder.decode(providerName, "UTF-8"));
             	APIIdentifier apiId = new APIIdentifier(providerName, apiName,
                         version);
-            	
+
                 APIConsumer apiConsumer = getAPIConsumer(thisObj);
                 content = apiConsumer.getDocumentationContent(apiId, docName);
             } catch (Exception e) {
@@ -3917,7 +3954,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
 	/**
 	 * remove user
-	 * 
+	 *
 	 * @param username
 	 * @param signupConfig
 	 *            tenant based configuration
@@ -3935,26 +3972,26 @@ public class APIStoreHostObject extends ScriptableObject {
 		CarbonUtils.setBasicAccessSecurityHeaders(adminUsername, adminPassword, userAdminStub._getServiceClient());
 		String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(username);
 		int index = tenantAwareUserName.indexOf(UserCoreConstants.DOMAIN_SEPARATOR);
-		//remove the 'PRIMARY' part from the user name		
+		//remove the 'PRIMARY' part from the user name
 		if (index > 0) {
 			if(tenantAwareUserName.substring(0, index)
 					.equalsIgnoreCase(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME)){
 				tenantAwareUserName = tenantAwareUserName.substring(index + 1);
-			}			
-		} 
+			}
+		}
 
 		userAdminStub.deleteUser(tenantAwareUserName);
 	}
 
 	/**
-	 * check whether UserAdmin service can be accessed using the admin credentials in the 
+	 * check whether UserAdmin service can be accessed using the admin credentials in the
 	 * @param userName
 	 * @param password
 	 * @param serverURL
 	 * @return
 	 */
 	private static boolean checkCredentialsForAuthServer(String userName, String password, String serverURL) {
-		
+
 		boolean status;
 		try {
 			UserAdminStub userAdminStub = new UserAdminStub(null, serverURL + "UserAdmin");
@@ -3969,10 +4006,10 @@ public class APIStoreHostObject extends ScriptableObject {
 			log.error("Error in checking admin credentials. Please check credentials in "
 						+ "the signup-config.xml in the registry. ", e);
 			status = false;
-		}		
+		}
 		return status;
 	}
-	
+
     public static boolean jsFunction_isUserExists(Context cx, Scriptable thisObj,
                                                   Object[] args, Function funObj)
             throws ScriptException,
@@ -4281,7 +4318,7 @@ public class APIStoreHostObject extends ScriptableObject {
         Boolean valid;
 
         NativeObject row = new NativeObject();
-    
+
 
         if (userName != null) {
             APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
@@ -4292,7 +4329,7 @@ public class APIStoreHostObject extends ScriptableObject {
             String adminPassword = config.getFirstProperty(APIConstants.AUTH_MANAGER_PASSWORD);
 
             CarbonUtils.setBasicAccessSecurityHeaders(adminUsername, adminPassword, userAdminStub._getServiceClient());
-            
+
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(userName));
             UserRegistrationConfigDTO signupConfig = SelfSignUpUtil.getSignupConfiguration(tenantDomain);
             //add user storage info 

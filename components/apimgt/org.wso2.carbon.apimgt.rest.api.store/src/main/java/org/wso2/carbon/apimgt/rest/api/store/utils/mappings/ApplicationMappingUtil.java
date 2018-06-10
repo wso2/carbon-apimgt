@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +39,8 @@ public class ApplicationMappingUtil {
         applicationDTO.setApplicationId(application.getUUID());
         applicationDTO.setThrottlingTier(application.getTier());
         applicationDTO.setDescription(application.getDescription());
+        Map<String,String> applicationAttributes = application.getApplicationAttributes();
+        applicationDTO.setAttributes(applicationAttributes);
         applicationDTO.setCallbackUrl(application.getCallbackUrl());
         applicationDTO.setName(application.getName());
         applicationDTO.setStatus(application.getStatus());
@@ -60,6 +63,9 @@ public class ApplicationMappingUtil {
         application.setDescription(applicationDTO.getDescription());
         application.setCallbackUrl(applicationDTO.getCallbackUrl());
         application.setUUID(applicationDTO.getApplicationId());
+        Object applicationAttributes = applicationDTO.getAttributes();
+        Map appAttributes = new ObjectMapper().convertValue(applicationAttributes,Map.class);
+        application.setApplicationAttributes(appAttributes);
         //groupId is not honored for now. Later we can improve by checking admin privileges of the user.
         //application.setGroupId(applicationDTO.getGroupId());
         return application;
@@ -131,6 +137,7 @@ public class ApplicationMappingUtil {
         applicationInfoDTO.setName(application.getName());
         applicationInfoDTO.setGroupId(application.getGroupId());
         applicationInfoDTO.setSubscriber(application.getSubscriber().getName());
+        applicationInfoDTO.setAttributes(application.getApplicationAttributes());
         return applicationInfoDTO;
     }
 }

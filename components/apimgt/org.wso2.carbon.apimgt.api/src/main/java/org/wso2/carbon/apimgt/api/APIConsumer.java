@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.api;
 
 import org.json.simple.JSONObject;
+import org.json.simple.JSONArray;
 import org.wso2.carbon.apimgt.api.model.*;
 
 import java.util.List;
@@ -673,5 +674,14 @@ public interface APIConsumer extends APIManager {
      */
     String getWSDLDocument(String username, String tenantDomain, String resourceUrl, Map environmentDetails,
             Map apiDetails) throws APIManagementException;
+
+    /**
+     * Returns application attributes defined in configuration
+     *
+     * @param userId           user name of the logged in user
+     * @return Array of JSONObjects of key values from configuration
+     * @throws APIManagementException
+     */
+    JSONArray getAppAttributesFromConfig(String userId)  throws APIManagementException;
 
 }

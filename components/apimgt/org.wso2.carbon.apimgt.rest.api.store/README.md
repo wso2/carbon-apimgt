@@ -241,5 +241,6 @@ curl -H "Authorization: Bearer <access-token>" https://localhost:9443/api/am/sto
 v0.10 - APIM 2.0.0
 v0.11 - APIM 2.1.0
 v0.12 - APIM 2.2.0
+v0.13 - APIM 2.5.0
 ```
 

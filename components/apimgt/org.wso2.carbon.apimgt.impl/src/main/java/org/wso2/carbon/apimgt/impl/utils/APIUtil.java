@@ -107,6 +107,7 @@ import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
+import org.apache.xerces.util.SecurityManager;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
@@ -311,9 +312,7 @@ public final class APIUtil {
             //setting api ID for scope retrieval
             api.getId().setApplicationId(Integer.toString(apiId));
             // set url
-            api.setStatus((artifact.getLifecycleState() != null) ?
-                    getApiStatus(artifact.getLifecycleState()) :
-                    getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
+            api.setStatus(getLcStateFromArtifact(artifact));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             api.setWsdlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WSDL));
             api.setWadlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WADL));
@@ -498,9 +497,7 @@ public final class APIUtil {
             //set last access time
             api.setLastUpdated(registry.get(artifactPath).getLastModified());
             // set url
-            api.setStatus((artifact.getLifecycleState() != null) ?
-                    getApiStatus(artifact.getLifecycleState()) :
-                    getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
+            api.setStatus(getLcStateFromArtifact(artifact));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             api.setWsdlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WSDL));
             api.setWadlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WADL));
@@ -709,9 +706,7 @@ public final class APIUtil {
             api.setUUID(artifact.getId());
             api.setRating(getAverageRating(apiId));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
-            api.setStatus((artifact.getLifecycleState() != null) ?
-                    getApiStatus(artifact.getLifecycleState()) :
-                    getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
+            api.setStatus(getLcStateFromArtifact(artifact));
             api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
             api.setVisibility(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY));
             api.setVisibleRoles(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES));
@@ -868,7 +863,7 @@ public final class APIUtil {
     public static GenericArtifact createAPIArtifactContent(GenericArtifact artifact, API api)
             throws APIManagementException {
         try {
-            String apiStatus = api.getStatus().getStatus();
+            String apiStatus = api.getStatus();
             artifact.setAttribute(APIConstants.API_OVERVIEW_NAME, api.getId().getApiName());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION, api.getId().getVersion());
 
@@ -1183,7 +1178,13 @@ public final class APIUtil {
             }
         }
         return apiStatus;
+    }
 
+    public static String getLcStateFromArtifact(GovernanceArtifact artifact) throws GovernanceException {
+        String state = (artifact.getLifecycleState() != null) ?
+                artifact.getLifecycleState() :
+                artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
+        return (state != null) ? state.toUpperCase() : null;
     }
 
 
@@ -2661,9 +2662,7 @@ public final class APIUtil {
             //set uuid
             api.setUUID(artifact.getId());
             // set url
-            api.setStatus((artifact.getLifecycleState() != null) ?
-                    getApiStatus(artifact.getLifecycleState()) :
-                    getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
+            api.setStatus(getLcStateFromArtifact(artifact));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             api.setWsdlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WSDL));
             api.setWadlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WADL));
@@ -4727,9 +4726,7 @@ public final class APIUtil {
             //set uuid
             api.setUUID(artifact.getId());
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
-            api.setStatus((artifact.getLifecycleState() != null) ?
-                    getApiStatus(artifact.getLifecycleState()) :
-                    getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
+            api.setStatus(getLcStateFromArtifact(artifact));
             api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
             api.setVisibility(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY));
             api.setVisibleRoles(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES));
@@ -5013,8 +5010,8 @@ public final class APIUtil {
 
                     if (doc != null && api != null) {
                         if (APIConstants.STORE_CLIENT.equals(searchClient)) {
-                            if (api.getStatus().equals(getApiStatus(APIConstants.PUBLISHED)) ||
-                                    api.getStatus().equals(getApiStatus(APIConstants.PROTOTYPED))) {
+                            if (APIConstants.PUBLISHED.equals(api.getStatus()) ||
+                                    APIConstants.PROTOTYPED.equals(api.getStatus())) {
                                 apiDocMap.put(doc, api);
                             }
                         } else {
@@ -5079,8 +5076,7 @@ public final class APIUtil {
                         continue;
                     }
                     if (apiNames.indexOf(artifact.getAttribute(APIConstants.API_OVERVIEW_NAME)) < 0) {
-                        APIStatus apiLcStatus = APIUtil.getApiStatus(artifact.getLifecycleState());
-                        String status = (apiLcStatus != null) ? apiLcStatus.getStatus() : null;
+                        String status = APIUtil.getLcStateFromArtifact(artifact);
                         if (isAllowDisplayAPIsWithMultipleStatus()) {
                             if (APIConstants.PUBLISHED.equals(status) || APIConstants.DEPRECATED.equals(status)) {
                                 API api = APIUtil.getAPI(artifact, registry);
@@ -7354,5 +7350,38 @@ public final class APIUtil {
         });
 
         return conditionDtoList;
+    }
+
+    /**
+     * Get if there any tenant-specific application configurations from the tenant
+     * registry
+     *
+     * @param tenantId The Tenant Id
+     * @return JSONObject The Application Attributes read from tenant registry or else null
+     * @throws APIManagementException Throws if the registry resource doesn't exist
+     * or the content cannot be parsed to JSON
+     */
+    public static JSONObject getAppAttributeKeysFromRegistry(int tenantId) throws APIManagementException {        try {
+        Registry registryConfig = ServiceReferenceHolder.getInstance().getRegistryService().getConfigSystemRegistry(tenantId);
+        if (registryConfig.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
+            Resource resource = registryConfig.get(APIConstants.API_TENANT_CONF_LOCATION);
+            String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
+            if (content != null) {
+                JSONObject tenantConfigs = (JSONObject) new JSONParser().parse(content);
+                String property = APIConstants.ApplicationAttributes.APPLICATION_CONFIGURATIONS;
+                if (tenantConfigs.keySet().contains(property)) {
+                    return (JSONObject) tenantConfigs.get(APIConstants.ApplicationAttributes.APPLICATION_CONFIGURATIONS);
+                }
+            }
+        }
+
+    } catch (RegistryException exception) {
+        String msg = "Error while retrieving application attributes from tenant registry.";
+        throw new APIManagementException(msg, exception);
+    } catch (ParseException parseExceptione) {
+        String msg = "Couldn't create json object from Swagger object for custom application attributes.";
+        throw new APIManagementException(msg, parseExceptione);
+    }
+        return null;
     }
 }

@@ -2,7 +2,7 @@
     <h1><a name="Application"></a>Application</h1>
 
             <hr/>
-            <h4 class="operation-heading"><a name="applicationsApplicationIdChangeOwnerPost"></a>Change Application Owner</h4> <code>POST https://apis.wso2.com/api/am/admin/v0.12/applications/{applicationId}/change-owner</code>
+            <h4 class="operation-heading"><a name="applicationsApplicationIdChangeOwnerPost"></a>Change Application Owner</h4> <code>POST https://apis.wso2.com/api/am/admin/v0.13/applications/{applicationId}/change-owner</code>
             <p class="marked"></p>
 
             <p class="marked">This operation is used to change the owner of an Application.
@@ -19,7 +19,7 @@ In order to change the owner of an application, we need to pass the new applicat
                 </h4>
             </div>
 
-                <div id="request-applicationsApplicationIdChangeOwnerPost"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/admin/v0.12/apis/change-owner?apiId&#x3D;890a4f4d-09eb-4877-a323-57f6ce2ed79b&amp;action&#x3D;Publish
+                <div id="request-applicationsApplicationIdChangeOwnerPost"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/admin/v0.13/apis/change-owner?apiId&#x3D;890a4f4d-09eb-4877-a323-57f6ce2ed79b&amp;action&#x3D;Publish
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -32,7 +32,7 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
                 <div id="response-applicationsApplicationIdChangeOwnerPost" class="pre collapse in"><code class="json">HTTP/1.1 200 OK</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -X POST &quot;https://localhost:9443/api/am/admin/v0.12/applications/890a4f4d-09eb-4877-a323-57f6ce2ed79b/change-owner?owner&#x3D;admin&quot;</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -X POST &quot;https://localhost:9443/api/am/admin/v0.13/applications/890a4f4d-09eb-4877-a323-57f6ce2ed79b/change-owner?owner&#x3D;admin&quot;</code></div>
 
          
 

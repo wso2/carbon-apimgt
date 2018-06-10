@@ -18,8 +18,7 @@ package org.wso2.carbon.apimgt.impl.template;
 
 import org.apache.velocity.VelocityContext;
 import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
-
+import org.wso2.carbon.apimgt.impl.APIConstants;
 
 /**
  * This will initialise a velocity context to used in the template
@@ -60,7 +59,7 @@ public class APIConfigContext extends ConfigContext {
         // customise how the synapse config is generated.
         context.put("apiObj", api);
 
-        if (api.getStatus().equals(APIStatus.BLOCKED)) {
+        if (APIConstants.BLOCKED.equals(api.getStatus())) {
             context.put("apiIsBlocked", Boolean.TRUE);
         } else {
             context.put("apiIsBlocked", Boolean.FALSE);
