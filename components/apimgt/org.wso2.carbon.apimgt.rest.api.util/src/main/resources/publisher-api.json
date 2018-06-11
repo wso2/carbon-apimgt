@@ -2905,7 +2905,8 @@
                 "transport",
                 "endpointConfig",
                 "visibility",
-                "type"
+                "type",
+                "apiDefinition"
             ],
             "allOf": [
                 {
