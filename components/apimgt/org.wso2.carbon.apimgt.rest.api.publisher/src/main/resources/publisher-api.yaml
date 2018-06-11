@@ -2943,6 +2943,7 @@ definitions:
       - endpointConfig
       - visibility
       - type
+      - apiDefinition
     allOf:
       - $ref: '#/definitions/APIInfo'
       - properties:
