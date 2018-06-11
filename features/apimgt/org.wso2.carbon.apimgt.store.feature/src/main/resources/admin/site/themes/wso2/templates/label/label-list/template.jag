@@ -6,6 +6,7 @@
     </div>
     <div class="content-section shadow-up">
     <div class="content-data">
+    <%if(outputs.labelList.size()) { %>
     <table class="table table-responsive table-striped" >
         <thead>
             <tr>
@@ -35,7 +36,7 @@
                         var urlType  = label.getAccessUrls().get(j);
                 %>
             <tr>
-                <td><%=urlType%></td>
+                <div class="might-overflow" title="<%=urlType%>"><%=urlType%></div></br>
             </tr>
             <%
                     }%>
@@ -63,7 +64,12 @@
             }
             %>  
     </table>
-   
+    <%} else { %>
+   	<div class="message message-info">
+   	    <h4><i class="icon fw fw-info"></i><%=i18n.localize("Microgateway labels are not defined")%></h4>
+   		<p><%=i18n.localize("Microgateway labels are not defined")%></p>
+   	</div>
+    <%} %>
     </div>
     </div>
 </div>
