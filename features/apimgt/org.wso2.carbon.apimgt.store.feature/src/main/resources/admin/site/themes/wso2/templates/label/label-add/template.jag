@@ -52,7 +52,7 @@
                 value='<%=i18n.localize("Invalid")%>'/>
     <input type='hidden' id='errorMessageIllegalChar' name='errorMessageIllegalChar'
                 value='<%=i18n.localize("Name contains one or more illegal characters")%> ( [ ~ ! & @ # ; % ^ & * + = { } | <> \"  , ] ). '/>
-    <input type="hidden" id="uuid" name="uuid" value="<%=uuid%>" />
+    <input type="hidden" id="uuid" name="uuid" value="<%=encode.forHtmlAttribute(uuid)%>" />
     <input type="hidden" id="action" name="action" value="<%=encode.forHtmlAttribute(action)%>"/>
     <input type='hidden' id='errorMessageSpaces' name='errorMessageSpaces' value='<%=i18n.localize("Name contains spaces")%>'/>
     <div class="page-header">
