@@ -751,7 +751,7 @@
 
                         <!-- Microgateway labels table -->
                         <% if ( labels != null && labels.length > 0 ) { %>
-                            <b><%=i18n.localize(">Microgateways")%></b>
+                            <b><%=i18n.localize("Microgateways")%></b>
                                 <table class="table table-striped table-hover display data-table">
                                     <thead>
                                         <tr>
