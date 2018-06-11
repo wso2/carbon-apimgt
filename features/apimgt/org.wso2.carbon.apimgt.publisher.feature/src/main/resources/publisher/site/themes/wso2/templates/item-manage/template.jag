@@ -666,7 +666,11 @@
                 <div class="panel-heading" role="tab" id="headingOne" data-toggle="collapse" data-parent=".accordion" href="#accordion1-collapse1" aria-controls="accordion1-collapse1">
                         <h4 class="panel-title">
                             <div>
-                                <div class="heading no-description"><%=i18n.localize("Gateway Environments")%></div>
+                                <% if ( labels != null && labels.length > 0 ) { %>
+                                    <div class="heading no-description"><%=i18n.localize("API Gateways / Microgateways")%></div>
+                                <%} else {%>
+                                    <div class="heading no-description"><%=i18n.localize("API Gateways")%></div>
+                                <%}%>
                                 <div class="status">
                                     <i class="fw fw-down"></i>
                                 </div>
@@ -677,11 +681,12 @@
                 </div>
                 <div id="accordion1-collapse1" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
                     <div class="panel-body">
+                        <b><%=i18n.localize("Gateways")%></b>
                         <table class="table table-striped table-hover display data-table">
                          <thead>
                              <tr>
                                 <th width="5%"><div class="environments_checkbox"></div></th>
-                                <th><div class="environments_data"><%=i18n.localize("Environment Name")%></div></th>
+                                <th width="30%"><div class="environments_data"><%=i18n.localize("Environment Name")%></div></th>
                                 <th><div class="environments_data"><%=i18n.localize("Type")%></div></th>
                                 <th><div class="environments_data"><%=i18n.localize("Description")%></div></th>
                              </tr>
@@ -744,22 +749,19 @@
                             </tbody>
                        </table>
 
-                        <!-- Micro-gateway labels section -->
+                        <!-- Microgateway labels table -->
                         <% if ( labels != null && labels.length > 0 ) { %>
-                            <div class="panel-body">
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label" for="gateway-labels"><%=i18n.localize("Micro Gateway Labels")%> :
-                                    <a class="help_popup" help_data="label_help" data-trigger="hover" data-placement="bottom" title="control_help">
-                                        <span class="icon fw-stack fw-lg" style="font-size:6px">
-                                            <i class="fw fw-circle fw-stack-2x"></i>
-                                            <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
-                                        </span>
-                                    </a>
-                                    <p id="label_help" class="hide"><%=i18n.localize("Specify the labels of the micro gateways here. This API will be deployed on the specified micro gateways.")%></p>
-                                </label>
-                                <div class="col-sm-4">
-                                    <select multiple class="selectpicker select  form-control" id="gatewayLabelList" name="gatewayLabelList" onchange="appendLabels()">
-                                        <% var currentLabels = "";
+                            <b><%=i18n.localize(">Microgateways")%></b>
+                                <table class="table table-striped table-hover display data-table">
+                                    <thead>
+                                        <tr>
+                                            <th width="5%"><div class="label_checkbox"></div></th>
+                                            <th width="30%"><div class="environments_data"><%=i18n.localize("Label Name")%></div></th>
+                                            <th><div class="environments_data"><%=i18n.localize("Description")%></div></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <%  var currentLabels = "";
                                             for (var i in labels) {
                                                 var isLabelAttached = false;
                                                 if (attachedLabels != null) {
@@ -772,28 +774,40 @@
                                                         }
                                                     }
                                                 }%>
-                                                <option <% if(isLabelAttached) { %> selected="selected" <%}%> value="<%=encode.forHtml("" + (labels[i].name))%>"> <%=encode.forHtml("" + (labels[i].name) + " " + (labels[i].description))%> </option>
+                                                <tr data-type="selectable">
+                                                    <td>
+                                                        <div class="label_checkbox">
+                                                        <label class="checkbox">
+                                                            <input type="checkbox" value="<%=labels[i].name%>" <% if(isLabelAttached) { %> checked <%}%> name="microgateways" onchange="appendLabels()">
+                                                            <span class="helper"></span>
+                                                        </label>
+                                                        </div>
+                                                    </td>
+                                                    <td><%=encode.forHtml("" + (labels[i].name))%></td>
+                                                    <td><%=encode.forHtml("" + (labels[i].description))%></td>
+                                                </tr>
                                             <%}%>
-                                    </select>
-                                    <% if (currentLabels.length > 1) {
-                                        currentLabels = currentLabels.substring(0, currentLabels.length-1);
-                                    }%>
-                                    <input type="hidden" id="gatewayLabels" name="gatewayLabels" value="<%=encode.forHtml("" + currentLabels)%>"/>
+                                    </tbody>
+                                </table>
+                                <% if (currentLabels.length > 1) {
+                                    currentLabels = currentLabels.substring(0, currentLabels.length-1);
+                                }%>
+                                <input type="hidden" id="gatewayLabels" name="gatewayLabels" value="<%=encode.forHtml("" + currentLabels)%>"/>
                                     <script type="text/javascript">
-                                        function appendLabels() {
-                                            var selectedLabelSet = $("#gatewayLabelList").val();
-                                            $("#gatewayLabels").val(selectedLabelSet);
+                                    function appendLabels() {
+                                        var selectedLabelSet = '';
+                                        $('input[name="microgateways"]').each(function(){
+                                            if(this.checked){
+                                                selectedLabelSet = selectedLabelSet + this.value + ',';
+                                            }
+                                        });
+                                        if (selectedLabelSet.endsWith(',')){
+                                            selectedLabelSet = selectedLabelSet.slice(0, -1);
                                         }
-                                    </script>
-                                    <style>
-                                        span.glyphicon.glyphicon-ok::after {
-                                            content: "\2714";
-                                        }
-                                    </style>
-                                </div>
-                            </div>
-                            </div>
-                        <%}%><!-- Micro-gateway labels section -->
+                                        $("#gatewayLabels").val(selectedLabelSet);
+                                    }
+                                </script>
+                        <%}%><!-- Microgateway labels table -->
 
                         <script>
                         $('input').on('change', function() {
