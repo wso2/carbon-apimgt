@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import org.apache.commons.io.FilenameUtils;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 
 public class TenantManagerHostObject extends ScriptableObject {
@@ -124,6 +125,7 @@ public class TenantManagerHostObject extends ScriptableObject {
             while(ze!=null){
 
                 String fileName = ze.getName();
+                APIUtil.validateFileName(fileName);
                 File newFile = new File(outputFolder + File.separator + fileName);
                 String canonicalizedNewFilePath = newFile.getCanonicalPath();
                 String canonicalizedDestinationPath = new File(outputFolder).getCanonicalPath();
