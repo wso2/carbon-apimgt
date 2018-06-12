@@ -142,19 +142,25 @@
     </p>
         <% } %>
 
-    <!-- Start of Micro Gateway Labels Section -->
+    <!-- Start of Microgateway Labels Section -->
     <% if(api.labels != null){ %>
-        <h4 class="add-margin-top-5x"><%=i18n.localize("Micro Gateway Labels")%></h4>
+        <h4 class="add-margin-top-5x"><%=i18n.localize("Microgateways")%></h4>
         <% for (var label in api.labels ) { %>
             <div class="endpoint-copybtn well well-sm add-margin-bottom-1x">
-                <p><%= api.labels[label].labelName %></p>
-                <% if (api.labels[label].accessURLs != null && api.labels[label].accessURLs.length > 0){ %>
-                    <p>Access URLs : <%= api.labels[label].accessURLs %></p>
-                <% } %>
+                <p><b><%=i18n.localize("Label")%> : </b> <%=api.labels[label].labelName%></p>
+                <% if (api.labels[label].accessURLs != null && api.labels[label].accessURLs.length > 0){
+                        var urlArray = api.labels[label].accessURLs.split(',');
+                        if (urlArray != null && urlArray.length > 0){
+                            for(var i=0; i < urlArray.length; i++){ %>
+                                <%=urlArray[i]%><%=encode.forHtml(api.context)%>
+                                <br/>
+                            <%}
+                        }
+                }%>
             </div>
         <% } %>
     <% } %>
-    <!-- End of Micro Gateway Labels Section -->
+    <!-- End of Microgateway Labels Section -->
 
 	 <% if((api.bizOwner && api.bizOwner != "") || (api.techOwner && api.techOwner != "")){ %>
 	 		<h4 class="add-margin-top-5x"><%=i18n.localize("Business Information")%></h4>
