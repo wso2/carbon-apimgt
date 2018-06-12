@@ -319,6 +319,9 @@ GrantTypes.prototype.getMap = function(selected){
                     if (isHashEnabled == 'true') {
                         $('#generateModal').modal('show');
                     }
+                    if (this.app.tokenType == 'JWT') {
+                        $('#generateJWTModal').modal('show');
+                    }
                     this.toggle_regenerate_button();
                 } else {
                     jagg.message({content: result.message, type: "error"});
@@ -362,6 +365,9 @@ GrantTypes.prototype.getMap = function(selected){
                         }
                     }
                     this.render();
+                    if (this.app.tokenType == 'JWT') {
+                        $('#generateJWTModal').modal('show');
+                    }
                     this.element.find('input.access_token').animate({ opacity: 0.1 }, 500).animate({ opacity: 1 }, 500);
                 } else {
                     jagg.message({content:result.message,type:"error"});
@@ -384,6 +390,9 @@ GrantTypes.prototype.getMap = function(selected){
                     this.render();
                     if (isHashEnabled == 'true') {
                         $('#regenerateModal').modal('show');
+                    }
+                    if (this.app.tokenType == 'JWT') {
+                        $('#generateJWTModal').modal('show');
                     }
                 } else {
                     jagg.message({content:result.data, type:"error"});
@@ -422,7 +431,7 @@ GrantTypes.prototype.getMap = function(selected){
             this.app.username = this.options.username;
             this.app.password = this.options.password;
             this.app.provide_keys = this.options.provide_keys;
-
+            this.app.not_jwt = this.app.tokenType !== "JWT";
             this.element.html(template(this.app));
             this.element.find(".selectpicker").selectpicker({dropupAuto:false});
             this.element.find(".curl_command").codeHighlight();
