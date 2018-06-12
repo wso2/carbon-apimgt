@@ -11,6 +11,12 @@
     padding-top: 100px;
     padding-bottom: 100px;
 }
+.might-overflow {
+    width:500px;
+    text-overflow: ellipsis;
+    overflow : hidden;
+    white-space: nowrap;
+}
 
 input.ep-field{
     min-width: 50%;
