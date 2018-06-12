@@ -62,6 +62,9 @@ public class APIDetailedDTO extends APIInfoDTO {
   private String apiLevelPolicy = null;
   
   
+  private String authorizationHeader = null;
+  
+  
   private APIMaxTpsDTO maxTps = null;
   
   public enum VisibilityEnum {
@@ -255,6 +258,19 @@ public class APIDetailedDTO extends APIInfoDTO {
   }
   public void setApiLevelPolicy(String apiLevelPolicy) {
     this.apiLevelPolicy = apiLevelPolicy;
+  }
+
+  
+  /**
+   * Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified\nin tenant or system level will be used. \n
+   **/
+  @ApiModelProperty(value = "Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified\nin tenant or system level will be used. \n")
+  @JsonProperty("authorizationHeader")
+  public String getAuthorizationHeader() {
+    return authorizationHeader;
+  }
+  public void setAuthorizationHeader(String authorizationHeader) {
+    this.authorizationHeader = authorizationHeader;
   }
 
   
@@ -475,6 +491,7 @@ public class APIDetailedDTO extends APIInfoDTO {
     sb.append("  tags: ").append(tags).append("\n");
     sb.append("  tiers: ").append(tiers).append("\n");
     sb.append("  apiLevelPolicy: ").append(apiLevelPolicy).append("\n");
+    sb.append("  authorizationHeader: ").append(authorizationHeader).append("\n");
     sb.append("  maxTps: ").append(maxTps).append("\n");
     sb.append("  visibility: ").append(visibility).append("\n");
     sb.append("  visibleRoles: ").append(visibleRoles).append("\n");
