@@ -127,14 +127,14 @@
     </dependencies>
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.wso2.maven.plugins</groupId>
-                <artifactId>swagger2cxf-maven-plugin</artifactId>
-                <version>1.0-SNAPSHOT</version>
-                <configuration>
-                    <inputSpec>${project.basedir}/src/main/resources/publisher-api.yaml</inputSpec>
-                </configuration>
-            </plugin>
+            <!--<plugin>-->
+                <!--<groupId>org.wso2.maven.plugins</groupId>-->
+                <!--<artifactId>swagger2cxf-maven-plugin</artifactId>-->
+                <!--<version>1.0-SNAPSHOT</version>-->
+                <!--<configuration>-->
+                    <!--<inputSpec>${project.basedir}/src/main/resources/publisher-api.yaml</inputSpec>-->
+                <!--</configuration>-->
+            <!--</plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
