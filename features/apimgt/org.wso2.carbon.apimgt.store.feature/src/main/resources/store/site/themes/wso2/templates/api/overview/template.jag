@@ -152,7 +152,7 @@
                         var urlArray = api.labels[label].accessURLs.split(',');
                         if (urlArray != null && urlArray.length > 0){
                             for(var i=0; i < urlArray.length; i++){ %>
-                                <%=urlArray[i]%><%=encode.forHtml(api.context)%>
+                                <%=encode.forHtml(urlArray[i])%><%=encode.forHtml(api.context)%>
                                 <br/>
                             <%}
                         }
