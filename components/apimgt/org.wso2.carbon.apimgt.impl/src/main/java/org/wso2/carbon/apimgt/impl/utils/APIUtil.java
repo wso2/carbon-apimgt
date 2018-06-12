@@ -7385,4 +7385,15 @@ public final class APIUtil {
         }
         return null;
     }
+
+    /**
+     * Validate the input file name for invalid path elements
+     *
+     * @param fileName
+     */
+    public static void validateFileName(String fileName) throws APIManagementException {
+        if (fileName.contains("../") || fileName.contains("..\\")) {
+            handleException("File name contains invalid path elements. " + fileName);
+        }
+    }
 }
