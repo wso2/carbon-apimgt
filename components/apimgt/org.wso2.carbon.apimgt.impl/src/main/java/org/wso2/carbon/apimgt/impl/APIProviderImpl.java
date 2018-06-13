@@ -1795,8 +1795,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         if (!StringUtils.isBlank(authorizationHeader)) {
             corsProperties.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
-        } else {
-            corsProperties.put(APIConstants.AUTHORIZATION_HEADER, APIConstants.AUTHORIZATION_HEADER_DEFAULT);
         }
 
         if (api.getCorsConfiguration() != null && api.getCorsConfiguration().isCorsConfigurationEnabled()) {
