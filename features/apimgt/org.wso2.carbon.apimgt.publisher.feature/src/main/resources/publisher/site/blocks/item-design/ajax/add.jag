@@ -60,7 +60,8 @@ if(jagg.isCSRFTokenValid())
 	action = request.getParameter("action"),
     site = require("/site/conf/site.json"),
     msg = require("/site/conf/ui-messages.jag"),
-    parser = new SwaggerParser();
+    parser = new SwaggerParser(),
+    supportedHTTPMethods = ["get", "put", "post", "delete", "patch", "head", "options"];
 
     if(jagg.getUser() == null){
         print({
@@ -929,6 +930,23 @@ if(jagg.isCSRFTokenValid())
                 });
                 return;
             } else {
+                var swaggerJSON = JSON.parse(swagger);
+                if (swaggerJSON.paths) {
+                    var swaggerPaths = swaggerJSON.paths;
+                    for (var pathKey in swaggerPaths) {
+                        var path = swaggerPaths[pathKey];
+                        for(var httpMethod in path){
+                            if(supportedHTTPMethods.indexOf(httpMethod.toLowerCase()) === -1){
+                                print({
+                                    error: true,
+                                    message: "The HTTP method '" + httpMethod + "' provided for resource '" + pathKey + "' is invalid"
+
+                                });
+                                return;
+                            }
+                        }
+                    }
+                }
                 print({
                     error: false
                 })
