@@ -128,6 +128,18 @@ public interface APIProvider extends APIManager {
     Set<Subscriber> getSubscribersOfAPI(APIIdentifier identifier) throws APIManagementException;
 
     /**
+     * Returns full list of subscriptions of an API
+     *
+     * @param apiName    Name of the API
+     * @param apiVersion Version of the API
+     * @param provider Name of API creator
+     * @return Set<UserApplicationAPIUsage>
+     * @throws APIManagementException if failed to get Subscribers
+     */
+    List<SubscribedAPI> getSubscriptionsOfAPI(String apiName, String apiVersion, String provider)
+            throws APIManagementException;
+
+    /**
      * this method returns the Set<APISubscriptionCount> for given provider and api
      *
      * @param identifier APIIdentifier

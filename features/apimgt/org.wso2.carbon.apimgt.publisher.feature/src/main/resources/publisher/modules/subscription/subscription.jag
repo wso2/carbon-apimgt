@@ -122,4 +122,40 @@ var updateSubscription = function (api, appId,newStatus) {
         };
     }
 };
+
+var getSubscriptionsOfAPI = function (apiName, apiVersion, apiProvider) {
+    var i, length, subscription, subscriptions,
+            list = [],
+            log = new Log(),
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        subscriptions = provider.getSubscriptionsOfAPI(apiName, apiVersion, apiProvider);
+        if (log.isDebugEnabled()) {
+            log.debug("getSubscriptionsOfAPI : " + stringify(subscriptions));
+        }
+        length = subscriptions.length;
+        for (i = 0; i < length; i++) {
+            subscription = subscriptions[i];
+            list.push({
+                subscriber:subscription.subscriber,
+                application:subscription.application,
+                appId:subscription.appId,
+                subscriptionStatus:subscription.subscriptionStatus,
+                subscriptionCreatedStatus:subscription.subscriptionCreatedStatus,
+                subscribedDate:subscription.subscribedDate
+            });
+        }
+        return {
+            error:false,
+            subscriptions:list
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            subscriptions:null,
+            message:e.message.split(":")[1]
+        };
+    }
+};
 %>
