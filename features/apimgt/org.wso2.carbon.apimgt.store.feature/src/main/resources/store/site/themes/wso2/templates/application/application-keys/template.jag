@@ -34,6 +34,7 @@
     } else {
         consumerSecretBtnStyle = "display: none;";
     }
+
 %>
 
 <script>
@@ -127,6 +128,7 @@
 	        </div>        
 		  </div>
 		</div>
+		{{#if not_jwt }}
 		  <div class="form-group add-margin-top-5x" style="<%=style%>">
 		    <h4><%=i18n.localize("Generate a Test Access Token")%></h4>
 		    <label class="" for="<%=type%>ConsumerKey"><%=i18n.localize("Access Token")%></label>
@@ -139,14 +141,18 @@
 		      </div>
 		    </div>
 		  </div>
+		{{/if}}
+
 		  <p style="<%=style%>">
 		  {{#if Key}}
 			{{#ifCond Key ''}}
 				<%=i18n.localize("Enable Client-Credentials grant type to generate test access tokens.")%>
 			{{else}}
-				<%=i18n.localize("Above token has a validity period of")%> <strong>{{ ValidityTime }}</strong> <%=i18n.localize("seconds.")%>
-				{{#if KeyScope}}
-					<%=i18n.localize("And the token has")%> ( <strong>{{KeyScope}}</strong> ) <%=i18n.localize("scopes.")%>
+				{{#if not_jwt }}
+					<%=i18n.localize("Above token has a validity period of")%> <strong>{{ ValidityTime }}</strong> <%=i18n.localize("seconds.")%>
+					{{#if KeyScope}}
+						<%=i18n.localize("And the token has")%> ( <strong>{{KeyScope}}</strong> ) <%=i18n.localize("scopes.")%>
+					{{/if}}
 				{{/if}}
 			{{/ifCond}}
 		  {{else}}
@@ -349,6 +355,38 @@
       </div>
     </div>
 
+</script>
+<script id="jwt-modal" type="text/x-handlebars-template">
+	     <!-- Modal JWT generate keys-->
+    <div class="modal fade" id="generateJWTModal" role="dialog" aria-labelledby="generateJWTModal">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header" style="background-color:#e6e6e6;">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel"><b><%=i18n.localize("JWT Details Title")%></b></h4>
+          </div>
+          <div class="modal-body">
+            <div style="margin-top:5px;background-color: #f4f4f4; border-left: 6px solid #cccccc;height:60px;width:90%;">
+              <p style="margin: 10px;padding-top:10px;display:block;"><strong>Note : <font color="red"> <%=i18n.localize("Note3")%> </font></strong></p>
+            </div>
+            <div class="form-group add-margin-top-5x" style="<%=style%>">
+		    <label class="" for="<%=type%>ConsumerKey"><%=i18n.localize("JWT")%></label>
+		    <div class="input-group">
+		      <input type="{{# if show_keys }}text{{else}}password{{/if}}" title="<%=i18n.localize("JWT")%>" class="form-control access_token" id="<%=type%>Key" placeholder="<%=i18n.localize("Access Token")%>" value="{{Key}}">
+		      <div class="input-group-btn">
+		      	<button class="btn btn-default copy-button" data-clipboard-text="{{Key}}"  type="button" title="<%=i18n.localize("Copy")%>">
+                    <i class="fw fw-copy"></i>
+                </button>		      
+		      </div>
+		    </div>
+		  </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
 </script>
 
 <% }); %>

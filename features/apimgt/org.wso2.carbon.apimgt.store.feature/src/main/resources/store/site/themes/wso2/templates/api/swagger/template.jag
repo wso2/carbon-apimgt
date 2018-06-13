@@ -3,8 +3,16 @@
 var log = new Log();
 var site = require("/site/conf/site.json");
 var host = site.hostname;
+var jwt = "JWT";
+var subscriptions_without_jwt = [];
 
 var subscriptions = outputs.subscriptions;
+for (var i = 0; i < subscriptions.length; i++) {
+    if (!jwt.equals(subscriptions[i].tokenType)) {
+        subscriptions_without_jwt.push(subscriptions[i]);
+    }
+}
+subscriptions = subscriptions_without_jwt;
 var protocol = "http";
 
 function getLocation(href) {
