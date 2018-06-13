@@ -1,12 +1,12 @@
 # Bootstrap Rating
 
-Bootstrap Rating is a jQuery plugin that creates a rating control that uses Bootstrap [glyphicons](http://glyphicons.com/) for rating symbols.
+Bootstrap Rating is a jQuery plug-in that creates a rating control that uses Bootstrap [glyphicons](http://glyphicons.com/) for rating symbols.
 
 See [bootstrap rating](http://dreyescat.github.io/bootstrap-rating/) in action.
 
 ## Dependencies
 
-Bootstrap Rating depends on [jQuery](http://jquery.com/) and can use Bootstrap for the rating symbols. Actually, the glyphs in font format that Bootstrap provides. 
+Bootstrap Rating depends on [jQuery](http://jquery.com/) and can use Bootstrap for the rating symbols. Glyphs is a font format that Bootstrap provides. 
 
     <link href="dist/css/bootstrap.css" rel="stylesheet">
     <script type="text/javascript" src="dist/js/jquery-1.10.2.js"></script>
@@ -20,7 +20,7 @@ Any rating input, those with class *rating*, are implicitly initialized.
 
     <input type="hidden" class="rating"/>
 
-Also it can be explicitly initialized just calling *.rating()* on the desired input:
+In addition, it can be explicitly initialized by simply calling the *.rating()* on the desired input:
 
     $('input').rating();
 
@@ -28,7 +28,7 @@ Also it can be explicitly initialized just calling *.rating()* on the desired in
 
 Bootstrap Rating uses an input to keep the rating value. But the relationship between the *behind the scenes* input control and the rating control goes a little further. This input is the associated control. They are tied together.
 
-You can disable the rating control simply disabling its associated input control:
+You can disable the rating control by simply disabling its associated input control:
 
     <input type="hidden" class="rating" disabled="disabled"/>
 
@@ -40,7 +40,7 @@ Set its initial value:
 
     <input type="hidden" class="rating" value="2"/>
 
-Or attach events:
+Attach events:
 
     $('input').on('change', function () {
       alert('Rating: ' + $(this).val());
@@ -48,27 +48,27 @@ Or attach events:
 
 ## Customizing the rating symbols
 
-The default rating symbols can be replaced with another ones. Just add the desired glyphicon for the filled and empty states:
+The default rating symbols can be replaced if needed. Just add the desired glyphicon for the *filled* and *empty* states:
 
     <input type="hidden" class="rating" data-filled="glyphicon glyphicon-heart" data-empty="glyphicon glyphicon-heart-empty"/>
 
 Check the [available glyphs](http://getbootstrap.com/components/#glyphicons-glyphs).
 
-Again, you can explicitly initialize the plugin passing the glyphicons as parameters:
+Again, you can explicitly initialize the plug-in passing the glyphicons as parameters:
 
     $('input').rating({
       filled: 'glyphicon glyphicon-heart',
       empty: 'glyphicon glyphicon-heart-empty'
     });
 
-If you want to change the default glyphicons for all the rating controls, you only need to override the plugin default values:
+If you want to change the default glyphicons for all the rating controls, you only need to override the plug-in default values:
 
     $.fn.rating.defaults.filled = 'glyphicon glyphicon-heart';
     $.fn.rating.defaults.empty = 'glyphicon glyphicon-heart-empty';
 
-This needs only be called once, but remember to make these assignments before the rating controls are created.
+This needs to be only be called once, but remember to make these assignments before the rating controls are created.
 
-If you even want more control over the symbols appearance, you can customize the selected symbol filled state with the filled-selected attribute. This attribute takes precedence over the default filled state allowing you, for example, to fill only the selected one:
+If you want more control over the appearance of the symbols, you can customize the selected symbol filled state with the filled-selected attribute. This attribute takes precedence over the default filled state allowing you, for example, to fill only the selected one:
 
     <input type="hidden" class="rating" data-filled="glyphicon glyphicon-heart-empty" data-filled-selected="glyphicon glyphicon-heart" data-empty="glyphicon glyphicon-heart-empty"/>
 
@@ -82,7 +82,7 @@ Or programmatically:
 
 ### Using Non-Bootsrap icons
 
-Though the original idea was to use glyphicons provided by Bootstrap, any symbol can be used. It means that the rating control is not tightly tied to Bootstrap and you can use it without Bootstrap.
+Though the original idea was to use glyphicons provided by Bootstrap, any symbol can be used. This means that the rating control is not tightly tied to Bootstrap and you can use it without Bootstrap.
 
 #### Font Awesome icons
 
@@ -126,18 +126,18 @@ You can even create your own not font based icons, using raw CSS:
 
 The default range is (0..5], or in plain text, starting at 0 (not included) and stopping at 5 (included). In this case the range of whole symbols would include [1, 2, 3, 4, 5].
 
-It can be overriden by means of two data attributes, **data-start** for the start rate value and **data-stop** for the stop/end one. If you want to define a range (5..10]:
+It can be overridden by means of two data attributes, **data-start** for the start rate value and **data-stop** for the stop/end one. If you want to define a range (5..10]:
 
     <input type="hidden" class="rating" data-start="5" data-stop="10"/>
 
-Also you can explicitly initialize the plugin passing the start and stop values as parameters:
+In addition, you can explicitly initialize the plug-in by passing the start and stop values as parameters:
 
     $('input').rating({
       start: 5,
       stop: 10
     });
 
-If what you need is to change the default start and stop values for all the rating controls, just override the plugin defaults:
+If what you need is to change the default start and stop values for all the rating controls, just override the plug-in defaults:
 
     $.fn.rating.defaults.start = 5;
     $.fn.rating.defaults.stop = 10;
@@ -157,7 +157,7 @@ The possible values in this case would be all the whole and half rates between (
 
 The rating range spans all the integers from **start** to **stop**, incremented or decremented by a **step**. The default **step** is 1.
 
-Use **data-step** attribute to change the stepping:
+Use the **data-step** attribute to change the stepping:
 
     <input type="hidden" class="rating" data-stop="10" data-step="2"/>
 
@@ -170,11 +170,11 @@ Or the explicit initialization:
 
 The range of whole symbols defined in this case would include [2, 4, 6, 8, 10].
 
-Also, as usual, you can change the default **step** globally:
+In addition, as usual, you can change the default **step** globally:
 
     $.fn.rating.defaults.step = 2
 
-My Python background wouldn't forgive me not supporting negative stepping:
+My Python background wouldn't forgive me for not supporting negative stepping:
 
     <input type="hidden" class="rating" data-stop="-10" data-step="-2"/>
 
@@ -229,7 +229,7 @@ For example, you can use these events to dynamically update the bootstrap toolti
 
 ### rate
 
-You can programmatically set or get the current rating value via javascript using the `rate` method.
+You can programmatically set or get the current rating value via Java Script using the `rate` method.
 
 To set the rate value:
 
