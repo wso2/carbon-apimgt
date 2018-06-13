@@ -61,7 +61,7 @@
                 <!-- Customizable content -->
                 <div id="privacyPolicy" class="padding-double">
                     <h4><a href="https://wso2.com/api-management/"><strong>About WSO2 API Manager</strong></a></h4>
-                    <p>WSO2 API Manager is an open source enterprise-class solution that supports API publishing, lifecycle management, application development, access control, rate limiting, and analytics in one cleanly integrated system.</p>
+                    <p>WSO2 API Manager (referred hereafter as &ldquo;API-M &rdquo;) is an open source enterprise-class solution that supports API publishing, lifecycle management, application development, access control, rate limiting, and analytics in one cleanly integrated system.</p>
                     <div class="margin-bottom-double"></div>
                     <h2 id="privacy-policy"><strong>Privacy Policy</strong></h2>
                     <p>This section explains how API-M captures your personal information, purpose of capturing, and the retention of your personal information.</p>
