@@ -370,5 +370,5 @@
     "JWT Details Title" : "Generated JWT",
     "Note" : "Please make a note of this consumer secret and access token values as it will be displayed only once. If you lose the consumer secret, you can regenerate it.",
     "Note2" : "Please make a note of this regenerated consumer secret value as it will be displayed only once. If you are using old client secret in your application, update it with regenerated client secret.",
-    "Note3" : "Please make a note of this regenerated JWT value as it will be displayed only once."
+    "Note3" : "Please copy this generated JWT value as it will be displayed only once."
 }

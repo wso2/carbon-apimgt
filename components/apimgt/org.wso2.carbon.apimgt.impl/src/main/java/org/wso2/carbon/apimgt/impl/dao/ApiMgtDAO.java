@@ -1586,6 +1586,7 @@ public class ApiMgtDAO {
                 if (application == null) {
                     application = new Application(result.getString("APP_NAME"), subscriber);
                     application.setId(result.getInt("APP_ID"));
+                    application.setTokenType(result.getString("APP_TOKEN_TYPE"));
                     application.setCallbackUrl(result.getString("CALLBACK_URL"));
                     application.setUUID(result.getString("APP_UUID"));
 

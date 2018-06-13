@@ -10,11 +10,13 @@ for(var i=0;i < outputs.tiers.length; i++){
   }
 }
 %>
+
 <div class="page-header" id="Message">
     <h2 id="application_name"><%= encode.forHtml(application.name) %></h2>
 </div>
   <!-- Nav tabs -->
   <div class="white-wrapper">
+    <div id="jwt_modal_placeholder"></div>
     <ul class="nav nav-tabs" role="tablist">
       <li role="presentation" id="details-tab" class="active"><a title="<%=i18n.localize("Details")%>" href="#details" aria-controls="profile" role="tab" data-toggle="tab"><%=i18n.localize("Details")%></a></li>
       <% if(application.status == "APPROVED"){ %>

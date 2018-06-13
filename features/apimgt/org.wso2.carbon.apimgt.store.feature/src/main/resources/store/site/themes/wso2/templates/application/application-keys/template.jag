@@ -315,7 +315,7 @@
     </div>
 
     <!-- Modal generate keys-->
-    <div class="modal fade" id="generateModal tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal fade" id="generateModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header" style="background-color:#e6e6e6;">
@@ -355,8 +355,10 @@
       </div>
     </div>
 
-     <!-- Modal JWT generate keys-->
-    <div class="modal fade" id="generateJWTModal" tabindex="-1" role="dialog" aria-labelledby="generateJWTModal">
+</script>
+<script id="jwt-modal" type="text/x-handlebars-template">
+	     <!-- Modal JWT generate keys-->
+    <div class="modal fade" id="generateJWTModal" role="dialog" aria-labelledby="generateJWTModal">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header" style="background-color:#e6e6e6;">
@@ -385,7 +387,6 @@
         </div>
       </div>
     </div>
-
 </script>
 
 <% }); %>

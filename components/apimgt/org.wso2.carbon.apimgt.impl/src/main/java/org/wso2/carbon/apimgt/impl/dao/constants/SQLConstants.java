@@ -626,6 +626,7 @@ public class SQLConstants {
             "   SUBS.SUB_STATUS AS SUB_STATUS, " +
             "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
             "   APP.NAME AS APP_NAME, " +
+            "   APP.TOKEN_TYPE AS APP_TOKEN_TYPE, " +
             "   APP.CALLBACK_URL AS CALLBACK_URL, " +
             "   SUBS.UUID AS SUB_UUID, " +
             "   APP.UUID AS APP_UUID, " +
