@@ -542,6 +542,12 @@ public class ApiMgtDAO {
                     return false;
                 }
 
+                String tokenType = rs.getString("TOKEN_TYPE");
+                if (APIConstants.JWT.equals(tokenType)) {
+                    infoDTO.setAuthorized(false);
+                    return false;
+                }
+
                 String apiProvider = rs.getString("API_PROVIDER");
                 String subTier = rs.getString("TIER_ID");
                 String appTier = rs.getString("APPLICATION_TIER");
@@ -11006,6 +11012,12 @@ public class ApiMgtDAO {
                         !APIConstants.API_KEY_TYPE_SANDBOX.equals(type)) {
                     infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_BLOCKED);
                     infoDTO.setType(type);
+                    infoDTO.setAuthorized(false);
+                    return infoDTO;
+                }
+
+                String tokenType = rs.getString("TOKEN_TYPE");
+                if (APIConstants.JWT.equals(tokenType)) {
                     infoDTO.setAuthorized(false);
                     return infoDTO;
                 }

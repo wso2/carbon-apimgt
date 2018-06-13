@@ -275,6 +275,7 @@ public class SQLConstants {
             "   APP.APPLICATION_ID," +
             "   APP.NAME," +
             "   APP.APPLICATION_TIER," +
+            "   APP.TOKEN_TYPE," +
             "   AKM.KEY_TYPE," +
             "   API.API_NAME," +
             "   API.API_PROVIDER " +
@@ -300,6 +301,7 @@ public class SQLConstants {
             "   APP.APPLICATION_ID," +
             "   APP.NAME," +
             "   APP.APPLICATION_TIER," +
+            "   APP.TOKEN_TYPE," +
             "   AKM.KEY_TYPE," +
             "   API.API_NAME," +
             "   API.API_PROVIDER" +
@@ -326,6 +328,7 @@ public class SQLConstants {
                     "   APP.APPLICATION_ID," +
                     "   APP.NAME," +
                     "   APP.APPLICATION_TIER," +
+                    "   APP.TOKEN_TYPE," +
                     "   AKM.KEY_TYPE," +
                     "   API.API_NAME," +
                     "   API.API_TIER," +
@@ -359,6 +362,7 @@ public class SQLConstants {
                     "   APP.APPLICATION_ID," +
                     "   APP.NAME," +
                     "   APP.APPLICATION_TIER," +
+                    "   APP.TOKEN_TYPE," +
                     "   AKM.KEY_TYPE," +
                     "   API.API_NAME," +
                     "   API.API_TIER," +
