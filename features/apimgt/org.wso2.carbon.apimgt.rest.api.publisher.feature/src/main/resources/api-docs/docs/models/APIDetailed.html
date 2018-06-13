@@ -1,6 +1,6 @@
 <div class="main-content">
 
-        <h2>API</h2>
+        <h2>APIDetailed</h2>
             <table class="table table-hover">
                 <colgroup>
                     <col style="width: 10%;"/>
@@ -38,8 +38,8 @@
                         <td class="parameter">
                             <p>name</p>
                             <p class="param-required">
-                                required
                                 
+                                optional
                             </p>
                         </td>
                         <td class="parameter"><p class="marked">Name of the API</p></td>
@@ -68,8 +68,8 @@
                         <td class="parameter">
                             <p>context</p>
                             <p class="param-required">
-                                required
                                 
+                                optional
                             </p>
                         </td>
                         <td class="parameter"><p class="marked">A string that represents the context of the user&#39;s request</p></td>
@@ -83,8 +83,8 @@
                         <td class="parameter">
                             <p>version</p>
                             <p class="param-required">
-                                required
                                 
+                                optional
                             </p>
                         </td>
                         <td class="parameter"><p class="marked">The version of the API</p></td>
@@ -102,12 +102,42 @@
                                 optional
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked">If the provider value is not given user invoking the api will be used as the provider. </p></td>
+                        <td class="parameter"><p class="marked">If the provider value is not given, the user invoking the API will be used as the provider. </p></td>
                         <td class="parameter">
                                 <a href="#!/models#string">string</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
                         <td class="parameter"> <p class="marked">admin</p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <p>status</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked">This describes in which status of the lifecycle the API is</p></td>
+                        <td class="parameter">
+                                <a href="#!/models#string">string</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">CREATED</p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <p>thumbnailUri</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter">
+                                <a href="#!/models#string">string</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">/apis/01234567-0123-0123-0123-012345678901/thumbnail</p></td>
                     </tr>
                     <tr>
                         <td class="parameter">
@@ -138,21 +168,6 @@
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
                         <td class="parameter"> <p class="marked">http://www.webservicex.com/globalweather.asmx?wsdl</p></td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            <p>status</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td class="parameter"><p class="marked">This describes in which status of the lifecycle the API is</p></td>
-                        <td class="parameter">
-                                <a href="#!/models#string">string</a>
-                        </td>
-                        <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">CREATED</p></td>
                     </tr>
                     <tr>
                         <td class="parameter">
@@ -203,8 +218,8 @@
                         <td class="parameter">
                             <p>isDefaultVersion</p>
                             <p class="param-required">
-                                required
                                 
+                                optional
                             </p>
                         </td>
                         <td class="parameter"><p class="marked"></p></td>
@@ -218,8 +233,8 @@
                         <td class="parameter">
                             <p>type</p>
                             <p class="param-required">
-                                required
                                 
+                                optional
                             </p>
                         </td>
                         <td class="parameter"><p class="marked">The transport to be set. Accepted values are HTTP, WS</p></td>
@@ -233,8 +248,8 @@
                         <td class="parameter">
                             <p>transport</p>
                             <p class="param-required">
-                                required
                                 
+                                optional
                             </p>
                         </td>
                         <td class="parameter"><p class="marked">Supported transports for the API (http and/or https). </p></td>
@@ -263,8 +278,8 @@
                         <td class="parameter">
                             <p>tiers</p>
                             <p class="param-required">
-                                required
                                 
+                                optional
                             </p>
                         </td>
                         <td class="parameter"><p class="marked">The subscription tiers selected for the particular API</p></td>
@@ -291,6 +306,21 @@
                     </tr>
                     <tr>
                         <td class="parameter">
+                            <p>authorizationHeader</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked">Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified in tenant or system level will be used.  </p></td>
+                        <td class="parameter">
+                                <a href="#!/models#string">string</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked"></p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
                             <p>maxTps</p>
                             <p class="param-required">
                                 
@@ -299,32 +329,17 @@
                         </td>
                         <td class="parameter"><p class="marked"></p></td>
                         <td class="parameter">
-                                <a href="#!/models#API_maxTps">API_maxTps</a>
+                                <a href="#!/models#APIMaxTps">APIMaxTps</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
                         <td class="parameter"> <p class="marked"></p></td>
                     </tr>
                     <tr>
                         <td class="parameter">
-                            <p>thumbnailUri</p>
+                            <p>visibility</p>
                             <p class="param-required">
                                 
                                 optional
-                            </p>
-                        </td>
-                        <td class="parameter"><p class="marked"></p></td>
-                        <td class="parameter">
-                                <a href="#!/models#string">string</a>
-                        </td>
-                        <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">/apis/01234567-0123-0123-0123-012345678901/thumbnail</p></td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            <p>visibility</p>
-                            <p class="param-required">
-                                required
-                                
                             </p>
                         </td>
                         <td class="parameter"><p class="marked">The visibility level of the API. Accepts one of the following. PUBLIC, PRIVATE, RESTRICTED OR CONTROLLED.</p></td>
@@ -351,10 +366,25 @@
                     </tr>
                     <tr>
                         <td class="parameter">
+                            <p>visibleTenants</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter">
+                                <a href="#!/models#array">array</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked"></p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
                             <p>endpointConfig</p>
                             <p class="param-required">
-                                required
                                 
+                                optional
                             </p>
                         </td>
                         <td class="parameter"><p class="marked"></p></td>
@@ -374,7 +404,7 @@
                         </td>
                         <td class="parameter"><p class="marked"></p></td>
                         <td class="parameter">
-                                <a href="#!/models#API_endpointSecurity">API_endpointSecurity</a>
+                                <a href="#!/models#APIEndpointSecurity">APIEndpointSecurity</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
                         <td class="parameter"> <p class="marked"></p></td>
@@ -393,6 +423,21 @@
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
                         <td class="parameter"> <p class="marked">Production and Sandbox</p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <p>labels</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked">Labels of micro-gateway environments attached to the API. </p></td>
+                        <td class="parameter">
+                                <a href="#!/models#array">array</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked"></p></td>
                     </tr>
                     <tr>
                         <td class="parameter">
@@ -449,7 +494,7 @@
                         </td>
                         <td class="parameter"><p class="marked">Map of custom properties of API</p></td>
                         <td class="parameter">
-                                <a href="#!/models#object">object</a>
+                                <a href="#!/models#map">map</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
                         <td class="parameter"> <p class="marked"></p></td>
@@ -462,7 +507,7 @@
                                 optional
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked">Is the API is restricted to certain set of publishers or creators or is it visible to all the publishers and creators. If the accessControl restriction is none, this API can be modified by all the publishers and creators, if not it can only be viewable/modifiable by certain set of publishers and creators,  based on the restriction.        enum: - NONE - RESTRICTED </p></td>
+                        <td class="parameter"><p class="marked">Is the API is restricted to certain set of publishers or creators or is it visible to all the publishers and creators. If the accessControl restriction is none, this API can be modified by all the publishers and creators, if not it can only be viewable/modifiable by certain set of publishers and creators,  based on the restriction. </p></td>
                         <td class="parameter">
                                 <a href="#!/models#string">string</a>
                         </td>
@@ -494,7 +539,7 @@
                         </td>
                         <td class="parameter"><p class="marked"></p></td>
                         <td class="parameter">
-                                <a href="#!/models#API_businessInformation">API_businessInformation</a>
+                                <a href="#!/models#APIBusinessInformation">APIBusinessInformation</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
                         <td class="parameter"> <p class="marked"></p></td>
@@ -509,7 +554,7 @@
                         </td>
                         <td class="parameter"><p class="marked"></p></td>
                         <td class="parameter">
-                                <a href="#!/models#API_corsConfiguration">API_corsConfiguration</a>
+                                <a href="#!/models#APICorsConfiguration">APICorsConfiguration</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
                         <td class="parameter"> <p class="marked"></p></td>
