@@ -128,7 +128,7 @@
               <li <%if (reqUrl.match("label-list")){%> class="active" <% } %>><a
                 href="<%= jagg.url("/label-list") %>"
                 onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-                <i class="fw fw-edit"></i><%= i18n.localize("Microgateway Labels")%></a>
+                <i class="fw fw-edit"></i><%= i18n.localize("Labels")%></a>
               </li>
             </ul>
         </li>

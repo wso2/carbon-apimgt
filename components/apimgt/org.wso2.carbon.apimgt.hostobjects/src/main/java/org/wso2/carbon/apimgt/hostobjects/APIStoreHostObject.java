@@ -39,6 +39,7 @@ import org.mozilla.javascript.NativeArray;
 import org.mozilla.javascript.NativeObject;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
+import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ApplicationNotFoundException;
@@ -667,6 +668,8 @@ public class APIStoreHostObject extends ScriptableObject {
                 row.put("error", row, false);
                 row.put("hasPublisherAccess", row, loginUserHasPublisherAccess);
             } else {
+                CarbonConstants.AUDIT_LOG.info('\'' + usernameWithDomain + APIConstants.EMAIL_DOMAIN_SEPARATOR
+                        + tenantDomain + " [" + tenantId + "]' login denied due to insufficient privileges");
                 handleException("Login failed. Insufficient Privileges.");
             }
         } catch (Exception e) {

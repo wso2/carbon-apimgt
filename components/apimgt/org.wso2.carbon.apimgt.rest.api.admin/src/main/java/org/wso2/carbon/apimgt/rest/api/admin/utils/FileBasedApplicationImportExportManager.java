@@ -152,7 +152,7 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
     private String extractUploadedArchiveApplication(InputStream uploadedAppArchiveInputStream,
                                                      String importedDirectoryName,
                                                      String appArchiveLocation, String extractLocation)
-            throws IOException {
+            throws IOException, APIManagementException {
         String archiveExtractLocation;
         String archiveName;
         String extractedFilePath;
@@ -353,7 +353,7 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
      * @throws IOException if an error occurs while extracting the archive
      */
     private String extractArchive(String archiveFilePath, String destination)
-            throws IOException {
+            throws IOException, APIManagementException {
         String archiveName = null;
 
         try (ZipFile zip = new ZipFile(new File(archiveFilePath))) {
@@ -371,6 +371,15 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
                 }
                 File destinationFile = new File(destination, currentEntry);
                 File destinationParent = destinationFile.getParentFile();
+                String canonicalizedDestinationFilePath = destinationFile.getCanonicalPath();
+                String canonicalizedDestinationFolderPath = new File(destination).getCanonicalPath();
+                if (!canonicalizedDestinationFilePath.startsWith(canonicalizedDestinationFolderPath)) {
+                    String errorMessage ="Attempt to upload invalid zip archive with file at " + currentEntry +
+                            ". File path is outside target directory.";
+                    log.error(errorMessage);
+                    throw new APIManagementException(errorMessage);
+                }
+
                 // create the parent directory structure
                 if (destinationParent.mkdirs()) {
                     log.debug("Creation of folder is successful. Directory Name : " + destinationParent.getName());

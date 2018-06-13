@@ -2905,7 +2905,8 @@
                 "transport",
                 "endpointConfig",
                 "visibility",
-                "type"
+                "type",
+                "apiDefinition"
             ],
             "allOf": [
                 {
@@ -2985,6 +2986,10 @@
                             "description": "The policy selected for the particular API",
                             "type": "string",
                             "example": "Unlimited"
+                        },
+                        "authorizationHeader": {
+                            "type": "string",
+                            "description": "Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified\nin tenant or system level will be used. \n"
                         },
                         "maxTps": {
                             "$ref": "#/definitions/APIMaxTps"

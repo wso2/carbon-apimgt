@@ -34,7 +34,8 @@ public class ApplicationInfoDTO  {
   
   
   private String groupId = null;
-
+  
+  
   private Object attributes = null;
 
   private String lastUpdatedTime = null;
@@ -148,7 +149,7 @@ public class ApplicationInfoDTO  {
     this.groupId = groupId;
   }
 
-
+  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -159,6 +160,7 @@ public class ApplicationInfoDTO  {
   public void setAttributes(Object attributes) {
     this.attributes = attributes;
   }
+
   
 
   @Override
