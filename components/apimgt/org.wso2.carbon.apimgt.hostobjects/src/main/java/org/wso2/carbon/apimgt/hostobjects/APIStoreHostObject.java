@@ -2638,6 +2638,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     NativeObject row = new NativeObject();
                     row.put("application", row, api.getApplication().getName());
                     row.put("applicationId", row, api.getApplication().getId());
+                    row.put("tokenType", row, api.getApplication().getTokenType());
                     if (APIUtil.isMultiGroupAppSharingEnabled()) {
                         row.put("owner", row, api.getApplication().getOwner());
                     }

@@ -447,6 +447,7 @@ public final class APIUtil {
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
             api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
+            api.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
 
         } catch (GovernanceException e) {
             String msg = "Failed to get API for artifact ";
@@ -800,6 +801,7 @@ public final class APIUtil {
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
             api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
+            api.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
         } catch (GovernanceException e) {
             String msg = "Failed to get API from artifact ";
             throw new APIManagementException(msg, e);
@@ -1404,7 +1406,7 @@ public final class APIUtil {
         return artifactManager;
     }
 
-    private static void handleException(String msg) throws APIManagementException {
+    public static void handleException(String msg) throws APIManagementException {
         log.error(msg);
         throw new APIManagementException(msg);
     }
@@ -7150,6 +7152,26 @@ public final class APIUtil {
     }
 
     /**
+     * This method is used to get the authorization configurations from the tenant registry or from api-manager.xml if 
+     * config is not available in tenant registry
+     *
+     * @param tenantId The Tenant ID
+     * @param property The configuration to get from tenant registry or api-manager.xml
+     * @return The configuration read from tenant registry or api-manager.xml
+     * @throws APIManagementException Throws if the registry resource doesn't exist
+     *                                or the content cannot be parsed to JSON
+     */
+    public static String getOAuthConfiguration(int tenantId, String property)
+            throws APIManagementException {
+        String authConfigValue = APIUtil
+                .getOAuthConfigurationFromTenantRegistry(tenantId, property);
+        if (StringUtils.isBlank(authConfigValue)) {
+            authConfigValue = APIUtil.getOAuthConfigurationFromAPIMConfig(property);
+        }
+        return authConfigValue;
+    }
+    
+    /**
      * This method is used to get the authorization configurations from the tenant registry
      *
      * @param tenantId The Tenant ID
@@ -7361,27 +7383,39 @@ public final class APIUtil {
      * @throws APIManagementException Throws if the registry resource doesn't exist
      * or the content cannot be parsed to JSON
      */
-    public static JSONObject getAppAttributeKeysFromRegistry(int tenantId) throws APIManagementException {        try {
-        Registry registryConfig = ServiceReferenceHolder.getInstance().getRegistryService().getConfigSystemRegistry(tenantId);
-        if (registryConfig.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
-            Resource resource = registryConfig.get(APIConstants.API_TENANT_CONF_LOCATION);
-            String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
-            if (content != null) {
-                JSONObject tenantConfigs = (JSONObject) new JSONParser().parse(content);
-                String property = APIConstants.ApplicationAttributes.APPLICATION_CONFIGURATIONS;
-                if (tenantConfigs.keySet().contains(property)) {
-                    return (JSONObject) tenantConfigs.get(APIConstants.ApplicationAttributes.APPLICATION_CONFIGURATIONS);
+    public static JSONObject getAppAttributeKeysFromRegistry(int tenantId) throws APIManagementException {
+
+        try {
+            Registry registryConfig = ServiceReferenceHolder.getInstance().getRegistryService().getConfigSystemRegistry(tenantId);
+            if (registryConfig.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
+                Resource resource = registryConfig.get(APIConstants.API_TENANT_CONF_LOCATION);
+                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
+                if (content != null) {
+                    JSONObject tenantConfigs = (JSONObject) new JSONParser().parse(content);
+                    String property = APIConstants.ApplicationAttributes.APPLICATION_CONFIGURATIONS;
+                    if (tenantConfigs.keySet().contains(property)) {
+                        return (JSONObject) tenantConfigs.get(APIConstants.ApplicationAttributes.APPLICATION_CONFIGURATIONS);
+                    }
                 }
             }
+        } catch (RegistryException exception) {
+            String msg = "Error while retrieving application attributes from tenant registry.";
+            throw new APIManagementException(msg, exception);
+        } catch (ParseException parseExceptione) {
+            String msg = "Couldn't create json object from Swagger object for custom application attributes.";
+            throw new APIManagementException(msg, parseExceptione);
         }
-
-    } catch (RegistryException exception) {
-        String msg = "Error while retrieving application attributes from tenant registry.";
-        throw new APIManagementException(msg, exception);
-    } catch (ParseException parseExceptione) {
-        String msg = "Couldn't create json object from Swagger object for custom application attributes.";
-        throw new APIManagementException(msg, parseExceptione);
-    }
         return null;
+    }
+
+    /**
+     * Validate the input file name for invalid path elements
+     *
+     * @param fileName
+     */
+    public static void validateFileName(String fileName) throws APIManagementException {
+        if (!fileName.isEmpty() && (fileName.contains("../") || fileName.contains("..\\"))) {
+            handleException("File name contains invalid path elements. " + fileName);
+        }
     }
 }

@@ -128,7 +128,7 @@
             <div class="form-group">
             <% if (applicationAttributes[i].Attribute) { %>
                 <label class="col-md-3 col-lg-3 control-label" for="attribute_<%= i%>">
-                <%=encode.forHtml(i18n.localize(applicationAttributes[i].Attribute,applicationAttributes[i].Attribute))%>:
+                <%=encode.forHtml(i18n.localize(applicationAttributes[i].Attribute,applicationAttributes[i].Attribute))%>
 
                 <% if ( Boolean(applicationAttributes[i].required ) || applicationAttributes[i].Required ) { %>
                 <span class="requiredAstrix">*</span>
@@ -162,7 +162,7 @@
     <label for="tokenType" class="col-md-3 col-lg-3 control-label"><%= i18n.localize("Token Type")%></label>
     <div class="col-md-9 col-lg-9">
         <select id="tokenType" name="tokenType">
-          <option title="DEFAULT">DEFAULT</option>
+          <option title="Default">DEFAULT</option>
           <option title="JWT">JWT</option>
         </select>
     </div>

@@ -2117,6 +2117,11 @@ definitions:
             Supported transports for the API (http and/or https).
           type: string
         example: ["http","https"]
+      authorizationHeader:
+        type: string
+        description: |
+          Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified
+          in tenant or system level will be used. 
       tags:
         type: array
         description: Search keywords related to the API
@@ -2268,7 +2273,7 @@ definitions:
         example: []
       attributes:
         type: object
-        example: {}
+        example: External Reference ID, Billing Tier
 
 #-----------------------------------------------------
 # The Application Info resource
@@ -2299,7 +2304,7 @@ definitions:
         example: ""
       attributes:
         type: object
-        example: {}
+        example: External Reference ID, Billing Tier
 
 #-----------------------------------------------------
 # The Document List resource

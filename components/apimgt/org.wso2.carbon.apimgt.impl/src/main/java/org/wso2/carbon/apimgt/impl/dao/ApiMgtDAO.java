@@ -536,6 +536,12 @@ public class ApiMgtDAO {
                     return false;
                 }
 
+                String tokenType = rs.getString("TOKEN_TYPE");
+                if (APIConstants.JWT.equals(tokenType)) {
+                    infoDTO.setAuthorized(false);
+                    return false;
+                }
+
                 String apiProvider = rs.getString("API_PROVIDER");
                 String subTier = rs.getString("TIER_ID");
                 String appTier = rs.getString("APPLICATION_TIER");
@@ -1580,6 +1586,7 @@ public class ApiMgtDAO {
                 if (application == null) {
                     application = new Application(result.getString("APP_NAME"), subscriber);
                     application.setId(result.getInt("APP_ID"));
+                    application.setTokenType(result.getString("APP_TOKEN_TYPE"));
                     application.setCallbackUrl(result.getString("CALLBACK_URL"));
                     application.setUUID(result.getString("APP_UUID"));
 
@@ -10306,7 +10313,7 @@ public class ApiMgtDAO {
         policy.setDescription(resultSet.getString(ThrottlePolicyConstants.COLUMN_DESCRIPTION));
         policy.setDisplayName(resultSet.getString(ThrottlePolicyConstants.COLUMN_DISPLAY_NAME));
         policy.setPolicyId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
-        policy.setTenantId(resultSet.getShort(ThrottlePolicyConstants.COLUMN_TENANT_ID));
+        policy.setTenantId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_TENANT_ID));
         policy.setTenantDomain(IdentityTenantUtil.getTenantDomain(policy.getTenantId()));
         policy.setDefaultQuotaPolicy(quotaPolicy);
         policy.setDeployed(resultSet.getBoolean(ThrottlePolicyConstants.COLUMN_DEPLOYED));
@@ -11046,6 +11053,12 @@ public class ApiMgtDAO {
                         !APIConstants.API_KEY_TYPE_SANDBOX.equals(type)) {
                     infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_BLOCKED);
                     infoDTO.setType(type);
+                    infoDTO.setAuthorized(false);
+                    return infoDTO;
+                }
+
+                String tokenType = rs.getString("TOKEN_TYPE");
+                if (APIConstants.JWT.equals(tokenType)) {
                     infoDTO.setAuthorized(false);
                     return infoDTO;
                 }
