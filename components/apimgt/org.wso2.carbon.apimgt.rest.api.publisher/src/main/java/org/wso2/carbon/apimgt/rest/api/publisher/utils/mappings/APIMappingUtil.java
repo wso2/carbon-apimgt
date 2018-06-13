@@ -672,7 +672,7 @@ public class APIMappingUtil {
             APIEndpointSecurityDTO securityDTO = new APIEndpointSecurityDTO();
             securityDTO.setType(APIEndpointSecurityDTO.TypeEnum.basic); //set default as basic
             securityDTO.setUsername(api.getEndpointUTUsername());
-            securityDTO.setPassword(api.getEndpointUTPassword());
+            securityDTO.setPassword(""); // Do not expose password
             if (api.isEndpointAuthDigest()) {
                 securityDTO.setType(APIEndpointSecurityDTO.TypeEnum.digest);
             }
