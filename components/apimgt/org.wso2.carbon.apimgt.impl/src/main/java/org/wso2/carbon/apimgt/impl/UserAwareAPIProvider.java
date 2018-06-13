@@ -275,6 +275,12 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
+    public void updateSubscription(APIIdentifier apiId, String subStatus, int appId) throws APIManagementException {
+        checkPublishPermission();
+        apiMgtDAO.updateSubscription(apiId, subStatus, appId);
+    }
+
+    @Override
     public SubscribedAPI getSubscriptionByUUID(String uuid) throws APIManagementException {
         checkCreatePermission();
         return super.getSubscriptionByUUID(uuid);

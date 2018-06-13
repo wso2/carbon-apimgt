@@ -14,7 +14,7 @@ var updateSubscription = function (apiName, version, provider, appId, newstatus,
     } else {
         newStatus = 'BLOCKED';
     }
-    jagg.post("/site/blocks/users-keys/ajax/subscriptions.jag", {
+    jagg.post("/site/blocks/users-api/ajax/subscriptions.jag", {
         action:"updateSubscription",
         apiName:apiName,
         version:version,
@@ -54,9 +54,7 @@ var getRadioValue = function (radioButton) {
     }
 };
 
-
 $(function(){
-
     /***********************************************************
      *  data-tables config
      ***********************************************************/
@@ -68,11 +66,10 @@ $(function(){
 	       else $('#manage-subscriptions_paginate').show();
 	     } ,
          "aoColumns": [
-         { "bSortable": false },
+         { "bSortable": true },
          null,
-         null,
-         { "bSortable": false },
-         { "bSortable": false }
+         { "bSortable": true },
+         { "bSortable": true }
          ]
 	});
 

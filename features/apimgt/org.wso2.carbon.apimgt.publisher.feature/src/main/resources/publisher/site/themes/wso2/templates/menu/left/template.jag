@@ -36,7 +36,7 @@
     	}
 	
     var  mod,isPermitted, isManageTierPermitted;
-    isPermitted=jagg.getCreatePermitted().permitted;
+    isPermitted = (jagg.getCreatePermitted().permitted || jagg.getPublishPermitted().permitted);
     isManageTierPermitted = jagg.getManageTierPermitted().permitted;
 
     //Deside the show  hide options for each sub section base on the page
@@ -178,13 +178,6 @@
             </li>
 		</ul>
 </li>
-
-					<%if(isPermitted){%>
-					<li <%if(reqUrl.equals(subsMappedUrl) || reqUrl.equals(subsUrl)){ %>class="active"<%} %>><a class="js_toggler" title="<%=i18n.localize("Manage Subscriptions")%>"
-						href="<%=subsMappedUrl%><%=urlPrefix%>"
-						onclick="jagg.sessionAwareJS({redirect:'<%=subsMappedUrl%><%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><i class="fw fw-settings fw-2x" title="<%=i18n.localize("Manage Subscriptions")%>" style="font-size:22px;"></i> <%=i18n.localize("Manage Subscriptions")%></a></li>
-					
-					<%}%>
 					<%
 						var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
 						var isAnalyticsEnabled = APIUtil.isAnalyticsEnabled();

@@ -1118,6 +1118,36 @@ public class SQLConstants {
             " ORDER BY " +
             "   APP.NAME";
 
+    public static final String GET_SUBSCRIPTIONS_OF_API_SQL =
+            " SELECT " +
+                    "   SUBS.SUBSCRIPTION_ID AS SUBSCRIPTION_ID, " +
+                    "   SUBS.APPLICATION_ID AS APPLICATION_ID, " +
+                    "   SUBS.SUB_STATUS AS SUB_STATUS, " +
+                    "   SUBS.TIER_ID AS TIER_ID, " +
+                    "   API.API_PROVIDER AS API_PROVIDER, " +
+                    "   SUB.USER_ID AS USER_ID, " +
+                    "   APP.NAME AS APPNAME, " +
+                    "   SUBS.UUID AS SUB_UUID, " +
+                    "   SUBS.CREATED_TIME AS SUB_CREATED_TIME, " +
+                    "   SUBS.TIER_ID AS SUB_TIER_ID, " +
+                    "   APP.UUID AS APP_UUID, " +
+                    "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE " +
+                    " FROM " +
+                    "   AM_SUBSCRIPTION SUBS, " +
+                    "   AM_APPLICATION APP, " +
+                    "   AM_SUBSCRIBER SUB, " +
+                    "   AM_API API " +
+                    " WHERE " +
+                    "   SUBS.APPLICATION_ID = APP.APPLICATION_ID " +
+                    "   AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID " +
+                    "   AND API.API_NAME = ? " +
+                    "   AND API.API_VERSION = ? " +
+                    "   AND API.API_PROVIDER = ? " +
+                    "   AND API.API_ID = SUBS.API_ID " +
+                    "   AND SUBS.SUB_STATUS != '" + APIConstants.SubscriptionStatus.REJECTED + "'" +
+                    " ORDER BY " +
+                    "   APP.NAME";
+
     public static final String GET_SUBSCRIBER_BY_ID_SQL =
             " SELECT" +
             "   SB.USER_ID, " +

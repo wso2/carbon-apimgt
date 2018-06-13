@@ -194,4 +194,32 @@ input.ep-field{
     color: white;
     background-color: #888888;
 }
+
+.subs-block-unblock-link {
+    display: inline-block;
+    padding-left: 10px;
+}
+.subs-block-unblock {
+    display: flex;
+}
+
+@font-face {
+    font-family: 'Glyphicons Halflings';
+  
+    src: url('../libs/bootstrap_3.3.5/fonts/glyphicons-halflings-regular.eot');
+    src: url('../libs/bootstrap_3.3.5/fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('../libs/bootstrap_3.3.5/fonts/glyphicons-halflings-regular.woff2') format('woff2'), url('../libs/bootstrap_3.3.5/fonts/glyphicons-halflings-regular.woff') format('woff'), url('../libs/bootstrap_3.3.5/fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('../libs/bootstrap_3.3.5/fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');
+  }
+  .glyphicon {
+    position: relative;
+    top: 1px;
+    display: inline-block;
+    font-family: 'Glyphicons Halflings';
+    font-style: normal;
+    font-weight: normal;
+    line-height: 1;
+  
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
 /*---------------------------------------*/

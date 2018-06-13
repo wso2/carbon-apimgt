@@ -76,6 +76,7 @@ import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -2362,7 +2363,7 @@ public class APIProviderHostObject extends ScriptableObject {
             return true;
 
         } catch (APIManagementException e) {
-            handleException("Error while updating subscription status", e);
+            handleException("Error while updating subscription status: " + e.getMessage(), e);
             return false;
         }
 
@@ -3626,6 +3627,47 @@ public class APIProviderHostObject extends ScriptableObject {
 
         } catch (APIManagementException e) {
             handleException("Error occurred while getting subscribers of the API- " + apiName +
+                    "-" + version, e);
+        }
+        return myn;
+    }
+
+    public static NativeArray jsFunction_getSubscriptionsOfAPI(Context cx, Scriptable thisObj,
+                                                             Object[] args, Function funObj)
+            throws APIManagementException {
+        String apiName;
+        String version;
+        String provider;
+        NativeArray myn = new NativeArray(0);
+        if (args == null || !isStringValues(args)) {
+            handleException("Invalid number of parameters or their types.");
+        }
+
+        apiName = (String) args[0];
+        version = (String) args[1];
+        provider = (String) args[2];
+
+        List<SubscribedAPI> subscriptions;
+        APIProvider apiProvider = getAPIProvider(thisObj);
+        try {
+            subscriptions = apiProvider.getSubscriptionsOfAPI(apiName, version, provider);
+            Iterator it = subscriptions.iterator();
+            int i = 0;
+            while (it.hasNext()) {
+                NativeObject row = new NativeObject();
+                Object subscriptionObject = it.next();
+                SubscribedAPI subscription = (SubscribedAPI) subscriptionObject;
+                row.put("subscriber", row, subscription.getSubscriber().getName());
+                row.put("application", row, subscription.getApplication().getName());
+                row.put("appId", row, subscription.getApplication().getId());
+                row.put("subscriptionStatus", row, subscription.getSubStatus());
+                row.put("subscriptionCreatedStatus", row, subscription.getSubCreatedStatus());
+                row.put("subscribedDate", row, subscription.getCreatedTime());
+                myn.put(i, myn, row);
+                i++;
+            }
+        } catch (APIManagementException e) {
+            handleException("Error occurred while getting subscriptions of the API- " + apiName +
                     "-" + version, e);
         }
         return myn;
