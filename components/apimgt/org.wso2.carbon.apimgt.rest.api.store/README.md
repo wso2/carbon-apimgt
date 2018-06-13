@@ -1,8 +1,8 @@
 ## API Manager REST API Development
 
 This guide explains the procedure of adding a new resource to API Manager CXF based REST APIs.
-The procedure follows a top-down approach. We first define our API changes in the particular APIs swagger definition.
-The changes are then applied to the CXF service java classes using code generation.
+The procedure follows a top-down approach. We first define our API changes in the particular APIs Swagger definition.
+The changes are then applied to the CXF service Java classes using code generation.
 
 The example described here is specific to Store REST API. It describes step by step procedure to add a new resource
 called /sample.
@@ -100,7 +100,7 @@ Add this resource:
 
 ```
 
-4. Validate the complete yaml using  [online swagger editor](http://editor.swagger.io/#/)
+4. Validate the complete YAML using an [online Swagger editor](http://editor.swagger.io/#/)
 
 ##### Generating the code
 
@@ -117,7 +117,7 @@ Classes generated under src/main/java/impl are only one-time generated. We shoul
 
 8. Revert the changes of beans.xml
 
-9. Compare the <jaxrs:serviceBeans> … </jaxrs:serviceBeans> element of changed and original beans.xml
+9. Compare the <jaxrs:serviceBeans> … </jaxrs:serviceBeans> element of the changed and original beans.xml
 
 After code generation:
 ```
@@ -208,11 +208,11 @@ beans.xml
 </beans>
 ```
 
-11. Convert store.yaml to json format using  [http://editor.swagger.io/#/](http://editor.swagger.io/#/)
+11. Convert store.yaml to JSON format using [http://editor.swagger.io/#/](http://editor.swagger.io/#/)
 
 12. Overwrite the downloaded store-api.json with components/apimgt/org.wso2.carbon.apimgt.rest.api
 .util/src/main/resources/store-api.json
-- **Note:** This is required to OAuth2 scopes validation related functionality to work. (See OAuthAuthenticationInterceptor class)
+- **Note:** This is required for the OAuth2 scopes validation related functionality to work. (See OAuthAuthenticationInterceptor class)
 
 13. Build org.wso2.carbon.apimgt.rest.api.util component
 
