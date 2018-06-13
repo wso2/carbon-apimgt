@@ -89,7 +89,7 @@ GrantTypes.prototype.getMap = function(selected){
     var jwt_source = $('#jwt-modal').html();
     var jwt_template;    
 
-    if(jwt_source != undefined && jwt_source !="" ){
+    if (jwt_source != undefined && jwt_source !="" ) {
         jwt_template = Handlebars.compile(jwt_source);
     }  
 
