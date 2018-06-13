@@ -12,7 +12,7 @@
             <tr>
                 <th class=""><%= i18n.localize("Name")%></th>
                 <th class=""><%= i18n.localize("Description")%></th>
-                <th class=""><%= i18n.localize("Host")%></th>
+                <th class=""><%= i18n.localize("Gateway Host")%></th>
                 <th class=""></th>
             </tr>
         </thead>
