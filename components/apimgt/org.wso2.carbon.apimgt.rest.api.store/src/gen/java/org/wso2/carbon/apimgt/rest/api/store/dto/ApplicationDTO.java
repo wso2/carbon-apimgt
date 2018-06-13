@@ -43,8 +43,8 @@ public class ApplicationDTO  {
   
   
   private List<ApplicationKeyDTO> keys = new ArrayList<ApplicationKeyDTO>();
-
-
+  
+  
   private Object attributes = null;
 
   private String lastUpdatedTime = null;
@@ -183,7 +183,7 @@ public class ApplicationDTO  {
     this.keys = keys;
   }
 
-
+  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -194,6 +194,8 @@ public class ApplicationDTO  {
   public void setAttributes(Object attributes) {
     this.attributes = attributes;
   }
+
+  
 
   @Override
   public String toString()  {

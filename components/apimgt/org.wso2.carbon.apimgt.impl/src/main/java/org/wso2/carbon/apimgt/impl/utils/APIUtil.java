@@ -447,6 +447,7 @@ public final class APIUtil {
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
             api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
+            api.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
 
         } catch (GovernanceException e) {
             String msg = "Failed to get API for artifact ";
@@ -800,6 +801,7 @@ public final class APIUtil {
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
             api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
+            api.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
         } catch (GovernanceException e) {
             String msg = "Failed to get API from artifact ";
             throw new APIManagementException(msg, e);
@@ -7149,6 +7151,26 @@ public final class APIUtil {
         return api;
     }
 
+    /**
+     * This method is used to get the authorization configurations from the tenant registry or from api-manager.xml if 
+     * config is not available in tenant registry
+     *
+     * @param tenantId The Tenant ID
+     * @param property The configuration to get from tenant registry or api-manager.xml
+     * @return The configuration read from tenant registry or api-manager.xml
+     * @throws APIManagementException Throws if the registry resource doesn't exist
+     *                                or the content cannot be parsed to JSON
+     */
+    public static String getOAuthConfiguration(int tenantId, String property)
+            throws APIManagementException {
+        String authConfigValue = APIUtil
+                .getOAuthConfigurationFromTenantRegistry(tenantId, property);
+        if (StringUtils.isBlank(authConfigValue)) {
+            authConfigValue = APIUtil.getOAuthConfigurationFromAPIMConfig(property);
+        }
+        return authConfigValue;
+    }
+    
     /**
      * This method is used to get the authorization configurations from the tenant registry
      *

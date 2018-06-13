@@ -149,7 +149,7 @@ public class APIMappingUtil {
             }
             dto.setLabels(labels);
         }
-
+        dto.setAuthorizationHeader(model.getAuthorizationHeader());
         return dto;
     }
 
