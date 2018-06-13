@@ -1788,12 +1788,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (!StringUtils.isBlank(api.getAuthorizationHeader())) {
             authorizationHeader = api.getAuthorizationHeader();
         } else {
-            authorizationHeader = APIUtil.getOAuthConfigurationFromTenantRegistry
-                    (tenantId, APIConstants.AUTHORIZATION_HEADER);
+            //Retrieves the auth configuration from tenant registry or api-manager.xml if not available 
+            // in tenant registry
+            authorizationHeader = APIUtil.getOAuthConfiguration(tenantId, APIConstants.AUTHORIZATION_HEADER);
         }
 
         if (!StringUtils.isBlank(authorizationHeader)) {
             corsProperties.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
+        } else {
+            corsProperties.put(APIConstants.AUTHORIZATION_HEADER, APIConstants.AUTHORIZATION_HEADER_DEFAULT);
         }
 
         if (api.getCorsConfiguration() != null && api.getCorsConfiguration().isCorsConfigurationEnabled()) {
@@ -1845,17 +1848,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 authProperties.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
             }
             //Get RemoveHeaderFromOutMessage from tenant registry or api-manager.xml
-            String removeHeaderFromOutMessage = APIUtil.getOAuthConfigurationFromTenantRegistry
-                    (tenantId, APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE);
-            if (StringUtils.isBlank(removeHeaderFromOutMessage)) {
-                removeHeaderFromOutMessage = APIUtil.getOAuthConfigurationFromAPIMConfig
-                        (APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE);
-                if (!StringUtils.isBlank(removeHeaderFromOutMessage)) {
-                    authProperties.put(APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE, removeHeaderFromOutMessage);
-                }
-
-            } else {
+            String removeHeaderFromOutMessage = APIUtil
+                    .getOAuthConfiguration(tenantId, APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE);
+            if (!StringUtils.isBlank(removeHeaderFromOutMessage)) {
                 authProperties.put(APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE, removeHeaderFromOutMessage);
+            } else {
+                authProperties.put(APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE,
+                        APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE_DEFAULT);
             }
 
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler",

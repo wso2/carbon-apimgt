@@ -327,6 +327,7 @@ public class APIMappingUtil {
             }
             dto.setLabels(labels);
         }
+        dto.setAuthorizationHeader(model.getAuthorizationHeader());
 
         return dto;
     }
@@ -542,7 +543,7 @@ public class APIMappingUtil {
         model.setCorsConfiguration(corsConfiguration);
         setEndpointSecurityFromApiDTOToModel(dto, model);
         setMaxTpsFromApiDTOToModel(dto, model);
-
+        model.setAuthorizationHeader(dto.getAuthorizationHeader());
         return model;
     }
 
@@ -671,7 +672,7 @@ public class APIMappingUtil {
             APIEndpointSecurityDTO securityDTO = new APIEndpointSecurityDTO();
             securityDTO.setType(APIEndpointSecurityDTO.TypeEnum.basic); //set default as basic
             securityDTO.setUsername(api.getEndpointUTUsername());
-            securityDTO.setPassword(api.getEndpointUTPassword());
+            securityDTO.setPassword(""); // Do not expose password
             if (api.isEndpointAuthDigest()) {
                 securityDTO.setType(APIEndpointSecurityDTO.TypeEnum.digest);
             }
