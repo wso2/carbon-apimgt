@@ -796,9 +796,9 @@
                                             <%}%>
                                     </tbody>
                                 </table>
-                                <div class="message message-warning" id="mediation-sequence-not-applicable-warning" <% if (attachedLabels != null && hasCustomSequences) { %> style="display:block" <% } else { %> style="display:none" <% } %> >
+                                <div class="message message-warning" id="mediation-sequence-not-applicable-warning" <% if (attachedLabels != null && hasCustomSequences) { %> style="display:block" <% } else { %> style="display:none" <% } %>>
                                    <h4><i class="icon fw fw-warning"></i>Warning!</h4>
-                                   <p><%=i18n.localize("You have select Microgateway labels for this API. The mediation policies defined in this API won't be applied at the Microgateway.")%></p>
+                                   <p><%=i18n.localize("You have selected Microgateway labels for this API. The mediation policies selected here will not be applied in Microgateway environments.")%></p>
                                </div>
                                 <% if (currentLabels.length > 1) {
                                     currentLabels = currentLabels.substring(0, currentLabels.length-1);
