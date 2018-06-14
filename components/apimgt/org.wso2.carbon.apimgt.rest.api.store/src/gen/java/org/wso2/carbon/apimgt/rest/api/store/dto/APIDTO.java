@@ -373,6 +373,7 @@ public class APIDTO  {
     sb.append("  endpointURLs: ").append(endpointURLs).append("\n");
     sb.append("  businessInformation: ").append(businessInformation).append("\n");
     sb.append("  labels: ").append(labels).append("\n");
+    sb.append("  lastUpdatedTime: ").append(lastUpdatedTime).append("\n");
     sb.append("}\n");
     return sb.toString();
   }
