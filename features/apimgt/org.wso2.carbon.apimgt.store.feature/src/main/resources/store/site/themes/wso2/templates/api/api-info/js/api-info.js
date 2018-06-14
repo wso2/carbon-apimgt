@@ -244,11 +244,18 @@ $('.rating-tooltip-manual').rating({
 
 
     $('#application-list').change(
-            function(){
-                if($(this).val() == "createNewApp"){
-                    //$.cookie('apiPath','foo');
-                    window.location.href = '../site/pages/application-add.jag?goBack=yes&'+urlPrefix;
-                }
+        function () {
+            var keyType = $('option:selected', this).attr('keyType');
+            if (keyType == 'JWT') {
+                jagg.message({
+                    content: i18n.t('The already generated tokens of this application will not work for this new subscription please regenerate tokens after the subscription'),
+                    type: "info"
+                });
             }
+            if ($(this).val() == "createNewApp") {
+                //$.cookie('apiPath','foo');
+                window.location.href = '../site/pages/application-add.jag?goBack=yes&' + urlPrefix;
+            }
+        }
     );
 });
