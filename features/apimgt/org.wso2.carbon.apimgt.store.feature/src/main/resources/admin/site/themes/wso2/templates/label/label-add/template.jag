@@ -102,6 +102,7 @@
             <table id="custom-attribute-table" style="width:700px">
                 <tbody id="custom-attribute-tbody" name="custom-attribute-tbody"/>
             </table>
+            <label style="color:red" id="mandate-host"></label>
         </div>
     </div>
                         

@@ -1300,6 +1300,7 @@ public class SQLConstants {
             "   NAME," +
             "   APPLICATION_TIER," +
             "   APP.SUBSCRIBER_ID,  " +
+            "   APP.TOKEN_TYPE,  " +
             "   CALLBACK_URL,  " +
             "   DESCRIPTION, " +
             "   APPLICATION_STATUS, " +
