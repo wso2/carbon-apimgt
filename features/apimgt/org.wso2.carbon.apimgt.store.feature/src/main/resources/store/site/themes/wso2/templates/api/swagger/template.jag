@@ -7,12 +7,15 @@ var jwt = "JWT";
 var subscriptions_without_jwt = [];
 
 var subscriptions = outputs.subscriptions;
-for (var i = 0; i < subscriptions.length; i++) {
-    if (!jwt.equals(subscriptions[i].tokenType)) {
-        subscriptions_without_jwt.push(subscriptions[i]);
+if(subscriptions) {
+    for (var i = 0; i < subscriptions.length; i++) {
+        if (!jwt.equals(subscriptions[i].tokenType)) {
+            subscriptions_without_jwt.push(subscriptions[i]);
+        }
     }
+    subscriptions = subscriptions_without_jwt;
 }
-subscriptions = subscriptions_without_jwt;
+
 var protocol = "http";
 
 function getLocation(href) {
