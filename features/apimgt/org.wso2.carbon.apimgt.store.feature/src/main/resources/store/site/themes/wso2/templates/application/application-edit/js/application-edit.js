@@ -73,7 +73,19 @@ $(document).ready(function () {
 			allowed: 70,
 			warning: 50,
 			counterText: i18n.t("Characters left: ")
-		}); 
+		});
+
+    $('#tokenType').change(
+        function () {
+            var keyType = $('option:selected', this).attr('title');
+            if (keyType == 'JWT') {
+                $('#jwt-token-type-warning').removeClass('hidden');
+            } else {
+                $('#jwt-token-type-warning').addClass('hidden');
+            }
+
+        }
+    );
 
 });
 
