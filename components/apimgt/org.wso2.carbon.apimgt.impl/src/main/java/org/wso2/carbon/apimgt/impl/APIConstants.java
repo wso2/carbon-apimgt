@@ -483,6 +483,7 @@ public final class APIConstants {
     public static final String API_GATEWAY_USERNAME = "Username";
     public static final String API_GATEWAY_PASSWORD = "Password";
     public static final String API_GATEWAY_ENDPOINT = "GatewayEndpoint";
+    public static final String API_WEBSOCKET_GATEWAY_ENDPOINT = "GatewayWSEndpoint";
     public static final String API_GATEWAY_TYPE = "GatewayType";
     public static final String API_GATEWAY_TYPE_SYNAPSE = "Synapse";
     public static final String API_GATEWAY_NONE = "none";

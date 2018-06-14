@@ -17,7 +17,7 @@
           <%}%>
 	<%if (!api.isAdvertiseOnly) {%>
 
-	    <% 
+	    <%
         if(domains != null){
             for (var key in domains) {
                 var re = /\/$/g
@@ -73,19 +73,7 @@
     	        for (var urltype in environmenturls ) {
                     if(urltype != "showInConsole"){
 	                    if(environmenturls[urltype] != ""){
-                            if (api.type.toUpperCase() == "WS") {
-                                var url = environmenturls[urltype];
-                                if(url.match("^ws:")) {
-                                    var gatewayUrl = url;
-                                } else {
-                                    var cut = url.match(":(.*):");
-                                    if (cut){
-                                        var gatewayUrl = "ws:" + cut[1]+ ":9099";
-                                    } else {
-                                        var gatewayUrl = "ws://host:9099";
-                                    }
-                                }
-                            }
+                            var gatewayUrl = environmenturls[urltype];
                         %>
 	    	            <div  class="endpoint-copybtn well well-sm add-margin-bottom-1x">
                             <a data-clipboard-text=

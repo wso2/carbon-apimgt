@@ -221,6 +221,8 @@ public class APIManagerConfiguration {
                     environment.setApiGatewayEndpoint(APIUtil.replaceSystemProperty(
                             environmentElem.getFirstChildWithName(new QName(
                                     APIConstants.API_GATEWAY_ENDPOINT)).getText()));
+                    environment.setWebsocketGatewayEndpoint(APIUtil.replaceSystemProperty(environmentElem
+                            .getFirstChildWithName(new QName(APIConstants.API_WEBSOCKET_GATEWAY_ENDPOINT)).getText()));
                     OMElement description =
                             environmentElem.getFirstChildWithName(new QName("Description"));
                     if (description != null) {
