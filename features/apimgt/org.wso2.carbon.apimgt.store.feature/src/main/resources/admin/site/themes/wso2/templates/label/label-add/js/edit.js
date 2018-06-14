@@ -6,27 +6,29 @@ var addLabel = function () {
     }
 
     var attributes = getCustomAttributesArray();
-    $('#add-label-btn').buttonLoader('start');
-    jagg.post("/site/blocks/label/label-add/ajax/label-edit.jag", {
-        action: $('#action').val(),
-        labelName: $('#labelName').val(),
-        uuid: $('#uuid').val(),
-        description: htmlEscape($('#description').val()),
-        attributes: JSON.stringify(attributes)
-    }, function (result) {
-        if (result.error == false) {
-            location.href = 'label-list'
-        } else {
-            $('#add-label-btn').buttonLoader('stop');
-            jagg.message({ content: result.message, type: "error" });
-        }
-    },
-        "json");
+    if (attributes != null) {
+        $('#add-label-btn').buttonLoader('start');
+        jagg.post("/site/blocks/label/label-add/ajax/label-edit.jag", {
+            action: $('#action').val(),
+            labelName: $('#labelName').val(),
+            uuid: $('#uuid').val(),
+            description: htmlEscape($('#description').val()),
+            attributes: JSON.stringify(attributes)
+        }, function (result) {
+            if (result.error == false) {
+                location.href = 'label-list'
+            } else {
+                $('#add-label-btn').buttonLoader('stop');
+                jagg.message({ content: result.message, type: "error" });
+            }
+        },
+            "json");
+    }
 };
 
 var getCustomAttributesArray = function () {
     customAttributesArray = new Array();
-
+    var hostValid = "At least one host is required";
     $('#custom-attribute-tbody tr').each(function () {
         var attributeValue = $(this).find('input[name^=attributeValue]').val();
 
@@ -35,7 +37,10 @@ var getCustomAttributesArray = function () {
 
         customAttributesArray.push(attributeObj);
     });
-
+    if (customAttributesArray.length == 0) {
+        document.getElementById("mandate-host").innerHTML = hostValid;
+        return null;
+    }
     return customAttributesArray;
 }
 
@@ -98,6 +103,7 @@ function addCustomAttributeInitially(element, count, name, value) {
 
 $(document).ready(function () {
     $('#add-attribute-btn').on('click', function () {
+        document.getElementById("mandate-host").innerHTML = "";
         ++attributeCount;
         var tBody = $('#custom-attribute-tbody');
         addCustomAttribute(tBody, attributeCount);
