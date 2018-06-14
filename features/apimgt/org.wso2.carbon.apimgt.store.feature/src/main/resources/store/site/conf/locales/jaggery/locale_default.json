@@ -371,5 +371,6 @@
     "JWT Details Title" : "Generated JWT",
     "Note" : "Please make a note of the consumer secret and access token values as it will be displayed only once. If you lose the consumer secret, you can regenerate it.",
     "Note2" : "Please make a note of the regenerated consumer secret value as it will be displayed only once. If you are using the previously generated client secret in your application, update it to the regenerated client secret.",
-    "Note3" : "Please copy this generated JWT value as it will be displayed only once."
+    "Note3" : "Please copy this generated JWT value as it will be displayed only once.",
+    "JWT token type can be used with micro gateways only": "JWT token type can be used with micro gateways only"
 }
