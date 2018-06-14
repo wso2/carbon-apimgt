@@ -39,8 +39,11 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -93,8 +96,19 @@ public class APIMappingUtil {
         dto.setIsDefaultVersion(model.isDefaultVersion());
         dto.setStatus(model.getStatus());
 
-        Timestamp timeStamp = new Timestamp(model.getLastUpdated().getTime());
-        dto.setLastUpdatedTime(String.valueOf(timeStamp));
+        if (null != model.getLastUpdated()) {
+            Date lastUpdateDate = model.getLastUpdated();
+            Timestamp timeStamp = new Timestamp(lastUpdateDate.getTime());
+            dto.setLastUpdatedTime(String.valueOf(timeStamp));
+        }
+
+        String createdTimeStamp = model.getCreatedTime();
+        if (null != createdTimeStamp) {
+            Date date = new Date(Long.valueOf(createdTimeStamp));
+            DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+            String dateFormatted = formatter.format(date);
+            dto.setCreatedTime(dateFormatted);
+        }
 
         //Get Swagger definition which has URL templates, scopes and resource details
         String apiSwaggerDefinition = null;
