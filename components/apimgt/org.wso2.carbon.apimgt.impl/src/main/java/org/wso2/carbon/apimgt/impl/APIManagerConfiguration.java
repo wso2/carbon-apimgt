@@ -77,6 +77,7 @@ public class APIManagerConfiguration {
     public static final String  AUTH_URL_PORT = "auth.url.port";
     public static final String  JMS_PORT = "jms.port";
     public static final String CARBON_CONFIG_PORT_OFFSET_NODE = "Ports.Offset";
+    public static final String WEBSOCKET_DEFAULT_GATEWAY_URL = "ws://localhost:9099";
     private Map<String, Map<String, String>> loginConfiguration = new ConcurrentHashMap<String, Map<String, String>>();
     private JSONArray applicationAttributes = new JSONArray();
 
@@ -221,8 +222,14 @@ public class APIManagerConfiguration {
                     environment.setApiGatewayEndpoint(APIUtil.replaceSystemProperty(
                             environmentElem.getFirstChildWithName(new QName(
                                     APIConstants.API_GATEWAY_ENDPOINT)).getText()));
-                    environment.setWebsocketGatewayEndpoint(APIUtil.replaceSystemProperty(environmentElem
-                            .getFirstChildWithName(new QName(APIConstants.API_WEBSOCKET_GATEWAY_ENDPOINT)).getText()));
+                    OMElement websocketGatewayEndpoint = environmentElem
+                            .getFirstChildWithName(new QName(APIConstants.API_WEBSOCKET_GATEWAY_ENDPOINT));
+                    if (websocketGatewayEndpoint != null) {
+                        environment.setWebsocketGatewayEndpoint(
+                                APIUtil.replaceSystemProperty(websocketGatewayEndpoint.getText()));
+                    } else {
+                        environment.setWebsocketGatewayEndpoint(WEBSOCKET_DEFAULT_GATEWAY_URL);
+                    }
                     OMElement description =
                             environmentElem.getFirstChildWithName(new QName("Description"));
                     if (description != null) {
