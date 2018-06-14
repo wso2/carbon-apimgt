@@ -13,6 +13,12 @@
     var default_tier = resourceTiers[resourceTiers.length -1].tierName;
     var isWSAPI = api.type.toUpperCase() == "WS";
 
+    var hasCustomSequences = false;
+    if((api.inSequence && (!"none".equals(api.inSequence))) || (api.outSequence && (!"none".equals(api.outSequence)))
+        || ( api.faultSequence && (!"none".equals(api.faultSequence)))) {
+        hasCustomSequences = true;
+    }
+
     //fetch gateway labels in the tenant space
     var labels = mod.getLabels().labels;
     //fetch labels attached to the current API
@@ -58,6 +64,7 @@
     var outSequencesLoaded = false;
     var faultSequencesLoaded = false;
     var ws = "<%=isWSAPI%>";
+    var hasCustomSequences = <%=hasCustomSequences%>;
 </script>
 <div id="item-add">
 <%
@@ -789,6 +796,10 @@
                                             <%}%>
                                     </tbody>
                                 </table>
+                                <div class="message message-warning" id="mediation-sequence-not-applicable-warning" <% if (attachedLabels != null && hasCustomSequences) { %> style="display:block" <% } else { %> style="display:none" <% } %> >
+                                   <h4><i class="icon fw fw-warning"></i>Warning!</h4>
+                                   <p><%=i18n.localize("You have select Microgateway labels for this API. The mediation policies defined in this API won't be applied at the Microgateway.")%></p>
+                               </div>
                                 <% if (currentLabels.length > 1) {
                                     currentLabels = currentLabels.substring(0, currentLabels.length-1);
                                 }%>
@@ -796,13 +807,21 @@
                                     <script type="text/javascript">
                                     function appendLabels() {
                                         var selectedLabelSet = '';
+                                        var atleastOneLabelChecked = false;
                                         $('input[name="microgateways"]').each(function(){
                                             if(this.checked){
                                                 selectedLabelSet = selectedLabelSet + this.value + ',';
+                                                atleastOneLabelChecked = true;
                                             }
                                         });
                                         if (selectedLabelSet.endsWith(',')){
                                             selectedLabelSet = selectedLabelSet.slice(0, -1);
+                                        }
+
+                                        if (atleastOneLabelChecked && hasCustomSequences) {
+                                            $("#mediation-sequence-not-applicable-warning").show();
+                                        } else {
+                                            $("#mediation-sequence-not-applicable-warning").hide();
                                         }
                                         $("#gatewayLabels").val(selectedLabelSet);
                                     }
