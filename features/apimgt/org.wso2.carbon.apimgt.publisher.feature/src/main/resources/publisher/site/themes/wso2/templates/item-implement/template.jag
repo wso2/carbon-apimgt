@@ -131,7 +131,7 @@
 														{{/inline}}
 
 														{{#*inline "endpoint"}}
-								                        <div class="form-group">
+								                        <div class="form-group  add-padding-top-3x">
 								                            <label class="control-label col-xs-6 col-sm-2 col-md-2 col-lg-2" for="endpoint_type">{{#if name}}{{#if @first}}{{ name }} :
 								                            	{{#if type}}<a class="help_popup" help_data="{{type}}_help" data-trigger="hover" data-placement="bottom" title="endpoint_help">
 								                            		<span class="icon fw-stack fw-lg" style="font-size:6px">
@@ -147,8 +147,8 @@
 																  {{/if}}
 																  <input type="text" class="form-control endpoint_input" id="endpoint-input" data-type="{{type}}" data-index="{{ @index }}" value="{{ url }}" placeholder="E.g.: http://appserver/resource">
 																  <span class="input-group-btn">
-																    <button class="btn btn-secondary ad_config" type="button" data-type="{{ type }}" data-index="{{ @index }}" title='<%=i18n.localize("Advanced Options")%>'><i class="fw fw-settings"></i></button>
 																    <button class="btn btn-secondary check_url_valid" type="button" ><%= i18n.localize("Test")%></button>
+																    <button class="btn btn-secondary ad_config add-margin-left-1x" type="button" data-type="{{ type }}" data-index="{{ @index }}" title='<%=i18n.localize("Advanced Options")%>'><i class="fw fw-settings"></i></button>
 																  </span>
 																</div>
 																{{#if invalid }}
@@ -214,53 +214,55 @@
                                                         </div>
                                                         <label class="control-label col-xs-12 col-sm-3 col-md-4 col-lg-3" />
 
-							                            <div class=" form-group col-xs-12 col-sm-7 col-md-7 col-lg-7" style="border: 1px solid #e2e2e2">
-								                        {{#each production_endpoints}}
-								                        	{{#if ../load_balance}}
-								                        		{{> endpoint this name="Production " type="production_endpoints" label=(inc @index) invalid=../invalid}}
-								                        	{{else if ../failover}}
-								                        		{{> endpoint this name="Production " type="production_endpoints" label="Primary" invalid=../invalid}}
-								                        	{{else}}
-								                        		{{> endpoint this name="Production " type="production_endpoints" invalid=../invalid}}
-								                        	{{/if}}
-							                            {{/each}}
+							                            <div class="form-group">
+							                                <div class="col-xs-12 col-sm-7 col-md-7 col-lg-7" style="border: 1px solid #e2e2e2">
+                                                                {{#each production_endpoints}}
+                                                                    {{#if ../load_balance}}
+                                                                        {{> endpoint this name="Production " type="production_endpoints" label=(inc @index) invalid=../invalid}}
+                                                                    {{else if ../failover}}
+                                                                        {{> endpoint this name="Production " type="production_endpoints" label="Primary" invalid=../invalid}}
+                                                                    {{else}}
+                                                                        {{> endpoint this name="Production " type="production_endpoints" invalid=../invalid}}
+                                                                    {{/if}}
+                                                                {{/each}}
 
-							                            {{#if load_balance }}
-							                            	{{> add_remove_ep ep_type="production_endpoints" }}
-							                            {{/if}}
+                                                                {{#if load_balance }}
+                                                                    {{> add_remove_ep ep_type="production_endpoints" }}
+                                                                {{/if}}
 
-							                            {{#if failover }}
-								                            {{#each production_failovers}}
-									                        	{{> endpoint this name="" type="production_failovers" label=(concat "Failover " (inc @index))}}
-								                            {{/each}}
-							                            {{/if}}
-							                            {{#if failover }}
-							                            	{{> add_remove_ep ep_type="production_failovers" }}
-							                            {{/if}}
+                                                                {{#if failover }}
+                                                                    {{#each production_failovers}}
+                                                                        {{> endpoint this name="" type="production_failovers" label=(concat "Failover " (inc @index))}}
+                                                                    {{/each}}
+                                                                {{/if}}
+                                                                {{#if failover }}
+                                                                    {{> add_remove_ep ep_type="production_failovers" }}
+                                                                {{/if}}
 
-								                        {{#each sandbox_endpoints}}
-								                        	{{#if ../load_balance}}
-								                        		{{> endpoint this name="Sandbox " type="sandbox_endpoints" label=(inc @index)}}
-								                        	{{else if ../failover}}
-								                        		{{> endpoint this name="Sandbox " type="sandbox_endpoints" label="Primary"}}
-								                        	{{else}}
-								                        		{{> endpoint this name="Sandbox " type="sandbox_endpoints"}}
-								                        	{{/if}}
-							                            {{/each}}
+                                                                {{#each sandbox_endpoints}}
+                                                                    {{#if ../load_balance}}
+                                                                        {{> endpoint this name="Sandbox " type="sandbox_endpoints" label=(inc @index)}}
+                                                                    {{else if ../failover}}
+                                                                        {{> endpoint this name="Sandbox " type="sandbox_endpoints" label="Primary"}}
+                                                                    {{else}}
+                                                                        {{> endpoint this name="Sandbox " type="sandbox_endpoints"}}
+                                                                    {{/if}}
+                                                                {{/each}}
 
-							                       		{{#if load_balance }}
-							                            	{{> add_remove_ep ep_type="sandbox_endpoints" }}
-							                            {{/if}}
+                                                                {{#if load_balance }}
+                                                                    {{> add_remove_ep ep_type="sandbox_endpoints" }}
+                                                                {{/if}}
 
-							                         	{{#if failover }}
-								                            {{#each sandbox_failovers}}
-									                        	{{> endpoint this name="" type="sandbox_failovers" label=(concat "Failover " (inc @index))}}
-								                            {{/each}}
-							                            {{/if}}
-							                            {{#if failover }}
-							                            	{{> add_remove_ep ep_type="sandbox_failovers" }}
-							                            {{/if}}
-							                            {{/if}}
+                                                                {{#if failover }}
+                                                                    {{#each sandbox_failovers}}
+                                                                        {{> endpoint this name="" type="sandbox_failovers" label=(concat "Failover " (inc @index))}}
+                                                                    {{/each}}
+                                                                {{/if}}
+                                                                {{#if failover }}
+                                                                    {{> add_remove_ep ep_type="sandbox_failovers" }}
+                                                                {{/if}}
+                                                                {{/if}}
+							                                </div>
                                                         </div>
 					                            {{#if load_balance}}
 
@@ -486,11 +488,10 @@
                                                                 </table>
 
                                                                 {{else}}
-                                                                <div>
-                                                                    <div class="alert alert-danger">
-                                                                        <%=i18n.localize("You do not have any uploaded Certificates for above endpoints")%>.
+                                                                    <div class="message message-info">
+                                                                        <h4><i class="icon fw fw-info"></i><%=i18n.localize("No uploaded certificates for the endpoints")%></h4>
+                                                                            <p><%=i18n.localize("Click the button below to add certificates.")%></p>
                                                                     </div>
-                                                                </div>
                                                                 {{/if}}
                                                                 <% if (outputs.isCreatePermitted) { %>
                                                                 <span class="btn btn-primary add-cert-btn"><%=i18n.localize("Add New Certificate")%></span>
@@ -696,6 +697,12 @@
 
 															</div>
 														</div>
+                                                        <%if(api != null && api.gatewayLabels != null){%>
+                                                            <div class="message message-warning">
+                                                                <h4><i class="icon fw fw-warning"></i>Warning!</h4>
+                                                                <p><%=i18n.localize("You have selected Microgateway labels for this API. The mediation policies selected here will not be applied in Microgateway environments.")%></p>
+                                                            </div>
+                                                        <%}%>
 														</span>
                                                 </fieldset>
 														<% if(outputs.isCreatePermitted){

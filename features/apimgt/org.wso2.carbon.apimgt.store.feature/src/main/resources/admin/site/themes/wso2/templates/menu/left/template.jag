@@ -123,7 +123,7 @@
           </ul>
         </li>
         <li class="nav-header">
-          <a href="#"><i class="fw fw-settings fw-2x" style="font-size:22px;"></i><%=i18n.localize("Microgateway")%><i class="fw fw-down fw-stack-1x toggle-icon-down toggle-caret remove-float"></i></a>
+          <a href="#"><i class="fw fw-configarations fw-2x" style="font-size:22px;"></i><%=i18n.localize("Microgateway")%><i class="fw fw-down fw-stack-1x toggle-icon-down toggle-caret remove-float"></i></a>
             <ul class="nav nav-pills secondary-nav collapse">
               <li <%if (reqUrl.match("label-list")){%> class="active" <% } %>><a
                 href="<%= jagg.url("/label-list") %>"

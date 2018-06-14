@@ -331,9 +331,9 @@
         switch (msgObject.code) {
             case (1) : {
                 if (msgObject.action === "add") {
-                    return i18n.t("Certificate is added successfully. This will be affect to all the users.");
+                    return i18n.t("The certificate was added successfully. Please note that it will be available to all users.");
                 } else {
-                    return i18n.t("Certificate is deleted Successfully. This will be affect to all the users.")
+                    return i18n.t("The certificate was deleted successfully. Note that it will not be accessible to any user hereafter.")
                 }
             }
             case (2) : {

@@ -52,7 +52,8 @@ var log = new Log();
         }
         var port = match.port;
         var accessProtocol = match.protocol;
-        var envName = request.getParameter("envName");
+        var gwType = request.getParameter("gwType");
+        var gwName = request.getParameter("gwName");
         var tenantDomain = "";
         var tenantID = -1234;
 	    var isTenantFlowStarted = false;
@@ -108,21 +109,40 @@ var log = new Log();
                 version:apiVersionVal,
                 provider:providerVal
             }, username);
-            var api = result.api;
-        var serverURL = api.serverURL;
-        var context = api.context;
-        var splitVal = JSON.parse(serverURL);
+        var api = result.api;
         var urlArr = new Array();
-        var count = 0;
-        for(var type in splitVal){
-            var environmentsToType = splitVal[type];
-            for(var name in environmentsToType ){
-                var environmentURL;
-                if(envName == name || envName == "undefined" || envName == null){
-                    environmentURL = environmentsToType[name];
-                    urlArr[count] = environmentURL[accessProtocol.replace(":","")];
-                    count++;
-                    break;
+        var context = api.context;
+        if(gwType == "microGW") {
+            var labels = api.labels;
+            var count = 0;
+            for (var i = 0; i < labels.length; i++) {
+                if ( gwName == labels[i].labelName) {
+                    var accessURLs = labels[i].accessURLs.split(",");
+                    var accessURL = "";
+                    for(var j = 0 ; j < accessURLs.length ; j++){
+                        if(accessURLs[j].indexOf("https://") == 0){
+                            urlArr[count] = accessURLs[j];
+                            break;
+                        }
+                    }
+                }
+
+            }
+        } else {
+            var serverURL = api.serverURL;
+            var splitVal = JSON.parse(serverURL);
+
+            var count = 0;
+            for (var type in splitVal) {
+                var environmentsToType = splitVal[type];
+                for (var name in environmentsToType) {
+                    var environmentURL;
+                    if (gwName == name || gwName == "undefined" || gwName == null) {
+                        environmentURL = environmentsToType[name];
+                        urlArr[count] = environmentURL[accessProtocol.replace(":", "")];
+                        count++;
+                        break;
+                    }
                 }
             }
         }

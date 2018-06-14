@@ -162,9 +162,13 @@
     <label for="tokenType" class="col-md-3 col-lg-3 control-label"><%= i18n.localize("Token Type")%></label>
     <div class="col-md-9 col-lg-9">
         <select id="tokenType" name="tokenType">
-          <option title="Default">DEFAULT</option>
+          <option value= "DEFAULT" title="<%=i18n.localize("DEFAULT")%>"><%=i18n.localize("DEFAULT")%></option>
           <option title="JWT">JWT</option>
         </select>
+    </div>
+    <div class="col-md-9 col-lg-9 message message-info hidden" id="jwt-token-type-warning" >
+       <h4><i class="icon fw fw-info"></i>Info!</h4>
+       <p><%=i18n.localize("JWT token type can be used with micro gateways only")%></p>
     </div>
   </div>
 
