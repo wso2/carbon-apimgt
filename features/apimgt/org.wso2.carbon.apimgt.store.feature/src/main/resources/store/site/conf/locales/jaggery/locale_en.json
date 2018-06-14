@@ -354,5 +354,9 @@
     "request.to.update.or.delete.user.profile": "To update other profile information or to delete your account, please contact the system administrator.",
     "have.read.and.understood": "I hereby confirm that I have read and understood the",
     "need.consent": "We need your consent on the attributes to use for the following purposes.",
-    "need.consent.sub.info": "By selecting a preferred attribute, you will be providing consent to use your personal information."
+    "need.consent.sub.info": "By selecting a preferred attribute, you will be providing consent to use your personal information.",
+    "API Gateways" : "API Gateways",
+    "Micro Gateways" : "Micro Gateways",
+    "Gateways" : "Gateways",
+    "DEFAULT" : "OAuth"
 }
