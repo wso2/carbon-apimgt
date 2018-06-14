@@ -4770,21 +4770,6 @@ public class APIStoreHostObject extends ScriptableObject {
                     jsonObject.put("http", filterUrlsByTransport(environmenturls, transports, "http"));
                     jsonObject.put("https", filterUrlsByTransport(environmenturls, transports, "https"));
                 }
-//                if ("WS".equals(api.getType())) {
-//                    List<String> wsTransports = new ArrayList<String>();
-//                    wsTransports.add("ws");
-//                    wsTransports.add("http");
-//                    wsTransports.add("https");
-//                    httpGatewayUrl = filterUrlsByTransport(environmenturls, wsTransports, "ws");
-//                    if (httpGatewayUrl == null || httpGatewayUrl.isEmpty()) {
-//                        httpGatewayUrl = filterUrlsByTransport(environmenturls, wsTransports, "http");
-//                    }
-//                    if (httpGatewayUrl == null || httpGatewayUrl.isEmpty()) {
-//                        httpGatewayUrl = filterUrlsByTransport(environmenturls, wsTransports, "https");
-//                    }
-//                } else {
-//                    httpGatewayUrl = filterUrlsByTransport(environmenturls, transports, "http");
-//                }
                 jsonObject.put("showInConsole", environment.isShowInConsole());
                 if (APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType())) {
                     productionEnvironmentObject.put(environment.getName(), jsonObject);
