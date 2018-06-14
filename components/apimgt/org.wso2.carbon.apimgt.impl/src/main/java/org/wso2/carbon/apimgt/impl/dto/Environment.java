@@ -34,7 +34,17 @@ public class Environment implements Serializable {
 
     private String apiGatewayEndpoint;
 
+    private String websocketGatewayEndpoint;
+
     private String description;
+
+    public String getWebsocketGatewayEndpoint() {
+        return websocketGatewayEndpoint;
+    }
+
+    public void setWebsocketGatewayEndpoint(String websocketGatewayEndpoint) {
+        this.websocketGatewayEndpoint = websocketGatewayEndpoint;
+    }
 
     public boolean isShowInConsole() {
         return showInConsole;

@@ -4761,27 +4761,16 @@ public class APIStoreHostObject extends ScriptableObject {
                 JSONObject jsonObject = new JSONObject();
                 List<String> environmenturls = new ArrayList<String>();
                 environmenturls.addAll(Arrays.asList((environment.getApiGatewayEndpoint().split(","))));
+                environmenturls.add(environment.getWebsocketGatewayEndpoint());
                 List<String> transports = new ArrayList<String>();
-                transports.addAll(Arrays.asList((api.getTransports().split(","))));
-                String httpGatewayUrl;
-                if ("WS".equals(api.getType())) {
-                    List<String> wsTransports = new ArrayList<String>();
-                    wsTransports.add("ws");
-                    wsTransports.add("http");
-                    wsTransports.add("https");
-                    httpGatewayUrl = filterUrlsByTransport(environmenturls, wsTransports, "ws");
-                    if (httpGatewayUrl == null || httpGatewayUrl.isEmpty()) {
-                        httpGatewayUrl = filterUrlsByTransport(environmenturls, wsTransports, "http");
-                    }
-                    if (httpGatewayUrl == null || httpGatewayUrl.isEmpty()) {
-                        httpGatewayUrl = filterUrlsByTransport(environmenturls, wsTransports, "https");
-                    }
+                if("WS".equals(api.getType())) {
+                    transports.add("ws");
+                    jsonObject.put("ws", filterUrlsByTransport(environmenturls, transports, "ws"));
                 } else {
-                    httpGatewayUrl = filterUrlsByTransport(environmenturls, transports, "http");
+                    transports.addAll(Arrays.asList((api.getTransports().split(","))));
+                    jsonObject.put("http", filterUrlsByTransport(environmenturls, transports, "http"));
+                    jsonObject.put("https", filterUrlsByTransport(environmenturls, transports, "https"));
                 }
-
-                jsonObject.put("http", httpGatewayUrl);
-                jsonObject.put("https", filterUrlsByTransport(environmenturls, transports, "https"));
                 jsonObject.put("showInConsole", environment.isShowInConsole());
                 if (APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType())) {
                     productionEnvironmentObject.put(environment.getName(), jsonObject);

@@ -92,6 +92,8 @@
                 <Password>${admin.password}</Password>
                 <!-- Endpoint URLs for the APIs hosted in this API gateway.-->
                 <GatewayEndpoint>http://${carbon.local.ip}:${http.nio.port},https://${carbon.local.ip}:${https.nio.port}</GatewayEndpoint>
+                <!-- Endpoint of the Websocket APIs hosted in this API Gateway -->
+                <GatewayWSEndpoint>ws://${carbon.local.ip}:9099</GatewayWSEndpoint>
             </Environment>
         </Environments>
     </APIGateway>
