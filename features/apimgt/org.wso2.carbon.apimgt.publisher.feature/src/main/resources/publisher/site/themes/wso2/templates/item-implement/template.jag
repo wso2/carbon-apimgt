@@ -700,7 +700,7 @@
                                                         <%if(api != null && api.gatewayLabels != null){%>
                                                             <div class="message message-warning">
                                                                 <h4><i class="icon fw fw-warning"></i>Warning!</h4>
-                                                                <p><%=i18n.localize("You have selected Microgateway labels for this API. The mediation policies selected here will not be applied in Microgateway environments.")%></p>
+                                                                <p><%=i18n.localize("You have selected Microgateways for this API. The mediation policies selected here will not be applied in Microgateway environments.")%></p>
                                                             </div>
                                                         <%}%>
 														</span>

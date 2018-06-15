@@ -28,7 +28,7 @@
     "Add Custom Policy": "Add Custom Policy",
     "Add Host":"Add Host",
     "Add Item": "Add Item",
-    "Add Microgateway Label":"Add Microgateway Label",
+    "Add Microgateway":"Add Microgateway",
     "Add New Policy": "Add New Policy",
     "Add New Tier": "Add New Tier",
     "Add Subscription Throttle Policy": "Add Subscription Throttle Policy",
@@ -98,7 +98,7 @@
     "Edit Advanced Throttle Policy": "Edit Advanced Throttle Policy",
     "Edit Configurations": "Edit Configurations",
     "Edit Custom Policy": "Edit Custom Policy",
-    "Edit Microgateway Label":"Edit Microgateway Label",
+    "Edit Microgateway":"Edit Microgateway",
     "Edit Subscription Policy": "Edit Subscription Policy",
     "Edit Tier": "Edit Tier",
     "Eg ": "Eg ",
@@ -153,9 +153,9 @@
     "Manage Alert Types": "Manage Alerts",
     "Manage Tiers": "Manage Tiers",
     "Microgateway":"Microgateway",
-    "Microgateway Labels":"Microgateway Labels",
+    "Microgateways":"Microgateways",
     "Microgateway Host":"Microgateway Host",
-    "Microgateway labels are not defined":"Microgateway labels are not defined",
+    "Microgateways are not defined":"Microgateways are not defined",
     "Minute(s)": "Minute(s)",
     "Modal title": "Modal title",
     "Month(s)": "Month(s)",
@@ -292,6 +292,9 @@
     "Allowed keys" : "Allowed keys",
     "Type an Email and press Enter":"Type an Email and press Enter",
     "API State Approval" : "API State Change",
-    "Suspended" : "Suspended"
+    "Suspended" : "Suspended",
+    "Label contains spaces": "Label contains spaces",
+    "Label": "Label",
+    "Label contains one or more illegal characters": "Label contains one or more illegal characters "
 
 }
