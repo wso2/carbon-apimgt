@@ -82,7 +82,7 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
     @Override public boolean init(byte[] wsdlContent) throws APIMgtWSDLException {
         boolean canProcess;
         try {
-            wsdlDefinition = wsdlReader.getWSDLDefinitionFromByteContent(wsdlContent);
+            wsdlDefinition = wsdlReader.getWSDLDefinitionFromByteContent(wsdlContent, true);
             canProcess = true;
             targetNamespace = wsdlDefinition.getTargetNamespace();
             Types types = wsdlDefinition.getTypes();
