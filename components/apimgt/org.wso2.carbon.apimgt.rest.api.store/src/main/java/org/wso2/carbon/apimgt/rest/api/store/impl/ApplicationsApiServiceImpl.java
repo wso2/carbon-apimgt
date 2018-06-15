@@ -344,9 +344,6 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                 if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
                     for (APIKey apiKey : application.getKeys()) {
                         if (keyType != null && keyType.equals(apiKey.getType())) {
-                            if(APIConstants.JWT.equals(application.getTokenType())){
-                                apiKey.setAccessToken("");
-                            }
                             ApplicationKeyDTO appKeyDTO = ApplicationKeyMappingUtil.fromApplicationKeyToDTO(apiKey);
                             return Response.ok().entity(appKeyDTO).build();
                         }
