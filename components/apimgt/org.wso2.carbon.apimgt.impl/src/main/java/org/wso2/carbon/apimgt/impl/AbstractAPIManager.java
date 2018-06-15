@@ -1592,6 +1592,9 @@ public abstract class AbstractAPIManager implements APIManager {
         if (application != null) {
             Set<APIKey> keys = getApplicationKeys(application.getId());
             for (APIKey key : keys) {
+                if (APIConstants.JWT.equals(application.getTokenType())) {
+                    key.setAccessToken("");
+                }
                 application.addKey(key);
             }
         }
