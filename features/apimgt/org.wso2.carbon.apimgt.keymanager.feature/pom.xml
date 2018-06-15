@@ -199,6 +199,7 @@
                                 <bundleDef>net.sf.ehcache.wso2:ehcache</bundleDef>
                                 <bundleDef>org.json.wso2:json:${orbit.version.json}</bundleDef>
                                 <bundleDef>org.wso2.uri.template:wso2-uri-templates:${wso2-uri-templates.version}</bundleDef>
+                                <bundleDef>com.fasterxml.jackson.core:jackson-core:${fasterxml.jackson.version}</bundleDef>
                             </bundles>
                             <importBundles>
                                 <importBundleDef>org.wso2.carbon.identity.framework:org.wso2.carbon.identity.authenticator.thrift:${carbon.identity.version}</importBundleDef>
