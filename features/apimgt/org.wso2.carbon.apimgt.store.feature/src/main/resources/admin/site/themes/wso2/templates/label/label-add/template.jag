@@ -3,14 +3,14 @@
     <%
     var uuid = request.getParameter("uuid");
     var action = request.getParameter("action");
-    var pageTitle = i18n.localize("Add Microgateway Label");
+    var pageTitle = i18n.localize("Add Microgateway");
     var nameFieldDisableStatus = "";
 
     if(action==null){
         action = "labelAction";
     }
     if(uuid != null){
-        pageTitle = i18n.localize("Edit Microgateway Label");
+        pageTitle = i18n.localize("Edit Microgateway");
         var labelTypes = session.get("labelList");
     	var Label = Packages.org.wso2.carbon.apimgt.api.model.Label;
   		var label = new Label();
@@ -51,16 +51,16 @@
     <input type='hidden' id='errorMessageInvalid' name='errorMessageInvalid'
                 value='<%=i18n.localize("Invalid")%>'/>
     <input type='hidden' id='errorMessageIllegalChar' name='errorMessageIllegalChar'
-                value='<%=i18n.localize("Name contains one or more illegal characters")%> ( [ ~ ! & @ # ; % ^ & * + = { } | <> \"  , ] ). '/>
+                value='<%=i18n.localize("Label contains one or more illegal characters")%> ( [ ~ ! $ & @ # ; % ^ & * + = { } | <> \"  , ] ). '/>
     <input type="hidden" id="uuid" name="uuid" value="<%=encode.forHtmlAttribute(uuid)%>" />
     <input type="hidden" id="action" name="action" value="<%=encode.forHtmlAttribute(action)%>"/>
-    <input type='hidden' id='errorMessageSpaces' name='errorMessageSpaces' value='<%=i18n.localize("Name contains spaces")%>'/>
+    <input type='hidden' id='errorMessageSpaces' name='errorMessageSpaces' value='<%=i18n.localize("Label contains spaces")%>'/>
     <div class="page-header">
 	    <h2><br></h2>
 	    <p class="lead"><%=i18n.localize("General Details")%></p>
 	</div>		        
     <div class="form-group">
-		<label class="control-label col-sm-3"><%=i18n.localize("Name")%>  <span class="requiredAstrix">*</span></label>
+		<label class="control-label col-sm-3"><%=i18n.localize("Label")%>  <span class="requiredAstrix">*</span></label>
 		<div class="col-md-9">
 		    <input class="form-control" type="text" id="labelName" name="labelName"/>
 		</div>

@@ -756,14 +756,14 @@
                             </tbody>
                        </table>
 
-                        <!-- Microgateway labels table -->
+                        <!-- Microgateways table -->
                         <% if ( labels != null && labels.length > 0 ) { %>
                             <b><%=i18n.localize("Microgateways")%></b>
                                 <table class="table table-striped table-hover display data-table">
                                     <thead>
                                         <tr>
                                             <th width="5%"><div class="label_checkbox"></div></th>
-                                            <th width="30%"><div class="environments_data"><%=i18n.localize("Label Name")%></div></th>
+                                            <th width="30%"><div class="environments_data"><%=i18n.localize("Label")%></div></th>
                                             <th><div class="environments_data"><%=i18n.localize("Description")%></div></th>
                                         </tr>
                                     </thead>
@@ -798,7 +798,7 @@
                                 </table>
                                 <div class="message message-warning" id="mediation-sequence-not-applicable-warning" <% if (attachedLabels != null && hasCustomSequences) { %> style="display:block" <% } else { %> style="display:none" <% } %>>
                                    <h4><i class="icon fw fw-warning"></i>Warning!</h4>
-                                   <p><%=i18n.localize("You have selected Microgateway labels for this API. The mediation policies selected here will not be applied in Microgateway environments.")%></p>
+                                   <p><%=i18n.localize("You have selected Microgateways for this API. The mediation policies selected here will not be applied in Microgateway environments.")%></p>
                                </div>
                                 <% if (currentLabels.length > 1) {
                                     currentLabels = currentLabels.substring(0, currentLabels.length-1);
@@ -826,7 +826,7 @@
                                         $("#gatewayLabels").val(selectedLabelSet);
                                     }
                                 </script>
-                        <%}%><!-- Microgateway labels table -->
+                        <%}%><!-- Microgateways table -->
 
                         <script>
                         $('input').on('change', function() {

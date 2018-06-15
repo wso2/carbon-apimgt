@@ -128,7 +128,7 @@ function validateInput(text, element, errorMsg) {
 
 function validateInputCharactors(text, element, errorMsg) {
     var elementId = element.attr('id');
-    var illegalChars = /([~!&@#;%^*+={}\|\\<>\"\',])/;
+    var illegalChars = /([~!&@#;%^*+={}$\|\\<>\"\',])/;
     text = text.trim();
     if (illegalChars.test(text)) {
         element.css("border", "1px solid red");

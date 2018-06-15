@@ -130,7 +130,7 @@
     </p>
         <% } %>
 
-    <!-- Start of Microgateway Labels Section -->
+    <!-- Start of Microgateways Section -->
     <% if(api.labels != null){ %>
         <h4 class="add-margin-top-5x"><%=i18n.localize("Microgateways")%></h4>
         <% for (var label in api.labels ) { %>
@@ -148,7 +148,7 @@
             </div>
         <% } %>
     <% } %>
-    <!-- End of Microgateway Labels Section -->
+    <!-- End of Microgateways Section -->
 
 	 <% if((api.bizOwner && api.bizOwner != "") || (api.techOwner && api.techOwner != "")){ %>
 	 		<h4 class="add-margin-top-5x"><%=i18n.localize("Business Information")%></h4>
