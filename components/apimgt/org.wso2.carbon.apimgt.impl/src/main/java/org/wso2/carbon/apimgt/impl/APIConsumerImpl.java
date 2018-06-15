@@ -4062,7 +4062,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     private byte[] getUpdatedWSDLByEnvironment(String wsdlResourcePath, byte[] wsdlContent, String environmentName,
             String environmentType, String apiName, String apiVersion) throws APIManagementException {
         APIMWSDLReader apimwsdlReader = new APIMWSDLReader(wsdlResourcePath);
-        Definition definition = apimwsdlReader.getWSDLDefinitionFromByteContent(wsdlContent);
+        Definition definition = apimwsdlReader.getWSDLDefinitionFromByteContent(wsdlContent, false);
         String wsdlFile = wsdlResourcePath.substring(wsdlResourcePath.lastIndexOf("/") + 1)
                 .replaceAll(APIConstants.WSDL_FILE_EXTENSION, "");
         String provider = wsdlFile.substring(0, wsdlFile.indexOf(APIConstants.WSDL_PROVIDER_SEPERATOR));
