@@ -299,7 +299,6 @@
 
     <!-- API Store Related Configurations -->
     <APIStore>
-        <EnableMultipleGroupId>false</EnableMultipleGroupId>
         <!--GroupingExtractor>org.wso2.carbon.apimgt.impl.DefaultGroupIDExtractorImpl</GroupingExtractor-->
         <!--This property is used to indicate how we do user name comparision for token generation https://wso2.org/jira/browse/APIMANAGER-2225-->
         <CompareCaseInsensitively>true</CompareCaseInsensitively>
