@@ -104,7 +104,7 @@ $(document).ready(function() {
                 }
             });
         return this.optional(element) || valid == true;
-    }, i18n.t('Invalid role name[s] or roles provided does not contain any of the roles of API creator.'));
+    }, i18n.t('Invalid role name[s] or roles provided do not contain any of the roles of API creator.'));
 
     $.validator.addMethod('validateEndpoints', function (value, element){
         return APP.is_production_endpoint_specified() || APP.is_sandbox_endpoint_specified();
