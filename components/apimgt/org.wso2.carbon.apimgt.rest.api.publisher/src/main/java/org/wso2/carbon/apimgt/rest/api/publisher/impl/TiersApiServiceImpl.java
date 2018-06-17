@@ -176,7 +176,11 @@ public class TiersApiServiceImpl extends TiersApiService {
             if (permissions.getRoles().size() > 0) {
                 String roles = StringUtils.join(permissions.getRoles(), ",");
                 String permissionType = permissions.getPermissionType().toString();
-                apiProvider.updateTierPermissions(tierName, permissionType, roles);
+                if (APIUtil.isAdvanceThrottlingEnabled()) {
+                    apiProvider.updateThrottleTierPermissions(tierName, permissionType, roles);
+                } else {
+                    apiProvider.updateTierPermissions(tierName, permissionType, roles);
+                }
                 return Response.ok().build();
             } else {
                 RestApiUtil.handleBadRequest("roles should be specified", log);
