@@ -35,6 +35,12 @@ public class ApplicationDTO  {
   
   private String description = null;
   
+  public enum TokenTypeEnum {
+     OAUTH,  JWT, 
+  };
+  
+  private TokenTypeEnum tokenType = TokenTypeEnum.OAUTH;
+  
   
   private String status = "";
   
@@ -149,6 +155,19 @@ public class ApplicationDTO  {
 
   
   /**
+   * Type of the access token generated for this application.\n\n**OAUTH:** A UUID based access token which is issued by default.\n**JWT:** A self-contained, signed JWT based access token. **Note:** This can be only used in Microgateway environments.\n
+   **/
+  @ApiModelProperty(value = "Type of the access token generated for this application.\n\n**OAUTH:** A UUID based access token which is issued by default.\n**JWT:** A self-contained, signed JWT based access token. **Note:** This can be only used in Microgateway environments.\n")
+  @JsonProperty("tokenType")
+  public TokenTypeEnum getTokenType() {
+    return tokenType;
+  }
+  public void setTokenType(TokenTypeEnum tokenType) {
+    this.tokenType = tokenType;
+  }
+
+  
+  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("status")
@@ -208,6 +227,7 @@ public class ApplicationDTO  {
     sb.append("  throttlingTier: ").append(throttlingTier).append("\n");
     sb.append("  callbackUrl: ").append(callbackUrl).append("\n");
     sb.append("  description: ").append(description).append("\n");
+    sb.append("  tokenType: ").append(tokenType).append("\n");
     sb.append("  status: ").append(status).append("\n");
     sb.append("  groupId: ").append(groupId).append("\n");
     sb.append("  keys: ").append(keys).append("\n");
