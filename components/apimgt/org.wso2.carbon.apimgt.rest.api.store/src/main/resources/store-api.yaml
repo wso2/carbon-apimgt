@@ -2259,6 +2259,18 @@ definitions:
       description:
         type: string
         example: Sample calculator application
+      tokenType:
+        type: string
+        enum:
+          - OAUTH
+          - JWT
+        description: |
+          Type of the access token generated for this application.
+          
+          **OAUTH:** A UUID based access token which is issued by default.
+          **JWT:** A self-contained, signed JWT based access token. **Note:** This can be only used in Microgateway environments.
+        default: OAUTH
+        example: OAUTH
       status:
         type: string
         example: APPROVED

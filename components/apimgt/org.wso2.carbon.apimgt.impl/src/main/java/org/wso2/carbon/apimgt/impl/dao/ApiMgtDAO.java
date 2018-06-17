@@ -5515,7 +5515,7 @@ public class ApiMgtDAO {
                 application.setGroupId(rs.getString("GROUP_ID"));
                 application.setUUID(rs.getString("UUID"));
                 application.setTier(rs.getString("APPLICATION_TIER"));
-                application.setTier(rs.getString("TOKEN_TYPE"));
+                application.setTokenType(rs.getString("TOKEN_TYPE"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
             }
             if (application != null) {
