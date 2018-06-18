@@ -3314,7 +3314,7 @@ public class ApiMgtDAO {
 
             //Adding data to AM_APPLICATION_ATTRIBUTES table
             if( application.getApplicationAttributes() != null) {
-                addApplicationAttributes(conn, application.getApplicationAttributes(), applicationId, tenantId);
+                addApplicationAttributes(application.getApplicationAttributes(), applicationId, tenantId);
             }
         } catch (SQLException e) {
             handleException("Failed to add Application", e);
@@ -3367,7 +3367,7 @@ public class ApiMgtDAO {
             }
 
             if (application.getApplicationAttributes() != null && !application.getApplicationAttributes().isEmpty()) {
-                addApplicationAttributes(conn, application.getApplicationAttributes(), application.getId(), tenantId);
+                addApplicationAttributes(application.getApplicationAttributes(), application.getId(), tenantId);
             }
             conn.commit();
             updateOAuthConsumerApp(application.getName(), application.getCallbackUrl());
@@ -11598,14 +11598,16 @@ public class ApiMgtDAO {
         return label;
     }
 
-    private void addApplicationAttributes(Connection conn, Map<String, String> attributes, int applicationId, int tenantId)
+    public void addApplicationAttributes(Map<String, String> attributes, int applicationId, int tenantId)
             throws APIManagementException {
 
+        Connection connection = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
+            connection = APIMgtDBUtil.getConnection();
             if(attributes != null) {
-                ps = conn.prepareStatement(SQLConstants.ADD_APPLICATION_ATTRIBUTES_SQL);
+                ps = connection.prepareStatement(SQLConstants.ADD_APPLICATION_ATTRIBUTES_SQL);
                 for (String key : attributes.keySet()) {
                     ps.setInt(1, applicationId);
                     ps.setString(2, key);
@@ -11618,7 +11620,7 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Error in adding attributes of application with id: " + applicationId , e);
         } finally {
-            APIMgtDBUtil.closeAllConnections(ps, null, rs);
+            APIMgtDBUtil.closeAllConnections(ps, connection, rs);
         }
     }
 
