@@ -152,7 +152,7 @@
                 <version>2.2</version>
                 <configuration>
                     <packagingExcludes>WEB-INF/lib/*.jar</packagingExcludes>
-                    <warName>micro-gateway#v0.9</warName>
+                    <warName>micro-gateway#v0.10</warName>
                 </configuration>
             </plugin>
             <plugin>
