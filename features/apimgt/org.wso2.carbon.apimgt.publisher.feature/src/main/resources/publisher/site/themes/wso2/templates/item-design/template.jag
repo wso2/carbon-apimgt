@@ -354,7 +354,7 @@
 															<% if(api && api.thumb!=null){ %>
 																<img id="apiEditThumb" alt="<%=i18n.localize("API Thumbnail")%>" src="<%=jagg.getRegistryPath(api.thumb)%>" style="width: 150px; height: 150px;"/>
 															<% }else{ %>
-																<img id="apiEditThumb" alt="<%=i18n.localize("Default API Thumbnail")%>" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/api-default.png"))%>" style="width: 150px; height: 150px;"/>
+																<img id="apiEditThumb" alt="<%=i18n.localize("Default API Thumbnail")%>" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/api-default.jpeg"))%>" style="width: 150px; height: 150px;"/>
 															<%}%>
 														  </div>
 														  <div class="fileinput-preview fileinput-exists thumbnail" style="max-width: 150px; max-height: 150px;"></div>
