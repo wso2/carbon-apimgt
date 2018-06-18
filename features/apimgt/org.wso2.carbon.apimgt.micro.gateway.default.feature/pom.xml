@@ -64,7 +64,7 @@
                                     <overWrite>true</overWrite>
                                     <type>war</type>
                                     <outputDirectory>${basedir}/src/main/resources/</outputDirectory>
-                                    <destFileName>micro-gateway#v0.9.war</destFileName>
+                                    <destFileName>micro-gateway#v0.10.war</destFileName>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
