@@ -143,8 +143,7 @@ public class SequenceGenerator {
 
                             List<JSONObject> mappingList = SequenceUtils
                                     .getResourceParametersFromSwagger(apiJSON, resource, method);
-                            String inSequence = generateApiInSequence(mappingList, soapOperations, resourcePath,
-                                    method);
+                            String inSequence = generateApiInSequence(mappingList, soapOperations, resourcePath);
                             String outSequence = generateApiOutSequence();
                             if (log.isDebugEnabled()) {
                                 log.debug("Generated api in sequence for " + resource + " is: " + inSequence);
@@ -197,15 +196,14 @@ public class SequenceGenerator {
      * @throws APIManagementException
      */
     private static String generateApiInSequence(List<JSONObject> mappingList, List<WSDLSOAPOperation> soapOperations,
-            String resourcePath, String method) throws APIManagementException {
+            String resourcePath) throws APIManagementException {
         RESTToSOAPMsgTemplate template = new RESTToSOAPMsgTemplate();
 
         String soapAction = "";
         String namespace = "";
         String opName = "";
         for (WSDLSOAPOperation operationParam : soapOperations) {
-            if (operationParam.getName().equals(resourcePath.substring(1)) && operationParam.getHttpVerb()
-                    .equalsIgnoreCase(method)) {
+            if (operationParam.getName().equals(resourcePath.substring(1))) {
                 opName = operationParam.getSoapBindingOpName();
                 soapAction = operationParam.getSoapAction();
                 namespace = operationParam.getTargetNamespace();
