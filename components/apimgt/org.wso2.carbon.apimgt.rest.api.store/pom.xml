@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.3.26-SNAPSHOT</version>
+        <version>6.3.87-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -123,6 +123,14 @@
 
     <build>
         <plugins>
+            <!--<plugin>-->
+                <!--<groupId>org.wso2.maven.plugins</groupId>-->
+                <!--<artifactId>swagger2cxf-maven-plugin</artifactId>-->
+                <!--<version>1.0-SNAPSHOT</version>-->
+                <!--<configuration>-->
+                    <!--<inputSpec>${project.basedir}/src/main/resources/store-api.yaml</inputSpec>-->
+                <!--</configuration>-->
+            <!--</plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -161,7 +169,7 @@
                             <directory>src/main/webapp</directory>
                         </resource>
                     </webResources>
-                    <warName>api#am#store#v0.12</warName>
+                    <warName>api#am#store#v0.13</warName>
                 </configuration>
             </plugin>
             <plugin>
@@ -182,15 +190,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.wso2.maven.plugins</groupId>
-                <artifactId>swagger2cxf-maven-plugin</artifactId>
-                <version>1.0-SNAPSHOT</version>
-                <configuration>
-                    <inputSpec>${project.basedir}/src/main/resources/store-api.yaml</inputSpec>
-                </configuration>
-            </plugin>
-
         </plugins>
     </build>
 </project>

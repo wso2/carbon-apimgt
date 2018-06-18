@@ -58,7 +58,7 @@ import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ ThriftAuthenticatorService.class, ServiceReferenceHolder.class, ApiMgtDAO.class,
-        PrivilegedCarbonContext.class, org.wso2.carbon.metrics.manager.internal.ServiceReferenceHolder.class,
+        PrivilegedCarbonContext.class, org.wso2.carbon.metrics.manager.ServiceReferenceHolder.class,
         Timer.class, MetricManager.class, APIKeyMgtUtil.class, KeyManagerHolder.class, OAuthServerConfiguration.class })
 public class APIKeyValidationServiceImplTest {
     private ServiceReferenceHolder serviceReferenceHolder;
@@ -156,32 +156,32 @@ public class APIKeyValidationServiceImplTest {
         PowerMockito.when(privilegedCarbonContext.getTenantDomain()).thenReturn(TENANT_DOMAIN);
         currentSession.setAttribute(MultitenantConstants.TENANT_ID, TENANT_ID);
 
-        org.wso2.carbon.metrics.manager.internal.ServiceReferenceHolder serviceReferenceHolder1 = Mockito
-                .mock(org.wso2.carbon.metrics.manager.internal.ServiceReferenceHolder.class);
-        PowerMockito.mockStatic(org.wso2.carbon.metrics.manager.internal.ServiceReferenceHolder.class);
+        org.wso2.carbon.metrics.manager.ServiceReferenceHolder serviceReferenceHolder1 = Mockito
+                .mock(org.wso2.carbon.metrics.manager.ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(org.wso2.carbon.metrics.manager.ServiceReferenceHolder.class);
         MetricService metricService = Mockito.mock(MetricService.class);
         Timer timer = Mockito.mock(Timer.class);
-        Mockito.when(org.wso2.carbon.metrics.manager.internal.ServiceReferenceHolder.getInstance())
+        Mockito.when(org.wso2.carbon.metrics.manager.ServiceReferenceHolder.getInstance())
                 .thenReturn(serviceReferenceHolder1);
         Mockito.when(serviceReferenceHolder1.getMetricService()).thenReturn(metricService);
 
         Timer.Context timerContext = Mockito.mock(Timer.Context.class);
         Mockito.when(timer.start()).thenReturn(timerContext);
 
-        Mockito.when(metricService.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager
-                .name(APIConstants.METRICS_PREFIX, APIKeyValidationService.class.getSimpleName(), "VALIDATE_MAIN")))
+        Mockito.when(metricService.timer(MetricManager
+                        .name(APIConstants.METRICS_PREFIX, APIKeyValidationService.class.getSimpleName(), "VALIDATE_MAIN"), org.wso2.carbon.metrics.manager.Level.INFO))
                 .thenReturn(timer);
-        Mockito.when(metricService.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager
-                .name(APIConstants.METRICS_PREFIX, APIKeyValidationService.class.getSimpleName(), "VALIDATE_TOKEN")))
+        Mockito.when(metricService.timer(MetricManager
+                        .name(APIConstants.METRICS_PREFIX, APIKeyValidationService.class.getSimpleName(), "VALIDATE_TOKEN"), org.wso2.carbon.metrics.manager.Level.INFO))
                 .thenReturn(timer);
-        Mockito.when(metricService.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager
-                .name(APIConstants.METRICS_PREFIX, APIKeyValidationService.class.getSimpleName(),
-                        "VALIDATE_SUBSCRIPTION"))).thenReturn(timer);
-        Mockito.when(metricService.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager
-                .name(APIConstants.METRICS_PREFIX, APIKeyValidationService.class.getSimpleName(), "VALIDATE_SCOPES")))
+        Mockito.when(metricService.timer(MetricManager
+                        .name(APIConstants.METRICS_PREFIX, APIKeyValidationService.class.getSimpleName(),
+                                "VALIDATE_SUBSCRIPTION"), org.wso2.carbon.metrics.manager.Level.INFO)).thenReturn(timer);
+        Mockito.when(metricService.timer(MetricManager
+                        .name(APIConstants.METRICS_PREFIX, APIKeyValidationService.class.getSimpleName(), "VALIDATE_SCOPES"), org.wso2.carbon.metrics.manager.Level.INFO))
                 .thenReturn(timer);
-        Mockito.when(metricService.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager
-                .name(APIConstants.METRICS_PREFIX, APIKeyValidationService.class.getSimpleName(), "GENERATE_JWT")))
+        Mockito.when(metricService.timer(MetricManager
+                        .name(APIConstants.METRICS_PREFIX, APIKeyValidationService.class.getSimpleName(), "GENERATE_JWT"), org.wso2.carbon.metrics.manager.Level.INFO))
                 .thenReturn(timer);
 
         PowerMockito.mockStatic(APIKeyMgtUtil.class);
@@ -201,8 +201,7 @@ public class APIKeyValidationServiceImplTest {
         PowerMockito.mockStatic(OAuthServerConfiguration.class);
         OAuthServerConfiguration oAuthServerConfiguration = Mockito.mock(OAuthServerConfiguration.class);
         PowerMockito.when(OAuthServerConfiguration.getInstance()).thenReturn(oAuthServerConfiguration);
-        PowerMockito.when(OAuthServerConfiguration.getInstance().getTimeStampSkewInSeconds())
-                .thenReturn(System.currentTimeMillis());
+        PowerMockito.when(oAuthServerConfiguration.getTimeStampSkewInSeconds()).thenReturn(System.currentTimeMillis());
         dto = apiKeyValidationServiceImpl
                 .validateKey(CONTEXT, VERSION, ACCESS_TOKEN, SESSION_ID, REQUIRED_AUTHENTICATION_LEVEL, ALLOWED_DOMAINS,
                         MATCHING_RESOURCE, HTTP_VERB);
@@ -220,20 +219,20 @@ public class APIKeyValidationServiceImplTest {
         Mockito.when(thriftAuthenticatorService.getSessionInfo(SESSION_ID)).thenReturn(currentSession);
         APIKeyValidationServiceImpl.init(thriftAuthenticatorService);
 
-        org.wso2.carbon.metrics.manager.internal.ServiceReferenceHolder serviceReferenceHolder1 = Mockito
-                .mock(org.wso2.carbon.metrics.manager.internal.ServiceReferenceHolder.class);
-        PowerMockito.mockStatic(org.wso2.carbon.metrics.manager.internal.ServiceReferenceHolder.class);
+        org.wso2.carbon.metrics.manager.ServiceReferenceHolder serviceReferenceHolder1 = Mockito
+                .mock(org.wso2.carbon.metrics.manager.ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(org.wso2.carbon.metrics.manager.ServiceReferenceHolder.class);
         MetricService metricService = Mockito.mock(MetricService.class);
         Timer timer = Mockito.mock(Timer.class);
-        Mockito.when(org.wso2.carbon.metrics.manager.internal.ServiceReferenceHolder.getInstance())
+        Mockito.when(org.wso2.carbon.metrics.manager.ServiceReferenceHolder.getInstance())
                 .thenReturn(serviceReferenceHolder1);
         Mockito.when(serviceReferenceHolder1.getMetricService()).thenReturn(metricService);
 
         Timer.Context timerContext = Mockito.mock(Timer.Context.class);
         Mockito.when(timer.start()).thenReturn(timerContext);
 
-        Mockito.when(metricService.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager
-                .name(APIConstants.METRICS_PREFIX, APIKeyValidationService.class.getSimpleName(), "GET_URI_TEMPLATE")))
+        Mockito.when(metricService.timer(MetricManager
+                        .name(APIConstants.METRICS_PREFIX, APIKeyValidationService.class.getSimpleName(), "GET_URI_TEMPLATE"), org.wso2.carbon.metrics.manager.Level.INFO))
                 .thenReturn(timer);
         ArrayList<org.wso2.carbon.apimgt.api.model.URITemplate> uriTemplates1 = new ArrayList<org.wso2.carbon.apimgt.api.model.URITemplate>();
         uriTemplates1.add(new org.wso2.carbon.apimgt.api.model.URITemplate());

@@ -92,6 +92,8 @@
                 <Password>${admin.password}</Password>
                 <!-- Endpoint URLs for the APIs hosted in this API gateway.-->
                 <GatewayEndpoint>http://${carbon.local.ip}:${http.nio.port},https://${carbon.local.ip}:${https.nio.port}</GatewayEndpoint>
+                <!-- Endpoint of the Websocket APIs hosted in this API Gateway -->
+                <GatewayWSEndpoint>ws://${carbon.local.ip}:9099</GatewayWSEndpoint>
             </Environment>
         </Environments>
     </APIGateway>
@@ -297,7 +299,6 @@
 
     <!-- API Store Related Configurations -->
     <APIStore>
-        <EnableMultipleGroupId>false</EnableMultipleGroupId>
         <!--GroupingExtractor>org.wso2.carbon.apimgt.impl.DefaultGroupIDExtractorImpl</GroupingExtractor-->
         <!--This property is used to indicate how we do user name comparision for token generation https://wso2.org/jira/browse/APIMANAGER-2225-->
         <CompareCaseInsensitively>true</CompareCaseInsensitively>
@@ -331,6 +332,12 @@
 
         <!--set isStoreForumEnabled to false for disable forum in store-->
         <!--isStoreForumEnabled>false</isStoreForumEnabled-->
+
+        <!--
+        This is an optional parameter. If this parameter has a value, it will be shown in the token generation
+        cURL command under subscriptions section in API Store.
+        -->
+        <!--StoreTokenDisplayURL>https://${carbon.local.ip}:${https.nio.port}</StoreTokenDisplayURL-->
     </APIStore>
 
     <APIPublisher>
@@ -622,9 +629,9 @@
     	<ServerUrl>https://localhost:9445/bpmn</ServerUrl>   		
     	<ServerUser>${admin.username}</ServerUser>
     	<ServerPassword>${admin.password}</ServerPassword>
-    	<WorkflowCallbackAPI>https://localhost:${mgt.transport.https.port}/api/am/publisher/v0.12/workflows/update-workflow-status</WorkflowCallbackAPI>
+    	<WorkflowCallbackAPI>https://localhost:${mgt.transport.https.port}/api/am/publisher/v0.13/workflows/update-workflow-status</WorkflowCallbackAPI>
         <TokenEndPoint>https://localhost:${https.nio.port}/token</TokenEndPoint>
-        <DCREndPoint>https://localhost:${mgt.transport.https.port}/client-registration/v0.12/register</DCREndPoint>
+        <DCREndPoint>https://localhost:${mgt.transport.https.port}/client-registration/v0.13/register</DCREndPoint>
         <DCREndPointUser>${admin.username}</DCREndPointUser>
         <DCREndPointPassword>${admin.password}</DCREndPointPassword>
     </WorkflowConfigurations>

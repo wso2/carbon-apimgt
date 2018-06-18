@@ -3,7 +3,7 @@
 
             <hr/>
             <h4 class="operation-heading"><a name="apisGet"></a>Retrieve/Search APIs
-</h4> <code>GET https://apis.wso2.com/api/am/publisher/v0.12/apis</code>
+</h4> <code>GET https://apis.wso2.com/api/am/publisher/v0.13/apis</code>
             <p class="marked"></p>
 
             <p class="marked">This operation provides you a list of available APIs qualifying under a given search condition.
@@ -21,7 +21,7 @@ Each retrieved API is represented with a minimal amount of attributes. If you wa
                 </h4>
             </div>
 
-                <div id="request-apisGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v0.12/apis
+                <div id="request-apisGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v0.13/apis
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -61,7 +61,7 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://localhost:9443/api/am/publisher/v0.12/apis</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://localhost:9443/api/am/publisher/v0.13/apis</code></div>
 
          
 
@@ -234,6 +234,34 @@ variant of the resource (Will be supported in future).
                         <td>
                             <span class="param-type">
                                 String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>expand</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Whether the returned response should contain full details of API
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                Boolean
                             </span>
                         </td>
                         <td>

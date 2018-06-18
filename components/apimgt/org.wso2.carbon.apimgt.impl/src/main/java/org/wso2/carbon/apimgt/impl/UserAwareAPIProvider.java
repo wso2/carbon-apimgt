@@ -148,7 +148,7 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public void changeAPIStatus(API api, APIStatus status, String userId,
+    public void changeAPIStatus(API api, String status, String userId,
                                 boolean updateGatewayConfig) throws APIManagementException, FaultGatewaysException {
         checkPublishPermission();
         if (api != null) {
@@ -158,17 +158,35 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public Map<String, String> propergateAPIStatusChangeToGateways(APIIdentifier identifier, APIStatus newStatus)
+    public void changeAPIStatus(API api, APIStatus status, String userId,
+            boolean updateGatewayConfig) throws APIManagementException, FaultGatewaysException {
+        changeAPIStatus(api, status.getStatus(), userId, updateGatewayConfig);
+    }
+
+    @Override
+    public Map<String, String> propergateAPIStatusChangeToGateways(APIIdentifier identifier, String newStatus)
             throws APIManagementException {
         checkAccessControlPermission(identifier);
         return super.propergateAPIStatusChangeToGateways(identifier, newStatus);
     }
 
     @Override
-    public boolean updateAPIforStateChange(APIIdentifier identifier, APIStatus newStatus,
+    public Map<String, String> propergateAPIStatusChangeToGateways(APIIdentifier identifier, APIStatus newStatus)
+            throws APIManagementException {
+        return propergateAPIStatusChangeToGateways(identifier, newStatus.getStatus());
+    }
+
+    @Override
+    public boolean updateAPIforStateChange(APIIdentifier identifier, String newStatus,
             Map<String, String> failedGatewaysMap) throws APIManagementException, FaultGatewaysException {
         checkAccessControlPermission(identifier);
         return super.updateAPIforStateChange(identifier, newStatus, failedGatewaysMap);
+    }
+
+    @Override
+    public boolean updateAPIforStateChange(APIIdentifier identifier, APIStatus newStatus,
+            Map<String, String> failedGatewaysMap) throws APIManagementException, FaultGatewaysException {
+        return updateAPIforStateChange(identifier, newStatus.getStatus(), failedGatewaysMap);
     }
 
     @Override
@@ -254,6 +272,12 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     public List<LifeCycleEvent> getLifeCycleEvents(APIIdentifier apiId) throws APIManagementException {
         checkAccessControlPermission(apiId);
         return super.getLifeCycleEvents(apiId);
+    }
+
+    @Override
+    public void updateSubscription(APIIdentifier apiId, String subStatus, int appId) throws APIManagementException {
+        checkPublishPermission();
+        apiMgtDAO.updateSubscription(apiId, subStatus, appId);
     }
 
     @Override

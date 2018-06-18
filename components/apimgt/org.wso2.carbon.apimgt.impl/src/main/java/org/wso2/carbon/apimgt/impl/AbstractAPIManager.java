@@ -1405,6 +1405,14 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiMgtDAO.isApiNameExist(apiName, tenantName);
     }
 
+    public boolean isApiNameWithDifferentCaseExist(String apiName) throws APIManagementException {
+        String tenantName = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            tenantName = tenantDomain;
+        }
+        return apiMgtDAO.isApiNameWithDifferentCaseExist(apiName, tenantName);
+    }
+
     public void addSubscriber(String username, String groupingId)
             throws APIManagementException {
 
@@ -1453,7 +1461,7 @@ public abstract class AbstractAPIManager implements APIManager {
         }
         //application will not be shared within the group
         defaultApp.setGroupId("");
-        defaultApp.setTokenType(APIConstants.APPLICATION_TOKEN_TYPE);
+        defaultApp.setTokenType(APIConstants.DEFAULT_TOKEN_TYPE);
         apiMgtDAO.addApplication(defaultApp, subscriber.getName());
     }
 
@@ -1584,6 +1592,9 @@ public abstract class AbstractAPIManager implements APIManager {
         if (application != null) {
             Set<APIKey> keys = getApplicationKeys(application.getId());
             for (APIKey key : keys) {
+                if (APIConstants.JWT.equals(application.getTokenType())) {
+                    key.setAccessToken("");
+                }
                 application.addKey(key);
             }
         }
@@ -1899,6 +1910,7 @@ public abstract class AbstractAPIManager implements APIManager {
         boolean isTenantFlowStarted = false;
         String[] searchQueries = searchQuery.split("&");
         StringBuilder filteredQuery = new StringBuilder();
+        String subQuery = null;
 
         if (log.isDebugEnabled()) {
             log.debug("Original search query received : " + searchQuery);
@@ -1906,6 +1918,11 @@ public abstract class AbstractAPIManager implements APIManager {
 
         // Filtering the queries related with custom properties
         for (String query : searchQueries) {
+            if (searchQuery.startsWith(APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX) ||
+                    searchQuery.startsWith(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX)) {
+                subQuery = query;
+                break;
+            }
             // If the query does not contains "=" then it is an errornous scenario.
             if (query.contains("=")) {
                 String[] searchKeys = query.split("=");
@@ -1965,9 +1982,9 @@ public abstract class AbstractAPIManager implements APIManager {
             }
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userNameLocal);
 
-            if (searchQuery.startsWith(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX)) {
+            if (subQuery != null && subQuery.startsWith(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX)) {
                 Map<Documentation, API> apiDocMap =
-                        searchAPIDoc(userRegistry, tenantIDLocal, userNameLocal, searchQuery.split("=")[1]);
+                        searchAPIDoc(userRegistry, tenantIDLocal, userNameLocal, subQuery.split("=")[1]);
                 result.put("apis", apiDocMap);
                 /*Pagination for Document search results is not supported yet, hence length is sent as end-start*/
                 if (apiDocMap.isEmpty()) {
@@ -1975,8 +1992,8 @@ public abstract class AbstractAPIManager implements APIManager {
                 } else {
                     result.put("length", end - start);
                 }
-            } else if (searchQuery.startsWith(APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX)) {
-                result = searchAPIsByURLPattern(userRegistry, searchQuery.split("=")[1], start, end);
+            } else if (subQuery != null && subQuery.startsWith(APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX)) {
+                result = searchAPIsByURLPattern(userRegistry, subQuery.split("=")[1], start, end);
             } else {
                 result = searchPaginatedAPIs(userRegistry, searchQuery, start, end, isLazyLoad);
             }

@@ -36,7 +36,6 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
@@ -214,14 +213,10 @@ public class ApisApiServiceImpl extends ApisApiService {
                 RestApiUtil.handleBadRequest("Context cannot end with '/' character", log);
             }
 
-            //The UI validation is added to prevent creating apis with same name to solve APIMANAGER-3226.
-            // But logically we should allow to create api with same name and different version using the api post of
-            // publisher rest api. Hence commenting out the validation for name already exist until we find a proper
-            // solution. UI validation will be remained as it is to prevent creating apis with same name.
-            /*if(apiProvider.isApiNameExist(body.getName())) {
-                RestApiUtil.handleBadRequest("Error occurred while adding API. API with name " +
-                        body.getName() + " already exists." , log);
-            }*/
+            if (apiProvider.isApiNameWithDifferentCaseExist(body.getName())) {
+                RestApiUtil.handleBadRequest("Error occurred while adding API. API with name " + body.getName()
+                        + " already exists.", log);
+            }
 
             //Get all existing versions of  api been adding
             List<String> apiVersions = apiProvider.getApiVersionsMatchingApiName(body.getName(), username);
@@ -267,7 +262,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             List<String> tiersFromDTO = body.getTiers();
             //If tiers are not defined, the api should be a PROTOTYPED one,
-            if (!APIStatus.PROTOTYPED.toString().equals(body.getStatus()) &&
+            if (!APIConstants.PROTOTYPED.equals(body.getStatus()) &&
                     (tiersFromDTO == null || tiersFromDTO.isEmpty())) {
                 RestApiUtil.handleBadRequest("No tier defined for the API", log);
             }
@@ -286,8 +281,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             API apiToAdd = APIMappingUtil.fromDTOtoAPI(body, provider);
             //Overriding some properties:
             //only allow CREATED as the stating state for the new api if not status is PROTOTYPED
-            if (!APIStatus.PROTOTYPED.equals(apiToAdd.getStatus())) {
-                apiToAdd.setStatus(APIStatus.CREATED);
+            if (!APIConstants.PROTOTYPED.equals(apiToAdd.getStatus())) {
+                apiToAdd.setStatus(APIConstants.CREATED);
             }
             //we are setting the api owner as the logged in user until we support checking admin privileges and assigning
             //  the owner as a different user
@@ -813,7 +808,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             body.setVersion(apiIdentifier.getVersion());
             body.setProvider(apiIdentifier.getProviderName());
             body.setContext(apiInfo.getContextTemplate());
-            body.setStatus(apiInfo.getStatus().getStatus());
+            body.setStatus(apiInfo.getStatus());
             body.setType(APIDetailedDTO.TypeEnum.valueOf(apiInfo.getType()));
             //Since there is separate API to change the thumbnail, set the existing thumbnail URL
             //If user needs to remove the thumbnail url, this will give the flexibility to do it via an empty string value
@@ -851,7 +846,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             //attach micro-geteway labels
             apiToUpdate = assignLabelsToDTO(body,apiToUpdate);
-            
+
             apiProvider.updateAPI(apiToUpdate);
 
             if (!isWSAPI) {

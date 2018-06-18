@@ -20,7 +20,7 @@
     <script src="assets/js/main.js" type="text/javascript"></script>
     <script src="assets/js/marked.min.js" type="text/javascript"></script>
 
-    <title>WSO2 API Manager - Store : v0.12.0</title>
+    <title>WSO2 API Manager - Store : v0.13.0</title>
 
 
     <!-- Custom CSS -->
@@ -120,6 +120,8 @@
                                         <li id="op-applicationsGenerateKeysPost"><a href="#!/operations#ApplicationIndividual#applicationsGenerateKeysPost">Generate keys for application
 </a></li>
                                         <li id="op-applicationsPost"><a href="#!/operations#ApplicationIndividual#applicationsPost">Create a new application
+</a></li>
+                                        <li id="op-applicationsRegenerateConsumersecretPost"><a href="#!/operations#ApplicationIndividual#applicationsRegenerateConsumersecretPost">Re generate consumer secret for an application
 </a></li>
                                         <li id="op-applicationsScopesApplicationIdGet"><a href="#!/operations#ApplicationIndividual#applicationsScopesApplicationIdGet">Get scopes associated with a particular application based on subscribed APIs
 </a></li>
@@ -265,6 +267,16 @@
                         </li>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
+                                <li id="def-ApplicationKeyReGenerateRequest"><a href="#!/models#ApplicationKeyReGenerateRequest">ApplicationKeyReGenerateRequest</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ApplicationKeyReGenerateResponse"><a href="#!/models#ApplicationKeyReGenerateResponse">ApplicationKeyReGenerateResponse</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
                                 <li id="def-ApplicationList"><a href="#!/models#ApplicationList">ApplicationList</a></li>
                             </ul>
                         </li>
@@ -291,6 +303,16 @@
                         <li class="section-box">
                             <ul class="nav nav-stacked">
                                 <li id="def-ErrorListItem"><a href="#!/models#ErrorListItem">ErrorListItem</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-Label"><a href="#!/models#Label">Label</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ScopeInfo"><a href="#!/models#ScopeInfo">ScopeInfo</a></li>
                             </ul>
                         </li>
                         <li class="section-box">
@@ -330,6 +352,11 @@
                         </li>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
+                                <li id="def-TierPermissionInfo"><a href="#!/models#TierPermissionInfo">TierPermissionInfo</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
                                 <li id="def-Token"><a href="#!/models#Token">Token</a></li>
                             </ul>
                         </li>
@@ -356,7 +383,7 @@ Please see [full swagger definition](https://raw.githubusercontent.com/wso2/carb
                                     <h3>Version information</h3>
 
                                     <div class="paragraph">
-                                        <p class="marked">0.12.0</p>
+                                        <p class="marked">0.13.0</p>
                                     </div>
 
                                         <h3>Contact information</h3>
@@ -380,7 +407,7 @@ Please see [full swagger definition](https://raw.githubusercontent.com/wso2/carb
                                     <div class="paragraph">
                                         <p class="marked">Host: apis.wso2.com</p>
 
-                                        <p class="marked">BasePath: /api/am/store/v0.12</p>
+                                        <p class="marked">BasePath: /api/am/store/v0.13</p>
                                         <code>Scheme: [HTTPS]</code>
                                     </div>
                                     <h3>Consumes</h3>

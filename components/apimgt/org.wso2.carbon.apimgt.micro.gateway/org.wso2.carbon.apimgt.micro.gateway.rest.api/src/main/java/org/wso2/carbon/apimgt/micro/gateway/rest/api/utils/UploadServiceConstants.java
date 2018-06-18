@@ -24,7 +24,7 @@ package org.wso2.carbon.apimgt.micro.gateway.rest.api.utils;
  */
 public final class UploadServiceConstants {
 
-    public static final String FILE_NAME_REGEX = "^api-usage-data\\.dat\\.(\\d{13}).gz$";
+    public static final String FILE_NAME_REGEX = "^api-usage-data\\.dat\\.(\\d{13}).zip$";
 
     public static final String FILE_NAME_HEADER = "FileName";
 

@@ -323,9 +323,11 @@ public final class APIConstants {
     public static final String IDENTITY_OAUTH2_FIELD_TIME_CREATED = "TIME_CREATED";
     public static final String IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD = "VALIDITY_PERIOD";
     public static final String IDENTITY_OAUTH2_FIELD_USER_DOMAIN = "USER_DOMAIN";
-
+    
+    public static final String DOT = ".";
     public static final String EXP = "exp";
     public static final String JWT = "JWT";
+    public static final String JWT_DEFAULT_AUDIENCE = "http://org.wso2.apimgt/gateway";
     public static final String JWT_CONFIGS = "JWTConfiguration.";
     public static final String JWT_HEADER = JWT_CONFIGS + "JWTHeader";
     public static final String TOKEN_GENERATOR_IMPL = JWT_CONFIGS + "JWTGeneratorImpl";
@@ -336,7 +338,9 @@ public final class APIConstants {
 
     public static final String OAUTH_CONFIGS = "OAuthConfigurations.";
     public static final String AUTHORIZATION_HEADER = "AuthorizationHeader";
+    public static final String AUTHORIZATION_HEADER_DEFAULT = "Authorization";
     public static final String REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE = "RemoveOAuthHeadersFromOutMessage";
+    public static final String REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE_DEFAULT = "true";
     public static final String REMOVE_OAUTH_HEADERS_FROM_MESSAGE = OAUTH_CONFIGS + "RemoveOAuthHeadersFromOutMessage";
     public static final String APPLICATION_TOKEN_SCOPE = OAUTH_CONFIGS + "ApplicationTokenScope";
     public static final String WHITELISTED_SCOPES = OAUTH_CONFIGS + "ScopeWhitelist.Scope";
@@ -370,6 +374,8 @@ public final class APIConstants {
     public static final String CREATED = "CREATED";
     public static final String DEPRECATED = "DEPRECATED";
     public static final String PROTOTYPED = "PROTOTYPED";
+    public static final String RETIRED = "RETIRED";
+    public static final String BLOCKED = "BLOCKED";
     public static final String VERB_INFO_DTO = "VERB_INFO";
 
     //Overview constants for CORS configuration
@@ -415,7 +421,7 @@ public final class APIConstants {
     public static final String SAML2_SSO_AUTHENTICATOR_NAME = "SAML2SSOAuthenticator";
     public static final String ORGANIZATION_CLAIM_ATTRIBUTE = "OrganizationClaimAttribute";
     public static final String DEFAULT_ORGANIZATION_CLAIM_NAME = "http://wso2.org/claims/organization";
-    public static final String APPLICATION_TOKEN_TYPE = "DEFAULT";
+    public static final String DEFAULT_TOKEN_TYPE = "DEFAULT";
 
     public static class TokenStatus {
         public static final String ACTIVE = "ACTIVE";
@@ -479,6 +485,7 @@ public final class APIConstants {
     public static final String API_GATEWAY_USERNAME = "Username";
     public static final String API_GATEWAY_PASSWORD = "Password";
     public static final String API_GATEWAY_ENDPOINT = "GatewayEndpoint";
+    public static final String API_WEBSOCKET_GATEWAY_ENDPOINT = "GatewayWSEndpoint";
     public static final String API_GATEWAY_TYPE = "GatewayType";
     public static final String API_GATEWAY_TYPE_SYNAPSE = "Synapse";
     public static final String API_GATEWAY_NONE = "none";
@@ -568,6 +575,7 @@ public final class APIConstants {
     public static final String API_STORE_DISPLAY_MULTIPLE_VERSIONS = API_STORE + "DisplayMultipleVersions";
     public static final String API_STORE_DISPLAY_COMMENTS = API_STORE + "DisplayComments";
     public static final String API_STORE_DISPLAY_RATINGS = API_STORE + "DisplayRatings";
+    public static final String STORE_TOKEN_DISPLAY_URL = API_STORE + "StoreTokenDisplayURL";
     public static final String API_STORE_FORCE_CI_COMPARISIONS = API_STORE + "CompareCaseInsensitively";
     public static final String API_STORE_DISABLE_PERMISSION_CHECK = API_STORE + "DisablePermissionCheck";
     public static final String API_STORE_APIS_PER_PAGE = API_STORE + "APIsPerPage";

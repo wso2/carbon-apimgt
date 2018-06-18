@@ -194,12 +194,18 @@ public class APIMWSDLReader {
      * @return {@link Definition} - WSDL4j definition constructed form the wsdl
      * @throws APIManagementException
      */
-    public Definition getWSDLDefinitionFromByteContent(byte[] wsdl) throws APIManagementException {
+    public Definition getWSDLDefinitionFromByteContent(byte[] wsdl, boolean readDependencies) throws APIManagementException {
         try {
             WSDLReader wsdlReader = getWsdlFactoryInstance().newWSDLReader();
             // switch off the verbose mode
             wsdlReader.setFeature(JAVAX_WSDL_VERBOSE_MODE, false);
             wsdlReader.setFeature(JAVAX_WSDL_IMPORT_DOCUMENTS, false);
+
+            if (!readDependencies) {
+                if (wsdlReader instanceof WSDLReaderImpl) {
+                    ((WSDLReaderImpl) wsdlReader).setIgnoreSchemaContent(true);
+                }
+            }
 
             return wsdlReader.readWSDL(null, getSecuredParsedDocumentFromContent(wsdl));
         } catch (Exception e) {

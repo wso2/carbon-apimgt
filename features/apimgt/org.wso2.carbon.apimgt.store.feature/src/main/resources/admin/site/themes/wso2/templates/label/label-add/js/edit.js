@@ -6,27 +6,29 @@ var addLabel = function () {
     }
 
     var attributes = getCustomAttributesArray();
-    $('#add-label-btn').buttonLoader('start');
-    jagg.post("/site/blocks/label/label-add/ajax/label-edit.jag", {
-        action: $('#action').val(),
-        labelName: $('#labelName').val(),
-        uuid: $('#uuid').val(),
-        description: htmlEscape($('#description').val()),
-        attributes: JSON.stringify(attributes)
-    }, function (result) {
-        if (result.error == false) {
-            location.href = 'label-list'
-        } else {
-            $('#add-label-btn').buttonLoader('stop');
-            jagg.message({ content: result.message, type: "error" });
-        }
-    },
-        "json");
+    if (attributes != null) {
+        $('#add-label-btn').buttonLoader('start');
+        jagg.post("/site/blocks/label/label-add/ajax/label-edit.jag", {
+            action: $('#action').val(),
+            labelName: $('#labelName').val(),
+            uuid: $('#uuid').val(),
+            description: htmlEscape($('#description').val()),
+            attributes: JSON.stringify(attributes)
+        }, function (result) {
+            if (result.error == false) {
+                location.href = 'label-list'
+            } else {
+                $('#add-label-btn').buttonLoader('stop');
+                jagg.message({ content: result.message, type: "error" });
+            }
+        },
+            "json");
+    }
 };
 
 var getCustomAttributesArray = function () {
     customAttributesArray = new Array();
-
+    var hostValid = "At least one host is required";
     $('#custom-attribute-tbody tr').each(function () {
         var attributeValue = $(this).find('input[name^=attributeValue]').val();
 
@@ -35,7 +37,10 @@ var getCustomAttributesArray = function () {
 
         customAttributesArray.push(attributeObj);
     });
-
+    if (customAttributesArray.length == 0) {
+        document.getElementById("mandate-host").innerHTML = hostValid;
+        return null;
+    }
     return customAttributesArray;
 }
 
@@ -75,7 +80,7 @@ function addCustomAttribute(element, count) {
         '<tr id="attribute' + count + '">' +
         '<td><div class="clear"></div></td>' +
         '<td><input type="text" class="form-control" id="attributeValue' + count + '" name="attributeValue' + count + '" placeholder="Value"/></td>' +
-        '<td class="delete_resource_td"><a  id="attributeDelete' + count + '"  href="javascript:removeCustomAttribute(' + count + ')">' +
+        '<td class="delete_resource_td">&nbsp;&nbsp;<a  id="attributeDelete' + count + '"  href="javascript:removeCustomAttribute(' + count + ')">' +
         '<span class="fw-stack"> <i class="fw fw-delete fw-stack-1x"></i> <i class="fw fw-circle-outline fw-stack-2x"></i></span></td></a></td>' +
         '</tr>'
     );
@@ -87,8 +92,8 @@ function addCustomAttributeInitially(element, count, name, value) {
     element.parent().append(
         '<tr id="attribute' + count + '">' +
         '<td><div class="clear"></div></td>' +
-        '<td><input type="text" class="form-control" id="attributeValue' + count + '" name="attributeValue' + count + '" readonly/></td>' +
-        '<td class="delete_resource_td "><a  id="attributeDelete' + count + '" href="javascript:removeCustomAttribute(' + count + ');">' +
+        '<td><input type="text" class="form-control" id="attributeValue' + count + '" name="attributeValue' + count + '" /></td>' +
+        '<td class="delete_resource_td ">&nbsp;&nbsp;<a  id="attributeDelete' + count + '" href="javascript:removeCustomAttribute(' + count + ');">' +
         '<span class="fw-stack"> <i class="fw fw-delete fw-stack-1x"></i> <i class="fw fw-circle-outline fw-stack-2x"></i></span></td>' +
         '</tr>'
     );
@@ -98,6 +103,7 @@ function addCustomAttributeInitially(element, count, name, value) {
 
 $(document).ready(function () {
     $('#add-attribute-btn').on('click', function () {
+        document.getElementById("mandate-host").innerHTML = "";
         ++attributeCount;
         var tBody = $('#custom-attribute-tbody');
         addCustomAttribute(tBody, attributeCount);
@@ -122,7 +128,7 @@ function validateInput(text, element, errorMsg) {
 
 function validateInputCharactors(text, element, errorMsg) {
     var elementId = element.attr('id');
-    var illegalChars = /([~!&@#;%^*+={}\|\\<>\"\',])/;
+    var illegalChars = /([~!&@#;%^*+={}$\|\\<>\"\',])/;
     text = text.trim();
     if (illegalChars.test(text)) {
         element.css("border", "1px solid red");

@@ -42,7 +42,7 @@
       },
       {
         "Name": "apim:subscription_block",
-        "Roles": "admin,Internal/creator"
+        "Roles": "admin,Internal/publisher"
       },
       {
         "Name": "apim:mediation_policy_view",

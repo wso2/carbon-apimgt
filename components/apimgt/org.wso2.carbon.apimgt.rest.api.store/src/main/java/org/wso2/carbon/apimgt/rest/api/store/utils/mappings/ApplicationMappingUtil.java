@@ -17,9 +17,11 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.utils.mappings;
 
+import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
@@ -46,6 +48,11 @@ public class ApplicationMappingUtil {
         applicationDTO.setStatus(application.getStatus());
         applicationDTO.setGroupId(application.getGroupId());
         applicationDTO.setSubscriber(application.getSubscriber().getName());
+        applicationDTO.setTokenType(ApplicationDTO.TokenTypeEnum.OAUTH);
+        if (StringUtils.isNotEmpty(application.getTokenType()) && !APIConstants.DEFAULT_TOKEN_TYPE
+                .equals(application.getTokenType())) {
+            applicationDTO.setTokenType(ApplicationDTO.TokenTypeEnum.valueOf(application.getTokenType()));
+        }
         List<ApplicationKeyDTO> applicationKeyDTOs = new ArrayList<>();
         for(APIKey apiKey : application.getKeys()) {
             ApplicationKeyDTO applicationKeyDTO = ApplicationKeyMappingUtil.fromApplicationKeyToDTO(apiKey);
@@ -63,6 +70,11 @@ public class ApplicationMappingUtil {
         application.setDescription(applicationDTO.getDescription());
         application.setCallbackUrl(applicationDTO.getCallbackUrl());
         application.setUUID(applicationDTO.getApplicationId());
+        application.setTokenType(APIConstants.DEFAULT_TOKEN_TYPE);
+        if (applicationDTO.getTokenType() != null && !ApplicationDTO.TokenTypeEnum.OAUTH
+                .equals(applicationDTO.getTokenType())) {
+            application.setTokenType(applicationDTO.getTokenType().toString());
+        }
         Object applicationAttributes = applicationDTO.getAttributes();
         Map appAttributes = new ObjectMapper().convertValue(applicationAttributes,Map.class);
         application.setApplicationAttributes(appAttributes);

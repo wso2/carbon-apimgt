@@ -39,7 +39,6 @@ var login = function (username, password, tenantMode) {
 	//Hence in addition to default login call we will log user with authentication admin service via store host object login method.
 	//Then use that domain aware user name for permission validation.
 	//Fixing https://wso2.org/jira/browse/APIMANAGER-5172
-	store.login(username, password);
 	loginResponse = store.login(username, password);
 	if (loginResponse.error) {
         	if (log.isDebugEnabled()) {

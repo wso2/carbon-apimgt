@@ -22,14 +22,14 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 
 public class EndpointBckConfigContextTest {
 
     @Test
     public void testEndpointBckConfigContext() throws Exception {
         API api = new API(new APIIdentifier("admin", "TestAPI", "1.0.0"));
-        api.setStatus(APIStatus.CREATED);
+        api.setStatus(APIConstants.CREATED);
         api.setContextTemplate("/");
         String url = "http://maps.googleapis.com/maps/api/geocode/json?address=Colombo";
         api.setUrl(url);

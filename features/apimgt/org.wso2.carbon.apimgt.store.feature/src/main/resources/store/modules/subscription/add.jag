@@ -11,7 +11,7 @@ var addSubscription = function (api, tier, applicationId, username) {
         var groupingId = session.get("groupId");
 
         var subscriptionResponse = Packages.org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
-        subscriptionResponse = store.addSubscription(api.provider, api.name, api.version, tier, applicationId,  username);
+        subscriptionResponse = store.addSubscription(api.provider, api.name, api.version, tier, applicationId,  username, groupingId);
         var workflowResponse = Packages.org.wso2.carbon.apimgt.api.WorkflowResponse;
         workflowResponse = subscriptionResponse.getWorkflowResponse();
         var jsonSubsResponse = {};

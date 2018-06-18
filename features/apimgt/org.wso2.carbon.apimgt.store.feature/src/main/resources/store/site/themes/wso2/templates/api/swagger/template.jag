@@ -3,8 +3,19 @@
 var log = new Log();
 var site = require("/site/conf/site.json");
 var host = site.hostname;
+var jwt = "JWT";
+var subscriptions_without_jwt = [];
 
 var subscriptions = outputs.subscriptions;
+if(subscriptions) {
+    for (var i = 0; i < subscriptions.length; i++) {
+        if (!jwt.equals(subscriptions[i].tokenType)) {
+            subscriptions_without_jwt.push(subscriptions[i]);
+        }
+    }
+    subscriptions = subscriptions_without_jwt;
+}
+
 var protocol = "http";
 
 function getLocation(href) {
@@ -198,24 +209,31 @@ $(document).ready(function(){
 	$('.env_name').selectpicker();
   var change_token = function(){
     $(".notoken").hide();
-    var option = $("#sub_app_list option:selected");
-    var type = $("#key_type").val();
-    var key = option.attr("data-"+type);
-    if(key == "null"){
-      $(".notoken").show("slow");
-      $("#access_token").val("");
-    }else{
-      $("#access_token").val(key);
+    var gatewayType = $("#environment_name option:selected").attr('data-attr');
+    if(gatewayType == "apiGW"){
+        var option = $("#sub_app_list option:selected");
+        var type = $("#key_type").val();
+        var key = option.attr("data-"+type);
+        if(key == "null"){
+            $(".notoken").show("slow");
+            $("#access_token").val("");
+        } else {
+            $("#access_token").val(key);
+        }
+    } else {
+        $("#access_token").val("");
     }
     $("#access_token").trigger("change");
   };
 
 var show_environments = function(){
     var type = $(".keytype option:selected").val();
-    $("#environment_name").children('option').hide();
-    $("#environment_name").children("option[class='" + type + "']").show();
-    $("#environment_name").children("option[class='hybrid']").show();
-    var options = $("#environment_name").children("option[class='hybrid'], option[class='" + type + "']");
+    $("#environment_name").children('optgroup').hide();
+    $("#api-gateways").children("option[class='" + type + "']").show();
+    $("#api-gateways").children("option[class='hybrid']").show();
+    $("#micro-gateways").children("option[class='microgw-label']").show();
+
+    var options = $("#environment_name").children('optgroup').children("option[class='hybrid'], option[class='microgw-label'], option[class='" + type + "']");
       if (options.length < 2) {
         $(".env_name").hide();
         $(".OnEnvironment").hide();
@@ -224,11 +242,13 @@ var show_environments = function(){
      options[0].selected = true;
      $(".OnEnvironment").show();
      $(".btn-group.env_name").show();
-    } else if ($("#environment_name").children("option[class='hybrid']").length > 0) {
-        $("#environment_name").children("option[class='hybrid']")[0].selected = true;
-    } else if($("#environment_name").children("option[class='" + type + "']").length > 0) {
-      $("#environment_name").children("option[class='" + type + "']")[0].selected = true;
-    }else{
+    } else if ($("#api-gateways").children("option[class='hybrid']").length > 0) {
+        $("#api-gateways").children("option[class='hybrid']")[0].selected = true;
+    } else if($("#api-gateways").children('optgroup').children("option[class='" + type + "']").length > 0) {
+      $("#api-gateways").children("option[class='" + type + "']")[0].selected = true;
+    } else if($("#micro-gateways").children("option[class='microgw-label']").length > 0){
+      $("#micro-gateways").children("option[class='microgw-label']")[0].selected = true;
+    } else{
       $(".env_name").hide();
       $(".OnEnvironment").hide();
     }
@@ -238,17 +258,36 @@ var show_environments = function(){
 
 var select_environment = function() {
     var selectedEnvironment = $("#environment_name");
+    var gatewayType = $("#environment_name option:selected").attr('data-attr');
     var name = selectedEnvironment.val();
+    debugger;
+
+    if(gatewayType == "microGW"){
+         $("#sub_app_list").hide();
+         $(".oauth-apps").hide();
+         $(".oauth-app-key-types").hide();
+
+    } else {
+         $(".oauth-apps").show();
+         $(".oauth-app-key-types").show();
+    }
     var swaggerURL = window.swaggerUI.getConfigs().url;
     var envSwaggerURL = "";
     if (swaggerURL.indexOf("?") != -1) {
-        if (swaggerURL.indexOf("envName") != -1) {
-            envSwaggerURL = swaggerURL.split("envName")[0] + "envName=" + name;
+        if (swaggerURL.indexOf("gwType") != -1) {
+            envSwaggerURL = swaggerURL.split("gwType")[0] + "gwType=" + gatewayType;
         } else {
-            envSwaggerURL = swaggerURL + "&envName=" + name;
+            envSwaggerURL = swaggerURL + "&gwType=" + gatewayType;
         }
+
+        if (envSwaggerURL.indexOf("gwName") != -1) {
+            envSwaggerURL = envSwaggerURL.split("gwName")[0] + "gwName=" + name;
+        } else {
+            envSwaggerURL = envSwaggerURL + "&gwName=" + name;
+        }
+
     } else {
-        envSwaggerURL = swaggerURL + "?envName=" + name;
+        envSwaggerURL = swaggerURL + "?gwType=" + gatewayType  + "&gwName=" + name;
     }
 
     //Load swagger spec for given environment
@@ -272,7 +311,7 @@ function checkOnKeyPress(e) {
 
 <% if(subscriptions != null && subscriptions.length > 0) { %>
 <form class="form-horizontal">
-      <div class="form-group">
+      <div class="form-group oauth-apps">
           <label for="" class="col-sm-3 control-label">Try</label>
           <div class="col-sm-9">
             <select id="sub_app_list" class="form-control subapp">
@@ -293,7 +332,7 @@ function checkOnKeyPress(e) {
             </select>
           </div>
       </div>
-      <div class="form-group">
+      <div class="form-group oauth-app-key-types">
         <label for="" class="col-sm-3 control-label">Using</label>
             <div class="col-sm-9">
             <div class="input-group">
@@ -306,19 +345,43 @@ function checkOnKeyPress(e) {
             </div>
       </div>
       <div class="form-group">
-        <label for="" class="col-sm-3 control-label OnEnvironment">On Environment</label>
+        <label for="" class="col-sm-3 control-label OnEnvironment"><%=i18n.localize("API Gateways")%></label>
         <div class="col-sm-9">
           <select id="environment_name" class="env_name">
                 <%
                 var envir = JSON.parse(api.serverURL);
+                %>
+                   <optgroup label="<%=i18n.localize("API Gateways")%>" id="api-gateways">
+                <%
                 for(var types in envir){
                   var endpointType=envir[types];
-                  for(var endpoint in endpointType){
+                    for(var endpoint in endpointType){
                       if(endpointType[endpoint]["showInConsole"]){
                       %>
-                         <option value="<%=encode.forHtmlAttribute(endpoint)%>" class="<%=types%>"><%=encode.forHtml(endpoint)%></option>
+                         <option value="<%=encode.forHtmlAttribute(endpoint)%>" class="<%=types%>" data-attr ="apiGW"><%=encode.forHtml(endpoint)%></option>
                       <% }
                   }
+                }
+                %>
+                   </optgroup>
+                <%
+                if(api.labels) {
+                    %>
+                      <optgroup label="<%=i18n.localize("Micro Gateways")%>" id="micro-gateways">
+                    <%
+                    var gatewayLabels = api.labels;
+                    for (var i = 0; i < gatewayLabels.length; i++) {
+                        var label = gatewayLabels[i];
+                        if(label.labelName && label.accessURLs.indexOf("https://") == 0) {
+                            %>
+                              <option value="<%=encode.forHtmlAttribute(label.labelName)%>" class="microgw-label" data-attr="microGW"><%=encode.forHtmlAttribute(label.labelName)%></option>
+                            <%
+                        }
+
+                    }
+                    %>
+                      </optgroup>
+                    <%
                 }
                 %>
           </select>
@@ -355,15 +418,18 @@ function checkOnKeyPress(e) {
             <p><%=i18n.localize("You require an access token to try the API. Please login and subscribe to the API to generate an access token.")%> &nbsp; <%=i18n.localize("If you already have an access token, please provide it below.")%></p>
         </div>
     <% } %>
-        <div class="alert alert-warning hide notoken">
-        <button type="button" class="close" data-dismiss="alert"><i class="fw fw-cancel"></i></button>
-        <strong><%=i18n.localize("Warning!")%> </strong>
-            <%=i18n.localize("The selected application does not have an access token for the selected environment. Please go to the subscription page and generate an access token first.")%>
-        </div>
 
-
-
-        <form class="form-horizontal">
+       <form class="form-horizontal">
+           <div class="col-sm-9 col-sm-offset-3">
+                <div class="row">
+                    <div class="notoken">
+                        <div class="message message-warning remove-margin-top">
+                            <h4><i class="icon fw fw-warning"></i><%=i18n.localize("No access token found")%></h4>
+                            <p><%=i18n.localize("The selected application does not have an access token for the selected environment. Go to the application page and generate keys.")%></p>
+                        </div>
+                    </div>
+                </div>
+           </div>
           <div class="form-group">
             <label class="col-sm-3 control-label">Set Request Header</label>
             <div class=" col-sm-9">

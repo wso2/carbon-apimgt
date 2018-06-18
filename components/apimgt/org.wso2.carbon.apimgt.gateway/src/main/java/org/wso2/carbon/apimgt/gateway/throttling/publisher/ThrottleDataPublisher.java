@@ -118,23 +118,27 @@ public class ThrottleDataPublisher {
             String appId, MessageContext messageContext,
             AuthenticationContext authenticationContext) {
         try {
-            DataProcessAndPublishingAgent agent = dataPublisherPool.get();
-            agent.setDataReference(applicationLevelThrottleKey, applicationLevelTier,
-                    apiLevelThrottleKey, apiLevelTier,
-                    subscriptionLevelThrottleKey, subscriptionLevelTier,
-                    resourceLevelThrottleKey, resourceLevelTier,
-                    authorizedUser, apiContext, apiVersion, appTenant, apiTenant, appId, messageContext,
-                    authenticationContext);
-            if (log.isDebugEnabled()) {
-                log.debug("Publishing throttle data from gateway to traffic-manager for: " + apiContext
-                        + " with ID: " + messageContext.getMessageID() + " started" + " at "
-                        + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
-            }
-            executor.execute(agent);
-            if (log.isDebugEnabled()) {
-                log.debug("Publishing throttle data from gateway to traffic-manager for: " + apiContext
-                        + " with ID: " + messageContext.getMessageID() + " ended" + " at "
-                        + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
+            if (dataPublisherPool != null) {
+                DataProcessAndPublishingAgent agent = dataPublisherPool.get();
+                agent.setDataReference(applicationLevelThrottleKey, applicationLevelTier,
+                        apiLevelThrottleKey, apiLevelTier,
+                        subscriptionLevelThrottleKey, subscriptionLevelTier,
+                        resourceLevelThrottleKey, resourceLevelTier,
+                        authorizedUser, apiContext, apiVersion, appTenant, apiTenant, appId, messageContext,
+                        authenticationContext);
+                if (log.isDebugEnabled()) {
+                    log.debug("Publishing throttle data from gateway to traffic-manager for: " + apiContext
+                            + " with ID: " + messageContext.getMessageID() + " started" + " at "
+                            + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
+                }
+                executor.execute(agent);
+                if (log.isDebugEnabled()) {
+                    log.debug("Publishing throttle data from gateway to traffic-manager for: " + apiContext
+                            + " with ID: " + messageContext.getMessageID() + " ended" + " at "
+                            + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
+                }
+            } else {
+                log.debug("Throttle data publisher pool is not initialized.");
             }
         } catch (Exception e) {
             log.error("Error while publishing throttling events to global policy server", e);

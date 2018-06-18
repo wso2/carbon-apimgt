@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.apimgt.keymgt.token;
 
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -13,6 +31,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -38,13 +57,13 @@ public class APIMJWTGenerator extends JWTGenerator {
 
         String base64UrlEncodedHeader = "";
         if (jwtHeader != null) {
-            base64UrlEncodedHeader = encode(jwtHeader.getBytes(Charset.defaultCharset()));
+            base64UrlEncodedHeader = Base64.getUrlEncoder().encodeToString(jwtHeader.getBytes(Charset.defaultCharset()));
         }
 
         String jwtBody = buildBody(jwtTokenInfoDTO);
         String base64UrlEncodedBody = "";
         if (jwtBody != null) {
-            base64UrlEncodedBody = encode(jwtBody.getBytes());
+            base64UrlEncodedBody = Base64.getUrlEncoder().encodeToString(jwtBody.getBytes());
         }
 
         if (SHA256_WITH_RSA.equals(signatureAlgorithm)) {
@@ -56,7 +75,7 @@ public class APIMJWTGenerator extends JWTGenerator {
             if (log.isDebugEnabled()) {
                 log.debug("signed assertion value : " + new String(signedAssertion, Charset.defaultCharset()));
             }
-            String base64UrlEncodedAssertion = encode(signedAssertion);
+            String base64UrlEncodedAssertion = Base64.getUrlEncoder().encodeToString(signedAssertion);
 
             return base64UrlEncodedHeader + '.' + base64UrlEncodedBody + '.' + base64UrlEncodedAssertion;
         } else {
@@ -138,7 +157,8 @@ public class APIMJWTGenerator extends JWTGenerator {
 
         //generating expiring timestamp
         long currentTime = System.currentTimeMillis();
-        long expireIn = currentTime + getTTL() * 1000;
+        // jwtTokenInfoDTO.getExpirationTime() gives the token validity time given when the token is generated.
+        long expireIn = currentTime + jwtTokenInfoDTO.getExpirationTime() * 1000;
 
         String endUserName = jwtTokenInfoDTO.getEndUserName();
 
@@ -149,12 +169,16 @@ public class APIMJWTGenerator extends JWTGenerator {
         String serverURL = configuration.getParameter(APIConstants.TOKEN_URL);
 
 
+        claims.put("sub", endUserName);
         claims.put("jti", UUID.randomUUID().toString());
         claims.put("iss", serverURL);
         claims.put("aud", jwtTokenInfoDTO.getAudience());
-        claims.put("exp", String.valueOf(expireIn));
-        claims.put("enduser", endUserName);
+        claims.put("iat", currentTime);
+        claims.put("exp", expireIn);
+        claims.put("scope", jwtTokenInfoDTO.getScopes());
         claims.put("subscribedAPIs", jwtTokenInfoDTO.getSubscribedApiDTOList());
+        claims.put("application", jwtTokenInfoDTO.getApplication());
+        claims.put("keytype", jwtTokenInfoDTO.getKeyType());
 
         return claims;
     }

@@ -3155,12 +3155,12 @@ msgstr ""
 
 #: site/themes/wso2/templates/item-implement/js/jquery.certUi.js:331
 msgid ""
-"Certificate is added successfully. This will be affect to all the users."
+"The certificate was added successfully. Please note that it will be available to all users."
 msgstr ""
 
 #: site/themes/wso2/templates/item-implement/js/jquery.certUi.js:333
 msgid ""
-"Certificate is deleted Successfully. This will be affect to all the users."
+"The certificate was deleted successfully. Note that it will not be accessible to any user hereafter."
 msgstr ""
 
 #: site/themes/wso2/templates/item-implement/js/jquery.certUi.js:338

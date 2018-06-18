@@ -91,7 +91,7 @@ public class MicroGatewayRestAPITest {
         Mockito.when(authDTO.getTenantDomain()).thenReturn(tenantDomain);
         Mockito.when(authDTO.getResponseStatus()).thenReturn(Response.Status.UNAUTHORIZED);
         InputStream anyInputStream = new ByteArrayInputStream("test data".getBytes());
-        String uploadedFileName = "api-usage-data.dat.1518413760007.gz";
+        String uploadedFileName = "api-usage-data.dat.1518413760007.zip";
 
         HttpHeaders httpHeaders = Mockito.mock(HttpHeaders.class);
         List<String> fileNameHeader = new ArrayList<>();

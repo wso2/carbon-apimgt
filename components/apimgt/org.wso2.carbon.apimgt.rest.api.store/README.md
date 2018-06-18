@@ -1,17 +1,17 @@
 ## API Manager REST API Development
 
 This guide explains the procedure of adding a new resource to API Manager CXF based REST APIs.
-The procedure follows a top-down approach. We first define our API changes in the particular APIs swagger definition.
-The changes are then applied to the CXF service java classes using code generation.
+The procedure follows a top-down approach. We first define our API changes in the particular API's Swagger definition.
+The changes are then applied to the CXF service Java classes using code generation.
 
 The example described here is specific to Store REST API. It describes step by step procedure to add a new resource
-called /sample.
+named /sample.
 
 ### Adding a new resource to Store REST API
 
 #### Steps
 
-1. Clone the code generator tool which is based on swagger-code-gen tool.
+1. Clone the code generator tool which is based on the swagger-code-gen tool.
 
 [https://github.com/hevayo/swagger2cxf-maven-plugin](https://github.com/hevayo/swagger2cxf-maven-plugin)
 
@@ -24,7 +24,7 @@ There are some corresponding branches in the repo for each API Manager Version. 
 | APIM 2.1.0 - Store REST API      | apim-2.1.0-store
 
 
-2. Add this plugin to org.wso2.carbon.apimgt.rest.api.store component’s pom.xml
+2. Add this plug-in to the org.wso2.carbon.apimgt.rest.api.store component’s pom.xml file.
 
 ```
 <plugin>
@@ -40,7 +40,7 @@ There are some corresponding branches in the repo for each API Manager Version. 
 
 ##### Adding the new changes
 
-3. Add the new API (resource) to /src/main/resources/store-api.yaml
+3. Add the newly defined API (resource) to /src/main/resources/store-api.yaml
 
 Eg:
 Add this resource:
@@ -50,9 +50,9 @@ Add this resource:
     get:
       x-scope: apim:api_view
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0
-      .1:9443/api/am/store/v0.10/sample"
+      .1:9443/api/am/store/v0.13/sample"
       x-wso2-request: |
-       GET https://127.0.0.1:9443/api/am/store/v0.10/sample
+       GET https://127.0.0.1:9443/api/am/store/v0.13/sample
        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
       x-wso2-response: "HTTP/1.1 200 OK"
       summary: |
@@ -100,7 +100,7 @@ Add this resource:
 
 ```
 
-4. Validate the complete yaml using  [online swagger editor](http://editor.swagger.io/#/)
+4. Validate the complete YAML using an [online Swagger editor](http://editor.swagger.io/#/)
 
 ##### Generating the code
 
@@ -117,7 +117,7 @@ Classes generated under src/main/java/impl are only one-time generated. We shoul
 
 8. Revert the changes of beans.xml
 
-9. Compare the <jaxrs:serviceBeans> … </jaxrs:serviceBeans> element of changed and original beans.xml
+9. Compare the <jaxrs:serviceBeans> … </jaxrs:serviceBeans> element of the changed and original beans.xml
 
 After code generation:
 ```
@@ -208,21 +208,21 @@ beans.xml
 </beans>
 ```
 
-11. Convert store.yaml to json format using  [http://editor.swagger.io/#/](http://editor.swagger.io/#/)
+11. Convert store.yaml to JSON format using [http://editor.swagger.io/#/](http://editor.swagger.io/#/)
 
 12. Overwrite the downloaded store-api.json with components/apimgt/org.wso2.carbon.apimgt.rest.api
 .util/src/main/resources/store-api.json
-- **Note:** This is required to OAuth2 scopes validation related functionality to work. (See OAuthAuthenticationInterceptor class)
+- **Note:** This is required for the OAuth2 scopes validation related functionality to work. (See OAuthAuthenticationInterceptor class)
 
 13. Build org.wso2.carbon.apimgt.rest.api.util component
 
-14. Build org.wso2.carbon.apimgt.rest.api.store and deploy the api#am#store#v0.10.war in the pack
-- **NOTE**: No need to put the org.wso2.carbon.apimgt.rest.api.util.jar as a patch. This will be bundled inside the
-webapp when we build the two components in that order. (v0.10 is for APIM 2.0.0 version)
+14. Build org.wso2.carbon.apimgt.rest.api.store and deploy the api#am#store#v0.13.war in the pack
+- **NOTE**: Yod do not need to put the org.wso2.carbon.apimgt.rest.api.util.jar as a patch as this will be bundled inside the
+webapp when you build the two components in that order. 
 
 ##### Invoke the new /sample resource:
 
-15. Follow the guide https://docs.wso2.com/display/AM200/apidocs/store/#guide and generate an access token with scope
+15. Follow the guide https://docs.wso2.com/display/AM250/apidocs/store/#guide and generate an access token with scope
 defined in x-scope element in your new resource definition.
 Here it is apim:api_view.
 
@@ -236,10 +236,12 @@ Here it is apim:api_view.
 16. Invoke /sample resource with the generated access token.
 
 ```
-curl -H "Authorization: Bearer <access-token>" https://localhost:9443/api/am/store/v0.10/sample -k -v
+curl -H "Authorization: Bearer <access-token>" https://localhost:9443/api/am/store/
+/sample -k -v
 
 v0.10 - APIM 2.0.0
 v0.11 - APIM 2.1.0
 v0.12 - APIM 2.2.0
+v0.13 - APIM 2.5.0
 ```
 

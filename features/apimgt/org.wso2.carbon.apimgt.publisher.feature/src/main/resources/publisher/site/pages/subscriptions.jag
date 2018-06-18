@@ -20,6 +20,7 @@ i18n.init(request,localeResourcesBasePath);
     return;
     }
     isCreatePermitted = jagg.getCreatePermitted().permitted;
+    isCreatePermitted = false; // 'subscriptions' page is removed. Hence blocking access.
     if (!isCreatePermitted) {
     response.sendRedirect(jagg.getAbsoluteUrl("/site/pages/index.jag"));
     return;

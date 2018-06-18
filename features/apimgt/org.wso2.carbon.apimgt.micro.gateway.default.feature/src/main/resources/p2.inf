@@ -1,4 +1,4 @@
 instructions.configure = \
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.micro.gateway.default_${feature.version}/stream-definitions/,target:${installFolder}/../../stream-definitions/,overwrite:true);\
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.micro.gateway.default_${feature.version}/conf/on-premise-gateway.properties/,target:${installFolder}/../../conf/on-premise-gateway.properties,overwrite:true);\
-org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.micro.gateway.default_${feature.version}/micro-gateway#v0.9.war,target:${installFolder}/../../deployment/server/webapps/micro-gateway#v0.9.war,overwrite:true);\
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.micro.gateway.default_${feature.version}/micro-gateway#v0.10.war,target:${installFolder}/../../deployment/server/webapps/micro-gateway#v0.10.war,overwrite:true);\

@@ -40,6 +40,8 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -137,6 +139,9 @@ public class APIMappingUtilTestCase {
         api.setThumbnailUrl("ThumbnailUrl");
         api.setUUID(UUID.randomUUID().toString());
         api.setContext("/test");
+        Date date = new Date();
+        api.setLastUpdated(date);
+        api.setCreatedTime(String.valueOf(new Timestamp(date.getTime()).getTime()));
 
         Set<String> environments = new HashSet<>();
         environments.add(envProdAndSandbox);
@@ -154,11 +159,14 @@ public class APIMappingUtilTestCase {
     private API getSampleAPI() {
         APIIdentifier apiIdentifier = new APIIdentifier("admin", "dtoTest", "v1.0.0");
         API api = new API(apiIdentifier);
-        api.setStatus(APIStatus.CREATED);
+        api.setStatus(APIConstants.CREATED);
         api.setTransports("https");
         api.setEnvironments(new HashSet<String>() {{
             add("SANDBOX");
         }});
+        Date date = new Date();
+        api.setLastUpdated(new Date());
+        api.setCreatedTime(String.valueOf(new Timestamp(date.getTime()).getTime()));
         return api;
     }
 }

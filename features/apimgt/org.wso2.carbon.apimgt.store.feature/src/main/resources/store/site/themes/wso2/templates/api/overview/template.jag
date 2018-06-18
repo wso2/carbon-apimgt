@@ -17,7 +17,7 @@
           <%}%>
 	<%if (!api.isAdvertiseOnly) {%>
 
-	    <% 
+	    <%
         if(domains != null){
             for (var key in domains) {
                 var re = /\/$/g
@@ -73,19 +73,7 @@
     	        for (var urltype in environmenturls ) {
                     if(urltype != "showInConsole"){
 	                    if(environmenturls[urltype] != ""){
-                            if (api.type.toUpperCase() == "WS") {
-                                var url = environmenturls[urltype];
-                                if(url.match("^ws:")) {
-                                    var gatewayUrl = url;
-                                } else {
-                                    var cut = url.match(":(.*):");
-                                    if (cut){
-                                        var gatewayUrl = "ws:" + cut[1]+ ":9099";
-                                    } else {
-                                        var gatewayUrl = "ws://host:9099";
-                                    }
-                                }
-                            }
+                            var gatewayUrl = environmenturls[urltype];
                         %>
 	    	            <div  class="endpoint-copybtn well well-sm add-margin-bottom-1x">
                             <a data-clipboard-text=
@@ -142,19 +130,25 @@
     </p>
         <% } %>
 
-    <!-- Start of Micro Gateway Labels Section -->
+    <!-- Start of Microgateways Section -->
     <% if(api.labels != null){ %>
-        <h4 class="add-margin-top-5x"><%=i18n.localize("Micro Gateway Labels")%></h4>
+        <h4 class="add-margin-top-5x"><%=i18n.localize("Microgateways")%></h4>
         <% for (var label in api.labels ) { %>
             <div class="endpoint-copybtn well well-sm add-margin-bottom-1x">
-                <p><%= api.labels[label].labelName %></p>
-                <% if (api.labels[label].accessURLs != null && api.labels[label].accessURLs.length > 0){ %>
-                    <p>Access URLs : <%= api.labels[label].accessURLs %></p>
-                <% } %>
+                <p><b><%=i18n.localize("Label")%> : </b> <%=api.labels[label].labelName%></p>
+                <% if (api.labels[label].accessURLs != null && api.labels[label].accessURLs.length > 0){
+                        var urlArray = api.labels[label].accessURLs.split(',');
+                        if (urlArray != null && urlArray.length > 0){
+                            for(var i=0; i < urlArray.length; i++){ %>
+                                <%=encode.forHtml(urlArray[i])%><%=encode.forHtml(api.context)%>
+                                <br/>
+                            <%}
+                        }
+                }%>
             </div>
         <% } %>
     <% } %>
-    <!-- End of Micro Gateway Labels Section -->
+    <!-- End of Microgateways Section -->
 
 	 <% if((api.bizOwner && api.bizOwner != "") || (api.techOwner && api.techOwner != "")){ %>
 	 		<h4 class="add-margin-top-5x"><%=i18n.localize("Business Information")%></h4>

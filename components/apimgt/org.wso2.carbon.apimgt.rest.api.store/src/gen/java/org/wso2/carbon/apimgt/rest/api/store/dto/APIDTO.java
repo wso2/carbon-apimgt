@@ -55,6 +55,9 @@ public class APIDTO  {
   private List<String> transport = new ArrayList<String>();
   
   
+  private String authorizationHeader = null;
+  
+  
   private List<String> tags = new ArrayList<String>();
   
   
@@ -82,7 +85,8 @@ public class APIDTO  {
   /**
   * gets and sets the lastUpdatedTime for APIDTO
   **/
-  @JsonIgnore
+  @ApiModelProperty(value = "Last Updated Time of the API")
+  @JsonProperty("lastUpdatedTime")
   public String getLastUpdatedTime(){
     return lastUpdatedTime;
   }
@@ -94,7 +98,8 @@ public class APIDTO  {
   * gets and sets the createdTime for a APIDTO
   **/
 
-  @JsonIgnore
+  @ApiModelProperty(value = "Created Time of the API")
+  @JsonProperty("createdTime")
   public String getCreatedTime(){
     return createdTime;
   }
@@ -245,6 +250,19 @@ public class APIDTO  {
 
   
   /**
+   * Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified\nin tenant or system level will be used. \n
+   **/
+  @ApiModelProperty(value = "Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified\nin tenant or system level will be used. \n")
+  @JsonProperty("authorizationHeader")
+  public String getAuthorizationHeader() {
+    return authorizationHeader;
+  }
+  public void setAuthorizationHeader(String authorizationHeader) {
+    this.authorizationHeader = authorizationHeader;
+  }
+
+  
+  /**
    * Search keywords related to the API
    **/
   @ApiModelProperty(value = "Search keywords related to the API")
@@ -349,6 +367,7 @@ public class APIDTO  {
     sb.append("  status: ").append(status).append("\n");
     sb.append("  isDefaultVersion: ").append(isDefaultVersion).append("\n");
     sb.append("  transport: ").append(transport).append("\n");
+    sb.append("  authorizationHeader: ").append(authorizationHeader).append("\n");
     sb.append("  tags: ").append(tags).append("\n");
     sb.append("  tiers: ").append(tiers).append("\n");
     sb.append("  thumbnailUrl: ").append(thumbnailUrl).append("\n");
@@ -356,6 +375,7 @@ public class APIDTO  {
     sb.append("  endpointURLs: ").append(endpointURLs).append("\n");
     sb.append("  businessInformation: ").append(businessInformation).append("\n");
     sb.append("  labels: ").append(labels).append("\n");
+    sb.append("  lastUpdatedTime: ").append(lastUpdatedTime).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

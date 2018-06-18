@@ -128,6 +128,18 @@ public interface APIProvider extends APIManager {
     Set<Subscriber> getSubscribersOfAPI(APIIdentifier identifier) throws APIManagementException;
 
     /**
+     * Returns full list of subscriptions of an API
+     *
+     * @param apiName    Name of the API
+     * @param apiVersion Version of the API
+     * @param provider Name of API creator
+     * @return Set<UserApplicationAPIUsage>
+     * @throws APIManagementException if failed to get Subscribers
+     */
+    List<SubscribedAPI> getSubscriptionsOfAPI(String apiName, String apiVersion, String provider)
+            throws APIManagementException;
+
+    /**
      * this method returns the Set<APISubscriptionCount> for given provider and api
      *
      * @param identifier APIIdentifier
@@ -261,6 +273,19 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException failed environments during gateway operation
      */
     void manageAPI(API api) throws APIManagementException, FaultGatewaysException;
+
+    /**
+     * Change the lifecycle state of the specified API
+     *
+     * @param api The API whose status to be updated
+     * @param status New status of the API
+     * @param userId User performing the API state change
+     * @param updateGatewayConfig Whether the changes should be pushed to the API gateway or not
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException on error
+     * @throws org.wso2.carbon.apimgt.api.FaultGatewaysException on Gateway Failure
+     * */
+    void changeAPIStatus(API api, String status, String userId, boolean updateGatewayConfig)
+            throws APIManagementException, FaultGatewaysException;
 
     /**
      * Change the lifecycle state of the specified API
@@ -685,8 +710,19 @@ public interface APIProvider extends APIManager {
       * @return collection of failed gateways. Map contains gateway name as the key and the error as the value
       * @throws APIManagementException
       */
-     Map<String, String> propergateAPIStatusChangeToGateways(APIIdentifier identifier, APIStatus newStatus) 
+     Map<String, String> propergateAPIStatusChangeToGateways(APIIdentifier identifier, String newStatus)
              throws APIManagementException;
+
+    /**
+     * Push api related state changes to the gateway. Api related configurations will be deployed or destroyed
+     * according to the new state.
+     * @param identifier Api identifier
+     * @param newStatus new state of the lifecycle
+     * @return collection of failed gateways. Map contains gateway name as the key and the error as the value
+     * @throws APIManagementException
+     */
+    Map<String, String> propergateAPIStatusChangeToGateways(APIIdentifier identifier, APIStatus newStatus)
+            throws APIManagementException;
      
      /**
       * Update api related information such as database entries, registry updates for state change.
@@ -698,9 +734,22 @@ public interface APIProvider extends APIManager {
       * @throws APIManagementException
       * @throws FaultGatewaysException
       */
-     boolean updateAPIforStateChange(APIIdentifier identifier, APIStatus newStatus, 
+     boolean updateAPIforStateChange(APIIdentifier identifier, String newStatus,
              Map<String, String> failedGatewaysMap) throws APIManagementException, FaultGatewaysException;
-     
+
+    /**
+     * Update api related information such as database entries, registry updates for state change.
+     * @param identifier
+     * @param newStatus
+     * @param failedGatewaysMap Map of failed gateways. Gateway name is the key and error message is value. Null is
+     * accepted if changes are not pushed to a gateway
+     * @return boolean value representing success not not
+     * @throws APIManagementException
+     * @throws FaultGatewaysException
+     */
+    boolean updateAPIforStateChange(APIIdentifier identifier, APIStatus newStatus,
+            Map<String, String> failedGatewaysMap) throws APIManagementException, FaultGatewaysException;
+
      /**
       * Get the current lifecycle status of the api
       * @param apiIdentifier Api identifier

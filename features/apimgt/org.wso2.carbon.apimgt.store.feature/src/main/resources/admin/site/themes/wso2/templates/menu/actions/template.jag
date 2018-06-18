@@ -148,7 +148,7 @@
                         	             <i class="fw fw-add fw-stack-1x"></i>
                         	             <i class="fw fw-circle-outline fw-stack-2x"></i>
                         	        </span>
-                        	        <%=i18n.localize("Add Microgateway Label")%>
+                        	        <%=i18n.localize("Add Microgateway")%>
                         	    </a>
                         	</li>
                         <%} %>

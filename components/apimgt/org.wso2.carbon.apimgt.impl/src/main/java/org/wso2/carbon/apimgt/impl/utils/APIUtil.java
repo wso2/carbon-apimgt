@@ -312,9 +312,7 @@ public final class APIUtil {
             //setting api ID for scope retrieval
             api.getId().setApplicationId(Integer.toString(apiId));
             // set url
-            api.setStatus((artifact.getLifecycleState() != null) ?
-                    getApiStatus(artifact.getLifecycleState()) :
-                    getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
+            api.setStatus(getLcStateFromArtifact(artifact));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             api.setWsdlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WSDL));
             api.setWadlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WADL));
@@ -449,6 +447,7 @@ public final class APIUtil {
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
             api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
+            api.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
 
         } catch (GovernanceException e) {
             String msg = "Failed to get API for artifact ";
@@ -499,9 +498,7 @@ public final class APIUtil {
             //set last access time
             api.setLastUpdated(registry.get(artifactPath).getLastModified());
             // set url
-            api.setStatus((artifact.getLifecycleState() != null) ?
-                    getApiStatus(artifact.getLifecycleState()) :
-                    getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
+            api.setStatus(getLcStateFromArtifact(artifact));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             api.setWsdlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WSDL));
             api.setWadlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WADL));
@@ -710,9 +707,7 @@ public final class APIUtil {
             api.setUUID(artifact.getId());
             api.setRating(getAverageRating(apiId));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
-            api.setStatus((artifact.getLifecycleState() != null) ?
-                    getApiStatus(artifact.getLifecycleState()) :
-                    getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
+            api.setStatus(getLcStateFromArtifact(artifact));
             api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
             api.setVisibility(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY));
             api.setVisibleRoles(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES));
@@ -806,6 +801,7 @@ public final class APIUtil {
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
             api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
+            api.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
         } catch (GovernanceException e) {
             String msg = "Failed to get API from artifact ";
             throw new APIManagementException(msg, e);
@@ -869,7 +865,7 @@ public final class APIUtil {
     public static GenericArtifact createAPIArtifactContent(GenericArtifact artifact, API api)
             throws APIManagementException {
         try {
-            String apiStatus = api.getStatus().getStatus();
+            String apiStatus = api.getStatus();
             artifact.setAttribute(APIConstants.API_OVERVIEW_NAME, api.getId().getApiName());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION, api.getId().getVersion());
 
@@ -1184,7 +1180,13 @@ public final class APIUtil {
             }
         }
         return apiStatus;
+    }
 
+    public static String getLcStateFromArtifact(GovernanceArtifact artifact) throws GovernanceException {
+        String state = (artifact.getLifecycleState() != null) ?
+                artifact.getLifecycleState() :
+                artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
+        return (state != null) ? state.toUpperCase() : null;
     }
 
 
@@ -1404,7 +1406,7 @@ public final class APIUtil {
         return artifactManager;
     }
 
-    private static void handleException(String msg) throws APIManagementException {
+    public static void handleException(String msg) throws APIManagementException {
         log.error(msg);
         throw new APIManagementException(msg);
     }
@@ -2662,9 +2664,7 @@ public final class APIUtil {
             //set uuid
             api.setUUID(artifact.getId());
             // set url
-            api.setStatus((artifact.getLifecycleState() != null) ?
-                    getApiStatus(artifact.getLifecycleState()) :
-                    getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
+            api.setStatus(getLcStateFromArtifact(artifact));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             api.setWsdlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WSDL));
             api.setWadlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WADL));
@@ -4728,9 +4728,7 @@ public final class APIUtil {
             //set uuid
             api.setUUID(artifact.getId());
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
-            api.setStatus((artifact.getLifecycleState() != null) ?
-                    getApiStatus(artifact.getLifecycleState()) :
-                    getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
+            api.setStatus(getLcStateFromArtifact(artifact));
             api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
             api.setVisibility(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY));
             api.setVisibleRoles(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES));
@@ -5014,8 +5012,8 @@ public final class APIUtil {
 
                     if (doc != null && api != null) {
                         if (APIConstants.STORE_CLIENT.equals(searchClient)) {
-                            if (api.getStatus().equals(getApiStatus(APIConstants.PUBLISHED)) ||
-                                    api.getStatus().equals(getApiStatus(APIConstants.PROTOTYPED))) {
+                            if (APIConstants.PUBLISHED.equals(api.getStatus()) ||
+                                    APIConstants.PROTOTYPED.equals(api.getStatus())) {
                                 apiDocMap.put(doc, api);
                             }
                         } else {
@@ -5080,8 +5078,7 @@ public final class APIUtil {
                         continue;
                     }
                     if (apiNames.indexOf(artifact.getAttribute(APIConstants.API_OVERVIEW_NAME)) < 0) {
-                        APIStatus apiLcStatus = APIUtil.getApiStatus(artifact.getLifecycleState());
-                        String status = (apiLcStatus != null) ? apiLcStatus.getStatus() : null;
+                        String status = APIUtil.getLcStateFromArtifact(artifact);
                         if (isAllowDisplayAPIsWithMultipleStatus()) {
                             if (APIConstants.PUBLISHED.equals(status) || APIConstants.DEPRECATED.equals(status)) {
                                 API api = APIUtil.getAPI(artifact, registry);
@@ -7155,6 +7152,26 @@ public final class APIUtil {
     }
 
     /**
+     * This method is used to get the authorization configurations from the tenant registry or from api-manager.xml if 
+     * config is not available in tenant registry
+     *
+     * @param tenantId The Tenant ID
+     * @param property The configuration to get from tenant registry or api-manager.xml
+     * @return The configuration read from tenant registry or api-manager.xml
+     * @throws APIManagementException Throws if the registry resource doesn't exist
+     *                                or the content cannot be parsed to JSON
+     */
+    public static String getOAuthConfiguration(int tenantId, String property)
+            throws APIManagementException {
+        String authConfigValue = APIUtil
+                .getOAuthConfigurationFromTenantRegistry(tenantId, property);
+        if (StringUtils.isBlank(authConfigValue)) {
+            authConfigValue = APIUtil.getOAuthConfigurationFromAPIMConfig(property);
+        }
+        return authConfigValue;
+    }
+    
+    /**
      * This method is used to get the authorization configurations from the tenant registry
      *
      * @param tenantId The Tenant ID
@@ -7366,27 +7383,39 @@ public final class APIUtil {
      * @throws APIManagementException Throws if the registry resource doesn't exist
      * or the content cannot be parsed to JSON
      */
-    public static JSONObject getAppAttributeKeysFromRegistry(int tenantId) throws APIManagementException {        try {
-        Registry registryConfig = ServiceReferenceHolder.getInstance().getRegistryService().getConfigSystemRegistry(tenantId);
-        if (registryConfig.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
-            Resource resource = registryConfig.get(APIConstants.API_TENANT_CONF_LOCATION);
-            String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
-            if (content != null) {
-                JSONObject tenantConfigs = (JSONObject) new JSONParser().parse(content);
-                String property = APIConstants.ApplicationAttributes.APPLICATION_CONFIGURATIONS;
-                if (tenantConfigs.keySet().contains(property)) {
-                    return (JSONObject) tenantConfigs.get(APIConstants.ApplicationAttributes.APPLICATION_CONFIGURATIONS);
+    public static JSONObject getAppAttributeKeysFromRegistry(int tenantId) throws APIManagementException {
+
+        try {
+            Registry registryConfig = ServiceReferenceHolder.getInstance().getRegistryService().getConfigSystemRegistry(tenantId);
+            if (registryConfig.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
+                Resource resource = registryConfig.get(APIConstants.API_TENANT_CONF_LOCATION);
+                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
+                if (content != null) {
+                    JSONObject tenantConfigs = (JSONObject) new JSONParser().parse(content);
+                    String property = APIConstants.ApplicationAttributes.APPLICATION_CONFIGURATIONS;
+                    if (tenantConfigs.keySet().contains(property)) {
+                        return (JSONObject) tenantConfigs.get(APIConstants.ApplicationAttributes.APPLICATION_CONFIGURATIONS);
+                    }
                 }
             }
+        } catch (RegistryException exception) {
+            String msg = "Error while retrieving application attributes from tenant registry.";
+            throw new APIManagementException(msg, exception);
+        } catch (ParseException parseExceptione) {
+            String msg = "Couldn't create json object from Swagger object for custom application attributes.";
+            throw new APIManagementException(msg, parseExceptione);
         }
-
-    } catch (RegistryException exception) {
-        String msg = "Error while retrieving application attributes from tenant registry.";
-        throw new APIManagementException(msg, exception);
-    } catch (ParseException parseExceptione) {
-        String msg = "Couldn't create json object from Swagger object for custom application attributes.";
-        throw new APIManagementException(msg, parseExceptione);
-    }
         return null;
+    }
+
+    /**
+     * Validate the input file name for invalid path elements
+     *
+     * @param fileName
+     */
+    public static void validateFileName(String fileName) throws APIManagementException {
+        if (!fileName.isEmpty() && (fileName.contains("../") || fileName.contains("..\\"))) {
+            handleException("File name contains invalid path elements. " + fileName);
+        }
     }
 }

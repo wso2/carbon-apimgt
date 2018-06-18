@@ -94,5 +94,6 @@
     "restricted": "Restricted by roles",
     "retired": "RETIRED",
     "roles": "Visible to Roles",
-    "tenants": "Visible to Tenants"
+    "tenants": "Visible to Tenants",
+    "The already generated tokens of this application will not work for this new subscription please regenerate tokens after the subscription": "The already generated tokens of this application will not work for this new subscription. Please regenerate tokens after the subscription"
 }

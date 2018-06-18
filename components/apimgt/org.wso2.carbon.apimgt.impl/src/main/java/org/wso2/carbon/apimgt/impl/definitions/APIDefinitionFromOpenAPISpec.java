@@ -120,6 +120,9 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
                             template.setScopes(scope);
 
                             uriTemplates.add(template);
+                        } else {
+                            handleException("The HTTP method '" + httpVerb + "' provided for resource '" + uriTempVal
+                                    + "' is invalid");
                         }
                     }
                 }

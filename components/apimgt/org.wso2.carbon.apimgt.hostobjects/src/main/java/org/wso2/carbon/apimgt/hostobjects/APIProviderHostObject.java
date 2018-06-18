@@ -56,6 +56,7 @@ import org.mozilla.javascript.NativeArray;
 import org.mozilla.javascript.NativeObject;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
+import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
@@ -65,7 +66,6 @@ import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Documentation;
@@ -76,6 +76,7 @@ import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -298,13 +299,14 @@ public class APIProviderHostObject extends ScriptableObject {
                         config.getFirstProperty(APIConstants.SHOW_API_STORE_URL_FROM_PUBLISHER));
             }
             if (authorized) {
-
                 row.put("user", row, usernameWithDomain);
                 row.put("sessionId", row, sessionCookie);
                 row.put("isSuperTenant", row, isSuperTenant);
                 row.put("error", row, false);
                 row.put("showStoreURL", row, displayStoreUrlFromPublisher);
             } else {
+                CarbonConstants.AUDIT_LOG.info('\'' + usernameWithDomain + APIConstants.EMAIL_DOMAIN_SEPARATOR
+                        + tenantDomain + " [" + tenantId + "]' login denied due to insufficient privileges");
                 handleException("Login failed. Insufficient privileges.");
             }
         } catch (Exception e) {
@@ -1037,7 +1039,7 @@ public class APIProviderHostObject extends ScriptableObject {
         }
 
         API api = new API(apiId);
-        api.setStatus(APIStatus.CREATED);
+        api.setStatus(APIConstants.CREATED);
         api.setType(type);
         // This is to support the new Pluggable version strategy
         // if the context does not contain any {version} segment, we use the default version strategy.
@@ -1566,7 +1568,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
             api.addAvailableTiers(availableTier);
         }
-        api.setStatus(APIStatus.CREATED);
+        api.setStatus(APIConstants.CREATED);
         api.setContext(context);
         api.setType(type);
         api.setContextTemplate(contextTemplate);
@@ -2299,13 +2301,13 @@ public class APIProviderHostObject extends ScriptableObject {
             APIIdentifier apiId = new APIIdentifier(provider, name, version);
             API api = apiProvider.getAPI(apiId);
             if (api != null) {
-                APIStatus oldStatus = api.getStatus();
-                APIStatus newStatus = getApiStatus(status);
+                String oldStatus = api.getStatus();
+                String newStatus = status.toUpperCase();
                 String currentUser = ((APIProviderHostObject) thisObj).getUsername();
                 apiProvider.changeAPIStatus(api, newStatus, currentUser, publishToGateway);
 
-                if ((oldStatus.equals(APIStatus.CREATED) || oldStatus.equals(APIStatus.PROTOTYPED))
-                        && newStatus.equals(APIStatus.PUBLISHED)) {
+                if ((APIConstants.CREATED.equals(oldStatus) || APIConstants.PROTOTYPED.equals(oldStatus))
+                        && APIConstants.PUBLISHED.equals(newStatus)) {
                     if (makeKeysForwardCompatible) {
                         apiProvider.makeAPIKeysForwardCompatible(api);
                     }
@@ -2315,10 +2317,10 @@ public class APIProviderHostObject extends ScriptableObject {
                         APIVersionComparator versionComparator = new APIVersionComparator();
                         for (API oldAPI : apiList) {
                             if (oldAPI.getId().getApiName().equals(name) &&
-                                    versionComparator.compare(oldAPI, api) < 0 &&
-                                    (oldAPI.getStatus().equals(APIStatus.PUBLISHED))) {
-                                apiProvider.changeAPIStatus(oldAPI, APIStatus.DEPRECATED,
-                                        currentUser, publishToGateway);
+                                versionComparator.compare(oldAPI, api) < 0 &&
+                                (oldAPI.getStatus().equals(APIConstants.PUBLISHED))) {
+                                apiProvider.changeAPIStatus(oldAPI, APIConstants.DEPRECATED,
+                                                                             currentUser, publishToGateway);
                             }
                         }
                     }
@@ -2361,7 +2363,7 @@ public class APIProviderHostObject extends ScriptableObject {
             return true;
 
         } catch (APIManagementException e) {
-            handleException("Error while updating subscription status", e);
+            handleException("Error while updating subscription status: " + e.getMessage(), e);
             return false;
         }
 
@@ -2721,7 +2723,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 }
 
                 myn.put(6, myn, checkValue(tiersSet.toString()));
-                myn.put(7, myn, checkValue(api.getStatus().toString()));
+                myn.put(7, myn, checkValue(api.getStatus()));
                 myn.put(8, myn, getWebContextRoot(api.getThumbnailUrl()));
                 myn.put(9, myn, api.getContext());
                 myn.put(10, myn, checkValue(Long.valueOf(api.getLastUpdated().getTime()).toString()));
@@ -2914,7 +2916,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
                 Map<String, Long> subscriptions = new TreeMap<String, Long>();
                 for (API api : apiSet) {
-                    if (api.getStatus() == APIStatus.CREATED) {
+                    if (APIConstants.CREATED.equals(api.getStatus())) {
                         continue;
                     }
                     long count = apiProvider.getAPISubscriptionCountByAPI(api.getId());
@@ -3019,7 +3021,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 for (String version : versions) {
                     APIIdentifier id = new APIIdentifier(providerName, apiName, version);
                     API api = apiProvider.getAPI(id);
-                    if (api == null || api.getStatus() == APIStatus.CREATED) {
+                    if (api == null || APIConstants.CREATED.equals(api.getStatus())) {
                         continue;
                     }
                     long count = apiProvider.getAPISubscriptionCountByAPI(api.getId());
@@ -3107,7 +3109,7 @@ public class APIProviderHostObject extends ScriptableObject {
                     row.put("name", row, apiIdentifier.getApiName());
                     row.put("version", row, apiIdentifier.getVersion());
                     row.put("provider", row, APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
-                    row.put("status", row, checkValue(api.getStatus().toString()));
+                    row.put("status", row, checkValue(api.getStatus()));
                     row.put("thumb", row, getWebContextRoot(api.getThumbnailUrl()));
                     row.put("subs", row, getSubscriberCount(apiIdentifier, thisObj));
                     myn.put(i, myn, row);
@@ -3630,6 +3632,47 @@ public class APIProviderHostObject extends ScriptableObject {
         return myn;
     }
 
+    public static NativeArray jsFunction_getSubscriptionsOfAPI(Context cx, Scriptable thisObj,
+                                                             Object[] args, Function funObj)
+            throws APIManagementException {
+        String apiName;
+        String version;
+        String provider;
+        NativeArray myn = new NativeArray(0);
+        if (args == null || !isStringValues(args)) {
+            handleException("Invalid number of parameters or their types.");
+        }
+
+        apiName = (String) args[0];
+        version = (String) args[1];
+        provider = (String) args[2];
+
+        List<SubscribedAPI> subscriptions;
+        APIProvider apiProvider = getAPIProvider(thisObj);
+        try {
+            subscriptions = apiProvider.getSubscriptionsOfAPI(apiName, version, provider);
+            Iterator it = subscriptions.iterator();
+            int i = 0;
+            while (it.hasNext()) {
+                NativeObject row = new NativeObject();
+                Object subscriptionObject = it.next();
+                SubscribedAPI subscription = (SubscribedAPI) subscriptionObject;
+                row.put("subscriber", row, subscription.getSubscriber().getName());
+                row.put("application", row, subscription.getApplication().getName());
+                row.put("appId", row, subscription.getApplication().getId());
+                row.put("subscriptionStatus", row, subscription.getSubStatus());
+                row.put("subscriptionCreatedStatus", row, subscription.getSubCreatedStatus());
+                row.put("subscribedDate", row, subscription.getCreatedTime());
+                myn.put(i, myn, row);
+                i++;
+            }
+        } catch (APIManagementException e) {
+            handleException("Error occurred while getting subscriptions of the API- " + apiName +
+                    "-" + version, e);
+        }
+        return myn;
+    }
+
     public static String jsFunction_isContextExist(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException {
         Boolean contextExist = false;
@@ -3669,6 +3712,25 @@ public class APIProviderHostObject extends ScriptableObject {
         return apiExist.toString();
     }
 
+    public static String jsFunction_isApiNameWithDifferentCaseExist(Context cx, Scriptable thisObj, Object[] args,
+            Function funObj) throws APIManagementException {
+        Boolean apiWithDifferentCaseExist = false;
+        if (args != null && isStringValues(args)) {
+            String apiName = (String) args[0];
+            APIProvider apiProvider = getAPIProvider(thisObj);
+            try {
+                apiWithDifferentCaseExist = apiProvider.isApiNameWithDifferentCaseExist(apiName);
+            } catch (APIManagementException e) {
+                handleException(
+                        "Error from registry while checking whether a different letter case api name already exists",
+                        e);
+            }
+        } else {
+            handleException("Input api name value is null");
+        }
+        return apiWithDifferentCaseExist.toString();
+    }
+
     private static DocumentationType getDocType(String docType) {
         DocumentationType docsType = null;
         for (DocumentationType type : DocumentationType.values()) {
@@ -3696,17 +3758,6 @@ public class APIProviderHostObject extends ScriptableObject {
         return input != null ? input : "";
     }
 
-
-    private static APIStatus getApiStatus(String status) {
-        APIStatus apiStatus = null;
-        for (APIStatus aStatus : APIStatus.values()) {
-            if (aStatus.getStatus().equalsIgnoreCase(status)) {
-                apiStatus = aStatus;
-            }
-
-        }
-        return apiStatus;
-    }
 
     public static NativeObject jsFunction_searchPaginatedAPIs(Context cx, Scriptable thisObj,
                                                               Object[] args,
@@ -3751,7 +3802,7 @@ public class APIProviderHostObject extends ScriptableObject {
                                 APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
                         currentApi.put("version", currentApi,
                                 apiIdentifier.getVersion());
-                        currentApi.put("status", currentApi, checkValue(api.getStatus().toString()));
+                        currentApi.put("status", currentApi, checkValue(api.getStatus()));
                         currentApi.put("thumb", currentApi, getWebContextRoot(api.getThumbnailUrl()));
                         currentApi.put("subs", currentApi, apiProvider.getSubscribersOfAPI(api.getId()).size());
                         if (providerName != null) {
@@ -3783,7 +3834,7 @@ public class APIProviderHostObject extends ScriptableObject {
                     row.put("name", row, apiIdentifier.getApiName());
                     row.put("provider", row, APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
                     row.put("version", row, apiIdentifier.getVersion());
-                    row.put("status", row, checkValue(api.getStatus().toString()));
+                    row.put("status", row, checkValue(api.getStatus()));
                     row.put("thumb", row, getWebContextRoot(api.getThumbnailUrl()));
                     row.put("subs", row, apiProvider.getSubscribersOfAPI(api.getId()).size());
                     if (providerName != null) {
@@ -3858,7 +3909,7 @@ public class APIProviderHostObject extends ScriptableObject {
                                 APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
                         currentApi.put("version", currentApi,
                                 apiIdentifier.getVersion());
-                        currentApi.put("status", currentApi, checkValue(api.getStatus().toString()));
+                        currentApi.put("status", currentApi, checkValue(api.getStatus()));
                         currentApi.put("thumb", currentApi, getWebContextRoot(api.getThumbnailUrl()));
                         currentApi.put("subs", currentApi, apiProvider.getSubscribersOfAPI(api.getId()).size());
                         if (providerName != null) {
@@ -3887,7 +3938,7 @@ public class APIProviderHostObject extends ScriptableObject {
                     row.put("name", row, apiIdentifier.getApiName());
                     row.put("provider", row, APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
                     row.put("version", row, apiIdentifier.getVersion());
-                    row.put("status", row, checkValue(api.getStatus().toString()));
+                    row.put("status", row, checkValue(api.getStatus()));
                     row.put("thumb", row, getWebContextRoot(api.getThumbnailUrl()));
                     row.put("subs", row, apiProvider.getSubscribersOfAPI(api.getId()).size());
                     if (providerName != null) {
@@ -5331,7 +5382,7 @@ public class APIProviderHostObject extends ScriptableObject {
                     row.put("name", row, apiIdentifier.getApiName());
                     row.put("version", row, apiIdentifier.getVersion());
                     row.put("provider", row, APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
-                    row.put("status", row, checkValue(api.getStatus().toString()));
+                    row.put("status", row, checkValue(api.getStatus()));
                     row.put("thumb", row, getWebContextRoot(api.getThumbnailUrl()));
                     row.put("subs", row, getSubscriberCount(apiIdentifier, thisObj));
                     myn.put(i, myn, row);

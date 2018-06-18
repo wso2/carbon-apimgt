@@ -19,16 +19,15 @@ package org.wso2.carbon.apimgt.impl.observers;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
 
 public class SimpleLoggingObserver implements APIStatusObserver {
 
     private static final Log log = LogFactory.getLog(SimpleLoggingObserver.class);
 
     @Override
-    public boolean statusChanged(APIStatus previous, APIStatus current, API api) {
-        log.info("API status updated from: " + previous.getStatus() + " to: " +
-                current.getStatus() + " for the API: " + api.getId().getApiName() + " (" +
+    public boolean statusChanged(String previous, String current, API api) {
+        log.info("API status updated from: " + previous + " to: " +
+                current + " for the API: " + api.getId().getApiName() + " (" +
                 api.getId().getVersion() + ')');
         return true;
     }

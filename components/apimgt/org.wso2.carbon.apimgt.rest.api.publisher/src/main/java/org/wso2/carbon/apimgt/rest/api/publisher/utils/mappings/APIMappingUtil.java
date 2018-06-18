@@ -27,7 +27,6 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -223,7 +222,7 @@ public class APIMappingUtil {
 
         dto.setSequences(sequences);
 
-        dto.setStatus(model.getStatus().getStatus());
+        dto.setStatus(model.getStatus());
 
         String subscriptionAvailability = model.getSubscriptionAvailability();
         if (subscriptionAvailability != null) {
@@ -328,6 +327,7 @@ public class APIMappingUtil {
             }
             dto.setLabels(labels);
         }
+        dto.setAuthorizationHeader(model.getAuthorizationHeader());
 
         return dto;
     }
@@ -426,7 +426,7 @@ public class APIMappingUtil {
         model.setThumbnailUrl(dto.getThumbnailUri());
 
         if (dto.getStatus() != null) {
-            model.setStatus(mapStatusFromDTOToAPI(dto.getStatus()));
+            model.setStatus((dto.getStatus() != null) ? dto.getStatus().toUpperCase() : null);
         }
         model.setAsDefaultVersion(dto.getIsDefaultVersion());
         model.setResponseCache(dto.getResponseCaching());
@@ -543,7 +543,7 @@ public class APIMappingUtil {
         model.setCorsConfiguration(corsConfiguration);
         setEndpointSecurityFromApiDTOToModel(dto, model);
         setMaxTpsFromApiDTOToModel(dto, model);
-
+        model.setAuthorizationHeader(dto.getAuthorizationHeader());
         return model;
     }
 
@@ -672,7 +672,7 @@ public class APIMappingUtil {
             APIEndpointSecurityDTO securityDTO = new APIEndpointSecurityDTO();
             securityDTO.setType(APIEndpointSecurityDTO.TypeEnum.basic); //set default as basic
             securityDTO.setUsername(api.getEndpointUTUsername());
-            securityDTO.setPassword(api.getEndpointUTPassword());
+            securityDTO.setPassword(""); // Do not expose password
             if (api.isEndpointAuthDigest()) {
                 securityDTO.setType(APIEndpointSecurityDTO.TypeEnum.digest);
             }
@@ -711,23 +711,6 @@ public class APIMappingUtil {
         }
     }
 
-    private static APIStatus mapStatusFromDTOToAPI(String apiStatus) {
-        // switch case statements are not working as APIStatus.<STATUS>.toString() or APIStatus.<STATUS>.getStatus()
-        //  is not a constant
-        if (apiStatus.equals(APIStatus.BLOCKED.toString())) {
-            return APIStatus.BLOCKED;
-        } else if (apiStatus.equals(APIStatus.CREATED.toString())) {
-            return APIStatus.CREATED;
-        } else if (apiStatus.equals(APIStatus.PUBLISHED.toString())) {
-            return APIStatus.PUBLISHED;
-        } else if (apiStatus.equals(APIStatus.DEPRECATED.toString())) {
-            return APIStatus.DEPRECATED;
-        } else if (apiStatus.equals(APIStatus.PROTOTYPED.toString())) {
-            return APIStatus.PROTOTYPED;
-        } else {
-            return null; // how to handle this?
-        }
-    }
 
     private static String mapVisibilityFromDTOtoAPI(APIDetailedDTO.VisibilityEnum visibility) {
         switch (visibility) {

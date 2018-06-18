@@ -124,5 +124,17 @@ $(document).ready(function () {
         }
     });
 
+    $('#tokenType').change(
+        function () {
+            var keyType = $('option:selected', this).attr('title');
+            if (keyType == 'JWT') {
+                $('#jwt-token-type-warning').removeClass('hidden');
+            } else {
+                $('#jwt-token-type-warning').addClass('hidden');
+            }
+
+        }
+    );
+
 });
 
