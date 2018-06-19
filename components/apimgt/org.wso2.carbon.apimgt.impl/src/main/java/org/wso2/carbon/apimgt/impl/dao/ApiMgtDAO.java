@@ -11797,7 +11797,7 @@ public class ApiMgtDAO {
      */
     public void addApplicationAttributes(Map<String, String> applicationAttributes, int applicationId, int tenantId)
             throws APIManagementException {
-        log.debug(applicationAttributes);
+
         Connection connection = null;
         try {
             connection = APIMgtDBUtil.getConnection();
