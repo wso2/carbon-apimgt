@@ -26,6 +26,7 @@ import io.swagger.parser.SwaggerParser;
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
+import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.httpclient.HttpStatus;
@@ -243,7 +244,9 @@ public class APIProviderHostObject extends ScriptableObject {
 
         boolean isTenantFlowStarted = false;
         try {
-            AuthenticationAdminStub authAdminStub = new AuthenticationAdminStub(null, url + "AuthenticationAdmin");
+            ConfigurationContext configurationContext = ServiceReferenceHolder.getInstance().getAxis2ConfigurationContext();
+            AuthenticationAdminStub authAdminStub = new AuthenticationAdminStub(configurationContext, url +
+                    "AuthenticationAdmin");
             ServiceClient client = authAdminStub._getServiceClient();
             Options options = client.getOptions();
             options.setManageSession(true);
