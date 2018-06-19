@@ -4201,8 +4201,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         }
 
-        for (Object key : attributeKeys){
-            if(!applicationAttributes.keySet().contains(key)){
+        for (Object key : attributeKeys) {
+            if (!applicationAttributes.keySet().contains(key)) {
                 newApplicationAttributes.put((String) key, "");
             }
         }
