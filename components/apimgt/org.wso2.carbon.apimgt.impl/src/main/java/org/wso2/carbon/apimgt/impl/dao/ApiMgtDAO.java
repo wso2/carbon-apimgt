@@ -3362,7 +3362,7 @@ public class ApiMgtDAO {
 
             //Adding data to AM_APPLICATION_ATTRIBUTES table
             if( application.getApplicationAttributes() != null) {
-                addApplicationAttributes(application.getApplicationAttributes(), applicationId, tenantId);
+                addApplicationAttributes(conn, application.getApplicationAttributes(), applicationId, tenantId);
             }
         } catch (SQLException e) {
             handleException("Failed to add Application", e);
@@ -3415,7 +3415,7 @@ public class ApiMgtDAO {
             }
 
             if (application.getApplicationAttributes() != null && !application.getApplicationAttributes().isEmpty()) {
-                addApplicationAttributes(application.getApplicationAttributes(), application.getId(), tenantId);
+                addApplicationAttributes(conn, application.getApplicationAttributes(), application.getId(), tenantId);
             }
             conn.commit();
             updateOAuthConsumerApp(application.getName(), application.getCallbackUrl());
@@ -11707,16 +11707,14 @@ public class ApiMgtDAO {
         return label;
     }
 
-    public void addApplicationAttributes(Map<String, String> attributes, int applicationId, int tenantId)
+    private void addApplicationAttributes(Connection conn, Map<String, String> attributes, int applicationId, int tenantId)
             throws APIManagementException {
 
-        Connection connection = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-            connection = APIMgtDBUtil.getConnection();
             if(attributes != null) {
-                ps = connection.prepareStatement(SQLConstants.ADD_APPLICATION_ATTRIBUTES_SQL);
+                ps = conn.prepareStatement(SQLConstants.ADD_APPLICATION_ATTRIBUTES_SQL);
                 for (String key : attributes.keySet()) {
                     ps.setInt(1, applicationId);
                     ps.setString(2, key);
@@ -11729,7 +11727,7 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Error in adding attributes of application with id: " + applicationId , e);
         } finally {
-            APIMgtDBUtil.closeAllConnections(ps, connection, rs);
+            APIMgtDBUtil.closeAllConnections(ps, null, rs);
         }
     }
 
@@ -11786,6 +11784,37 @@ public class ApiMgtDAO {
             handleException("Error in establishing SQL connection ", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, connection, null);
+        }
+    }
+
+    /**
+     * Add new attributes against an Application in API Store
+     *
+     * @param applicationAttributes Map of key, value pair of attributes
+     * @param applicationId
+     * @param tenantId
+     * @throws APIManagementException
+     */
+    public void addApplicationAttributes(Map<String, String> applicationAttributes, int applicationId, int tenantId)
+            throws APIManagementException {
+        log.debug(applicationAttributes);
+        Connection connection = null;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            addApplicationAttributes(connection, applicationAttributes, applicationId, tenantId);
+            connection.commit();
+        } catch (SQLException sqlException) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException e) {
+                    log.error("Failed to rollback add application attributes ", e);
+                }
+            }
+            handleException("Failed to add Application", sqlException);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(null, connection, null);
         }
     }
 }
