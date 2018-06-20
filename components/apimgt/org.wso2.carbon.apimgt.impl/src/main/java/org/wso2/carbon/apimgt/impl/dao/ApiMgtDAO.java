@@ -11791,8 +11791,8 @@ public class ApiMgtDAO {
      * Add new attributes against an Application in API Store
      *
      * @param applicationAttributes Map of key, value pair of attributes
-     * @param applicationId
-     * @param tenantId
+     * @param applicationId Id of Application against which attributes are getting stored
+     * @param tenantId Id of tenant
      * @throws APIManagementException
      */
     public void addApplicationAttributes(Map<String, String> applicationAttributes, int applicationId, int tenantId)
