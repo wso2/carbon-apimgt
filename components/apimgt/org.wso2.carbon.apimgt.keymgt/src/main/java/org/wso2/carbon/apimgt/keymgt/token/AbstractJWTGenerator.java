@@ -326,9 +326,10 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
 
                 if (apimKeyCacheExpiry != null) {
                     ttl = Long.parseLong(apimKeyCacheExpiry);
+                } else {
+                    ttl = Long.valueOf(900);
                 }
-            }
-            else {
+            } else {
                 String ttlValue = config.getFirstProperty(APIConstants.JWT_EXPIRY_TIME);
                 if (ttlValue != null) {
                     ttl = Long.parseLong(ttlValue);
