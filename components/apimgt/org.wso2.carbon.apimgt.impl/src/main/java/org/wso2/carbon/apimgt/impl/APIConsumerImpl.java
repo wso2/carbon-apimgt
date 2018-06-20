@@ -4178,6 +4178,14 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         Map<String, String> applicationAttributes = application.getApplicationAttributes();
         List attributeKeys = new ArrayList<String>();
         int applicationId = application.getId();
+        int tenantId = 0;
+        Map<String, String> newApplicationAttributes = new HashMap<>();
+        String tenantDomain = MultitenantUtils.getTenantDomain(userId);
+        try {
+            tenantId = getTenantId(tenantDomain);
+        } catch (UserStoreException e) {
+            handleException("Error in getting tenantId of " + tenantDomain, e);
+        }
 
         for (Object object : applicationAttributesFromConfig) {
             JSONObject attribute = (JSONObject) object;
@@ -4192,6 +4200,13 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 }
             }
         }
+
+        for (Object key : attributeKeys) {
+            if (!applicationAttributes.keySet().contains(key)) {
+                newApplicationAttributes.put((String) key, "");
+            }
+        }
+        apiMgtDAO.addApplicationAttributes(newApplicationAttributes, applicationId, tenantId);
     }
 
 }

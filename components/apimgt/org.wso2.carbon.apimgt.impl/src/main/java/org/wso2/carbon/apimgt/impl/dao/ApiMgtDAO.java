@@ -11786,4 +11786,35 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, connection, null);
         }
     }
+
+    /**
+     * Add new attributes against an Application in API Store
+     *
+     * @param applicationAttributes Map of key, value pair of attributes
+     * @param applicationId Id of Application against which attributes are getting stored
+     * @param tenantId Id of tenant
+     * @throws APIManagementException
+     */
+    public void addApplicationAttributes(Map<String, String> applicationAttributes, int applicationId, int tenantId)
+            throws APIManagementException {
+
+        Connection connection = null;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            addApplicationAttributes(connection, applicationAttributes, applicationId, tenantId);
+            connection.commit();
+        } catch (SQLException sqlException) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException e) {
+                    log.error("Failed to rollback add application attributes ", e);
+                }
+            }
+            handleException("Failed to add Application", sqlException);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(null, connection, null);
+        }
+    }
 }
