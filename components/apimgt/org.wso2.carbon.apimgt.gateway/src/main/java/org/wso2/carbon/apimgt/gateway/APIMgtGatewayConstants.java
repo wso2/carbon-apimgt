@@ -88,6 +88,7 @@ public class APIMgtGatewayConstants {
     public static final String XML_VALIDATION = "xmlValidation";
     public static final String SCHEMA_VALIDATION = "schemaValidation";
     public static final String XSD_URL = "xsdURL";
+    public static final String UTF8 = "UTF-8";
 
 }
 
