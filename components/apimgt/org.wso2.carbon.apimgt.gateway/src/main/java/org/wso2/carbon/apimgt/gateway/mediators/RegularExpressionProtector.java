@@ -139,7 +139,10 @@ public class RegularExpressionProtector extends AbstractMediator {
             try {
                 parameter = URLDecoder.decode(queryParams, APIMgtGatewayConstants.UTF8);
             } catch (UnsupportedEncodingException e) {
-                logger.error("Error occurred while decoding the query/path parameters: " + parameter);
+                String message = "Error occurred while decoding the query/path parameters: " + parameter;
+                logger.error(message, e);
+                GatewayUtils.handleThreat(messageContext, ThreatProtectorConstants.HTTP_SC_CODE,
+                        message + e.getMessage());
             }
             if (pattern != null && parameter != null && pattern.matcher(parameter).find()) {
                 if (logger.isDebugEnabled()) {
