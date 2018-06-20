@@ -28,8 +28,11 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.threatprotection.utils.ThreatProtectorConstants;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -131,9 +134,18 @@ public class RegularExpressionProtector extends AbstractMediator {
     private void checkRequestPath(MessageContext messageContext) {
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext)
                 messageContext).getAxis2MessageContext();
+        String parameter = null;
         if (enabledCheckPathParam) {
             String queryParams = (String) axis2MC.getProperty(NhttpConstants.REST_URL_POSTFIX);
-            if (pattern != null && queryParams != null && pattern.matcher(queryParams).find()) {
+            try {
+                parameter = URLDecoder.decode(queryParams, APIMgtGatewayConstants.UTF8);
+            } catch (UnsupportedEncodingException e) {
+                String message = "Error occurred while decoding the query/path parameters: " + parameter;
+                logger.error(message, e);
+                GatewayUtils.handleThreat(messageContext, ThreatProtectorConstants.HTTP_SC_CODE,
+                        message + e.getMessage());
+            }
+            if (pattern != null && parameter != null && pattern.matcher(parameter).find()) {
                 if (logger.isDebugEnabled()) {
                     logger.debug(String.format("Threat detected in query parameters [ %s ] by regex [ %s ]",
                             queryParams, pattern));
