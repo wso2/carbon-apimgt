@@ -15,12 +15,16 @@
  */
 package org.wso2.carbon.apimgt.hostobjects.internal;
 
+import org.apache.axis2.AxisFault;
+import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.apimgt.hostobjects.HostObjectUtils;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -55,9 +59,16 @@ public class HostObjectComponent {
     private static DataSourceService dataSourceService;
 
     protected void activate(ComponentContext componentContext) {
-       if (log.isDebugEnabled()){
-           log.debug("HostObjectComponent activated");
-       }
+        try {
+            ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContextFromFileSystem
+                    (getClientRepoLocation(), getAxis2ClientXmlLocation());
+            ServiceReferenceHolder.getInstance().setAxis2ConfigurationContext(ctx);
+            if (log.isDebugEnabled()) {
+                log.debug("HostObjectComponent activated");
+            }
+        } catch (AxisFault axisFault) {
+            log.error("Error while initializing the API HostObject component", axisFault);
+        }
     }
 
     protected void deactivate(ComponentContext componentContext) {
@@ -131,5 +142,15 @@ public class HostObjectComponent {
 
     protected void unsetRegistryService(RegistryService registryService) {
         ServiceReferenceHolder.getInstance().setRegistryService(null);
+    }
+
+    protected String getAxis2ClientXmlLocation() {
+        String axis2ClientXml = ServerConfiguration.getInstance().getFirstProperty("Axis2Config.clientAxis2XmlLocation");
+        return axis2ClientXml;
+    }
+
+    protected String getClientRepoLocation() {
+        String axis2ClientXml = ServerConfiguration.getInstance().getFirstProperty("Axis2Config.ClientRepositoryLocation");
+        return axis2ClientXml;
     }
 }

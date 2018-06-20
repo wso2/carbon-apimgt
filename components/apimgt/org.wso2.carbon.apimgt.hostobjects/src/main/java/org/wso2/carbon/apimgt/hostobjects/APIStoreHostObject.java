@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.hostobjects;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
+import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.axis2.transport.http.HttpTransportProperties;
@@ -598,7 +599,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
         String username = (String) args[0];
         String password = (String) args[1];
-
+        ConfigurationContext configurationContext = ServiceReferenceHolder.getInstance().getAxis2ConfigurationContext();
         APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
         String url = config.getFirstProperty(APIConstants.AUTH_MANAGER_URL);
         if (url == null) {
@@ -608,7 +609,8 @@ public class APIStoreHostObject extends ScriptableObject {
         NativeObject row = new NativeObject();
 
         try {
-            AuthenticationAdminStub authAdminStub = new AuthenticationAdminStub(null, url + "AuthenticationAdmin");
+            AuthenticationAdminStub authAdminStub = new AuthenticationAdminStub(configurationContext, url +
+                    "AuthenticationAdmin");
             ServiceClient client = authAdminStub._getServiceClient();
             Options options = client.getOptions();
             options.setManageSession(true);
