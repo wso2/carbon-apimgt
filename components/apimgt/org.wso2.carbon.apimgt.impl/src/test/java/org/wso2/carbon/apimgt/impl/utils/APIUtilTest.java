@@ -1970,4 +1970,11 @@ public class APIUtilTest {
         JSONObject appAttributes = APIUtil.getAppAttributeKeysFromRegistry(tenantId);
         Assert.assertEquals(applicationAttributes, appAttributes);
     }
+
+    @Test
+    public void testSanitizeUserRole() throws Exception {
+        Assert.assertEquals("Test%26123", APIUtil.sanitizeUserRole("Test&123"));
+        Assert.assertEquals("Test%26123%26test", APIUtil.sanitizeUserRole("Test&123&test"));
+        Assert.assertEquals("Test123", APIUtil.sanitizeUserRole("Test123"));
+    }
 }
