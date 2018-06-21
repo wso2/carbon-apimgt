@@ -3533,7 +3533,9 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (oAuthApplicationInfo != null) {
                 apiKey.setConsumerSecret(oAuthApplicationInfo.getClientSecret());
                 apiKey.setCallbackUrl(oAuthApplicationInfo.getCallBackURL());
-                apiKey.setGrantTypes(oAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES).toString());
+                if (oAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES) != null) {
+                    apiKey.setGrantTypes(oAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES).toString());
+                }
             }
             if (tokenInfo != null) {
                 apiKey.setAccessToken(tokenInfo.getAccessToken());
@@ -3877,10 +3879,13 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (userRoles != null) {
             for (String userRole : userRoles) {
                 rolesQuery.append(" OR ");
-                rolesQuery.append(ClientUtils.escapeQueryChars(userRole.toLowerCase()));
+                rolesQuery.append(ClientUtils.escapeQueryChars(APIUtil.sanitizeUserRole(userRole.toLowerCase())));
             }
         }
         rolesQuery.append(")");
+        if(log.isDebugEnabled()) {
+        	log.debug("User role list solr query " + APIConstants.STORE_VIEW_ROLES + "=" + rolesQuery.toString());
+        }
         return  APIConstants.STORE_VIEW_ROLES + "=" + rolesQuery.toString();
     }
 

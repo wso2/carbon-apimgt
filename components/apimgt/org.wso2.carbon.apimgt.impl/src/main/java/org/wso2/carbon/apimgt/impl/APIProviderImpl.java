@@ -5482,10 +5482,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (userRoles != null) {
             for (String userRole : userRoles) {
                 rolesQuery.append(" OR ");
-                rolesQuery.append(ClientUtils.escapeQueryChars(userRole.toLowerCase()));
+                rolesQuery.append(ClientUtils.escapeQueryChars(APIUtil.sanitizeUserRole(userRole.toLowerCase())));
             }
         }
         rolesQuery.append(")");
+        if(log.isDebugEnabled()) {
+        	log.debug("User role list solr query " + APIConstants.PUBLISHER_ROLES + "=" + rolesQuery.toString());
+        }
         return APIConstants.PUBLISHER_ROLES + "=" + rolesQuery.toString();
     }
 
