@@ -3533,7 +3533,9 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (oAuthApplicationInfo != null) {
                 apiKey.setConsumerSecret(oAuthApplicationInfo.getClientSecret());
                 apiKey.setCallbackUrl(oAuthApplicationInfo.getCallBackURL());
-                apiKey.setGrantTypes(oAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES).toString());
+                if (oAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES) != null) {
+                    apiKey.setGrantTypes(oAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES).toString());
+                }
             }
             if (tokenInfo != null) {
                 apiKey.setAccessToken(tokenInfo.getAccessToken());
