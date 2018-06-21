@@ -7418,4 +7418,18 @@ public final class APIUtil {
             handleException("File name contains invalid path elements. " + fileName);
         }
     }
+
+    /**
+     * Convert special characters to encoded value.
+     * 
+     * @param role
+     * @return encorded value
+     */
+    public static String sanitizeUserRole(String role) {
+        if (role.contains("&")) {
+            return role.replaceAll("&", "%26");
+        } else {
+            return role;
+        }
+    }
 }
