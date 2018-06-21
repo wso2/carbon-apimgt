@@ -1122,6 +1122,7 @@ public final class APIConstants {
     public static final String API_DATA_ISMORE = "isMore";
     public static final String API_DATA_PRODUCTION_ENDPOINTS = "production_endpoints";
     public static final String API_DATA_SANDBOX_ENDPOINTS = "sandbox_endpoints";
+    public static final String API_DATA_URL = "url";
 
     public static final String ACTIVITY_ID = "activityID";
     public static final String USER_AGENT = "User-Agent";

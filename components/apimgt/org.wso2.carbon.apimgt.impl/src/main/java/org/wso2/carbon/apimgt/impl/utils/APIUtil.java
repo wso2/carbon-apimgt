@@ -675,6 +675,21 @@ public final class APIUtil {
                 api.setGatewayLabels(gatewayLabelListForAPI);
             }
 
+            //get endpoint config string from artifact, parse it as a json and set the environment list configured with
+            //non empty URLs to API object
+            try {
+                api.setEnvironmentList(extractEnvironmentListForAPI(
+                        artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG)));
+            } catch (ParseException e) {
+                String msg = "Failed to parse endpoint config JSON of API: " + apiName + " " + apiVersion;
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            } catch (ClassCastException e) {
+                String msg = "Invalid endpoint config JSON found in API: " + apiName + " " + apiVersion;
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            }
+
         } catch (GovernanceException e) {
             String msg = "Failed to get API for artifact ";
             throw new APIManagementException(msg, e);
@@ -688,6 +703,57 @@ public final class APIUtil {
         return api;
     }
 
+    /**
+     * This method used to extract environment list configured with non empty URLs.
+     *
+     * @param endpointConfigs (Eg: {"production_endpoints":{"url":"http://www.test.com/v1/xxx","config":null,
+     *                              "template_not_supported":false},"endpoint_type":"http"})
+     * @return Set<String>
+     */
+    private static Set<String> extractEnvironmentListForAPI(String endpointConfigs)
+            throws ParseException, ClassCastException {
+        Set<String> environmentList = new HashSet<String>();
+        if (endpointConfigs != null) {
+            JSONParser parser = new JSONParser();
+            JSONObject endpointConfigJson = (JSONObject) parser.parse(endpointConfigs);
+            if (endpointConfigJson.containsKey(APIConstants.API_DATA_PRODUCTION_ENDPOINTS) &&
+                    isEndpointURLNonEmpty(endpointConfigJson.get(APIConstants.API_DATA_PRODUCTION_ENDPOINTS))) {
+                environmentList.add(APIConstants.API_KEY_TYPE_PRODUCTION);
+            }
+            if (endpointConfigJson.containsKey(APIConstants.API_DATA_SANDBOX_ENDPOINTS) &&
+                    isEndpointURLNonEmpty(endpointConfigJson.get(APIConstants.API_DATA_SANDBOX_ENDPOINTS))) {
+                environmentList.add(APIConstants.API_KEY_TYPE_SANDBOX);
+            }
+        }
+        return environmentList;
+    }
+
+    /**
+     * This method used to check whether the endpoints JSON object has a non empty URL.
+     *
+     * @param endpoints (Eg: {"url":"http://www.test.com/v1/xxx","config":null,"template_not_supported":false})
+     * @return boolean
+     */
+    private static boolean isEndpointURLNonEmpty(Object endpoints) {
+        if (endpoints instanceof JSONObject) {
+            JSONObject endpointJson = (JSONObject) endpoints;
+            if (endpointJson.containsKey(APIConstants.API_DATA_URL) &&
+                    endpointJson.get(APIConstants.API_DATA_URL) != null) {
+                String url = (endpointJson.get(APIConstants.API_DATA_URL)).toString();
+                if (StringUtils.isNotBlank(url)) {
+                    return true;
+                }
+            }
+        } else if (endpoints instanceof JSONArray) {
+            JSONArray endpointsJson = (JSONArray) endpoints;
+            for (int i = 0; i < endpointsJson.size(); i++) {
+                if (isEndpointURLNonEmpty(endpointsJson.get(i))) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     public static API getAPI(GovernanceArtifact artifact)
             throws APIManagementException {
@@ -802,6 +868,21 @@ public final class APIUtil {
             api.setEnvironments(extractEnvironmentsForAPI(environments));
             api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
             api.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
+
+            //get endpoint config string from artifact, parse it as a json and set the environment list configured with
+            //non empty URLs to API object
+            try {
+                api.setEnvironmentList(extractEnvironmentListForAPI(
+                        artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG)));
+            } catch (ParseException e) {
+                String msg = "Failed to parse endpoint config JSON of API: " + apiName + " " + apiVersion;
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            } catch (ClassCastException e) {
+                String msg = "Invalid endpoint config JSON found in API: " + apiName + " " + apiVersion;
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            }
         } catch (GovernanceException e) {
             String msg = "Failed to get API from artifact ";
             throw new APIManagementException(msg, e);

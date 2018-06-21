@@ -2184,7 +2184,12 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Label'
-
+      environmentList:
+        type: array
+        description: The environment list configured with non empty endpoint URLs for the particular API.
+        items:
+          type: string
+        example: ["PRODUCTION","SANDBOX"]
 #-----------------------------------------------------
 # The Label resource
 #-----------------------------------------------------
