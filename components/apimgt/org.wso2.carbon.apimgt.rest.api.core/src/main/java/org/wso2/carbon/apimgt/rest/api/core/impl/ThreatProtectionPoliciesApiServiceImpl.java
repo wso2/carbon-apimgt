@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.policy.ThreatProtectionPolicy;
 import org.wso2.carbon.apimgt.rest.api.core.*;
 import org.wso2.carbon.apimgt.rest.api.core.dto.*;
@@ -12,18 +11,19 @@ import org.wso2.carbon.apimgt.rest.api.core.dto.*;
 
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.core.NotFoundException;
-
-import java.io.InputStream;
-
 import org.wso2.carbon.apimgt.rest.api.core.utils.MappingUtil;
-import org.wso2.msf4j.formparam.FormDataParam;
-import org.wso2.msf4j.formparam.FileInfo;
 import org.wso2.msf4j.Request;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
 public class ThreatProtectionPoliciesApiServiceImpl extends ThreatProtectionPoliciesApiService {
+
+    private APIMgtAdminService apiMgtAdminService;
+
     private static final Logger log = LoggerFactory.getLogger(ThreatProtectionPoliciesApiServiceImpl.class);
+
+    public ThreatProtectionPoliciesApiServiceImpl(APIMgtAdminService apiMgtAdminService) {
+        this.apiMgtAdminService = apiMgtAdminService;
+    }
 
     /**
      * Get a list of all threat protection policies
@@ -35,7 +35,6 @@ public class ThreatProtectionPoliciesApiServiceImpl extends ThreatProtectionPoli
     @Override
     public Response threatProtectionPoliciesGet(Request request) throws NotFoundException {
         try {
-            APIMgtAdminService apiMgtAdminService = APIManagerFactory.getInstance().getAPIMgtAdminService();
             List<ThreatProtectionPolicy> policyList = apiMgtAdminService.getThreatProtectionPolicyList();
             ThreatProtectionPolicyListDTO listDTO = new ThreatProtectionPolicyListDTO();
             for (ThreatProtectionPolicy policy : policyList) {

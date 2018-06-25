@@ -21,33 +21,23 @@ package org.wso2.carbon.apimgt.rest.api.core.impl;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.core.impl.APIMgtAdminServiceImpl;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.msf4j.Request;
-import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
 import javax.ws.rs.core.Response;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(APIManagerFactory.class)
 public class ExportApiServiceImplTestCase {
 
     @Test
     public void exportPoliciesThrottleGetTest() throws Exception {
-        APIMgtAdminServiceImpl apiMgtAdminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        APIManagerFactory instance = Mockito.mock(APIManagerFactory.class);
-        PowerMockito.mockStatic(APIManagerFactory.class);
-        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(instance);
-        Mockito.when(instance.getAPIMgtAdminService()).thenReturn(apiMgtAdminService);
+        APIMgtAdminService apiMgtAdminService = Mockito.mock(APIMgtAdminService.class);
 
-        ExportApiServiceImpl exportApiService = new ExportApiServiceImpl();
+        ExportApiServiceImpl exportApiService = new ExportApiServiceImpl(apiMgtAdminService);
 
         LogManager.getRootLogger().setLevel(Level.DEBUG);
 
@@ -58,17 +48,19 @@ public class ExportApiServiceImplTestCase {
 
     @Test
     public void exportPoliciesThrottleGetExceptionTest() throws Exception {
+        APIMgtAdminService apiMgtAdminService = Mockito.mock(APIMgtAdminService.class);
+
+        Mockito.when(apiMgtAdminService.getApiPolicies()).thenThrow(
+                new APIManagementException("", ExceptionCodes.APIMGT_DAO_EXCEPTION));
+
         LogManager.getRootLogger().setLevel(Level.INFO);
-        ExportApiServiceImpl exportApiService = new ExportApiServiceImpl();
+        ExportApiServiceImpl exportApiService = new ExportApiServiceImpl(apiMgtAdminService);
         Response response = exportApiService.exportPoliciesThrottleGet(null, getRequest());
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }
 
-    private Request getRequest() throws Exception {
-        HTTPCarbonMessage carbonMessage = Mockito.mock(HTTPCarbonMessage.class);
-        Request request = new Request(carbonMessage);
-        PowerMockito.whenNew(Request.class).withArguments(carbonMessage).thenReturn(request);
-        return request;
+    private Request getRequest() {
+        return Mockito.mock(Request.class);
     }
 
 }

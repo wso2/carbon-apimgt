@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
@@ -24,7 +23,13 @@ import javax.ws.rs.core.Response;
 @javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-01-18T15:27:32.639+05:30")
 public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
+    private APIMgtAdminService apiMgtAdminService;
+
     private static final Logger log = LoggerFactory.getLogger(SubscriptionsApiServiceImpl.class);
+
+    public SubscriptionsApiServiceImpl(APIMgtAdminService apiMgtAdminService) {
+        this.apiMgtAdminService = apiMgtAdminService;
+    }
 
     /**
      * Retrieve subscriptions
@@ -40,7 +45,6 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                                      Integer limit, String accept,
                                      Request request) throws NotFoundException {
         try {
-            APIMgtAdminService apiMgtAdminService = APIManagerFactory.getInstance().getAPIMgtAdminService();
             List<SubscriptionValidationData> subscriptionsOfApi;
             if (StringUtils.isEmpty(apiContext) || StringUtils.isEmpty(apiVersion)) {
                 APIUtils.logDebug("API Context or version is null or empty. Retrieving subscriptions of all APIs", log);

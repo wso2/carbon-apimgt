@@ -19,23 +19,17 @@
 
 package org.wso2.carbon.apimgt.rest.api.core.impl;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.testng.Assert;
+import org.testng.annotations.Test;
+import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
+import org.wso2.carbon.apimgt.core.exception.APIConfigRetrievalException;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
-import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.core.impl.APIMgtAdminServiceImpl;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.core.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.core.utils.SampleTestObjectCreator;
 import org.wso2.msf4j.Request;
-import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
@@ -43,15 +37,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ APIManagerFactory.class, RestApiUtil.class })
+
 public class ApisApiServiceImplTestCase {
 
     @Test
     public void apisApiIdGatewayConfigGetTestCase() throws Exception {
 
-        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
-        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl(adminService);
 
         String apiID = UUID.randomUUID().toString();
         String gatewayConfig = "package deployment.org.wso2.apim;\n" + "import ballerina.net.http;\n" + "\n"
@@ -68,11 +61,6 @@ public class ApisApiServiceImplTestCase {
                 + "        }\n" + "\n" + "        reply response;\n" + "    }\n" + "}";
 
         Mockito.when(adminService.getAPIGatewayServiceConfig(apiID)).thenReturn(gatewayConfig);
-        APIManagerFactory instance = Mockito.mock(APIManagerFactory.class);
-
-        PowerMockito.mockStatic(APIManagerFactory.class);
-        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(instance);
-        Mockito.when(instance.getAPIMgtAdminService()).thenReturn(adminService);
 
         Response response = apisApiService.apisApiIdGatewayConfigGet(apiID, null, getRequest());
 
@@ -81,19 +69,13 @@ public class ApisApiServiceImplTestCase {
 
     @Test
     public void apisApiIdGatewayConfigGetWhenGatewayConfigNullTestCase() throws Exception {
-
-        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
-        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl(adminService);
 
         String apiID = UUID.randomUUID().toString();
         String gatewayConfig = null;
 
         Mockito.when(adminService.getAPIGatewayServiceConfig(apiID)).thenReturn(gatewayConfig);
-        APIManagerFactory instance = Mockito.mock(APIManagerFactory.class);
-
-        PowerMockito.mockStatic(APIManagerFactory.class);
-        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(instance);
-        Mockito.when(instance.getAPIMgtAdminService()).thenReturn(adminService);
 
         Response response = apisApiService.apisApiIdGatewayConfigGet(apiID, null, getRequest());
 
@@ -102,22 +84,18 @@ public class ApisApiServiceImplTestCase {
 
     @Test
     public void apisApiIdGatewayConfigExceptionTestCase() throws Exception {
-
-        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl(adminService);
 
         String apiID = UUID.randomUUID().toString();
 
         String message = "Error while retrieving gateway config of API " + apiID;
 
-        APIManagerFactory instance = Mockito.mock(APIManagerFactory.class);
+        APIConfigRetrievalException apiManagementException = new APIConfigRetrievalException(message,
+                ExceptionCodes.APIM_DAO_EXCEPTION);
 
-        PowerMockito.mockStatic(APIManagerFactory.class);
-        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(instance);
+        Mockito.when(adminService.getAPIGatewayServiceConfig(apiID)).thenThrow(apiManagementException);
 
-        APIManagementException apiManagementException = new APIManagementException(message,
-                ExceptionCodes.GATEWAY_EXCEPTION);
-
-        Mockito.when(instance.getAPIMgtAdminService()).thenThrow(apiManagementException);
 
         Response response = apisApiService.apisApiIdGatewayConfigGet(apiID, null, getRequest());
 
@@ -131,10 +109,7 @@ public class ApisApiServiceImplTestCase {
         String[] gatewayLabels = labels.split(",");
         List<String> labelList = new ArrayList<String>(Arrays.asList(gatewayLabels));
 
-        APIMgtAdminServiceImpl apiMgtAdminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(apiMgtAdminService);
+        APIMgtAdminService apiMgtAdminService = Mockito.mock(APIMgtAdminService.class);
 
         List<API> apiList = new ArrayList<>();
         apiList.add(SampleTestObjectCreator.createUniqueAPI().build());
@@ -143,7 +118,7 @@ public class ApisApiServiceImplTestCase {
 
         Mockito.when(apiMgtAdminService.getAPIsByStatus(labelList, "Published")).thenReturn(apiList);
 
-        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl(apiMgtAdminService);
         Response response = apisApiService.apisGet(labels, "Published", getRequest());
 
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
@@ -158,12 +133,9 @@ public class ApisApiServiceImplTestCase {
 
         String labels = "ZONE_ONE,ZONE_TWO";
 
-        APIMgtAdminServiceImpl apiMgtAdminService = Mockito.mock(APIMgtAdminServiceImpl.class);
+        APIMgtAdminService apiMgtAdminService = Mockito.mock(APIMgtAdminService.class);
 
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(apiMgtAdminService);
-
-        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl(apiMgtAdminService);
         Response response = apisApiService.apisGet(labels, null, getRequest());
 
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
@@ -174,12 +146,9 @@ public class ApisApiServiceImplTestCase {
 
         String labels = "ZONE_ONE,ZONE_TWO";
 
-        APIMgtAdminServiceImpl apiMgtAdminService = Mockito.mock(APIMgtAdminServiceImpl.class);
+        APIMgtAdminService apiMgtAdminService = Mockito.mock(APIMgtAdminService.class);
 
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(apiMgtAdminService);
-
-        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl(apiMgtAdminService);
         Response response = apisApiService.apisGet(labels, "", getRequest());
 
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
@@ -190,12 +159,9 @@ public class ApisApiServiceImplTestCase {
 
         String labels = null;
 
-        APIMgtAdminServiceImpl apiMgtAdminService = Mockito.mock(APIMgtAdminServiceImpl.class);
+        APIMgtAdminService apiMgtAdminService = Mockito.mock(APIMgtAdminService.class);
 
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(apiMgtAdminService);
-
-        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl(apiMgtAdminService);
         Response response = apisApiService.apisGet(labels, "Published", getRequest());
 
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
@@ -206,12 +172,9 @@ public class ApisApiServiceImplTestCase {
 
         String labels = "";
 
-        APIMgtAdminServiceImpl apiMgtAdminService = Mockito.mock(APIMgtAdminServiceImpl.class);
+        APIMgtAdminService apiMgtAdminService = Mockito.mock(APIMgtAdminService.class);
 
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(apiMgtAdminService);
-
-        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl(apiMgtAdminService);
         Response response = apisApiService.apisGet(labels, "Published", getRequest());
 
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
@@ -222,10 +185,10 @@ public class ApisApiServiceImplTestCase {
 
         String labels = "ZONE_ONE,ZONE_TWO";
 
-        APIMgtAdminServiceImpl apiMgtAdminService = Mockito.mock(APIMgtAdminServiceImpl.class);
+        String[] gatewayLabels = labels.split(",");
+        List<String> labelList = new ArrayList<String>(Arrays.asList(gatewayLabels));
 
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(apiMgtAdminService);
+        APIMgtAdminService apiMgtAdminService = Mockito.mock(APIMgtAdminService.class);
 
         String apiID = UUID.randomUUID().toString();
         String message = "Error while retrieving gateway config of API " + apiID;
@@ -233,17 +196,14 @@ public class ApisApiServiceImplTestCase {
         APIManagementException apiManagementException = new APIManagementException(message,
                 ExceptionCodes.GATEWAY_EXCEPTION);
 
-        Mockito.when(RestApiUtil.getAPIMgtAdminService()).thenThrow(apiManagementException);
+        Mockito.when(apiMgtAdminService.getAPIsByStatus(labelList, "Published")).thenThrow(apiManagementException);
 
-        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl(apiMgtAdminService);
         Response response = apisApiService.apisGet(labels, "Published", getRequest());
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }
 
-    private Request getRequest() throws Exception {
-        HTTPCarbonMessage carbonMessage = Mockito.mock(HTTPCarbonMessage.class);
-        Request request = new Request(carbonMessage);
-        PowerMockito.whenNew(Request.class).withArguments(carbonMessage).thenReturn(request);
-        return request;
+    private Request getRequest() {
+        return Mockito.mock(Request.class);
     }
 }

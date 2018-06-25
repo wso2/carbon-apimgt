@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
@@ -22,7 +21,13 @@ import java.util.Map;
 import javax.ws.rs.core.Response;
 
 public class ResourcesApiServiceImpl extends ResourcesApiService {
+    private APIMgtAdminService apiMgtAdminService;
+
     private static final Logger log = LoggerFactory.getLogger(ResourcesApiServiceImpl.class);
+
+    public ResourcesApiServiceImpl(APIMgtAdminService apiMgtAdminService) {
+        this.apiMgtAdminService = apiMgtAdminService;
+    }
 
     @Override
     public Response resourcesGet(String apiContext
@@ -30,7 +35,6 @@ public class ResourcesApiServiceImpl extends ResourcesApiService {
             , String accept
             , Request request) throws NotFoundException {
         try {
-            APIMgtAdminService apiMgtAdminService = APIManagerFactory.getInstance().getAPIMgtAdminService();
             List<UriTemplate> resourcesOfApi = new ArrayList<>();
             if (!StringUtils.isEmpty(apiContext) && !StringUtils.isEmpty(apiVersion)) {
                 resourcesOfApi = apiMgtAdminService.getAllResourcesForApi(apiContext, apiVersion);

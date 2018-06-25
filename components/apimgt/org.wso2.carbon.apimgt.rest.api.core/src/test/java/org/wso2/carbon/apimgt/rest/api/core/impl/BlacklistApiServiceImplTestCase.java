@@ -20,41 +20,29 @@
 
 package org.wso2.carbon.apimgt.rest.api.core.impl;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
-import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.core.impl.APIMgtAdminServiceImpl;
 import org.wso2.carbon.apimgt.core.models.BlockConditions;
 import org.wso2.carbon.apimgt.rest.api.core.dto.BlockingConditionListDTO;
 import org.wso2.carbon.apimgt.rest.api.core.utils.SampleTestObjectCreator;
 import org.wso2.msf4j.Request;
-import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(APIManagerFactory.class)
 public class BlacklistApiServiceImplTestCase {
 
     @Test
     public void blacklistGetTestCase() throws Exception {
 
-        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        APIManagerFactory instance = Mockito.mock(APIManagerFactory.class);
-        PowerMockito.mockStatic(APIManagerFactory.class);
-        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(instance);
-        Mockito.when(instance.getAPIMgtAdminService()).thenReturn(adminService);
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
 
-        BlacklistApiServiceImpl blacklistApiService = new BlacklistApiServiceImpl();
+        BlacklistApiServiceImpl blacklistApiService = new BlacklistApiServiceImpl(adminService);
 
         BlockConditions blockConditionOne = SampleTestObjectCreator.createUniqueBlockConditions("IP_RANGE");
         BlockConditions blockConditionTwo = SampleTestObjectCreator.createUniqueBlockConditions("IP");
@@ -74,28 +62,21 @@ public class BlacklistApiServiceImplTestCase {
 
     @Test
     public void applicationsGetExceptionTestCase() throws Exception {
-
-        BlacklistApiServiceImpl blacklistApiService = new BlacklistApiServiceImpl();
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
+        BlacklistApiServiceImpl blacklistApiService = new BlacklistApiServiceImpl(adminService);
 
         String message = "Error while retrieving applications.";
 
-        APIManagerFactory instance = Mockito.mock(APIManagerFactory.class);
-        PowerMockito.mockStatic(APIManagerFactory.class);
-        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(instance);
-
         APIManagementException apiManagementException = new APIManagementException(message,
                 ExceptionCodes.APPLICATION_INACTIVE);
-        Mockito.when(instance.getAPIMgtAdminService()).thenThrow(apiManagementException);
+        Mockito.when(adminService.getBlockConditions()).thenThrow(apiManagementException);
 
         Response response = blacklistApiService.blacklistGet(null, getRequest());
         Assert.assertEquals(response.getStatus(), 400);
 
     }
 
-    private Request getRequest() throws Exception {
-        HTTPCarbonMessage carbonMessage = Mockito.mock(HTTPCarbonMessage.class);
-        Request request = new Request(carbonMessage);
-        PowerMockito.whenNew(Request.class).withArguments(carbonMessage).thenReturn(request);
-        return request;
+    private Request getRequest() {
+        return Mockito.mock(Request.class);
     }
 }

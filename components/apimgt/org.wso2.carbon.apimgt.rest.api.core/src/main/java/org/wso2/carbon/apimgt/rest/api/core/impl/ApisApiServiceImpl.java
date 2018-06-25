@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
@@ -25,7 +24,13 @@ import java.util.List;
 @javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-26T10:56:28.057+05:30")
 public class ApisApiServiceImpl extends ApisApiService {
 
+    private APIMgtAdminService apiMgtAdminService;
+
     private static final Logger log = LoggerFactory.getLogger(ApisApiServiceImpl.class);
+
+    public ApisApiServiceImpl(APIMgtAdminService apiMgtAdminService) {
+        this.apiMgtAdminService = apiMgtAdminService;
+    }
 
     /**
      * Retrieve API's gateway configuration
@@ -40,7 +45,6 @@ public class ApisApiServiceImpl extends ApisApiService {
                                               Request request) throws NotFoundException {
 
         try {
-            APIMgtAdminService apiMgtAdminService = APIManagerFactory.getInstance().getAPIMgtAdminService();
             String apiGatewayConfig = null;
             apiGatewayConfig = apiMgtAdminService.getAPIGatewayServiceConfig(apiId);
 
@@ -77,16 +81,15 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisGet(String labels, String status, Request request) throws NotFoundException {
         APIListDTO apiListDTO;
         try {
-            APIMgtAdminService adminService = RestApiUtil.getAPIMgtAdminService();
             if (labels != null && !labels.isEmpty()) {
                 String[] gatewayLabels = labels.split(",");
                 List<String> labelList = new ArrayList<String>(Arrays.asList(gatewayLabels));
 
                 if (status != null && !status.isEmpty()) {
-                    apiListDTO = MappingUtil.toAPIListDTO(adminService.getAPIsByStatus(labelList, status));
+                    apiListDTO = MappingUtil.toAPIListDTO(apiMgtAdminService.getAPIsByStatus(labelList, status));
                     return Response.ok().entity(apiListDTO).build();
                 } else {
-                    apiListDTO = MappingUtil.toAPIListDTO(adminService.getAPIsByGatewayLabel(labelList));
+                    apiListDTO = MappingUtil.toAPIListDTO(apiMgtAdminService.getAPIsByGatewayLabel(labelList));
                     return Response.ok().entity(apiListDTO).build();
                 }
             } else {
