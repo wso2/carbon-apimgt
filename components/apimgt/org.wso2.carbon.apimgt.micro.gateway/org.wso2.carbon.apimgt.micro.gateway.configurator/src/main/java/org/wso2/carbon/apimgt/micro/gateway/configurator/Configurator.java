@@ -390,19 +390,19 @@ public class Configurator {
                 for (; enumeration.hasMoreElements(); ) {
                     InetAddress address = enumeration.nextElement();
                     if (!address.isLoopbackAddress() && !address.isLinkLocalAddress() && address.isSiteLocalAddress()) {
-                        ip = address;
+                        byte[] mac = networkInterface.getHardwareAddress();
+                        if (mac != null) {
+                            StringBuilder sb = new StringBuilder();
+                            for (int i = 0; i < mac.length; i++) {
+                                //Construct mac address
+                                sb.append(String.format("%02X%s", mac[i],
+                                        (i < mac.length - 1) ? ConfigConstants.DELIMITER : ""));
+                            }
+                            macAddress = sb.toString();
+                            break;
+                        }
                     }
                 }
-            }
-            NetworkInterface network = NetworkInterface.getByInetAddress(ip);
-            if (network != null) {
-                byte[] mac = network.getHardwareAddress();
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < mac.length; i++) {
-                    //Construct mac address
-                    sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? ConfigConstants.DELIMITER : ""));
-                }
-                macAddress = sb.toString();
             }
         } catch (UnknownHostException | SocketException e) {
             log.error("Error while retrieving mac address", e);
