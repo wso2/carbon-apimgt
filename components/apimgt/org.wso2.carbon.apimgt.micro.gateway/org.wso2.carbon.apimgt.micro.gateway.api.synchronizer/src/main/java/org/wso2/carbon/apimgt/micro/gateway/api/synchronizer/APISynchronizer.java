@@ -73,6 +73,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -275,19 +276,9 @@ public class APISynchronizer implements OnPremiseGatewayInitListener {
                     log.debug("Using default API publisher URL: " + apiPublisherUrl);
                 }
             }
-            String[] publisherUrl = apiPublisherUrl.split(":");
-            String publisherPort = null;
-            Integer publisherPortValue = 0;
-            if (publisherUrl.length > 3) {
-                publisherPort = publisherUrl[2];
-            }
-            if (publisherPort != null) {
-                publisherPortValue =  Integer.valueOf(publisherPort);
-            }
-            else {
-                publisherPortValue = OnPremiseGatewayConstants.DEFAULT_PORT;
-            }
-            HttpClient httpClient = APIUtil.getHttpClient(publisherPortValue, apiPublisherUrl.split(":")[0]);
+            URL apiPublisherUrlValue = MicroGatewayCommonUtil.getURLFromStringUrlValue(apiPublisherUrl);
+            HttpClient httpClient = APIUtil.getHttpClient(apiPublisherUrlValue.getPort(), apiPublisherUrlValue
+                    .getProtocol());
             HttpGet httpGet = new HttpGet(detailedAPIViewUrl);
             String authHeaderValue = OnPremiseGatewayConstants.AUTHORIZATION_BEARER + accessTokenDTO.getAccessToken();
             httpGet.addHeader(OnPremiseGatewayConstants.AUTHORIZATION_HEADER, authHeaderValue);
@@ -335,19 +326,13 @@ public class APISynchronizer implements OnPremiseGatewayInitListener {
                 log.debug("Using default API publisher URL: " + apiPublisherUrl);
             }
         }
-        String[] publisherUrl = apiPublisherUrl.split(":");
-        String publisherPort = null;
-        Integer publisherPortValue = 0;
-        if (publisherUrl.length > 3) {
-            publisherPort = publisherUrl[2];
+        HttpClient httpClient = null;
+        try {
+            URL apiPublisherUrlValue = MicroGatewayCommonUtil.getURLFromStringUrlValue(apiPublisherUrl);
+            httpClient = APIUtil.getHttpClient(apiPublisherUrlValue.getPort(), apiPublisherUrlValue.getProtocol());
+        } catch (OnPremiseGatewayException e) {
+            throw new APISynchronizationException("Error while retrieving Http client." ,e);
         }
-        if (publisherPort != null) {
-            publisherPortValue =  Integer.valueOf(publisherPort);
-        }
-        else {
-            publisherPortValue = OnPremiseGatewayConstants.DEFAULT_PORT;
-        }
-        HttpClient httpClient = APIUtil.getHttpClient(publisherPortValue, apiPublisherUrl.split(":")[0]);
 
         HttpGet httpGet = new HttpGet(apiViewUrl);
         String authHeaderValue = OnPremiseGatewayConstants.AUTHORIZATION_BEARER + accessTokenDTO.getAccessToken();
@@ -391,19 +376,9 @@ public class APISynchronizer implements OnPremiseGatewayInitListener {
             if (updatedAPIViewUrl == null) {
                 updatedAPIViewUrl = APISynchronizationConstants.DEFAULT_API_UPDATE_SERVICE_URL;
             }
-            String[] updatedAPIsUrl = updatedAPIViewUrl.split(":");
-            String updatedAPIsPort = null;
-            Integer updatedAPIsPortValue = 0;
-            if (updatedAPIsUrl.length > 3) {
-                updatedAPIsPort = updatedAPIsUrl[2].split("/")[0];
-            }
-            if (updatedAPIsPort != null) {
-                updatedAPIsPortValue =  Integer.valueOf(updatedAPIsPort);
-            }
-            else {
-                updatedAPIsPortValue = OnPremiseGatewayConstants.DEFAULT_PORT;
-            }
-            HttpClient httpClient = APIUtil.getHttpClient(updatedAPIsPortValue, updatedAPIViewUrl.split(":")[0]);
+            URL updatedAPIViewUrlValue = MicroGatewayCommonUtil.getURLFromStringUrlValue(updatedAPIViewUrl);
+            HttpClient httpClient = APIUtil.getHttpClient(updatedAPIViewUrlValue.getPort(), updatedAPIViewUrlValue
+                    .getProtocol());
 
             HttpGet httpGet = new HttpGet(updatedAPIViewUrl);
             String authHeaderValue = TokenUtil.getBasicAuthHeaderValue(username, password);
@@ -472,19 +447,9 @@ public class APISynchronizer implements OnPremiseGatewayInitListener {
                         log.debug("Using default API publisher URL: " + apiPublisherUrl);
                     }
                 }
-                String[] publisherUrl = apiPublisherUrl.split(":");
-                String publisherPort = null;
-                Integer publisherPortValue = 0;
-                if (publisherUrl.length > 3) {
-                    publisherPort = publisherUrl[2];
-                }
-                if (publisherPort != null) {
-                    publisherPortValue =  Integer.valueOf(publisherPort);
-                }
-                else {
-                    publisherPortValue = OnPremiseGatewayConstants.DEFAULT_PORT;
-                }
-                HttpClient httpClient = APIUtil.getHttpClient(publisherPortValue, apiPublisherUrl.split(":")[0]);
+                URL apiPublisherUrlValue = MicroGatewayCommonUtil.getURLFromStringUrlValue(apiPublisherUrl);
+                HttpClient httpClient = APIUtil.getHttpClient(apiPublisherUrlValue.getPort(), apiPublisherUrlValue
+                        .getProtocol());
                 HttpGet httpGet = new HttpGet(mediationPolicyViewUrl);
                 String authHeaderValue = OnPremiseGatewayConstants.AUTHORIZATION_BEARER +
                         accessTokenDTO.getAccessToken();
@@ -560,19 +525,9 @@ public class APISynchronizer implements OnPremiseGatewayInitListener {
                     log.debug("Using default API publisher URL: " + apiPublisherUrl);
                 }
             }
-            String[] publisherUrl = apiPublisherUrl.split(":");
-            String publisherPort = null;
-            Integer publisherPortValue = 0;
-            if (publisherUrl.length > 3) {
-                publisherPort = publisherUrl[2];
-            }
-            if (publisherPort != null) {
-                publisherPortValue =  Integer.valueOf(publisherPort);
-            }
-            else {
-                publisherPortValue = OnPremiseGatewayConstants.DEFAULT_PORT;
-            }
-            HttpClient httpClient = APIUtil.getHttpClient(publisherPortValue, apiPublisherUrl.split(":")[0]);
+            URL apiPublisherUrlValue = MicroGatewayCommonUtil.getURLFromStringUrlValue(apiPublisherUrl);
+            HttpClient httpClient = APIUtil.getHttpClient(apiPublisherUrlValue.getPort(), apiPublisherUrlValue
+                    .getProtocol());
             HttpGet httpGet = new HttpGet(mediationPolicyUrl);
             String authHeaderValue = OnPremiseGatewayConstants.AUTHORIZATION_BEARER +
                     accessTokenDTO.getAccessToken();
@@ -623,19 +578,9 @@ public class APISynchronizer implements OnPremiseGatewayInitListener {
                     log.debug("Using default API publisher URL: " + apiPublisherUrl);
                 }
             }
-            String[] publisherUrl = apiPublisherUrl.split(":");
-            String publisherPort = null;
-            Integer publisherPortValue = 0;
-            if (publisherUrl.length > 3) {
-                publisherPort = publisherUrl[2];
-            }
-            if (publisherPort != null) {
-                publisherPortValue =  Integer.valueOf(publisherPort);
-            }
-            else {
-                publisherPortValue = OnPremiseGatewayConstants.DEFAULT_PORT;
-            }
-            HttpClient httpClient = APIUtil.getHttpClient(publisherPortValue, apiPublisherUrl.split(":")[0]);
+            URL apiPublisherUrlValue = MicroGatewayCommonUtil.getURLFromStringUrlValue(apiPublisherUrl);
+            HttpClient httpClient = APIUtil.getHttpClient(apiPublisherUrlValue.getPort(), apiPublisherUrlValue
+                    .getProtocol());
             HttpGet httpGet = new HttpGet(uri);
             String authHeaderValue = OnPremiseGatewayConstants.AUTHORIZATION_BEARER +
                     accessTokenDTO.getAccessToken();

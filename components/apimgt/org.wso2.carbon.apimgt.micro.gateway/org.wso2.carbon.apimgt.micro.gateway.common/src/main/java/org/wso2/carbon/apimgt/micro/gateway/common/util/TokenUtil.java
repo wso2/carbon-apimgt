@@ -43,6 +43,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -134,19 +135,10 @@ public class TokenUtil {
                 apiPublisherUrl + OnPremiseGatewayConstants.DYNAMIC_CLIENT_REGISTRATION_URL_SUFFIX
                         .replace(OnPremiseGatewayConstants.API_VERSION_PARAM, restApiVersion).replace("//",
                                 OnPremiseGatewayConstants.URL_PATH_SEPARATOR); //remove "//" created in cloud case.
-        String[] publisherUrl = apiPublisherUrl.split(":");
-        String publisherPort = null;
-        Integer publisherPortValue = 0;
-        if (publisherUrl.length > 3) {
-            publisherPort = publisherUrl[2];
-        }
-        if (publisherPort != null) {
-            publisherPortValue =  Integer.valueOf(publisherPort);
-        }
-        else {
-            publisherPortValue = OnPremiseGatewayConstants.DEFAULT_PORT;
-        }
-        HttpClient httpClient = APIUtil.getHttpClient(publisherPortValue, apiPublisherUrl.split(":")[0]);
+
+        URL apiPublisherUrlValue = MicroGatewayCommonUtil.getURLFromStringUrlValue(apiPublisherUrl);
+        HttpClient httpClient = APIUtil.getHttpClient(apiPublisherUrlValue.getPort(), apiPublisherUrlValue
+                .getProtocol());
         String authHeader = getBasicAuthHeaderValue(username, password);
         HttpPost httpPost = new HttpPost(clientRegistrationUrl);
         httpPost.addHeader(OnPremiseGatewayConstants.AUTHORIZATION_HEADER, authHeader);
@@ -217,19 +209,9 @@ public class TokenUtil {
                 OnPremiseGatewayConstants.TOKEN_API_SUFFIX;
         String gatewayUrl = ConfigManager.getConfigManager()
                 .getProperty(OnPremiseGatewayConstants.API_GATEWAY_URL_PROPERTY_KEY);
-        String[] apiGatewayUrl = gatewayUrl.split(":");
-        String gatewayPort = null;
-        Integer gatewayPortValue = 0;
-        if (apiGatewayUrl.length > 3) {
-            gatewayPort = apiGatewayUrl[2];
-        }
-        if (gatewayPort != null) {
-            gatewayPortValue =  Integer.valueOf(gatewayPort);
-        }
-        else {
-            gatewayPortValue = OnPremiseGatewayConstants.DEFAULT_GATEWAY_PORT;
-        }
-        HttpClient httpClient = APIUtil.getHttpClient(gatewayPortValue, gatewayUrl.split(":")[0]);
+        URL gatewayUrlValue = MicroGatewayCommonUtil.getURLFromStringUrlValue(gatewayUrl);
+        HttpClient httpClient = APIUtil.getHttpClient(gatewayUrlValue.getPort(), gatewayUrlValue.getProtocol());
+
         List<NameValuePair> paramsArray = new ArrayList<>();
         for (Map.Entry<String, String> entry : params.entrySet()) {
             paramsArray.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
