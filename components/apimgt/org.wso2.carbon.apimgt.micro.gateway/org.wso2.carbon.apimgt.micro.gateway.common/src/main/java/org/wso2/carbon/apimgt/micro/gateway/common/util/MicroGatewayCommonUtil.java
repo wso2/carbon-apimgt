@@ -18,6 +18,10 @@
 
 package org.wso2.carbon.apimgt.micro.gateway.common.util;
 
+import org.wso2.carbon.apimgt.micro.gateway.common.exception.OnPremiseGatewayException;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
@@ -49,6 +53,27 @@ public class MicroGatewayCommonUtil {
      * @param passwordCharArray char array of password
      */
     public static void cleanPasswordCharArray(char[] passwordCharArray) {
-        Arrays.fill(passwordCharArray,'0');
+        Arrays.fill(passwordCharArray, '0');
+    }
+
+    /**
+     * This method returns the URL value for the String value
+     *
+     * @param urlValue URL value
+     * @return URL value
+     * @throws OnPremiseGatewayException if failed to get the URL
+     */
+    public static URL getURLFromStringUrlValue(String urlValue) throws OnPremiseGatewayException {
+
+        String errorMessage = "Error while retrieving URL from the string url value: ";
+        try {
+            URL url = new URL(urlValue);
+            if (url != null) {
+                return url;
+            }
+        } catch (MalformedURLException e) {
+            throw new OnPremiseGatewayException(errorMessage + urlValue, e);
+        }
+        throw new OnPremiseGatewayException(errorMessage + urlValue);
     }
 }
