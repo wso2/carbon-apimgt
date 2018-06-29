@@ -319,7 +319,8 @@ public class APIKeyValidationService extends AbstractAdmin {
             }
 
             if (APIKeyMgtDataHolder.isJwtGenerationEnabled() &&
-                    validationContext.getValidationInfoDTO().getEndUserName() != null && !validationContext.isCacheHit()) {
+                    validationContext.getValidationInfoDTO().getEndUserName() != null
+                    && !validationContext.isCacheHit()) {
                 Application application = APIUtil.getApplicationByClientId(validationContext.getValidationInfoDTO()
                         .getConsumerKey());
 
