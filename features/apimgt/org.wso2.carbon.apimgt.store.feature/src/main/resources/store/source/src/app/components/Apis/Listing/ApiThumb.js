@@ -25,7 +25,7 @@ import ImageGenerator from './ImageGenerator';
 import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types';
 import {Star} from "../Details/Overview";
-import Api from '../../../data/api'
+import Api from '../../../data/api';
 
 const styles = theme => ({
     lifeCycleState: {
@@ -134,12 +134,12 @@ class ApiThumb extends React.Component {
 
     }
 
-    componentDidMount(){
-        var api = new Api();
-        let promised_rating = api.getRatingFromUser(this.props.api.id,null);
+    componentDidMount() {
+        let api = new Api();
+        let promised_rating = api.getRatingFromUser(this.props.api.id, null);
         promised_rating.then(
             response => {
-                this.setState({rating:response.obj.userRating});
+                this.setState({rating: response.obj.userRating});
             }
         );
     }
@@ -204,6 +204,7 @@ class StarRatingBar extends React.Component {
     constructor(props) {
         super(props);
     }
+
     render() {
         return (
             <div>
