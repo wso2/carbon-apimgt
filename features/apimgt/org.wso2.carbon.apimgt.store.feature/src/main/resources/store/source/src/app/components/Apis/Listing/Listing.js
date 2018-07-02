@@ -26,18 +26,13 @@ import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import Grid from 'material-ui/Grid';
 import Typography from 'material-ui/Typography';
-import BottomNavigation, {BottomNavigationAction} from 'material-ui/BottomNavigation';
-import ListIcon from 'material-ui-icons/List';
-import GridOnIcon from 'material-ui-icons/GridOn';
 
-import Table, {TableBody, TableCell, TableHead, TableRow} from 'material-ui/Table';
-import Paper from 'material-ui/Paper';
+import Table, { TableBody, TableCell, TableHead, TableRow, TableSortLabel } from 'material-ui/Table';
 import IconButton from 'material-ui/IconButton';
 import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
 import List from 'material-ui-icons/List';
 import GridIcon from 'material-ui-icons/GridOn';
-import { Manager, Target } from 'react-popper';
 
 const styles = theme => ({
     rightIcon: {
@@ -79,41 +74,111 @@ const styles = theme => ({
         paddingTop: 10,
     }
 });
+
+function getSorting(order, orderBy) {
+    return order === 'desc'
+        ? (a, b) => (b[orderBy] < a[orderBy] ? -1 : 1)
+        : (a, b) => (a[orderBy] < b[orderBy] ? -1 : 1);
+}
+
+class EnhancedAPITableHead extends React.Component {
+    static propTypes = {
+        onRequestSort: PropTypes.func.isRequired,
+        order: PropTypes.string.isRequired,
+        orderBy: PropTypes.string.isRequired,
+    };
+
+    createSortHandler = property => event => {
+        this.props.onRequestSort(event, property);
+    };
+
+    render() {
+        const columnData = [
+            { id: 'name', numeric: false, disablePadding: true, label: 'Name' },
+            { id: 'version', numeric: false, disablePadding: false, label: 'Version' },
+            { id: 'context', numeric: false, disablePadding: false, label: 'Context' },
+            { id: 'rating', numeric: false, disablePadding: false, label: 'Rating' },
+        ];
+        const { order, orderBy } = this.props;
+
+        return (
+            <TableHead>
+                <TableRow>
+                    {columnData.map(column => {
+                        return (
+                            <TableCell
+                                key={column.id}
+                                numeric={column.numeric}
+                                sortDirection={orderBy === column.id ? order : false}
+                            >
+                                <TableSortLabel
+                                    active={orderBy === column.id}
+                                    direction={order}
+                                    onClick={this.createSortHandler(column.id)}
+                                >
+                                    {column.label}
+                                </TableSortLabel>
+                            </TableCell>
+                        );
+                    }, this)}
+                </TableRow>
+            </TableHead>
+        );
+    }
+}
+
 class Listing extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {listType: 'grid', apis: null, value: 1};
+        this.state = {
+            listType: 'grid',
+            apis: null,
+            value: 1,
+            order: 'asc',
+            orderBy: 'name'
+        };
     }
 
     setListType = (value) => {
-        this.setState({listType: value});
+        this.setState({ listType: value });
     }
 
     componentDidMount() {
         let api = new API();
         let promised_apis = api.getAllAPIs();
         promised_apis.then((response) => {
-            this.setState({apis: response.obj});
+            this.setState({ apis: response.obj });
         }).catch(error => {
             let status = error.status;
             if (status === 404) {
-                this.setState({notFound: true});
+                this.setState({ notFound: true });
             } else if (status === 401) {
-                this.setState({isAuthorize: false});
-                let params = qs.stringify({reference: this.props.location.pathname});
-                this.props.history.push({pathname: "/login", search: params});
+                this.setState({ isAuthorize: false });
+                let params = qs.stringify({ reference: this.props.location.pathname });
+                this.props.history.push({ pathname: "/login", search: params });
             }
         });
     }
 
-    render() {
-        if (this.state.notFound) {
-            return <ResourceNotFound/>
+    handleRequestSort = (event, property) => {
+        const orderBy = property;
+        let order = 'desc';
+
+        if (this.state.orderBy === property && this.state.order === 'desc') {
+            order = 'asc';
         }
 
-        const {value} = this.state;
-        const classes = this.props.classes;
+        this.setState({ order, orderBy });
+    };
 
+    render() {
+        if (this.state.notFound) {
+            return <ResourceNotFound />
+        }
+
+        const { value } = this.state;
+        const classes = this.props.classes;
+        const { order, orderBy } = this.state;
         return (
             <div>
                 <Grid container spacing={0} justify="center">
@@ -141,42 +206,31 @@ class Listing extends React.Component {
                             this.state.apis ?
                                 this.state.listType === "grid" ?
                                     <Grid container className={classes.ListingWrapper} >
-                                        {this.state.apis.list.map( api => <ApiThumb api={api} key={api.id}/> )}
+                                        {this.state.apis.list.map(api => <ApiThumb api={api} key={api.id} />)}
                                     </Grid>
                                     :
-                                        <Table>
-                                            <TableHead>
-                                                <TableRow>
-                                                    <TableCell>Name</TableCell>
-                                                    <TableCell>Version</TableCell>
-                                                    <TableCell>Context</TableCell>
-                                                    <TableCell>Description</TableCell>
-                                                </TableRow>
-                                            </TableHead>
-                                            <TableBody>
-                                                {this.state.apis.list.map( api => <APiTableRow api={api} key={api.id}/> )}
-                                            </TableBody>
-                                        </Table>
+                                    <Table>
+                                        <EnhancedAPITableHead order={order} orderBy={orderBy}
+                                            onRequestSort={this.handleRequestSort} />
+                                        <TableBody>
+                                            {this.state.apis.list
+                                                .sort(getSorting(order, orderBy))
+                                                .map(api => <APiTableRow api={api} key={api.id} />)}
+                                        </TableBody>
+                                    </Table>
 
                                 :
-                                <Loading/>
+                                <Loading />
                         }
                     </Grid>
                 </Grid>
-
-
-
-
-
             </div>
         );
     }
 }
 
-
 Listing.propTypes = {
     classes: PropTypes.object.isRequired,
     theme: PropTypes.object.isRequired,
 };
-
 export default withStyles(styles, { withTheme: true })(Listing);
