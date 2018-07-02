@@ -163,7 +163,6 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 
                 if (!Strings.isNullOrEmpty(token)) {
                     ((FullHttpRequest) msg).headers().set(APIMgtGatewayConstants.WS_JWT_TOKEN_HEADER, token);
-
                 }
                 ctx.fireChannelRead(msg);
 
