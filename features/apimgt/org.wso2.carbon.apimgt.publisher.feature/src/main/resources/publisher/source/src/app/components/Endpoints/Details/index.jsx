@@ -18,6 +18,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import Grid from 'material-ui/Grid';
 import Typography from 'material-ui/Typography';
 
 import EndpointForm from '../Create/EndpointForm';
@@ -64,8 +65,12 @@ class EndpointDetails extends Component {
         }
         return (
             <div>
-                <Typography variant='headline'> {endpoint.name} </Typography>
-                <EndpointForm endpoint={endpoint} />
+                <Grid container spacing={0} justify='center'>
+                    <Grid item md={10}>
+                        <Typography variant='headline'> {endpoint.name} </Typography>
+                        <EndpointForm endpoint={endpoint} />
+                    </Grid>
+                </Grid>
             </div>
         );
     }

@@ -186,7 +186,7 @@ class EndpointForm extends Component {
                                 placeholder='Password'
                                 defaultValue={endpointSecurity && endpointSecurity.password}
                                 disabled={isReadOnly}
-                                InputProps={{ classes: { disabled: classes.disabled } }}
+                                InputProps={{ classes: { disabled: classes.disabled }, type: 'password' }}
                             />
                         </div>
                     )}

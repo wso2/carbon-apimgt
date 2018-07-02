@@ -23,21 +23,13 @@ import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
 import Grid from 'material-ui/Grid';
-import ArrowBack from '@material-ui/icons/ArrowBack';
-import Alert from '../../Shared/Alert';
+import Paper from 'material-ui/Paper';
 
+import Alert from '../../Shared/Alert';
 import EndpointForm from './EndpointForm';
 import Endpoint from '../../../data/Endpoint';
 
 const styles = theme => ({
-    titleBar: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        borderBottomWidth: '1px',
-        borderBottomStyle: 'solid',
-        borderColor: theme.palette.text.secondary,
-        marginBottom: 20,
-    },
     buttonLeft: {
         alignSelf: 'flex-start',
         display: 'flex',
@@ -45,10 +37,6 @@ const styles = theme => ({
     buttonRight: {
         alignSelf: 'flex-end',
         display: 'flex',
-    },
-    title: {
-        display: 'inline-block',
-        marginRight: 50,
     },
     buttonBack: {
         marginRight: 20,
@@ -82,6 +70,9 @@ const styles = theme => ({
     },
     buttonsWrapper: {
         marginTop: 40,
+    },
+    paper: {
+        padding: theme.spacing.unit * 2,
     },
 });
 /**
@@ -135,10 +126,19 @@ class EndpointCreate extends Component {
      */
     handleSubmit() {
         const { endpoint } = this.state;
+        // API call fails with endpointSecurity with an empty JSON object
+        if (Object.keys(endpoint.endpointSecurity).length === 0) {
+            endpoint.endpointSecurity.enabled = false;
+        }
         endpoint
             .save()
             .then((newEndpoint) => {
-                Alert.info('New endpoint ' + newEndpoint.name + ' created successfully');
+                const message = (
+                    <span>
+                        New endpoint <b> {newEndpoint.name} </b> created successfully
+                    </span>
+                );
+                Alert.info(message);
                 const redirectURL = '/endpoints/' + newEndpoint.id + '/';
                 this.props.history.push(redirectURL);
             })
@@ -157,31 +157,27 @@ class EndpointCreate extends Component {
         const { classes } = this.props;
         const { endpoint } = this.state;
         return (
-            <Grid container spacing={0} justify='flex-start'>
-                <Grid item xs={12} className={classes.titleBar}>
-                    <div className={classes.buttonLeft}>
-                        <Link to='/endpoints/'>
-                            <Button variant='raised' size='small' className={classes.buttonBack} color='default'>
-                                <ArrowBack />
-                            </Button>
-                        </Link>
-                        <div className={classes.title}>
+            <Grid container spacing={0} justify='center'>
+                <Grid item xs={12} lg={10} xl={10}>
+                    <Paper className={classes.paper}>
+                        <div>
                             <Typography variant='display2'>Add new Global Endpoint</Typography>
                         </div>
-                    </div>
-                </Grid>
-                <Grid item xs={12} lg={6} xl={4}>
-                    <EndpointForm handleInputs={this.handleInputs} endpoint={endpoint} />
-                    <div className={classes.buttonsWrapper}>
-                        <Button variant='raised' color='primary' className={classes.button} onClick={this.handleSubmit}>
-                            Create
-                        </Button>
-                        <Link to='/endpoints/'>
-                            <Button variant='raised' className={classes.button}>
-                                Cancel
+                        <EndpointForm handleInputs={this.handleInputs} endpoint={endpoint} />
+                        <div className={classes.buttonsWrapper}>
+                            <Button
+                                variant='raised'
+                                color='primary'
+                                className={classes.button}
+                                onClick={this.handleSubmit}
+                            >
+                                Create
                             </Button>
-                        </Link>
-                    </div>
+                            <Link to='/endpoints/'>
+                                <Button className={classes.button}>Cancel</Button>
+                            </Link>
+                        </div>
+                    </Paper>
                 </Grid>
             </Grid>
         );

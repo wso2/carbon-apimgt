@@ -98,7 +98,7 @@ class EndpointTableRows extends React.Component {
 EndpointTableRows.propTypes = {
     endpoint: PropTypes.shape({
         id: PropTypes.string,
-        maxTps: PropTypes.string,
+        maxTps: PropTypes.number,
         name: PropTypes.string,
         type: PropTypes.string,
         endpointConfig: PropTypes.string,

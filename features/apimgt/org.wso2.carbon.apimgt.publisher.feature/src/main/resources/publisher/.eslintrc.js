@@ -59,6 +59,8 @@ module.exports = {
         'jsx-a11y/anchor-is-valid': 'off', // Due to using React-Router Link components
         'react/jsx-indent': ['error', 4],
         'react/jsx-indent-props': ['error', 4],
+        'react/no-did-mount-set-state': ['off'], // Validity of this rule is questionable with react 16.3.0 onwards,
+        // until this (https://github.com/yannickcr/eslint-plugin-react/issues/1754) issue resolved
         'no-mixed-operators': ['error'],
         'jsx-quotes': ['error', 'prefer-single'],
         'no-else-return': 'off',

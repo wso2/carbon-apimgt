@@ -39,7 +39,7 @@ class LifeCycle extends Component {
         this.updateData = this.updateData.bind(this);
     }
 
-    componentWillMount() {
+    componentDidMount() {
         this.updateData();
     }
 

@@ -38,7 +38,7 @@ export default class LoginForm extends Component {
         this.handleInputs = this.handleInputs.bind(this);
     }
 
-    componentWillMount() {
+    componentDidMount() {
         let queryString = this.props.location.search;
         queryString = queryString.replace(/^\?/, '');
         /* With QS version up we can directly use {ignoreQueryPrefix: true} option */

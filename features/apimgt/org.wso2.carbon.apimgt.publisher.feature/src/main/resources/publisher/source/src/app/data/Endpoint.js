@@ -58,6 +58,15 @@ export default class Endpoint extends Resource {
     }
 
     /**
+     * Return the service URL of the Endpoint
+     * @returns {String} HTTP/HTTPS Service URL
+     * @memberof Endpoint
+     */
+    getServiceUrl() {
+        return this.endpointConfig.service_url;
+    }
+
+    /**
      * Persist the local endpoint object changes via Endpoint REST API
      * @returns {Promise} Promise resolve with newly created Endpoint object
      * @memberof Endpoint
@@ -116,6 +125,22 @@ export default class Endpoint extends Resource {
         return promisedGet.then((response) => {
             const endpointJSON = response.body;
             return new Endpoint(endpointJSON);
+        });
+    }
+
+    /**
+     * Get all Global endpoints
+     * @static
+     * @returns {Array} Array of global Endpoint objects
+     * @memberof Endpoint
+     */
+    static all() {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const promisedEndpoints = apiClient.then((client) => {
+            return client.apis['Endpoint (Collection)'].get_endpoints({}, this._requestMetaData());
+        });
+        return promisedEndpoints.then((response) => {
+            return response.body.list.map(endpointJSON => new Endpoint(endpointJSON));
         });
     }
 }

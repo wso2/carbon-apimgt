@@ -78,18 +78,11 @@ class Protected extends Component {
      * @inheritDoc
      * @memberof Protected
      */
-    componentWillMount() {
+    componentDidMount() {
         const storedThemeIndex = localStorage.getItem('themeIndex');
         if (storedThemeIndex) {
             this.setState({ themeIndex: parseInt(storedThemeIndex, 10) });
         }
-    }
-
-    /**
-     * @inheritDoc
-     * @memberof Protected
-     */
-    componentDidMount() {
         ConfigManager.getConfigs()
             .environments.then((response) => {
                 this.environments = response.data.environments;
