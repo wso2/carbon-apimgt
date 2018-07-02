@@ -315,3 +315,4 @@ Overview.propTypes = {
 };
 
 export default withStyles(styles)(Overview);
+export {Star};

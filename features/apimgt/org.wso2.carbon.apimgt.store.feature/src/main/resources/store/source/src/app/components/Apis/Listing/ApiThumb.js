@@ -24,7 +24,8 @@ import { Manager, Target, Popper } from 'react-popper';
 import ImageGenerator from './ImageGenerator';
 import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types';
-
+import {Star} from "../Details/Overview";
+import Api from '../../../data/api'
 
 const styles = theme => ({
     lifeCycleState: {
@@ -128,10 +129,20 @@ class ApiThumb extends React.Component {
             overview_link: '',
             isRedirect: false,
             openMoreMenu: false,
+            rating: 0
         };
 
     }
 
+    componentDidMount(){
+        var api = new Api();
+        let promised_rating = api.getRatingFromUser(this.props.api.id,null);
+        promised_rating.then(
+            response => {
+                this.setState({rating:response.obj.userRating});
+            }
+        );
+    }
 
     render() {
         let details_link = "/apis/" + this.props.api.id;
@@ -172,17 +183,38 @@ class ApiThumb extends React.Component {
                             </Typography>
                         </div>
                     </div>
+                    <div className={classes.thumbInfo}>
+                        <Typography variant="subheading" gutterBottom align="left">
+                            <StarRatingBar rating={this.state.rating}/>
+                        </Typography>
+                    </div>
                     <div className={classes.descriptionWrapper}>
                         {description}
                         <div className={classes.descriptionOverlay} />
-                        </div>
-
+                    </div>
                 </div>
 
             </Grid>
         );
     }
 
+}
+
+class StarRatingBar extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+    render() {
+        return (
+            <div>
+                <Star name={1} isRated={this.props.rating >= 1}> </Star>
+                <Star name={2} isRated={this.props.rating >= 2}> </Star>
+                <Star name={3} isRated={this.props.rating >= 3}> </Star>
+                <Star name={4} isRated={this.props.rating >= 4}> </Star>
+                <Star name={5} isRated={this.props.rating >= 5}> </Star>
+            </div>
+        );
+    }
 }
 
 ApiThumb.propTypes = {
