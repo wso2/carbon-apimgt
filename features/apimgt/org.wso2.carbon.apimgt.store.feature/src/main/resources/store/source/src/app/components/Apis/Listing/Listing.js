@@ -201,7 +201,6 @@ class Listing extends React.Component {
                     </Grid>
 
                     <Grid item xs={12}>
-
                         {
                             this.state.apis ?
                                 this.state.listType === "grid" ?
@@ -218,7 +217,6 @@ class Listing extends React.Component {
                                                 .map(api => <APiTableRow api={api} key={api.id} />)}
                                         </TableBody>
                                     </Table>
-
                                 :
                                 <Loading />
                         }
