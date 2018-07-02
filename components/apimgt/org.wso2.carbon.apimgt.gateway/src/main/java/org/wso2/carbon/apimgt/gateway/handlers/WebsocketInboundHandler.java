@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.gateway.handlers;
 
+import com.google.common.base.Strings;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
@@ -159,7 +160,11 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 } else {
                     req.setUri(uri); // Setting endpoint appended uri
                 }
-                ((FullHttpRequest) msg).headers().set(APIMgtGatewayConstants.WS_JWT_TOKEN_HEADER, token);
+
+                if (!Strings.isNullOrEmpty(token)) {
+                    ((FullHttpRequest) msg).headers().set(APIMgtGatewayConstants.WS_JWT_TOKEN_HEADER, token);
+
+                }
                 ctx.fireChannelRead(msg);
 
                 // publish google analytics data
