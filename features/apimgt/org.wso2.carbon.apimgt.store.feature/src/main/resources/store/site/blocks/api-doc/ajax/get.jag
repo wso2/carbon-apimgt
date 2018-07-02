@@ -72,6 +72,7 @@ var log = new Log();
              providerVal = providerVal.replace("-DOM-","/");
         }
 
+        var isError = false;
     	try {
     		//start tenant flow before fetching swagger resource from the registry
     		if (tenantDomain != "" && tenantDomain != 'carbon.super') {
@@ -83,16 +84,35 @@ var log = new Log();
 
             var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
             var apiUtil = new APIUtil();
-            var swaggerPath = apiUtil.getOpenAPIDefinitionFilePath(apiNameVal,apiVersionVal, providerVal);
-    		var registry = carbon.server.osgiService('org.wso2.carbon.registry.core.service.RegistryService').getGovernanceUserRegistry("wso2.anonymous.user", tenantID);
+            var swaggerPath = apiUtil.getOpenAPIDefinitionFilePath(apiNameVal, apiVersionVal, providerVal);
+            var user = jagg.getUser();
+            if (user && user.username) {
+                var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+                username = MultitenantUtils.getTenantAwareUsername(user.username);
+            } else {
+                username = "wso2.anonymous.user";
+            }
 
-    		url = swaggerPath + "swagger.json";
-    		var data = registry.get(url);
-    	}finally {
+            var registry = carbon.server.osgiService('org.wso2.carbon.registry.core.service.RegistryService').getGovernanceUserRegistry(username, tenantID);
+
+            url = swaggerPath + "swagger.json";
+            var data = null;
+            data = registry.get(url);
+        } catch (e) {
+            isError = true;
+    	} finally {
     		if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
             }
     	}
+
+        if (isError) {
+            print({
+                error: true,
+                message: "API definition not found"
+            });
+            return;
+        }
         var output = new Packages.java.lang.String(data.content);
         var jsonObj = JSON.parse(output);
 

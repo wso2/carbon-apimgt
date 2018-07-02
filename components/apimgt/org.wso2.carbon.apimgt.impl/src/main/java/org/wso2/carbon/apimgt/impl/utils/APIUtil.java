@@ -3082,6 +3082,35 @@ public final class APIUtil {
         }
     }
 
+    /**
+     * This function is to set resource permissions based on its visibility
+     *
+     * @param artifactPath API resource path
+     * @throws APIManagementException Throwing exception
+     */
+    public static void clearResourcePermissions(String artifactPath, APIIdentifier apiId, int tenantId)
+            throws APIManagementException {
+        try {
+            String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+                    APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+                            RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + artifactPath);
+            String tenantDomain = MultitenantUtils
+                    .getTenantDomain(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
+            if (!org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
+                    .equals(tenantDomain)) {
+                org.wso2.carbon.user.api.AuthorizationManager authManager = ServiceReferenceHolder.getInstance()
+                        .getRealmService().getTenantUserRealm(tenantId).getAuthorizationManager();
+                authManager.clearResourceAuthorizations(resourcePath);
+            } else {
+                RegistryAuthorizationManager authorizationManager = new RegistryAuthorizationManager(
+                        ServiceReferenceHolder.getUserRealm());
+                authorizationManager.clearResourceAuthorizations(resourcePath);
+            }
+        } catch (UserStoreException e) {
+            handleException("Error while adding role permissions to API", e);
+        }
+    }
+
     public static void loadTenantAPIPolicy(String tenant, int tenantID) throws APIManagementException {
 
         String tierBasePath = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources"

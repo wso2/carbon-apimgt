@@ -1202,7 +1202,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     api.getAdditionalProperties());
 
             if (updatePermissions) {
-                clearResourcePermissions(artifactPath, api.getId());
+                APIUtil.clearResourcePermissions(artifactPath, api.getId(), ((UserRegistry) registry).getTenantId());
                 String visibleRolesList = api.getVisibleRoles();
 
                 if (visibleRolesList != null) {
@@ -2519,7 +2519,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             GenericArtifact updateApiArtifact = APIUtil.createDocArtifactContent(artifact, apiId, documentation);
             artifactManager.updateGenericArtifact(updateApiArtifact);
-            clearResourcePermissions(docPath, apiId);
+            APIUtil.clearResourcePermissions(docPath, apiId, ((UserRegistry) registry).getTenantId());
 
             APIUtil.setResourcePermissions(api.getId().getProviderName(), visibility, authorizedRoles,
                     artifact.getPath(), registry);
@@ -2674,33 +2674,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             } catch (RegistryException ex) {
                 handleException("Error while rolling back the transaction for API: " + api.getId().getApiName(), ex);
             }
-        }
-    }
-
-    /**
-     * This function is to set resource permissions based on its visibility
-     *
-     * @param artifactPath API resource path
-     * @throws APIManagementException Throwing exception
-     */
-    private void clearResourcePermissions(String artifactPath, APIIdentifier apiId) throws APIManagementException {
-        try {
-            String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                    APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
-                            RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + artifactPath);
-            String tenantDomain = MultitenantUtils
-                    .getTenantDomain(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
-            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                AuthorizationManager authManager = ServiceReferenceHolder.getInstance().getRealmService()
-                        .getTenantUserRealm(((UserRegistry) registry).getTenantId()).getAuthorizationManager();
-                authManager.clearResourceAuthorizations(resourcePath);
-            } else {
-                RegistryAuthorizationManager authorizationManager = new RegistryAuthorizationManager(
-                        ServiceReferenceHolder.getUserRealm());
-                authorizationManager.clearResourceAuthorizations(resourcePath);
-            }
-        } catch (UserStoreException e) {
-            handleException("Error while adding role permissions to API", e);
         }
     }
 
@@ -4122,10 +4095,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public void saveSwagger20Definition(APIIdentifier apiId, String jsonText) throws APIManagementException {
+
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            definitionFromOpenAPISpec.saveAPIDefinition(getAPI(apiId), jsonText, registry);
+            saveSwaggerDefinition(getAPI(apiId), jsonText);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+    }
+
+    @Override
+    public void saveSwaggerDefinition(API api, String jsonText) throws APIManagementException {
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            definitionFromOpenAPISpec.saveAPIDefinition(api, jsonText, registry);
 
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
