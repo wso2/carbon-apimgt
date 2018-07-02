@@ -132,6 +132,7 @@ public class APIManagerComponent {
     public static final String APPLICATION_ROOT_PERMISSION =  "applications";
     public static final String API_RXT =  "api.rxt";
     public static final String AUTHORIZATION_HEADER =  "Authorization Header";
+    public static final String LABELS =  "Labels";
 
 
     protected void activate(ComponentContext componentContext) throws Exception {
@@ -371,10 +372,12 @@ public class APIManagerComponent {
                             // check whether the resource contains a field called authorization header.
                             if(!RegistryUtils.decodeBytes((byte[]) resource.getContent()).
                                     contains(AUTHORIZATION_HEADER)) {
-                                String rxt = FileUtil.readFileToString(rxtDir + File.separator + rxtPath);
-                                resource.setContent(rxt.getBytes(Charset.defaultCharset()));
-                                resource.setMediaType(APIConstants.RXT_MEDIA_TYPE);
-                                systemRegistry.put(resourcePath, resource);
+                                updateRegistryResourceContent(resource, systemRegistry, rxtDir, rxtPath, resourcePath);
+                            }
+                            // check whether the resource contains a section called 'Labels' and add it
+                            if (!RegistryUtils.decodeBytes((byte[]) resource.getContent()).
+                                    contains(LABELS)) {
+                                updateRegistryResourceContent(resource, systemRegistry, rxtDir, rxtPath, resourcePath);
                             }
                         }
                     }
@@ -393,6 +396,15 @@ public class APIManagerComponent {
                 throw new APIManagementException(msg, e);
             }
         }
+    }
+
+    private void updateRegistryResourceContent(Resource resource, UserRegistry systemRegistry, String rxtDir,
+                                               String rxtPath, String resourcePath) throws RegistryException, IOException {
+
+        String rxt = FileUtil.readFileToString(rxtDir + File.separator + rxtPath);
+        resource.setContent(rxt.getBytes(Charset.defaultCharset()));
+        resource.setMediaType(APIConstants.RXT_MEDIA_TYPE);
+        systemRegistry.put(resourcePath, resource);
     }
 
     private void setupImagePermissions() throws APIManagementException {
