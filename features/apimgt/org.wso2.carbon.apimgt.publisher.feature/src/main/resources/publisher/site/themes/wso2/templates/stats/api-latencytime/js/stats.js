@@ -219,29 +219,37 @@ function renderGraph(fromDate,toDate,drillDown){
             var data1 = {};
                 if (json.usage && json.usage.length > 0) {
                   $('#apiLatencyTimeNote').removeClass('hide');
-                  for(var usage1 in json.usage ){
-                    var apiResponseTimeData = (data1["Total Time"]) ? data1["Total Time"] : [];
-                    var backendLatencyData  = (data1["BackEnd"])? data1["BackEnd"] : [] ;
-                    var otherLatencyData    = (data1["Other"]) ? data1["Other"] :[];
-                    var requestMediationLatencyData = (data1["Request Mediation"]) ? data1["Request Mediation"] :[];
-                    var responseMediationLatencyData = (data1["Response Mediation"]) ? data1["Response Mediation"] : [];
-                    var securityLatencyData = (data1["Authentication"]) ? data1["Authentication"] : [];
-                    var throttlingLatencyData = (data1["Throttling"])? data1["Throttling"] : [];
-                    var d = new Date(json.usage[usage1].values.year, (json.usage[usage1].values.month -1), json.usage[usage1].values.day, json.usage[usage1].values.hour,json.usage[usage1].values.minutes,json.usage[usage1].values.seconds,"00");
-                    apiResponseTimeData.push({x:d,y:json.usage[usage1].values.apiResponseTime});
-                    backendLatencyData.push({x:d,y:json.usage[usage1].values.backendLatency});
-                    otherLatencyData.push({x:d,y:json.usage[usage1].values.otherLatency});
-                    requestMediationLatencyData.push({x:d,y:json.usage[usage1].values.requestMediationLatency});
-                    responseMediationLatencyData.push({x:d,y:json.usage[usage1].values.responseMediationLatency});
-                    securityLatencyData.push({x:d,y:json.usage[usage1].values.securityLatency});
-                    throttlingLatencyData.push({x:d,y:json.usage[usage1].values.throttlingLatency});
-                     data1["Total Time"] = apiResponseTimeData;
-                     data1["BackEnd"] = backendLatencyData;
-                     data1["Other"] = otherLatencyData;
-                     data1["Request Mediation"] = requestMediationLatencyData;
-                     data1["Response Mediation"] = responseMediationLatencyData;
-                     data1["Authentication"] = securityLatencyData;
-                     data1["Throttling"] = throttlingLatencyData;
+                  for (var usage1 in json.usage ) {
+                      if (json.usage[usage1].values) {
+                          var apiResponseTimeData = (data1["Total Time"]) ? data1["Total Time"] : [];
+                          var backendLatencyData = (data1["BackEnd"]) ? data1["BackEnd"] : [];
+                          var otherLatencyData = (data1["Other"]) ? data1["Other"] : [];
+                          var requestMediationLatencyData = (data1["Request Mediation"]) ? data1["Request Mediation"] : [];
+                          var responseMediationLatencyData = (data1["Response Mediation"]) ? data1["Response Mediation"] : [];
+                          var securityLatencyData = (data1["Authentication"]) ? data1["Authentication"] : [];
+                          var throttlingLatencyData = (data1["Throttling"]) ? data1["Throttling"] : [];
+                          var d = new Date(json.usage[usage1].values.year, (json.usage[usage1].values.month - 1), json.usage[usage1].values.day, json.usage[usage1].values.hour, json.usage[usage1].values.minutes, json.usage[usage1].values.seconds, "00");
+                          apiResponseTimeData.push({x: d, y: json.usage[usage1].values.apiResponseTime});
+                          backendLatencyData.push({x: d, y: json.usage[usage1].values.backendLatency});
+                          otherLatencyData.push({x: d, y: json.usage[usage1].values.otherLatency});
+                          requestMediationLatencyData.push({
+                              x: d,
+                              y: json.usage[usage1].values.requestMediationLatency
+                          });
+                          responseMediationLatencyData.push({
+                              x: d,
+                              y: json.usage[usage1].values.responseMediationLatency
+                          });
+                          securityLatencyData.push({x: d, y: json.usage[usage1].values.securityLatency});
+                          throttlingLatencyData.push({x: d, y: json.usage[usage1].values.throttlingLatency});
+                          data1["Total Time"] = apiResponseTimeData;
+                          data1["BackEnd"] = backendLatencyData;
+                          data1["Other"] = otherLatencyData;
+                          data1["Request Mediation"] = requestMediationLatencyData;
+                          data1["Response Mediation"] = responseMediationLatencyData;
+                          data1["Authentication"] = securityLatencyData;
+                          data1["Throttling"] = throttlingLatencyData;
+                      }
                   }
                     populateMediations(data1);
                     drawGraphInArea(data1,drillDown);
