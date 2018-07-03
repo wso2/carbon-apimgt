@@ -160,10 +160,13 @@ public class CertificateMgtDaoTest {
         certificateMgtDAO.addCertificate("ALIAS4", "EP4", TENANT_ID);
     }
 
-    @Test(expected = EndpointForCertificateExistsException.class)
+    @Test
     public void testAddCertificateForExistingEndpoint() throws CertificateManagementException,
             CertificateAliasExistsException, EndpointForCertificateExistsException {
-        certificateMgtDAO.addCertificate("ALIAS_31", "EP_3", TENANT_2);
+        // add certificate
+        certificateMgtDAO.addCertificate("ALIAS_WSO2_1", "http://wso2.com", TENANT_2);
+        // add same cert for endpoint with differnt alias
+        Assert.assertTrue(certificateMgtDAO.addCertificate("ALIAS_WSO2_2", "http://wso2.com", TENANT_2));
     }
 }
 
