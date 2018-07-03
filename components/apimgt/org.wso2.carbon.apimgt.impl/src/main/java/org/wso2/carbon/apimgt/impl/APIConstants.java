@@ -1390,6 +1390,7 @@ public final class APIConstants {
      * Publisher Access Control related registry properties and values.
      */
     public static final String PUBLISHER_ROLES = "publisher_roles";
+    public static final String DISPLAY_PUBLISHER_ROLES = "display_publisher_roles";
     public static final String ACCESS_CONTROL = "publisher_access_control";
     public static final String NO_ACCESS_CONTROL = "all";
     public static final String NULL_USER_ROLE_LIST = "null";

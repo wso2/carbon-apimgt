@@ -922,7 +922,7 @@ public class APIProviderHostObject extends ScriptableObject {
         if (publisherAccessControl != null && publisherAccessControl.equals(APIConstants.API_RESTRICTED_VISIBILITY)) {
             publisherAccessControlRoles = (String) apiData.get(APIConstants.ACCESS_CONTROL_ROLES_PARAMETER, apiData);
             if (publisherAccessControlRoles != null) {
-                publisherAccessControlRoles = publisherAccessControlRoles.toLowerCase().trim();
+                publisherAccessControlRoles = publisherAccessControlRoles.trim();
             }
         }
 

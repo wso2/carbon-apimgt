@@ -7255,9 +7255,9 @@ public final class APIUtil {
         }
         api.setAccessControl(apiResource.getProperty(APIConstants.ACCESS_CONTROL));
         api.setAccessControlRoles(
-                APIConstants.NULL_USER_ROLE_LIST.equals(apiResource.getProperty(APIConstants.PUBLISHER_ROLES)) ?
+                APIConstants.NULL_USER_ROLE_LIST.equals(apiResource.getProperty(APIConstants.DISPLAY_PUBLISHER_ROLES)) ?
                         null :
-                        apiResource.getProperty(APIConstants.PUBLISHER_ROLES));
+                        apiResource.getProperty(APIConstants.DISPLAY_PUBLISHER_ROLES));
         return api;
     }
 
