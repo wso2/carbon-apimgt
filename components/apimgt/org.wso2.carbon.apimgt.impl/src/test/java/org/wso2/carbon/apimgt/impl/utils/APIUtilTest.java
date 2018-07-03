@@ -21,6 +21,7 @@
 package org.wso2.carbon.apimgt.impl.utils;
 
 import org.apache.axiom.om.OMElement;
+import org.apache.commons.collections.SetUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -107,6 +108,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.mockito.Matchers.eq;
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.DISABLE_ROLE_VALIDATION_AT_SCOPE_CREATION;
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.getOAuthConfigurationFromAPIMConfig;
@@ -1456,9 +1458,20 @@ public class APIUtilTest {
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN)).
                 thenReturn(corsConfiguration.getAccessControlAllowOrigins().toString());
 
+        Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG))
+                .thenReturn("{\"production_endpoints\":{\"url\":\"http://www.mocky.io/v2/5b21fe0f2e00002a00e313fe\"," +
+                        "\"config\":null,\"template_not_supported\":false}," +
+                        "\"sandbox_endpoints\":{\"url\":\"http://www.mocky.io/v2/5b21fe0f2e00002a00e313fe\"," +
+                        "\"config\":null,\"template_not_supported\":false},\"endpoint_type\":\"http\"}");
+
         API api = APIUtil.getAPIForPublishing(artifact, registry);
 
         Assert.assertNotNull(api);
+
+        Set<String> testEnvironmentList = new HashSet<String>();
+        testEnvironmentList.add("PRODUCTION");
+        testEnvironmentList.add("SANDBOX");
+        Assert.assertThat(SetUtils.isEqualSet(api.getEnvironmentList(), testEnvironmentList), is(true));
     }
 
     @Test

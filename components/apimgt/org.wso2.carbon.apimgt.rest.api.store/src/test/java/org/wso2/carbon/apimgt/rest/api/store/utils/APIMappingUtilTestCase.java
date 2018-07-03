@@ -148,6 +148,10 @@ public class APIMappingUtilTestCase {
         environments.add("Sandbox");
         api.setEnvironments(environments);
 
+        Set< String > environmentList = new HashSet<>();
+        environmentList.add("SANDBOX");
+        api.setEnvironmentList(environmentList);
+
         APIDTO apidto = APIMappingUtil.fromAPItoDTO(api, tenantDomain);
         Assert.assertNotNull("APIDto is returned", apidto);
     }
@@ -164,6 +168,9 @@ public class APIMappingUtilTestCase {
         api.setEnvironments(new HashSet<String>() {{
             add("SANDBOX");
         }});
+        Set< String > environmentList = new HashSet<>();
+        environmentList.add("SANDBOX");
+        api.setEnvironmentList(environmentList);
         Date date = new Date();
         api.setLastUpdated(new Date());
         api.setCreatedTime(String.valueOf(new Timestamp(date.getTime()).getTime()));

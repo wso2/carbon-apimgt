@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  * This is the test class for {@link APIMappingUtil}
@@ -115,6 +116,9 @@ public class APIMappingUtilTest {
         api.setContextTemplate("/test");
         api.setType("HTTP");
         api.setVisibility("public");
+        Set< String > environmentList = new HashSet<>();
+        environmentList.add("SANDBOX");
+        api.setEnvironmentList(environmentList);
         return api;
     }
 
