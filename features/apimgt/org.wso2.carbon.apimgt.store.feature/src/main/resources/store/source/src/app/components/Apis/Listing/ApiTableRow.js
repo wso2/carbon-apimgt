@@ -16,14 +16,14 @@
  * under the License.
  */
 
-import React from "react";
-import { Link } from "react-router-dom";
-import API from "../../../data/api";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import API from '../../../data/api';
 
-import { TableCell, TableRow } from "material-ui/Table";
-import { withStyles } from "material-ui/styles";
-import PropTypes from "prop-types";
-import Typography from "material-ui/Typography";
+import { TableCell, TableRow } from 'material-ui/Table';
+import { withStyles } from 'material-ui/styles';
+import PropTypes from 'prop-types';
+import Typography from 'material-ui/Typography';
 
 const styles = theme => ({
   root: {
@@ -97,13 +97,14 @@ class APiTableRow extends React.Component {
         let [api, subscriptions, applications, rating] = response.map(
           data => data.obj
         );
-        this.setState({ policies: api.policies });
-        this.setState({ description: api.description });
-        this.setState({ rating: rating.userRating });
-        let subscribedApplications = [];
-        subscriptions.list.map(element =>
-          subscribedApplications.push({ value: element.applicationId })
-        );
+        this.setState({
+          policies: api.policies,
+          description: api.description,
+          rating: rating.userRating
+        });
+        let subscribedApplications = subscriptions.list.map(element => ({
+          value: element.applicationId
+        }));
         // Get the application names of subscribed aplications
         for (let i = 0; i < applications.list.length; i++) {
           let applicationId = applications.list[i].applicationId;
@@ -114,7 +115,7 @@ class APiTableRow extends React.Component {
             }
           }
         }
-        this.setState({ subscribedApplications: subscribedApplications });
+        this.setState({ subscribedApplications });
       })
       .catch(error => {
         if (process.env.NODE_ENV !== "production") {
@@ -128,66 +129,69 @@ class APiTableRow extends React.Component {
   }
 
   render() {
-    let details_link = "/apis/" + this.props.api.id;
-    const { name, version, context, description } = this.props.api;
+    const { name, version, context, id } = this.props.api;
+    const details_link = "/apis/" + id;
+    const {
+      collapseOpen,
+      subscribedApplications,
+      rating,
+      description,
+      policies
+    } = this.state;
     if (!this.state.active) {
       // Controls the delete state, We set the state to inactive on delete success call
       return null;
     }
     const { classes } = this.props;
     const apiRows = [
-      <TableRow
-        hover
-        onClick={this.handleClick}
-        key={"row-data-" + this.props.api.id}
-      >
-        <TableCell className={this.state.collapseOpen ? classes.root : null}>
+      <TableRow hover onClick={this.handleClick} key={"row-data-" + id}>
+        <TableCell className={collapseOpen ? classes.root : null}>
           <Link to={details_link}>{name}</Link>
         </TableCell>
-        <TableCell className={this.state.collapseOpen ? classes.root : null}>
+        <TableCell className={collapseOpen ? classes.root : null}>
           {version}
         </TableCell>
-        <TableCell className={this.state.collapseOpen ? classes.root : null}>
+        <TableCell className={collapseOpen ? classes.root : null}>
           {context}
         </TableCell>
-        <TableCell className={this.state.collapseOpen ? classes.root : null}>
-          <StarRatingBar rating={this.state.rating} />
+        <TableCell className={collapseOpen ? classes.root : null}>
+          <StarRatingBar rating={rating} />
         </TableCell>
       </TableRow>
     ];
 
     // If the state of collapsible row is open, render the row with additional details of the api
-    if (this.state.collapseOpen) {
+    if (collapseOpen) {
       apiRows.push(
-        <TableRow key={"row-data-child-" + this.props.api.id}>
+        <TableRow key={"row-data-child-" + id}>
           <TableCell colSpan="4">
-            <Typography variant="body2">{this.state.description}</Typography>
+            <Typography variant="body2">{description}</Typography>
             <Typography variant="body2">
               Policies:
-              {this.state.policies.length === 0 ? (
+              {policies.length === 0 ? (
                 <span>&lt; NOT SET FOR THIS API &gt;</span>
               ) : null}
-              {this.state.policies.map((policy, index) => (
+              {policies.map((policy, index) => (
                 <span key={"span-policy-" + index}>
                   {" " + policy}
-                  {this.state.policies.length !== 1 &&
-                    index !== this.state.policies.length - 1 && <span>,</span>}
+                  {policies.length !== 1 &&
+                    index !== policies.length - 1 && <span>,</span>}
                 </span>
               ))}
             </Typography>
             <Typography variant="body2">
               Subscribed Apps:
-              {this.state.subscribedApplications.length === 0 ? (
+              {subscribedApplications.length === 0 ? (
                 <span>&lt; NOT SET FOR THIS API &gt;</span>
               ) : null}
-              {this.state.subscribedApplications.map((app, index) => (
+              {subscribedApplications.map((app, index) => (
                 <Link
                   to={"/applications/" + app.value}
                   key={"app-link-" + app.value}
                 >
                   {" " + app.label}
-                  {this.state.subscribedApplications.length !== 1 &&
-                    index !== this.state.subscribedApplications.length - 1 && (
+                  {subscribedApplications.length !== 1 &&
+                    index !== subscribedApplications.length - 1 && (
                       <span>,</span>
                     )}
                 </Link>
@@ -220,13 +224,14 @@ class StarRatingBar extends React.Component {
   }
 
   render() {
+    const { rating } = this.props;
     return (
       <div>
-        <Star name={1} isRated={this.props.rating >= 1} />
-        <Star name={2} isRated={this.props.rating >= 2} />
-        <Star name={3} isRated={this.props.rating >= 3} />
-        <Star name={4} isRated={this.props.rating >= 4} />
-        <Star name={5} isRated={this.props.rating >= 5} />
+        <Star name={1} isRated={rating >= 1} />
+        <Star name={2} isRated={rating >= 2} />
+        <Star name={3} isRated={rating >= 3} />
+        <Star name={4} isRated={rating >= 4} />
+        <Star name={5} isRated={rating >= 5} />
       </div>
     );
   }

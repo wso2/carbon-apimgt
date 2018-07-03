@@ -176,7 +176,6 @@ class Listing extends React.Component {
             return <ResourceNotFound />
         }
 
-        const { value } = this.state;
         const classes = this.props.classes;
         const { order, orderBy } = this.state;
         return (
