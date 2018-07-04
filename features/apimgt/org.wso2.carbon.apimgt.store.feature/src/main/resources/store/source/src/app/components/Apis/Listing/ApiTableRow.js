@@ -1,4 +1,4 @@
-/*
+  /*
  * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
@@ -24,6 +24,7 @@ import { TableCell, TableRow } from 'material-ui/Table';
 import { withStyles } from 'material-ui/styles';
 import PropTypes from 'prop-types';
 import Typography from 'material-ui/Typography';
+import StarRatingBar from './StarRating';
 
 const styles = theme => ({
   root: {
@@ -202,38 +203,6 @@ class APiTableRow extends React.Component {
       );
     }
     return apiRows;
-  }
-}
-
-class Star extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
-  render() {
-    return this.props.isRated ? (
-      <span style={{ color: "gold" }}>★</span>
-    ) : (
-      <span style={{ color: "gold" }}>☆</span>
-    );
-  }
-}
-class StarRatingBar extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
-  render() {
-    const { rating } = this.props;
-    return (
-      <div>
-        <Star name={1} isRated={rating >= 1} />
-        <Star name={2} isRated={rating >= 2} />
-        <Star name={3} isRated={rating >= 3} />
-        <Star name={4} isRated={rating >= 4} />
-        <Star name={5} isRated={rating >= 5} />
-      </div>
-    );
   }
 }
 
