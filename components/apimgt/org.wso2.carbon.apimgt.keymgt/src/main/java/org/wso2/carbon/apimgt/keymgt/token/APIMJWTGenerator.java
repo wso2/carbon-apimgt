@@ -179,6 +179,7 @@ public class APIMJWTGenerator extends JWTGenerator {
         claims.put("subscribedAPIs", jwtTokenInfoDTO.getSubscribedApiDTOList());
         claims.put("application", jwtTokenInfoDTO.getApplication());
         claims.put("keytype", jwtTokenInfoDTO.getKeyType());
+        claims.put("consumerKey" , jwtTokenInfoDTO.getConsumerKey());
 
         return claims;
     }
