@@ -1195,9 +1195,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             saveAPIStatus(artifactPath, apiStatus);
             String[] visibleRoles = new String[0];
             String publisherAccessControlRoles = api.getAccessControlRoles();
-            if (publisherAccessControlRoles != null) {
-                publisherAccessControlRoles = publisherAccessControlRoles.replaceAll("\\s+", "").toLowerCase();
-            }
+
             updateRegistryResources(artifactPath, publisherAccessControlRoles, api.getAccessControl(),
                     api.getAdditionalProperties());
 
@@ -2163,6 +2161,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
                 apiTargetArtifact.setProperty(APIConstants.PUBLISHER_ROLES,
                         apiSourceArtifact.getProperty(APIConstants.PUBLISHER_ROLES));
+                apiTargetArtifact.setProperty(APIConstants.DISPLAY_PUBLISHER_ROLES,
+                        apiSourceArtifact.getProperty(APIConstants.DISPLAY_PUBLISHER_ROLES));
                 apiTargetArtifact.setProperty(APIConstants.ACCESS_CONTROL,
                         apiSourceArtifact.getProperty(APIConstants.ACCESS_CONTROL));
                 registry.put(targetPath, apiTargetArtifact);
@@ -2633,18 +2633,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
             String publisherAccessControlRoles = api.getAccessControlRoles();
-            if (publisherAccessControlRoles != null) {
-                // We are changing to lowercase, as registry search only supports lower-case characters.
-                publisherAccessControlRoles = publisherAccessControlRoles.replace("\\s+", "").toLowerCase();
-                if (publisherAccessControlRoles.isEmpty()) {
-                    publisherAccessControlRoles = null;
-                }
-            }
+
             APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
                     artifactPath, registry);
-            publisherAccessControlRoles = publisherAccessControlRoles == null ?
-                    APIConstants.NULL_USER_ROLE_LIST :
-                    publisherAccessControlRoles;
+
             updateRegistryResources(artifactPath, publisherAccessControlRoles, api.getAccessControl(),
                     api.getAdditionalProperties());
             registry.commitTransaction();
@@ -5340,6 +5332,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (!registry.resourceExists(artifactPath)) {
             return;
         }
+
+        // Replace spaces
+        publisherAccessControlRoles = publisherAccessControlRoles.replaceAll("\\s+", "");
+
         Resource apiResource = registry.get(artifactPath);
         if (apiResource != null) {
             if (additionalProperties != null) {
@@ -5355,7 +5351,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
                 }
             }
-            apiResource.setProperty(APIConstants.PUBLISHER_ROLES, publisherAccessControlRoles.replaceAll("\\s+", ""));
+            // We are changing to lowercase, as registry search only supports lower-case characters.
+            apiResource.setProperty(APIConstants.PUBLISHER_ROLES, publisherAccessControlRoles.toLowerCase());
+
+            // This property will be only used for display proposes in the Publisher UI so that the original case of
+            // the roles that were specified can be maintained.
+            apiResource.setProperty(APIConstants.DISPLAY_PUBLISHER_ROLES, publisherAccessControlRoles);
             apiResource.setProperty(APIConstants.ACCESS_CONTROL, publisherAccessControl);
             apiResource.removeProperty(APIConstants.CUSTOM_API_INDEXER_PROPERTY);
             if (additionalProperties != null && additionalProperties.size() != 0) {
@@ -5702,7 +5703,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (APIUtil.hasPermission(userNameWithTenantDomain, APIConstants.Permissions.APIM_ADMIN)) {
                 return;
             }
-            String publisherAccessControlRoles = apiResource.getProperty(APIConstants.PUBLISHER_ROLES);
+            String publisherAccessControlRoles = apiResource.getProperty(APIConstants.DISPLAY_PUBLISHER_ROLES);
             if (publisherAccessControlRoles != null && !publisherAccessControlRoles.trim().isEmpty()) {
                 String[] accessControlRoleList = publisherAccessControlRoles.replaceAll("\\s+", "").split(",");
                 if (log.isDebugEnabled()) {

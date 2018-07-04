@@ -7254,10 +7254,25 @@ public final class APIUtil {
             }
         }
         api.setAccessControl(apiResource.getProperty(APIConstants.ACCESS_CONTROL));
-        api.setAccessControlRoles(
-                APIConstants.NULL_USER_ROLE_LIST.equals(apiResource.getProperty(APIConstants.PUBLISHER_ROLES)) ?
-                        null :
-                        apiResource.getProperty(APIConstants.PUBLISHER_ROLES));
+
+        String accessControlRoles = null;
+
+        String displayPublisherRoles = apiResource.getProperty(APIConstants.DISPLAY_PUBLISHER_ROLES);
+        if (displayPublisherRoles == null) {
+
+            String publisherRoles = apiResource.getProperty(APIConstants.PUBLISHER_ROLES);
+
+            if (publisherRoles != null) {
+                accessControlRoles = APIConstants.NULL_USER_ROLE_LIST.equals(
+                        apiResource.getProperty(APIConstants.PUBLISHER_ROLES)) ?
+                        null : apiResource.getProperty(APIConstants.PUBLISHER_ROLES);
+            }
+        } else {
+            accessControlRoles = APIConstants.NULL_USER_ROLE_LIST.equals(displayPublisherRoles) ?
+                    null : displayPublisherRoles;
+        }
+
+        api.setAccessControlRoles(accessControlRoles);
         return api;
     }
 
