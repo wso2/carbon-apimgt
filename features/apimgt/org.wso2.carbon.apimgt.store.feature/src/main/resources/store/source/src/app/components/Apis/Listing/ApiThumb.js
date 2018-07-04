@@ -24,7 +24,7 @@ import { Manager, Target, Popper } from 'react-popper';
 import ImageGenerator from './ImageGenerator';
 import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types';
-import {Star} from "../Details/Overview";
+import StarRatingBar from './StarRating';
 import Api from '../../../data/api';
 
 const styles = theme => ({
@@ -198,24 +198,6 @@ class ApiThumb extends React.Component {
         );
     }
 
-}
-
-class StarRatingBar extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-
-    render() {
-        return (
-            <div>
-                <Star name={1} isRated={this.props.rating >= 1}> </Star>
-                <Star name={2} isRated={this.props.rating >= 2}> </Star>
-                <Star name={3} isRated={this.props.rating >= 3}> </Star>
-                <Star name={4} isRated={this.props.rating >= 4}> </Star>
-                <Star name={5} isRated={this.props.rating >= 5}> </Star>
-            </div>
-        );
-    }
 }
 
 ApiThumb.propTypes = {
