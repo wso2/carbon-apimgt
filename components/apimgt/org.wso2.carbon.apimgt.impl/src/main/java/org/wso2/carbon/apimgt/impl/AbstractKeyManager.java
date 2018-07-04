@@ -108,7 +108,6 @@ public abstract class AbstractKeyManager implements KeyManager {
                 if (params.get(APIConstants.JSON_CLIENT_ID) != null) {
                     oAuthApplicationInfo.setClientId((String) params.get(APIConstants.JSON_CLIENT_ID));
                 }
-
                 //set client secret
                 if (params.get(APIConstants.JSON_CLIENT_SECRET) != null) {
                     oAuthApplicationInfo.setClientSecret((String) params.get(APIConstants.JSON_CLIENT_SECRET));
