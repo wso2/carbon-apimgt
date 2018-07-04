@@ -24,7 +24,8 @@ import { Manager, Target, Popper } from 'react-popper';
 import ImageGenerator from './ImageGenerator';
 import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types';
-
+import StarRatingBar from './StarRating';
+import Api from '../../../data/api';
 
 const styles = theme => ({
     lifeCycleState: {
@@ -128,16 +129,27 @@ class ApiThumb extends React.Component {
             overview_link: '',
             isRedirect: false,
             openMoreMenu: false,
+            rating: 0
         };
 
     }
 
+    componentDidMount() {
+        let api = new Api();
+        let promised_rating = api.getRatingFromUser(this.props.api.id, null);
+        promised_rating.then(
+            response => {
+                this.setState({rating: response.obj.userRating});
+            }
+        );
+    }
 
     render() {
         let details_link = "/apis/" + this.props.api.id;
         const {api, classes} = this.props;
 
         const {name, lifeCycleStatus, version, context, description} = this.props.api;
+        const {rating} = this.state;
 
         return (
             <Grid item xs={12} sm={6} md={4} lg={3} xl={2} className={classes.thumbWrapper}>
@@ -172,11 +184,15 @@ class ApiThumb extends React.Component {
                             </Typography>
                         </div>
                     </div>
+                    <div className={classes.thumbInfo}>
+                        <Typography variant="subheading" gutterBottom align="left">
+                            <StarRatingBar rating={ rating }/>
+                        </Typography>
+                    </div>
                     <div className={classes.descriptionWrapper}>
                         {description}
                         <div className={classes.descriptionOverlay} />
-                        </div>
-
+                    </div>
                 </div>
 
             </Grid>
