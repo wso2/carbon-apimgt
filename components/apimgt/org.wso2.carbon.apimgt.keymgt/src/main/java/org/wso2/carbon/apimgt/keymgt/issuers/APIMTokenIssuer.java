@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.keymgt.issuers;
 
+import com.nimbusds.jwt.JWT;
+import com.nimbusds.jwt.JWTParser;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,18 +32,20 @@ import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.token.APIMJWTGenerator;
 import org.wso2.carbon.apimgt.keymgt.util.APIMTokenIssuerUtil;
+import org.wso2.carbon.identity.base.IdentityConstants;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.oauth.common.exception.InvalidOAuthClientException;
-import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.oauth.dao.OAuthAppDO;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
-import org.wso2.carbon.identity.oauth2.token.JWTTokenIssuer;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
+import org.wso2.carbon.identity.oauth2.token.OauthTokenIssuerImpl;
 import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
 
+import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
 
-public class APIMTokenIssuer extends JWTTokenIssuer {
+public class APIMTokenIssuer extends OauthTokenIssuerImpl {
 
     private static final Log log = LogFactory.getLog(APIMTokenIssuer.class);
 
@@ -109,13 +113,21 @@ public class APIMTokenIssuer extends JWTTokenIssuer {
                     "information", e);
             throw new OAuthSystemException("Error occurred while getting JWT Token client ID : " + clientId, e);
         }
-        return OAuthServerConfiguration.getInstance().getOAuthTokenGenerator().accessToken();
+        return super.accessToken(tokReqMsgCtx);
     }
 
     @Override
     public String getAccessTokenHash(String accessToken) throws OAuthSystemException {
         if (StringUtils.isNotEmpty(accessToken) && accessToken.contains(APIConstants.DOT)) {
-            return super.getAccessTokenHash(accessToken);
+            try {
+                JWT parse = JWTParser.parse(accessToken);
+                return parse.getJWTClaimsSet().getJWTID();
+            } catch (ParseException e) {
+                if (log.isDebugEnabled() && IdentityUtil.isTokenLoggable(IdentityConstants.IdentityTokens.ACCESS_TOKEN)) {
+                    log.debug("Error while getting JWTID from token: " + accessToken);
+                }
+                throw new OAuthSystemException("Error while getting access token hash", e);
+            }
         } else {
             return accessToken;
         }
