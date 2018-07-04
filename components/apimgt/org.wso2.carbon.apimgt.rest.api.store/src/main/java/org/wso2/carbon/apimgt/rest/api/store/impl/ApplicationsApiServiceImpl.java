@@ -265,10 +265,10 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                     /* Read clientId & clientSecret from ApplicationKeyGenerateRequestDTO object.
                        User can provide clientId only or both clientId and clientSecret
                        User cannot provide clientSecret only */
-                    if (!StringUtils.isEmpty(body.getClientId())){
+                    if (!StringUtils.isEmpty(body.getClientId())) {
                         jsonParamObj.put(APIConstants.JSON_CLIENT_ID, body.getClientId());
-                        if (!StringUtils.isEmpty(body.getClientSecret())){
-                            jsonParamObj.put(APIConstants.JSON_CLIENT_SECRET,body.getClientSecret());
+                        if (!StringUtils.isEmpty(body.getClientSecret())) {
+                            jsonParamObj.put(APIConstants.JSON_CLIENT_SECRET, body.getClientSecret());
                         }
                     }
                     String jsonParams = jsonParamObj.toString();

@@ -186,13 +186,13 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
                   //set allowed grant types if grant types are not provided
                     allowedGrantTypes = oAuthAdminService.getAllowedGrantTypes();
                 }
-                if (jsonObj != null && jsonObj.has(APIConstants.JSON_CLIENT_ID)){
+                if (jsonObj != null && jsonObj.has(APIConstants.JSON_CLIENT_ID)) {
                     String clientId = (String) jsonObj.get(APIConstants.JSON_CLIENT_ID);
-                    if (!clientId.isEmpty()){
+                    if (!clientId.isEmpty()) {
                         oAuthConsumerAppDTO.setOauthConsumerKey(clientId);
-                        if (jsonObj.has(APIConstants.JSON_CLIENT_SECRET)){
+                        if (jsonObj.has(APIConstants.JSON_CLIENT_SECRET)) {
                             String clientSecret = (String) jsonObj.get(APIConstants.JSON_CLIENT_SECRET);
-                            if (!clientSecret.isEmpty()){
+                            if (!clientSecret.isEmpty()) {
                                 oAuthConsumerAppDTO.setOauthConsumerSecret(clientSecret);
                             }
                         }
