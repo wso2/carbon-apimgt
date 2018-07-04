@@ -149,6 +149,7 @@ class ApiThumb extends React.Component {
         const {api, classes} = this.props;
 
         const {name, lifeCycleStatus, version, context, description} = this.props.api;
+        const {rating} = this.state;
 
         return (
             <Grid item xs={12} sm={6} md={4} lg={3} xl={2} className={classes.thumbWrapper}>
@@ -185,7 +186,7 @@ class ApiThumb extends React.Component {
                     </div>
                     <div className={classes.thumbInfo}>
                         <Typography variant="subheading" gutterBottom align="left">
-                            <StarRatingBar rating={this.state.rating}/>
+                            <StarRatingBar rating={ rating }/>
                         </Typography>
                     </div>
                     <div className={classes.descriptionWrapper}>
