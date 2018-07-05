@@ -83,6 +83,7 @@ class ApplicationTableHead extends Component {
             {id: 'name', numeric: false, disablePadding: true, label: 'Name'},
             {id: 'throttlingTier', numeric: false, disablePadding: false, label: 'Tier'},
             {id: 'lifeCycleStatus', numeric: false, disablePadding: false, label: 'Workflow Status'},
+            {id: 'subscriptions', numeric: false, disablePadding: false, label: 'Subscriptions'},
             {id: 'actions', numeric: false, disablePadding: false, label: 'Actions'},
         ];
         const {order, orderBy} = this.props;

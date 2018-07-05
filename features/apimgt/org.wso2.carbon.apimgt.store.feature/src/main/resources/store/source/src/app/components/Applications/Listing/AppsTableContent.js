@@ -23,6 +23,7 @@ import DeleteIcon from 'material-ui-icons/Delete';
 import IconButton from 'material-ui/IconButton';
 import Tooltip from 'material-ui/Tooltip';
 import {CircularProgress} from 'material-ui/Progress';
+import Subscription from "../../../data/Subscription";
 
 const AppsTableBody = (props) => {
     const {apps, handleAppDelete, classes} = props;
@@ -42,6 +43,9 @@ const AppsTableBody = (props) => {
                     {app.lifeCycleStatus}
                 </TableCell>
                 <TableCell>
+                    <Subscribers applicationId={app.applicationId}/>
+                </TableCell>
+                <TableCell>
                     <Tooltip title="Delete" placement="right-start">
                         <IconButton disabled={app.deleting} data-appId={app.applicationId}
                                     onClick={handleAppDelete} color="default"
@@ -56,5 +60,32 @@ const AppsTableBody = (props) => {
     });
     return <TableBody>{appsTableData}</TableBody>;
 };
+
+class Subscribers extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            subscriptions:0
+        }
+    }
+    componentDidMount() {
+        let client = new Subscription();
+        const {applicationId} = this.props;
+        let promised_subscriptions = client.getSubscriptions(null, applicationId);
+        promised_subscriptions.then ( (response) => {
+            this.setState({subscriptions:response.obj.count});
+
+        }).catch(
+            error => {
+                const { status } = error;
+                if (status === 404) {
+                    this.setState({ notFound: true });
+                }
+            });
+    }
+    render(){
+        return this.state.subscriptions;
+    }
+}
 
 export default AppsTableBody;
