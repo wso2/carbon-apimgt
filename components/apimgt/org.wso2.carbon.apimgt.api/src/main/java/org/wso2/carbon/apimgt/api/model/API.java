@@ -124,6 +124,17 @@ public class API implements Serializable {
      */
     private JSONObject additionalProperties;
 
+    // Used for endpoint environments configured with non empty URLs
+    private Set<String> environmentList;
+
+    public void setEnvironmentList(Set<String> environmentList) {
+        this.environmentList = environmentList;
+    }
+
+    public Set<String> getEnvironmentList() {
+        return environmentList;
+    }
+
     /**
      * To get the additional properties
      *

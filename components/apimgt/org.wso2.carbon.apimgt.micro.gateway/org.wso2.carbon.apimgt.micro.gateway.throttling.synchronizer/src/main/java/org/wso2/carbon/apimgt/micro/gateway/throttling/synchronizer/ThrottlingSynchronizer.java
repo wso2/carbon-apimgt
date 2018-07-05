@@ -42,6 +42,7 @@ import org.wso2.carbon.apimgt.micro.gateway.common.dto.AccessTokenDTO;
 import org.wso2.carbon.apimgt.micro.gateway.common.dto.OAuthApplicationInfoDTO;
 import org.wso2.carbon.apimgt.micro.gateway.common.exception.OnPremiseGatewayException;
 import org.wso2.carbon.apimgt.micro.gateway.common.util.HttpRequestUtil;
+import org.wso2.carbon.apimgt.micro.gateway.common.util.MicroGatewayCommonUtil;
 import org.wso2.carbon.apimgt.micro.gateway.common.util.OnPremiseGatewayConstants;
 import org.wso2.carbon.apimgt.micro.gateway.common.util.TokenUtil;
 import org.wso2.carbon.apimgt.micro.gateway.throttling.synchronizer.dto.ApplicationThrottlePolicyListDTO;
@@ -67,6 +68,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -229,19 +231,9 @@ public class ThrottlingSynchronizer implements OnPremiseGatewayInitListener {
                 log.debug("Using default API Admin URL." + apiAdminUrl);
             }
         }
-        String[] adminUrl = apiAdminUrl.split(":");
-        String adminPort = null;
-        Integer adminPortValue = 0;
-        if (adminUrl.length > 3) {
-            adminPort = adminUrl[2];
-        }
-        if (adminPort != null) {
-            adminPortValue =  Integer.valueOf(adminPort);
-        }
-        else {
-            adminPortValue = OnPremiseGatewayConstants.DEFAULT_PORT;
-        }
-        HttpClient httpClient = APIUtil.getHttpClient(adminPortValue, apiAdminUrl.split(":")[0]);
+        URL apiAdminUrlValue = MicroGatewayCommonUtil.getURLFromStringUrlValue(apiAdminUrl);
+        HttpClient httpClient = APIUtil.getHttpClient(apiAdminUrlValue.getPort(), apiAdminUrlValue.getProtocol());
+
         HttpGet httpGet = new HttpGet(subscriptionPolicyUrl);
         String authHeaderValue = OnPremiseGatewayConstants.AUTHORIZATION_BEARER + accessTokenDTO.getAccessToken();
         httpGet.addHeader(OnPremiseGatewayConstants.AUTHORIZATION_HEADER, authHeaderValue);
@@ -317,19 +309,8 @@ public class ThrottlingSynchronizer implements OnPremiseGatewayInitListener {
                 log.debug("Using default API Admin URL." + apiAdminUrl);
             }
         }
-        String[] adminUrl = apiAdminUrl.split(":");
-        String adminPort = null;
-        Integer adminPortValue = 0;
-        if (adminUrl.length > 3) {
-            adminPort = adminUrl[2];
-        }
-        if (adminPort != null) {
-            adminPortValue =  Integer.valueOf(adminPort);
-        }
-        else {
-            adminPortValue = OnPremiseGatewayConstants.DEFAULT_PORT;
-        }
-        HttpClient httpClient = APIUtil.getHttpClient(adminPortValue, apiAdminUrl.split(":")[0]);
+        URL apiAdminUrlValue = MicroGatewayCommonUtil.getURLFromStringUrlValue(apiAdminUrl);
+        HttpClient httpClient = APIUtil.getHttpClient(apiAdminUrlValue.getPort(), apiAdminUrlValue.getProtocol());
 
         HttpGet httpGet = new HttpGet(applicationPolicyUrl);
         String authHeaderValue = OnPremiseGatewayConstants.AUTHORIZATION_BEARER + accessTokenDTO.getAccessToken();
@@ -406,19 +387,8 @@ public class ThrottlingSynchronizer implements OnPremiseGatewayInitListener {
                 log.debug("Using default API Admin URL." + apiAdminUrl);
             }
         }
-        String[] adminUrl = apiAdminUrl.split(":");
-        String adminPort = null;
-        Integer adminPortValue = 0;
-        if (adminUrl.length > 3) {
-            adminPort = adminUrl[2];
-        }
-        if (adminPort != null) {
-            adminPortValue =  Integer.valueOf(adminPort);
-        }
-        else {
-            adminPortValue = OnPremiseGatewayConstants.DEFAULT_PORT;
-        }
-        HttpClient httpClient = APIUtil.getHttpClient(adminPortValue, apiAdminUrl.split(":")[0]);
+        URL apiAdminUrlValue = MicroGatewayCommonUtil.getURLFromStringUrlValue(apiAdminUrl);
+        HttpClient httpClient = APIUtil.getHttpClient(apiAdminUrlValue.getPort(), apiAdminUrlValue.getProtocol());
         HttpGet httpGet = new HttpGet(advancedPolicyUrl);
         String authHeaderValue = OnPremiseGatewayConstants.AUTHORIZATION_BEARER + accessTokenDTO.getAccessToken();
         httpGet.addHeader(OnPremiseGatewayConstants.AUTHORIZATION_HEADER, authHeaderValue);
@@ -449,19 +419,8 @@ public class ThrottlingSynchronizer implements OnPremiseGatewayInitListener {
                 log.debug("Using default API Admin URL." + apiAdminUrl);
             }
         }
-        String[] adminUrl = apiAdminUrl.split(":");
-        String adminPort = null;
-        Integer adminPortValue = 0;
-        if (adminUrl.length > 3) {
-            adminPort = adminUrl[2];
-        }
-        if (adminPort != null) {
-            adminPortValue =  Integer.valueOf(adminPort);
-        }
-        else {
-            adminPortValue = OnPremiseGatewayConstants.DEFAULT_PORT;
-        }
-        HttpClient httpClient = APIUtil.getHttpClient(adminPortValue, apiAdminUrl.split(":")[0]);
+        URL apiAdminUrlValue = MicroGatewayCommonUtil.getURLFromStringUrlValue(apiAdminUrl);
+        HttpClient httpClient = APIUtil.getHttpClient(apiAdminUrlValue.getPort(), apiAdminUrlValue.getProtocol());
 
         for (AdvancedThrottlePolicyInfoDTO infoDTO : policyListDTO.getList()) {
             HttpGet httpGet = new HttpGet(advancedPolicyUrl + ThrottlingConstants.URL_PATH_SEPARATOR + infoDTO.getPolicyId());
@@ -533,19 +492,8 @@ public class ThrottlingSynchronizer implements OnPremiseGatewayInitListener {
                 log.debug("Using default API Admin URL." + apiAdminUrl);
             }
         }
-        String[] adminUrl = apiAdminUrl.split(":");
-        String adminPort = null;
-        Integer adminPortValue = 0;
-        if (adminUrl.length > 3) {
-            adminPort = adminUrl[2];
-        }
-        if (adminPort != null) {
-            adminPortValue =  Integer.valueOf(adminPort);
-        }
-        else {
-            adminPortValue = OnPremiseGatewayConstants.DEFAULT_PORT;
-        }
-        HttpClient httpClient = APIUtil.getHttpClient(adminPortValue, apiAdminUrl.split(":")[0]);
+        URL apiAdminUrlValue = MicroGatewayCommonUtil.getURLFromStringUrlValue(apiAdminUrl);
+        HttpClient httpClient = APIUtil.getHttpClient(apiAdminUrlValue.getPort(), apiAdminUrlValue.getProtocol());
         HttpGet httpGet = new HttpGet(blockingPolicyUrl);
         String authHeaderValue = OnPremiseGatewayConstants.AUTHORIZATION_BEARER + accessTokenDTO.getAccessToken();
         httpGet.addHeader(OnPremiseGatewayConstants.AUTHORIZATION_HEADER, authHeaderValue);

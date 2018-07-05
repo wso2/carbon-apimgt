@@ -7497,13 +7497,19 @@ public class ApiMgtDAO {
                 if (scopeHashMap.containsKey(scopeKey)) {
                     // scope already exists append roles.
                     scope = scopeHashMap.get(scopeKey);
-                    scope.setRoles(scope.getRoles().concat("," + resultSet.getString(4)).trim());
+                    String roles = scope.getRoles();
+                    if (StringUtils.isNotEmpty(roles)) {
+                        scope.setRoles(scope.getRoles().concat("," + resultSet.getString(4)).trim());
+                    }
                 } else {
                     scope = new Scope();
                     scope.setKey(scopeKey);
                     scope.setName(resultSet.getString(2));
                     scope.setDescription(resultSet.getString(3));
-                    scope.setRoles(resultSet.getString(4).trim());
+                    String roles = resultSet.getString(4);
+                    if (StringUtils.isNotEmpty(roles)) {
+                        scope.setRoles(resultSet.getString(4).trim());
+                    }
                 }
                 scopeHashMap.put(scopeKey, scope);
             }

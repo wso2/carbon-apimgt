@@ -1122,6 +1122,7 @@ public final class APIConstants {
     public static final String API_DATA_ISMORE = "isMore";
     public static final String API_DATA_PRODUCTION_ENDPOINTS = "production_endpoints";
     public static final String API_DATA_SANDBOX_ENDPOINTS = "sandbox_endpoints";
+    public static final String API_DATA_URL = "url";
 
     public static final String ACTIVITY_ID = "activityID";
     public static final String USER_AGENT = "User-Agent";
@@ -1384,11 +1385,14 @@ public final class APIConstants {
     public static final String JSON_GRANT_TYPES = "grant_types";
     public static final String JSON_USERNAME = "username";
     public static final String REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA = "[~!@#;%^*()+={}|<>\"\',\\[\\]&/$\\\\]";
+    public static final String JSON_CLIENT_ID = "client_id";
+    public static final String JSON_CLIENT_SECRET = "client_secret";
 
     /**
      * Publisher Access Control related registry properties and values.
      */
     public static final String PUBLISHER_ROLES = "publisher_roles";
+    public static final String DISPLAY_PUBLISHER_ROLES = "display_publisher_roles";
     public static final String ACCESS_CONTROL = "publisher_access_control";
     public static final String NO_ACCESS_CONTROL = "all";
     public static final String NULL_USER_ROLE_LIST = "null";

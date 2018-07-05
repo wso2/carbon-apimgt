@@ -2184,7 +2184,12 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Label'
-
+      environmentList:
+        type: array
+        description: The environment list configured with non empty endpoint URLs for the particular API.
+        items:
+          type: string
+        example: ["PRODUCTION","SANDBOX"]
 #-----------------------------------------------------
 # The Label resource
 #-----------------------------------------------------
@@ -2750,6 +2755,14 @@ definitions:
           type: string
         description: Allowed scopes for the access token
         example: ["am_application_scope","default"]
+      clientId:
+        type: string
+        description: Client Id
+        example: ""
+      clientSecret:
+        type: string
+        description: Client Secret
+        example: ""
 
 #-----------------------------------------------------
 # The Application Key Re Generation Request schema

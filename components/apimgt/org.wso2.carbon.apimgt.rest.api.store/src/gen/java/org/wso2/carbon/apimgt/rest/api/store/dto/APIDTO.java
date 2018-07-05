@@ -77,6 +77,9 @@ public class APIDTO  {
   
   
   private List<LabelDTO> labels = new ArrayList<LabelDTO>();
+  
+  
+  private List<String> environmentList = new ArrayList<String>();
 
   private String lastUpdatedTime = null;
 
@@ -97,7 +100,6 @@ public class APIDTO  {
   /**
   * gets and sets the createdTime for a APIDTO
   **/
-
   @ApiModelProperty(value = "Created Time of the API")
   @JsonProperty("createdTime")
   public String getCreatedTime(){
@@ -350,6 +352,19 @@ public class APIDTO  {
   }
 
   
+  /**
+   * The environment list configured with non empty endpoint URLs for the particular API.
+   **/
+  @ApiModelProperty(value = "The environment list configured with non empty endpoint URLs for the particular API.")
+  @JsonProperty("environmentList")
+  public List<String> getEnvironmentList() {
+    return environmentList;
+  }
+  public void setEnvironmentList(List<String> environmentList) {
+    this.environmentList = environmentList;
+  }
+
+  
 
   @Override
   public String toString()  {
@@ -376,6 +391,7 @@ public class APIDTO  {
     sb.append("  businessInformation: ").append(businessInformation).append("\n");
     sb.append("  labels: ").append(labels).append("\n");
     sb.append("  lastUpdatedTime: ").append(lastUpdatedTime).append("\n");
+    sb.append("  environmentList: ").append(environmentList).append("\n");
     sb.append("}\n");
     return sb.toString();
   }
