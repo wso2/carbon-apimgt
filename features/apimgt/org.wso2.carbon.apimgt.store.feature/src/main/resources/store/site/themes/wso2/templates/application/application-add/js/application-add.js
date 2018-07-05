@@ -12,7 +12,7 @@ $(document).ready(function () {
     var application = $("#application-name").val("");
 
      $.validator.addMethod('validateSpecialChars', function(value, element) {
-        return !/(["\'])/g.test(value);
+        return /(^[a-zA-Z0-9 ._-]*$)/g.test(value);
      }, i18n.t('The Name contains one or more illegal characters') + '( &nbsp;&nbsp; " &nbsp;&nbsp; \' &nbsp;&nbsp; )');
 
     $.validator.addMethod('checkForSpaces', function(value, element) {
