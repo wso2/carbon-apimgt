@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionPolicyDTO;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.dao.OAuthAppDO;
+import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
 
 import java.util.ArrayList;
@@ -37,10 +38,11 @@ import java.util.Map;
 
 public class APIMTokenIssuerUtil {
 
-    public static JwtTokenInfoDTO getJwtTokenInfoDTO(Application application) throws APIManagementException {
+    public static JwtTokenInfoDTO getJwtTokenInfoDTO(Application application, OAuthTokenReqMessageContext tokReqMsgCtx)
+            throws APIManagementException {
 
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        String userName = application.getOwner();
+        String userName = tokReqMsgCtx.getAuthorizedUser().getUserName();
         String applicationName = application.getName();
 
         String tenantedUserName;
@@ -52,7 +54,7 @@ public class APIMTokenIssuerUtil {
 
         APISubscriptionInfoDTO[] apis = ApiMgtDAO.getInstance()
                 .getSubscribedAPIsOfUserByApp(tenantedUserName, applicationName);
-        
+
         JwtTokenInfoDTO jwtTokenInfoDTO = new JwtTokenInfoDTO();
         jwtTokenInfoDTO.setSubscriber("sub");
         jwtTokenInfoDTO.setEndUserName(userName);

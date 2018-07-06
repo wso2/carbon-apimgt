@@ -83,13 +83,15 @@ public class APIMTokenIssuer extends OauthTokenIssuerImpl {
                     applicationDTO.setId(application.getId());
                     applicationDTO.setName(application.getName());
                     applicationDTO.setTier(application.getTier());
+                    applicationDTO.setOwner(application.getOwner());
 
-                    JwtTokenInfoDTO jwtTokenInfoDTO = APIMTokenIssuerUtil.getJwtTokenInfoDTO(application);
+                    JwtTokenInfoDTO jwtTokenInfoDTO = APIMTokenIssuerUtil.getJwtTokenInfoDTO(application, tokReqMsgCtx);
                     jwtTokenInfoDTO.setScopes(scopeString.toString().trim());
                     jwtTokenInfoDTO.setAudience(audienceList);
                     jwtTokenInfoDTO.setExpirationTime(tokReqMsgCtx.getValidityPeriod());
                     jwtTokenInfoDTO.setApplication(applicationDTO);
                     jwtTokenInfoDTO.setKeyType(application.getKeyType());
+                    jwtTokenInfoDTO.setConsumerKey(clientId);
                     APIMJWTGenerator apimjwtGenerator = new APIMJWTGenerator();
                     String accessToken = apimjwtGenerator.generateJWT(jwtTokenInfoDTO);
                     if (log.isDebugEnabled()) {
