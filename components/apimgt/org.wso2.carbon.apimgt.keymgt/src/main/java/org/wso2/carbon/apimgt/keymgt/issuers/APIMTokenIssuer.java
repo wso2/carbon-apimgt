@@ -89,7 +89,7 @@ public class APIMTokenIssuer extends OauthTokenIssuerImpl {
                     JwtTokenInfoDTO jwtTokenInfoDTO = APIMTokenIssuerUtil.getJwtTokenInfoDTO(application);
                     jwtTokenInfoDTO.setScopes(scopeString.toString().trim());
                     jwtTokenInfoDTO.setAudience(audienceList);
-                    jwtTokenInfoDTO.setExpirationTime(getSecondsTillExpiry(tokReqMsgCtx.getValidityPeriod()));
+                    jwtTokenInfoDTO.setExpirationTime(tokReqMsgCtx.getValidityPeriod());
                     jwtTokenInfoDTO.setApplication(applicationDTO);
                     jwtTokenInfoDTO.setKeyType(application.getKeyType());
                     APIMJWTGenerator apimjwtGenerator = new APIMJWTGenerator();
@@ -116,19 +116,6 @@ public class APIMTokenIssuer extends OauthTokenIssuerImpl {
             throw new OAuthSystemException("Error occurred while getting JWT Token client ID : " + clientId, e);
         }
         return super.accessToken(tokReqMsgCtx);
-    }
-
-    private long getSecondsTillExpiry(long validityPeriod) throws APIManagementException {
-        if (validityPeriod == -1) {
-            // the token request does not specify the validity period explicitly
-            KeyManagerConfiguration configuration = KeyManagerHolder.getKeyManagerInstance().getKeyManagerConfiguration();;
-            return Long.parseLong(configuration.getParameter(APIConstants.IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD));
-        } else if (validityPeriod == -2) {
-            // a non-expiring token request, set the expiration to a large value
-            return Integer.MAX_VALUE;
-        } else {
-            return validityPeriod;
-        }
     }
 
     @Override
