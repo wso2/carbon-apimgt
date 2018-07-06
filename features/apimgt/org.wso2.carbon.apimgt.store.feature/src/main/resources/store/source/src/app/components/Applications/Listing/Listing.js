@@ -35,6 +35,7 @@ import Alert from "../../Base/Alert";
 import Card, { CardActions, CardContent } from 'material-ui/Card';
 import Divider from 'material-ui/Divider';
 import qs from 'qs';
+import TablePagination from 'material-ui/Table/TablePagination';
 
 const styles = theme => ({
         card: {
@@ -119,6 +120,8 @@ class Listing extends Component {
             selected: [],
             data: null,
             alertMessage: null,
+            page: 0,
+            rowsPerPage : 5
         };
         this.handleAppDelete = this.handleAppDelete.bind(this);
     }
@@ -172,8 +175,16 @@ class Listing extends Component {
         });
     }
 
+    handleChangePage = (event, page) => {
+        this.setState({ page });
+    };
+
+    handleChangeRowsPerPage = event => {
+        this.setState({ rowsPerPage: event.target.value });
+    };
+
     render() {
-        const {data, order, orderBy, alertMessage} = this.state;
+        const {data, order, orderBy, alertMessage, rowsPerPage, page} = this.state;
         if (!data) {
             return <Loading/>;
         }
@@ -197,7 +208,7 @@ class Listing extends Component {
                             }
                         </div>
                         <Divider className={classes.divider} />
-                        
+
                             {data.size > 0 ? (
                                 <div>
                                     <Typography variant="caption" gutterBottom align="left">
@@ -208,8 +219,23 @@ class Listing extends Component {
                                     <Table>
                                         <ApplicationTableHead order={order} orderBy={orderBy}
                                                             onRequestSort={this.handleRequestSort}/>
-                                        <AppsTableContent handleAppDelete={this.handleAppDelete} apps={data}/>
+                                        <AppsTableContent handleAppDelete={this.handleAppDelete} apps={data} page={page}
+                                        rowsPerPage={rowsPerPage}/>
                                     </Table>
+                                    <TablePagination
+                                        component="div"
+                                        count={data.size}
+                                        rowsPerPage={rowsPerPage}
+                                        page={page}
+                                        backIconButtonProps={{
+                                            'aria-label': 'Previous Page',
+                                        }}
+                                        nextIconButtonProps={{
+                                            'aria-label': 'Next Page',
+                                        }}
+                                        onChangePage={this.handleChangePage}
+                                        onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                                    />
                                 </div>
                             ) : (
                                 <Grid item xs={12} sm={12} md={6} lg={4} xl={4} >
@@ -218,7 +244,8 @@ class Listing extends Component {
                                         <Typography className={classes.title}>
                                         An application is a logical collection of APIs. Applications allow you to use a single
                             access token to invoke a collection of APIs and to subscribe to one API multiple times with different
-                            SLA levels. The DefaultApplication is pre-created and allows unlimited access by default.</Typography>
+                            SLA levels. The DefaultApplication is pre-created and allows unlimited access by default. \n
+                                        </Typography>
                                         </CardContent>
                                         <CardActions>
                                             <Link to={"/application/create"} className={classes.createAppWrapper}>
@@ -230,7 +257,7 @@ class Listing extends Component {
                                     </Card>
                                 </Grid>
                             )}
-                        
+
                     </Grid>
                 </Grid>
             </div>

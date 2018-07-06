@@ -26,7 +26,8 @@ import {CircularProgress} from 'material-ui/Progress';
 import Subscription from "../../../data/Subscription";
 
 const AppsTableBody = (props) => {
-    const {apps, handleAppDelete, classes} = props;
+    const {apps, handleAppDelete, classes, page, rowsPerPage} = props;
+    const emptyRowsPerPage = rowsPerPage - Math.min(rowsPerPage, apps.size - page*rowsPerPage);
     let appsTableData = [];
     apps.forEach(app => {
         appsTableData.push(
@@ -58,7 +59,16 @@ const AppsTableBody = (props) => {
             </TableRow>
         );
     });
-    return <TableBody>{appsTableData}</TableBody>;
+    return (
+        <TableBody>
+            {appsTableData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)}
+            {emptyRowsPerPage > 0 && (
+                <TableRow style={{ height: 49 * emptyRowsPerPage }}>
+                    <TableCell colSpan={6} />
+                </TableRow>
+            )}
+        </TableBody>
+    )
 };
 
 class Subscribers extends Component {
