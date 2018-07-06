@@ -20,6 +20,8 @@ import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
 import {TableBody, TableCell, TableRow} from 'material-ui/Table';
 import DeleteIcon from 'material-ui-icons/Delete';
+import EditIcon from 'material-ui-icons/Edit';
+import RemoveRedEye from 'material-ui-icons/RemoveRedEye';
 import IconButton from 'material-ui/IconButton';
 import Tooltip from 'material-ui/Tooltip';
 import {CircularProgress} from 'material-ui/Progress';
@@ -47,6 +49,16 @@ const AppsTableBody = (props) => {
                     <Subscribers applicationId={app.applicationId}/>
                 </TableCell>
                 <TableCell>
+                    <Tooltip title="View" placement="right-start">
+                        <IconButton>
+                            <RemoveRedEye/>
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Edit" placement="right-start">
+                        <IconButton>
+                            <EditIcon/>
+                        </IconButton>
+                    </Tooltip>
                     <Tooltip title="Delete" placement="right-start">
                         <IconButton disabled={app.deleting} data-appId={app.applicationId}
                                     onClick={handleAppDelete} color="default"
