@@ -840,6 +840,15 @@ public class APIConsumerImplTest {
         Mockito.when(apiMgtDAO.addApplication(application, "userID")).thenReturn(1);
         assertEquals(1, apiConsumer.addApplication(application, "userID"));
     }
+    @Test
+    public void testAddApplicationWithInvalidCharacter() throws APIManagementException, UserStoreException {
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
+        apiConsumer.apiMgtDAO = apiMgtDAO;
+        Application application = Mockito.mock(Application.class);
+        PowerMockito.when(APIUtil.isApplicationExist("userID", "premières", "1")).
+                thenReturn(false);
+        assertEquals(0, apiConsumer.addApplication(application, "userID"));
+    }
 
     @Test
     public void testGetScopesBySubscribedAPIs() throws APIManagementException {
