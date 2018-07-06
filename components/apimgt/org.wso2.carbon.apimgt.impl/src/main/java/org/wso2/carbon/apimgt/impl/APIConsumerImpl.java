@@ -2582,11 +2582,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             handleApplicationNameContainSpacesException("Application name " +
                                                             "cannot contain leading or trailing white spaces");
         }
-
-        String regex = "[~!#$;%^*+={}\\|\\\\<>\\\"\\'\\/,]";
+        String regex = "^[a-zA-Z0-9 ._-]*$";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(application.getName());
-        if (matcher.find()) {
+        if (!matcher.find()) {
             handleApplicationNameContainsInvalidCharactersException("Application name contains invalid characters");
         }
 
@@ -2698,10 +2697,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     "cannot contain leading or trailing white spaces");
         }
 
-        String regex = "[~!#$;%^*+={}\\|\\\\<>\\\"\\'\\/,]";
+        String regex = "^[a-zA-Z0-9 ._-]*$";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(application.getName());
-        if (matcher.find()) {
+        if (!matcher.find()) {
             handleApplicationNameContainsInvalidCharactersException("Application name contains invalid characters");
         }
 
