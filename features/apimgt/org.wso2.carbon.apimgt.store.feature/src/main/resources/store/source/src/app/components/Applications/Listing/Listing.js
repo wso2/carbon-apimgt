@@ -244,7 +244,7 @@ class Listing extends Component {
                                         <Typography className={classes.title}>
                                         An application is a logical collection of APIs. Applications allow you to use a single
                             access token to invoke a collection of APIs and to subscribe to one API multiple times with different
-                            SLA levels. The DefaultApplication is pre-created and allows unlimited access by default. \n
+                            SLA levels. The DefaultApplication is pre-created and allows unlimited access by default.
                                         </Typography>
                                         </CardContent>
                                         <CardActions>
