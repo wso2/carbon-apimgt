@@ -467,4 +467,23 @@ export default class API extends Resource {
         return promise_sdk;
     }
 
+    /**
+     * Get details of a given Tier
+     * @param id {string} name of the tier.
+     * @param callback {function} A callback function to invoke after receiving successful response.
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    getTierByName(name, level, callback = null) {
+        var promise_get = this.client.then(
+            (client) => {
+                return client.apis["Tier (Individual)"].get_policies__tierLevel___tierName_(
+                    {tierName: name, tierLevel: level}, this._requestMetaData());
+            }
+        );
+        if (callback) {
+            return promise_get.then(callback);
+        } else {
+            return promise_get;
+        }
+    }
 }

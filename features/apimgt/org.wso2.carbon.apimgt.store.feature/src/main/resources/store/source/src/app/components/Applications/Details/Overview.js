@@ -38,52 +38,53 @@ class Overview extends Component {
         super(props);
         this.state = {
             application: null,
-            notFound: false
+            notFound: false,
+            tierDescription: null
         };
     }
 
     componentDidMount() {
- 	const client = new API();
+        const client = new API();
+        // Get application
         let promised_application = client.getApplication(this.props.match.params.applicationId);
         promised_application.then(
             response => {
-                this.setState({application: response.obj});
-            }
-        ).catch(
-            error => {
-                if (process.env.NODE_ENV !== "production") {
-                    console.log(error);
-                }
-                let status = error.status;
-                if (status === 404) {
-                    this.setState({notFound: true});
-                }
-            }
-        );
+                let promised_tier = client.getTierByName(response.obj.throttlingTier,"application");
+                return Promise.all([response, promised_tier]);
+            }).then(
+                response => {
+                    let [application, tier] = response.map(data => data.obj);
+                    this.setState({ application, tierDescription: tier.description });
+                }).catch(
+                    error => {
+                        if (process.env.NODE_ENV !== "production") {
+                            console.log(error);
+                        }
+                        let status = error.status;
+                        if (status === 404) {
+                            this.setState({notFound: true});
+                        }
+                    }
+                );
     }
-
-  
 
     render() {
         let redirect_url = "/applications/" + this.props.match.params.application_uuid + "/overview";
-        const application = this.state.application;
-        if (this.state.notFound) {
+        const { application, tierDescription, notFound } = this.state;
+        if (notFound) {
             return <ResourceNotFound/>
         }
-        if (!this.state.application) {
+        if (!application) {
             return <Loading/>
         }
         return (
             <Paper>
                 <Grid container className="tab-grid" spacing={0} >
-                    <Grid item xs={12} sm={12} md={4} lg={4} xl={4}>
+                    <Grid>
                         <Table>
                             <TableBody>
                                 <TableRow>
-                                    <TableCell>Application Name</TableCell><TableCell>{application.name}</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                    <TableCell>Throttling Tier</TableCell><TableCell>{application.throttlingTier}</TableCell>
+                                    <TableCell>Throttling Tier</TableCell><TableCell>{application.throttlingTier}   {tierDescription}</TableCell>
                                 </TableRow>
                                 <TableRow>
                                     <TableCell>Life Cycle State</TableCell><TableCell>{application.lifeCycleStatus}</TableCell>
