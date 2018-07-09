@@ -49,17 +49,19 @@ const AppsTableBody = (props) => {
                     <Subscribers applicationId={app.applicationId}/>
                 </TableCell>
                 <TableCell>
-                    <Tooltip title="View" placement="right-start">
+                    <Tooltip title="View">
+                        <Link to={"/applications/" + app.applicationId}>
                         <IconButton>
-                            <RemoveRedEye/>
+                            <RemoveRedEye aria-label="View"/>
+                        </IconButton>
+                        </Link>
+                    </Tooltip>
+                    <Tooltip title="Edit">
+                        <IconButton>
+                            <EditIcon aria-label="Edit"/>
                         </IconButton>
                     </Tooltip>
-                    <Tooltip title="Edit" placement="right-start">
-                        <IconButton>
-                            <EditIcon/>
-                        </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Delete" placement="right-start">
+                    <Tooltip title="Delete">
                         <IconButton disabled={app.deleting} data-appId={app.applicationId}
                                     onClick={handleAppDelete} color="default"
                                     aria-label="Delete">

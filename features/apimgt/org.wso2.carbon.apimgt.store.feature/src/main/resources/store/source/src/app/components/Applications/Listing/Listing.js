@@ -121,7 +121,7 @@ class Listing extends Component {
             data: null,
             alertMessage: null,
             page: 0,
-            rowsPerPage : 10
+            rowsPerPage : 5
         };
         this.handleAppDelete = this.handleAppDelete.bind(this);
     }
@@ -220,7 +220,7 @@ class Listing extends Component {
                                         <ApplicationTableHead order={order} orderBy={orderBy}
                                                             onRequestSort={this.handleRequestSort}/>
                                         <AppsTableContent handleAppDelete={this.handleAppDelete} apps={data} page={page}
-                                        rowsPerPage={rowsPerPage}/>
+                                                          rowsPerPage={rowsPerPage}/>
                                     </Table>
                                     <TablePagination
                                         component="div"
