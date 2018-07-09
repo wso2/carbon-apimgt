@@ -26,9 +26,11 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.token.APIMJWTGenerator;
 import org.wso2.carbon.apimgt.keymgt.util.APIMTokenIssuerUtil;
@@ -88,7 +90,7 @@ public class APIMTokenIssuer extends OauthTokenIssuerImpl {
                     JwtTokenInfoDTO jwtTokenInfoDTO = APIMTokenIssuerUtil.getJwtTokenInfoDTO(application, tokReqMsgCtx);
                     jwtTokenInfoDTO.setScopes(scopeString.toString().trim());
                     jwtTokenInfoDTO.setAudience(audienceList);
-                    jwtTokenInfoDTO.setExpirationTime(tokReqMsgCtx.getValidityPeriod());
+                    jwtTokenInfoDTO.setExpirationTime(getSecondsTillExpiry(tokReqMsgCtx.getValidityPeriod()));
                     jwtTokenInfoDTO.setApplication(applicationDTO);
                     jwtTokenInfoDTO.setKeyType(application.getKeyType());
                     jwtTokenInfoDTO.setConsumerKey(clientId);
@@ -116,6 +118,19 @@ public class APIMTokenIssuer extends OauthTokenIssuerImpl {
             throw new OAuthSystemException("Error occurred while getting JWT Token client ID : " + clientId, e);
         }
         return super.accessToken(tokReqMsgCtx);
+    }
+
+    private long getSecondsTillExpiry(long validityPeriod) throws APIManagementException {
+        if (validityPeriod == -1) {
+            // the token request does not specify the validity period explicitly
+            KeyManagerConfiguration configuration = KeyManagerHolder.getKeyManagerInstance().getKeyManagerConfiguration();;
+            return Long.parseLong(configuration.getParameter(APIConstants.IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD));
+        } else if (validityPeriod == -2) {
+            // a non-expiring token request, set the expiration to a large value
+            return Integer.MAX_VALUE;
+        } else {
+            return validityPeriod;
+        }
     }
 
     @Override
