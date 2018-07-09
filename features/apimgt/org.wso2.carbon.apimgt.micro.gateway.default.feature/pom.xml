@@ -39,68 +39,9 @@
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.micro.gateway.common</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.micro.gateway.usage.publisher</artifactId>
-        </dependency>
     </dependencies>
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.wso2.carbon.apimgt</groupId>
-                                    <artifactId>org.wso2.carbon.apimgt.micro.gateway.rest.api</artifactId>
-                                    <overWrite>true</overWrite>
-                                    <type>war</type>
-                                    <outputDirectory>${basedir}/src/main/resources/</outputDirectory>
-                                    <destFileName>micro-gateway#v0.10.war</destFileName>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy-resources</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>src/main/resources</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>resources</directory>
-                                    <includes>
-                                        <include>p2.inf</include>
-                                        <include>conf/on-premise-gateway.properties</include>
-                                    </includes>
-                                </resource>
-                                <resource>
-                                    <directory>resources/stream-definitions</directory>
-                                    <includes>
-                                        <include>*</include>
-                                    </includes>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.wso2.maven</groupId>
                 <artifactId>carbon-p2-plugin</artifactId>
@@ -124,7 +65,6 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.micro.gateway.common:${carbon.apimgt.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.micro.gateway.usage.publisher:${carbon.apimgt.version}</bundleDef>
                             </bundles>
                         </configuration>
                     </execution>
