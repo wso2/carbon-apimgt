@@ -404,20 +404,38 @@ public class APIGatewayManager {
                 context.replace('/', '-') + "\">\n" +
                 "   <property name=\"OUT_ONLY\" value=\"true\"/>\n" +
                 "   <script language=\"js\">var sub_path = mc.getProperty(\"websocket.subscriber.path\");\t    \n" +
-                "        \tvar queryParamString = sub_path.split(\"\\\\?\")[1];\t    \n" +
+                "        \tvar queryParamString = sub_path.split(\"\\\\?\")[1];\n" +
+                "                if(queryParamString != undefined) {\t    \n" +
                 "\t\tmc.setProperty('queryparams', \"?\" + queryParamString);\n" +
-                "\t</script>\n" +
-                "\t<property xmlns:ns=\"http://org.apache.synapse/xsd\" name=\"queryparams\"" +
-                " expression=\"$ctx:queryparams\"/>\n\t" +
-                "<property name=\"urlVal\" value=\"ws://echo.websocket.org:80\"/> \n" +
-                "\t<property name=\"fullUrl\" expression=\"fn:concat(get-property('urlVal'), " +
-                "get-property('queryparams'))\" type=\"STRING\"/>\n" +
-                "\t<header name=\"To\" expression=\"$ctx:fullUrl\"/>\n" +
-                "\t<send>\n" +
-                "\t\t<endpoint>\n" +
-                "\t\t\t<default/>\n" +
-                "\t\t</endpoint>\n" +
-                "\t</send>\n" +
+                "\t\t}\t\t\n" +
+                "   </script>\n" +
+                "   <property xmlns:soapenv=\"http://www.w3.org/2003/05/soap-envelope\"\n" +
+                "             xmlns:ns=\"http://org.apache.synapse/xsd\"\n" +
+                "             xmlns:ns3=\"http://org.apache.synapse/xsd\"\n" +
+                "             name=\"queryparams\"\n" +
+                "             expression=\"$ctx:queryparams\"/>\n" +
+                "  <log level=\"full\">\n" +
+                "\t<property xmlns:soapenv=\"http://www.w3.org/2003/05/soap-envelope\"\n" +
+                "             xmlns:ns=\"http://org.apache.synapse/xsd\"\n" +
+                "             xmlns:ns3=\"http://org.apache.synapse/xsd\"\n" +
+                "             name=\"queryparams\"\n" +
+                "             expression=\"$ctx:queryparams\"/>\n" +
+                "  </log>\n" +
+                "   <property name=\"urlVal\" value=\"ws://echo.websocket.org:80\"/>\n" +
+                "   <property xmlns:soapenv=\"http://www.w3.org/2003/05/soap-envelope\"\n" +
+                "             xmlns:ns3=\"http://org.apache.synapse/xsd\"\n" +
+                "             name=\"fullUrl\"\n" +
+                "             expression=\"fn:concat(get-property('urlVal'), get-property('queryparams'))\"\n" +
+                "             type=\"STRING\"/>\n" +
+                "   <header xmlns:soapenv=\"http://www.w3.org/2003/05/soap-envelope\"\n" +
+                "           xmlns:ns3=\"http://org.apache.synapse/xsd\"\n" +
+                "           name=\"To\"\n" +
+                "           expression=\"$ctx:fullUrl\"/>\n" +
+                "   <send>\n" +
+                "      <endpoint>\n" +
+                "         <default/>\n" +
+                "      </endpoint>\n" +
+                "   </send>\n" +
                 "</sequence>";
         return seq;
     }
