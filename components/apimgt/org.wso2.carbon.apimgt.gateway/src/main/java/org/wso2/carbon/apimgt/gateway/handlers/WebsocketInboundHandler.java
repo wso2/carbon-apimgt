@@ -62,7 +62,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 	private String tenantDomain;
 	private static APIMgtUsageDataPublisher usageDataPublisher;
 	private String uri;
-    private String apiContextUri;
+	private String apiContextUri;
 	private String version;
 	private APIKeyValidationInfoDTO infoDTO = new APIKeyValidationInfoDTO();
 	private io.netty.handler.codec.http.HttpHeaders headers = new DefaultHttpHeaders();
@@ -134,8 +134,8 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             FullHttpRequest req = (FullHttpRequest) msg;
             uri = req.getUri();
             URI uriTemp = new URI(uri);
-            apiContextUri = new URI(uriTemp.getScheme(), uriTemp.getAuthority(), uriTemp.getPath(),null,
-            uriTemp.getFragment()).toString();
+            apiContextUri = new URI(uriTemp.getScheme(), uriTemp.getAuthority(), uriTemp.getPath(),
+                     null, uriTemp.getFragment()).toString();
 
             if (req.getUri().contains("/t/")) {
                 tenantDomain = MultitenantUtils.getTenantDomainFromUrl(req.getUri());
