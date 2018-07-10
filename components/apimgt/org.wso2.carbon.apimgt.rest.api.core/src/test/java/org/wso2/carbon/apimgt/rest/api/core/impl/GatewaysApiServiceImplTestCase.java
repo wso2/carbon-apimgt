@@ -19,7 +19,6 @@
 
 package org.wso2.carbon.apimgt.rest.api.core.impl;
 
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.Test;

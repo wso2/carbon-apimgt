@@ -51,7 +51,7 @@ public class ExportApiServiceImplTestCase {
         APIMgtAdminService apiMgtAdminService = Mockito.mock(APIMgtAdminService.class);
 
         Mockito.when(apiMgtAdminService.getApiPolicies()).thenThrow(
-                new APIManagementException("", ExceptionCodes.APIMGT_DAO_EXCEPTION));
+                new APIManagementException("Error while exporting policiesXXX", ExceptionCodes.APIMGT_DAO_EXCEPTION));
 
         LogManager.getRootLogger().setLevel(Level.INFO);
         ExportApiServiceImpl exportApiService = new ExportApiServiceImpl(apiMgtAdminService);
