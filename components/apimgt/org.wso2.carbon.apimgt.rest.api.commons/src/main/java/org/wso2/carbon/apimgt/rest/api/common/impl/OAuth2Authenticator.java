@@ -116,8 +116,8 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
                 isTokenValid = true;
                 request.setProperty(LOGGED_IN_USER, ANONYMOUS_USER);
         } else {
-                throw new APIMgtSecurityException("Missing Authorization header in the request.`",
-                        ExceptionCodes.MALFORMED_AUTHORIZATION_HEADER_OAUTH);
+            throw new APIMgtSecurityException("Missing Authorization header in the request.`",
+                    ExceptionCodes.MALFORMED_AUTHORIZATION_HEADER_OAUTH);
         }
         return isTokenValid;
     }
@@ -151,13 +151,13 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
                 }
             } catch (APIManagementException e) {
                 String message = "Error while validating scopes for matching resource " + path + " and verb "
-                                + verb + " for anonymous permission.";
+                        + verb + " for anonymous permission.";
                 log.error(message, e);
                 throw new APIMgtSecurityException(message, ExceptionCodes.INVALID_SCOPE);
             }
         } else {
-            String message  = "Rest API resource could not be found for request path '" + path
-                                + "' while checking for anonymous permission.";
+            String message = "Rest API resource could not be found for request path '" + path
+                    + "' while checking for anonymous permission.";
             throw new APIMgtSecurityException(message, ExceptionCodes.INVALID_SCOPE);
         }
         return false;
