@@ -34,8 +34,6 @@
         <module>org.wso2.carbon.apimgt.micro.gateway.common</module>
         <module>org.wso2.carbon.apimgt.micro.gateway.tenant.initializer</module>
         <module>org.wso2.carbon.apimgt.micro.gateway.throttling.synchronizer</module>
-        <module>org.wso2.carbon.apimgt.micro.gateway.usage.publisher</module>
-        <module>org.wso2.carbon.apimgt.micro.gateway.rest.api</module>
         <module>org.wso2.carbon.apimgt.micro.gateway.api.synchronizer</module>
         <module>org.wso2.carbon.apimgt.micro.gateway.configurator</module>
         <module>org.wso2.carbon.apimgt.micro.gateway.status.checker</module>
