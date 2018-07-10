@@ -403,12 +403,22 @@ public class APIGatewayManager {
                 "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"" +
                 context.replace('/', '-') + "\">\n" +
                 "   <property name=\"OUT_ONLY\" value=\"true\"/>\n" +
-                "   <send>\n" +
-                "       <endpoint>\n" +
-                "           <address uri=\"" + url + "\"/>\n" +
-                "       </endpoint>\n" +
-                "   </send>\n" +
-                "</sequence>\n";
+                "   <script language=\"js\">var sub_path = mc.getProperty(\"websocket.subscriber.path\");\t    \n" +
+                "        \tvar queryParamString = sub_path.split(\"\\\\?\")[1];\t    \n" +
+                "\t\tmc.setProperty('queryparams', \"?\" + queryParamString);\n" +
+                "\t</script>\n" +
+                "\t<property xmlns:ns=\"http://org.apache.synapse/xsd\" name=\"queryparams\"" +
+                " expression=\"$ctx:queryparams\"/>\n\t" +
+                "<property name=\"urlVal\" value=\"ws://echo.websocket.org:80\"/> \n" +
+                "\t<property name=\"fullUrl\" expression=\"fn:concat(get-property('urlVal'), " +
+                "get-property('queryparams'))\" type=\"STRING\"/>\n" +
+                "\t<header name=\"To\" expression=\"$ctx:fullUrl\"/>\n" +
+                "\t<send>\n" +
+                "\t\t<endpoint>\n" +
+                "\t\t\t<default/>\n" +
+                "\t\t</endpoint>\n" +
+                "\t</send>\n" +
+                "</sequence>";
         return seq;
     }
 

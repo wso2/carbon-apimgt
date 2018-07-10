@@ -49,6 +49,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.net.InetSocketAddress;
+import java.net.URI;
 import java.util.UUID;
 
 /**
@@ -61,6 +62,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 	private String tenantDomain;
 	private static APIMgtUsageDataPublisher usageDataPublisher;
 	private String uri;
+	private String apiContextUri;
 	private String version;
 	private APIKeyValidationInfoDTO infoDTO = new APIKeyValidationInfoDTO();
 	private io.netty.handler.codec.http.HttpHeaders headers = new DefaultHttpHeaders();
@@ -131,6 +133,10 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
         if (msg instanceof FullHttpRequest) {
             FullHttpRequest req = (FullHttpRequest) msg;
             uri = req.getUri();
+            URI uriTemp = new URI(uri);
+            apiContextUri = new URI(uriTemp.getScheme(), uriTemp.getAuthority(), uriTemp.getPath(),
+                     null, uriTemp.getFragment()).toString();
+
             if (req.getUri().contains("/t/")) {
                 tenantDomain = MultitenantUtils.getTenantDomainFromUrl(req.getUri());
             } else {
@@ -262,11 +268,11 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
     }
 
     protected APIKeyValidationInfoDTO getApiKeyDataForThriftClient(String apiKey) throws APISecurityException {
-        return new WebsocketThriftClient().getAPIKeyData(uri, version, apiKey);
+        return new WebsocketThriftClient().getAPIKeyData(apiContextUri, version, apiKey);
     }
 
     protected APIKeyValidationInfoDTO getApiKeyDataForWSClient(String apiKey) throws APISecurityException {
-        return new WebsocketWSClient().getAPIKeyData(uri, version, apiKey);
+        return new WebsocketWSClient().getAPIKeyData(apiContextUri, version, apiKey);
     }
 
     protected APIManagerAnalyticsConfiguration getApiManagerAnalyticsConfiguration() {
@@ -295,7 +301,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             authorizedUser = infoDTO.getSubscriber();
         }
         String apiName = infoDTO.getApiName();
-        String apiContext = uri;
+        String apiContext = apiContextUri;
         String apiVersion = version;
         String appTenant = infoDTO.getSubscriberTenantDomain();
         String apiTenant = tenantDomain;
