@@ -323,7 +323,6 @@ public class APIKeyValidationService extends AbstractAdmin {
                     && !validationContext.isCacheHit()) {
                 Application application = APIUtil.getApplicationByClientId(validationContext.getValidationInfoDTO()
                         .getConsumerKey());
-
                 validationContext.getValidationInfoDTO().setApplicationId(String.valueOf(application.getId()));
                 validationContext.getValidationInfoDTO().setApplicationTier(application.getTier());
                 keyValidationHandler.generateConsumerToken(validationContext);
