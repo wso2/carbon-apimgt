@@ -414,7 +414,7 @@ public class APIGatewayManager {
                 "             xmlns:ns3=\"http://org.apache.synapse/xsd\"\n" +
                 "             name=\"queryparams\"\n" +
                 "             expression=\"$ctx:queryparams\"/>\n" +
-                "   <property name=\"urlVal\" value=\"ws://echo.websocket.org:80\"/>\n" +
+                "   <property name=\"urlVal\" value=\""+ url + "\"/>\n" +
                 "   <property xmlns:soapenv=\"http://www.w3.org/2003/05/soap-envelope\"\n" +
                 "             xmlns:ns3=\"http://org.apache.synapse/xsd\"\n" +
                 "             name=\"fullUrl\"\n" +
