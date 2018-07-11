@@ -90,5 +90,9 @@ public class APIMgtGatewayConstants {
     public static final String XSD_URL = "xsdURL";
     public static final String UTF8 = "UTF-8";
 
+    /**
+     * Web socket header for jwt assertion.
+     * */
+    public static final String WS_JWT_TOKEN_HEADER = "websocket.custom.header.X-JWT-Assertion";
 }
 

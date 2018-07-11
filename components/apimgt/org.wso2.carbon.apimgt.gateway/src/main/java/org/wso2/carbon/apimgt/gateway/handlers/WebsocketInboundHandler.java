@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.gateway.handlers;
 
+import com.google.common.base.Strings;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
@@ -29,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
@@ -39,7 +41,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageDataBridgeDataPublisher;
 import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageDataPublisher;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 import org.wso2.carbon.apimgt.usage.publisher.dto.RequestPublisherDTO;
@@ -66,6 +67,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 	private String version;
 	private APIKeyValidationInfoDTO infoDTO = new APIKeyValidationInfoDTO();
 	private io.netty.handler.codec.http.HttpHeaders headers = new DefaultHttpHeaders();
+	private String token;
 
 	public WebsocketInboundHandler() {
         if (throttleDataPublisher == null) {
@@ -164,6 +166,10 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 } else {
                     req.setUri(uri); // Setting endpoint appended uri
                 }
+
+                if (!Strings.isNullOrEmpty(token)) {
+                    ((FullHttpRequest) msg).headers().set(APIMgtGatewayConstants.WS_JWT_TOKEN_HEADER, token);
+                }
                 ctx.fireChannelRead(msg);
 
                 // publish google analytics data
@@ -257,6 +263,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                     cacheKey = WebsocketUtil.getAccessTokenCacheKey(apiKey, uri);
                     WebsocketUtil.putCache(info, apiKey, cacheKey);
                 }
+                token = info.getEndUserToken();
                 infoDTO = info;
                 return true;
             } else {
