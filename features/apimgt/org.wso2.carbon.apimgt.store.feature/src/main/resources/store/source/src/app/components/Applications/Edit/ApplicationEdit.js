@@ -135,7 +135,7 @@ class ApplicationEdit extends Component {
     };
 
     render() {
-        const { classes, updateSubscriptionData } = this.props;
+        const { classes } = this.props;
         let application = this.state.application;
         let tiers = this.state.tiers;
         if (!application){
@@ -143,7 +143,6 @@ class ApplicationEdit extends Component {
         }
         return (
             <Grid container spacing={0} justify="flex-start">
-                { !updateSubscriptionData &&
                 <Grid item xs={12} sm={12} md={12} lg={11} xl={10} className={classes.titleBar}>
                     <div className={classes.buttonLeft}>
                         <Link to={"/applications/" + application.id}>
@@ -159,7 +158,6 @@ class ApplicationEdit extends Component {
                         </div>
                     </div>
                 </Grid>
-                }
                 <Grid item xs={12} lg={6} xl={4}>
                     <form className={classes.container} noValidate autoComplete="off">
                         <TextField
@@ -168,8 +166,7 @@ class ApplicationEdit extends Component {
                             InputLabelProps={{
                                 shrink: true,
                             }}
-                            helperText="Enter a name to identify the Application. You will be able to pick this
-                                        application when subscribing to APIs "
+                            helperText="Enter a name to identify the Application. You will be able to pick this application when subscribing to APIs "
                             fullWidth
                             name="name"
                             onChange={this.handleChange('name')}
@@ -212,17 +209,11 @@ class ApplicationEdit extends Component {
                             <Button variant="raised" color="primary"  onClick={this.handleSubmit}>
                                 Update
                             </Button>
-                            {updateSubscriptionData ?
-                                <Button variant="raised" className={classes.buttonAlignment} onClick={this.props.handleAppDialogClose}>
-                                    Cancel
-                                </Button>
-                                :
-                                <Link to={"/applications/"} className={classes.buttonRightLink}>
+                                <Link to={"/applications"} className={classes.buttonRightLink}>
                                     <Button variant="raised" className={classes.buttonAlignment}>
                                         Cancel
                                     </Button>
                                 </Link>
-                            }
                         </div>
                     </form>
                 </Grid>
