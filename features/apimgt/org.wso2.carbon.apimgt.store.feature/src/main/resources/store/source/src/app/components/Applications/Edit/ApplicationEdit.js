@@ -166,7 +166,8 @@ class ApplicationEdit extends Component {
                             InputLabelProps={{
                                 shrink: true,
                             }}
-                            helperText="Enter a name to identify the Application. You will be able to pick this application when subscribing to APIs "
+                            helperText="Enter a name to identify the Application. You will be able to pick this
+                            application when subscribing to APIs "
                             fullWidth
                             name="name"
                             onChange={this.handleChange('name')}
