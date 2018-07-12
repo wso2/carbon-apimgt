@@ -17,7 +17,6 @@
  */
 package org.wso2.carbon.apimgt.gateway.handlers;
 
-import com.google.common.base.Strings;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
@@ -25,6 +24,7 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import org.apache.axiom.util.UIDGenerator;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
@@ -167,7 +167,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                     req.setUri(uri); // Setting endpoint appended uri
                 }
 
-                if (!Strings.isNullOrEmpty(token)) {
+                if (StringUtils.isNotEmpty(token)) {
                     ((FullHttpRequest) msg).headers().set(APIMgtGatewayConstants.WS_JWT_TOKEN_HEADER, token);
                 }
                 ctx.fireChannelRead(msg);
