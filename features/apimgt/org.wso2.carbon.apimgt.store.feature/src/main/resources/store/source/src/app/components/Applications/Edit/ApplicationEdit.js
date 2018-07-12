@@ -70,7 +70,6 @@ class ApplicationEdit extends Component {
             tiers: []
         };
     }
-
     componentDidMount(){
         let promised_application = Application.get(this.props.match.params.application_id);
         const api = new API();
@@ -106,11 +105,9 @@ class ApplicationEdit extends Component {
             }
         );
     }
-
     handleChange = name => event => {
         this.setState({ [name]: event.target.value });
     };
-
     handleSubmit = (event) => {
         event.preventDefault();
         let updated_application = {
@@ -133,7 +130,6 @@ class ApplicationEdit extends Component {
                 console.log("Error while updating application");
             });
     };
-
     render() {
         const { classes } = this.props;
         let application = this.state.application;
