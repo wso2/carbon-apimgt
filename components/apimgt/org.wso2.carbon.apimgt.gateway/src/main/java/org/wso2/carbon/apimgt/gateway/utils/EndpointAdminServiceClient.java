@@ -125,6 +125,10 @@ public class EndpointAdminServiceClient {
             } else {
                 endpointNames = endpointAdminStub.getEndPointsNames();
             }
+            if(endpointNames == null) {
+                log.error("Error while removing endpoints for updating endpoints. Endpoints not found");
+                return true;
+            }
             Arrays.sort(endpointNames); //Sorting required for Binary Search
             arrayList.add(Arrays.binarySearch(endpointNames, apiName + "--v" +
                     apiVersion + "_API" + APIConstants.GATEWAY_ENV_TYPE_PRODUCTION + "Endpoint"));
