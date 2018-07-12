@@ -120,7 +120,6 @@ class ApplicationEdit extends Component {
             description: this.state.description,
             lifeCycleStatus:this.state.application.lifeCycleStatus
         };
-        console.error("updated app " + JSON.stringify(this.state.application.lifeCycleStatus));
         let api = new API();
         let promised_update = api.updateApplication(updated_application,null);
         promised_update.then(response => {
@@ -128,11 +127,10 @@ class ApplicationEdit extends Component {
             let redirectUrl = "/applications/" + appId;
             this.props.history.push(redirectUrl);
             console.log("Application updated successfully.");
-
         }).catch(
             function (error) {
                 Alert.error("Error while updating application");
-                console.log(error);
+                console.log("Error while updating application");
             });
     };
 
@@ -170,8 +168,8 @@ class ApplicationEdit extends Component {
                             InputLabelProps={{
                                 shrink: true,
                             }}
-                            helperText="Enter a name to identify the Application. You will be able to pick this application
-                                        when subscribing to APIs "
+                            helperText="Enter a name to identify the Application. You will be able to pick this
+                                        application when subscribing to APIs "
                             fullWidth
                             name="name"
                             onChange={this.handleChange('name')}
@@ -179,8 +177,7 @@ class ApplicationEdit extends Component {
                             autoFocus={true}
                             className={classes.inputText}
                         />
-
-                        {tiers &&
+                        { tiers &&
                         <FormControl margin="normal">
                             <InputLabel htmlFor="quota-helper">Per Token Quota</InputLabel>
                             <Select
@@ -190,8 +187,10 @@ class ApplicationEdit extends Component {
                             >
                                 {this.state.tiers.map((tier) => <MenuItem key={tier} value={tier}>{tier}</MenuItem>)}
                             </Select>
-                            <FormHelperText>Assign API request quota per access token. Allocated quota will be
-                                shared among all the subscribed APIs of the application.</FormHelperText>
+                            <FormHelperText>
+                                Assign API request quota per access token. Allocated quota will be
+                                shared among all the subscribed APIs of the application.
+                            </FormHelperText>
                         </FormControl>
                         }
                         <TextField
@@ -231,7 +230,6 @@ class ApplicationEdit extends Component {
         );
     }
 }
-
 ApplicationEdit.propTypes = {
     classes: PropTypes.object.isRequired,
 };

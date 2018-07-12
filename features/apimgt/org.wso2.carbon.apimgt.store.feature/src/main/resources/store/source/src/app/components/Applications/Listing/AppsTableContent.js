@@ -26,6 +26,7 @@ import IconButton from 'material-ui/IconButton';
 import Tooltip from 'material-ui/Tooltip';
 import {CircularProgress} from 'material-ui/Progress';
 import Subscription from "../../../data/Subscription";
+import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 
 function getSorting(order, orderBy) {
     return order === 'desc'
@@ -64,7 +65,9 @@ const AppsTableBody = (props) => {
                             </TableCell>
                             <TableCell>{app.throttlingTier}</TableCell>
                             <TableCell>{app.lifeCycleStatus}</TableCell>
-                            <TableCell><Subscribers applicationId={app.id}/></TableCell>
+                            <TableCell>
+                                <Subscribers applicationId={app.id}/>
+                            </TableCell>
                             <TableCell>
                                 <Tooltip title="View">
                                     <Link to={"/applications/" + app.id}>
@@ -106,7 +109,8 @@ class Subscribers extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            subscriptions:0
+            subscriptions:0,
+            notFound: false
         }
     }
     componentDidMount() {
@@ -115,7 +119,6 @@ class Subscribers extends Component {
         let promised_subscriptions = client.getSubscriptions(null, applicationId);
         promised_subscriptions.then ( (response) => {
             this.setState({subscriptions:response.obj.count});
-
         }).catch(
             error => {
                 const { status } = error;
@@ -125,7 +128,11 @@ class Subscribers extends Component {
             });
     }
     render(){
-        return this.state.subscriptions;
+        const {subscriptions, notFound} = this.state;
+        if (notFound) {
+            return <ResourceNotFound/>
+        }
+        return subscriptions;
     }
 }
 
