@@ -225,7 +225,7 @@ export default class API extends Resource {
             (client) => {
                 let payload = {applicationId: application.id, body: application};
                 return client.apis["Application (Individual)"].put_applications__applicationId_(
-                    {payload}, this._requestMetaData());
+                    payload, this._requestMetaData());
             }
         );
         if (callback) {

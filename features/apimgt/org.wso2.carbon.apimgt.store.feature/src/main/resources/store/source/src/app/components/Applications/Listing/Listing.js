@@ -93,7 +93,11 @@ class ApplicationTableHead extends Component {
                 <TableRow>
                     {columnData.map(column => {
                         return (
-                            <TableCell key={column.id} numeric={column.numeric}>
+                            <TableCell
+                                key={column.id}
+                                numeric={column.numeric}
+                                sortDirection={orderBy === column.id ? order : false}
+                            >
                                 <TableSortLabel
                                     active={orderBy === column.id}
                                     direction={order}
@@ -103,7 +107,7 @@ class ApplicationTableHead extends Component {
                                 </TableSortLabel>
                             </TableCell>
                         );
-                    })}
+                    }, this)}
                 </TableRow>
             </TableHead>
         );
@@ -152,10 +156,10 @@ class Listing extends Component {
         if (this.state.orderBy === property && this.state.order === 'desc') {
             order = 'asc';
         }
-        const data = this.state.data.sort(
-            (a, b) => (order === 'desc' ? b[orderBy] > a[orderBy] : a[orderBy] > b[orderBy]),
-        );
-        this.setState({data, order, orderBy});
+        // const data = this.state.data.sort(
+        //     (a, b) => (order === 'desc' ? b[orderBy] > a[orderBy] : a[orderBy] > b[orderBy]),
+        // );
+        this.setState({ order, orderBy});
     };
 
     handleAppDelete(event) {
@@ -220,12 +224,14 @@ class Listing extends Component {
                                         <ApplicationTableHead order={order} orderBy={orderBy}
                                                             onRequestSort={this.handleRequestSort}/>
                                         <AppsTableContent handleAppDelete={this.handleAppDelete} apps={data} page={page}
-                                                          rowsPerPage={rowsPerPage}/>
+                                                          rowsPerPage={rowsPerPage} order={order} orderBy={orderBy}/>
                                     </Table>
                                     <TablePagination
                                         component="div"
                                         count={data.size}
                                         rowsPerPage={rowsPerPage}
+                                        rowsPerPageOptions={[5,10,15]}
+                                        labelRowsPerPage="Show"
                                         page={page}
                                         backIconButtonProps={{
                                             'aria-label': 'Previous Page',

@@ -23,6 +23,7 @@ import {Apis, ApplicationCreate, Applications, Base, Login, Logout} from './app/
 import {PageNotFound} from './app/components/Base/Errors'
 import AuthManager from './app/data/AuthManager'
 import qs from 'qs'
+import ApplicationEdit from './app/components/Applications/Edit/ApplicationEdit';
 
 // import 'typeface-roboto'
 import Utils from "./app/data/Utils";
@@ -113,6 +114,7 @@ class Protected extends Component {
                             <Route path={"/apis"} component={Apis}/>
                             <Route path={"/applications"} component={Applications}/>
                             <Route path={"/application/create"} component={ApplicationCreate}/>
+                            <Route path={"/application/edit/:application_id"} render={ props => (<ApplicationEdit {...props} />)}/>
                             <Route component={PageNotFound}/>
                         </Switch>
                     </Base>

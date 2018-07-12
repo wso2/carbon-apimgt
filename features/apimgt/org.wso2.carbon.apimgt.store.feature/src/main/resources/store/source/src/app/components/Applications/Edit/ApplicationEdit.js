@@ -1,42 +1,20 @@
-/*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- *
- * WSO2 Inc. licenses this file to you under the Apache License,
- * Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
-import API from '../../../data/api'
-
-import Button from 'material-ui/Button';
-import { MenuItem } from 'material-ui/Menu';
-import {Form} from 'material-ui/Form'
-import { FormGroup, FormControlLabel, FormControl, FormHelperText, FormLabel } from 'material-ui/Form';
+import PropTypes from 'prop-types';
+import {withStyles} from 'material-ui/styles';
 import Grid from 'material-ui/Grid';
+import { Link } from 'react-router-dom';
+import Button from 'material-ui/Button';
 import Typography from 'material-ui/Typography';
-import { Delete, Edit, CreateNewFolder, Description  }from 'material-ui-icons';
+import ArrowBack from 'material-ui-icons/ArrowBack';
+import Application from "../../../data/Application.js";
+import Loading from "../../Base/Loading/Loading";
 import TextField from 'material-ui/TextField';
-import IconButton from 'material-ui/IconButton';
-import Paper from 'material-ui/Paper';
 import Input, { InputLabel } from 'material-ui/Input';
 import Select from 'material-ui/Select';
-import ArrowBack from 'material-ui-icons/ArrowBack';
-import Divider from 'material-ui/Divider';
-import {withStyles} from 'material-ui/styles';
-import PropTypes from 'prop-types';
-import Alert from '../../Shared/Alert';
+import { FormControl, FormHelperText } from 'material-ui/Form';
+import { MenuItem } from 'material-ui/Menu';
+import API from "../../../data/api";
+import Alert from "../../Shared/Alert";
 
 const styles = theme => ({
     titleBar: {
@@ -71,7 +49,7 @@ const styles = theme => ({
     inputText: {
         marginTop: 20,
     },
-    buttonRight: {
+    buttonAlignment: {
         marginLeft: 20,
     },
     buttonRightLink: {
@@ -79,35 +57,43 @@ const styles = theme => ({
     }
 });
 
-class ApplicationCreate extends Component {
+class ApplicationEdit extends Component {
 
-    constructor(props) {
+    constructor(props){
         super(props);
         this.state = {
-            quota: "Unlimited",
-            tiers: [],
-            throttlingTier: null,
-            description: null,
+            application: null,
             name: null,
-            callbackUrl: null
+            quota: "Unlimited",
+            description: null,
+            id: null,
+            tiers: []
         };
-        this.handleChange = this.handleChange.bind(this);
     }
 
-    componentDidMount() {
-        //Get all the tires to populate the drop down.
+    componentDidMount(){
+        let promised_application = Application.get(this.props.match.params.application_id);
         const api = new API();
         let promised_tiers = api.getAllTiers("application");
-        promised_tiers.then((response) => {
-            let tierResponseObj = response.body;
-            let tiers = [];
-            tierResponseObj.list.map(item => tiers.push(item.name));
-            this.setState({tiers: tiers});
-
-            if (tiers.length > 0){
-                this.setState({quota: tiers[0]});
+        promised_application.then( application => {
+            this.setState({
+                application:application,
+                quota:application.throttlingTier,
+                name:application.name,
+                description:application.description,
+                id:application.id
+            });
+        }).catch(
+            error => {
+                console.error(error);
             }
-        }
+        );
+        promised_tiers.then((response) => {
+                let tierResponseObj = response.body;
+                let tiers = [];
+                tierResponseObj.list.map(item => tiers.push(item.name));
+                this.setState({tiers: tiers});
+            }
         ).catch(
             error => {
                 if (process.env.NODE_ENV !== "production") {
@@ -125,59 +111,52 @@ class ApplicationCreate extends Component {
         this.setState({ [name]: event.target.value });
     };
 
-    handlePolicyChange = name => event => {
-        this.setState({ [name]: event.target.value });
-    };
-
-    handleSubmit = (e) => {
-        e.preventDefault();
-        let application_data = {
+    handleSubmit = (event) => {
+        event.preventDefault();
+        let updated_application = {
+            id:this.state.id,
             name: this.state.name,
             throttlingTier: this.state.quota,
-            description: this.state.description
+            description: this.state.description,
+            lifeCycleStatus:this.state.application.lifeCycleStatus
         };
-        let updateSubscriptionData = this.props.updateSubscriptionData;
-        let handleAppDialogClose = this.props.handleAppDialogClose;
-        let new_api = new API();
-        let promised_create = new_api.createApplication(application_data);
-        promised_create.then(response => {
-            let uuid = JSON.parse(response.data).applicationId;
-            //Once application loading fixed this need to pass application ID and load app
-            
-            if(updateSubscriptionData){
-                handleAppDialogClose();
-                updateSubscriptionData();   
-            } else {
-                let redirect_url = "/applications";
-                this.props.history.push(redirect_url);
-                console.log("Application created successfully.");
-            }
-            
+        console.error("updated app " + JSON.stringify(this.state.application.lifeCycleStatus));
+        let api = new API();
+        let promised_update = api.updateApplication(updated_application,null);
+        promised_update.then(response => {
+            let appId = response.body.applicationId;
+            let redirectUrl = "/applications/" + appId;
+            this.props.history.push(redirectUrl);
+            console.log("Application updated successfully.");
+
         }).catch(
-            function (error_response) {
-                Alert.error('Application already exists.');
-                console.log("Error while creating the application");
+            function (error) {
+                Alert.error("Error while updating application");
+                console.log(error);
             });
     };
 
     render() {
         const { classes, updateSubscriptionData } = this.props;
-        
+        let application = this.state.application;
+        let tiers = this.state.tiers;
+        if (!application){
+            return <Loading/>
+        }
         return (
             <Grid container spacing={0} justify="flex-start">
-                {/* Show the heading only for the normal application creation page */}
-                {!updateSubscriptionData &&
+                { !updateSubscriptionData &&
                 <Grid item xs={12} sm={12} md={12} lg={11} xl={10} className={classes.titleBar}>
                     <div className={classes.buttonLeft}>
-                        <Link to={"/applications/"}>
+                        <Link to={"/applications/" + application.id}>
                             <Button  variant="raised" size="small" className={classes.buttonBack}
-                                    color="default">
+                                     color="default">
                                 <ArrowBack />
                             </Button>
                         </Link>
                         <div className={classes.title}>
-                            <Typography variant="display2">
-                                Add New Application
+                            <Typography variant="display1">
+                                Go Back
                             </Typography>
                         </div>
                     </div>
@@ -187,6 +166,7 @@ class ApplicationCreate extends Component {
                     <form className={classes.container} noValidate autoComplete="off">
                         <TextField
                             label="Application Name"
+                            value={this.state.name}
                             InputLabelProps={{
                                 shrink: true,
                             }}
@@ -199,28 +179,27 @@ class ApplicationCreate extends Component {
                             autoFocus={true}
                             className={classes.inputText}
                         />
-            
-                     
-                        {this.state.tiers &&
+
+                        {tiers &&
                         <FormControl margin="normal">
                             <InputLabel htmlFor="quota-helper">Per Token Quota</InputLabel>
                             <Select
                                 value={this.state.quota}
-                                onChange={this.handlePolicyChange('quota')}
+                                onChange={this.handleChange('quota')}
                                 input={<Input name="quota" id="quota-helper" />}
                             >
                                 {this.state.tiers.map((tier) => <MenuItem key={tier} value={tier}>{tier}</MenuItem>)}
                             </Select>
                             <FormHelperText>Assign API request quota per access token. Allocated quota will be
-                            shared among all the subscribed APIs of the application.</FormHelperText>
+                                shared among all the subscribed APIs of the application.</FormHelperText>
                         </FormControl>
                         }
-
                         <TextField
                             label="Application Description"
                             InputLabelProps={{
                                 shrink: true,
                             }}
+                            value={this.state.description}
                             helperText="Describe the application"
                             fullWidth
                             multiline
@@ -232,19 +211,19 @@ class ApplicationCreate extends Component {
                         />
                         <div className={classes.buttonsWrapper}>
                             <Button variant="raised" color="primary"  onClick={this.handleSubmit}>
-                                Create
+                                Update
                             </Button>
                             {updateSubscriptionData ?
-                                <Button variant="raised" className={classes.buttonRight} onClick={this.props.handleAppDialogClose}>
+                                <Button variant="raised" className={classes.buttonAlignment} onClick={this.props.handleAppDialogClose}>
                                     Cancel
                                 </Button>
-                            :
+                                :
                                 <Link to={"/applications/"} className={classes.buttonRightLink}>
-                                    <Button variant="raised" className={classes.buttonRight}>
+                                    <Button variant="raised" className={classes.buttonAlignment}>
                                         Cancel
                                     </Button>
                                 </Link>
-                             }
+                            }
                         </div>
                     </form>
                 </Grid>
@@ -253,8 +232,8 @@ class ApplicationCreate extends Component {
     }
 }
 
-ApplicationCreate.propTypes = {
+ApplicationEdit.propTypes = {
     classes: PropTypes.object.isRequired,
 };
-  
-export default withStyles(styles)(ApplicationCreate);
+
+export default withStyles(styles)(ApplicationEdit);

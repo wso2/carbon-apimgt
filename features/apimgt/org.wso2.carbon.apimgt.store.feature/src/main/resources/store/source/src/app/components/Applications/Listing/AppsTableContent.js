@@ -21,14 +21,20 @@ import {Link} from 'react-router-dom';
 import {TableBody, TableCell, TableRow} from 'material-ui/Table';
 import DeleteIcon from 'material-ui-icons/Delete';
 import EditIcon from 'material-ui-icons/Edit';
-import RemoveRedEye from 'material-ui-icons/RemoveRedEye';
+import ViewIcon from 'material-ui-icons/RemoveRedEye';
 import IconButton from 'material-ui/IconButton';
 import Tooltip from 'material-ui/Tooltip';
 import {CircularProgress} from 'material-ui/Progress';
 import Subscription from "../../../data/Subscription";
 
+function getSorting(order, orderBy) {
+    return order === 'desc'
+        ? (a, b) => (b[orderBy] < a[orderBy] ? -1 : 1)
+        : (a, b) => (a[orderBy] < b[orderBy] ? -1 : 1);
+}
+
 const AppsTableBody = (props) => {
-    const {apps, handleAppDelete, classes, page, rowsPerPage} = props;
+    const {apps, handleAppDelete, classes, page, rowsPerPage, order, orderBy} = props;
     const emptyRowsPerPage = rowsPerPage - Math.min(rowsPerPage, apps.size - page*rowsPerPage);
     let appsTableData = [];
     apps.forEach(app => {
@@ -51,15 +57,17 @@ const AppsTableBody = (props) => {
                 <TableCell>
                     <Tooltip title="View">
                         <Link to={"/applications/" + app.applicationId}>
-                        <IconButton>
-                            <RemoveRedEye aria-label="View"/>
-                        </IconButton>
+                            <IconButton>
+                                <ViewIcon aria-label="View"/>
+                            </IconButton>
                         </Link>
                     </Tooltip>
                     <Tooltip title="Edit">
-                        <IconButton>
-                            <EditIcon aria-label="Edit"/>
-                        </IconButton>
+                        <Link to={"application/edit/" + app.applicationId}>
+                            <IconButton>
+                                <EditIcon aria-label="Edit"/>
+                            </IconButton>
+                        </Link>
                     </Tooltip>
                     <Tooltip title="Delete">
                         <IconButton disabled={app.deleting} data-appId={app.applicationId}
@@ -75,7 +83,10 @@ const AppsTableBody = (props) => {
     });
     return (
         <TableBody>
-            {appsTableData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)}
+            {appsTableData
+                .sort(getSorting(order,orderBy))
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+            }
             {emptyRowsPerPage > 0 && (
                 <TableRow style={{ height: 49 * emptyRowsPerPage }}>
                     <TableCell colSpan={6} />
