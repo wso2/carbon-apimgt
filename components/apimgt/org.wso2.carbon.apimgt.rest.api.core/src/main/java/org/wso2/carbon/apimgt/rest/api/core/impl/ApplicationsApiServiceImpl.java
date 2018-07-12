@@ -38,13 +38,17 @@ import java.util.List;
 import javax.ws.rs.core.Response;
 
 public class ApplicationsApiServiceImpl extends ApplicationsApiService {
+    private APIMgtAdminService apiMgtAdminService;
     private static final Logger log = LoggerFactory.getLogger(ApplicationsApiServiceImpl.class);
+
+    public ApplicationsApiServiceImpl(APIMgtAdminService apiMgtAdminService) {
+        this.apiMgtAdminService = apiMgtAdminService;
+    }
 
     @Override
     public Response applicationsGet(String accept
             , Request request) throws NotFoundException {
         try {
-            APIMgtAdminService apiMgtAdminService = APIManagerFactory.getInstance().getAPIMgtAdminService();
             List<Application> applicationList = apiMgtAdminService.getAllApplications();
             ApplicationListDTO applicationListDTO = new ApplicationListDTO();
             applicationListDTO.setList(MappingUtil.convertToApplicationDtoList(applicationList));

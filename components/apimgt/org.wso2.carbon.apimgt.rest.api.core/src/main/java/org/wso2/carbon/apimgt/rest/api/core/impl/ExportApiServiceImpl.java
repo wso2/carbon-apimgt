@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.util.APIFileUtils;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.core.ExportApiService;
@@ -21,8 +20,12 @@ import javax.ws.rs.core.Response;
  * This class contains the implementation of export policies api.
  */
 public class ExportApiServiceImpl extends ExportApiService {
-
+    private APIMgtAdminService apiMgtAdminService;
     private static final Logger log = LoggerFactory.getLogger(ExportApiServiceImpl.class);
+
+    public ExportApiServiceImpl(APIMgtAdminService apiMgtAdminService) {
+        this.apiMgtAdminService = apiMgtAdminService;
+    }
 
     /**
      * Export throttle policies containing zip.
@@ -45,7 +48,6 @@ public class ExportApiServiceImpl extends ExportApiService {
             log.debug("Received export policies GET request ");
         }
         try {
-            APIMgtAdminService apiMgtAdminService = APIManagerFactory.getInstance().getAPIMgtAdminService();
             PolicyExportManager policyExportManager = new PolicyExportManager(apiMgtAdminService);
             //create archive and get the archive location
             String zippedFilePath = policyExportManager

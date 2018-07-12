@@ -19,27 +19,21 @@
 
 package org.wso2.carbon.apimgt.rest.api.core.impl;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.core.impl.APIMgtAdminServiceImpl;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.rest.api.core.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.core.utils.SampleTestObjectCreator;
 import org.wso2.msf4j.Request;
-import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(APIManagerFactory.class)
 public class SubscriptionsApiServiceImplTestCase {
 
     private static final String API_CONTEXT = "/api";
@@ -48,13 +42,9 @@ public class SubscriptionsApiServiceImplTestCase {
 
     @Test
     public void subscriptionsGetTest() throws Exception {
-        APIMgtAdminServiceImpl apiMgtAdminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        APIManagerFactory instance = Mockito.mock(APIManagerFactory.class);
-        PowerMockito.mockStatic(APIManagerFactory.class);
-        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(instance);
-        Mockito.when(instance.getAPIMgtAdminService()).thenReturn(apiMgtAdminService);
+        APIMgtAdminService apiMgtAdminService = Mockito.mock(APIMgtAdminService.class);
 
-        SubscriptionsApiServiceImpl subscriptionsApiService = new SubscriptionsApiServiceImpl();
+        SubscriptionsApiServiceImpl subscriptionsApiService = new SubscriptionsApiServiceImpl(apiMgtAdminService);
 
         Mockito.when(apiMgtAdminService.getAPISubscriptionsOfApi(API_CONTEXT, API_VERSION))
                 .thenReturn(createSubscriptionValidationDataList());
@@ -81,34 +71,21 @@ public class SubscriptionsApiServiceImplTestCase {
 
     @Test
     public void policiesGetExceptionTest() throws Exception {
-        SubscriptionsApiServiceImpl subscriptionsApiService = new SubscriptionsApiServiceImpl();
+        APIMgtAdminService apiMgtAdminService = Mockito.mock(APIMgtAdminService.class);
+
+        Mockito.when(apiMgtAdminService.getAPISubscriptionsOfApi(API_CONTEXT, API_VERSION)).thenThrow(
+                new APIManagementException("", ExceptionCodes.APIMGT_DAO_EXCEPTION));
+
+        SubscriptionsApiServiceImpl subscriptionsApiService = new SubscriptionsApiServiceImpl(apiMgtAdminService);
         Response response = subscriptionsApiService
                 .subscriptionsGet(API_CONTEXT, API_VERSION, LIMIT, null, getRequest());
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }
 
-    @Test
-    public void policiesGetApiContextEmptyExceptionTest() throws Exception {
-        SubscriptionsApiServiceImpl subscriptionsApiService = new SubscriptionsApiServiceImpl();
-        Response response = subscriptionsApiService.subscriptionsGet(null, API_VERSION, LIMIT, null, getRequest());
-        Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
-    }
-
-    @Test
-    public void policiesGetApiVersionEmptyExceptionTest() throws Exception {
-        SubscriptionsApiServiceImpl subscriptionsApiService = new SubscriptionsApiServiceImpl();
-        Response response = subscriptionsApiService.subscriptionsGet(API_CONTEXT, null, LIMIT, null, getRequest());
-        Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
-    }
-
     private Response getResponse(String apiContext, String apiVersion) throws Exception {
-        APIMgtAdminServiceImpl apiMgtAdminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        APIManagerFactory instance = Mockito.mock(APIManagerFactory.class);
-        PowerMockito.mockStatic(APIManagerFactory.class);
-        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(instance);
-        Mockito.when(instance.getAPIMgtAdminService()).thenReturn(apiMgtAdminService);
+        APIMgtAdminService apiMgtAdminService = Mockito.mock(APIMgtAdminService.class);
 
-        SubscriptionsApiServiceImpl subscriptionsApiService = new SubscriptionsApiServiceImpl();
+        SubscriptionsApiServiceImpl subscriptionsApiService = new SubscriptionsApiServiceImpl(apiMgtAdminService);
 
         Mockito.when(apiMgtAdminService.getAPISubscriptions(LIMIT)).thenReturn(createSubscriptionValidationDataList());
         return subscriptionsApiService.subscriptionsGet(apiContext, apiVersion, LIMIT, null, getRequest());
@@ -129,10 +106,7 @@ public class SubscriptionsApiServiceImplTestCase {
     }
 
     private Request getRequest() throws Exception {
-        HTTPCarbonMessage carbonMessage = Mockito.mock(HTTPCarbonMessage.class);
-        Request request = new Request(carbonMessage);
-        PowerMockito.whenNew(Request.class).withArguments(carbonMessage).thenReturn(request);
-        return request;
+        return Mockito.mock(Request.class);
     }
 
 }
