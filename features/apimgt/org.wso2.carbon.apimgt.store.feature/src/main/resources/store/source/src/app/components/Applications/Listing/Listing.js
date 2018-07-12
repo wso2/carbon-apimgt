@@ -156,9 +156,6 @@ class Listing extends Component {
         if (this.state.orderBy === property && this.state.order === 'desc') {
             order = 'asc';
         }
-        // const data = this.state.data.sort(
-        //     (a, b) => (order === 'desc' ? b[orderBy] > a[orderBy] : a[orderBy] > b[orderBy]),
-        // );
         this.setState({ order, orderBy});
     };
 
