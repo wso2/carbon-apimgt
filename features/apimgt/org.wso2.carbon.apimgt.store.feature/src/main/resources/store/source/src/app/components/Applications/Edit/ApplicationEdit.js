@@ -15,6 +15,7 @@ import { FormControl, FormHelperText } from 'material-ui/Form';
 import { MenuItem } from 'material-ui/Menu';
 import API from "../../../data/api";
 import Alert from "../../Shared/Alert";
+import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 
 const styles = theme => ({
     titleBar: {
@@ -67,7 +68,8 @@ class ApplicationEdit extends Component {
             quota: "Unlimited",
             description: null,
             id: null,
-            tiers: []
+            tiers: [],
+            notFound: false
         };
     }
     componentDidMount(){
@@ -84,6 +86,10 @@ class ApplicationEdit extends Component {
             });
         }).catch(
             error => {
+                let status = error.status;
+                if (status === 404) {
+                    this.setState({ notFound: true });
+                }
                 console.error(error);
             }
         );
@@ -95,12 +101,9 @@ class ApplicationEdit extends Component {
             }
         ).catch(
             error => {
-                if (process.env.NODE_ENV !== "production") {
-                    console.log(error);
-                }
                 let status = error.status;
                 if (status === 404) {
-                    this.setState({notFound: true});
+                    this.setState({ notFound: true });
                 }
             }
         );
@@ -125,15 +128,17 @@ class ApplicationEdit extends Component {
             this.props.history.push(redirectUrl);
             console.log("Application updated successfully.");
         }).catch(
-            function (error) {
+            error => {
                 Alert.error("Error while updating application");
                 console.log("Error while updating application");
             });
     };
     render() {
         const { classes } = this.props;
-        let application = this.state.application;
-        let tiers = this.state.tiers;
+        const {application, tiers, notFound } = this.state;
+        if (notFound) {
+            return <ResourceNotFound/>
+        }
         if (!application){
             return <Loading/>
         }
