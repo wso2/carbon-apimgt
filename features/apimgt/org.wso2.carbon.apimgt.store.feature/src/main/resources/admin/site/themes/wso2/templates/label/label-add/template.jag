@@ -124,8 +124,6 @@
 	</div>
 </form>
 
-
-
 <script>
    $(document).ready(function() {
     	$('#cancel-label-btn').on('click',function(){
@@ -145,5 +143,3 @@
     });
 </script>
 <%});%>
-
-
