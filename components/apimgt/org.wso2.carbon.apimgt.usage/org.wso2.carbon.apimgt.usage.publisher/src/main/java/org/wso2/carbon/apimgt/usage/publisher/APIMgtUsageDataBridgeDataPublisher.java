@@ -191,11 +191,10 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
     public void publishEvent(RequestResponseStreamDTO requestStream) {
         DataBridgeRequestResponseStreamPublisherDTO dataBridgeRequestStreamPublisherDTO = new DataBridgeRequestResponseStreamPublisherDTO(requestStream);
         try {
-           //TODO get from apimanager.xml
-           //  String streamID= DataPublisherUtil.getApiManagerAnalyticsConfiguration().getRequestStreamName()+":"
-           //                  +DataPublisherUtil.getApiManagerAnalyticsConfiguration().getRequestStreamVersion();
+
+            String streamID = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getRequestStreamName() + ":"
+                    + DataPublisherUtil.getApiManagerAnalyticsConfiguration().getRequestStreamVersion();
             //Publish Request Data
-            String streamID = "org.wso2.apimgt.statistics.request:3.0.0";
             dataPublisher.tryPublish(streamID, System.currentTimeMillis(),
                     (Object[]) dataBridgeRequestStreamPublisherDTO.createMetaData(), null,
                     (Object[]) dataBridgeRequestStreamPublisherDTO.createPayload());
