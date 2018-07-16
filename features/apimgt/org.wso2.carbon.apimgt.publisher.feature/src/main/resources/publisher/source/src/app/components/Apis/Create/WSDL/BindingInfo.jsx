@@ -4,7 +4,9 @@ import { FormControl, FormControlLabel, FormLabel } from 'material-ui/Form';
 import Radio, { RadioGroup } from 'material-ui/Radio';
 
 const BindingInfo = (props) => {
-    const { apiFields, wsdlBean, classes } = props;
+    const {
+        apiFields, wsdlBean, classes, updateApiInputs,
+    } = props;
     if (wsdlBean.info && (wsdlBean.info.bindingInfo.hasHttpBinding || wsdlBean.info.bindingInfo.hasSoapBinding)) {
         return (
             <FormControl component='fieldset'>
@@ -13,7 +15,7 @@ const BindingInfo = (props) => {
                     aria-label='Implementation-Type'
                     name='implementationType'
                     value={apiFields.implementationType}
-                    onChange={this.updateApiInputs}
+                    onChange={updateApiInputs}
                 >
                     <FormControlLabel
                         disabled={!wsdlBean.info.bindingInfo.hasSoapBinding}
@@ -37,6 +39,7 @@ const BindingInfo = (props) => {
 };
 
 BindingInfo.propTypes = {
+    updateApiInputs: PropTypes.func.isRequired,
     apiFields: PropTypes.shape({
         implementationType: PropTypes.string,
     }).isRequired,

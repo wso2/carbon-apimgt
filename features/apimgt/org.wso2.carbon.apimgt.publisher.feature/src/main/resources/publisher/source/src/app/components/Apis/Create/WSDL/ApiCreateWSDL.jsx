@@ -159,8 +159,9 @@ class ApiCreateWSDL extends Component {
     updateApiInputs(event) {
         let name = 'selectedPolicies';
         let value = event;
+        // If event is an Synthetic event , extract the input name and its value from event.target object
         if (!Array.isArray(event)) {
-            ({ name, value } = event.target.name);
+            ({ name, value } = event.target);
         }
         const { apiFields } = this.state;
         apiFields[name] = value;
@@ -270,7 +271,12 @@ class ApiCreateWSDL extends Component {
                                         </Typography>
                                         <InputForm apiFields={apiFields} handleInputChange={this.updateApiInputs} />
                                         <Grid item xs={10}>
-                                            <BindingInfo wsdlBean={wsdlBean} classes={classes} apiFields={apiFields} />
+                                            <BindingInfo
+                                                updateApiInputs={this.updateApiInputs}
+                                                wsdlBean={wsdlBean}
+                                                classes={classes}
+                                                apiFields={apiFields}
+                                            />
                                         </Grid>
                                         <div className={classes.optionAction}>
                                             <Button color='primary' onClick={this.stepBack}>
