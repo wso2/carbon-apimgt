@@ -35,5 +35,7 @@ public interface APIMgtUsageDataPublisher {
     public void publishEvent(ExecutionTimePublisherDTO executionTimePublisherDTO);
 
     public void publishEvent(AlertTypeDTO alertTypeDTO) throws APIManagementException;
+    
+    public void publishEvent(RequestResponseStreamDTO requestStream);
 
 }
