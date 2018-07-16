@@ -487,42 +487,48 @@ var drawChart = function (from, to) {
 
                     //on main checkbox check and uncheck event
                     $('#apiSelectTable').on( 'change', 'input.mainCheckBox', function () {
-
-                      while(count != 0){
-                            var id = count - 1;
-                            $("#"+id).prop("checked", false);
-                            count--;
-                            state_array[id] = false;
-                      }
-                      var check=$(this).is(':checked');
-                      var draw_chart=[];
-
-                      if (check) {
-                          for(var n=0;n<sortData.length;n++){
-                          var id = n;
-                          count++;
-                            //limiting to show 20 entries at a time
-                            if(count>20){
-                                  $('#displayMsg').html('<h5 style="color:#555" >'+ i18n.t('Note that the graph shows only 20 entries') + '</h5>');
-                                  state_array[id] = false;
-                                  count--;
-                              }else{
-                                  state_array[id] = true;
-                                  $("#"+n).prop("checked", true);
-                                  $('#displayMsg').html('');
-                              }
-                          }
-                      }
-
-                    $.each(chartData, function (index, value) {
-                            if (state_array[index]){
-                                draw_chart.push(value);
+                        var rowCount = $('#apiSelectTable tr').length - 1;
+                        var pageNumber = document.getElementsByClassName("paginate_button active")[0].
+                                                                    children[0].getAttribute('data-dt-idx') - 1;
+                        if (pageNumber == "0") {
+                            pageNumber = "";
+                        }
+                        while (rowCount!= 0) {
+                            var id = rowCount - 1;
+                            if ($("#"+pageNumber+id).prop("checked")) {
+                                count--;
                             }
-                      });
+                            $("#"+pageNumber+id.toString()).prop("checked", false);
+                            state_array[pageNumber+id.toString()] = false;
+                            rowCount--;
+                        }
+                        var check=$(this).is(':checked');
+                        var draw_chart=[];
 
-                      chart.data = dimple.filterData(data, "API", draw_chart);
-                      chart.draw();
-                     });
+                        if (check) {
+                            var n = pageNumber+"0";
+                            rowCount = $('#apiSelectTable tr').length - 1;
+                            rowCount = parseInt(n) + rowCount;
+                            for (;n < rowCount;n++) {
+                                var id = n;
+                                //limiting to show 20 entries at a time
+                                if (count < 20) {
+                                    count++;
+                                    state_array[id] = true;
+                                    $("#"+n).prop("checked", true);
+                                    $('#displayMsg').html('');
+                                }
+                            }
+                        }
+
+                        $.each(chartData, function (index, value) {
+                                if (state_array[index]){
+                                    draw_chart.push(value);
+                                }
+                        });
+                        chart.data = dimple.filterData(data, "API", draw_chart);
+                        chart.draw();
+                    });
 
                     var count=20;
 
