@@ -406,7 +406,7 @@ var drawChart = function (from, to) {
 
                     $dataTable.append($('<thead class="tableHead"><tr>'+
                                             '<th>'+
-                                            '<input name="mainCheckBox" id="mainCheckBox" type=checkbox checked class="mainCheckBox"> Check/Uncheck All</input>'+
+                                            '<input name="mainCheckBox" id="mainCheckBox" type=checkbox checked class="mainCheckBox"/>'+
                                             '</th>'+
                                             '<th>API</th>'+
                                             '<th style="text-align:right" width="20%" >'+ i18n.t('Subscriber Count') + '</th>'+
@@ -486,25 +486,7 @@ var drawChart = function (from, to) {
                     chart.data = dimple.filterData(data, "API", defaultFilterValues);
 
                     $(document).on("click",".paginate_button", function () {
-                        var rowCount = $('#apiSelectTable tr').length - 1;
-                        var pageNumber = document.getElementsByClassName("paginate_button active")[0].
-                                                                    children[0].getAttribute('data-dt-idx') - 1;
-                        var n = pageNumber+"0";
-                        rowCount = parseInt(n) + rowCount;
-                        var checkCount = 0;
-                        for (;n < rowCount;n++) {
-                            var id = n;
-                            if ($("#"+parseInt(id)).prop("checked")) {
-                                checkCount++;
-                            }
-                        }
-                        n = pageNumber+"0";
-                        if (checkCount == rowCount - parseInt(n)) {
-                            $("#mainCheckBox").prop("checked", true);
-                        }
-                        else {
-                            $("#mainCheckBox").prop("checked", false);
-                        }
+                        checkAllButtonStateChange();
                     });
 
                     //on main checkbox check and uncheck event
@@ -517,9 +499,6 @@ var drawChart = function (from, to) {
                         }
                         while (rowCount!= 0) {
                             var id = rowCount - 1;
-                            if ($("#"+pageNumber+id).prop("checked")) {
-                                count--;
-                            }
                             $("#"+pageNumber+id.toString()).prop("checked", false);
                             state_array[pageNumber+id.toString()] = false;
                             rowCount--;
@@ -533,13 +512,9 @@ var drawChart = function (from, to) {
                             rowCount = parseInt(n) + rowCount;
                             for (;n < rowCount;n++) {
                                 var id = n;
-                                //limiting to show 20 entries at a time
-                                if (count < 20) {
-                                    count++;
-                                    state_array[id] = true;
-                                    $("#"+n).prop("checked", true);
-                                    $('#displayMsg').html('');
-                                }
+                                state_array[id] = true;
+                                $("#"+n).prop("checked", true);
+                                $('#displayMsg').html('');
                             }
                         }
 
@@ -552,8 +527,6 @@ var drawChart = function (from, to) {
                         chart.draw();
                     });
 
-                    var count=20;
-
                     //on checkbox check and uncheck event
                     $('#apiSelectTable').on( 'change', 'input.inputCheckbox', function () {
                           var id =  $(this).attr('id');
@@ -561,21 +534,12 @@ var drawChart = function (from, to) {
                           var draw_chart=[];
                           $("#mainCheckBox").prop("checked", false);
                           if (check) {
-                          $('#displayMsg').html('');
-                          count++;
-                            //limiting to show 20 entries at a time
-                            if(count>20){
-                                $('#displayMsg').html('<h5 style="color:#555" >'+ i18n.t('Note that the graph shows only 20 entries') + '</h5>');
-                                state_array[id] = false;
-                                $(this).prop("checked", "");
-                                count--;
-                              }else{
+                                $('#displayMsg').html('');
                                 state_array[id] = true;
-                              }
+                                checkAllButtonStateChange();
                           } else {
                                 $('#displayMsg').html('');
                                 state_array[id] = false;
-                                count--;
                           }
 
                           $.each(chartData, function (index, value) {
@@ -721,4 +685,26 @@ function getDateTime(currentDay,fromDay){
     $('#date-range').data('daterangepicker').setStartDate(from);
     $('#date-range').data('daterangepicker').setEndDate(to);
     drawAPIUsage(from,to,apiFilter);
+}
+
+function checkAllButtonStateChange() {
+    var rowCount = $('#apiSelectTable tr').length - 1;
+    var pageNumber = document.getElementsByClassName("paginate_button active")[0].
+                                                children[0].getAttribute('data-dt-idx') - 1;
+    var n = pageNumber+"0";
+    rowCount = parseInt(n) + rowCount;
+    var checkCount = 0;
+    for (;n < rowCount;n++) {
+        var id = n;
+        if ($("#"+parseInt(id)).prop("checked")) {
+            checkCount++;
+        }
+    }
+    n = pageNumber+"0";
+    if (checkCount == rowCount - parseInt(n)) {
+        $("#mainCheckBox").prop("checked", true);
+    }
+    else {
+        $("#mainCheckBox").prop("checked", false);
+    }
 }
