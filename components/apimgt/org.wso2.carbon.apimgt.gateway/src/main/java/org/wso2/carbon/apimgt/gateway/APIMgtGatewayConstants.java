@@ -95,7 +95,7 @@ public class APIMgtGatewayConstants {
      * */
     public static final String WS_JWT_TOKEN_HEADER = "websocket.custom.header.X-JWT-Assertion";
     
-    public static final String GATEWAY_TYPE = "Synapse";
+    public static final String GATEWAY_TYPE = "SYNAPSE";
     public static final String SYNAPDE_GW_LABEL = "Synapse";
 }
 

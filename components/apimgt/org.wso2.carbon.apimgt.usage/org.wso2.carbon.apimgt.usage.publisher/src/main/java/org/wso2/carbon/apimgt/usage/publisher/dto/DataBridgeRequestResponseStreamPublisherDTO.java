@@ -20,36 +20,38 @@ package org.wso2.carbon.apimgt.usage.publisher.dto;
 
 public class DataBridgeRequestResponseStreamPublisherDTO extends RequestResponseStreamDTO {
 
-    public DataBridgeRequestResponseStreamPublisherDTO(RequestResponseStreamDTO requestStreamDTO) {
-        setApiContext(requestStreamDTO.getApiContext());
-        setApiHostname(requestStreamDTO.getApiHostname());
-        setApiMethod(requestStreamDTO.getApiMethod());
-        setApiName(requestStreamDTO.getApiName());
-        setApiProviderTenantDomain(requestStreamDTO.getApiProviderTenantDomain());
-        setApiPublisher(requestStreamDTO.getApiPublisher());
-        setApiResourcePath(requestStreamDTO.getApiResourcePath());
-        setApiResourceTemplate(requestStreamDTO.getApiResourceTemplate());
-        setApiTier(requestStreamDTO.getApiTier());
-        setApiVersion(requestStreamDTO.getApiVersion());
-        setApplicationConsumerKey(requestStreamDTO.getApplicationConsumerKey());
-        setApplicationId(requestStreamDTO.getApplicationId());
-        setApplicationName(requestStreamDTO.getApplicationName());
-        setApplicationOwner(requestStreamDTO.getApplicationOwner());
-        setBackendTime(requestStreamDTO.getBackendTime());
-        setDestination(requestStreamDTO.getDestination());
-        setExecutionTime(requestStreamDTO.getExecutionTime());
-        setMetaClientType(requestStreamDTO.getMetaClientType()); 
-        setProtocol(requestStreamDTO.getProtocol());
-        setRequestTimestamp(requestStreamDTO.getRequestTimestamp());
-        setResponseCacheHit(requestStreamDTO.isResponseCacheHit());
-        setResponseCode(requestStreamDTO.getResponseCode());
-        setResponseSize(requestStreamDTO.getResponseSize());
-        setServiceTime(requestStreamDTO.getServiceTime());
-        setThrottledOut(requestStreamDTO.isThrottledOut());
-        setUserAgent(requestStreamDTO.getUserAgent());
-        setUserIp(requestStreamDTO.getUserIp());
-        setUsername(requestStreamDTO.getUsername());
-        setUserTenantDomain(requestStreamDTO.getUserTenantDomain());
+    public DataBridgeRequestResponseStreamPublisherDTO(RequestResponseStreamDTO requestResponseStreamDTO) {
+        setApiContext(requestResponseStreamDTO.getApiContext());
+        setApiHostname(requestResponseStreamDTO.getApiHostname());
+        setApiMethod(requestResponseStreamDTO.getApiMethod());
+        setApiName(requestResponseStreamDTO.getApiName());
+        setApiProviderTenantDomain(requestResponseStreamDTO.getApiProviderTenantDomain());
+        setApiPublisher(requestResponseStreamDTO.getApiPublisher());
+        setApiResourcePath(requestResponseStreamDTO.getApiResourcePath());
+        setApiResourceTemplate(requestResponseStreamDTO.getApiResourceTemplate());
+        setApiTier(requestResponseStreamDTO.getApiTier());
+        setApiVersion(requestResponseStreamDTO.getApiVersion());
+        setApplicationConsumerKey(requestResponseStreamDTO.getApplicationConsumerKey());
+        setApplicationId(requestResponseStreamDTO.getApplicationId());
+        setApplicationName(requestResponseStreamDTO.getApplicationName());
+        setApplicationOwner(requestResponseStreamDTO.getApplicationOwner());
+        setBackendTime(requestResponseStreamDTO.getBackendTime());
+        setDestination(requestResponseStreamDTO.getDestination());
+        setExecutionTime(requestResponseStreamDTO.getExecutionTime());
+        setMetaClientType(requestResponseStreamDTO.getMetaClientType()); 
+        setProtocol(requestResponseStreamDTO.getProtocol());
+        setRequestTimestamp(requestResponseStreamDTO.getRequestTimestamp());
+        setResponseCacheHit(requestResponseStreamDTO.isResponseCacheHit());
+        setResponseCode(requestResponseStreamDTO.getResponseCode());
+        setResponseSize(requestResponseStreamDTO.getResponseSize());
+        setServiceTime(requestResponseStreamDTO.getServiceTime());
+        setThrottledOut(requestResponseStreamDTO.isThrottledOut());
+        setUserAgent(requestResponseStreamDTO.getUserAgent());
+        setUserIp(requestResponseStreamDTO.getUserIp());
+        setUsername(requestResponseStreamDTO.getUsername());
+        setUserTenantDomain(requestResponseStreamDTO.getUserTenantDomain());
+        setGatewayType(requestResponseStreamDTO.getGatewayType());
+        setLabel(requestResponseStreamDTO.getLabel());
     }
 
     public Object createPayload() {
@@ -62,8 +64,8 @@ public class DataBridgeRequestResponseStreamPublisherDTO extends RequestResponse
                 getResponseCode(), getDestination(), getExecutionTime().getSecurityLatency(),
                 getExecutionTime().getThrottlingLatency(), getExecutionTime().getRequestMediationLatency(),
                 getExecutionTime().getResponseMediationLatency(), getExecutionTime().getBackEndLatency(),
-                getExecutionTime().getOtherLatency() };
-        //TODO add gatewayType, label and id as new properties
+                getExecutionTime().getOtherLatency(), getGatewayType(), getLabel() };
+
     }
 
     public Object[] createMetaData() {
