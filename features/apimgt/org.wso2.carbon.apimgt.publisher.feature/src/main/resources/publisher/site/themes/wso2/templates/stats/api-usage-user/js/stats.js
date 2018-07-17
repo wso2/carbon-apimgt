@@ -485,6 +485,28 @@ var drawChart = function (from, to) {
                     //$('select').css('width','80px');
                     chart.data = dimple.filterData(data, "API", defaultFilterValues);
 
+                    $(document).on("click",".paginate_button", function () {
+                        var rowCount = $('#apiSelectTable tr').length - 1;
+                        var pageNumber = document.getElementsByClassName("paginate_button active")[0].
+                                                                    children[0].getAttribute('data-dt-idx') - 1;
+                        var n = pageNumber+"0";
+                        rowCount = parseInt(n) + rowCount;
+                        var checkCount = 0;
+                        for (;n < rowCount;n++) {
+                            var id = n;
+                            if ($("#"+parseInt(id)).prop("checked")) {
+                                checkCount++;
+                            }
+                        }
+                        n = pageNumber+"0";
+                        if (checkCount == rowCount - parseInt(n)) {
+                            $("#mainCheckBox").prop("checked", true);
+                        }
+                        else {
+                            $("#mainCheckBox").prop("checked", false);
+                        }
+                    });
+
                     //on main checkbox check and uncheck event
                     $('#apiSelectTable').on( 'change', 'input.mainCheckBox', function () {
                         var rowCount = $('#apiSelectTable tr').length - 1;
