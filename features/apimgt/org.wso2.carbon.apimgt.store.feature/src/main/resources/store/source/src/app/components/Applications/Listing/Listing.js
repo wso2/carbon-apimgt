@@ -81,11 +81,11 @@ class ApplicationTableHead extends Component {
 
     render() {
         const columnData = [
-            {id: 'name', numeric: false, disablePadding: true, label: 'Name'},
-            {id: 'throttlingTier', numeric: false, disablePadding: false, label: 'Tier'},
-            {id: 'lifeCycleStatus', numeric: false, disablePadding: false, label: 'Workflow Status'},
-            {id: 'subscriptions', numeric: false, disablePadding: false, label: 'Subscriptions'},
-            {id: 'actions', numeric: false, disablePadding: false, label: 'Actions'},
+            {id: 'name', numeric: false, disablePadding: true, label: 'Name', sorting:true},
+            {id: 'throttlingTier', numeric: false, disablePadding: false, label: 'Tier', sorting:true},
+            {id: 'lifeCycleStatus', numeric: false, disablePadding: false, label: 'Workflow Status', sorting:true},
+            {id: 'subscriptions', numeric: false, disablePadding: false, label: 'Subscriptions', sorting:true},
+            {id: 'actions', numeric: false, disablePadding: false, label: 'Actions', sorting:false},
         ];
         const {order, orderBy} = this.props;
         return (
@@ -98,13 +98,16 @@ class ApplicationTableHead extends Component {
                                 numeric={column.numeric}
                                 sortDirection={orderBy === column.id ? order : false}
                             >
+                                {column.sorting ?
                                 <TableSortLabel
                                     active={orderBy === column.id}
                                     direction={order}
                                     onClick={this.createSortHandler(column.id)}
                                 >
                                     {column.label}
-                                </TableSortLabel>
+                                </TableSortLabel> :
+                                    column.label
+                                }
                             </TableCell>
                         );
                     }, this)}

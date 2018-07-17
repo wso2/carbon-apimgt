@@ -27,6 +27,7 @@ import Tooltip from 'material-ui/Tooltip';
 import {CircularProgress} from 'material-ui/Progress';
 import Subscription from "../../../data/Subscription";
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
+import Loading from "../../Base/Loading/Loading";
 
 function getSorting(order, orderBy) {
     return order === 'desc'
@@ -34,106 +35,114 @@ function getSorting(order, orderBy) {
         : (a, b) => (a[orderBy] < b[orderBy] ? -1 : 1);
 }
 
-const AppsTableBody = (props) => {
-    const {apps, handleAppDelete, classes, page, rowsPerPage, order, orderBy} = props;
-    const emptyRowsPerPage = rowsPerPage - Math.min(rowsPerPage, apps.size - page*rowsPerPage);
-    let appsTableData = [];
-    apps.forEach(app => {
-        appsTableData.push(
-            {
-                name:app.name,
-                id:app.applicationId,
-                throttlingTier:app.throttlingTier,
-                lifeCycleStatus:app.lifeCycleStatus,
-                appDelete: app.deleting
-            }
-        );
-    });
-
-    return (
-        <TableBody>
-            {appsTableData
-                .sort(getSorting(order,orderBy))
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map(app => {
-                    return(
-                        <TableRow key={app.id}>
-                            <TableCell>
-                                <Link to={"/applications/" + app.id}>
-                                    {app.name}
-                                </Link>
-                            </TableCell>
-                            <TableCell>{app.throttlingTier}</TableCell>
-                            <TableCell>{app.lifeCycleStatus}</TableCell>
-                            <TableCell>
-                                <Subscribers applicationId={app.id}/>
-                            </TableCell>
-                            <TableCell>
-                                <Tooltip title="View">
-                                    <Link to={"/applications/" + app.id}>
-                                        <IconButton>
-                                            <ViewIcon aria-label="View"/>
-                                        </IconButton>
-                                    </Link>
-                                </Tooltip>
-                                <Tooltip title="Edit">
-                                    <Link to={"application/edit/" + app.id}>
-                                        <IconButton>
-                                            <EditIcon aria-label="Edit"/>
-                                        </IconButton>
-                                    </Link>
-                                </Tooltip>
-                                <Tooltip title="Delete">
-                                    <IconButton disabled={app.appDelete} data-appId={app.id}
-                                                onClick={handleAppDelete} color="default"
-                                                aria-label="Delete">
-                                        <DeleteIcon />
-                                    </IconButton>
-                                </Tooltip>
-                                { app.appDelete && <CircularProgress size={24}/>}
-                            </TableCell>
-                        </TableRow>
-                    );
-                })
-            }
-            {emptyRowsPerPage > 0 && (
-                <TableRow style={{ height: 49 * emptyRowsPerPage }}>
-                    <TableCell colSpan={6} />
-                </TableRow>
-            )}
-        </TableBody>
-    )
-};
-
-class Subscribers extends Component {
-    constructor(props) {
+class AppsTableBody extends Component {
+    constructor(props){
         super(props);
         this.state = {
-            subscriptions:0,
-            notFound: false
+            subscriptions: null,
+            notFound :  false
         }
     }
-    componentDidMount() {
+
+    componentDidMount(){
+        let promises = [];
+        let subscriptions = [];
         let client = new Subscription();
-        const {applicationId} = this.props;
-        let promised_subscriptions = client.getSubscriptions(null, applicationId);
-        promised_subscriptions.then ( (response) => {
-            this.setState({subscriptions:response.obj.count});
-        }).catch(
-            error => {
-                const { status } = error;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                }
+        let {apps} = this.props;
+        apps.forEach(app => {
+            promises.push(client.getSubscriptions(null,app.applicationId))
+        });
+
+        Promise.all(promises).then(response => {
+            response.forEach(appData => {
+                subscriptions.push(appData.obj.count);
             });
+            this.setState({subscriptions:subscriptions})
+        }).catch(error => {
+            this.setState({notFound : true});
+            console.error(error);
+        });
     }
-    render(){
+
+    render() {
+        const {apps, handleAppDelete, classes, page, rowsPerPage, order, orderBy} = this.props;
         const {subscriptions, notFound} = this.state;
+        const emptyRowsPerPage = rowsPerPage - Math.min(rowsPerPage, apps.size - page * rowsPerPage);
+        let appsTableData = [];
+        let index = 0;
+
+        if(subscriptions) {
+            apps.forEach((app) => {
+                appsTableData.push(
+                    {
+                        name: app.name,
+                        id: app.applicationId,
+                        throttlingTier: app.throttlingTier,
+                        lifeCycleStatus: app.lifeCycleStatus,
+                        appDelete: app.deleting,
+                        subscriptions: subscriptions[index]
+                    }
+                );
+                index = index + 1;
+            });
+        }
+
         if (notFound) {
             return <ResourceNotFound/>
         }
-        return subscriptions;
-    }
+
+        return (
+            <TableBody>
+                {appsTableData
+                    .sort(getSorting(order, orderBy))
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map(app => {
+                        return (
+                            <TableRow key={app.id}>
+                                <TableCell>
+                                    <Link to={"/applications/" + app.id}>
+                                        {app.name}
+                                    </Link>
+                                </TableCell>
+                                <TableCell>{app.throttlingTier}</TableCell>
+                                <TableCell>{app.lifeCycleStatus}</TableCell>
+                                <TableCell>{app.subscriptions}</TableCell>
+                                <TableCell>
+                                    <Tooltip title="View">
+                                        <Link to={"/applications/" + app.id}>
+                                            <IconButton>
+                                                <ViewIcon aria-label="View"/>
+                                            </IconButton>
+                                        </Link>
+                                    </Tooltip>
+                                    <Tooltip title="Edit">
+                                        <Link to={"application/edit/" + app.id}>
+                                            <IconButton>
+                                                <EditIcon aria-label="Edit"/>
+                                            </IconButton>
+                                        </Link>
+                                    </Tooltip>
+                                    <Tooltip title="Delete">
+                                        <IconButton disabled={app.appDelete} data-appId={app.id}
+                                                    onClick={handleAppDelete} color="default"
+                                                    aria-label="Delete">
+                                            <DeleteIcon/>
+                                        </IconButton>
+                                    </Tooltip>
+                                    {app.appDelete && <CircularProgress size={24}/>}
+                                </TableCell>
+                            </TableRow>
+                        );
+                    })
+                }
+                {emptyRowsPerPage > 0 && (
+                    <TableRow style={{height: 49 * emptyRowsPerPage}}>
+                        <TableCell colSpan={6}/>
+                    </TableRow>
+                )}
+            </TableBody>
+        )
+    };
 }
 
 export default AppsTableBody;
