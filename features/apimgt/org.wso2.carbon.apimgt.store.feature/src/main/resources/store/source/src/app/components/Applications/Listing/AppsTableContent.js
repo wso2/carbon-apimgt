@@ -27,7 +27,6 @@ import Tooltip from 'material-ui/Tooltip';
 import {CircularProgress} from 'material-ui/Progress';
 import Subscription from "../../../data/Subscription";
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
-import Loading from "../../Base/Loading/Loading";
 
 function getSorting(order, orderBy) {
     return order === 'desc'
@@ -43,7 +42,6 @@ class AppsTableBody extends Component {
             notFound :  false
         }
     }
-
     componentDidMount(){
         let promises = [];
         let subscriptions = [];
@@ -63,7 +61,6 @@ class AppsTableBody extends Component {
             console.error(error);
         });
     }
-
     render() {
         const {apps, handleAppDelete, classes, page, rowsPerPage, order, orderBy} = this.props;
         const {subscriptions, notFound} = this.state;
@@ -71,7 +68,7 @@ class AppsTableBody extends Component {
         let appsTableData = [];
         let index = 0;
 
-        if(subscriptions) {
+        if (subscriptions) {
             apps.forEach((app) => {
                 appsTableData.push(
                     {
@@ -86,11 +83,9 @@ class AppsTableBody extends Component {
                 index = index + 1;
             });
         }
-
         if (notFound) {
             return <ResourceNotFound/>
         }
-
         return (
             <TableBody>
                 {appsTableData
@@ -144,5 +139,4 @@ class AppsTableBody extends Component {
         )
     };
 }
-
 export default AppsTableBody;
