@@ -18,9 +18,6 @@
 
 package org.wso2.carbon.apimgt.usage.publisher.dto;
 
-import org.apache.commons.lang.StringEscapeUtils;
-import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
-
 public class DataBridgeThrottlePublisherDTO extends ThrottlePublisherDTO {
 
     public DataBridgeThrottlePublisherDTO(ThrottlePublisherDTO throttlePublisherDTO) {
@@ -32,55 +29,23 @@ public class DataBridgeThrottlePublisherDTO extends ThrottlePublisherDTO {
         setVersion(throttlePublisherDTO.getVersion());
         setContext(throttlePublisherDTO.getContext());
         setProvider(throttlePublisherDTO.getProvider());
+        setProviderTenantDomain(throttlePublisherDTO.getProviderTenantDomain());
         setThrottledTime(throttlePublisherDTO.getThrottledTime());
         setApplicationName(throttlePublisherDTO.getApplicationName());
         setApplicationId(throttlePublisherDTO.getApplicationId());
-        setSubscriber(throttlePublisherDTO.getSubscriber());
         setThrottledOutReason(throttlePublisherDTO.getThrottledOutReason());
         setKeyType(throttlePublisherDTO.getKeyType());
         setCorrelationID(throttlePublisherDTO.getCorrelationID());
-    }
-
-    public static String getStreamDefinition() {
-
-        return "{" +
-               "  'name':'" +
-                DataPublisherUtil.getApiManagerAnalyticsConfiguration().getThrottleStreamName() +
-               "'," +
-               "  'version':'" +
-                DataPublisherUtil.getApiManagerAnalyticsConfiguration().getThrottleStreamVersion() +
-               "'," +
-               "  'nickName': 'API Manager Throttle Data'," +
-               "  'description': 'Throttle Data'," +
-               "  'metaData':[" +
-               "          {'name':'clientType','type':'STRING'}" +
-               "  ]," +
-               "  'payloadData':[" +
-               "          {'name':'accessToken','type':'STRING'}," +
-               "          {'name':'userId','type':'STRING'}," +
-               "          {'name':'tenantDomain','type':'STRING'}," +
-               "          {'name':'api','type':'STRING'}," +
-               "          {'name':'api_version','type':'STRING'}," +
-               "          {'name':'context','type':'STRING'}," +
-               "          {'name':'apiPublisher','type':'STRING'}," +
-               "          {'name':'throttledTime','type':'LONG'}," +
-               "          {'name':'applicationName','type':'STRING'}," +
-               "          {'name':'applicationId','type':'STRING'}," +
-               "          {'name':'subscriber','type':'STRING'}," +
-               "          {'name':'throttledOutReason','type':'STRING'}" +
-               "  ]" +
-
-               "}";
+        setGatewayType(throttlePublisherDTO.getGatewayType());
     }
 
     public Object createPayload() {
-        return new Object[]{getAccessToken(), getUsername(), getTenantDomain(), getApiname(),
-                            getVersion(), getContext(), getProvider(), getThrottledTime(),
-                            getApplicationName(), getApplicationId(), getSubscriber(), getThrottledOutReason()};
+        return new Object[] { getKeyType(), getAccessToken(), getUsername(), getTenantDomain(),
+                getProviderTenantDomain(), getApiname(), getVersion(), getProvider(), getContext(), getApplicationId(),
+                getApplicationName(), getSubscriber(), getThrottledTime(), getThrottledOutReason(), getGatewayType() };
     }
 
     public Object createMetaData() {
-        String jsonString = "{\"keyType\":\"" + getKeyType() + "\",\"correlationID\": \"" + getCorrelationID() + "\"}";
-        return new Object[] { StringEscapeUtils.escapeJava(jsonString) };
+        return null;
     }
 }

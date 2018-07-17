@@ -39,7 +39,7 @@ public class APIMgtThrottleUsageHandler extends APIMgtCommonExecutionPublisher {
     }
 
     public boolean mediate(MessageContext messageContext) {
-        super.mediate(messageContext);
+        
         if (publisher == null) {
             this.initializeDataPublisher();
         }
@@ -71,7 +71,8 @@ public class APIMgtThrottleUsageHandler extends APIMgtCommonExecutionPublisher {
                 throttlePublisherDTO.setAccessToken(String.valueOf(hashCode));
                 String username = authContext.getUsername();
                 throttlePublisherDTO.setUsername(username);
-                throttlePublisherDTO.setTenantDomain(MultitenantUtils.getTenantDomain(
+                throttlePublisherDTO.setTenantDomain(MultitenantUtils.getTenantDomain(username));
+                throttlePublisherDTO.setProviderTenantDomain(MultitenantUtils.getTenantDomain(
                         (String) messageContext.getProperty(APIMgtGatewayConstants.API_PUBLISHER)));
                 throttlePublisherDTO.setApiname((String) messageContext.getProperty(
                         APIMgtGatewayConstants.API));
@@ -89,6 +90,7 @@ public class APIMgtThrottleUsageHandler extends APIMgtCommonExecutionPublisher {
                 throttlePublisherDTO.setSubscriber(authContext.getSubscriber());
                 throttlePublisherDTO.setKeyType(keyType);
                 throttlePublisherDTO.setCorrelationID(correlationID);
+                throttlePublisherDTO.setGatewayType(APIMgtGatewayConstants.GATEWAY_TYPE);
                 if (log.isDebugEnabled()) {
                     log.debug("Publishing throttling event from gateway to analytics for: "
                             + messageContext.getProperty(APIMgtGatewayConstants.CONTEXT) + " with ID: "
