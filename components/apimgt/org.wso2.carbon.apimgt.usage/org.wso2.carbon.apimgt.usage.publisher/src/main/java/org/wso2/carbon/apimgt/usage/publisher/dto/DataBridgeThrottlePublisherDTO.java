@@ -37,6 +37,7 @@ public class DataBridgeThrottlePublisherDTO extends ThrottlePublisherDTO {
         setKeyType(throttlePublisherDTO.getKeyType());
         setCorrelationID(throttlePublisherDTO.getCorrelationID());
         setGatewayType(throttlePublisherDTO.getGatewayType());
+        setSubscriber(throttlePublisherDTO.getSubscriber());
     }
 
     public Object createPayload() {

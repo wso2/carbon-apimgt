@@ -52,6 +52,7 @@ public class DataBridgeRequestResponseStreamPublisherDTO extends RequestResponse
         setUserTenantDomain(requestResponseStreamDTO.getUserTenantDomain());
         setGatewayType(requestResponseStreamDTO.getGatewayType());
         setLabel(requestResponseStreamDTO.getLabel());
+        setResponseTime(requestResponseStreamDTO.getResponseTime());
     }
 
     public Object createPayload() {
