@@ -23,17 +23,13 @@ import org.wso2.carbon.apimgt.usage.publisher.dto.*;
 public interface APIMgtUsageDataPublisher {
 
     public void init();
-
-    public void publishEvent(RequestPublisherDTO requestPublisherDTO);
-
-    public void publishEvent(ResponsePublisherDTO responsePublisherDTO);
-
+    
     public void publishEvent(FaultPublisherDTO faultPublisherDTO);
 
     public void publishEvent(ThrottlePublisherDTO throttlePublisherDTO);
 
-    public void publishEvent(ExecutionTimePublisherDTO executionTimePublisherDTO);
-
     public void publishEvent(AlertTypeDTO alertTypeDTO) throws APIManagementException;
+    
+    public void publishEvent(RequestResponseStreamDTO requestStream);
 
 }

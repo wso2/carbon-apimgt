@@ -18,77 +18,41 @@
 
 package org.wso2.carbon.apimgt.usage.publisher.dto;
 
-import org.apache.commons.lang.StringEscapeUtils;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 
 public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
 
     public DataBridgeFaultPublisherDTO(FaultPublisherDTO faultPublisherDTO){
-        setConsumerKey(faultPublisherDTO.getConsumerKey());
-        setContext(faultPublisherDTO.getContext());
+        setApplicationConsumerKey(faultPublisherDTO.getApplicationConsumerKey());
+        setApiContext(faultPublisherDTO.getApiContext());
         setApiVersion(faultPublisherDTO.getApiVersion());
-        setApi(faultPublisherDTO.getApi());
-        setResourcePath(faultPublisherDTO.getResourcePath());
-        setMethod(faultPublisherDTO.getMethod());
-        setVersion(faultPublisherDTO.getVersion());
+        setApiName(faultPublisherDTO.getApiName());
+        setApiResourcePath(faultPublisherDTO.getApiResourcePath());
+        setApiMethod(faultPublisherDTO.getApiMethod());
+        setApiVersion(faultPublisherDTO.getApiVersion());
         setErrorCode(faultPublisherDTO.getErrorCode());
         setErrorMessage(faultPublisherDTO.getErrorMessage());
-        setRequestTime((faultPublisherDTO.getRequestTime()));
+        setRequestTimestamp((faultPublisherDTO.getRequestTimestamp()));
         setUsername(faultPublisherDTO.getUsername());
-        setTenantDomain(faultPublisherDTO.getTenantDomain());
-        setHostName(DataPublisherUtil.getHostAddress());
-        setApiPublisher(faultPublisherDTO.getApiPublisher());
+        setApiCreatorTenantDomain(faultPublisherDTO.getApiCreatorTenantDomain());
+        setHostname(DataPublisherUtil.getHostAddress());
+        setApiCreator(faultPublisherDTO.getApiCreator());
         setApplicationName(faultPublisherDTO.getApplicationName());
         setApplicationId(faultPublisherDTO.getApplicationId());
         setProtocol(faultPublisherDTO.getProtocol());
-        setKeyType(faultPublisherDTO.getKeyType());
-        setCorrelationID(faultPublisherDTO.getCorrelationID());
+        setMetaClientType(faultPublisherDTO.getMetaClientType());
+        setGatewaType(faultPublisherDTO.getGatewaType());
+        setUserTenantDomain(faultPublisherDTO.getUserTenantDomain());
     }
 
-    public static String getStreamDefinition() {
-
-        return  "{" +
-                "  'name':'" +
-                DataPublisherUtil.getApiManagerAnalyticsConfiguration().getFaultStreamName() + "'," +
-                "  'version':'" +
-                DataPublisherUtil.getApiManagerAnalyticsConfiguration().getFaultStreamVersion() + "'," +
-                "  'nickName': 'API Manager Fault Data'," +
-                "  'description': 'Fault Data'," +
-                "  'metaData':[" +
-                "          {'name':'clientType','type':'STRING'}" +
-                "  ]," +
-                "  'payloadData':[" +
-                "          {'name':'consumerKey','type':'STRING'}," +
-                "          {'name':'context','type':'STRING'}," +
-                "          {'name':'api_version','type':'STRING'}," +
-                "          {'name':'api','type':'STRING'}," +
-                "          {'name':'resourcePath','type':'STRING'}," +
-                "          {'name':'method','type':'STRING'}," +
-                "          {'name':'version','type':'STRING'}," +
-                "          {'name':'errorCode','type':'STRING'}," +
-                "          {'name':'errorMessage','type':'STRING'}," +
-                "          {'name':'requestTime','type':'LONG'}," +
-                "          {'name':'userId','type':'STRING'}," +
-                "          {'name':'tenantDomain','type':'STRING'}," +
-                "          {'name':'hostName','type':'STRING'}," +
-                "          {'name':'apiPublisher','type':'STRING'}," +
-                "          {'name':'applicationName','type':'STRING'}," +
-                "          {'name':'applicationId','type':'STRING'}," +
-                "          {'name':'protocol','type':'STRING'}" +
-                "  ]" +
-
-                "}";
-
-    }
-
-    public Object createPayload(){
-        return new Object[]{getConsumerKey(), getContext(), getApiVersion(), getApi(), getResourcePath(), getMethod(),
-                            getVersion(), getErrorCode(), getErrorMessage(), getRequestTime(), getUsername(),
-                            getTenantDomain(), getHostName(), getApiPublisher(), getApplicationName(), getApplicationId(), getProtocol()};
+    public Object createPayload() {
+        return new Object[] { getMetaClientType(), getApplicationConsumerKey(), getApiName(), getApiVersion(),
+                getApiContext(), getApiResourcePath(), getApiMethod(), getApiCreator(), getUsername(), getUserTenantDomain(),
+                getApiCreatorTenantDomain(), getHostname(), getApplicationId(), getApplicationName(), getProtocol(),
+                getErrorCode(), getErrorMessage(), getRequestTimestamp(), getGatewaType() };
     }
 
     public Object createMetaData() {
-        String jsonString = "{\"keyType\":\"" + getKeyType() + "\",\"correlationID\": \"" + getCorrelationID() + "\"}";
-        return new Object[] { StringEscapeUtils.escapeJava(jsonString) };
+        return null;
     }
 }
