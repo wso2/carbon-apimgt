@@ -21,7 +21,6 @@ import {Link} from 'react-router-dom';
 import {TableBody, TableCell, TableRow} from 'material-ui/Table';
 import DeleteIcon from 'material-ui-icons/Delete';
 import EditIcon from 'material-ui-icons/Edit';
-import ViewIcon from 'material-ui-icons/RemoveRedEye';
 import IconButton from 'material-ui/IconButton';
 import Tooltip from 'material-ui/Tooltip';
 import {CircularProgress} from 'material-ui/Progress';
@@ -103,13 +102,6 @@ class AppsTableBody extends Component {
                                 <TableCell>{app.lifeCycleStatus}</TableCell>
                                 <TableCell>{app.subscriptions}</TableCell>
                                 <TableCell>
-                                    <Tooltip title="View">
-                                        <Link to={"/applications/" + app.id}>
-                                            <IconButton>
-                                                <ViewIcon aria-label="View"/>
-                                            </IconButton>
-                                        </Link>
-                                    </Tooltip>
                                     <Tooltip title="Edit">
                                         <Link to={"application/edit/" + app.id}>
                                             <IconButton>
