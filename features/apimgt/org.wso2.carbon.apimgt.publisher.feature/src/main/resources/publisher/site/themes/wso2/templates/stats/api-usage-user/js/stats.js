@@ -405,12 +405,12 @@ var drawChart = function (from, to) {
                     var $dataTable =$('<table class="display table table-striped table-bordered" width="100%" cellspacing="0" id="apiSelectTable"></table>');
 
                     $dataTable.append($('<thead class="tableHead"><tr>'+
-                                            '<th>'+
+                                            '<th width="2%">'+
                                             '<input name="mainCheckBox" id="mainCheckBox" type=checkbox checked class="mainCheckBox"/>'+
                                             '</th>'+
-                                            '<th>API</th>'+
+                                            '<th width="38%">API</th>'+
                                             '<th style="text-align:right" width="20%" >'+ i18n.t('Subscriber Count') + '</th>'+
-                                            '<th class="details-control sorting_disabled"></th>'+
+                                            '<th class="details-control sorting_disabled" width="40%"></th>'+
                                         '</tr></thead>'));
 
                     sortData = dimple.filterData(data, "API", filterValues);
