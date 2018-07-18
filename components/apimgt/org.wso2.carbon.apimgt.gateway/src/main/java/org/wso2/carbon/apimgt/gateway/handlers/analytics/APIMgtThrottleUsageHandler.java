@@ -72,14 +72,14 @@ public class APIMgtThrottleUsageHandler extends APIMgtCommonExecutionPublisher {
                 String username = authContext.getUsername();
                 throttlePublisherDTO.setUsername(username);
                 throttlePublisherDTO.setTenantDomain(MultitenantUtils.getTenantDomain(username));
-                throttlePublisherDTO.setProviderTenantDomain(MultitenantUtils.getTenantDomain(
+                throttlePublisherDTO.setApiCreatorTenantDomain(MultitenantUtils.getTenantDomain(
                         (String) messageContext.getProperty(APIMgtGatewayConstants.API_PUBLISHER)));
                 throttlePublisherDTO.setApiname((String) messageContext.getProperty(
                         APIMgtGatewayConstants.API));
                 throttlePublisherDTO.setVersion((String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API));
                 throttlePublisherDTO.setContext((String) messageContext.getProperty(
                         APIMgtGatewayConstants.CONTEXT));
-                throttlePublisherDTO.setProvider((String) messageContext.getProperty(
+                throttlePublisherDTO.setApiCreator((String) messageContext.getProperty(
                         APIMgtGatewayConstants.API_PUBLISHER));
                 throttlePublisherDTO.setApplicationName((String) messageContext.getProperty(
                         APIMgtGatewayConstants.APPLICATION_NAME));

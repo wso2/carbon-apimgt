@@ -28,8 +28,8 @@ public class DataBridgeThrottlePublisherDTO extends ThrottlePublisherDTO {
         setApiname(throttlePublisherDTO.getApiname());
         setVersion(throttlePublisherDTO.getVersion());
         setContext(throttlePublisherDTO.getContext());
-        setProvider(throttlePublisherDTO.getProvider());
-        setProviderTenantDomain(throttlePublisherDTO.getProviderTenantDomain());
+        setApiCreator(throttlePublisherDTO.getApiCreator());
+        setApiCreatorTenantDomain(throttlePublisherDTO.getApiCreatorTenantDomain());
         setThrottledTime(throttlePublisherDTO.getThrottledTime());
         setApplicationName(throttlePublisherDTO.getApplicationName());
         setApplicationId(throttlePublisherDTO.getApplicationId());
@@ -41,7 +41,7 @@ public class DataBridgeThrottlePublisherDTO extends ThrottlePublisherDTO {
 
     public Object createPayload() {
         return new Object[] { getKeyType(), getAccessToken(), getUsername(), getTenantDomain(),
-                getProviderTenantDomain(), getApiname(), getVersion(), getProvider(), getContext(), getApplicationId(),
+                getApiCreatorTenantDomain(), getApiname(), getVersion(), getApiCreator(), getContext(), getApplicationId(),
                 getApplicationName(), getSubscriber(), getThrottledTime(), getThrottledOutReason(), getGatewayType() };
     }
 

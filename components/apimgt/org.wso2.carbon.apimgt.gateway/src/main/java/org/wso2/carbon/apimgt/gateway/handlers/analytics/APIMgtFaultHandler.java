@@ -83,8 +83,8 @@ public class APIMgtFaultHandler extends APIMgtCommonExecutionPublisher {
                 String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
                 apiPublisher = APIUtil.getAPIProviderFromRESTAPI(apiVersion, tenantDomain);
             }
-            faultPublisherDTO.setApiProvider(apiPublisher);
-            faultPublisherDTO.setApiProviderTenantDomain(MultitenantUtils.getTenantDomain(apiPublisher));
+            faultPublisherDTO.setApiCreator(apiPublisher);
+            faultPublisherDTO.setApiCreatorTenantDomain(MultitenantUtils.getTenantDomain(apiPublisher));
             faultPublisherDTO.setApplicationName((String) messageContext.getProperty(
                     APIMgtGatewayConstants.APPLICATION_NAME));
             faultPublisherDTO.setApplicationId((String) messageContext.getProperty(

@@ -23,8 +23,8 @@ public class ThrottlePublisherDTO {
     private String apiname;
     private String context;
     private String version;
-    private String provider;
-    private String providerTenantDomain;
+    private String apiCreator;
+    private String apiCreatorTenantDomain;
     private String applicationName;
     private String applicationId;
     private String subscriber;
@@ -84,12 +84,12 @@ public class ThrottlePublisherDTO {
         this.context = context;
     }
 
-    public String getProvider() {
-        return provider;
+    public String getApiCreator() {
+        return apiCreator;
     }
 
-    public void setProvider(String provider) {
-        this.provider = provider;
+    public void setApiCreator(String creator) {
+        this.apiCreator = creator;
     }
 
     public String getTenantDomain() {
@@ -156,12 +156,12 @@ public class ThrottlePublisherDTO {
         this.gatewayType = gatewayType;
     }
 
-    public String getProviderTenantDomain() {
-        return providerTenantDomain;
+    public String getApiCreatorTenantDomain() {
+        return apiCreatorTenantDomain;
     }
 
-    public void setProviderTenantDomain(String providerTenantDomain) {
-        this.providerTenantDomain = providerTenantDomain;
+    public void setApiCreatorTenantDomain(String apiProviderTenantDomain) {
+        this.apiCreatorTenantDomain = apiProviderTenantDomain;
     }
     
 }

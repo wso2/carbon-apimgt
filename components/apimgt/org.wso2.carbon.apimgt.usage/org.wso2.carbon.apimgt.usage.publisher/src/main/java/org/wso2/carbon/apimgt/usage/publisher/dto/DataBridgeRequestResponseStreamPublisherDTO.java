@@ -25,8 +25,8 @@ public class DataBridgeRequestResponseStreamPublisherDTO extends RequestResponse
         setApiHostname(requestResponseStreamDTO.getApiHostname());
         setApiMethod(requestResponseStreamDTO.getApiMethod());
         setApiName(requestResponseStreamDTO.getApiName());
-        setApiProviderTenantDomain(requestResponseStreamDTO.getApiProviderTenantDomain());
-        setApiPublisher(requestResponseStreamDTO.getApiPublisher());
+        setApiCreatorTenantDomain(requestResponseStreamDTO.getApiCreatorTenantDomain());
+        setApiCreator(requestResponseStreamDTO.getApiCreator());
         setApiResourcePath(requestResponseStreamDTO.getApiResourcePath());
         setApiResourceTemplate(requestResponseStreamDTO.getApiResourceTemplate());
         setApiTier(requestResponseStreamDTO.getApiTier());
@@ -57,8 +57,8 @@ public class DataBridgeRequestResponseStreamPublisherDTO extends RequestResponse
     public Object createPayload() {
         return new Object[] { getMetaClientType(), getApplicationConsumerKey(), getApplicationName(),
                 getApplicationId(), getApplicationOwner(), getApiContext(), getApiName(), getApiVersion(),
-                getApiResourcePath(), getApiResourceTemplate(), getApiMethod(), getApiPublisher(),
-                getApiProviderTenantDomain(), getApiTier(), getApiHostname(), getUsername(), getUserTenantDomain(),
+                getApiResourcePath(), getApiResourceTemplate(), getApiMethod(), getApiCreator(),
+                getApiCreatorTenantDomain(), getApiTier(), getApiHostname(), getUsername(), getUserTenantDomain(),
                 getUserIp(), getUserAgent(), getRequestTimestamp(), isThrottledOut(), getResponseTime(),
                 getServiceTime(), getBackendTime(), isResponseCacheHit(), getResponseSize(), getProtocol(),
                 getResponseCode(), getDestination(), getExecutionTime().getSecurityLatency(),

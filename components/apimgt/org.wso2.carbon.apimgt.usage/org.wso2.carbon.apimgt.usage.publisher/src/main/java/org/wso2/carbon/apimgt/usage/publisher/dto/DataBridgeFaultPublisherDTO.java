@@ -34,9 +34,9 @@ public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
         setErrorMessage(faultPublisherDTO.getErrorMessage());
         setRequestTimestamp((faultPublisherDTO.getRequestTimestamp()));
         setUsername(faultPublisherDTO.getUsername());
-        setApiProviderTenantDomain(faultPublisherDTO.getApiProviderTenantDomain());
+        setApiCreatorTenantDomain(faultPublisherDTO.getApiCreatorTenantDomain());
         setHostname(DataPublisherUtil.getHostAddress());
-        setApiProvider(faultPublisherDTO.getApiProvider());
+        setApiCreator(faultPublisherDTO.getApiCreator());
         setApplicationName(faultPublisherDTO.getApplicationName());
         setApplicationId(faultPublisherDTO.getApplicationId());
         setProtocol(faultPublisherDTO.getProtocol());
@@ -47,8 +47,8 @@ public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
 
     public Object createPayload() {
         return new Object[] { getMetaClientType(), getApplicationConsumerKey(), getApiName(), getApiVersion(),
-                getApiContext(), getApiResourcePath(), getApiMethod(), getApiProvider(), getUsername(), getUserTenantDomain(),
-                getApiProviderTenantDomain(), getHostname(), getApplicationId(), getApplicationName(), getProtocol(),
+                getApiContext(), getApiResourcePath(), getApiMethod(), getApiCreator(), getUsername(), getUserTenantDomain(),
+                getApiCreatorTenantDomain(), getHostname(), getApplicationId(), getApplicationName(), getProtocol(),
                 getErrorCode(), getErrorMessage(), getRequestTimestamp(), getGatewaType() };
     }
 

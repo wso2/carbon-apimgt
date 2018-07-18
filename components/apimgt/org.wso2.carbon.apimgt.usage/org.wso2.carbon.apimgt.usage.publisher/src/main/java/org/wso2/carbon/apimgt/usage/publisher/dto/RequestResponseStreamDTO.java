@@ -30,8 +30,8 @@ public class RequestResponseStreamDTO {
         private String apiResourcePath;
         private String apiResourceTemplate;
         private String apiMethod;
-        private String apiPublisher;
-        private String apiProviderTenantDomain;
+        private String apiCreator;
+        private String apiCreatorTenantDomain;
         private String apiTier;
         private String apiHostname;
         private String username;
@@ -139,17 +139,17 @@ public class RequestResponseStreamDTO {
         public void setApiMethod(String apiMethod) {
             this.apiMethod = apiMethod;
         }
-        public String getApiPublisher() {
-            return apiPublisher;
+        public String getApiCreator() {
+            return apiCreator;
         }
-        public void setApiPublisher(String apiPublisher) {
-            this.apiPublisher = apiPublisher;
+        public void setApiCreator(String apiCreator) {
+            this.apiCreator = apiCreator;
         }
-        public String getApiProviderTenantDomain() {
-            return apiProviderTenantDomain;
+        public String getApiCreatorTenantDomain() {
+            return apiCreatorTenantDomain;
         }
-        public void setApiProviderTenantDomain(String apiProviderTenantDomain) {
-            this.apiProviderTenantDomain = apiProviderTenantDomain;
+        public void setApiCreatorTenantDomain(String apiCreatorTenantDomain) {
+            this.apiCreatorTenantDomain = apiCreatorTenantDomain;
         }
         public String getApiTier() {
             return apiTier;

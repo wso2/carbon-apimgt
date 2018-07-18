@@ -376,8 +376,8 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 
             RequestResponseStreamDTO requestPublisherDTO = new RequestResponseStreamDTO();
             requestPublisherDTO.setApiName(infoDTO.getApiName());
-            requestPublisherDTO.setApiPublisher(infoDTO.getApiPublisher());
-            requestPublisherDTO.setApiProviderTenantDomain(MultitenantUtils.getTenantDomain(infoDTO.getApiPublisher()));
+            requestPublisherDTO.setApiCreator(infoDTO.getApiPublisher());
+            requestPublisherDTO.setApiCreatorTenantDomain(MultitenantUtils.getTenantDomain(infoDTO.getApiPublisher()));
             requestPublisherDTO.setApiVersion(infoDTO.getApiName() + ':' + version);
             requestPublisherDTO.setApplicationId(infoDTO.getApplicationId());
             requestPublisherDTO.setApplicationName(infoDTO.getApplicationName());

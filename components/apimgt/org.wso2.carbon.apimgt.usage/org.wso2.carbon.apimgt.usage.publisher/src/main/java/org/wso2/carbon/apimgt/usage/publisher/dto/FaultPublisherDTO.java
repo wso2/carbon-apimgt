@@ -26,8 +26,8 @@ public class FaultPublisherDTO {
     private String apiContext;
     private String apiResourcePath;
     private String apiMethod;
-    private String apiProvider;
-    private String apiProviderTenantDomain;
+    private String apiCreator;
+    private String apiCreatorTenantDomain;
     private String username;
     private String userTenantDomain;
     private String protocol;
@@ -88,17 +88,17 @@ public class FaultPublisherDTO {
     public void setApiMethod(String apiMethod) {
         this.apiMethod = apiMethod;
     }
-    public String getApiProvider() {
-        return apiProvider;
+    public String getApiCreator() {
+        return apiCreator;
     }
-    public void setApiProvider(String apiProvider) {
-        this.apiProvider = apiProvider;
+    public void setApiCreator(String apiProvider) {
+        this.apiCreator = apiProvider;
     }
-    public String getApiProviderTenantDomain() {
-        return apiProviderTenantDomain;
+    public String getApiCreatorTenantDomain() {
+        return apiCreatorTenantDomain;
     }
-    public void setApiProviderTenantDomain(String apiProviderTenantDomain) {
-        this.apiProviderTenantDomain = apiProviderTenantDomain;
+    public void setApiCreatorTenantDomain(String apiCreatorTenantDomain) {
+        this.apiCreatorTenantDomain = apiCreatorTenantDomain;
     }
     public String getUsername() {
         return username;
