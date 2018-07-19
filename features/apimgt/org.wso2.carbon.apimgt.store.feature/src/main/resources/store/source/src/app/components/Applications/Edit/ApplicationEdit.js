@@ -76,7 +76,8 @@ class ApplicationEdit extends Component {
             description: null,
             id: null,
             tiers: [],
-            notFound: false
+            notFound: false,
+            lifeCycleStatus: null
         };
     }
     componentDidMount(){
@@ -89,7 +90,8 @@ class ApplicationEdit extends Component {
                 quota:application.throttlingTier,
                 name:application.name,
                 description:application.description,
-                id:application.id
+                id:application.id,
+                lifeCycleStatus:application.lifeCycleStatus
             });
             let tiers = [];
             tierResponse.body.list.map(item => tiers.push(item.name));
@@ -114,7 +116,7 @@ class ApplicationEdit extends Component {
             name: this.state.name,
             throttlingTier: this.state.quota,
             description: this.state.description,
-            lifeCycleStatus:this.state.application.lifeCycleStatus
+            lifeCycleStatus:this.state.lifeCycleStatus
         };
         let api = new API();
         let promised_update = api.updateApplication(updated_application,null);

@@ -128,7 +128,7 @@ class Listing extends Component {
             data: null,
             alertMessage: null,
             page: 0,
-            rowsPerPage : 5
+            rowsPerPage : 10
         };
         this.handleAppDelete = this.handleAppDelete.bind(this);
     }
