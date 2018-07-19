@@ -71,7 +71,6 @@ class ApplicationEdit extends Component {
     constructor(props){
         super(props);
         this.state = {
-            application: null,
             name: null,
             quota: "Unlimited",
             description: null,
@@ -87,7 +86,6 @@ class ApplicationEdit extends Component {
         Promise.all([promised_application, promised_tiers]).then( response => {
             let [ application, tierResponse] = response;
             this.setState({
-                application:application,
                 quota:application.throttlingTier,
                 name:application.name,
                 description:application.description,
@@ -133,18 +131,18 @@ class ApplicationEdit extends Component {
     };
     render() {
         const { classes } = this.props;
-        const {application, tiers, notFound } = this.state;
+        const {name, tiers, notFound, id, quota, description } = this.state;
         if (notFound) {
             return <ResourceNotFound/>
         }
-        if (!application){
+        if (!name){
             return <Loading/>
         }
         return (
             <Grid container spacing={0} justify="flex-start">
                 <Grid item xs={12} sm={12} md={12} lg={11} xl={10} className={classes.titleBar}>
                     <div className={classes.buttonLeft}>
-                        <Link to={"/applications/" + application.id}>
+                        <Link to={"/applications/" + id}>
                             <Button  variant="raised" size="small" className={classes.buttonBack}
                                      color="default">
                                 <ArrowBack />
@@ -161,7 +159,7 @@ class ApplicationEdit extends Component {
                     <form className={classes.container} noValidate autoComplete="off">
                         <TextField
                             label="Application Name"
-                            value={this.state.name}
+                            value={name}
                             InputLabelProps={{
                                 shrink: true,
                             }}
@@ -177,11 +175,11 @@ class ApplicationEdit extends Component {
                         <FormControl margin="normal">
                             <InputLabel htmlFor="quota-helper">Per Token Quota</InputLabel>
                             <Select
-                                value={this.state.quota}
+                                value={quota}
                                 onChange={this.handleChange('quota')}
                                 input={<Input name="quota" id="quota-helper" />}
                             >
-                                {this.state.tiers.map((tier) => <MenuItem key={tier} value={tier}>{tier}</MenuItem>)}
+                                {tiers.map((tier) => <MenuItem key={tier} value={tier}>{tier}</MenuItem>)}
                             </Select>
                             <FormHelperText>
                                 Assign API request quota per access token. Allocated quota will be
@@ -194,7 +192,7 @@ class ApplicationEdit extends Component {
                             InputLabelProps={{
                                 shrink: true,
                             }}
-                            value={this.state.description}
+                            value={description}
                             helperText="Describe the application"
                             fullWidth
                             multiline

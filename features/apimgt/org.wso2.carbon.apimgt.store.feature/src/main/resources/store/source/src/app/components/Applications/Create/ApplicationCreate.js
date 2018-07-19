@@ -131,33 +131,37 @@ class ApplicationCreate extends Component {
 
     handleSubmit = (e) => {
         e.preventDefault();
-        let application_data = {
-            name: this.state.name,
-            throttlingTier: this.state.quota,
-            description: this.state.description
-        };
-        let updateSubscriptionData = this.props.updateSubscriptionData;
-        let handleAppDialogClose = this.props.handleAppDialogClose;
-        let new_api = new API();
-        let promised_create = new_api.createApplication(application_data);
-        promised_create.then(response => {
-            let uuid = JSON.parse(response.data).applicationId;
-            //Once application loading fixed this need to pass application ID and load app
-            
-            if(updateSubscriptionData){
-                handleAppDialogClose();
-                updateSubscriptionData();   
-            } else {
-                let redirect_url = "/applications";
-                this.props.history.push(redirect_url);
-                console.log("Application created successfully.");
-            }
-            
-        }).catch(
-            function (error_response) {
-                Alert.error('Application already exists.');
-                console.log("Error while creating the application");
-            });
+        if (!this.state.name) {
+            Alert.error("Application name is required");
+        } else {
+            let application_data = {
+                name: this.state.name,
+                throttlingTier: this.state.quota,
+                description: this.state.description
+            };
+            let updateSubscriptionData = this.props.updateSubscriptionData;
+            let handleAppDialogClose = this.props.handleAppDialogClose;
+            let new_api = new API();
+            let promised_create = new_api.createApplication(application_data);
+            promised_create.then(response => {
+                let uuid = JSON.parse(response.data).applicationId;
+                //Once application loading fixed this need to pass application ID and load app
+
+                if (updateSubscriptionData) {
+                    handleAppDialogClose();
+                    updateSubscriptionData();
+                } else {
+                    let redirect_url = "/applications";
+                    this.props.history.push(redirect_url);
+                    console.log("Application created successfully.");
+                }
+
+            }).catch(
+                function (error_response) {
+                    Alert.error('Application already exists.');
+                    console.log("Error while creating the application");
+                });
+        }
     };
 
     render() {
@@ -186,6 +190,7 @@ class ApplicationCreate extends Component {
                 <Grid item xs={12} lg={6} xl={4}>
                     <form className={classes.container} noValidate autoComplete="off">
                         <TextField
+                            required
                             label="Application Name"
                             InputLabelProps={{
                                 shrink: true,
