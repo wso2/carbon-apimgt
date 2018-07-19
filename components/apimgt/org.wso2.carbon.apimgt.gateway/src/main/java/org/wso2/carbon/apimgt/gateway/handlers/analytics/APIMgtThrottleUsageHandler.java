@@ -76,7 +76,8 @@ public class APIMgtThrottleUsageHandler extends APIMgtCommonExecutionPublisher {
                         (String) messageContext.getProperty(APIMgtGatewayConstants.API_PUBLISHER)));
                 throttlePublisherDTO.setApiname((String) messageContext.getProperty(
                         APIMgtGatewayConstants.API));
-                throttlePublisherDTO.setVersion((String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API));
+                throttlePublisherDTO.setVersion(
+                        ((String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).split(":")[1]);
                 throttlePublisherDTO.setContext((String) messageContext.getProperty(
                         APIMgtGatewayConstants.CONTEXT));
                 throttlePublisherDTO.setApiCreator((String) messageContext.getProperty(
