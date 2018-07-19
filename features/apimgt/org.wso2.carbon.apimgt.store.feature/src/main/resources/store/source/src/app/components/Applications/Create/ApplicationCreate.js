@@ -244,7 +244,7 @@ class ApplicationCreate extends Component {
                                     Cancel
                                 </Button>
                             :
-                                <Link to={"/applications/"} className={classes.buttonRightLink}>
+                                <Link to={"/applications"} className={classes.buttonRightLink}>
                                     <Button variant="raised" className={classes.buttonRight}>
                                         Cancel
                                     </Button>
