@@ -48,10 +48,6 @@ const styles = theme => ({
         alignSelf: 'flex-start',
         display: 'flex',
     },
-    buttonRight: {
-        alignSelf: 'flex-end',
-        display: 'flex',
-    },
     title: {
         display: 'inline-block',
         marginLeft: 20
@@ -59,19 +55,13 @@ const styles = theme => ({
     buttonsWrapper: {
         marginTop: 40
     },
-    legend: {
-        marginBottom: 0,
-        borderBottomStyle: 'none',
-        marginTop: 20,
-        fontSize: 12,
-    },
     inputText: {
         marginTop: 20,
     },
     buttonAlignment: {
         marginLeft: 20,
     },
-    buttonRightLink: {
+    buttonRight: {
         textDecoration: 'none',
     }
 });
@@ -91,10 +81,11 @@ class ApplicationEdit extends Component {
         };
     }
     componentDidMount(){
-        let promised_application = Application.get(this.props.match.params.application_id);
         const api = new API();
+        let promised_application = Application.get(this.props.match.params.application_id);
         let promised_tiers = api.getAllTiers("application");
-        promised_application.then( application => {
+        Promise.all([promised_application, promised_tiers]).then( response => {
+            let [ application, tierResponse] = response;
             this.setState({
                 application:application,
                 quota:application.throttlingTier,
@@ -102,6 +93,9 @@ class ApplicationEdit extends Component {
                 description:application.description,
                 id:application.id
             });
+            let tiers = [];
+            tierResponse.body.list.map(item => tiers.push(item.name));
+            this.setState({tiers: tiers});
         }).catch(
             error => {
                 let status = error.status;
@@ -109,20 +103,6 @@ class ApplicationEdit extends Component {
                     this.setState({ notFound: true });
                 }
                 console.error(error);
-            }
-        );
-        promised_tiers.then((response) => {
-                let tierResponseObj = response.body;
-                let tiers = [];
-                tierResponseObj.list.map(item => tiers.push(item.name));
-                this.setState({tiers: tiers});
-            }
-        ).catch(
-            error => {
-                let status = error.status;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                }
             }
         );
     }
@@ -148,7 +128,7 @@ class ApplicationEdit extends Component {
         }).catch(
             error => {
                 Alert.error("Error while updating application");
-                console.log("Error while updating application");
+                console.log("Error while updating application " + error);
             });
     };
     render() {
@@ -228,7 +208,7 @@ class ApplicationEdit extends Component {
                             <Button variant="raised" color="primary"  onClick={this.handleSubmit}>
                                 Update
                             </Button>
-                                <Link to={"/applications"} className={classes.buttonRightLink}>
+                                <Link to={"/applications"} className={classes.buttonRight}>
                                     <Button variant="raised" className={classes.buttonAlignment}>
                                         Cancel
                                     </Button>

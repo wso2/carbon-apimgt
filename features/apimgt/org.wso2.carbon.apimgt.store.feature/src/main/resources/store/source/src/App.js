@@ -114,7 +114,7 @@ class Protected extends Component {
                             <Route path={"/apis"} component={Apis}/>
                             <Route path={"/applications"} component={Applications}/>
                             <Route path={"/application/create"} component={ApplicationCreate}/>
-                            <Route path={"/application/edit/:application_id"} render={ props => (<ApplicationEdit {...props} />)}/>
+                            <Route path={"/application/edit/:application_id"} component={ApplicationEdit}/>
                             <Route component={PageNotFound}/>
                         </Switch>
                     </Base>
