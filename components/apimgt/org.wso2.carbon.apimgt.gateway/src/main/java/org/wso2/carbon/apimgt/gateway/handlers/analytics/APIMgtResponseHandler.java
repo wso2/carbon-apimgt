@@ -136,10 +136,12 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
             String fullRequestPath = (String) mc.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
             String tenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(fullRequestPath);
             String apiVersion = (String) mc.getProperty(RESTConstants.SYNAPSE_REST_API);
-            String apiPublisher = (String) mc.getProperty(APIMgtGatewayConstants.API_PUBLISHER);
-            if (apiPublisher == null) {
-                apiPublisher = APIUtil.getAPIProviderFromRESTAPI(apiVersion, tenantDomain);
+            String creator = (String) mc.getProperty(APIMgtGatewayConstants.API_PUBLISHER);
+            if (creator == null) {
+                creator = APIUtil.getAPIProviderFromRESTAPI(apiVersion, tenantDomain);
             }
+            //get the version
+            apiVersion = apiVersion.split(":")[1];
             String url = (String) mc.getProperty(RESTConstants.REST_URL_PREFIX);
 
             URL apiurl = new URL(url);
@@ -179,8 +181,8 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
             stream.setApiHostname((String) mc.getProperty(APIMgtGatewayConstants.HOST_NAME));
             stream.setApiMethod((String) mc.getProperty(APIMgtGatewayConstants.HTTP_METHOD));
             stream.setApiName((String) mc.getProperty(APIMgtGatewayConstants.API));
-            stream.setApiCreatorTenantDomain(MultitenantUtils.getTenantDomain(apiPublisher));
-            stream.setApiCreator(apiPublisher);
+            stream.setApiCreatorTenantDomain(MultitenantUtils.getTenantDomain(creator));
+            stream.setApiCreator(creator);
             stream.setApiResourcePath(GatewayUtils.extractResource(mc));
             stream.setApiResourceTemplate((String) mc.getProperty(APIConstants.API_ELECTED_RESOURCE));
             stream.setApiTier(tier);

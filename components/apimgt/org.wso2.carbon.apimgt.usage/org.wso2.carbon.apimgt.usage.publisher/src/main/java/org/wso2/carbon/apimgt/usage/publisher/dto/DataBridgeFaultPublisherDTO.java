@@ -47,9 +47,9 @@ public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
 
     public Object createPayload() {
         return new Object[] { getMetaClientType(), getApplicationConsumerKey(), getApiName(), getApiVersion(),
-                getApiContext(), getApiResourcePath(), getApiMethod(), getApiCreator(), getUsername(), getUserTenantDomain(),
-                getApiCreatorTenantDomain(), getHostname(), getApplicationId(), getApplicationName(), getProtocol(),
-                getErrorCode(), getErrorMessage(), getRequestTimestamp(), getGatewaType() };
+                getApiContext(), getApiResourcePath(), getApiMethod(), getApiCreator(), getApiCreatorTenantDomain(),
+                getUsername(), getUserTenantDomain(), getHostname(), getApplicationId(), getApplicationName(),
+                getProtocol(), getErrorCode(), getErrorMessage(), getRequestTimestamp(), getGatewaType() };
     }
 
     public Object createMetaData() {
