@@ -82,7 +82,7 @@ class ApplicationTableHead extends Component {
     render() {
         const columnData = [
             {id: 'name', numeric: false, disablePadding: true, label: 'Name', sorting:true},
-            {id: 'throttlingTier', numeric: false, disablePadding: false, label: 'Tier', sorting:true},
+            {id: 'throttlingTier', numeric: false, disablePadding: false, label: 'Policy', sorting:true},
             {id: 'lifeCycleStatus', numeric: false, disablePadding: false, label: 'Workflow Status', sorting:true},
             {id: 'subscriptions', numeric: false, disablePadding: false, label: 'Subscriptions', sorting:true},
             {id: 'actions', numeric: false, disablePadding: false, label: 'Actions', sorting:false},
@@ -173,7 +173,8 @@ class Listing extends Component {
         let promised_delete = Application.deleteApp(id);
         promised_delete.then(ok => {
             if (ok) {
-                this.state.data.delete(id);
+                let {data} = this.state;
+                data.delete(id);
                 this.setState({data: this.state.data, alertMessage: message});
             }
         });

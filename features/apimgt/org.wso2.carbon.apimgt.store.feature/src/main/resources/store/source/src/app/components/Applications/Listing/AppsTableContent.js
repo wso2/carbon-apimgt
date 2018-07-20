@@ -37,49 +37,39 @@ class AppsTableBody extends Component {
     constructor(props){
         super(props);
         this.state = {
-            subscriptions: null,
+            subscriptions: false,
             notFound :  false
         }
     }
     componentDidMount(){
-        let promises = [];
-        let subscriptions = [];
         let client = new Subscription();
         let {apps} = this.props;
-        apps.forEach(app => {
-            promises.push(client.getSubscriptions(null,app.applicationId))
-        });
+        let appIds = [...apps.keys()];
+        let promises = appIds.map(appId => client.getSubscriptions(null, appId)
+            .then(response => { response.appId = appId; return response}));
 
         Promise.all(promises).then(response => {
-            response.forEach(appData => {
-                subscriptions.push(appData.obj.count);
+            response.map(data => {
+                let app = apps.get(data.appId);
+                app["subscriptions"] = data.body.count;
+                apps.set(app.applicationId, app);
             });
-            this.setState({subscriptions:subscriptions})
+            this.setState({ subscriptions: true})
         }).catch(error => {
             this.setState({notFound : true});
             console.error(error);
         });
     }
     render() {
-        const {apps, handleAppDelete, classes, page, rowsPerPage, order, orderBy} = this.props;
+        const {apps, handleAppDelete, page, rowsPerPage, order, orderBy} = this.props;
         const {subscriptions, notFound} = this.state;
         const emptyRowsPerPage = rowsPerPage - Math.min(rowsPerPage, apps.size - page * rowsPerPage);
         let appsTableData = [];
-        let index = 0;
 
         if (subscriptions) {
-            apps.forEach((app) => {
-                appsTableData.push(
-                    {
-                        name: app.name,
-                        id: app.applicationId,
-                        throttlingTier: app.throttlingTier,
-                        lifeCycleStatus: app.lifeCycleStatus,
-                        appDelete: app.deleting,
-                        subscriptions: subscriptions[index]
-                    }
-                );
-                index = index + 1;
+            appsTableData = [...apps.values()].map(app => {
+                app["deleting"] = false;
+                return app;
             });
         }
         if (notFound) {
@@ -92,9 +82,9 @@ class AppsTableBody extends Component {
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map(app => {
                         return (
-                            <TableRow key={app.id}>
+                            <TableRow key={app.applicationId}>
                                 <TableCell>
-                                    <Link to={"/applications/" + app.id}>
+                                    <Link to={"/applications/" + app.applicationId}>
                                         {app.name}
                                     </Link>
                                 </TableCell>
@@ -103,20 +93,20 @@ class AppsTableBody extends Component {
                                 <TableCell>{app.subscriptions}</TableCell>
                                 <TableCell>
                                     <Tooltip title="Edit">
-                                        <Link to={"application/edit/" + app.id}>
+                                        <Link to={"application/edit/" + app.applicationId}>
                                             <IconButton>
                                                 <EditIcon aria-label="Edit"/>
                                             </IconButton>
                                         </Link>
                                     </Tooltip>
                                     <Tooltip title="Delete">
-                                        <IconButton disabled={app.appDelete} data-appId={app.id}
+                                        <IconButton disabled={app.deleting} data-appId={app.applicationId}
                                                     onClick={handleAppDelete} color="default"
                                                     aria-label="Delete">
                                             <DeleteIcon/>
                                         </IconButton>
                                     </Tooltip>
-                                    {app.appDelete && <CircularProgress size={24}/>}
+                                    {app.deleting && <CircularProgress size={24}/>}
                                 </TableCell>
                             </TableRow>
                         );
