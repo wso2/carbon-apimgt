@@ -170,11 +170,6 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
                 tier = authContext.getTier();
                 applicationOwner = authContext.getSubscriber();
             }
-            org.apache.axis2.context.MessageContext axis2MsgContext =
-                    ((Axis2MessageContext) mc).getAxis2MessageContext();
-            Map headers = (Map) (axis2MsgContext)
-                    .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-            String userAgent = (String) headers.get(APIConstants.USER_AGENT);
 
             RequestResponseStreamDTO stream = new RequestResponseStreamDTO();
             stream.setApiContext((String) mc.getProperty(APIMgtGatewayConstants.CONTEXT));
@@ -203,8 +198,8 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
             stream.setResponseSize(responseSize);
             stream.setServiceTime(serviceTime);
             stream.setThrottledOut(throttleOutHappened);
-            stream.setUserAgent(userAgent);
-            stream.setUserIp(DataPublisherUtil.getClientIp(axis2MsgContext));
+            stream.setUserAgent((String) mc.getProperty(APIMgtGatewayConstants.CLIENT_USER_AGENT));
+            stream.setUserIp((String) mc.getProperty(APIMgtGatewayConstants.CLIENT_IP));
             stream.setUsername(username);
             stream.setUserTenantDomain(MultitenantUtils.getTenantDomain(username));
             stream.setResponseTime(responseTime);
