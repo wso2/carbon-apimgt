@@ -19,11 +19,15 @@ package org.wso2.carbon.apimgt.gateway.handlers.analytics;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageDataPublisher;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 
+import java.util.Map;
 import java.util.regex.Pattern;
 
 public class APIMgtUsageHandler extends AbstractHandler {
@@ -42,6 +46,14 @@ public class APIMgtUsageHandler extends AbstractHandler {
         /*setting global analytic enabled status. Which use at by the by bam mediator in
         synapse to enable or disable destination based stat publishing*/
         mc.setProperty("isStatEnabled", Boolean.toString(enabled));
+        org.apache.axis2.context.MessageContext axis2MsgContext =
+                ((Axis2MessageContext) mc).getAxis2MessageContext();
+        Map headers = (Map) (axis2MsgContext)
+                .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        String userAgent = (String) headers.get(APIConstants.USER_AGENT);
+        String clientIp = DataPublisherUtil.getClientIp(axis2MsgContext);
+        mc.setProperty(APIMgtGatewayConstants.CLIENT_USER_AGENT, userAgent);
+        mc.setProperty(APIMgtGatewayConstants.CLIENT_IP, clientIp);
         return true;
     }
 

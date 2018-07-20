@@ -97,5 +97,8 @@ public class APIMgtGatewayConstants {
     
     public static final String GATEWAY_TYPE = "SYNAPSE";
     public static final String SYNAPDE_GW_LABEL = "Synapse";
+    public static final String CLIENT_USER_AGENT = "clientUserAgent";
+    public static final String CLIENT_IP = "clientIp";
+    
 }
 
