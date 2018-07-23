@@ -137,9 +137,6 @@ class ApplicationEdit extends Component {
         if (notFound) {
             return <ResourceNotFound/>
         }
-        if (!name){
-            return <Loading/>
-        }
         return (
             <Grid container spacing={0} justify="flex-start">
                 <Grid item xs={12} sm={12} md={12} lg={11} xl={10} className={classes.titleBar}>
