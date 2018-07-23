@@ -111,25 +111,29 @@ class ApplicationEdit extends Component {
     };
     handleSubmit = (event) => {
         event.preventDefault();
-        let updated_application = {
-            id:this.state.id,
-            name: this.state.name,
-            throttlingTier: this.state.quota,
-            description: this.state.description,
-            lifeCycleStatus:this.state.lifeCycleStatus
-        };
-        let api = new API();
-        let promised_update = api.updateApplication(updated_application,null);
-        promised_update.then(response => {
-            let appId = response.body.applicationId;
-            let redirectUrl = "/applications/" + appId;
-            this.props.history.push(redirectUrl);
-            console.log("Application updated successfully.");
-        }).catch(
-            error => {
-                Alert.error("Error while updating application");
-                console.log("Error while updating application " + error);
-            });
+        if (!this.state.name) {
+            Alert.error("Application name is required");
+        } else {
+            let updated_application = {
+                id: this.state.id,
+                name: this.state.name,
+                throttlingTier: this.state.quota,
+                description: this.state.description,
+                lifeCycleStatus: this.state.lifeCycleStatus
+            };
+            let api = new API();
+            let promised_update = api.updateApplication(updated_application, null);
+            promised_update.then(response => {
+                let appId = response.body.applicationId;
+                let redirectUrl = "/applications/" + appId;
+                this.props.history.push(redirectUrl);
+                console.log("Application updated successfully.");
+            }).catch(
+                error => {
+                    Alert.error("Error while updating application");
+                    console.log("Error while updating application " + error);
+                });
+        }
     };
     render() {
         const { classes } = this.props;
@@ -157,6 +161,7 @@ class ApplicationEdit extends Component {
                 <Grid item xs={12} lg={6} xl={4}>
                     <form className={classes.container} noValidate autoComplete="off">
                         <TextField
+                            required
                             label="Application Name"
                             value={name}
                             InputLabelProps={{
