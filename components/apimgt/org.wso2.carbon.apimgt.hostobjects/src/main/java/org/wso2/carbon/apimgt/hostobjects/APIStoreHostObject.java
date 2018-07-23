@@ -4464,7 +4464,24 @@ public class APIStoreHostObject extends ScriptableObject {
         APIConsumer apiConsumer = getAPIConsumer(thisObj);
 
         try {
-            Set<String> tiers = apiConsumer.getDeniedTiers();
+            Set<String> tiers;
+            if (args.length != 0) {
+                String providerTenantDomain = (String) args[0];
+                int providerTenantId = 0;
+                try {
+                    RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+                    if (realmService != null && realmService.getTenantManager() != null) {
+                        providerTenantId = realmService.getTenantManager().getTenantId(providerTenantDomain);
+                    } else {
+                        handleException("Error while retrieving tenant information of " + providerTenantDomain);
+                    }
+                } catch (UserStoreException exception) {
+                    handleException("Error while getting tenant information " + providerTenantDomain, exception);
+                }
+                tiers = apiConsumer.getDeniedTiers(providerTenantId);
+            } else {
+                tiers = apiConsumer.getDeniedTiers();
+            }
             int i = 0;
             for (String tier : tiers) {
                 NativeObject row = new NativeObject();
