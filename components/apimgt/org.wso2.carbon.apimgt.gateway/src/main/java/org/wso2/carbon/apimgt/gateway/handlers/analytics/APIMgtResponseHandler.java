@@ -143,6 +143,7 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
             //get the version
             apiVersion = apiVersion.split(":")[1];
             if (apiVersion != null) {
+                //remove proceeding letter v in api version if not null
                 apiVersion = apiVersion.substring(1);
             }
             String url = (String) mc.getProperty(RESTConstants.REST_URL_PREFIX);
