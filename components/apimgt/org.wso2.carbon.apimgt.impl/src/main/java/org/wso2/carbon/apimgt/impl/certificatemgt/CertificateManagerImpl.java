@@ -19,10 +19,11 @@ package org.wso2.carbon.apimgt.impl.certificatemgt;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateAliasExistsException;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
-import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.EndpointForCertificateExistsException;
 import org.wso2.carbon.apimgt.impl.dao.CertificateMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 
@@ -46,6 +47,7 @@ public class CertificateManagerImpl implements CertificateManager {
 
     @Override
     public ResponseCode addCertificateToParentNode(String certificate, String alias, String endpoint, int tenantId) {
+
         try {
             if (certificateMgtDAO.addCertificate(alias, endpoint, tenantId)) {
                 ResponseCode responseCode = certificateMgtUtils.addCertificateToTrustStore(certificate, alias);
@@ -70,8 +72,6 @@ public class CertificateManagerImpl implements CertificateManager {
                         "publisher Trust Store.");
                 return ResponseCode.INTERNAL_SERVER_ERROR;
             }
-        } catch (EndpointForCertificateExistsException e) {
-            return ResponseCode.CERTIFICATE_FOR_ENDPOINT_EXISTS;
         } catch (CertificateManagementException e) {
             log.error("Error when persisting/ deleting certificate metadata. ", e);
             return ResponseCode.INTERNAL_SERVER_ERROR;
@@ -82,6 +82,7 @@ public class CertificateManagerImpl implements CertificateManager {
 
     @Override
     public ResponseCode deleteCertificateFromParentNode(String alias, String endpoint, int tenantId) {
+
         try {
             boolean removeFromDB = certificateMgtDAO.deleteCertificate(alias, endpoint, tenantId);
             if (removeFromDB) {
@@ -101,8 +102,6 @@ public class CertificateManagerImpl implements CertificateManager {
                 log.error("Failed to remove certificate from the data base. No certificate changes will be affected.");
                 return ResponseCode.INTERNAL_SERVER_ERROR;
             }
-        } catch (EndpointForCertificateExistsException e) {
-            return ResponseCode.CERTIFICATE_FOR_ENDPOINT_EXISTS;
         } catch (CertificateManagementException e) {
             log.error("Error persisting/ deleting certificate metadata. ", e);
             return ResponseCode.INTERNAL_SERVER_ERROR;
@@ -113,6 +112,7 @@ public class CertificateManagerImpl implements CertificateManager {
 
     @Override
     public boolean addCertificateToGateway(String certificate, String alias) {
+
         boolean result;
         ResponseCode responseCode = certificateMgtUtils.addCertificateToTrustStore(certificate, alias);
         if (responseCode == ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE) {
@@ -133,6 +133,7 @@ public class CertificateManagerImpl implements CertificateManager {
 
     @Override
     public boolean deleteCertificateFromGateway(String alias) {
+
         ResponseCode responseCode = certificateMgtUtils.removeCertificateFromTrustStore(alias);
         if (responseCode != ResponseCode.INTERNAL_SERVER_ERROR) {
             log.info("The certificate with Alias '" + alias + "' is successfully removed from the Gateway " +
@@ -147,6 +148,7 @@ public class CertificateManagerImpl implements CertificateManager {
 
     @Override
     public boolean isConfigured() {
+
         boolean isTableExists = false;
         boolean isFilePresent = new File(SSL_PROFILE_FILE_PATH).exists();
         try {
@@ -159,25 +161,89 @@ public class CertificateManagerImpl implements CertificateManager {
     }
 
     @Override
-    public CertificateMetadataDTO getCertificate(String endpoint, int tenantId) {
-        CertificateMetadataDTO certificateMetadata = null;
+    public List<CertificateMetadataDTO> getCertificates(String endpoint, int tenantId) {
+
+        List<CertificateMetadataDTO> certificateMetadataList = null;
         try {
-            certificateMetadata = certificateMgtDAO.getCertificate("", endpoint, tenantId);
+            certificateMetadataList = certificateMgtDAO.getCertificates("", endpoint, tenantId);
         } catch (CertificateManagementException e) {
             log.error("Error when retrieving certificate metadata for endpoint '" + endpoint + "'", e);
         }
-        return certificateMetadata;
+        return certificateMetadataList;
     }
 
     @Override
     public List<CertificateMetadataDTO> getCertificates(int tenantId) {
+
         List<CertificateMetadataDTO> certificates = null;
         try {
-            certificates = certificateMgtDAO.getCertificates(tenantId);
+            certificates = certificateMgtDAO.getCertificates(null, null, tenantId);
         } catch (CertificateManagementException e) {
             log.error("Error retrieving certificates for the tenantId '" + tenantId + "' ", e);
         }
         return certificates;
+    }
+
+    @Override
+    public List<CertificateMetadataDTO> getCertificates(int tenantId, String alias, String endpoint)
+            throws APIManagementException {
+
+        List<CertificateMetadataDTO> certificateMetadataList;
+
+        try {
+            certificateMetadataList = certificateMgtDAO.getCertificates(alias, endpoint, tenantId);
+        } catch (CertificateManagementException e) {
+            throw new APIManagementException("Error retrieving certificate information for tenantId '" + tenantId +
+                    "' and alias '" + alias + "'");
+        }
+        return certificateMetadataList;
+    }
+
+    @Override
+    public boolean isCertificatePresent(int tenantId, String alias) throws APIManagementException {
+
+        List<CertificateMetadataDTO> certificateMetadataList;
+
+        try {
+            certificateMetadataList = certificateMgtDAO.getCertificates(alias, null, tenantId);
+        } catch (CertificateManagementException e) {
+            throw new APIManagementException("Error retrieving certificate information for tenantId '" + tenantId +
+                    "' and alias '" + alias + "'");
+        }
+        return certificateMetadataList.size() == 1; // The list would not be null so we check the size.
+    }
+
+    @Override
+    public CertificateInformationDTO getCertificateInformation(String alias) throws APIManagementException {
+
+        CertificateMgtUtils certificateMgtUtils = new CertificateMgtUtils();
+        try {
+            return certificateMgtUtils.getCertificateExpiryInformation(alias);
+        } catch (CertificateManagementException e) {
+            throw new APIManagementException(e);
+        }
+
+    }
+
+    @Override
+    public ResponseCode updateCertificate(String certificate, String alias) throws APIManagementException {
+
+        CertificateMgtUtils certificateMgtUtils = new CertificateMgtUtils();
+        try {
+            return certificateMgtUtils.updateCertificate(certificate, alias);
+        } catch (CertificateManagementException e) {
+            throw new APIManagementException(e);
+        }
+    }
+
+    @Override
+    public int getCertificateCount(int tenantId) throws APIManagementException {
+
+        try {
+            return certificateMgtDAO.getCertificateCount(tenantId);
+        } catch (CertificateManagementException e) {
+            throw new APIManagementException(e);
+        }
     }
 
     /**
@@ -186,6 +252,7 @@ public class CertificateManagerImpl implements CertificateManager {
      * @return : True if the file modification is success.
      */
     private boolean touchConfigFile() {
+
         boolean success = false;
         File file = new File(SSL_PROFILE_FILE_PATH);
         if (file.exists()) {

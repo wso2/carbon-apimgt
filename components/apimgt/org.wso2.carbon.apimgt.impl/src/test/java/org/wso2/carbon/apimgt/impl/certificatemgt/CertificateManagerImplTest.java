@@ -27,6 +27,7 @@ import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateAliasExistsException;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
@@ -291,22 +292,47 @@ public class CertificateManagerImplTest {
     }
 
     @Test
-    public void testGetCertificate() {
+    public void testGetCertificate() throws APIManagementException {
         CertificateMetadataDTO certificateMetadata = generateMetadata();
-        PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "getCertificate", String.class,
-                String.class, int.class)).toReturn(certificateMetadata);
-        CertificateMetadataDTO result = certificateManager.getCertificate(END_POINT, TENANT_ID);
+        List<CertificateMetadataDTO> certificateMetadataList = new ArrayList<>();
+        certificateMetadataList.add(certificateMetadata);
+        PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "getCertificates", String.class,
+                String.class, int.class)).toReturn(certificateMetadataList);
+        List<CertificateMetadataDTO> result = certificateManager.getCertificates(TENANT_ID, ALIAS, END_POINT);
         Assert.assertNotNull(result);
-        Assert.assertEquals(certificateMetadata, result);
+        Assert.assertEquals(certificateMetadataList, result);
     }
 
     @Test
     public void testGetCertificates() {
         List<CertificateMetadataDTO> certificateMetadataList = generateCertificates();
-        PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "getCertificates")).toReturn
+        PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "getCertificates", int.class)).toReturn
                 (certificateMetadataList);
         List<CertificateMetadataDTO> resultMetadataList = certificateManager.getCertificates(TENANT_ID);
         Assert.assertNotNull(resultMetadataList);
+    }
+
+    @Test
+    public void testIsCertificatePresent() throws APIManagementException {
+        CertificateMetadataDTO certificateMetadataDTO = generateMetadata();
+        List<CertificateMetadataDTO> certificateMetadataList = new ArrayList<>();
+        certificateMetadataList.add(certificateMetadataDTO);
+
+        PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "getCertificates", String.class,
+                String.class, int.class)).toReturn(certificateMetadataList);
+
+        Boolean result = certificateManager.isCertificatePresent(TENANT_ID, ALIAS);
+        Assert.assertTrue(result);
+    }
+
+    @Test
+    public void testGetCertificateInformation() {
+
+    }
+
+    @Test
+    public void testUpdateCertificate() {
+
     }
 
     private CertificateMetadataDTO generateMetadata() {

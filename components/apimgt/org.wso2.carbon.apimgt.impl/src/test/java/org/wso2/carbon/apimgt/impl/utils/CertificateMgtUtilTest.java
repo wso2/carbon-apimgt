@@ -22,10 +22,13 @@ import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
+import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
+import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
 
 import java.lang.reflect.Field;
 import java.net.URL;
+import java.util.Date;
 
 /**
  * This class contains the unit tests for CertificateMgtUtil class.
@@ -138,5 +141,46 @@ public class CertificateMgtUtilTest {
         ResponseCode responseCode = certificateMgtUtils.addCertificateToTrustStore(EXPIRED_CERTIFICATE,
                 ALIAS_EXPIRED);
         Assert.assertEquals(responseCode, ResponseCode.CERTIFICATE_EXPIRED);
+    }
+
+    @Test
+    public void testGetCertificateExpireDate() throws CertificateManagementException {
+        certificateMgtUtils.addCertificateToTrustStore(BASE64_ENCODED_CERT_STRING,
+                ALIAS);
+        CertificateInformationDTO certificateInformationDTO = certificateMgtUtils.getCertificateExpiryInformation(ALIAS);
+        Assert.assertNotNull(certificateInformationDTO);
+    }
+
+    @Test
+    public void testUpdateCertificate() throws CertificateManagementException {
+        ResponseCode responseCode = certificateMgtUtils.updateCertificate(BASE64_ENCODED_CERT_STRING, ALIAS);
+        Assert.assertEquals(ResponseCode.SUCCESS, responseCode);
+    }
+
+    @Test
+    public void testUpdateCertificateWithCertificateException() {
+        try {
+            ResponseCode responseCode = certificateMgtUtils.updateCertificate(BASE64_ENCODED_ERROR_CERT, ALIAS);
+        } catch (CertificateManagementException e) {
+            Assert.assertEquals(CertificateManagementException.class, e.getClass());
+        }
+    }
+
+    @Test
+    public void testUpdateCertificateWithExpiredCertificate() throws CertificateManagementException {
+        ResponseCode responseCode = certificateMgtUtils.updateCertificate(EXPIRED_CERTIFICATE, ALIAS);
+        Assert.assertEquals(ResponseCode.CERTIFICATE_EXPIRED, responseCode);
+    }
+
+    @Test
+    public void testUpdateCertificateWithCertificateNotFound() throws CertificateManagementException {
+        ResponseCode responseCode = certificateMgtUtils.updateCertificate(BASE64_ENCODED_CERT_STRING, ALIAS_NOT_EXIST);
+        Assert.assertEquals(ResponseCode.CERTIFICATE_NOT_FOUND, responseCode);
+    }
+
+    @Test
+    public void testUpdateCertificateWithEmptyCertificate() throws CertificateManagementException {
+        ResponseCode responseCode = certificateMgtUtils.updateCertificate("", ALIAS);
+        Assert.assertEquals(ResponseCode.INTERNAL_SERVER_ERROR, responseCode);
     }
 }

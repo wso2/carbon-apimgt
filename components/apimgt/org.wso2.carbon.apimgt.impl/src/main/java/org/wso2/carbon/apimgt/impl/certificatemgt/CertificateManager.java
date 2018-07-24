@@ -17,6 +17,8 @@
  */
 package org.wso2.carbon.apimgt.impl.certificatemgt;
 
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 
 import java.util.List;
@@ -35,10 +37,10 @@ public interface CertificateManager {
      * @param endpoint    : The endpoint which the certificate will be mapped to.
      * @param tenantId    : The tenant id which the certificate is belongs to.
      * @return :    SUCCESS : If Operation executed successfully
-     *              INTERNAL_SERVER_ERROR : If any internal error occurred.
-     *              ALIAS_EXISTS_IN_TRUST_STORE : If the alias already present in the trust store.
-     *              CERTIFICATE_EXPIRED : If the certificate is expired.
-     *              CERTIFICATE_FOR_ENDPOINT_EXISTS : If the endpoint exists in the database.
+     * INTERNAL_SERVER_ERROR : If any internal error occurred.
+     * ALIAS_EXISTS_IN_TRUST_STORE : If the alias already present in the trust store.
+     * CERTIFICATE_EXPIRED : If the certificate is expired.
+     * CERTIFICATE_FOR_ENDPOINT_EXISTS : If the endpoint exists in the database.
      */
     public ResponseCode addCertificateToParentNode(String certificate, String alias, String endpoint, int tenantId);
 
@@ -49,8 +51,8 @@ public interface CertificateManager {
      * @param endpoint : The endpoint which the certificate is mapped to.
      * @param tenantId : The owner tenant id.
      * @return :    SUCCESS: If operation success
-     *              INTERNAL_SERVER_ERROR: If any internal error occurred
-     *              CERTIFICATE_NOT_FOUND : If Certificate is not found in the trust store.
+     * INTERNAL_SERVER_ERROR: If any internal error occurred
+     * CERTIFICATE_NOT_FOUND : If Certificate is not found in the trust store.
      */
     public ResponseCode deleteCertificateFromParentNode(String alias, String endpoint, int tenantId);
 
@@ -86,7 +88,8 @@ public interface CertificateManager {
      * @param tenantId : The Id of the tenant that endpoint belongs to.
      * @return CertificateMetadataDTO object which contains the certificate meta data.
      */
-    public CertificateMetadataDTO getCertificate(String endpoint, int tenantId);
+    @Deprecated
+    public List<CertificateMetadataDTO> getCertificates(String endpoint, int tenantId);
 
     /**
      * This method is used to retrieve all the certificates which belong to the given tenant.
@@ -95,4 +98,50 @@ public interface CertificateManager {
      * @return : List of Certificate metadata objects.
      */
     public List<CertificateMetadataDTO> getCertificates(int tenantId);
+
+    /**
+     * This method is used to search the certificate metadata based on the given parameters.
+     *
+     * @param tenantId : The id of the tenant which the certificates are belong to.
+     * @param alias    : Alias of the certificate
+     * @param endpoint : The endpoint which the certificate is mapped to.
+     * @return : If any matching certificates is found, it will be returned as an array list. Otherwise and empty
+     * array list will be returned.
+     */
+    List<CertificateMetadataDTO> getCertificates(int tenantId, String alias, String endpoint) throws APIManagementException;
+
+    /**
+     * Check whether a certificate for the given alias is present in the database.
+     *
+     * @param tenantId: The Id of the tenant
+     * @param alias     : The alias of the certificate
+     * @return : True if the certificate is present. False otherwise.
+     */
+    boolean isCertificatePresent(int tenantId, String alias) throws APIManagementException;
+
+    /**
+     * Method to retrieve the properties (expiry date etc) of the certificate which matches the given alias.
+     *
+     * @param alias : Alias of the certificate that the properties should be retrieved.
+     * @return : The list of properties as a map.
+     * @throws APIManagementException
+     */
+    CertificateInformationDTO getCertificateInformation(String alias) throws APIManagementException;
+
+    /**
+     * Method to update an existing certificate.
+     *
+     * @param certificate : The base64 encoded certificate string.
+     * @param alias       : The alias of the certificate that should be updated.
+     * @return : Operation status code.
+     */
+    ResponseCode updateCertificate(String certificate, String alias) throws APIManagementException;
+
+    /**
+     * Get the number of certificates which a tenant has uploaded.
+     *
+     * @param tenantId : The id of the tenant.
+     * @return : The total count of certificates.
+     */
+    int getCertificateCount(int tenantId) throws APIManagementException;
 }

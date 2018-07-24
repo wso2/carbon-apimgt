@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.PolicyDeploymentFailureException;
 import org.wso2.carbon.apimgt.api.UnsupportedPolicyTypeException;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
+import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -5225,6 +5226,48 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handleException("Error while reading tenant information", e);
         }
         return certificateManager.getCertificates(tenantId);
+    }
+
+    @Override
+    public List<CertificateMetadataDTO> searchCertificates(int tenantId, String alias, String endpoint) throws
+            APIManagementException {
+        CertificateManager certificateManager = new CertificateManagerImpl();
+        return certificateManager.getCertificates(tenantId, alias, endpoint);
+    }
+
+    @Override
+    public boolean isCertificatePresent(int tenantId, String alias) throws APIManagementException {
+
+        CertificateManager certificateManager = new CertificateManagerImpl();
+        return certificateManager.isCertificatePresent(tenantId, alias);
+    }
+
+    @Override
+    public CertificateInformationDTO getCertificateStatus(String alias) throws APIManagementException {
+
+        CertificateManager certificateManager = new CertificateManagerImpl();
+        return certificateManager.getCertificateInformation(alias);
+    }
+
+    @Override
+    public int updateCertificate(String certificateString, String alias) throws APIManagementException {
+
+        CertificateManager certificateManager = new CertificateManagerImpl();
+        ResponseCode responseCode = certificateManager.updateCertificate(certificateString, alias);
+
+        if (ResponseCode.SUCCESS == responseCode) {
+            GatewayCertificateManager gatewayCertificateManager = new GatewayCertificateManager();
+            gatewayCertificateManager.removeFromGateways(alias);
+            gatewayCertificateManager.addToGateways(certificateString, alias);
+        }
+        return responseCode != null ? responseCode.getResponseCode() :
+                ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode();
+    }
+
+    @Override
+    public int getCertificateCountPerTenant(int tenantId) throws APIManagementException {
+
+        return new CertificateManagerImpl().getCertificateCount(tenantId);
     }
 
     /**
