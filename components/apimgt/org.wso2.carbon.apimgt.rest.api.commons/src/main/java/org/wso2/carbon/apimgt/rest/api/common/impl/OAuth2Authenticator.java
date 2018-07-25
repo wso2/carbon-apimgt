@@ -54,7 +54,6 @@ import javax.ws.rs.core.HttpHeaders;
 public class OAuth2Authenticator implements RESTAPIAuthenticator {
     private static final Logger log = LoggerFactory.getLogger(OAuth2Authenticator.class);
     private static final String LOGGED_IN_USER = "LOGGED_IN_USER";
-    private static final String ANONYMOUS_USER = "__wso2.am.anon__";
     private static String authServerURL;
 
     static {
@@ -76,7 +75,7 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
     public boolean authenticate(Request request, Response responder, ServiceMethodInfo serviceMethodInfo)
             throws APIMgtSecurityException {
         ErrorHandler errorHandler = null;
-        boolean isTokenValid = false;
+        boolean isAuthenticated = false;
         HttpHeaders headers = request.getHeaders();
         boolean isCookieHeaderPresent = false;
         boolean isAuthorizationHeaderPresent = false;
@@ -101,25 +100,25 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
                         partialTokenFromHeader + partialTokenFromCookie :
                         partialTokenFromCookie;
             }
-            isTokenValid = validateTokenAndScopes(request, serviceMethodInfo, accessToken);
+            isAuthenticated = validateTokenAndScopes(request, serviceMethodInfo, accessToken);
             request.setProperty(LOGGED_IN_USER, getEndUserName(accessToken));
         } else if (headers != null && isAuthorizationHeaderPresent) {
             String authHeader = request.getHeader(RestApiConstants.AUTHORIZATION_HTTP_HEADER);
             String accessToken = extractAccessToken(authHeader);
             if (accessToken != null) {
-                isTokenValid = validateTokenAndScopes(request, serviceMethodInfo, accessToken);
+                isAuthenticated = validateTokenAndScopes(request, serviceMethodInfo, accessToken);
                 request.setProperty(LOGGED_IN_USER, getEndUserName(accessToken));
             }
         } else if (headers != null && !isAuthorizationHeaderPresent &&
                 checkAnonymousPermission(request, serviceMethodInfo)) {
                 // If the REST api resource has anonymous permission, set the logged in user as "__wso2.am.anon__".
-                isTokenValid = true;
-                request.setProperty(LOGGED_IN_USER, ANONYMOUS_USER);
+                isAuthenticated = true;
+                request.setProperty(LOGGED_IN_USER, RestApiConstants.ANONYMOUS_USER);
         } else {
             throw new APIMgtSecurityException("Missing Authorization header in the request.`",
                     ExceptionCodes.MALFORMED_AUTHORIZATION_HEADER_OAUTH);
         }
-        return isTokenValid;
+        return isAuthenticated;
     }
 
     /**
@@ -134,21 +133,18 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
         String restAPIResource = getRestAPIResource(request);
         String verb = (String) request.getProperty(APIConstants.HTTP_METHOD);
         String path = (String) request.getProperty(APIConstants.REQUEST_URL);
-        if (log.isDebugEnabled()) {
-            log.debug("Invoking rest api resource path " + verb + " " + path + " to check anonymous permission.");
-        }
+        log.debug("Invoking rest api resource path {} {} to check anonymous permission.", verb, path);
         if (restAPIResource != null) {
             APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
             try {
                 String apiResourceDefinitionScopes = apiDefinition.getScopeOfResourcePath(restAPIResource, request,
                         serviceMethodInfo);
                 if (StringUtils.isEmpty(apiResourceDefinitionScopes)) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Scope not defined in swagger for matching resource " + path + " and verb "
-                                + verb + " . Hence consider as anonymous permission.");
-                    }
+                    log.debug("Scope not defined in swagger for matching resource {} and verb {}. Hence consider as " +
+                            "anonymous permission.", path, verb);
                     return true;
                 }
+                log.debug("Scope defined in swagger for resource {} and verb {}.", path, verb);
             } catch (APIManagementException e) {
                 String message = "Error while validating scopes for matching resource " + path + " and verb "
                         + verb + " for anonymous permission.";
