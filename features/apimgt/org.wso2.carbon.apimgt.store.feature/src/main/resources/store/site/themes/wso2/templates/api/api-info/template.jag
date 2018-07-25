@@ -453,7 +453,7 @@ function startAPIStoreInteractiveTutorial() {
 
 function getHTTPMethod() {
     if (!localStorage.getItem("intractiveTutorialHTTPMethod")) {
-        var httpMethod = $('#default_endpoint_list').children().find('.heading').find(".http_method").find(".toggleOperation")[0].textContent;
+        var httpMethod = $('.opblock').children().find('.opblock-summary').prevObject["0"].firstChild.textContent;
         localStorage.setItem("intractiveTutorialHTTPMethod", httpMethod);
     }
 }
