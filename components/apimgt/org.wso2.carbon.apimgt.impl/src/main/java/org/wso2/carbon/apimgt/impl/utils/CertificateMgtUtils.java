@@ -261,7 +261,7 @@ public class CertificateMgtUtils {
      * @param alias : Alias of the certificate which information should be retrieved
      * @return : The details of the certificate as a MAP.
      */
-    public CertificateInformationDTO getCertificateExpiryInformation(String alias) throws CertificateManagementException {
+    public CertificateInformationDTO getCertificateInformation(String alias) throws CertificateManagementException {
 
         CertificateInformationDTO certificateInformation = new CertificateInformationDTO();
 
@@ -292,6 +292,39 @@ public class CertificateMgtUtils {
             closeStreams(localTrustStoreStream);
         }
         return certificateInformation;
+    }
+
+    /**
+     * Retrieve the certificate which is represented by the given alias.
+     *
+     * @param alias : The alias of the required certificate.
+     * @return : The Certificate as a ByteArrayInputStream.
+     * @throws CertificateManagementException :
+     */
+    public ByteArrayInputStream getCertificateContent(String alias) throws CertificateManagementException {
+        File trustStoreFile = new File(TRUST_STORE);
+        Certificate certificate;
+        try {
+            localTrustStoreStream = new FileInputStream(trustStoreFile);
+            KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            trustStore.load(localTrustStoreStream, TRUST_STORE_PASSWORD);
+
+            if (trustStore.containsAlias(alias)) {
+                certificate = trustStore.getCertificate(alias);
+                return new ByteArrayInputStream(certificate.getEncoded());
+            }
+        } catch (IOException e) {
+            throw new CertificateManagementException("Error in loading the certificate.", e);
+        } catch (CertificateException e) {
+            throw new CertificateManagementException("Error loading certificate.", e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new CertificateManagementException("Could not find the algorithm to load the certificate.", e);
+        } catch (KeyStoreException e) {
+            throw new CertificateManagementException("Error reading certificate contents.", e);
+        } finally {
+            closeStreams(localTrustStoreStream);
+        }
+        return null;
     }
 
     /**

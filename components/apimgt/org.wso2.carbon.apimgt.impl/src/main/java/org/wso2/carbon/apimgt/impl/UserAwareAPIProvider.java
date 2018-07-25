@@ -29,6 +29,7 @@ import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.*;
 
@@ -521,5 +522,11 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     public int getCertificateCountPerTenant(int tenantId) throws APIManagementException {
         checkPublishPermission();
         return super.getCertificateCountPerTenant(tenantId);
+    }
+
+    @Override
+    public ByteArrayInputStream getCertificateContent(String alias) throws APIManagementException {
+        checkPublishPermission();
+        return super.getCertificateContent(alias);
     }
 }

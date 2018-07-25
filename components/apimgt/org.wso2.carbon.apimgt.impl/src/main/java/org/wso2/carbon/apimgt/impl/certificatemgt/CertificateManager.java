@@ -21,6 +21,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 
+import java.io.ByteArrayInputStream;
 import java.util.List;
 
 /**
@@ -42,7 +43,7 @@ public interface CertificateManager {
      * CERTIFICATE_EXPIRED : If the certificate is expired.
      * CERTIFICATE_FOR_ENDPOINT_EXISTS : If the endpoint exists in the database.
      */
-    public ResponseCode addCertificateToParentNode(String certificate, String alias, String endpoint, int tenantId);
+    ResponseCode addCertificateToParentNode(String certificate, String alias, String endpoint, int tenantId);
 
     /**
      * Method to delete certificate from publisher trust store.
@@ -54,7 +55,7 @@ public interface CertificateManager {
      * INTERNAL_SERVER_ERROR: If any internal error occurred
      * CERTIFICATE_NOT_FOUND : If Certificate is not found in the trust store.
      */
-    public ResponseCode deleteCertificateFromParentNode(String alias, String endpoint, int tenantId);
+    ResponseCode deleteCertificateFromParentNode(String alias, String endpoint, int tenantId);
 
     /**
      * Method to add the certificate to gateway nodes.
@@ -63,7 +64,7 @@ public interface CertificateManager {
      * @param alias       : Certificate alias.
      * @return : True if the certificate is added to gateway node successfully. False otherwise.
      */
-    public boolean addCertificateToGateway(String certificate, String alias);
+    boolean addCertificateToGateway(String certificate, String alias);
 
     /**
      * This method is to remove the certificate from client-truststore.jks of gateway nodes.
@@ -71,14 +72,14 @@ public interface CertificateManager {
      * @param alias : The alias of the certificate to be removed.
      * @return : True if the certificate is removed successfully, false otherwise.
      */
-    public boolean deleteCertificateFromGateway(String alias);
+    boolean deleteCertificateFromGateway(String alias);
 
     /**
      * This method is to check whether the API-Manager is configured for Certificate Management feature.
      *
      * @return : True if configured else false.
      */
-    public boolean isConfigured();
+    boolean isConfigured();
 
     /**
      * This method will return the Certificate Metadata object which maps to the endpoint and belongs to the provided
@@ -89,7 +90,7 @@ public interface CertificateManager {
      * @return CertificateMetadataDTO object which contains the certificate meta data.
      */
     @Deprecated
-    public List<CertificateMetadataDTO> getCertificates(String endpoint, int tenantId);
+    List<CertificateMetadataDTO> getCertificates(String endpoint, int tenantId);
 
     /**
      * This method is used to retrieve all the certificates which belong to the given tenant.
@@ -97,7 +98,7 @@ public interface CertificateManager {
      * @param tenantId : The id of the tenant which the certificates should be retrieved.
      * @return : List of Certificate metadata objects.
      */
-    public List<CertificateMetadataDTO> getCertificates(int tenantId);
+    List<CertificateMetadataDTO> getCertificates(int tenantId);
 
     /**
      * This method is used to search the certificate metadata based on the given parameters.
@@ -123,8 +124,8 @@ public interface CertificateManager {
      * Method to retrieve the properties (expiry date etc) of the certificate which matches the given alias.
      *
      * @param alias : Alias of the certificate that the properties should be retrieved.
-     * @return : The list of properties as a map.
-     * @throws APIManagementException
+     * @return : The common information of the certificate.
+     * @throws APIManagementException :
      */
     CertificateInformationDTO getCertificateInformation(String alias) throws APIManagementException;
 
@@ -144,4 +145,12 @@ public interface CertificateManager {
      * @return : The total count of certificates.
      */
     int getCertificateCount(int tenantId) throws APIManagementException;
+
+    /**
+     * Get the certificate which matches the provided alias from the trust store.
+     *
+     * @param alias : The alias of the certificate.
+     * @return : The Certificate object.
+     */
+    ByteArrayInputStream getCertificateContent(String alias) throws APIManagementException;
 }

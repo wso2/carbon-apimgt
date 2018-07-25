@@ -28,6 +28,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateAliasExistsException;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
@@ -140,15 +141,6 @@ public class CertificateManagerImplTest {
         ResponseCode responseCode = certificateManager.addCertificateToParentNode(BASE64_ENCODED_CERT, ALIAS,
                 END_POINT, TENANT_ID);
         Assert.assertEquals(ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE, responseCode);
-    }
-
-    @Test
-    public void testAddToPublisherWithExistingEndpointInDB() {
-        PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "addCertificate")).toThrow(new
-                EndpointForCertificateExistsException(""));
-        ResponseCode responseCode = certificateManager.addCertificateToParentNode(BASE64_ENCODED_CERT, ALIAS,
-                END_POINT, TENANT_ID);
-        Assert.assertEquals(ResponseCode.CERTIFICATE_FOR_ENDPOINT_EXISTS, responseCode);
     }
 
     @Test
@@ -306,8 +298,8 @@ public class CertificateManagerImplTest {
     @Test
     public void testGetCertificates() {
         List<CertificateMetadataDTO> certificateMetadataList = generateCertificates();
-        PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "getCertificates", int.class)).toReturn
-                (certificateMetadataList);
+        PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "getCertificates", String.class, String.class,
+        int.class)).toReturn(certificateMetadataList);
         List<CertificateMetadataDTO> resultMetadataList = certificateManager.getCertificates(TENANT_ID);
         Assert.assertNotNull(resultMetadataList);
     }
@@ -326,13 +318,23 @@ public class CertificateManagerImplTest {
     }
 
     @Test
-    public void testGetCertificateInformation() {
+    public void testGetCertificateInformation() throws APIManagementException {
+        CertificateInformationDTO certificateInformation = generateCertificateInformationDTO();
+        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "getCertificateInformation", String.class))
+                .toReturn(certificateInformation);
+
+        CertificateInformationDTO certificateInformationDTO = certificateManager.getCertificateInformation(ALIAS);
+        Assert.assertNotNull(certificateInformationDTO);
 
     }
 
     @Test
-    public void testUpdateCertificate() {
+    public void testUpdateCertificate() throws APIManagementException {
+        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "updateCertificate", String.class, String.class))
+                .toReturn(ResponseCode.SUCCESS);
 
+        ResponseCode responseCode = certificateManager.updateCertificate(BASE64_ENCODED_CERT, ALIAS);
+        Assert.assertEquals(ResponseCode.SUCCESS.getResponseCode(), responseCode.getResponseCode());
     }
 
     private CertificateMetadataDTO generateMetadata() {
@@ -351,5 +353,15 @@ public class CertificateManagerImplTest {
             certificateMetadataDTOList.add(certificateMetadataDTO);
         }
         return certificateMetadataDTOList;
+    }
+
+    private CertificateInformationDTO generateCertificateInformationDTO() {
+        CertificateInformationDTO certificateInformationDTO = new CertificateInformationDTO();
+        certificateInformationDTO.setStatus("ACTIVE");
+        certificateInformationDTO.setVersion("V3");
+        certificateInformationDTO.setFrom("");
+        certificateInformationDTO.setTo("");
+        certificateInformationDTO.setSubject("");
+        return certificateInformationDTO;
     }
 }

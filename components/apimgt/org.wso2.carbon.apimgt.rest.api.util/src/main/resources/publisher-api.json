@@ -2639,8 +2639,8 @@
                     "application/json"
                 ],
                 "x-wso2-curl": "curl -X GET -H \"Authorization: Bearer\nae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type:\napplication/json\"\n\"https://localhost:9443/api/am/publisher/v0.13/certificates\"\n",
-                "x-wso2-request": "GET\nhttps://localhost:9443/api/am/publisher/v0.13/certificates?alias=wso2carbon&endpoint=https://www.abc.com\n",
-                "x-wso2-response": "HTTP/1.1 200 OK",
+                "x-wso2-request": "GET\nhttps://localhost:9443/api/am/publisher/v0.13/certificates?limit=2&offset=0&alias=wso2carbon&endpoint=https://www.abc.com\n",
+                "x-wso2-response": "HTTP/1.1 200 OK {\"count\":2,\"next\":\"\",\"previous\":\"\",\"certificates\":[{\"alias\":\"wso2carbon\",\"endpoint\":\"https://www.abc.com\"}],\"pagination\":{\"total\":5,\"offset\":0,\"limit\":2}}",
                 "summary": "Retrieve/ search the uploaded Certificates.",
                 "description": "This operation can be used to retrieve and search the uploaded\ncertificates.\n",
                 "tags": [
@@ -2708,7 +2708,7 @@
                 ],
                 "x-wso2-curl": "curl -X POST -H \"Authorization: Bearer\nae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type:\nmultipart/form-data\"  -F 'certificate=@/home/user/wso2carbon.cert' -F\n'alias=wso2carbon' -F 'endpoint=https://www.abc.com'\n\"https://localhost:9443/api/am/publisher/v0.13/certificates/certificate\"\n",
                 "x-wso2-request": "POST\nhttps://localhost:9443/api/am/publisher/v0.13/certificates/certificate\n\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8 -F\n'certificate=/home/user/wso2carbon.cert' -F 'alias=wso2' -F\n'endpoint=https://www.abc.com'\n",
-                "x-wso2-response": "HTTP/1.1 200 OK",
+                "x-wso2-response": "HTTP/1.1 201 Created. Location:certificates?alias=wso2\n {\"alias\":wso2carbon,\"endpoint\":\"abc.com\"}",
                 "summary": "Upload a new Certificate.",
                 "description": "This operation can be used to upload a new certificate for an endpoint.\n",
                 "parameters": [
@@ -2783,7 +2783,7 @@
                 ],
                 "x-wso2-curl": "curl -X PUT -H \"Authorization: Bearer\nae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type:\nmultipart/form-data\" -F 'certificate=@/home/user/wso2carbon.cert' -F\n'alias=wso2carbon'\n\"https://localhost:9443/api/am/publisher/v0.13/certificates/wso2carbon\"\n",
                 "x-wso2-request": "PUT https://localhost:9443/api/am/publisher/v0.13/certificates/wso2carbon\n\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8 -F\n'certificate=@/home/user/wso2carbon.cert' -F 'alias=wso2carbon'\n",
-                "x-wso2-response": "HTTP/1.1 200 OK",
+                "x-wso2-response": "HTTP/1.1 200 OK\n Content-Type:application/json\n {\"alias\":wso2carbon,\"endpoint\":\"abc.com\"}",
                 "summary": "Update a certificate.",
                 "description": "This operation can be used to update an uploaded certificate.\n",
                 "parameters": [
@@ -2898,7 +2898,7 @@
                 ],
                 "x-wso2-curl": "curl -X POST\n\"https://apis.wso2.com/api/am/publisher/v0.13/certificates/wso2carbon\"\n-H  \"accept: application/json\"\n",
                 "x-wso2-request": "POST\nhttps://apis.wso2.com/api/am/publisher/v0.13/certificates/wso2carbon\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
-                "x-wso2-response": "HTTP/1.1 200 OK",
+                "x-wso2-response": "HTTP/1.1 200 OK \nContent-Type: application/json\n{\n\"status\":\"Active\",\n\"from\":\"Fri May 04 19:01:01 IST 2018\",\n\"to\":\"Thu Aug 02 19:01:01 IST 2018\",\n\"version\":\"3\",\n\"subject\":\"CN=foitt2.com, OU=wso2, O=wso2, L=Colombo, ST=Western, C=LK\"}\"",
                 "summary": "Get the certificate information.",
                 "description": "This operation can be used to get the information about the certificate.\n",
                 "parameters": [
@@ -2949,9 +2949,6 @@
         "/certificates/{alias}/content": {
             "get": {
                 "x-scope": "apim:api_create",
-                "produces": [
-                    "application/json"
-                ],
                 "x-wso2-curl": "curl -X POST\n\"https://apis.wso2.com/api/am/publisher/v0.13/certificates/wso2carbon/content\"\n-H  \"accept: application/json\"",
                 "x-wso2-request": "POST\nhttps://apis.wso2.com/api/am/publisher/v0.13/certificates/wso2carbon/content\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
                 "x-wso2-response": "HTTP/1.1 200 OK",

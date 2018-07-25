@@ -73,14 +73,13 @@ public class CertificateRestApiUtils {
         }
 
         int start = offset;
-        int end = certCount > limit ? start + limit : certCount;
+        int end = certCount > start + limit ? start + limit : certCount;
         for (int i = start; i < end; i++) {
             CertMetadataDTO certMetadataDTO = new CertMetadataDTO();
             CertificateMetadataDTO certificateMetadataDTO = certificateMetadataList.get(i);
             certMetadataDTO.setAlias(certificateMetadataDTO.getAlias());
             certMetadataDTO.setEndpoint(certificateMetadataDTO.getEndpoint());
             certificateList.add(certMetadataDTO);
-
         }
 
         Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, certCount);
@@ -88,8 +87,9 @@ public class CertificateRestApiUtils {
         String paginatedNext = "";
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
-            paginatedPrevious = getCertificatesPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
-                    paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), query);
+            paginatedPrevious = getCertificatesPaginatedURL(paginatedParams.get(
+                    RestApiConstants.PAGINATION_PREVIOUS_OFFSET), paginatedParams.get(
+                    RestApiConstants.PAGINATION_PREVIOUS_LIMIT), query);
         }
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {

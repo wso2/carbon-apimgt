@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
@@ -972,6 +973,15 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException :
      */
     int updateCertificate(String certificateString, String alias) throws APIManagementException;
+
+    /**
+     * Retrieve the certificate which matches the given alias.
+     *
+     * @param alias : The alias of the certificate.
+     * @return : The certificate input stream.
+     * @throws APIManagementException :
+     */
+    ByteArrayInputStream getCertificateContent(String alias) throws APIManagementException;
 
     /**
      * Method to get the selected mediation sequence as a String.

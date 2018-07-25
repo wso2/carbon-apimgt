@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 public class CertificatesApiServiceImpl extends CertificatesApiService {
@@ -155,9 +156,9 @@ public class CertificatesApiServiceImpl extends CertificatesApiService {
     }
 
     @Override
-    public Response certificatesGet(Integer limit,Integer offset,String alias,String endpoint){
+    public Response certificatesGet(Integer limit, Integer offset, String alias, String endpoint) {
 
-        limit = limit !=null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
         List<CertificateMetadataDTO> certificates;
@@ -247,8 +248,34 @@ public class CertificatesApiServiceImpl extends CertificatesApiService {
     @Override
     public Response certificatesAliasContentGet(String alias) {
 
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        String certFileName = alias + ".crt";
+
+        if (!StringUtils.isNotEmpty(alias)) {
+            RestApiUtil.handleBadRequest("The alias cannot be empty", log);
+        }
+
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            if (!apiProvider.isCertificatePresent(tenantId, alias)) {
+                String message = "Certificate for Alias '" + alias + "' is not found.";
+                RestApiUtil.handleResourceNotFoundError(message, log);
+            }
+
+            Object certificate = apiProvider.getCertificateContent(alias);
+
+            if (certificate != null) {
+                Response.ResponseBuilder responseBuilder = Response.ok().entity(certificate);
+                responseBuilder.header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
+                        + certFileName + "\"");
+                responseBuilder.header(RestApiConstants.HEADER_CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM);
+
+                return responseBuilder.build();
+            }
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while retrieving the certificate status.", e, log);
+        }
         return null;
     }
-
-
 }

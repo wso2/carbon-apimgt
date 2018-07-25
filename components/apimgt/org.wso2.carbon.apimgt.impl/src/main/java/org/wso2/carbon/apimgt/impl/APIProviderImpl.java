@@ -141,12 +141,14 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.rmi.RemoteException;
+import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -5268,6 +5270,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public int getCertificateCountPerTenant(int tenantId) throws APIManagementException {
 
         return new CertificateManagerImpl().getCertificateCount(tenantId);
+    }
+
+    @Override
+    public ByteArrayInputStream getCertificateContent(String alias) throws APIManagementException {
+        return new CertificateManagerImpl().getCertificateContent(alias);
     }
 
     /**

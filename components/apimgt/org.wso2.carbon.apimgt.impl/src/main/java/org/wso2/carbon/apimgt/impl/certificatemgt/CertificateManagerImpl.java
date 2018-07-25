@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManageme
 import org.wso2.carbon.apimgt.impl.dao.CertificateMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.List;
 
@@ -43,7 +44,7 @@ public class CertificateManagerImpl implements CertificateManager {
     private static String SSL_PROFILE_FILE_PATH = CARBON_HOME + SEP + "repository" + SEP + "resources" + SEP
             + "security" + SEP + PROFILE_CONFIG;
     private static CertificateMgtDAO certificateMgtDAO = CertificateMgtDAO.getInstance();
-    private static CertificateMgtUtils certificateMgtUtils = new CertificateMgtUtils();
+    private CertificateMgtUtils certificateMgtUtils = new CertificateMgtUtils();
 
     @Override
     public ResponseCode addCertificateToParentNode(String certificate, String alias, String endpoint, int tenantId) {
@@ -216,9 +217,8 @@ public class CertificateManagerImpl implements CertificateManager {
     @Override
     public CertificateInformationDTO getCertificateInformation(String alias) throws APIManagementException {
 
-        CertificateMgtUtils certificateMgtUtils = new CertificateMgtUtils();
         try {
-            return certificateMgtUtils.getCertificateExpiryInformation(alias);
+            return certificateMgtUtils.getCertificateInformation(alias);
         } catch (CertificateManagementException e) {
             throw new APIManagementException(e);
         }
@@ -228,7 +228,6 @@ public class CertificateManagerImpl implements CertificateManager {
     @Override
     public ResponseCode updateCertificate(String certificate, String alias) throws APIManagementException {
 
-        CertificateMgtUtils certificateMgtUtils = new CertificateMgtUtils();
         try {
             return certificateMgtUtils.updateCertificate(certificate, alias);
         } catch (CertificateManagementException e) {
@@ -241,6 +240,16 @@ public class CertificateManagerImpl implements CertificateManager {
 
         try {
             return certificateMgtDAO.getCertificateCount(tenantId);
+        } catch (CertificateManagementException e) {
+            throw new APIManagementException(e);
+        }
+    }
+
+    @Override
+    public ByteArrayInputStream getCertificateContent(String alias) throws APIManagementException {
+
+        try {
+            return certificateMgtUtils.getCertificateContent(alias);
         } catch (CertificateManagementException e) {
             throw new APIManagementException(e);
         }
