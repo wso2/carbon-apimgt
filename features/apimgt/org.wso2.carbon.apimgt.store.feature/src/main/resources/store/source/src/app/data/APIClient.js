@@ -113,6 +113,7 @@ class APIClient {
      */
     _fixSpec(spec) {
         spec.host = this.host;
+        spec.security = [{OAuth2Security : ["apim:api_subscribe"]}];
         return spec;
     }
 

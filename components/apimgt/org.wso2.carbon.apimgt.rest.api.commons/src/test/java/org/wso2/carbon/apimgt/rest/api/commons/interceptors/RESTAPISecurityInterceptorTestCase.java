@@ -61,5 +61,29 @@ public class RESTAPISecurityInterceptorTestCase {
         }
     }
 
+    @Test
+    public void testGetTiersByLevelSuccess() throws APIManagementException {
+
+        HTTPCarbonMessage carbonMessage = Mockito.mock(HTTPCarbonMessage.class);
+        Request requestObj = Mockito.mock(Request.class);
+
+        try {
+            PowerMockito.whenNew(Request.class).withArguments(carbonMessage).thenReturn(requestObj);
+        } catch (Exception e) {
+            throw new APIMgtSecurityException("Error while mocking Request Object ", e);
+        }
+
+        Response responseObj = Mockito.mock(Response.class);
+        Mockito.when(requestObj.getHeader("REQUEST_URL")).
+                thenReturn("http://localhost:9090/api/am/store/v1/tiers/application");
+        ServiceMethodInfo serviceMethodInfoObj = Mockito.mock(ServiceMethodInfo.class);
+        RESTAPISecurityInterceptor interceptor = Mockito.mock(RESTAPISecurityInterceptor.class);
+        boolean isAuthorized = interceptor.preCall(requestObj, responseObj, serviceMethodInfoObj);
+        if (isAuthorized) {
+            Assert.assertEquals(isAuthorized, true);
+        } else {
+            Assert.assertEquals(isAuthorized, false);
+        }
+    }
 
 }

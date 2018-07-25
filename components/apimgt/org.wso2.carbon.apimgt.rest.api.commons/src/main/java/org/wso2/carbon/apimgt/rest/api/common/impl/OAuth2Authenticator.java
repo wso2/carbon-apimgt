@@ -75,7 +75,7 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
     public boolean authenticate(Request request, Response responder, ServiceMethodInfo serviceMethodInfo)
             throws APIMgtSecurityException {
         ErrorHandler errorHandler = null;
-        boolean isTokenValid = false;
+        boolean isAuthenticated = false;
         HttpHeaders headers = request.getHeaders();
         boolean isCookieHeaderPresent = false;
         boolean isAuthorizationHeaderPresent = false;
@@ -100,21 +100,63 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
                         partialTokenFromHeader + partialTokenFromCookie :
                         partialTokenFromCookie;
             }
-            isTokenValid = validateTokenAndScopes(request, serviceMethodInfo, accessToken);
+            isAuthenticated = validateTokenAndScopes(request, serviceMethodInfo, accessToken);
             request.setProperty(LOGGED_IN_USER, getEndUserName(accessToken));
         } else if (headers != null && isAuthorizationHeaderPresent) {
             String authHeader = request.getHeader(RestApiConstants.AUTHORIZATION_HTTP_HEADER);
             String accessToken = extractAccessToken(authHeader);
             if (accessToken != null) {
-                isTokenValid = validateTokenAndScopes(request, serviceMethodInfo, accessToken);
+                isAuthenticated = validateTokenAndScopes(request, serviceMethodInfo, accessToken);
                 request.setProperty(LOGGED_IN_USER, getEndUserName(accessToken));
             }
+        } else if (headers != null && !isAuthorizationHeaderPresent &&
+                checkAnonymousPermission(request, serviceMethodInfo)) {
+                // If the REST api resource has anonymous permission, set the logged in user as "__wso2.am.anon__".
+                isAuthenticated = true;
+                request.setProperty(LOGGED_IN_USER, RestApiConstants.ANONYMOUS_USER);
         } else {
             throw new APIMgtSecurityException("Missing Authorization header in the request.`",
                     ExceptionCodes.MALFORMED_AUTHORIZATION_HEADER_OAUTH);
         }
+        return isAuthenticated;
+    }
 
-        return isTokenValid;
+    /**
+     * Check if the api resource in the request has anonymous permission defined in the swagger definition.
+     *
+     * @param request the request
+     * @param serviceMethodInfo
+     * @return true if the api resource has given anonymous permission in the swagger definition.
+     */
+    private boolean checkAnonymousPermission(Request request, ServiceMethodInfo serviceMethodInfo)
+            throws APIMgtSecurityException {
+        String restAPIResource = getRestAPIResource(request);
+        String verb = (String) request.getProperty(APIConstants.HTTP_METHOD);
+        String path = (String) request.getProperty(APIConstants.REQUEST_URL);
+        log.debug("Invoking rest api resource path {} {} to check anonymous permission.", verb, path);
+        if (restAPIResource != null) {
+            APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
+            try {
+                String apiResourceDefinitionScopes = apiDefinition.getScopeOfResourcePath(restAPIResource, request,
+                        serviceMethodInfo);
+                if (StringUtils.isEmpty(apiResourceDefinitionScopes)) {
+                    log.debug("Scope not defined in swagger for matching resource {} and verb {}. Hence consider as " +
+                            "anonymous permission.", path, verb);
+                    return true;
+                }
+                log.debug("Scope defined in swagger for resource {} and verb {}.", path, verb);
+            } catch (APIManagementException e) {
+                String message = "Error while validating scopes for matching resource " + path + " and verb "
+                        + verb + " for anonymous permission.";
+                log.error(message, e);
+                throw new APIMgtSecurityException(message, ExceptionCodes.INVALID_SCOPE);
+            }
+        } else {
+            String message = "Rest API resource could not be found for request path '" + path
+                    + "' while checking for anonymous permission.";
+            throw new APIMgtSecurityException(message, ExceptionCodes.INVALID_SCOPE);
+        }
+        return false;
     }
 
     private boolean validateTokenAndScopes(Request request, ServiceMethodInfo serviceMethodInfo, String accessToken)
@@ -213,7 +255,7 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
     }
 
     /*
-    * This methos is used to get the rest api resource based on the api context
+    * This method is used to get the rest api resource based on the api context
     * @param Request
     * @return String : api resource object
     * @throws APIMgtSecurityException if resource could not be found.
