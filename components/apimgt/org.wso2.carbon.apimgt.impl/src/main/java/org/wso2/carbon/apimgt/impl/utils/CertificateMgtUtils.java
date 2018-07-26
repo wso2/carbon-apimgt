@@ -42,7 +42,6 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.Date;
 
 /**
  * This class holds the utility methods for certificate management.
@@ -64,7 +63,7 @@ public class CertificateMgtUtils {
      * @param base64Cert : The base 64 encoded string of the server certificate.
      * @param alias      : The alias for the certificate.
      * @return : ResponseCode which matches the execution result.
-     * <p>
+     *
      * Response Codes.
      * SUCCESS : If certificate added successfully.
      * INTERNAL_SERVER_ERROR : If any internal error occurred
@@ -203,28 +202,11 @@ public class CertificateMgtUtils {
     public ResponseCode updateCertificate(String certificate, String alias) throws CertificateManagementException {
 
         InputStream certificateStream = null;
-
         try {
             File trustStoreFile = new File(TRUST_STORE);
             localTrustStoreStream = new FileInputStream(trustStoreFile);
             KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
             trustStore.load(localTrustStoreStream, TRUST_STORE_PASSWORD);
-
-            //Generate the certificate from the input string.
-            byte[] cert = (Base64.decodeBase64(certificate.getBytes(StandardCharsets.UTF_8)));
-            certificateStream = new ByteArrayInputStream(cert);
-            if (certificateStream.available() == 0) {
-                log.error("Certificate is empty for the provided alias " + alias);
-                return ResponseCode.INTERNAL_SERVER_ERROR;
-            }
-            CertificateFactory certificateFactory = CertificateFactory.getInstance(CERTIFICATE_TYPE);
-            Certificate newCertificate = certificateFactory.generateCertificate(certificateStream);
-
-            X509Certificate x509Certificate = (X509Certificate) newCertificate;
-            if (x509Certificate.getNotAfter().getTime() <= System.currentTimeMillis()) {
-                log.error("Could not update the certificate. The certificate expired.");
-                return ResponseCode.CERTIFICATE_EXPIRED;
-            }
 
             if (trustStore.getCertificate(alias) == null) {
                 log.error("Could not update the certificate. The certificate for alias '" + alias + "' is not found" +
@@ -232,12 +214,27 @@ public class CertificateMgtUtils {
                 return ResponseCode.CERTIFICATE_NOT_FOUND;
             }
 
+            //Generate the certificate from the input string.
+            byte[] cert = (Base64.decodeBase64(certificate.getBytes(StandardCharsets.UTF_8)));
+            certificateStream = new ByteArrayInputStream(cert);
+
+            if (certificateStream.available() == 0) {
+                log.error("Certificate is empty for the provided alias " + alias);
+                return ResponseCode.INTERNAL_SERVER_ERROR;
+            }
+
+            CertificateFactory certificateFactory = CertificateFactory.getInstance(CERTIFICATE_TYPE);
+            Certificate newCertificate = certificateFactory.generateCertificate(certificateStream);
+            X509Certificate x509Certificate = (X509Certificate) newCertificate;
+
+            if (x509Certificate.getNotAfter().getTime() <= System.currentTimeMillis()) {
+                log.error("Could not update the certificate. The certificate expired.");
+                return ResponseCode.CERTIFICATE_EXPIRED;
+            }
             // If the certificate is not expired, delete the existing certificate and add the new cert.
             trustStore.deleteEntry(alias);
-
             //Store the certificate in the trust store.
             trustStore.setCertificateEntry(alias, newCertificate);
-
             fileOutputStream = new FileOutputStream(trustStoreFile);
             trustStore.store(fileOutputStream, TRUST_STORE_PASSWORD);
         } catch (IOException e) {
@@ -251,7 +248,6 @@ public class CertificateMgtUtils {
         } finally {
             closeStreams(fileOutputStream, certificateStream, localTrustStoreStream);
         }
-
         return ResponseCode.SUCCESS;
     }
 
@@ -264,7 +260,6 @@ public class CertificateMgtUtils {
     public CertificateInformationDTO getCertificateInformation(String alias) throws CertificateManagementException {
 
         CertificateInformationDTO certificateInformation = new CertificateInformationDTO();
-
         File trustStoreFile = new File(TRUST_STORE);
         try {
             localTrustStoreStream = new FileInputStream(trustStoreFile);
@@ -279,7 +274,7 @@ public class CertificateMgtUtils {
                 certificateInformation.setTo(certificate.getNotAfter().toString());
                 certificateInformation.setSubject(certificate.getSubjectDN().toString());
                 certificateInformation.setVersion(String.valueOf(certificate.getVersion()));
-            } 
+            }
         } catch (IOException e) {
             throw new CertificateManagementException("Error in loading the certificate.", e);
         } catch (CertificateException e) {
@@ -302,6 +297,7 @@ public class CertificateMgtUtils {
      * @throws CertificateManagementException :
      */
     public ByteArrayInputStream getCertificateContent(String alias) throws CertificateManagementException {
+
         File trustStoreFile = new File(TRUST_STORE);
         Certificate certificate;
         try {

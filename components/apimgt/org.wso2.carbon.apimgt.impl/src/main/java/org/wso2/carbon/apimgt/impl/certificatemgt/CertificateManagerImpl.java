@@ -39,8 +39,8 @@ public class CertificateManagerImpl implements CertificateManager {
     private static Log log = LogFactory.getLog(CertificateManagerImpl.class);
     private static final String PROFILE_CONFIG = "sslprofiles.xml";
     private static final String CARBON_HOME_STRING = "carbon.home";
-    private static String CARBON_HOME = System.getProperty(CARBON_HOME_STRING);
     private static final char SEP = File.separatorChar;
+    private static String CARBON_HOME = System.getProperty(CARBON_HOME_STRING);
     private static String SSL_PROFILE_FILE_PATH = CARBON_HOME + SEP + "repository" + SEP + "resources" + SEP
             + "security" + SEP + PROFILE_CONFIG;
     private static CertificateMgtDAO certificateMgtDAO = CertificateMgtDAO.getInstance();
@@ -190,7 +190,6 @@ public class CertificateManagerImpl implements CertificateManager {
             throws APIManagementException {
 
         List<CertificateMetadataDTO> certificateMetadataList;
-
         try {
             certificateMetadataList = certificateMgtDAO.getCertificates(alias, endpoint, tenantId);
         } catch (CertificateManagementException e) {
@@ -204,7 +203,6 @@ public class CertificateManagerImpl implements CertificateManager {
     public boolean isCertificatePresent(int tenantId, String alias) throws APIManagementException {
 
         List<CertificateMetadataDTO> certificateMetadataList;
-
         try {
             certificateMetadataList = certificateMgtDAO.getCertificates(alias, null, tenantId);
         } catch (CertificateManagementException e) {
@@ -222,7 +220,6 @@ public class CertificateManagerImpl implements CertificateManager {
         } catch (CertificateManagementException e) {
             throw new APIManagementException(e);
         }
-
     }
 
     @Override

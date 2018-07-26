@@ -314,13 +314,11 @@ public class CertificateMgtDAO {
             connection = APIMgtDBUtil.getConnection();
             preparedStatement = connection.prepareStatement(certificateCountQuery);
             preparedStatement.setInt(1, tenantId);
-
             ResultSet resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
                 count = resultSet.getInt("count");
             }
-
         } catch (SQLException e) {
             handleException("Error while retrieving the certificate count.", e);
         } finally {

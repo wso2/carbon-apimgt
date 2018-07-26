@@ -38,8 +38,8 @@ public class CertificatesApiServiceImpl extends CertificatesApiService {
 
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-
         String userName = RestApiUtil.getLoggedInUsername();
+
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             if (!apiProvider.isCertificatePresent(tenantId, alias)) {
@@ -124,7 +124,6 @@ public class CertificatesApiServiceImpl extends CertificatesApiService {
 
             String base64EncodedCert = CertificateRestApiUtils.generateEncodedCertificate(certificateInputStream);
             int responseCode = apiProvider.updateCertificate(base64EncodedCert, alias);
-
             List<CertificateMetadataDTO> updatedCertificate = apiProvider.searchCertificates(tenantId, alias, null);
 
             if (ResponseCode.SUCCESS.getResponseCode() == responseCode && updatedCertificate.size() > 0) {
@@ -172,7 +171,6 @@ public class CertificatesApiServiceImpl extends CertificatesApiService {
 
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-
             int totalCount = apiProvider.getCertificateCountPerTenant(tenantId);
 
             if (StringUtils.isNotEmpty(alias) || StringUtils.isNotEmpty(endpoint)) {
@@ -215,7 +213,6 @@ public class CertificatesApiServiceImpl extends CertificatesApiService {
             }
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
-
             String base64EncodedCert = CertificateRestApiUtils.generateEncodedCertificate(certificateInputStream);
             int responseCode = apiProvider.addCertificate(userName, base64EncodedCert, alias, endpoint);
 
