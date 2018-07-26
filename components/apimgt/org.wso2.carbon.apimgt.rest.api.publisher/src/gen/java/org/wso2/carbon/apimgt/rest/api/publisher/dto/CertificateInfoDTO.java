@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.CertificateValidityDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -18,10 +19,7 @@ public class CertificateInfoDTO  {
   private String status = null;
   
   
-  private String from = null;
-  
-  
-  private String to = null;
+  private CertificateValidityDTO validity = null;
   
   
   private String version = null;
@@ -45,24 +43,12 @@ public class CertificateInfoDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("from")
-  public String getFrom() {
-    return from;
+  @JsonProperty("validity")
+  public CertificateValidityDTO getValidity() {
+    return validity;
   }
-  public void setFrom(String from) {
-    this.from = from;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("to")
-  public String getTo() {
-    return to;
-  }
-  public void setTo(String to) {
-    this.to = to;
+  public void setValidity(CertificateValidityDTO validity) {
+    this.validity = validity;
   }
 
   
@@ -97,8 +83,7 @@ public class CertificateInfoDTO  {
     sb.append("class CertificateInfoDTO {\n");
     
     sb.append("  status: ").append(status).append("\n");
-    sb.append("  from: ").append(from).append("\n");
-    sb.append("  to: ").append(to).append("\n");
+    sb.append("  validity: ").append(validity).append("\n");
     sb.append("  version: ").append(version).append("\n");
     sb.append("  subject: ").append(subject).append("\n");
     sb.append("}\n");

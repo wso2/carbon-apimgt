@@ -15,6 +15,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.CertificatesApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListPaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.CertMetadataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.CertificateInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.CertificateValidityDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.CertificatesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.CertificateRestApiUtils;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
@@ -79,10 +80,13 @@ public class CertificatesApiServiceImpl extends CertificatesApiService {
             }
 
             CertificateInformationDTO certificateInformationDTO = apiProvider.getCertificateStatus(alias);
-            CertificateInfoDTO certificateInfoDTO = new CertificateInfoDTO();
 
-            certificateInfoDTO.setFrom(certificateInformationDTO.getFrom());
-            certificateInfoDTO.setTo(certificateInformationDTO.getTo());
+            CertificateValidityDTO certificateValidityDTO = new CertificateValidityDTO();
+            certificateValidityDTO.setFrom(certificateInformationDTO.getFrom());
+            certificateValidityDTO.setTo(certificateInformationDTO.getTo());
+
+            CertificateInfoDTO certificateInfoDTO = new CertificateInfoDTO();
+            certificateInfoDTO.setValidity(certificateValidityDTO);
             certificateInfoDTO.setStatus(certificateInformationDTO.getStatus());
             certificateInfoDTO.setSubject(certificateInformationDTO.getSubject());
             certificateInfoDTO.setVersion(certificateInformationDTO.getVersion());

@@ -4225,13 +4225,8 @@
                     "type": "string",
                     "example": "Active"
                 },
-                "from": {
-                    "type": "string",
-                    "example": "12-12-2017"
-                },
-                "to": {
-                    "type": "string",
-                    "example": "01-01-2019"
+                "validity": {
+                    "$ref": "#/definitions/CertificateValidity"
                 },
                 "version": {
                     "type": "string",
@@ -4240,6 +4235,19 @@
                 "subject": {
                     "type": "string",
                     "example": "CN=wso2.com, OU=wso2, O=wso2, L=Colombo, ST=Western, C=LK"
+                }
+            }
+        },
+        "CertificateValidity": {
+            "title": "Certificate valid period",
+            "properties": {
+                "from": {
+                    "type": "string",
+                    "example": "12-12-2017"
+                },
+                "to": {
+                    "type": "string",
+                    "example": "01-01-2019"
                 }
             }
         }

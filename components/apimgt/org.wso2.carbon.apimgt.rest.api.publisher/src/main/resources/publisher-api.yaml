@@ -4123,6 +4123,9 @@ definitions:
         items:
           type: string
 
+#-----------------------------------------------------
+# Certificates list resource
+#-----------------------------------------------------
   Certificates:
     title: Certificates
     description: Representation of a list of certificates
@@ -4152,6 +4155,9 @@ definitions:
             type: integer
             example: 1290
 
+#-----------------------------------------------------
+# Certificate metadata resource
+#-----------------------------------------------------
   CertMetadata:
     title: Certificate
     description: Representation of the details of a certificate
@@ -4163,21 +4169,33 @@ definitions:
         type: string
         example: www.abc.com
 
+#-----------------------------------------------------
+# Certificates information resource
+#-----------------------------------------------------
   CertificateInfo:
     title: Certificate information
     properties:
       status:
         type: string
         example: Active
-      from:
-        type: string
-        example: 12-12-2017
-      to:
-        type: string
-        example: 01-01-2019
+      validity:
+              $ref: '#/definitions/CertificateValidity'
       version:
         type: string
         example: V3
       subject:
         type: string
         example: CN=wso2.com, OU=wso2, O=wso2, L=Colombo, ST=Western, C=LK
+
+#-----------------------------------------------------
+# Certificate validity period resource
+#-----------------------------------------------------
+  CertificateValidity:
+    title: Certificate Valid period
+    properties:
+      from:
+        type: string
+        example: 12-12-2017
+      to:
+        type: string
+        example: 01-01-2019
