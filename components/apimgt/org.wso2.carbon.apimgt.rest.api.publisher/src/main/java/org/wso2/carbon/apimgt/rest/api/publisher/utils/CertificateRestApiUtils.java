@@ -17,8 +17,8 @@
  */
 package org.wso2.carbon.apimgt.rest.api.publisher.utils;
 
-import com.hazelcast.util.Base64;
 import com.nimbusds.jose.util.StandardCharset;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
@@ -45,7 +45,7 @@ public class CertificateRestApiUtils {
     public static String generateEncodedCertificate(InputStream certificateInputStream) throws IOException {
 
         byte[] certificateBytes = IOUtils.toByteArray(certificateInputStream);
-        byte[] encodedCert = Base64.encode(certificateBytes);
+        byte[] encodedCert = Base64.encodeBase64(certificateBytes);
         return new String(encodedCert, StandardCharset.UTF_8);
     }
 
