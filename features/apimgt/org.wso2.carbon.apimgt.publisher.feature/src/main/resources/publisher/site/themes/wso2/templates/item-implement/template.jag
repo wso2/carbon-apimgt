@@ -1228,12 +1228,12 @@
 					<label class="control-label col-sm-3" for="format">Format</label>
 					<div class="col-sm-4">
 						<select class="form-control selectpicker" id="format" name="format">
-							<option value="soap11">SOAP 1.1</option>
-							<option value="soap12">SOAP 1.2</option>
-							<option value="POX">Plain Old XML (POX)</option>
-							<option value="REST">Representational State Transer (REST)</option>
-							<option value="GET">GET</option>
-							<option selected value="leave-as-is"><%=i18n.localize("Leave As-Is")%></option>
+							<option {{#contains "soap11" format}}selected{{/contains}} value="soap11">SOAP 1.1</option>
+							<option {{#contains "soap12" format}}selected{{/contains}} value="soap12">SOAP 1.2</option>
+							<option {{#contains "POX" format}}selected{{/contains}} value="POX">Plain Old XML (POX)</option>
+							<option {{#contains "REST" format}}selected{{/contains}} value="REST">Representational State Transer (REST)</option>
+							<option {{#contains "GET" format}}selected{{/contains}} value="GET">GET</option>
+							<option value="leave-as-is"><%=i18n.localize("Leave As-Is")%></option>
 						</select>
 						<p class="help-block hide"><%=i18n.localize("Message format for the endpoint.")%></p>
 					</div>
@@ -1242,9 +1242,9 @@
 					<label class="control-label col-sm-3" for="optimize"><%=i18n.localize("Optimize")%></label>
 					<div class="col-sm-4">
 						<select class="form-control selectpicker" id="optimize" name="optimize">
-							<option value="SWA">SWA</option>
-							<option value="MTOM">MTOM</option>
-							<option selected value="leave-as-is"><%=i18n.localize("Leave As-Is")%></option>
+							<option {{#contains "SWA" optimize}}selected{{/contains}} value="SWA">SWA</option>
+							<option {{#contains "MTOM" optimize}}selected{{/contains}} value="MTOM">MTOM</option>
+							<option value="leave-as-is"><%=i18n.localize("Leave As-Is")%></option>
 						</select>
 						<p class="help-block hide"><%=i18n.localize("Method to optimize the attachments.")%></p>
 					</div>
@@ -1357,9 +1357,9 @@
                 <label class="control-label col-sm-3" for="actionSelect">Action</label>
                 <div class="col-sm-6">
                     <select class="form-control selectpicker" id="actionSelect" name="actionSelect">
-                        <option {{#ifCond "==" retryErroCode "fault"}}selected{{/ifCond}} value="fault"><%=i18n.localize("Execute fault sequence")%></option>
-                        <option {{#ifCond "==" retryErroCode "neverTimeout"}}selected{{/ifCond}}value="neverTimeout"><%=i18n.localize("Never timeout")%></option>
-                        <option {{#ifCond "==" retryErroCode "discard"}}selected{{/ifCond}} value="discard"><%=i18n.localize("Discard message")%></option>
+                        <option {{#ifCond actionSelect "==" "fault"}}selected{{/ifCond}} value="fault"><%=i18n.localize("Execute fault sequence")%></option>
+                        <option {{#ifCond actionSelect "==" "Never timeout"}}selected{{/ifCond}} value="Never timeout"><%=i18n.localize("Never timeout")%></option>
+                        <option {{#ifCond actionSelect "==" "discard"}}selected{{/ifCond}} value="discard"><%=i18n.localize("Discard message")%></option>
                     </select>
                     <p class="help-block hide"><%=i18n.localize("The action to be made at a timeout situation. You can select from: 1) Never Timeout 2) Discard Message 3) Execute Fault Sequence")%></p>
 					<span class="help-block jsonform-errortext" style="display:none;"></span>
