@@ -34,7 +34,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -52,6 +51,7 @@ public class CertificateMgtUtils {
     private static char[] TRUST_STORE_PASSWORD = System.getProperty("javax.net.ssl.trustStorePassword").toCharArray();
     private static String TRUST_STORE = System.getProperty("javax.net.ssl.trustStore");
     private static String CERTIFICATE_TYPE = "X.509";
+    private static final String CHARSET_UTF_8 = "UTF-8";
     private static InputStream localTrustStoreStream = null;
     private static OutputStream fileOutputStream = null;
     private static ResponseCode responseCode;
@@ -77,7 +77,7 @@ public class CertificateMgtUtils {
         InputStream serverCert = null;
         try {
             //Decode base64 encoded certificate.
-            byte[] cert = (Base64.decodeBase64(base64Cert.getBytes(StandardCharsets.UTF_8)));
+            byte[] cert = (Base64.decodeBase64(base64Cert.getBytes(CHARSET_UTF_8)));
             serverCert = new ByteArrayInputStream(cert);
             if (serverCert.available() == 0) {
                 log.error("Certificate is empty for the provided alias " + alias);
@@ -215,7 +215,7 @@ public class CertificateMgtUtils {
             }
 
             //Generate the certificate from the input string.
-            byte[] cert = (Base64.decodeBase64(certificate.getBytes(StandardCharsets.UTF_8)));
+            byte[] cert = (Base64.decodeBase64(certificate.getBytes(CHARSET_UTF_8)));
             certificateStream = new ByteArrayInputStream(cert);
 
             if (certificateStream.available() == 0) {
@@ -276,9 +276,9 @@ public class CertificateMgtUtils {
                 certificateInformation.setVersion(String.valueOf(certificate.getVersion()));
             }
         } catch (IOException e) {
-            throw new CertificateManagementException("Error in loading the certificate.", e);
+            throw new CertificateManagementException("Error wile loading the keystore.", e);
         } catch (CertificateException e) {
-            throw new CertificateManagementException("Error loading certificate.", e);
+            throw new CertificateManagementException("Error loading the keystore from the stream.", e);
         } catch (NoSuchAlgorithmException e) {
             throw new CertificateManagementException("Could not find the algorithm to load the certificate.", e);
         } catch (KeyStoreException e) {

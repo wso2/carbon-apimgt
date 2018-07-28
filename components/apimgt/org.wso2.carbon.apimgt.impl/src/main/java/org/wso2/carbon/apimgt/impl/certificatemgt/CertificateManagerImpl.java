@@ -177,6 +177,10 @@ public class CertificateManagerImpl implements CertificateManager {
     public List<CertificateMetadataDTO> getCertificates(int tenantId) {
 
         List<CertificateMetadataDTO> certificates = null;
+
+        if (log.isDebugEnabled()) {
+            log.debug("Get all the certificates for tenant " + tenantId);
+        }
         try {
             certificates = certificateMgtDAO.getCertificates(null, null, tenantId);
         } catch (CertificateManagementException e) {
@@ -190,6 +194,11 @@ public class CertificateManagerImpl implements CertificateManager {
             throws APIManagementException {
 
         List<CertificateMetadataDTO> certificateMetadataList;
+
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("Retrieve certificates of tenant %d which matches alias : %s and endpoint : %s",
+                    tenantId, alias, endpoint));
+        }
         try {
             certificateMetadataList = certificateMgtDAO.getCertificates(alias, endpoint, tenantId);
         } catch (CertificateManagementException e) {
@@ -203,6 +212,10 @@ public class CertificateManagerImpl implements CertificateManager {
     public boolean isCertificatePresent(int tenantId, String alias) throws APIManagementException {
 
         List<CertificateMetadataDTO> certificateMetadataList;
+
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("Check whether the tenant %d has a certificate for alias %s", tenantId, alias));
+        }
         try {
             certificateMetadataList = certificateMgtDAO.getCertificates(alias, null, tenantId);
         } catch (CertificateManagementException e) {
@@ -215,6 +228,9 @@ public class CertificateManagerImpl implements CertificateManager {
     @Override
     public CertificateInformationDTO getCertificateInformation(String alias) throws APIManagementException {
 
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("Get Certificate information for alias %s", alias));
+        }
         try {
             return certificateMgtUtils.getCertificateInformation(alias);
         } catch (CertificateManagementException e) {
@@ -235,6 +251,9 @@ public class CertificateManagerImpl implements CertificateManager {
     @Override
     public int getCertificateCount(int tenantId) throws APIManagementException {
 
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("Get the number of certificates tenant %d has.", tenantId));
+        }
         try {
             return certificateMgtDAO.getCertificateCount(tenantId);
         } catch (CertificateManagementException e) {
@@ -245,6 +264,9 @@ public class CertificateManagerImpl implements CertificateManager {
     @Override
     public ByteArrayInputStream getCertificateContent(String alias) throws APIManagementException {
 
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("Get the contents of the certificate for alias %s", alias));
+        }
         try {
             return certificateMgtUtils.getCertificateContent(alias);
         } catch (CertificateManagementException e) {

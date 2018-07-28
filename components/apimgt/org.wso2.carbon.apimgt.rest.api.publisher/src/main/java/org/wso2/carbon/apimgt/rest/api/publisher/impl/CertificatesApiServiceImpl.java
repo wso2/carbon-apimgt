@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * you may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
 import org.apache.commons.lang.StringUtils;
@@ -29,6 +46,9 @@ import java.util.List;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+/**
+ * The service implementation for dynamic certificate management APIs.
+ */
 public class CertificatesApiServiceImpl extends CertificatesApiService {
 
     private static final Log log = LogFactory.getLog(CertificatesApiServiceImpl.class);
@@ -50,8 +70,16 @@ public class CertificatesApiServiceImpl extends CertificatesApiService {
             int responseCode = apiProvider.deleteCertificate(userName, alias, null);
 
             if (responseCode == ResponseCode.SUCCESS.getResponseCode()) {
+                if (log.isDebugEnabled()) {
+                    log.debug(String.format("The certificate which belongs to tenant : %d represented by the alias : " +
+                            "%s is deleted successfully", tenantId, alias));
+                }
                 return Response.ok().entity("The certificate for alias '" + alias + "' deleted successfully.").build();
             } else {
+                if (log.isDebugEnabled()) {
+                    log.debug(String.format("Failed to delete the certificate which belongs to tenant : %d " +
+                            "represented by the alias : %s.", tenantId, alias));
+                }
                 RestApiUtil.handleInternalServerError("Error while deleting the certificate for alias '" +
                         alias + "'.", log);
             }
@@ -72,9 +100,18 @@ public class CertificatesApiServiceImpl extends CertificatesApiService {
             RestApiUtil.handleBadRequest("The alias cannot be empty", log);
         }
 
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("Retrieving the common information of the certificate which is represented by the" +
+                    " alias : %s", alias));
+        }
+
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             if (!apiProvider.isCertificatePresent(tenantId, alias)) {
+                if (log.isDebugEnabled()) {
+                    log.debug(String.format("Could not find a certificate in truststore which belongs to tenant %d " +
+                            "and with alias %s. Hence the operation is terminated.", tenantId, alias));
+                }
                 String message = "Certificate for Alias '" + alias + "' is not found.";
                 RestApiUtil.handleResourceNotFoundError(message, log);
             }
@@ -118,6 +155,10 @@ public class CertificatesApiServiceImpl extends CertificatesApiService {
             int tenantId = APIUtil.getTenantId(userName);
 
             if (!apiProvider.isCertificatePresent(tenantId, alias)) {
+                if (log.isDebugEnabled()) {
+                    log.debug(String.format("Could not find a certificate in truststore which belongs to tenant : %d " +
+                            "and with alias : %s. Hence the operation is terminated.", tenantId, alias));
+                }
                 RestApiUtil.handleResourceNotFoundError("Could not update the certificate. " +
                         "The alias '" + alias + "' not found.", log);
             }
@@ -151,9 +192,10 @@ public class CertificatesApiServiceImpl extends CertificatesApiService {
             RestApiUtil.handleInternalServerError("Error while adding the certificate due to an internal server " +
                     "error", log);
         } catch (IOException e) {
-            RestApiUtil.handleInternalServerError("Error while reading the certificate", log);
+            RestApiUtil.handleInternalServerError("Error while encoding certificate", log);
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+            RestApiUtil.handleInternalServerError("Error while generating the resource location URI for alias '" +
+                    alias + "'", log);
         }
         return null;
     }
@@ -174,8 +216,16 @@ public class CertificatesApiServiceImpl extends CertificatesApiService {
             int totalCount = apiProvider.getCertificateCountPerTenant(tenantId);
 
             if (StringUtils.isNotEmpty(alias) || StringUtils.isNotEmpty(endpoint)) {
+                if (log.isDebugEnabled()) {
+                    log.debug(String.format("Call the search certificate api to get the filtered certificates for " +
+                            "tenant id : %d, alias : %s, and endpoint : %s", tenantId, alias, endpoint));
+                }
                 certificates = apiProvider.searchCertificates(tenantId, alias, endpoint);
             } else {
+                if (log.isDebugEnabled()) {
+                    log.debug(String.format("There is no query parameters provided. So, retrieve all the certificates" +
+                                    " belongs to the tenantId : %d", tenantId));
+                }
                 certificates = apiProvider.getCertificates(userName);
             }
 
@@ -188,7 +238,6 @@ public class CertificatesApiServiceImpl extends CertificatesApiService {
             paginationDTO.setTotal(totalCount);
 
             certificatesDTO.setPagination(paginationDTO);
-
             return Response.status(Response.Status.OK).entity(certificatesDTO).build();
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while retrieving the certificates.", e, log);
@@ -209,12 +258,17 @@ public class CertificatesApiServiceImpl extends CertificatesApiService {
             String fileName = contentDisposition.getParameter(RestApiConstants.CONTENT_DISPOSITION_FILENAME);
 
             if (StringUtils.isBlank(fileName)) {
-                RestApiUtil.handleBadRequest("Certificate update failed. The Certificate should not be empty", log);
+                RestApiUtil.handleBadRequest("Certificate update failed. Proper Certificate file should be provided",
+                        log);
             }
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
             String base64EncodedCert = CertificateRestApiUtils.generateEncodedCertificate(certificateInputStream);
             int responseCode = apiProvider.addCertificate(userName, base64EncodedCert, alias, endpoint);
+
+            if (log.isDebugEnabled()) {
+                log.debug(String.format("Add certificate operation response code : %d", responseCode));
+            }
 
             if (ResponseCode.SUCCESS.getResponseCode() == responseCode) {
                 CertMetadataDTO certificateDTO = new CertMetadataDTO();
@@ -223,9 +277,7 @@ public class CertificatesApiServiceImpl extends CertificatesApiService {
 
                 URI createdCertUri = new URI(RestApiConstants.CERTS_BASE_PATH + "?alias=" + alias);
                 return Response.created(createdCertUri).entity(certificateDTO).build();
-            }
-
-            if (ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode() == responseCode) {
+            } else if (ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode() == responseCode) {
                 RestApiUtil.handleInternalServerError("Error while adding the certificate due to an" +
                         " internal server error", log);
             } else if (ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE.getResponseCode() == responseCode) {
@@ -238,10 +290,10 @@ public class CertificatesApiServiceImpl extends CertificatesApiService {
             RestApiUtil.handleInternalServerError("Error while adding the certificate due to an internal server " +
                     "error", log);
         } catch (IOException e) {
-            RestApiUtil.handleInternalServerError("Error while reading the certificate", log);
+            RestApiUtil.handleInternalServerError("Error while generating the encoded certificate", log);
         } catch (URISyntaxException e) {
-            RestApiUtil.handleInternalServerError("Error while retrieving the resource location of the certificate",
-                    log);
+            RestApiUtil.handleInternalServerError("Error while generating the resource location URI for alias '" +
+                            alias + "'", log);
         }
         return null;
     }
@@ -260,18 +312,20 @@ public class CertificatesApiServiceImpl extends CertificatesApiService {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             if (!apiProvider.isCertificatePresent(tenantId, alias)) {
+                if (log.isDebugEnabled()) {
+                    log.debug(String.format("Could not find a certificate in truststore which belongs to tenant : %d " +
+                            "and with alias : %s. Hence the operation is terminated.", tenantId, alias));
+                }
                 String message = "Certificate for Alias '" + alias + "' is not found.";
                 RestApiUtil.handleResourceNotFoundError(message, log);
             }
 
             Object certificate = apiProvider.getCertificateContent(alias);
-
             if (certificate != null) {
                 Response.ResponseBuilder responseBuilder = Response.ok().entity(certificate);
                 responseBuilder.header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
                         + certFileName + "\"");
                 responseBuilder.header(RestApiConstants.HEADER_CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM);
-
                 return responseBuilder.build();
             }
         } catch (APIManagementException e) {

@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.impl.dao;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateAliasExistsException;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
@@ -55,12 +54,14 @@ public class CertificateMgtDAO {
      * Private constructor
      */
     private CertificateMgtDAO() {
+
     }
 
     /**
      * Returns an instance of CertificateMgtDao.
      */
     public static synchronized CertificateMgtDAO getInstance() {
+
         if (certificateMgtDAO == null) {
             certificateMgtDAO = new CertificateMgtDAO();
         }
@@ -73,6 +74,7 @@ public class CertificateMgtDAO {
      * @return : True if exists, false otherwise.
      */
     public boolean isTableExists() throws CertificateManagementException {
+
         boolean isExists = false;
         Connection connection = null;
         ResultSet resultSet = null;
@@ -109,6 +111,7 @@ public class CertificateMgtDAO {
      */
     public boolean addCertificate(String alias, String endpoint, int tenantId) throws CertificateManagementException,
             CertificateAliasExistsException {
+
         boolean result = false;
         Connection connection = null;
         PreparedStatement preparedStatement = null;
@@ -138,7 +141,6 @@ public class CertificateMgtDAO {
             preparedStatement.setString(3, alias);
             result = preparedStatement.executeUpdate() == 1;
             connection.commit();
-
         } catch (SQLException e) {
             try {
                 if (connection != null) {
@@ -167,10 +169,11 @@ public class CertificateMgtDAO {
      * Addresses : If some tenant is trying to add a certificate with the same alias, proper error should be shown in
      * the UI.
      *
-     * @param alias    : Alias for the certificate. (Optional)
+     * @param alias : Alias for the certificate. (Optional)
      * @return : A CertificateMetadataDTO object if the certificate is retrieved successfully, null otherwise.
      */
     private CertificateMetadataDTO getCertificate(String alias) throws CertificateManagementException {
+
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
@@ -192,7 +195,10 @@ public class CertificateMgtDAO {
                 certificateMetadataDTO.setEndpoint(resultSet.getString("END_POINT"));
             }
         } catch (SQLException e) {
-            handleException("Error while retrieving certificate metadata.", e);
+            if (log.isDebugEnabled()) {
+                log.debug("Error while retrieving certificate metadata for alias " + alias);
+            }
+            handleException("Error while retrieving certificate metadata for alias " + alias, e);
         } finally {
             APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
@@ -211,6 +217,7 @@ public class CertificateMgtDAO {
      */
     public List<CertificateMetadataDTO> getCertificates(String alias, String endpoint, int tenantId)
             throws CertificateManagementException {
+
         Connection connection = null;
         String getCertQuery = null;
         PreparedStatement preparedStatement = null;
@@ -219,8 +226,16 @@ public class CertificateMgtDAO {
         List<CertificateMetadataDTO> certificateMetadataList = new ArrayList<>();
 
         if (StringUtils.isNotEmpty(alias) || StringUtils.isNotEmpty(endpoint)) {
+            if (log.isDebugEnabled()) {
+                log.debug("The alias and endpoint are not empty. Invoking the search query with parameters " +
+                        "alias = " + alias + " endpoint = " + endpoint);
+            }
             getCertQuery = SQLConstants.CertificateConstants.GET_CERTIFICATE_TENANT;
         } else {
+            if (log.isDebugEnabled()) {
+                log.debug("The alias and endpoint are empty. Invoking the get all certificates for tenant " +
+                        tenantId);
+            }
             getCertQuery = SQLConstants.CertificateConstants.GET_CERTIFICATES;
         }
 
@@ -263,6 +278,7 @@ public class CertificateMgtDAO {
      */
     public boolean deleteCertificate(String alias, String endpoint, int tenantId)
             throws CertificateManagementException {
+
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         boolean result = false;
@@ -309,32 +325,39 @@ public class CertificateMgtDAO {
         PreparedStatement preparedStatement = null;
         String certificateCountQuery = SQLConstants.CertificateConstants.CERTIFICATE_COUNT_QUERY;
         int count = 0;
+        ResultSet resultSet = null;
+
+        if (log.isDebugEnabled()) {
+            log.debug("Get the certificate count for tenantId" + tenantId);
+        }
 
         try {
             connection = APIMgtDBUtil.getConnection();
             preparedStatement = connection.prepareStatement(certificateCountQuery);
             preparedStatement.setInt(1, tenantId);
-            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
                 count = resultSet.getInt("count");
             }
         } catch (SQLException e) {
-            handleException("Error while retrieving the certificate count.", e);
+            handleException("Error while retrieving the certificate count for tenantId " + tenantId + ".", e);
         } finally {
             APIMgtDBUtil.closeStatement(preparedStatement);
-            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, null);
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
         }
         return count;
     }
 
     /**
      * Method to handle the SQL Exception.
+     *
      * @param message : Error message.
-     * @param e : Throwable cause.
-     * @throws APIManagementException :
+     * @param e       : Throwable cause.
+     * @throws CertificateManagementException :
      */
     private void handleException(String message, Throwable e) throws CertificateManagementException {
+
         throw new CertificateManagementException(message, e);
     }
 }

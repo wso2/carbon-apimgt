@@ -21,6 +21,8 @@ import com.nimbusds.jose.util.StandardCharset;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.CertMetadataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.CertificatesDTO;
@@ -33,7 +35,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Utility operations for Dynamic Certificate Management REST API.
+ */
 public class CertificateRestApiUtils {
+
+    private static final Log log = LogFactory.getLog(CertificateRestApiUtils.class);
 
     /**
      * Generates a base64 encoded string of the certificate that is being uploaded.
@@ -61,17 +68,23 @@ public class CertificateRestApiUtils {
     public static CertificatesDTO getPaginatedCertificates(
             List<CertificateMetadataDTO> certificateMetadataList, int limit, int offset, String query) {
 
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("Filter the certificates based on the pagination parameters, limit = %d and " +
+                    "offset = %d", limit, offset));
+        }
+
         int certCount = certificateMetadataList.size();
         List<CertMetadataDTO> certificateList = new ArrayList<>();
 
         CertificatesDTO certificatesDTO = new CertificatesDTO();
         certificatesDTO.setCount(certCount > limit ? limit : certCount);
 
-        // If the provided offset value exceeds the number of pages, reset the offset to default.
+        // If the provided offset value exceeds the offset, reset the offset to default.
         if (offset > certCount) {
             offset = RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         }
 
+        // Select only the set of Certificates which matches the given limit and offset values.
         int start = offset;
         int end = certCount > start + limit ? start + limit : certCount;
         for (int i = start; i < end; i++) {
@@ -99,10 +112,8 @@ public class CertificateRestApiUtils {
 
         certificatesDTO.setNext(paginatedNext);
         certificatesDTO.setPrevious(paginatedPrevious);
-
         certificatesDTO.setCount(certificateList.size());
         certificatesDTO.setCertificates(certificateList);
-
         return certificatesDTO;
     }
 
@@ -139,6 +150,9 @@ public class CertificateRestApiUtils {
 
         if (StringUtils.isNotBlank(endpoint)) {
             query = query + "&endpoint=" + endpoint;
+        }
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("The query string for the api : %s", query));
         }
         return query;
     }
