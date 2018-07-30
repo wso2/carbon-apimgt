@@ -382,11 +382,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     .LABEL_TYPE_STORE));
             apiBuilder.labels(labelSet);
         }
-        Map<String, Endpoint> apiEndpointMap = apiBuilder.getEndpoint();
-        validateEndpoints(apiEndpointMap, false);
 
         try {
             if (!isApiNameExist(apiBuilder.getName()) && !isContextExist(apiBuilder.getContext())) {
+                Map<String, Endpoint> apiEndpointMap = apiBuilder.getEndpoint();
+                validateEndpoints(apiEndpointMap, false);
                 LifecycleState lifecycleState = getApiLifecycleManager().addLifecycle(APIMgtConstants.API_LIFECYCLE,
                         getUsername());
                 apiBuilder.associateLifecycle(lifecycleState);
