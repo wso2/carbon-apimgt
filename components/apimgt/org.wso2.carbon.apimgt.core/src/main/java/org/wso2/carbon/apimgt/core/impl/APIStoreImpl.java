@@ -262,6 +262,11 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                         throw new APIManagementException(message, ExceptionCodes.TIER_NAME_INVALID);
                     }
                     application.setPolicy(policy);
+                } else {
+                    String existingPolicyName = existingApplication.getPolicy().getPolicyName();
+                    Policy existingPolicy = getPolicyDAO().getSimplifiedPolicyByLevelAndName(APIMgtAdminService
+                            .PolicyLevel.application, existingPolicyName);
+                    application.setPolicy(existingPolicy);
                 }
                 workflow.setExistingApplication(existingApplication);
                 workflow.setUpdatedApplication(application);

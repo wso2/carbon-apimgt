@@ -35,6 +35,7 @@ import Alert from "../../Base/Alert";
 import Card, { CardActions, CardContent } from 'material-ui/Card';
 import Divider from 'material-ui/Divider';
 import qs from 'qs';
+import TablePagination from 'material-ui/Table/TablePagination';
 
 const styles = theme => ({
         card: {
@@ -80,10 +81,11 @@ class ApplicationTableHead extends Component {
 
     render() {
         const columnData = [
-            {id: 'name', numeric: false, disablePadding: true, label: 'Name'},
-            {id: 'throttlingTier', numeric: false, disablePadding: false, label: 'Tier'},
-            {id: 'lifeCycleStatus', numeric: false, disablePadding: false, label: 'Workflow Status'},
-            {id: 'actions', numeric: false, disablePadding: false, label: 'Actions'},
+            {id: 'name', numeric: false, disablePadding: true, label: 'Name', sorting:true},
+            {id: 'throttlingTier', numeric: false, disablePadding: false, label: 'Policy', sorting:true},
+            {id: 'lifeCycleStatus', numeric: false, disablePadding: false, label: 'Workflow Status', sorting:true},
+            {id: 'subscriptions', numeric: false, disablePadding: false, label: 'Subscriptions', sorting:true},
+            {id: 'actions', numeric: false, disablePadding: false, label: 'Actions', sorting:false},
         ];
         const {order, orderBy} = this.props;
         return (
@@ -91,17 +93,24 @@ class ApplicationTableHead extends Component {
                 <TableRow>
                     {columnData.map(column => {
                         return (
-                            <TableCell key={column.id} numeric={column.numeric}>
+                            <TableCell
+                                key={column.id}
+                                numeric={column.numeric}
+                                sortDirection={orderBy === column.id ? order : false}
+                            >
+                                {column.sorting ?
                                 <TableSortLabel
                                     active={orderBy === column.id}
                                     direction={order}
                                     onClick={this.createSortHandler(column.id)}
                                 >
                                     {column.label}
-                                </TableSortLabel>
+                                </TableSortLabel> :
+                                    column.label
+                                }
                             </TableCell>
                         );
-                    })}
+                    }, this)}
                 </TableRow>
             </TableHead>
         );
@@ -118,6 +127,8 @@ class Listing extends Component {
             selected: [],
             data: null,
             alertMessage: null,
+            page: 0,
+            rowsPerPage : 10
         };
         this.handleAppDelete = this.handleAppDelete.bind(this);
     }
@@ -148,10 +159,7 @@ class Listing extends Component {
         if (this.state.orderBy === property && this.state.order === 'desc') {
             order = 'asc';
         }
-        const data = this.state.data.sort(
-            (a, b) => (order === 'desc' ? b[orderBy] > a[orderBy] : a[orderBy] > b[orderBy]),
-        );
-        this.setState({data, order, orderBy});
+        this.setState({ order, orderBy});
     };
 
     handleAppDelete(event) {
@@ -165,14 +173,23 @@ class Listing extends Component {
         let promised_delete = Application.deleteApp(id);
         promised_delete.then(ok => {
             if (ok) {
-                this.state.data.delete(id);
+                let {data} = this.state;
+                data.delete(id);
                 this.setState({data: this.state.data, alertMessage: message});
             }
         });
     }
 
+    handleChangePage = (event, page) => {
+        this.setState({ page });
+    };
+
+    handleChangeRowsPerPage = event => {
+        this.setState({ rowsPerPage: event.target.value });
+    };
+
     render() {
-        const {data, order, orderBy, alertMessage} = this.state;
+        const {data, order, orderBy, alertMessage, rowsPerPage, page} = this.state;
         if (!data) {
             return <Loading/>;
         }
@@ -196,7 +213,7 @@ class Listing extends Component {
                             }
                         </div>
                         <Divider className={classes.divider} />
-                        
+
                             {data.size > 0 ? (
                                 <div>
                                     <Typography variant="caption" gutterBottom align="left">
@@ -207,8 +224,25 @@ class Listing extends Component {
                                     <Table>
                                         <ApplicationTableHead order={order} orderBy={orderBy}
                                                             onRequestSort={this.handleRequestSort}/>
-                                        <AppsTableContent handleAppDelete={this.handleAppDelete} apps={data}/>
+                                        <AppsTableContent handleAppDelete={this.handleAppDelete} apps={data} page={page}
+                                                          rowsPerPage={rowsPerPage} order={order} orderBy={orderBy}/>
                                     </Table>
+                                    <TablePagination
+                                        component="div"
+                                        count={data.size}
+                                        rowsPerPage={rowsPerPage}
+                                        rowsPerPageOptions={[5,10,15]}
+                                        labelRowsPerPage="Show"
+                                        page={page}
+                                        backIconButtonProps={{
+                                            'aria-label': 'Previous Page',
+                                        }}
+                                        nextIconButtonProps={{
+                                            'aria-label': 'Next Page',
+                                        }}
+                                        onChangePage={this.handleChangePage}
+                                        onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                                    />
                                 </div>
                             ) : (
                                 <Grid item xs={12} sm={12} md={6} lg={4} xl={4} >
@@ -217,7 +251,8 @@ class Listing extends Component {
                                         <Typography className={classes.title}>
                                         An application is a logical collection of APIs. Applications allow you to use a single
                             access token to invoke a collection of APIs and to subscribe to one API multiple times with different
-                            SLA levels. The DefaultApplication is pre-created and allows unlimited access by default.</Typography>
+                            SLA levels. The DefaultApplication is pre-created and allows unlimited access by default.
+                                        </Typography>
                                         </CardContent>
                                         <CardActions>
                                             <Link to={"/application/create"} className={classes.createAppWrapper}>
@@ -229,7 +264,7 @@ class Listing extends Component {
                                     </Card>
                                 </Grid>
                             )}
-                        
+
                     </Grid>
                 </Grid>
             </div>
