@@ -5693,7 +5693,15 @@ public class ApiMgtDAO {
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
+        int tenantId;
         ArrayList<URITemplate> uriTemplates = new ArrayList<URITemplate>();
+
+        String apiTenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(apiContext);
+        if (apiTenantDomain != null) {
+            tenantId = APIUtil.getTenantIdFromTenantDomain(apiTenantDomain);
+        } else {
+            tenantId = MultitenantConstants.SUPER_TENANT_ID;
+        }
 
         // TODO : FILTER RESULTS ONLY FOR ACTIVE APIs
         String query = SQLConstants.ThrottleSQLConstants.GET_CONDITION_GROUPS_FOR_POLICIES_SQL;
@@ -5702,6 +5710,7 @@ public class ApiMgtDAO {
             prepStmt = connection.prepareStatement(query);
             prepStmt.setString(1, apiContext);
             prepStmt.setString(2, version);
+            prepStmt.setInt(3, tenantId);
 
             rs = prepStmt.executeQuery();
             Map<String, Set<ConditionGroupDTO>> mapByHttpVerbURLPatternToId = new HashMap<String, Set<ConditionGroupDTO>>();
