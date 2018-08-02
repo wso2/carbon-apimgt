@@ -138,7 +138,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
                                     <div class="form-group">
                                         <label class="col-xs-4 col-sm-4 control-label"><strong><%=i18n.localize("By:")%></strong></label>
                                         <div class="col-xs-8 col-sm-8">
-                                            <p class="form-control-static"><%=encode.forHtml(displayOwner)%></p>
+                                            <p class="form-control-static"><%=jagg.validateForScript(displayOwner)%></p>
                                         </div>
                                     </div>
                                     <div class="form-group">
