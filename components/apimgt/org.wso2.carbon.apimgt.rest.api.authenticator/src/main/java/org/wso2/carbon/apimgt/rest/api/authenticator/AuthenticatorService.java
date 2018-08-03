@@ -226,6 +226,13 @@ public class AuthenticatorService {
                     String errorMsg = "User " + usernameFromJWT + " does not exists in this environment.";
                     throw new APIManagementException(errorMsg, e, ExceptionCodes.USER_NOT_AUTHENTICATED);
                 }
+            } else if (KeyManagerConstants.CLIENT_CREDENTIALS_GRANT_TYPE.equals(grantType)){
+                accessTokenRequest = AuthUtil
+                        .createAccessTokenRequest(null,null,grantType,refreshToken,
+                                null,validityPeriod,KeyManagerConstants.SELF_SIGN_UP_SCOPE,
+                                consumerKeySecretMap.get(KeyManagerConstants.KeyDetails.CONSUMER_KEY),
+                                consumerKeySecretMap.get(KeyManagerConstants.KeyDetails.CONSUMER_SECRET));
+                accessTokenInfo = getKeyManager().getNewAccessToken(accessTokenRequest);
             }
         } catch (KeyManagementException e) {
             String errorMsg = "Error while receiving tokens for OAuth application : " + appName;
@@ -401,6 +408,7 @@ public class AuthenticatorService {
             List<String> grantTypes = new ArrayList<>();
             grantTypes.add(KeyManagerConstants.PASSWORD_GRANT_TYPE);
             grantTypes.add(KeyManagerConstants.REFRESH_GRANT_TYPE);
+            grantTypes.add(KeyManagerConstants.CLIENT_CREDENTIALS_GRANT_TYPE);
             OAuthApplicationInfo oAuthApplicationInfo;
             oAuthApplicationInfo = createDCRApplication(appName, "http://temporary.callback/url", grantTypes);
 

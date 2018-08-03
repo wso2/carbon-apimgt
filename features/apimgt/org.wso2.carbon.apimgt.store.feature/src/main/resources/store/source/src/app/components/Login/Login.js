@@ -26,7 +26,6 @@ import Paper from 'material-ui/Paper';
 import Button from 'material-ui/Button';
 import Typography from 'material-ui/Typography';
 import Snackbar from 'material-ui/Snackbar';
-import Footer from '../Base/Footer/Footer'
 import User from '../../data/User'
 import ConfigManager from "../../data/ConfigManager";
 import Utils from "../../data/Utils";
@@ -37,6 +36,7 @@ import {MenuItem} from 'material-ui/Menu';
 import Grid from 'material-ui/Grid';
 import Loading from "../Base/Loading/Loading";
 import Redirecting from "../Shared/Redirecting";
+import { Link } from 'react-router-dom';
 
 class Login extends Component {
 
@@ -254,7 +254,7 @@ class Login extends Component {
                                 <Grid item sm={9} xs={12}>
                                     <div className="login-main-content">
                                         <Paper elevation={1} square={true} className="login-paper">
-                                            <form onSubmit={this.handleSubmit} className="login-form">
+                                            <form className="login-form">
                                                 <Typography type="body1" gutterBottom>
                                                     Sign in to your account
                                                 </Typography>
@@ -322,9 +322,27 @@ class Login extends Component {
                                                     color="primary"
                                                     className="login-form-submit"
                                                     disabled={!isSsoUpdated}
+                                                    onClick={this.handleSubmit}
                                                 >
                                                     {isSsoEnabled ? "Visit Login Page" : "Login"}
                                                 </Button>
+                                                <Button
+                                                    type="submit"
+                                                    variant="raised"
+                                                    color="primary"
+                                                    style={{marginLeft:20}}
+                                                    component={Link}
+                                                    to={"/"}
+                                                >
+                                                    Go Back
+                                                </Button>
+
+                                                <Typography type="body1" style={{marginTop:10}}>
+                                                    Don't have an account! {' '}
+                                                    <Link to={"/sign-up"} style={{ textDecoration: 'none' }}>
+                                                        Sign Up here
+                                                    </Link>
+                                                </Typography>
                                             </form>
                                         </Paper>
                                     </div>
