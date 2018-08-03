@@ -221,7 +221,7 @@ class AuthManager {
     /**
      * Register anonymous user by generating token using client_credentials grant type
      * @param {Object} environment : environment object
-     * @returns {AxiosPromise} : Promise object with the login request made
+     * @returns {AxiosPromise} : Promise object with the request made
      */
     registerUser(environment) {
         const headers = {
