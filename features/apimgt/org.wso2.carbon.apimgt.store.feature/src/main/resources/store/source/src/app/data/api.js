@@ -467,14 +467,4 @@ export default class API extends Resource {
         return promise_sdk;
     }
 
-    createUser(body) {
-        let payload = {body: body};
-        const promise = this.client.then(
-            (client) => {
-                return client.apis["Sign Up"].post_self_signup(payload, {'Content-Type': 'application/json'});
-            }
-        );
-        return promise;
-    }
-
 }
