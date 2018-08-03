@@ -339,9 +339,7 @@ class Login extends Component {
 
                                                 <Typography type="body1" style={{marginTop:10}}>
                                                     Don't have an account! {' '}
-                                                    <Link to={"/sign-up"} style={{ textDecoration: 'none' }}>
-                                                        Sign Up here
-                                                    </Link>
+                                                    <Link to={"/sign-up"} style={{ textDecoration: 'none' }}> Sign Up here</Link>
                                                 </Typography>
                                             </form>
                                         </Paper>
