@@ -227,11 +227,10 @@ public class AuthenticatorService {
                     throw new APIManagementException(errorMsg, e, ExceptionCodes.USER_NOT_AUTHENTICATED);
                 }
             } else if (KeyManagerConstants.CLIENT_CREDENTIALS_GRANT_TYPE.equals(grantType)) {
-                accessTokenRequest = AuthUtil
-                        .createAccessTokenRequest(null, null, grantType, refreshToken,
-                                null, validityPeriod, KeyManagerConstants.SELF_SIGN_UP_SCOPE,
-                                consumerKeySecretMap.get(KeyManagerConstants.KeyDetails.CONSUMER_KEY),
-                                consumerKeySecretMap.get(KeyManagerConstants.KeyDetails.CONSUMER_SECRET));
+                accessTokenRequest = AuthUtil.createAccessTokenRequest(null, null, grantType,
+                        refreshToken, null, validityPeriod, KeyManagerConstants.SELF_SIGN_UP_SCOPE,
+                        consumerKeySecretMap.get(KeyManagerConstants.KeyDetails.CONSUMER_KEY),
+                        consumerKeySecretMap.get(KeyManagerConstants.KeyDetails.CONSUMER_SECRET));
                 accessTokenInfo = getKeyManager().getNewAccessToken(accessTokenRequest);
             }
         } catch (KeyManagementException e) {

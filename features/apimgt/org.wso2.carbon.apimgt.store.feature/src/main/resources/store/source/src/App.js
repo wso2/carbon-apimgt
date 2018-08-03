@@ -120,7 +120,7 @@ class Protected extends Component {
                             <Route path={"/applications"} component={Applications}/>
                             <Route path={"/application/create"} component={ApplicationCreate}/>
                             <Route path={"/application/edit/:application_id"} component={ApplicationEdit}/>
-                            <Route exact path={"/user"} component={ChangePassword}/>
+                            <Route path={"/user"} component={ChangePassword}/>
                             <Route component={PageNotFound}/>
                         </Switch>
                     </Base>

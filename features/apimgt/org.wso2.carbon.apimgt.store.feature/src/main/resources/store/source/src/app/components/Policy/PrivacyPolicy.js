@@ -34,84 +34,84 @@ const styles = {
         paddingTop:70
     }
 };
+
 class PrivacyPolicy extends React.Component {
     render(){
         const { classes } = this.props;
         return (
             <div>
                 <div className={classes.header}>
-                <AppBar position="absolute">
-                    <ToolBar>
-                        <Typography variant="title"  noWrap>
-                            <img src="/store/public/app/images/logo.png"
-                                 alt="wso2-logo"/> <span style={{color: 'white'}}>API STORE</span>
-                        </Typography>
-                    </ToolBar>
-                </AppBar>
+                    <AppBar position="absolute">
+                        <ToolBar>
+                            <Typography variant="title"  noWrap>
+                                <img src="/store/public/app/images/logo.png"
+                                     alt="wso2-logo"/>
+                                <span style={{color: 'white'}}>API STORE</span>
+                            </Typography>
+                        </ToolBar>
+                    </AppBar>
                 </div>
-            <Grid container spacing={24}>
-            <Grid item xs={3}>
-                    <MenuList>
-                        <MenuItem>
-                            <ListItemIcon >
-                                <Label />
-                            </ListItemIcon>
-                            <Link style={{ textDecoration: 'none' }} to="#privacyPolicy">Privacy Policy</Link>
-                        </MenuItem>
-                        <MenuItem >
-                            <ListItemIcon >
-                                <Label />
-                            </ListItemIcon>
-                            <Link style={{ textDecoration: 'none' }} to="#personalInfo">What are the personal information?</Link>
-                        </MenuItem>
-                        <MenuItem >
-                            <ListItemIcon >
-                                <Label />
-                            </ListItemIcon>
-                            <Link style={{ textDecoration: 'none' }} to="#infoCollection">Collection of your information</Link>
-                        </MenuItem>
-                        <MenuItem >
-                            <ListItemIcon >
-                                <Label />
-                            </ListItemIcon>
-                            <Link style={{ textDecoration: 'none' }} to="#useOfInfo">Use of your personal information</Link>
-                        </MenuItem>
-                        <MenuItem >
-                            <ListItemIcon >
-                                <Label />
-                            </ListItemIcon>
-                            <Link style={{ textDecoration: 'none' }} to="#disclosureOfInfo">Disclosure of your information</Link>
-                        </MenuItem>
-                        <MenuItem >
-                            <ListItemIcon >
-                                <Label />
-                            </ListItemIcon>
-                            <Link style={{ textDecoration: 'none' }} to="#storageOfInfo">How API-M keeps your information</Link>
-                        </MenuItem>
-                        <MenuItem >
-                            <ListItemIcon >
-                                <Label />
-                            </ListItemIcon>
-                            <Link style={{ textDecoration: 'none' }} to="#about">About</Link>
-                        </MenuItem>
-                        <MenuItem>
-                            <ListItemIcon >
-                                <Label />
-                            </ListItemIcon>
-                            <Link style={{ textDecoration: 'none' }} to="#disclaimer">Disclaimer</Link>
-                        </MenuItem>
-                    </MenuList>
-            </Grid>
-                <Grid item xs={8}>
+                <Grid container spacing={24}>
+                    <Grid item xs={3}>
+                        <MenuList>
+                            <MenuItem>
+                                <ListItemIcon >
+                                    <Label />
+                                </ListItemIcon>
+                                <Link style={{ textDecoration: 'none' }} to="#privacyPolicy">Privacy Policy</Link>
+                            </MenuItem>
+                            <MenuItem >
+                                <ListItemIcon >
+                                    <Label />
+                                </ListItemIcon>
+                                <Link style={{ textDecoration: 'none' }} to="#personalInfo">What are the personal information?</Link>
+                            </MenuItem>
+                            <MenuItem >
+                                <ListItemIcon >
+                                    <Label />
+                                </ListItemIcon>
+                                <Link style={{ textDecoration: 'none' }} to="#infoCollection">Collection of your information</Link>
+                            </MenuItem>
+                            <MenuItem >
+                                <ListItemIcon >
+                                    <Label />
+                                </ListItemIcon>
+                                <Link style={{ textDecoration: 'none' }} to="#useOfInfo">Use of your personal information</Link>
+                            </MenuItem>
+                            <MenuItem >
+                                <ListItemIcon >
+                                    <Label />
+                                </ListItemIcon>
+                                <Link style={{ textDecoration: 'none' }} to="#disclosureOfInfo">Disclosure of your information</Link>
+                            </MenuItem>
+                            <MenuItem >
+                                <ListItemIcon >
+                                    <Label />
+                                </ListItemIcon>
+                                <Link style={{ textDecoration: 'none' }} to="#storageOfInfo">How API-M keeps your information</Link>
+                            </MenuItem>
+                            <MenuItem >
+                                <ListItemIcon >
+                                    <Label />
+                                </ListItemIcon>
+                                <Link style={{ textDecoration: 'none' }} to="#about">About</Link>
+                            </MenuItem>
+                            <MenuItem>
+                                <ListItemIcon >
+                                    <Label />
+                                </ListItemIcon>
+                                <Link style={{ textDecoration: 'none' }} to="#disclaimer">Disclaimer</Link>
+                            </MenuItem>
+                        </MenuList>
+                    </Grid>
+                    <Grid item xs={8}>
                         <h1>
                             <strong>WSO2 API Manager - Privacy Policy</strong>
                         </h1>
                         <p>
                             <a target="_blank" href="https://wso2.com/api-management/">About WSO2 API Manager</a>
                         </p>
-                        <p>
-                            WSO2 API Manager (referred hereafter as “API-M ”) is an open source enterprise-class solution that supports API publishing, lifecycle management, application development, access control, rate limiting, and analytics in one cleanly integrated system.
-                        </p>
+                        <p>WSO2 API Manager (referred hereafter as “API-M ”) is an open source enterprise-class solution that supports API publishing, lifecycle management, application development, access control, rate limiting, and analytics in one cleanly integrated system.</p>
                         <h2 id="privacyPolicy">
                             <strong>Privacy Policy</strong>
                         </h2>
@@ -121,9 +121,7 @@ class PrivacyPolicy extends React.Component {
                             or its developers have no access to the information held within API-M. Please refer
                             “Disclaimer” for more information.
                         </p>
-                        <h2 id="personalInfo">
-                            What are the personal information?
-                        </h2>
+                        <h2 id="personalInfo">What are the personal information?</h2>
                         <ul>
                             <li>Your user name (except in the case where your user name is created by your employer under contract)</li>
                             <li>The IP address you use to login</li>
@@ -141,9 +139,7 @@ class PrivacyPolicy extends React.Component {
                             <li>Type of the device you use to login (Phone, Tablet, etc.)</li>
                             <li>Operating system and Generic browser information</li>
                         </ul>
-                        <h2 id="infoCollection">
-                            Collection of your information
-                        </h2>
+                        <h2 id="infoCollection">Collection of your information</h2>
                         <p>API-M collects your information to only serve your access requirements. For example,</p>
                         <ul>
                             <li>API-M uses your IP address to detect any suspicious login attempt to your account.</li>
@@ -158,9 +154,7 @@ class PrivacyPolicy extends React.Component {
                             <li>Your login history with browser cookies. Please refer our cookie policy for more information</li>
                         </ul>
                         <h2 id="useOfInfo">Use of your personal information</h2>
-                        <p>
-                            API-M will use your personal information only for the purposes for which it was collected (or for a use identified as consistent with that purpose).
-                        </p>
+                        <p>API-M will use your personal information only for the purposes for which it was collected (or for a use identified as consistent with that purpose).</p>
                         <p>API-M uses your personal information only for the following purposes.</p>
                         <ul>
                             <li>To provide you with a personalized user experience. API-M uses attributes such as your name for this purpose</li>
@@ -202,17 +196,16 @@ class PrivacyPolicy extends React.Component {
                             <a target="_blank" href="https://wso2.com/contact/">https://wso2.com/contact/</a>
                         </p>
                         <h2 id="disclaimer">Disclaimer</h2>
-                            <ol>
-                                <li>This privacy policy statement serves as a template for the organization running WSO2 API-M. The organizational policies will govern the real privacy policy applicable for its business purposes.</li>
-                                <li>WSO2 or its employees, partners, affiliates do not have access to any data, including privacy-related data held at the organization running API-M.</li>
-                                <li>This policy should be modified according to the organizational requirements.</li>
-                            </ol>
+                        <ol>
+                            <li>This privacy policy statement serves as a template for the organization running WSO2 API-M. The organizational policies will govern the real privacy policy applicable for its business purposes.</li>
+                            <li>WSO2 or its employees, partners, affiliates do not have access to any data, including privacy-related data held at the organization running API-M.</li>
+                            <li>This policy should be modified according to the organizational requirements.</li>
+                        </ol>
+                    </Grid>
                 </Grid>
                 <Footer/>
-            </Grid>
             </div>
-        )
-    }
+        )}
 }
 
 PrivacyPolicy.propTypes = {

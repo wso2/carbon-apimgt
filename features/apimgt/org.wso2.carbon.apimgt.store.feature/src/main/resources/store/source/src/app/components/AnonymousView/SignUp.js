@@ -54,7 +54,6 @@ const styles = {
 };
 
 class SignUp extends React.Component{
-
     constructor(props) {
         super(props);
         this.authManager = new AuthManager();
@@ -80,11 +79,12 @@ class SignUp extends React.Component{
             if (environmentId === -1) {
                 environmentId = 0;
             }
-            this.setState({environments, environmentId});
-
+            this.setState({
+                environments:environments,
+                environmentId:environmentId
+            });
             const environment = environments[environmentId];
             Utils.setEnvironment(environment);
-
         }).catch(() => {
             console.error('Error while receiving environment configurations');
         });
@@ -119,8 +119,8 @@ class SignUp extends React.Component{
                 Alert.info("User added successfully. You can now sign into the API store.");
                 let redirect_url = "/login";
                 this.props.history.push(redirect_url);
-            }).catch((error) => {
-                console.log(JSON.stringify(error));
+            }).catch(() => {
+                console.log("Error while creating user");
             })
         }
     };
@@ -145,7 +145,6 @@ class SignUp extends React.Component{
                 errorMessage: ""
             })
         }
-      console.log( JSON.stringify(event.target.value) + "password")
     };
 
     handlePolicyChange  = (event) => {
@@ -154,19 +153,19 @@ class SignUp extends React.Component{
         } else {
             this.setState({ policy: false });
         }
-    }
-    ;
+    };
 
     render(){
         const { classes } = this.props;
-        if (!this.state.environments[0]) {
+        const { environments, alert, error, errorMessage, policy } = this.state;
+        if (!environments[0]) {
             return <LoadingAnimation/>
         }
         return(
             <div className="login-flex-container">
                 <Snackbar
                     anchorOrigin={{vertical: 'top', horizontal: 'center'}}
-                    open={this.state.alert}
+                    open={alert}
                     message={ 'Please fill all required fields' }
                 />
                 <Grid container justify={"center"} alignItems={"center"} spacing={0} style={{height: "100vh"}}>
@@ -184,7 +183,6 @@ class SignUp extends React.Component{
                                             {`API STORE`}
                                         </Typography>
                                     </Grid>
-
                                 </Grid>
                             </Grid>
 
@@ -234,7 +232,7 @@ class SignUp extends React.Component{
                                                     />
                                                     <TextField
                                                         required
-                                                        error={this.state.error}
+                                                        error={error}
                                                         id="rePassword"
                                                         label="Re-type Password"
                                                         type="password"
@@ -249,7 +247,7 @@ class SignUp extends React.Component{
                                                                 </InputAdornment>
                                                             ),
                                                         }}
-                                                        helperText={this.state.errorMessage}
+                                                        helperText={errorMessage}
                                                     />
                                                     <TextField
                                                         required
@@ -330,7 +328,7 @@ class SignUp extends React.Component{
                                                     variant="raised"
                                                     color="primary"
                                                     onClick={this.handleClick.bind(this)}
-                                                    disabled={!this.state.policy}
+                                                    disabled={!policy}
                                                 >
                                                     Sign up
                                                 </Button>

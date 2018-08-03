@@ -64,56 +64,56 @@ class CookiePolicy extends React.Component {
                 </div>
                 <Grid container spacing={24}>
                     <Grid item xs={3}>
-                            <MenuList>
-                                <MenuItem>
-                                    <ListItemIcon >
-                                        <Label />
-                                    </ListItemIcon>
-                                    <a style={{ textDecoration: 'none' }} href="#cookiePolicy">Cookie Policy</a>
-                                </MenuItem>
-                                <MenuItem >
-                                    <ListItemIcon >
-                                        <Label />
-                                    </ListItemIcon>
-                                    <a style={{ textDecoration: 'none' }} href="#cookie">What is a cookie?</a>
-                                </MenuItem>
-                                <MenuItem >
-                                    <ListItemIcon >
-                                        <Label />
-                                    </ListItemIcon>
-                                    <a style={{ textDecoration: 'none' }} href="#howCookieIsProcessed">How does API-M process cookies?</a>
-                                </MenuItem>
-                                <MenuItem >
-                                    <ListItemIcon >
-                                        <Label />
-                                    </ListItemIcon>
-                                    <a style={{ textDecoration: 'none' }} href="#useOfCookies">What does API-M use cookies for?</a>
-                                </MenuItem>
-                                <MenuItem >
-                                    <ListItemIcon >
-                                        <Label />
-                                    </ListItemIcon>
-                                    <a style={{ textDecoration: 'none' }} href="#typeOfCookies">What type of cookies does API-M use?</a>
-                                </MenuItem>
-                                <MenuItem >
-                                    <ListItemIcon >
-                                        <Label />
-                                    </ListItemIcon>
-                                    <a style={{ textDecoration: 'none' }} href="#controllingCookies">How do I control my cookies?</a>
-                                </MenuItem>
-                                <MenuItem >
-                                    <ListItemIcon >
-                                        <Label />
-                                    </ListItemIcon>
-                                    <a style={{ textDecoration: 'none' }} href="#usedCookies">What are the cookies used?</a>
-                                </MenuItem>
-                                <MenuItem>
-                                    <ListItemIcon >
-                                        <Label />
-                                    </ListItemIcon>
-                                    <a style={{ textDecoration: 'none' }} href="#disclaimer">Disclaimer</a>
-                                </MenuItem>
-                            </MenuList>
+                        <MenuList>
+                            <MenuItem>
+                                <ListItemIcon >
+                                    <Label />
+                                </ListItemIcon>
+                                <a style={{ textDecoration: 'none' }} href="#cookiePolicy">Cookie Policy</a>
+                            </MenuItem>
+                            <MenuItem >
+                                <ListItemIcon >
+                                    <Label />
+                                </ListItemIcon>
+                                <a style={{ textDecoration: 'none' }} href="#cookie">What is a cookie?</a>
+                            </MenuItem>
+                            <MenuItem >
+                                <ListItemIcon >
+                                    <Label />
+                                </ListItemIcon>
+                                <a style={{ textDecoration: 'none' }} href="#howCookieIsProcessed">How does API-M process cookies?</a>
+                            </MenuItem>
+                            <MenuItem >
+                                <ListItemIcon >
+                                    <Label />
+                                </ListItemIcon>
+                                <a style={{ textDecoration: 'none' }} href="#useOfCookies">What does API-M use cookies for?</a>
+                            </MenuItem>
+                            <MenuItem >
+                                <ListItemIcon >
+                                    <Label />
+                                </ListItemIcon>
+                                <a style={{ textDecoration: 'none' }} href="#typeOfCookies">What type of cookies does API-M use?</a>
+                            </MenuItem>
+                            <MenuItem >
+                                <ListItemIcon >
+                                    <Label />
+                                </ListItemIcon>
+                                <a style={{ textDecoration: 'none' }} href="#controllingCookies">How do I control my cookies?</a>
+                            </MenuItem>
+                            <MenuItem >
+                                <ListItemIcon >
+                                    <Label />
+                                </ListItemIcon>
+                                <a style={{ textDecoration: 'none' }} href="#usedCookies">What are the cookies used?</a>
+                            </MenuItem>
+                            <MenuItem>
+                                <ListItemIcon >
+                                    <Label />
+                                </ListItemIcon>
+                                <a style={{ textDecoration: 'none' }} href="#disclaimer">Disclaimer</a>
+                            </MenuItem>
+                        </MenuList>
                     </Grid>
                     <Grid item xs={8}>
                         <h1>
@@ -122,9 +122,7 @@ class CookiePolicy extends React.Component {
                         <p>
                             <a target="_blank" href="https://wso2.com/api-management/">About WSO2 API Manager</a>
                         </p>
-                        <p>
-                            WSO2 API Manager (referred hereafter as “API-M ”) is an open source enterprise-class solution that supports API publishing, lifecycle management, application development, access control, rate limiting, and analytics in one cleanly integrated system.
-                        </p>
+                        <p>WSO2 API Manager (referred hereafter as “API-M ”) is an open source enterprise-class solution that supports API publishing, lifecycle management, application development, access control, rate limiting, and analytics in one cleanly integrated system.</p>
                         <h2 id="cookiePolicy">
                             <strong>Cookie Policy</strong>
                         </h2>
@@ -165,7 +163,6 @@ class CookiePolicy extends React.Component {
                             <li>Any third party federated login</li>
                         </ul>
                         <p>We strongly advise you to refer the respective cookie policies of such sites carefully as API-M has no knowledge or use on these cookies.</p>
-
                         <h2 id={"typeOfCookies"}>What type of cookies does API-M use?</h2>
                         <p>API-M uses persistent cookies and session cookies. A persistent cookie helps API-M to recognize you as an existing user, so you can easily return to WSO2 or interact with API-M without signing in again. After you sign in, a persistent cookie stays in your browser and will be read by API-M when you return.</p>
                         <p>A session cookie is erased when the user closes the Web browser. It is stored in temporarily and is not retained after the browser is closed. Session cookies do not collect information from the user’s computer.</p>
@@ -191,13 +188,13 @@ class CookiePolicy extends React.Component {
                                         </TableRow>
                                     )
                                 })}
-                                </TableBody>
+                            </TableBody>
                         </Table>
                         <h2 id={"disclaimer"}>Disclaimer</h2>
                         <p>This cookie policy is only for illustrative purposes of the API-M product. The content in this policy is technically correct at the time of product shipment. The organization which runs this API-M instance has the full authority and responsibility of the effective Cookie Policy.</p>
                     </Grid>
-                    <Footer/>
                 </Grid>
+                <Footer/>
             </div>
         )
     }
