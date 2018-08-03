@@ -300,7 +300,7 @@ class SignUp extends React.Component{
                                                     <FormControl>
                                                     <Typography>
                                                         After successfully signing in, a cookie is placed in your browser to track your session. See our {' '}
-                                                        <Link to={"/policy/cookie-policy"}>
+                                                        <Link to={"/policy/cookie-policy"} target="_blank">
                                                               Cookie Policy
                                                         </Link>
                                                         {' '} for more details.

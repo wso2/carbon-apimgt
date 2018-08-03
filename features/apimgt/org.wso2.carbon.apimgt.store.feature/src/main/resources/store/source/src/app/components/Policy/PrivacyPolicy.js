@@ -58,49 +58,49 @@ class PrivacyPolicy extends React.Component {
                                 <ListItemIcon >
                                     <Label />
                                 </ListItemIcon>
-                                <Link style={{ textDecoration: 'none' }} to="#privacyPolicy">Privacy Policy</Link>
+                                <a style={{ textDecoration: 'none' }} href="#privacyPolicy">Privacy Policy</a>
                             </MenuItem>
                             <MenuItem >
                                 <ListItemIcon >
                                     <Label />
                                 </ListItemIcon>
-                                <Link style={{ textDecoration: 'none' }} to="#personalInfo">What are the personal information?</Link>
+                                <a style={{ textDecoration: 'none' }} href="#personalInfo">What are the personal information?</a>
                             </MenuItem>
                             <MenuItem >
                                 <ListItemIcon >
                                     <Label />
                                 </ListItemIcon>
-                                <Link style={{ textDecoration: 'none' }} to="#infoCollection">Collection of your information</Link>
+                                <a style={{ textDecoration: 'none' }} href="#infoCollection">Collection of your information</a>
                             </MenuItem>
                             <MenuItem >
                                 <ListItemIcon >
                                     <Label />
                                 </ListItemIcon>
-                                <Link style={{ textDecoration: 'none' }} to="#useOfInfo">Use of your personal information</Link>
+                                <a style={{ textDecoration: 'none' }} href="#useOfInfo">Use of your personal information</a>
                             </MenuItem>
                             <MenuItem >
                                 <ListItemIcon >
                                     <Label />
                                 </ListItemIcon>
-                                <Link style={{ textDecoration: 'none' }} to="#disclosureOfInfo">Disclosure of your information</Link>
+                                <a style={{ textDecoration: 'none' }} href="#disclosureOfInfo">Disclosure of your information</a>
                             </MenuItem>
                             <MenuItem >
                                 <ListItemIcon >
                                     <Label />
                                 </ListItemIcon>
-                                <Link style={{ textDecoration: 'none' }} to="#storageOfInfo">How API-M keeps your information</Link>
+                                <a style={{ textDecoration: 'none' }} href="#storageOfInfo">How API-M keeps your information</a>
                             </MenuItem>
                             <MenuItem >
                                 <ListItemIcon >
                                     <Label />
                                 </ListItemIcon>
-                                <Link style={{ textDecoration: 'none' }} to="#about">About</Link>
+                                <a style={{ textDecoration: 'none' }} href="#about">About</a>
                             </MenuItem>
                             <MenuItem>
                                 <ListItemIcon >
                                     <Label />
                                 </ListItemIcon>
-                                <Link style={{ textDecoration: 'none' }} to="#disclaimer">Disclaimer</Link>
+                                <a style={{ textDecoration: 'none' }} href="#disclaimer">Disclaimer</a>
                             </MenuItem>
                         </MenuList>
                     </Grid>
