@@ -24,12 +24,16 @@ import javax.ws.rs.core.Response;
  *
  */
 public class BlacklistApiServiceImpl extends BlacklistApiService {
+    private APIMgtAdminService apiMgtAdminService;
     private static final Logger log = LoggerFactory.getLogger(BlacklistApiServiceImpl.class);
+
+    public BlacklistApiServiceImpl(APIMgtAdminService apiMgtAdminService) {
+        this.apiMgtAdminService = apiMgtAdminService;
+    }
 
     @Override
     public Response blacklistGet(String accept, Request request) throws NotFoundException {
         try {
-            APIMgtAdminService apiMgtAdminService = APIManagerFactory.getInstance().getAPIMgtAdminService();
             List<BlockConditions> blockConditionsList = apiMgtAdminService.getBlockConditions();
             BlockingConditionListDTO blockingConditionListDTO = MappingUtil.fromBlockConditionListToListDTO
                     (blockConditionsList);

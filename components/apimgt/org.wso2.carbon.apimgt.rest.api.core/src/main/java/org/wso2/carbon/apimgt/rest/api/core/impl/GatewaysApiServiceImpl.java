@@ -30,7 +30,13 @@ import javax.ws.rs.core.SecurityContext;
 
 public class GatewaysApiServiceImpl extends GatewaysApiService {
 
+    private APIMgtAdminService adminService;
+
     private static final Logger log = LoggerFactory.getLogger(GatewaysApiServiceImpl.class);
+
+    public GatewaysApiServiceImpl(APIMgtAdminService adminService) {
+        this.adminService = adminService;
+    }
 
     /**
      * Register gateway
@@ -48,7 +54,6 @@ public class GatewaysApiServiceImpl extends GatewaysApiService {
             LabelInfoDTO labelInfoDTO = body.getLabelInfo();
 
             if (labelInfoDTO != null) {
-                APIMgtAdminService adminService = RestApiUtil.getAPIMgtAdminService();
                 String overwriteLabels = labelInfoDTO.getOverwriteLabels();
                 List<Label> labels = MappingUtil.convertToLabels(labelInfoDTO.getLabelList());
                 adminService.registerGatewayLabels(labels, overwriteLabels);

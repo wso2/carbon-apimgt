@@ -63,39 +63,32 @@ public class PolicyExportManager {
 
     public String createArchiveFromExecutionPlans(String exportedPoliciesDirName, String archiveDir, String archiveName)
             throws APIManagementException {
-
-        try {
-            //retrieve all policies under each policy level
-            List<APIPolicy> apiPolicies = apiMgtAdminService.getApiPolicies();
-            List<ApplicationPolicy> applicationPolicies = apiMgtAdminService.getApplicationPolicies();
-            List<SubscriptionPolicy> subscriptionPolicies = apiMgtAdminService.getSubscriptionPolicies();
-            List<CustomPolicy> customPolicies = apiMgtAdminService.getCustomRules();
-            //write all execution Plans/Siddhi Apps to exportPoliciesDirName directory
-            String dirLocation = exportedPoliciesDirName + File.separator + EXPORT_POLICIES;
-            APIFileUtils.createDirectory(dirLocation);
-            if (!apiPolicies.isEmpty()) {
-                for (Map<String, String> map : getApiPolicySiddhiApps(apiPolicies)) {
-                    prepareFile(dirLocation, map);
-                }
+        //retrieve all policies under each policy level
+        List<APIPolicy> apiPolicies = apiMgtAdminService.getApiPolicies();
+        List<ApplicationPolicy> applicationPolicies = apiMgtAdminService.getApplicationPolicies();
+        List<SubscriptionPolicy> subscriptionPolicies = apiMgtAdminService.getSubscriptionPolicies();
+        List<CustomPolicy> customPolicies = apiMgtAdminService.getCustomRules();
+        //write all execution Plans/Siddhi Apps to exportPoliciesDirName directory
+        String dirLocation = exportedPoliciesDirName + File.separator + EXPORT_POLICIES;
+        APIFileUtils.createDirectory(dirLocation);
+        if (!apiPolicies.isEmpty()) {
+            for (Map<String, String> map : getApiPolicySiddhiApps(apiPolicies)) {
+                prepareFile(dirLocation, map);
             }
-            if (!applicationPolicies.isEmpty()) {
-                prepareFile(dirLocation, getAppPolicySiddhiApps(applicationPolicies));
-            }
-            if (!subscriptionPolicies.isEmpty()) {
-                prepareFile(dirLocation, getSubscriptionPolicySiddhiApps(subscriptionPolicies));
-            }
-            if (!customPolicies.isEmpty()) {
-                prepareFile(dirLocation, getCustomPolicySiddhiApps(customPolicies));
-            }
-            //create archive and get the archive location
-            String zippedFilePath = createArchiveFromPolicies(exportedPoliciesDirName, archiveDir, archiveName);
-            APIFileUtils.deleteDirectory(exportedPoliciesDirName);
-            return zippedFilePath;
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while exporting policies";
-            log.error(errorMessage, e);
-            throw new APIManagementException(errorMessage, e);
         }
+        if (!applicationPolicies.isEmpty()) {
+            prepareFile(dirLocation, getAppPolicySiddhiApps(applicationPolicies));
+        }
+        if (!subscriptionPolicies.isEmpty()) {
+            prepareFile(dirLocation, getSubscriptionPolicySiddhiApps(subscriptionPolicies));
+        }
+        if (!customPolicies.isEmpty()) {
+            prepareFile(dirLocation, getCustomPolicySiddhiApps(customPolicies));
+        }
+        //create archive and get the archive location
+        String zippedFilePath = createArchiveFromPolicies(exportedPoliciesDirName, archiveDir, archiveName);
+        APIFileUtils.deleteDirectory(exportedPoliciesDirName);
+        return zippedFilePath;
     }
 
     /**

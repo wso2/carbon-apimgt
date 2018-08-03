@@ -45,14 +45,18 @@ import javax.ws.rs.core.Response;
  * Implementation class for Endpoints
  */
 public class EndpointsApiServiceImpl extends EndpointsApiService {
+    private APIMgtAdminService apiMgtAdminService;
     private static final Logger log = LoggerFactory.getLogger(EndpointsApiServiceImpl.class);
+
+    public EndpointsApiServiceImpl(APIMgtAdminService apiMgtAdminService) {
+        this.apiMgtAdminService = apiMgtAdminService;
+    }
 
     @Override
     public Response endpointsEndpointIdGatewayConfigGet(String endpointId
             , String accept
             , Request request) throws NotFoundException {
         try {
-            APIMgtAdminService apiMgtAdminService = APIManagerFactory.getInstance().getAPIMgtAdminService();
             String endpointGatewayConfig = apiMgtAdminService.getEndpointGatewayConfig(endpointId);
 
             if (endpointGatewayConfig != null) {
@@ -81,8 +85,7 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
             , Request request) throws NotFoundException {
         EndpointListDTO endpointListDTO = new EndpointListDTO();
         try {
-            APIMgtAdminService adminService = RestApiUtil.getAPIMgtAdminService();
-            List<Endpoint> endpointList = adminService.getAllEndpoints();
+            List<Endpoint> endpointList = apiMgtAdminService.getAllEndpoints();
             endpointListDTO.setList(MappingUtil.toEndpointListDto(endpointList));
             endpointListDTO.setCount(endpointList.size());
             return Response.ok().entity(endpointListDTO).build();

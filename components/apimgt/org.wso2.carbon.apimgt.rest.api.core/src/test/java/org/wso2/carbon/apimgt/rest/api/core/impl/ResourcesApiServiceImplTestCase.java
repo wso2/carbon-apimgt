@@ -19,27 +19,21 @@
 
 package org.wso2.carbon.apimgt.rest.api.core.impl;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.core.impl.APIMgtAdminServiceImpl;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.rest.api.core.dto.ResourcesListDTO;
 import org.wso2.carbon.apimgt.rest.api.core.utils.SampleTestObjectCreator;
 import org.wso2.msf4j.Request;
-import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(APIManagerFactory.class)
 public class ResourcesApiServiceImplTestCase {
 
     private static final String API_CONTEXT = "/api";
@@ -47,13 +41,9 @@ public class ResourcesApiServiceImplTestCase {
 
     @Test
     public void resourcesGetTest() throws Exception {
-        APIMgtAdminServiceImpl apiMgtAdminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        APIManagerFactory instance = Mockito.mock(APIManagerFactory.class);
-        PowerMockito.mockStatic(APIManagerFactory.class);
-        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(instance);
-        Mockito.when(instance.getAPIMgtAdminService()).thenReturn(apiMgtAdminService);
+        APIMgtAdminService apiMgtAdminService = Mockito.mock(APIMgtAdminService.class);
 
-        ResourcesApiServiceImpl resourcesApiService = new ResourcesApiServiceImpl();
+        ResourcesApiServiceImpl resourcesApiService = new ResourcesApiServiceImpl(apiMgtAdminService);
 
         UriTemplate uriTemplateOne = SampleTestObjectCreator.createUniqueUriTemplate();
         UriTemplate uriTemplateTwo = SampleTestObjectCreator.createUniqueUriTemplate();
@@ -90,41 +80,25 @@ public class ResourcesApiServiceImplTestCase {
 
     @Test
     public void policiesGetExceptionTest() throws Exception {
-        ResourcesApiServiceImpl resourcesApiService = new ResourcesApiServiceImpl();
+        APIMgtAdminService apiMgtAdminService = Mockito.mock(APIMgtAdminService.class);
+
+        Mockito.when(apiMgtAdminService.getAllResourcesForApi(API_CONTEXT, API_VERSION)).thenThrow(
+                new APIManagementException("", ExceptionCodes.APIMGT_DAO_EXCEPTION));
+
+        ResourcesApiServiceImpl resourcesApiService = new ResourcesApiServiceImpl(apiMgtAdminService);
         Response response = resourcesApiService.resourcesGet(API_CONTEXT, API_VERSION, null, getRequest());
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }
 
-    @Test
-    public void policiesGetApiContextEmptyExceptionTest() throws Exception {
-        ResourcesApiServiceImpl resourcesApiService = new ResourcesApiServiceImpl();
-        Response response = resourcesApiService.resourcesGet(null, API_VERSION, null, getRequest());
-        Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
-    }
-
-    @Test
-    public void policiesGetApiVersionEmptyExceptionTest() throws Exception {
-        ResourcesApiServiceImpl resourcesApiService = new ResourcesApiServiceImpl();
-        Response response = resourcesApiService.resourcesGet(API_CONTEXT, null, null, getRequest());
-        Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
-    }
-
     private Response getResponse(String apiContext, String apiVersion) throws Exception {
-        APIMgtAdminServiceImpl apiMgtAdminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        APIManagerFactory instance = Mockito.mock(APIManagerFactory.class);
-        PowerMockito.mockStatic(APIManagerFactory.class);
-        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(instance);
-        Mockito.when(instance.getAPIMgtAdminService()).thenReturn(apiMgtAdminService);
+        APIMgtAdminService apiMgtAdminService = Mockito.mock(APIMgtAdminService.class);
 
-        ResourcesApiServiceImpl resourcesApiService = new ResourcesApiServiceImpl();
+        ResourcesApiServiceImpl resourcesApiService = new ResourcesApiServiceImpl(apiMgtAdminService);
         return resourcesApiService.resourcesGet(apiContext, apiVersion, null, getRequest());
     }
 
     private Request getRequest() throws Exception {
-        HTTPCarbonMessage carbonMessage = Mockito.mock(HTTPCarbonMessage.class);
-        Request request = new Request(carbonMessage);
-        PowerMockito.whenNew(Request.class).withArguments(carbonMessage).thenReturn(request);
-        return request;
+        return Mockito.mock(Request.class);
     }
 
 }

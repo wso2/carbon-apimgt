@@ -19,38 +19,28 @@
 
 package org.wso2.carbon.apimgt.rest.api.core.impl;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.core.impl.APIMgtAdminServiceImpl;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.PolicyValidationData;
 import org.wso2.carbon.apimgt.rest.api.core.dto.PolicyListDTO;
 import org.wso2.msf4j.Request;
-import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
 import javax.ws.rs.core.Response;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.UUID;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(APIManagerFactory.class)
 public class PoliciesApiServiceImplTestCase {
 
     @Test
     public void policiesGetTest() throws Exception {
-        APIMgtAdminServiceImpl apiMgtAdminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        APIManagerFactory instance = Mockito.mock(APIManagerFactory.class);
-        PowerMockito.mockStatic(APIManagerFactory.class);
-        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(instance);
-        Mockito.when(instance.getAPIMgtAdminService()).thenReturn(apiMgtAdminService);
+        APIMgtAdminService apiMgtAdminService = Mockito.mock(APIMgtAdminService.class);
 
-        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl();
+        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl(apiMgtAdminService);
 
         PolicyValidationData policyValidationDataOne = new PolicyValidationData(UUID.randomUUID().toString(),
                 "APPLICATION_POLICY", true);
@@ -74,15 +64,16 @@ public class PoliciesApiServiceImplTestCase {
 
     @Test
     public void policiesGetExceptionTest() throws Exception {
-        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl();
+        APIMgtAdminService apiMgtAdminService = Mockito.mock(APIMgtAdminService.class);
+        Mockito.when(apiMgtAdminService.getAllPolicies()).thenThrow(new APIManagementException("",
+                ExceptionCodes.APIMGT_DAO_EXCEPTION));
+
+        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl(apiMgtAdminService);
         Response response = policiesApiService.policiesGet(null, getRequest());
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }
 
     private Request getRequest() throws Exception {
-        HTTPCarbonMessage carbonMessage = Mockito.mock(HTTPCarbonMessage.class);
-        Request request = new Request(carbonMessage);
-        PowerMockito.whenNew(Request.class).withArguments(carbonMessage).thenReturn(request);
-        return request;
+        return Mockito.mock(Request.class);
     }
 }

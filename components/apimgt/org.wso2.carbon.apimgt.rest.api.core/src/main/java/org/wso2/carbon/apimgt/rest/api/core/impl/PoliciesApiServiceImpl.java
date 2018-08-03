@@ -39,13 +39,18 @@ import javax.ws.rs.core.Response;
  * Implementation class for Policies
  */
 public class PoliciesApiServiceImpl extends PoliciesApiService {
+    private APIMgtAdminService adminService;
+
     private static final Logger log = LoggerFactory.getLogger(PoliciesApiServiceImpl.class);
+
+    public PoliciesApiServiceImpl(APIMgtAdminService adminService) {
+        this.adminService = adminService;
+    }
 
     @Override
     public Response policiesGet(String accept, Request request) throws NotFoundException {
         PolicyListDTO policyListDTO = new PolicyListDTO();
         try {
-            APIMgtAdminService adminService = RestApiUtil.getAPIMgtAdminService();
             List<PolicyDTO> policyDTOList = MappingUtil.convertToPolicyDtoList(adminService.getAllPolicies());
             policyListDTO.setList(policyDTOList);
             policyListDTO.setCount(policyDTOList.size());

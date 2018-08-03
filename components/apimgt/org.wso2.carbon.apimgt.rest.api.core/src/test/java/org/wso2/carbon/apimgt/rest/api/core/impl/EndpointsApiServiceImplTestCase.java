@@ -20,43 +20,29 @@
 
 package org.wso2.carbon.apimgt.rest.api.core.impl;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
-import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.core.impl.APIMgtAdminServiceImpl;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
-import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.core.dto.EndpointListDTO;
 import org.wso2.carbon.apimgt.rest.api.core.utils.SampleTestObjectCreator;
 import org.wso2.msf4j.Request;
-import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ APIManagerFactory.class,
-        RestApiUtil.class })
 public class EndpointsApiServiceImplTestCase {
 
     @Test
     public void endpointsEndpointIdGatewayConfigGetTest() throws Exception {
-        APIMgtAdminServiceImpl apiMgtAdminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        APIManagerFactory instance = Mockito.mock(APIManagerFactory.class);
-        PowerMockito.mockStatic(APIManagerFactory.class);
-        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(instance);
-        Mockito.when(instance.getAPIMgtAdminService()).thenReturn(apiMgtAdminService);
+        APIMgtAdminService apiMgtAdminService = Mockito.mock(APIMgtAdminService.class);
 
-        EndpointsApiServiceImpl endpointsApiService = new EndpointsApiServiceImpl();
+        EndpointsApiServiceImpl endpointsApiService = new EndpointsApiServiceImpl(apiMgtAdminService);
 
         String endpointId = UUID.randomUUID().toString();
 
@@ -80,13 +66,9 @@ public class EndpointsApiServiceImplTestCase {
 
     @Test
     public void nullEndpointGatewayConfigTest() throws Exception {
-        APIMgtAdminServiceImpl apiMgtAdminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        APIManagerFactory instance = Mockito.mock(APIManagerFactory.class);
-        PowerMockito.mockStatic(APIManagerFactory.class);
-        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(instance);
-        Mockito.when(instance.getAPIMgtAdminService()).thenReturn(apiMgtAdminService);
+        APIMgtAdminService apiMgtAdminService = Mockito.mock(APIMgtAdminService.class);
 
-        EndpointsApiServiceImpl endpointsApiService = new EndpointsApiServiceImpl();
+        EndpointsApiServiceImpl endpointsApiService = new EndpointsApiServiceImpl(apiMgtAdminService);
 
         String endpointId = UUID.randomUUID().toString();
 
@@ -99,20 +81,17 @@ public class EndpointsApiServiceImplTestCase {
 
     @Test
     public void endpointsEndpointIdGatewayConfigGetExceptionTest() throws Exception {
-
-        EndpointsApiServiceImpl endpointsApiService = new EndpointsApiServiceImpl();
+        APIMgtAdminService apiMgtAdminService = Mockito.mock(APIMgtAdminService.class);
+        EndpointsApiServiceImpl endpointsApiService = new EndpointsApiServiceImpl(apiMgtAdminService);
 
         String message = "Error while retrieving gateway configuration.";
 
-        APIManagerFactory instance = Mockito.mock(APIManagerFactory.class);
-        PowerMockito.mockStatic(APIManagerFactory.class);
-        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(instance);
+        String endpointId = UUID.randomUUID().toString();
 
         APIManagementException apiManagementException = new APIManagementException(message,
                 ExceptionCodes.ENDPOINT_CONFIG_NOT_FOUND);
-        Mockito.when(instance.getAPIMgtAdminService()).thenThrow(apiManagementException);
+        Mockito.when(apiMgtAdminService.getEndpointGatewayConfig(endpointId)).thenThrow(apiManagementException);
 
-        String endpointId = UUID.randomUUID().toString();
         Response response = endpointsApiService.endpointsEndpointIdGatewayConfigGet(endpointId, null, getRequest());
         Assert.assertEquals(response.getStatus(), 404);
 
@@ -121,9 +100,7 @@ public class EndpointsApiServiceImplTestCase {
     @Test
     public void endpointsGetTest() throws Exception {
 
-        APIMgtAdminServiceImpl apiMgtAdminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(apiMgtAdminService);
+        APIMgtAdminService apiMgtAdminService = Mockito.mock(APIMgtAdminService.class);
 
         Endpoint endpointOne = SampleTestObjectCreator.createUniqueEndpoint();
         Endpoint endpointTwo = SampleTestObjectCreator.createUniqueEndpoint();
@@ -136,7 +113,7 @@ public class EndpointsApiServiceImplTestCase {
 
         Mockito.when(apiMgtAdminService.getAllEndpoints()).thenReturn(endpointList);
 
-        EndpointsApiServiceImpl endpointsApiService = new EndpointsApiServiceImpl();
+        EndpointsApiServiceImpl endpointsApiService = new EndpointsApiServiceImpl(apiMgtAdminService);
         Response response = endpointsApiService.endpointsGet(null, null, getRequest());
 
         Assert.assertEquals(response.getStatus(), 200);
@@ -145,27 +122,22 @@ public class EndpointsApiServiceImplTestCase {
 
     @Test
     public void endpointsGetExceptionTest() throws Exception {
-        APIMgtAdminServiceImpl apiMgtAdminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        PowerMockito.mockStatic(RestApiUtil.class);
+        APIMgtAdminService apiMgtAdminService = Mockito.mock(APIMgtAdminService.class);
 
         String message = "Error while retrieving endpoint";
 
         APIManagementException apiManagementException = new APIManagementException(message,
                 ExceptionCodes.ENDPOINT_NOT_FOUND);
-        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenThrow(apiManagementException);
-        Mockito.when(apiMgtAdminService.getAllEndpoints()).thenReturn(null);
+        Mockito.when(apiMgtAdminService.getAllEndpoints()).thenThrow(apiManagementException);
 
-        EndpointsApiServiceImpl endpointsApiService = new EndpointsApiServiceImpl();
+        EndpointsApiServiceImpl endpointsApiService = new EndpointsApiServiceImpl(apiMgtAdminService);
         Response response = endpointsApiService.endpointsGet(null, null, getRequest());
         Assert.assertEquals(response.getStatus(), 404);
 
     }
 
-    private Request getRequest() throws Exception {
-        HTTPCarbonMessage carbonMessage = Mockito.mock(HTTPCarbonMessage.class);
-        Request request = new Request(carbonMessage);
-        PowerMockito.whenNew(Request.class).withArguments(carbonMessage).thenReturn(request);
-        return request;
+    private Request getRequest() {
+        return Mockito.mock(Request.class);
     }
 
 }
