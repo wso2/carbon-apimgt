@@ -2,10 +2,10 @@ import React from 'react'
 import {resourceMethod, resourcePath, ScopeValidation} from '../../../data/ScopeValidation'
 import ApiPermissionValidation from '../../../data/ApiPermissionValidation'
 
-import Dialog, {DialogActions, DialogContent, DialogContentText, DialogTitle} from 'material-ui/Dialog';
-import Button from 'material-ui/Button';
+import Dialog, {DialogActions, DialogContent, DialogContentText, DialogTitle} from '@material-ui/core/Dialog';
+import Button from '@material-ui/core/Button';
 import { Delete } from '@material-ui/icons/';
-import Slide from "material-ui/transitions/Slide";
+import Slide from "@material-ui/core/Slide";
 import Alert from '../../Shared/Alert'
 
 

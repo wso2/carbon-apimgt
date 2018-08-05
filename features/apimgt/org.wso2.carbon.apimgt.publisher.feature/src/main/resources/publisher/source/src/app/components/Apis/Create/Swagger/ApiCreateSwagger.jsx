@@ -18,17 +18,17 @@
 import React from 'react';
 import Dropzone from 'react-dropzone';
 
-import Radio, { RadioGroup } from 'material-ui/Radio';
-import { FormControl, FormControlLabel } from 'material-ui/Form';
-import Button from 'material-ui/Button';
-import TextField from 'material-ui/TextField';
-import Paper from 'material-ui/Paper';
-import Typography from 'material-ui/Typography';
-import Grid from 'material-ui/Grid';
-import AppBar from 'material-ui/AppBar';
-import Toolbar from 'material-ui/Toolbar';
-import Snackbar from 'material-ui/Snackbar';
-import IconButton from 'material-ui/IconButton';
+import Radio, { RadioGroup } from '@material-ui/core/Radio';
+import { FormControl, FormControlLabel } from '@material-ui/core/';
+import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
+import Paper from '@material-ui/core/Paper';
+import Typography from '@material-ui/core/Typography';
+import Grid from '@material-ui/core/Grid';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import Snackbar from '@material-ui/core/Snackbar';
+import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import PropTypes from 'prop-types';
 

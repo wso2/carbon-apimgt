@@ -18,8 +18,8 @@
 
 import React, { Component } from 'react';
 import { Link, Redirect, Route, Switch } from 'react-router-dom';
-import Grid from 'material-ui/Grid';
-import Button from 'material-ui/Button';
+import Grid from '@material-ui/core/Grid';
+import Button from '@material-ui/core/Button';
 import Log from 'log4javascript';
 import PropTypes from 'prop-types';
 

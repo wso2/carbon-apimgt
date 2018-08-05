@@ -15,21 +15,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-"use strict";
 
 import React, {Component} from 'react';
 
-import Grid from 'material-ui/Grid';
-import Paper from "material-ui/Paper";
-import Typography from "material-ui/Typography";
-import Button from "material-ui/Button";
+import Grid from '@material-ui/core/Grid';
+import Paper from "@material-ui/core/Paper";
+import Typography from "@material-ui/core/Typography";
+import Button from "@material-ui/core/Button";
 import API from '../../../data/api';
 import Alert from '../../Shared/Alert';
 import Redirect from "react-router-dom/Redirect";
-import CircularProgress from "material-ui/Progress/CircularProgress";
-import {withStyles} from 'material-ui/styles';
-import green from "material-ui/colors/green";
-import {Create, GetApp} from '@material-ui/icons/';
+import CircularProgress from "@material-ui/core/CircularProgress";
+import {withStyles} from '@material-ui/core/styles';
+import green from "@material-ui/core/colors/green";
+import {Create, GetApp} from '@material-ui/icons';
 import {Link} from 'react-router-dom';
 
 const styles = {

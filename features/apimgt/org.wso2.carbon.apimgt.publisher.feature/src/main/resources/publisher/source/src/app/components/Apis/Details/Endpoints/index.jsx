@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import React, { Component } from 'react';
-import { Grid, Paper, Typography, Divider } from 'material-ui';
+import { Grid, Paper, Typography, Divider } from '@material-ui/core';
 import PropTypes from 'prop-types';
 
 import EndpointForm from '../../../Endpoints/Create/EndpointForm';

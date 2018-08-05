@@ -17,12 +17,12 @@
  */
 
 import React, { Component } from 'react';
-import Typography from 'material-ui/Typography';
-import ExpansionPanel, { ExpansionPanelDetails, ExpansionPanelSummary } from 'material-ui/ExpansionPanel';
+import Typography from '@material-ui/core/Typography';
+import ExpansionPanel, { ExpansionPanelDetails, ExpansionPanelSummary } from '@material-ui/core/ExpansionPanel';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { withStyles } from 'material-ui/styles';
+import { withStyles } from '@material-ui/core/styles';
 
-import Grid from 'material-ui/Grid';
+import Grid from '@material-ui/core/Grid';
 import ApiThumb from '../../Listing/ApiThumb';
 import API from '../../../../data/api';
 import { Progress } from '../../../Shared';

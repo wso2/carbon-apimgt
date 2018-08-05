@@ -17,35 +17,51 @@
  */
 'use strict';
 
-import React, {Component} from 'react'
+import React, {
+    Component
+} from 'react'
 import API from '../../../../data/api'
 
-import Input, {InputLabel} from 'material-ui/Input';
-import {MenuItem} from 'material-ui/Menu';
-import {FormControl, FormHelperText} from 'material-ui/Form';
-import Select from 'material-ui/Select';
-import Button from 'material-ui/Button';
+import Input, {
+    InputLabel
+} from '@material-ui/core/Input';
+import {
+    MenuItem
+} from '@material-ui/core/Menu';
+import {
+    FormControl,
+    FormHelperText
+} from '@material-ui/core/';
+import Select from '@material-ui/core/Select';
+import Button from '@material-ui/core/Button';
 
 const Option = Select.Option;
 
 export default class Policies extends Component {
     constructor() {
         super();
-        this.state = {loading: false, selectedPolicies: []};
+        this.state = {
+            loading: false,
+            selectedPolicies: []
+        };
         this.handleChange = this.handleChange.bind(this);
         this.changeTiers = this.changeTiers.bind(this);
         this.api = new API();
     }
 
     handleChange(e) {
-        this.setState({selectedPolicies: e.target.value});
+        this.setState({
+            selectedPolicies: e.target.value
+        });
         if (this.props.handlePolicies) {
             this.props.handlePolicies(e.target.value);
         }
     }
 
     changeTiers(event) {
-        this.setState({loading: true});
+        this.setState({
+            loading: true
+        });
         const api_uuid = this.props.api.id;
         let promisedApi = this.api.get(api_uuid);
         promisedApi.then(response => {
@@ -53,7 +69,9 @@ export default class Policies extends Component {
             api_data.policies = this.state.selectedPolicies;
             let promised_update = this.api.update(api_data);
             promised_update.then(response => {
-                this.setState({loading: false});
+                this.setState({
+                    loading: false
+                });
                 message.info("Lifecycle state updated successfully");
             })
         });
@@ -61,40 +79,57 @@ export default class Policies extends Component {
 
     render() {
         const policies = this.props.policies;
-        const {classes} = this.props;
-        return (
-            <div>
-                <FormControl className="policies-select">
-                    <InputLabel htmlFor="name-multiple">Business Plans</InputLabel>
-                    <Select
-                        margin="none"
-                        multiple
-                        value={this.state.selectedPolicies}
-                        onChange={this.handleChange}
-                        input={<Input id="name-multiple"/>}
-                        MenuProps={{
-                            PaperProps: {
-                                style: {
-                                    width: 200,
-                                },
-                            },
-                        }}
-                    >
-                        {policies.map(policy => (
-                            <MenuItem
-                                key={policy.policyName}
-                                value={policy.policyName}
-                                style={{
-                                    fontWeight: policies.indexOf(policy.policyName) !== -1 ? '500' : '400',
-                                }}
-                            >
-                                {policy.displayName}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                    <FormHelperText>Select a plan for the API and enable API level throttling.</FormHelperText>
-                </FormControl>
-            </div>
+        const {
+            classes
+        } = this.props;
+        return ( <
+            div >
+            <
+            FormControl className = "policies-select" >
+            <
+            InputLabel htmlFor = "name-multiple" > Business Plans < /InputLabel> <
+            Select margin = "none"
+            multiple value = {
+                this.state.selectedPolicies
+            }
+            onChange = {
+                this.handleChange
+            }
+            input = { < Input id = "name-multiple" / >
+            }
+            MenuProps = {
+                {
+                    PaperProps: {
+                        style: {
+                            width: 200,
+                        },
+                    },
+                }
+            } >
+            {
+                policies.map(policy => ( <
+                    MenuItem key = {
+                        policy.policyName
+                    }
+                    value = {
+                        policy.policyName
+                    }
+                    style = {
+                        {
+                            fontWeight: policies.indexOf(policy.policyName) !== -1 ? '500' : '400',
+                        }
+                    } >
+                    {
+                        policy.displayName
+                    } <
+                    /MenuItem>
+                ))
+            } <
+            /Select> <
+            FormHelperText > Select a plan
+            for the API and enable API level throttling. < /FormHelperText> <
+            /FormControl> <
+            /div>
         );
     }
 }

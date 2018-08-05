@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormControl, FormControlLabel, FormLabel } from 'material-ui/Form';
-import Radio, { RadioGroup } from 'material-ui/Radio';
+import { FormControl, FormControlLabel, FormLabel } from '@material-ui/core/';
+import Radio, { RadioGroup } from '@material-ui/core/Radio';
 
 const BindingInfo = (props) => {
     const {

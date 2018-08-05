@@ -17,9 +17,9 @@
  */
 import React, { Component } from 'react';
 /* MUI Imports */
-import { Grid, Button, Typography, withStyles } from 'material-ui';
-import Stepper, { Step, StepLabel, StepContent } from 'material-ui/Stepper';
-import Card, { CardContent } from 'material-ui/Card';
+import { Grid, Button, Typography, withStyles } from '@material-ui/core';
+import Stepper, { Step, StepLabel, StepContent } from '@material-ui/core/Stepper';
+import Card, { CardContent } from '@material-ui/core/Card';
 import PropTypes from 'prop-types';
 
 import InputForm from '../Endpoint/InputForm';
