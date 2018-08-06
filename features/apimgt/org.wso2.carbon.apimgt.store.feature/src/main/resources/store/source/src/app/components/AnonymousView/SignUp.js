@@ -36,9 +36,8 @@ import Utils from "../../data/Utils";
 import ConfigManager from "../../data/ConfigManager";
 import LoadingAnimation from "../Base/Loading/Loading";
 import API from "../../data/api";
-import Snackbar from 'material-ui/Snackbar';
 import Checkbox from 'material-ui/Checkbox';
-import Alert from '../Shared/Alert'
+import Alert from '../Shared/Alert';
 
 const styles = {
     buttonsWrapper: {
@@ -67,8 +66,9 @@ class SignUp extends React.Component{
             email: "",
             errorMessage: "",
             error: false,
-            alert: false,
-            policy: false
+            policy: false,
+            validation: false,
+            validationError: ""
         };
     }
 
@@ -80,8 +80,8 @@ class SignUp extends React.Component{
                 environmentId = 0;
             }
             this.setState({
-                environments:environments,
-                environmentId:environmentId
+                environments: environments,
+                environmentId: environmentId
             });
             const environment = environments[environmentId];
             Utils.setEnvironment(environment);
@@ -99,11 +99,14 @@ class SignUp extends React.Component{
     };
 
     handleSignUp = () => {
-        let { username, password, firstName, lastName, email } = this.state;
-        if (!username || !password || !firstName || !lastName || !email){
-            this.setState({ alert: true })
+        let { username, password, firstName, lastName, email, error } = this.state;
+        if (!username || !password || !firstName || !lastName || !email || error){
+            if (error) {
+                Alert.warning('Please re-check password');
+            } else {
+                Alert.warning('Please fill all required fields');
+            }
         } else {
-            this.setState({ alert: false});
             let user_data = {
                 username: this.state.username,
                 password: this.state.password,
@@ -126,7 +129,8 @@ class SignUp extends React.Component{
     };
 
     handleAuthentication = () => {
-        return this.authManager.registerUser(this.state.environments[0]);
+        const { environments, environmentId } = this.state;
+        return this.authManager.registerUser(environments[environmentId]);
     };
 
     handleChange = name => event => {
@@ -134,16 +138,33 @@ class SignUp extends React.Component{
     };
 
     handlePasswordChange = () => event => {
-        if (event.target.value != this.state.password) {
+        if (event.target.value !== this.state.password) {
             this.setState({
                 error: true,
                 errorMessage: "Password does not match"
             })
         } else {
             this.setState({
-                error:false,
+                error: false,
                 errorMessage: ""
             })
+        }
+    };
+
+    handlePasswordValidation= name => event => {
+        let password = event.target.value;
+        let regex = new RegExp("^(?=.*[A-Z])(?=.*[0-9])(?=.{8,})");
+        if (!regex.test(password)) {
+            this.setState({
+                validation: true,
+                validationError: "Password must contain minimum 8 characters, at least one upper case letter and one number"
+            });
+        } else {
+            this.setState({
+                validation: false,
+                validationError: "",
+                [name]: event.target.value
+            });
         }
     };
 
@@ -157,17 +178,12 @@ class SignUp extends React.Component{
 
     render(){
         const { classes } = this.props;
-        const { environments, alert, error, errorMessage, policy } = this.state;
-        if (!environments[0]) {
+        const { environments, error, errorMessage, policy, environmentId, validation, validationError } = this.state;
+        if (!environments[environmentId]) {
             return <LoadingAnimation/>
         }
         return(
             <div className="login-flex-container">
-                <Snackbar
-                    anchorOrigin={{vertical: 'top', horizontal: 'center'}}
-                    open={alert}
-                    message={ 'Please fill all required fields' }
-                />
                 <Grid container justify={"center"} alignItems={"center"} spacing={0} style={{height: "100vh"}}>
                     <Grid item lg={6} md={8} xs={10}>
                         <Grid container>
@@ -180,7 +196,7 @@ class SignUp extends React.Component{
                                     </Grid>
                                     <Grid item>
                                         <Typography type="subheading" align="right" gutterBottom>
-                                            {`API STORE`}
+                                            API STORE
                                         </Typography>
                                     </Grid>
                                 </Grid>
@@ -221,14 +237,16 @@ class SignUp extends React.Component{
                                                         autoComplete="current-password"
                                                         margin="normal"
                                                         style={{width: "100%"}}
-                                                        onChange={this.handleChange('password')}
+                                                        onChange={ this.handlePasswordValidation('password') }
                                                         InputProps={{
                                                             startAdornment: (
                                                                 <InputAdornment position="start">
                                                                     <Lock />
                                                                 </InputAdornment>
-                                                            ),
+                                                            )
                                                         }}
+                                                        error={validation}
+                                                        helperText={validationError}
                                                     />
                                                     <TextField
                                                         required
@@ -245,7 +263,7 @@ class SignUp extends React.Component{
                                                                 <InputAdornment position="start">
                                                                     <Lock />
                                                                 </InputAdornment>
-                                                            ),
+                                                            )
                                                         }}
                                                         helperText={errorMessage}
                                                     />
@@ -285,7 +303,7 @@ class SignUp extends React.Component{
                                                         required
                                                         id="email"
                                                         label="E mail"
-                                                        type="mail"
+                                                        type="email"
                                                         margin="normal"
                                                         style={{width: "100%"}}
                                                         onChange={this.handleChange('email')}
