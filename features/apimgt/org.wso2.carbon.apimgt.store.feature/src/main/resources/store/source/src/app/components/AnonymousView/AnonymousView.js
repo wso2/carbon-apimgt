@@ -80,12 +80,12 @@ class AnonymousView extends React.Component{
                                  alt="wso2-logo"/> <span>API STORE</span>
                         </Typography>
                         <div className={classes.buttonsWrapper}>
-                            <Link to={"/sign-up"}>
+                            <Link to={"/sign-up"} style={{ textDecoration: 'none' }}>
                         <Button variant="raised" color="secondary">
                             Sign-up
                         </Button>
                             </Link>
-                        <Link to={"/login"}>
+                        <Link to={"/login"} style={{ textDecoration: 'none' }}>
                             <Button variant="raised" color="secondary" className={classes.buttonAlignment}>
                                 Sign-in
                             </Button>
