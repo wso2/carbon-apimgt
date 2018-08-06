@@ -31,7 +31,6 @@ import ConfigManager from "./app/data/ConfigManager";
 import {MuiThemeProvider, createMuiTheme} from 'material-ui/styles';
 import DarkTheme from './app/components/Shared/DarkTheme'
 import LightTheme from './app/components/Shared/LightTheme'
-import ChangePassword from "./app/components/ChangePassword/ChangePassword";
 import AnonymousView from "./app/components/AnonymousView/AnonymousView";
 import SignUp from "./app/components/AnonymousView/SignUp";
 import PrivacyPolicy from "./app/components/Policy/PrivacyPolicy";
@@ -120,7 +119,6 @@ class Protected extends Component {
                             <Route path={"/applications"} component={Applications}/>
                             <Route path={"/application/create"} component={ApplicationCreate}/>
                             <Route path={"/application/edit/:application_id"} component={ApplicationEdit}/>
-                            <Route path={"/user"} component={ChangePassword}/>
                             <Route component={PageNotFound}/>
                         </Switch>
                     </Base>
