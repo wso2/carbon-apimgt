@@ -248,7 +248,7 @@ class AuthManager {
             user.scopes = response.data.scopes;
             AuthManager.setUser(user);
         }).catch(error => {
-            console.error("Authentication Error:\n", error);
+            console.error("Authentication Error: ", error);
         });
         return promised_response;
     }

@@ -46,9 +46,6 @@ const styles = {
     },
     buttonAlignment: {
         marginLeft: 20,
-    },
-    buttonRight: {
-        textDecoration: 'none',
     }
 };
 
@@ -83,8 +80,6 @@ class SignUp extends React.Component{
                 environments: environments,
                 environmentId: environmentId
             });
-            const environment = environments[environmentId];
-            Utils.setEnvironment(environment);
         }).catch(() => {
             console.error('Error while receiving environment configurations');
         });
@@ -93,8 +88,8 @@ class SignUp extends React.Component{
     handleClick = () => {
         this.handleAuthentication().then(
             () => this.handleSignUp()
-        ).catch(
-            () => console.log("Error occurred during authentication")
+        ).catch(() =>
+            console.log("Error occurred during authentication")
         );
     };
 
@@ -108,11 +103,11 @@ class SignUp extends React.Component{
             }
         } else {
             let user_data = {
-                username: this.state.username,
-                password: this.state.password,
-                firstName: this.state.firstName,
-                lastName: this.state.lastName,
-                email: this.state.email
+                username: username.toLowerCase(),
+                password: password,
+                firstName: firstName,
+                lastName: lastName,
+                email: email
             };
             let api = new API();
             let promise = api.createUser(user_data);

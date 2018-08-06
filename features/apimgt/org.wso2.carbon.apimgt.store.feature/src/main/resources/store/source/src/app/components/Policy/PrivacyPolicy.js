@@ -24,7 +24,7 @@ import Grid from 'material-ui/Grid';
 import PropTypes from 'prop-types';
 import {withStyles} from 'material-ui/styles';
 import { MenuList, MenuItem} from 'material-ui/Menu';
-import { ListItemIcon, ListItemText, List, ListItem} from 'material-ui/List'
+import { ListItemIcon } from 'material-ui/List'
 import Label from '@material-ui/icons/Label';
 import { Link } from 'react-router-dom';
 import ToolBar from 'material-ui/Toolbar';
