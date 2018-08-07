@@ -222,11 +222,6 @@
             <version>0.31.0</version>
         </dependency>
         <dependency>
-            <groupId>io.jaegertracing</groupId>
-            <artifactId>jaeger-core</artifactId>
-            <version>0.27.0</version>
-        </dependency>
-        <dependency>
             <groupId>io.opentracing.brave</groupId>
             <artifactId>brave-opentracing</artifactId>
             <version>0.31.3</version>
@@ -241,12 +236,11 @@
             <artifactId>zipkin-sender-okhttp3</artifactId>
             <version>2.7.6</version>
         </dependency>
-        <!--&lt;!&ndash; https://mvnrepository.com/artifact/io.jaegertracing/jaeger-thrift &ndash;&gt;-->
-        <!--<dependency>-->
-            <!--<groupId>io.jaegertracing</groupId>-->
-            <!--<artifactId>jaeger-thrift</artifactId>-->
-            <!--<version>0.30.3</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>io.jaegertracing</groupId>
+            <artifactId>jaeger-thrift</artifactId>
+            <version>0.30.3</version>
+        </dependency>
 
 
     </dependencies>
