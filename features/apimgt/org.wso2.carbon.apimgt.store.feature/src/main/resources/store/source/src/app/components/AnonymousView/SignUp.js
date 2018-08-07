@@ -80,6 +80,8 @@ class SignUp extends React.Component{
                 environments: environments,
                 environmentId: environmentId
             });
+            const environment = environments[environmentId];
+            Utils.setEnvironment(environment);
         }).catch(() => {
             console.error('Error while receiving environment configurations');
         });
