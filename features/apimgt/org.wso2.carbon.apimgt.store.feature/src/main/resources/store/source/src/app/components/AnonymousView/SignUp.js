@@ -39,15 +39,21 @@ import API from "../../data/api";
 import Checkbox from 'material-ui/Checkbox';
 import Alert from '../Shared/Alert';
 
-const styles = {
+const styles = theme => ({
     buttonsWrapper: {
-        marginTop: 10,
-        marginLeft:10
+        marginTop: theme.spacing.unit,
+        marginLeft:theme.spacing.unit
     },
     buttonAlignment: {
-        marginLeft: 20,
+        marginLeft: theme.spacing.unit * 3,
+    },
+    linkDisplay: {
+        textDecoration: 'none'
+    },
+    gridAlignment: {
+        height: theme.spacing.unit * 150
     }
-};
+});
 
 class SignUp extends React.Component{
     constructor(props) {
@@ -61,11 +67,11 @@ class SignUp extends React.Component{
             firstName: "",
             lastName: "",
             email: "",
-            errorMessage: "",
             error: false,
-            policy: false,
+            errorMessage: "",
             validation: false,
-            validationError: ""
+            validationError: "",
+            policy: false,
         };
     }
 
@@ -97,7 +103,7 @@ class SignUp extends React.Component{
 
     handleSignUp = () => {
         let { username, password, firstName, lastName, email, error } = this.state;
-        if (!username || !password || !firstName || !lastName || !email || error){
+        if (!username || !password || !firstName || !lastName || !email || error) {
             if (error) {
                 Alert.warning('Please re-check password');
             } else {
@@ -148,7 +154,7 @@ class SignUp extends React.Component{
         }
     };
 
-    handlePasswordValidation= name => event => {
+    handlePasswordValidation = name => event => {
         let password = event.target.value;
         let regex = new RegExp("^(?=.*[A-Z])(?=.*[0-9])(?=.{8,})");
         if (!regex.test(password)) {
@@ -181,7 +187,7 @@ class SignUp extends React.Component{
         }
         return(
             <div className="login-flex-container">
-                <Grid container justify={"center"} alignItems={"center"} spacing={0} style={{height: "100vh"}}>
+                <Grid container justify={"center"} alignItems={"center"} spacing={0} className={classes.gridAlignment}>
                     <Grid item lg={6} md={8} xs={10}>
                         <Grid container>
                             <Grid item sm={3} xs={12}>
@@ -208,7 +214,7 @@ class SignUp extends React.Component{
                                                 Create your account
                                             </Typography>
                                             <span>
-                                                <FormControl style={{width: "100%"}}>
+                                                <FormControl>
                                                     <TextField
                                                         required
                                                         id="username"
@@ -216,7 +222,6 @@ class SignUp extends React.Component{
                                                         type="text"
                                                         autoComplete="username"
                                                         margin="normal"
-                                                        style={{width: "100%"}}
                                                         onChange={this.handleChange('username')}
                                                         InputProps={{
                                                             startAdornment: (
@@ -233,7 +238,6 @@ class SignUp extends React.Component{
                                                         type="password"
                                                         autoComplete="current-password"
                                                         margin="normal"
-                                                        style={{width: "100%"}}
                                                         onChange={ this.handlePasswordValidation('password') }
                                                         InputProps={{
                                                             startAdornment: (
@@ -253,7 +257,6 @@ class SignUp extends React.Component{
                                                         type="password"
                                                         autoComplete="current-password"
                                                         margin="normal"
-                                                        style={{width: "100%"}}
                                                         onChange={this.handlePasswordChange('rePassword')}
                                                         InputProps={{
                                                             startAdornment: (
@@ -270,7 +273,6 @@ class SignUp extends React.Component{
                                                         label="First Name"
                                                         type="text"
                                                         margin="normal"
-                                                        style={{width: "100%"}}
                                                         onChange={this.handleChange('firstName')}
                                                         InputProps={{
                                                             startAdornment: (
@@ -286,7 +288,6 @@ class SignUp extends React.Component{
                                                         label="Last Name"
                                                         type="text"
                                                         margin="normal"
-                                                        style={{width: "100%"}}
                                                         onChange={this.handleChange('lastName')}
                                                         InputProps={{
                                                             startAdornment: (
@@ -302,7 +303,6 @@ class SignUp extends React.Component{
                                                         label="E mail"
                                                         type="email"
                                                         margin="normal"
-                                                        style={{width: "100%"}}
                                                         onChange={this.handleChange('email')}
                                                         InputProps={{
                                                             startAdornment: (
@@ -329,7 +329,7 @@ class SignUp extends React.Component{
                                                             <p>
                                                                 <strong>
                                                                     I hereby confirm that I have read and understood the {''}
-                                                                    <Link to={"/policy/privacy-policy"} target="_blank">
+                                                                    <Link to={"/policy/privacy-policy"} target="_blank" className={classes.linkDisplay}>
                                                                         Privacy Policy.
                                                                     </Link>
                                                                 </strong>
@@ -347,7 +347,7 @@ class SignUp extends React.Component{
                                                 >
                                                     Sign up
                                                 </Button>
-                                                <Link to={"/"} style={{ textDecoration: 'none' }}>
+                                                <Link to={"/"} className={classes.linkDisplay}>
                                                     <Button variant="raised" className={classes.buttonAlignment}>
                                                         Back to Store
                                                     </Button>
