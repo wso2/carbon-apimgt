@@ -25,9 +25,6 @@ import java.util.*;
 public class APIKeyValidationService {
 
   private static final Log log = LogFactory.getLog(APIKeyValidationService.class);
-//  private static final HashMap<String,Span> tracerMap = new HashMap<>();
-
-//  public static Map<String, Span> spanMap = APIMgtLatencySynapseHandler.getSpanMap();
 
   public interface Iface {
 
@@ -87,22 +84,6 @@ public class APIKeyValidationService {
       args.setMatchingResource(matchingResource);
       args.setHttpVerb(httpVerb);
 
-
-//      OkHttpSender sender = OkHttpSender.create("http://localhost:9411/api/v1/spans");
-//      Tracer tracer = BraveTracer.create(Tracing.newBuilder()
-//              .localServiceName("Hello")
-//              .spanReporter(AsyncReporter.builder(sender).build())
-//              .build());
-//
-////      Map<String,Object> map = hashmap.getSpanMap();
-//
-////      Tracer tracer = (Tracer) map.get("Tracer");
-//      Span keySpan = tracer.buildSpan("KeyValidation").asChildOf(spanMap.get("ParentSpan")).start();
-//      spanMap.put("KeySpan",keySpan);
-////      Span keySpan = tracer.buildSpan("KeyValidation").start();
-////      tracerMap.put("KeySpan",keySpan);
-
-
       if (log.isDebugEnabled()) {
         log.debug("KeyValidation request from gateway to keymanager via thrift call for: " + context + " with ID: "
                 + MessageContext.getCurrentMessageContext().getMessageID() + " at "
@@ -118,10 +99,6 @@ public class APIKeyValidationService {
 
       validateKey_result result = new validateKey_result();
       receiveBase(result, "validateKey");
-
-////      Span span = (Span) tracerMap.get("KeySpan");
-//      Span span = spanMap.get("KeySpan");
-//      span.finish();
 
       if (log.isDebugEnabled()) {
         log.debug("KeyValidation response received to gateway from keymanager via thrift call for:"
