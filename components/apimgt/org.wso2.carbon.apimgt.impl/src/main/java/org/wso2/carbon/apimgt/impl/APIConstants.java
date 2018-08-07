@@ -1441,4 +1441,6 @@ public final class APIConstants {
     public static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
     public static final String JSON_FILENAME_EXTENSION = ".json";
     public static final String JSON_GZIP_FILENAME_EXTENSION = ".json.gz";
+
+    public static final String OPEN_TRACER_NAME = "OpenTracer.Name";
 }

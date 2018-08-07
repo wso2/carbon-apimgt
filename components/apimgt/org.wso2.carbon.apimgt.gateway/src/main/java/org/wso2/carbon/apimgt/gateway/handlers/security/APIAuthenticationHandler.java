@@ -16,6 +16,8 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security;
 
+import io.opentracing.Span;
+import io.opentracing.Tracer;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
@@ -142,6 +144,12 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "EXS_EXCEPTION_SOFTENING_RETURN_FALSE",
             justification = "Error is sent through payload")
     public boolean handleRequest(MessageContext messageContext) {
+
+        Span parentSpan = (Span) messageContext.getProperty("ParentSpan");
+        Tracer tracer = (Tracer) messageContext.getProperty("Tracer");
+        Span keySpan = tracer.buildSpan("KeyValidationLatency").asChildOf(parentSpan).start();
+        messageContext.setProperty("KeySpan",keySpan);
+
         Timer.Context context = startMetricTimer();
         long startTime = System.nanoTime();
         long endTime;
@@ -187,6 +195,8 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
             handleAuthFailure(messageContext, e);
         } finally {
+            Span span = (Span) messageContext.getProperty("KeySpan");
+            span.finish();
             messageContext.setProperty(APIMgtGatewayConstants.SECURITY_LATENCY,
                     TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime));
             stopMetricTimer(context);

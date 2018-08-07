@@ -215,6 +215,40 @@
             <groupId>com.fasterxml.woodstox</groupId>
             <artifactId>woodstox-core</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>io.opentracing</groupId>
+            <artifactId>opentracing-api</artifactId>
+            <version>0.31.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jaegertracing</groupId>
+            <artifactId>jaeger-core</artifactId>
+            <version>0.27.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.opentracing.brave</groupId>
+            <artifactId>brave-opentracing</artifactId>
+            <version>0.31.3</version>
+        </dependency>
+        <dependency>
+            <groupId>io.zipkin.reporter2</groupId>
+            <artifactId>zipkin-reporter</artifactId>
+            <version>2.7.7</version>
+        </dependency>
+        <dependency>
+            <groupId>io.zipkin.reporter2</groupId>
+            <artifactId>zipkin-sender-okhttp3</artifactId>
+            <version>2.7.6</version>
+        </dependency>
+        <!--&lt;!&ndash; https://mvnrepository.com/artifact/io.jaegertracing/jaeger-thrift &ndash;&gt;-->
+        <!--<dependency>-->
+            <!--<groupId>io.jaegertracing</groupId>-->
+            <!--<artifactId>jaeger-thrift</artifactId>-->
+            <!--<version>0.30.3</version>-->
+        <!--</dependency>-->
+
+
     </dependencies>
 
     <build>
@@ -269,7 +303,20 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Private-Package>
-                            org.wso2.carbon.apimgt.gateway.internal
+                            org.wso2.carbon.apimgt.gateway.internal,
+                            zipkin2.reporter.*,
+                            zipkin2.*,
+                            io.opentracing.*,
+                            okio.*,
+                            okhttp3.*,
+                            brave.*,
+
+                            <!--io.jaegertracing.*,-->
+                            <!--io.jaegertracing.thrift.*,-->
+                            <!--jaeger.okhttp3.*,-->
+                            <!--jaeger.okio.*,-->
+                            <!--jaeger.org.apache.*,-->
+                            <!--org.apache.thrift.*,-->
                         </Private-Package>
                         <Export-Package>
                             !javax.servlet,
@@ -277,7 +324,11 @@
                             !org.wso2.carbon.apimgt.gateway.internal,
                             !org.wso2.carbon.apimgt.gateway.stub.*,
                             org.wso2.carbon.apimgt.gateway.*;version="${carbon.apimgt.version}",
-                            org.wso2.throttle.*
+                            org.wso2.throttle.*,
+
+                            io.opentracing.*,
+                            brave.*,
+                            zipkin2.*,
                         </Export-Package>
                         <Import-Package>
                             !javax.xml.soap,

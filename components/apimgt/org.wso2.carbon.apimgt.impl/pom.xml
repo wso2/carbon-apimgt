@@ -309,6 +309,38 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>io.opentracing</groupId>
+            <artifactId>opentracing-api</artifactId>
+            <version>0.31.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.opentracing.brave</groupId>
+            <artifactId>brave-opentracing</artifactId>
+            <version>0.31.3</version>
+        </dependency>
+        <dependency>
+            <groupId>io.zipkin.reporter2</groupId>
+            <artifactId>zipkin-reporter</artifactId>
+            <version>2.7.7</version>
+        </dependency>
+        <dependency>
+            <groupId>io.zipkin.reporter2</groupId>
+            <artifactId>zipkin-sender-okhttp3</artifactId>
+            <version>2.7.6</version>
+        </dependency>
+        <dependency>
+            <groupId>io.opentracing</groupId>
+            <artifactId>opentracing-util</artifactId>
+            <version>0.31.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.gateway</artifactId>
+        </dependency>
+
+
     </dependencies>
     <build>
         <plugins>
@@ -383,7 +415,14 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Private-Package>
-                            org.wso2.carbon.apimgt.impl.internal.*
+                            org.wso2.carbon.apimgt.impl.internal.*,
+
+                            zipkin2.reporter.*,
+                            zipkin2.*,
+                            io.opentracing.*,
+                            okio.*,
+                            okhttp3.*,
+                            brave.*,
                         </Private-Package>
                         <Export-Package>
                             !org.apache.commons.codec.*,
@@ -455,6 +494,8 @@
                             org.wso2.securevault.*,
                             org.wso2.carbon.registry.*;version="${carbon.registry.imp.pkg.version}",
                             *;resolution:=optional
+
+                            <!--org.wso2.carbon.apimgt.gateway.*;version="${carbon.apimgt.version}",-->
                         </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>

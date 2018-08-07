@@ -9,33 +9,25 @@ package org.wso2.carbon.apimgt.impl.generated.thrift;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.thrift.protocol.TTupleProtocol;
 import org.apache.thrift.scheme.IScheme;
 import org.apache.thrift.scheme.SchemeFactory;
 import org.apache.thrift.scheme.StandardScheme;
-
 import org.apache.thrift.scheme.TupleScheme;
-import org.apache.thrift.protocol.TTupleProtocol;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.EnumMap;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.EnumSet;
-import java.util.Collections;
-import java.util.BitSet;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+
 
 public class APIKeyValidationService {
 
   private static final Log log = LogFactory.getLog(APIKeyValidationService.class);
+//  private static final HashMap<String,Span> tracerMap = new HashMap<>();
+
+//  public static Map<String, Span> spanMap = APIMgtLatencySynapseHandler.getSpanMap();
 
   public interface Iface {
 
@@ -94,18 +86,43 @@ public class APIKeyValidationService {
       args.setClientDomain(clientDomain);
       args.setMatchingResource(matchingResource);
       args.setHttpVerb(httpVerb);
+
+
+//      OkHttpSender sender = OkHttpSender.create("http://localhost:9411/api/v1/spans");
+//      Tracer tracer = BraveTracer.create(Tracing.newBuilder()
+//              .localServiceName("Hello")
+//              .spanReporter(AsyncReporter.builder(sender).build())
+//              .build());
+//
+////      Map<String,Object> map = hashmap.getSpanMap();
+//
+////      Tracer tracer = (Tracer) map.get("Tracer");
+//      Span keySpan = tracer.buildSpan("KeyValidation").asChildOf(spanMap.get("ParentSpan")).start();
+//      spanMap.put("KeySpan",keySpan);
+////      Span keySpan = tracer.buildSpan("KeyValidation").start();
+////      tracerMap.put("KeySpan",keySpan);
+
+
       if (log.isDebugEnabled()) {
         log.debug("KeyValidation request from gateway to keymanager via thrift call for: " + context + " with ID: "
                 + MessageContext.getCurrentMessageContext().getMessageID() + " at "
                 + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
       }
       sendBase("validateKey", args);
+
     }
 
     public APIKeyValidationInfoDTO recv_validateKey() throws APIKeyMgtException, APIManagementException, org.apache.thrift.TException
     {
+
+
       validateKey_result result = new validateKey_result();
       receiveBase(result, "validateKey");
+
+////      Span span = (Span) tracerMap.get("KeySpan");
+//      Span span = spanMap.get("KeySpan");
+//      span.finish();
+
       if (log.isDebugEnabled()) {
         log.debug("KeyValidation response received to gateway from keymanager via thrift call for:"
                 + " with ID: " + MessageContext.getCurrentMessageContext().getMessageID() + " at "
