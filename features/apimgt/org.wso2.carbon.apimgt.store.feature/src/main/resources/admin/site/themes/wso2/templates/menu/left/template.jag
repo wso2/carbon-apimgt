@@ -130,6 +130,19 @@
                 onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
                 <i class="fw fw-edit"></i><%= i18n.localize("Labels")%></a>
               </li>
+              <%
+              var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+              var isAnalyticsEnabled = APIUtil.isAnalyticsEnabled();
+              if(isAnalyticsEnabled) {
+              %>
+              <li <%if (reqUrl.match("reports")){%> class="active" <% } %>><a
+                href="<%= jagg.url("/reports") %>"
+                onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+                <i class="fw fw-task"></i><%= i18n.localize("Usage Reports")%></a>
+              </li>
+              <%
+              }
+              %>
             </ul>
         </li>
         <li class="nav-header">

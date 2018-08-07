@@ -105,6 +105,7 @@ import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.reportgen.ReportGenerator;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
 import org.apache.xerces.util.SecurityManager;
@@ -7556,5 +7557,21 @@ public final class APIUtil {
         } else {
             return role;
         }
+    }
+    
+    /**
+     * This method used to Downloaded Uploaded Documents from publisher
+     *
+     * @param userName     logged in username
+     * @param resourceUrl  resource want to download
+     * @param tenantDomain loggedUserTenantDomain
+     * @return map that contains Data of the resource
+     * @throws APIManagementException
+     */
+    public static Map<String, Object> getMicroGatewayRequestSummeryReport(String userName, String monthDuration)
+            throws APIManagementException {
+        Map<String, Object> documentMap = new HashMap<String, Object>();
+        documentMap.put("Data", ReportGenerator.getSampleReport());
+        return documentMap;
     }
 }
