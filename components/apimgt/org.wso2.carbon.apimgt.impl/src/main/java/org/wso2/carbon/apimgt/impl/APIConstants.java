@@ -18,12 +18,12 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import javax.xml.namespace.QName;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import javax.xml.namespace.QName;
 
 /**
  * This class represents the constants that are used for APIManager implementation
@@ -1442,5 +1442,4 @@ public final class APIConstants {
     public static final String JSON_FILENAME_EXTENSION = ".json";
     public static final String JSON_GZIP_FILENAME_EXTENSION = ".json.gz";
 
-    public static final String OPEN_TRACER_NAME = "OpenTracer.Name";
 }

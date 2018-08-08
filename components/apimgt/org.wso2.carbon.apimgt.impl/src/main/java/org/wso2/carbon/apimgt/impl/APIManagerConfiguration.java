@@ -70,8 +70,6 @@ public class APIManagerConfiguration {
     public static final String WEBSOCKET_DEFAULT_GATEWAY_URL = "ws://localhost:9099";
     private Map<String, Map<String, String>> loginConfiguration = new ConcurrentHashMap<String, Map<String, String>>();
     private JSONArray applicationAttributes = new JSONArray();
-    private Map<String,String> openTraceConfig = new HashMap<String, String>();
-
     private SecretResolver secretResolver;
 
     private boolean initialized;
@@ -333,22 +331,6 @@ public class APIManagerConfiguration {
                     }
                     applicationAttributes.add(jsonObject);
                 }
-            } else if ("OpenTracer".equals(localName)) {
-                Iterator itr = element.getChildElements();
-
-                while (itr.hasNext()){
-                    OMElement omElement = (OMElement) itr.next();
-                    String name = omElement.getLocalName();
-                    String value =  omElement.getText();
-                    openTraceConfig.put(name,value);
-                }
-                Iterator<String> itrr = openTraceConfig.keySet().iterator();
-                while (itrr.hasNext()) {
-                    String key = itrr.next();
-                    log.info(" @@@@@@@@@@ " + key + " " + openTraceConfig.get(key));
-                }
-                log.info("******" + openTraceConfig);
-
             }
             readChildElements(element, nameStack);
             nameStack.pop();
@@ -356,11 +338,9 @@ public class APIManagerConfiguration {
         }
     }
 
-
     public JSONArray getApplicationAttributes() {
         return applicationAttributes;
     }
-    public Map<String,String> getOpenTracerConfig() { return openTraceConfig; }
 
     /**
      * Read the primary/secondary login configuration

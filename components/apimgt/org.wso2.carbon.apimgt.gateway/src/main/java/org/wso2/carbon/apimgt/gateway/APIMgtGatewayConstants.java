@@ -19,8 +19,6 @@
 
 package org.wso2.carbon.apimgt.gateway;
 
-import io.opentracing.Span;
-
 public class APIMgtGatewayConstants {
 
     public static final String CONSUMER_KEY = "api.ut.consumerKey";
@@ -100,17 +98,5 @@ public class APIMgtGatewayConstants {
     public static final String SYNAPSE_BACKEND_LATENCY = "synapse.backend.latency";
     public static final String SYNAPSE_RESPONSE_LATENCY = "synapse.response.latency";
     public static final String REQUEST_ID = "request.id";
-
-    public static final String OPEN_TRACER_NAME = "OpenTracer.Name";
-    public static final String OPEN_TRACER_PORT = "OpenTracer.Port";
-    public static final String OPEN_TRACER_HOST = "OpenTracer.Hostname";
-    public static final String OPEN_TRACER_ENABLED = "OpenTracer.Enabled";
-    public static final String OPEN_TRACER_SAMPLER_PARAM = "OpenTracer.SamplerParam";
-    public static final String OPEN_TRACER_SAMPLER_TYPE = "OpenTracer.SamplerType";
-    public static final String OPEN_TRACER_REPORTER_FLUSH_INTERVAL = "OpenTracer.ReporterFlushInterval";
-    public static final String OPEN_TRACER_REPORTER_BUFFER_SIZE = "OpenTracer.ReporterBufferSize";
-
-
-
 }
 
