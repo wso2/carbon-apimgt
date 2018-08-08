@@ -14,10 +14,6 @@ import zipkin2.reporter.okhttp3.OkHttpSender;
 
 import java.util.UUID;
 
-//import org.wso2.carbon.apimgt.tracing.*;
-
-//@Component(name = "org.wso2.carbon.apimgt.gateway.handlers.common.APIMgtSynapseHandler" , immediate = true)
-
 public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 
     private static final Log log = LogFactory.getLog(APIMgtLatencySynapseHandler.class);
@@ -26,9 +22,6 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
     private long handleRequestOutFlowTime;
     private long handleResponseInFlowTime;
     private long handleResponseOutFlowTime;
-
-//    TracingService tracingService = new TracingService();
-//    OpenTracerService openTracerService = new OpenTracerService();
 
     private APIManagerConfiguration configuration = new APIManagerConfiguration();
 
