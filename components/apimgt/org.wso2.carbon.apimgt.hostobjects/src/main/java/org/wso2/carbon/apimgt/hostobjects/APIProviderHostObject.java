@@ -97,6 +97,7 @@ import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.impl.reportgen.util.ReportGenUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -5494,31 +5495,22 @@ public class APIProviderHostObject extends ScriptableObject {
      * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
      */
     public static NativeObject jsFunction_getMicroGatewayRequestSummeryReport(Context cx, Scriptable thisObj,
-            Object[] args, Function funObj)
-            throws ScriptException,
-            APIManagementException {
+            Object[] args, Function funObj) throws ScriptException, APIManagementException {
         NativeObject data = new NativeObject();
-//        if (args == null || args.length != 2 || !isStringArray(args)) {
-//            handleException("Invalid input parameters expected resource Url and tenantDomain");
-//        }
-//        NativeObject data = new NativeObject();
-//
-//        String username = ((APIProviderHostObject) thisObj).getUsername();
-//        // Set anonymous user if no user is login to the system
-//        if (username == null) {
-//            username = APIConstants.END_USER_ANONYMOUS;
-//        }
-//        String resource = (String) args[1];
-//        String tenantDomain = (String) args[0];
-        Map<String, Object> docResourceMap = APIUtil.getMicroGatewayRequestSummeryReport("", "");
-        if (!docResourceMap.isEmpty()) {
-            data.put("Data", data,
-                    cx.newObject(thisObj, "Stream", new Object[]{docResourceMap.get("Data")}));
-            //data.put("contentType", data, docResourceMap.get("contentType"));
-            //data.put("name", data, docResourceMap.get("name"));
-        } else {
-            handleException("Resource couldn't found for ");////////////
+        if (args == null || args.length != 2 || !isStringArray(args)) {
+            handleException("Invalid input parameters expected username and date");
         }
+
+        String date = (String) args[1];
+        String username = (String) args[0];
+        //TODO implement for multitenant use case
+        InputStream stream = ReportGenUtil.getMicroGatewayRequestSummaryReport(username, date);
+        if (stream != null) {
+            data.put("Data", data, cx.newObject(thisObj, "Stream", new Object[] { stream }));
+        } else {
+            handleException("Resource strean couldn't be found to generate report");
+        }
+
         return data;
     }
 

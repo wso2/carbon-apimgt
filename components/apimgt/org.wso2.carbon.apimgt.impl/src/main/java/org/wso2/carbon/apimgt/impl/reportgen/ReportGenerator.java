@@ -18,12 +18,8 @@ package org.wso2.carbon.apimgt.impl.reportgen;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -34,6 +30,7 @@ import org.apache.pdfbox.pdmodel.edit.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.graphics.xobject.PDJpeg;
+import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.reportgen.model.RowEntry;
 import org.wso2.carbon.apimgt.impl.reportgen.model.TableData;
 
@@ -48,74 +45,17 @@ public class ReportGenerator {
     // Font configuration
     private static final PDFont TEXT_FONT = PDType1Font.HELVETICA;
     private static final float FONT_SIZE = 9;
-    
-    private static List sampleData() {
-        List rows = new ArrayList<RowEntry>();
-        RowEntry entry = new RowEntry();
-        entry.setEntry("1");
-        entry.setEntry("July 2018");
-        entry.setEntry("1432");
-        rows.add(entry);
-        
-        entry = new RowEntry();
-        entry.setEntry("2");
-        entry.setEntry("June 2018");
-        entry.setEntry("1442");
-        rows.add(entry);
-        
-        entry = new RowEntry();
-        entry.setEntry("3");
-        entry.setEntry("May 2018");
-        entry.setEntry("1772");
-        rows.add(entry);
-        return rows;
-    }
-    
-    public static void main(String[] args) {
-        ReportGenerator generator = new ReportGenerator();
-        TableData table = new TableData();
-        String[] columnHeaders = { "", "Date", "Number of requests" };
-        table.setColumnHeaders(columnHeaders); 
-        table.setRows(sampleData());
-        
-        InputStream inStream = null;
-        
-        try {
-            generator.generateRequestSummeryReport(table);
-        } catch (COSVisitorException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
-    
-    public static InputStream getSampleReport() {
-        ReportGenerator generator = new ReportGenerator();
-        TableData table = new TableData();
-        String[] columnHeaders = { "", "Date", "Number of requests" };
-        table.setColumnHeaders(columnHeaders); 
-        table.setRows(sampleData());
-        
-        InputStream inStream = null;
-        
-        try {
-            inStream = generator.generateRequestSummeryReport(table);
-        } catch (COSVisitorException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        return inStream;
-    }
-    
-    public InputStream generateRequestSummeryReport(TableData table) throws IOException, COSVisitorException {
-        System.out.println("X --> " + PDPage.PAGE_SIZE_A4.getWidth() + "  Y --> " + PDPage.PAGE_SIZE_A4.getHeight());
-       // String[][] entries = { { "1", "July 2018", "2011" }, { "2", "June 2018", "2211" },
-       //         { "3", "May 2018", "4211" } };
+
+    /**
+     * Generate PDF file for API microgateway request summary
+     * 
+     * @param table object containing table headers and row data
+     * @return InputStream pdf as a stream
+     * @throws IOException
+     * @throws COSVisitorException
+     */
+    public InputStream generateMGRequestSummeryPDF(TableData table) throws IOException, COSVisitorException {
+
         String[] columnHeaders = table.getColumnHeaders();
 
         PDDocument document = new PDDocument();
@@ -127,14 +67,13 @@ public class ReportGenerator {
         PDPageContentStream contentStream = new PDPageContentStream(document, page, false, false);
 
         // add logo
-//        InputStream in = new FileInputStream(
-//                new File("/Users/wso2/eclipse-workspace/apimdev/ReportGen/images/wso2-logo-2.jpg"));
-//        PDJpeg img = new PDJpeg(document, in);
-//        contentStream.drawImage(img, 375, 755);
+        InputStream in = APIManagerComponent.class.getResourceAsStream("/report/wso2-logo.jpg");
+        PDJpeg img = new PDJpeg(document, in);
+        contentStream.drawImage(img, 375, 755);
 
         // Add topic
         contentStream.setFont(PDType1Font.HELVETICA_BOLD, 16);
-        writeContent(contentStream, tableMargin, 770, "Microgateway request summary");
+        writeContent(contentStream, tableMargin, 770, "API Microgateway request summary");
 
         // Add generated time
         contentStream.setFont(PDType1Font.HELVETICA_BOLD, FONT_SIZE);
@@ -150,13 +89,12 @@ public class ReportGenerator {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         document.save(out);
         document.close();
-        
+
         return new ByteArrayInputStream(out.toByteArray());
 
     }
-    
 
-    public static void drowTableGrid(PDPageContentStream contentStream, int numberOfRows) throws IOException {
+    private void drowTableGrid(PDPageContentStream contentStream, int numberOfRows) throws IOException {
         float nextY = tableTopY;
         // draw horizontal lines
         for (int i = 0; i <= numberOfRows + 1; i++) {
@@ -165,7 +103,7 @@ public class ReportGenerator {
         }
 
         // draw vertical lines
-        final float tableYLength = rowHeight + (rowHeight * numberOfRows);////// Check this
+        final float tableYLength = rowHeight + (rowHeight * numberOfRows);
         final float tableBottomY = tableTopY - tableYLength;
         float nextX = tableMargin;
         for (int i = 0; i < columWidth.length; i++) {
@@ -191,6 +129,7 @@ public class ReportGenerator {
             positionX += columWidth[i];
         }
     }
+
     private void writeToRow(PDPageContentStream contentStream, float positionX, float positionY, RowEntry entry)
             throws IOException {
 
@@ -199,6 +138,7 @@ public class ReportGenerator {
             positionX += columWidth[i];
         }
     }
+
     private void writeRowsContent(PDPageContentStream contentStream, String[] columnHeaders, List<RowEntry> rowEntries)
             throws IOException {
         float startX = tableMargin + cellPadding; // space between entry and the column line
