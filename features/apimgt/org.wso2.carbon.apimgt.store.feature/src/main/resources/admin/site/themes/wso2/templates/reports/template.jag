@@ -2,7 +2,7 @@
 %>
 <div id="listing">
 	<div class="page-header">
-      <h2><%=i18n.localize("Micro gateway request summery report")%></h2>
+      <h2><%=i18n.localize("Microgateway request summary report")%></h2>
   </div>
 </div>
 <form class="form-horizontal apim-form" method="POST" id="downloadPDFForm">
