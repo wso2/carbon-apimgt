@@ -10937,21 +10937,23 @@ public class ApiMgtDAO {
 
 
     /**
-     * Get a list of access tokens issued for given user under the given app. Returned object carries consumer key
-     * and secret information related to the access token
+     * Get a list of access tokens issued for given user under the given app of given owner. Returned object carries
+     * consumer key and secret information related to the access token
      *
      * @param userName end user name
      * @param appName  application name
+     * @param appOwner application owner user name
      * @return list of tokens
      * @throws SQLException in case of a DB issue
      */
-    public static List<AccessTokenInfo> getAccessTokenListForUser(String userName, String appName) throws SQLException {
-
+    public static List<AccessTokenInfo> getAccessTokenListForUser(String userName, String appName, String appOwner)
+            throws SQLException {
         List<AccessTokenInfo> accessTokens = new ArrayList<AccessTokenInfo>(5);
         Connection connection = APIMgtDBUtil.getConnection();
         PreparedStatement consumerSecretIDPS = connection.prepareStatement(SQLConstants.GET_ACCESS_TOKENS_BY_USER_SQL);
         consumerSecretIDPS.setString(1, userName);
         consumerSecretIDPS.setString(2, appName);
+        consumerSecretIDPS.setString(3, appOwner);
 
         ResultSet consumerSecretIDResult = consumerSecretIDPS.executeQuery();
 

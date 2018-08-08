@@ -2679,7 +2679,8 @@ public class SQLConstants {
             "FROM " +
             "IDN_OAUTH_CONSUMER_APPS CON_APP, AM_APPLICATION APP, IDN_OAUTH2_ACCESS_TOKEN  TOKEN, AM_APPLICATION_KEY_MAPPING AKM " +
             "WHERE TOKEN.AUTHZ_USER =? " +
-            "AND APP.NAME=? " +
+            "AND APP.NAME =? " +
+            "AND APP.CREATED_BY =? " +
             "AND TOKEN.TOKEN_STATE = 'ACTIVE' " +
             "AND TOKEN.CONSUMER_KEY_ID = CON_APP.ID " +
             "AND CON_APP.CONSUMER_KEY=AKM.CONSUMER_KEY " +
