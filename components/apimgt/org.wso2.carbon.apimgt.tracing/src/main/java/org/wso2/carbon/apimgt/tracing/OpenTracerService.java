@@ -1,50 +1,98 @@
 package org.wso2.carbon.apimgt.tracing;
 
+import brave.Tracing;
+import brave.opentracing.BraveTracer;
+import io.opentracing.Tracer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.utils.CarbonUtils;
+import zipkin2.reporter.AsyncReporter;
+import zipkin2.reporter.okhttp3.OkHttpSender;
 
 import java.io.File;
+
+/**
+ * @scr.component name="org.wso2.apimgt.impl.services" immediate="true"
+ *  * @scr.reference name="api.manager.config.service"
+ *  * interface="org.wso2.carbon.apimgt.impl.APIManagerConfigurationService" cardinality="1..1"
+ *  * policy="dynamic" bind="setAPIManagerConfigurationService" unbind="unsetAPIManagerConfigurationService"
+ */
 
 
 public class OpenTracerService {
 
     private static final Log log = LogFactory.getLog(OpenTracerService.class) ;
 
-    private APIManagerConfiguration configuration = new APIManagerConfiguration();
+//    private APIManagerConfiguration configuration = new APIManagerConfiguration();
+    TracerLoader tracerLoader = TracerLoader.getInstance();
     private ServiceRegistration registration;
 
+    private String openTracerName;
+    private String enabled;
+    private String hostname;
+    private int port;
+    private String samplerType;
+    private float samplerParam;
+    private int reporterFlushInterval;
+    private int reporterBufferSize;
 
-    protected void activate(ComponentContext componentContextcontext) {
+    private String apiContext;
+    private boolean compressionEnabled;
+    private String apiVersion;
 
-        BundleContext bundleContext = componentContextcontext.getBundleContext();
-        bundleContext.registerService(OpenTracer.class.getName(), new ZipkinTracerImpl(), null);
+
+    protected void activate(ComponentContext componentContext) {
+
+        BundleContext bundleContext = componentContext.getBundleContext();
+//        bundleContext.registerService(OpenTracer.class.getName(), new ZipkinTracerImpl(), null);
 
         if (log.isDebugEnabled()) {
             log.debug("OpenTracer service component activated");
         }
-        try {
-            String filePath = getFilePath();
-            configuration.load(filePath);
+//        try {
+//            String filePath = getFilePath();
+//            configuration.load(filePath);
+//
+//            openTracerName = configuration.getFirstProperty(OpenTracerConstants.OPEN_TRACER_NAME); //"OpenTracer.Name"
+//            enabled = configuration.getFirstProperty(OpenTracerConstants.OPEN_TRACER_ENABLED);
+//
+//            if(openTracerName.equalsIgnoreCase("JAEGER") && enabled.equalsIgnoreCase("TRUE")) {
+//
+//                Tracer tracer = tracerLoader.getTracer(openTracerName, configuration);
+//
+//            }else if(openTracerName.equalsIgnoreCase("ZIPKIN") && enabled.equalsIgnoreCase("TRUE")) {
+//
+//                Tracer tracer = tracerLoader.getTracer(openTracerName,configuration);
+//
+//                OkHttpSender sender = OkHttpSender.create("http://localhost:9411/api/v1/spans");
+//                Tracer tracer = BraveTracer.create(Tracing.newBuilder()
+//                        .localServiceName("Hello")
+//                        .spanReporter(AsyncReporter.builder(sender).build())
+//                        .build());
+//
+//                ServiceReferenceHolder.getInstance().setTracer(tracer);
+//
+//            }else
+//                log.error("Invalid Configuration");
+//            } catch (APIManagementException e) {
+//            e.printStackTrace();
+//        }
 
-            String openTracerName = configuration.getFirstProperty(OpenTracerConstants.OPEN_TRACER_NAME); //"OpenTracer.Name"
-            String enabled = configuration.getFirstProperty(OpenTracerConstants.OPEN_TRACER_ENABLED);
-            log.info(openTracerName);
-            if ("jaeger".equalsIgnoreCase(openTracerName)) {}
 
-            log.info(openTracerName);
+        OkHttpSender sender = OkHttpSender.create("http://localhost:9411/api/v1/spans");
+        Tracer tracer = BraveTracer.create(Tracing.newBuilder()
+                .localServiceName("Hello")
+                .spanReporter(AsyncReporter.builder(sender).build())
+                .build());
 
-        } catch (APIManagementException e) {
-            e.printStackTrace();
-        }
+
+        ServiceReferenceHolder.getInstance().setTracer(tracer);
+
     }
-
-
 
     protected void deactivate(ComponentContext context) {
         if (log.isDebugEnabled()) {

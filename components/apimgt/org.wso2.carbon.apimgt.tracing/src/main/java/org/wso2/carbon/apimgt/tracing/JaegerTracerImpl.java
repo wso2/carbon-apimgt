@@ -2,12 +2,7 @@ package org.wso2.carbon.apimgt.tracing;
 
 import io.jaegertracing.Configuration;
 import io.opentracing.Tracer;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.utils.CarbonUtils;
-
-import javax.cache.InvalidConfigurationException;
-import java.io.File;
 
 public class JaegerTracerImpl implements OpenTracer{
 
@@ -21,31 +16,18 @@ public class JaegerTracerImpl implements OpenTracer{
     private int reporterBufferSize;
     private  String openTracerName;
 
-
     private APIManagerConfiguration configuration = new APIManagerConfiguration();
 
     @Override
-    public void init() throws InvalidConfigurationException {
+    public Tracer getTracer(String tracerName, APIManagerConfiguration configuration) {
 
-        try {
-            String filePath = CarbonUtils.getCarbonConfigDirPath() + File.separator + "api-manager.xml";
-            configuration.load(filePath);
 
-            port = Integer.parseInt(configuration.getFirstProperty(OpenTracerConstants.OPEN_TRACER_PORT));
-            hostname = configuration.getFirstProperty(OpenTracerConstants.OPEN_TRACER_HOST);
-            samplerType = configuration.getFirstProperty(OpenTracerConstants.OPEN_TRACER_SAMPLER_TYPE);
-            samplerParam = Float.parseFloat(configuration.getFirstProperty(OpenTracerConstants.OPEN_TRACER_SAMPLER_PARAM));
-            reporterFlushInterval = Integer.parseInt(configuration.getFirstProperty(OpenTracerConstants.OPEN_TRACER_REPORTER_FLUSH_INTERVAL));
-            reporterBufferSize = Integer.parseInt(configuration.getFirstProperty(OpenTracerConstants.OPEN_TRACER_REPORTER_BUFFER_SIZE));
-            openTracerName = configuration.getFirstProperty(OpenTracerConstants.OPEN_TRACER_NAME);
-        } catch (APIManagementException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public Tracer getTracer(String tracerName,String serviceName) {
-
+        hostname = configuration.getFirstProperty(OpenTracerConstants.OPEN_TRACER_HOST);
+        port = Integer.parseInt(configuration.getFirstProperty(OpenTracerConstants.OPEN_TRACER_PORT));
+        samplerType = configuration.getFirstProperty(OpenTracerConstants.OPEN_TRACER_SAMPLER_PARAM);
+        samplerParam = Float.parseFloat(configuration.getFirstProperty(OpenTracerConstants.OPEN_TRACER_SAMPLER_PARAM));
+        reporterFlushInterval = Integer.parseInt(configuration.getFirstProperty(OpenTracerConstants.OPEN_TRACER_REPORTER_FLUSH_INTERVAL));
+        reporterBufferSize = Integer.parseInt(configuration.getFirstProperty(OpenTracerConstants.OPEN_TRACER_REPORTER_BUFFER_SIZE));
 
         Tracer tracer = null;
         Configuration.SamplerConfiguration samplerConfig = new Configuration.SamplerConfiguration()
@@ -59,7 +41,8 @@ public class JaegerTracerImpl implements OpenTracer{
                 .withFlushInterval(reporterFlushInterval)
                 .withMaxQueueSize(reporterBufferSize)
                 .withSender(senderConfig);
-        tracer = new Configuration(serviceName).withSampler(samplerConfig).withReporter(reporterConfig).getTracer();
+
+        tracer = new Configuration("Hello").withSampler(samplerConfig).withReporter(reporterConfig).getTracer();
 
         return tracer;
     }

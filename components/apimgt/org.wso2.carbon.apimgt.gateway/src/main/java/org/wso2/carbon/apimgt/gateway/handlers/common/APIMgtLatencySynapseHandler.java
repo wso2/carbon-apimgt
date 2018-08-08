@@ -1,7 +1,5 @@
 package org.wso2.carbon.apimgt.gateway.handlers.common;
 
-import brave.Tracing;
-import brave.opentracing.BraveTracer;
 import io.opentracing.Span;
 import io.opentracing.Tracer;
 import org.apache.commons.lang.StringUtils;
@@ -11,7 +9,7 @@ import org.apache.synapse.AbstractSynapseHandler;
 import org.apache.synapse.MessageContext;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import zipkin2.reporter.AsyncReporter;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import zipkin2.reporter.okhttp3.OkHttpSender;
 
 import java.util.UUID;
@@ -34,11 +32,14 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 
     private APIManagerConfiguration configuration = new APIManagerConfiguration();
 
-    OkHttpSender sender = OkHttpSender.create("http://localhost:9411/api/v1/spans");
-    Tracer tracer = BraveTracer.create(Tracing.newBuilder()
-            .localServiceName("Hello")
-            .spanReporter(AsyncReporter.builder(sender).build())
-            .build());
+//    OkHttpSender sender = OkHttpSender.create("http://localhost:9411/api/v1/spans");
+//    Tracer tracer = BraveTracer.create(Tracing.newBuilder()
+//                    .localServiceName("Hello")
+//                    .spanReporter(AsyncReporter.builder(sender).build())
+//                    .build());
+
+    Tracer tracer = (Tracer) ServiceReferenceHolder.getInstance().getTracer();
+
 
     @Override
     public boolean handleRequestInFlow(MessageContext messageContext) {

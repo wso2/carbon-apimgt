@@ -1,14 +1,13 @@
 package org.wso2.carbon.apimgt.tracing;
 
 import io.opentracing.Tracer;
-
-import javax.cache.InvalidConfigurationException;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 
 public interface OpenTracer {
 
-    void init() throws InvalidConfigurationException;
+//    void init() throws InvalidConfigurationException;
 
-    Tracer getTracer(String tracerName, String serviceName);
+    Tracer getTracer(String tracerName, APIManagerConfiguration configuration);
 
     String getName();
 }
