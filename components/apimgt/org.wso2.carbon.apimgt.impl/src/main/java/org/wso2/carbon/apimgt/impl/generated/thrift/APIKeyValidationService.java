@@ -20,8 +20,6 @@ import org.slf4j.LoggerFactory;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-
-
 public class APIKeyValidationService {
 
   private static final Log log = LogFactory.getLog(APIKeyValidationService.class);
