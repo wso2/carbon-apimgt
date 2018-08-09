@@ -47,17 +47,19 @@ public class ReportGenUtil {
             throws APIManagementException {
         InputStream pdfInputStream = null;
         // get data
-        String value = "";
+        String value = "0"; //default 
         String appName = "API_ACCESS_SUMMARY";
         String query = "from ApiUserPerAppAgg on gatewayType=='MICRO' within '" + date 
                 + "-** **:**:**' per 'months' SELECT sum(totalRequestCount) as sum;";
         
         JSONObject jsonObj = APIUtil.executeQueryOnStreamProcessor(appName, query);
         JSONArray jarray =  (JSONArray) jsonObj.get("records");
-        JSONArray val = (JSONArray) jarray.get(0);
-        Long result = (Long) val.get(0);
-        value = String.valueOf(result);
-        
+        if(jarray != null && jarray.size() != 0) {
+            JSONArray val = (JSONArray) jarray.get(0);
+            Long result = (Long) val.get(0);
+            value = String.valueOf(result);
+        }
+
         //build data object to pass for generation
         TableData table = new TableData();
         String[] columnHeaders = { "", "Date", "Number of requests" };
