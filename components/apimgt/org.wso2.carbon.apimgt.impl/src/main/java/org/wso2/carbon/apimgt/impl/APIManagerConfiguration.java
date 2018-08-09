@@ -1025,7 +1025,6 @@ public class APIManagerConfiguration {
     public ThrottleProperties getThrottleProperties() {
         return throttleProperties;
     }
-
     public WorkflowProperties getWorkflowProperties() {
         return workflowProperties;
     }
