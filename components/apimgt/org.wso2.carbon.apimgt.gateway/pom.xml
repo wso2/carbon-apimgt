@@ -237,12 +237,9 @@
             <version>2.7.6</version>
         </dependency>
         <dependency>
-            <groupId>io.jaegertracing</groupId>
-            <artifactId>jaeger-thrift</artifactId>
-            <version>0.30.3</version>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.tracing</artifactId>
         </dependency>
-
-
     </dependencies>
 
     <build>
@@ -298,19 +295,13 @@
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Private-Package>
                             org.wso2.carbon.apimgt.gateway.internal,
+
                             zipkin2.reporter.*,
                             zipkin2.*,
                             io.opentracing.*,
                             okio.*,
                             okhttp3.*,
                             brave.*,
-
-                            <!--io.jaegertracing.*,-->
-                            <!--io.jaegertracing.thrift.*,-->
-                            <!--jaeger.okhttp3.*,-->
-                            <!--jaeger.okio.*,-->
-                            <!--jaeger.org.apache.*,-->
-                            <!--org.apache.thrift.*,-->
                         </Private-Package>
                         <Export-Package>
                             !javax.servlet,
@@ -370,6 +361,7 @@
                             org.wso2.carbon.sequences.stub.types,
                             org.wso2.carbon.context,
                             org.wso2.carbon.mediation.*; version="${carbon.mediation.imp.pkg.version}",
+                            org.wso2.carbon.apimgt.tracing.*; version="${carbon.apimgt.imp.pkg.version}",
                             *;resolution:=optional
                         </Import-Package>
                     </instructions>

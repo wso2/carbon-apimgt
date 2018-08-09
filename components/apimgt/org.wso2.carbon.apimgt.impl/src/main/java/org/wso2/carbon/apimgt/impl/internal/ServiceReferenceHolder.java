@@ -36,15 +36,6 @@ public class ServiceReferenceHolder {
     private TenantIndexingLoader indexLoader;
     private OutputEventAdapterService outputEventAdapterService;
     private APIMgtWorkflowDataPublisher apiMgtWorkflowDataPublisher;
-    private Object tracer;
-
-    public Object getTracer() {
-        return tracer;
-    }
-
-    public void setTracer(Object tracer) {
-        this.tracer = tracer;
-    }
 
     public static ConfigurationContextService getContextService() {
         return contextService;
