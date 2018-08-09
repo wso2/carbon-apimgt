@@ -35,12 +35,12 @@ import org.wso2.carbon.apimgt.impl.reportgen.model.RowEntry;
 import org.wso2.carbon.apimgt.impl.reportgen.model.TableData;
 
 public class ReportGenerator {
-    private static float[] columWidth = { 50, 200, 150 };
-    private static float rowHeight = 25;
-    private static float cellPadding = 10;
-    private static float tableMargin = 40; // margin on left side;
-    private static float tableWidth = 500;
-    private static float tableTopY = 700;
+    private static final float[] COLUMN_WIDTH = { 50, 200, 150 };
+    private static final float ROW_HEIGHT = 25;
+    private static final float CELL_PADDING = 10;
+    private static final float CELL_MARGIN = 40; // margin on left side;
+    private static final float TABLE_WIDTH = 500;
+    private static final float TABLE_TOP_Y = 700;
 
     // Font configuration
     private static final PDFont TEXT_FONT = PDType1Font.HELVETICA;
@@ -73,11 +73,11 @@ public class ReportGenerator {
 
         // Add topic
         contentStream.setFont(PDType1Font.HELVETICA_BOLD, 16);
-        writeContent(contentStream, tableMargin, 770, "API Microgateway request summary");
+        writeContent(contentStream, CELL_MARGIN, 770, "API Microgateway request summary");
 
         // Add generated time
         contentStream.setFont(PDType1Font.HELVETICA_BOLD, FONT_SIZE);
-        writeContent(contentStream, tableMargin, 730, "Report generated on: " + new Date().toString());
+        writeContent(contentStream, CELL_MARGIN, 730, "Report generated on: " + new Date().toString());
 
         contentStream.setFont(TEXT_FONT, FONT_SIZE);
 
@@ -95,22 +95,22 @@ public class ReportGenerator {
     }
 
     private void drowTableGrid(PDPageContentStream contentStream, int numberOfRows) throws IOException {
-        float nextY = tableTopY;
+        float nextY = TABLE_TOP_Y;
         // draw horizontal lines
         for (int i = 0; i <= numberOfRows + 1; i++) {
-            contentStream.drawLine(tableMargin, nextY, tableMargin + tableWidth, nextY);
-            nextY -= rowHeight;
+            contentStream.drawLine(CELL_MARGIN, nextY, CELL_MARGIN + TABLE_WIDTH, nextY);
+            nextY -= ROW_HEIGHT;
         }
 
         // draw vertical lines
-        final float tableYLength = rowHeight + (rowHeight * numberOfRows);
-        final float tableBottomY = tableTopY - tableYLength;
-        float nextX = tableMargin;
-        for (int i = 0; i < columWidth.length; i++) {
-            contentStream.drawLine(nextX, tableTopY, nextX, tableBottomY);
-            nextX += columWidth[i];
+        final float tableYLength = ROW_HEIGHT + (ROW_HEIGHT * numberOfRows);
+        final float tableBottomY = TABLE_TOP_Y - tableYLength;
+        float nextX = CELL_MARGIN;
+        for (int i = 0; i < COLUMN_WIDTH.length; i++) {
+            contentStream.drawLine(nextX, TABLE_TOP_Y, nextX, tableBottomY);
+            nextX += COLUMN_WIDTH[i];
         }
-        contentStream.drawLine(tableMargin + tableWidth, tableTopY, tableMargin + tableWidth, tableBottomY);
+        contentStream.drawLine(CELL_MARGIN + TABLE_WIDTH, TABLE_TOP_Y, CELL_MARGIN + TABLE_WIDTH, tableBottomY);
     }
 
     private void writeContent(PDPageContentStream contentStream, float positionX, float positionY, String text)
@@ -124,37 +124,37 @@ public class ReportGenerator {
     private void writeColumHeader(PDPageContentStream contentStream, float positionX, float positionY, String[] content)
             throws IOException {
 
-        for (int i = 0; i < columWidth.length; i++) {
+        for (int i = 0; i < COLUMN_WIDTH.length; i++) {
             writeContent(contentStream, positionX, positionY, content[i]);
-            positionX += columWidth[i];
+            positionX += COLUMN_WIDTH[i];
         }
     }
 
     private void writeToRow(PDPageContentStream contentStream, float positionX, float positionY, RowEntry entry)
             throws IOException {
 
-        for (int i = 0; i < columWidth.length; i++) {
+        for (int i = 0; i < COLUMN_WIDTH.length; i++) {
             writeContent(contentStream, positionX, positionY, (String) entry.getEntries().get(i));
-            positionX += columWidth[i];
+            positionX += COLUMN_WIDTH[i];
         }
     }
 
     private void writeRowsContent(PDPageContentStream contentStream, String[] columnHeaders, List<RowEntry> rowEntries)
             throws IOException {
-        float startX = tableMargin + cellPadding; // space between entry and the column line
-        float startY = tableTopY - (rowHeight / 2)
+        float startX = CELL_MARGIN + CELL_PADDING; // space between entry and the column line
+        float startY = TABLE_TOP_Y - (ROW_HEIGHT / 2)
                 - ((TEXT_FONT.getFontDescriptor().getFontBoundingBox().getHeight() / 1000 * FONT_SIZE) / 4);
         // write table colum headers
         writeColumHeader(contentStream, startX, startY, columnHeaders);
 
-        startY -= rowHeight;
-        startX = tableMargin + cellPadding;
+        startY -= ROW_HEIGHT;
+        startX = CELL_MARGIN + CELL_PADDING;
         // write content
         for (RowEntry entry : rowEntries) {
 
             writeToRow(contentStream, startX, startY, entry);
-            startY -= rowHeight;
-            startX = tableMargin + cellPadding;
+            startY -= ROW_HEIGHT;
+            startX = CELL_MARGIN + CELL_PADDING;
         }
     }
 }

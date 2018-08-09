@@ -11,12 +11,7 @@ $(document).ready(
     chartData = "";
     var d = new Date();
     var currentDay = new Date(d.getFullYear(), d.getMonth(), d.getDate(),d.getHours(),d.getMinutes());
-/*
-    $('#date-range').click(function(){
-        $(this).removeClass('active');
-    });*/
 
-    /* Load date range picker */
     $('#date-range').daterangepicker({
         singleDatePicker: true,
         timePicker: false,

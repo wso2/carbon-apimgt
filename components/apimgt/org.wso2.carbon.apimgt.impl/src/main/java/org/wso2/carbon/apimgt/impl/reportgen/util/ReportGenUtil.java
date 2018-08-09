@@ -37,11 +37,11 @@ public class ReportGenUtil {
     private static final Log log = LogFactory.getLog(ReportGenUtil.class);
 
     /**
-     * 
+     * Get microgateway request summary report as a pdf.
      * @param username
      * @param date month with year. Format should be yyyy-mm (ex: 2018-07)
-     * @return
-     * @throws APIManagementException
+     * @return inputstream InputStream of the pdf
+     * @throws APIManagementException exception
      */
     public static InputStream getMicroGatewayRequestSummaryReport(String username, String date)
             throws APIManagementException {
