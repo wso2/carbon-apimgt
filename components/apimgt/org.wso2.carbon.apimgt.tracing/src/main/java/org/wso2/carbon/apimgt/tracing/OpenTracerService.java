@@ -1,7 +1,5 @@
 package org.wso2.carbon.apimgt.tracing;
 
-import brave.Tracing;
-import brave.opentracing.BraveTracer;
 import io.opentracing.Tracer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -12,8 +10,6 @@ import org.osgi.service.component.annotations.Activate;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.utils.CarbonUtils;
-import zipkin2.reporter.AsyncReporter;
-import zipkin2.reporter.okhttp3.OkHttpSender;
 
 import java.io.File;
 
@@ -31,21 +27,8 @@ public class OpenTracerService {
     TracerLoader tracerLoader = TracerLoader.getInstance();
     private ServiceRegistration registration;
 
-    private String openTracerName;
-    private String enabled;
-    private String hostname;
-    private int port;
-    private String samplerType;
-    private float samplerParam;
-    private int reporterFlushInterval;
-    private int reporterBufferSize;
-
-    private String apiContext;
-    private boolean compressionEnabled;
-    private String apiVersion;
-
     @Activate
-    protected void activate(ComponentContext componentContext) {
+    protected void activate(ComponentContext componentContext) throws org.wso2.carbon.apimgt.api.APIManagementException {
 
         BundleContext bundleContext = componentContext.getBundleContext();
         bundleContext.registerService(OpenTracer.class.getName(), new ZipkinTracerImpl(), null);
@@ -54,38 +37,24 @@ public class OpenTracerService {
         if (log.isDebugEnabled()) {
             log.debug("OpenTracer service component activated");
         }
-//        try {
-//            String filePath = getFilePath();
-//            configuration.load(filePath);
-//
-//            openTracerName = configuration.getFirstProperty(OpenTracerConstants.OPEN_TRACER_NAME); //"OpenTracer.Name"
-//            enabled = configuration.getFirstProperty(OpenTracerConstants.OPEN_TRACER_ENABLED);
-//
-//            if(openTracerName.equalsIgnoreCase("JAEGER") && enabled.equalsIgnoreCase("TRUE")) {
-//
-//                Tracer tracer = tracerLoader.getTracer(openTracerName, configuration);
-//
-//            }else if(openTracerName.equalsIgnoreCase("ZIPKIN") && enabled.equalsIgnoreCase("TRUE")) {
-//
-//                Tracer tracer = tracerLoader.getTracer(openTracerName,configuration);
-//
-//
-//
-//            }else
-//                log.error("Invalid Configuration");
-//            } catch (APIManagementException e) {
-//            e.printStackTrace();
-//        }
+        String filePath = getFilePath();
+        configuration.load(filePath);
 
+        String openTracerName = configuration.getFirstProperty(OpenTracerConstants.OPEN_TRACER_NAME);
+        String enabled = configuration.getFirstProperty(OpenTracerConstants.OPEN_TRACER_ENABLED);
 
-        OkHttpSender sender = OkHttpSender.create("http://localhost:9411/api/v1/spans");
-        Tracer tracer = BraveTracer.create(Tracing.newBuilder()
-                .localServiceName("Hello")
-                .spanReporter(AsyncReporter.builder(sender).build())
-                .build());
+        if(openTracerName.equalsIgnoreCase("JAEGER") && enabled.equalsIgnoreCase("TRUE")) {
 
-        ServiceReferenceHolder.getInstance().setTracer(tracer);
+            Tracer tracer = tracerLoader.getTracer(openTracerName, configuration);
+            ServiceReferenceHolder.getInstance().setTracer(tracer);
 
+        }else if(openTracerName.equalsIgnoreCase("ZIPKIN") && enabled.equalsIgnoreCase("TRUE")) {
+
+            Tracer tracer = tracerLoader.getTracer(openTracerName,configuration);
+            ServiceReferenceHolder.getInstance().setTracer(tracer);
+
+        }else
+            log.error("Invalid Configuration");
     }
 
     protected void deactivate(ComponentContext context) {
