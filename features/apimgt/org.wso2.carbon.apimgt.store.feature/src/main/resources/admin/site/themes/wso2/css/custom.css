@@ -300,3 +300,8 @@ table.table-bordered th:last-child, table.table-bordered td:last-child {
     word-break: break-all;
     white-space: pre-wrap;
 }
+
+.table-condensed thead tr:nth-child(2),
+.table-condensed tbody {
+  display: none
+}

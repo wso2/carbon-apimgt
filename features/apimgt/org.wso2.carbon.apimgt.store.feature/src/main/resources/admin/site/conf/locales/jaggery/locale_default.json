@@ -295,6 +295,10 @@
     "Suspended" : "Suspended",
     "Label contains spaces": "Label contains spaces",
     "Label": "Label",
-    "Label contains one or more illegal characters": "Label contains one or more illegal characters "
+    "Label contains one or more illegal characters": "Label contains one or more illegal characters ",
+    "Reports": "Reports",
+    "Usage Reports" : "Usage Reports",
+    "Microgateway request summary report" : "Microgateway request summary report",
+    "Generate" : "Generate"
 
 }

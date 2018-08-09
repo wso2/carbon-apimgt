@@ -61,6 +61,9 @@
 
                 var conditionsManageUrl = jagg.getAbsoluteUrl("/site/pages/conditions-manage");
                 var conditionsManageMappedUrl = jagg.getMappedUrl("/site/pages/conditions-manage");
+
+                var reportsUrl = jagg.getAbsoluteUrl("/reports");
+                var reportsMappedUrl = jagg.getMappedUrl("/reports");
             %>
 
 
@@ -205,6 +208,14 @@
                         <a href="<%=alertsDomainManageMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=alertsDomainManageMappedUrl%>',e:event})"><%=i18n.localize("Analytics")%></a>
                     </li>
                     <% } %>
+              <%  if (reqUrl.indexOf("reportsUrl") >= 0 || reqUrl.indexOf(reportsMappedUrl) >= 0) { %>
+                    <li>
+                      <a href="#"><%=i18n.localize("Reports")%> </a>
+                    </li>
+                    <li class="active">
+                      <a href="<%=reportsMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=reportsMappedUrl%>',e:event})"><%=i18n.localize("Reports")%></a>
+                    </li>
+              <% } %>
 		      <% if (reqUrl.indexOf(tierEditUrl) >= 0 || reqUrl.indexOf(tierEditMappedUrl) >= 0) { %>
 			 	<li>
 		        	<a href="#"><%=i18n.localize("Settings")%> </a>
