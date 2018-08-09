@@ -695,9 +695,9 @@ APIDesigner.prototype.load_api_document = function(api_document){
     this.load_swagger_editor_content();
     this.render_resources();
     this.render_scopes();
-    if (this.api_document != null) {
+    if (this.api_doc != null) {
         $("#version").val(this.api_doc.info.version);
-        $("#name").val(this.api_doc.info.title.info.title);
+        $("#name").val(this.api_doc.info.title);
         if (this.api_doc.info.description) {
             $("#description").val(this.api_doc.info.description);
         }
