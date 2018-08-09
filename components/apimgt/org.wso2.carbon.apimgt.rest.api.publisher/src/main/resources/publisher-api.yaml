@@ -2608,19 +2608,12 @@ paths:
       x-scope: 'apim:api_create'
       produces:
         - application/json
-      x-wso2-curl: |
-        curl -X GET -H "Authorization: Bearer
-        ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type:
-        application/json"
-        "https://localhost:9443/api/am/publisher/v0.13/certificates"
-      x-wso2-request: |
-        GET
-        https://localhost:9443/api/am/publisher/v0.13/certificates?alias=wso2carbon&endpoint=https://www.abc.com
-      x-wso2-response: "HTTP/1.1 200 OK {\"count\":2,\"next\":\"\",\"previous\":\"\",\"certificates\":[{\"alias\":\"wso2carbon\",\"endpoint\":\"https://www.abc.com\"}],\"pagination\":{\"total\":5,\"offset\":0,\"limit\":2}}"
-      summary: Retrieve/ search the uploaded Certificates.
+      x-wso2-curl: "curl -X GET -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" \"https://localhost:9443/api/am/publisher/v0.13/certificates\""
+      x-wso2-request: "GET https://localhost:9443/api/am/publisher/v0.13/certificates?alias=wso2carbon&endpoint=https://www.abc.com"
+      x-wso2-response: "HTTP/1.1 200 OK \n\n{\n  \"count\":1,\n  \"next\":\"\",\n  \"previous\":\"\",\n\"certificates\":[\n   {\n    \"alias\":\"wso2carbon\",\n    \"endpoint\":\"https://www.abc.com\"\n   }\n],\n  \"pagination\":{\n	  \"total\":1,\n          \"offset\":0,\n          \"limit\":25\n   } \n}"
+      summary: Retrieve/ Search uploaded Certificates.
       description: |
-        This operation can be used to retrieve and search the uploaded
-        certificates.
+        This operation can be used to retrieve and search the uploaded certificates.
       tags:
         - Certificates (Collection)
       parameters:
@@ -2672,20 +2665,9 @@ paths:
       x-scope: 'apim:api_create'
       consumes:
         - multipart/form-data
-      x-wso2-curl: |
-        curl -X POST -H "Authorization: Bearer
-        ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type:
-        multipart/form-data"  -F 'certificate=@/home/user/wso2carbon.cert' -F
-        'alias=wso2carbon' -F 'endpoint=https://www.abc.com'
-        "https://localhost:9443/api/am/publisher/v0.13/certificates/certificate"
-      x-wso2-request: |
-        POST
-        https://localhost:9443/api/am/publisher/v0.13/certificates/certificate
-
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8 -F
-        'certificate=/home/user/wso2carbon.cert' -F 'alias=wso2' -F
-        'endpoint=https://www.abc.com'
-      x-wso2-response: "HTTP/1.1 201 Created.\nLocation:certificates?alias=wso2\n {\"alias\":wso2carbon,\"endpoint\":\"abc.com\"}"
+      x-wso2-curl: "curl -X POST -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: multipart/form-data\"  -F \"certificate=@/home/user/wso2carbon.cert\" -F \"alias=wso2carbon\" -F \"endpoint=https://www.abc.com\" \"https://localhost:9443/api/am/publisher/v0.13/certificates/certificate\""
+      x-wso2-request: "POST https://localhost:9443/api/am/publisher/v0.13/certificates/certificate \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -F \"certificate=/home/user/wso2carbon.cert\" -F \"alias=wso2carbon\" -F \"endpoint=https://www.abc.com\""
+      x-wso2-response: "HTTP/1.1 201 Created.\r\nLocation: certificates?alias=wso2carbon\r\n{\"alias\":wso2carbon, \"endpoint\":\"https://www.abc.com\"}"
       summary: Upload a new Certificate.
       description: |
         This operation can be used to upload a new certificate for an endpoint.
@@ -2730,11 +2712,6 @@ paths:
             * Failures due to existing alias or expired certificate.
           schema:
             $ref: '#/definitions/Error'
-        '404':
-          description: |
-            Not Found.
-          schema:
-            $ref: '#/definitions/Error'
         '500':
           description: |
             Internal Server Error
@@ -2750,18 +2727,9 @@ paths:
       x-scope: 'apim:api_create'
       consumes:
         - multipart/form-data
-      x-wso2-curl: |
-        curl -X PUT -H "Authorization: Bearer
-        ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type:
-        multipart/form-data" -F 'certificate=@/home/user/wso2carbon.cert' -F
-        'alias=wso2carbon'
-        "https://localhost:9443/api/am/publisher/v0.13/certificates/wso2carbon"
-      x-wso2-request: |
-        PUT https://localhost:9443/api/am/publisher/v0.13/certificates/wso2carbon
-
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8 -F
-        'certificate=@/home/user/wso2carbon.cert' -F 'alias=wso2carbon'
-      x-wso2-response: "HTTP/1.1 200 OK\n Content-Type:application/json\n {\"alias\":wso2carbon,\"endpoint\":\"abc.com\"}"
+      x-wso2-curl: "curl -X PUT -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type:multipart/form-data\" -F \"certificate=@/home/user/wso2carbon.cert\" \"https://localhost:9443/api/am/publisher/v0.13/certificates/wso2carbon\""
+      x-wso2-request: "PUT https://localhost:9443/api/am/publisher/v0.13/certificates/wso2carbon Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8 -F  \"certificate=@/home/user/wso2carbon.cert\""
+      x-wso2-response: "HTTP/1.1 200 OK\r\n {\"alias\":wso2carbon,\"endpoint\":\"https://www.abc.com\"}"
       summary: Update a certificate.
       description: |
         This operation can be used to update an uploaded certificate.
@@ -2817,15 +2785,9 @@ paths:
   #-------------------------------------------------------------------
     delete:
       x-scope: 'apim:api_create'
-      x-wso2-curl: |
-        curl -X DELETE -H "Authorization: Bearer
-        ae4eae22-3f65-387b-a171-d37eaa366fa8"
-        "https://localhost:9443/api/am/publisher/v0.13/certificates/wso2carbon"
-      x-wso2-request: |
-        DELETE
-        https://localhost:9443/api/am/publisher/v0.13/certificates/wso2carbon
-
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-curl:
+        "curl -X DELETE -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/publisher/v0.13/certificates/wso2carbon\""
+      x-wso2-request: "DELETE https://localhost:9443/api/am/publisher/v0.13/certificates/wso2carbon Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
       x-wso2-response: HTTP/1.1 200 OK
       summary: Delete a certificate.
       description: |
@@ -2876,18 +2838,12 @@ paths:
       x-scope: 'apim:api_create'
       produces:
         - application/json
-      x-wso2-curl: |
-        curl -X POST
-        "https://apis.wso2.com/api/am/publisher/v0.13/certificates/wso2carbon"
-        -H  "accept: application/json"
-      x-wso2-request: |
-        POST
-        https://apis.wso2.com/api/am/publisher/v0.13/certificates/wso2carbon
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK \nContent-Type: application/json\n{\n\"status\":\"Active\",\n\"from\":\"Fri May 04 19:01:01 IST 2018\",\n\"to\":\"Thu Aug 02 19:01:01 IST 2018\",\n\"version\":\"3\",\n\"subject\":\"CN=foitt2.com, OU=wso2, O=wso2, L=Colombo, ST=Western, C=LK\"}\""
+      x-wso2-curl: "curl -X GET \"https://apis.wso2.com/api/am/publisher/v0.13/certificates/wso2carbon\" -H  \"accept: application/json\""
+      x-wso2-request: "GET https://apis.wso2.com/api/am/publisher/v0.13/certificates/wso2carbon Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+      x-wso2-response: "HTTP/1.1 200 OK \nContent-Type: application/json\r\n {\n  \"status\":\"Active\",\n  \"validity\":{\n    \"from\":\"Fri May 04 19:01:01 IST 2018\",\n    \"to\":\"Thu Aug 02 19:01:01 IST 2018\"\n  }\n,  \"version\":\"3\",\n  \"subject\":\"CN=wso2.com, OU=wso2, O=wso2, L=Colombo, ST=Western, C=LK\"\n}"
       summary: Get the certificate information.
       description: |
-        This operation can be used to get the information about the certificate.
+        This operation can be used to get the information about a certificate.
       parameters:
         - in: path
           name: alias
@@ -2930,18 +2886,12 @@ paths:
   /certificates/{alias}/content:
     get:
       x-scope: 'apim:api_create'
-      x-wso2-curl: |-
-        curl -X POST
-        "https://apis.wso2.com/api/am/publisher/v0.13/certificates/wso2carbon/content"
-        -H  "accept: application/json"
-      x-wso2-request: |
-        POST
-        https://apis.wso2.com/api/am/publisher/v0.13/certificates/wso2carbon/content
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: HTTP/1.1 200 OK
-      summary: Download the certificate defined by the given alias.
+      x-wso2-curl: "curl -X GET \"https://apis.wso2.com/api/am/publisher/v0.13/certificates/wso2carbon/content\" -H \"accept: application/json\""
+      x-wso2-request: "GET https://apis.wso2.com/api/am/publisher/v0.13/certificates/wso2carbon/content Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+      x-wso2-response: "HTTP/1.1 200 OK\r\n [content of the certificate]"
+      summary: Download a certificate.
       description: |
-        This operation can be used to download the certificate which matches the given alias.
+        This operation can be used to download a certificate which matches the given alias.
       parameters:
         - in: path
           name: alias

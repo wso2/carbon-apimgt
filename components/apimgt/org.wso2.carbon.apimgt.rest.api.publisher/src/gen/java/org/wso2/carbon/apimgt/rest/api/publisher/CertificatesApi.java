@@ -33,7 +33,7 @@ public class CertificatesApi  {
     @Path("/{alias}/content")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Download the certificate defined by the given alias.", notes = "This operation can be used to download the certificate which matches the given alias.\n", response = void.class)
+    @io.swagger.annotations.ApiOperation(value = "Download a certificate.", notes = "This operation can be used to download a certificate which matches the given alias.\n", response = void.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\n"),
         
@@ -69,7 +69,7 @@ public class CertificatesApi  {
     @Path("/{alias}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Get the certificate information.", notes = "This operation can be used to get the information about the certificate.\n", response = CertificateInfoDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "Get the certificate information.", notes = "This operation can be used to get the information about a certificate.\n", response = CertificateInfoDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\n"),
         
@@ -107,7 +107,7 @@ public class CertificatesApi  {
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Retrieve/ search the uploaded Certificates.", notes = "This operation can be used to retrieve and search the uploaded\ncertificates.\n", response = CertificatesDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "Retrieve/ Search uploaded Certificates.", notes = "This operation can be used to retrieve and search the uploaded certificates.\n", response = CertificatesDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Successful response with the list of matching certificate information in the body.\n"),
         
@@ -133,8 +133,6 @@ public class CertificatesApi  {
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nThe Certificate added successfully.\n"),
         
         @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nInvalid request or validation error.\n* Failures due to existing alias or expired certificate.\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\n"),
         
         @io.swagger.annotations.ApiResponse(code = 500, message = "Internal Server Error\n* Failed to add the Certificate due to an Internal Server Error\n") })
 
