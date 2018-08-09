@@ -5,8 +5,6 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 
 public interface OpenTracer {
 
-//    void init() throws InvalidConfigurationException;
-
     Tracer getTracer(String tracerName, APIManagerConfiguration configuration);
 
     String getName();
