@@ -308,7 +308,6 @@
             <version>1.4.01</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>io.opentracing</groupId>
             <artifactId>opentracing-api</artifactId>
@@ -339,8 +338,6 @@
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.gateway</artifactId>
         </dependency>
-
-
     </dependencies>
     <build>
         <plugins>
