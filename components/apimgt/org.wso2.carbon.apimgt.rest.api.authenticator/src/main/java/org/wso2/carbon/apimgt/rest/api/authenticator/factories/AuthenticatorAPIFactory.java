@@ -54,7 +54,7 @@ public class AuthenticatorAPIFactory {
     public synchronized AuthenticatorService getService() throws APIMgtDAOException, IdentityProviderException {
         if (service == null) {
             IdentityProvider identityProvider = APIManagerFactory.getInstance().getIdentityProvider();
-            SystemApplicationDao systemApplicationDao = DAOFactory.getSystemApplicationDao();
+            SystemApplicationDao systemApplicationDao = new DAOFactory().getSystemApplicationDao();
             APIMConfigurationService apimConfigurationService = APIMConfigurationService.getInstance();
             APIMAppConfigurationService apimAppConfigurationService = APIMAppConfigurationService.getInstance();
 

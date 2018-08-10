@@ -41,9 +41,8 @@ import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
-import org.wso2.carbon.apimgt.core.dao.TagDAO;
-import org.wso2.carbon.apimgt.core.dao.ThreatProtectionDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
+import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
@@ -166,6 +165,10 @@ public class APIPublisherImplTestCase {
                 .thenReturn(new LifecycleState());
         APIGateway gateway = Mockito.mock(APIGateway.class);
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDao);
         Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api,
                 APIMgtConstants.DEFAULT_API_POLICY)).thenReturn(new APIPolicy(APIMgtConstants.DEFAULT_API_POLICY));
         Mockito.when(
@@ -177,8 +180,8 @@ public class APIPublisherImplTestCase {
         Mockito.when(
                 policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription, BRONZE_TIER))
                 .thenReturn(new SubscriptionPolicy(BRONZE_TIER));
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(null, apiDAO, null, null, policyDAO, apiLifecycleManager,
-                labelDao, null, null, null, gatewaySourceGenerator, gateway);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(null, null, daoFactory, apiLifecycleManager,
+                gatewaySourceGenerator, gateway);
         String endpointId = apiBuilder.getEndpoint().get("production").getId();
         Endpoint endpoint = new Endpoint.Builder().id(endpointId).name("testEndpoint").build();
         Mockito.when(apiDAO.getEndpoint(endpointId)).thenReturn(endpoint);
@@ -242,6 +245,10 @@ public class APIPublisherImplTestCase {
         APIGateway gateway = Mockito.mock(APIGateway.class);
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
         LabelDAO labelDao = Mockito.mock(LabelDAO.class);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDao);
         Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api,
                 APIMgtConstants.DEFAULT_API_POLICY)).thenReturn(new APIPolicy(APIMgtConstants.DEFAULT_API_POLICY));
         Mockito.when(
@@ -253,8 +260,8 @@ public class APIPublisherImplTestCase {
         Mockito.when(
                 policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription, BRONZE_TIER))
                 .thenReturn(new SubscriptionPolicy(BRONZE_TIER));
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(null, apiDAO, null, null, policyDAO, apiLifecycleManager,
-                labelDao, null, null, null, gatewaySourceGenerator, gateway);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(null, null, daoFactory, apiLifecycleManager,
+                gatewaySourceGenerator, gateway);
         apiPublisher.addAPI(apiBuilder);
         Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
         Mockito.verify(apiLifecycleManager, Mockito.times(1)).addLifecycle(APIMgtConstants.API_LIFECYCLE, USER);
@@ -271,6 +278,10 @@ public class APIPublisherImplTestCase {
         APIGateway gateway = Mockito.mock(APIGateway.class);
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
         LabelDAO labelDao = Mockito.mock(LabelDAO.class);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDao);
         Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api,
                 APIMgtConstants.DEFAULT_API_POLICY)).thenReturn(new APIPolicy(APIMgtConstants.DEFAULT_API_POLICY));
         Mockito.when(
@@ -282,8 +293,8 @@ public class APIPublisherImplTestCase {
         Mockito.when(
                 policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription, BRONZE_TIER))
                 .thenReturn(new SubscriptionPolicy(BRONZE_TIER));
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(null, apiDAO, null, null, policyDAO, apiLifecycleManager,
-                labelDao, null, null, null, gatewaySourceGenerator, gateway);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(null, null, daoFactory, apiLifecycleManager,
+                gatewaySourceGenerator, gateway);
         apiPublisher.addAPI(apiBuilder);
         Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
         Mockito.verify(apiLifecycleManager, Mockito.times(1)).addLifecycle(APIMgtConstants.API_LIFECYCLE, USER);
@@ -310,6 +321,10 @@ public class APIPublisherImplTestCase {
         APIGateway gateway = Mockito.mock(APIGateway.class);
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
         LabelDAO labelDao = Mockito.mock(LabelDAO.class);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDao);
         Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api,
                 APIMgtConstants.DEFAULT_API_POLICY)).thenReturn(new APIPolicy(APIMgtConstants.DEFAULT_API_POLICY));
         Mockito.when(
@@ -321,8 +336,8 @@ public class APIPublisherImplTestCase {
         Mockito.when(
                 policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription, BRONZE_TIER))
                 .thenReturn(new SubscriptionPolicy(BRONZE_TIER));
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(null, apiDAO, null, null, policyDAO, apiLifecycleManager,
-                labelDao, null, null, null, gatewaySourceGenerator, gateway);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(null, null, daoFactory, apiLifecycleManager,
+                gatewaySourceGenerator, gateway);
         apiPublisher.addAPI(apiBuilder);
         Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
         Mockito.verify(apiLifecycleManager, Mockito.times(1)).addLifecycle(APIMgtConstants.API_LIFECYCLE, USER);
@@ -337,7 +352,10 @@ public class APIPublisherImplTestCase {
         String configString = SampleTestObjectCreator.createSampleGatewayConfig();
         APIGateway gateway = Mockito.mock(APIGateway.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, gatewaySourceGenerator, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, null, daoFactory, null,
+                gatewaySourceGenerator, gateway);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
         Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.DEVELOPER_ROLE_ID))
                 .thenReturn(DEVELOPER_ROLE);
@@ -364,8 +382,11 @@ public class APIPublisherImplTestCase {
         String uuid = api.getId();
         String configString = SampleTestObjectCreator.createSampleGatewayConfig();
         APIGateway gateway = Mockito.mock(APIGateway.class);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, gatewaySourceGenerator, gateway);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, null, daoFactory, null,
+                gatewaySourceGenerator, gateway);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
         Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.DEVELOPER_ROLE_ID))
                 .thenReturn(DEVELOPER_ROLE);
@@ -390,8 +411,10 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiDAO.isAPIContextExists("weather")).thenReturn(true);
         Mockito.when(apiDAO.isAPINameExists("WeatherAPI", USER)).thenReturn(false);
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(null, apiDAO, null, null, null, apiLifecycleManager,
-                labelDao, null, null, null, null, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDao);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(null, null, daoFactory, apiLifecycleManager, null, gateway);
         apiPublisher.addAPI(apiBuilder);
         Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
         Mockito.verify(apiLifecycleManager, Mockito.times(1)).addLifecycle(APIMgtConstants.API_LIFECYCLE, USER);
@@ -408,8 +431,10 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiDAO.isAPIContextExists("weather")).thenReturn(false);
         Mockito.when(apiDAO.isAPINameExists("WeatherAPI", USER)).thenReturn(true);
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(null, apiDAO, null, null, null, apiLifecycleManager,
-                labelDao, null, null, null, null, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDao);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(null, null, daoFactory, apiLifecycleManager, null, gateway);
         apiPublisher.addAPI(apiBuilder);
         Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
         Mockito.verify(apiLifecycleManager, Mockito.times(1)).addLifecycle(APIMgtConstants.API_LIFECYCLE, USER);
@@ -425,7 +450,10 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, USER))
                 .thenThrow(new LifecycleException("Couldn't add api lifecycle"));
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, labelDao, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDao);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(null, null, daoFactory, apiLifecycleManager, null, gateway);
         apiPublisher.addAPI(apiBuilder);
         Mockito.verify(apiLifecycleManager, Mockito.times(1)).addLifecycle(APIMgtConstants.API_LIFECYCLE, USER);
         Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
@@ -446,6 +474,10 @@ public class APIPublisherImplTestCase {
                 .thenReturn(new LifecycleState());
         APIGateway gateway = Mockito.mock(APIGateway.class);
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDao);
         Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api,
                 APIMgtConstants.DEFAULT_API_POLICY)).thenReturn(new APIPolicy(APIMgtConstants.DEFAULT_API_POLICY));
         Mockito.when(
@@ -457,8 +489,8 @@ public class APIPublisherImplTestCase {
         Mockito.when(
                 policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription, BRONZE_TIER))
                 .thenReturn(new SubscriptionPolicy(BRONZE_TIER));
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(null, apiDAO, null, null, policyDAO, apiLifecycleManager,
-                labelDao, null, null, null, gatewaySourceGenerator, gateway);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(null, null, daoFactory, apiLifecycleManager,
+                gatewaySourceGenerator, gateway);
         String endpointId = apiBuilder.getEndpoint().get("production").getId();
         Endpoint endpoint = new Endpoint.Builder().id(endpointId).name("testEndpoint").build();
         Mockito.when(apiDAO.getEndpoint(endpointId)).thenReturn(endpoint);
@@ -473,7 +505,10 @@ public class APIPublisherImplTestCase {
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiLifecycleManager, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, null, daoFactory, apiLifecycleManager,
+                null, gateway);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
@@ -498,8 +533,12 @@ public class APIPublisherImplTestCase {
         APIGateway gateway = Mockito.mock(APIGateway.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
         LabelDAO labelDao = Mockito.mock(LabelDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(ALTERNATIVE_USER, identityProvider, apiDAO,
-                apiSubscriptionDAO, apiLifecycleManager, gateway, labelDao);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDao);
+        Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(ALTERNATIVE_USER, identityProvider, null, daoFactory,
+                apiLifecycleManager, null, gateway);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
 
         //Assuming the user role list retrieved from IS is null
@@ -530,8 +569,12 @@ public class APIPublisherImplTestCase {
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
         LabelDAO labelDao = Mockito.mock(LabelDAO.class);
         KeyManager keyManager = Mockito.mock(KeyManager.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(ALTERNATIVE_USER, identityProvider, keyManager, apiDAO,
-                null, apiSubscriptionDAO, null, apiLifecycleManager, labelDao, null, null, null, null, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDao);
+        Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(ALTERNATIVE_USER, identityProvider, keyManager, daoFactory,
+                apiLifecycleManager, null, gateway);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
         Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
         Mockito.when(identityProvider.getIdOfUser(ALTERNATIVE_USER)).thenReturn(USER_ID);
@@ -562,8 +605,12 @@ public class APIPublisherImplTestCase {
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
         KeyManager keyManager = Mockito.mock(KeyManager.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(USER, identityProvider, keyManager, apiDAO,
-                null, apiSubscriptionDAO, null, apiLifecycleManager, null, workflowDAO, null, null, null, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getWorkflowDAO()).thenReturn(workflowDAO);
+        Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(USER, identityProvider, keyManager, daoFactory,
+                apiLifecycleManager, null, gateway);
         String externalRef = UUID.randomUUID().toString();
         Mockito.when(
                 workflowDAO.getExternalWorkflowReferenceForPendingTask(uuid, WorkflowConstants.WF_TYPE_AM_API_STATE))
@@ -581,23 +628,19 @@ public class APIPublisherImplTestCase {
                 .getExternalWorkflowReferenceForPendingTask(uuid, WorkflowConstants.WF_TYPE_AM_API_STATE);
     }
 
-    private APIPublisherImpl getApiPublisherImpl(IdentityProvider identityProvider, ApiDAO apiDAO, APISubscriptionDAO
-            apiSubscriptionDAO, APILifecycleManager apiLifecycleManager, WorkflowDAO workflowDAO, APIGateway gateway,
-                                                 KeyManager keyManager) {
-        return new APIPublisherImpl(USER, identityProvider, keyManager, apiDAO, null, apiSubscriptionDAO, null,
-                apiLifecycleManager, null, workflowDAO, null, null, null, gateway);
-    }
-
     @Test(description = "Exception when getting api subscription count by API",
             expectedExceptions = APIManagementException.class)
     public void testGetAPISubscriptionCountByAPI() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
         Mockito.when(apiSubscriptionDAO.getSubscriptionCountByAPI(uuid))
                 .thenThrow(new APIMgtDAOException("Couldn't retrieve Subscriptions for API " + uuid));
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiSubscriptionDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         apiPublisher.getAPISubscriptionCountByAPI(uuid);
 
     }
@@ -616,8 +659,13 @@ public class APIPublisherImplTestCase {
         LabelDAO labelDao = Mockito.mock(LabelDAO.class);
         KeyManager keyManager = Mockito.mock(KeyManager.class);
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(USER, identityProvider, keyManager, apiDAO,
-                null, apiSubscriptionDAO, null, apiLifecycleManager, labelDao, workflowDAO, null, null, null, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDao);
+        Mockito.when(daoFactory.getWorkflowDAO()).thenReturn(workflowDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(USER, identityProvider, keyManager, daoFactory,
+                apiLifecycleManager, null, gateway);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
 
         //LifeCycleException
@@ -655,7 +703,9 @@ public class APIPublisherImplTestCase {
         List<String> roleIdsOfUser = new ArrayList<>();
         roleIdsOfUser.add(ADMIN_ROLE_ID);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(ALTERNATIVE_USER, identityProvider, apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(ALTERNATIVE_USER, identityProvider, daoFactory);
         API api1 = SampleTestObjectCreator.createDefaultAPI().build();
         List<API> apimResultsFromDAO = new ArrayList<>();
         apimResultsFromDAO.add(api1);
@@ -672,7 +722,9 @@ public class APIPublisherImplTestCase {
     @Test(description = "Search APIs with null query string")
     public void testSearchAPIsWithNullQuery() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         List<API> apimResultsFromDAO = new ArrayList<>();
         Mockito.when(apiDAO.searchAPIs(new HashSet<>(), USER, null, 1, 2)).thenReturn(apimResultsFromDAO);
         apiPublisher.searchAPIs(2, 1, null);
@@ -683,7 +735,9 @@ public class APIPublisherImplTestCase {
     public void testSearchAPIsException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(ALTERNATIVE_USER, identityProvider, apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(ALTERNATIVE_USER, identityProvider, daoFactory);
 
         //Error path
         //APIMgtDAOException
@@ -710,7 +764,9 @@ public class APIPublisherImplTestCase {
     @Test(description = "Get subscriptions for a provider's APIs")
     public void testGetSubscribersOfProvider() throws APIManagementException {
         APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiSubscriptionDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         Mockito.when(apiSubscriptionDAO.getAPISubscriptionsForUser(1, 2, USER))
                 .thenReturn(new ArrayList<Subscription>());
         apiPublisher.getSubscribersOfProvider(1, 2, USER);
@@ -721,7 +777,9 @@ public class APIPublisherImplTestCase {
             expectedExceptions = APIManagementException.class)
     public void testGetSubscribersOfProviderException() throws APIManagementException {
         APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiSubscriptionDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         Mockito.when(apiSubscriptionDAO.getAPISubscriptionsForUser(1, 2, USER))
                 .thenThrow(new APIMgtDAOException("Unable to fetch subscriptions APIs of provider " + USER));
         apiPublisher.getSubscribersOfProvider(1, 2, USER);
@@ -739,8 +797,10 @@ public class APIPublisherImplTestCase {
         String lifecycleId = api.getLifecycleInstanceId();
         Mockito.when(apiSubscriptionDAO.getSubscriptionCountByAPI(uuid)).thenReturn(0L);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiSubscriptionDAO,
-                apiLifecycleManager);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, daoFactory, apiLifecycleManager);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
         Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.DEVELOPER_ROLE_ID))
                 .thenReturn(DEVELOPER_ROLE);
@@ -756,12 +816,15 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI();
         API api = apiBuilder.build();
         String uuid = apiBuilder.getId();
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
         Mockito.when(apiSubscriptionDAO.getSubscriptionCountByAPI(uuid)).thenReturn(2L);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiSubscriptionDAO, apiLifecycleManager);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager);
         apiPublisher.deleteAPI(uuid);
     }
 
@@ -786,8 +849,11 @@ public class APIPublisherImplTestCase {
         Mockito.when(
                 policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription, BRONZE_TIER))
                 .thenReturn(new SubscriptionPolicy(BRONZE_TIER));
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiLifecycleManager,
-                gatewaySourceGenerator, gateway, policyDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, null, daoFactory, apiLifecycleManager,
+                gatewaySourceGenerator, gateway);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.lifeCycleStatus(APIStatus.CREATED.getStatus()).build());
         Mockito.when(identityProvider.getRoleId(ADMIN_ROLE)).thenReturn(ADMIN_ROLE_ID);
         Mockito.when(identityProvider.getRoleId(DEVELOPER_ROLE)).thenReturn(DEVELOPER_ROLE_ID);
@@ -808,7 +874,10 @@ public class APIPublisherImplTestCase {
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiLifecycleManager, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, null, daoFactory, apiLifecycleManager,
+                null, gateway);
         API.APIBuilder api = SampleTestObjectCreator.createDefaultAPI();
         String uuid = api.getId();
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.build());
@@ -838,8 +907,11 @@ public class APIPublisherImplTestCase {
         Mockito.when(
                 policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription, BRONZE_TIER))
                 .thenReturn(new SubscriptionPolicy(BRONZE_TIER));
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiLifecycleManager,
-                gatewaySourceGenerator, gateway, policyDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, null, daoFactory, apiLifecycleManager,
+                gatewaySourceGenerator, gateway);
         API.APIBuilder api = SampleTestObjectCreator.createDefaultAPI();
         String uuid = api.getId();
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.build());
@@ -856,7 +928,9 @@ public class APIPublisherImplTestCase {
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiLifecycleManager, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, daoFactory, apiLifecycleManager, gateway);
         API.APIBuilder api = SampleTestObjectCreator.createDefaultAPI();
         String uuid = api.getId();
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.build());
@@ -873,7 +947,9 @@ public class APIPublisherImplTestCase {
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiLifecycleManager, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, daoFactory, apiLifecycleManager, gateway);
         API.APIBuilder api = SampleTestObjectCreator.createDefaultAPI();
         String uuid = api.getId();
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.build());
@@ -892,8 +968,10 @@ public class APIPublisherImplTestCase {
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(newProvider, identityProvider, apiDAO, apiLifecycleManager,
-                gatewaySourceGenerator, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(newProvider, identityProvider, null, daoFactory,
+                apiLifecycleManager, gatewaySourceGenerator, gateway);
         API.APIBuilder api = SampleTestObjectCreator.createDefaultAPI();
         String uuid = api.getId();
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.build());
@@ -909,7 +987,9 @@ public class APIPublisherImplTestCase {
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiLifecycleManager, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, daoFactory, apiLifecycleManager, gateway);
         API.APIBuilder api = SampleTestObjectCreator.createDefaultAPI();
         String uuid = api.getId();
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.build());
@@ -941,8 +1021,11 @@ public class APIPublisherImplTestCase {
         Mockito.when(
                 policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription, BRONZE_TIER))
                 .thenReturn(new SubscriptionPolicy(BRONZE_TIER));
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiLifecycleManager,
-                gatewaySourceGenerator, gateway, policyDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, null, daoFactory, apiLifecycleManager,
+                gatewaySourceGenerator, gateway);
         API.APIBuilder api = SampleTestObjectCreator.createDefaultAPI();
         String uuid = api.getId();
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.build());
@@ -990,7 +1073,9 @@ public class APIPublisherImplTestCase {
     public void testUpdateAPIIdentityProviderException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(ALTERNATIVE_USER, identityProvider, apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(ALTERNATIVE_USER, identityProvider, daoFactory);
         API.APIBuilder api = SampleTestObjectCreator.createDefaultAPI();
         String uuid = api.getId();
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.build());
@@ -1027,8 +1112,11 @@ public class APIPublisherImplTestCase {
         Mockito.when(
                 policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription, BRONZE_TIER))
                 .thenReturn(new SubscriptionPolicy(BRONZE_TIER));
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiLifecycleManager,
-                gatewaySourceGenerator, gateway, policyDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, null, daoFactory, apiLifecycleManager,
+                gatewaySourceGenerator, gateway);
         Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.build());
         Mockito.when(identityProvider.getRoleId(ADMIN_ROLE)).thenReturn(ADMIN_ROLE_ID);
@@ -1054,8 +1142,11 @@ public class APIPublisherImplTestCase {
         apiPolicy.setUuid(UUID.randomUUID().toString());
         Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api,
                 APIMgtConstants.DEFAULT_API_POLICY)).thenReturn(apiPolicy);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiLifecycleManager,
-                gatewaySourceGenerator, gateway, policyDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, null, daoFactory, apiLifecycleManager,
+                gatewaySourceGenerator, gateway);
         Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.build());
         Mockito.when(apiDAO.isAPIContextExists("testContext")).thenReturn(true);
@@ -1072,7 +1163,9 @@ public class APIPublisherImplTestCase {
         API.APIBuilder api = SampleTestObjectCreator.createDefaultAPI();
         String uuid = api.getId();
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gateway);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(null);
         apiPublisher.updateAPI(api);
     }
@@ -1101,8 +1194,11 @@ public class APIPublisherImplTestCase {
         Mockito.when(
                 policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription, BRONZE_TIER))
                 .thenReturn(new SubscriptionPolicy(BRONZE_TIER));
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiLifecycleManager,
-                gatewaySourceGenerator, gateway, policyDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, null, daoFactory, apiLifecycleManager,
+                gatewaySourceGenerator, gateway);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.lifeCycleStatus(APIStatus.CREATED.getStatus()).build());
         Mockito.when(apiDAO.isAPIContextExists(api.getContext())).thenReturn(true);
         String configString = SampleTestObjectCreator.createSampleGatewayConfig();
@@ -1141,8 +1237,11 @@ public class APIPublisherImplTestCase {
         Mockito.when(
                 policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription, BRONZE_TIER))
                 .thenReturn(new SubscriptionPolicy(BRONZE_TIER));
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiLifecycleManager,
-                gatewaySourceGenerator, gateway, policyDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, null, daoFactory, apiLifecycleManager,
+                gatewaySourceGenerator, gateway);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.build());
         Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
         Mockito.when(identityProvider.getRoleId(ADMIN_ROLE)).thenReturn(ADMIN_ROLE_ID);
@@ -1160,7 +1259,10 @@ public class APIPublisherImplTestCase {
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
 
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiLifecycleManager, apiDAO, workflowDAO, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getWorkflowDAO()).thenReturn(workflowDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gateway);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
         String lcState = api.getLifeCycleStatus();
@@ -1196,7 +1298,9 @@ public class APIPublisherImplTestCase {
         Mockito.doThrow(new APIMgtDAOException("Couldn't change the status of api ID " + uuid)).when(apiDAO)
                 .changeLifeCycleStatus(uuid, APIStatus.PUBLISHED.getStatus());
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gateway);
         apiPublisher.updateAPIStatus(uuid, APIStatus.PUBLISHED.getStatus(), Collections.emptyMap());
     }
 
@@ -1213,7 +1317,9 @@ public class APIPublisherImplTestCase {
                 .executeLifecycleEvent(APIStatus.CREATED.getStatus(), APIStatus.PUBLISHED.getStatus(), uuid, USER, api))
                 .thenReturn(SampleTestObjectCreator.getMockLifecycleStateObject(lifecycleId));
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gateway);
         apiPublisher.updateAPIStatus(uuid, APIStatus.PUBLISHED.getStatus(), Collections.emptyMap());
     }
 
@@ -1227,8 +1333,13 @@ public class APIPublisherImplTestCase {
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, applicationDAO, apiSubscriptionDAO,
-                apiLifecycleManager, gatewaySourceGenerator, workflowDAO, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
+        Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
+        Mockito.when(daoFactory.getWorkflowDAO()).thenReturn(workflowDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gatewaySourceGenerator
+                , gateway);
         API previousApi = SampleTestObjectCreator.createDefaultAPI().build();
         String previousApiUUID = previousApi.getId();
         String lifecycleIdPrevious = previousApi.getLifecycleInstanceId();
@@ -1288,8 +1399,13 @@ public class APIPublisherImplTestCase {
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, applicationDAO, apiSubscriptionDAO,
-                apiLifecycleManager, gatewaySourceGenerator, workflowDAO, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
+        Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
+        Mockito.when(daoFactory.getWorkflowDAO()).thenReturn(workflowDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gatewaySourceGenerator,
+                gateway);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
         String lcState = api.getLifeCycleStatus();
@@ -1320,7 +1436,10 @@ public class APIPublisherImplTestCase {
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiLifecycleManager, apiDAO, workflowDAO, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getWorkflowDAO()).thenReturn(workflowDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gateway);
         API api = SampleTestObjectCreator.createDefaultAPI()
                 .workflowStatus(APIMgtConstants.APILCWorkflowStatus.PENDING.toString()).build();
         String uuid = api.getId();
@@ -1348,7 +1467,9 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gateway);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
         String lifecycleId = api.getLifecycleInstanceId();
@@ -1373,7 +1494,9 @@ public class APIPublisherImplTestCase {
         String uuid = api.getId();
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiLifecycleManager,
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, null, daoFactory, apiLifecycleManager,
                 gatewaySourceGenerator, gateway);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.lifeCycleStatus(APIStatus.CREATED.getStatus()).build());
         Mockito.when(identityProvider.getRoleId("invalid_role"))
@@ -1396,7 +1519,10 @@ public class APIPublisherImplTestCase {
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiLifecycleManager, apiDAO, workflowDAO, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getWorkflowDAO()).thenReturn(workflowDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gateway);
         APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         builder.workflowStatus(APILCWorkflowStatus.PENDING.toString());
         API api = builder.build();
@@ -1421,7 +1547,10 @@ public class APIPublisherImplTestCase {
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiLifecycleManager, apiDAO, workflowDAO, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getWorkflowDAO()).thenReturn(workflowDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gateway);
         APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         builder.workflowStatus(APILCWorkflowStatus.APPROVED.toString());
         API api = builder.build();
@@ -1439,7 +1568,10 @@ public class APIPublisherImplTestCase {
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiLifecycleManager, apiDAO, workflowDAO, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getWorkflowDAO()).thenReturn(workflowDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gateway);
         APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         builder.workflowStatus(APILCWorkflowStatus.PENDING.toString());
         API api = builder.build();
@@ -1464,7 +1596,10 @@ public class APIPublisherImplTestCase {
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiLifecycleManager, apiDAO, workflowDAO, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getWorkflowDAO()).thenReturn(workflowDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gateway);
         String uuid = UUID.randomUUID().toString();
         Mockito.when(apiDAO.getAPI(uuid)).thenThrow(
                 new APIMgtDAOException("API with ID " + uuid + " does not exist", ExceptionCodes.API_NOT_FOUND));
@@ -1480,7 +1615,10 @@ public class APIPublisherImplTestCase {
         String uuid = api.getId();
         APIGateway gateway = Mockito.mock(APIGateway.class);
         APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiSubscriptionDAO, apiLifecycleManager, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gateway);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
         Mockito.when(apiSubscriptionDAO.getAPISubscriptionsByAPI(api.getId())).thenReturn(new ArrayList<>());
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, USER))
@@ -1499,7 +1637,10 @@ public class APIPublisherImplTestCase {
         String uuid = api.getId();
         APIGateway gateway = Mockito.mock(APIGateway.class);
         APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiSubscriptionDAO, apiLifecycleManager, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gateway);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
         Mockito.when(apiSubscriptionDAO.getAPISubscriptionsByAPI(api.getId())).thenReturn(new ArrayList<>());
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, USER))
@@ -1515,7 +1656,9 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gateway);
         Mockito.when(apiDAO.getAPI("xxxxxx")).thenThrow(new APIMgtDAOException("API with ID does not exist",
                 ExceptionCodes.API_NOT_FOUND));
         try {
@@ -1530,7 +1673,9 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gateway);
         try {
             apiPublisher.createNewAPIVersion(null, "2.0.0");
         } catch (APIManagementException e) {
@@ -1545,7 +1690,9 @@ public class APIPublisherImplTestCase {
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gateway);
         try {
             apiPublisher.createNewAPIVersion(uuid, null);
         } catch (APIManagementException e) {
@@ -1560,7 +1707,9 @@ public class APIPublisherImplTestCase {
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gateway);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, USER))
                 .thenReturn(new LifecycleState());
@@ -1580,7 +1729,9 @@ public class APIPublisherImplTestCase {
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gateway);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, USER))
                 .thenThrow(new LifecycleException(""));
@@ -1594,7 +1745,9 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gateway);
         Mockito.when(apiDAO.getAPI("yyyyy")).thenThrow(new APIMgtDAOException(""));
         apiPublisher.createNewAPIVersion("yyyyy", "2.0.0");
     }
@@ -1602,7 +1755,9 @@ public class APIPublisherImplTestCase {
     @Test(description = "Check if api exist with valid uuid")
     public void testCheckIfAPIExistForValidUuid() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         Mockito.when(apiDAO.isAPIExists("zzzzz")).thenReturn(true);
         Assert.assertTrue(apiPublisher.isAPIExists("zzzzz"));
     }
@@ -1610,7 +1765,9 @@ public class APIPublisherImplTestCase {
     @Test(description = "Check if api exist with invalid uuid")
     public void testCheckIfAPIExistForInValidUuid() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         Mockito.when(apiDAO.isAPIExists("aaaaa")).thenReturn(false);
         Assert.assertFalse(apiPublisher.isAPIExists("aaaaa"));
     }
@@ -1619,7 +1776,9 @@ public class APIPublisherImplTestCase {
             expectedExceptions = {APIMgtDAOException.class, APIManagementException.class})
     public void testCheckIfAPIExistWhileGettingJDBCConnectionFailure() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         Mockito.when(apiDAO.isAPIExists("bbbbb")).thenThrow(new APIMgtDAOException(""));
         apiPublisher.isAPIExists("bbbbb");
     }
@@ -1629,7 +1788,9 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DocumentInfo documentInfo = new DocumentInfo.Builder().fileName("sample_doc.pdf").name("howto_guide").id(DOC_ID)
                 .permission("[{\"groupId\": \"testGroup\",\"permission\":[\"READ\",\"UPDATE\",\"DELETE\"]}]").build();
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         apiPublisher.addDocumentationInfo(API_ID, documentInfo);
         Mockito.verify(apiDAO, Mockito.times(1)).addDocumentInfo(API_ID, documentInfo);
     }
@@ -1639,7 +1800,9 @@ public class APIPublisherImplTestCase {
     public void testAddDocumentationInfoDocAlreadyExists() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo();
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         Mockito.when(apiDAO.isDocumentExist(API_ID, documentInfo)).thenReturn(true);
         apiPublisher.addDocumentationInfo(API_ID, documentInfo);
     }
@@ -1648,7 +1811,9 @@ public class APIPublisherImplTestCase {
     public void testUnableToAddDocumentationException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo();
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         Mockito.doThrow(new APIMgtDAOException("Unable to add documentation")).when(apiDAO)
                 .addDocumentInfo(API_ID, documentInfo);
         apiPublisher.addDocumentationInfo(API_ID, documentInfo);
@@ -1660,14 +1825,18 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DocumentInfo documentInfo = new DocumentInfo.Builder().fileName("sample_doc.pdf").name("howto_guide").id("")
                 .permission("data").build();
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         apiPublisher.addDocumentationInfo(API_ID, documentInfo);
     }
 
     @Test(description = "Remove Documentation Info")
     public void testRemoveDocumentationInfo() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         apiPublisher.removeDocumentation(DOC_ID);
         Mockito.verify(apiDAO, Mockito.times(1)).deleteDocument(DOC_ID);
     }
@@ -1675,7 +1844,9 @@ public class APIPublisherImplTestCase {
     @Test(description = "Exception when removing Documentation Info", expectedExceptions = APIManagementException.class)
     public void testRemoveDocumentationInfoException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         Mockito.doThrow(new APIMgtDAOException("Unable to add documentation with file")).when(apiDAO)
                 .deleteDocument(DOC_ID);
         apiPublisher.removeDocumentation(DOC_ID);
@@ -1684,7 +1855,9 @@ public class APIPublisherImplTestCase {
     @Test(description = "Upload Documentation File")
     public void testUploadDocumentationFile() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         apiPublisher.uploadDocumentationFile(DOC_ID, null, "text/plain");
         Mockito.verify(apiDAO, Mockito.times(1)).addDocumentFileContent(DOC_ID, null, "text/plain", USER);
     }
@@ -1693,7 +1866,9 @@ public class APIPublisherImplTestCase {
             expectedExceptions = APIManagementException.class)
     public void testUploadDocumentationFileException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         Mockito.doThrow(new APIMgtDAOException("Unable to add documentation with file")).when(apiDAO)
                 .addDocumentFileContent(DOC_ID, null, "text/plain", USER);
         apiPublisher.uploadDocumentationFile(DOC_ID, null, "text/plain");
@@ -1703,7 +1878,9 @@ public class APIPublisherImplTestCase {
     public void testAddDocumentationContent() throws APIManagementException, IOException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         String inlineContent = SampleTestObjectCreator.createDefaultInlineDocumentationContent();
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         apiPublisher.addDocumentationContent(DOC_ID, inlineContent);
         Mockito.verify(apiDAO, Mockito.times(1)).addDocumentInlineContent(DOC_ID, inlineContent, USER);
     }
@@ -1713,7 +1890,9 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DocumentInfo documentInfo = new DocumentInfo.Builder().fileName("sample_doc.pdf").name("howto_guide").id(DOC_ID)
                 .permission("[{\"groupId\": \"testGroup\",\"permission\":[\"READ\",\"UPDATE\",\"DELETE\"]}]").build();
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         Mockito.when(apiDAO.isDocumentExist(API_ID, documentInfo)).thenReturn(true);
         apiPublisher.updateDocumentation(API_ID, documentInfo);
         Mockito.verify(apiDAO, Mockito.times(1)).updateDocumentInfo(API_ID, documentInfo, USER);
@@ -1725,7 +1904,9 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo();
         Mockito.when(apiDAO.isDocumentExist(API_ID, documentInfo)).thenReturn(false);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         apiPublisher.updateDocumentation(API_ID, documentInfo);
     }
 
@@ -1733,7 +1914,9 @@ public class APIPublisherImplTestCase {
     public void testUnableToUpdateDocumentationException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo();
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         Mockito.when(apiDAO.isDocumentExist(API_ID, documentInfo)).thenReturn(true);
         Mockito.doThrow(APIMgtDAOException.class).when(apiDAO).updateDocumentInfo(API_ID, documentInfo, USER);
         try {
@@ -1749,7 +1932,9 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DocumentInfo documentInfo = new DocumentInfo.Builder().fileName("sample_doc.pdf").name("howto_guide").id("")
                 .permission("data").build();
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         apiPublisher.updateDocumentation(API_ID, documentInfo);
     }
 
@@ -1760,7 +1945,10 @@ public class APIPublisherImplTestCase {
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
 
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiLifecycleManager, apiDAO, workflowDAO, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getWorkflowDAO()).thenReturn(workflowDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gateway);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
         String lcState = api.getLifeCycleStatus();
@@ -1783,7 +1971,9 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gateway);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
         String lifecycleId = api.getLifecycleInstanceId();
@@ -1801,7 +1991,9 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gateway);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
         String lifecycleId = api.getLifecycleInstanceId();
@@ -1823,7 +2015,9 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         Mockito.when(apiDAO.getAPISummary(API_ID))
                 .thenThrow(new APIMgtDAOException("Couldn't find APISummary Resource for ID " + API_ID));
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         apiPublisher.getLifeCycleEvents(API_ID);
     }
 
@@ -1834,7 +2028,9 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gateway);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
         String lifecycleId = api.getLifecycleInstanceId();
@@ -1849,7 +2045,9 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gateway);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
         String lifecycleId = api.getLifecycleInstanceId();
@@ -1865,7 +2063,9 @@ public class APIPublisherImplTestCase {
             expectedExceptions = APIManagementException.class)
     public void testGetAPILifeCycleDataForNullAPI() throws APIManagementException, LifecycleException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         Mockito.when(apiDAO.getAPISummary(API_ID)).thenThrow(
                 new APIMgtDAOException("API with ID " + API_ID + " does not exist", ExceptionCodes.API_NOT_FOUND));
         apiPublisher.getAPILifeCycleData(API_ID);
@@ -1876,7 +2076,9 @@ public class APIPublisherImplTestCase {
     public void testGetAPILifeCycleDataExceptionWhenRetrievingAPISummary()
             throws APIManagementException, LifecycleException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         Mockito.when(apiDAO.getAPISummary(API_ID))
                 .thenThrow(new APIMgtDAOException("Couldn't retrieve API Summary for " + API_ID));
         apiPublisher.getAPILifeCycleData(API_ID);
@@ -1889,7 +2091,9 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gateway);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
         String lcState = api.getLifeCycleStatus();
@@ -1903,7 +2107,9 @@ public class APIPublisherImplTestCase {
     @Test(description = "Save thumbnail image for API")
     public void testSaveThumbnailImage() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         InputStream image = SampleTestObjectCreator.createDefaultThumbnailImage();
         apiPublisher.saveThumbnailImage(API_ID, image, "png");
         Mockito.verify(apiDAO, Mockito.times(1)).updateImage(API_ID, image, "png", USER);
@@ -1913,7 +2119,9 @@ public class APIPublisherImplTestCase {
             expectedExceptions = APIManagementException.class)
     public void testSaveThumbnailImageException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         Mockito.doThrow(new APIMgtDAOException("Couldn't save the thumbnail image")).when(apiDAO)
                 .updateImage(API_ID, null, "jpeg", USER);
         apiPublisher.saveThumbnailImage(API_ID, null, "jpeg");
@@ -1922,7 +2130,9 @@ public class APIPublisherImplTestCase {
     @Test(description = "Get thumbnail image for API")
     public void testGetThumbnailImage() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
         Mockito.when(apiDAO.getImage(uuid)).thenReturn(null);
@@ -1934,7 +2144,9 @@ public class APIPublisherImplTestCase {
             expectedExceptions = APIManagementException.class)
     public void testGetThumbnailImageException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         Mockito.when(apiDAO.getImage(API_ID))
                 .thenThrow(new APIMgtDAOException("Couldn't retrieve thumbnail for api " + API_ID));
         apiPublisher.getThumbnailImage(API_ID);
@@ -1943,7 +2155,9 @@ public class APIPublisherImplTestCase {
     @Test(description = "Retrieving all labels")
     public void testGetAllLabels() throws APIManagementException {
         LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(labelDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         Mockito.when(labelDAO.getLabels()).thenReturn(new ArrayList<Label>());
         apiPublisher.getAllLabels();
         Mockito.verify(labelDAO, Mockito.times(1)).getLabels();
@@ -1952,7 +2166,9 @@ public class APIPublisherImplTestCase {
     @Test(description = "Exception when retrieving all labels", expectedExceptions = Exception.class)
     public void testGetAllLabelsException() throws Exception {
         LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(labelDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         Mockito.when(labelDAO.getLabels()).thenThrow(new LabelException("Error occurred while retrieving labels"));
         apiPublisher.getAllLabels();
     }
@@ -1961,7 +2177,9 @@ public class APIPublisherImplTestCase {
     @Test(description = "get  labels by STORE type")
     public void getLabelsByType() throws Exception {
         LabelDAO labelDao = Mockito.mock(LabelDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(labelDao);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDao);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         Mockito.when(labelDao.getLabelsByType("GATEWAY")).thenReturn(new ArrayList<Label>());
         apiPublisher.getLabelsByType("GATEWAY");
         Mockito.verify(labelDao, Mockito.times(1)).getLabelsByType("GATEWAY");
@@ -1971,7 +2189,9 @@ public class APIPublisherImplTestCase {
     @Test(description = "get labels by type Exception", expectedExceptions = Exception.class)
     public void getLabelsByTypeException() throws Exception {
         LabelDAO labelDao = Mockito.mock(LabelDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(labelDao);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDao);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         Mockito.when(labelDao.getLabelsByType("GATEWAY")).thenThrow(new LabelException("Error occurred while " +
                 "retrieving labels"));
         apiPublisher.getLabelsByType("GATEWAY");
@@ -1985,7 +2205,9 @@ public class APIPublisherImplTestCase {
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Policy policy = SampleTestObjectCreator.createDefaultSubscriptionPolicy();
         Subscription subscription = new Subscription(SUB_ID, application, api, policy);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiSubscriptionDAO, apiGatewayPublisher);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiGatewayPublisher);
         Mockito.when(apiSubscriptionDAO.getAPISubscription(SUB_ID)).thenReturn(subscription);
         apiPublisher.updateSubscriptionStatus(SUB_ID, APIMgtConstants.SubscriptionStatus.ACTIVE);
         Mockito.verify(apiSubscriptionDAO, Mockito.times(1))
@@ -1995,7 +2217,9 @@ public class APIPublisherImplTestCase {
     @Test(description = "Error when updating subscription status", expectedExceptions = APIManagementException.class)
     public void testUpdateSubscriptionStatusException() throws APIManagementException {
         APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiSubscriptionDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         Mockito.doThrow(new APIMgtDAOException("", new Throwable())).when(apiSubscriptionDAO)
                 .updateSubscriptionStatus(SUB_ID, APIMgtConstants.SubscriptionStatus.ACTIVE);
         apiPublisher.updateSubscriptionStatus(SUB_ID, APIMgtConstants.SubscriptionStatus.ACTIVE);
@@ -2004,7 +2228,9 @@ public class APIPublisherImplTestCase {
     @Test(description = "Update subscription policy")
     public void testUpdateSubscriptionPolicy() throws APIManagementException {
         APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiSubscriptionDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         apiPublisher.updateSubscriptionPolicy(SUB_ID, "test policy");
         Mockito.verify(apiSubscriptionDAO, Mockito.times(1)).updateSubscriptionPolicy(SUB_ID, "test policy");
     }
@@ -2012,7 +2238,9 @@ public class APIPublisherImplTestCase {
     @Test(description = "Error when updating subscription policy", expectedExceptions = APIManagementException.class)
     public void testUpdateSubscriptionPolicyException() throws APIManagementException {
         APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiSubscriptionDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         Mockito.doThrow(new APIMgtDAOException("", new Throwable())).when(apiSubscriptionDAO)
                 .updateSubscriptionPolicy(SUB_ID, "test policy");
         apiPublisher.updateSubscriptionPolicy(SUB_ID, "test policy");
@@ -2021,7 +2249,9 @@ public class APIPublisherImplTestCase {
     @Test(description = "Get last updated time of endpoint")
     public void testGetLastUpdatedTimeOfEndpoint() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         Mockito.when(apiDAO.getLastUpdatedTimeOfEndpoint(ENDPOINT_ID)).thenReturn("2017-03-19T13:45:30");
         apiPublisher.getLastUpdatedTimeOfEndpoint(ENDPOINT_ID);
         Mockito.verify(apiDAO, Mockito.times(1)).getLastUpdatedTimeOfEndpoint(ENDPOINT_ID);
@@ -2031,7 +2261,9 @@ public class APIPublisherImplTestCase {
             expectedExceptions = APIManagementException.class)
     public void testGetLastUpdatedTimeOfEndpointException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         Mockito.when(apiDAO.getLastUpdatedTimeOfEndpoint(ENDPOINT_ID)).thenThrow(new APIMgtDAOException(
                 "Error occurred while retrieving the last update time of the endpoint with id " + ENDPOINT_ID));
         apiPublisher.getLastUpdatedTimeOfEndpoint(ENDPOINT_ID);
@@ -2040,7 +2272,9 @@ public class APIPublisherImplTestCase {
     @Test(description = "Get last updated time of Throttling Policy")
     public void testGetLastUpdatedTimeOfThrottlingPolicy() throws APIManagementException {
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(policyDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         Mockito.when(
                 policyDAO.getLastUpdatedTimeOfThrottlingPolicy(APIMgtAdminService.PolicyLevel.application, POLICY_NAME))
                 .thenReturn("2017-03-19T13:45:30");
@@ -2052,7 +2286,9 @@ public class APIPublisherImplTestCase {
     @Test(description = "Get last updated time of Gateway Config")
     public void testGetLastUpdatedTimeOfGatewayConfig() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         Mockito.when(apiDAO.getLastUpdatedTimeOfGatewayConfig(API_ID)).thenReturn("2017-03-19T13:45:30");
         apiPublisher.getLastUpdatedTimeOfGatewayConfig(API_ID);
         Mockito.verify(apiDAO, Mockito.times(1)).getLastUpdatedTimeOfGatewayConfig(API_ID);
@@ -2062,7 +2298,9 @@ public class APIPublisherImplTestCase {
             expectedExceptions = APIManagementException.class)
     public void testGetLastUpdatedTimeOfGatewayConfigException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         Mockito.when(apiDAO.getLastUpdatedTimeOfGatewayConfig(API_ID)).thenThrow(new APIMgtDAOException(
                 "Error occurred while retrieving the last update time of the gateway configuration of API with id "
                         + API_ID));
@@ -2073,7 +2311,9 @@ public class APIPublisherImplTestCase {
             expectedExceptions = APIManagementException.class)
     public void testGetLastUpdatedTimeOfThrottlingPolicyException() throws APIManagementException {
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(policyDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         Mockito.when(
                 policyDAO.getLastUpdatedTimeOfThrottlingPolicy(APIMgtAdminService.PolicyLevel.application, POLICY_NAME))
                 .thenThrow(new APIMgtDAOException(
@@ -2088,7 +2328,9 @@ public class APIPublisherImplTestCase {
         Policy policy = Mockito.mock(Policy.class);
         policy.setPolicyName(POLICY_NAME);
         policies.add(policy);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(policyDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         Mockito.when(policyDAO.getPoliciesByLevel(APIMgtAdminService.PolicyLevel.application)).thenReturn(policies);
         apiPublisher.getAllPoliciesByLevel(APIMgtAdminService.PolicyLevel.application);
         Mockito.verify(policyDAO, Mockito.times(1)).getPoliciesByLevel(APIMgtAdminService.PolicyLevel.application);
@@ -2109,7 +2351,9 @@ public class APIPublisherImplTestCase {
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
         Policy policy = Mockito.mock(Policy.class);
         policy.setPolicyName(POLICY_NAME);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(policyDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         Mockito.when(
                 policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application, POLICY_NAME))
                 .thenReturn(policy);
@@ -2133,7 +2377,9 @@ public class APIPublisherImplTestCase {
     @Test(description = "Test if endpoint exists")
     public void testIsEndpointExist() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         Mockito.when(apiDAO.isEndpointExist(ENDPOINT_NAME)).thenReturn(true);
         apiPublisher.isEndpointExist(ENDPOINT_NAME);
 
@@ -2156,8 +2402,12 @@ public class APIPublisherImplTestCase {
         APILifecycleManager apiLifecycleManager = getDefaultMockedAPILifecycleManager();
         PolicyDAO policyDAO = getDefaultMockedPolicyDAO();
         LabelDAO labelDao = Mockito.mock(LabelDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator,
-                gateway, policyDAO, labelDao);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDao);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gatewaySourceGenerator,
+                gateway);
         String endpointId = apiBuilder.getEndpoint().get("production").getId();
         Endpoint endpoint = new Endpoint.Builder().id(endpointId).name("testEndpoint").build();
         Mockito.when(apiDAO.getEndpoint(endpointId)).thenReturn(endpoint);
@@ -2186,8 +2436,12 @@ public class APIPublisherImplTestCase {
         APILifecycleManager apiLifecycleManager = getDefaultMockedAPILifecycleManager();
         PolicyDAO policyDAO = getDefaultMockedPolicyDAO();
         LabelDAO labelDao = Mockito.mock(LabelDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator,
-                gateway, policyDAO, labelDao);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDao);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gatewaySourceGenerator,
+                gateway);
         String endpointId = apiBuilder.getEndpoint().get("production").getId();
         Endpoint endpoint = new Endpoint.Builder().id(endpointId).name("testEndpoint").build();
         Mockito.when(apiDAO.getEndpoint(endpointId)).thenReturn(endpoint);
@@ -2207,7 +2461,9 @@ public class APIPublisherImplTestCase {
     public void testGetAPIWSDL() throws APIManagementException, IOException {
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
         Mockito.when(apiDAO.getWSDL(api.getId()))
                 .thenReturn(new String(SampleTestObjectCreator.createDefaultWSDL11Content()));
@@ -2220,7 +2476,9 @@ public class APIPublisherImplTestCase {
     public void testGetAPIWSDLArchive() throws APIManagementException, IOException {
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIPublisher apiPublisher = getApiPublisherImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         Mockito.when(apiDAO.getWSDLArchive(api.getId()))
                 .thenReturn(SampleTestObjectCreator.createDefaultWSDL11ArchiveInputStream());
         InputStream inputStream = apiPublisher.getAPIWSDLArchive(api.getId());
@@ -2237,8 +2495,10 @@ public class APIPublisherImplTestCase {
         APIGateway gateway = Mockito.mock(APIGateway.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
         KeyManager keyManager = Mockito.mock(KeyManager.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, gatewaySourceGenerator,
-                gateway, keyManager);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, keyManager, daoFactory, null,
+                gatewaySourceGenerator, gateway);
         Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.DEVELOPER_ROLE_ID))
                 .thenReturn(DEVELOPER_ROLE);
         String oldSwagger = IOUtils.toString(new FileInputStream("src" + File.separator + "test" + File
@@ -2268,8 +2528,10 @@ public class APIPublisherImplTestCase {
         APIGateway gateway = Mockito.mock(APIGateway.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
         KeyManager keyManager = Mockito.mock(KeyManager.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, gatewaySourceGenerator,
-                gateway, keyManager);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, keyManager, daoFactory, null,
+                gatewaySourceGenerator, gateway);
         Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.DEVELOPER_ROLE_ID))
                 .thenReturn(DEVELOPER_ROLE);
         Mockito.when(keyManager.retrieveScope("apim:api_create")).thenReturn(new Scope("apim:api_create", "Create " +
@@ -2282,18 +2544,13 @@ public class APIPublisherImplTestCase {
         apiPublisher.saveSwagger20Definition(uuid, SampleTestObjectCreator.apiDefinition);
     }
 
-    private APIPublisherImpl getApiPublisherImpl(IdentityProvider identityProvider, ApiDAO apiDAO,
-                                                 GatewaySourceGenerator gatewaySourceGenerator, APIGateway gateway,
-                                                 KeyManager keyManager) {
-        return new APIPublisherImpl(USER, identityProvider, keyManager, apiDAO, null, null, null, null,
-                null, null, null, null, gatewaySourceGenerator, gateway);
-    }
-
     @Test(description = "Test getting all endpoints")
     public void testGetAllEndpoints() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         List<Endpoint> endpointList = new ArrayList<>();
-        APIPublisher apiPublisher = getApiPublisherImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisher apiPublisher = getApiPublisherImpl(daoFactory);
         Mockito.when(apiDAO.getEndpoints()).thenReturn(endpointList);
         apiPublisher.getAllEndpoints();
         Mockito.verify(apiDAO, Mockito.times(1)).getEndpoints();
@@ -2312,7 +2569,9 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         Endpoint endpoint = SampleTestObjectCreator.createMockEndpoint();
         String endpointId = endpoint.getId();
-        APIPublisher apiPublisher = getApiPublisherImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisher apiPublisher = getApiPublisherImpl(daoFactory);
         Mockito.when(apiDAO.getEndpoint(endpointId)).thenReturn(endpoint);
         apiPublisher.getEndpoint(endpointId);
         Mockito.verify(apiDAO, Mockito.times(1)).getEndpoint(endpointId);
@@ -2331,7 +2590,9 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         Endpoint endpoint = SampleTestObjectCreator.createMockEndpoint();
         String endpointName = endpoint.getName();
-        APIPublisher apiPublisher = getApiPublisherImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisher apiPublisher = getApiPublisherImpl(daoFactory);
         Mockito.when(apiDAO.getEndpointByName(endpointName)).thenReturn(endpoint);
         apiPublisher.getEndpointByName(endpointName);
         Mockito.verify(apiDAO, Mockito.times(1)).getEndpointByName(endpointName);
@@ -2381,14 +2642,6 @@ public class APIPublisherImplTestCase {
 
     }
 
-    private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APILifecycleManager apiLifecycleManager,
-                                                 GatewaySourceGenerator
-                                                         gatewaySourceGenerator, APIGateway gateway, PolicyDAO
-                                                         policyDAO, KeyManager keyManager) {
-        return new APIPublisherImpl(USER, null, keyManager, apiDAO, null, null, policyDAO, apiLifecycleManager, null,
-                null, null, null, gatewaySourceGenerator, gateway);
-    }
-
     @Test(description = "Add api from definition using httpUrlConnection")
     public void testAddApiFromDefinitionFromUrlConnection()
             throws APIManagementException, LifecycleException, IOException {
@@ -2404,8 +2657,12 @@ public class APIPublisherImplTestCase {
         KeyManager keyManager = Mockito.mock(KeyManager.class);
         Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api, APIMgtConstants
                 .DEFAULT_API_POLICY)).thenReturn(new APIPolicy(APIMgtConstants.DEFAULT_API_POLICY));
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(null, keyManager, apiDAO, null, null, policyDAO,
-                apiLifecycleManager, labelDao, null, null, null, gatewaySourceGenerator, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDao);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(null, keyManager, daoFactory, apiLifecycleManager,
+                gatewaySourceGenerator, gateway);
         String def = SampleTestObjectCreator.apiDefinition;
         InputStream apiDefinition = new ByteArrayInputStream(def.getBytes());
         Mockito.when(httpURLConnection.getInputStream()).thenReturn(apiDefinition);
@@ -2418,7 +2675,9 @@ public class APIPublisherImplTestCase {
             expectedExceptions = APIManagementException.class)
     public void testGetApiGatewayConfigException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisher apiPublisher = getApiPublisherImpl(daoFactory);
         Mockito.when(apiDAO.getGatewayConfigOfAPI(API_ID))
                 .thenThrow(new APIMgtDAOException("Error generating swagger from gateway config " + API_ID));
         apiPublisher.getApiGatewayConfig(API_ID);
@@ -2434,7 +2693,9 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, USER))
                 .thenReturn(new LifecycleState());
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisher apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gateway);
         Mockito.when(httpURLConnection.getResponseCode()).thenReturn(400);
         apiPublisher.addApiFromDefinition(httpURLConnection);
         Mockito.verify(apiLifecycleManager, Mockito.times(0)).addLifecycle(APIMgtConstants.API_LIFECYCLE, USER);
@@ -2450,7 +2711,9 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, USER))
                 .thenReturn(new LifecycleState());
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisher apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gateway);
         Mockito.doThrow(new ProtocolException()).when(httpURLConnection).setRequestMethod(APIMgtConstants.HTTP_GET);
         apiPublisher.addApiFromDefinition(httpURLConnection);
         Mockito.verify(apiLifecycleManager, Mockito.times(0)).addLifecycle(APIMgtConstants.API_LIFECYCLE, USER);
@@ -2465,7 +2728,9 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, USER))
                 .thenReturn(new LifecycleState());
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisher apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gateway);
         Mockito.doThrow(new IOException()).when(httpURLConnection).getResponseCode();
         apiPublisher.addApiFromDefinition(httpURLConnection);
         Mockito.verify(apiLifecycleManager, Mockito.times(0)).addLifecycle(APIMgtConstants.API_LIFECYCLE, USER);
@@ -2476,7 +2741,9 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         String uuid = UUID.randomUUID().toString();
         Mockito.when(apiDAO.getApiSwaggerDefinition(uuid)).thenReturn(SampleTestObjectCreator.apiDefinition);
-        String returnedSwagger = getApiPublisherImpl(apiDAO).getApiSwaggerDefinition(uuid);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        String returnedSwagger = getApiPublisherImpl(daoFactory).getApiSwaggerDefinition(uuid);
         Mockito.verify(apiDAO, Mockito.times(1)).getApiSwaggerDefinition(uuid);
     }
 
@@ -2485,7 +2752,9 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        String id = getApiPublisherImpl(apiDAO, gatewaySourceGenerator, gateway)
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        String id = getApiPublisherImpl(daoFactory, gatewaySourceGenerator, gateway)
                 .addEndpoint(SampleTestObjectCreator.createMockEndpoint());
         Endpoint endpoint = new Endpoint.Builder(SampleTestObjectCreator.createMockEndpoint()).id(id)
                 .applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).build();
@@ -2497,7 +2766,9 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, gatewaySourceGenerator, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, gatewaySourceGenerator, gateway);
         try {
             apiPublisher
                     .addEndpoint(new Endpoint.Builder(SampleTestObjectCreator.createMockEndpoint()).name(null).build());
@@ -2511,7 +2782,9 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, gatewaySourceGenerator, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, gatewaySourceGenerator, gateway);
         try {
             apiPublisher
                     .addEndpoint(new Endpoint.Builder(SampleTestObjectCreator.createMockEndpoint()).name("").build());
@@ -2525,7 +2798,9 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, gatewaySourceGenerator, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, gatewaySourceGenerator, gateway);
         Endpoint endpointToAdd = new Endpoint.Builder(SampleTestObjectCreator.createMockEndpoint()).build();
         Mockito.when(apiDAO.getEndpointByName(endpointToAdd.getName())).thenReturn(endpointToAdd);
         try {
@@ -2541,7 +2816,9 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, gatewaySourceGenerator, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, gatewaySourceGenerator, gateway);
         Endpoint endpointToAdd = new Endpoint.Builder(SampleTestObjectCreator.createMockEndpoint()).build();
         Mockito.when(apiDAO.getEndpointByName(endpointToAdd.getName())).thenReturn(null);
         Mockito.doThrow(APIMgtDAOException.class).when(apiDAO).addEndpoint(Mockito.any());
@@ -2558,7 +2835,9 @@ public class APIPublisherImplTestCase {
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
 
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, gatewaySourceGenerator, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, gatewaySourceGenerator, gateway);
         Endpoint endpoint = new Endpoint.Builder(SampleTestObjectCreator.createMockEndpoint()).build();
         Mockito.when(apiDAO.updateEndpoint(endpoint)).thenReturn(true);
         apiPublisher.updateEndpoint(endpoint);
@@ -2578,7 +2857,9 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, gatewaySourceGenerator, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, gatewaySourceGenerator, gateway);
         Endpoint endpoint = new Endpoint.Builder(SampleTestObjectCreator.createMockEndpoint()).build();
         Mockito.when(apiDAO.isEndpointAssociated(endpoint.getId())).thenReturn(false);
         Mockito.when(apiDAO.deleteEndpoint(endpoint.getId())).thenReturn(true);
@@ -2627,8 +2908,13 @@ public class APIPublisherImplTestCase {
         Policy apiPolicy = new APIPolicy(UUID.randomUUID().toString(), APIMgtConstants.DEFAULT_API_POLICY);
         Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api, APIMgtConstants
                 .DEFAULT_API_POLICY)).thenReturn(apiPolicy);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(null, apiDAO, null, null, policyDAO, apiLifecycleManager,
-                labelDao, null, null, null, gatewaySourceGenerator, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDao);
+
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(null, null, daoFactory, apiLifecycleManager,
+                gatewaySourceGenerator, gateway);
         Mockito.when(apiDAO.getEndpoint(globalEndpoint.getId())).thenReturn(globalEndpoint);
         Mockito.when(apiDAO.getEndpointByName(apiEndpoint.getName())).thenReturn(null);
         Mockito.when(apiDAO.isAPINameExists(apiBuilder.getName(), USER)).thenReturn(false);
@@ -2662,8 +2948,11 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, USER))
                 .thenReturn(new LifecycleState());
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(null, apiDAO, null, null, null, apiLifecycleManager,
-                labelDao, null, null, null, gatewaySourceGenerator, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDao);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(null, null, daoFactory, apiLifecycleManager,
+                gatewaySourceGenerator, gateway);
         Mockito.when(apiDAO.getEndpoint(globalEndpoint.getId())).thenReturn(globalEndpoint);
         Mockito.when(apiDAO.getEndpointByName(apiEndpoint.getName())).thenReturn(apiEndpoint);
         Mockito.when(apiDAO.isAPINameExists(apiBuilder.getName(), USER)).thenReturn(false);
@@ -2695,8 +2984,11 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, USER))
                 .thenReturn(new LifecycleState());
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(null, apiDAO, null, null, null, apiLifecycleManager,
-                labelDao, null, null, null, gatewaySourceGenerator, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDao);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(null, null, daoFactory, apiLifecycleManager,
+                gatewaySourceGenerator, gateway);
         Mockito.when(apiDAO.getEndpoint(globalEndpoint.getId())).thenReturn(globalEndpoint);
         Mockito.when(apiDAO.getEndpointByName(apiEndpoint.getName())).thenThrow(APIMgtDAOException.class);
         Mockito.when(apiDAO.isAPINameExists(apiBuilder.getName(), USER)).thenReturn(false);
@@ -2749,8 +3041,13 @@ public class APIPublisherImplTestCase {
         Mockito.when(
                 policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription, BRONZE_TIER))
                 .thenReturn(new SubscriptionPolicy(BRONZE_TIER));
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(null, apiDAO, null, null, policyDAO, apiLifecycleManager,
-                labelDao, null, null, null, gatewaySourceGenerator, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDao);
+
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(null, null, daoFactory, apiLifecycleManager,
+                gatewaySourceGenerator, gateway);
         Mockito.when(apiDAO.getEndpoint(globalEndpoint.getId())).thenReturn(globalEndpoint);
         Mockito.when(apiDAO.getEndpointByName(apiEndpoint.getName())).thenReturn(null);
         Mockito.when(apiDAO.getEndpointByName(resourceEndpoint.getName())).thenReturn(null);
@@ -2795,8 +3092,12 @@ public class APIPublisherImplTestCase {
                 .thenReturn(new LifecycleState());
         APIGateway gateway = Mockito.mock(APIGateway.class);
         LabelDAO labelDao = Mockito.mock(LabelDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(null, apiDAO, null, null, null, apiLifecycleManager,
-                labelDao, null, null, null, gatewaySourceGenerator, gateway);
+
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDao);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gatewaySourceGenerator,
+                gateway);
         Mockito.when(apiDAO.getEndpoint(globalEndpoint.getId())).thenReturn(globalEndpoint);
         Mockito.when(apiDAO.getEndpointByName(apiEndpoint.getName())).thenReturn(null);
         Mockito.when(apiDAO.getEndpointByName(resourceEndpoint.getName())).thenReturn(resourceEndpoint);
@@ -2840,8 +3141,11 @@ public class APIPublisherImplTestCase {
                 .thenReturn(new LifecycleState());
         APIGateway gateway = Mockito.mock(APIGateway.class);
         LabelDAO labelDao = Mockito.mock(LabelDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(null, apiDAO, null, null, null, apiLifecycleManager,
-                labelDao, null, null, null, gatewaySourceGenerator, gateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDao);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gatewaySourceGenerator,
+                gateway);
         Mockito.when(apiDAO.getEndpoint(globalEndpoint.getId())).thenReturn(globalEndpoint);
         Mockito.when(apiDAO.getEndpointByName(apiEndpoint.getName())).thenReturn(null);
         Mockito.when(apiDAO.getEndpointByName(resourceEndpoint.getName())).thenThrow(APIMgtDAOException.class);
@@ -2898,8 +3202,12 @@ public class APIPublisherImplTestCase {
         Mockito.when(
                 policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription, BRONZE_TIER))
                 .thenReturn(new SubscriptionPolicy(BRONZE_TIER));
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator,
-                gateway, policyDAO, labelDao);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDao);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gatewaySourceGenerator,
+                gateway);
         Mockito.when(apiDAO.getEndpoint(globalEndpoint.getId())).thenReturn(globalEndpoint);
         Mockito.when(apiDAO.getEndpointByName(apiEndpoint.getName())).thenReturn(null);
         Mockito.when(apiDAO.getEndpointByName(resourceEndpoint.getName())).thenReturn(null);
@@ -2938,8 +3246,12 @@ public class APIPublisherImplTestCase {
         Mockito.when(
                 policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription, BRONZE_TIER))
                 .thenReturn(new SubscriptionPolicy(BRONZE_TIER));
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiLifecycleManager,
-                gatewaySourceGenerator, gateway, policyDAO);
+
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, null, daoFactory, apiLifecycleManager,
+                gatewaySourceGenerator, gateway);
         Mockito.when(apiDAO.getEndpoint(endpointMap.get(APIMgtConstants.PRODUCTION_ENDPOINT).getId()))
                 .thenReturn(endpointMap.get(APIMgtConstants.PRODUCTION_ENDPOINT));
         Mockito.when(apiDAO.getEndpoint(endpointMap.get(APIMgtConstants.SANDBOX_ENDPOINT).getId()))
@@ -2984,8 +3296,13 @@ public class APIPublisherImplTestCase {
         LabelDAO labelDao = Mockito.mock(LabelDAO.class);
         Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api,
                 APIMgtConstants.DEFAULT_API_POLICY)).thenReturn(new APIPolicy(APIMgtConstants.DEFAULT_API_POLICY));
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator,
-                gateway, policyDAO, labelDao);
+
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDao);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gatewaySourceGenerator,
+                gateway);
         Mockito.when(apiDAO.getEndpoint(endpoint1.getId())).thenReturn(endpoint1);
         Mockito.when(apiDAO.getEndpoint(endpoint2.getId())).thenReturn(endpoint2);
         Mockito.when(apiDAO.getEndpoint(endpoint3.getId())).thenReturn(null);
@@ -3026,7 +3343,9 @@ public class APIPublisherImplTestCase {
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator,
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gatewaySourceGenerator,
                 gateway);
         Mockito.when(apiDAO.getEndpoint(endpoint1.getId())).thenReturn(endpoint1);
         Mockito.when(apiDAO.getEndpoint(endpoint2.getId())).thenReturn(endpoint2);
@@ -3069,8 +3388,12 @@ public class APIPublisherImplTestCase {
         LabelDAO labelDao = Mockito.mock(LabelDAO.class);
         Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api,
                 APIMgtConstants.DEFAULT_API_POLICY)).thenReturn(new APIPolicy(APIMgtConstants.DEFAULT_API_POLICY));
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator,
-                gateway, policyDAO, labelDao);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDao);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gatewaySourceGenerator,
+                gateway);
         Mockito.when(apiDAO.getEndpoint(endpoint1.getId())).thenReturn(endpoint1);
         Mockito.when(apiDAO.getApiSwaggerDefinition(apiBuilder.getId())).thenReturn(SampleTestObjectCreator
                 .apiDefinition);
@@ -3109,7 +3432,9 @@ public class APIPublisherImplTestCase {
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator,
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gatewaySourceGenerator,
                 gateway);
         Mockito.when(apiDAO.getEndpoint(endpoint1.getId())).thenReturn(endpoint1);
         Mockito.when(apiDAO.getEndpoint(endpoint2.getId())).thenReturn(endpoint2);
@@ -3153,8 +3478,12 @@ public class APIPublisherImplTestCase {
         LabelDAO labelDao = Mockito.mock(LabelDAO.class);
         Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api,
                 APIMgtConstants.DEFAULT_API_POLICY)).thenReturn(new APIPolicy(APIMgtConstants.DEFAULT_API_POLICY));
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator,
-                gateway, policyDAO, labelDao);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDao);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gatewaySourceGenerator,
+                gateway);
         Mockito.when(apiDAO.getEndpoint(endpoint1.getId())).thenReturn(endpoint1);
         Mockito.when(apiDAO.getEndpoint(endpoint2.getId())).thenReturn(endpoint2);
         Mockito.when(apiDAO.getEndpoint(endpoint1.getName())).thenReturn(endpoint1);
@@ -3189,8 +3518,12 @@ public class APIPublisherImplTestCase {
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
         Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api,
                 APIMgtConstants.DEFAULT_API_POLICY)).thenReturn(new APIPolicy(APIMgtConstants.DEFAULT_API_POLICY));
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator,
-                gateway, policyDAO, labelDao);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDao);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gatewaySourceGenerator,
+                gateway);
         Mockito.when(apiDAO.getApiSwaggerDefinition(apiBuilder.getId())).thenReturn(SampleTestObjectCreator
                 .apiDefinition);
         apiPublisher.updateAPI(apiBuilder);
@@ -3226,8 +3559,12 @@ public class APIPublisherImplTestCase {
         LabelDAO labelDao = Mockito.mock(LabelDAO.class);
         Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api,
                 APIMgtConstants.DEFAULT_API_POLICY)).thenReturn(new APIPolicy(APIMgtConstants.DEFAULT_API_POLICY));
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator,
-                gateway, policyDAO, labelDao);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDao);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, apiLifecycleManager, gatewaySourceGenerator,
+                gateway);
         Mockito.when(apiDAO.getEndpoint(endpoint1.getId())).thenReturn(endpoint1);
         Mockito.when(apiDAO.getEndpoint(endpoint2.getId())).thenReturn(endpoint2);
         Mockito.when(apiDAO.getApiSwaggerDefinition(apiBuilder.getId())).thenReturn(SampleTestObjectCreator
@@ -3248,8 +3585,10 @@ public class APIPublisherImplTestCase {
         APIGateway gateway = Mockito.mock(APIGateway.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
         KeyManager keyManager = Mockito.mock(KeyManager.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, gatewaySourceGenerator,
-                gateway, keyManager);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, keyManager, daoFactory, null,
+                gatewaySourceGenerator, gateway);
         Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.DEVELOPER_ROLE_ID))
                 .thenReturn(DEVELOPER_ROLE);
         Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.ADMIN_ROLE_ID)).thenReturn(ADMIN_ROLE);
@@ -3273,8 +3612,10 @@ public class APIPublisherImplTestCase {
         APIGateway gateway = Mockito.mock(APIGateway.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
         KeyManager keyManager = Mockito.mock(KeyManager.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, gatewaySourceGenerator,
-                gateway, keyManager);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, keyManager, daoFactory, null,
+                gatewaySourceGenerator, gateway);
         Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.DEVELOPER_ROLE_ID))
                 .thenReturn(DEVELOPER_ROLE);
         Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.ADMIN_ROLE_ID)).thenReturn(ADMIN_ROLE);
@@ -3291,7 +3632,9 @@ public class APIPublisherImplTestCase {
     @Test(description = "Save swagger definition for API")
     public void testGetScopesFromApi() throws APIManagementException, IOException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         String newSwagger = IOUtils.toString(new FileInputStream("src" + File.separator + "test" + File
                 .separator + "resources" + File.separator + "swagger" + File.separator + "swaggerWithAuthorization" +
                 ".yaml"));
@@ -3306,7 +3649,9 @@ public class APIPublisherImplTestCase {
     public void testGetScopeInformationFromApi() throws APIManagementException, IOException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         KeyManager keyManager = Mockito.mock(KeyManager.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, keyManager);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, keyManager);
         String newSwagger = IOUtils.toString(new FileInputStream("src" + File.separator + "test" + File
                 .separator + "resources" + File.separator + "swagger" + File.separator + "swaggerWithAuthorization" +
                 ".yaml"));
@@ -3321,7 +3666,9 @@ public class APIPublisherImplTestCase {
     public void testGetScopeInformationForNonExistingScope() throws APIManagementException, IOException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         KeyManager keyManager = Mockito.mock(KeyManager.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, keyManager);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory, keyManager);
         String newSwagger = IOUtils.toString(new FileInputStream("src" + File.separator + "test" + File
                 .separator + "resources" + File.separator + "swagger" + File.separator + "swaggerWithAuthorization" +
                 ".yaml"));
@@ -3348,8 +3695,10 @@ public class APIPublisherImplTestCase {
         APIGateway gateway = Mockito.mock(APIGateway.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
         KeyManager keyManager = Mockito.mock(KeyManager.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, gatewaySourceGenerator,
-                gateway, keyManager);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, keyManager, daoFactory, null,
+                gatewaySourceGenerator, gateway);
         String oldSwagger = IOUtils.toString(new FileInputStream("src" + File.separator + "test" + File
                 .separator + "resources" + File.separator + "swagger" + File.separator + "swaggerWithAuthorization" +
                 ".yaml"));
@@ -3372,8 +3721,10 @@ public class APIPublisherImplTestCase {
         APIGateway gateway = Mockito.mock(APIGateway.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
         KeyManager keyManager = Mockito.mock(KeyManager.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, gatewaySourceGenerator,
-                gateway, keyManager);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, keyManager, daoFactory, null,
+                gatewaySourceGenerator, gateway);
         String oldSwagger = IOUtils.toString(new FileInputStream("src" + File.separator + "test" + File
                 .separator + "resources" + File.separator + "swagger" + File.separator + "swaggerWithAuthorization" +
                 ".yaml"));
@@ -3397,8 +3748,10 @@ public class APIPublisherImplTestCase {
         APIGateway gateway = Mockito.mock(APIGateway.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
         KeyManager keyManager = Mockito.mock(KeyManager.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, gatewaySourceGenerator,
-                gateway, keyManager);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, keyManager, daoFactory, null,
+                gatewaySourceGenerator, gateway);
         String oldSwagger = IOUtils.toString(new FileInputStream("src" + File.separator + "test" + File
                 .separator + "resources" + File.separator + "swagger" + File.separator + "swaggerWithAuthorization" +
                 ".yaml"));
@@ -3423,8 +3776,10 @@ public class APIPublisherImplTestCase {
         APIGateway gateway = Mockito.mock(APIGateway.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
         KeyManager keyManager = Mockito.mock(KeyManager.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, gatewaySourceGenerator,
-                gateway, keyManager);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, keyManager, daoFactory, null,
+                gatewaySourceGenerator, gateway);
         String oldSwagger = IOUtils.toString(new FileInputStream("src" + File.separator + "test" + File
                 .separator + "resources" + File.separator + "swagger" + File.separator + "swaggerWithAuthorization" +
                 ".yaml"));
@@ -3446,8 +3801,10 @@ public class APIPublisherImplTestCase {
         APIGateway gateway = Mockito.mock(APIGateway.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
         KeyManager keyManager = Mockito.mock(KeyManager.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, gatewaySourceGenerator,
-                gateway, keyManager);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, keyManager, daoFactory, null,
+                gatewaySourceGenerator, gateway);
         String oldSwagger = IOUtils.toString(new FileInputStream("src" + File.separator + "test" + File
                 .separator + "resources" + File.separator + "swagger" + File.separator + "swaggerWithAuthorization" +
                 ".yaml"));
@@ -3471,8 +3828,10 @@ public class APIPublisherImplTestCase {
         APIGateway gateway = Mockito.mock(APIGateway.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
         KeyManager keyManager = Mockito.mock(KeyManager.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, gatewaySourceGenerator,
-                gateway, keyManager);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, keyManager, daoFactory, null,
+                gatewaySourceGenerator, gateway);
         String oldSwagger = IOUtils.toString(new FileInputStream("src" + File.separator + "test" + File
                 .separator + "resources" + File.separator + "swagger" + File.separator + "swaggerWithAuthorization" +
                 ".yaml"));
@@ -3492,8 +3851,10 @@ public class APIPublisherImplTestCase {
         APIGateway gateway = Mockito.mock(APIGateway.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
         KeyManager keyManager = Mockito.mock(KeyManager.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, gatewaySourceGenerator,
-                gateway, keyManager);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, keyManager, daoFactory, null,
+                gatewaySourceGenerator, gateway);
         String oldSwagger = IOUtils.toString(new FileInputStream("src" + File.separator + "test" + File
                 .separator + "resources" + File.separator + "swagger" + File.separator + "swaggerWithAuthorization" +
                 ".yaml"));
@@ -3512,9 +3873,13 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DedicatedGateway dedicatedGateway = new DedicatedGateway();
         dedicatedGateway.setEnabled(true);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
-        Mockito.when(apiDAO.getDedicatedGateway(Mockito.anyString())).thenReturn(dedicatedGateway);
-        DedicatedGateway result = apiPublisher.getDedicatedGateway(Mockito.anyString());
+        String apiId = "api-1";
+        dedicatedGateway.setApiId(apiId);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
+        Mockito.when(apiDAO.getDedicatedGateway(apiId)).thenReturn(dedicatedGateway);
+        DedicatedGateway result = apiPublisher.getDedicatedGateway(apiId);
         Assert.assertTrue(result.isEnabled());
     }
 
@@ -3523,9 +3888,13 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DedicatedGateway dedicatedGateway = new DedicatedGateway();
         dedicatedGateway.setEnabled(true);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
-        Mockito.when(apiDAO.getDedicatedGateway(Mockito.anyString())).thenThrow(APIMgtDAOException.class);
-        apiPublisher.getDedicatedGateway(Mockito.anyString());
+        String apiId = "api-1";
+        dedicatedGateway.setApiId(apiId);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
+        Mockito.when(apiDAO.getDedicatedGateway(apiId)).thenThrow(APIMgtDAOException.class);
+        apiPublisher.getDedicatedGateway(apiId);
     }
 
     @Test(description = "Update dedicated gateway")
@@ -3547,7 +3916,10 @@ public class APIPublisherImplTestCase {
         Mockito.when(labelDAO.getLabelByName(autoGenLabelName)).thenReturn(null);
         Mockito.when(labelDAO.getLabelIdByNameAndType(Mockito.anyString(), Mockito.anyString())).thenReturn(UUID
                 .randomUUID().toString());
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, labelDAO, gatewaySourceGenerator);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, daoFactory, gatewaySourceGenerator);
         DedicatedGateway dedicatedGateway = SampleTestObjectCreator.createDedicatedGateway(uuid, true,
                 api.getCreatedBy());
         apiPublisher.updateDedicatedGateway(dedicatedGateway);
@@ -3575,7 +3947,10 @@ public class APIPublisherImplTestCase {
         Mockito.when(labelDAO.getLabelByName(autoGenLabelName)).thenReturn(label);
         Mockito.when(labelDAO.getLabelIdByNameAndType(Mockito.anyString(), Mockito.anyString())).thenReturn(UUID
                 .randomUUID().toString());
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, labelDAO, gatewaySourceGenerator);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, daoFactory, gatewaySourceGenerator);
         DedicatedGateway dedicatedGateway = SampleTestObjectCreator.createDedicatedGateway(uuid, true,
                 api.getCreatedBy());
         apiPublisher.updateDedicatedGateway(dedicatedGateway);
@@ -3599,7 +3974,10 @@ public class APIPublisherImplTestCase {
 
         String autoGenLabelName = ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX + uuid;
 
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, labelDAO, gatewaySourceGenerator);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, daoFactory, gatewaySourceGenerator);
         DedicatedGateway dedicatedGateway = SampleTestObjectCreator.createDedicatedGateway(uuid, false,
                 api.getCreatedBy());
         apiPublisher.updateDedicatedGateway(dedicatedGateway);
@@ -3624,7 +4002,10 @@ public class APIPublisherImplTestCase {
         Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.ADMIN_ROLE_ID)).thenReturn(ADMIN_ROLE);
         Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
 
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, labelDAO, gatewaySourceGenerator);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, daoFactory, gatewaySourceGenerator);
         DedicatedGateway dedicatedGateway = SampleTestObjectCreator.createDedicatedGateway(uuid, false,
                 api.getCreatedBy());
         apiPublisher.updateDedicatedGateway(dedicatedGateway);
@@ -3648,7 +4029,11 @@ public class APIPublisherImplTestCase {
 
         String autoGenLabelName = ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX + uuid;
         Mockito.when(labelDAO.getLabelByName(autoGenLabelName)).thenReturn(null);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, labelDAO, gatewaySourceGenerator);
+
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, daoFactory, gatewaySourceGenerator);
         DedicatedGateway dedicatedGateway = SampleTestObjectCreator.createDedicatedGateway(uuid, true,
                 api.getCreatedBy());
         List<String> labelSet = new ArrayList<>();
@@ -3673,7 +4058,10 @@ public class APIPublisherImplTestCase {
         Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.ADMIN_ROLE_ID)).thenReturn(ADMIN_ROLE);
         Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
 
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, labelDAO, gatewaySourceGenerator);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, daoFactory, gatewaySourceGenerator);
         DedicatedGateway dedicatedGateway = SampleTestObjectCreator.createDedicatedGateway(uuid, true,
                 api.getCreatedBy());
         apiPublisher.updateDedicatedGateway(dedicatedGateway);
@@ -3695,7 +4083,10 @@ public class APIPublisherImplTestCase {
         Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.ADMIN_ROLE_ID)).thenReturn(ADMIN_ROLE);
         Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
 
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, labelDAO, gatewaySourceGenerator);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, daoFactory, gatewaySourceGenerator);
         DedicatedGateway dedicatedGateway = SampleTestObjectCreator.createDedicatedGateway(uuid, true,
                 api.getCreatedBy());
         apiPublisher.updateDedicatedGateway(dedicatedGateway);
@@ -3717,15 +4108,17 @@ public class APIPublisherImplTestCase {
         Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.ADMIN_ROLE_ID)).thenReturn(ADMIN_ROLE);
         Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
 
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, labelDAO, gatewaySourceGenerator);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDAO);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, daoFactory, gatewaySourceGenerator);
         DedicatedGateway dedicatedGateway = SampleTestObjectCreator.createDedicatedGateway(uuid, true,
                 api.getCreatedBy());
         apiPublisher.updateDedicatedGateway(dedicatedGateway);
     }
 
-    private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, KeyManager keyManager) {
-        return new APIPublisherImpl(USER, null, keyManager, apiDAO, null, null, null, null, null, null, null, null,
-                null, null);
+    private APIPublisherImpl getApiPublisherImpl(DAOFactory daoFactory, KeyManager keyManager) {
+        return new APIPublisherImpl(USER, null, keyManager, daoFactory, null, null, null);
     }
 
     private PolicyDAO getDefaultMockedPolicyDAO() throws APIManagementException {
@@ -3752,239 +4145,81 @@ public class APIPublisherImplTestCase {
     }
 
     private APIPublisherImpl getApiPublisherImpl() {
-        return new APIPublisherImpl(USER, null, null, null, null, null, null, null, null, null, null,
-                null, new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
+        return new APIPublisherImpl(USER, null, null, null, null, new GatewaySourceGeneratorImpl(),
+                new APIGatewayPublisherImpl());
     }
 
-    private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APILifecycleManager apiLifecycleManager,
+    private APIPublisherImpl getApiPublisherImpl(DAOFactory daoFactory, APILifecycleManager apiLifecycleManager,
                                                  APIGateway apiGatewayPublisher) {
-        return new APIPublisherImpl(USER, null, null, apiDAO, null, null, null, apiLifecycleManager, null, null, null,
-                null, new GatewaySourceGeneratorImpl(), apiGatewayPublisher);
+        return new APIPublisherImpl(USER, null, null, daoFactory, apiLifecycleManager, new GatewaySourceGeneratorImpl()
+                , apiGatewayPublisher);
     }
 
-    private APIPublisherImpl getApiPublisherImpl(IdentityProvider identityProvider, ApiDAO apiDAO,
+    private APIPublisherImpl getApiPublisherImpl(IdentityProvider identityProvider, DAOFactory daoFactory,
                                                  APILifecycleManager apiLifecycleManager, APIGateway
                                                          apiGatewayPublisher) {
-        return new APIPublisherImpl(USER, identityProvider, null, apiDAO, null, null, null, apiLifecycleManager,
-                null, null, null, null, new GatewaySourceGeneratorImpl(), apiGatewayPublisher);
+        return new APIPublisherImpl(USER, identityProvider, null, daoFactory, apiLifecycleManager,
+                new GatewaySourceGeneratorImpl(), apiGatewayPublisher);
     }
 
-    private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO) {
-        return new APIPublisherImpl(USER, null, null, apiDAO, null, null, null, null, null, null, null,
-                null, new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
+    private APIPublisherImpl getApiPublisherImpl(String user, IdentityProvider identityProvider,
+                                                 DAOFactory daoFactory) {
+        return new APIPublisherImpl(user, identityProvider, null, daoFactory, null, new GatewaySourceGeneratorImpl(),
+                new APIGatewayPublisherImpl());
     }
 
-    private APIPublisherImpl getApiPublisherImpl(String user, IdentityProvider identityProvider, ApiDAO apiDAO) {
-        return new APIPublisherImpl(user, identityProvider, null, apiDAO, null, null, null, null, null, null, null,
-                null, new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
+    private APIPublisherImpl getApiPublisherImpl(DAOFactory daoFactory, APILifecycleManager apiLifecycleManager) {
+        return new APIPublisherImpl(USER, null, null, daoFactory, apiLifecycleManager, new GatewaySourceGeneratorImpl()
+                , new APIGatewayPublisherImpl());
     }
 
-    private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APISubscriptionDAO apiSubscriptionDAO,
+    private APIPublisherImpl getApiPublisherImpl(IdentityProvider identityProvider, DAOFactory daoFactory,
                                                  APILifecycleManager apiLifecycleManager) {
-        return new APIPublisherImpl(USER, null, null, apiDAO, null, apiSubscriptionDAO, null, apiLifecycleManager,
-                null, null, null, null, new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
-    }
-
-    private APIPublisherImpl getApiPublisherImpl(IdentityProvider identityProvider, ApiDAO apiDAO,
-                                                 APISubscriptionDAO apiSubscriptionDAO, APILifecycleManager
-                                                         apiLifecycleManager) {
-        return new APIPublisherImpl(USER, identityProvider, null, apiDAO, null, apiSubscriptionDAO, null,
-                apiLifecycleManager, null, null, null, null,
+        return new APIPublisherImpl(USER, identityProvider, null, daoFactory, apiLifecycleManager,
                 new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
-    private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APISubscriptionDAO apiSubscriptionDAO,
-                                                 APILifecycleManager apiLifecycleManager, APIGateway
-                                                         apiGatewayPublisher) {
-        return new APIPublisherImpl(USER, null, null, apiDAO, null, apiSubscriptionDAO, null, apiLifecycleManager,
-                null, null, null, null, new GatewaySourceGeneratorImpl(), apiGatewayPublisher);
-    }
-
-    private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APISubscriptionDAO apiSubscriptionDAO,
-                                                 APILifecycleManager apiLifecycleManager, WorkflowDAO workfloDAO,
-                                                 APIGateway apiGatewayPublisher) {
-        return new APIPublisherImpl(USER, null, null, apiDAO, null, apiSubscriptionDAO, null, apiLifecycleManager, null,
-                workfloDAO, null, null, new GatewaySourceGeneratorImpl(), apiGatewayPublisher);
-    }
-
-
-    private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APILifecycleManager apiLifecycleManager,
-                                                 LabelDAO labelDAO, APIGateway apiGatewayPublisher) {
-        return new APIPublisherImpl(USER, null, null, apiDAO, null, null, null, apiLifecycleManager,
-                labelDAO, null, null, null, new GatewaySourceGeneratorImpl(), apiGatewayPublisher);
-    }
-
-    private APIPublisherImpl getApiPublisherImpl(String user, IdentityProvider identityProvider, ApiDAO apiDAO,
-                                                 APISubscriptionDAO apiSubscriptionDAO,
-                                                 APILifecycleManager apiLifecycleManager,
-                                                 APIGateway apiGatewayPublisher, LabelDAO labelDAO) {
-        return new APIPublisherImpl(user, identityProvider, null, apiDAO, null, apiSubscriptionDAO, null,
-                apiLifecycleManager, labelDAO, null, null, null,
-                new GatewaySourceGeneratorImpl(), apiGatewayPublisher);
-    }
-
-    private APIPublisherImpl getApiPublisherImpl(IdentityProvider identityProvider, ApiDAO apiDAO,
-                                                 APISubscriptionDAO apiSubscriptionDAO, APILifecycleManager
-                                                         apiLifecycleManager, WorkflowDAO workfloDAO,
-                                                 APIGateway apiGatewayPublisher) {
-        return new APIPublisherImpl(USER, identityProvider, null, apiDAO, null, apiSubscriptionDAO, null,
-                apiLifecycleManager, null, workfloDAO, null, null,
-                new GatewaySourceGeneratorImpl(), apiGatewayPublisher);
-    }
-
-    private APIPublisherImpl getApiPublisherImpl(String username, IdentityProvider idp, KeyManager keyManager, ApiDAO
-            apiDAO,
-                                                 ApplicationDAO applicationDAO, APISubscriptionDAO
-                                                         apiSubscriptionDAO, PolicyDAO policyDAO,
-                                                 APILifecycleManager apiLifecycleManager, LabelDAO labelDAO,
-                                                 WorkflowDAO workflowDAO,
-                                                 TagDAO tagDAO, ThreatProtectionDAO threatProtectionDAO,
+    private APIPublisherImpl getApiPublisherImpl(String username, IdentityProvider idp, KeyManager keyManager,
+                                                 DAOFactory daoFactory, APILifecycleManager apiLifecycleManager,
                                                  GatewaySourceGenerator gatewaySourceGenerator, APIGateway
                                                          apiGatewayPublisher) {
-        return new APIPublisherImpl(username, idp, keyManager, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO,
-                apiLifecycleManager,
-                labelDAO, workflowDAO, tagDAO, threatProtectionDAO, gatewaySourceGenerator, apiGatewayPublisher);
-    }
-
-    private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APISubscriptionDAO apiSubscriptionDAO) {
-        return new APIPublisherImpl(USER, null, null, apiDAO, null, apiSubscriptionDAO, null, null, null, null, null,
-                null, new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
-    }
-
-    private APIPublisherImpl getApiPublisherImpl(LabelDAO labelDAO) {
-        return new APIPublisherImpl(USER, null, null, null, null, null, null, null, labelDAO, null, null,
-                null, new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
-    }
-
-    private APIPublisherImpl getApiPublisherImpl(PolicyDAO policyDAO) {
-        return new APIPublisherImpl(USER, null, null, null, null, null, policyDAO, null, null, null, null,
-                null, new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
-    }
-
-    private APIPublisherImpl getApiPublisherImpl(APISubscriptionDAO apiSubscriptionDAO) {
-        return new APIPublisherImpl(USER, null, null, null, null, apiSubscriptionDAO, null, null, null, null, null,
-                null, new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
-    }
-
-    private APIPublisherImpl getApiPublisherImpl(APISubscriptionDAO apiSubscriptionDAO, APIGateway gatewayPublisher) {
-        return new APIPublisherImpl(USER, null, null, null, null, apiSubscriptionDAO, null, null, null, null, null,
-                null, new GatewaySourceGeneratorImpl(), gatewayPublisher);
-    }
-
-    private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APILifecycleManager apiLifecycleManager,
-                                                 GatewaySourceGenerator gatewaySourceGenerator,
-                                                 APIGateway gatewayPublisher) {
-        return new APIPublisherImpl(USER, null, null, apiDAO, null, null, null, apiLifecycleManager, null, null,
-                null, null,
-                gatewaySourceGenerator, gatewayPublisher);
-    }
-
-    private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, GatewaySourceGenerator gatewaySourceGenerator,
-                                                 APIGateway apiGatewayPublisher) {
-        return new APIPublisherImpl(USER, null, null, apiDAO, null, null, null, null, null, null, null, null,
-                gatewaySourceGenerator, apiGatewayPublisher);
-    }
-
-    private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
-            apiSubscriptionDAO, APILifecycleManager apiLifecycleManager, GatewaySourceGenerator
-                                                         gatewaySourceGenerator) {
-        return new APIPublisherImpl(USER, null, null, apiDAO, applicationDAO, apiSubscriptionDAO, null,
-                apiLifecycleManager, null, null, null, null, gatewaySourceGenerator, new APIGatewayPublisherImpl());
-    }
-
-    private APIPublisherImpl getApiPublisherImpl(String user, ApiDAO apiDAO, APILifecycleManager apiLifecycleManager,
-                                                 GatewaySourceGenerator gatewaySourceGenerator,
-                                                 APIGateway apiGatewayPublisher) {
-        return new APIPublisherImpl(user, null, null, apiDAO, null, null, null, apiLifecycleManager, null, null,
-                null, null,
-                gatewaySourceGenerator, apiGatewayPublisher);
-    }
-
-    private APIPublisherImpl getApiPublisherImpl(APILifecycleManager apiLifecycleManager, ApiDAO apiDAO, WorkflowDAO
-            workflowDAO, APIGateway apiGatewayPublisher) {
-        return new APIPublisherImpl(USER, null, null, apiDAO, null, null, null, apiLifecycleManager, null, workflowDAO
-                , null, null, new GatewaySourceGeneratorImpl(), apiGatewayPublisher);
-    }
-
-    private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
-            apiSubscriptionDAO, APILifecycleManager apiLifecycleManager, GatewaySourceGenerator
-                                                         gatewaySourceGenerator, WorkflowDAO workflowDAO,
-                                                 APIGateway apiGatewayPublisher) {
-        return new APIPublisherImpl(USER, null, null, apiDAO, applicationDAO, apiSubscriptionDAO, null,
-                apiLifecycleManager, null, workflowDAO, null, null, gatewaySourceGenerator, apiGatewayPublisher);
-    }
-
-    private APIPublisherImpl getApiPublisherImpl(IdentityProvider idp, ApiDAO apiDAO,
-                                                 APILifecycleManager apiLifecycleManager, GatewaySourceGenerator
-                                                         gatewaySourceGenerator,
-                                                 APIGateway gatewayPublisher) {
-        return new APIPublisherImpl(USER, idp, null, apiDAO, null, null, null, apiLifecycleManager, null, null, null,
-                null, gatewaySourceGenerator, gatewayPublisher);
-    }
-
-    private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APILifecycleManager apiLifecycleManager,
-                                                 GatewaySourceGenerator gatewaySourceGenerator,
-                                                 APIGateway gateway, PolicyDAO policyDAO, LabelDAO labelDao) {
-        return new APIPublisherImpl(USER, null, null, apiDAO, null, null, policyDAO, apiLifecycleManager, labelDao,
-                null, null, null, gatewaySourceGenerator, gateway);
-    }
-
-    private APIPublisherImpl getApiPublisherImpl(IdentityProvider identityProvider, ApiDAO apiDAO, APILifecycleManager
-            apiLifecycleManager, GatewaySourceGenerator gatewaySourceGenerator, APIGateway gateway,
-                                                 PolicyDAO policyDAO) {
-        return new APIPublisherImpl(USER, identityProvider, null, apiDAO, null, null, policyDAO, apiLifecycleManager,
-                null, null, null, null, gatewaySourceGenerator, gateway);
-    }
-
-    private APIPublisherImpl getApiPublisherImpl(IdentityProvider identityProvider, ApiDAO apiDAO,
-                                                 GatewaySourceGenerator gatewaySourceGenerator, APIGateway gateway) {
-        return new APIPublisherImpl(USER, identityProvider, null, apiDAO, null, null, null, null,
-                null, null, null, null, gatewaySourceGenerator, gateway);
-    }
-
-    private APIPublisherImpl getApiPublisherImpl(String user, IdentityProvider identityProvider, ApiDAO apiDAO,
-                                                 APILifecycleManager apiLifecycleManager,
-                                                 GatewaySourceGenerator gatewaySourceGenerator, APIGateway gateway) {
-        return new APIPublisherImpl(user, identityProvider, null, apiDAO, null, null, null, apiLifecycleManager,
-                null, null, null, null, gatewaySourceGenerator, gateway);
-    }
-
-    private APIPublisherImpl getApiPublisherImpl(IdentityProvider identityProvider, ApiDAO apiDAO,
-                                                 ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO,
-                                                 PolicyDAO policyDAO, APILifecycleManager apiLifecycleManager,
-                                                 LabelDAO labelDAO, WorkflowDAO workflowDAO, TagDAO tagDAO,
-                                                 ThreatProtectionDAO threatProtectionDAO,
-                                                 GatewaySourceGenerator gatewaySourceGenerator,
-                                                 APIGateway apiGatewayPublisher) {
-        return new APIPublisherImpl(USER, identityProvider, null, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO,
-                apiLifecycleManager, labelDAO, workflowDAO, tagDAO, threatProtectionDAO, gatewaySourceGenerator,
+        return new APIPublisherImpl(username, idp, keyManager, daoFactory, apiLifecycleManager, gatewaySourceGenerator,
                 apiGatewayPublisher);
     }
 
-    private APIPublisherImpl getApiPublisherImpl(IdentityProvider identityProvider, KeyManager keyManager, ApiDAO
-            apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO,
-                                                 PolicyDAO policyDAO, APILifecycleManager apiLifecycleManager,
-                                                 LabelDAO labelDAO, WorkflowDAO workflowDAO, TagDAO tagDAO,
-                                                 ThreatProtectionDAO threatProtectionDAO,
-                                                 GatewaySourceGenerator gatewaySourceGenerator,
-                                                 APIGateway apiGatewayPublisher) {
-        return new APIPublisherImpl(USER, identityProvider, keyManager, apiDAO, applicationDAO, apiSubscriptionDAO,
-                policyDAO,
-                apiLifecycleManager, labelDAO, workflowDAO, tagDAO, threatProtectionDAO, gatewaySourceGenerator,
-                apiGatewayPublisher);
+    private APIPublisherImpl getApiPublisherImpl(DAOFactory daoFactory) {
+        return new APIPublisherImpl(USER, null, null, daoFactory, null, new GatewaySourceGeneratorImpl(),
+                new APIGatewayPublisherImpl());
     }
 
-    private APIPublisherImpl getApiPublisherImpl(IdentityProvider identityProvider, ApiDAO apiDAO, LabelDAO labelDAO,
+    private APIPublisherImpl getApiPublisherImpl(DAOFactory daoFactory, APIGateway gatewayPublisher) {
+        return new APIPublisherImpl(USER, null, null, daoFactory, null, new GatewaySourceGeneratorImpl(),
+                gatewayPublisher);
+    }
+
+    private APIPublisherImpl getApiPublisherImpl(DAOFactory daoFactory, APILifecycleManager apiLifecycleManager,
+                                                 GatewaySourceGenerator gatewaySourceGenerator,
+                                                 APIGateway gatewayPublisher) {
+        return new APIPublisherImpl(USER, null, null, daoFactory, apiLifecycleManager, gatewaySourceGenerator
+                , gatewayPublisher);
+    }
+
+    private APIPublisherImpl getApiPublisherImpl(DAOFactory daoFactory, GatewaySourceGenerator gatewaySourceGenerator,
+                                                 APIGateway apiGatewayPublisher) {
+        return new APIPublisherImpl(USER, null, null, daoFactory, null, gatewaySourceGenerator, apiGatewayPublisher);
+    }
+
+    private APIPublisherImpl getApiPublisherImpl(IdentityProvider identityProvider, DAOFactory daoFactory,
                                                  GatewaySourceGenerator gatewaySourceGenerator) {
-        return new APIPublisherImpl(USER, identityProvider, null, apiDAO, null,
-                null, null, null, labelDAO, null, null, null, gatewaySourceGenerator, null);
+        return new APIPublisherImpl(USER, identityProvider, null, daoFactory, null, gatewaySourceGenerator, null);
     }
 
-
-    private APIPublisherImpl getApiPublisherImpl(String user, IdentityProvider identityProvider, ApiDAO apiDAO,
-                                                 APISubscriptionDAO apiSubscriptionDao,
-                                                 APILifecycleManager apiLifecycleManager, APIGateway gateway) {
-        return new APIPublisherImpl(user, identityProvider, null, apiDAO, null, null, null, apiLifecycleManager,
-                null, null, null, null, null, gateway);
+    private APIPublisherImpl getApiPublisherImpl(IdentityProvider identityProvider, KeyManager keyManager,
+                                                 DAOFactory daoFactory, APILifecycleManager apiLifecycleManager,
+                                                 GatewaySourceGenerator gatewaySourceGenerator,
+                                                 APIGateway apiGatewayPublisher) {
+        return new APIPublisherImpl(USER, identityProvider, keyManager, daoFactory, apiLifecycleManager,
+                gatewaySourceGenerator, apiGatewayPublisher);
     }
+
 }

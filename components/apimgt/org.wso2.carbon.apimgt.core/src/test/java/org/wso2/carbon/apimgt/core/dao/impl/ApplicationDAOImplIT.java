@@ -42,7 +42,7 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
 
         //add new app
         Application app = TestUtil.addTestApplication();
-        ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
+        ApplicationDAO applicationDAO = new DAOFactory().getApplicationDAO();
         //get added app
         Application appFromDB = applicationDAO.getApplication(app.getId());
         Assert.assertNotNull(appFromDB);
@@ -56,7 +56,7 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
 
         //add new app
         Application currentApp = TestUtil.addTestApplication();
-        ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
+        ApplicationDAO applicationDAO = new DAOFactory().getApplicationDAO();
         Application newApp = SampleTestObjectCreator.createAlternativeApplication();
         newApp.setId(currentApp.getId());
         newApp.setCreatedTime(currentApp.getCreatedTime());
@@ -75,7 +75,7 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
 
         // add app
         Application app = TestUtil.addTestApplication();
-        ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
+        ApplicationDAO applicationDAO = new DAOFactory().getApplicationDAO();
         //delete app
         applicationDAO.deleteApplication(app.getId());
 
@@ -89,7 +89,7 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
     @Test
     public void testIsApplicationNameExists() throws Exception {
 
-        ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
+        ApplicationDAO applicationDAO = new DAOFactory().getApplicationDAO();
         //check for a non-existing application
         Assert.assertFalse(applicationDAO.isApplicationNameExists("ExistingApp"));
         //add new app
@@ -103,7 +103,7 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
 
         // add app
         Application app = TestUtil.addTestApplication();
-        ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
+        ApplicationDAO applicationDAO = new DAOFactory().getApplicationDAO();
         //get app by name
         Application appFromDB = applicationDAO.getApplicationByName(app.getName(), app.getCreatedUser());
         Assert.assertNotNull(appFromDB);
@@ -117,7 +117,7 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
 
         //add new app with permissions
         Application app = TestUtil.addTestApplicationWithPermissions();
-        ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
+        ApplicationDAO applicationDAO = new DAOFactory().getApplicationDAO();
         //get added app
         Application appFromDB = applicationDAO.getApplication(app.getId());
         Assert.assertNotNull(appFromDB);
@@ -131,7 +131,7 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
 
         //add new app
         Application currentApp = TestUtil.addTestApplication();
-        ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
+        ApplicationDAO applicationDAO = new DAOFactory().getApplicationDAO();
         //create new app with permissions
         HashMap permissionMap = new HashMap();
         permissionMap.put(APIMgtConstants.Permission.UPDATE, APIMgtConstants.Permission.UPDATE_PERMISSION);
@@ -154,7 +154,7 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
 
         //add new app
         Application app = TestUtil.addTestApplication();
-        ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
+        ApplicationDAO applicationDAO = new DAOFactory().getApplicationDAO();
         //update app
         applicationDAO.updateApplicationState(app.getId(), APIMgtConstants.ApplicationStatus.APPLICATION_APPROVED);
         //get app
@@ -176,7 +176,7 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
         Application app2 = TestUtil.addCustomApplication("App2", username);
         Application app3 = TestUtil.addCustomApplication("App3", username);
         Application app4 = TestUtil.addCustomApplication("App4", username);
-        ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
+        ApplicationDAO applicationDAO = new DAOFactory().getApplicationDAO();
         //get added apps
         List<Application> appsFromDB = applicationDAO.getApplications(username);
         Assert.assertNotNull(appsFromDB);
@@ -210,8 +210,8 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
         Application app2 = TestUtil.addCustomApplication("App2", username);
         Application app3 = TestUtil.addCustomApplication("App3", username);
         Application app4 = TestUtil.addCustomApplication("App4", username);
-        ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
-        PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
+        ApplicationDAO applicationDAO = new DAOFactory().getApplicationDAO();
+        PolicyDAO policyDAO = new DAOFactory().getPolicyDAO();
         //get added apps
         List<Application> appsFromDB = applicationDAO.getAllApplications();
         Assert.assertNotNull(appsFromDB);
@@ -234,7 +234,7 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testFingerprintAfterUpdatingApplication() throws Exception {
-        ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
+        ApplicationDAO applicationDAO = new DAOFactory().getApplicationDAO();
 
         //add new app
         Application currentApp = TestUtil.addTestApplication();
@@ -268,7 +268,7 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testAddAndGetApplicationKeys() throws Exception {
-        ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
+        ApplicationDAO applicationDAO = new DAOFactory().getApplicationDAO();
         //add test app
         Application app = TestUtil.addTestApplicationWithPermissions();
         String appId = app.getId();

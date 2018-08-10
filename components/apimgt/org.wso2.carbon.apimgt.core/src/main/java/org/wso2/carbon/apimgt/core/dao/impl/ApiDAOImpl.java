@@ -665,9 +665,10 @@ public class ApiDAOImpl implements ApiDAO {
                 connection.setAutoCommit(false);
 
                 addCompositeAPIRelatedInformation(connection, statement, api);
-                String policyUuid = DAOFactory.getPolicyDAO()
+                String policyUuid = new DAOFactory().getPolicyDAO()
                         .getSubscriptionPolicy(ThrottleConstants.DEFAULT_SUB_POLICY_UNLIMITED).getUuid();
-                APISubscriptionDAOImpl apiSubscriptionDAO = (APISubscriptionDAOImpl) DAOFactory.getAPISubscriptionDAO();
+                APISubscriptionDAOImpl apiSubscriptionDAO = (APISubscriptionDAOImpl) new DAOFactory()
+                        .getAPISubscriptionDAO();
                 apiSubscriptionDAO.createSubscription(api.getId(), api.getApplicationId(), UUID.randomUUID().toString(),
                         policyUuid, APIMgtConstants.SubscriptionStatus.ACTIVE, connection);
 
@@ -908,7 +909,7 @@ public class ApiDAOImpl implements ApiDAO {
 
     @Override
     public void deleteCompositeApi(String apiId) throws APIMgtDAOException {
-        APISubscriptionDAO apiSubscriptionDAO = DAOFactory.getAPISubscriptionDAO();
+        APISubscriptionDAO apiSubscriptionDAO = new DAOFactory().getAPISubscriptionDAO();
         List<Subscription> subscriptions = apiSubscriptionDAO.getAPISubscriptionsByAPI(apiId);
 
         for (Subscription subscription : subscriptions) {
@@ -2256,7 +2257,7 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     private String getCompositeAPIApplicationId(Connection connection, String apiId) throws APIMgtDAOException {
-        APISubscriptionDAO apiSubscriptionDAO = DAOFactory.getAPISubscriptionDAO();
+        APISubscriptionDAO apiSubscriptionDAO = new DAOFactory().getAPISubscriptionDAO();
 
         List<Subscription> subscriptions = apiSubscriptionDAO.getAPISubscriptionsByAPI(apiId);
 

@@ -41,7 +41,7 @@ public class TagDAOImplIT extends DAOIntegrationTestBase {
         API alternativeApi = TestUtil.addAlternativeAPI();
 
         //get the list of all tags from DB
-        TagDAO tag = DAOFactory.getTagDAO();
+        TagDAO tag = new DAOFactory().getTagDAO();
         List<Tag> tagList = tag.getTags();
         Assert.assertNotNull(tagList);
 

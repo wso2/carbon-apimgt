@@ -73,29 +73,30 @@ public class WorkflowExecutorFactory {
     public Workflow createWorkflow(String workflowType) throws APIMgtDAOException {
         Workflow workflow = null;
         if (WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION.equals(workflowType)) {
-            workflow = new ApplicationCreationWorkflow(DAOFactory.getApplicationDAO(), DAOFactory.getWorkflowDAO(),
-                    APIManagerFactory.getInstance().getApiGateway());
+            workflow = new ApplicationCreationWorkflow(new DAOFactory().getApplicationDAO(), new DAOFactory()
+                    .getWorkflowDAO(), APIManagerFactory.getInstance().getApiGateway());
             workflow.setWorkflowType(workflowType);
         } else if (WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION.equals(workflowType)) {
-            workflow = new ApplicationDeletionWorkflow(DAOFactory.getApplicationDAO(), DAOFactory.getWorkflowDAO(),
-                    APIManagerFactory.getInstance().getApiGateway());
+            workflow = new ApplicationDeletionWorkflow(new DAOFactory().getApplicationDAO(), new DAOFactory()
+                    .getWorkflowDAO(), APIManagerFactory.getInstance().getApiGateway());
             workflow.setWorkflowType(workflowType);
         } else if (WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION.equals(workflowType)) {
-            workflow = new SubscriptionCreationWorkflow(DAOFactory.getAPISubscriptionDAO(), DAOFactory.getWorkflowDAO(),
-                    APIManagerFactory.getInstance().getApiGateway());
+            workflow = new SubscriptionCreationWorkflow(new DAOFactory().getAPISubscriptionDAO(), new DAOFactory()
+                    .getWorkflowDAO(), APIManagerFactory.getInstance().getApiGateway());
             workflow.setWorkflowType(workflowType);
         } else if (WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION.equals(workflowType)) {
-            workflow = new SubscriptionDeletionWorkflow(DAOFactory.getAPISubscriptionDAO(), DAOFactory.getWorkflowDAO(),
-                    APIManagerFactory.getInstance().getApiGateway());
+            workflow = new SubscriptionDeletionWorkflow(new DAOFactory().getAPISubscriptionDAO(), new DAOFactory()
+                    .getWorkflowDAO(), APIManagerFactory.getInstance().getApiGateway());
             workflow.setWorkflowType(workflowType);
         } else if (WorkflowConstants.WF_TYPE_AM_API_STATE.equals(workflowType)) {
-            workflow = new APIStateChangeWorkflow(DAOFactory.getApiDAO(), DAOFactory.getAPISubscriptionDAO(),
-                    DAOFactory.getWorkflowDAO(), APIManagerFactory.getInstance().geApiLifecycleManager(),
-                    APIManagerFactory.getInstance().getApiGateway(), DAOFactory.getLabelDAO());
+            workflow = new APIStateChangeWorkflow(new DAOFactory().getApiDAO(), new DAOFactory()
+                    .getAPISubscriptionDAO(), new DAOFactory().getWorkflowDAO(), APIManagerFactory.getInstance()
+                    .geApiLifecycleManager(), APIManagerFactory.getInstance().getApiGateway(), new DAOFactory()
+                    .getLabelDAO());
             workflow.setWorkflowType(workflowType);
         } else if (WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE.equals(workflowType)) {
-            workflow = new ApplicationUpdateWorkflow(DAOFactory.getApplicationDAO(), DAOFactory.getWorkflowDAO(),
-                    APIManagerFactory.getInstance().getApiGateway());
+            workflow = new ApplicationUpdateWorkflow(new DAOFactory().getApplicationDAO(), new DAOFactory()
+                    .getWorkflowDAO(), APIManagerFactory.getInstance().getApiGateway());
             workflow.setWorkflowType(workflowType);
         } else {
             throw new APIMgtDAOException("Invalid workflow type: " + workflowType + " specified",

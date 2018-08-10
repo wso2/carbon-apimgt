@@ -72,7 +72,7 @@ public class ApiFileDAOImplTestCase {
 
     @Test
     public void testAddGetAPI() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
         apiDAO.addAPI(api);
@@ -85,7 +85,7 @@ public class ApiFileDAOImplTestCase {
 
     @Test
     public void testAddGetAPIWithApiLevelEndpoint() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPIWithApiLevelEndpoint();
         API api = builder.build();
         apiDAO.addAPI(api);
@@ -97,7 +97,7 @@ public class ApiFileDAOImplTestCase {
 
     @Test
     public void testDeleteAPI() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
         apiDAO.addAPI(api);
@@ -110,7 +110,7 @@ public class ApiFileDAOImplTestCase {
 
     @Test
     public void testUpdateAPI() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
         apiDAO.addAPI(api);
@@ -131,7 +131,7 @@ public class ApiFileDAOImplTestCase {
 
     @Test(description = "Get image from API")
     public void testGetImage() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         apiDAO.addAPI(api);
         apiDAO.updateImage(api.getId(), SampleTestObjectCreator.createDefaultThumbnailImage(), "image/jpg", ADMIN);

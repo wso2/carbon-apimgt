@@ -25,6 +25,7 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
+import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtEntityImportExportException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
@@ -50,8 +51,8 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
     private static final String IMPORTED_APPLICATIONS_DIRECTORY_NAME = "imported-applications";
     private String path;
 
-    public FileBasedApplicationImportExportManager(APIStore apiStore, String path) {
-        super(apiStore);
+    public FileBasedApplicationImportExportManager(APIStore apiStore, DAOFactory daoFactory, String path) {
+        super(apiStore, daoFactory);
         this.path = path;
     }
 

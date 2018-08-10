@@ -44,7 +44,7 @@ public class AnalyticsDAOImplIT extends DAOIntegrationTestBase {
         Instant fromTimeStamp = Instant.ofEpochMilli(System.currentTimeMillis());
         TestUtil.addCustomApplication("app1", "john");
         Instant toTimeStamp = Instant.ofEpochMilli(System.currentTimeMillis() + DELAY_TIME);
-        AnalyticsDAO analyticsDAO = DAOFactory.getAnalyticsDAO();
+        AnalyticsDAO analyticsDAO = new DAOFactory().getAnalyticsDAO();
         List<ApplicationCount> applicationCountList = analyticsDAO
                 .getApplicationCount(fromTimeStamp, toTimeStamp, null);
         Assert.assertEquals(applicationCountList.size(), 1);
@@ -55,7 +55,7 @@ public class AnalyticsDAOImplIT extends DAOIntegrationTestBase {
         Instant fromTimeStamp = Instant.ofEpochMilli(System.currentTimeMillis());
         TestUtil.addTestAPI();
         Instant toTimeStamp = Instant.ofEpochMilli(System.currentTimeMillis() + DELAY_TIME);
-        AnalyticsDAO analyticsDAO = DAOFactory.getAnalyticsDAO();
+        AnalyticsDAO analyticsDAO = new DAOFactory().getAnalyticsDAO();
         List<APICount> applicationCountList = analyticsDAO
                 .getAPICount(fromTimeStamp, toTimeStamp, null);
         Assert.assertEquals(applicationCountList.size(), 1);
@@ -67,7 +67,7 @@ public class AnalyticsDAOImplIT extends DAOIntegrationTestBase {
         API testAPI1 = TestUtil.addCustomAPI("Name1", "1.0.0", "sample1");
         API testAPI2 = TestUtil.addCustomAPI("Name2", "1.0.0", "sample2");
         Instant toTimeStamp = Instant.ofEpochMilli(System.currentTimeMillis() + DELAY_TIME);
-        AnalyticsDAO analyticsDAO = DAOFactory.getAnalyticsDAO();
+        AnalyticsDAO analyticsDAO = new DAOFactory().getAnalyticsDAO();
         List<APIInfo> apiInfoList = analyticsDAO
                 .getAPIInfo(fromTimeStamp, toTimeStamp, null);
         Assert.assertEquals(apiInfoList.size(), 2);
@@ -86,7 +86,7 @@ public class AnalyticsDAOImplIT extends DAOIntegrationTestBase {
         Application testApplication = TestUtil.addTestApplication();
         TestUtil.subscribeToAPI(testAPI, testApplication);
         Instant toTimeStamp = Instant.ofEpochMilli(System.currentTimeMillis() + DELAY_TIME);
-        AnalyticsDAO analyticsDAO = DAOFactory.getAnalyticsDAO();
+        AnalyticsDAO analyticsDAO = new DAOFactory().getAnalyticsDAO();
         List<SubscriptionCount> subscriptionCount = analyticsDAO.getSubscriptionCount(fromTimeStamp, toTimeStamp, null);
         Assert.assertEquals(subscriptionCount.size(), 1);
     }
@@ -105,7 +105,7 @@ public class AnalyticsDAOImplIT extends DAOIntegrationTestBase {
         TestUtil.subscribeToAPI(testAPI1, testApplication);
         TestUtil.subscribeToAPI(testAPI2, testApplication2);
         Instant toTimeStamp = Instant.ofEpochMilli(System.currentTimeMillis() + DELAY_TIME);
-        AnalyticsDAO analyticsDAO = DAOFactory.getAnalyticsDAO();
+        AnalyticsDAO analyticsDAO = new DAOFactory().getAnalyticsDAO();
         List<APISubscriptionCount> subscriptionCount = analyticsDAO.getAPISubscriptionCount(fromTimeStamp, toTimeStamp,
                 null);
         Assert.assertEquals(subscriptionCount.size(), 3);
@@ -118,7 +118,7 @@ public class AnalyticsDAOImplIT extends DAOIntegrationTestBase {
         Application testApplication = TestUtil.addTestApplication();
         Subscription subscription = TestUtil.subscribeToAPI(testAPI, testApplication);
         Instant toTimeStamp = Instant.ofEpochMilli(System.currentTimeMillis() + DELAY_TIME);
-        AnalyticsDAO analyticsDAO = DAOFactory.getAnalyticsDAO();
+        AnalyticsDAO analyticsDAO = new DAOFactory().getAnalyticsDAO();
         List<SubscriptionInfo> subscriptionInfo = analyticsDAO.getSubscriptionInfo(fromTimeStamp, toTimeStamp,
                 null);
         Assert.assertEquals(subscriptionInfo.size(), 1);

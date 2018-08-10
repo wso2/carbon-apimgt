@@ -29,7 +29,7 @@ public class UserMappingDAOImplIT extends DAOIntegrationTestBase {
 
     @Test(description = "Get user name mapping test")
     public void testUserNameMapping() throws APIManagementException {
-        UserMappingDAO userMappingDAO = DAOFactory.getUserMappingDAO();
+        UserMappingDAO userMappingDAO = new DAOFactory().getUserMappingDAO();
         String pseudoName = userMappingDAO.getPseudoNameByUserID("test_user");
         Assert.assertNotNull(pseudoName);
         Assert.assertTrue(userMappingDAO.getUserIDByPseudoName(pseudoName).equalsIgnoreCase("test_user"));

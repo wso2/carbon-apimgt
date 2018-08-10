@@ -78,8 +78,8 @@ public class APIExecutor implements Executor {
         if (!currentState.equals(targetState)) {
             //todo:This place need to write how to handle Gateway publishing
             try {
-                ApiDAO apiDAO = DAOFactory.getApiDAO();
-                APISubscriptionDAO apiSubscriptionDAO = DAOFactory.getAPISubscriptionDAO();
+                ApiDAO apiDAO = new DAOFactory().getApiDAO();
+                APISubscriptionDAO apiSubscriptionDAO = new DAOFactory().getAPISubscriptionDAO();
                 if (APIStatus.RETIRED.getStatus().equals(targetState)) {
                     apiSubscriptionDAO.deleteSubscriptionsByAPIId(api.getId());
                 }
