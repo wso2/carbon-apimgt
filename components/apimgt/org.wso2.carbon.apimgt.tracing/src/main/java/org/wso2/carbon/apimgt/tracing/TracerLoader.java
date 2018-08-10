@@ -26,6 +26,7 @@ public class TracerLoader {
         ServiceLoader<OpenTracer> openTracers = ServiceLoader.load(OpenTracer.class);
         HashMap<String, OpenTracer> tracerMap = new HashMap<>();
         openTracers.forEach(t -> tracerMap.put(t.getName().toLowerCase(), t));
+
         OpenTracer openTracer = tracerMap.get(openTracerName.toLowerCase());
 
         return openTracer.getTracer(openTracerName,configuration);

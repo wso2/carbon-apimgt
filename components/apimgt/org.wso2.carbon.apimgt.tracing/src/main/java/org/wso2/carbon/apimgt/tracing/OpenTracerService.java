@@ -7,18 +7,19 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
 
-/**
- * @scr.component name="org.wso2.carbon.apimgt.tracing.OpenTracerService" immediate="true"
- * @scr.reference name="api.manager.config.service"
- * interface="org.wso2.carbon.apimgt.impl.APIManagerConfigurationService" cardinality="1..1"
- * policy="dynamic" bind="setAPIManagerConfigurationService" unbind="unsetAPIManagerConfigurationService"
- */
+///**
+// * @scr.component name="org.wso2.carbon.apimgt.tracing.OpenTracerService" immediate="true"
+// * @scr.reference name="api.manager.config.service"
+// * interface="org.wso2.carbon.apimgt.impl.APIManagerConfigurationService" cardinality="1..1"
+// * policy="dynamic" bind="setAPIManagerConfigurationService" unbind="unsetAPIManagerConfigurationService"
+// */
 public class OpenTracerService {
 
     private static final Log log = LogFactory.getLog(OpenTracerService.class) ;
@@ -28,7 +29,7 @@ public class OpenTracerService {
     private ServiceRegistration registration;
 
     @Activate
-    protected void activate(ComponentContext componentContext) throws org.wso2.carbon.apimgt.api.APIManagementException {
+    protected void activate(ComponentContext componentContext) {
 
         BundleContext bundleContext = componentContext.getBundleContext();
         bundleContext.registerService(OpenTracer.class.getName(), new ZipkinTracerImpl(), null);
@@ -38,7 +39,11 @@ public class OpenTracerService {
             log.debug("OpenTracer service component activated");
         }
         String filePath = getFilePath();
-        configuration.load(filePath);
+        try {
+            configuration.load(filePath);
+        } catch (APIManagementException e) {
+            e.printStackTrace();
+        }
 
         String openTracerName = configuration.getFirstProperty(OpenTracerConstants.OPEN_TRACER_NAME);
         String enabled = configuration.getFirstProperty(OpenTracerConstants.OPEN_TRACER_ENABLED);
@@ -58,27 +63,19 @@ public class OpenTracerService {
     }
 
     protected void deactivate(ComponentContext context) {
-        if (log.isDebugEnabled()) {
-            log.debug("API handlers component deactivated");
-        }
 
         if (registration != null) {
-            log.debug("Unregistering ThrottleDataService...");
             registration.unregister();
         }
     }
 
     protected void setAPIManagerConfigurationService(APIManagerConfigurationService amcService) {
-        if (log.isDebugEnabled()) {
-            log.debug("API manager configuration service bound to the API handlers");
-        }
+
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(amcService);
     }
 
     protected void unsetAPIManagerConfigurationService(APIManagerConfigurationService amcService) {
-        if (log.isDebugEnabled()) {
-            log.debug("API manager configuration service unbound from the API handlers");
-        }
+
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(null);
     }
 

@@ -8,12 +8,30 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.AbstractSynapseHandler;
 import org.apache.synapse.MessageContext;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.tracing.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.tracing.TracingService;
 
 import java.util.UUID;
 
+///**
+// * @scr.component name="org.wso2.carbon.apimgt.gateway.handlers.common" immediate="true"
+// * @scr.reference name="org.wso2.carbon.apimgt.tracing"
+// * interface="org.wso2.carbon.apimgt.tracing.TracingService" cardinality="1..1"
+// * policy="dynamic" bind="setTracingService" unbind="unsetTracingService"
+// */
+
 public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
+
+    private Tracer tracer;
+
+    public APIMgtLatencySynapseHandler(){
+
+        ServiceReferenceHolder serviceReferenceHolder = ServiceReferenceHolder.getInstance();
+        TracingService tracingService = serviceReferenceHolder.getTracingService();
+        tracer = tracingService.getTracer("Latency");
+
+    }
 
     private static final Log log = LogFactory.getLog(APIMgtLatencySynapseHandler.class);
 
@@ -30,7 +48,11 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 //                    .spanReporter(AsyncReporter.builder(sender).build())
 //                    .build());
 
-    Tracer tracer = ServiceReferenceHolder.getInstance().getTracer();
+//    ServiceReferenceHolder serviceReferenceHolder = ServiceReferenceHolder.getInstance();
+//    TracingService tracingService = serviceReferenceHolder.getTracingService();
+//    Tracer tracer = tracingService.getTracer("zipkin");
+
+//    Tracer tracer1 = ServiceReferenceHolder.getInstance().getTracingService().getTracer("zipkin");
 
     @Override
     public boolean handleRequestInFlow(MessageContext messageContext) {

@@ -22,7 +22,6 @@ public class ServiceReferenceHolder {
         this.tracer = tracer;
     }
 
-
     public void setAPIManagerConfigurationService(APIManagerConfigurationService amConfigService) {
         this.amConfigService = amConfigService;
     }

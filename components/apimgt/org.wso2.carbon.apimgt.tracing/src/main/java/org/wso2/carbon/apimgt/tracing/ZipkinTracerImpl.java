@@ -11,23 +11,14 @@ public class ZipkinTracerImpl implements OpenTracer {
 
     private static final String NAME = "zipkin";
 
-    private String hostname;
-    private int port;
-    private String apiContext;
-    private boolean compressionEnabled;
-    private String apiVersion;
-
-    private APIManagerConfiguration configuration = new APIManagerConfiguration();
-
-
     @Override
     public Tracer getTracer(String tracerName, APIManagerConfiguration configuration) {
 
-        hostname = configuration.getFirstProperty(OpenTracerConstants.OPEN_TRACER_HOST);
-        port = Integer.parseInt(configuration.getFirstProperty(configuration.getFirstProperty(OpenTracerConstants.OPEN_TRACER_PORT)));
-        apiContext = configuration.getFirstProperty(OpenTracerConstants.OPEN_TRACER_API_CONTEXT);
-        compressionEnabled = Boolean.parseBoolean(configuration.getFirstProperty(OpenTracerConstants.OPEN_TRACER_COMPRESSION_ENABLED));
-        apiVersion = configuration.getFirstProperty(OpenTracerConstants.OPEN_TRACER_API_VERSION);
+        String hostname = configuration.getFirstProperty(OpenTracerConstants.OPEN_TRACER_HOST);
+        int port = Integer.parseInt(configuration.getFirstProperty(configuration.getFirstProperty(OpenTracerConstants.OPEN_TRACER_PORT)));
+        String apiContext = configuration.getFirstProperty(OpenTracerConstants.OPEN_TRACER_API_CONTEXT);
+        boolean compressionEnabled = Boolean.parseBoolean(configuration.getFirstProperty(OpenTracerConstants.OPEN_TRACER_COMPRESSION_ENABLED));
+        String apiVersion = configuration.getFirstProperty(OpenTracerConstants.OPEN_TRACER_API_VERSION);
 
         OkHttpSender sender = OkHttpSender.create("http://" + hostname + ":" + port + apiContext);
         Tracer tracer = BraveTracer.create(Tracing.newBuilder()
