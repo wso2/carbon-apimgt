@@ -23,7 +23,7 @@ public class TracingServiceComponent {
 
 
         }catch(Throwable t) {
-            log.error("Error occured&&&&&&&", t);
+            log.error("Error occured", t);
         }
     }
 

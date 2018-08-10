@@ -14,12 +14,7 @@ import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
 
-///**
-// * @scr.component name="org.wso2.carbon.apimgt.tracing.OpenTracerService" immediate="true"
-// * @scr.reference name="api.manager.config.service"
-// * interface="org.wso2.carbon.apimgt.impl.APIManagerConfigurationService" cardinality="1..1"
-// * policy="dynamic" bind="setAPIManagerConfigurationService" unbind="unsetAPIManagerConfigurationService"
-// */
+
 public class OpenTracerService {
 
     private static final Log log = LogFactory.getLog(OpenTracerService.class) ;
