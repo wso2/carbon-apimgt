@@ -17,12 +17,10 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
     private Tracer tracer;
 
     public APIMgtLatencySynapseHandler(){
-
         ServiceReferenceHolder serviceReferenceHolder = ServiceReferenceHolder.getInstance();
         TracingService tracingService = serviceReferenceHolder.getTracingService();
         tracer = tracingService.getTracer("Latency");
-
-    }
+        }
 
     private static final Log log = LogFactory.getLog(APIMgtLatencySynapseHandler.class);
 
@@ -43,7 +41,6 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
             if (messageContext.getProperty(APIMgtGatewayConstants.HANDLE_REQUEST_INFLOW_TIME) == null) {
                 messageContext.setProperty(APIMgtGatewayConstants.HANDLE_REQUEST_INFLOW_TIME, Long.toString(handleRequestInFlowTime));
             }
-
             String requestId = null;
             if (StringUtils.isEmpty(requestId)) {
                 requestId = UUID.randomUUID().toString();
@@ -74,11 +71,9 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
             if (messageContext.getProperty(APIMgtGatewayConstants.HANDLE_RESPONSE_INFLOW_TIME) == null) {
                 messageContext.setProperty(APIMgtGatewayConstants.HANDLE_RESPONSE_INFLOW_TIME, Long.toString(handleResponseInFlowTime));
             }
-
             Span childSpan = (Span) messageContext.getProperty("ChildSpan");
             childSpan.finish();
-
-        return true;
+            return true;
     }
 
     @Override
@@ -88,7 +83,6 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
         if (messageContext.getProperty(APIMgtGatewayConstants.HANDLE_RESPONSE_OUTFLOW_TIME) == null) {
             messageContext.setProperty(APIMgtGatewayConstants.HANDLE_RESPONSE_OUTFLOW_TIME, Long.toString(handleResponseOutFlowTime));
         }
-
         long backendLatency = handleResponseInFlowTime - handleRequestOutFlowTime;
         long responseLatency = handleResponseOutFlowTime - handleRequestInFlowTime;
 
@@ -99,7 +93,6 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 
         Span parentSpan = (Span) messageContext.getProperty("ParentSpan");
         parentSpan.finish();
-
         return true;
     }
 }
