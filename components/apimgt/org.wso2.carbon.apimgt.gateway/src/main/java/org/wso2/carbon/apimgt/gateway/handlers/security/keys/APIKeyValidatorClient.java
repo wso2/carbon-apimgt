@@ -46,7 +46,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-
 public class APIKeyValidatorClient {
 
     private static final Log log = LogFactory.getLog(APIKeyValidatorClient.class);
