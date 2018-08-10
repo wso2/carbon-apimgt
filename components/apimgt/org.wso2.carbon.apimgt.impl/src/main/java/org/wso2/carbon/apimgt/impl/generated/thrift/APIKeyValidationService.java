@@ -12,6 +12,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.scheme.IScheme;
 import org.apache.thrift.scheme.SchemeFactory;
 import org.apache.thrift.scheme.StandardScheme;
+
 import org.apache.thrift.scheme.TupleScheme;
 import org.apache.thrift.protocol.TTupleProtocol;
 
@@ -93,23 +94,18 @@ public class APIKeyValidationService {
       args.setClientDomain(clientDomain);
       args.setMatchingResource(matchingResource);
       args.setHttpVerb(httpVerb);
-
       if (log.isDebugEnabled()) {
         log.debug("KeyValidation request from gateway to keymanager via thrift call for: " + context + " with ID: "
                 + MessageContext.getCurrentMessageContext().getMessageID() + " at "
                 + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
       }
       sendBase("validateKey", args);
-
     }
 
     public APIKeyValidationInfoDTO recv_validateKey() throws APIKeyMgtException, APIManagementException, org.apache.thrift.TException
     {
-
-
       validateKey_result result = new validateKey_result();
       receiveBase(result, "validateKey");
-
       if (log.isDebugEnabled()) {
         log.debug("KeyValidation response received to gateway from keymanager via thrift call for:"
                 + " with ID: " + MessageContext.getCurrentMessageContext().getMessageID() + " at "
