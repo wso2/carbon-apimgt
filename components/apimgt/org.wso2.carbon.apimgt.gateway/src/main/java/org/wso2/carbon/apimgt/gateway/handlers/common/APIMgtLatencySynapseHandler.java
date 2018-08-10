@@ -9,17 +9,8 @@ import org.apache.synapse.AbstractSynapseHandler;
 import org.apache.synapse.MessageContext;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.tracing.TracingService;
-
 import java.util.UUID;
-
-///**
-// * @scr.component name="org.wso2.carbon.apimgt.gateway.handlers.common" immediate="true"
-// * @scr.reference name="org.wso2.carbon.apimgt.tracing"
-// * interface="org.wso2.carbon.apimgt.tracing.TracingService" cardinality="1..1"
-// * policy="dynamic" bind="setTracingService" unbind="unsetTracingService"
-// */
 
 public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 
@@ -39,20 +30,6 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
     private long handleRequestOutFlowTime;
     private long handleResponseInFlowTime;
     private long handleResponseOutFlowTime;
-
-    private APIManagerConfiguration configuration = new APIManagerConfiguration();
-
-//    OkHttpSender sender = OkHttpSender.create("http://localhost:9411/api/v1/spans");
-//    Tracer tracer = BraveTracer.create(Tracing.newBuilder()
-//                    .localServiceName("Hello")
-//                    .spanReporter(AsyncReporter.builder(sender).build())
-//                    .build());
-
-//    ServiceReferenceHolder serviceReferenceHolder = ServiceReferenceHolder.getInstance();
-//    TracingService tracingService = serviceReferenceHolder.getTracingService();
-//    Tracer tracer = tracingService.getTracer("zipkin");
-
-//    Tracer tracer1 = ServiceReferenceHolder.getInstance().getTracingService().getTracer("zipkin");
 
     @Override
     public boolean handleRequestInFlow(MessageContext messageContext) {
@@ -87,7 +64,6 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
         if (messageContext.getProperty(APIMgtGatewayConstants.HANDLE_REQUEST_OUTFLOW_TIME) == null) {
             messageContext.setProperty(APIMgtGatewayConstants.HANDLE_REQUEST_OUTFLOW_TIME, Long.toString(handleRequestOutFlowTime));
         }
-
         return true;
     }
 
