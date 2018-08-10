@@ -215,7 +215,6 @@
             <groupId>com.fasterxml.woodstox</groupId>
             <artifactId>woodstox-core</artifactId>
         </dependency>
-
         <dependency>
             <groupId>io.opentracing</groupId>
             <artifactId>opentracing-api</artifactId>
@@ -295,7 +294,6 @@
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Private-Package>
                             org.wso2.carbon.apimgt.gateway.internal,
-
                             zipkin2.reporter.*,
                             zipkin2.*,
                             io.opentracing.*,
@@ -310,7 +308,6 @@
                             !org.wso2.carbon.apimgt.gateway.stub.*,
                             org.wso2.carbon.apimgt.gateway.*;version="${carbon.apimgt.version}",
                             org.wso2.throttle.*,
-
                             io.opentracing.*,
                             brave.*,
                             zipkin2.*,
@@ -361,7 +358,6 @@
                             org.wso2.carbon.sequences.stub.types,
                             org.wso2.carbon.context,
                             org.wso2.carbon.mediation.*; version="${carbon.mediation.imp.pkg.version}",
-
                             org.osgi.framework,
                             org.osgi.service.component,
                             org.wso2.carbon.apimgt.tracing.*; version="${carbon.apimgt.imp.pkg.version}",
