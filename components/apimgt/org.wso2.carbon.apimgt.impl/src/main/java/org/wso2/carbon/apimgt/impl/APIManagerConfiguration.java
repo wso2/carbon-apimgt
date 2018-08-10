@@ -80,6 +80,7 @@ public class APIManagerConfiguration {
     public static final String WEBSOCKET_DEFAULT_GATEWAY_URL = "ws://localhost:9099";
     private Map<String, Map<String, String>> loginConfiguration = new ConcurrentHashMap<String, Map<String, String>>();
     private JSONArray applicationAttributes = new JSONArray();
+
     private SecretResolver secretResolver;
 
     private boolean initialized;
@@ -1020,13 +1021,17 @@ public class APIManagerConfiguration {
                             .API_KEY_VALIDATOR_PASSWORD));
                 }
                 throttleProperties.setBlockCondition(blockConditionRetrieverConfiguration);
+
             }
         }
     }
+
     public ThrottleProperties getThrottleProperties() {
         return throttleProperties;
     }
+
     public WorkflowProperties getWorkflowProperties() {
         return workflowProperties;
     }
+
 }
