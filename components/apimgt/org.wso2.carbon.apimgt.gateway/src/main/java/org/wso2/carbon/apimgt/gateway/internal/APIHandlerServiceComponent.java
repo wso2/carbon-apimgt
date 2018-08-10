@@ -66,8 +66,6 @@ public class APIHandlerServiceComponent {
     private ServiceRegistration registration;
 
     protected void activate(ComponentContext context) {
-        log.info("*******Gateway Component activated**********");
-
         BundleContext bundleContext = context.getBundleContext();
         if (log.isDebugEnabled()) {
             log.debug("API handlers component activated");
@@ -131,9 +129,6 @@ public class APIHandlerServiceComponent {
     }
 
     protected void deactivate(ComponentContext context) {
-
-        log.info("*******Gateway Component deactivated**********");
-
         if (log.isDebugEnabled()) {
             log.debug("API handlers component deactivated");
         }
@@ -196,7 +191,6 @@ public class APIHandlerServiceComponent {
     protected void setTracingService(TracingService tracingService) {
         ServiceReferenceHolder.getInstance().setTracingService(tracingService);
     }
-
     protected void unsetTracingService(TracingService tracingService) {
         ServiceReferenceHolder.getInstance().setTracingService(null);
     }
