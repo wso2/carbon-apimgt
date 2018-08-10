@@ -14,7 +14,7 @@ import org.wso2.carbon.apimgt.tracing.TracingServiceImpl;
 public class TracingServiceComponent {
 
     private static final Log log = LogFactory.getLog(TracingServiceComponent.class);
-//    @Activate
+
     protected void activate(ComponentContext componentContext) {
         try {
             log.info("*******Tracing Component activated**********");
@@ -27,7 +27,6 @@ public class TracingServiceComponent {
         }
     }
 
-//    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         log.info("*******Tracing Component deactivated**********");
     }
