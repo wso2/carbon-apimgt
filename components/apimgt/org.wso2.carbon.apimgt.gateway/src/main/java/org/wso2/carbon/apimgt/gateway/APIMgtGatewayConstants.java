@@ -98,5 +98,6 @@ public class APIMgtGatewayConstants {
     public static final String SYNAPSE_BACKEND_LATENCY = "synapse.backend.latency";
     public static final String SYNAPSE_RESPONSE_LATENCY = "synapse.response.latency";
     public static final String REQUEST_ID = "request.id";
+
 }
 
