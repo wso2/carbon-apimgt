@@ -21,7 +21,7 @@ public class TracerLoader {
     private TracerLoader() {
     }
 
-    public Tracer getTracer(String openTracerName, APIManagerConfiguration configuration) {
+    public Tracer getTracer(String openTracerName, APIManagerConfiguration configuration, String serviceName) {
 
         ServiceLoader<OpenTracer> openTracers = ServiceLoader.load(OpenTracer.class);
         HashMap<String, OpenTracer> tracerMap = new HashMap<>();
@@ -29,7 +29,7 @@ public class TracerLoader {
 
         OpenTracer openTracer = tracerMap.get(openTracerName.toLowerCase());
 
-        return openTracer.getTracer(openTracerName,configuration);
+        return openTracer.getTracer(openTracerName,configuration,serviceName);
 
         }
 

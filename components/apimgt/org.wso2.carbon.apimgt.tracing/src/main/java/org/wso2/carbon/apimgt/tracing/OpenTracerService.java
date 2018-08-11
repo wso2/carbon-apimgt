@@ -1,6 +1,5 @@
 package org.wso2.carbon.apimgt.tracing;
 
-import io.opentracing.Tracer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
@@ -10,6 +9,8 @@ import org.osgi.service.component.annotations.Activate;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.tracing.jaeger.JaegerTracerImpl;
+import org.wso2.carbon.apimgt.tracing.zipkin.ZipkinTracerImpl;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
@@ -45,13 +46,13 @@ public class OpenTracerService {
 
         if(openTracerName.equalsIgnoreCase("JAEGER") && enabled.equalsIgnoreCase("TRUE")) {
 
-            Tracer tracer = tracerLoader.getTracer(openTracerName, configuration);
-            ServiceReferenceHolder.getInstance().setTracer(tracer);
+//            Tracer tracer = tracerLoader.getTracer(openTracerName, configuration);
+//            ServiceReferenceHolder.getInstance().setTracer(tracer);
 
         }else if(openTracerName.equalsIgnoreCase("ZIPKIN") && enabled.equalsIgnoreCase("TRUE")) {
 
-            Tracer tracer = tracerLoader.getTracer(openTracerName,configuration);
-            ServiceReferenceHolder.getInstance().setTracer(tracer);
+//            Tracer tracer = tracerLoader.getTracer(openTracerName,configuration);
+//            ServiceReferenceHolder.getInstance().setTracer(tracer);
 
         }else
             log.error("Invalid Configuration");
