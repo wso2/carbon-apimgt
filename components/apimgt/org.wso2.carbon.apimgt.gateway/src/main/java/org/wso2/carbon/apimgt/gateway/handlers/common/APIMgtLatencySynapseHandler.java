@@ -33,7 +33,6 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
     public boolean handleRequestInFlow(MessageContext messageContext) {
 
         Span parentSpan = tracer.buildSpan("ResponseLatency").start();
-        parentSpan.setTag("ParentSpan","ResponseLatency");
         messageContext.setProperty("Tracer",tracer);
         messageContext.setProperty("ParentSpan",parentSpan);
 

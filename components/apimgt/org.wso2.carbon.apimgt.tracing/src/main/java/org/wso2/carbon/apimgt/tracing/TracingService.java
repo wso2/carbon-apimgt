@@ -4,6 +4,6 @@ import io.opentracing.Tracer;
 
 public interface TracingService {
 
-    Tracer getTracer(String tracerName);
+    Tracer getTracer(String serviceName);
 
 }

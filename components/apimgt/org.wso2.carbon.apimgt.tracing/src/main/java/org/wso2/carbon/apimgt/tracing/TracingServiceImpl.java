@@ -1,15 +1,15 @@
 package org.wso2.carbon.apimgt.tracing;
 
-import brave.Tracing;
-import brave.opentracing.BraveTracer;
 import io.opentracing.Tracer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.tracing.jaeger.JaegerTracerImpl;
+import org.wso2.carbon.apimgt.tracing.zipkin.ZipkinTracerImpl;
 import org.wso2.carbon.utils.CarbonUtils;
-import zipkin2.reporter.AsyncReporter;
-import zipkin2.reporter.okhttp3.OkHttpSender;
+
+
 
 import java.io.File;
 
@@ -17,24 +17,37 @@ public class TracingServiceImpl implements TracingService{
 
     private static final Log log = LogFactory.getLog(TracingServiceImpl.class) ;
     private APIManagerConfiguration configuration = new APIManagerConfiguration();
-    TracerLoader tracerLoader = TracerLoader.getInstance();
-
-    String filePath = getFilePath();
-    configuration.load(filePath);
 
     @Override
-    public Tracer getTracer(String tracerName) {
+    public Tracer getTracer(String serviceName) {
 
-        OkHttpSender sender = OkHttpSender.create("http://localhost:9411/api/v1/spans");
-        Tracer tracer = BraveTracer.create(Tracing.newBuilder()
-                .localServiceName("Hello")
-                .spanReporter(AsyncReporter.builder(sender).build())
-                .build());
+        try {
+            String filePath = CarbonUtils.getCarbonConfigDirPath() + File.separator + "api-manager.xml";
+            configuration.load(filePath);
 
-        return tracer;
+        } catch (APIManagementException e) {
+            e.printStackTrace();
+        }
+
+        String openTracerName = configuration.getFirstProperty("OpenTracer.Name");
+        String enabled = configuration.getFirstProperty("OpenTracer.Enabled");
+
+        if(openTracerName.equalsIgnoreCase("JAEGER") && enabled.equalsIgnoreCase("TRUE")) {
+
+            Tracer tracer = new JaegerTracerImpl().getTracer(openTracerName, configuration, serviceName);
+            return tracer;
+
+        }else if(openTracerName.equalsIgnoreCase("ZIPKIN") && enabled.equalsIgnoreCase("TRUE")) {
+
+            Tracer tracer = new ZipkinTracerImpl().getTracer(openTracerName,configuration, serviceName);
+            return tracer;
+
+
+        }else
+            log.error("Invalid Configuration");
+
+            return null;
+
     }
 
-    protected String getFilePath() {
-        return CarbonUtils.getCarbonConfigDirPath() + File.separator + "api-manager.xml";
-    }
 }
