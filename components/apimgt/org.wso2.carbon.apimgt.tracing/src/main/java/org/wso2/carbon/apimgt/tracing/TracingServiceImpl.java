@@ -22,11 +22,6 @@ public class TracingServiceImpl implements TracingService{
     String filePath = getFilePath();
     configuration.load(filePath);
 
-    String openTracerName = configuration.getFirstProperty(OpenTracerConstants.OPEN_TRACER_NAME);
-    String enabled = configuration.getFirstProperty(OpenTracerConstants.OPEN_TRACER_ENABLED);
-
-
-
     @Override
     public Tracer getTracer(String tracerName) {
 

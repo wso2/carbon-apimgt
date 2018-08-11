@@ -5,8 +5,6 @@ import brave.opentracing.BraveTracer;
 import io.opentracing.Tracer;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.tracing.OpenTracer;
-import org.wso2.carbon.apimgt.tracing.OpenTracerConstants;
-import zipkin2.codec.SpanBytesEncoder;
 import zipkin2.reporter.AsyncReporter;
 import zipkin2.reporter.okhttp3.OkHttpSender;
 
@@ -33,10 +31,7 @@ public class ZipkinTracerImpl implements OpenTracer {
                 .build());
 
         return tracer;
-
     }
-
-
     @Override
     public String getName() {
         return NAME;

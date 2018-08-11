@@ -45,7 +45,6 @@ public class JaegerTracerImpl implements OpenTracer {
                 .withSender(senderConfig);
 
         tracer = new Configuration(serviceName).withSampler(samplerConfig).withReporter(reporterConfig).getTracer();
-
         return tracer;
     }
 
