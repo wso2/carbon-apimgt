@@ -33,9 +33,9 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
     @Override
     public boolean handleRequestInFlow(MessageContext messageContext) {
 
-        Span parentSpan = tracer.buildSpan("ResponseLatency").start();
+        Span responseLatencySpan = tracer.buildSpan("ResponseLatency").start();
         messageContext.setProperty("Tracer", tracer);
-        messageContext.setProperty("ParentSpan", parentSpan);
+        messageContext.setProperty("ResponseLatencySpan", responseLatencySpan);
 
         handleRequestInFlowTime = System.currentTimeMillis();
         if (messageContext.getProperty(APIMgtGatewayConstants.HANDLE_REQUEST_INFLOW_TIME) == null) {
@@ -51,10 +51,9 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
     @Override
     public boolean handleRequestOutFlow(MessageContext messageContext) {
 
-        Span parentSpan = (Span) messageContext.getProperty("ParentSpan");
-        Span childSpan = tracer.buildSpan("BackendLatency").asChildOf(parentSpan).start();
-        childSpan.setTag("ChildSpan", "BackendLatency");
-        messageContext.setProperty("ChildSpan", childSpan);
+        Span responseLatencySpan = (Span) messageContext.getProperty("ResponseLatencySpan");
+        Span backendLatencySpan = tracer.buildSpan("BackendLatency").asChildOf(responseLatencySpan).start();
+        messageContext.setProperty("BackendLatencySpan", backendLatencySpan);
 
         handleRequestOutFlowTime = System.currentTimeMillis();
         if (messageContext.getProperty(APIMgtGatewayConstants.HANDLE_REQUEST_OUTFLOW_TIME) == null) {
@@ -70,8 +69,8 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
         if (messageContext.getProperty(APIMgtGatewayConstants.HANDLE_RESPONSE_INFLOW_TIME) == null) {
             messageContext.setProperty(APIMgtGatewayConstants.HANDLE_RESPONSE_INFLOW_TIME, Long.toString(handleResponseInFlowTime));
         }
-        Span childSpan = (Span) messageContext.getProperty("ChildSpan");
-        childSpan.finish();
+        Span backendLatencySpan = (Span) messageContext.getProperty("BackendLatencySpan");
+        backendLatencySpan.finish();
         return true;
     }
 
