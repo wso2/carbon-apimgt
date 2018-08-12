@@ -19,8 +19,8 @@ public class TracingServiceImpl implements TracingService {
 
     @Override
     public Tracer getTracer(String serviceName) {
-
         try {
+            log.error("$$$$$$$Praveen hello$$$$$$$$");
             String filePath = CarbonUtils.getCarbonConfigDirPath() + File.separator + "api-manager.xml";
             configuration.load(filePath);
 
@@ -42,11 +42,11 @@ public class TracingServiceImpl implements TracingService {
             Tracer tracer = new ZipkinTracerImpl().getTracer(openTracerName, configuration, serviceName);
             return tracer;
 
-        } else
+        } else {
             log.error("Invalid Configuration");
+        }
 
         return null;
-
     }
 
 }

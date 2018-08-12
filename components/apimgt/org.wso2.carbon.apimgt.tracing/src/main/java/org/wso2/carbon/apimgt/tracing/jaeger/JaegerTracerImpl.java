@@ -17,7 +17,7 @@ public class JaegerTracerImpl implements OpenTracer {
             configuration.getFirstProperty(Constants.CONFIG_HOST) : Constants.DEFAULT_HOST;
 
         int port = configuration.getFirstProperty(Constants.CONFIG_PORT) != null ?
-            Integer.parseInt(configuration.getFirstProperty(Constants.CONFIG_HOST)) : Constants.DEFAULT_PORT;
+            Integer.parseInt(configuration.getFirstProperty(Constants.CONFIG_PORT)) : Constants.DEFAULT_PORT;
 
         String samplerType = configuration.getFirstProperty(Constants.CONFIG_SAMPLER_TYPE) != null ?
             configuration.getFirstProperty(Constants.CONFIG_SAMPLER_TYPE) : Constants.DEFAULT_SAMPLER_TYPE;
@@ -31,7 +31,6 @@ public class JaegerTracerImpl implements OpenTracer {
         int reporterBufferSize = configuration.getFirstProperty(Constants.CONFIG_REPORTER_BUFFER_SIZE) != null ?
             Integer.parseInt(configuration.getFirstProperty(Constants.CONFIG_REPORTER_BUFFER_SIZE)) : Constants.DEFAULT_REPORTER_BUFFER_SIZE;
 
-        Tracer tracer = null;
         Configuration.SamplerConfiguration samplerConfig = new Configuration.SamplerConfiguration()
             .withType(samplerType)
             .withParam(samplerParam);
@@ -44,7 +43,7 @@ public class JaegerTracerImpl implements OpenTracer {
             .withMaxQueueSize(reporterBufferSize)
             .withSender(senderConfig);
 
-        tracer = new Configuration(serviceName).withSampler(samplerConfig).withReporter(reporterConfig).getTracer();
+        Tracer tracer = new Configuration(serviceName).withSampler(samplerConfig).withReporter(reporterConfig).getTracer();
         return tracer;
     }
 

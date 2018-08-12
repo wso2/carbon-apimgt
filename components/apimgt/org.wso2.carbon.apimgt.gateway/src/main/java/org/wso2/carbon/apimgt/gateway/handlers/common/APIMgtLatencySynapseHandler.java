@@ -89,7 +89,7 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 
         log.info(messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID) + " Backend Latency : " + backendLatency + " - Response Latency : " + responseLatency);
 
-        Span parentSpan = (Span) messageContext.getProperty("ParentSpan");
+        Span parentSpan = (Span) messageContext.getProperty("ResponseLatencySpan");
         parentSpan.finish();
         return true;
     }
