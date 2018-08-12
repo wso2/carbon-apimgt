@@ -8,4 +8,5 @@ public interface OpenTracer {
     Tracer getTracer(String tracerName, APIManagerConfiguration configuration, String serviceName);
 
     String getName();
+
 }
