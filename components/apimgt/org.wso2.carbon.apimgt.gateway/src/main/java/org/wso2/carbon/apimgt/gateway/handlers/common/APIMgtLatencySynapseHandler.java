@@ -10,17 +10,18 @@ import org.apache.synapse.MessageContext;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.tracing.TracingService;
+
 import java.util.UUID;
 
 public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 
     private Tracer tracer;
 
-    public APIMgtLatencySynapseHandler(){
+    public APIMgtLatencySynapseHandler() {
         ServiceReferenceHolder serviceReferenceHolder = ServiceReferenceHolder.getInstance();
         TracingService tracingService = serviceReferenceHolder.getTracingService();
         tracer = tracingService.getTracer("Latency");
-        }
+    }
 
     private static final Log log = LogFactory.getLog(APIMgtLatencySynapseHandler.class);
 
@@ -28,23 +29,23 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
     private long handleRequestOutFlowTime;
     private long handleResponseInFlowTime;
     private long handleResponseOutFlowTime;
+    private String requestId;
 
     @Override
     public boolean handleRequestInFlow(MessageContext messageContext) {
 
         Span parentSpan = tracer.buildSpan("ResponseLatency").start();
-        messageContext.setProperty("Tracer",tracer);
-        messageContext.setProperty("ParentSpan",parentSpan);
+        messageContext.setProperty("Tracer", tracer);
+        messageContext.setProperty("ParentSpan", parentSpan);
 
-            handleRequestInFlowTime = System.currentTimeMillis();
-            if (messageContext.getProperty(APIMgtGatewayConstants.HANDLE_REQUEST_INFLOW_TIME) == null) {
-                messageContext.setProperty(APIMgtGatewayConstants.HANDLE_REQUEST_INFLOW_TIME, Long.toString(handleRequestInFlowTime));
-            }
-            String requestId = null;
-            if (StringUtils.isEmpty(requestId)) {
-                requestId = UUID.randomUUID().toString();
-                messageContext.setProperty(APIMgtGatewayConstants.REQUEST_ID, requestId);
-            }
+        handleRequestInFlowTime = System.currentTimeMillis();
+        if (messageContext.getProperty(APIMgtGatewayConstants.HANDLE_REQUEST_INFLOW_TIME) == null) {
+            messageContext.setProperty(APIMgtGatewayConstants.HANDLE_REQUEST_INFLOW_TIME, Long.toString(handleRequestInFlowTime));
+        }
+
+        requestId = UUID.randomUUID().toString();
+        messageContext.setProperty(APIMgtGatewayConstants.REQUEST_ID, requestId);
+
         return true;
     }
 
@@ -53,8 +54,8 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 
         Span parentSpan = (Span) messageContext.getProperty("ParentSpan");
         Span childSpan = tracer.buildSpan("BackendLatency").asChildOf(parentSpan).start();
-        childSpan.setTag("ChildSpan","BackendLatency");
-        messageContext.setProperty("ChildSpan",childSpan);
+        childSpan.setTag("ChildSpan", "BackendLatency");
+        messageContext.setProperty("ChildSpan", childSpan);
 
         handleRequestOutFlowTime = System.currentTimeMillis();
         if (messageContext.getProperty(APIMgtGatewayConstants.HANDLE_REQUEST_OUTFLOW_TIME) == null) {
@@ -66,13 +67,13 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
     @Override
     public boolean handleResponseInFlow(MessageContext messageContext) {
 
-            handleResponseInFlowTime = System.currentTimeMillis();
-            if (messageContext.getProperty(APIMgtGatewayConstants.HANDLE_RESPONSE_INFLOW_TIME) == null) {
-                messageContext.setProperty(APIMgtGatewayConstants.HANDLE_RESPONSE_INFLOW_TIME, Long.toString(handleResponseInFlowTime));
-            }
-            Span childSpan = (Span) messageContext.getProperty("ChildSpan");
-            childSpan.finish();
-            return true;
+        handleResponseInFlowTime = System.currentTimeMillis();
+        if (messageContext.getProperty(APIMgtGatewayConstants.HANDLE_RESPONSE_INFLOW_TIME) == null) {
+            messageContext.setProperty(APIMgtGatewayConstants.HANDLE_RESPONSE_INFLOW_TIME, Long.toString(handleResponseInFlowTime));
+        }
+        Span childSpan = (Span) messageContext.getProperty("ChildSpan");
+        childSpan.finish();
+        return true;
     }
 
     @Override

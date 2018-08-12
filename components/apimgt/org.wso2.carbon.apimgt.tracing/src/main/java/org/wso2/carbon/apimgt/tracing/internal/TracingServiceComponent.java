@@ -21,8 +21,7 @@ public class TracingServiceComponent {
             BundleContext bundleContext = componentContext.getBundleContext();
             bundleContext.registerService(TracingService.class, new TracingServiceImpl(), null);
 
-
-        }catch(Throwable t) {
+        } catch (Throwable t) {
             log.error("Error occured", t);
         }
     }
