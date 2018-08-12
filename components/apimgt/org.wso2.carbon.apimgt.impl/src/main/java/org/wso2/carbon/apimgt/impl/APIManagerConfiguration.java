@@ -1021,8 +1021,7 @@ public class APIManagerConfiguration {
                             .API_KEY_VALIDATOR_PASSWORD));
                 }
                 throttleProperties.setBlockCondition(blockConditionRetrieverConfiguration);
-
-            }
+                }
         }
     }
 
