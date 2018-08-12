@@ -189,4 +189,13 @@ public final class APIUsageStatisticsClientConstants {
     public static final String RES_MEDIATION_LATENCY = "responseMediationLatency";
     public static final String BACKEND_LATENCY = "backendLatency";
     public static final String OTHER_LATENCY = "otherLatency";
+
+    //------------------------------------------------------------------------------------------------
+    public static final String API_USER_PER_APP_AGG = "ApiUserPerAppAgg";
+
+    //------field names-------
+    public static final String TIME_STAMP = "AGG_TIMESTAMP";
+
+    //------siddhi app names----
+    public static final String API_ACCESS_SUMMARY_SIDDHI_APP = "API_ACCESS_SUMMARY";
 }

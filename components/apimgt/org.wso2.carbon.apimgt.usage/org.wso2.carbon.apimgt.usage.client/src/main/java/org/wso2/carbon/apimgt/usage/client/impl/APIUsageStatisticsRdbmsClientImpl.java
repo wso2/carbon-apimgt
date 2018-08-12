@@ -29,6 +29,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -99,6 +100,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -2232,13 +2234,14 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 
     /**
      * This method find the first access time of the API
+     *
      * @param providerName provider name
      * @return APIFirstAccess
      * @throws APIMgtUsageQueryServiceClientException
      */
     @Override
     public List<APIFirstAccess> getFirstAccessTime(String providerName) throws APIMgtUsageQueryServiceClientException {
-        APIFirstAccess firstAccess = this.queryFirstAccess(APIUsageStatisticsClientConstants.KEY_USAGE_SUMMARY);
+        APIFirstAccess firstAccess = this.queryFirstAccess(APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG);
         List<APIFirstAccess> APIFirstAccessList = new ArrayList<APIFirstAccess>();
         APIFirstAccess fTime;
 
@@ -2250,68 +2253,44 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     }
 
     /**
-     * Finf first accesstime form the database
-     * @param columnFamily table name in the RDBMS
-     * @return APIFirstAccess represnting the time
+     * Find first accesstime from the database
+     *
+     * @param columnFamily aggregate table name in the RDBMS
+     * @return APIFirstAccess representing the time
      * @throws APIMgtUsageQueryServiceClientException throws if database error occurred
      */
     private APIFirstAccess queryFirstAccess(String columnFamily) throws APIMgtUsageQueryServiceClientException {
 
-        if (dataSource == null) {
-            handleException("BAM data source hasn't been initialized. Ensure that the data source " +
-                    "is properly configured in the APIUsageTracker configuration.");
-        }
-
-        Connection connection = null;
-        Statement statement = null;
-        ResultSet rs = null;
         try {
-            connection = dataSource.getConnection();
-            statement = connection.createStatement();
-            String query;
-            if (connection.getMetaData().getDatabaseProductName().equalsIgnoreCase("oracle")) {
-                query = "SELECT " + APIUsageStatisticsClientConstants.TIME + ','
-                        + APIUsageStatisticsClientConstants.YEAR + ',' + APIUsageStatisticsClientConstants.MONTH + ','
-                        + APIUsageStatisticsClientConstants.DAY + " FROM (SELECT "
-                        + APIUsageStatisticsClientConstants.TIME + ',' + APIUsageStatisticsClientConstants.YEAR + ','
-                        + APIUsageStatisticsClientConstants.MONTH + ',' + APIUsageStatisticsClientConstants.DAY
-                        + " FROM " + columnFamily + " order by " + APIUsageStatisticsClientConstants.TIME
-                        + " ASC) where ROWNUM <= 1";
-            } else if (connection.getMetaData().getDatabaseProductName().contains("Microsoft")) {
-                query = "SELECT TOP 1 " + APIUsageStatisticsClientConstants.TIME + ','
-                        + APIUsageStatisticsClientConstants.YEAR + ',' + APIUsageStatisticsClientConstants.MONTH + ','
-                        + APIUsageStatisticsClientConstants.DAY + " FROM  " + columnFamily + " order by "
-                        + APIUsageStatisticsClientConstants.TIME + " ASC";
-            } else if (connection.getMetaData().getDatabaseProductName().contains("DB2")) {
-                query = "SELECT " + APIUsageStatisticsClientConstants.TIME + ','
-                        + APIUsageStatisticsClientConstants.YEAR + ',' + APIUsageStatisticsClientConstants.MONTH + ','
-                        + APIUsageStatisticsClientConstants.DAY + " FROM  " + columnFamily + " order by "
-                        + APIUsageStatisticsClientConstants.TIME + " ASC FETCH FIRST 1 ROWS ONLY";
-            } else {
-                query = "SELECT " + APIUsageStatisticsClientConstants.TIME + ','
-                        + APIUsageStatisticsClientConstants.YEAR + ',' + APIUsageStatisticsClientConstants.MONTH + ','
-                        + APIUsageStatisticsClientConstants.DAY + " FROM  " + columnFamily + " order by "
-                        + APIUsageStatisticsClientConstants.TIME + " ASC limit 1";
-            }
-            rs = statement.executeQuery(query);
+            String query = "from " + columnFamily + "_SECONDS select " + APIUsageStatisticsClientConstants.TIME_STAMP
+                    + " order by " + APIUsageStatisticsClientConstants.TIME_STAMP + " limit 1;";
+            JSONObject jsonObj = APIUtil
+                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.API_ACCESS_SUMMARY_SIDDHI_APP,
+                            query);
+            APIFirstAccess firstAccess = null;
+            Date date;
+            Calendar calendar;
             String year;
             String month;
             String day;
-            APIFirstAccess firstAccess = null;
-            while (rs.next()) {
-                year = rs.getInt(APIUsageStatisticsClientConstants.YEAR) + "";
-                month = rs.getInt(APIUsageStatisticsClientConstants.MONTH) - 1 + "";
-                day = rs.getInt(APIUsageStatisticsClientConstants.DAY) + "";
-                firstAccess = new APIFirstAccess(year, month, day);
+            if (jsonObj != null) {
+                JSONArray jArray = (JSONArray) jsonObj.get("records");
+                for (Object record : jArray) {
+                    Long timeStamp = (Long) ((JSONArray) record).get(0);
+                    date = new Date(timeStamp);
+                    calendar = Calendar.getInstance();
+                    calendar.setTime(date);
+                    year = Integer.toString(calendar.get(Calendar.YEAR));
+                    month = Integer.toString(calendar.get(Calendar.MONTH)); //Month is 0 based
+                    day = Integer.toString(calendar.get(Calendar.DAY_OF_MONTH));
+                    firstAccess = new APIFirstAccess(year, month, day);
+                }
             }
-
             return firstAccess;
-        } catch (Exception e) {
-            log.error("Error occurred while querying from JDBC database " + e.getMessage(), e);
+        } catch (APIManagementException e) {
+            log.error("Error occurred while querying from the stream processor " + e.getMessage(), e);
             throw new APIMgtUsageQueryServiceClientException(
-                    "Error occurred while querying from JDBC database" + e.getMessage(), e);
-        } finally {
-            closeDatabaseLinks(rs, statement, connection);
+                    "Error occurred while querying from the stream processor " + e.getMessage(), e);
         }
     }
 
