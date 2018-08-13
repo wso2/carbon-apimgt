@@ -70,6 +70,8 @@ import org.wso2.carbon.identity.oauth.common.OAuthConstants;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.oauth.dto.OAuthConsumerAppDTO;
 import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -79,6 +81,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -765,25 +769,96 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
     /**
      * Service method to revoke all access tokens issued for given user under the given application. This will change
      * access token status to revoked and remove cached access tokens from memory of all gateway nodes.
+     *
      * @param userName end user name
-     * @param appName application name
+     * @param appName  application name
+     * @param appOwner application owner username
      * @return if operation is success
      * @throws APIManagementException in case of revoke failure.
      */
-    public boolean revokeTokensOfUserByApp(String userName, String appName)
+    public boolean revokeTokensOfUserByApp(String userName, String appName, String appOwner)
             throws APIManagementException {
-
+        List<AccessTokenInfo> accessTokens;
+        String baseUsername = CarbonContext.getThreadLocalCarbonContext().getUsername();
+        String baseUserTenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String baseUserNameWithoutTenant = MultitenantUtils.getTenantAwareUsername(baseUsername);
+        //Check if the username returned from CarbonContext.getThreadLocalCarbonContext() already contains domain name
+        //Otherwise append the domain name to the username
+        String baseUserNameWithTenant = (!baseUserNameWithoutTenant.equals(baseUsername)) ?
+                baseUsername : baseUsername.concat(APIConstants.EMAIL_DOMAIN_SEPARATOR).concat(baseUserTenantDomain);
+        userName = MultitenantUtils.getTenantAwareUsername(userName);
         try {
-
-            //find access tokens for user
-            List<AccessTokenInfo> accessTokens = ApiMgtDAO.getAccessTokenListForUser(userName,appName);
+            if (appOwner != null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("appOwner parameter present in the request to revoke tokens of user=" + userName +
+                            " for application=" + appName);
+                }
+                String appOwnerTenantDomain = MultitenantUtils.getTenantDomain(appOwner);
+                String appOwnerUserNameWithTenant = MultitenantUtils.getTenantAwareUsername(appOwner)
+                        .concat(APIConstants.EMAIL_DOMAIN_SEPARATOR)
+                        .concat(appOwnerTenantDomain);
+                //If app owner is given as appowner@carbon.super get the tenant aware username 'admin'
+                String appOwnerUserName = appOwnerTenantDomain.equals(APIConstants.SUPER_TENANT_DOMAIN) ?
+                        MultitenantUtils.getTenantAwareUsername(appOwner) : appOwner;
+                //If both app owner and logged in user in both tenants
+                if (appOwnerTenantDomain.equals(baseUserTenantDomain)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("appOwner=" + appOwner + " and the logged in user=" + baseUserNameWithTenant +
+                                " both exist in the same tenant");
+                    }
+                    UserStoreManager userstoremanager =
+                            CarbonContext.getThreadLocalCarbonContext().getUserRealm().getUserStoreManager();
+                    //Get the role list of logged in user
+                    Collection<String> baseUserRoles = Arrays.asList(userstoremanager.
+                            getRoleListOfUser((baseUserNameWithoutTenant)));
+                    //Get admin role name of the current domain
+                    String adminRoleName = CarbonContext
+                            .getThreadLocalCarbonContext()
+                            .getUserRealm()
+                            .getRealmConfiguration()
+                            .getAdminRoleName();
+                    //If logged in user an admin or same as the app owner
+                    if (baseUserRoles != null && (baseUserRoles.contains(adminRoleName) ||
+                            baseUserNameWithTenant.equals(appOwnerUserNameWithTenant))) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Logged in user=" + baseUserNameWithTenant +
+                                    " is either the tenant admin or the same app owner of application=" + appName);
+                        }
+                        //find access tokens for the given user for given the application owned by given owner
+                        accessTokens = ApiMgtDAO.getAccessTokenListForUser(userName, appName, appOwnerUserName);
+                    } else {
+                        //Tokens can only be invoked by the tenant admin or the app owner, hence return error
+                        String errorMessage = "Insufficient permission to revoke token for user=" + userName +
+                                " for app=" + appName + " owned by=" + appOwner + " by logged in user=" +
+                                baseUserNameWithTenant;
+                        log.error(errorMessage);
+                        throw new APIManagementException(errorMessage);
+                    }
+                } else {
+                    //Tokens cannot be invoked by a user in another domain than the application owner
+                    String errorMessage = "Logged in user=" + baseUserNameWithTenant +
+                            " does not have access to revoke token for user=" + userName + " for app=" +
+                            appName + " owned by=" + appOwner + " in tenant domain=" + appOwnerTenantDomain;
+                    log.error(errorMessage);
+                    throw new APIManagementException(errorMessage);
+                }
+            } else {
+                //If appOwner field not present in the request, assume the logged in user as the application owner
+                if (log.isDebugEnabled()) {
+                    log.debug("appOwner parameter not present in the request to revoke tokens of user=" + userName +
+                            " for application=" + appName);
+                }
+                String appOwnerUserName = baseUserTenantDomain.equals(APIConstants.SUPER_TENANT_DOMAIN) ?
+                        baseUserNameWithoutTenant : baseUserNameWithTenant;
+                accessTokens = ApiMgtDAO.getAccessTokenListForUser(userName, appName, appOwnerUserName);
+            }
             //find revoke urls
             List<String> APIGatewayURLs = getAPIGatewayURLs();
             List<String> APIRevokeURLs = new ArrayList<String>(APIGatewayURLs.size());
 
             for (String apiGatewayURL : APIGatewayURLs) {
-                String [] apiGatewayURLs = apiGatewayURL.split(",");
-                if(apiGatewayURL.length()> 1) {
+                String[] apiGatewayURLs = apiGatewayURL.split(",");
+                if (apiGatewayURL.length() > 1) {
                     //get https url
                     String apiHTTPSURL = apiGatewayURLs[1];
                     String revokeURL = apiHTTPSURL + getRevokeURLPath();
@@ -800,10 +875,26 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             }
 
             log.info("Successfully revoked all tokens issued for user=" + userName + "for application " + appName);
+            if (!accessTokens.isEmpty()) {
+                log.info("Successfully revoked all tokens by logged in user=" +
+                        baseUserNameWithTenant + " issued for user= " + userName + " for application=" + appName +
+                        " owned by=" + appOwner);
+            } else {
+                log.info("No active tokens to revoke by logged in user=" +
+                        baseUserNameWithTenant + " for user= " + userName + " for application=" + appName +
+                        " owned by=" + appOwner);
+            }
             return true;
-
         } catch (SQLException e) {
-            throw new APIManagementException("Error while revoking token for user=" + userName + " app="+ appName, e);
+            String errorMessage = "Error while revoking token for user=" + userName + " app=" + appName + " owned by=" +
+                    appOwner + " by logged in user=" + baseUserNameWithTenant;
+            log.error(errorMessage);
+            throw new APIManagementException(errorMessage, e);
+        } catch (UserStoreException e) {
+            String errorMessage = "Error while authenticating the logged in user=" + baseUserNameWithTenant +
+                    " while revoking token for user=" + userName + " app=" + appName + " owned by=" + appOwner;
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, e);
         }
 
     }
