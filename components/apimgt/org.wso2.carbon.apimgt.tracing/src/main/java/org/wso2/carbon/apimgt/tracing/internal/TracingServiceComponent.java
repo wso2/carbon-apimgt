@@ -25,7 +25,6 @@ public class TracingServiceComponent {
             log.error("Error occured", t);
         }
     }
-
     protected void deactivate(ComponentContext componentContext) {
         log.info("*******Tracing Component deactivated**********");
     }

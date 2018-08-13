@@ -20,7 +20,6 @@ public class TracingServiceImpl implements TracingService {
     @Override
     public Tracer getTracer(String serviceName) {
         try {
-            log.error("$$$$$$$Praveen hello$$$$$$$$");
             String filePath = CarbonUtils.getCarbonConfigDirPath() + File.separator + "api-manager.xml";
             configuration.load(filePath);
 
@@ -28,7 +27,6 @@ public class TracingServiceImpl implements TracingService {
             e.printStackTrace();
         }
 
-        String t = configuration.getFirstProperty("APIManager.DataSourceName");
         String openTracerName = configuration.getFirstProperty("OpenTracer.Name");
         String enabled = configuration.getFirstProperty("OpenTracer.Enabled");
 
