@@ -2712,7 +2712,7 @@ definitions:
     properties:
       consumerKey:
         type: string
-        description: The consumer key associated with the application and identifying the client
+        description: The consumer key associated with the application and used to indetify the client
         example: vYDoc9s7IgAFdkSyNDaswBX7ejoa
       consumerSecret:
         type: string
@@ -2779,7 +2779,7 @@ definitions:
     properties:
       consumerKey:
         type: string
-        description: The consumer key associated with the application and identifying the client
+        description: The consumer key associated with the application and used to identify the client
         example: vYDoc9s7IgAFdkSyNDaswBX7ejoa
 
 
