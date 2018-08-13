@@ -22,11 +22,10 @@ package org.wso2.carbon.apimgt.rest.api.store.utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
+import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.Application;
-
-import static org.wso2.carbon.apimgt.core.dao.impl.DAOFactory.getApplicationDAO;
 
 /**
  * Manager class for Applications Import and Export handling
@@ -35,9 +34,11 @@ public class ApplicationImportExportManager {
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationImportExportManager.class);
     private APIStore apiStore;
+    private DAOFactory daoFactory;
 
-    public ApplicationImportExportManager(APIStore apiStore) {
+    public ApplicationImportExportManager(APIStore apiStore, DAOFactory daoFactory) {
         this.apiStore = apiStore;
+        this.daoFactory = daoFactory;
     }
 
     /**
@@ -70,7 +71,7 @@ public class ApplicationImportExportManager {
             throws APIManagementException {
         Application updatedApp = null;
         try {
-            if (getApplicationDAO().isApplicationNameExists(importedApplication.getName())) {
+            if (daoFactory.getApplicationDAO().isApplicationNameExists(importedApplication.getName())) {
                 Application existingApplication = apiStore.getApplicationByName(importedApplication.getName(),
                         username);
                 apiStore.updateApplication(existingApplication.getUuid(), importedApplication);

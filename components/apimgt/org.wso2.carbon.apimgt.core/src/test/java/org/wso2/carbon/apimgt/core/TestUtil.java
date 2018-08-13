@@ -49,28 +49,28 @@ public class TestUtil {
     }
 
     public static Application addTestApplication() throws APIMgtDAOException {
-        ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
+        ApplicationDAO applicationDAO = new DAOFactory().getApplicationDAO();
         Application application = SampleTestObjectCreator.createDefaultApplication();
         applicationDAO.addApplication(application);
         return application;
     }
 
     public static Application addTestApplicationWithPermissions() throws APIMgtDAOException {
-        ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
+        ApplicationDAO applicationDAO = new DAOFactory().getApplicationDAO();
         Application application = SampleTestObjectCreator.createApplicationWithPermissions();
         applicationDAO.addApplication(application);
         return application;
     }
 
     public static Application addCustomApplication(String applicationName, String owner) throws APIMgtDAOException {
-        ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
+        ApplicationDAO applicationDAO = new DAOFactory().getApplicationDAO();
         Application application = SampleTestObjectCreator.createCustomApplication(applicationName, owner);
         applicationDAO.addApplication(application);
         return application;
     }
 
     public static API addTestAPI() throws APIManagementException {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         apiDAO.addEndpoint(SampleTestObjectCreator.createMockEndpoint());
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         apiDAO.addAPI(api);
@@ -86,7 +86,7 @@ public class TestUtil {
      * @throws APIManagementException If failed to add subscription.
      */
     public static Subscription subscribeToAPI(API api, Application application) throws APIManagementException {
-        APISubscriptionDAO subscriptionDAO = DAOFactory.getAPISubscriptionDAO();
+        APISubscriptionDAO subscriptionDAO = new DAOFactory().getAPISubscriptionDAO();
         String subscriptionId = UUID.randomUUID().toString();
         subscriptionDAO.addAPISubscription(subscriptionId, api.getId(), application.getId(), api
                 .getPolicies().iterator().next().getUuid(), APIMgtConstants.SubscriptionStatus.ACTIVE);
@@ -94,7 +94,7 @@ public class TestUtil {
     }
 
     public static API addAlternativeAPI() throws APIManagementException {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         apiDAO.addEndpoint(SampleTestObjectCreator.createAlternativeEndpoint());
         API api = SampleTestObjectCreator.createAlternativeAPI().build();
         apiDAO.addAPI(api);
@@ -102,7 +102,7 @@ public class TestUtil {
     }
 
     public static API addCustomAPI(String name, String version, String context) throws APIManagementException {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         API api = SampleTestObjectCreator.createCustomAPI(name, version, context).build();
         apiDAO.addAPI(api);
         return api;

@@ -58,7 +58,7 @@ public class DAOFactory {
     private static final String EDITOR_SAVE_PATH = "editorSavePath";
     private static final String EDITOR_MODE = "editorMode";
 
-    public static ApiDAO getApiDAO() throws APIMgtDAOException {
+    public ApiDAO getApiDAO() throws APIMgtDAOException {
         ApiDAO apiDAO = null;
 
         if (System.getProperty(EDITOR_MODE) != null) {
@@ -104,7 +104,7 @@ public class DAOFactory {
         return apiDAO;
     }
 
-    public static ApplicationDAO getApplicationDAO() throws APIMgtDAOException {
+    public ApplicationDAO getApplicationDAO() throws APIMgtDAOException {
         ApplicationDAO appDAO = null;
 
         try (Connection connection = DAOUtil.getConnection()) {
@@ -133,7 +133,7 @@ public class DAOFactory {
         return appDAO;
     }
 
-    public static APISubscriptionDAO getAPISubscriptionDAO() throws APIMgtDAOException {
+    public APISubscriptionDAO getAPISubscriptionDAO() throws APIMgtDAOException {
         APISubscriptionDAO apiSubscriptionDAO = null;
 
         try (Connection connection = DAOUtil.getConnection()) {
@@ -164,7 +164,7 @@ public class DAOFactory {
         return apiSubscriptionDAO;
     }
 
-    public static PolicyDAO getPolicyDAO() throws APIMgtDAOException {
+    public PolicyDAO getPolicyDAO() throws APIMgtDAOException {
         PolicyDAO policyDAO = null;
 
         try (Connection connection = DAOUtil.getConnection()) {
@@ -195,7 +195,7 @@ public class DAOFactory {
         return policyDAO;
     }
 
-    public static TagDAO getTagDAO() throws APIMgtDAOException {
+    public TagDAO getTagDAO() throws APIMgtDAOException {
         TagDAO tagDAO = null;
 
         try (Connection connection = DAOUtil.getConnection()) {
@@ -224,7 +224,7 @@ public class DAOFactory {
         return tagDAO;
     }
 
-    public static LabelDAO getLabelDAO() throws APIMgtDAOException {
+    public LabelDAO getLabelDAO() throws APIMgtDAOException {
         LabelDAO labelDAO = null;
 
         try (Connection connection = DAOUtil.getConnection()) {
@@ -253,7 +253,7 @@ public class DAOFactory {
         return labelDAO;
     }
 
-    public static WorkflowDAO getWorkflowDAO() throws APIMgtDAOException {
+    public WorkflowDAO getWorkflowDAO() throws APIMgtDAOException {
         WorkflowDAO workflowDAO = null;
 
         try (Connection connection = DAOUtil.getConnection()) {
@@ -288,7 +288,7 @@ public class DAOFactory {
      * @return FunctionDAO object
      * @throws APIMgtDAOException In case of unhandled DB type or SQLException
      */
-    public static FunctionDAO getFunctionDAO() throws APIMgtDAOException {
+    public FunctionDAO getFunctionDAO() throws APIMgtDAOException {
         FunctionDAO functionDAO = null;
 
         try (Connection connection = DAOUtil.getConnection()) {
@@ -325,7 +325,7 @@ public class DAOFactory {
      * @return AnalyticsDAO object
      * @throws APIMgtDAOException if error during getting analytics database connection
      */
-    public static AnalyticsDAO getAnalyticsDAO() throws APIMgtDAOException {
+    public AnalyticsDAO getAnalyticsDAO() throws APIMgtDAOException {
         AnalyticsDAO analyticsDAO;
         boolean isAnalyticsEnabled = ServiceReferenceHolder.getInstance().getAPIMConfiguration()
                 .getAnalyticsConfigurations().isEnabled();
@@ -346,11 +346,11 @@ public class DAOFactory {
         return analyticsDAO;
     }
 
-    public static ThreatProtectionDAO getThreatProtectionDAO() {
+    public ThreatProtectionDAO getThreatProtectionDAO() {
         return new ThreatProtectionDAOImpl();
     }
 
-    private static AnalyticsDAO getAnalyticsDaoImplForVendor(Connection connection)
+    private AnalyticsDAO getAnalyticsDaoImplForVendor(Connection connection)
             throws SQLException, APIMgtDAOException {
         AnalyticsDAO analyticsDAO = null;
         String driverName = connection.getMetaData().getDriverName();
@@ -372,17 +372,17 @@ public class DAOFactory {
         return analyticsDAO;
     }
 
-    public static SystemApplicationDao getSystemApplicationDao() throws APIMgtDAOException {
+    public SystemApplicationDao getSystemApplicationDao() throws APIMgtDAOException {
         return new SystemApplicationDaoImpl();
     }
 
-    private static void setup() throws APIMgtDAOException {
+    private void setup() throws APIMgtDAOException {
         ApiDAOImpl.initResourceCategories();
         ApiDAOImpl.initApiTypes();
         LabelDAOImpl.initDefaultLabels();
     }
 
-    public static UserMappingDAO getUserMappingDAO() {
+    public UserMappingDAO getUserMappingDAO() {
         return new UserMappingDAOImpl();
     }
 

@@ -15,6 +15,7 @@ import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.dao.ThreatProtectionDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
+import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.dao.impl.LabelDAOImpl;
 import org.wso2.carbon.apimgt.core.exception.APIConfigRetrievalException;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
@@ -50,34 +51,48 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
 
     private static final Logger log = LoggerFactory.getLogger(APIStoreImpl.class);
 
-    private APISubscriptionDAO apiSubscriptionDAO;
-    private PolicyDAO policyDAO;
-    private ApiDAO apiDAO;
-    private LabelDAO labelDAO;
-    private ApplicationDAO applicationDAO;
     private APIMConfigurations apimConfiguration;
     private APIGateway apiGateway;
-    private WorkflowDAO workflowDAO;
-    private ThreatProtectionDAO threatProtectionDAO;
+    private DAOFactory daoFactory;
 
-    public APIMgtAdminServiceImpl(APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, ApiDAO apiDAO,
-                                  LabelDAO labelDAO, ApplicationDAO applicationDAO, APIGateway apiGateway,
-                                  WorkflowDAO workflowDAO, ThreatProtectionDAO threatProtectionDAO) {
-        this.apiSubscriptionDAO = apiSubscriptionDAO;
-        this.policyDAO = policyDAO;
-        this.apiDAO = apiDAO;
-        this.labelDAO = labelDAO;
+    public APIMgtAdminServiceImpl(DAOFactory daoFactory, APIGateway apiGateway) {
+        this.daoFactory = daoFactory;
         this.apimConfiguration = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
-        this.applicationDAO = applicationDAO;
         this.apiGateway = apiGateway;
-        this.workflowDAO = workflowDAO;
-        this.threatProtectionDAO = threatProtectionDAO;
+    }
+
+    protected PolicyDAO getPolicyDAO() throws APIMgtDAOException {
+        return daoFactory.getPolicyDAO();
+    }
+
+    protected APISubscriptionDAO getAPISubscriptionDAO() throws APIMgtDAOException {
+        return daoFactory.getAPISubscriptionDAO();
+    }
+
+    protected LabelDAO getLabelDAO() throws APIMgtDAOException {
+        return daoFactory.getLabelDAO();
+    }
+
+    protected ApiDAO getApiDAO() throws APIMgtDAOException {
+        return daoFactory.getApiDAO();
+    }
+
+    protected ApplicationDAO getApplicationDAO() throws APIMgtDAOException {
+        return daoFactory.getApplicationDAO();
+    }
+
+    protected WorkflowDAO getWorkflowDAO() throws APIMgtDAOException {
+        return daoFactory.getWorkflowDAO();
+    }
+
+    public ThreatProtectionDAO getThreatProtectionDAO() {
+        return daoFactory.getThreatProtectionDAO();
     }
 
     @Override
     public List<Policy> getPoliciesByLevel(PolicyLevel policyLevel) throws APIManagementException {
         try {
-            return policyDAO.getPoliciesByLevel(policyLevel);
+            return getPolicyDAO().getPoliciesByLevel(policyLevel);
 
         } catch (APIMgtDAOException e) {
             String errorMessage = "Couldn't retrieve Throttle Policies with level: " + policyLevel.name();
@@ -89,7 +104,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public Policy getPolicyByLevelAndName(PolicyLevel policyLevel, String policyName) throws APIManagementException {
         try {
-            return policyDAO.getPolicyByLevelAndName(policyLevel, policyName);
+            return getPolicyDAO().getPolicyByLevelAndName(policyLevel, policyName);
 
         } catch (APIMgtDAOException e) {
             String errorMessage = "Couldn't retrieve Throttle Policy with level: " + policyLevel.name() + ", name: "
@@ -101,13 +116,13 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
 
     @Override
     public List<SubscriptionValidationData> getAPISubscriptions(int limit) throws APIManagementException {
-        return apiSubscriptionDAO.getAPISubscriptionsOfAPIForValidation(limit);
+        return getAPISubscriptionDAO().getAPISubscriptionsOfAPIForValidation(limit);
     }
 
     @Override
     public List<SubscriptionValidationData> getAPISubscriptionsOfApi(String apiContext, String apiVersion)
             throws APIManagementException {
-        return apiSubscriptionDAO.getAPISubscriptionsOfAPIForValidation(apiContext, apiVersion);
+        return getAPISubscriptionDAO().getAPISubscriptionsOfAPIForValidation(apiContext, apiVersion);
     }
 
     @Override
@@ -122,7 +137,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
                 policyUuid = UUID.randomUUID().toString();
                 policy.setUuid(policyUuid);
             }
-            policyDAO.addApiPolicy(policy);
+            getPolicyDAO().addApiPolicy(policy);
             PolicyValidationData policyValidationData = new PolicyValidationData(policyUuid, policy.getPolicyName(),
                     false);
             apiGateway.addPolicy(policyValidationData);
@@ -147,7 +162,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
                 policyUuid = UUID.randomUUID().toString();
                 policy.setUuid(policyUuid);
             }
-            policyDAO.addApplicationPolicy(policy);
+            getPolicyDAO().addApplicationPolicy(policy);
             PolicyValidationData policyValidationData = new PolicyValidationData(policyUuid, policy.getPolicyName(),
                     false);
             apiGateway.addPolicy(policyValidationData);
@@ -172,7 +187,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
                 policyUuid = UUID.randomUUID().toString();
                 policy.setUuid(policyUuid);
             }
-            policyDAO.addSubscriptionPolicy(policy);
+            getPolicyDAO().addSubscriptionPolicy(policy);
             PolicyValidationData policyValidationData = new PolicyValidationData(policyUuid, policy.getPolicyName(),
                     policy.isStopOnQuotaReach());
             apiGateway.addPolicy(policyValidationData);
@@ -188,7 +203,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public void updateApiPolicy(APIPolicy policy) throws APIManagementException {
         try {
-            policyDAO.updateApiPolicy(policy);
+            getPolicyDAO().updateApiPolicy(policy);
             PolicyValidationData policyValidationData = new PolicyValidationData(policy.getUuid(), policy
                     .getPolicyName(), false);
             apiGateway.updatePolicy(policyValidationData);
@@ -202,7 +217,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public void updateSubscriptionPolicy(SubscriptionPolicy policy) throws APIManagementException {
         try {
-            policyDAO.updateSubscriptionPolicy(policy);
+            getPolicyDAO().updateSubscriptionPolicy(policy);
             PolicyValidationData policyValidationData = new PolicyValidationData(policy.getUuid(), policy
                     .getPolicyName(), policy.isStopOnQuotaReach());
             apiGateway.updatePolicy(policyValidationData);
@@ -216,7 +231,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public void updateApplicationPolicy(ApplicationPolicy policy) throws APIManagementException {
         try {
-            policyDAO.updateApplicationPolicy(policy);
+            getPolicyDAO().updateApplicationPolicy(policy);
             PolicyValidationData policyValidationData = new PolicyValidationData(policy.getUuid(), policy
                     .getPolicyName(), false);
             apiGateway.updatePolicy(policyValidationData);
@@ -230,8 +245,8 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public void deletePolicy(String policyName, PolicyLevel policyLevel) throws APIManagementException {
         try {
-            Policy policy = policyDAO.getPolicyByLevelAndName(policyLevel, policyName);
-            policyDAO.deletePolicy(policyLevel, policyName);
+            Policy policy = getPolicyDAO().getPolicyByLevelAndName(policyLevel, policyName);
+            getPolicyDAO().deletePolicy(policyLevel, policyName);
             PolicyValidationData policyValidationData = new PolicyValidationData(policy.getUuid(), policy
                     .getPolicyName(), false);
             apiGateway.deletePolicy(policyValidationData);
@@ -246,7 +261,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public void deletePolicyByUuid(String uuid, PolicyLevel policyLevel) throws APIManagementException {
         try {
-            policyDAO.deletePolicyByUuid(policyLevel, uuid);
+            getPolicyDAO().deletePolicyByUuid(policyLevel, uuid);
             PolicyValidationData policyValidationData = new PolicyValidationData(uuid, "", false);
             apiGateway.deletePolicy(policyValidationData);
         } catch (APIMgtDAOException e) {
@@ -260,7 +275,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     public APIPolicy getApiPolicy(String policyName) throws APIManagementException {
 
         try {
-            return policyDAO.getApiPolicy(policyName);
+            return getPolicyDAO().getApiPolicy(policyName);
 
         } catch (APIMgtDAOException e) {
             String errorMessage = "Couldn't retrieve API policy with name: " + policyName;
@@ -273,7 +288,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     public SubscriptionPolicy getSubscriptionPolicy(String policyName) throws APIManagementException {
 
         try {
-            return policyDAO.getSubscriptionPolicy(policyName);
+            return getPolicyDAO().getSubscriptionPolicy(policyName);
 
         } catch (APIMgtDAOException e) {
             String errorMessage = "Couldn't retrieve Subscription policy with name: " + policyName;
@@ -286,7 +301,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     public ApplicationPolicy getApplicationPolicy(String policyName) throws APIManagementException {
 
         try {
-            return policyDAO.getApplicationPolicy(policyName);
+            return getPolicyDAO().getApplicationPolicy(policyName);
 
         } catch (APIMgtDAOException e) {
             String errorMessage = "Couldn't retrieve Application policy with name: " + policyName;
@@ -298,7 +313,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public APIPolicy getApiPolicyByUuid(String uuid) throws APIManagementException {
         try {
-            return policyDAO.getApiPolicyByUuid(uuid);
+            return getPolicyDAO().getApiPolicyByUuid(uuid);
 
         } catch (APIMgtDAOException e) {
             String errorMessage = "Couldn't retrieve API policy with id: " + uuid;
@@ -310,7 +325,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public ApplicationPolicy getApplicationPolicyByUuid(String uuid) throws APIManagementException {
         try {
-            return policyDAO.getApplicationPolicyByUuid(uuid);
+            return getPolicyDAO().getApplicationPolicyByUuid(uuid);
 
         } catch (APIMgtDAOException e) {
             String errorMessage = "Couldn't retrieve Application policy with id: " + uuid;
@@ -323,7 +338,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public SubscriptionPolicy getSubscriptionPolicyByUuid(String uuid) throws APIManagementException {
         try {
-            return policyDAO.getSubscriptionPolicyByUuid(uuid);
+            return getPolicyDAO().getSubscriptionPolicyByUuid(uuid);
 
         } catch (APIMgtDAOException e) {
             String errorMessage = "Couldn't retrieve Subscription policy with id: " + uuid;
@@ -335,7 +350,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public List<APIPolicy> getApiPolicies() throws APIManagementException {
         try {
-            return policyDAO.getApiPolicies();
+            return getPolicyDAO().getApiPolicies();
         } catch (APIMgtDAOException e) {
             String errorMessage = "Couldn't retrieve API policies";
             log.error(errorMessage, e);
@@ -346,7 +361,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public List<ApplicationPolicy> getApplicationPolicies() throws APIManagementException {
         try {
-            return policyDAO.getApplicationPolicies();
+            return getPolicyDAO().getApplicationPolicies();
         } catch (APIMgtDAOException e) {
             String errorMessage = "Couldn't retrieve Application policies";
             log.error(errorMessage, e);
@@ -357,7 +372,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public List<SubscriptionPolicy> getSubscriptionPolicies() throws APIManagementException {
         try {
-            return policyDAO.getSubscriptionPolicies();
+            return getPolicyDAO().getSubscriptionPolicies();
         } catch (APIMgtDAOException e) {
             String errorMessage = "Couldn't retrieve Subscription policies";
             log.error(errorMessage, e);
@@ -368,7 +383,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public List<Label> getLabels() throws APIManagementException {
         try {
-             return labelDAO.getLabels();
+             return getLabelDAO().getLabels();
         } catch (APIMgtDAOException e) {
             String msg = "Error occurred while Getting all  labels";
             throw new APIManagementException(msg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
@@ -379,7 +394,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     public Label getLabelByID(String labelID) throws APIManagementException {
         Label  label = null;
         try {
-            label = labelDAO.getLabelByID(labelID);
+            label = getLabelDAO().getLabelByID(labelID);
         } catch (APIMgtDAOException e) {
             String msg = "Error occurred while getting the label by ID";
             throw new APIManagementException(msg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
@@ -390,7 +405,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     public void deleteLabel(String labelId) throws APIManagementException {
 
         try {
-            labelDAO.deleteLabel(labelId);
+            getLabelDAO().deleteLabel(labelId);
         } catch (APIMgtDAOException e) {
             String msg = "Error occurred while deleting label [labelId] " + labelId;
             log.error(msg, e);
@@ -409,7 +424,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
 
     public Label updateLabel(Label updatedLabel) throws APIManagementException {
         try {
-            return labelDAO.updateLabel(updatedLabel);
+            return getLabelDAO().updateLabel(updatedLabel);
         } catch (APIMgtDAOException e) {
             String msg = "Error occurred while updating the label -" + updatedLabel.getId();
             throw new APIManagementException(msg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
@@ -428,7 +443,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
             }
 
             try {
-                List<Label> existingLabels = labelDAO.getLabelsByName(labelNames);
+                List<Label> existingLabels = getLabelDAO().getLabelsByName(labelNames);
 
                 if (!existingLabels.isEmpty()) {
                     List<Label> labelsToRemove = new ArrayList<>();
@@ -437,7 +452,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
                         for (Label label : labels) {
                             if (existingLabel.getName().equals(label.getName())) {
                                 if (overwriteValues) {
-                                    labelDAO.updateLabel(label);
+                                    getLabelDAO().updateLabel(label);
                                 }
                                 labelsToRemove.add(label);
                             }
@@ -445,7 +460,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
                     }
                     labels.removeAll(labelsToRemove);    // Remove already existing labels from the list
                 }
-                labelDAO.addLabels(labels);
+                getLabelDAO().addLabels(labels);
             } catch (APIMgtDAOException e) {
                 String msg = "Error occurred while registering gateway labels";
                 log.error(msg, e);
@@ -458,7 +473,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public String getAPIGatewayServiceConfig(String apiId) throws APIConfigRetrievalException {
         try {
-            return apiDAO.getGatewayConfigOfAPI(apiId);
+            return getApiDAO().getGatewayConfigOfAPI(apiId);
         } catch (APIMgtDAOException e) {
             String errorMessage = "Couldn't retrieve gateway configuration for apiId " + apiId;
             log.error(errorMessage, e);
@@ -469,7 +484,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public List<UriTemplate> getAllResourcesForApi(String apiContext, String apiVersion) throws APIManagementException {
         try {
-            return apiDAO.getResourcesOfApi(apiContext, apiVersion);
+            return getApiDAO().getResourcesOfApi(apiContext, apiVersion);
         } catch (APIMgtDAOException e) {
             String msg = "Couldn't retrieve resources for Api Name: " + apiContext;
             log.error(msg, e);
@@ -483,7 +498,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         List<API> apiList;
         try {
             if (gatewayLabels != null && status != null) {
-                apiList = apiDAO.getAPIsByStatus(gatewayLabels, status);
+                apiList = getApiDAO().getAPIsByStatus(gatewayLabels, status);
             } else {
                 if (gatewayLabels == null) {
                     String msg = "Gateway labels cannot be null";
@@ -508,7 +523,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         List<API> apiList;
         try {
             if (gatewayLabels != null) {
-                apiList = apiDAO.getAPIsByGatewayLabel(gatewayLabels);
+                apiList = getApiDAO().getAPIsByGatewayLabel(gatewayLabels);
             } else {
                 String msg = "Gateway labels cannot be null";
                 log.error(msg);
@@ -530,7 +545,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public List<Application> getAllApplications() throws APIManagementException {
         try {
-            return applicationDAO.getAllApplications();
+            return getApplicationDAO().getAllApplications();
         } catch (APIMgtDAOException ex) {
             String msg = "Error occurred while getting the Application list";
             log.error(msg, ex);
@@ -541,7 +556,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public List<Endpoint> getAllEndpoints() throws APIManagementException {
         try {
-            return apiDAO.getEndpoints();
+            return getApiDAO().getEndpoints();
         } catch (APIMgtDAOException ex) {
             String msg = "Error occurred while getting the Endpoint list";
             log.error(msg, ex);
@@ -552,7 +567,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public String getEndpointGatewayConfig(String endpointId) throws APIManagementException {
         try {
-            return apiDAO.getEndpointConfig(endpointId);
+            return getApiDAO().getEndpointConfig(endpointId);
         } catch (APIMgtDAOException ex) {
             String msg = "Error occurred while getting the Endpoint Configuration";
             log.error(msg, ex);
@@ -564,7 +579,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public Set<PolicyValidationData> getAllPolicies() throws APIManagementException {
         try {
-            return policyDAO.getAllPolicies();
+            return getPolicyDAO().getAllPolicies();
         } catch (APIMgtDAOException ex) {
             String msg = "Error occurred while retrieving policies";
             log.error(msg, ex);
@@ -578,7 +593,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
             if (StringUtils.isEmpty(blockConditions.getUuid())) {
                 blockConditions.setUuid(UUID.randomUUID().toString());
             }
-            policyDAO.addBlockConditions(blockConditions);
+            getPolicyDAO().addBlockConditions(blockConditions);
             apiGateway.addBlockCondition(blockConditions);
             return blockConditions.getUuid();
         } catch (APIMgtDAOException e) {
@@ -593,7 +608,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public boolean updateBlockConditionStateByUUID(String uuid, Boolean state) throws APIManagementException {
         try {
-            if (policyDAO.updateBlockConditionStateByUUID(uuid, state)) {
+            if (getPolicyDAO().updateBlockConditionStateByUUID(uuid, state)) {
                 BlockConditions blockConditions = getBlockConditionByUUID(uuid);
                 apiGateway.updateBlockCondition(blockConditions);
                 return true;
@@ -611,7 +626,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     public boolean deleteBlockConditionByUuid(String uuid) throws APIManagementException {
         try {
             BlockConditions blockConditions = getBlockConditionByUUID(uuid);
-            if (policyDAO.deleteBlockConditionByUuid(uuid)) {
+            if (getPolicyDAO().deleteBlockConditionByUuid(uuid)) {
                 apiGateway.deleteBlockCondition(blockConditions);
                 return true;
             } else {
@@ -627,7 +642,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public List<BlockConditions> getBlockConditions() throws APIManagementException {
         try {
-            return policyDAO.getBlockConditions();
+            return getPolicyDAO().getBlockConditions();
         } catch (APIMgtDAOException e) {
             String errorMessage = "Couldn't get list of block conditions.";
             log.error(errorMessage, e);
@@ -638,7 +653,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public BlockConditions getBlockConditionByUUID(String uuid) throws APIManagementException {
         try {
-            return policyDAO.getBlockConditionByUUID(uuid);
+            return getPolicyDAO().getBlockConditionByUUID(uuid);
         } catch (APIMgtDAOException e) {
             String errorMessage = "Couldn't get block condition by UUID: " + uuid;
             log.error(errorMessage, e);
@@ -650,7 +665,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     public String addCustomRule(CustomPolicy customPolicy) throws APIManagementException {
         try {
             //todo: deploy policy in CEP
-            return policyDAO.addCustomPolicy(customPolicy);
+            return getPolicyDAO().addCustomPolicy(customPolicy);
         } catch (APIMgtDAOException e) {
             String errorMessage = "Couldn't add custom policy with policy name: " + customPolicy.getPolicyName();
             log.error(errorMessage, e);
@@ -661,7 +676,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public void updateCustomRule(CustomPolicy customPolicy) throws APIManagementException {
         try {
-            policyDAO.updateCustomPolicy(customPolicy);
+            getPolicyDAO().updateCustomPolicy(customPolicy);
         } catch (APIMgtDAOException e) {
             String errorMessage = "Couldn't update custom policy with UUID: " + customPolicy.getUuid();
             log.error(errorMessage, e);
@@ -672,7 +687,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public void deleteCustomRule(String uuid) throws APIManagementException {
         try {
-            policyDAO.deleteCustomPolicy(uuid);
+            getPolicyDAO().deleteCustomPolicy(uuid);
         } catch (APIMgtDAOException e) {
             String errorMessage = "Couldn't delete custom policy with UUID: " + uuid;
             log.error(errorMessage, e);
@@ -683,7 +698,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public List<CustomPolicy> getCustomRules() throws APIManagementException {
         try {
-            return policyDAO.getCustomPolicies();
+            return getPolicyDAO().getCustomPolicies();
         } catch (APIMgtDAOException e) {
             String errorMessage = "Couldn't get list of custom policy.";
             log.error(errorMessage, e);
@@ -694,7 +709,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public CustomPolicy getCustomRuleByUUID(String uuid) throws APIManagementException {
         try {
-            return policyDAO.getCustomPolicyByUuid(uuid);
+            return getPolicyDAO().getCustomPolicyByUuid(uuid);
         } catch (APIMgtDAOException e) {
             String errorMessage = "Couldn't get custom policy by UUID: " + uuid;
             log.error(errorMessage, e);
@@ -708,7 +723,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
             log.debug("Retrieving workflow for refId: " + workflowRefId);
         }
         try {
-            return workflowDAO.retrieveWorkflow(workflowRefId);    
+            return getWorkflowDAO().retrieveWorkflow(workflowRefId);
         } catch (APIMgtDAOException e) {
             String message = "Error while retrieving workflow entry for :" + workflowRefId;
             log.error(message, e);
@@ -738,7 +753,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
             throw new APIManagementException(message, ExceptionCodes.WORKFLOW_RETRIEVE_EXCEPTION);
         }
         try {
-            return workflowDAO.retrieveUncompleteWorkflows(type);
+            return getWorkflowDAO().retrieveUncompleteWorkflows(type);
         } catch (APIMgtDAOException e) {
             String message = "Error while retrieving workflow information";
             log.error(message, e);
@@ -752,7 +767,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
             log.debug("Requesting all uncompleted workflow information ");
         }
         try {
-            return workflowDAO.retrieveUncompleteWorkflows();
+            return getWorkflowDAO().retrieveUncompleteWorkflows();
         } catch (APIMgtDAOException e) {
             String message = "Error while retrieving workflow information";
             log.error(message, e);
@@ -763,7 +778,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public ThreatProtectionPolicy getThreatProtectionPolicy(String policyId) throws APIManagementException {
         try {
-            return threatProtectionDAO.getPolicy(policyId);
+            return getThreatProtectionDAO().getPolicy(policyId);
         } catch (APIMgtDAOException e) {
             String message = "Error while retrieving threat protection policy";
             log.error(message, e);
@@ -774,7 +789,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public List<ThreatProtectionPolicy> getThreatProtectionPolicyList() throws APIManagementException {
         try {
-            return threatProtectionDAO.getPolicies();
+            return getThreatProtectionDAO().getPolicies();
         } catch (APIMgtDAOException e) {
             String message = "Error while retrieving threat protection policy list";
             log.error(message, e);
@@ -787,10 +802,10 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         try {
             if (StringUtils.isBlank(policy.getUuid())) {
                 policy.setUuid(UUID.randomUUID().toString());
-                threatProtectionDAO.addPolicy(policy);
+                getThreatProtectionDAO().addPolicy(policy);
                 apiGateway.addThreatProtectionPolicy(policy);
             } else {
-                threatProtectionDAO.updatePolicy(policy);
+                getThreatProtectionDAO().updatePolicy(policy);
                 apiGateway.updateThreatProtectionPolicy(policy);
             }
         } catch (APIMgtDAOException e) {
@@ -803,7 +818,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public void deleteThreatProtectionPolicy(String policyId) throws APIManagementException {
         try {
-            threatProtectionDAO.deletePolicy(policyId);
+            getThreatProtectionDAO().deletePolicy(policyId);
 
             ThreatProtectionPolicy policy = new ThreatProtectionPolicy();
             policy.setUuid(policyId);

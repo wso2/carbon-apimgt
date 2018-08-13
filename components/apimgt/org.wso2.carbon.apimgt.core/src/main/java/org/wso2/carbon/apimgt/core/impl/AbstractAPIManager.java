@@ -41,6 +41,7 @@ import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.dao.TagDAO;
 import org.wso2.carbon.apimgt.core.dao.ThreatProtectionDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
+import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
@@ -68,55 +69,36 @@ public abstract class AbstractAPIManager implements APIManager {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractAPIManager.class);
 
-    private ApiDAO apiDAO;
-    private ApplicationDAO applicationDAO;
-    private APISubscriptionDAO apiSubscriptionDAO;
-    private PolicyDAO policyDAO;
     private String username;
     private IdentityProvider identityProvider;
     private KeyManager keyManager;
     private APILifecycleManager apiLifecycleManager;
-    private LabelDAO labelDAO;
-    private WorkflowDAO workflowDAO;
-    private TagDAO tagDAO;
-    private ThreatProtectionDAO threatProtectionDAO;
     private GatewaySourceGenerator gatewaySourceGenerator;
     private APIGateway apiGatewayPublisher;
     protected APIDefinition apiDefinitionFromSwagger20 = new APIDefinitionFromSwagger20();
     protected APIMConfigurations config;
+    private DAOFactory daoFactory;
 
-    public AbstractAPIManager(String username, IdentityProvider idp, KeyManager keyManager, ApiDAO apiDAO,
-                              ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO,
-                              APILifecycleManager apiLifecycleManager, LabelDAO labelDAO, WorkflowDAO workflowDAO,
-                              TagDAO tagDAO, ThreatProtectionDAO threatProtectionDAO,
-                              GatewaySourceGenerator gatewaySourceGenerator, APIGateway apiGatewayPublisher) {
+    public AbstractAPIManager(String username, IdentityProvider idp, KeyManager keyManager, DAOFactory daoFactory,
+                              APILifecycleManager apiLifecycleManager, GatewaySourceGenerator gatewaySourceGenerator,
+                              APIGateway apiGatewayPublisher) {
 
+        this.daoFactory = daoFactory;
         this.username = username;
         this.identityProvider = idp;
         this.keyManager = keyManager;
-        this.apiDAO = apiDAO;
-        this.applicationDAO = applicationDAO;
-        this.apiSubscriptionDAO = apiSubscriptionDAO;
-        this.policyDAO = policyDAO;
-        this.apiLifecycleManager = apiLifecycleManager;
-        this.labelDAO = labelDAO;
-        this.workflowDAO = workflowDAO;
-        this.tagDAO = tagDAO;
-        this.threatProtectionDAO = threatProtectionDAO;
         this.gatewaySourceGenerator = gatewaySourceGenerator;
         this.apiGatewayPublisher = apiGatewayPublisher;
+        this.apiLifecycleManager = apiLifecycleManager;
         this.config = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
     }
 
-    public AbstractAPIManager(String username, IdentityProvider idp, KeyManager keyManager, ApiDAO apiDAO,
-                              ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO,
-                              APILifecycleManager apiLifecycleManager, LabelDAO labelDAO, WorkflowDAO workflowDAO,
-                              TagDAO tagDAO) {
+    public AbstractAPIManager(String username, IdentityProvider idp, KeyManager keyManager, DAOFactory daoFactory,
+                              APILifecycleManager apiLifecycleManager) {
 
-        this(username, idp, keyManager, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, apiLifecycleManager,
-                labelDAO, workflowDAO, tagDAO, null, new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
+        this(username, idp, keyManager, daoFactory, apiLifecycleManager, new GatewaySourceGeneratorImpl()
+                , new APIGatewayPublisherImpl());
     }
-
 
     /**
      * Returns details of an API.
@@ -128,7 +110,7 @@ public abstract class AbstractAPIManager implements APIManager {
     @Override
     public API getAPIbyUUID(String uuid) throws APIManagementException {
         try {
-            return apiDAO.getAPI(uuid);
+            return getApiDAO().getAPI(uuid);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while retrieving API with id " + uuid;
             log.error(errorMsg, e);
@@ -143,7 +125,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public String getLastUpdatedTimeOfAPI(String apiId) throws APIManagementException {
         String lastUpdatedTime;
         try {
-            lastUpdatedTime = apiDAO.getLastUpdatedTimeOfAPI(apiId);
+            lastUpdatedTime = getApiDAO().getLastUpdatedTimeOfAPI(apiId);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while retrieving the last update time of API with id " + apiId;
             log.error(errorMsg, e);
@@ -161,7 +143,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public String getLastUpdatedTimeOfSwaggerDefinition(String apiId) throws APIManagementException {
         String lastUpdatedTime;
         try {
-            lastUpdatedTime = apiDAO.getLastUpdatedTimeOfSwaggerDefinition(apiId);
+            lastUpdatedTime = getApiDAO().getLastUpdatedTimeOfSwaggerDefinition(apiId);
         } catch (APIMgtDAOException e) {
             String errorMsg =
                     "Error occurred while retrieving the last update time of the swagger definition of API with id "
@@ -216,7 +198,8 @@ public abstract class AbstractAPIManager implements APIManager {
      * @return true if the api name already exists and false otherwise
      * @throws APIManagementException if failed to check the context availability
      */
-    @Override public boolean isApiNameExist(String apiName) throws APIManagementException {
+    @Override
+    public boolean isApiNameExist(String apiName) throws APIManagementException {
         try {
             return getApiDAO().isAPINameExists(apiName, username);
 
@@ -245,7 +228,7 @@ public abstract class AbstractAPIManager implements APIManager {
      *
      * @param api id of the String
      * @return swagger string
-     * @throws APIManagementException   If failed to retrieve swagger definition.
+     * @throws APIManagementException If failed to retrieve swagger definition.
      */
     @Override
     public String getApiSwaggerDefinition(String api) throws APIManagementException {
@@ -273,9 +256,9 @@ public abstract class AbstractAPIManager implements APIManager {
     /**
      * Returns a paginated list of documentation attached to a particular API
      *
-     * @param apiId UUID of API
+     * @param apiId  UUID of API
      * @param offset The number of results from the beginning that is to be ignored
-     * @param limit The maximum number of results to be returned after the offset
+     * @param limit  The maximum number of results to be returned after the offset
      * @return {@code List<DocumentInfo>} Document meta data list
      * @throws APIManagementException if it failed to fetch Documentations
      */
@@ -349,15 +332,16 @@ public abstract class AbstractAPIManager implements APIManager {
 
     /**
      * Returns the corresponding application given the uuid
-     * @param uuid uuid of the Application
-     * @param userId  Name of the User.
+     *
+     * @param uuid   uuid of the Application
+     * @param userId Name of the User.
      * @return it will return Application corresponds to the uuid provided.
-     * @throws APIManagementException   If failed to retrieve application.
+     * @throws APIManagementException If failed to retrieve application.
      */
     public Application getApplication(String uuid, String userId) throws APIManagementException {
         Application application = null;
         try {
-           application = getApplicationDAO().getApplication(uuid);
+            application = getApplicationDAO().getApplication(uuid);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while retrieving application - ";
             log.error(errorMsg, e);
@@ -370,19 +354,18 @@ public abstract class AbstractAPIManager implements APIManager {
      * Return {@link Subscription} of subscription id
      *
      * @param subId UUID of the subscription.
-     * @return  Subscription object.
-     * @throws APIManagementException   If failed to retrieve subscription.
+     * @return Subscription object.
+     * @throws APIManagementException If failed to retrieve subscription.
      */
     public Subscription getSubscriptionByUUID(String subId) throws APIManagementException {
         try {
-            return getApiSubscriptionDAO().getAPISubscription(subId);
+            return getAPISubscriptionDAO().getAPISubscription(subId);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Couldn't retrieve subscription for id " + subId;
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg + subId);
         }
     }
-
 
 
     /**
@@ -441,7 +424,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public String getLastUpdatedTimeOfDocument(String documentId) throws APIManagementException {
         String lastUpdatedTime;
         try {
-            lastUpdatedTime = apiDAO.getLastUpdatedTimeOfDocument(documentId);
+            lastUpdatedTime = getApiDAO().getLastUpdatedTimeOfDocument(documentId);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while retrieving the last updated time of document " + documentId;
             log.error(errorMsg, e);
@@ -457,7 +440,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public String getLastUpdatedTimeOfDocumentContent(String apiId, String documentId) throws APIManagementException {
         String lastUpdatedTime;
         try {
-            lastUpdatedTime = apiDAO.getLastUpdatedTimeOfDocumentContent(apiId, documentId);
+            lastUpdatedTime = getApiDAO().getLastUpdatedTimeOfDocumentContent(apiId, documentId);
         } catch (APIMgtDAOException e) {
             String errorMsg =
                     "Error occurred while retrieving the last updated time of the document's content " + documentId;
@@ -474,7 +457,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public String getLastUpdatedTimeOfAPIThumbnailImage(String apiId) throws APIManagementException {
         String lastUpdatedTime;
         try {
-            lastUpdatedTime = apiDAO.getLastUpdatedTimeOfAPIThumbnailImage(apiId);
+            lastUpdatedTime = getApiDAO().getLastUpdatedTimeOfAPIThumbnailImage(apiId);
         } catch (APIMgtDAOException e) {
             String errorMsg =
                     "Error occurred while retrieving the last updated time of the thumbnail image of the API " + apiId;
@@ -491,7 +474,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public String getLastUpdatedTimeOfApplication(String applicationId) throws APIManagementException {
         String lastUpdatedTime;
         try {
-            lastUpdatedTime = applicationDAO.getLastUpdatedTimeOfApplication(applicationId);
+            lastUpdatedTime = getApplicationDAO().getLastUpdatedTimeOfApplication(applicationId);
         } catch (APIMgtDAOException e) {
             String errorMsg =
                     "Error occurred while retrieving the last updated time of the application " + applicationId;
@@ -505,7 +488,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public String getLastUpdatedTimeOfComment(String commentId) throws APIManagementException {
         String lastUpdatedTime;
         try {
-            lastUpdatedTime = apiDAO.getLastUpdatedTimeOfComment(commentId);
+            lastUpdatedTime = getApiDAO().getLastUpdatedTimeOfComment(commentId);
         } catch (APIMgtDAOException e) {
             String errorMsg =
                     "Error occurred while retrieving the last updated time of the comment " + commentId;
@@ -522,7 +505,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public String getLastUpdatedTimeOfSubscription(String subscriptionId) throws APIManagementException {
         String lastUpdatedTime;
         try {
-            lastUpdatedTime = apiSubscriptionDAO.getLastUpdatedTimeOfSubscription(subscriptionId);
+            lastUpdatedTime = getAPISubscriptionDAO().getLastUpdatedTimeOfSubscription(subscriptionId);
         } catch (APIMgtDAOException e) {
             String errorMsg =
                     "Error occurred while retrieving the last updated time of the subscription " + subscriptionId;
@@ -554,12 +537,12 @@ public abstract class AbstractAPIManager implements APIManager {
      *
      * @param apiId UUID of the API.
      * @return List of the subscriptions.
-     * @throws APIManagementException   If failed to get list of subscriptions.
+     * @throws APIManagementException If failed to get list of subscriptions.
      */
     @Override
     public List<Subscription> getSubscriptionsByAPI(String apiId) throws APIManagementException {
         try {
-            return apiSubscriptionDAO.getAPISubscriptionsByAPI(apiId);
+            return getAPISubscriptionDAO().getAPISubscriptionsByAPI(apiId);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Couldn't find subscriptions for apiId " + apiId;
             log.error(errorMsg, e);
@@ -567,28 +550,28 @@ public abstract class AbstractAPIManager implements APIManager {
         }
     }
 
-    protected ApiDAO getApiDAO() {
-        return apiDAO;
+    protected ApiDAO getApiDAO() throws APIMgtDAOException {
+        return daoFactory.getApiDAO();
     }
 
-    protected ApplicationDAO getApplicationDAO() {
-        return applicationDAO;
+    protected ApplicationDAO getApplicationDAO() throws APIMgtDAOException {
+        return daoFactory.getApplicationDAO();
     }
 
-    protected APISubscriptionDAO getApiSubscriptionDAO() {
-        return apiSubscriptionDAO;
+    protected APISubscriptionDAO getAPISubscriptionDAO() throws APIMgtDAOException {
+        return daoFactory.getAPISubscriptionDAO();
     }
 
-    protected PolicyDAO getPolicyDAO() {
-        return policyDAO;
+    protected PolicyDAO getPolicyDAO() throws APIMgtDAOException {
+        return daoFactory.getPolicyDAO();
     }
 
-    protected LabelDAO getLabelDAO() {
-        return labelDAO;
+    protected LabelDAO getLabelDAO() throws APIMgtDAOException {
+        return daoFactory.getLabelDAO();
     }
 
-    protected WorkflowDAO getWorkflowDAO() {
-        return workflowDAO;
+    protected WorkflowDAO getWorkflowDAO() throws APIMgtDAOException {
+        return daoFactory.getWorkflowDAO();
     }
 
     protected String getUsername() {
@@ -618,22 +601,22 @@ public abstract class AbstractAPIManager implements APIManager {
         }
         return workflow.completeWorkflow(workflowExecutor);
     }
-    
+
     /**
      * Retrieve workflow for given internal ref id
-     * 
+     *
      * @param workflowRefId workflow reference id
      * @return Workflow workflow.
-     * @throws APIManagementException  If failed to get list of subscriptions.
+     * @throws APIManagementException If failed to get list of subscriptions.
      */
     public Workflow retrieveWorkflow(String workflowRefId) throws APIManagementException {
         try {
-            return workflowDAO.retrieveWorkflow(workflowRefId);    
+            return getWorkflowDAO().retrieveWorkflow(workflowRefId);
         } catch (APIMgtDAOException e) {
             String message = "Error while updating workflow entry";
             log.error(message);
             throw new APIManagementException(message, e, e.getErrorHandler());
-        }        
+        }
     }
 
     protected void addWorkflowEntries(Workflow workflow) throws APIManagementException {
@@ -648,7 +631,7 @@ public abstract class AbstractAPIManager implements APIManager {
         }
 
     }
-    
+
     protected void cleanupPendingTask(WorkflowExecutor executor, String internalWFReference, String workflowType)
             throws APIMgtDAOException {
         Optional<String> externalWfReferenceId = getWorkflowDAO().
@@ -664,11 +647,11 @@ public abstract class AbstractAPIManager implements APIManager {
             getWorkflowDAO().deleteWorkflowEntryforExternalReference(externalWfReferenceId.get());
         }
     }
-    
+
     @Override
     public Label getLabelByID(String labelID) throws APIManagementException {
         try {
-            return labelDAO.getLabelByID(labelID);
+            return getLabelDAO().getLabelByID(labelID);
         } catch (APIMgtDAOException e) {
             String message = "Error occured while retrieving Label information for " + labelID;
             log.error(message);
@@ -696,11 +679,11 @@ public abstract class AbstractAPIManager implements APIManager {
         return config;
     }
 
-    public TagDAO getTagDAO() {
-        return tagDAO;
+    protected TagDAO getTagDAO() throws APIMgtDAOException {
+        return daoFactory.getTagDAO();
     }
 
     public ThreatProtectionDAO getThreatProtectionDAO() {
-        return threatProtectionDAO;
+        return daoFactory.getThreatProtectionDAO();
     }
 }

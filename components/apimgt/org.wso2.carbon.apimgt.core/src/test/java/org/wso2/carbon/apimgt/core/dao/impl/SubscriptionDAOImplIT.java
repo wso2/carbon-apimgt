@@ -69,7 +69,7 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         API api = TestUtil.addTestAPI();
         //add subscription
         String subscriptionTier = GOLD_TIER;
-        APISubscriptionDAO apiSubscriptionDAO = DAOFactory.getAPISubscriptionDAO();
+        APISubscriptionDAO apiSubscriptionDAO = new DAOFactory().getAPISubscriptionDAO();
         String uuid = UUID.randomUUID().toString();
         apiSubscriptionDAO.addAPISubscription(uuid, api.getId(), app.getId(), goldSubscriptionPolicy.getUuid(),
                 APIMgtConstants.SubscriptionStatus.ACTIVE);
@@ -95,7 +95,7 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         API api = TestUtil.addTestAPI();
         //add subscription
         String subscriptionPolicy = GOLD_TIER;
-        APISubscriptionDAO apiSubscriptionDAO = DAOFactory.getAPISubscriptionDAO();
+        APISubscriptionDAO apiSubscriptionDAO = new DAOFactory().getAPISubscriptionDAO();
         String uuid = UUID.randomUUID().toString();
         apiSubscriptionDAO.addAPISubscription(uuid, api.getId(), app.getId(), goldSubscriptionPolicy.getUuid(),
                 APIMgtConstants.SubscriptionStatus.ACTIVE);
@@ -154,8 +154,8 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         //add test apis, apps and subscriptions
         ApisAndApps apisAndApps = createApisAppsAndSubscriptions();
 
-        APISubscriptionDAO subscriptionDAO = DAOFactory.getAPISubscriptionDAO();
-        ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
+        APISubscriptionDAO subscriptionDAO = new DAOFactory().getAPISubscriptionDAO();
+        ApplicationDAO applicationDAO = new DAOFactory().getApplicationDAO();
 
         API api1 = apisAndApps.getApis().get(0);
         API api2 = apisAndApps.getApis().get(1);
@@ -237,8 +237,8 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         //add test apis, apps and subscriptions
         ApisAndApps apisAndApps = createApisAppsAndSubscriptions();
 
-        APISubscriptionDAO subscriptionDAO = DAOFactory.getAPISubscriptionDAO();
-        ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
+        APISubscriptionDAO subscriptionDAO = new DAOFactory().getAPISubscriptionDAO();
+        ApplicationDAO applicationDAO = new DAOFactory().getApplicationDAO();
 
         API api1 = apisAndApps.getApis().get(0);
         API api2 = apisAndApps.getApis().get(1);
@@ -338,8 +338,8 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         //app2: api1, api2
         ApisAndApps apisAndApps = createApisAppsAndSubscriptions();
 
-        APISubscriptionDAO subscriptionDAO = DAOFactory.getAPISubscriptionDAO();
-        ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
+        APISubscriptionDAO subscriptionDAO = new DAOFactory().getAPISubscriptionDAO();
+        ApplicationDAO applicationDAO = new DAOFactory().getApplicationDAO();
         
         API api1 = apisAndApps.getApis().get(0);
         API api2 = apisAndApps.getApis().get(1);
@@ -371,8 +371,8 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         //app4: api1, api2, api3, api4
         ApisAndApps apisAndApps = createApisAppsAndSubscriptions();
 
-        APISubscriptionDAO subscriptionDAO = DAOFactory.getAPISubscriptionDAO();
-        ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
+        APISubscriptionDAO subscriptionDAO = new DAOFactory().getAPISubscriptionDAO();
+        ApplicationDAO applicationDAO = new DAOFactory().getApplicationDAO();
 
         API api2 = apisAndApps.getApis().get(1);
 
@@ -405,8 +405,8 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         //app4: api1, api2, api3, api4
         ApisAndApps apisAndApps = createApisAppsAndSubscriptions();
 
-        APISubscriptionDAO subscriptionDAO = DAOFactory.getAPISubscriptionDAO();
-        ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
+        APISubscriptionDAO subscriptionDAO = new DAOFactory().getAPISubscriptionDAO();
+        ApplicationDAO applicationDAO = new DAOFactory().getApplicationDAO();
 
         API api2 = apisAndApps.getApis().get(1);
 
@@ -444,7 +444,7 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         //app4: api1, api2, api3, api4
         createApisAppsAndSubscriptions();
 
-        APISubscriptionDAO subscriptionDAO = DAOFactory.getAPISubscriptionDAO();
+        APISubscriptionDAO subscriptionDAO = new DAOFactory().getAPISubscriptionDAO();
 
         //TODO getAPISubscriptionsForUser() pagination not implemented properly
         List<Subscription> subscriptions = subscriptionDAO.getAPISubscriptionsForUser(0, Integer.MAX_VALUE, "admin");
@@ -462,7 +462,7 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         Application app2 = TestUtil.addCustomApplication(APP_2, ADMIN);
 
         //Add subscriptions
-        APISubscriptionDAO subscriptionDAO = DAOFactory.getAPISubscriptionDAO();
+        APISubscriptionDAO subscriptionDAO = new DAOFactory().getAPISubscriptionDAO();
 
         //api1v1: app1, app2
         subscriptionDAO.addAPISubscription(UUID.randomUUID().toString(), api1v1.getId(), app1.getId(),
@@ -496,7 +496,7 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         //add test apis, apps and subscriptions
         ApisAndApps apisAndApps = createApisAppsAndSubscriptions();
 
-        APISubscriptionDAO subscriptionDAO = DAOFactory.getAPISubscriptionDAO();
+        APISubscriptionDAO subscriptionDAO = new DAOFactory().getAPISubscriptionDAO();
 
         API api1 = apisAndApps.getApis().get(0);
         API api2 = apisAndApps.getApis().get(1);
@@ -598,7 +598,7 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         //add test apis, apps and subscriptions
         ApisAndApps apisAndApps = createApisAppsAndSubscriptions();
 
-        APISubscriptionDAO subscriptionDAO = DAOFactory.getAPISubscriptionDAO();
+        APISubscriptionDAO subscriptionDAO = new DAOFactory().getAPISubscriptionDAO();
 
         API api1 = apisAndApps.getApis().get(0);
         API api2 = apisAndApps.getApis().get(1);
@@ -689,7 +689,7 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         //add new api
         API api = TestUtil.addTestAPI();
         //add subscription
-        APISubscriptionDAO apiSubscriptionDAO = DAOFactory.getAPISubscriptionDAO();
+        APISubscriptionDAO apiSubscriptionDAO = new DAOFactory().getAPISubscriptionDAO();
         String uuid = UUID.randomUUID().toString();
         apiSubscriptionDAO.addAPISubscription(uuid, api.getId(), app.getId(), goldSubscriptionPolicy.getUuid(),
                 APIMgtConstants.SubscriptionStatus.ACTIVE);
@@ -710,7 +710,7 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         //add new api
         API api = TestUtil.addTestAPI();
         //add subscription
-        APISubscriptionDAO apiSubscriptionDAO = DAOFactory.getAPISubscriptionDAO();
+        APISubscriptionDAO apiSubscriptionDAO = new DAOFactory().getAPISubscriptionDAO();
         String uuid = UUID.randomUUID().toString();
         apiSubscriptionDAO.addAPISubscription(uuid, api.getId(), app.getId(), goldSubscriptionPolicy.getUuid(),
                 APIMgtConstants.SubscriptionStatus.ACTIVE);
@@ -733,7 +733,7 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         API api2 = TestUtil.addCustomAPI(API_2, API_VERSION, API2_CONTEXT);
         API api3 = TestUtil.addCustomAPI(API_3, API_VERSION, API3_CONTEXT);
         //Add subscriptions
-        APISubscriptionDAO subscriptionDAO = DAOFactory.getAPISubscriptionDAO();
+        APISubscriptionDAO subscriptionDAO = new DAOFactory().getAPISubscriptionDAO();
         subscriptionDAO.addAPISubscription(UUID.randomUUID().toString(), api1.getId(), app.getId(),
                 goldSubscriptionPolicy.getUuid(),
                 APIMgtConstants.SubscriptionStatus.ON_HOLD);
@@ -775,7 +775,7 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         apis.add(api4);
 
         //Add subscriptions
-        APISubscriptionDAO subscriptionDAO = DAOFactory.getAPISubscriptionDAO();
+        APISubscriptionDAO subscriptionDAO = new DAOFactory().getAPISubscriptionDAO();
 
         //app1: api2
         subscriptionDAO.addAPISubscription(UUID.randomUUID().toString(), api2.getId(), app1.getId(),

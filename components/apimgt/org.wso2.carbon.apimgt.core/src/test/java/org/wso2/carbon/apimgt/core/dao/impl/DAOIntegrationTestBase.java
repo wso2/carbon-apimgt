@@ -125,7 +125,7 @@ public class DAOIntegrationTestBase {
         try (Connection connection = DAOUtil.getConnection()) {
             DBScriptRunnerUtil.executeSQLScript(sqlFilePath, connection);
         }
-        PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
+        PolicyDAO policyDAO = new DAOFactory().getPolicyDAO();
         SampleTestObjectCreator.createDefaultPolicy(policyDAO);
     }
 

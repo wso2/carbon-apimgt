@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.rest.api.store.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
+import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.Application;
@@ -63,7 +64,7 @@ public class ExportApiServiceImpl extends ExportApiService {
         try {
             consumer = RestApiUtil.getConsumer(username);
             FileBasedApplicationImportExportManager importExportManager = new FileBasedApplicationImportExportManager
-                    (consumer, pathToExportDir);
+                    (consumer, new DAOFactory(), pathToExportDir);
             applicationDetails = importExportManager.getApplicationDetails(appId, username);
             if (applicationDetails == null) {
                 // 404

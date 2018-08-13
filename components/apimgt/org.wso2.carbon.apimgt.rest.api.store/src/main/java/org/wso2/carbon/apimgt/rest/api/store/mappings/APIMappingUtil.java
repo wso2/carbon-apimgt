@@ -88,6 +88,8 @@ public class APIMappingUtil {
         api.getPolicies().forEach(policy -> apiDTO.addPoliciesItem(policy.getPolicyName()));
         apiDTO.setLabels(new ArrayList<>(api.getLabels()));
         apiDTO.setType(BaseAPIDTO.TypeEnum.API);
+        apiDTO.setTags(new ArrayList<>(api.getTags()));
+        apiDTO.setTransport(new ArrayList<>(api.getTransport()));
         return apiDTO;
     }
 
