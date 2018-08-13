@@ -2766,7 +2766,7 @@ definitions:
         example: ""
       clientSecret:
         type: string
-        description: Client secret for generating access token. This is given given together with the client Id.
+        description: Client secret for generating access token. This is given together with the client Id.
         example: ""
 
 #-----------------------------------------------------
