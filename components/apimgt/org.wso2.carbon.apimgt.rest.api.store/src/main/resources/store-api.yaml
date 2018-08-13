@@ -1073,7 +1073,12 @@ paths:
       summary: |
         Generate keys for application
       description: |
-        This operation can be used to generate client Id and client secret for an application
+        This operation can be used to generate client ID and client secret for an application
+
+        **NOTE**
+
+        * This operation does not require the client ID and the client secret by default.
+        * When using credentials from a third party key manager, you can generate access tokens by providing only the client ID or both the client ID and the client secret.
       parameters:
         - $ref: '#/parameters/applicationId-Q'
         - in: body
@@ -2757,11 +2762,11 @@ definitions:
         example: ["am_application_scope","default"]
       clientId:
         type: string
-        description: Client Id
+        description: Client ID for generating access token.
         example: ""
       clientSecret:
         type: string
-        description: Client Secret
+        description: Client secret for generating access token. This is given given together with the client Id.
         example: ""
 
 #-----------------------------------------------------

@@ -1169,7 +1169,12 @@ Content-Type: application/json
 </h4> <code>POST https://apis.wso2.com/api/am/store/v0.13/applications/generate-keys</code>
             <p class="marked"></p>
 
-            <p class="marked">This operation can be used to generate client Id and client secret for an application
+            <p class="marked">This operation can be used to generate client ID and client secret for an application
+
+**NOTE**
+
+* This operation does not require the client ID and the client secret by default.
+* When using credentials from a third party key manager, you can generate access tokens by providing only the client ID or both the client ID and the client secret.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
@@ -1188,8 +1193,9 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 {
   &quot;validityTime&quot;: &quot;3600&quot;,
   &quot;keyType&quot;: &quot;PRODUCTION&quot;,
-  &quot;accessAllowDomains&quot;: [&quot;ALL&quot;
-  ]
+  &quot;accessAllowDomains&quot;: [ &quot;ALL&quot; ],
+  &quot;scopes&quot;: [ &quot;am_application_scope&quot;, &quot;default&quot; ],
+  &quot;supportedGrantTypes&quot;: [ &quot;urn:ietf:params:oauth:grant-type:saml2-bearer&quot;, &quot;iwa:ntlm&quot;, &quot;refresh_token&quot;, &quot;client_credentials&quot;, &quot;password&quot; ]
 }</code></div>
 
             <div class="pointer" data-toggle="collapse" data-target="#response-applicationsGenerateKeysPost">
