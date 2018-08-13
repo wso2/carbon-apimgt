@@ -28,6 +28,10 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.joda.time.LocalDateTime;
+import org.joda.time.Period;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -72,7 +76,6 @@ import org.wso2.carbon.apimgt.usage.client.pojo.APIUsageByDestination;
 import org.wso2.carbon.apimgt.usage.client.pojo.APIUsageByResourcePath;
 import org.wso2.carbon.apimgt.usage.client.pojo.APIUsageByUser;
 import org.wso2.carbon.apimgt.usage.client.pojo.APIUsageByUserName;
-import org.wso2.carbon.apimgt.usage.client.util.APIUsageClientUtil;
 import org.wso2.carbon.apimgt.usage.client.util.RestClientUtil;
 import org.wso2.carbon.application.mgt.stub.upload.CarbonAppUploaderStub;
 import org.wso2.carbon.application.mgt.stub.upload.types.carbon.UploadedFileItem;
@@ -105,6 +108,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -1143,7 +1147,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     }
 
     /**
-     * This method find the destination of the apis
+     * This method finds the destination of the apis
      * @param providerName Name of the API provider
      * @param fromDate     starting date of the results
      * @param toDate       ending date of the results
@@ -1155,10 +1159,10 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             throws APIMgtUsageQueryServiceClientException {
 
         List<APIUsageByDestination> usageData = this
-                .getAPIUsageByDestinationData(APIUsageStatisticsClientConstants.API_USAGEBY_DESTINATION_SUMMARY,
+                .getAPIUsageByDestinationData(APIUsageStatisticsClientConstants.API_PER_DESTINATION_AGG,
                         fromDate, toDate);
         List<API> providerAPIs = getAPIsByProvider(providerName);
-        List<APIDestinationUsageDTO> usageByResourcePath = new ArrayList<APIDestinationUsageDTO>();
+        List<APIDestinationUsageDTO> usageByDestination = new ArrayList<APIDestinationUsageDTO>();
 
         for (APIUsageByDestination usage : usageData) {
             for (API providerAPI : providerAPIs) {
@@ -1171,11 +1175,11 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                     usageDTO.setDestination(usage.getDestination());
                     usageDTO.setContext(usage.getContext());
                     usageDTO.setCount(usage.getRequestCount());
-                    usageByResourcePath.add(usageDTO);
+                    usageByDestination.add(usageDTO);
                 }
             }
         }
-        return usageByResourcePath;
+        return usageByDestination;
     }
 
     /**
@@ -1767,60 +1771,70 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     }
 
     /**
-     * This method find the API Destination usage of APIs
+     * This method finds the API Destination usage of APIs
      *
-     * @param tableName Name of the table data exist
-     * @param fromDate starting data
-     * @param toDate ending date
+     * @param tableName Name of the table where the data exist
+     * @param fromDate  starting date
+     * @param toDate    ending date
      * @return list of APIUsageByDestination
      * @throws APIMgtUsageQueryServiceClientException throws if error occurred
      */
-    private List<APIUsageByDestination> getAPIUsageByDestinationData(String tableName, String fromDate, String toDate) throws APIMgtUsageQueryServiceClientException {
-        if (dataSource == null) {
-            handleException("BAM data source hasn't been initialized. Ensure that the data source " +
-                    "is properly configured in the APIUsageTracker configuration.");
-        }
+    private List<APIUsageByDestination> getAPIUsageByDestinationData(String tableName, String fromDate, String toDate)
+            throws APIMgtUsageQueryServiceClientException {
 
-        Connection connection = null;
-        PreparedStatement statement = null;
-        ResultSet rs = null;
         List<APIUsageByDestination> usageByResourcePath = new ArrayList<APIUsageByDestination>();
         try {
-            connection = dataSource.getConnection();
-            String query =
-                    "SELECT " + APIUsageStatisticsClientConstants.API + ',' + APIUsageStatisticsClientConstants.VERSION
-                            + ',' + APIUsageStatisticsClientConstants.API_PUBLISHER + ','
-                            + APIUsageStatisticsClientConstants.CONTEXT + ','
-                            + APIUsageStatisticsClientConstants.DESTINATION + ',' + "SUM("
-                            + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") as total_request_count"
-                            + " FROM " + tableName + " WHERE " + APIUsageStatisticsClientConstants.TIME
-                            + " BETWEEN ? AND ?" + " GROUP BY " + APIUsageStatisticsClientConstants.API + ','
-                            + APIUsageStatisticsClientConstants.VERSION + ','
-                            + APIUsageStatisticsClientConstants.API_PUBLISHER + ','
-                            + APIUsageStatisticsClientConstants.CONTEXT + ','
-                            + APIUsageStatisticsClientConstants.DESTINATION;
+            String granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;//default granularity
 
-            statement = connection.prepareStatement(query);
-            statement.setString(1, fromDate);
-            statement.setString(2, toDate);
-            rs = statement.executeQuery();
+            Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
+
+            if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
+                granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
+            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
+                granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
+            }
+
+            String query = "from " + tableName + " within '" + fromDate + "', '" + toDate + "' per '" + granularity
+                    + "' select " + APIUsageStatisticsClientConstants.API_NAME + ", "
+                    + APIUsageStatisticsClientConstants.API_VERSION + ", "
+                    + APIUsageStatisticsClientConstants.API_CREATOR + ", "
+                    + APIUsageStatisticsClientConstants.API_CONTEXT + ", "
+                    + APIUsageStatisticsClientConstants.DESTINATION + ", " + "sum("
+                    + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") as total_request_count group by "
+                    + APIUsageStatisticsClientConstants.API_NAME + ", " + APIUsageStatisticsClientConstants.API_VERSION
+                    + ", " + APIUsageStatisticsClientConstants.API_CREATOR + ", "
+                    + APIUsageStatisticsClientConstants.API_CONTEXT + ", "
+                    + APIUsageStatisticsClientConstants.DESTINATION + ";";
+            JSONObject jsonObj = APIUtil
+                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.API_ACCESS_SUMMARY_SIDDHI_APP,
+                            query);
+            String apiName;
+            String version;
+            String context;
+            String destination;
+            Long requestCount;
             APIUsageByDestination apiUsageByDestination;
 
-            while (rs.next()) {
-                String apiName = rs.getString(APIUsageStatisticsClientConstants.API);
-                String version = rs.getString(APIUsageStatisticsClientConstants.VERSION);
-                String context = rs.getString(APIUsageStatisticsClientConstants.CONTEXT);
-                String destination = rs.getString(APIUsageStatisticsClientConstants.DESTINATION);
-                long requestCount = rs.getLong("total_request_count");
-                apiUsageByDestination = new APIUsageByDestination(apiName, version, context, destination, requestCount);
-                usageByResourcePath.add(apiUsageByDestination);
+            if (jsonObj != null) {
+                JSONArray jArray = (JSONArray) jsonObj.get("records");
+                for (Object record : jArray) {
+                    JSONArray recordArray = (JSONArray) record;
+                    if (recordArray.size() == 6) {
+                        apiName = (String) recordArray.get(0);
+                        version = (String) recordArray.get(1);
+                        context = (String) recordArray.get(3);//omitting apiCreator
+                        destination = (String) recordArray.get(4);
+                        requestCount = (Long) recordArray.get(5);
+                        apiUsageByDestination = new APIUsageByDestination(apiName, version, context, destination,
+                                requestCount);
+                        usageByResourcePath.add(apiUsageByDestination);
+                    }
+                }
             }
             return usageByResourcePath;
-        } catch (Exception e) {
-            log.error("Error occurred while querying from JDBC database " + e.getMessage(), e);
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
-        } finally {
-            closeDatabaseLinks(rs, statement, connection);
+        } catch (APIManagementException e) {
+            log.error("Error occurred while querying from stream processor " + e.getMessage(), e);
+            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from stream processor", e);
         }
     }
 
@@ -2967,5 +2981,41 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             closeDatabaseLinks(rs, preparedStatement, connection);
         }
         return result;
+    }
+
+    /**
+     * This method is used to get the breakdown of the duration between 2 days/timestamps in terms of years,
+     * months, days, hours, minutes and seconds
+     *
+     * @param fromDate Start timestamp of the duration
+     * @param toDate   End timestamp of the duration
+     * @return A map containing the breakdown
+     * @throws APIMgtUsageQueryServiceClientException when there is an error during date parsing
+     */
+    private Map<String, Integer> getDurationBreakdown(String fromDate, String toDate)
+            throws APIMgtUsageQueryServiceClientException {
+        Map<String, Integer> durationBreakdown = new HashMap<String, Integer>();
+
+        DateTimeFormatter formatter = DateTimeFormat.forPattern(APIUsageStatisticsClientConstants.TIMESTAMP_PATTERN);
+        LocalDateTime startDate = LocalDateTime.parse(fromDate, formatter);
+        LocalDateTime endDate = LocalDateTime.parse(toDate, formatter);
+        Period period = new Period(startDate, endDate);
+        int numOfYears = period.getYears();
+        int numOfMonths = period.getMonths();
+        int numOfWeeks = period.getWeeks();
+        int numOfDays = period.getDays();
+        if (numOfWeeks > 0) {
+            numOfDays += numOfWeeks * 7;
+        }
+        int numOfHours = period.getHours();
+        int numOfMinutes = period.getMinutes();
+        int numOfSeconds = period.getSeconds();
+        durationBreakdown.put(APIUsageStatisticsClientConstants.DURATION_YEARS, numOfYears);
+        durationBreakdown.put(APIUsageStatisticsClientConstants.DURATION_MONTHS, numOfMonths);
+        durationBreakdown.put(APIUsageStatisticsClientConstants.DURATION_DAYS, numOfDays);
+        durationBreakdown.put(APIUsageStatisticsClientConstants.DURATION_HOURS, numOfHours);
+        durationBreakdown.put(APIUsageStatisticsClientConstants.DURATION_MINUTES, numOfMinutes);
+        durationBreakdown.put(APIUsageStatisticsClientConstants.DURATION_SECONDS, numOfSeconds);
+        return durationBreakdown;
     }
 }

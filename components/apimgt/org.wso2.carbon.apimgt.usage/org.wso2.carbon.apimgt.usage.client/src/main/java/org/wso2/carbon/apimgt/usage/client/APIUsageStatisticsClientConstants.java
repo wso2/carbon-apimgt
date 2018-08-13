@@ -17,8 +17,6 @@
 */
 package org.wso2.carbon.apimgt.usage.client;
 
-import org.wso2.carbon.apimgt.impl.APIConstants;
-
 public final class APIUsageStatisticsClientConstants {
 
     public static final String API_LAST_ACCESS_TIME_SUMMARY = "API_LAST_ACCESS_TIME_SUMMARY";
@@ -65,11 +63,7 @@ public final class APIUsageStatisticsClientConstants {
 
     public static final String ROW = "row";
 
-    public static final String TOTAL_REQUEST_COUNT = "total_request_count";
-
     public static final String API = "api";
-
-    public static final String API_VERSION = "api_version";
 
     public static final String SERVICE_TIME = "serviceTime";
 
@@ -100,8 +94,6 @@ public final class APIUsageStatisticsClientConstants {
     public static final String DAY= "day";
 
     public static final String TIME= "time";
-    
-    public static final String DESTINATION= "destination";
 
     public static final int DEFAULT_RESULTS_LIMIT = 10;
     
@@ -191,11 +183,39 @@ public final class APIUsageStatisticsClientConstants {
     public static final String OTHER_LATENCY = "otherLatency";
 
     //------------------------------------------------------------------------------------------------
+    //-------Aggregation names-----
     public static final String API_USER_PER_APP_AGG = "ApiUserPerAppAgg";
+    public static final String API_PER_DESTINATION_AGG="ApiPerDestinationAgg";
 
-    //------field names-------
+
+    //------Field names-------
     public static final String TIME_STAMP = "AGG_TIMESTAMP";
+    public static final String API_NAME = "apiName";
+    public static final String API_VERSION = "apiVersion";
+    public static final String API_CREATOR = "apiCreator";
+    public static final String API_CONTEXT = "apiContext";
+    public static final String DESTINATION = "destination";
+    public static final String TOTAL_REQUEST_COUNT = "totalRequestCount";
 
-    //------siddhi app names----
+    //------Siddhi app names----
     public static final String API_ACCESS_SUMMARY_SIDDHI_APP = "API_ACCESS_SUMMARY";
+
+    //------Other---------------
+    public static final String SECONDS_GRANULARITY = "seconds";
+    public static final String MINUTES_GRANULARITY = "minutes";
+    public static final String HOURS_GRANULARITY = "hours";
+    public static final String DAYS_GRANULARITY = "days";
+    public static final String MONTHS_GRANULARITY = "months";
+    public static final String YEARS_GRANULARITY = "years";
+
+    public static final String DURATION_SECONDS = "SECONDS";
+    public static final String DURATION_MINUTES = "MINUTES";
+    public static final String DURATION_HOURS = "HOURS";
+    public static final String DURATION_DAYS = "DAYS";
+    public static final String DURATION_MONTHS = "MONTHS";
+    public static final String DURATION_YEARS = "YEARS";
+
+    public static final String TIMESTAMP_PATTERN = "yyyy-MM-dd HH:mm:ss";
+
+
 }
