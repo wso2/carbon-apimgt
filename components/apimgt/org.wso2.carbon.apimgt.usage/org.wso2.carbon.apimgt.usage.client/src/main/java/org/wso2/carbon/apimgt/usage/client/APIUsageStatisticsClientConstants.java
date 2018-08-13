@@ -199,6 +199,8 @@ public final class APIUsageStatisticsClientConstants {
     public static final String TOTAL_REQUEST_COUNT = "totalRequestCount";
     public static final String API_METHOD = "apiMethod";
     public static final String API_RESOURCE_TEMPLATE = "apiResourceTemplate";
+    public static final String USERNAME = "username";
+    public static final String API_CREATOR_TENANT_DOMAIN = "apiCreatorTenantDomain";
 
     //------Siddhi app names----
     public static final String API_ACCESS_SUMMARY_SIDDHI_APP = "API_ACCESS_SUMMARY";
