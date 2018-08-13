@@ -185,7 +185,8 @@ public final class APIUsageStatisticsClientConstants {
     //------------------------------------------------------------------------------------------------
     //-------Aggregation names-----
     public static final String API_USER_PER_APP_AGG = "ApiUserPerAppAgg";
-    public static final String API_PER_DESTINATION_AGG="ApiPerDestinationAgg";
+    public static final String API_PER_DESTINATION_AGG = "ApiPerDestinationAgg";
+    public static final String API_RESOURCE_PATH_PER_APP_AGG = "ApiResourcePathPerAppAgg";
 
 
     //------Field names-------
@@ -196,6 +197,8 @@ public final class APIUsageStatisticsClientConstants {
     public static final String API_CONTEXT = "apiContext";
     public static final String DESTINATION = "destination";
     public static final String TOTAL_REQUEST_COUNT = "totalRequestCount";
+    public static final String API_METHOD = "apiMethod";
+    public static final String API_RESOURCE_TEMPLATE = "apiResourceTemplate";
 
     //------Siddhi app names----
     public static final String API_ACCESS_SUMMARY_SIDDHI_APP = "API_ACCESS_SUMMARY";
@@ -216,6 +219,7 @@ public final class APIUsageStatisticsClientConstants {
     public static final String DURATION_YEARS = "YEARS";
 
     public static final String TIMESTAMP_PATTERN = "yyyy-MM-dd HH:mm:ss";
+    public static final String RECORDS_DELIMITER = "records";
 
 
 }

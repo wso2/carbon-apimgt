@@ -28,6 +28,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.joda.time.DateTime;
 import org.joda.time.LocalDateTime;
 import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
@@ -1121,15 +1122,14 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             throws APIMgtUsageQueryServiceClientException {
 
         Collection<APIUsageByResourcePath> usageData = this
-                .getAPIUsageByResourcePathData(APIUsageStatisticsClientConstants.API_Resource_Path_USAGE_SUMMARY,
+                .getAPIUsageByResourcePathData(APIUsageStatisticsClientConstants.API_RESOURCE_PATH_PER_APP_AGG,
                         fromDate, toDate);
         List<API> providerAPIs = getAPIsByProvider(providerName);
         List<APIResourcePathUsageDTO> usageByResourcePath = new ArrayList<APIResourcePathUsageDTO>();
         for (APIUsageByResourcePath usage : usageData) {
             for (API providerAPI : providerAPIs) {
-                if (providerAPI.getId().getApiName().equals(usage.getApiName()) &&
-                        providerAPI.getId().getVersion().equals(usage.getApiVersion()) &&
-                        providerAPI.getContext().equals(usage.getContext())) {
+                if (providerAPI.getId().getApiName().equals(usage.getApiName()) && providerAPI.getId().getVersion()
+                        .equals(usage.getApiVersion()) && providerAPI.getContext().equals(usage.getContext())) {
 
                     APIResourcePathUsageDTO usageDTO = new APIResourcePathUsageDTO();
                     usageDTO.setApiName(usage.getApiName());
@@ -1715,58 +1715,74 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     }
 
     /**
-     * This method find the Resource path usage of APIs
+     * This method finds the Resource path usage of APIs
      *
-     * @param tableName Name of the table data exist
-     * @param fromDate starting data
-     * @param toDate ending date
+     * @param tableName Name of the aggregation where the data exist
+     * @param fromDate  starting date
+     * @param toDate    ending date
      * @return list of APIUsageByResourcePath
      * @throws APIMgtUsageQueryServiceClientException throws if error occurred
      */
-    private List<APIUsageByResourcePath> getAPIUsageByResourcePathData(String tableName, String fromDate, String toDate) throws APIMgtUsageQueryServiceClientException {
-
-        if (dataSource == null) {
-            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
-                    + "that the data source is properly configured in the APIUsageTracker configuration.");
-        }
-
-        Connection connection = null;
-        PreparedStatement statement = null;
-        ResultSet rs = null;
+    private List<APIUsageByResourcePath> getAPIUsageByResourcePathData(String tableName, String fromDate, String toDate)
+            throws APIMgtUsageQueryServiceClientException {
         List<APIUsageByResourcePath> usage = new ArrayList<APIUsageByResourcePath>();
         try {
-            connection = dataSource.getConnection();
-            String query =
-                    "SELECT " + APIUsageStatisticsClientConstants.API + ',' + APIUsageStatisticsClientConstants.VERSION
-                            + ',' + APIUsageStatisticsClientConstants.API_PUBLISHER + ','
-                            + APIUsageStatisticsClientConstants.CONTEXT + ',' + APIUsageStatisticsClientConstants.METHOD
-                            + ',' + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT
-                            + ',' + APIUsageStatisticsClientConstants.RESOURCE + ','
-                            + APIUsageStatisticsClientConstants.TIME + " FROM " + tableName + " WHERE "
-                    + APIUsageStatisticsClientConstants.TIME + " BETWEEN ?  AND ?";
-            statement = connection.prepareStatement(query);
-            statement.setString(1, fromDate);
-            statement.setString(2, toDate);
-            rs = statement.executeQuery();
-            APIUsageByResourcePath apiUsageByResourcePath;
+            String granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;//default granularity
 
-            while (rs.next()) {
-                String apiName = rs.getString(APIUsageStatisticsClientConstants.API);
-                String version = rs.getString(APIUsageStatisticsClientConstants.VERSION);
-                String context = rs.getString(APIUsageStatisticsClientConstants.CONTEXT);
-                String method = rs.getString(APIUsageStatisticsClientConstants.METHOD);
-                long hits = rs.getLong(APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT);
-                String resourcePaths = rs.getString(APIUsageStatisticsClientConstants.RESOURCE);
-                String time = rs.getString(APIUsageStatisticsClientConstants.TIME);
-                apiUsageByResourcePath = new APIUsageByResourcePath(apiName, version, method, context, hits, time,resourcePaths);
-                usage.add(apiUsageByResourcePath);
+            Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
+
+            if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
+                granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
+            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
+                granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
+            }
+
+            String query = "from " + tableName + " within '" + fromDate + "', '" + toDate + "' per '" + granularity
+                    + "' select " + APIUsageStatisticsClientConstants.API_NAME + ", "
+                    + APIUsageStatisticsClientConstants.API_VERSION + ", "
+                    + APIUsageStatisticsClientConstants.API_CREATOR + ", "
+                    + APIUsageStatisticsClientConstants.API_CONTEXT + ", "
+                    + APIUsageStatisticsClientConstants.API_METHOD + ", "
+                    + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ", "
+                    + APIUsageStatisticsClientConstants.API_RESOURCE_TEMPLATE + ", "
+                    + APIUsageStatisticsClientConstants.TIME_STAMP + ";";
+
+            JSONObject jsonObj = APIUtil
+                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.API_ACCESS_SUMMARY_SIDDHI_APP,
+                            query);
+            String apiName;
+            String version;
+            String context;
+            String method;
+            Long hits;
+            String resourcePaths;
+            Long time;
+            APIUsageByResourcePath apiUsageByResourcePath;
+            DateTimeFormatter formatter = DateTimeFormat
+                    .forPattern(APIUsageStatisticsClientConstants.TIMESTAMP_PATTERN);
+            if (jsonObj != null) {
+                JSONArray jArray = (JSONArray) jsonObj.get(APIUsageStatisticsClientConstants.RECORDS_DELIMITER);
+                for (Object record : jArray) {
+                    JSONArray recordArray = (JSONArray) record;
+                    if (recordArray.size() == 8) {
+                        apiName = (String) recordArray.get(0);
+                        version = (String) recordArray.get(1);
+                        context = (String) recordArray.get(3);//omitting apiCreator
+                        method = (String) recordArray.get(4);
+                        hits = (Long) recordArray.get(5);
+                        resourcePaths = (String) recordArray.get(6);
+                        time = (Long) recordArray.get(7);
+                        DateTime date = new DateTime(time);
+                        apiUsageByResourcePath = new APIUsageByResourcePath(apiName, version, method, context, hits,
+                                date.toString(formatter), resourcePaths);
+                        usage.add(apiUsageByResourcePath);
+                    }
+                }
             }
             return usage;
-        } catch (Exception e) {
-            log.error("Error occurred while querying from JDBC database " + e.getMessage(), e);
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
-        } finally {
-            closeDatabaseLinks(rs, statement, connection);
+        } catch (APIManagementException e) {
+            log.error("Error occurred while querying from stream processor " + e.getMessage(), e);
+            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from stream processor ", e);
         }
     }
 
@@ -1782,7 +1798,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     private List<APIUsageByDestination> getAPIUsageByDestinationData(String tableName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
-        List<APIUsageByDestination> usageByResourcePath = new ArrayList<APIUsageByDestination>();
+        List<APIUsageByDestination> usageByDestination = new ArrayList<APIUsageByDestination>();
         try {
             String granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;//default granularity
 
@@ -1816,7 +1832,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             APIUsageByDestination apiUsageByDestination;
 
             if (jsonObj != null) {
-                JSONArray jArray = (JSONArray) jsonObj.get("records");
+                JSONArray jArray = (JSONArray) jsonObj.get(APIUsageStatisticsClientConstants.RECORDS_DELIMITER);
                 for (Object record : jArray) {
                     JSONArray recordArray = (JSONArray) record;
                     if (recordArray.size() == 6) {
@@ -1827,11 +1843,11 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                         requestCount = (Long) recordArray.get(5);
                         apiUsageByDestination = new APIUsageByDestination(apiName, version, context, destination,
                                 requestCount);
-                        usageByResourcePath.add(apiUsageByDestination);
+                        usageByDestination.add(apiUsageByDestination);
                     }
                 }
             }
-            return usageByResourcePath;
+            return usageByDestination;
         } catch (APIManagementException e) {
             log.error("Error occurred while querying from stream processor " + e.getMessage(), e);
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from stream processor", e);
