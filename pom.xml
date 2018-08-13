@@ -39,6 +39,16 @@
         <pluginManagement>
             <plugins>
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-site-plugin</artifactId>
+                    <version>${maven-site-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-project-info-reports-plugin</artifactId>
+                    <version>${maven-project-info-reports-plugin.version}</version>
+                </plugin>
+                <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-scr-plugin</artifactId>
                     <version>${maven-scr-plugin.version}</version>
@@ -1572,6 +1582,9 @@
         <httpcore.version>4.3.3.wso2v1</httpcore.version>
         <slf4j.wso2.version>1.5.10.wso2v1</slf4j.wso2.version>
         <ballerina.lang.version>0.970.0</ballerina.lang.version>
+        <maven-site-plugin.version>3.3</maven-site-plugin.version>
+        <maven-project-info-reports-plugin.version>2.7</maven-project-info-reports-plugin.version>
+        <swagger-codegen-maven-plugin.version>2.3.1</swagger-codegen-maven-plugin.version>
     </properties>
 </project>
 
