@@ -33,6 +33,7 @@
     "react": "^16.3.0",
     "react-dom": "^16.3.0",
     "react-dropzone": "^3.13.4",
+    "react-intl": "^2.4.0",
     "react-modal": "^2.2.2",
     "react-quill": "1.0.0",
     "react-router-dom": "^4.2.2",

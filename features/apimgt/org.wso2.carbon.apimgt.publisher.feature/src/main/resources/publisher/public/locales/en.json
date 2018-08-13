@@ -1,0 +1,14 @@
+{
+  "welcome.to.wso2.api.manager": "Welcome to WSO2 API Manager",
+  "to.get.started.with.api.manager.do.any.of.the.following:": "To get started with API Manager, do any of the following:",
+  "create.new.api": "Create New API",
+  "deploy.sample.api": "Deploy Sample API",
+  "i.have.an.existing.api": "I Have an Existing API",
+  "use.an.existing.api.endpoint.or.the.api.swagger.definition.to.create.an.api" : "Use an existing API endpoint or the API Swagger definition to create an API",
+  "i.have.a.soap.endpoint" : "I Have a SOAP Endpoint",
+  "use.an.existing.soap.endpoint.to.create.a.managed.api.import.the.wsdl.of.the.soap.service" : "Use an existing SOAP endpoint to create a managed API. Import the WSDL of the SOAP service",
+  "designa.a.new.rest.api": "Design a New REST API",
+  "design.and.prototype.a.new.rest.api": "Design and prototype a new REST API",
+  "design.new.websocket.api": "Design New Websocket API",
+  "design.and.prototype.a.new.websocket.api": "Design and prototype a new Websocket API"
+}

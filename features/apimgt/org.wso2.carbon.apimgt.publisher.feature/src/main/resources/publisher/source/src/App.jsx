@@ -16,18 +16,23 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom';
+import {BrowserRouter as Router, Redirect, Route, Switch} from 'react-router-dom';
 import qs from 'qs';
+<<<<<<< 3f75885742bdc05d2de716c76327c8c74c685a2e
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+=======
+import {createMuiTheme, MuiThemeProvider} from 'material-ui/styles';
+>>>>>>> Fix product-apim 1989: Add i18n support for publisher app
 import Log from 'log4javascript';
 import './App.css';
 import Utils from './app/data/Utils';
 import ConfigManager from './app/data/ConfigManager';
 import MaterialDesignCustomTheme from './app/components/Shared/CustomTheme';
-import { PageNotFound } from './app/components/Base/Errors';
+import {PageNotFound} from './app/components/Base/Errors';
 import AuthManager from './app/data/AuthManager';
+import {addLocaleData, defineMessages, IntlProvider} from 'react-intl';
 import ApiCreate from './app/components/Apis/Create/ApiCreate';
 import Apis from './app/components/Apis/Apis';
 import Endpoints from './app/components/Endpoints';
@@ -57,6 +62,18 @@ themes.push(darkTheme);
 themes.push(lightTheme);
 themes.push(createMuiTheme(MaterialDesignCustomTheme));
 
+
+/**
+ * Language.
+ * @type {string}
+ */
+const language = (navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage;
+
+/**
+ * Language without region code.
+ */
+const languageWithoutRegionCode = language.toLowerCase().split(/[_-]+/)[0];
+
 /**
  * Render protected application paths
  */
@@ -70,8 +87,34 @@ class Protected extends Component {
         super(props);
         this.state = {
             themeIndex: 0,
+            messages: {},
         };
         this.environments = [];
+        this.loadLocale = this.loadLocale.bind(this);
+    }
+
+    /**
+     * Initialize i18n.
+     */
+    componentWillMount() {
+        const locale = (languageWithoutRegionCode || language || 'en');
+        this.loadLocale(locale);
+    }
+
+    /**
+     * Load locale file.
+     *
+     * @param {string} locale Locale name
+     * @returns {Promise} Promise
+     */
+    loadLocale(locale = 'en') {
+        fetch(`${Utils.CONST.CONTEXT_PATH}/public/app/locales/${locale}.json`)
+            .then((resp) => resp.json())
+            .then((data) => {
+                // eslint-disable-next-line global-require, import/no-dynamic-require
+                addLocaleData(require(`react-intl/locale-data/${locale}`));
+                this.setState({messages: defineMessages(data)});
+            })
     }
 
     /**
@@ -141,17 +184,19 @@ class Protected extends Component {
 
         if (AuthManager.getUser(environmentName)) {
             return (
-                <MuiThemeProvider theme={themes[this.state.themeIndex % 3]}>
-                    <Base setTheme={() => this.setTheme()}>
-                        <Switch>
-                            <Redirect exact from='/' to='/apis' />
-                            <Route path='/apis' component={Apis} />
-                            <Route path='/endpoints' component={Endpoints} />
-                            <Route path='/api/create' component={ApiCreate} />
-                            <Route component={PageNotFound} />
-                        </Switch>
-                    </Base>
-                </MuiThemeProvider>
+                <IntlProvider locale={language} messages={this.state.messages}>
+                    <MuiThemeProvider theme={themes[this.state.themeIndex % 3]}>
+                        <Base setTheme={() => this.setTheme()}>
+                            <Switch>
+                                <Redirect exact from='/' to='/apis'/>
+                                <Route path='/apis' component={Apis}/>
+                                <Route path='/endpoints' component={Endpoints}/>
+                                <Route path='/api/create' component={ApiCreate}/>
+                                <Route component={PageNotFound}/>
+                            </Switch>
+                        </Base>
+                    </MuiThemeProvider>
+                </IntlProvider>
             );
         }
 
