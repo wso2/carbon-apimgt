@@ -1940,7 +1940,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                         + APIUsageStatisticsClientConstants.API_CREATOR + ", "
                         + APIUsageStatisticsClientConstants.API_CONTEXT + ";";
             } else {
-                query = "from " + APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG + "_HOURS on "
+                query = "from " + APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG + "_SECONDS on "
                         + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName + "' select "
                         + APIUsageStatisticsClientConstants.API_NAME + ", "
                         + APIUsageStatisticsClientConstants.API_VERSION + ", "
@@ -2272,7 +2272,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         Collection<APIUsageByUser> usageData = new ArrayList<APIUsageByUser>();
         try {
             StringBuilder query = new StringBuilder(
-                    "from " + APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG + "_HOURS");
+                    "from " + APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG + "_SECONDS");
             if (apiVersion != null) {
                 query.append(" on (" + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName + "' " + " AND "
                         + APIUsageStatisticsClientConstants.API_VERSION + "=='" + apiVersion + "') ");
