@@ -29,6 +29,7 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import {withStyles} from '@material-ui/core/styles';
 import green from "@material-ui/core/colors/green";
 import {Create, GetApp} from '@material-ui/icons';
+import { FormattedMessage } from 'react-intl';
 import {Link} from 'react-router-dom';
 
 const styles = {
@@ -145,25 +146,25 @@ class SampleAPI extends Component {
                 <Grid item xs={6} style={{textAlign: "center"}}>
                     <Paper elevation={0}>
                         <Typography align="center" type="headline" gutterBottom>
-                            Welcome to WSO2 API Manager
+                            <FormattedMessage id="welcome.to.wso2.api.manager" defaultMessage="Welcome to WSO2 API Manager" />
                         </Typography>
 
                         <Typography align="center" type="title" gutterBottom>
-                            To get started with API Manager, do any of the following:
+                            <FormattedMessage id="to.get.started.with.api.manager.do.any.of.the.following:" defaultMessage="To get started with API Manager, do any of the following:" />
                         </Typography>
                         <Grid container spacing={24} justify="center">
                             <Grid item xs={3}>
                                 <Link to="/api/create/home">
                                     <Button variant='raised'>
                                         <Create style={{fontSize: 50}}/>
-                                        Create New API
+                                        <FormattedMessage id="create.new.api" defaultMessage="Create New API" />
                                     </Button>
                                 </Link>
                             </Grid>
                             <Grid item xs={3}>
                                 <Button disabled={deploying} variant='raised' onClick={this.handleDeploySample}>
                                     <GetApp style={{fontSize: 50}}/>
-                                    Deploy Sample API
+                                    <FormattedMessage id="deploy.sample.api" defaultMessage="Deploy Sample API" />
                                 </Button>
                                 {deploying && <CircularProgress size={24} className={classes.buttonProgress}/>}
                             </Grid>
