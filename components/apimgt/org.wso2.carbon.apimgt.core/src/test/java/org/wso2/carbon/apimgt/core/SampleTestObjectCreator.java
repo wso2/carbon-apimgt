@@ -441,7 +441,7 @@ public class SampleTestObjectCreator {
         //generate random name for each time when generating unique composite API
         app.setName(UUID.randomUUID().toString());
         try {
-            DAOFactory.getApplicationDAO().addApplication(app);
+            new DAOFactory().getApplicationDAO().addApplication(app);
         } catch (APIMgtDAOException e) {
             log.error("Error adding application", e);
         }
@@ -1083,8 +1083,8 @@ public class SampleTestObjectCreator {
 
     public static Workflow createWorkflow(String workflowReferenceID) throws APIMgtDAOException {
         Instant time = APIUtils.getCurrentUTCTime();
-        Workflow workflow = new ApplicationCreationWorkflow(DAOFactory.getApplicationDAO(),
-                DAOFactory.getWorkflowDAO(), null);
+        Workflow workflow = new ApplicationCreationWorkflow(new DAOFactory().getApplicationDAO(),
+                new DAOFactory().getWorkflowDAO(), null);
         workflow.setExternalWorkflowReference(workflowReferenceID);
         workflow.setStatus(WorkflowStatus.CREATED);
         workflow.setCreatedTime(time);
@@ -1234,7 +1234,7 @@ public class SampleTestObjectCreator {
             try {
                 API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI();
                 API api = apiBuilder.build();
-                DAOFactory.getApiDAO().addAPI(api);
+                new DAOFactory().getApiDAO().addAPI(api);
                 blockConditions.setConditionValue(api.getContext());
             } catch (APIMgtDAOException e) {
                 log.error("Error while adding default api in default block condition", e);
@@ -1242,7 +1242,7 @@ public class SampleTestObjectCreator {
         } else if (conditionType.equals(APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_APPLICATION)) {
             try {
                 Application app = createDefaultApplication();
-                DAOFactory.getApplicationDAO().addApplication(app);
+                new DAOFactory().getApplicationDAO().addApplication(app);
                 blockConditions.setConditionValue(app.getId() + ":" + app.getName());
             } catch (APIMgtDAOException e) {
                 log.error("Error while adding default app in default block condition", e);
@@ -1515,9 +1515,9 @@ public class SampleTestObjectCreator {
         List<String> defaultLabels = new ArrayList<>();
 
         try {
-            String defaultGatewayLabel = DAOFactory.getLabelDAO().getLabelIdByNameAndType(APIMgtConstants
+            String defaultGatewayLabel = new DAOFactory().getLabelDAO().getLabelIdByNameAndType(APIMgtConstants
                     .DEFAULT_LABEL_NAME, APIMgtConstants.LABEL_TYPE_GATEWAY);
-            String  defaultStoreLabel = DAOFactory.getLabelDAO().getLabelIdByNameAndType(APIMgtConstants
+            String  defaultStoreLabel = new DAOFactory().getLabelDAO().getLabelIdByNameAndType(APIMgtConstants
                     .DEFAULT_LABEL_NAME, APIMgtConstants.LABEL_TYPE_STORE);
             defaultLabels.add(defaultStoreLabel);
             defaultLabels.add(defaultGatewayLabel);

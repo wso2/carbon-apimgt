@@ -784,8 +784,8 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     throw new APIMgtDAOException("Subscription already exists for API " +
-                            DAOFactory.getApiDAO().getAPI(apiId).getName() + " in Application " +
-                            DAOFactory.getApplicationDAO().getApplication(appId).getName(),
+                            new DAOFactory().getApiDAO().getAPI(apiId).getName() + " in Application " +
+                            new DAOFactory().getApplicationDAO().getApplication(appId).getName(),
                             ExceptionCodes.SUBSCRIPTION_ALREADY_EXISTS);
                 }
             }

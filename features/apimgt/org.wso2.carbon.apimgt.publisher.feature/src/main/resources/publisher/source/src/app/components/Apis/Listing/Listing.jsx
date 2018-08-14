@@ -21,12 +21,12 @@ import qs from 'qs';
 
 import { Link } from 'react-router-dom';
 import { Col, Menu, Row, Table } from 'antd';
-import Grid from 'material-ui/Grid';
-import Typography from 'material-ui/Typography';
-import Button from 'material-ui/Button';
+import Grid from '@material-ui/core/Grid';
+import Typography from '@material-ui/core/Typography';
+import Button from '@material-ui/core/Button';
 import PropTypes from 'prop-types';
-import { withStyles } from 'material-ui/styles';
-import IconButton from 'material-ui/IconButton';
+import { withStyles } from '@material-ui/core/styles';
+import IconButton from '@material-ui/core/IconButton';
 import List from '@material-ui/icons/List';
 import GridIcon from '@material-ui/icons/GridOn';
 import AddNewMenu from './AddNewMenu';

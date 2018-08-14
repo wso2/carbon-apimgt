@@ -108,7 +108,7 @@ export default class User {
      * @param {String} path - Path which need to be set to cookie
      */
     setPartialToken(newToken, validityPeriod, path) {
-        Utils.delete_cookie(User.CONST.WSO2_AM_TOKEN_1, path, this._environmentName);
+        Utils.deleteCookie(User.CONST.WSO2_AM_TOKEN_1, path, this._environmentName);
         Utils.setCookie(User.CONST.WSO2_AM_TOKEN_1, newToken, validityPeriod, path, this._environmentName);
     }
 

@@ -17,9 +17,9 @@
  */
 
 import React, { Component } from 'react';
-import Grid from 'material-ui/Grid';
-import Paper from 'material-ui/Paper';
-import Typography from 'material-ui/Typography';
+import Grid from '@material-ui/core/Grid';
+import Paper from '@material-ui/core/Paper';
+import Typography from '@material-ui/core/Typography';
 
 import Api from '../../../../data/api';
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';

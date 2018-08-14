@@ -19,16 +19,16 @@
 import React, { Component } from 'react';
 import { Redirect, Switch } from 'react-router-dom';
 import qs from 'qs';
-import TextField from 'material-ui/TextField';
-import Paper from 'material-ui/Paper';
-import Button from 'material-ui/Button';
-import Typography from 'material-ui/Typography';
-import Snackbar from 'material-ui/Snackbar';
-import Input, { InputLabel } from 'material-ui/Input';
-import Select from 'material-ui/Select';
-import { FormControl } from 'material-ui/Form';
-import { MenuItem } from 'material-ui/Menu';
-import Grid from 'material-ui/Grid';
+import TextField from '@material-ui/core/TextField';
+import Paper from '@material-ui/core/Paper';
+import Button from '@material-ui/core/Button';
+import Typography from '@material-ui/core/Typography';
+import Snackbar from '@material-ui/core/Snackbar';
+import Input, { InputLabel } from '@material-ui/core/Input';
+import Select from '@material-ui/core/Select';
+import { FormControl } from '@material-ui/core/';
+import MenuItem from '@material-ui/core/MenuItem';
+import Grid from '@material-ui/core/Grid';
 import PropTypes from 'prop-types';
 
 import './login.css';
@@ -113,7 +113,7 @@ class Login extends Component {
 
     fetchDCRAppInfo(environments, idToken) {
         // Array of promises
-        const promisedSSoData = environments.map(environment => Utils.getPromised_DCRAppInfo(environment));
+        const promisedSSoData = environments.map(environment => Utils.getPromisedDCRAppInfo(environment));
 
         Promise.all(promisedSSoData)
             .then((responses) => {

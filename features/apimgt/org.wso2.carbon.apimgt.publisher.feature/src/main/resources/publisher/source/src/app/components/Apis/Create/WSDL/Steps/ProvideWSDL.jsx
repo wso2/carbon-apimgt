@@ -28,7 +28,7 @@ import {
     InputLabel,
     FormHelperText,
     FormControlLabel,
-} from 'material-ui';
+} from '@material-ui/core';
 import { Done, ErrorOutline } from '@material-ui/icons/';
 import PropTypes from 'prop-types';
 

@@ -19,7 +19,7 @@
 import 'typeface-roboto';
 import 'material-design-icons';
 import '@material-ui/icons/';
-import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import ReactDOM from 'react-dom';
 import React from 'react';
 import Publisher from './src/App.jsx';

@@ -19,18 +19,25 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 
-import Typography from 'material-ui/Typography';
-import Button from 'material-ui/Button';
-import { MenuItem } from 'material-ui/Menu';
-import { CircularProgress } from 'material-ui/Progress';
-import Table, { TableBody, TableCell, TableHead, TableRow, TableFooter, TablePagination } from 'material-ui/Table';
+import Typography from '@material-ui/core/Typography';
+import Button from '@material-ui/core/Button';
+import MenuItem from '@material-ui/core/MenuItem';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import Table, {
+    TableBody,
+    TableCell,
+    TableHead,
+    TableRow,
+    TableFooter,
+    TablePagination,
+} from '@material-ui/core/Table';
 import PropTypes from 'prop-types';
-import { withStyles } from 'material-ui/styles';
-import Grid from 'material-ui/Grid';
+import { withStyles } from '@material-ui/core/styles';
+import Grid from '@material-ui/core/Grid';
 import ArrowBack from '@material-ui/icons/ArrowBack';
-import { FormControl } from 'material-ui/Form';
-import TextField from 'material-ui/TextField';
-import Select from 'material-ui/Select';
+import { FormControl } from '@material-ui/core/';
+import TextField from '@material-ui/core/TextField';
+import Select from '@material-ui/core/Select';
 
 import API from '../../../data/api';
 import { ScopeValidation, resourceMethod, resourcePath } from '../../../data/ScopeValidation';

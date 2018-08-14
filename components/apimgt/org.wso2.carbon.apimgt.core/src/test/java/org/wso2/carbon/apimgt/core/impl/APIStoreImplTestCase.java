@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.dao.TagDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
+import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
@@ -151,7 +152,9 @@ public class APIStoreImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         CompositeAPI api = SampleTestObjectCreator.createUniqueCompositeAPI().build();
         String apiId = api.getId();
-        APIStore apiStore = getApiStoreImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         Mockito.when(apiDAO.getCompositeAPI(apiId)).thenReturn(api);
         CompositeAPI apiReturned = apiStore.getCompositeAPIbyId(apiId);
         Mockito.verify(apiDAO, Mockito.times(1)).getCompositeAPI(apiId);
@@ -169,7 +172,9 @@ public class APIStoreImplTestCase {
     @Test(description = "Search APIs with a search query")
     public void searchAPIs() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         List<API> apimResultsFromDAO = new ArrayList<>();
         Mockito.when(apiDAO.searchAPIsByStoreLabel(new HashSet<>(), "admin", "pizza",
                 1, 2, new HashSet<>())).thenReturn(apimResultsFromDAO);
@@ -182,7 +187,9 @@ public class APIStoreImplTestCase {
     @Test(description = "Search APIs with labels")
     public void searchAPIsByStoreLabels() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         List<API> apimResultsFromDAO = new ArrayList<>();
         Set<String> labelList = new HashSet<>();
         labelList.add("Default");
@@ -197,7 +204,9 @@ public class APIStoreImplTestCase {
     @Test(description = "Search APIs with an empty query")
     public void searchAPIsEmpty() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         List<API> apimResultsFromDAO = new ArrayList<>();
         Set<APIStatus> statuses = EnumSet.of(APIStatus.PUBLISHED, APIStatus.PROTOTYPED);
         Mockito.when(apiDAO.getAPIsByStatus(statuses)).thenReturn(apimResultsFromDAO);
@@ -210,7 +219,9 @@ public class APIStoreImplTestCase {
     @Test(description = "Search API", expectedExceptions = APIManagementException.class)
     public void searchAPIsWithException() throws Exception {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         Set<APIStatus> statuses = EnumSet.of(APIStatus.PUBLISHED, APIStatus.PROTOTYPED);
         Set<String> roles = new HashSet<>();
         roles.add("admin");
@@ -228,7 +239,9 @@ public class APIStoreImplTestCase {
     @Test(description = "get all labels")
     public void getAllLabels() throws Exception {
         LabelDAO labelDao = Mockito.mock(LabelDAO.class);
-        APIStore apiStore = getApiStoreImpl(labelDao);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDao);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         List<Label> labels = new ArrayList<>();
         Label label = new Label.Builder().id("123").name("Default").type("STORE").accessUrls(new ArrayList<>()).build();
         labels.add(label);
@@ -242,7 +255,9 @@ public class APIStoreImplTestCase {
     @Test(description = "get all labels Exception", expectedExceptions = Exception.class)
     public void getAllLabelsException() throws Exception {
         LabelDAO labelDao = Mockito.mock(LabelDAO.class);
-        APIStore apiStore = getApiStoreImpl();
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDao);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         List<Label> labels = new ArrayList<>();
         Label label = new Label.Builder().id("123").name("Default").type("STORE").accessUrls(new ArrayList<>()).build();
         labels.add(label);
@@ -255,7 +270,9 @@ public class APIStoreImplTestCase {
     @Test(description = "get  labels by STORE type")
     public void getLabelsByType() throws Exception {
         LabelDAO labelDao = Mockito.mock(LabelDAO.class);
-        APIStore apiStore = getApiStoreImpl(labelDao);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDao);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         List<Label> labels = new ArrayList<>();
         Label label = new Label.Builder().id("123").name("Default").type("STORE").accessUrls(new ArrayList<>()).build();
         labels.add(label);
@@ -269,7 +286,9 @@ public class APIStoreImplTestCase {
     @Test(description = "get labels by type Exception", expectedExceptions = Exception.class)
     public void getLabelsByTypeException() throws Exception {
         LabelDAO labelDao = Mockito.mock(LabelDAO.class);
-        APIStore apiStore = getApiStoreImpl();
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDao);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         List<Label> labels = new ArrayList<>();
         Label label = new Label.Builder().id("123").name("Default").type("STORE").accessUrls(new ArrayList<>()).build();
         labels.add(label);
@@ -284,7 +303,9 @@ public class APIStoreImplTestCase {
     @Test(description = "Retrieve an API by status")
     public void getAPIsByStatus() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         List<API> expectedAPIs = new ArrayList<API>();
         Mockito.when(apiDAO.getAPIsByStatus(EnumSet.of(APIStatus.CREATED, APIStatus.PUBLISHED))).
                 thenReturn(expectedAPIs);
@@ -304,7 +325,10 @@ public class APIStoreImplTestCase {
         API api = SampleTestObjectCreator.createDefaultAPI().labels(labels).build();
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO, labelDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
         Mockito.when(labelDAO.getLabelByName(labelName)).thenReturn(label);
         Mockito.when(apiDAO.getWSDL(api.getId()))
@@ -325,7 +349,10 @@ public class APIStoreImplTestCase {
         API api = SampleTestObjectCreator.createDefaultAPI().labels(labels).build();
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO, labelDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
         Mockito.when(labelDAO.getLabelByName(labelName)).thenReturn(label);
         Mockito.when(apiDAO.getWSDLArchive(api.getId()))
@@ -352,7 +379,10 @@ public class APIStoreImplTestCase {
         APIGateway apiGateway = Mockito.mock(APIGateway.class);
         IdentityProvider idp = Mockito.mock(IdentityProvider.class);
         KeyManager km = Mockito.mock(KeyManager.class);
-        APIStore apiStore = getApiStoreImpl(idp, km, apiDAO, apiSubscriptionDAO, gatewaySourceGenerator, apiGateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
+        APIStore apiStore = getApiStoreImpl(idp, km, daoFactory, gatewaySourceGenerator, apiGateway);
         apiStore.addCompositeApi(apiBuilder);
         Mockito.verify(apiDAO, Mockito.times(1)).addApplicationAssociatedAPI(apiBuilder.build());
     }
@@ -367,7 +397,10 @@ public class APIStoreImplTestCase {
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGateway apiGateway = Mockito.mock(APIGateway.class);
         IdentityProvider idp = Mockito.mock(IdentityProvider.class);
-        APIStore apiStore = getApiStoreImpl(idp, null, apiDAO, apiSubscriptionDAO, gatewaySourceGenerator, apiGateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
+        APIStore apiStore = getApiStoreImpl(idp, null, daoFactory, gatewaySourceGenerator, apiGateway);
 
         String ballerinaImpl = "Ballerina";
 
@@ -409,7 +442,10 @@ public class APIStoreImplTestCase {
         APIGateway apiGateway = Mockito.mock(APIGateway.class);
         APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
         IdentityProvider idp = Mockito.mock(IdentityProvider.class);
-        APIStore apiStore = getApiStoreImpl(idp, null, apiDAO, apiSubscriptionDAO, gatewaySourceGenerator, apiGateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
+        APIStore apiStore = getApiStoreImpl(idp, null, daoFactory, gatewaySourceGenerator, apiGateway);
 
         apiStore.addCompositeApi(apiBuilder);
 
@@ -434,7 +470,9 @@ public class APIStoreImplTestCase {
     @Test(description = "Retrieve an application by name")
     public void testGetApplicationByName() throws APIManagementException {
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
-        APIStore apiStore = getApiStoreImpl(applicationDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         Application applicationFromDAO = new Application(APP_NAME, null);
         Mockito.when(applicationDAO.getApplicationByName(APP_NAME, USER_ID)).thenReturn(applicationFromDAO);
         Application application = apiStore.getApplicationByName(APP_NAME, USER_ID);
@@ -445,7 +483,9 @@ public class APIStoreImplTestCase {
     @Test(description = "Retrieve an application by uuid")
     public void testGetApplicationByUUID() throws APIManagementException {
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
-        APIStore apiStore = getApiStoreImpl(applicationDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         Application applicationFromDAO = new Application(APP_NAME, USER_NAME);
         Mockito.when(applicationDAO.getApplication(UUID)).thenReturn(applicationFromDAO);
         Application application = apiStore.getApplicationByUuid(UUID);
@@ -460,7 +500,11 @@ public class APIStoreImplTestCase {
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
         Policy policy = Mockito.mock(Policy.class);
         APIGateway apiGateway = Mockito.mock(APIGateway.class);
-        APIStore apiStore = getApiStoreImpl(applicationDAO, policyDAO, workflowDAO, apiGateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        Mockito.when(daoFactory.getWorkflowDAO()).thenReturn(workflowDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory, apiGateway);
         Application application = new Application(APP_NAME, USER_NAME);
         application.setPolicy(new ApplicationPolicy(TIER));
         application.setPermissionString(
@@ -481,7 +525,11 @@ public class APIStoreImplTestCase {
         Policy policy = Mockito.mock(Policy.class);
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
         APIGateway apiGateway = Mockito.mock(APIGateway.class);
-        APIStore apiStore = getApiStoreImpl(applicationDAO, policyDAO, workflowDAO, apiGateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        Mockito.when(daoFactory.getWorkflowDAO()).thenReturn(workflowDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory, apiGateway);
         Application application = new Application(APP_NAME, USER_NAME);
         application.setPolicy(new ApplicationPolicy(TIER));
         application.setPermissionString(null);
@@ -502,7 +550,11 @@ public class APIStoreImplTestCase {
         Policy policy = Mockito.mock(Policy.class);
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
         APIGateway apiGateway = Mockito.mock(APIGateway.class);
-        APIStore apiStore = getApiStoreImpl(applicationDAO, policyDAO, workflowDAO, apiGateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        Mockito.when(daoFactory.getWorkflowDAO()).thenReturn(workflowDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory, apiGateway);
         Application application = new Application(APP_NAME, USER_NAME);
         application.setPolicy(new ApplicationPolicy(TIER));
         application.setPermissionString("");
@@ -523,7 +575,11 @@ public class APIStoreImplTestCase {
         Policy policy = Mockito.mock(Policy.class);
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
         APIGateway apiGateway = Mockito.mock(APIGateway.class);
-        APIStore apiStore = getApiStoreImpl(applicationDAO, policyDAO, workflowDAO, apiGateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        Mockito.when(daoFactory.getWorkflowDAO()).thenReturn(workflowDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory, apiGateway);
         Application application = new Application(APP_NAME, USER_NAME);
         application.setPolicy(new ApplicationPolicy(TIER));
         application.setPermissionString("[{\"groupId\": \"testGroup\",\"permission\":[\"TESTREAD\",\"TESTUPDATE\"]}]");
@@ -548,8 +604,13 @@ public class APIStoreImplTestCase {
         Policy policy = new SubscriptionPolicy(UUID, TIER);
         Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription, TIER))
                 .thenReturn(policy);
-        APIStore apiStore = getApiStoreImpl(apiDAO, applicationDAO, apiSubscriptionDAO, workflowDAO, apiGateway,
-                policyDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
+        Mockito.when(daoFactory.getWorkflowDAO()).thenReturn(workflowDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory, apiGateway);
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI();
         apiBuilder.lifeCycleStatus(APIStatus.PUBLISHED.getStatus());
         API api = apiBuilder.build();
@@ -580,7 +641,11 @@ public class APIStoreImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIGateway apiGateway = Mockito.mock(APIGateway.class);
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO, applicationDAO, apiSubscriptionDAO, workflowDAO, apiGateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
+        Mockito.when(daoFactory.getWorkflowDAO()).thenReturn(workflowDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory, apiGateway);
 
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI();
         API api = apiBuilder.build();
@@ -608,8 +673,12 @@ public class APIStoreImplTestCase {
         APIGateway apiGateway = Mockito.mock(APIGateway.class);
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO, applicationDAO, apiSubscriptionDAO, workflowDAO, apiGateway,
-                policyDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        Mockito.when(daoFactory.getWorkflowDAO()).thenReturn(workflowDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory, apiGateway);
         Application application = new Application("TestApp", USER_ID);
         application.setId(UUID);
 
@@ -631,7 +700,11 @@ public class APIStoreImplTestCase {
         APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
         APIGateway apiGateway = Mockito.mock(APIGateway.class);
-        APIStore apiStore = getApiStoreImpl(applicationDAO, apiSubscriptionDAO, workflowDAO, apiGateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
+        Mockito.when(daoFactory.getWorkflowDAO()).thenReturn(workflowDAO);
+        Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory, apiGateway);
 
         Application application = SampleTestObjectCreator.createDefaultApplication();
         APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
@@ -648,7 +721,11 @@ public class APIStoreImplTestCase {
         APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
         APIGateway apiGateway = Mockito.mock(APIGateway.class);
-        APIStore apiStore = getApiStoreImpl(applicationDAO, apiSubscriptionDAO, workflowDAO, apiGateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
+        Mockito.when(daoFactory.getWorkflowDAO()).thenReturn(workflowDAO);
+        Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory, apiGateway);
 
         Application application = SampleTestObjectCreator.createDefaultApplication();
         APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
@@ -671,7 +748,10 @@ public class APIStoreImplTestCase {
     public void testGetAPISubscriptionsByApplication() throws APIManagementException {
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
         APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
-        APIStore apiStore = getApiStoreImpl(applicationDAO, apiSubscriptionDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
+        Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         Application application = new Application(APP_NAME, USER_NAME);
         application.setPolicy(new ApplicationPolicy(TIER));
         application.setId(UUID);
@@ -684,7 +764,11 @@ public class APIStoreImplTestCase {
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
-        APIStore apiStore = getApiStoreImpl(applicationDAO, policyDAO, workflowDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        Mockito.when(daoFactory.getWorkflowDAO()).thenReturn(workflowDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         Application application = new Application(APP_NAME, USER_NAME);
         application.setPolicy(new ApplicationPolicy(null));
         Mockito.when(applicationDAO.isApplicationNameExists(APP_NAME)).thenReturn(false);
@@ -696,7 +780,11 @@ public class APIStoreImplTestCase {
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
-        APIStore apiStore = getApiStoreImpl(applicationDAO, policyDAO, workflowDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        Mockito.when(daoFactory.getWorkflowDAO()).thenReturn(workflowDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         Application application = new Application(APP_NAME, USER_NAME);
         application.setPolicy(new ApplicationPolicy(TIER));
         Mockito.when(applicationDAO.isApplicationNameExists(APP_NAME)).thenReturn(false);
@@ -710,7 +798,10 @@ public class APIStoreImplTestCase {
     public void testAddApplicationWithDuplicateName() throws APIManagementException {
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
-        APIStore apiStore = getApiStoreImpl(applicationDAO, workflowDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
+        Mockito.when(daoFactory.getWorkflowDAO()).thenReturn(workflowDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         Application application = new Application(APP_NAME, USER_NAME);
         Mockito.when(applicationDAO.isApplicationNameExists(APP_NAME)).thenReturn(true);
         apiStore.addApplication(application);
@@ -722,7 +813,11 @@ public class APIStoreImplTestCase {
         APISubscriptionDAO subscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
         APIGateway apiGateway = Mockito.mock(APIGateway.class);
-        APIStore apiStore = getApiStoreImpl(applicationDAO, subscriptionDAO, workflowDAO, apiGateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
+        Mockito.when(daoFactory.getWorkflowDAO()).thenReturn(workflowDAO);
+        Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(subscriptionDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory, apiGateway);
         Application application = SampleTestObjectCreator.createDefaultApplication();
         application.setId(UUID);
         Mockito.when(applicationDAO.getApplication(UUID)).thenReturn(application);
@@ -739,7 +834,11 @@ public class APIStoreImplTestCase {
         APISubscriptionDAO subscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
         APIGateway apiGateway = Mockito.mock(APIGateway.class);
-        APIStore apiStore = getApiStoreImpl(applicationDAO, subscriptionDAO, workflowDAO, apiGateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
+        Mockito.when(daoFactory.getWorkflowDAO()).thenReturn(workflowDAO);
+        Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(subscriptionDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory, apiGateway);
         Application application = SampleTestObjectCreator.createDefaultApplication();
         application.setStatus(APIMgtConstants.ApplicationStatus.APPLICATION_ONHOLD);
         application.setId(UUID);
@@ -763,7 +862,11 @@ public class APIStoreImplTestCase {
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
         APIGateway apiGateway = Mockito.mock(APIGateway.class);
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
-        APIStore apiStore = getApiStoreImpl(applicationDAO, policyDAO, workflowDAO, apiGateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
+        Mockito.when(daoFactory.getWorkflowDAO()).thenReturn(workflowDAO);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory, apiGateway);
         Application existingApplication = SampleTestObjectCreator.createDefaultApplication();
         String appUUID = existingApplication.getUuid();
         existingApplication.setStatus(ApplicationStatus.APPLICATION_APPROVED);
@@ -806,7 +909,9 @@ public class APIStoreImplTestCase {
     @Test(description = "Retrieve applications")
     public void testGetApplications() throws APIManagementException {
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
-        APIStore apiStore = getApiStoreImpl(applicationDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         apiStore.getApplications(USER_ID);
         Mockito.verify(applicationDAO, Mockito.times(1)).getApplications(USER_ID);
     }
@@ -814,7 +919,9 @@ public class APIStoreImplTestCase {
     @Test(description = "Retrieve all tags")
     public void testGetAllTags() throws APIManagementException {
         TagDAO tagDAO = Mockito.mock(TagDAO.class);
-        APIStore apiStore = getApiStoreImpl(tagDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getTagDAO()).thenReturn(tagDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         apiStore.getAllTags();
         Mockito.verify(tagDAO, Mockito.times(1)).getTags();
     }
@@ -822,7 +929,9 @@ public class APIStoreImplTestCase {
     @Test(description = "Get all policies of a specific policy level")
     public void testGetPolicies() throws APIManagementException {
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
-        APIStore apiStore = getApiStoreImpl(policyDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         apiStore.getPolicies(APIMgtAdminService.PolicyLevel.application);
         Mockito.verify(policyDAO, Mockito.times(1)).getPoliciesByLevel(APIMgtAdminService.PolicyLevel.application);
     }
@@ -830,7 +939,9 @@ public class APIStoreImplTestCase {
     @Test(description = "Get policy given policy name and policy level")
     public void testGetPolicy() throws APIManagementException {
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
-        APIStore apiStore = getApiStoreImpl(policyDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         apiStore.getPolicy(APIMgtAdminService.PolicyLevel.application, POLICY_NAME);
         Mockito.verify(policyDAO, Mockito.times(1)).getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application,
                 POLICY_NAME);
@@ -839,7 +950,9 @@ public class APIStoreImplTestCase {
     @Test(description = "Retrieve labels")
     public void testGetLabelInfo() throws APIManagementException {
         LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
-        APIStore apiStore = getApiStoreImpl(labelDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         List<Label> labelList = new ArrayList<>();
         List<String> labelNames = new ArrayList<>();
         Label label = SampleTestObjectCreator.createLabel("Public", SampleTestObjectCreator.LABEL_TYPE_STORE).build();
@@ -854,7 +967,9 @@ public class APIStoreImplTestCase {
     @Test(description = "Add comment")
     public void testAddComment() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
         Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
@@ -866,7 +981,9 @@ public class APIStoreImplTestCase {
     @Test(description = "Get comment")
     public void testGetComment() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
         Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
@@ -879,7 +996,9 @@ public class APIStoreImplTestCase {
     @Test(description = "Get all comments for an api")
     public void testGetAllCommentsForApi() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
         List<Comment> commentList = new ArrayList<>();
@@ -898,7 +1017,9 @@ public class APIStoreImplTestCase {
     @Test(description = "Delete comment")
     public void testDeleteComment() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
         Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
@@ -911,7 +1032,9 @@ public class APIStoreImplTestCase {
     @Test(description = "Update comment")
     public void testUpdateComment() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
         Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
@@ -924,7 +1047,9 @@ public class APIStoreImplTestCase {
     @Test(description = "Add rating")
     public void testAddRating() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
         Rating rating = SampleTestObjectCreator.createDefaultRating(api.getId());
@@ -937,7 +1062,9 @@ public class APIStoreImplTestCase {
     @Test(description = "Update rating")
     public void testUpdateRating() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
         Rating ratingFromDB = SampleTestObjectCreator.createDefaultRating(api.getId());
@@ -952,7 +1079,9 @@ public class APIStoreImplTestCase {
     @Test(description = "Get rating for api from user")
     public void testGetRatingForApiFromUser() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
         Rating ratingFromDB = SampleTestObjectCreator.createDefaultRating(api.getId());
@@ -965,7 +1094,9 @@ public class APIStoreImplTestCase {
     @Test(description = "Get rating from rating id")
     public void testGetRatingByUUID() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
         String randomRatingUUID = java.util.UUID.randomUUID().toString();
@@ -979,7 +1110,9 @@ public class APIStoreImplTestCase {
     @Test(description = "Get average rating for a given api")
     public void testGetAverageRating() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
         apiStore.getAvgRating(api.getId());
@@ -990,7 +1123,9 @@ public class APIStoreImplTestCase {
     @Test(description = "Get list of ratings for a given api")
     public void testGetRatingsListForApi() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
         apiStore.getRatingsListForApi(api.getId());
@@ -1006,7 +1141,9 @@ public class APIStoreImplTestCase {
     @Test(description = "Add rating exception in dao", expectedExceptions = APIRatingException.class)
     public void testAddRatingDaoException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
         Rating rating = SampleTestObjectCreator.createDefaultRating(api.getId());
@@ -1020,7 +1157,9 @@ public class APIStoreImplTestCase {
             expectedExceptions = APIManagementException.class)
     public void testGetCommentDaoException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
         String randomUUIDForComment = java.util.UUID.randomUUID().toString();
@@ -1034,7 +1173,9 @@ public class APIStoreImplTestCase {
             expectedExceptions = APIMgtResourceNotFoundException.class)
     public void testGetCommentMissingException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
         String randomUUIDForComment = java.util.UUID.randomUUID().toString();
@@ -1045,7 +1186,9 @@ public class APIStoreImplTestCase {
     @Test(description = "Exception in dao when adding a comment", expectedExceptions = APIManagementException.class)
     public void testAddCommentException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
         Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
@@ -1059,7 +1202,9 @@ public class APIStoreImplTestCase {
             expectedExceptions = APIMgtResourceNotFoundException.class)
     public void testDeleteCommentDaoException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
         Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
@@ -1074,7 +1219,9 @@ public class APIStoreImplTestCase {
             expectedExceptions = APIMgtResourceNotFoundException.class)
     public void testCommentModeratorWhileDeleteComment() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
         Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
@@ -1087,7 +1234,9 @@ public class APIStoreImplTestCase {
             expectedExceptions = APIMgtResourceNotFoundException.class)
     public void testDeleteCommentMissingException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
         String randomUUIDForComment = java.util.UUID.randomUUID().toString();
@@ -1099,7 +1248,9 @@ public class APIStoreImplTestCase {
             expectedExceptions = APIMgtResourceNotFoundException.class)
     public void testUpdateCommentDaoException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
         Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
@@ -1114,7 +1265,9 @@ public class APIStoreImplTestCase {
             expectedExceptions = APIMgtResourceNotFoundException.class)
     public void testUpdateCommentMissingException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
         Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
@@ -1126,7 +1279,9 @@ public class APIStoreImplTestCase {
             expectedExceptions = APIManagementException.class)
     public void testGetAllCommentsForApiException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
         Mockito.doThrow(new APIMgtDAOException("Error occurred while retrieving all comments for api " + api.getId(),
@@ -1140,7 +1295,9 @@ public class APIStoreImplTestCase {
     public void testGetCommentApiMissingException()
             throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         String randomUUIDForApi = java.util.UUID.randomUUID().toString();
         Mockito.when(apiDAO.getAPI(randomUUIDForApi)).thenReturn(null);
         String randomUUIDForComment = java.util.UUID.randomUUID().toString();
@@ -1152,7 +1309,9 @@ public class APIStoreImplTestCase {
     public void testAddCommentApiMissingException()
             throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         String randomUUIDForApi = java.util.UUID.randomUUID().toString();
         Mockito.when(apiDAO.getAPI(randomUUIDForApi)).thenReturn(null);
         Comment comment = SampleTestObjectCreator.createDefaultComment(randomUUIDForApi);
@@ -1164,7 +1323,9 @@ public class APIStoreImplTestCase {
     public void testDeleteCommentApiMissingException()
             throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         String randomUUIDForApi = java.util.UUID.randomUUID().toString();
         Mockito.when(apiDAO.getAPI(randomUUIDForApi)).thenReturn(null);
         String randomUUIDForComment = java.util.UUID.randomUUID().toString();
@@ -1176,7 +1337,9 @@ public class APIStoreImplTestCase {
     public void testUpdateCommentApiMissingException()
             throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         String randomUUIDForApi = java.util.UUID.randomUUID().toString();
         Mockito.when(apiDAO.getAPI(randomUUIDForApi)).thenReturn(null);
         Comment comment = SampleTestObjectCreator.createDefaultComment(randomUUIDForApi);
@@ -1188,7 +1351,10 @@ public class APIStoreImplTestCase {
     public void testDeleteSubscriptionException() throws APIManagementException {
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
         APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
-        APIStore apiStore = getApiStoreImpl(applicationDAO, apiSubscriptionDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
+        Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         Mockito.doThrow(new APIMgtDAOException("Error occurred while deleting api subscription " + UUID,
                 new SQLException()))
                 .when(apiSubscriptionDAO).deleteAPISubscription(UUID);
@@ -1198,7 +1364,9 @@ public class APIStoreImplTestCase {
     @Test(description = "Exception when retrieving all tags", expectedExceptions = APIManagementException.class)
     public void testGetAllTagsException() throws APIManagementException {
         TagDAO tagDAO = Mockito.mock(TagDAO.class);
-        APIStore apiStore = getApiStoreImpl(tagDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getTagDAO()).thenReturn(tagDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         Mockito.when(tagDAO.getTags()).thenThrow(new APIMgtDAOException("Error occurred while retrieving tags",
                 new SQLException()));
         apiStore.getAllTags();
@@ -1208,7 +1376,9 @@ public class APIStoreImplTestCase {
             expectedExceptions = APIManagementException.class)
     public void testGetPoliciesException() throws APIManagementException {
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
-        APIStore apiStore = getApiStoreImpl(policyDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         Mockito.when(policyDAO.getPoliciesByLevel(APIMgtAdminService.PolicyLevel.application)).
                 thenThrow(new APIMgtDAOException(
                         "Error occurred while retrieving policies for policy level - " + APPLICATION_POLICY_LEVEL,
@@ -1220,7 +1390,9 @@ public class APIStoreImplTestCase {
             expectedExceptions = APIManagementException.class)
     public void testGetPolicyException() throws APIManagementException {
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
-        APIStore apiStore = getApiStoreImpl(policyDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         Mockito.when(policyDAO.getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application, POLICY_NAME))
                 .thenThrow(new APIMgtDAOException("Error occurred while retrieving policy - " + POLICY_NAME,
                         new SQLException()));
@@ -1230,7 +1402,9 @@ public class APIStoreImplTestCase {
     @Test(description = "Exception when deleting an application", expectedExceptions = APIManagementException.class)
     public void testDeleteApplicationException() throws APIManagementException {
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
-        APIStore apiStore = getApiStoreImpl(applicationDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         Application application = new Application(APP_NAME, USER_NAME);
         application.setId(UUID);
         Mockito.doThrow(new APIMgtDAOException("Error occurred while deleting the application - " + UUID,
@@ -1245,7 +1419,9 @@ public class APIStoreImplTestCase {
             expectedExceptions = APIManagementException.class)
     public void testGetApplicationByUUIDException() throws APIManagementException {
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
-        APIStore apiStore = getApiStoreImpl(applicationDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         Mockito.when(applicationDAO.getApplication(UUID))
                 .thenThrow(new APIMgtDAOException("Error occurred while retrieving application - " + UUID,
                         new SQLException()));
@@ -1257,7 +1433,10 @@ public class APIStoreImplTestCase {
     public void testGetAPISubscriptionsByApplicationException() throws APIManagementException {
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
         APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
-        APIStore apiStore = getApiStoreImpl(applicationDAO, apiSubscriptionDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
+        Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         Application application = new Application(APP_NAME, USER_NAME);
         application.setPolicy(new ApplicationPolicy(TIER));
         application.setId(UUID);
@@ -1271,7 +1450,9 @@ public class APIStoreImplTestCase {
     @Test(description = "Exception when retrieving APIs by status", expectedExceptions = APIManagementException.class)
     public void getAPIsByStatusException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         String[] statuses = {STATUS_CREATED, STATUS_PUBLISHED};
         Mockito.when(apiDAO.getAPIsByStatus(EnumSet.of(APIStatus.CREATED, APIStatus.PUBLISHED))).
                 thenThrow(new APIMgtDAOException(
@@ -1284,7 +1465,9 @@ public class APIStoreImplTestCase {
             expectedExceptions = APIManagementException.class)
     public void testGetApplicationByNameException() throws APIManagementException {
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
-        APIStore apiStore = getApiStoreImpl(applicationDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         Mockito.when(applicationDAO.getApplicationByName(APP_NAME, USER_ID)).thenThrow(new APIMgtDAOException(
                 "Error occurred while fetching application for the given applicationName - " + APP_NAME,
                 new SQLException()));
@@ -1294,7 +1477,9 @@ public class APIStoreImplTestCase {
     @Test(description = "Exception when retrieving applications", expectedExceptions = APIManagementException.class)
     public void testGetApplicationsException() throws APIManagementException {
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
-        APIStore apiStore = getApiStoreImpl(applicationDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         Mockito.when(applicationDAO.getApplications(USER_ID)).thenThrow(new APIMgtDAOException(
                 "Error occurred while fetching applications for the given subscriber - " + USER_ID,
                 new SQLException()));
@@ -1304,7 +1489,9 @@ public class APIStoreImplTestCase {
     @Test(description = "Exception when updating an application", expectedExceptions = APIManagementException.class)
     public void testUpdateApplicationException() throws APIManagementException {
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
-        APIStore apiStore = getApiStoreImpl(applicationDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         Application application = new Application(APP_NAME, USER_NAME);
         Mockito.doThrow(new APIMgtDAOException("Error occurred while updating the application - " + UUID)).when
                 (applicationDAO)
@@ -1317,7 +1504,10 @@ public class APIStoreImplTestCase {
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
         Policy policy = Mockito.mock(Policy.class);
-        APIStore apiStore = getApiStoreImpl(applicationDAO, policyDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         Application application = new Application(APP_NAME, USER_NAME);
         application.setPolicy(new ApplicationPolicy(TIER));
         Mockito.when(applicationDAO.isApplicationNameExists(APP_NAME)).thenReturn(false);
@@ -1334,7 +1524,10 @@ public class APIStoreImplTestCase {
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
         Policy policy = Mockito.mock(Policy.class);
-        APIStore apiStore = getApiStoreImpl(applicationDAO, policyDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         Application application = new Application(APP_NAME, USER_NAME);
         application.setPolicy(new ApplicationPolicy(TIER));
         application.setPermissionString("data");
@@ -1347,7 +1540,9 @@ public class APIStoreImplTestCase {
     @Test(description = "Exception when retrieving labels", expectedExceptions = LabelException.class)
     public void testGetLabelInfoException() throws APIManagementException {
         LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
-        APIStore apiStore = getApiStoreImpl(labelDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         List<String> labels = new ArrayList<>();
         labels.add("label");
         Mockito.when(labelDAO.getLabelsByName(labels))
@@ -1364,7 +1559,10 @@ public class APIStoreImplTestCase {
 
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
-        APIStore apiStore = getApiStoreImpl(applicationDAO, workflowDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
+        Mockito.when(daoFactory.getWorkflowDAO()).thenReturn(workflowDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         APIGateway apiGateway = Mockito.mock(APIGateway.class);
         WorkflowExecutor executor = new DefaultWorkflowExecutor();
         Workflow workflow = new ApplicationCreationWorkflow(applicationDAO, workflowDAO, apiGateway);
@@ -1379,7 +1577,11 @@ public class APIStoreImplTestCase {
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
         Policy policy = Mockito.mock(Policy.class);
         APIGateway apiGateway = Mockito.mock(APIGateway.class);
-        APIStore apiStore = getApiStoreImpl(applicationDAO, policyDAO, workflowDAO, apiGateway);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        Mockito.when(daoFactory.getWorkflowDAO()).thenReturn(workflowDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory, apiGateway);
         Application application = new Application(APP_NAME, USER_NAME);
         application.setPolicy(new ApplicationPolicy(TIER));
         application.setPermissionString(
@@ -1413,7 +1615,11 @@ public class APIStoreImplTestCase {
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
         Policy policy = Mockito.mock(Policy.class);
-        APIStore apiStore = getApiStoreImpl(applicationDAO, policyDAO, workflowDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        Mockito.when(daoFactory.getWorkflowDAO()).thenReturn(workflowDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory);
         Application application = new Application(APP_NAME, USER_NAME);
         application.setStatus(ApplicationStatus.APPLICATION_APPROVED);
         application.setPolicy(new ApplicationPolicy(TIER));
@@ -1468,8 +1674,13 @@ public class APIStoreImplTestCase {
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
         Policy policy = new SubscriptionPolicy(UUID, TIER);
-        APIStore apiStore = getApiStoreImpl(apiDAO, applicationDAO, apiSubscriptionDAO, workflowDAO, apiGateway,
-                policyDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
+        Mockito.when(daoFactory.getWorkflowDAO()).thenReturn(workflowDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory, apiGateway);
         Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription, TIER))
                 .thenReturn(policy);
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI();
@@ -1511,9 +1722,10 @@ public class APIStoreImplTestCase {
         Policy policy = new SubscriptionPolicy(UUID, TIER);
         Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription, TIER))
                 .thenReturn(policy);
-        APIStore apiStore = getApiStoreImpl(apiDAO, Mockito.mock(ApplicationDAO.class),
-                Mockito.mock(APISubscriptionDAO.class), Mockito.mock(WorkflowDAO.class), Mockito.mock(APIGateway.class),
-                policyDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory, Mockito.mock(APIGateway.class));
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI();
         String apiId = apiBuilder.getId();
 
@@ -1546,9 +1758,10 @@ public class APIStoreImplTestCase {
         Policy policy = new SubscriptionPolicy(UUID, TIER);
         Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription, TIER))
                 .thenReturn(policy);
-        APIStore apiStore = getApiStoreImpl(apiDAO, Mockito.mock(ApplicationDAO.class),
-                Mockito.mock(APISubscriptionDAO.class), Mockito.mock(WorkflowDAO.class), Mockito.mock(APIGateway.class),
-                policyDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIStore apiStore = getApiStoreImpl(daoFactory, Mockito.mock(APIGateway.class));
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI();
         String apiId = apiBuilder.getId();
 
@@ -1626,22 +1839,30 @@ public class APIStoreImplTestCase {
     @Test(description = "Get dedicated gateway")
     public void testGetDedicatedGateway() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        String apiId = "api-1";
         DedicatedGateway dedicatedGateway = new DedicatedGateway();
         dedicatedGateway.setEnabled(true);
-        APIStoreImpl apiStore = getApiStoreImpl(apiDAO);
-        Mockito.when(apiDAO.getDedicatedGateway(Mockito.anyString())).thenReturn(dedicatedGateway);
-        DedicatedGateway result = apiStore.getDedicatedGateway(Mockito.anyString());
+        dedicatedGateway.setApiId(apiId);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIStoreImpl apiStore = getApiStoreImpl(daoFactory);
+        Mockito.when(apiDAO.getDedicatedGateway(apiId)).thenReturn(dedicatedGateway);
+        DedicatedGateway result = apiStore.getDedicatedGateway(apiId);
         Assert.assertTrue(result.isEnabled());
     }
 
     @Test(description = "Get dedicated gateway exception scenario", expectedExceptions = APIManagementException.class)
     public void testGetDedicatedGatewayForException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        String apiId = "api-1";
         DedicatedGateway dedicatedGateway = new DedicatedGateway();
         dedicatedGateway.setEnabled(true);
-        APIStoreImpl apiStore = getApiStoreImpl(apiDAO);
-        Mockito.when(apiDAO.getDedicatedGateway(Mockito.anyString())).thenThrow(APIMgtDAOException.class);
-        apiStore.getDedicatedGateway(Mockito.anyString());
+        dedicatedGateway.setApiId(apiId);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIStoreImpl apiStore = getApiStoreImpl(daoFactory);
+        Mockito.when(apiDAO.getDedicatedGateway(apiId)).thenThrow(APIMgtDAOException.class);
+        apiStore.getDedicatedGateway(apiId);
     }
 
     @Test(description = "Update dedicated gateway")
@@ -1655,7 +1876,10 @@ public class APIStoreImplTestCase {
 
         String autoGenLabelName = ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX + uuid;
         Mockito.when(labelDAO.getLabelByName(autoGenLabelName)).thenReturn(null);
-        APIStoreImpl apiStore = getApiStoreImpl(apiDAO, labelDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDAO);
+        APIStoreImpl apiStore = getApiStoreImpl(daoFactory);
         DedicatedGateway dedicatedGateway = SampleTestObjectCreator.createDedicatedGateway(uuid, true,
                 api.getCreatedBy());
         apiStore.updateDedicatedGateway(dedicatedGateway);
@@ -1678,7 +1902,10 @@ public class APIStoreImplTestCase {
         Label label = new Label.Builder().id(java.util.UUID.randomUUID().toString()).
                 name(autoGenLabelName).accessUrls(null).build();
         Mockito.when(labelDAO.getLabelByName(autoGenLabelName)).thenReturn(label);
-        APIStoreImpl apiStore = getApiStoreImpl(apiDAO, labelDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDAO);
+        APIStoreImpl apiStore = getApiStoreImpl(daoFactory);
         DedicatedGateway dedicatedGateway = SampleTestObjectCreator.createDedicatedGateway(uuid, true,
                 api.getCreatedBy());
         apiStore.updateDedicatedGateway(dedicatedGateway);
@@ -1698,7 +1925,10 @@ public class APIStoreImplTestCase {
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
         String autoGenLabelName = ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX + uuid;
 
-        APIStoreImpl apiStore = getApiStoreImpl(apiDAO, labelDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDAO);
+        APIStoreImpl apiStore = getApiStoreImpl(daoFactory);
         DedicatedGateway dedicatedGateway = SampleTestObjectCreator.createDedicatedGateway(uuid, false,
                 api.getCreatedBy());
         apiStore.updateDedicatedGateway(dedicatedGateway);
@@ -1718,7 +1948,10 @@ public class APIStoreImplTestCase {
         String uuid = api.getId();
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
 
-        APIStoreImpl apiStore = getApiStoreImpl(apiDAO, labelDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDAO);
+        APIStoreImpl apiStore = getApiStoreImpl(daoFactory);
         DedicatedGateway dedicatedGateway = SampleTestObjectCreator.createDedicatedGateway(uuid, false,
                 api.getCreatedBy());
         apiStore.updateDedicatedGateway(dedicatedGateway);
@@ -1738,7 +1971,10 @@ public class APIStoreImplTestCase {
         String autoGenLabelName = ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX + uuid;
 
         Mockito.when(labelDAO.getLabelByName(autoGenLabelName)).thenReturn(null);
-        APIStoreImpl apiStore = getApiStoreImpl(apiDAO, labelDAO);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDAO);
+        APIStoreImpl apiStore = getApiStoreImpl(daoFactory);
         DedicatedGateway dedicatedGateway = SampleTestObjectCreator.createDedicatedGateway(uuid, true,
                 api.getCreatedBy());
         List<String> labelSet = new ArrayList<>();
@@ -1747,112 +1983,30 @@ public class APIStoreImplTestCase {
         apiStore.updateDedicatedGateway(dedicatedGateway);
     }
 
-    private APIStoreImpl getApiStoreImpl(ApiDAO apiDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, apiDAO, null, null, null, null, null, null, null, null);
+    private APIStoreImpl getApiStoreImpl(DAOFactory daoFactory) {
+        return new APIStoreImpl(USER_NAME, null, null, daoFactory, null, null);
     }
 
-    private APIStoreImpl getApiStoreImpl(ApiDAO apiDAO, LabelDAO labelDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, apiDAO, null, null, null, null, labelDAO, null, null, null);
-    }
-
-    private APIStoreImpl getApiStoreImpl(IdentityProvider idp, KeyManager keyManager, ApiDAO apiDAO,
-                                         APISubscriptionDAO apiSubscriptionDAO,
+    private APIStoreImpl getApiStoreImpl(IdentityProvider idp, KeyManager keyManager, DAOFactory daoFactory,
                                          GatewaySourceGenerator gatewaySourceGenerator, APIGateway apiGateway) {
-        return new APIStoreImpl(USER_NAME, idp, keyManager, apiDAO, null, apiSubscriptionDAO, null,
-                null, null, null, gatewaySourceGenerator, apiGateway);
+        return new APIStoreImpl(USER_NAME, idp, keyManager, daoFactory, gatewaySourceGenerator, apiGateway);
     }
 
-    private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, null, applicationDAO, null, null, null, null, null, null, null);
+    private APIStoreImpl getApiStoreImpl(DAOFactory daoFactory, APIGateway apiGateway) {
+        return new APIStoreImpl(USER_NAME, null, null, daoFactory, null, apiGateway);
     }
 
-    private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO, PolicyDAO policyDAO, WorkflowDAO workflowDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, null, applicationDAO, null, policyDAO, null, null, workflowDAO,
-                null, null);
-    }
-
-    private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO, PolicyDAO policyDAO, WorkflowDAO workflowDAO,
+    private APIStoreImpl getApiStoreImpl(DAOFactory daoFactory, GatewaySourceGenerator gatewaySourceGenerator,
                                          APIGateway apiGateway) {
-        return new APIStoreImpl(USER_NAME, null, null, null, applicationDAO, null, policyDAO, null, null, workflowDAO,
-                null, apiGateway);
-    }
-
-    private APIStoreImpl getApiStoreImpl(ApiDAO apiDAO, ApplicationDAO applicationDAO,
-                                         APISubscriptionDAO apiSubscriptionDAO, WorkflowDAO workflowDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, apiDAO, applicationDAO, apiSubscriptionDAO, null, null, null,
-                workflowDAO, null, null);
-    }
-
-    private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO,
-                                         WorkflowDAO workflowDAO, APIGateway apiGateway) {
-        return new APIStoreImpl(USER_NAME, null, null, null, applicationDAO, apiSubscriptionDAO, null, null, null,
-                workflowDAO, null, apiGateway);
-    }
-
-    private APIStoreImpl getApiStoreImpl(ApiDAO apiDAO, ApplicationDAO applicationDAO,
-                                         APISubscriptionDAO apiSubscriptionDAO, WorkflowDAO workflowDAO,
-                                         APIGateway apiGateway) {
-        return new APIStoreImpl(USER_NAME, null, null, apiDAO, applicationDAO, apiSubscriptionDAO, null, null, null,
-                workflowDAO, null, apiGateway);
-    }
-
-    private APIStoreImpl getApiStoreImpl(ApiDAO apiDAO, GatewaySourceGenerator gatewaySourceGenerator,
-                                         APIGateway apiGateway) {
-        return new APIStoreImpl(USER_NAME, null, null, apiDAO, null, null, null, null, null, null,
-                gatewaySourceGenerator, apiGateway);
-    }
-
-    private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO,
-                                         WorkflowDAO workflowDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, null, applicationDAO, apiSubscriptionDAO, null, null, null,
-                workflowDAO, null, null);
-    }
-
-    private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, null, applicationDAO, apiSubscriptionDAO, null, null, null,
-                null, null, null);
-    }
-
-    private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO, WorkflowDAO workflowDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, null, applicationDAO, null, null, null, null, workflowDAO,
-                null, null);
-    }
-
-    private APIStoreImpl getApiStoreImpl(TagDAO tagDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, null, null, null, null, tagDAO, null, null, null, null);
-    }
-
-    private APIStoreImpl getApiStoreImpl(PolicyDAO policyDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, null, null, null, policyDAO, null, null, null, null, null);
-    }
-
-    private APIStoreImpl getApiStoreImpl(LabelDAO labelDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, null, null, null, null, null, labelDAO, null, null, null);
-    }
-
-    private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO, PolicyDAO policyDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, null, applicationDAO, null, policyDAO, null, null, null,
-                null, null);
+        return new APIStoreImpl(USER_NAME, null, null, daoFactory, gatewaySourceGenerator, apiGateway);
     }
 
     private APIStoreImpl getApiStoreImpl() {
-        return new APIStoreImpl(USER_NAME, null, null, null, null, null, null, null, null, null, null, null);
+        return new APIStoreImpl(USER_NAME, null, null, null, null, null);
     }
 
     private APIStoreImpl getApiStoreImpl(IdentityProvider identityProvider) {
-        return new APIStoreImpl(USER_NAME, identityProvider, null, null, null, null, null, null, null, null,
-                null, null);
-    }
-
-    private APIStore getApiStoreImpl(ApplicationDAO applicationDAO, WorkflowDAO workflowDAO, APIGateway apiGateway) {
-        return new APIStoreImpl(USER_NAME, null, null, null, applicationDAO, null, null, null, null, workflowDAO, null,
-                apiGateway);
-    }
-
-    private APIStore getApiStoreImpl(ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
-            apiSubscriptionDAO, WorkflowDAO workflowDAO, APIGateway apiGateway, PolicyDAO policyDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO,
-                null, null, workflowDAO, null, apiGateway);
+        return new APIStoreImpl(USER_NAME, identityProvider, null, null, null, null);
     }
 
 }

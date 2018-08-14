@@ -40,13 +40,15 @@ import org.wso2.carbon.apimgt.core.models.Application;
 import java.util.UUID;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({DAOFactory.class, Application.class})
+@PrepareForTest({Application.class})
 public class ApplicationImportExportManagerTestCase {
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationImportExportManagerTestCase.class);
     APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+    DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
     private String USER = "admin";
-    ApplicationImportExportManager applicationImportExportManager = new ApplicationImportExportManager(apiStore);
+    ApplicationImportExportManager applicationImportExportManager = new ApplicationImportExportManager(apiStore,
+            daoFactory);
 
     @Test
     public void testGetApplicationDetails() throws Exception {
@@ -73,7 +75,7 @@ public class ApplicationImportExportManagerTestCase {
         Application testApp = Mockito.mock(Application.class);
         PowerMockito.mockStatic(DAOFactory.class);
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
-        PowerMockito.when(DAOFactory.getApplicationDAO()).thenReturn(applicationDAO);
+        Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
         PowerMockito.when(applicationDAO.isApplicationNameExists(Mockito.anyString())).thenReturn(true);
         Mockito.when(apiStore.getApplicationByName(testApp.getName(), USER)).thenReturn(testApp);
         WorkflowResponse workflowResponse = Mockito.mock(WorkflowResponse.class);
@@ -89,7 +91,7 @@ public class ApplicationImportExportManagerTestCase {
         Application testApp = Mockito.mock(Application.class);
         PowerMockito.mockStatic(DAOFactory.class);
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
-        PowerMockito.when(DAOFactory.getApplicationDAO()).thenReturn(applicationDAO);
+        Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
         PowerMockito.when(applicationDAO.isApplicationNameExists(Mockito.anyString())).thenReturn(true);
         Mockito.when(apiStore.getApplicationByName(testApp.getName(), USER)).thenReturn(testApp);
         WorkflowResponse workflowResponse = Mockito.mock(WorkflowResponse.class);

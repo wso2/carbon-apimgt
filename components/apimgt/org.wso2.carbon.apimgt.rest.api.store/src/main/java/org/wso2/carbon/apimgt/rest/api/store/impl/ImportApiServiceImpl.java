@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.rest.api.store.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
+import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationResponse;
@@ -60,8 +61,8 @@ public class ImportApiServiceImpl extends ImportApiService {
         try {
             consumer = RestApiUtil.getConsumer(username);
             FileBasedApplicationImportExportManager importExportManager = new FileBasedApplicationImportExportManager
-                    (consumer, System.getProperty("java.io.tmpdir") + File.separator + "exported-app-archives-" +
-                            UUID.randomUUID().toString());
+                    (consumer, new DAOFactory(), System.getProperty("java.io.tmpdir") + File.separator +
+                            "exported-app-archives-" + UUID.randomUUID().toString());
             Application applicationDetails = importExportManager.importApplication(fileInputStream);
             applicationDetails.setCreatedUser(username);
             applicationDetails.setUpdatedUser(username);
@@ -84,8 +85,8 @@ public class ImportApiServiceImpl extends ImportApiService {
         try {
             consumer = RestApiUtil.getConsumer(RestApiUtil.getLoggedInUsername(request));
             FileBasedApplicationImportExportManager importExportManager = new FileBasedApplicationImportExportManager
-                    (consumer, System.getProperty("java.io.tmpdir") + File.separator + "exported-app-archives-" +
-                            UUID.randomUUID().toString());
+                    (consumer, new DAOFactory(), System.getProperty("java.io.tmpdir") + File.separator +
+                            "exported-app-archives-" + UUID.randomUUID().toString());
             Application applicationDetails = importExportManager.importApplication(fileInputStream);
             applicationDetails.setCreatedUser(username);
             applicationDetails.setUpdatedUser(username);

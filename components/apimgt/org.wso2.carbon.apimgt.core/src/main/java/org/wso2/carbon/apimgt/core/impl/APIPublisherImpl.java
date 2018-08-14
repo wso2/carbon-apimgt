@@ -43,15 +43,9 @@ import org.wso2.carbon.apimgt.core.configuration.models.KeyMgtConfigurations;
 import org.wso2.carbon.apimgt.core.configuration.models.NotificationConfigurations;
 import org.wso2.carbon.apimgt.core.configuration.models.ServiceDiscoveryConfigurations;
 import org.wso2.carbon.apimgt.core.configuration.models.ServiceDiscoveryImplConfig;
-import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
-import org.wso2.carbon.apimgt.core.dao.ApiDAO;
-import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
-import org.wso2.carbon.apimgt.core.dao.LabelDAO;
-import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.dao.SearchType;
-import org.wso2.carbon.apimgt.core.dao.TagDAO;
 import org.wso2.carbon.apimgt.core.dao.ThreatProtectionDAO;
-import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
+import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
@@ -136,13 +130,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     // Map to store observers, which observe APIPublisher events
     private Map<String, EventObserver> eventObservers = new HashMap<>();
 
-    public APIPublisherImpl(String username, IdentityProvider idp, KeyManager keyManager, ApiDAO apiDAO,
-                            ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO,
-                            APILifecycleManager apiLifecycleManager, LabelDAO labelDAO, WorkflowDAO workflowDAO,
-                            TagDAO tagDAO, ThreatProtectionDAO threatProtectionDAO,
-                            GatewaySourceGenerator gatewaySourceGenerator, APIGateway apiGatewayPublisher) {
-        super(username, idp, keyManager, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, apiLifecycleManager,
-                labelDAO, workflowDAO, tagDAO, threatProtectionDAO, gatewaySourceGenerator, apiGatewayPublisher);
+    public APIPublisherImpl(String username, IdentityProvider idp, KeyManager keyManager, DAOFactory daoFactory,
+                            APILifecycleManager apiLifecycleManager, GatewaySourceGenerator gatewaySourceGenerator,
+                            APIGateway apiGatewayPublisher) {
+        super(username, idp, keyManager, daoFactory, apiLifecycleManager, gatewaySourceGenerator, apiGatewayPublisher);
     }
 
     /**
@@ -169,7 +160,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public List<Subscription> getSubscribersOfProvider(int offset, int limit, String providerName)
             throws APIManagementException {
         try {
-            return getApiSubscriptionDAO().getAPISubscriptionsForUser(offset, limit, providerName);
+            return getAPISubscriptionDAO().getAPISubscriptionsForUser(offset, limit, providerName);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Unable to fetch subscriptions APIs of provider " + providerName;
             log.error(errorMsg, e);
@@ -212,7 +203,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public long getAPISubscriptionCountByAPI(String id) throws APIManagementException {
         long subscriptionCount;
         try {
-            subscriptionCount = getApiSubscriptionDAO().getSubscriptionCountByAPI(id);
+            subscriptionCount = getAPISubscriptionDAO().getSubscriptionCountByAPI(id);
         } catch (APIMgtDAOException e) {
             log.error("Couldn't retrieve Subscriptions for API " + id, e, log);
             throw new APIManagementException("Couldn't retrieve Subscriptions for API " + id, e, ExceptionCodes
@@ -976,7 +967,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 API originalAPI = apiBuilder.build();
                 WorkflowExecutor executor = WorkflowExecutorFactory.getInstance()
                         .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_STATE);
-                APIStateChangeWorkflow workflow = new APIStateChangeWorkflow(getApiDAO(), getApiSubscriptionDAO(),
+                APIStateChangeWorkflow workflow = new APIStateChangeWorkflow(getApiDAO(), getAPISubscriptionDAO(),
                         getWorkflowDAO(), getApiLifecycleManager(), getApiGateway(), getLabelDAO());
                 workflow.setApiName(originalAPI.getName());
                 workflow.setApiProvider(originalAPI.getProvider());
@@ -1529,11 +1520,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public void updateSubscriptionStatus(String subId, APIMgtConstants.SubscriptionStatus subStatus) throws
             APIManagementException {
         try {
-            getApiSubscriptionDAO().updateSubscriptionStatus(subId, subStatus);
-            Subscription subscription = getApiSubscriptionDAO().getAPISubscription(subId);
+            getAPISubscriptionDAO().updateSubscriptionStatus(subId, subStatus);
+            Subscription subscription = getAPISubscriptionDAO().getAPISubscription(subId);
             if (subscription != null) {
                 API subscribedApi = subscription.getApi();
-                List<SubscriptionValidationData> subscriptionValidationDataList = getApiSubscriptionDAO()
+                List<SubscriptionValidationData> subscriptionValidationDataList = getAPISubscriptionDAO()
                         .getAPISubscriptionsOfAPIForValidation(subscribedApi.getContext(), subscribedApi
                                 .getVersion(), subscription.getApplication().getId());
                 getApiGateway().updateAPISubscriptionStatus(subscriptionValidationDataList);
@@ -1553,7 +1544,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public void updateSubscriptionPolicy(String subId, String newPolicy) throws APIManagementException {
         try {
-            getApiSubscriptionDAO().updateSubscriptionPolicy(subId, newPolicy);
+            getAPISubscriptionDAO().updateSubscriptionPolicy(subId, newPolicy);
         } catch (APIMgtDAOException e) {
             throw new APIManagementException(e);
         }

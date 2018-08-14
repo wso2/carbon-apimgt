@@ -18,7 +18,8 @@
 import React from 'react';
 import { getAsyncComponent } from 'async-react-component';
 
-import { Route, Switch, Link } from 'react-router-dom';
+import { Link, Route, Switch } from 'react-router-dom';
+import { FormattedMessage } from 'react-intl';
 import './ApiCreate.css';
 import ApiCreateEndpoint from './Endpoint/ApiCreateEndpoint';
 
@@ -41,12 +42,22 @@ const ApiCreate = () => {
                                                 <div className='ch-info'>
                                                     <div className='ch-info-front ch-img-1'>
                                                         <i className='fw fw-document fw-4x' />
-                                                        <span>I Have an Existing API</span>
+                                                        <span>
+                                                            <FormattedMessage
+                                                                id='i.have.an.existing.api'
+                                                                defaultMessage='I Have an Existing API'
+                                                            />
+                                                        </span>
                                                     </div>
                                                     <div className='ch-info-back'>
                                                         <p className='unselectable'>
-                                                            Use an existing API endpoint or the API Swagger definition
-                                                            to create an API
+                                                            <FormattedMessage
+                                                                id='use.an.existing.api.endpoint.or.the.api.
+                                                                swagger.definition.to.create.an.api'
+                                                                defaultMessage='Use an existing API
+                                                                endpoint or the API Swagger definition
+                                                            to create an API'
+                                                            />
                                                         </p>
                                                     </div>
                                                 </div>
@@ -61,12 +72,23 @@ const ApiCreate = () => {
                                                 <div className='ch-info'>
                                                     <div className='ch-info-front ch-img-2'>
                                                         <i className='fw fw-endpoint fw-4x' />
-                                                        <span>I Have a SOAP Endpoint</span>
+                                                        <span>
+                                                            <FormattedMessage
+                                                                id='i.have.a.soap.endpoint'
+                                                                defaultMessage='I Have a SOAP Endpoint'
+                                                            />
+                                                        </span>
                                                     </div>
                                                     <div className='ch-info-back'>
                                                         <p className='unselectable'>
-                                                            Use an existing SOAP endpoint to create a managed API.
-                                                            Import the WSDL of the SOAP service
+                                                            <FormattedMessage
+                                                                id={'use.an.existing.soap.endpoint.\
+                                                            to.create.a.managed.api.import.the.wsdl.of.\
+                                                            the.soap.service'}
+                                                                defaultMessage={'Use an existing SOAP endpoint to \
+                                                                create a \
+                                                          managed API. Import the WSDL of the SOAP service'}
+                                                            />
                                                         </p>
                                                     </div>
                                                 </div>
@@ -81,11 +103,19 @@ const ApiCreate = () => {
                                                 <div className='ch-info'>
                                                     <div className='ch-info-front ch-img-3'>
                                                         <i className='fw fw-rest-api fw-4x' />
-                                                        <span>Design a New REST API</span>
+                                                        <span>
+                                                            <FormattedMessage
+                                                                id='designa.a.new.rest.api'
+                                                                defaultMessage='Design a New REST API'
+                                                            />
+                                                        </span>
                                                     </div>
                                                     <div className='ch-info-back'>
                                                         <p className='unselectable'>
-                                                            Design and prototype a new REST API
+                                                            <FormattedMessage
+                                                                id='design.and.prototype.a.new.rest.api'
+                                                                defaultMessage='Design and prototype a new REST API'
+                                                            />
                                                         </p>
                                                     </div>
                                                 </div>
@@ -100,11 +130,21 @@ const ApiCreate = () => {
                                                 <div className='ch-info'>
                                                     <div className='ch-info-front ch-img-4'>
                                                         <i className='fw fw-web-clip fw-4x' />
-                                                        <span>Design New Websocket API</span>
+                                                        <span>
+                                                            <FormattedMessage
+                                                                id='design.new.websocket.api'
+                                                                defaultMessage='Design New Websocket API'
+                                                            />
+                                                        </span>
                                                     </div>
                                                     <div className='ch-info-back'>
                                                         <p className='unselectable'>
-                                                            Design and prototype a new Websocket API
+                                                            <FormattedMessage
+                                                                id={'design.and.prototype.a.new. \
+                                                            websocket.api'}
+                                                                defaultMessage={'Design and prototype a new \
+                                                                Websocket API'}
+                                                            />
                                                         </p>
                                                     </div>
                                                 </div>

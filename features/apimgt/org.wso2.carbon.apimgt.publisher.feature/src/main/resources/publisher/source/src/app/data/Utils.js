@@ -24,12 +24,12 @@ import Axios from 'axios';
 class Utils {
     /**
      * Get JavaScript accessible cookies saved in browser, by giving the cooke name.
-     * @param {String} name - Name of the cookie which need to be retrieved
+     * @param {String} nameWithEnv - Name of the cookie which need to be retrieved
      * @param {String} environmentName - label of the environment of the cookie
      * @returns {String|null} - If found a cookie with given name , return its value,Else null value is returned
      */
     static getCookie(name, environmentName = Utils.getCurrentEnvironment().label) {
-        name = `${name}_${environmentName}`;
+        const nameWithEnv = `${name}_${environmentName}`;
 
         const pairs = document.cookie.split(';');
         let cookie = null;
@@ -37,7 +37,7 @@ class Utils {
             pair = pair.split('=');
             const cookieName = pair[0].trim();
             const value = encodeURIComponent(pair[1]);
-            if (cookieName === name) {
+            if (cookieName === nameWithEnv) {
                 cookie = value;
                 break;
             }
@@ -51,7 +51,7 @@ class Utils {
      * @param {String} path - Path of the cookie which need to be deleted
      * @param {String} environmentName - label of the environment of the cookie
      */
-    static delete_cookie(name, path, environmentName = Utils.getCurrentEnvironment().label) {
+    static deleteCookie(name, path, environmentName = Utils.getCurrentEnvironment().label) {
         document.cookie = `${name}_${environmentName}=; path=${path}; expires=Thu, 01 Jan 1970 00:00:01 GMT`;
     }
 
@@ -65,7 +65,7 @@ class Utils {
      * @param {String} environmentName - Name of the environment to be appended to cookie name
      * @param {boolean} secured - secured parameter is set
      */
-    static  setCookie(
+    static setCookie(
         name,
         value,
         validityPeriod,
@@ -75,13 +75,13 @@ class Utils {
     ) {
         let expiresDirective = '';
         const securedDirective = secured ? '; Secure' : '';
-		if (validityPeriod) {
-			const date = new Date();
-            if(validityPeriod < 0){
-				date.setTime(date.getTime() + 1000000000000);
-			}else{
-				date.setTime(date.getTime() + validityPeriod * 1000);
-			}
+        if (validityPeriod) {
+            const date = new Date();
+            if (validityPeriod < 0) {
+                date.setTime(date.getTime() + 1000000000000);
+            } else {
+                date.setTime((date.getTime() + validityPeriod) * 1000);
+            }
             expiresDirective = '; expires=' + date.toUTCString();
         }
 
@@ -102,13 +102,13 @@ class Utils {
      * @returns {Object} environment: {label, host, loginTokenPath}
      */
     static getCurrentEnvironment() {
-        if (Utils._environment) {
-            return Utils._environment;
+        if (Utils.environment) {
+            return Utils.environment;
         }
 
         const environmentData = localStorage.getItem(Utils.CONST.LOCAL_STORAGE_ENVIRONMENT);
         if (!environmentData) {
-            return Utils._getDefaultEnvironment();
+            return Utils.getDefaultEnvironment();
         }
 
         return JSON.parse(environmentData);
@@ -135,22 +135,28 @@ class Utils {
 
     /**
      * Store the given environment in local-storage
-     * @param {object} environment
+     * @param {object} defaultEnvironment
      */
     static setEnvironment(environment) {
+        let defaultEnvironment = environment;
         if (!environment) {
-            environment = Utils._getDefaultEnvironment();
+            defaultEnvironment = Utils.getDefaultEnvironment();
         }
 
         if (!environment.host) {
-            environment.host = window.location.host;
+            defaultEnvironment.host = window.location.host;
         }
         // Store environment.
-        Utils._environment = environment;
-        localStorage.setItem(Utils.CONST.LOCAL_STORAGE_ENVIRONMENT, JSON.stringify(environment));
+        Utils.environment = defaultEnvironment;
+        localStorage.setItem(Utils.CONST.LOCAL_STORAGE_ENVIRONMENT, JSON.stringify(defaultEnvironment));
     }
 
-    static getPromised_DCRAppInfo(environment) {
+    /**
+     * Get Publisher OAuth App info from back end to construct SSO Request
+     * @param {Object} environment Current Environment
+     * @returns {Promise} Promised Publisher OAuth app info
+     */
+    static getPromisedDCRAppInfo(environment) {
         return Axios.get(Utils.getDCRAppInfoRequestURL(environment));
     }
 
@@ -179,7 +185,7 @@ class Utils {
      */
     static timeDifference(targetTime) {
         const currentTime = Date.now();
-        return ~~((targetTime - currentTime) / 1000);
+        return Math.floor((targetTime - currentTime) / 1000);
     }
 
     /**
@@ -216,8 +222,12 @@ class Utils {
      * @returns {Object} environment: {label: string, host: string, loginTokenPath: string}
      * @private
      */
-    static _getDefaultEnvironment() {
-        return { label: 'Default', host: window.location.host, loginTokenPath: '/login/token' };
+    static getDefaultEnvironment() {
+        return {
+            label: 'Default',
+            host: window.location.host,
+            loginTokenPath: '/login/token',
+        };
     }
 }
 
@@ -237,5 +247,5 @@ Utils.CONST = {
  * @type {object} environment object
  * @private
  */
-Utils._environment = undefined;
+Utils.environment = undefined;
 export default Utils;

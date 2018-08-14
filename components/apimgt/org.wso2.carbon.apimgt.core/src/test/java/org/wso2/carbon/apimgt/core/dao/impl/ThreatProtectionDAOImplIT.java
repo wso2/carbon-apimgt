@@ -36,7 +36,7 @@ public class ThreatProtectionDAOImplIT extends DAOIntegrationTestBase {
     @Test
     public void testAddPolicy() throws Exception {
         ThreatProtectionPolicy policy = SampleTestObjectCreator.createUniqueThreatProtectionPolicy();
-        ThreatProtectionDAO dao = DAOFactory.getThreatProtectionDAO();
+        ThreatProtectionDAO dao = new DAOFactory().getThreatProtectionDAO();
         dao.addPolicy(policy);
 
         ThreatProtectionPolicy fromDb = dao.getPolicy(policy.getUuid());
@@ -53,7 +53,7 @@ public class ThreatProtectionDAOImplIT extends DAOIntegrationTestBase {
         policyList.add(SampleTestObjectCreator.createUniqueThreatProtectionPolicy());
         policyList.add(SampleTestObjectCreator.createUniqueThreatProtectionPolicy());
 
-        ThreatProtectionDAO dao = DAOFactory.getThreatProtectionDAO();
+        ThreatProtectionDAO dao = new DAOFactory().getThreatProtectionDAO();
         for (ThreatProtectionPolicy policy: policyList) {
             dao.addPolicy(policy);
         }
@@ -74,7 +74,7 @@ public class ThreatProtectionDAOImplIT extends DAOIntegrationTestBase {
     @Test
     public void testPolicyExists() throws Exception {
         ThreatProtectionPolicy policy = SampleTestObjectCreator.createUniqueThreatProtectionPolicy();
-        ThreatProtectionDAO dao = DAOFactory.getThreatProtectionDAO();
+        ThreatProtectionDAO dao = new DAOFactory().getThreatProtectionDAO();
         dao.addPolicy(policy);
         Assert.assertEquals(dao.isPolicyExists(policy.getUuid()), true);
 
@@ -85,7 +85,7 @@ public class ThreatProtectionDAOImplIT extends DAOIntegrationTestBase {
     @Test
     public void testUpdatePolicy() throws Exception {
         ThreatProtectionPolicy policy = SampleTestObjectCreator.createUniqueThreatProtectionPolicy();
-        ThreatProtectionDAO dao = DAOFactory.getThreatProtectionDAO();
+        ThreatProtectionDAO dao = new DAOFactory().getThreatProtectionDAO();
         dao.addPolicy(policy);
 
         //make some changes, except UUID
@@ -105,7 +105,7 @@ public class ThreatProtectionDAOImplIT extends DAOIntegrationTestBase {
     @Test
     public void testGetThreatProtectionPolicyIdsForApi() throws Exception {
         ThreatProtectionPolicy policy = SampleTestObjectCreator.createUniqueThreatProtectionPolicy();
-        ThreatProtectionDAO threatProtectionDAO = DAOFactory.getThreatProtectionDAO();
+        ThreatProtectionDAO threatProtectionDAO = new DAOFactory().getThreatProtectionDAO();
         threatProtectionDAO.addPolicy(policy);
 
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
@@ -113,7 +113,7 @@ public class ThreatProtectionDAOImplIT extends DAOIntegrationTestBase {
         Set<String> policyIds = new HashSet<>();
         policyIds.add(policy.getUuid());
         builder = builder.threatProtectionPolicies(policyIds);
-        ApiDAO dao = DAOFactory.getApiDAO();
+        ApiDAO dao = new DAOFactory().getApiDAO();
         dao.addAPI(builder.build());
 
         Set<String> fromDb = threatProtectionDAO.getThreatProtectionPolicyIdsForApi(builder.getId());

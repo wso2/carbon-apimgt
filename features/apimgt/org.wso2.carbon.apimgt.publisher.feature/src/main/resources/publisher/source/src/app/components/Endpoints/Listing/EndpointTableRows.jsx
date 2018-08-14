@@ -18,14 +18,14 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { TableCell, TableRow } from 'material-ui/Table';
-import Dialog, { DialogActions, DialogContent, DialogContentText, DialogTitle } from 'material-ui/Dialog';
-import Button from 'material-ui/Button';
+import { TableCell, TableRow } from '@material-ui/core/Table';
+import Dialog, { DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core/Dialog';
+import Button from '@material-ui/core/Button';
 import Delete from '@material-ui/icons/Delete';
-import Slide from 'material-ui/transitions/Slide';
-import IconButton from 'material-ui/IconButton';
+import Slide from '@material-ui/core/Slide';
+import IconButton from '@material-ui/core/IconButton';
 import PropTypes from 'prop-types';
-import { withStyles } from 'material-ui/styles';
+import { withStyles } from '@material-ui/core/styles';
 
 import { ScopeValidation, resourceMethod, resourcePath } from '../../../data/ScopeValidation';
 

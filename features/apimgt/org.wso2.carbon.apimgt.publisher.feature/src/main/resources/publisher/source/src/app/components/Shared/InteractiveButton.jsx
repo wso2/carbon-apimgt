@@ -17,10 +17,10 @@
  */
 
 import React from 'react';
-import { CircularProgress } from 'material-ui/Progress';
-import { withStyles } from 'material-ui/styles';
-import green from 'material-ui/colors/green';
-import { Button } from 'material-ui';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import { withStyles } from '@material-ui/core/styles';
+import green from '@material-ui/core/colors/green';
+import { Button } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 

@@ -55,7 +55,7 @@ public class ThrottlerUtil {
         String[] appPolicyDecs = new String[] { ThrottleConstants.DEFAULT_APP_POLICY_LARGE_DESC,
                 ThrottleConstants.DEFAULT_APP_POLICY_MEDIUM_DESC, ThrottleConstants.DEFAULT_APP_POLICY_SMALL_DESC,
                 ThrottleConstants.DEFAULT_APP_POLICY_UNLIMITED_DESC };
-        PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
+        PolicyDAO policyDAO = new DAOFactory().getPolicyDAO();
         String policyName;
         //Add application level throttle policies
         for (int i = 0; i < appPolicies.length; i++) {
@@ -144,6 +144,6 @@ public class ThrottlerUtil {
      */
     public static boolean isPolicyExist(APIMgtAdminService.PolicyLevel policyLevel, String policyName)
             throws APIManagementException {
-        return DAOFactory.getPolicyDAO().policyExists(policyLevel, policyName);
+        return new DAOFactory().getPolicyDAO().policyExists(policyLevel, policyName);
     }
 }

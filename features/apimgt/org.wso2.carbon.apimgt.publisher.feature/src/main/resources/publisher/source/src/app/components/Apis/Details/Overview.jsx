@@ -18,21 +18,22 @@
 
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import Grid from 'material-ui/Grid';
-import Typography from 'material-ui/Typography';
-import { withStyles } from 'material-ui/styles';
+import Grid from '@material-ui/core/Grid';
+import Typography from '@material-ui/core/Typography';
+import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import ChipInput from 'material-ui-chip-input';
 import OpenInNew from '@material-ui/icons/OpenInNew';
-import Tooltip from 'material-ui/Tooltip';
-import Select from 'material-ui/Select';
-import Input, { InputLabel } from 'material-ui/Input';
-import { MenuItem } from 'material-ui/Menu';
-import { ListItemText } from 'material-ui/List';
-import Checkbox from 'material-ui/Checkbox';
+import Tooltip from '@material-ui/core/Tooltip';
+import Select from '@material-ui/core/Select';
+import Input from '@material-ui/core/Input';
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import Checkbox from '@material-ui/core/Checkbox';
 import EditIcon from '@material-ui/icons/ModeEdit';
-import { FormControl } from 'material-ui/Form';
-import IconButton from 'material-ui/IconButton';
+import { FormControl } from '@material-ui/core/';
+import IconButton from '@material-ui/core/IconButton';
 
 import { Progress } from '../../Shared';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';

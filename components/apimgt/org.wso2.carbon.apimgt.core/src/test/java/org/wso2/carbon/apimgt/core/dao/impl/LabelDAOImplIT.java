@@ -33,7 +33,7 @@ public class LabelDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testAddGetLabels() throws Exception {
-        LabelDAO labelDAO = DAOFactory.getLabelDAO();
+        LabelDAO labelDAO = new DAOFactory().getLabelDAO();
         List<String> accessUrls = new ArrayList<>();
         accessUrls.add("https://test.public");
         accessUrls.add("http://test.public");
@@ -77,7 +77,7 @@ public class LabelDAOImplIT extends DAOIntegrationTestBase {
     @Test
     public void testGetLabelById() throws Exception {
 
-        LabelDAO labelDAO = DAOFactory.getLabelDAO();
+        LabelDAO labelDAO = new DAOFactory().getLabelDAO();
         Label label = SampleTestObjectCreator.createLabel("public", SampleTestObjectCreator.LABEL_TYPE_STORE).build();
         Label labelAdded = LabelDAOImpl.addLabel(label);
 
@@ -90,7 +90,7 @@ public class LabelDAOImplIT extends DAOIntegrationTestBase {
     @Test
     public void testGetLabelsByIDForIncorrectLabelID() throws Exception {
 
-        LabelDAO labelDAO = DAOFactory.getLabelDAO();
+        LabelDAO labelDAO = new DAOFactory().getLabelDAO();
         Label labelFromDb = labelDAO.getLabelByID("100000000002");
         Assert.assertNull(labelFromDb);
     }
@@ -98,7 +98,7 @@ public class LabelDAOImplIT extends DAOIntegrationTestBase {
     @Test
     public void testGetLabelsByID() throws Exception {
 
-        LabelDAO labelDAO = DAOFactory.getLabelDAO();
+        LabelDAO labelDAO = new DAOFactory().getLabelDAO();
         Label label1 = SampleTestObjectCreator.createLabel("public", SampleTestObjectCreator.LABEL_TYPE_STORE).build();
         Label label2 = SampleTestObjectCreator.createLabel("private", SampleTestObjectCreator.LABEL_TYPE_STORE).build();
         List<Label> labelList = new ArrayList<>();
@@ -124,7 +124,7 @@ public class LabelDAOImplIT extends DAOIntegrationTestBase {
     @Test
     public void testGetLabelsByNameForIncorrectLabelNames() throws Exception {
 
-        LabelDAO labelDAO = DAOFactory.getLabelDAO();
+        LabelDAO labelDAO = new DAOFactory().getLabelDAO();
         Label label1 = SampleTestObjectCreator.createLabel("public", SampleTestObjectCreator.LABEL_TYPE_STORE).build();
         Label label2 = SampleTestObjectCreator.createLabel("private", SampleTestObjectCreator.LABEL_TYPE_STORE).build();
         LabelDAOImpl.addLabel(label1);
@@ -142,7 +142,7 @@ public class LabelDAOImplIT extends DAOIntegrationTestBase {
     @Test
     public void testGetLabelNamesByIDs() throws Exception {
 
-        LabelDAO labelDAO = DAOFactory.getLabelDAO();
+        LabelDAO labelDAO = new DAOFactory().getLabelDAO();
         Label label1 = SampleTestObjectCreator.createLabel("public", SampleTestObjectCreator.LABEL_TYPE_STORE).build();
         Label label2 = SampleTestObjectCreator.createLabel("private", SampleTestObjectCreator.LABEL_TYPE_STORE).build();
         List<Label> labelList = new ArrayList<>();
@@ -165,7 +165,7 @@ public class LabelDAOImplIT extends DAOIntegrationTestBase {
     @Test
     public void testDeleteLabel() throws Exception {
 
-        LabelDAO labelDAO = DAOFactory.getLabelDAO();
+        LabelDAO labelDAO = new DAOFactory().getLabelDAO();
         Label label = SampleTestObjectCreator.createLabel("public", SampleTestObjectCreator.LABEL_TYPE_STORE).build();
         LabelDAOImpl.addLabel(label);
 
@@ -177,7 +177,7 @@ public class LabelDAOImplIT extends DAOIntegrationTestBase {
     @Test
     public void testUpdateLabel() throws Exception {
 
-        LabelDAO labelDAO = DAOFactory.getLabelDAO();
+        LabelDAO labelDAO = new DAOFactory().getLabelDAO();
         Label label = SampleTestObjectCreator.createLabel("public", SampleTestObjectCreator.LABEL_TYPE_GATEWAY)
                 .build();
         Label labelAddedtoDB = LabelDAOImpl.addLabel(label);

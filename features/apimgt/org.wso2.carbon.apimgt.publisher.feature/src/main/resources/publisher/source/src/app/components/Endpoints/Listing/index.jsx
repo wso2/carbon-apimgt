@@ -17,11 +17,11 @@
  */
 
 import React, { Component } from 'react';
-import Grid from 'material-ui/Grid';
-import Table, { TableBody, TableCell, TableRow, TableHead } from 'material-ui/Table';
-import Typography from 'material-ui/Typography';
+import Grid from '@material-ui/core/Grid';
+import Table, { TableBody, TableCell, TableRow, TableHead } from '@material-ui/core/Table';
+import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
-import { withStyles } from 'material-ui/styles';
+import { withStyles } from '@material-ui/core/styles';
 import Alert from '../../Shared/Alert';
 
 import EndpointTableRows from './EndpointTableRows';

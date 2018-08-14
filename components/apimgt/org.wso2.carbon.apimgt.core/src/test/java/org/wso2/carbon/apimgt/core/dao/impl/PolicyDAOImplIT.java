@@ -53,7 +53,7 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
     @Test
     public void testFingerprintAfterUpdatingAPIPolicy() throws Exception {
         APIPolicy policy = SampleTestObjectCreator.createDefaultAPIPolicy();
-        PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
+        PolicyDAO policyDAO = new DAOFactory().getPolicyDAO();
         policyDAO.addApiPolicy(policy);
         String fingerprintBeforeUpdatingPolicy = ETagUtils
                 .generateETag(policyDAO.getLastUpdatedTimeOfThrottlingPolicy(APIMgtAdminService.PolicyLevel.api,
@@ -74,7 +74,7 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
     @Test
     public void testFingerprintAfterUpdatingApplicationPolicy() throws Exception {
         ApplicationPolicy policy = SampleTestObjectCreator.createDefaultApplicationPolicy();
-        PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
+        PolicyDAO policyDAO = new DAOFactory().getPolicyDAO();
         policyDAO.addApplicationPolicy(policy);
         String fingerprintBeforeUpdatingPolicy = ETagUtils
                 .generateETag(policyDAO.getLastUpdatedTimeOfThrottlingPolicy(APIMgtAdminService.PolicyLevel.application,
@@ -95,7 +95,7 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
     @Test
     public void testFingerprintAfterUpdatingSubscriptionPolicy() throws Exception {
         SubscriptionPolicy policy = SampleTestObjectCreator.createDefaultSubscriptionPolicy();
-        PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
+        PolicyDAO policyDAO = new DAOFactory().getPolicyDAO();
         policyDAO.addSubscriptionPolicy(policy);
         String fingerprintBeforeUpdatingPolicy = ETagUtils
                 .generateETag(policyDAO.getLastUpdatedTimeOfThrottlingPolicy(APIMgtAdminService.PolicyLevel
@@ -115,7 +115,7 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
     @Test (description = "Add, Get and Delete an API policy")
     public void testAddGetAndDeleteApiPolicy() throws Exception {
         APIPolicy policy = SampleTestObjectCreator.createDefaultAPIPolicy();
-        PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
+        PolicyDAO policyDAO = new DAOFactory().getPolicyDAO();
         //add policy
         policyDAO.addApiPolicy(policy);
         //get added policy
@@ -143,7 +143,7 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
     @Test(description = "Add, Get and Delete an Application policy")
     public void testAddGetAndDeleteApplicationPolicy() throws Exception {
         ApplicationPolicy policy = SampleTestObjectCreator.createDefaultApplicationPolicy();
-        PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
+        PolicyDAO policyDAO = new DAOFactory().getPolicyDAO();
         //add policy
         policyDAO.addApplicationPolicy(policy);
         //get added policy
@@ -175,7 +175,7 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
             throws Exception {
         SubscriptionPolicy policy = SampleTestObjectCreator.createDefaultSubscriptionPolicy();
         policy.setUuid("3d253272-25b3-11e7-93ae-92361f002671");
-        PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
+        PolicyDAO policyDAO = new DAOFactory().getPolicyDAO();
         //add policy
         policyDAO.addSubscriptionPolicy(policy);
         //get added policy
@@ -205,7 +205,7 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
     @Test(description = "Get API Policies")
     public void testGetAPIPolicies() throws Exception {
         APIPolicy policy = SampleTestObjectCreator.createDefaultAPIPolicy();
-        PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
+        PolicyDAO policyDAO = new DAOFactory().getPolicyDAO();
         //add policy
         policyDAO.addApiPolicy(policy);
         List<APIPolicy> policyList = policyDAO.getApiPolicies();
@@ -219,7 +219,7 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
     @Test(description = "Get Application Policies")
     public void testGetApplicationPolicies() throws Exception {
         ApplicationPolicy policy = SampleTestObjectCreator.createDefaultApplicationPolicy();
-        PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
+        PolicyDAO policyDAO = new DAOFactory().getPolicyDAO();
         //add policy
         policyDAO.addApplicationPolicy(policy);
         List<ApplicationPolicy> policyList = policyDAO.getApplicationPolicies();
@@ -237,7 +237,7 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         policy2.setStopOnQuotaReach(false);
         policy2.setDeployed(false);
         
-        PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
+        PolicyDAO policyDAO = new DAOFactory().getPolicyDAO();
         //add policy
         policyDAO.addSubscriptionPolicy(policy);
         policyDAO.addSubscriptionPolicy(policy2);
@@ -330,7 +330,7 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
     public void testGetSubscriptionPolicyByUUIDandName() throws Exception {
         SubscriptionPolicy policy = SampleTestObjectCreator.createDefaultSubscriptionPolicy();
        
-        PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
+        PolicyDAO policyDAO = new DAOFactory().getPolicyDAO();
         //add policy
         policyDAO.addSubscriptionPolicy(policy);
         
@@ -407,7 +407,7 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
     public void testGetAPIPolicyWithBandwidthLimit()
             throws Exception {
         APIPolicy policy = SampleTestObjectCreator.createDefaultAPIPolicyWithBandwidthLimit();
-        PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
+        PolicyDAO policyDAO = new DAOFactory().getPolicyDAO();
         //add policy
         policyDAO.addApiPolicy(policy);
         Policy policyAdded = policyDAO.getApiPolicy(policy.getPolicyName());
@@ -417,7 +417,7 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
 
     @Test(description = "policy exists test")
     public void testPolicyExists () throws Exception {
-        PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
+        PolicyDAO policyDAO = new DAOFactory().getPolicyDAO();
 
         ApplicationPolicy applicationPolicy = SampleTestObjectCreator.createDefaultApplicationPolicy();
         policyDAO.addApplicationPolicy(applicationPolicy);
@@ -451,7 +451,7 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
     @Test(description = "Add, Get, Delete block condition")
     public void testAddGetUpdateDeleteBlockConditions() throws Exception {
 
-        PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
+        PolicyDAO policyDAO = new DAOFactory().getPolicyDAO();
 
         BlockConditions blockConditionsIP = SampleTestObjectCreator
                 .createDefaultBlockCondition(APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_IP);
@@ -496,7 +496,7 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testAddGetUpdateDeleteCustomPolicy() throws Exception {
-        PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
+        PolicyDAO policyDAO = new DAOFactory().getPolicyDAO();
         CustomPolicy customPolicy = SampleTestObjectCreator.createDefaultCustomPolicy();
         String uuid = policyDAO.addCustomPolicy(customPolicy);
 
@@ -514,7 +514,7 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testGetAllPolicies() throws Exception {
-        PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
+        PolicyDAO policyDAO = new DAOFactory().getPolicyDAO();
         int size = policyDAO.getAllPolicies().size();
         APIPolicy apiPolicy = SampleTestObjectCreator.createDefaultAPIPolicy();
         ApplicationPolicy applicationPolicy = SampleTestObjectCreator.createDefaultApplicationPolicy();
@@ -528,7 +528,7 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testGetCustomPolicies() throws Exception {
-        PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
+        PolicyDAO policyDAO = new DAOFactory().getPolicyDAO();
         int size = policyDAO.getCustomPolicies().size();
         CustomPolicy customPolicy = SampleTestObjectCreator.createDefaultCustomPolicy();
         policyDAO.addCustomPolicy(customPolicy);
@@ -537,7 +537,7 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testGetPoliciesByLevel() throws Exception {
-        PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
+        PolicyDAO policyDAO = new DAOFactory().getPolicyDAO();
         int policySize;
         //api policy by level
         policySize = policyDAO.getPoliciesByLevel(APIMgtAdminService.PolicyLevel.api).size();
@@ -583,7 +583,7 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testGetPolicyByLevelAndUUUID() throws Exception {
-        PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
+        PolicyDAO policyDAO = new DAOFactory().getPolicyDAO();
         APIPolicy apiPolicy = SampleTestObjectCreator.createDefaultAPIPolicy();
         ApplicationPolicy applicationPolicy = SampleTestObjectCreator.createDefaultApplicationPolicy();
         SubscriptionPolicy subscriptionPolicy = SampleTestObjectCreator.createDefaultSubscriptionPolicy();
@@ -604,7 +604,7 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testValidityOfBlockCondition() throws Exception {
-        PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
+        PolicyDAO policyDAO = new DAOFactory().getPolicyDAO();
         BlockConditions blockConditionIPRange = SampleTestObjectCreator
                 .createDefaultBlockCondition(APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITION_IP_RANGE);
         BlockConditions blockConditionAPI = SampleTestObjectCreator

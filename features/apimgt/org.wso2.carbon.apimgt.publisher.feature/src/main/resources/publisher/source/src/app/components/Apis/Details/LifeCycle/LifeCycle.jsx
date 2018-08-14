@@ -17,9 +17,9 @@
  */
 
 import React, { Component } from 'react';
-import Typography from 'material-ui/Typography';
-import Grid from 'material-ui/Grid';
-import Paper from 'material-ui/Paper';
+import Typography from '@material-ui/core/Typography';
+import Grid from '@material-ui/core/Grid';
+import Paper from '@material-ui/core/Paper';
 
 import Api from '../../../../data/api';
 import ConfigManager from '../../../../data/ConfigManager';

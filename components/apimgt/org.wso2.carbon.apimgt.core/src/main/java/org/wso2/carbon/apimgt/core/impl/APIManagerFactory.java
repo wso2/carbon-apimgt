@@ -60,7 +60,7 @@ public class APIManagerFactory {
     private APIGateway apiGateway;
     private APILifecycleManager apiLifecycleManager;
     private UserNameMapper userNameMapper;
-    
+
     private static final int MAX_PROVIDERS = 50;
     private static final int MAX_CONSUMERS = 500;
     private static final int MAX_ANALYZERS = 50;
@@ -120,14 +120,12 @@ public class APIManagerFactory {
     private APIPublisher newProvider(String username) throws APIManagementException {
         try {
             APIPublisherImpl apiPublisher = new APIPublisherImpl(username, getIdentityProvider(), getKeyManager(),
-                    DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(), DAOFactory.getAPISubscriptionDAO(),
-                    DAOFactory.getPolicyDAO(), geApiLifecycleManager(), DAOFactory.getLabelDAO(),
-                    DAOFactory.getWorkflowDAO(), DAOFactory.getTagDAO(), DAOFactory.getThreatProtectionDAO(),
+                    new DAOFactory(), geApiLifecycleManager(),
                     new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
 
             // Register all the observers which need to observe 'Publisher' component
             apiPublisher.registerObserver(new EventLogger());
-            apiPublisher.registerObserver(new FunctionTrigger(DAOFactory.getFunctionDAO(),
+            apiPublisher.registerObserver(new FunctionTrigger(new DAOFactory().getFunctionDAO(),
                     new RestCallUtilImpl()));
 
             return apiPublisher;
@@ -139,16 +137,7 @@ public class APIManagerFactory {
     }
 
     private APIMgtAdminServiceImpl newAPIMgtAdminService() throws APIManagementException {
-        try {
-            return new APIMgtAdminServiceImpl(DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO(),
-                    DAOFactory.getApiDAO(), DAOFactory.getLabelDAO(), DAOFactory.getApplicationDAO(), new
-                    APIGatewayPublisherImpl(), DAOFactory.getWorkflowDAO(), DAOFactory.getThreatProtectionDAO());
-        } catch (APIMgtDAOException e) {
-            log.error("Couldn't create API Management Admin Service", e);
-            throw new APIMgtDAOException("Couldn't create API Management Admin Service",
-                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
-        }
-
+        return new APIMgtAdminServiceImpl(new DAOFactory(), new APIGatewayPublisherImpl());
     }
 
     private APIStore newConsumer(String username) throws APIManagementException {
@@ -157,13 +146,11 @@ public class APIManagerFactory {
         // }
         try {
             APIStoreImpl userAwareAPIStore = new APIStoreImpl(username, getIdentityProvider(), getKeyManager(),
-                    DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(), DAOFactory.getAPISubscriptionDAO(),
-                    DAOFactory.getPolicyDAO(), DAOFactory.getTagDAO(), DAOFactory.getLabelDAO(),
-                    DAOFactory.getWorkflowDAO(), new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
+                    new DAOFactory(), new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
 
             // Register all the observers which need to observe 'Store' component
             userAwareAPIStore.registerObserver(new EventLogger());
-            userAwareAPIStore.registerObserver(new FunctionTrigger(DAOFactory.getFunctionDAO(),
+            userAwareAPIStore.registerObserver(new FunctionTrigger(new DAOFactory().getFunctionDAO(),
                     new RestCallUtilImpl()));
 
             return userAwareAPIStore;
@@ -221,7 +208,7 @@ public class APIManagerFactory {
 
     private Analyzer newAnalyzer(String username) throws APIMgtDAOException {
         try {
-            AnalyzerImpl analyzer = new AnalyzerImpl(username, DAOFactory.getAnalyticsDAO());
+            AnalyzerImpl analyzer = new AnalyzerImpl(username, new DAOFactory().getAnalyticsDAO());
             return analyzer;
         } catch (APIMgtDAOException e) {
             throw new APIMgtDAOException("Couldn't Create Analyzer", ExceptionCodes.APIMGT_DAO_EXCEPTION);

@@ -82,7 +82,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         List<String> apiIDList = createAPIsAndGetIDsOfAddedAPIs();
         Set<String> userRoles = new HashSet<>();
         Set<APIStatus> statuses = EnumSet.of(APIStatus.PUBLISHED, APIStatus.PROTOTYPED);
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         String[] expectedAPINames;
         List<API> apiResults;
 
@@ -199,7 +199,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         attributeMap.clear();
 
         //cleanup added APIs
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         for (String apiID : apiIDList) {
             apiDAO.deleteAPI(apiID);
         }
@@ -216,7 +216,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Set<String> visibleRoles = new HashSet<>();
         Set<String> apiTags = new HashSet<>();
         List<String> apiIDList = new ArrayList<>();
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         Map<String, UriTemplate> uriTemplateMap;
 
         //Construct an API which has public visibility
@@ -339,7 +339,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     private boolean compareResults(Set<String> userRoles, Set<String> labels, Map<SearchType, String> attributeMap,
                                    String[] expectedAPINames) throws APIMgtDAOException {
 
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         List<API> apiList = apiDAO.searchAPIsByAttributeInStore(userRoles, labels, attributeMap, 0, 10);
         List<String> resultAPINameList = new ArrayList<>();
         for (API api : apiList) {
@@ -375,7 +375,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
                                      String finalLifecycleStatus) throws APIMgtDAOException {
 
         API.APIBuilder builder;
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         builder = SampleTestObjectCreator.createCustomAPI(apiName, apiVersion, apiContext);
         builder.provider(apiProvider);
         builder.createdBy(apiProvider);
@@ -399,7 +399,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testAddGetAPI() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
         testAddGetEndpoint();
@@ -413,7 +413,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testAddDuplicateProviderNameVersionAPI() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         API api = SampleTestObjectCreator.createUniqueAPI().build();
         apiDAO.addAPI(api);
 
@@ -444,7 +444,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testAddSameAPIWithDifferentProviders() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         API api = SampleTestObjectCreator.createUniqueAPI().build();
         apiDAO.addAPI(api);
 
@@ -467,7 +467,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testDuplicateContext() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         API api = SampleTestObjectCreator.createUniqueAPI().build();
         testAddGetEndpoint();
         apiDAO.addAPI(api);
@@ -497,7 +497,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testGetAPISummary() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
         testAddGetEndpoint();
@@ -513,7 +513,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test(description = "Tests getting the APIs when the user has no roles assigned")
     public void testGetAPIs() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
 
         List<API> apiList = apiDAO.getAPIs(new HashSet<>(), ADMIN);
         Assert.assertTrue(apiList.isEmpty());
@@ -542,7 +542,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test(description = "Tests getting the APIs when the user has roles assigned")
     public void testGetAPIsWithUserRoles() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
 
         Set<String> rolesOfUser = new HashSet<>();
         rolesOfUser.add(SampleTestObjectCreator.ADMIN_ROLE_ID);
@@ -574,7 +574,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test(description = "Tests getting the APIs when the user is the provider of the API")
     public void testGetAPIsWhenUserIsProvider() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
 
         Set<String> rolesOfUser = new HashSet<>();
         //The ID here is the group ID of the provider of the API. This ID is not assigned permissions for the API
@@ -603,7 +603,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test(description = "Tests getting the APIs when the API has no permissions assigned")
     public void testGetAPIsWhenAPIHasNoPermissionsAssigned() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
 
         Set<String> rolesOfUser = new HashSet<>();
         //The ID here is the group ID of the provider of the API. This ID is not assigned permissions for the API
@@ -632,7 +632,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test(description = "Tests getting the APIs when the user roles are contained in the API permission list")
     public void testGetAPIsWhenUserRolesInAPIPermissions() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
 
         Set<String> rolesOfUser = new HashSet<>();
         rolesOfUser.add(SampleTestObjectCreator.DEVELOPER_ROLE_ID);
@@ -661,7 +661,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     @Test(description = "Tests getting the APIs when the user roles are contained in the API permission list "
             + "but without READ permissions")
     public void testGetAPIsWhenUserRolesInAPIPermissionsWithoutREAD() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
 
         Set<String> rolesOfUser = new HashSet<>();
         rolesOfUser.add(SampleTestObjectCreator.DEVELOPER_ROLE_ID);
@@ -687,7 +687,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testGetAPIsByStatus() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
 
         // Define number of APIs to be created for a given status
         final int numberOfPublished = 4;
@@ -783,7 +783,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         final String privateLabel = "private";
 
         //Add labels
-        LabelDAO labelDAO = DAOFactory.getLabelDAO();
+        LabelDAO labelDAO = new DAOFactory().getLabelDAO();
         Label label1 = SampleTestObjectCreator.createLabel(publicLabel, SampleTestObjectCreator.LABEL_TYPE_GATEWAY)
                 .build();
         Label label2 = SampleTestObjectCreator.createLabel(privateLabel, SampleTestObjectCreator.LABEL_TYPE_GATEWAY)
@@ -799,7 +799,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         String privateLabelId = labelDAO.getLabelIdByNameAndType(privateLabel, SampleTestObjectCreator
                 .LABEL_TYPE_GATEWAY);
 
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
 
         // Define number of APIs to be created for a given status
         final int numberOfPublishedWithLabelPublicPrivate = 1;
@@ -879,7 +879,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testSearchAPIs() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         Set<String> userRoles = new HashSet<>(Arrays.asList(CUSTOMER_ROLE, MANAGER_ROLE, EMPLOYEE_ROLE));
         // Sample API names
         final String mixedCaseString = "Mixed Case";
@@ -962,7 +962,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testIsAPINameExists() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         testAddGetEndpoint();
         API api = SampleTestObjectCreator.createUniqueAPI().build();
         apiDAO.addAPI(api);
@@ -1014,7 +1014,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testIsAPIContextExists() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         testAddGetEndpoint();
         API api = SampleTestObjectCreator.createUniqueAPI().build();
         apiDAO.addAPI(api);
@@ -1023,7 +1023,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testGetSwaggerDefinition() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         testAddGetEndpoint();
         API api = SampleTestObjectCreator.createUniqueAPI().build();
         apiDAO.addAPI(api);
@@ -1032,7 +1032,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testGetGatewayConfig() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         testAddGetEndpoint();
         String configString = SampleTestObjectCreator.createSampleGatewayConfig();
         API api = SampleTestObjectCreator.createUniqueAPI().gatewayConfig(configString).build();
@@ -1042,7 +1042,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test(description = "Changing the Lifecycle status of a given API")
     public void testChangeLifeCycleStatus() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         testAddGetEndpoint();
         API api = SampleTestObjectCreator.createUniqueAPI().build();
         apiDAO.addAPI(api);
@@ -1055,7 +1055,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test(description = "Getting document info list for an API")
     public void testGetDocumentInfoList() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         testAddGetEndpoint();
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         apiDAO.addAPI(api);
@@ -1073,7 +1073,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test(description = "Getting document content for an API")
     public void testGetDocumentContent() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         testAddGetEndpoint();
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         apiDAO.addAPI(api);
@@ -1096,7 +1096,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test(description = "Getting document info for an API")
     public void testGetDocumentInfo() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         testAddGetEndpoint();
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         apiDAO.addAPI(api);
@@ -1108,7 +1108,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test(description = "Getting document inline content for an API")
     public void testGetDocumentInlineContent() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         testAddGetEndpoint();
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         apiDAO.addAPI(api);
@@ -1122,7 +1122,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test(description = "Delete documentation for an API")
     public void testDeleteDocumentation() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         testAddGetEndpoint();
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         apiDAO.addAPI(api);
@@ -1138,7 +1138,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test(description = "Retrieve summary of paginated data of all available APIs that match the given search criteria")
     public void testAttributeSearchAPIs() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         testAddGetEndpoint();
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         apiDAO.addAPI(api);
@@ -1151,7 +1151,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test(description = "Get image from API")
     public void testGetImage() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         testAddGetEndpoint();
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         apiDAO.addAPI(api);
@@ -1162,7 +1162,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test(expectedExceptions = APIMgtDAOException.class)
     public void testDeleteAPI() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
         testAddGetEndpoint();
@@ -1174,7 +1174,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testUpdateAPI() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
         testAddGetEndpoint();
@@ -1196,7 +1196,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testFingerprintAfterUpdatingAPI() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
         testAddGetEndpoint();
@@ -1218,7 +1218,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testFingerprintAfterUpdatingSwaggerDefinition() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
         testAddGetEndpoint();
@@ -1240,7 +1240,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testFingerprintAfterUpdatingGatewayConfig() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         builder.gatewayConfig(SampleTestObjectCreator.createSampleGatewayConfig());
         API api = builder.build();
@@ -1263,7 +1263,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testFingerprintAfterUpdatingThumbnailImage() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
         testAddGetEndpoint();
@@ -1286,7 +1286,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testAddGetEndpoint() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         Endpoint endpoint = SampleTestObjectCreator.createMockEndpoint();
         apiDAO.addEndpoint(endpoint);
         Endpoint retrieved = apiDAO.getEndpoint(endpoint.getId());
@@ -1295,7 +1295,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testEndpointExists() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         Endpoint endpoint = SampleTestObjectCreator.createMockEndpoint();
         apiDAO.addEndpoint(endpoint);
         Assert.assertTrue(apiDAO.isEndpointExist(endpoint.getName()));
@@ -1303,7 +1303,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test(description = "Test getting endpoint by name")
     public void testGetEndpointByName() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         Endpoint endpoint = SampleTestObjectCreator.createMockEndpoint();
         apiDAO.addEndpoint(endpoint);
         Endpoint retrieved = apiDAO.getEndpointByName(endpoint.getName());
@@ -1312,7 +1312,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test(description = "Test adding API with endpointMap")
     public void testAddEndPointsForApi() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         Map<String, Endpoint> endpointMap = new HashMap<>();
         endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT, new Endpoint.Builder().id(SampleTestObjectCreator
                 .endpointId).applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).build());
@@ -1328,7 +1328,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testAddUpdateGetEndpoint() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         apiDAO.addEndpoint(SampleTestObjectCreator.createMockEndpoint());
         Endpoint updatedEndpoint = SampleTestObjectCreator.createUpdatedEndpoint();
         apiDAO.updateEndpoint(updatedEndpoint);
@@ -1338,7 +1338,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testAddDeleteGetEndpoint() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         Endpoint endpoint = SampleTestObjectCreator.createMockEndpoint();
         apiDAO.addEndpoint(endpoint);
         apiDAO.deleteEndpoint(endpoint.getId());
@@ -1348,7 +1348,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testAddGetAllEndPointsAndUUIDs() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         Endpoint endpoint1 = SampleTestObjectCreator.createMockEndpoint();
         Endpoint endpoint2 = SampleTestObjectCreator.createAlternativeEndpoint();
         Endpoint apiSpecificEndpoint = new Endpoint.Builder(SampleTestObjectCreator.createAlternativeEndpoint()).name
@@ -1376,7 +1376,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     @Test
     public void testAddGetAPIWithLabels() throws Exception {
 
-        LabelDAO labelDAO = DAOFactory.getLabelDAO();
+        LabelDAO labelDAO = new DAOFactory().getLabelDAO();
         Label labelPublic = SampleTestObjectCreator.createLabel("public", SampleTestObjectCreator.LABEL_TYPE_GATEWAY)
                 .build();
         Label labelPrivate = SampleTestObjectCreator.createLabel("private", SampleTestObjectCreator.LABEL_TYPE_GATEWAY)
@@ -1392,7 +1392,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         String privateLabelFromDB = labelDAO.getLabelIdByNameAndType("private", SampleTestObjectCreator
                 .LABEL_TYPE_GATEWAY);
 
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         List<String> labelIds = new ArrayList<>();
         labelIds.add(publicLabelFromDB);
         labelIds.add(privateLabelFromDB);
@@ -1433,7 +1433,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     @Test
     public void testAddAPIWithoutAddingLabels() throws Exception {
 
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         Label label1 = SampleTestObjectCreator.createLabel("public", SampleTestObjectCreator.LABEL_TYPE_STORE).build();
         Label label2 = SampleTestObjectCreator.createLabel("private", SampleTestObjectCreator.LABEL_TYPE_STORE).build();
         List<String> labelIds = new ArrayList<>();
@@ -1452,14 +1452,14 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     @Test
     public void testUpdateAPIWithLabels() throws Exception {
 
-        LabelDAO labelDAO = DAOFactory.getLabelDAO();
+        LabelDAO labelDAO = new DAOFactory().getLabelDAO();
         Label label1 = SampleTestObjectCreator.createLabel("public", SampleTestObjectCreator.LABEL_TYPE_STORE).build();
         Label label2 = SampleTestObjectCreator.createLabel("private", SampleTestObjectCreator.LABEL_TYPE_STORE).build();
 
         LabelDAOImpl.addLabel(label1);
         LabelDAOImpl.addLabel(label2);
 
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         List<String> labelIds = new ArrayList<>();
         labelIds.add(label1.getId());
         API.APIBuilder builder1 = SampleTestObjectCreator.createDefaultAPI();
@@ -1482,7 +1482,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testFingerprintAfterUpdatingEndpoint() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         Endpoint endpoint = SampleTestObjectCreator.createMockEndpoint();
         apiDAO.addEndpoint(endpoint);
 
@@ -1500,7 +1500,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testFingerprintAfterUpdatingDocument() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
         testAddGetEndpoint();
@@ -1524,7 +1524,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testFingerprintAfterUpdatingDocumentContent() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
         testAddGetEndpoint();
@@ -1550,7 +1550,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testAPIWorkflowStatusUpdate() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
         testAddGetEndpoint();
@@ -1566,7 +1566,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testCheckContextExist() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI().apiDefinition(SampleTestObjectCreator
                 .apiDefinition);
         API api = builder.build();
@@ -1580,7 +1580,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testDocumentAdd() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI().apiDefinition(SampleTestObjectCreator
                 .apiDefinition);
         API api = builder.build();
@@ -1619,7 +1619,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
             UriTemplate uriTemplate = new UriTemplate.UriTemplateBuilder(v).endpoint(uriTemplateEndpointMap).build();
             uriTemplateMap.replace(k, uriTemplate);
         });
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         API api = SampleTestObjectCreator.createDefaultAPI().apiDefinition(SampleTestObjectCreator
                 .apiDefinition).endpoint(apiEndpointMap).uriTemplates(uriTemplateMap).build();
         apiDAO.addEndpoint(endpointToInsert);
@@ -1635,7 +1635,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testAddGetComment() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
                 .apiDefinition(SampleTestObjectCreator.apiDefinition);
         API api = builder.build();
@@ -1649,7 +1649,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testAddGetCommentsOfAPI() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
                 .apiDefinition(SampleTestObjectCreator.apiDefinition);
         API api = builder.build();
@@ -1672,7 +1672,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testDeleteComment() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
                 .apiDefinition(SampleTestObjectCreator.apiDefinition);
         API api = builder.build();
@@ -1688,7 +1688,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     @Test
     public void testUpdateComment() throws Exception {
         String newCommentText = "updated comment";
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
                 .apiDefinition(SampleTestObjectCreator.apiDefinition);
         API api = builder.build();
@@ -1718,7 +1718,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testAddGetRating() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
                 .apiDefinition(SampleTestObjectCreator.apiDefinition);
         API api = builder.build();
@@ -1732,7 +1732,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testUpdateRating() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
                 .apiDefinition(SampleTestObjectCreator.apiDefinition);
         API api = builder.build();
@@ -1750,7 +1750,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testGetAllAverageAndUserRatingsOfAPI() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
                 .apiDefinition(SampleTestObjectCreator.apiDefinition);
         API api = builder.build();
@@ -1785,7 +1785,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     @Test(expectedExceptions = APIMgtDAOException.class)
     public void testGetAPIByStatus() throws Exception {
 
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         // Define statuses used in test
         final String publishedStatus = "PUBLISHED";
         final String createdStatus = "CREATED";
@@ -1870,7 +1870,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testUpdateAPIWithBlankwsdlUri() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
         testAddGetEndpoint();
@@ -1888,9 +1888,9 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testGetResourcesOfApi() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
-        PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
+        PolicyDAO policyDAO = new DAOFactory().getPolicyDAO();
         API api = builder.build();
         testAddGetEndpoint();
         apiDAO.addAPI(api);
@@ -1915,7 +1915,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testSingleWSDLForAPI() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
                 .apiDefinition(SampleTestObjectCreator.apiDefinition);
         API api = builder.build();
@@ -1971,7 +1971,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testWSDLArchiveForAPI() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
                 .apiDefinition(SampleTestObjectCreator.apiDefinition);
         API api = builder.build();
@@ -2031,7 +2031,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testAddGetDeleteCompositeAPI() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         String gateWayConfig = SampleTestObjectCreator.createSampleGatewayConfig();
         CompositeAPI compositeAPI = SampleTestObjectCreator.createUniqueCompositeAPI().gatewayConfig(gateWayConfig)
                 .build();
@@ -2077,7 +2077,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testUpdateGetDedicatedGateway() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
                 .apiDefinition(SampleTestObjectCreator.apiDefinition);
         API api = builder.build();
@@ -2086,7 +2086,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         String autoGeneratedLabelName = ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX + api.getId();
         List<Label> labelList = new ArrayList<>();
-        LabelDAO labelDAO = DAOFactory.getLabelDAO();
+        LabelDAO labelDAO = new DAOFactory().getLabelDAO();
         Label autoGenLabel = new Label.Builder().id(UUID.randomUUID().toString()).
                 name(autoGeneratedLabelName).
                 accessUrls(null).build();
@@ -2107,7 +2107,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testUpdateGetDedicatedGatewayWhenLabelsAreNull() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
                 .apiDefinition(SampleTestObjectCreator.apiDefinition);
         API api = builder.build();
@@ -2126,7 +2126,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testUpdateGetDedicatedGatewayWhenLabelsAreEmpty() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
                 .apiDefinition(SampleTestObjectCreator.apiDefinition);
         API api = builder.build();
@@ -2146,7 +2146,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testGetDedicatedGatewayForInvalidAPIId() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
         try {
             apiDAO.getDedicatedGateway(UUID.randomUUID().toString());
             Assert.fail("Exception is not thrown when retrieving the dedicated gateway for invalid api id!");

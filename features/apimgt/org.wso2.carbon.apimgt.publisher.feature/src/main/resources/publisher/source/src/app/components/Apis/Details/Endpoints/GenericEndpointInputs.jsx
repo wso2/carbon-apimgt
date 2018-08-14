@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Grid } from 'material-ui';
-import Input, { InputLabel } from 'material-ui/Input';
-import { FormControl, FormHelperText } from 'material-ui/Form';
-import Select from 'material-ui/Select';
+import { Grid } from '@material-ui/core';
+import Input, { InputLabel } from '@material-ui/core/Input';
+import { FormControl, FormHelperText } from '@material-ui/core/';
+import Select from '@material-ui/core/Select';
 
 /**
  * Define common Endpoint definition form to be used both in API details and global endpoint creation.

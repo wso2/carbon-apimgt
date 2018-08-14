@@ -40,15 +40,10 @@ import org.wso2.carbon.apimgt.core.api.LabelExtractor;
 import org.wso2.carbon.apimgt.core.api.WSDLProcessor;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
-import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiType;
-import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
-import org.wso2.carbon.apimgt.core.dao.LabelDAO;
-import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.dao.SearchType;
-import org.wso2.carbon.apimgt.core.dao.TagDAO;
-import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
+import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APICommentException;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
@@ -142,22 +137,13 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
      * @param username               Logged in user's username
      * @param idp                    Identity Provider Object
      * @param keyManager             Key Manager Object
-     * @param apiDAO                 API Data Access Object
-     * @param applicationDAO         Application Data Access Object
-     * @param apiSubscriptionDAO     API Subscription Data Access Object
-     * @param policyDAO              Policy Data Access Object
-     * @param tagDAO                 Tag Data Access Object
-     * @param labelDAO               Label Data Access Object
-     * @param workflowDAO            WorkFlow Data Access Object
+     * @param daoFactory             DaoFactory Object
      * @param gatewaySourceGenerator GatewaySourceGenerator object
      * @param apiGateway             APIGateway object
      */
-    public APIStoreImpl(String username, IdentityProvider idp, KeyManager keyManager, ApiDAO apiDAO,
-                        ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO,
-                        TagDAO tagDAO, LabelDAO labelDAO, WorkflowDAO workflowDAO,
+    public APIStoreImpl(String username, IdentityProvider idp, KeyManager keyManager, DAOFactory daoFactory,
                         GatewaySourceGenerator gatewaySourceGenerator, APIGateway apiGateway) {
-        super(username, idp, keyManager, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO,
-                new APILifeCycleManagerImpl(), labelDAO, workflowDAO, tagDAO, null, gatewaySourceGenerator, apiGateway);
+        super(username, idp, keyManager, daoFactory, new APILifeCycleManagerImpl(), gatewaySourceGenerator, apiGateway);
     }
 
     /**
@@ -354,7 +340,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                     + application.getName() + " Client Id: " + oauthAppInfo.getClientId());
         }
 
-        List<SubscriptionValidationData> subscriptionValidationData = getApiSubscriptionDAO()
+        List<SubscriptionValidationData> subscriptionValidationData = getAPISubscriptionDAO()
                 .getAPISubscriptionsOfAppForValidation(applicationId, keyType);
         if (subscriptionValidationData != null && !subscriptionValidationData.isEmpty()) {
             getApiGateway().addAPISubscription(subscriptionValidationData);
@@ -395,7 +381,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
         log.debug("Application keys are successfully saved in the database");
 
-        List<SubscriptionValidationData> subscriptionValidationData = getApiSubscriptionDAO()
+        List<SubscriptionValidationData> subscriptionValidationData = getAPISubscriptionDAO()
                 .getAPISubscriptionsOfAppForValidation(applicationId, keyType);
         if (subscriptionValidationData != null && !subscriptionValidationData.isEmpty()) {
             getApiGateway().addAPISubscription(subscriptionValidationData);
@@ -553,7 +539,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     public List<Subscription> getAPISubscriptionsByApplication(Application application) throws APIManagementException {
         List<Subscription> subscriptionsList = null;
         try {
-            subscriptionsList = getApiSubscriptionDAO().getAPISubscriptionsByApplication(application.getId());
+            subscriptionsList = getAPISubscriptionDAO().getAPISubscriptionsByApplication(application.getId());
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while retrieving subscriptions for application - "
                     + application.getName();
@@ -569,7 +555,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             throws APIManagementException {
         List<Subscription> subscriptionsList;
         try {
-            subscriptionsList = getApiSubscriptionDAO().getAPISubscriptionsByApplication(application.getId(), apiType);
+            subscriptionsList = getAPISubscriptionDAO().getAPISubscriptionsByApplication(application.getId(), apiType);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while retrieving subscriptions for application - "
                     + application.getName() + " to API Type " + apiType.toString();
@@ -604,7 +590,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 log.error(errorMsg);
                 throw new APIManagementException(errorMsg, ExceptionCodes.POLICY_NOT_FOUND);
             }
-            getApiSubscriptionDAO().addAPISubscription(subscriptionId, apiId, applicationId, policy.getUuid(),
+            getAPISubscriptionDAO().addAPISubscription(subscriptionId, apiId, applicationId, policy.getUuid(),
                     APIMgtConstants.SubscriptionStatus.ON_HOLD);
 
             WorkflowExecutor addSubscriptionWFExecutor = WorkflowExecutorFactory.getInstance()
@@ -613,7 +599,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             Subscription subscription = new Subscription(subscriptionId, application, api, policy);
             subscription.setStatus(APIMgtConstants.SubscriptionStatus.ON_HOLD);
 
-            SubscriptionCreationWorkflow workflow = new SubscriptionCreationWorkflow(getApiSubscriptionDAO(),
+            SubscriptionCreationWorkflow workflow = new SubscriptionCreationWorkflow(getAPISubscriptionDAO(),
                     getWorkflowDAO(), getApiGateway());
 
             workflow.setCreatedTime(Instant.now());
@@ -666,7 +652,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 throw new APIManagementException(errorMsg, ExceptionCodes.PARAMETER_NOT_PROVIDED);
             }
 
-            Subscription subscription = getApiSubscriptionDAO().getAPISubscription(subscriptionId);
+            Subscription subscription = getAPISubscriptionDAO().getAPISubscription(subscriptionId);
             if (subscription == null) {
                 String errorMsg = "Subscription not found for the id - " + subscriptionId;
                 log.error(errorMsg);
@@ -675,7 +661,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 //remove pending tasks for subscription creation first
                 cleanupPendingTaskForSubscriptionDeletion(subscription);
 
-                SubscriptionDeletionWorkflow workflow = new SubscriptionDeletionWorkflow(getApiSubscriptionDAO(),
+                SubscriptionDeletionWorkflow workflow = new SubscriptionDeletionWorkflow(getAPISubscriptionDAO(),
                         getWorkflowDAO(), getApiGateway());
                 workflow.setWorkflowReference(subscriptionId);
                 workflow.setSubscription(subscription);
@@ -1119,7 +1105,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         List<CompositeAPIEndpointDTO> endpointDTOs = new ArrayList<CompositeAPIEndpointDTO>();
         try {
             appId = apiBuilder.getApplicationId();
-            List<Subscription> subscriptions = getApiSubscriptionDAO().getAPISubscriptionsByApplication(
+            List<Subscription> subscriptions = getAPISubscriptionDAO().getAPISubscriptionsByApplication(
                     apiBuilder.getApplicationId(), ApiType.STANDARD);
             for (Subscription subscription : subscriptions) {
                 CompositeAPIEndpointDTO endpointDTO = new CompositeAPIEndpointDTO();
@@ -1599,7 +1585,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
         String appId = application.getId();
         // get subscriptions with pending status
-        List<Subscription> pendingSubscriptions = getApiSubscriptionDAO()
+        List<Subscription> pendingSubscriptions = getAPISubscriptionDAO()
                 .getPendingAPISubscriptionsByApplication(appId);
 
         String applicationStatus = application.getStatus();

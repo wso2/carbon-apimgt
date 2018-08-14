@@ -29,7 +29,7 @@ import java.util.UUID;
 public class SystemApplicationDaoImplIT extends DAOIntegrationTestBase {
     @Test
     public void testAddAndGetApplicationKey() throws Exception {
-        SystemApplicationDao systemApplicationDao = DAOFactory.getSystemApplicationDao();
+        SystemApplicationDao systemApplicationDao = new DAOFactory().getSystemApplicationDao();
         String consumerKey = UUID.randomUUID().toString();
         String appName = "publisher";
         systemApplicationDao.addApplicationKey(appName, consumerKey);

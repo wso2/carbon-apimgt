@@ -45,7 +45,7 @@ public class WorkflowDAOIT extends DAOIntegrationTestBase {
     public void testAddWorkflowEntry() throws Exception {
 
         String workflowRefId = UUID.randomUUID().toString();
-        WorkflowDAO workflowDAO = DAOFactory.getWorkflowDAO();
+        WorkflowDAO workflowDAO = new DAOFactory().getWorkflowDAO();
         Workflow workflow = SampleTestObjectCreator.createWorkflow(workflowRefId);
         workflowDAO.addWorkflowEntry(workflow);
         Workflow retrieveWorflow = workflowDAO.retrieveWorkflow(workflow.getExternalWorkflowReference());
@@ -60,7 +60,7 @@ public class WorkflowDAOIT extends DAOIntegrationTestBase {
     public void testAddWorkflowEntryWithoutAttributes() throws Exception {
 
         String workflowRefId = UUID.randomUUID().toString();
-        WorkflowDAO workflowDAO = DAOFactory.getWorkflowDAO();
+        WorkflowDAO workflowDAO = new DAOFactory().getWorkflowDAO();
         Workflow workflow = SampleTestObjectCreator.createWorkflow(workflowRefId);
         workflow.setAttributes(null);
         
@@ -74,7 +74,7 @@ public class WorkflowDAOIT extends DAOIntegrationTestBase {
     }
     @Test
     public void testUpdateWorkflowStatus() throws Exception {
-        WorkflowDAO workflowDAO = DAOFactory.getWorkflowDAO();
+        WorkflowDAO workflowDAO = new DAOFactory().getWorkflowDAO();
         String workflowRefId = UUID.randomUUID().toString();
         Workflow workflow = SampleTestObjectCreator.createWorkflow(workflowRefId);
         workflowDAO.addWorkflowEntry(workflow);
@@ -91,7 +91,7 @@ public class WorkflowDAOIT extends DAOIntegrationTestBase {
     
     @Test
     public void testUpdateWorkflowStatusWithoutAddingEntry() throws Exception {
-        WorkflowDAO workflowDAO = DAOFactory.getWorkflowDAO();
+        WorkflowDAO workflowDAO = new DAOFactory().getWorkflowDAO();
         String workflowRefId = UUID.randomUUID().toString();
         Workflow workflow = SampleTestObjectCreator.createWorkflow(workflowRefId);
         workflow.setStatus(WorkflowStatus.APPROVED);
@@ -110,7 +110,7 @@ public class WorkflowDAOIT extends DAOIntegrationTestBase {
 
     @Test
     public void testGetExternalWorkflowReferenceForAPIStateChange() throws Exception {
-        WorkflowDAO workflowDAO = DAOFactory.getWorkflowDAO();
+        WorkflowDAO workflowDAO = new DAOFactory().getWorkflowDAO();
         String workflowExtRefId = UUID.randomUUID().toString();
         String apiId = UUID.randomUUID().toString();
         Workflow workflow = SampleTestObjectCreator.createWorkflow(workflowExtRefId);
@@ -130,7 +130,7 @@ public class WorkflowDAOIT extends DAOIntegrationTestBase {
 
     @Test
     public void testGetExternalWorkflowReferenceForSubscription() throws Exception {
-        WorkflowDAO workflowDAO = DAOFactory.getWorkflowDAO();
+        WorkflowDAO workflowDAO = new DAOFactory().getWorkflowDAO();
         String workflowExtRefId = UUID.randomUUID().toString();
         String subscriptionId = UUID.randomUUID().toString();
         Workflow workflow = SampleTestObjectCreator.createWorkflow(workflowExtRefId);
@@ -150,7 +150,7 @@ public class WorkflowDAOIT extends DAOIntegrationTestBase {
 
     @Test
     public void testGetExternalWorkflowReferenceForApplication() throws Exception {
-        WorkflowDAO workflowDAO = DAOFactory.getWorkflowDAO();
+        WorkflowDAO workflowDAO = new DAOFactory().getWorkflowDAO();
         String workflowExtRefId = UUID.randomUUID().toString();
         String applicationId = UUID.randomUUID().toString();
         Workflow workflow = SampleTestObjectCreator.createWorkflow(workflowExtRefId);
@@ -170,7 +170,7 @@ public class WorkflowDAOIT extends DAOIntegrationTestBase {
     
     @Test
     public void testGetPendinExternalWorkflowReferenceForApprovedasks() throws Exception {
-        WorkflowDAO workflowDAO = DAOFactory.getWorkflowDAO();
+        WorkflowDAO workflowDAO = new DAOFactory().getWorkflowDAO();
         String workflowExtRefId = UUID.randomUUID().toString();
         String applicationId = UUID.randomUUID().toString();
         Workflow workflow = SampleTestObjectCreator.createWorkflow(workflowExtRefId);
@@ -188,7 +188,7 @@ public class WorkflowDAOIT extends DAOIntegrationTestBase {
     public void testremoveWorkflowEntry() throws Exception {
 
         String workflowRefId = UUID.randomUUID().toString();
-        WorkflowDAO workflowDAO = DAOFactory.getWorkflowDAO();
+        WorkflowDAO workflowDAO = new DAOFactory().getWorkflowDAO();
         Workflow workflow = SampleTestObjectCreator.createWorkflow(workflowRefId);
         workflowDAO.addWorkflowEntry(workflow);
         workflowDAO.deleteWorkflowEntryforExternalReference(workflow.getExternalWorkflowReference());
@@ -205,7 +205,7 @@ public class WorkflowDAOIT extends DAOIntegrationTestBase {
     
     @Test
     public void testGetWorkflowsList() throws Exception {
-        WorkflowDAO workflowDAO = DAOFactory.getWorkflowDAO();
+        WorkflowDAO workflowDAO = new DAOFactory().getWorkflowDAO();
         
         //pending application 1
         String workflowExtRefId1 = UUID.randomUUID().toString();        

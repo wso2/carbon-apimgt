@@ -20,18 +20,18 @@
 import React, {Component} from 'react'
 
 import {Link} from 'react-router-dom'
-import AppBar from 'material-ui/AppBar';
-import Toolbar from 'material-ui/Toolbar';;
-import IconButton from 'material-ui/IconButton';
-import Button from 'material-ui/Button';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';;
+import IconButton from '@material-ui/core/IconButton';
+import Button from '@material-ui/core/Button';
 import MenuIcon from '@material-ui/icons/Menu';
-import Typography from 'material-ui/Typography';
-import Divider from 'material-ui/Divider';
-import Grid from 'material-ui/Grid';
-import Paper from 'material-ui/Paper';
-import Input, { InputLabel } from 'material-ui/Input';
-import Select from 'material-ui/Select';
-import { MenuItem } from 'material-ui/Menu';
+import Typography from '@material-ui/core/Typography';
+import Divider from '@material-ui/core/Divider';
+import Grid from '@material-ui/core/Grid';
+import Paper from '@material-ui/core/Paper';
+import Input, { InputLabel } from '@material-ui/core/Input';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
 
 import API from '../../../../data/api'
 import Alert from '../../../Shared/Alert'

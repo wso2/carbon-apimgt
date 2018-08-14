@@ -33,7 +33,7 @@ public class FunctionDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testUpdateGetUserDeployedFunctions() throws Exception {
-        FunctionDAO functionDAO = DAOFactory.getFunctionDAO();
+        FunctionDAO functionDAO = new DAOFactory().getFunctionDAO();
 
         //validate getUserDeployedFunctions() args
         try {
@@ -79,7 +79,7 @@ public class FunctionDAOImplIT extends DAOIntegrationTestBase {
     
     @Test
     public void testAddGetDeleteEventFunctionMapping() throws Exception {
-        FunctionDAO functionDAO = DAOFactory.getFunctionDAO();
+        FunctionDAO functionDAO = new DAOFactory().getFunctionDAO();
         Function function1 = SampleTestObjectCreator.createDefaultFunction();
         Function function2 = SampleTestObjectCreator.createAlternativeFunction();
         Function function3 = SampleTestObjectCreator.createAlternativeFunction2();
