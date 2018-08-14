@@ -233,7 +233,7 @@ class AuthManager {
             validity_period: 3600,
             scopes: 'apim:self-signup'
         };
-        let promised_response = axios(Utils.getLoginTokenPath(environment), {
+        let promised_response = axios(Utils.getSignUpTokenPath(environment), {
             method: "POST",
             data: qs.stringify(data),
             headers: headers,

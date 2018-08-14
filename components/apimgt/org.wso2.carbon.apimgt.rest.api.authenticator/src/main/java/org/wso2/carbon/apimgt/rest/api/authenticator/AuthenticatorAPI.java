@@ -91,6 +91,7 @@ public class AuthenticatorAPI implements Microservice {
             Map<String, NewCookie> cookies = new HashMap<>();
 
             String refreshToken = null;
+            String scopes = authenticatorService.getApplicationScopes(appName);
             if (AuthenticatorConstants.REFRESH_GRANT.equals(grantType)) {
                 String environmentName = APIMConfigurationService.getInstance()
                         .getEnvironmentConfigurations().getEnvironmentLabel();
@@ -106,7 +107,7 @@ public class AuthenticatorAPI implements Microservice {
 
             Map<String, String> contextPaths = AuthUtil.getContextPaths(appName);
             AccessTokenInfo accessTokenInfo = authenticatorService.getTokens(appName, grantType, userName, password,
-                    refreshToken, Long.parseLong(validityPeriod), null, assertion, identityProvider);
+                    refreshToken, Long.parseLong(validityPeriod), null, assertion, identityProvider, scopes);
             authResponseBean = authenticatorService.getResponseBeanFromTokenInfo(accessTokenInfo);
             authenticatorService.setupAccessTokenParts(cookies, authResponseBean, accessTokenInfo.getAccessToken(),
                     contextPaths, false);
@@ -151,6 +152,51 @@ public class AuthenticatorAPI implements Microservice {
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO)
                     .build();
         }
+    }
+
+    @OPTIONS
+    @POST
+    @Path("/signup/{appName}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes({MediaType.APPLICATION_FORM_URLENCODED, MediaType.MULTIPART_FORM_DATA})
+    public Response authenticateSignUp( @Context Request request, @PathParam("appName") String appName,
+                                        @FormDataParam("grant_type") String grantType,
+                                        @FormDataParam("validity_period") String validityPeriod ) {
+        try {
+            AuthenticatorService authenticatorService = AuthenticatorAPIFactory.getInstance().getService();
+            IdentityProvider identityProvider = APIManagerFactory.getInstance().getIdentityProvider();
+            AuthResponseBean authResponseBean;
+            Map<String, NewCookie> cookies = new HashMap<>();
+
+            Map<String, String> contextPaths = AuthUtil.getContextPaths(appName);
+            AccessTokenInfo accessTokenInfo = authenticatorService.getTokens(appName, grantType, null, null,
+                    null, Long.parseLong(validityPeriod), null, null, identityProvider,
+                    "apim:self-signup");
+            authResponseBean = authenticatorService.getResponseBeanFromTokenInfo(accessTokenInfo);
+            authenticatorService.setupAccessTokenParts(cookies, authResponseBean, accessTokenInfo.getAccessToken(),
+                    contextPaths, false);
+
+            return Response.ok(authResponseBean, MediaType.APPLICATION_JSON)
+                    .cookie(cookies.get(AuthenticatorConstants.Context.REST_API_CONTEXT),
+                            cookies.get(AuthenticatorConstants.Context.LOGOUT_CONTEXT))
+                    .header(AuthenticatorConstants.
+                                    REFERER_HEADER,
+                            (request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) != null && request
+                                    .getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER)
+                                    .equals(request.getHeader(AuthenticatorConstants.REFERER_HEADER))) ?
+                                    "" :
+                                    request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) != null ?
+                                            request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) :
+                                            "")
+                    .build();
+
+        } catch (APIManagementException e) {
+            ErrorDTO errorDTO = AuthUtil.getErrorDTO(e.getErrorHandler(), null);
+            log.error(e.getMessage(), e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO)
+                    .build();
+        }
+
     }
 
     @OPTIONS
@@ -248,8 +294,10 @@ public class AuthenticatorAPI implements Microservice {
             Map<String, NewCookie> cookies = new HashMap<>();
 
             Map<String, String> contextPaths = AuthUtil.getContextPaths(appName);
+            String scopes = authenticatorService.getApplicationScopes(appName);
             AccessTokenInfo accessTokenInfo = authenticatorService.getTokens(appName, grantType,
-                    null, null, null, 0, authorizationCode, null, null);
+                    null, null, null, 0, authorizationCode, null,
+                    null, scopes);
             authResponseBean = authenticatorService.getResponseBeanFromTokenInfo(accessTokenInfo);
             authenticatorService.setupAccessTokenParts(cookies, authResponseBean, accessTokenInfo.getAccessToken(),
                     contextPaths, true);
