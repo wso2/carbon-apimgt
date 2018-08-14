@@ -2423,68 +2423,60 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     @Override
     public List<APIThrottlingOverTimeDTO> getThrottleDataOfApplication(String appName, String provider, String fromDate,
             String toDate) throws APIMgtUsageQueryServiceClientException {
-
-        if (dataSource == null) {
-            handleException("BAM data source hasn't been initialized. Ensure that the data source " +
-                    "is properly configured in the APIUsageTracker configuration.");
-        }
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        ResultSet rs = null;
         try {
-            connection = dataSource.getConnection();
-            String query;
             List<APIThrottlingOverTimeDTO> throttlingData = new ArrayList<APIThrottlingOverTimeDTO>();
             String tenantDomain = MultitenantUtils.getTenantDomain(provider);
 
-            if (isTableExist(APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY, connection)) { //Table exists
+            String granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;//default granularity
 
-                query = "SELECT " + APIUsageStatisticsClientConstants.API + ','
-                        + APIUsageStatisticsClientConstants.API_PUBLISHER + ',' + " SUM(COALESCE("
-                        + APIUsageStatisticsClientConstants.SUCCESS_REQUEST_COUNT + ",0)) " +
-                        "AS success_request_count, SUM(COALESCE("
-                        + APIUsageStatisticsClientConstants.THROTTLED_OUT_COUNT + ",0)) as throttleout_count " +
-                        "FROM " + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY +
-                        " WHERE " + APIUsageStatisticsClientConstants.TENANT_DOMAIN + " = ? " +
-                        "AND " + APIUsageStatisticsClientConstants.APPLICATION_NAME + " = ? " +
-                        (provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS) ?
-                                "" :
-                                "AND " + APIUsageStatisticsClientConstants.API_PUBLISHER + " = ?") +
-                        "AND " + APIUsageStatisticsClientConstants.TIME + " BETWEEN ? AND ? " +
-                        "GROUP BY " + APIUsageStatisticsClientConstants.API + ','
-                        + APIUsageStatisticsClientConstants.API_PUBLISHER +
-                        " ORDER BY api ASC";
+            Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
 
-                preparedStatement = connection.prepareStatement(query);
-                int index = 1;
-                preparedStatement.setString(index++, tenantDomain);
-                preparedStatement.setString(index++, appName);
-                if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
-                    preparedStatement.setString(index++, provider);
+            if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
+                granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
+            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
+                granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
+            }
+
+            StringBuilder query = new StringBuilder(
+                    "from " + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_AGG + " on ("
+                            + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='" + tenantDomain
+                            + "' AND " + APIUsageStatisticsClientConstants.APPLICATION_NAME + "=='" + appName + "'");
+            if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+                query.append("AND " + APIUsageStatisticsClientConstants.API_CREATOR + "=='" + provider + "'");
+            }
+            query.append(") within '" + fromDate + "', '" + toDate + "' per '" + granularity + "' select "
+                    + APIUsageStatisticsClientConstants.API_NAME + ", " + APIUsageStatisticsClientConstants.API_CREATOR
+                    + ", sum(coalesce(2L,0L)) as success_request_count, sum(coalesce("
+                    + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_COUNT + ",0L)) as throttleout_count group by "
+                    + APIUsageStatisticsClientConstants.API_NAME + ", " + APIUsageStatisticsClientConstants.API_CREATOR
+                    + " order by " + APIUsageStatisticsClientConstants.API_NAME + " ASC;");
+
+            JSONObject jsonObj = APIUtil.executeQueryOnStreamProcessor(
+                    APIUsageStatisticsClientConstants.APIM_THROTTLED_OUT_SUMMARY_SIDDHI_APP, query.toString());
+
+            String apiName;
+            String apiCreator;
+            int successRequestCount;
+            int throttledOutCount;
+
+            if (jsonObj != null) {
+                JSONArray jArray = (JSONArray) jsonObj.get(APIUsageStatisticsClientConstants.RECORDS_DELIMITER);
+                for (Object record : jArray) {
+                    JSONArray recordArray = (JSONArray) record;
+                    if (recordArray.size() == 4) {
+                        apiName = (String) recordArray.get(0);
+                        apiCreator = (String) recordArray.get(1);
+                        successRequestCount = (Integer) recordArray.get(2);
+                        throttledOutCount = (Integer) recordArray.get(3);
+                        throttlingData.add(new APIThrottlingOverTimeDTO(apiName, apiCreator, successRequestCount,
+                                throttledOutCount, null));
+                    }
                 }
-                preparedStatement.setString(index++, fromDate);
-                preparedStatement.setString(index, toDate);
-                rs = preparedStatement.executeQuery();
-                while (rs.next()) {
-                    String api = rs.getString(APIUsageStatisticsClientConstants.API);
-                    String apiPublisher = rs.getString(APIUsageStatisticsClientConstants.API_PUBLISHER_THROTTLE_TABLE);
-                    int successRequestCount = rs.getInt(APIUsageStatisticsClientConstants.SUCCESS_REQUEST_COUNT);
-                    int throttledOutCount = rs.getInt(APIUsageStatisticsClientConstants.THROTTLED_OUT_COUNT);
-                    throttlingData
-                            .add(new APIThrottlingOverTimeDTO(api, apiPublisher, successRequestCount, throttledOutCount,
-                                    null));
-                }
-
-            } else {
-                handleException("Statistics Table:" + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY +
-                        " does not exist.");
             }
             return throttlingData;
-        } catch (SQLException e) {
-            log.error("Error occurred while querying from JDBC database " + e.getMessage(), e);
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
-        } finally {
-            closeDatabaseLinks(rs, preparedStatement, connection);
+        } catch (APIManagementException e) {
+            log.error("Error occurred while querying from Stream Processor " + e.getMessage(), e);
+            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from Stream Processor ", e);
         }
     }
 
@@ -2558,56 +2550,41 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     @Override
     public List<String> getAppsForThrottleStats(String provider, String apiName)
             throws APIMgtUsageQueryServiceClientException {
-
-        if (dataSource == null) {
-            handleException("BAM data source hasn't been initialized. Ensure that the data source " +
-                    "is properly configured in the APIUsageTracker configuration.");
-        }
-
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        ResultSet rs = null;
         try {
-            connection = dataSource.getConnection();
-            String query;
             List<String> throttlingAppData = new ArrayList<String>();
             String tenantDomain = MultitenantUtils.getTenantDomain(provider);
-            //check whether table exist first
-            if (isTableExist(APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY, connection)) { //Tables exist
-                query = "SELECT DISTINCT " + APIUsageStatisticsClientConstants.APPLICATION_NAME + " FROM "
-                        + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY +
-                        " WHERE " + APIUsageStatisticsClientConstants.TENANT_DOMAIN + " = ? " +
-                        (provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS) ?
-                                "" :
-                                "AND " + APIUsageStatisticsClientConstants.API_PUBLISHER + " = ? ") +
-                        (apiName == null ? "" : "AND " + APIUsageStatisticsClientConstants.API + " = ? ") +
-                        "ORDER BY " + APIUsageStatisticsClientConstants.APPLICATION_NAME + " ASC";
+            StringBuilder query = new StringBuilder(
+                    "from " + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_AGG + "_SECONDS");
+            if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+                query.append(" on "
+                        + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='" + tenantDomain
+                        + "' AND " + APIUsageStatisticsClientConstants.API_CREATOR + "=='" + APIUtil.getUserNameWithTenantSuffix(provider) + "'");
+            }
+            if (apiName != null) {
+                query.append(" on "
+                        + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='" + tenantDomain
+                        + "' AND " + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName + "'");
+            }
+            query.append(" select " + APIUsageStatisticsClientConstants.APPLICATION_NAME + " order by " + APIUsageStatisticsClientConstants.APPLICATION_NAME + " DESC;");
+            JSONObject jsonObj = APIUtil
+                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_THROTTLED_OUT_SUMMARY_SIDDHI_APP,
+                            query.toString());
 
-                preparedStatement = connection.prepareStatement(query);
-                int index = 1;
-                preparedStatement.setString(index++, tenantDomain);
-                if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
-                    provider = APIUtil.getUserNameWithTenantSuffix(provider);
-                    preparedStatement.setString(index++, provider);
+            String applicationName;
+            if (jsonObj != null) {
+                JSONArray jArray = (JSONArray) jsonObj.get(APIUsageStatisticsClientConstants.RECORDS_DELIMITER);
+                for (Object record : jArray) {
+                    JSONArray recordArray = (JSONArray) record;
+                    if (recordArray.size() == 1) {
+                        applicationName = (String) recordArray.get(0);
+                        throttlingAppData.add(applicationName);
+                    }
                 }
-                if (apiName != null) {
-                    preparedStatement.setString(index, apiName);
-                }
-                rs = preparedStatement.executeQuery();
-                while (rs.next()) {
-                    String applicationName = rs.getString(APIUsageStatisticsClientConstants.APPLICATION_NAME);
-                    throttlingAppData.add(applicationName);
-                }
-            } else {
-                handleException("Statistics Table:" + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY +
-                        " does not exist.");
             }
             return throttlingAppData;
-        } catch (SQLException e) {
-            log.error("Error occurred while querying from JDBC database " + e.getMessage(), e);
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
-        } finally {
-            closeDatabaseLinks(rs, preparedStatement, connection);
+        } catch (APIManagementException e) {
+            log.error("Error occurred while querying from Stream Processor " + e.getMessage(), e);
+            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from Stream Processor ", e);
         }
     }
 
