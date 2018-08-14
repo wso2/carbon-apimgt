@@ -113,7 +113,7 @@ class Login extends Component {
 
     fetchDCRAppInfo(environments, idToken) {
         // Array of promises
-        const promisedSSoData = environments.map(environment => Utils.getPromised_DCRAppInfo(environment));
+        const promisedSSoData = environments.map(environment => Utils.getPromisedDCRAppInfo(environment));
 
         Promise.all(promisedSSoData)
             .then((responses) => {

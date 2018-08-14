@@ -170,8 +170,12 @@ class AuthManager {
      * @returns {User} Instance of an user who is currently logged in (for the selected environment)
      */
     static loginUserMapper(response, environmentName) {
-        const { data } = response;
-        const { validityPeriod } = data; // In seconds
+        const {
+            data,
+        } = response;
+        const {
+            validityPeriod,
+        } = data; // In seconds
         const WSO2_AM_TOKEN_1 = data.partialToken;
         const user = new User(environmentName, data.authUser);
         user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, Utils.CONST.CONTEXT_PATH);
@@ -194,10 +198,12 @@ class AuthManager {
             'Content-Type': 'application/json',
             Authorization: authHeader,
         };
-        const promisedLogout = axios.post(url, null, { headers });
+        const promisedLogout = axios.post(url, null, {
+            headers,
+        });
         promisedLogout
             .then(() => {
-                Utils.delete_cookie(User.CONST.WSO2_AM_TOKEN_1, Utils.CONST.CONTEXT_PATH, environmentName);
+                Utils.deleteCookie(User.CONST.WSO2_AM_TOKEN_1, Utils.CONST.CONTEXT_PATH, environmentName);
                 AuthManager.dismissUser(environmentName);
                 APIClientFactory.getInstance().destroyAPIClient(environmentName);
                 // Single client should be re initialize after log out
@@ -262,7 +268,9 @@ class AuthManager {
             'Content-Type': 'application/x-www-form-urlencoded',
             'X-Alt-Referer': referrer,
         };
-        return axios.post(url, qs.stringify(params), { headers });
+        return axios.post(url, qs.stringify(params), {
+            headers,
+        });
     }
 
     /**
@@ -330,8 +338,7 @@ class AuthManager {
 
 // TODO: derive this from swagger definitions ~tmkb
 AuthManager.CONST = {
-    USER_SCOPES:
-        'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage ' +
+    USER_SCOPES: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage ' +
         'apim:subscription_view apim:subscription_block apim:subscribe apim:external_services_discover',
 };
 export default AuthManager;

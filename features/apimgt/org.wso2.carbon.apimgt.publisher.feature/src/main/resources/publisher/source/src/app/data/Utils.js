@@ -138,7 +138,7 @@ class Utils {
      * @param {object} defaultEnvironment
      */
     static setEnvironment(environment) {
-        let defaultEnvironment;
+        let defaultEnvironment = environment;
         if (!environment) {
             defaultEnvironment = Utils.getDefaultEnvironment();
         }
