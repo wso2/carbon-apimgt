@@ -19,8 +19,16 @@ class ApiConsole extends React.Component {
     }
     componentDidMount() {
         const api = new Api();
+        const disableAuthorizeAndInfoPlugin = function() {
+          return {
+            wrapComponents: {
+              authorizeBtn: () => () => null,
+              info: () => () => null
+            }
+          };
+        };
         let promised_swagger = api.getSwaggerByAPIId(this.api_uuid);
-        
+
         promised_swagger.then(
             response => {
                 console.info(response);
@@ -37,13 +45,11 @@ class ApiConsole extends React.Component {
                       },
                     presets: [
                             SwaggerUI.presets.apis,
-                            StandalonePreset
-
+                            disableAuthorizeAndInfoPlugin
                     ],
                     plugins: [
-                        SwaggerUI.plugins.DownloadUrl,
-                    ],
-                    layout: "StandaloneLayout"
+                        SwaggerUI.plugins.DownloadUrl
+                    ]
                 })
             }
         ).catch(
@@ -57,7 +63,7 @@ class ApiConsole extends React.Component {
                 }
             }
         );
-        
+
       }
 
     render() {
