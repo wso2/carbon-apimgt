@@ -43,8 +43,13 @@ import javax.ws.rs.core.Response;
 
 public class LabelsApiServiceImpl extends LabelsApiService {
 
+    private APIMgtAdminService apiMgtAdminService;
+
     private static final Logger log = LoggerFactory.getLogger(LabelsApiServiceImpl.class);
 
+    public LabelsApiServiceImpl(APIMgtAdminService apiMgtAdminService) {
+        this.apiMgtAdminService = apiMgtAdminService;
+    }
     /**
      * Gets all labels
      *
@@ -56,7 +61,6 @@ public class LabelsApiServiceImpl extends LabelsApiService {
     public Response labelsGet(Request request) throws NotFoundException {
         List<Label> labels;
         try {
-            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             labels = apiMgtAdminService.getLabels();
         } catch (APIManagementException e) {
             String errorMessage = "Error occurred while retrieving all labels";
@@ -82,7 +86,6 @@ public class LabelsApiServiceImpl extends LabelsApiService {
 
         try {
             if (labelId != null) {
-                APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
                 apiMgtAdminService.deleteLabel(labelId);
             } else {
                 //mandatory parameters not provided
@@ -114,7 +117,6 @@ public class LabelsApiServiceImpl extends LabelsApiService {
     @Override
     public Response labelsLabelIdPut(String labelId, LabelDTO body, Request request) throws NotFoundException {
         try {
-            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             body.labelUUID(labelId);
             Label updatedLabel = apiMgtAdminService.updateLabel(LabelMappingUtil.fromDTOTLabel(body));
             return Response.status(Response.Status.OK).entity(LabelMappingUtil.fromLabelToDTO(updatedLabel)).build();
@@ -129,7 +131,6 @@ public class LabelsApiServiceImpl extends LabelsApiService {
     public Response labelsLabelIdGet(String labelId, String ifNoneMatch, String ifModifiedSince, Request request)
             throws NotFoundException {
         try {
-            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             Label label = apiMgtAdminService.getLabelByID(labelId);
             return Response.status(Response.Status.OK).entity(LabelMappingUtil.fromLabelToDTO(label)).build();
         } catch (APIManagementException e) {
@@ -153,7 +154,6 @@ public class LabelsApiServiceImpl extends LabelsApiService {
     public Response labelsPost(LabelDTO body, Request request) throws NotFoundException {
 
         try {
-            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             if (body != null && body.getName() != null) {
                 if (body.getName().equalsIgnoreCase("STORE")) {
                     body.setAccessUrls(new ArrayList<>());

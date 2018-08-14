@@ -49,14 +49,18 @@ import java.util.Map;
 import javax.ws.rs.core.Response;
 
 public class WorkflowsApiServiceImpl extends WorkflowsApiService {
+    private APIMgtAdminService apiMgtAdminService;
 
     private static final Logger log = LoggerFactory.getLogger(WorkflowsApiServiceImpl.class);
+
+    public WorkflowsApiServiceImpl(APIMgtAdminService apiMgtAdminService) {
+        this.apiMgtAdminService = apiMgtAdminService;
+    }
 
     @Override
     public Response workflowsGet(String ifNoneMatch, String ifModifiedSince, String workflowType,
             Request request) throws NotFoundException {
         try {
-            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             List<Workflow> workflowList;
             if (workflowType == null) {
                 workflowList = apiMgtAdminService.retrieveUncompletedWorkflows();
@@ -79,7 +83,6 @@ public class WorkflowsApiServiceImpl extends WorkflowsApiService {
     public Response workflowsWorkflowReferenceIdGet(String workflowReferenceId, Request request)
             throws NotFoundException {
         try {
-            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             Workflow workflow = apiMgtAdminService.retrieveWorkflow(workflowReferenceId);
             WorkflowDTO workflowDTO = WorkflowMappingUtil.toWorkflowDTO(workflow);
             return Response.ok().entity(workflowDTO).build();
@@ -96,7 +99,6 @@ public class WorkflowsApiServiceImpl extends WorkflowsApiService {
             Request request) throws NotFoundException {
         try {
 
-            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             Workflow workflow = apiMgtAdminService.retrieveWorkflow(workflowReferenceId);
             if (workflow == null) {
                 String errorMessage = "Workflow entry not found for: " + workflowReferenceId;

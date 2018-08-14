@@ -48,8 +48,13 @@ import java.util.List;
 import java.util.Map;
 
 public class PoliciesApiServiceImpl extends PoliciesApiService {
+    private APIMgtAdminService apiMgtAdminService;
 
     private static final Logger log = LoggerFactory.getLogger(PoliciesApiServiceImpl.class);
+
+    public PoliciesApiServiceImpl(APIMgtAdminService apiMgtAdminService) {
+        this.apiMgtAdminService = apiMgtAdminService;
+    }
 
     /**
      * Get policies 
@@ -67,7 +72,6 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
             log.debug("Received Advance Throttle Policy GET request");
         }
         try {
-            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             List<APIPolicy> policies = apiMgtAdminService.getApiPolicies();
             AdvancedThrottlePolicyListDTO advancedThrottlePolicyListDTO = AdvancedThrottlePolicyMappingUtil
                     .fromAPIPolicyArrayToListDTO(policies);
@@ -115,7 +119,6 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
             log.info("Received Advanced Policy Get request. Policy uuid: " + Id);
         }
         try {
-            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             APIPolicy policy = apiMgtAdminService.getApiPolicyByUuid(Id);
             return Response.status(Response.Status.OK).entity(AdvancedThrottlePolicyMappingUtil.
                     fromAdvancedPolicyToDTO(policy)).build();
@@ -146,7 +149,6 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
             log.info("Received Advance Policy PUT request " + body + " with tierLevel = " + tierLevel);
         }
         try {
-            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             APIPolicy apiPolicy = AdvancedThrottlePolicyMappingUtil.fromAdvancedPolicyDTOToPolicy(body);
             apiPolicy.setUuid(id);
             apiMgtAdminService.updateApiPolicy(apiPolicy);
@@ -182,7 +184,6 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
             log.info("Received Advance Policy PUT request " + body + " with tierLevel = " + tierLevel);
         }
         try {
-            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             APIPolicy apiPolicy = AdvancedThrottlePolicyMappingUtil.fromAdvancedPolicyDTOToPolicy(body);
             String policyId = apiMgtAdminService.addApiPolicy(apiPolicy);
             return Response.status(Response.Status.CREATED).entity(AdvancedThrottlePolicyMappingUtil
@@ -214,7 +215,6 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
             log.debug("Received Application Throttle Policy GET request");
         }
         try {
-            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             List<ApplicationPolicy> policies = apiMgtAdminService.getApplicationPolicies();
             ApplicationThrottlePolicyListDTO applicationThrottlePolicyListDTO = ApplicationThrottlePolicyMappingUtil
                     .fromApplicationPolicyArrayToListDTO(policies);
@@ -267,7 +267,6 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
             log.info("Received Application Policy Get request. Policy uuid: " + id);
         }
         try {
-            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             Policy applicationPolicy = apiMgtAdminService.getApplicationPolicyByUuid(id);
             return Response.status(Response.Status.OK).entity(ApplicationThrottlePolicyMappingUtil.
                     fromApplicationThrottlePolicyToDTO(applicationPolicy)).build();
@@ -301,7 +300,6 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         }
 
         try {
-            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             ApplicationPolicy applicationPolicy = ApplicationThrottlePolicyMappingUtil
                     .fromApplicationThrottlePolicyDTOToModel(body);
             applicationPolicy.setUuid(id);
@@ -334,7 +332,6 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
             log.debug("Received Custom Policy GET request.");
         }
         try {
-            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             List<CustomPolicy> policies = apiMgtAdminService.getCustomRules();
             CustomRuleListDTO customRuleListDTO = CustomPolicyMappingUtil.fromCustomPolicyArrayToListDTO(policies);
             return Response.ok().entity(customRuleListDTO).build();
@@ -362,7 +359,6 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
             log.debug("Received Custom Policy POST request " + body);
         }
         try {
-            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             CustomPolicy customPolicy = CustomPolicyMappingUtil.fromCustomPolicyDTOToModel(body);
             String uuid = apiMgtAdminService.addCustomRule(customPolicy);
             return Response.status(Response.Status.CREATED)
@@ -393,7 +389,6 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
             log.debug("Received Custom Policy DELETE request with rule ID = " + ruleId);
         }
         try {
-            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             apiMgtAdminService.deleteCustomRule(ruleId);
             return Response.ok().build();
         } catch (APIManagementException e) {
@@ -424,7 +419,6 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
             log.debug("Received Custom Policy GET request with rule ID = " + ruleId);
         }
         try {
-            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             CustomPolicy customPolicy = apiMgtAdminService.getCustomRuleByUUID(ruleId);
             CustomRuleDTO dto = CustomPolicyMappingUtil.fromCustomPolicyToDTO(customPolicy);
             return Response.status(Response.Status.OK).entity(dto).build();
@@ -454,7 +448,6 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
             log.debug("Received Custom Policy PUT request " + body + " with rule ID = " + ruleId);
         }
         try {
-            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             CustomPolicy customPolicy = CustomPolicyMappingUtil.fromCustomPolicyDTOToModel(body);
             customPolicy.setUuid(ruleId);
             apiMgtAdminService.updateCustomRule(customPolicy);
@@ -487,7 +480,6 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
 
         String policyName = null;
         try {
-            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             ApplicationPolicy applicationPolicy = ApplicationThrottlePolicyMappingUtil.
                     fromApplicationThrottlePolicyDTOToModel(body);
             policyName = applicationPolicy.getPolicyName();
@@ -520,7 +512,6 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
             log.debug("Received Application Throttle Policy GET request");
         }
         try {
-            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             List<SubscriptionPolicy> policies = apiMgtAdminService.getSubscriptionPolicies();
             SubscriptionThrottlePolicyListDTO subscriptionThrottlePolicyListDTO = SubscriptionThrottlePolicyMappingUtil
                     .fromSubscriptionPolicyArrayToListDTO(policies);
@@ -571,7 +562,6 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
             log.info("Received Subscription Policy Get request. Policy uuid: " + id);
         }
         try {
-            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             SubscriptionPolicy subscriptionPolicy = apiMgtAdminService.getSubscriptionPolicyByUuid(id);
             SubscriptionThrottlePolicyDTO subscriptionThrottlePolicyDTO = SubscriptionThrottlePolicyMappingUtil
                     .fromSubscriptionThrottlePolicyToDTO(subscriptionPolicy);
@@ -604,7 +594,6 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
             log.info("Received Subscription Policy PUT request " + body + " with tierLevel = " + tierLevel);
         }
         try {
-            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             SubscriptionPolicy subscriptionPolicy = SubscriptionThrottlePolicyMappingUtil
                     .fromSubscriptionThrottlePolicyDTOToModel(body);
             subscriptionPolicy.setUuid(id);
@@ -638,7 +627,6 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
             log.info("Received Subscription Policy POST request " + body + " with tierLevel = " + tierLevel);
         }
         try {
-            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             SubscriptionPolicy subscriptionPolicy = SubscriptionThrottlePolicyMappingUtil
                     .fromSubscriptionThrottlePolicyDTOToModel(body);
             String policyId = apiMgtAdminService.addSubscriptionPolicy(subscriptionPolicy);
@@ -657,7 +645,6 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
 
     private Response deletePolicy(String policyId, APIMgtAdminService.PolicyLevel tierLevel) {
         try {
-            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             apiMgtAdminService.deletePolicyByUuid(policyId, tierLevel);
             return Response.ok().build();
         } catch (APIManagementException e) {
