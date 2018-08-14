@@ -20,11 +20,7 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {BrowserRouter as Router, Redirect, Route, Switch} from 'react-router-dom';
 import qs from 'qs';
-<<<<<<< 3f75885742bdc05d2de716c76327c8c74c685a2e
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
-=======
-import {createMuiTheme, MuiThemeProvider} from 'material-ui/styles';
->>>>>>> Fix product-apim 1989: Add i18n support for publisher app
 import Log from 'log4javascript';
 import './App.css';
 import Utils from './app/data/Utils';

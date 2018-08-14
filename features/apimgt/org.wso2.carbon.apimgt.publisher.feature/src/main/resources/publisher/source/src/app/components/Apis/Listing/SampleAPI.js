@@ -25,18 +25,11 @@ import Button from "@material-ui/core/Button";
 import API from '../../../data/api';
 import Alert from '../../Shared/Alert';
 import Redirect from "react-router-dom/Redirect";
-<<<<<<< 3f75885742bdc05d2de716c76327c8c74c685a2e
 import CircularProgress from "@material-ui/core/CircularProgress";
 import {withStyles} from '@material-ui/core/styles';
 import green from "@material-ui/core/colors/green";
 import {Create, GetApp} from '@material-ui/icons';
-=======
 import { FormattedMessage } from 'react-intl';
-import CircularProgress from "material-ui/Progress/CircularProgress";
-import {withStyles} from 'material-ui/styles';
-import green from "material-ui/colors/green";
-import {Create, GetApp} from '@material-ui/icons/';
->>>>>>> Fix product-apim 1989: Add i18n support for publisher app
 import {Link} from 'react-router-dom';
 
 const styles = {
