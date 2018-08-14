@@ -17,20 +17,20 @@
  */
 
 import React from 'react';
-import Button from 'material-ui/Button';
-import Card, { CardContent } from 'material-ui/Card';
-import Grid from 'material-ui/Grid';
-import Typography from 'material-ui/Typography';
-import Select from 'material-ui/Select';
-import { MenuItem } from 'material-ui/Menu';
-import { InputLabel } from 'material-ui/Input';
-import TextField from 'material-ui/TextField';
-import { FormGroup, FormControlLabel, FormControl } from 'material-ui/Form';
-import Checkbox from 'material-ui/Checkbox';
-import { withStyles } from 'material-ui/styles';
+import Button from '@material-ui/core/Button';
+import Card, { CardContent } from '@material-ui/core/Card';
+import Grid from '@material-ui/core/Grid';
+import Typography from '@material-ui/core/Typography';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
+import { InputLabel } from '@material-ui/core/Input';
+import TextField from '@material-ui/core/TextField';
+import { FormGroup, FormControlLabel, FormControl } from '@material-ui/core/';
+import Checkbox from '@material-ui/core/Checkbox';
+import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
-import Divider from 'material-ui/Divider';
-import List, { ListItem, ListItemSecondaryAction } from 'material-ui/List';
+import Divider from '@material-ui/core/Divider';
+import List, { ListItem, ListItemSecondaryAction } from '@material-ui/core/List';
 
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
 import Api from '../../../../data/api';

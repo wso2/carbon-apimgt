@@ -18,7 +18,7 @@
 
 import React, { Component } from 'react';
 import { Link, withRouter } from 'react-router-dom';
-import Button from 'material-ui/Button';
+import Button from '@material-ui/core/Button';
 import {
     Code,
     Description,
@@ -33,15 +33,16 @@ import {
     ArrowDropDown,
     OpenInNew,
 } from '@material-ui/icons/';
-import Menu, { MenuItem } from 'material-ui/Menu';
-import Grow from 'material-ui/transitions/Grow';
+import MenuItem from '@material-ui/core/MenuItem';
+import Menu from '@material-ui/core/Menu';
+import Grow from '@material-ui/core/Grow';
 import classNames from 'classnames';
-import Paper from 'material-ui/Paper';
-import Typography from 'material-ui/Typography';
-import { Manager, Target, Popper } from 'react-popper';
-import ClickAwayListener from 'material-ui/utils/ClickAwayListener';
-import { withStyles } from 'material-ui/styles';
-import blue from 'material-ui/colors/blue';
+import Paper from '@material-ui/core/Paper';
+import Typography from '@material-ui/core/Typography';
+import { Popper } from '@material-ui/core/';
+import ClickAwayListener from '@material-ui/core/ClickAwayListener';
+import { withStyles } from '@material-ui/core/styles';
+import blue from '@material-ui/core/colors/blue';
 import PropTypes from 'prop-types';
 
 import Utils from '../../../data/Utils';
@@ -64,11 +65,6 @@ const styles = {
     },
     icon: {
         marginRight: 10,
-    },
-    manager: {
-        display: 'inline-block',
-        marginLeft: 20,
-        zIndex: 1203,
     },
     activeMoreTab: {
         color: '#efefef',
@@ -228,54 +224,50 @@ class NavBar extends Component {
                         </Link>
                     ))}
                 {api && <DeleteApi api={api} />}
-                <Manager className={classes.manager}>
-                    <Target>
-                        <Button
-                            aria-owns={openMore ? 'menu-list' : null}
-                            aria-haspopup='true'
-                            onClick={this.handleClickMore}
-                            variant='raised'
-                            size='small'
-                            className={classes.moreButton}
-                            color={showMoreActiveTab() === '' ? 'default' : 'primary'}
-                        >
-                            <ArrowDropDown />
-                            More
-                            <div className={classes.activeMoreTab}>{showMoreActiveTab()}</div>
-                        </Button>
-                    </Target>
-                    <Popper
-                        placement='bottom-start'
-                        eventsEnabled={openMore}
-                        className={classNames({ [classes.popperClose]: !openMore })}
-                    >
-                        <ClickAwayListener onClickAway={this.handleCloseMore}>
-                            <Grow in={openMore} id='menu-list' style={{ transformOrigin: '0 0 0' }}>
-                                <Paper>
-                                    <Menu anchorEl={anchorEl} open={openMore} onClose={this.handleCloseMore}>
-                                        {tabs.map(tab =>
-                                            !tab.important && (
-                                                <Link
+                <Button
+                    aria-owns={openMore ? 'menu-list' : null}
+                    aria-haspopup='true'
+                    onClick={this.handleClickMore}
+                    variant='raised'
+                    size='small'
+                    className={classes.moreButton}
+                    color={showMoreActiveTab() === '' ? 'default' : 'primary'}
+                >
+                    <ArrowDropDown />
+                    More
+                    <div className={classes.activeMoreTab}>{showMoreActiveTab()}</div>
+                </Button>
+                <Popper
+                    placement='bottom-start'
+                    open={openMore}
+                    className={classNames({ [classes.popperClose]: !openMore })}
+                >
+                    <ClickAwayListener onClickAway={this.handleCloseMore}>
+                        <Grow in={openMore} id='menu-list' style={{ transformOrigin: '0 0 0' }}>
+                            <Paper>
+                                <Menu anchorEl={anchorEl} open={openMore} onClose={this.handleCloseMore}>
+                                    {tabs.map(tab =>
+                                        !tab.important && (
+                                            <Link
+                                                key={tab.name}
+                                                name={tab.name}
+                                                to={'/apis/' + apiUUID + '/' + tab.name}
+                                            >
+                                                <MenuItem
                                                     key={tab.name}
-                                                    name={tab.name}
-                                                    to={'/apis/' + apiUUID + '/' + tab.name}
+                                                    size='small'
+                                                    color={highlightActiveTab(tab.name)}
+                                                    className={classes.button}
                                                 >
-                                                    <MenuItem
-                                                        key={tab.name}
-                                                        size='small'
-                                                        color={highlightActiveTab(tab.name)}
-                                                        className={classes.button}
-                                                    >
-                                                        {tab.icon} {tab.name}
-                                                    </MenuItem>
-                                                </Link>
-                                            ))}
-                                    </Menu>
-                                </Paper>
-                            </Grow>
-                        </ClickAwayListener>
-                    </Popper>
-                </Manager>
+                                                    {tab.icon} {tab.name}
+                                                </MenuItem>
+                                            </Link>
+                                        ))}
+                                </Menu>
+                            </Paper>
+                        </Grow>
+                    </ClickAwayListener>
+                </Popper>
                 <div className={classes.contentShifter} />
                 <a
                     href={`/store/apis/${apiUUID}/overview?environment=${Utils.getCurrentEnvironment().label}`}

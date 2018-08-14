@@ -19,13 +19,12 @@
 import React from 'react';
 
 import { Redirect, Switch } from 'react-router-dom';
-import Typography from 'material-ui/Typography';
-import Grid from 'material-ui/Grid';
-import { withStyles } from 'material-ui/styles';
+import Typography from '@material-ui/core/Typography';
+import Grid from '@material-ui/core/Grid';
+import { withStyles } from '@material-ui/core/styles';
 import Delete from '@material-ui/icons/Delete';
 import PropTypes from 'prop-types';
 
-import MoreMenu from './MoreMenu';
 import ImageGenerator from './ImageGenerator';
 import API from '../../../data/api';
 import { resourceMethod, resourcePath, ScopeValidation } from '../../../data/ScopeValidation';
@@ -322,7 +321,6 @@ class ApiThumb extends React.Component {
                     </ScopeValidation>
                 )}
                 <ImageGenerator handleRedirectToAPIOverview={this.handleRedirectToAPIOverview} apiName={api.name} />
-                <MoreMenu api_uuid={api.id} />
 
                 <div className={classes.thumbContent}>
                     <Typography

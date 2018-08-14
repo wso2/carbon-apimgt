@@ -36,15 +36,12 @@ const config = {
         extensions: ['.js', '.jsx'],
     },
     module: {
-        rules: [
-            {
+        rules: [{
                 test: /\.(js|jsx)$/,
                 exclude: /node_modules/,
-                use: [
-                    {
-                        loader: 'babel-loader',
-                    },
-                ],
+                use: [{
+                    loader: 'babel-loader',
+                }, ],
             },
             {
                 test: /\.css$/,
@@ -52,8 +49,7 @@ const config = {
             },
             {
                 test: /\.less$/,
-                use: [
-                    {
+                use: [{
                         loader: 'style-loader', // creates style nodes from JS strings
                     },
                     {
@@ -93,18 +89,12 @@ if (process.env.NODE_ENV === 'development') {
             /.*\/Apis\/Details\/NavBar.jsx/,
             /.*\/Apis\/Details\/index.jsx/,
             /.*\/Apis\/Details\/Overview.jsx/,
+            /.*\/Apis\/Details\/DeleteApi.jsx/,
             // /.*\/Apis\/Details\/Endpoints\/*/,
             /.*\/Apis\/Details\/Scopes\/*/,
             /.*\/Apis\/Details\/Subscriptions\/*/,
             /.*\/Apis\/Create\/*/,
-            /.*\/data\/APIClient.js/,
-            /.*\/data\/AuthManager.js/,
-            /.*\/data\/APIClientFactory.js/,
-            /.*\/data\/ApiPermissionValidation.js/,
-            /.*\/data\/AuthManager.js/,
-            /.*\/data\/ConfigManager.js/,
-            /.*\/data\/ScopeValidation.jsx/,
-            /.*\/data\/User.js/,
+            /.*\/data\/*/,
         ],
         loader: 'eslint-loader',
         options: {
@@ -115,7 +105,7 @@ if (process.env.NODE_ENV === 'development') {
     config.module.rules.push(esLintLoader);
 }
 
-module.exports = function(env) {
+module.exports = function (env) {
     if (env && env.analysis) {
         var BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
         config.plugins.push(new BundleAnalyzerPlugin());

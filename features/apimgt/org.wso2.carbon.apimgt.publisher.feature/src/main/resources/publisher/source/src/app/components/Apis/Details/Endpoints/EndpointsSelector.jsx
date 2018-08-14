@@ -15,10 +15,10 @@
  */
 import React from 'react';
 import PropTypes from 'prop-types';
-import { InputLabel } from 'material-ui/Input';
-import { FormControl } from 'material-ui/Form';
-import { MenuItem } from 'material-ui/Menu';
-import Select from 'material-ui/Select';
+import { InputLabel } from '@material-ui/core/Input';
+import { FormControl } from '@material-ui/core/';
+import MenuItem from '@material-ui/core/MenuItem';
+import Select from '@material-ui/core/Select';
 
 const getMenuItems = (endpoints) => {
     const menuItems = [];

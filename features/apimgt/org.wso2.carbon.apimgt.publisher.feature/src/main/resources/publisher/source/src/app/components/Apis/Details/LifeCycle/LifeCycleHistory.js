@@ -20,8 +20,8 @@ import React from 'react'
 import List, {
     ListItem,
     ListItemText,
-} from 'material-ui/List';
-import Avatar from 'material-ui/Avatar'
+} from '@material-ui/core/List';
+import Avatar from '@material-ui/core/Avatar'
 import Person from '@material-ui/icons/Person';
 
 const LifeCycleHistory = props => {

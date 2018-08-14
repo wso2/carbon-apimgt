@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import Typography from 'material-ui/Typography';
-import { withStyles } from 'material-ui/styles';
-import Card, { CardContent, CardActions, CardHeader } from 'material-ui/Card';
+import Typography from '@material-ui/core/Typography';
+import { withStyles } from '@material-ui/core/styles';
+import Card, { CardContent, CardActions, CardHeader } from '@material-ui/core/Card';
 import { ErrorOutline, Refresh } from '@material-ui/icons/';
-import IconButton from 'material-ui/IconButton';
-import Avatar from 'material-ui/Avatar';
-import red from 'material-ui/colors/red';
-import Divider from 'material-ui/Divider';
+import IconButton from '@material-ui/core/IconButton';
+import Avatar from '@material-ui/core/Avatar';
+import red from '@material-ui/core/colors/red';
+import Divider from '@material-ui/core/Divider';
 
 const styles = () => ({
     cardContent: { color: 'pink', backgroundColor: 'black' },

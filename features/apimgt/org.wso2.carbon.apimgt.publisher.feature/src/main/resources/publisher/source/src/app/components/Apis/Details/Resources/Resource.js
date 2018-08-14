@@ -18,25 +18,24 @@
 
 import React from 'react'
 import { Input, Icon, Form } from 'antd';
-import Select from 'material-ui/Select';
-import {MenuItem} from 'material-ui/Menu';
+import Select from '@material-ui/core/Select';
+import {MenuItem} from '@material-ui/core/Menu';
 const FormItem = Form.Item;
-import Chip from 'material-ui/Chip';
+import Chip from '@material-ui/core/Chip';
 import List, {
     ListItem,
     ListItemText,
     ListItemSecondaryAction
-} from 'material-ui/List';
-import { withStyles } from 'material-ui/styles';
-import Paper from 'material-ui/Paper';
+} from '@material-ui/core/List';
+import { withStyles } from '@material-ui/core/styles';
+import Paper from '@material-ui/core/Paper';
 import PropTypes from 'prop-types';
-import Table, { TableBody, TableCell, TableHead, TableRow } from 'material-ui/Table';
+import Table, { TableBody, TableCell, TableHead, TableRow } from '@material-ui/core/Table';
 import Delete from '@material-ui/icons/Delete';
-import Grid from 'material-ui/Grid';
-import Button from 'material-ui/Button';
-import { FormGroup, FormControlLabel } from 'material-ui/Form';
-import Checkbox from 'material-ui/Checkbox';
-import Collapse from 'material-ui/transitions/Collapse';
+import Grid from '@material-ui/core/Grid';
+import Button from '@material-ui/core/Button';
+import { FormGroup, FormControlLabel } from '@material-ui/core/';
+import Checkbox from '@material-ui/core/Checkbox';
 
 const styles = theme => ({
     root: {

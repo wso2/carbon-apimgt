@@ -18,9 +18,9 @@
 
 import React, { Component } from 'react';
 import { Checkbox, Table, Col, Row, Card, Button, message, Form, Badge } from 'antd';
-import { MenuItem } from 'material-ui/Menu';
-import Select from 'material-ui/Select';
-import Input from 'material-ui/Input';
+import MenuItem from '@material-ui/core/MenuItem';
+import Select from '@material-ui/core/Select';
+import Input from '@material-ui/core/Input';
 
 import Api from '../../../data/api';
 import { Progress } from '../../Shared';

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-
+/* eslint-disable */
 import APIClientFactory from './APIClientFactory';
 import Utils from './Utils';
 
@@ -78,23 +78,36 @@ class API {
         let payload;
         let promise_create;
         if (api_data.constructor.name === 'Blob' || api_data.constructor.name === 'File') {
-            payload = { file: api_data, 'Content-Type': 'multipart/form-data' };
+            payload = {
+                file: api_data,
+                'Content-Type': 'multipart/form-data'
+            };
             promise_create = this.client.then((client) => {
                 return client.apis['API (Collection)'].post_apis_import_definition(
                     payload,
-                    this._requestMetaData({ 'Content-Type': 'multipart/form-data' }),
+                    this._requestMetaData({
+                        'Content-Type': 'multipart/form-data'
+                    }),
                 );
             });
         } else if (api_data.type === 'swagger-url') {
-            payload = { url: api_data.url, 'Content-Type': 'multipart/form-data' };
+            payload = {
+                url: api_data.url,
+                'Content-Type': 'multipart/form-data'
+            };
             promise_create = this.client.then((client) => {
                 return client.apis['API (Collection)'].post_apis_import_definition(
                     payload,
-                    this._requestMetaData({ 'Content-Type': 'multipart/form-data' }),
+                    this._requestMetaData({
+                        'Content-Type': 'multipart/form-data'
+                    }),
                 );
             });
         } else {
-            payload = { body: this._updateTemplate(api_data), 'Content-Type': 'application/json' };
+            payload = {
+                body: this._updateTemplate(api_data),
+                'Content-Type': 'application/json'
+            };
             promise_create = this.client.then((client) => {
                 return client.apis['API (Collection)'].post_apis(payload, this._requestMetaData());
             });
@@ -129,7 +142,9 @@ class API {
         promise_create = this.client.then((client) => {
             return client.apis['API (Collection)'].post_apis_import_definition(
                 payload,
-                this._requestMetaData({ 'Content-Type': 'multipart/form-data' }),
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data'
+                }),
             );
         });
         if (callback) {
@@ -165,7 +180,9 @@ class API {
      */
     get(id, callback = null) {
         const promise_get = this.client.then((client) => {
-            return client.apis['API (Individual)'].get_apis__apiId_({ apiId: id }, this._requestMetaData());
+            return client.apis['API (Individual)'].get_apis__apiId_({
+                apiId: id
+            }, this._requestMetaData());
         });
         if (callback) {
             return promise_get.then(callback);
@@ -183,8 +200,10 @@ class API {
      */
     createNewAPIVersion(id, version, callback = null) {
         const promise_copy_api = this.client.then((client) => {
-            return client.apis['API (Individual)'].post_apis_copy_api(
-                { apiId: id, newVersion: version },
+            return client.apis['API (Individual)'].post_apis_copy_api({
+                    apiId: id,
+                    newVersion: version
+                },
                 this._requestMetaData(),
             );
         });
@@ -203,7 +222,9 @@ class API {
      */
     getSwagger(id, callback = null) {
         const promise_get = this.client.then((client) => {
-            return client.apis['API (Individual)'].get_apis__apiId__swagger({ apiId: id }, this._requestMetaData());
+            return client.apis['API (Individual)'].get_apis__apiId__swagger({
+                apiId: id
+            }, this._requestMetaData());
         });
         if (callback) {
             return promise_get.then(callback);
@@ -220,7 +241,9 @@ class API {
      */
     getScopes(id, callback = null) {
         const promise_get = this.client.then((client) => {
-            return client.apis['Scope (Collection)'].get_apis__apiId__scopes({ apiId: id }, this._requestMetaData());
+            return client.apis['Scope (Collection)'].get_apis__apiId__scopes({
+                apiId: id
+            }, this._requestMetaData());
         });
         if (callback) {
             return promise_get.then(callback);
@@ -238,8 +261,7 @@ class API {
      */
     getScopeDetail(api_id, scopeName, callback = null) {
         const promise_get_Scope_detail = this.client.then((client) => {
-            return client.apis['Scope (Individual)'].get_apis__apiId__scopes__name_(
-                {
+            return client.apis['Scope (Individual)'].get_apis__apiId__scopes__name_({
                     apiId: api_id,
                     name: scopeName,
                 },
@@ -286,8 +308,7 @@ class API {
 
     deleteScope(api_id, scope_name) {
         const promise_deleteScope = this.client.then((client) => {
-            return client.apis['Scope (Individual)'].delete_apis__apiId__scopes__name_(
-                {
+            return client.apis['Scope (Individual)'].delete_apis__apiId__scopes__name_({
                     apiId: api_id,
                     name: scope_name,
                 },
@@ -310,7 +331,9 @@ class API {
             };
             return client.apis['API (Individual)'].put_apis__apiId__swagger(
                 payload,
-                this._requestMetaData({ 'Content-Type': 'multipart/form-data' }),
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data'
+                }),
             );
         });
         return promised_update;
@@ -323,8 +346,9 @@ class API {
      */
     policies(tier_level) {
         const promise_policies = this.client.then((client) => {
-            return client.apis['Throttling Tier (Collection)'].get_policies__tierLevel_(
-                { tierLevel: 'subscription' },
+            return client.apis['Throttling Tier (Collection)'].get_policies__tierLevel_({
+                    tierLevel: 'subscription'
+                },
                 this._requestMetaData(),
             );
         });
@@ -339,7 +363,9 @@ class API {
      */
     deleteAPI(id) {
         const promised_delete = this.client.then((client) => {
-            return client.apis['API (Individual)'].delete_apis__apiId_({ apiId: id }, this._requestMetaData());
+            return client.apis['API (Individual)'].delete_apis__apiId_({
+                apiId: id
+            }, this._requestMetaData());
         });
         return promised_delete;
     }
@@ -351,7 +377,9 @@ class API {
      */
     getLcState(id, callback = null) {
         const promise_lc_get = this.client.then((client) => {
-            return client.apis['API (Individual)'].get_apis__apiId__lifecycle({ apiId: id }, this._requestMetaData());
+            return client.apis['API (Individual)'].get_apis__apiId__lifecycle({
+                apiId: id
+            }, this._requestMetaData());
         });
         if (callback) {
             return promise_lc_get.then(callback);
@@ -367,8 +395,9 @@ class API {
      */
     getLcHistory(id, callback = null) {
         const promise_lc_history_get = this.client.then((client) => {
-            return client.apis['API (Individual)'].get_apis__apiId__lifecycle_history(
-                { apiId: id },
+            return client.apis['API (Individual)'].get_apis__apiId__lifecycle_history({
+                    apiId: id
+                },
                 this._requestMetaData(),
             );
         });
@@ -409,8 +438,9 @@ class API {
      */
     cleanupPendingTask(id, callback = null) {
         const promise_deletePendingTask = this.client.then((client) => {
-            return client.apis['API (Individual)'].delete_apis_apiId_lifecycle_lifecycle_pending_task(
-                { apiId: id },
+            return client.apis['API (Individual)'].delete_apis_apiId_lifecycle_lifecycle_pending_task({
+                    apiId: id
+                },
                 this._requestMetaData(),
             );
         });
@@ -423,7 +453,10 @@ class API {
      */
     update(api) {
         const promised_update = this.client.then((client) => {
-            const payload = { apiId: api.id, body: api };
+            const payload = {
+                apiId: api.id,
+                body: api
+            };
             return client.apis['API (Individual)'].put_apis__apiId_(payload);
         });
         return promised_update;
@@ -436,7 +469,9 @@ class API {
      */
     subscriptions(id, callback = null) {
         const promise_subscription = this.client.then((client) => {
-            return client.apis['Subscription (Collection)'].get_subscriptions({ apiId: id }, this._requestMetaData());
+            return client.apis['Subscription (Collection)'].get_subscriptions({
+                apiId: id
+            }, this._requestMetaData());
         });
         if (callback) {
             return promise_subscription.then(callback);
@@ -453,8 +488,10 @@ class API {
      */
     blockSubscriptions(id, state, callback = null) {
         const promise_subscription = this.client.then((client) => {
-            return client.apis['Subscription (Individual)'].post_subscriptions_block_subscription(
-                { subscriptionId: id, blockState: state },
+            return client.apis['Subscription (Individual)'].post_subscriptions_block_subscription({
+                    subscriptionId: id,
+                    blockState: state
+                },
                 this._requestMetaData(),
             );
         });
@@ -472,8 +509,9 @@ class API {
      */
     unblockSubscriptions(id, callback = null) {
         const promise_subscription = this.client.then((client) => {
-            return client.apis['Subscription (Individual)'].post_subscriptions_unblock_subscription(
-                { subscriptionId: id },
+            return client.apis['Subscription (Individual)'].post_subscriptions_unblock_subscription({
+                    subscriptionId: id
+                },
                 this._requestMetaData(),
             );
         });
@@ -490,7 +528,10 @@ class API {
      */
     addEndpoint(body) {
         const promised_addEndpoint = this.client.then((client) => {
-            const payload = { body, 'Content-Type': 'application/json' };
+            const payload = {
+                body,
+                'Content-Type': 'application/json'
+            };
             return client.apis['Endpoint (Collection)'].post_endpoints(payload, this._requestMetaData());
         });
 
@@ -504,8 +545,7 @@ class API {
      */
     deleteEndpoint(id) {
         const promised_delete = this.client.then((client) => {
-            return client.apis['Endpoint (individual)'].delete_endpoints__endpointId_(
-                {
+            return client.apis['Endpoint (individual)'].delete_endpoints__endpointId_({
                     endpointId: id,
                     'Content-Type': 'application/json',
                 },
@@ -534,8 +574,7 @@ class API {
      */
     getEndpoint(id) {
         return this.client.then((client) => {
-            return client.apis['Endpoint (individual)'].get_endpoints__endpointId_(
-                {
+            return client.apis['Endpoint (individual)'].get_endpoints__endpointId_({
                     endpointId: id,
                     'Content-Type': 'application/json',
                 },
@@ -551,8 +590,7 @@ class API {
      */
     updateEndpoint(data) {
         return this.client.then((client) => {
-            return client.apis['Endpoint (individual)'].put_endpoints__endpointId_(
-                {
+            return client.apis['Endpoint (individual)'].put_endpoints__endpointId_({
                     endpointId: data.id,
                     body: data,
                     'Content-Type': 'application/json',
@@ -569,8 +607,7 @@ class API {
      */
     checkIfEndpointExists(endpointName) {
         return this.client.then((client) => {
-            return client.apis['Endpoint (Collection)'].head_endpoints(
-                {
+            return client.apis['Endpoint (Collection)'].head_endpoints({
                     name: endpointName,
                 },
                 this._requestMetaData(),
@@ -584,8 +621,7 @@ class API {
      */
     discoverServices() {
         return this.client.then((client) => {
-            return client.apis['External Resources (Collection)'].get_external_resources_services(
-                {},
+            return client.apis['External Resources (Collection)'].get_external_resources_services({},
                 this._requestMetaData(),
             );
         });
@@ -593,7 +629,11 @@ class API {
 
     addDocument(api_id, body) {
         const promised_addDocument = this.client.then((client) => {
-            const payload = { apiId: api_id, body, 'Content-Type': 'application/json' };
+            const payload = {
+                apiId: api_id,
+                body,
+                'Content-Type': 'application/json'
+            };
             return client.apis['Document (Collection)'].post_apis__apiId__documents(payload, this._requestMetaData());
         });
         return promised_addDocument;
@@ -612,7 +652,9 @@ class API {
             };
             return client.apis['Document (Individual)'].post_apis__apiId__documents__documentId__content(
                 payload,
-                this._requestMetaData({ 'Content-Type': 'multipart/form-data' }),
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data'
+                }),
             );
         });
 
@@ -632,7 +674,9 @@ class API {
             };
             return client.apis['Document (Individual)'].post_apis__apiId__documents__documentId__content(
                 payload,
-                this._requestMetaData({ 'Content-Type': 'multipart/form-data' }),
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data'
+                }),
             );
         });
         return promised_addInlineContentToDocument;
@@ -640,10 +684,16 @@ class API {
 
     getFileForDocument(api_id, docId) {
         const promised_getDocContent = this.client.then((client) => {
-            const payload = { apiId: api_id, documentId: docId, Accept: 'application/octet-stream' };
+            const payload = {
+                apiId: api_id,
+                documentId: docId,
+                Accept: 'application/octet-stream'
+            };
             return client.apis['Document (Individual)'].get_apis__apiId__documents__documentId__content(
                 payload,
-                this._requestMetaData({ 'Content-Type': 'multipart/form-data' }),
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data'
+                }),
             );
         });
         return promised_getDocContent;
@@ -654,7 +704,10 @@ class API {
      */
     getInlineContentOfDocument(api_id, docId) {
         const promised_getDocContent = this.client.then((client) => {
-            const payload = { apiId: api_id, documentId: docId };
+            const payload = {
+                apiId: api_id,
+                documentId: docId
+            };
             return client.apis['Document (Individual)'].get_apis__apiId__documents__documentId__content(payload);
         });
         return promised_getDocContent;
@@ -662,8 +715,9 @@ class API {
 
     getDocuments(api_id, callback) {
         const promise_get_all = this.client.then((client) => {
-            return client.apis['Document (Collection)'].get_apis__apiId__documents(
-                { apiId: api_id },
+            return client.apis['Document (Collection)'].get_apis__apiId__documents({
+                    apiId: api_id
+                },
                 this._requestMetaData(),
             );
         });
@@ -692,8 +746,7 @@ class API {
 
     getDocument(api_id, docId, callback) {
         const promise_get = this.client.then((client) => {
-            return client.apis['Document (Individual)'].get_apis__apiId__documents__documentId_(
-                {
+            return client.apis['Document (Individual)'].get_apis__apiId__documents__documentId_({
                     apiId: api_id,
                     documentId: docId,
                 },
@@ -705,8 +758,7 @@ class API {
 
     deleteDocument(api_id, document_id) {
         const promise_deleteDocument = this.client.then((client) => {
-            return client.apis['Document (Individual)'].delete_apis__apiId__documents__documentId_(
-                {
+            return client.apis['Document (Individual)'].delete_apis__apiId__documents__documentId_({
                     apiId: api_id,
                     documentId: document_id,
                 },
@@ -729,13 +781,14 @@ class API {
 
     validateWSDLUrl(wsdlUrl) {
         const promised_validationResponse = this.client.then((client) => {
-            return client.apis['API (Collection)'].post_apis_validate_definition(
-                {
+            return client.apis['API (Collection)'].post_apis_validate_definition({
                     type: 'WSDL',
                     url: wsdlUrl,
                     'Content-Type': 'multipart/form-data',
                 },
-                this._requestMetaData({ 'Content-Type': 'multipart/form-data' }),
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data'
+                }),
             );
         });
         return promised_validationResponse;
@@ -743,13 +796,14 @@ class API {
 
     validateWSDLFile(file) {
         const promised_validationResponse = this.client.then((client) => {
-            return client.apis['API (Collection)'].post_apis_validate_definition(
-                {
+            return client.apis['API (Collection)'].post_apis_validate_definition({
                     type: 'WSDL',
                     file,
                     'Content-Type': 'multipart/form-data',
                 },
-                this._requestMetaData({ 'Content-Type': 'multipart/form-data' }),
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data'
+                }),
             );
         });
         return promised_validationResponse;
@@ -757,11 +811,12 @@ class API {
 
     getWSDL(apiId) {
         const promised_wsdlResponse = this.client.then((client) => {
-            return client.apis['API (Individual)'].get_apis__apiId__wsdl(
-                {
+            return client.apis['API (Individual)'].get_apis__apiId__wsdl({
                     apiId,
                 },
-                this._requestMetaData({ Accept: 'application/octet-stream' }),
+                this._requestMetaData({
+                    Accept: 'application/octet-stream'
+                }),
             );
         });
         return promised_wsdlResponse;
@@ -783,7 +838,9 @@ class API {
      */
     getThreatProtectionPolicy(id) {
         const promisedPolicies = this.client.then((client) => {
-            return client.apis['Threat Protection Policy'].get_threat_protection_policies__policyId_({ policyId: id });
+            return client.apis['Threat Protection Policy'].get_threat_protection_policies__policyId_({
+                policyId: id
+            });
         });
         return promisedPolicies;
     }
@@ -847,8 +904,9 @@ class API {
      */
     getHasOwnGateway(id) {
         const promised_getDedicatedGateway = this.client.then((client) => {
-            return client.apis['DedicatedGateway (Individual)'].get_apis__apiId__dedicated_gateway(
-                { apiId: id },
+            return client.apis['DedicatedGateway (Individual)'].get_apis__apiId__dedicated_gateway({
+                    apiId: id
+                },
                 this._requestMetaData(),
             );
         });
@@ -869,8 +927,12 @@ class API {
             type: 'production',
             inline: {
                 name: apiName + apiVersion.replace(/\./g, '_'), // TODO: It's better to add this name property from the REST api itself, making sure no name conflicts with other inline endpoint definitions ~tmkb
-                endpointConfig: JSON.stringify({ serviceUrl: apiEndpoint }),
-                endpointSecurity: { enabled: secured },
+                endpointConfig: JSON.stringify({
+                    serviceUrl: apiEndpoint
+                }),
+                endpointSecurity: {
+                    enabled: secured
+                },
                 type: 'http',
             },
         };

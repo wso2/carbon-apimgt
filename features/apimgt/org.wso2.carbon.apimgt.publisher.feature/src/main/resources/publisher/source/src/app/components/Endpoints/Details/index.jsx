@@ -18,8 +18,8 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import Grid from 'material-ui/Grid';
-import Typography from 'material-ui/Typography';
+import Grid from '@material-ui/core/Grid';
+import Typography from '@material-ui/core/Typography';
 
 import EndpointForm from '../Create/EndpointForm';
 import Endpoint from '../../../data/Endpoint';

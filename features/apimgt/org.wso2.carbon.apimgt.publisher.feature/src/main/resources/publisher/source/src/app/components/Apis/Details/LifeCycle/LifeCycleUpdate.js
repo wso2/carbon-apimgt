@@ -15,23 +15,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-'use strict';
 
-import React, {Component} from 'react'
-
-import API from '../../../../data/api'
-import {ScopeValidation , resourceMethod, resourcePath} from '../../../../data/ScopeValidation'
-import ApiPermissionValidation from '../../../../data/ApiPermissionValidation'
-import Alert from '../../../Shared/Alert'
-
-import Button from 'material-ui/Button';
-import Typography from 'material-ui/Typography';
-import Grid from 'material-ui/Grid'
-import { FormGroup, FormControlLabel } from 'material-ui/Form';
-import Checkbox from 'material-ui/Checkbox';
-import LifeCycleImage from './LifeCycleImage';
+import React, { Component } from 'react';
+import Button from '@material-ui/core/Button';
+import Typography from '@material-ui/core/Typography';
+import Grid from '@material-ui/core/Grid';
+import { FormGroup } from '@material-ui/core/FormGroup';
+import { FormControlLabel } from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
 import PropTypes from 'prop-types';
-import { withStyles } from 'material-ui/styles';
+import { withStyles } from '@material-ui/core/styles';
+
+import API from '../../../../data/api';
+import { ScopeValidation, resourceMethod, resourcePath } from '../../../../data/ScopeValidation';
+import ApiPermissionValidation from '../../../../data/ApiPermissionValidation';
+import Alert from '../../../Shared/Alert';
+import LifeCycleImage from './LifeCycleImage';
+
 
 const styles = theme => ({
     buttonsWrapper: {
