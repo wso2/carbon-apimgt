@@ -154,7 +154,6 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         Span keySpan = openTracer.startSpan("KeyValidationLatency", responseLatencySpan, tracer);
         messageContext.setProperty("KeySpan", keySpan);
 
-
         Timer.Context context = startMetricTimer();
         long startTime = System.nanoTime();
         long endTime;
@@ -188,7 +187,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
             if (APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE.equals(errorMessage)) {
                 log.error("API authentication failure due to "
-                            + APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
+                    + APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
             } else {
                 // We do not need to log known authentication failures as errors since these are not product errors.
                 log.warn("API authentication failure due to " + errorMessage);
