@@ -205,6 +205,7 @@ public final class APIUsageStatisticsClientConstants {
     public static final String API_CREATOR_TENANT_DOMAIN = "apiCreatorTenantDomain";
     public static final String LAST_ACCESS_TIME = "lastAccessTime";
     public static final String APP_OWNER = "applicationOwner";
+    public static final String AGG_COUNT = "AGG_COUNT";
 
     //------Siddhi app names----
     public static final String API_ACCESS_SUMMARY_SIDDHI_APP = "API_ACCESS_SUMMARY";

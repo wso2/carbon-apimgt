@@ -1946,7 +1946,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                         + APIUsageStatisticsClientConstants.API_VERSION + ", "
                         + APIUsageStatisticsClientConstants.API_CREATOR + ", "
                         + APIUsageStatisticsClientConstants.API_CONTEXT + ", sum("
-                        + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") as total_request_count group by "
+                        + APIUsageStatisticsClientConstants.AGG_COUNT + ") as total_request_count group by "
                         + APIUsageStatisticsClientConstants.API_NAME + ", "
                         + APIUsageStatisticsClientConstants.API_VERSION + ", "
                         + APIUsageStatisticsClientConstants.API_CREATOR + ", "
@@ -2269,45 +2269,45 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     private Collection<APIUsageByUser> getUsageOfAPI(String apiName, String apiVersion)
             throws APIMgtUsageQueryServiceClientException {
-        if (dataSource == null) {
-            handleException("BAM data source hasn't been initialized. Ensure that the data source " +
-                    "is properly configured in the APIUsageTracker configuration.");
-        }
-        Connection connection = null;
-        PreparedStatement prepareStatement = null;
-        ResultSet rs = null;
         Collection<APIUsageByUser> usageData = new ArrayList<APIUsageByUser>();
         try {
-            connection = dataSource.getConnection();
-            String query;
-            //check whether table exist first
-            if (isTableExist(APIUsageStatisticsClientConstants.KEY_USAGE_SUMMARY, connection)) {//Table Exists
-                query = "SELECT * FROM " + APIUsageStatisticsClientConstants.KEY_USAGE_SUMMARY + " WHERE "
-                        + APIUsageStatisticsClientConstants.API + " = ? ";
-                if (apiVersion != null) {
-                    query += " AND " + APIUsageStatisticsClientConstants.VERSION + " = ? ";
-                }
-                prepareStatement = connection.prepareStatement(query);
-                prepareStatement.setString(1, apiName);
-                if (apiVersion != null) {
-                    prepareStatement.setString(2, apiVersion);
-                }
+            StringBuilder query = new StringBuilder(
+                    "from " + APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG + "_HOURS");
+            if (apiVersion != null) {
+                query.append(" on (" + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName + "' " + " AND "
+                        + APIUsageStatisticsClientConstants.API_VERSION + "=='" + apiVersion + "') ");
+            } else {
+                query.append(" on " + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName + "' ");
+            }
+            query.append("select " + APIUsageStatisticsClientConstants.API_CONTEXT + ", "
+                    + APIUsageStatisticsClientConstants.USERNAME + ", " + APIUsageStatisticsClientConstants.AGG_COUNT
+                    + ", " + APIUsageStatisticsClientConstants.API_VERSION + ";");
 
-                rs = prepareStatement.executeQuery();
-                while (rs.next()) {
-                    String context = rs.getString(APIUsageStatisticsClientConstants.CONTEXT);
-                    String username = rs.getString(APIUsageStatisticsClientConstants.USER_ID);
-                    long requestCount = rs.getLong(APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT);
-                    String version = rs.getString(APIUsageStatisticsClientConstants.VERSION);
-                    usageData.add(new APIUsageByUser(context, username, requestCount, version));
+            JSONObject jsonObj = APIUtil
+                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.API_ACCESS_SUMMARY_SIDDHI_APP,
+                            query.toString());
+            String apiContext;
+            String username;
+            Long requestCount;
+            String version;
+
+            if (jsonObj != null) {
+                JSONArray jArray = (JSONArray) jsonObj.get(APIUsageStatisticsClientConstants.RECORDS_DELIMITER);
+                for (Object record : jArray) {
+                    JSONArray recordArray = (JSONArray) record;
+                    if (recordArray.size() == 4) {
+                        apiContext = (String) recordArray.get(0);
+                        username = (String) recordArray.get(1);
+                        requestCount = (Long) recordArray.get(2);
+                        version = (String) recordArray.get(3);
+                        usageData.add(new APIUsageByUser(apiContext, username, requestCount, version));
+                    }
                 }
             }
             return usageData;
-        } catch (SQLException e) {
-            log.error("Error occurred while querying from JDBC database " + e.getMessage(), e);
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
-        } finally {
-            closeDatabaseLinks(rs,prepareStatement,connection);
+        } catch (APIManagementException e) {
+            log.error("Error occurred while querying from Stream Processor " + e.getMessage(), e);
+            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from Stream Processor", e);
         }
     }
 
