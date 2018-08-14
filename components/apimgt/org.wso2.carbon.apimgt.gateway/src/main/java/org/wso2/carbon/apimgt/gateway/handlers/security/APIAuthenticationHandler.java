@@ -216,7 +216,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
     protected Timer.Context startMetricTimer() {
         Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
-            APIConstants.METRICS_PREFIX, this.getClass().getSimpleName()));
+                APIConstants.METRICS_PREFIX, this.getClass().getSimpleName()));
         return timer.start();
     }
 
@@ -268,7 +268,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         } else {
             status = HttpStatus.SC_UNAUTHORIZED;
             Map<String, String> headers =
-                (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+                    (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
             if (headers != null) {
                 headers.put(HttpHeaders.WWW_AUTHENTICATE, getAuthenticator().getChallengeString() +
                         ", error=\"invalid token\"" +
@@ -300,7 +300,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     protected OMElement getFaultPayload(APISecurityException e) {
         OMFactory fac = OMAbstractFactory.getOMFactory();
         OMNamespace ns = fac.createOMNamespace(APISecurityConstants.API_SECURITY_NS,
-            APISecurityConstants.API_SECURITY_NS_PREFIX);
+                APISecurityConstants.API_SECURITY_NS_PREFIX);
         OMElement payload = fac.createOMElement("fault", ns);
 
         OMElement errorCode = fac.createOMElement("code", ns);
@@ -334,12 +334,12 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             logMessage = logMessage + " transactionId=" + logID;
         }
         String userAgent = (String) ((TreeMap) axisMC.getProperty(org.apache.axis2.context.MessageContext
-            .TRANSPORT_HEADERS)).get(APIConstants.USER_AGENT);
+                .TRANSPORT_HEADERS)).get(APIConstants.USER_AGENT);
         if (userAgent != null) {
             logMessage = logMessage + " with userAgent=" + userAgent;
         }
         String accessToken = (String) ((TreeMap) axisMC.getProperty(org.apache.axis2.context.MessageContext
-            .TRANSPORT_HEADERS)).get(APIMgtGatewayConstants.AUTHORIZATION);
+                .TRANSPORT_HEADERS)).get(APIMgtGatewayConstants.AUTHORIZATION);
         if (accessToken != null) {
             logMessage = logMessage + " with accessToken=" + accessToken;
         }
@@ -366,7 +366,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
         AuthenticationContext authContext = getAuthenticationContext(messageContext);
         org.apache.axis2.context.MessageContext axis2MsgContext =
-            ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
 
         String consumerKey = "";
         String username = "";
