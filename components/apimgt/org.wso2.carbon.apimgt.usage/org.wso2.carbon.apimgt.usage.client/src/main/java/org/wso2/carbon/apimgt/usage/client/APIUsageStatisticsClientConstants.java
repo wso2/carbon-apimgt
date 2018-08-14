@@ -187,6 +187,7 @@ public final class APIUsageStatisticsClientConstants {
     public static final String API_USER_PER_APP_AGG = "ApiUserPerAppAgg";
     public static final String API_PER_DESTINATION_AGG = "ApiPerDestinationAgg";
     public static final String API_RESOURCE_PATH_PER_APP_AGG = "ApiResourcePathPerAppAgg";
+    public static final String API_LAST_ACCESS_SUMMARY= "ApiLastAccessSummary";
 
 
     //------Field names-------
@@ -201,6 +202,8 @@ public final class APIUsageStatisticsClientConstants {
     public static final String API_RESOURCE_TEMPLATE = "apiResourceTemplate";
     public static final String USERNAME = "username";
     public static final String API_CREATOR_TENANT_DOMAIN = "apiCreatorTenantDomain";
+    public static final String LAST_ACCESS_TIME = "lastAccessTime";
+    public static final String APP_OWNER = "applicationOwner";
 
     //------Siddhi app names----
     public static final String API_ACCESS_SUMMARY_SIDDHI_APP = "API_ACCESS_SUMMARY";
