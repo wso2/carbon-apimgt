@@ -187,7 +187,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
             if (APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE.equals(errorMessage)) {
                 log.error("API authentication failure due to "
-                    + APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
+                      + APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
             } else {
                 // We do not need to log known authentication failures as errors since these are not product errors.
                 log.warn("API authentication failure due to " + errorMessage);
