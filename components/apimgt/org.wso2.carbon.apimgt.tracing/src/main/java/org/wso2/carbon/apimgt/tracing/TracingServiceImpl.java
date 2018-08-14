@@ -8,17 +8,21 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.tracing.jaeger.JaegerTracerImpl;
 import org.wso2.carbon.apimgt.tracing.zipkin.ZipkinTracerImpl;
 import org.wso2.carbon.utils.CarbonUtils;
-
-
 import java.io.File;
 
 public class TracingServiceImpl implements TracingService {
 
     private static final Log log = LogFactory.getLog(TracingServiceImpl.class);
     private APIManagerConfiguration configuration = new APIManagerConfiguration();
+    private Tracer tracer;
+
+    public TracingServiceImpl() {
+
+    }
+
 
     @Override
-    public Tracer getTracer(String serviceName) {
+    public Tracer buildTracer(String serviceName) {
         try {
             String filePath = CarbonUtils.getCarbonConfigDirPath() + File.separator + "api-manager.xml";
             configuration.load(filePath);
@@ -32,14 +36,12 @@ public class TracingServiceImpl implements TracingService {
 
         if (openTracerName.equalsIgnoreCase("JAEGER") && enabled.equalsIgnoreCase("TRUE")) {
 
-            Tracer tracer = new JaegerTracerImpl().getTracer(openTracerName, configuration, serviceName);
+            tracer = new JaegerTracerImpl().getTracer(openTracerName, configuration, serviceName);
             return tracer;
-
         } else if (openTracerName.equalsIgnoreCase("ZIPKIN") && enabled.equalsIgnoreCase("TRUE")) {
 
-            Tracer tracer = new ZipkinTracerImpl().getTracer(openTracerName, configuration, serviceName);
+            tracer = new ZipkinTracerImpl().getTracer(openTracerName, configuration, serviceName);
             return tracer;
-
         } else {
             log.error("Invalid Configuration");
         }

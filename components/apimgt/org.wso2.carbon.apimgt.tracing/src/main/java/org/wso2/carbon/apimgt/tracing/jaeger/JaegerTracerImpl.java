@@ -1,11 +1,12 @@
 package org.wso2.carbon.apimgt.tracing.jaeger;
 
 import io.jaegertracing.Configuration;
+import io.opentracing.Span;
 import io.opentracing.Tracer;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.tracing.OpenTracer;
 
-public class JaegerTracerImpl implements OpenTracer {
+public class JaegerTracerImpl extends OpenTracer {
 
     private static final String NAME = "jaeger";
 
@@ -45,6 +46,22 @@ public class JaegerTracerImpl implements OpenTracer {
 
         Tracer tracer = new Configuration(serviceName).withSampler(samplerConfig).withReporter(reporterConfig).getTracer();
         return tracer;
+    }
+
+    public Span startSpan(String spanName, Span parentSpan, Tracer tracer) {
+
+        if (parentSpan == null) {
+            Span span = tracer.buildSpan(spanName).start();
+            return span;
+
+        } else {
+            Span childSpan = tracer.buildSpan(spanName).asChildOf(parentSpan).start();
+            return childSpan;
+        }
+    }
+
+    public void finishSpan(Span span) {
+        span.finish();
     }
 
     @Override

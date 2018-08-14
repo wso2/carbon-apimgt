@@ -2,13 +2,14 @@ package org.wso2.carbon.apimgt.tracing.zipkin;
 
 import brave.Tracing;
 import brave.opentracing.BraveTracer;
+import io.opentracing.Span;
 import io.opentracing.Tracer;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.tracing.OpenTracer;
 import zipkin2.reporter.AsyncReporter;
 import zipkin2.reporter.okhttp3.OkHttpSender;
 
-public class ZipkinTracerImpl implements OpenTracer {
+public class ZipkinTracerImpl extends OpenTracer {
 
     private static final String NAME = "zipkin";
 

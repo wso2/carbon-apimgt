@@ -46,6 +46,8 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.tracing.OpenTracer;
+import org.wso2.carbon.apimgt.tracing.TracingService;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 
@@ -78,6 +80,8 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
     private String authorizationHeader;
     private boolean removeOAuthHeadersFromOutMessage = true;
+    TracingService tracingService;
+    private OpenTracer openTracer;
 
     public void init(SynapseEnvironment synapseEnvironment) {
         this.synapseEnvironment = synapseEnvironment;
@@ -147,8 +151,9 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
         Span responseLatencySpan = (Span) messageContext.getProperty("ResponseLatencySpan");
         Tracer tracer = (Tracer) messageContext.getProperty("Tracer");
-        Span keyValidationLatencySpan = tracer.buildSpan("KeyValidationLatency").asChildOf(responseLatencySpan).start();
-        messageContext.setProperty("KeyValidationLatencySpan", keyValidationLatencySpan);
+        Span keySpan = openTracer.startSpan("KeyValidationLatency", responseLatencySpan, tracer);
+        messageContext.setProperty("KeySpan", keySpan);
+
 
         Timer.Context context = startMetricTimer();
         long startTime = System.nanoTime();
@@ -195,7 +200,8 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
             handleAuthFailure(messageContext, e);
         } finally {
-            keyValidationLatencySpan.finish();
+            Span span = (Span) messageContext.getProperty("KeySpan");
+            openTracer.finishSpan(span);
             messageContext.setProperty(APIMgtGatewayConstants.SECURITY_LATENCY,
                 TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime));
             stopMetricTimer(context);
