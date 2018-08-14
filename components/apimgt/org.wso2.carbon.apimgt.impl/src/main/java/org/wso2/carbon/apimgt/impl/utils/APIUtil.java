@@ -6790,6 +6790,9 @@ public final class APIUtil {
                     tier.setRequestsPerMin(bandwidthLimit.getDataAmount());
                     tier.setRequestCount(bandwidthLimit.getDataAmount());
                 }
+                if (PolicyConstants.POLICY_LEVEL_SUB.equalsIgnoreCase(policyLevel)) {
+                    tier.setTierPlan(((SubscriptionPolicy) policy).getBillingPlan());
+                }
                 tierMap.put(policy.getPolicyName(), tier);
             } else {
                 if (APIUtil.isEnabledUnlimitedTier()) {
