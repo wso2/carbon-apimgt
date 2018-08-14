@@ -188,6 +188,7 @@ public final class APIUsageStatisticsClientConstants {
     public static final String API_PER_DESTINATION_AGG = "ApiPerDestinationAgg";
     public static final String API_RESOURCE_PATH_PER_APP_AGG = "ApiResourcePathPerAppAgg";
     public static final String API_LAST_ACCESS_SUMMARY= "ApiLastAccessSummary";
+    public static final String API_VERSION_PER_APP_AGG = "ApiVersionPerAppAgg";
 
 
     //------Field names-------

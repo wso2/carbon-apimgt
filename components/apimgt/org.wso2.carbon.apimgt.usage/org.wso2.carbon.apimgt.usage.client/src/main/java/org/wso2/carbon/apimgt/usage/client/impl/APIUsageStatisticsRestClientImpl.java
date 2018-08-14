@@ -987,7 +987,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     public List<APIUsageDTO> getProviderAPIUsage(String providerName, String fromDate, String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
-        Collection<APIUsage> usageData = getAPIUsageData(APIUsageStatisticsClientConstants.API_VERSION_USAGE_SUMMARY,
+        Collection<APIUsage> usageData = getAPIUsageData(APIUsageStatisticsClientConstants.API_VERSION_PER_APP_AGG,
                 fromDate, toDate);
         List<API> providerAPIs = getAPIsByProvider(providerName);
         Map<String, APIUsageDTO> usageByAPIs = new TreeMap<String, APIUsageDTO>();
@@ -1029,52 +1029,47 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     private Collection<APIUsage> getAPIUsageData(String tableName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
-        Connection connection = null;
-        PreparedStatement statement = null;
-        ResultSet resultSet = null;
         Collection<APIUsage> usageDataList = new ArrayList<APIUsage>();
         try {
-            connection = dataSource.getConnection();
-            String query;
-            //check whether table exist first
-            if (isTableExist(tableName, connection)) {
+            String granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;//default granularity
 
-                if (connection.getMetaData().getDatabaseProductName().contains("DB2")) {
-                    query = "SELECT " +
-                            APIUsageStatisticsClientConstants.API + "," +
-                            APIUsageStatisticsClientConstants.CONTEXT + "," +
-                            APIUsageStatisticsClientConstants.VERSION + "," +
-                            "SUM(" + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS aggregateSum " +
-                            " FROM " + tableName + " GROUP BY " + APIUsageStatisticsClientConstants.API + "," +
-                            APIUsageStatisticsClientConstants.CONTEXT + "," + APIUsageStatisticsClientConstants.VERSION;
-                    statement = connection.prepareStatement(query);
-                } else {
-                    query = "SELECT " +
-                            APIUsageStatisticsClientConstants.API + "," +
-                            APIUsageStatisticsClientConstants.CONTEXT + "," +
-                            APIUsageStatisticsClientConstants.VERSION + "," +
-                            "SUM(" + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS aggregateSum " +
-                            " FROM " + tableName + " WHERE " + APIUsageStatisticsClientConstants.TIME + " BETWEEN ? AND ? " +
-                            " GROUP BY " + APIUsageStatisticsClientConstants.API + "," +
-                            APIUsageStatisticsClientConstants.CONTEXT + "," + APIUsageStatisticsClientConstants.VERSION;
-                    statement = connection.prepareStatement(query);
-                    statement.setString(1, fromDate);
-                    statement.setString(2, toDate);
-                }
+            Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
 
-                resultSet = statement.executeQuery();
-                while (resultSet.next()) {
-                    String apiName = resultSet.getString(APIUsageStatisticsClientConstants.API);
-                    String context = resultSet.getString(APIUsageStatisticsClientConstants.CONTEXT);
-                    String version = resultSet.getString(APIUsageStatisticsClientConstants.VERSION);
-                    long requestCount = resultSet.getLong("aggregateSum");
-                    usageDataList.add(new APIUsage(apiName, context, version, requestCount));
+            if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
+                granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
+            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
+                granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
+            }
+            String query = "from " + tableName + " within '" + fromDate + "', '" + toDate + "' per '" + granularity
+                    + "' select " + APIUsageStatisticsClientConstants.API_NAME + ", "
+                    + APIUsageStatisticsClientConstants.API_CONTEXT + ", "
+                    + APIUsageStatisticsClientConstants.API_VERSION + ", sum("
+                    + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") as aggregateSum group by "
+                    + APIUsageStatisticsClientConstants.API_NAME + ", " + APIUsageStatisticsClientConstants.API_CONTEXT
+                    + ", " + APIUsageStatisticsClientConstants.API_VERSION + ";";
+            JSONObject jsonObj = APIUtil
+                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.API_ACCESS_SUMMARY_SIDDHI_APP,
+                            query);
+
+            String apiName;
+            String apiContext;
+            String apiVersion;
+            Long requestCount;
+            if (jsonObj != null) {
+                JSONArray jArray = (JSONArray) jsonObj.get(APIUsageStatisticsClientConstants.RECORDS_DELIMITER);
+                for (Object record : jArray) {
+                    JSONArray recordArray = (JSONArray) record;
+                    if (recordArray.size() == 4) {
+                        apiName = (String) recordArray.get(0);
+                        apiContext = (String) recordArray.get(1);
+                        apiVersion = (String) recordArray.get(2);//omitting apiCreator
+                        requestCount = (Long) recordArray.get(3);
+                        usageDataList.add(new APIUsage(apiName, apiContext, apiVersion, requestCount));
+                    }
                 }
             }
-        } catch (SQLException e) {
-            handleException("Error occurred while querying API usage data from JDBC database", e);
-        } finally {
-            closeDatabaseLinks(resultSet, statement, connection);
+        } catch (APIManagementException e) {
+            handleException("Error occurred while querying API usage data from Stream Processor ", e);
         }
         return usageDataList;
     }
