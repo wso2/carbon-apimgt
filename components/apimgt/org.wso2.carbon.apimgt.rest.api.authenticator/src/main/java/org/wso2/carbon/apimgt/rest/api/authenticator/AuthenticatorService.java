@@ -163,7 +163,7 @@ public class AuthenticatorService {
                                      long validityPeriod, String authorizationCode, String assertion,
                                      IdentityProvider identityProvider, String scopesList)
             throws APIManagementException {
-        AccessTokenInfo accessTokenInfo;
+        AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
         AccessTokenRequest accessTokenRequest = new AccessTokenRequest();
         MultiEnvironmentOverview multiEnvironmentOverviewConfigs = apimConfigurationService
                 .getEnvironmentConfigurations().getMultiEnvironmentOverview();
@@ -194,7 +194,20 @@ public class AuthenticatorService {
                     log.error(errorMsg, ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);
                     throw new APIManagementException(errorMsg, ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);
                 }
-            }  else if (isMultiEnvironmentOverviewEnabled) { // JWT or Custom grant type
+            } else if (KeyManagerConstants.PASSWORD_GRANT_TYPE.equals(grantType)) {
+                // Access token for password code grant type
+                accessTokenRequest = AuthUtil
+                        .createAccessTokenRequest(userName, password, grantType, refreshToken,
+                                null, validityPeriod, scopesList,
+                                consumerKeySecretMap.get("CONSUMER_KEY"), consumerKeySecretMap.get("CONSUMER_SECRET"));
+                accessTokenInfo = getKeyManager().getNewAccessToken(accessTokenRequest);
+            } else if (KeyManagerConstants.REFRESH_GRANT_TYPE.equals(grantType)) {
+                accessTokenRequest = AuthUtil
+                        .createAccessTokenRequest(userName, password, grantType, refreshToken,
+                                null, validityPeriod, scopesList,
+                                consumerKeySecretMap.get("CONSUMER_KEY"), consumerKeySecretMap.get("CONSUMER_SECRET"));
+                accessTokenInfo = getKeyManager().getNewAccessToken(accessTokenRequest);
+            } else if (isMultiEnvironmentOverviewEnabled) { // JWT or Custom grant type
                 accessTokenRequest.setClientId(consumerKeySecretMap.get("CONSUMER_KEY"));
                 accessTokenRequest.setClientSecret(consumerKeySecretMap.get("CONSUMER_SECRET"));
                 accessTokenRequest.setAssertion(assertion);
@@ -211,11 +224,11 @@ public class AuthenticatorService {
                     String errorMsg = "User " + usernameFromJWT + " does not exists in this environment.";
                     throw new APIManagementException(errorMsg, e, ExceptionCodes.USER_NOT_AUTHENTICATED);
                 }
-            } else {
-                accessTokenRequest = AuthUtil
-                        .createAccessTokenRequest(userName, password, grantType, refreshToken,
-                                null, validityPeriod, scopesList,
-                                consumerKeySecretMap.get("CONSUMER_KEY"), consumerKeySecretMap.get("CONSUMER_SECRET"));
+            } else if (KeyManagerConstants.CLIENT_CREDENTIALS_GRANT_TYPE.equals(grantType)) {
+                accessTokenRequest = AuthUtil.createAccessTokenRequest(userName, password, grantType,
+                        refreshToken, null, validityPeriod, scopesList,
+                        consumerKeySecretMap.get(KeyManagerConstants.KeyDetails.CONSUMER_KEY),
+                        consumerKeySecretMap.get(KeyManagerConstants.KeyDetails.CONSUMER_SECRET));
                 accessTokenInfo = getKeyManager().getNewAccessToken(accessTokenRequest);
             }
         } catch (KeyManagementException e) {
