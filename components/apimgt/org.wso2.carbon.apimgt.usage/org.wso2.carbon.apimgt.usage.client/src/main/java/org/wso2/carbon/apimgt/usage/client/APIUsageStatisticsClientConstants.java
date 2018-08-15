@@ -99,6 +99,7 @@ public final class APIUsageStatisticsClientConstants {
     public static final String API_EXECUTION_TIME_SECONDS_SUMMARY = "API_EXE_TIME_SEC_SUMMARY";
 
     public static final String RDBMS_STATISTICS_CLIENT_TYPE = "RDBMS";
+    public static final String REST_STATISTICS_CLIENT_TYPE = "REST";
 
     public static final String HOUR = "hour";
     public static final String MINUTES = "minutes";
@@ -158,7 +159,8 @@ public final class APIUsageStatisticsClientConstants {
     public static final String BACKEND_LATENCY = "backendLatency";
     public static final String OTHER_LATENCY = "otherLatency";
     public static final String APPLICATION_ID = "applicationId";
-
+    public static final String COUNTRY = "apiName"; //change to country
+    public static final String CITY = "apiVersion"; //change to city
 
     //------Siddhi app names----
     public static final String API_ACCESS_SUMMARY_SIDDHI_APP = "API_ACCESS_SUMMARY";

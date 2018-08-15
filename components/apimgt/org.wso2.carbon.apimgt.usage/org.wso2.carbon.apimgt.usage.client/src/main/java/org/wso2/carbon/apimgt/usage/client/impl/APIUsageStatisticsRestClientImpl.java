@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+* Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 * WSO2 Inc. licenses this file to you under the Apache License,
 * Version 2.0 (the "License"); you may not use this file except
@@ -85,10 +85,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.activation.DataHandler;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -99,7 +95,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -118,16 +113,13 @@ import java.util.regex.Pattern;
 
 /**
  * Usage statistics class implementation for the APIUsageStatisticsClient.
- * Use the RDBMS to query and fetch the data for getting usage Statistics
+ * Use the Siddhi Rest API to query and fetch the data for getting usage Statistics
  */
 public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
-    private static final String DATA_SOURCE_NAME = "jdbc/WSO2AM_STATS_DB";
-    private static volatile DataSource dataSource = null;
     private static PaymentPlan paymentPlan;
     private APIProvider apiProviderImpl;
-    private static final Log log = LogFactory.getLog(APIUsageStatisticsRdbmsClientImpl.class);
-    private static final  Object lock = new Object();
+    private static final Log log = LogFactory.getLog(APIUsageStatisticsRestClientImpl.class);
 
     /**
      * default constructor
@@ -136,9 +128,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     }
 
     /**
-     * Initialize the RDBMS client with logged user
+     * Initialize the Rest client with logged user
      * @param username logged user ID
-     * @throws APIMgtUsageQueryServiceClientException throws when error occured
+     * @throws APIMgtUsageQueryServiceClientException throws when error occurred
      */
     public APIUsageStatisticsRestClientImpl(String username) throws APIMgtUsageQueryServiceClientException {
         OMElement element;
@@ -147,10 +139,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         try {
             config = APIUsageClientServiceComponent.getAPIManagerConfiguration();
             apiManagerAnalyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
-            if (APIUtil.isAnalyticsEnabled() && dataSource == null) {
-                initializeDataSource();
-            }
-            // text = config.getFirstProperty("BillingConfig");
             String billingConfig = config.getFirstProperty("EnableBillingAndUsage");
             boolean isBillingEnabled = Boolean.parseBoolean(billingConfig);
             if (isBillingEnabled) {
@@ -172,21 +160,12 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     }
 
     /**
-     * This method Initialised the datasource
+     * This method Initialises the datasource
      * @throws APIMgtUsageQueryServiceClientException throws if error occurred
      */
     @Override
     public void initializeDataSource() throws APIMgtUsageQueryServiceClientException {
-        try {
-            synchronized (lock) {
-                if(dataSource == null){
-                    Context ctx = new InitialContext();
-                    dataSource = (DataSource) ctx.lookup(DATA_SOURCE_NAME);
-                }
-            }
-        } catch (NamingException e) {
-            handleException("Error while looking up the data source: " + DATA_SOURCE_NAME, e);
-        }
+        //do nothing
     }
 
     /**
@@ -208,78 +187,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         }
         StAXOMBuilder builder = new StAXOMBuilder(parser);
         return builder.getDocumentElement();
-    }
-
-    /**
-     * This method is used to close the ResultSet, PreparedStatement and Connection after getting data from the DB
-     * This is called if a "PreparedStatement" is used to fetch results from the DB
-     *
-     * @param resultSet         ResultSet returned from the database query
-     * @param preparedStatement prepared statement used in the database query
-     * @param connection        DB connection used to get data from the database
-     */
-    public void closeDatabaseLinks(ResultSet resultSet, PreparedStatement preparedStatement, Connection connection) {
-
-        if (resultSet != null) {
-            try {
-                resultSet.close();
-            } catch (SQLException e) {
-                //this is logged and the process is continued because the query has executed
-                log.error("Error occurred while closing the result set from JDBC database.", e);
-            }
-        }
-        if (preparedStatement != null) {
-            try {
-                preparedStatement.close();
-            } catch (SQLException e) {
-                //this is logged and the process is continued because the query has executed
-                log.error("Error occurred while closing the prepared statement from JDBC database.", e);
-            }
-        }
-        if (connection != null) {
-            try {
-                connection.close();
-            } catch (SQLException e) {
-                //this is logged and the process is continued because the query has executed
-                log.error("Error occurred while closing the JDBC database connection.", e);
-            }
-        }
-    }
-
-    /**
-     * This method is used to close the ResultSet, Statement and Connection after getting data from the DB
-     * This is called if a "Statement" is used to fetch results from the DB
-     *
-     * @param resultSet  ResultSet returned from the database query
-     * @param statement  statement used in the database query
-     * @param connection DB connection used to get data from the database
-     */
-    public void closeDatabaseLinks(ResultSet resultSet, Statement statement,
-            Connection connection) {
-        if (resultSet != null) {
-            try {
-                resultSet.close();
-            } catch (SQLException e) {
-                //this is logged and the process is continued because the query has executed
-                log.error("Error occurred while closing the result set from JDBC database.", e);
-            }
-        }
-        if (statement != null) {
-            try {
-                statement.close();
-            } catch (SQLException e) {
-                //this is logged and the process is continued because the query has executed
-                log.error("Error occurred while closing the prepared statement from JDBC database.", e);
-            }
-        }
-        if (connection != null) {
-            try {
-                connection.close();
-            } catch (SQLException e) {
-                //this is logged and the process is continued because the query has executed
-                log.error("Error occurred while closing the JDBC database connection.", e);
-            }
-        }
     }
 
     /**
@@ -347,11 +254,11 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * This method gets the app usage data for invoking APIs
      *
      * @param tableName name of the required table in the database
-     * @param IdString concatenated Ids of applications
+     * @param idString concatenated Ids of applications
      * @return a collection containing the data related to App usage
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
-    private List<AppUsageDTO> getTopAppUsageData(String tableName, String IdString, String fromDate, String toDate,
+    private List<AppUsageDTO> getTopAppUsageData(String tableName, String idString, String fromDate, String toDate,
             int limit) throws APIMgtUsageQueryServiceClientException {
         List<AppUsageDTO> topAppUsageDataList = new ArrayList<AppUsageDTO>();
         try {
@@ -465,7 +372,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     private List<ApiTopUsersDTO> getTopApiUsers(String tableName, String apiName, String tenantDomain, String version,
             String fromDate, String toDate) throws APIMgtUsageQueryServiceClientException {
-        //ignoring sql injection for keyString since it construct locally and no public access
         List<ApiTopUsersDTO> apiTopUsersDataList = new ArrayList<ApiTopUsersDTO>();
         try {
             StringBuilder topApiUserQuery;
@@ -543,11 +449,11 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * This method gets the API faulty invocation data
      *
      * @param tableName name of the required table in the database
-     * @param IdString concatenated Ids of applications
+     * @param idString concatenated Ids of applications
      * @return a collection containing the data related to API faulty invocations
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
-    private List<FaultCountDTO> getFaultAppUsageData(String tableName, String IdString, String fromDate, String toDate,
+    private List<FaultCountDTO> getFaultAppUsageData(String tableName, String idString, String fromDate, String toDate,
             int limit) throws APIMgtUsageQueryServiceClientException {
         List<FaultCountDTO> falseAppUsageDataList = new ArrayList<FaultCountDTO>();
         try {
@@ -644,11 +550,11 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * This method gets the API usage data per API call type
      *
      * @param tableName name of the required table in the database
-     * @param IdString  concatenated Ids of applications
+     * @param idString  concatenated Ids of applications
      * @return a collection containing the data related to API call types
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
-    private List<AppCallTypeDTO> getAPICallTypeUsageData(String tableName, String IdString, String fromDate,
+    private List<AppCallTypeDTO> getAPICallTypeUsageData(String tableName, String idString, String fromDate,
             String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
         List<AppCallTypeDTO> appApiCallTypeList = new ArrayList<AppCallTypeDTO>();
         try {
@@ -753,11 +659,11 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * This method gets the API usage data per application
      *
      * @param tableName name of the required table in the database
-     * @param IdString concatenated Ids of applications
+     * @param idString concatenated Ids of applications
      * @return a collection containing the data related to per App API usage
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
-    private List<PerAppApiCountDTO> getPerAppAPIUsageData(String tableName, String IdString, String fromDate,
+    private List<PerAppApiCountDTO> getPerAppAPIUsageData(String tableName, String idString, String fromDate,
             String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
         List<PerAppApiCountDTO> perAppUsageDataList = new ArrayList<PerAppApiCountDTO>();
         try {
@@ -911,7 +817,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                     if (recordArray.size() == 4) {
                         apiName = (String) recordArray.get(0);
                         apiContext = (String) recordArray.get(1);
-                        apiVersion = (String) recordArray.get(2);//omitting apiCreator
+                        apiVersion = (String) recordArray.get(2);
                         requestCount = (Long) recordArray.get(3);
                         usageDataList.add(new APIUsage(apiName, apiContext, apiVersion, requestCount));
                     }
@@ -1076,33 +982,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     public List<APIResponseTimeDTO> getProviderAPIServiceTime(String providerName, String fromDate, String toDate,
             int limit) throws APIMgtUsageQueryServiceClientException {
 
-        Collection<APIResponseTime> responseTimes = getAPIResponseTimeData(
-                APIUsageStatisticsClientConstants.API_VERSION_SERVICE_TIME_SUMMARY);
-        List<API> providerAPIs = getAPIsByProvider(providerName);
-        DecimalFormat format = new DecimalFormat("#.##");
-        NumberFormat numberFormat = NumberFormat.getInstance(Locale.getDefault());
-        List<APIResponseTimeDTO> apiResponseTimeUsage = new ArrayList<APIResponseTimeDTO>();
-
-        for (APIResponseTime responseTime : responseTimes) {
-            for (API providerAPI : providerAPIs) {
-                if (providerAPI.getId().getApiName().equals(responseTime.getApiName()) &&
-                        providerAPI.getId().getVersion().equals(responseTime.getApiVersion()) &&
-                        providerAPI.getContext().equals(responseTime.getContext())) {
-                    APIResponseTimeDTO responseTimeDTO = new APIResponseTimeDTO();
-                    responseTimeDTO.setApiName(responseTime.getApiName());
-                    //calculate the average response time
-                    double avgTime = responseTime.getResponseTime() / responseTime.getResponseCount();
-                    //format the time
-                    try {
-                        responseTimeDTO.setServiceTime(numberFormat.parse(format.format(avgTime)).doubleValue());
-                    } catch (ParseException e) {
-                        handleException("Parse exception while formatting time");
-                    }
-                    apiResponseTimeUsage.add(responseTimeDTO);
-                }
-            }
-        }
-        return getResponseTimeTopEntries(apiResponseTimeUsage, limit);
+        //do nothing
+        return null;
     }
 
     /**
@@ -1114,72 +995,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     private Collection<APIResponseTime> getAPIResponseTimeData(String tableName)
             throws APIMgtUsageQueryServiceClientException {
-
-        Connection connection = null;
-        PreparedStatement statement = null;
-        ResultSet resultSet = null;
-        Collection<APIResponseTime> responseTimeData = new ArrayList<APIResponseTime>();
-        try {
-            connection = dataSource.getConnection();
-            String query;
-            if (connection.getMetaData().getDatabaseProductName().contains("DB2")) {
-                query = "SELECT TempTable.*, " + "SUM(" + APIUsageStatisticsClientConstants.TOTAL_RESPONSE_COUNT
-                        + ") AS totalTime ," + "SUM(weighted_service_time) AS totalWeightTime " + " FROM (SELECT "
-                        + APIUsageStatisticsClientConstants.API_VERSION + ","
-                        + APIUsageStatisticsClientConstants.API_PUBLISHER + ","
-                        + APIUsageStatisticsClientConstants.CONTEXT + ","
-                        + APIUsageStatisticsClientConstants.SERVICE_TIME + ","
-                        + APIUsageStatisticsClientConstants.TOTAL_RESPONSE_COUNT + ","
-                        + APIUsageStatisticsClientConstants.HOST_NAME + "," + APIUsageStatisticsClientConstants.YEAR
-                        + "," + APIUsageStatisticsClientConstants.MONTH + "," + APIUsageStatisticsClientConstants.DAY
-                        + "," + APIUsageStatisticsClientConstants.TIME + ", ("
-                        + APIUsageStatisticsClientConstants.SERVICE_TIME + " * "
-                        + APIUsageStatisticsClientConstants.TOTAL_RESPONSE_COUNT + ") AS weighted_service_time "
-                        + " FROM " + APIUsageStatisticsClientConstants.API_VERSION_SERVICE_TIME_SUMMARY + ") "
-                        + "TempTable " + " GROUP BY " + APIUsageStatisticsClientConstants.API_VERSION + ","
-                        + APIUsageStatisticsClientConstants.API_PUBLISHER + ","
-                        + APIUsageStatisticsClientConstants.CONTEXT + ","
-                        + APIUsageStatisticsClientConstants.SERVICE_TIME + ","
-                        + APIUsageStatisticsClientConstants.TOTAL_RESPONSE_COUNT + ","
-                        + APIUsageStatisticsClientConstants.HOST_NAME + "," + APIUsageStatisticsClientConstants.YEAR
-                        + "," + APIUsageStatisticsClientConstants.MONTH + "," + APIUsageStatisticsClientConstants.DAY
-                        + "," + APIUsageStatisticsClientConstants.TIME + ", weighted_service_time";
-            } else if (connection != null && connection.getMetaData().getDatabaseProductName()
-                    .equalsIgnoreCase("oracle")) {
-                query = "select " + APIUsageStatisticsClientConstants.API_VERSION + ','
-                        + APIUsageStatisticsClientConstants.CONTEXT + ',' + "SUM("
-                        + APIUsageStatisticsClientConstants.TOTAL_RESPONSE_COUNT + ") AS totalTime,SUM(CAST("
-                        + APIUsageStatisticsClientConstants.SERVICE_TIME + " as FLOAT) * CAST("
-                        + APIUsageStatisticsClientConstants.TOTAL_RESPONSE_COUNT + " as FLOAT)) AS totalWeightTime" +
-                        " from " + tableName + " GROUP BY " + APIUsageStatisticsClientConstants.CONTEXT + ','
-                        + APIUsageStatisticsClientConstants.API_VERSION;
-            } else {
-                query = "select " + APIUsageStatisticsClientConstants.API_VERSION + ','
-                        + APIUsageStatisticsClientConstants.CONTEXT + ',' + "SUM("
-                        + APIUsageStatisticsClientConstants.TOTAL_RESPONSE_COUNT + ") AS totalTime,SUM(CAST("
-                        + APIUsageStatisticsClientConstants.SERVICE_TIME + " as bigint) * CAST("
-                        + APIUsageStatisticsClientConstants.TOTAL_RESPONSE_COUNT + " as bigint)) AS totalWeightTime" +
-                        " from " + tableName + " GROUP BY " + APIUsageStatisticsClientConstants.CONTEXT + ','
-                        + APIUsageStatisticsClientConstants.API_VERSION;
-            }
-
-            statement = connection.prepareStatement(query);
-            resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                String apiVersion = resultSet.getString(APIUsageStatisticsClientConstants.API_VERSION).split("--")[1];
-                String apiName = apiVersion.split(":v")[0];
-                String version = apiVersion.split(":v")[1];
-                String context = resultSet.getString(APIUsageStatisticsClientConstants.CONTEXT);
-                long responseCount = resultSet.getLong("totalTime");
-                double responseTime = resultSet.getDouble("totalWeightTime") / responseCount;
-                responseTimeData.add(new APIResponseTime(apiName, version, context, responseTime, responseCount));
-            }
-        } catch (SQLException e) {
-            handleException("Error occurred while querying API response times from JDBC database", e);
-        } finally {
-            closeDatabaseLinks(resultSet, statement, connection);
-        }
-        return responseTimeData;
+        //do nothing
+        return null;
     }
 
     /**
@@ -1479,19 +1296,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @return list of APIResponseTimeDTO
      */
     private List<APIResponseTimeDTO> getResponseTimeTopEntries(List<APIResponseTimeDTO> usageData, int limit) {
-        Collections.sort(usageData, new Comparator<APIResponseTimeDTO>() {
-            public int compare(APIResponseTimeDTO o1, APIResponseTimeDTO o2) {
-                // Note that o2 appears before o1
-                // This is because we need to sort in the descending order
-                return (int) (o2.getServiceTime() - o1.getServiceTime());
-            }
-        });
-        if (usageData.size() > limit) {
-            while (usageData.size() > limit) {
-                usageData.remove(limit);
-            }
-        }
-        return usageData;
+        //do nothing
+        return null;
     }
 
     /**
@@ -1934,50 +1740,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     }
 
     /**
-     * This method find the existence of the table in given RDBMS
-     * @param tableName Name of the table
-     * @param connection Database connection
-     * @return return boolean to indicate it's existence
-     * @throws SQLException throws if database exception occurred
-     */
-    private boolean isTableExist(String tableName, Connection connection) throws SQLException {
-        final String checkTableSQLQuery = "SELECT DISTINCT 1 FROM " + tableName;
-        Statement statement = null;
-        ResultSet rs = null;
-        try {
-            statement = connection.createStatement();
-            rs = statement.executeQuery(checkTableSQLQuery);
-            return true;
-        } catch (SQLException e) {
-            // SQL error related to table not exist is db specific
-            // error is logged and continues.
-            log.error("Error occurred while checking existence of the table:" + tableName, e);
-            return false;
-        } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                    // this is logged and the process is continued because the
-                    // query has executed
-                    log.error("Error occurred while closing the result set from JDBC database.", e);
-                }
-            }
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    // this is logged and the process is continued because the
-                    // query has executed
-                    log.error("Error occurred while closing the prepared statement from JDBC database.", e);
-                }
-            }
-            // connection object will not be closed as it should be handled by
-            // the parent method.
-        }
-    }
-
-    /**
      * This method find the list of API published by particular Pulisher
      * @param providerId Provider username
      * @return list of APIs
@@ -2377,19 +2139,18 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             StringBuilder query = new StringBuilder(
                     "from " + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_AGG + "_SECONDS");
             if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
-                query.append(" on "
-                        + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='" + tenantDomain
-                        + "' AND " + APIUsageStatisticsClientConstants.API_CREATOR + "=='" + APIUtil.getUserNameWithTenantSuffix(provider) + "'");
+                query.append(" on " + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='" + tenantDomain
+                        + "' AND " + APIUsageStatisticsClientConstants.API_CREATOR + "=='" + APIUtil
+                        .getUserNameWithTenantSuffix(provider) + "'");
             }
             if (apiName != null) {
-                query.append(" on "
-                        + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='" + tenantDomain
+                query.append(" on " + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='" + tenantDomain
                         + "' AND " + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName + "'");
             }
-            query.append(" select " + APIUsageStatisticsClientConstants.APPLICATION_NAME + " order by " + APIUsageStatisticsClientConstants.APPLICATION_NAME + " DESC;");
-            JSONObject jsonObj = APIUtil
-                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_THROTTLED_OUT_SUMMARY_SIDDHI_APP,
-                            query.toString());
+            query.append(" select " + APIUsageStatisticsClientConstants.APPLICATION_NAME + " order by "
+                    + APIUsageStatisticsClientConstants.APPLICATION_NAME + " DESC;");
+            JSONObject jsonObj = APIUtil.executeQueryOnStreamProcessor(
+                    APIUsageStatisticsClientConstants.APIM_THROTTLED_OUT_SUMMARY_SIDDHI_APP, query.toString());
 
             String applicationName;
             if (jsonObj != null) {
@@ -2416,7 +2177,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     @Override
     public String getClientType() {
-        return APIUsageStatisticsClientConstants.RDBMS_STATISTICS_CLIENT_TYPE;
+        return APIUsageStatisticsClientConstants.REST_STATISTICS_CLIENT_TYPE;
     }
 
     @Override
@@ -2536,93 +2297,78 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     public List<Result<PerGeoLocationUsageCount>> getGeoLocationsByApi(String apiName, String version, String
             tenantDomain, String fromDate, String toDate, String drillDown) throws
             APIMgtUsageQueryServiceClientException {
-        if (dataSource == null) {
-            handleException("BAM data source hasn't been initialized. Ensure that the data source " +
-                    "is properly configured in the APIUsageTracker configuration.");
-        }
         List<Result<PerGeoLocationUsageCount>> result = new ArrayList<Result<PerGeoLocationUsageCount>>();
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        ResultSet rs = null;
         try {
-            boolean isVersionSet = false;
-            boolean isTenantSet = false;
-            boolean isDrilldownSet = false;
-            connection = dataSource.getConnection();
-            StringBuilder query = new StringBuilder("SELECT sum(total_request_count) as count,country ");
-            if (!"ALL".equals(drillDown)) {
-                query.append(",city " );
+            String tableName = APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG;
+            StringBuilder query;
+            if (fromDate == null || toDate == null) {
+                tableName = tableName + "_SECONDS";
             }
-            query.append("FROM ");
-            String tableName = APIUsageStatisticsClientConstants.API_REQUEST_GEO_LOCATION_SUMMARY;
-            query.append(tableName).append(" WHERE api= ?");
+            query = new StringBuilder("from " + tableName + " on(" + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName + "'");
             if (version != null && !"ALL".equals(version)) {
-                query.append(" AND ").append(APIUsageStatisticsClientConstants.VERSION).append("= ?");
-                isVersionSet = true;
+                query.append(" AND " + APIUsageStatisticsClientConstants.API_VERSION + "=='" + version + "'");
             }
             if (tenantDomain != null) {
-                query.append(" AND ").append(APIUsageStatisticsClientConstants.TENANT_DOMAIN).append("= ?");
-                isTenantSet = true;
+                query.append(" AND " + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='" + tenantDomain + "'");
+            }
+            if (!"ALL".equals(drillDown)) {
+                query.append(" AND " + APIUsageStatisticsClientConstants.COUNTRY + "=='" + drillDown + "'");
             }
             if (fromDate != null && toDate != null) {
-                try {
-                    query.append(" AND ").append(getDateToLong(fromDate)).append(" <= ").append("requestTime")
-                            .append(" AND ").append(" requestTime ").append("<=").append(getDateToLong(toDate));
-                } catch (ParseException e) {
-                    handleException("Error occurred while Error parsing date", e);
-                }
-            }
-            if (!"ALL".equals(drillDown)) {
-                query.append(" AND country = ?");
-                isDrilldownSet = true;
-            }
-            query.append(" GROUP BY country ");
-            if (!"ALL".equals(drillDown)) {
-                query.append(",city");
-            }
-            if (isTableExist(tableName, connection)) { //Tables exist
+                String granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;//default granularity
 
-                // dynamically set parameters to prepared statement according to what is appended before
-                int counter = 2;
-                preparedStatement = connection.prepareStatement(query.toString());
-                preparedStatement.setString(1, apiName);
-                if (isVersionSet) {
-                    preparedStatement.setString(counter, version);
-                    counter++;
-                }
-                if (isTenantSet) {
-                    preparedStatement.setString(counter, tenantDomain);
-                    counter++;
-                }
-                if (isDrilldownSet) {
-                    preparedStatement.setString(counter, drillDown);
-                }
+                Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
 
-                rs = preparedStatement.executeQuery();
-                while (rs.next()) {
-                    Result<PerGeoLocationUsageCount> result1 = new Result<PerGeoLocationUsageCount>();
-                    int count = rs.getInt("count");
-                    String country1 = rs.getString("country");
-                    List<String> facetValues = new ArrayList<String>();
-                    facetValues.add(country1);
-                    if (!"ALL".equals(drillDown)) {
-                        String city = rs.getString("city");
-                        facetValues.add(city);
-                    }
-                    PerGeoLocationUsageCount perGeoLocationUsageCount = new PerGeoLocationUsageCount(count,
-                            facetValues);
-                    result1.setValues(perGeoLocationUsageCount);
-                    result1.setTableName(tableName);
-                    result1.setTimestamp(RestClientUtil.longToDate(new Date().getTime()));
-                    result.add(result1);
+                if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
+                    granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
+                } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
+                    granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
                 }
+                query.append(") within '" + fromDate + "', '" + toDate + "' per '" + granularity + "' select sum("
+                        + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT);
             } else {
-                handleException("Statistics Table:" + tableName + " does not exist.");
+                query.append(") select sum(" + APIUsageStatisticsClientConstants.AGG_COUNT);
             }
-        } catch (SQLException e) {
-            handleException("Error occurred while querying from JDBC database", e);
-        } finally {
-            closeDatabaseLinks(rs, preparedStatement, connection);
+            query.append(") as count, " + APIUsageStatisticsClientConstants.COUNTRY);
+            if (!"ALL".equals(drillDown)) {
+                query.append(", " + APIUsageStatisticsClientConstants.CITY);
+            }
+            query.append(" group by " + APIUsageStatisticsClientConstants.COUNTRY);
+            if (!"ALL".equals(drillDown)) {
+                query.append(", " + APIUsageStatisticsClientConstants.CITY);
+            }
+            query.append(";");
+            JSONObject jsonObj = APIUtil
+                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.API_ACCESS_SUMMARY_SIDDHI_APP,
+                            query.toString());
+            long count;
+            String country;
+            String city;
+            if (jsonObj != null) {
+                JSONArray jArray = (JSONArray) jsonObj.get(APIUsageStatisticsClientConstants.RECORDS_DELIMITER);
+                for (Object record : jArray) {
+                    JSONArray recordArray = (JSONArray) record;
+                    if (recordArray.size() >= 2) {
+                        Result<PerGeoLocationUsageCount> result1 = new Result<PerGeoLocationUsageCount>();
+                        count = (Long) recordArray.get(0);
+                        country = (String) recordArray.get(1);
+                        List<String> facetValues = new ArrayList<String>();
+                        facetValues.add(country);
+                        if (!"ALL".equals(drillDown)) {
+                            city = (String) recordArray.get(2);
+                            facetValues.add(city);
+                        }
+                        PerGeoLocationUsageCount perGeoLocationUsageCount = new PerGeoLocationUsageCount((int) count,
+                                facetValues);
+                        result1.setValues(perGeoLocationUsageCount);
+                        result1.setTableName(tableName);
+                        result1.setTimestamp(RestClientUtil.longToDate(new Date().getTime()));
+                        result.add(result1);
+                    }
+                }
+            }
+        } catch (APIManagementException e) {
+            handleException("Error occurred while querying from Stream Processor ", e);
         }
         return result;
 
