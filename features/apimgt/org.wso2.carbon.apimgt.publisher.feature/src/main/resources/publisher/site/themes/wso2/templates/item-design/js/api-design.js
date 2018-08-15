@@ -1136,7 +1136,19 @@ APIDesigner.prototype.render_resource = function(container){
     };
 
 APIDesigner.prototype.query = function(path){
-    return JSONPath(path, this.api_doc);
+    var operation = JSONPath(path, this.api_doc);
+    // Check for $ref element in all available parameters and resolve to actual definition else return inline definition
+    if (operation[0].parameters) {
+        operation[0].parameters = operation[0].parameters.map(function (param) {
+                if (param["$ref"] !== undefined) {
+                    return this.query(param["$ref"].replace("#","$").replace(/\//g,"."), this.api_doc)[0];
+                } else {
+                    return param;
+                }
+            }.bind(this));
+    }
+
+    return operation;
 }
 
 APIDesigner.prototype.add_resource = function(resource, path){
