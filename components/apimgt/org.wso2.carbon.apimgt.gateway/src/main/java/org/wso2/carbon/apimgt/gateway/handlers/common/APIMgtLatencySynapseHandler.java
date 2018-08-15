@@ -1,6 +1,5 @@
 package org.wso2.carbon.apimgt.gateway.handlers.common;
 
-import io.opentracing.Span;
 import io.opentracing.Tracer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -10,6 +9,8 @@ import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.tracing.OpenTracer;
 import org.wso2.carbon.apimgt.tracing.TracingService;
+import org.wso2.carbon.apimgt.tracing.TracingSpan;
+
 import java.util.UUID;
 
 public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
@@ -33,7 +34,7 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 
     @Override
     public boolean handleRequestInFlow(MessageContext messageContext) {
-        Span responseLatencySpan = OpenTracer.startSpan("ResponseLatency", null, tracer);
+        TracingSpan responseLatencySpan = OpenTracer.startSpan("ResponseLatency", null, tracer);
         messageContext.setProperty("ResponseLatency", responseLatencySpan);
         messageContext.setProperty("Tracer",tracer);
 
@@ -51,8 +52,8 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
     @Override
     public boolean handleRequestOutFlow(MessageContext messageContext) {
 
-        Span parentSpan = (Span)messageContext.getProperty("ResponseLatency");
-        Span backendLatencySpan = OpenTracer.startSpan("BackendLatency", parentSpan, tracer);
+        TracingSpan parentSpan = (TracingSpan) messageContext.getProperty("ResponseLatency");
+        TracingSpan backendLatencySpan = OpenTracer.startSpan("BackendLatency", parentSpan, tracer);
         messageContext.setProperty("BackendLatency", backendLatencySpan);
 
         handleRequestOutFlowTime = System.currentTimeMillis();
@@ -70,7 +71,7 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
             messageContext.setProperty(APIMgtGatewayConstants.HANDLE_RESPONSE_INFLOW_TIME, Long.toString(handleResponseInFlowTime));
         }
 
-        Span backendLatencySpan = (Span) messageContext.getProperty("BackendLatency");
+        TracingSpan backendLatencySpan = (TracingSpan) messageContext.getProperty("BackendLatency");
         OpenTracer.finishSpan(backendLatencySpan);
         return true;
     }
@@ -90,7 +91,7 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 
         log.info(messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID) + " Backend Latency : " + backendLatency + " - Response Latency : " + responseLatency);
 
-        Span responseLatencySpan = (Span) messageContext.getProperty("ResponseLatency");
+        TracingSpan responseLatencySpan = (TracingSpan) messageContext.getProperty("ResponseLatency");
         OpenTracer.finishSpan(responseLatencySpan);
 
         return true;
