@@ -48,7 +48,7 @@ public class ReportGenUtil {
         InputStream pdfInputStream = null;
         // get data
         String value = "0"; //default 
-        String appName = "API_ACCESS_SUMMARY";
+        String appName = "APIM_ACCESS_SUMMARY";
         String query = "from ApiUserPerAppAgg on gatewayType=='MICRO' within '" + date 
                 + "-** **:**:**' per 'months' SELECT sum(totalRequestCount) as sum;";
         
