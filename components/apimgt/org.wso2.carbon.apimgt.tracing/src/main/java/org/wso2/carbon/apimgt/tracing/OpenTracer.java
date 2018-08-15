@@ -10,7 +10,7 @@ public abstract class OpenTracer {
 
     public abstract String getName();
 
-    public Span startSpan(String spanName, Span parentSpan, Tracer tracer) {
+    public static Span startSpan(String spanName, Span parentSpan, Tracer tracer) {
 
         if (parentSpan == null) {
             Span span = tracer.buildSpan(spanName).start();
@@ -22,7 +22,7 @@ public abstract class OpenTracer {
         }
     }
 
-    public void finishSpan(Span span) {
+    public static void finishSpan(Span span) {
         span.finish();
     }
 

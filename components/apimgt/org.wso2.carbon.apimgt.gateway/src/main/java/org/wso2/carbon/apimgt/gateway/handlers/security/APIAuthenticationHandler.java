@@ -80,8 +80,6 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
     private String authorizationHeader;
     private boolean removeOAuthHeadersFromOutMessage = true;
-    TracingService tracingService;
-    private OpenTracer openTracer;
 
     public void init(SynapseEnvironment synapseEnvironment) {
         this.synapseEnvironment = synapseEnvironment;
@@ -149,9 +147,9 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             justification = "Error is sent through payload")
     public boolean handleRequest(MessageContext messageContext) {
 
-        Span responseLatencySpan = (Span) messageContext.getProperty("ResponseLatencySpan");
+        Span responseLatencySpan = (Span) messageContext.getProperty("ResponseLatency");
         Tracer tracer = (Tracer) messageContext.getProperty("Tracer");
-        Span keySpan = openTracer.startSpan("KeyValidationLatency", responseLatencySpan, tracer);
+        Span keySpan = OpenTracer.startSpan("KeyValidationLatency", responseLatencySpan, tracer);
         messageContext.setProperty("KeySpan", keySpan);
 
         Timer.Context context = startMetricTimer();
@@ -200,7 +198,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             handleAuthFailure(messageContext, e);
         } finally {
             Span span = (Span) messageContext.getProperty("KeySpan");
-            openTracer.finishSpan(span);
+            OpenTracer.finishSpan(span);
             messageContext.setProperty(APIMgtGatewayConstants.SECURITY_LATENCY,
                     TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime));
             stopMetricTimer(context);

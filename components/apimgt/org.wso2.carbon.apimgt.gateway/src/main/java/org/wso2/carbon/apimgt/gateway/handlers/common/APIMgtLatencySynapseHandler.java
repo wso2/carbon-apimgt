@@ -23,7 +23,7 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
     private String requestId;
     private TracingService tracingService;
     private Tracer tracer;
-    private OpenTracer openTracer;
+
 
     public APIMgtLatencySynapseHandler() {
         ServiceReferenceHolder serviceReferenceHolder = ServiceReferenceHolder.getInstance();
@@ -33,7 +33,7 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 
     @Override
     public boolean handleRequestInFlow(MessageContext messageContext) {
-        Span responseLatencySpan = openTracer.startSpan("ResponseLatency", null, tracer);
+        Span responseLatencySpan = OpenTracer.startSpan("ResponseLatency", null, tracer);
         messageContext.setProperty("ResponseLatency", responseLatencySpan);
         messageContext.setProperty("Tracer",tracer);
 
@@ -52,7 +52,7 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
     public boolean handleRequestOutFlow(MessageContext messageContext) {
 
         Span parentSpan = (Span)messageContext.getProperty("ResponseLatency");
-        Span backendLatencySpan = openTracer.startSpan("BackendLatency", parentSpan, tracer);
+        Span backendLatencySpan = OpenTracer.startSpan("BackendLatency", parentSpan, tracer);
         messageContext.setProperty("BackendLatency", backendLatencySpan);
 
         handleRequestOutFlowTime = System.currentTimeMillis();
@@ -71,7 +71,7 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
         }
 
         Span backendLatencySpan = (Span) messageContext.getProperty("BackendLatency");
-        openTracer.finishSpan(backendLatencySpan);
+        OpenTracer.finishSpan(backendLatencySpan);
         return true;
     }
 
@@ -91,7 +91,7 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
         log.info(messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID) + " Backend Latency : " + backendLatency + " - Response Latency : " + responseLatency);
 
         Span responseLatencySpan = (Span) messageContext.getProperty("ResponseLatency");
-        openTracer.finishSpan(responseLatencySpan);
+        OpenTracer.finishSpan(responseLatencySpan);
 
         return true;
     }

@@ -48,22 +48,6 @@ public class JaegerTracerImpl extends OpenTracer {
         return tracer;
     }
 
-    public Span startSpan(String spanName, Span parentSpan, Tracer tracer) {
-
-        if (parentSpan == null) {
-            Span span = tracer.buildSpan(spanName).start();
-            return span;
-
-        } else {
-            Span childSpan = tracer.buildSpan(spanName).asChildOf(parentSpan).start();
-            return childSpan;
-        }
-    }
-
-    public void finishSpan(Span span) {
-        span.finish();
-    }
-
     @Override
     public String getName() {
         return NAME;
