@@ -865,7 +865,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         for (int i = 1; i < subscriberApps.size(); i++) {
             concatenatedKeys.append(",'").append(subscriberApps.get(i)).append("'");
         }
-        return getPerAppAPIUsageData(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY, concatenatedKeys.toString(),
+        return getPerAppAPIUsageData(APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG, concatenatedKeys.toString(),
                 fromDate, toDate, limit);
     }
 
@@ -879,94 +879,64 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     private List<PerAppApiCountDTO> getPerAppAPIUsageData(String tableName, String keyString, String fromDate,
             String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
-
-        Connection connection = null;
-        PreparedStatement statement = null;
-        ResultSet resultSet = null;
         List<PerAppApiCountDTO> perAppUsageDataList = new ArrayList<PerAppApiCountDTO>();
         try {
-            connection = dataSource.getConnection();
-            String query;
-            //check whether table exist first
-            if (isTableExist(tableName, connection)) {
-                //ignoring sql injection for keyString since it construct locally and no public access
-                if (connection.getMetaData().getDatabaseProductName().contains("DB2")) {
-                    query = "SELECT " + APIUsageStatisticsClientConstants.API + ","
-                            + APIUsageStatisticsClientConstants.API_VERSION + ","
-                            + APIUsageStatisticsClientConstants.VERSION + ","
-                            + APIUsageStatisticsClientConstants.API_PUBLISHER + ","
-                            + APIUsageStatisticsClientConstants.CONSUMERKEY + ","
-                            + APIUsageStatisticsClientConstants.USER_ID + ","
-                            + APIUsageStatisticsClientConstants.CONTEXT + ","
-                            + APIUsageStatisticsClientConstants.MAX_REQUEST_TIME + ","
-                            + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ","
-                            + APIUsageStatisticsClientConstants.HOST_NAME + ","
-                            + APIUsageStatisticsClientConstants.YEAR + "," + APIUsageStatisticsClientConstants.MONTH + ","
-                            + APIUsageStatisticsClientConstants.DAY + ","
-                            + APIUsageStatisticsClientConstants.TIME + ",SUM("
-                            + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS total_calls " + " FROM "
-                            + APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY + " WHERE "
-                            + APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ") AND "
-                            + APIUsageStatisticsClientConstants.TIME + " BETWEEN ? AND ?  GROUP BY "
-                            + APIUsageStatisticsClientConstants.API + ","
-                            + APIUsageStatisticsClientConstants.API_VERSION + ","
-                            + APIUsageStatisticsClientConstants.VERSION + ","
-                            + APIUsageStatisticsClientConstants.API_PUBLISHER + ","
-                            + APIUsageStatisticsClientConstants.CONSUMERKEY + ","
-                            + APIUsageStatisticsClientConstants.USER_ID + ","
-                            + APIUsageStatisticsClientConstants.CONTEXT + ","
-                            + APIUsageStatisticsClientConstants.MAX_REQUEST_TIME + ","
-                            + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ","
-                            + APIUsageStatisticsClientConstants.HOST_NAME + ","
-                            + APIUsageStatisticsClientConstants.YEAR + "," + APIUsageStatisticsClientConstants.MONTH + ","
-                            + APIUsageStatisticsClientConstants.DAY + "," + APIUsageStatisticsClientConstants.TIME;
-                } else {
-                    query = "SELECT " + APIUsageStatisticsClientConstants.API + ","
-                            + APIUsageStatisticsClientConstants.API_PUBLISHER + ","
-                            + APIUsageStatisticsClientConstants.CONSUMERKEY + "," + " SUM("
-                            + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS total_calls " + " FROM "
-                            + APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY + " WHERE "
-                            + APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ")  AND "
-                            + APIUsageStatisticsClientConstants.TIME + " BETWEEN ? AND ?  GROUP BY "
-                            + APIUsageStatisticsClientConstants.API + ","
-                            + APIUsageStatisticsClientConstants.API_PUBLISHER + ","
-                            + APIUsageStatisticsClientConstants.CONSUMERKEY;
-                }
+            String startDate = fromDate + ":00";
+            String endDate = toDate + ":00";
+            String granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;//default granularity
+            Map<String, Integer> durationBreakdown = this.getDurationBreakdown(startDate, endDate);
 
-                statement = connection.prepareStatement(query);
-                int index = 1;
-                statement.setEscapeProcessing(true);
-                statement.setString(index++, fromDate);
-                statement.setString(index, toDate);
-                resultSet = statement.executeQuery();
-                PerAppApiCountDTO apiUsageDTO;
-                while (resultSet.next()) {
-                    String apiName = resultSet.getString(APIUsageStatisticsClientConstants.API);
-                    String publisher = resultSet.getString(APIUsageStatisticsClientConstants.API_PUBLISHER);
-                    apiName = apiName + " (" + publisher + ")";
-                    long requestCount = resultSet.getLong("total_calls");
-                    String consumerKey = resultSet.getString(APIUsageStatisticsClientConstants.CONSUMERKEY);
-                    String appName = subscriberAppsMap.get(consumerKey);
-                    boolean found = false;
-                    for (PerAppApiCountDTO dto : perAppUsageDataList) {
-                        if (dto.getAppName().equals(appName)) {
-                            dto.addToApiCountArray(apiName, requestCount);
-                            found = true;
-                            break;
+            if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
+                granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
+            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
+                granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
+            }
+            String query = "from " + tableName + " within '" + startDate + "', '" + endDate + "' per '" + granularity
+                    + "' select " + APIUsageStatisticsClientConstants.API_NAME + ", "
+                    + APIUsageStatisticsClientConstants.API_CREATOR + ", "
+                    + APIUsageStatisticsClientConstants.APPLICATION_ID + ", sum("
+                    + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") as total_calls group by "
+                    + APIUsageStatisticsClientConstants.API_NAME + ", " + APIUsageStatisticsClientConstants.API_CREATOR
+                    + ", " + APIUsageStatisticsClientConstants.APPLICATION_ID + ";";
+            JSONObject jsonObj = APIUtil
+                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.API_ACCESS_SUMMARY_SIDDHI_APP,
+                            query);
+            String apiName;
+            String apiCreator;
+            String applicationId;
+            long requestCount;
+            PerAppApiCountDTO apiUsageDTO;
+            if (jsonObj != null) {
+                JSONArray jArray = (JSONArray) jsonObj.get(APIUsageStatisticsClientConstants.RECORDS_DELIMITER);
+                for (Object record : jArray) {
+                    JSONArray recordArray = (JSONArray) record;
+                    if (recordArray.size() == 4) {
+                        apiName = (String) recordArray.get(0);
+                        apiCreator = (String) recordArray.get(1);
+                        apiName = apiName + " (" + apiCreator + ")";
+                        applicationId = (String) recordArray.get(2);
+                        requestCount = (Long) recordArray.get(3);
+                        //String appName = subscriberAppsMap.get(applicationId);
+                        String appName = "DefaultApplication";
+                        boolean found = false;
+                        for (PerAppApiCountDTO dto : perAppUsageDataList) {
+                            if (dto.getAppName().equals(appName)) {
+                                dto.addToApiCountArray(apiName, requestCount);
+                                found = true;
+                                break;
+                            }
                         }
-                    }
-                    if (!found) {
-                        apiUsageDTO = new PerAppApiCountDTO();
-                        apiUsageDTO.setAppName(appName);
-                        apiUsageDTO.addToApiCountArray(apiName, requestCount);
-                        perAppUsageDataList.add(apiUsageDTO);
+                        if (!found) {
+                            apiUsageDTO = new PerAppApiCountDTO();
+                            apiUsageDTO.setAppName(appName);
+                            apiUsageDTO.addToApiCountArray(apiName, requestCount);
+                            perAppUsageDataList.add(apiUsageDTO);
+                        }
                     }
                 }
             }
-        } catch (SQLException e) {
-            handleException("Error occurred while querying per App usage data from JDBC database", e);
-        } finally {
-            closeDatabaseLinks(resultSet, statement, connection);
+        } catch (APIManagementException e) {
+            handleException("Error occurred while querying per App usage data from Stream Processor", e);
         }
         return perAppUsageDataList;
     }

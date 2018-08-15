@@ -215,7 +215,6 @@ public final class APIUsageStatisticsClientConstants {
     public static final String AGG_SUM_RESPONSE_MEDIATION_LATENCY = "AGG_SUM_responseMediationLatency";
     public static final String AGG_SUM_BACKEND_LATENCY = "AGG_SUM_backendLatency";
     public static final String AGG_SUM_OTHER_LATENCY = "AGG_SUM_otherLatency";
-
     public static final String RESPONSE_TIME = "responseTime";
     public static final String SERVICE_TIME = "serviceTime";
     public static final String BACKEND_TIME = "backendTime";
@@ -225,6 +224,7 @@ public final class APIUsageStatisticsClientConstants {
     public static final String RESPONSE_MEDIATION_LATENCY = "responseMediationLatency";
     public static final String BACKEND_LATENCY = "backendLatency";
     public static final String OTHER_LATENCY = "otherLatency";
+    public static final String APPLICATION_ID = "applicationId";
 
 
     //------Siddhi app names----
