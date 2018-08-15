@@ -288,7 +288,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @param subscriberName subscriber name
      * @param groupId        group id of the subscriber
      * @param fromDate       starting date
-     * @param toDate         ending data
+     * @param toDate         ending date
      * @param limit          limit of the result
      * @return list of fault count data
      * @throws APIMgtUsageQueryServiceClientException throws when error occurred
@@ -297,20 +297,20 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     public List<FaultCountDTO> getPerAppAPIFaultCount(String subscriberName, String groupId, String fromDate,
             String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
 
-        List<String> subscriberApps = getAppsBySubscriber(subscriberName, groupId);
-        StringBuilder concatenatedKeySetString = new StringBuilder();
+        List<String> subscriberApps = getAppsAndIdsBySubscriber(subscriberName, groupId);
+        StringBuilder concatenatedIdString = new StringBuilder();
 
         int size = subscriberApps.size();
         if (size > 0) {
-            concatenatedKeySetString.append("'").append(subscriberApps.get(0)).append("'");
+            concatenatedIdString.append("'").append(subscriberApps.get(0)).append("'");
         } else {
             return Collections.emptyList();
         }
         for (int i = 1; i < subscriberApps.size(); i++) {
-            concatenatedKeySetString.append(",'").append(subscriberApps.get(i)).append("'");
+            concatenatedIdString.append(",'").append(subscriberApps.get(i)).append("'");
         }
         return getFaultAppUsageData(APIUsageStatisticsClientConstants.API_FAULTY_INVOCATION_AGG,
-                concatenatedKeySetString.toString(), fromDate, toDate, limit);
+                concatenatedIdString.toString(), fromDate, toDate, limit);
     }
 
     /**
@@ -319,7 +319,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @param subscriberName subscriber name
      * @param groupId        group id of the subscriber
      * @param fromDate       starting date
-     * @param toDate         ending data
+     * @param toDate         ending date
      * @param limit          limit of the result
      * @return list of AppUsageDTO
      * @throws APIMgtUsageQueryServiceClientException
@@ -328,30 +328,30 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     public List<AppUsageDTO> getTopAppUsers(String subscriberName, String groupId, String fromDate, String toDate,
             int limit) throws APIMgtUsageQueryServiceClientException {
 
-        List<String> subscriberApps = getAppsBySubscriber(subscriberName, groupId);
-        StringBuilder concatenatedKeys = new StringBuilder();
+        List<String> subscriberApps = getAppsAndIdsBySubscriber(subscriberName, groupId);
+        StringBuilder concatenatedIdString = new StringBuilder();
         int size = subscriberApps.size();
         if (size > 0) {
-            concatenatedKeys.append("'").append(subscriberApps.get(0)).append("'");
+            concatenatedIdString.append("'").append(subscriberApps.get(0)).append("'");
         } else {
             return Collections.emptyList();
         }
         for (int i = 1; i < subscriberApps.size(); i++) {
-            concatenatedKeys.append(",'").append(subscriberApps.get(i)).append("'");
+            concatenatedIdString.append(",'").append(subscriberApps.get(i)).append("'");
         }
-        return getTopAppUsageData(APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG, concatenatedKeys.toString(),
-                fromDate, toDate, limit);
+        return getTopAppUsageData(APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG,
+                concatenatedIdString.toString(), fromDate, toDate, limit);
     }
 
     /**
      * This method gets the app usage data for invoking APIs
      *
      * @param tableName name of the required table in the database
-     * @param keyString concatenated key set of applications
+     * @param IdString concatenated Ids of applications
      * @return a collection containing the data related to App usage
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
-    private List<AppUsageDTO> getTopAppUsageData(String tableName, String keyString, String fromDate, String toDate,
+    private List<AppUsageDTO> getTopAppUsageData(String tableName, String IdString, String fromDate, String toDate,
             int limit) throws APIMgtUsageQueryServiceClientException {
         List<AppUsageDTO> topAppUsageDataList = new ArrayList<AppUsageDTO>();
         try {
@@ -393,8 +393,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                         applicationId = (String) recordArray.get(0);
                         username = (String) recordArray.get(1);
                         requestCount = (Long) recordArray.get(2);
-                        //String appName = subscriberAppsMap.get(applicationId);
-                        String appName = "DefaultApplication";
+                        String appName = subscriberAppsMap.get(applicationId);
                         boolean found = false;
                         for (AppUsageDTO dto : topAppUsageDataList) {
                             if (dto.getAppName().equals(appName)) {
@@ -544,11 +543,11 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * This method gets the API faulty invocation data
      *
      * @param tableName name of the required table in the database
-     * @param keyString concatenated key set of applications
+     * @param IdString concatenated Ids of applications
      * @return a collection containing the data related to API faulty invocations
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
-    private List<FaultCountDTO> getFaultAppUsageData(String tableName, String keyString, String fromDate, String toDate,
+    private List<FaultCountDTO> getFaultAppUsageData(String tableName, String IdString, String fromDate, String toDate,
             int limit) throws APIMgtUsageQueryServiceClientException {
         List<FaultCountDTO> falseAppUsageDataList = new ArrayList<FaultCountDTO>();
         try {
@@ -588,8 +587,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                         apiCreator = (String) recordArray.get(2);
                         apiName = apiName + " (" + apiCreator + ")";
                         faultCount = (Long) recordArray.get(3);
-                        //String appName = subscriberAppsMap.get(applicationId);
-                        String appName = "DefaultApplication";
+                        String appName = subscriberAppsMap.get(applicationId);
                         boolean found = false;
                         for (FaultCountDTO dto : falseAppUsageDataList) {
                             if (dto.getAppName().equals(appName)) {
@@ -614,11 +612,11 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     }
 
     /**
-     * This method retrieve and return the usage parth invocations per applications
+     * This method retrieve and return the usage path invocations per applications
      * @param subscriberName subscriber name
      * @param groupId        group id of the subscriber
      * @param fromDate       starting date
-     * @param toDate         ending data
+     * @param toDate         ending date
      * @param limit          limit of the result
      * @return list if AppCallTypeDTO
      * @throws APIMgtUsageQueryServiceClientException throws if error occurred
@@ -627,30 +625,30 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     public List<AppCallTypeDTO> getAppApiCallType(String subscriberName, String groupId, String fromDate, String toDate,
             int limit) throws APIMgtUsageQueryServiceClientException {
 
-        List<String> subscriberApps = getAppsBySubscriber(subscriberName, groupId);
-        StringBuilder concatenatedKeys = new StringBuilder();
+        List<String> subscriberApps = getAppsAndIdsBySubscriber(subscriberName, groupId);
+        StringBuilder concatenatedIds = new StringBuilder();
         int size = subscriberApps.size();
         if (size > 0) {
-            concatenatedKeys.append("'").append(subscriberApps.get(0)).append("'");
+            concatenatedIds.append("'").append(subscriberApps.get(0)).append("'");
         } else {
             return Collections.emptyList();
         }
         for (int i = 1; i < subscriberApps.size(); i++) {
-            concatenatedKeys.append(",'").append(subscriberApps.get(i)).append("'");
+            concatenatedIds.append(",'").append(subscriberApps.get(i)).append("'");
         }
         return getAPICallTypeUsageData(APIUsageStatisticsClientConstants.API_RESOURCE_PATH_PER_APP_AGG,
-                concatenatedKeys.toString(), fromDate, toDate, limit);
+                concatenatedIds.toString(), fromDate, toDate, limit);
     }
 
     /**
      * This method gets the API usage data per API call type
      *
      * @param tableName name of the required table in the database
-     * @param keyString concatenated key set of applications
+     * @param IdString  concatenated Ids of applications
      * @return a collection containing the data related to API call types
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
-    private List<AppCallTypeDTO> getAPICallTypeUsageData(String tableName, String keyString, String fromDate,
+    private List<AppCallTypeDTO> getAPICallTypeUsageData(String tableName, String IdString, String fromDate,
             String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
         List<AppCallTypeDTO> appApiCallTypeList = new ArrayList<AppCallTypeDTO>();
         try {
@@ -665,19 +663,16 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
                 granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
             }
-            String query =
-                    "from " + APIUsageStatisticsClientConstants.API_RESOURCE_PATH_PER_APP_AGG + " within '" + startDate
-                            + "', '" + endDate + "' per '" + granularity + "' select "
-                            + APIUsageStatisticsClientConstants.API_NAME + ", "
-                            + APIUsageStatisticsClientConstants.API_CREATOR + ", "
-                            + APIUsageStatisticsClientConstants.API_METHOD + ", "
-                            + APIUsageStatisticsClientConstants.APPLICATION_ID + ", "
-                            + APIUsageStatisticsClientConstants.API_RESOURCE_TEMPLATE + " group by "
-                            + APIUsageStatisticsClientConstants.APPLICATION_ID + ", "
-                            + APIUsageStatisticsClientConstants.API_NAME + ", "
-                            + APIUsageStatisticsClientConstants.API_CREATOR + ", "
-                            + APIUsageStatisticsClientConstants.API_METHOD + ", "
-                            + APIUsageStatisticsClientConstants.API_RESOURCE_TEMPLATE + ";";
+            String query = "from " + tableName + " within '" + startDate + "', '" + endDate + "' per '" + granularity
+                    + "' select " + APIUsageStatisticsClientConstants.API_NAME + ", "
+                    + APIUsageStatisticsClientConstants.API_CREATOR + ", "
+                    + APIUsageStatisticsClientConstants.API_METHOD + ", "
+                    + APIUsageStatisticsClientConstants.APPLICATION_ID + ", "
+                    + APIUsageStatisticsClientConstants.API_RESOURCE_TEMPLATE + " group by "
+                    + APIUsageStatisticsClientConstants.APPLICATION_ID + ", "
+                    + APIUsageStatisticsClientConstants.API_NAME + ", " + APIUsageStatisticsClientConstants.API_CREATOR
+                    + ", " + APIUsageStatisticsClientConstants.API_METHOD + ", "
+                    + APIUsageStatisticsClientConstants.API_RESOURCE_TEMPLATE + ";";
             JSONObject jsonObj = APIUtil
                     .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.API_ACCESS_SUMMARY_SIDDHI_APP,
                             query);
@@ -700,8 +695,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                         apiResourceTemplate = (String) recordArray.get(4);
                         List<String> callTypeList = new ArrayList<String>();
                         callTypeList.add(apiResourceTemplate + " (" + callType + ")");
-                        //String appName = subscriberAppsMap.get(applicationId);
-                        String appName = "DefaultApplication";
+                        String appName = subscriberAppsMap.get(applicationId);
                         boolean found = false;
                         for (AppCallTypeDTO dto : appApiCallTypeList) {
                             if (dto.getAppName().equals(appName)) {
@@ -727,6 +721,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
     /**
      * this method find the API Usage per Application data
+     *
      * @param subscriberName subscriber name
      * @param groupId        group id of the subscriber
      * @param fromDate       starting date
@@ -739,18 +734,18 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     public List<PerAppApiCountDTO> perAppPerAPIUsage(String subscriberName, String groupId, String fromDate,
             String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
 
-        List<String> subscriberApps = getAppsBySubscriber(subscriberName, groupId);
-        StringBuilder concatenatedKeys = new StringBuilder();
+        List<String> subscriberApps = getAppsAndIdsBySubscriber(subscriberName, groupId);
+        StringBuilder concatenatedIds = new StringBuilder();
         int size = subscriberApps.size();
         if (size > 0) {
-            concatenatedKeys.append("'").append(subscriberApps.get(0)).append("'");
+            concatenatedIds.append("'").append(subscriberApps.get(0)).append("'");
         } else {
             return Collections.emptyList();
         }
         for (int i = 1; i < subscriberApps.size(); i++) {
-            concatenatedKeys.append(",'").append(subscriberApps.get(i)).append("'");
+            concatenatedIds.append(",'").append(subscriberApps.get(i)).append("'");
         }
-        return getPerAppAPIUsageData(APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG, concatenatedKeys.toString(),
+        return getPerAppAPIUsageData(APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG, concatenatedIds.toString(),
                 fromDate, toDate, limit);
     }
 
@@ -758,11 +753,11 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * This method gets the API usage data per application
      *
      * @param tableName name of the required table in the database
-     * @param keyString concatenated key set of applications
+     * @param IdString concatenated Ids of applications
      * @return a collection containing the data related to per App API usage
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
-    private List<PerAppApiCountDTO> getPerAppAPIUsageData(String tableName, String keyString, String fromDate,
+    private List<PerAppApiCountDTO> getPerAppAPIUsageData(String tableName, String IdString, String fromDate,
             String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
         List<PerAppApiCountDTO> perAppUsageDataList = new ArrayList<PerAppApiCountDTO>();
         try {
@@ -801,8 +796,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                         apiName = apiName + " (" + apiCreator + ")";
                         applicationId = (String) recordArray.get(2);
                         requestCount = (Long) recordArray.get(3);
-                        //String appName = subscriberAppsMap.get(applicationId);
-                        String appName = "DefaultApplication";
+                        String appName = subscriberAppsMap.get(applicationId);
                         boolean found = false;
                         for (PerAppApiCountDTO dto : perAppUsageDataList) {
                             if (dto.getAppName().equals(appName)) {
