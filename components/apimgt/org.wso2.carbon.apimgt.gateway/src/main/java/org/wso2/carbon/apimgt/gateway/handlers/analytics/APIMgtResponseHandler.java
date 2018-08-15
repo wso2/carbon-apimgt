@@ -141,7 +141,7 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
                 creator = APIUtil.getAPIProviderFromRESTAPI(apiVersion, tenantDomain);
             }
             //get the version
-            apiVersion = apiVersion.split(":")[1];
+            apiVersion = apiVersion.split(":v")[1];
             String url = (String) mc.getProperty(RESTConstants.REST_URL_PREFIX);
 
             URL apiurl = new URL(url);

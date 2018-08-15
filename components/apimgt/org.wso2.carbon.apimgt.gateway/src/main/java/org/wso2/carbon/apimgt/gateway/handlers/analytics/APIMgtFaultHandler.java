@@ -56,7 +56,7 @@ public class APIMgtFaultHandler extends APIMgtCommonExecutionPublisher {
             faultPublisherDTO.setApiContext((String) messageContext.getProperty(
                     APIMgtGatewayConstants.CONTEXT));
             faultPublisherDTO.setApiVersion(((String) messageContext.getProperty(
-                    APIMgtGatewayConstants.API_VERSION)).split(":")[1]);
+                    APIMgtGatewayConstants.API_VERSION)).split(":v")[1]);
             faultPublisherDTO.setApiName((String) messageContext.getProperty(
                     APIMgtGatewayConstants.API));
             faultPublisherDTO.setApiResourcePath((String) messageContext.getProperty(
