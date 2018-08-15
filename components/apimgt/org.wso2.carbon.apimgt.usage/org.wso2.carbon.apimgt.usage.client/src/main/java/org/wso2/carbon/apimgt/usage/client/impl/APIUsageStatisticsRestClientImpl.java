@@ -634,7 +634,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         for (int i = 1; i < subscriberApps.size(); i++) {
             concatenatedKeys.append(",'").append(subscriberApps.get(i)).append("'");
         }
-        return getAPICallTypeUsageData(APIUsageStatisticsClientConstants.API_Resource_Path_USAGE_SUMMARY,
+        return getAPICallTypeUsageData(APIUsageStatisticsClientConstants.API_RESOURCE_PATH_PER_APP_AGG,
                 concatenatedKeys.toString(), fromDate, toDate, limit);
     }
 
@@ -648,94 +648,75 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     private List<AppCallTypeDTO> getAPICallTypeUsageData(String tableName, String keyString, String fromDate,
             String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
-
-        Connection connection = null;
-        PreparedStatement statement = null;
-        ResultSet resultSet = null;
         List<AppCallTypeDTO> appApiCallTypeList = new ArrayList<AppCallTypeDTO>();
         try {
-            connection = dataSource.getConnection();
-            String query;
-            //check whether table exist first
-            if (isTableExist(tableName, connection)) {
-                //ignoring sql injection for keyString since it construct locally and no public access
-                if (connection.getMetaData().getDatabaseProductName().contains("DB2")) {
-                    query = "SELECT " + APIUsageStatisticsClientConstants.API + ","
-                            + APIUsageStatisticsClientConstants.VERSION + ","
-                            + APIUsageStatisticsClientConstants.API_PUBLISHER + ","
-                            + APIUsageStatisticsClientConstants.CONSUMERKEY + ","
-                            + APIUsageStatisticsClientConstants.RESOURCE + ","
-                            + APIUsageStatisticsClientConstants.CONTEXT + "," + APIUsageStatisticsClientConstants.METHOD
-                            + "," + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ","
-                            + APIUsageStatisticsClientConstants.HOST_NAME + "," + APIUsageStatisticsClientConstants.YEAR
-                            + "," + APIUsageStatisticsClientConstants.MONTH + ","
-                            + APIUsageStatisticsClientConstants.DAY + "," + APIUsageStatisticsClientConstants.TIME
-                            + " FROM " + tableName + "  WHERE " + APIUsageStatisticsClientConstants.CONSUMERKEY
-                            + " IN (" + keyString + " ) " + " AND " + APIUsageStatisticsClientConstants.TIME
-                            + " BETWEEN ? AND ? "
-                            + " GROUP BY " + APIUsageStatisticsClientConstants.API + ","
-                            + APIUsageStatisticsClientConstants.VERSION + ","
-                            + APIUsageStatisticsClientConstants.API_PUBLISHER + ","
-                            + APIUsageStatisticsClientConstants.CONSUMERKEY + ","
-                            + APIUsageStatisticsClientConstants.RESOURCE + ","
-                            + APIUsageStatisticsClientConstants.CONTEXT + "," + APIUsageStatisticsClientConstants.METHOD
-                            + "," + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ","
-                            + APIUsageStatisticsClientConstants.HOST_NAME + "," + APIUsageStatisticsClientConstants.YEAR
-                            + "," + APIUsageStatisticsClientConstants.MONTH + ","
-                            + APIUsageStatisticsClientConstants.DAY + "," +
-                            APIUsageStatisticsClientConstants.TIME;
-                } else {
-                    query = "SELECT " + APIUsageStatisticsClientConstants.API + ","
-                            + APIUsageStatisticsClientConstants.API_PUBLISHER + ","
-                            + APIUsageStatisticsClientConstants.METHOD + ","
-                            + APIUsageStatisticsClientConstants.CONSUMERKEY + ","
-                            + APIUsageStatisticsClientConstants.RESOURCE + " FROM " + tableName + " WHERE "
-                            + APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ") " +
-                            " AND " + APIUsageStatisticsClientConstants.TIME + " BETWEEN ? AND ?  GROUP BY "
-                            + APIUsageStatisticsClientConstants.CONSUMERKEY + ","
-                            + APIUsageStatisticsClientConstants.API + ","
-                            + APIUsageStatisticsClientConstants.API_PUBLISHER + ","
-                            + APIUsageStatisticsClientConstants.METHOD + ","
-                            + APIUsageStatisticsClientConstants.RESOURCE;
-                }
+            String startDate = fromDate + ":00";
+            String endDate = toDate + ":00";
+            String granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;//default granularity
 
-                statement = connection.prepareStatement(query);
-                int index = 1;
-                statement.setString(index++, fromDate);
-                statement.setString(index, toDate);
-                resultSet = statement.executeQuery();
-                AppCallTypeDTO appCallTypeDTO;
-                while (resultSet.next()) {
-                    String apiName = resultSet.getString(APIUsageStatisticsClientConstants.API);
-                    String publisher = resultSet.getString(APIUsageStatisticsClientConstants.API_PUBLISHER);
-                    apiName = apiName + " (" + publisher + ")";
-                    String callType = resultSet.getString(APIUsageStatisticsClientConstants.METHOD);
-                    String consumerKey = resultSet.getString(APIUsageStatisticsClientConstants.CONSUMERKEY);
-                    String resource = resultSet.getString(APIUsageStatisticsClientConstants.RESOURCE);
-                    List<String> callTypeList = new ArrayList<String>();
-                    callTypeList.add(resource + " (" + callType + ")");
-                    String appName = subscriberAppsMap.get(consumerKey);
+            Map<String, Integer> durationBreakdown = this.getDurationBreakdown(startDate, endDate);
 
-                    boolean found = false;
-                    for (AppCallTypeDTO dto : appApiCallTypeList) {
-                        if (dto.getAppName().equals(appName)) {
-                            dto.addToApiCallTypeArray(apiName, callTypeList);
-                            found = true;
-                            break;
+            if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
+                granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
+            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
+                granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
+            }
+            String query =
+                    "from " + APIUsageStatisticsClientConstants.API_RESOURCE_PATH_PER_APP_AGG + " within '" + startDate
+                            + "', '" + endDate + "' per '" + granularity + "' select "
+                            + APIUsageStatisticsClientConstants.API_NAME + ", "
+                            + APIUsageStatisticsClientConstants.API_CREATOR + ", "
+                            + APIUsageStatisticsClientConstants.API_METHOD + ", "
+                            + APIUsageStatisticsClientConstants.APPLICATION_ID + ", "
+                            + APIUsageStatisticsClientConstants.API_RESOURCE_TEMPLATE + " group by "
+                            + APIUsageStatisticsClientConstants.APPLICATION_ID + ", "
+                            + APIUsageStatisticsClientConstants.API_NAME + ", "
+                            + APIUsageStatisticsClientConstants.API_CREATOR + ", "
+                            + APIUsageStatisticsClientConstants.API_METHOD + ", "
+                            + APIUsageStatisticsClientConstants.API_RESOURCE_TEMPLATE + ";";
+            JSONObject jsonObj = APIUtil
+                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.API_ACCESS_SUMMARY_SIDDHI_APP,
+                            query);
+            String apiName;
+            String apiCreator;
+            String callType;
+            String applicationId;
+            String apiResourceTemplate;
+            AppCallTypeDTO appCallTypeDTO;
+            if (jsonObj != null) {
+                JSONArray jArray = (JSONArray) jsonObj.get(APIUsageStatisticsClientConstants.RECORDS_DELIMITER);
+                for (Object record : jArray) {
+                    JSONArray recordArray = (JSONArray) record;
+                    if (recordArray.size() == 5) {
+                        apiName = (String) recordArray.get(0);
+                        apiCreator = (String) recordArray.get(1);
+                        apiName = apiName + " (" + apiCreator + ")";
+                        callType = (String) recordArray.get(2);
+                        applicationId = (String) recordArray.get(3);
+                        apiResourceTemplate = (String) recordArray.get(4);
+                        List<String> callTypeList = new ArrayList<String>();
+                        callTypeList.add(apiResourceTemplate + " (" + callType + ")");
+                        //String appName = subscriberAppsMap.get(applicationId);
+                        String appName = "DefaultApplication";
+                        boolean found = false;
+                        for (AppCallTypeDTO dto : appApiCallTypeList) {
+                            if (dto.getAppName().equals(appName)) {
+                                dto.addToApiCallTypeArray(apiName, callTypeList);
+                                found = true;
+                                break;
+                            }
                         }
-                    }
-                    if (!found) {
-                        appCallTypeDTO = new AppCallTypeDTO();
-                        appCallTypeDTO.setAppName(appName);
-                        appCallTypeDTO.addToApiCallTypeArray(apiName, callTypeList);
-                        appApiCallTypeList.add(appCallTypeDTO);
+                        if (!found) {
+                            appCallTypeDTO = new AppCallTypeDTO();
+                            appCallTypeDTO.setAppName(appName);
+                            appCallTypeDTO.addToApiCallTypeArray(apiName, callTypeList);
+                            appApiCallTypeList.add(appCallTypeDTO);
+                        }
                     }
                 }
             }
-        } catch (SQLException e) {
-            handleException("Error occurred while querying API call type data from JDBC database", e);
-        } finally {
-            closeDatabaseLinks(resultSet, statement, connection);
+        } catch (APIManagementException e) {
+            handleException("Error occurred while querying API call type data from Stream Processor ", e);
         }
         return appApiCallTypeList;
     }
