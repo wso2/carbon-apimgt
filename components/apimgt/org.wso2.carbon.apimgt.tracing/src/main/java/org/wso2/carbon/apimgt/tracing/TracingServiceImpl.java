@@ -22,7 +22,7 @@ public class TracingServiceImpl implements TracingService {
 
 
     @Override
-    public Tracer buildTracer(String serviceName) {
+    public TracingTracer buildTracer(String serviceName) {
         try {
             String filePath = CarbonUtils.getCarbonConfigDirPath() + File.separator + "api-manager.xml";
             configuration.load(filePath);
@@ -37,11 +37,11 @@ public class TracingServiceImpl implements TracingService {
         if (openTracerName.equalsIgnoreCase("JAEGER") && enabled.equalsIgnoreCase("TRUE")) {
 
             tracer = new JaegerTracerImpl().getTracer(openTracerName, configuration, serviceName);
-            return tracer;
+            return new TracingTracer(tracer);
         } else if (openTracerName.equalsIgnoreCase("ZIPKIN") && enabled.equalsIgnoreCase("TRUE")) {
 
             tracer = new ZipkinTracerImpl().getTracer(openTracerName, configuration, serviceName);
-            return tracer;
+            return new TracingTracer(tracer);
         } else {
             log.error("Invalid Configuration");
         }

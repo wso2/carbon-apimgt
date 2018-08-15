@@ -48,6 +48,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.tracing.OpenTracer;
 import org.wso2.carbon.apimgt.tracing.TracingService;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
+import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 
@@ -148,7 +149,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     public boolean handleRequest(MessageContext messageContext) {
 
         TracingSpan responseLatencySpan = (TracingSpan) messageContext.getProperty("ResponseLatency");
-        Tracer tracer = (Tracer) messageContext.getProperty("Tracer");
+        TracingTracer tracer = (TracingTracer) messageContext.getProperty("Tracer");
         TracingSpan keySpan = OpenTracer.startSpan("KeyValidationLatency", responseLatencySpan, tracer);
         messageContext.setProperty("KeySpan", keySpan);
 

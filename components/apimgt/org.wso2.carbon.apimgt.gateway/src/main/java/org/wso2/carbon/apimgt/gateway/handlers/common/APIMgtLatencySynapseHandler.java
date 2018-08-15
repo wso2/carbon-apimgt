@@ -1,6 +1,6 @@
 package org.wso2.carbon.apimgt.gateway.handlers.common;
 
-import io.opentracing.Tracer;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.AbstractSynapseHandler;
@@ -10,6 +10,7 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.tracing.OpenTracer;
 import org.wso2.carbon.apimgt.tracing.TracingService;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
+import org.wso2.carbon.apimgt.tracing.TracingTracer;
 
 import java.util.UUID;
 
@@ -23,7 +24,7 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
     private long handleResponseOutFlowTime;
     private String requestId;
     private TracingService tracingService;
-    private Tracer tracer;
+    private TracingTracer tracer;
 
 
     public APIMgtLatencySynapseHandler() {

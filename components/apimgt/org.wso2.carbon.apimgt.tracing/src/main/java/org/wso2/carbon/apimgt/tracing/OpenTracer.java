@@ -10,14 +10,14 @@ public abstract class OpenTracer {
 
     public abstract String getName();
 
-    public static TracingSpan startSpan(String spanName, TracingSpan parentSpan, Tracer tracer) {
+    public static TracingSpan startSpan(String spanName, TracingSpan parentSpan, TracingTracer tracer) {
 
         if (parentSpan == null) {
-            Span span = tracer.buildSpan(spanName).start();
+            Span span = tracer.getTracingTracer().buildSpan(spanName).start();
             return new TracingSpan(span);
 
         } else {
-            Span childSpan = tracer.buildSpan(spanName).asChildOf(parentSpan.getSpan()).start();
+            Span childSpan = tracer.getTracingTracer().buildSpan(spanName).asChildOf(parentSpan.getSpan()).start();
             return new TracingSpan(childSpan);
         }
     }
