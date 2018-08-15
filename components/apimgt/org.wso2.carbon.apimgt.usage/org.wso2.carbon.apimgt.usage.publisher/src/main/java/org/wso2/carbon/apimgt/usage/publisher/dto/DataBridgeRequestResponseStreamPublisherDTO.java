@@ -56,7 +56,7 @@ public class DataBridgeRequestResponseStreamPublisherDTO extends RequestResponse
     }
 
     public Object createPayload() {
-        return new Object[] { getMetaClientType(), getApplicationConsumerKey(), getApplicationName(),
+        return new Object[] { getApplicationConsumerKey(), getApplicationName(),
                 getApplicationId(), getApplicationOwner(), getApiContext(), getApiName(), getApiVersion(),
                 getApiResourcePath(), getApiResourceTemplate(), getApiMethod(), getApiCreator(),
                 getApiCreatorTenantDomain(), getApiTier(), getApiHostname(), getUsername(), getUserTenantDomain(),
@@ -70,7 +70,6 @@ public class DataBridgeRequestResponseStreamPublisherDTO extends RequestResponse
     }
 
     public Object[] createMetaData() {
-        // TODO Auto-generated method stub
-        return null;
+        return new Object[] { getMetaClientType() };
     }
 }
