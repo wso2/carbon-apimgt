@@ -343,7 +343,7 @@ var getDataFromTable = function (tableName, tenantDomain, startIndex,count, sort
                                  "api" : record[0],
                                  "api_version" : record[1],
                                  "apiPublisher" : record[2],
-                                 "status" : record[3]                             
+                                 "status" : record[4]                             
                                  }
                               }
                     objArr.push(obj);

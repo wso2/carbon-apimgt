@@ -81,6 +81,11 @@ include("/jagg/jagg.jag");
                 apiName = parsedDataResult[i]["values"]["api"];
                 apiVersion = parsedDataResult[i]["values"]["api_version"];
                 apiProvider = parsedDataResult[i]["values"]["apiPublisher"]
+
+                var providerNameSpltArr = apiProvider.split("@");
+                apiProvider = providerNameSpltArr[providerNameSpltArr.length -2]
+                
+
                 isExists = APIManagerFactory.getInstance().getAPIProvider(provider).isAPIAvailable(
                         new APIIdentifier(apiProvider, apiName, apiVersion));
                 if (isExists) {
