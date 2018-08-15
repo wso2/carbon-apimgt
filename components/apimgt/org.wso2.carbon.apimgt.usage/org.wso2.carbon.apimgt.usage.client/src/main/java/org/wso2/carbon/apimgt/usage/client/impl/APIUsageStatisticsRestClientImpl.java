@@ -309,7 +309,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         for (int i = 1; i < subscriberApps.size(); i++) {
             concatenatedKeySetString.append(",'").append(subscriberApps.get(i)).append("'");
         }
-        return getFaultAppUsageData(APIUsageStatisticsClientConstants.API_FAULT_SUMMARY,
+        return getFaultAppUsageData(APIUsageStatisticsClientConstants.API_FAULTY_INVOCATION_AGG,
                 concatenatedKeySetString.toString(), fromDate, toDate, limit);
     }
 
@@ -550,61 +550,65 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     private List<FaultCountDTO> getFaultAppUsageData(String tableName, String keyString, String fromDate, String toDate,
             int limit) throws APIMgtUsageQueryServiceClientException {
-
-        Connection connection = null;
-        PreparedStatement statement = null;
-        ResultSet resultSet = null;
         List<FaultCountDTO> falseAppUsageDataList = new ArrayList<FaultCountDTO>();
-
         try {
-            connection = dataSource.getConnection();
-            String query;
-            //check whether table exist first
-            if (isTableExist(tableName, connection)) {
-                //ignoring sql injection for keyString since it construct locally and no public access
-                query = "SELECT " +
-                        APIUsageStatisticsClientConstants.CONSUMERKEY + ',' + APIUsageStatisticsClientConstants.API
-                        + ',' + APIUsageStatisticsClientConstants.API_PUBLISHER + ',' + "SUM("
-                        + APIUsageStatisticsClientConstants.TOTAL_FAULT_COUNT + ") AS total_faults " +
-                        " FROM " + tableName +
-                        " WHERE " + APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString
-                        + ") AND time BETWEEN ? AND ? GROUP BY " + APIUsageStatisticsClientConstants.CONSUMERKEY + ","
-                        + APIUsageStatisticsClientConstants.API_PUBLISHER + "," + APIUsageStatisticsClientConstants.API;
+            String startDate = fromDate + ":00";
+            String endDate = toDate + ":00";
+            String granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;//default granularity
 
-                statement = connection.prepareStatement(query);
-                int index = 1;
-                statement.setString(index++, fromDate);
-                statement.setString(index, toDate);
-                resultSet = statement.executeQuery();
-                FaultCountDTO faultCountDTO;
-                while (resultSet.next()) {
-                    String apiName = resultSet.getString(APIUsageStatisticsClientConstants.API);
-                    String publisher = resultSet.getString(APIUsageStatisticsClientConstants.API_PUBLISHER);
-                    apiName = apiName + " (" + publisher + ")";
-                    long faultCount = resultSet.getLong("total_faults");
-                    String consumerKey = resultSet.getString(APIUsageStatisticsClientConstants.CONSUMERKEY);
-                    String appName = subscriberAppsMap.get(consumerKey);
-                    boolean found = false;
-                    for (FaultCountDTO dto : falseAppUsageDataList) {
-                        if (dto.getAppName().equals(appName)) {
-                            dto.addToApiFaultCountArray(apiName, faultCount);
-                            found = true;
-                            break;
+            Map<String, Integer> durationBreakdown = this.getDurationBreakdown(startDate, endDate);
+
+            if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
+                granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
+            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
+                granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
+            }
+            String query = "from " + tableName + " within '" + startDate + "', '" + endDate + "' per '" + granularity
+                    + "' select " + APIUsageStatisticsClientConstants.APPLICATION_ID + ", "
+                    + APIUsageStatisticsClientConstants.API_NAME + ", " + APIUsageStatisticsClientConstants.API_CREATOR
+                    + ", sum(" + APIUsageStatisticsClientConstants.TOTAL_FAULT_COUNT + ") as total_faults group by "
+                    + APIUsageStatisticsClientConstants.APPLICATION_ID + ", "
+                    + APIUsageStatisticsClientConstants.API_CREATOR + ", " + APIUsageStatisticsClientConstants.API_NAME
+                    + ";";
+            JSONObject jsonObj = APIUtil
+                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_FAULT_SUMMARY_SIDDHI_APP,
+                            query);
+            String applicationId;
+            String apiName;
+            String apiCreator;
+            long faultCount;
+            FaultCountDTO faultCountDTO;
+            if (jsonObj != null) {
+                JSONArray jArray = (JSONArray) jsonObj.get(APIUsageStatisticsClientConstants.RECORDS_DELIMITER);
+                for (Object record : jArray) {
+                    JSONArray recordArray = (JSONArray) record;
+                    if (recordArray.size() == 4) {
+                        applicationId = (String) recordArray.get(0);
+                        apiName = (String) recordArray.get(1);
+                        apiCreator = (String) recordArray.get(2);
+                        apiName = apiName + " (" + apiCreator + ")";
+                        faultCount = (Long) recordArray.get(3);
+                        //String appName = subscriberAppsMap.get(applicationId);
+                        String appName = "DefaultApplication";
+                        boolean found = false;
+                        for (FaultCountDTO dto : falseAppUsageDataList) {
+                            if (dto.getAppName().equals(appName)) {
+                                dto.addToApiFaultCountArray(apiName, faultCount);
+                                found = true;
+                                break;
+                            }
                         }
-                    }
-
-                    if (!found) {
-                        faultCountDTO = new FaultCountDTO();
-                        faultCountDTO.setAppName(appName);
-                        faultCountDTO.addToApiFaultCountArray(apiName, faultCount);
-                        falseAppUsageDataList.add(faultCountDTO);
+                        if (!found) {
+                            faultCountDTO = new FaultCountDTO();
+                            faultCountDTO.setAppName(appName);
+                            faultCountDTO.addToApiFaultCountArray(apiName, faultCount);
+                            falseAppUsageDataList.add(faultCountDTO);
+                        }
                     }
                 }
             }
-        } catch (SQLException e) {
-            handleException("Error occurred while querying API faulty invocation data from JDBC database", e);
-        } finally {
-            closeDatabaseLinks(resultSet, statement, connection);
+        } catch (APIManagementException e) {
+            handleException("Error occurred while querying API faulty invocation data from Stream Processor ", e);
         }
         return falseAppUsageDataList;
     }
