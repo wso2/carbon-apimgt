@@ -17,6 +17,8 @@
 */
 package org.wso2.carbon.apimgt.usage.client;
 
+import ch.ethz.ssh2.packets.PacketUserauthBanner;
+
 public final class APIUsageStatisticsClientConstants {
 
     public static final String API_LAST_ACCESS_TIME_SUMMARY = "API_LAST_ACCESS_TIME_SUMMARY";
@@ -76,8 +78,6 @@ public final class APIUsageStatisticsClientConstants {
     public static final String TOTAL_RESPONSE_COUNT = "total_response_count";
 
 	public static final String INVOCATION_TIME = "requesttime";
-
-    public static final String TOTAL_FAULT_COUNT = "total_fault_count";
 
     public static final String REQUEST_TIME = "max_request_time";
 
@@ -188,7 +188,8 @@ public final class APIUsageStatisticsClientConstants {
     public static final String API_LAST_ACCESS_SUMMARY= "ApiLastAccessSummary";
     public static final String API_VERSION_PER_APP_AGG = "ApiVersionPerAppAgg";
     public static final String API_THROTTLED_OUT_AGG = "ApiThrottledOutAgg";
-
+    public static final String API_FAULTY_INVOCATION_AGG = "ApiFaultyInvocationAgg";
+    public static final String API_USER_BROWSER_AGG = "ApiUserBrowserAgg";
 
     //------Field names-------
     public static final String TIME_STAMP = "AGG_TIMESTAMP";
@@ -199,6 +200,7 @@ public final class APIUsageStatisticsClientConstants {
     public static final String DESTINATION = "destination";
     public static final String TOTAL_REQUEST_COUNT = "totalRequestCount";
     public static final String API_THROTTLED_OUT_COUNT = "throttledOutCount";
+    public static final String TOTAL_FAULT_COUNT = "totalFaultCount";
     public static final String API_METHOD = "apiMethod";
     public static final String API_RESOURCE_TEMPLATE = "apiResourceTemplate";
     public static final String USERNAME = "username";
@@ -207,10 +209,13 @@ public final class APIUsageStatisticsClientConstants {
     public static final String APP_OWNER = "applicationOwner";
     public static final String AGG_COUNT = "AGG_COUNT";
     public static final String APPLICATION_NAME = "applicationName";
+    public static final String OPERATING_SYSTEM = "operatingSystem";
+    public static final String BROWSER = "browser";
 
     //------Siddhi app names----
     public static final String API_ACCESS_SUMMARY_SIDDHI_APP = "API_ACCESS_SUMMARY";
     public static final String APIM_THROTTLED_OUT_SUMMARY_SIDDHI_APP = "APIM_THROTTLED_OUT_SUMMARY";
+    public static final String APIM_FAULT_SUMMARY_SIDDHI_APP = "APIM_FAULT_SUMMARY";
 
     //------Other---------------
     public static final String SECONDS_GRANULARITY = "seconds";
