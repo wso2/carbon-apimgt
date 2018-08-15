@@ -2579,123 +2579,106 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     }
 
     @Override
-    public List<Result<ExecutionTimeOfAPIValues>> getExecutionTimeByAPI(String apiName, String version, String
-            tenantDomain, String fromDate, String toDate, String drillDown, String mediationType) throws
-            APIMgtUsageQueryServiceClientException {
-        if (dataSource == null) {
-            handleException("BAM data source hasn't been initialized. Ensure that the data source " +
-                    "is properly configured in the APIUsageTracker configuration.");
-        }
+    public List<Result<ExecutionTimeOfAPIValues>> getExecutionTimeByAPI(String apiName, String version,
+            String tenantDomain, String fromDate, String toDate, String drillDown, String mediationType)
+            throws APIMgtUsageQueryServiceClientException {
         List<Result<ExecutionTimeOfAPIValues>> result = new ArrayList<Result<ExecutionTimeOfAPIValues>>();
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        ResultSet rs = null;
         try {
-            boolean isVersionSet = false;
-            boolean isTenantSet = false;
-            boolean isMediationTypeSet = false;
-            connection = dataSource.getConnection();
-            StringBuilder query = new StringBuilder("SELECT * FROM ");
-            String tableName = getExecutionTimeTableByView(drillDown);
-            query.append(tableName).append(" WHERE api = ?");
+            String tableName = APIUsageStatisticsClientConstants.API_EXECUTION_TIME_AGG;
+            StringBuilder query;
+            if (fromDate == null || toDate == null) {
+                tableName = tableName + "_SECONDS";
+            }
+            query = new StringBuilder(
+                    "from " + tableName + " on(" + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName + "'");
             if (version != null) {
-                query.append(" AND ").append(APIUsageStatisticsClientConstants.VERSION).append("= ?");
-                isVersionSet = true;
+                query.append(" AND " + APIUsageStatisticsClientConstants.API_VERSION + "=='" + version + "'");
             }
             if (tenantDomain != null) {
-                query.append(" AND ").append(APIUsageStatisticsClientConstants.TENANT_DOMAIN).append("= ?");
-                isTenantSet = true;
+                query.append(
+                        " AND " + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='" + tenantDomain
+                                + "'");
             }
             if (fromDate != null && toDate != null) {
-                try {
-                    query.append(" AND ").append(getDateToLong(fromDate)).append(" <= ").append(" " +
-                            "" + APIUsageStatisticsClientConstants.TIME + " ").append(" AND ").append(" " +
-                            "" + APIUsageStatisticsClientConstants.TIME + " ").append("<=").append(getDateToLong
-                            (toDate));
-                } catch (ParseException e) {
-                    handleException("Error occurred while Error parsing date", e);
-                }
-            }
-            if (mediationType != null && mediationType != "ALL") {
-                query.append(" AND ").append(APIUsageStatisticsClientConstants.MEDIATION).append(" = ?");
-                isMediationTypeSet = true;
-            }
-            if (isTableExist(tableName, connection)) { //Tables exist
+                String granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;//default granularity
 
-                // dynamically set parameters to prepared statement according to what is appended before
-                int counter = 2;
-                preparedStatement = connection.prepareStatement(query.toString());
-                preparedStatement.setString(1, apiName);
-                if (isVersionSet) {
-                    preparedStatement.setString(counter, version);
-                    counter++;
+                Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
+
+                if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
+                    granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
+                } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
+                    granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
                 }
-                if (isTenantSet) {
-                    preparedStatement.setString(counter, tenantDomain);
-                    counter++;
-                }
-                if (isMediationTypeSet) {
-                    preparedStatement.setString(counter, mediationType);
-                }
-                rs = preparedStatement.executeQuery();
-                int hour = 0;
-                int minute = 0;
-                int seconds = 0;
-                while (rs.next()) {
-                    if ("HOUR".equals(drillDown)) {
-                        hour = rs.getInt(APIUsageStatisticsClientConstants.HOUR);
-                    } else if ("MINUTES".equals(drillDown)) {
-                        hour = rs.getInt(APIUsageStatisticsClientConstants.HOUR);
-                        minute = rs.getInt(APIUsageStatisticsClientConstants.MINUTES);
-                    } else if ("SECONDS".equals(drillDown)) {
-                        hour = rs.getInt(APIUsageStatisticsClientConstants.HOUR);
-                        minute = rs.getInt(APIUsageStatisticsClientConstants.MINUTES);
-                        seconds = rs.getInt(APIUsageStatisticsClientConstants.SECONDS);
-                    }
-                    Result<ExecutionTimeOfAPIValues> result1 = new Result<ExecutionTimeOfAPIValues>();
-                    ExecutionTimeOfAPIValues executionTimeOfAPIValues = new ExecutionTimeOfAPIValues();
-                    executionTimeOfAPIValues.setApi(rs.getString(APIUsageStatisticsClientConstants.API));
-                    executionTimeOfAPIValues.setContext(rs.getString(APIUsageStatisticsClientConstants.CONTEXT));
-                    executionTimeOfAPIValues.setApiPublisher(rs.getString(APIUsageStatisticsClientConstants
-                            .API_PUBLISHER));
-                    executionTimeOfAPIValues.setVersion(rs.getString(APIUsageStatisticsClientConstants.VERSION));
-                    executionTimeOfAPIValues.setYear(rs.getInt(APIUsageStatisticsClientConstants.YEAR));
-                    executionTimeOfAPIValues.setMonth(rs.getInt(APIUsageStatisticsClientConstants.MONTH));
-                    executionTimeOfAPIValues.setDay(rs.getInt(APIUsageStatisticsClientConstants.DAY));
-                    executionTimeOfAPIValues.setHour(hour);
-                    executionTimeOfAPIValues.setMinutes(minute);
-                    executionTimeOfAPIValues.setSeconds(seconds);
-                    executionTimeOfAPIValues.setApiResponseTime(rs.getLong(APIUsageStatisticsClientConstants
-                            .API_RESPONSE_TIME));
-                    executionTimeOfAPIValues.setSecurityLatency(rs.getLong(APIUsageStatisticsClientConstants
-                            .SECURITY_LATENCY));
-                    executionTimeOfAPIValues.setThrottlingLatency(rs.getLong(APIUsageStatisticsClientConstants.
-                            THROTTLING_LATENCY));
-                    executionTimeOfAPIValues.setRequestMediationLatency(rs.getLong(APIUsageStatisticsClientConstants.
-                            REQ_MEDIATION_LATENCY));
-                    executionTimeOfAPIValues.setResponseMediationLatency(rs.getLong(APIUsageStatisticsClientConstants.
-                            RES_MEDIATION_LATENCY));
-                    executionTimeOfAPIValues.setBackendLatency(rs.getLong(APIUsageStatisticsClientConstants.
-                            BACKEND_LATENCY));
-                    executionTimeOfAPIValues.setOtherLatency(rs.getLong(APIUsageStatisticsClientConstants.
-                            OTHER_LATENCY));
-                    result1.setValues(executionTimeOfAPIValues);
-                    result1.setTableName(tableName);
-                    result1.setTimestamp(RestClientUtil.longToDate(new Date().getTime()));
-                    result.add(result1);
-                }
+                query.append(") within '" + fromDate + "', '" + toDate + "' per '" + granularity + "'");
             } else {
-                handleException("Statistics Table:" + tableName + " does not exist.");
+                query.append(")");
             }
-            if (!result.isEmpty()) {
+            query.append(" select " + APIUsageStatisticsClientConstants.API_NAME + ", "
+                    + APIUsageStatisticsClientConstants.API_CONTEXT + ", "
+                    + APIUsageStatisticsClientConstants.API_CREATOR + ", "
+                    + APIUsageStatisticsClientConstants.API_VERSION + ", "
+                    + APIUsageStatisticsClientConstants.TIME_STAMP + ", ");
+            if (fromDate != null && toDate != null) {
+                query.append(APIUsageStatisticsClientConstants.RESPONSE_TIME + ", "
+                        + APIUsageStatisticsClientConstants.SECURITY_LATENCY + ", "
+                        + APIUsageStatisticsClientConstants.THROTTLING_LATENCY + ", "
+                        + APIUsageStatisticsClientConstants.REQUEST_MEDIATION_LATENCY + ", "
+                        + APIUsageStatisticsClientConstants.RESPONSE_MEDIATION_LATENCY + ", "
+                        + APIUsageStatisticsClientConstants.BACKEND_LATENCY + ", "
+                        + APIUsageStatisticsClientConstants.OTHER_LATENCY + ";");
+            } else {
+                query.append(APIUsageStatisticsClientConstants.AGG_SUM_RESPONSE_TIME + ", "
+                        + APIUsageStatisticsClientConstants.AGG_SUM_SECURITY_LATENCY + ", "
+                        + APIUsageStatisticsClientConstants.AGG_SUM_THROTTLING_LATENCY + ", "
+                        + APIUsageStatisticsClientConstants.AGG_SUM_REQUEST_MEDIATION_LATENCY + ", "
+                        + APIUsageStatisticsClientConstants.AGG_SUM_RESPONSE_MEDIATION_LATENCY + ", "
+                        + APIUsageStatisticsClientConstants.AGG_SUM_BACKEND_LATENCY + ", "
+                        + APIUsageStatisticsClientConstants.AGG_SUM_OTHER_LATENCY + ";");
+            }
+            JSONObject jsonObj = APIUtil
+                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.API_ACCESS_SUMMARY_SIDDHI_APP,
+                            query.toString());
+            long timeStamp;
+            if (jsonObj != null) {
+                JSONArray jArray = (JSONArray) jsonObj.get(APIUsageStatisticsClientConstants.RECORDS_DELIMITER);
+                for (Object record : jArray) {
+                    JSONArray recordArray = (JSONArray) record;
+                    if (recordArray.size() == 12) {
+                        Result<ExecutionTimeOfAPIValues> result1 = new Result<ExecutionTimeOfAPIValues>();
+                        ExecutionTimeOfAPIValues executionTimeOfAPIValues = new ExecutionTimeOfAPIValues();
+                        executionTimeOfAPIValues.setApi((String) recordArray.get(0));
+                        executionTimeOfAPIValues.setContext((String) recordArray.get(1));
+                        executionTimeOfAPIValues.setApiPublisher((String) recordArray.get(2));
+                        executionTimeOfAPIValues.setVersion((String) recordArray.get(3));
+                        timeStamp = (Long) recordArray.get(4);
+                        DateTime time = new DateTime(timeStamp);
+                        executionTimeOfAPIValues.setYear(time.getYear());
+                        executionTimeOfAPIValues.setMonth(time.getMonthOfYear());
+                        executionTimeOfAPIValues.setDay(time.getDayOfMonth());
+                        executionTimeOfAPIValues.setHour(time.getHourOfDay());
+                        executionTimeOfAPIValues.setMinutes(time.getMinuteOfHour());
+                        executionTimeOfAPIValues.setSeconds(time.getSecondOfMinute());
+                        executionTimeOfAPIValues.setApiResponseTime((Long) recordArray.get(5));
+                        executionTimeOfAPIValues.setSecurityLatency((Long) recordArray.get(6));
+                        executionTimeOfAPIValues.setThrottlingLatency((Long) recordArray.get(7));
+                        executionTimeOfAPIValues.setRequestMediationLatency((Long) recordArray.get(8));
+                        executionTimeOfAPIValues.setResponseMediationLatency((Long) recordArray.get(9));
+                        executionTimeOfAPIValues.setBackendLatency((Long) recordArray.get(10));
+                        executionTimeOfAPIValues.setOtherLatency((Long) recordArray.get(11));
+                        result1.setValues(executionTimeOfAPIValues);
+                        result1.setTableName(tableName);
+                        result1.setTimestamp(RestClientUtil.longToDate(new Date().getTime()));
+                        result.add(result1);
+                    }
+                }
+            }
+            if (!result.isEmpty() && fromDate != null && toDate != null) {
                 insertZeroElementsAndSort(result, drillDown, getDateToLong(fromDate), getDateToLong(toDate));
             }
-        } catch (SQLException e) {
-            handleException("Error occurred while querying from JDBC database", e);
+        } catch (APIManagementException e) {
+            handleException("Error occurred while querying from Stream Processor ", e);
         } catch (ParseException e) {
             handleException("Couldn't parse the date", e);
-        } finally {
-            closeDatabaseLinks(rs, preparedStatement, connection);
         }
         return result;
     }
@@ -2804,16 +2787,17 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             String tableName = APIUsageStatisticsClientConstants.API_USER_BROWSER_AGG;
             StringBuilder query;
             if (fromDate == null || toDate == null) {
-                tableName = APIUsageStatisticsClientConstants.API_USER_BROWSER_AGG + "_SECONDS";
+                tableName = tableName + "_SECONDS";
             }
             query = new StringBuilder(
-                    "from " + tableName + " on("
-                            + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName + "'");
+                    "from " + tableName + " on(" + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName + "'");
             if (version != null && !"ALL".equals(version)) {
                 query.append(" AND " + APIUsageStatisticsClientConstants.API_VERSION + "=='" + version + "'");
             }
             if (tenantDomain != null) {
-                query.append(" AND " + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='" + tenantDomain + "'");
+                query.append(
+                        " AND " + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='" + tenantDomain
+                                + "'");
             }
             if (!"ALL".equals(drillDown)) {
                 query.append(" AND " + APIUsageStatisticsClientConstants.OPERATING_SYSTEM + "=='" + drillDown + "'");
@@ -2828,12 +2812,12 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
                     granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
                 }
-                query.append(") within '" + fromDate + "', '" + toDate + "' per '" + granularity + "' select sum(" + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT);
+                query.append(") within '" + fromDate + "', '" + toDate + "' per '" + granularity + "' select sum("
+                        + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT);
             } else {
                 query.append(") select sum(" + APIUsageStatisticsClientConstants.AGG_COUNT);
             }
-            query.append(") as count, "
-                    + APIUsageStatisticsClientConstants.OPERATING_SYSTEM + ", "
+            query.append(") as count, " + APIUsageStatisticsClientConstants.OPERATING_SYSTEM + ", "
                     + APIUsageStatisticsClientConstants.BROWSER + " group by "
                     + APIUsageStatisticsClientConstants.OPERATING_SYSTEM + ", "
                     + APIUsageStatisticsClientConstants.BROWSER + ";");

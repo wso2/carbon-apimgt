@@ -67,8 +67,6 @@ public final class APIUsageStatisticsClientConstants {
 
     public static final String API = "api";
 
-    public static final String SERVICE_TIME = "serviceTime";
-
     public static final String VERSION = "version";
 
     public static final String METHOD= "method";
@@ -173,12 +171,8 @@ public final class APIUsageStatisticsClientConstants {
     public static String OS_BROWSER_FACET = "key_os_browser_facet";
 
     public static final String API_RESPONSE_TIME = "apiResponseTime";
-    public static final String SECURITY_LATENCY = "securityLatency";
-    public static final String THROTTLING_LATENCY = "throttlingLatency";
     public static final String REQ_MEDIATION_LATENCY = "requestMediationLatency";
     public static final String RES_MEDIATION_LATENCY = "responseMediationLatency";
-    public static final String BACKEND_LATENCY = "backendLatency";
-    public static final String OTHER_LATENCY = "otherLatency";
 
     //------------------------------------------------------------------------------------------------
     //-------Aggregation names-----
@@ -190,6 +184,7 @@ public final class APIUsageStatisticsClientConstants {
     public static final String API_THROTTLED_OUT_AGG = "ApiThrottledOutAgg";
     public static final String API_FAULTY_INVOCATION_AGG = "ApiFaultyInvocationAgg";
     public static final String API_USER_BROWSER_AGG = "ApiUserBrowserAgg";
+    public static final String API_EXECUTION_TIME_AGG = "ApiExecutionTimeAgg";
 
     //------Field names-------
     public static final String TIME_STAMP = "AGG_TIMESTAMP";
@@ -211,6 +206,26 @@ public final class APIUsageStatisticsClientConstants {
     public static final String APPLICATION_NAME = "applicationName";
     public static final String OPERATING_SYSTEM = "operatingSystem";
     public static final String BROWSER = "browser";
+    public static final String AGG_SUM_RESPONSE_TIME = "AGG_SUM_responseTime";
+    public static final String AGG_SUM_SERVICE_TIME = "AGG_SUM_serviceTime";
+    public static final String AGG_SUM_BACKEND_TIME = "AGG_SUM_backendTime";
+    public static final String AGG_SUM_SECURITY_LATENCY = "AGG_SUM_securityLatency";
+    public static final String AGG_SUM_THROTTLING_LATENCY = "AGG_SUM_throttlingLatency";
+    public static final String AGG_SUM_REQUEST_MEDIATION_LATENCY = "AGG_SUM_requestMediationLatency";
+    public static final String AGG_SUM_RESPONSE_MEDIATION_LATENCY = "AGG_SUM_responseMediationLatency";
+    public static final String AGG_SUM_BACKEND_LATENCY = "AGG_SUM_backendLatency";
+    public static final String AGG_SUM_OTHER_LATENCY = "AGG_SUM_otherLatency";
+
+    public static final String RESPONSE_TIME = "responseTime";
+    public static final String SERVICE_TIME = "serviceTime";
+    public static final String BACKEND_TIME = "backendTime";
+    public static final String SECURITY_LATENCY = "securityLatency";
+    public static final String THROTTLING_LATENCY = "throttlingLatency";
+    public static final String REQUEST_MEDIATION_LATENCY = "requestMediationLatency";
+    public static final String RESPONSE_MEDIATION_LATENCY = "responseMediationLatency";
+    public static final String BACKEND_LATENCY = "backendLatency";
+    public static final String OTHER_LATENCY = "otherLatency";
+
 
     //------Siddhi app names----
     public static final String API_ACCESS_SUMMARY_SIDDHI_APP = "API_ACCESS_SUMMARY";
