@@ -38,6 +38,7 @@ import LoadingAnimation from "../Base/Loading/Loading";
 import API from "../../data/api";
 import Checkbox from 'material-ui/Checkbox';
 import Alert from '../Shared/Alert';
+import { PRIVACY_POLICY_URL, COOKIE_POLICY_URL } from "../../constants/constants";
 
 const styles = theme => ({
     buttonsWrapper: {
@@ -315,7 +316,7 @@ class SignUp extends React.Component{
                                                     <FormControl>
                                                     <Typography>
                                                         After successfully signing in, a cookie is placed in your browser to track your session. See our {' '}
-                                                        <Link to={"/policy/cookie-policy"} target="_blank">
+                                                        <Link to={ COOKIE_POLICY_URL } target="_blank">
                                                               Cookie Policy
                                                         </Link>
                                                         {' '} for more details.
@@ -329,7 +330,7 @@ class SignUp extends React.Component{
                                                             <p>
                                                                 <strong>
                                                                     I hereby confirm that I have read and understood the {''}
-                                                                    <Link to={"/policy/privacy-policy"} target="_blank" className={classes.linkDisplay}>
+                                                                    <Link to={ PRIVACY_POLICY_URL } target="_blank" className={classes.linkDisplay}>
                                                                         Privacy Policy.
                                                                     </Link>
                                                                 </strong>
