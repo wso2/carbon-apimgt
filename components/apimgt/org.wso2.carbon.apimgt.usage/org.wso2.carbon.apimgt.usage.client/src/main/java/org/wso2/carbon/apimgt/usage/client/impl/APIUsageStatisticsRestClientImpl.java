@@ -339,7 +339,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         for (int i = 1; i < subscriberApps.size(); i++) {
             concatenatedKeys.append(",'").append(subscriberApps.get(i)).append("'");
         }
-        return getTopAppUsageData(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY, concatenatedKeys.toString(),
+        return getTopAppUsageData(APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG, concatenatedKeys.toString(),
                 fromDate, toDate, limit);
     }
 
@@ -353,167 +353,67 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     private List<AppUsageDTO> getTopAppUsageData(String tableName, String keyString, String fromDate, String toDate,
             int limit) throws APIMgtUsageQueryServiceClientException {
-        //ignoring sql injection for keyString since it construct locally and no public access
-        Connection connection = null;
-        PreparedStatement statement = null;
-        ResultSet resultSet = null;
         List<AppUsageDTO> topAppUsageDataList = new ArrayList<AppUsageDTO>();
         try {
-            connection = dataSource.getConnection();
-            String dbProductName = connection.getMetaData().getDatabaseProductName();
-            String query;
-            //check whether table exist first
-            if (isTableExist(tableName, connection)) {
-                // no limit enforced
-                if (limit < 0) {
-                    if (dbProductName.contains("DB2")) {
-                        query = "SELECT " + APIUsageStatisticsClientConstants.API + ","
-                                + APIUsageStatisticsClientConstants.API_VERSION + ","
-                                + APIUsageStatisticsClientConstants.VERSION + ","
-                                + APIUsageStatisticsClientConstants.API_PUBLISHER + ","
-                                + APIUsageStatisticsClientConstants.CONSUMERKEY + ","
-                                + APIUsageStatisticsClientConstants.USER_ID + ","
-                                + APIUsageStatisticsClientConstants.CONTEXT + ","
-                                + APIUsageStatisticsClientConstants.REQUEST_TIME + ","
-                                + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ","
-                                + APIUsageStatisticsClientConstants.HOST_NAME + ","
-                                + APIUsageStatisticsClientConstants.YEAR + "," + APIUsageStatisticsClientConstants.MONTH
-                                + "," + APIUsageStatisticsClientConstants.DAY + ","
-                                + APIUsageStatisticsClientConstants.TIME + ",SUM("
-                                + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") "
-                                + "AS net_total_requests FROM " + tableName + " WHERE "
-                                + APIUsageStatisticsClientConstants.CONSUMERKEY + " IN ( " + keyString + " )"
-                                + " AND time BETWEEN  ? AND ? " + " GROUP BY " + APIUsageStatisticsClientConstants.API
-                                + "," + APIUsageStatisticsClientConstants.API_VERSION + ","
-                                + APIUsageStatisticsClientConstants.VERSION + ","
-                                + APIUsageStatisticsClientConstants.API_PUBLISHER + ","
-                                + APIUsageStatisticsClientConstants.CONSUMERKEY + ","
-                                + APIUsageStatisticsClientConstants.USER_ID + ","
-                                + APIUsageStatisticsClientConstants.CONTEXT + ","
-                                + APIUsageStatisticsClientConstants.REQUEST_TIME + ","
-                                + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ","
-                                + APIUsageStatisticsClientConstants.HOST_NAME + ","
-                                + APIUsageStatisticsClientConstants.YEAR + "," + APIUsageStatisticsClientConstants.MONTH
-                                + "," + APIUsageStatisticsClientConstants.DAY + ","
-                                + APIUsageStatisticsClientConstants.TIME + " ORDER BY net_total_requests DESC";
-                    } else {
-                        query = "SELECT " + APIUsageStatisticsClientConstants.CONSUMERKEY + ','
-                                + APIUsageStatisticsClientConstants.USER_ID + ",SUM("
-                                + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS net_total_requests"
-                                + " FROM " + tableName + " WHERE " + APIUsageStatisticsClientConstants.CONSUMERKEY
-                                + " IN ( " + keyString + " )" + " AND " + APIUsageStatisticsClientConstants.TIME
-                                + " BETWEEN ? AND ? " + " GROUP BY " + APIUsageStatisticsClientConstants.CONSUMERKEY
-                                + ',' + APIUsageStatisticsClientConstants.USER_ID + " ORDER BY net_total_requests DESC";
-                    }
+            String startDate = fromDate + ":00";
+            String endDate = toDate + ":00";
+            String granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;//default granularity
 
-                    statement = connection.prepareStatement(query);
-                    int index = 1;
-                    statement.setString(index++, fromDate);
-                    statement.setString(index, toDate);
-                } else {
-                    if (dbProductName.contains("DB2")) {
-                        query = "SELECT " + APIUsageStatisticsClientConstants.API + ","
-                                + APIUsageStatisticsClientConstants.API_VERSION + ","
-                                + APIUsageStatisticsClientConstants.VERSION + ","
-                                + APIUsageStatisticsClientConstants.API_PUBLISHER + ","
-                                + APIUsageStatisticsClientConstants.CONSUMERKEY + ","
-                                + APIUsageStatisticsClientConstants.USER_ID + ","
-                                + APIUsageStatisticsClientConstants.CONTEXT + ","
-                                + APIUsageStatisticsClientConstants.REQUEST_TIME + ","
-                                + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ","
-                                + APIUsageStatisticsClientConstants.HOST_NAME + ","
-                                + APIUsageStatisticsClientConstants.YEAR + "," + APIUsageStatisticsClientConstants.MONTH
-                                + "," + APIUsageStatisticsClientConstants.DAY + ","
-                                + APIUsageStatisticsClientConstants.TIME + ",SUM("
-                                + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") "
-                                + "AS net_total_requests FROM " + tableName + " WHERE "
-                                + APIUsageStatisticsClientConstants.CONSUMERKEY + " IN ( " + keyString + " )"
-                                + " AND time BETWEEN  ? AND ? " + " GROUP BY " + APIUsageStatisticsClientConstants.API
-                                + "," + APIUsageStatisticsClientConstants.API_VERSION + ","
-                                + APIUsageStatisticsClientConstants.VERSION + ","
-                                + APIUsageStatisticsClientConstants.API_PUBLISHER + ","
-                                + APIUsageStatisticsClientConstants.CONSUMERKEY + ","
-                                + APIUsageStatisticsClientConstants.USER_ID + ","
-                                + APIUsageStatisticsClientConstants.CONTEXT + ","
-                                + APIUsageStatisticsClientConstants.REQUEST_TIME + ","
-                                + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ","
-                                + APIUsageStatisticsClientConstants.HOST_NAME + ","
-                                + APIUsageStatisticsClientConstants.YEAR + "," + APIUsageStatisticsClientConstants.MONTH
-                                + "," + APIUsageStatisticsClientConstants.DAY + ","
-                                + APIUsageStatisticsClientConstants.TIME + " ORDER BY net_total_requests DESC "
-                                + "FETCH FIRST ? ROWS ONLY";
-                    } else if (dbProductName.contains("Microsoft") || dbProductName.contains("MS SQL")) {
+            Map<String, Integer> durationBreakdown = this.getDurationBreakdown(startDate, endDate);
 
-                        query = "SET ROWCOUNT ? SELECT " + APIUsageStatisticsClientConstants.CONSUMERKEY + ','
-                                + APIUsageStatisticsClientConstants.USER_ID + ",SUM("
-                                + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS net_total_requests"
-                                + " FROM " + tableName + " WHERE " + APIUsageStatisticsClientConstants.CONSUMERKEY
-                                + " IN ( " + keyString + " )" + " AND " + APIUsageStatisticsClientConstants.TIME
-                                + " BETWEEN ? AND ? " + " GROUP BY " + APIUsageStatisticsClientConstants.CONSUMERKEY
-                                + ',' + APIUsageStatisticsClientConstants.USER_ID + " ORDER BY net_total_requests DESC";
-                    } else if (dbProductName.contains("Oracle")) {
-
-                        query = "SELECT " + APIUsageStatisticsClientConstants.CONSUMERKEY + ','
-                                + APIUsageStatisticsClientConstants.USER_ID + ",SUM("
-                                + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS net_total_requests"
-                                + " FROM " + tableName + " WHERE " + APIUsageStatisticsClientConstants.CONSUMERKEY
-                                + " IN ( " + keyString + " )" + " AND " + APIUsageStatisticsClientConstants.TIME
-                                + " BETWEEN ? AND ? " + " AND ROWNUM <= ?" + " GROUP BY "
-                                + APIUsageStatisticsClientConstants.CONSUMERKEY + ','
-                                + APIUsageStatisticsClientConstants.USER_ID + " ORDER BY net_total_requests DESC";
-                    } else {
-                        // MYSql, H2, Postgres
-                        query = "SELECT " + APIUsageStatisticsClientConstants.CONSUMERKEY + ','
-                                + APIUsageStatisticsClientConstants.USER_ID + ",SUM("
-                                + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS net_total_requests"
-                                + " FROM " + tableName + " WHERE " + APIUsageStatisticsClientConstants.CONSUMERKEY
-                                + " IN ( " + keyString + " )" + " AND " + APIUsageStatisticsClientConstants.TIME
-                                + " BETWEEN ? AND ? " + " GROUP BY " + APIUsageStatisticsClientConstants.CONSUMERKEY
-                                + ',' + APIUsageStatisticsClientConstants.USER_ID
-                                + " ORDER BY net_total_requests DESC LIMIT ?";
-                    }
-
-                    statement = connection.prepareStatement(query);
-                    if (dbProductName.contains("Microsoft") || dbProductName.contains("MS SQL")) {
-                        statement.setInt(1, limit);
-                        statement.setString(2, fromDate);
-                        statement.setString(3, toDate);
-
-                    } else {
-                        int index = 1;
-                        statement.setString(index++, fromDate);
-                        statement.setString(index, toDate);
-                        statement.setInt(3, limit);
-                    }
-                }
-
-                resultSet = statement.executeQuery();
-                AppUsageDTO appUsageDTO;
-                while (resultSet.next()) {
-                    String userId = resultSet.getString(APIUsageStatisticsClientConstants.USER_ID);
-                    long requestCount = resultSet.getLong("net_total_requests");
-                    String consumerKey = resultSet.getString(APIUsageStatisticsClientConstants.CONSUMERKEY);
-                    String appName = subscriberAppsMap.get(consumerKey);
-                    boolean found = false;
-                    for (AppUsageDTO dto : topAppUsageDataList) {
-                        if (dto.getAppName().equals(appName)) {
-                            dto.addToUserCountArray(userId, requestCount);
-                            found = true;
-                            break;
+            if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
+                granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
+            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
+                granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
+            }
+            StringBuilder query = new StringBuilder(
+                    "from " + tableName + " within '" + startDate + "', '" + endDate + "' per '" + granularity
+                            + "' select " + APIUsageStatisticsClientConstants.APPLICATION_ID + ", "
+                            + APIUsageStatisticsClientConstants.USERNAME + ", sum("
+                            + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT
+                            + ") as net_total_requests group by " + APIUsageStatisticsClientConstants.APPLICATION_ID
+                            + ", " + APIUsageStatisticsClientConstants.USERNAME + " order by net_total_requests DESC");
+            // limit enforced
+            if (limit >= 0) {
+                query.append(" limit" + limit);
+            }
+            query.append(";");
+            JSONObject jsonObj = APIUtil
+                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.API_ACCESS_SUMMARY_SIDDHI_APP,
+                            query.toString());
+            String applicationId;
+            String username;
+            long requestCount;
+            AppUsageDTO appUsageDTO;
+            if (jsonObj != null) {
+                JSONArray jArray = (JSONArray) jsonObj.get(APIUsageStatisticsClientConstants.RECORDS_DELIMITER);
+                for (Object record : jArray) {
+                    JSONArray recordArray = (JSONArray) record;
+                    if (recordArray.size() == 3) {
+                        applicationId = (String) recordArray.get(0);
+                        username = (String) recordArray.get(1);
+                        requestCount = (Long) recordArray.get(2);
+                        //String appName = subscriberAppsMap.get(applicationId);
+                        String appName = "DefaultApplication";
+                        boolean found = false;
+                        for (AppUsageDTO dto : topAppUsageDataList) {
+                            if (dto.getAppName().equals(appName)) {
+                                dto.addToUserCountArray(username, requestCount);
+                                found = true;
+                                break;
+                            }
                         }
-                    }
-                    if (!found) {
-                        appUsageDTO = new AppUsageDTO();
-                        appUsageDTO.setAppName(appName);
-                        appUsageDTO.addToUserCountArray(userId, requestCount);
-                        topAppUsageDataList.add(appUsageDTO);
+                        if (!found) {
+                            appUsageDTO = new AppUsageDTO();
+                            appUsageDTO.setAppName(appName);
+                            appUsageDTO.addToUserCountArray(username, requestCount);
+                            topAppUsageDataList.add(appUsageDTO);
+                        }
                     }
                 }
             }
-        } catch (SQLException e) {
-            handleException("Error occurred while querying top app usage data from JDBC database", e);
-        } finally {
-            closeDatabaseLinks(resultSet, statement, connection);
+        } catch (APIManagementException e) {
+            handleException("Error occurred while querying top app usage data from Stream Processor ", e);
         }
         return topAppUsageDataList;
     }
