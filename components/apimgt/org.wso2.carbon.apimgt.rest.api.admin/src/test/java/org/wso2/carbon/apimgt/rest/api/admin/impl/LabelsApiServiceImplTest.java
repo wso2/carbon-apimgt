@@ -72,7 +72,7 @@ public class LabelsApiServiceImplTest {
     }
 
 
-    private Request getRequest() throws Exception {
+    private Request getRequest() {
         HTTPCarbonMessage carbonMessage = Mockito.mock(HTTPCarbonMessage.class);
         Mockito.when(carbonMessage.getProperty("LOGGED_IN_USER")).thenReturn(USER);
         Request request = new Request(carbonMessage);
@@ -94,17 +94,13 @@ public class LabelsApiServiceImplTest {
     public void testLabelsLabelIdPut() throws Exception {
         APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
 
-        List<Label> labels = new ArrayList<>();
         Label label1 = new Label.Builder().id("1").name("label1").type("GATEWAY").build();
-        Label label2 = new Label.Builder().id("2").name("label2").type("STORE").build();
-        labels.add(label1);
-        labels.add(label2);
 
         LabelsApiServiceImpl labelService = new LabelsApiServiceImpl(adminService);
         Mockito.when(adminService.updateLabel(label1)).thenReturn(label1);
 
         Response response = labelService.labelsLabelIdPut("1", LabelMappingUtil.fromLabelToDTO(label1), getRequest());
-        Assert.assertEquals(response.getEntity(), LabelMappingUtil.fromLabelArrayToListDTO(labels));
+        Assert.assertEquals(response.getEntity(), LabelMappingUtil.fromLabelToDTO(label1));
     }
 
     @Test
@@ -114,11 +110,9 @@ public class LabelsApiServiceImplTest {
         Label label1 = new Label.Builder().id("1").name("label1").type("GATEWAY").build();
 
         LabelsApiServiceImpl labelService = new LabelsApiServiceImpl(adminService);
-        Mockito.when(labelService.labelsPost(LabelMappingUtil.fromLabelToDTO(label1), getRequest()))
-                .thenReturn(Response.status(Response.Status.CREATED).
-                        entity(LabelMappingUtil.fromLabelToDTO(label1)).build());
+        Mockito.when(adminService.addLabel(Mockito.any(Label.class))).thenReturn(label1);
 
         Response response = labelService.labelsPost(LabelMappingUtil.fromLabelToDTO(label1), getRequest());
-        Assert.assertEquals(response.getStatus(), Response.Status.CREATED);
+        Assert.assertEquals(response.getStatus(), Response.Status.CREATED.getStatusCode());
     }
 }
