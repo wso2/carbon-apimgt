@@ -76,7 +76,8 @@ import static java.util.Collections.sort;
 /**
  * Abstract class and act as a interface for the Statistic usage client for APIM.
  * Known implementations are,
- * org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRdbmsClientImpl
+ * org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRdbmsClientImpl and
+ * org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRestClientImpl
  */
 public abstract class APIUsageStatisticsClient {
 
@@ -437,6 +438,89 @@ public abstract class APIUsageStatisticsClient {
             //iterate over the results
             while (rs.next()) {
                 String consumerKey = rs.getString("CONSUMER_KEY");
+                String appName = rs.getString("NAME");
+                consumerKeys.add(consumerKey);
+                subscriberAppsMap.put(consumerKey, appName);
+            }
+            return consumerKeys;
+
+        } catch (Exception e) {
+            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ignore) {
+
+                }
+            }
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+
+                }
+            }
+        }
+    }
+
+    /**
+     * get the list if application of subscribers with Ids
+     *
+     * @param subscriberName subscriber name
+     * @param groupId        group of the subscriber
+     * @return list of string contain the application name
+     * @throws APIMgtUsageQueryServiceClientException
+     */
+    protected List<String> getAppsAndIdsBySubscriber(String subscriberName, String groupId)
+            throws APIMgtUsageQueryServiceClientException {
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+        try {
+            //get the connection
+            connection = APIMgtDBUtil.getConnection();
+
+            //make query
+            String query = "SELECT AM_APPLICATION.APPLICATION_ID, NAME FROM AM_APPLICATION_KEY_MAPPING INNER JOIN AM_APPLICATION ON " +
+                    "AM_APPLICATION_KEY_MAPPING.APPLICATION_ID=AM_APPLICATION.APPLICATION_ID INNER JOIN " +
+                    "AM_SUBSCRIBER" +
+                    " ON AM_APPLICATION.SUBSCRIBER_ID = AM_SUBSCRIBER.SUBSCRIBER_ID WHERE ";
+
+            //check is it shared application
+            boolean sharedApp;
+            if (!StringUtils.isEmpty(groupId)) {
+                query = query + "AM_APPLICATION.GROUP_ID = ? ";
+                sharedApp = true;
+            } else {
+                query = query + "AM_SUBSCRIBER.USER_ID = ? ";
+                sharedApp = false;
+            }
+
+            statement = connection.prepareStatement(query);
+
+            if (!sharedApp) {
+                statement.setString(1, subscriberName);
+            } else {
+                statement.setString(1, groupId);
+            }
+
+            //execute
+            rs = statement.executeQuery();
+
+            List<String> consumerKeys = new ArrayList<String>();
+
+            //iterate over the results
+            while (rs.next()) {
+                String consumerKey = rs.getString("APPLICATION_ID");
                 String appName = rs.getString("NAME");
                 consumerKeys.add(consumerKey);
                 subscriberAppsMap.put(consumerKey, appName);

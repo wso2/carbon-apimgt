@@ -248,7 +248,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
      * @param connection DB connection used to get data from the database
      */
     public void closeDatabaseLinks(ResultSet resultSet, Statement statement,
-                                   Connection connection) {
+            Connection connection) {
         if (resultSet != null) {
             try {
                 resultSet.close();
@@ -478,8 +478,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                         statement.setString(index, toDate);
                         statement.setInt(3, limit);
                     }
-                }   
-                
+                }
+
                 resultSet = statement.executeQuery();
                 AppUsageDTO appUsageDTO;
                 while (resultSet.next()) {
@@ -732,7 +732,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
     private List<AppCallTypeDTO> getAPICallTypeUsageData(String tableName, String keyString, String fromDate,
-    String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
+            String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
 
         Connection connection = null;
         PreparedStatement statement = null;
@@ -1737,7 +1737,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                             + ',' + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT
                             + ',' + APIUsageStatisticsClientConstants.RESOURCE + ','
                             + APIUsageStatisticsClientConstants.TIME + " FROM " + tableName + " WHERE "
-                    + APIUsageStatisticsClientConstants.TIME + " BETWEEN ?  AND ?";
+                            + APIUsageStatisticsClientConstants.TIME + " BETWEEN ?  AND ?";
             statement = connection.prepareStatement(query);
             statement.setString(1, fromDate);
             statement.setString(2, toDate);
