@@ -41,7 +41,13 @@ import javax.ws.rs.core.Response;
 
 public class BlacklistApiServiceImpl extends BlacklistApiService {
 
+    private APIMgtAdminService apiMgtAdminService;
+
     private static final Logger log = LoggerFactory.getLogger(PoliciesApiServiceImpl.class);
+
+    public BlacklistApiServiceImpl(APIMgtAdminService apiMgtAdminService) {
+        this.apiMgtAdminService = apiMgtAdminService;
+    }
 
     /**
      * Delete blacklist condition using ID
@@ -60,7 +66,6 @@ public class BlacklistApiServiceImpl extends BlacklistApiService {
             log.debug("Received Blacklist Condition DELETE request with id: " + conditionId);
         }
         try {
-            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             apiMgtAdminService.deleteBlockConditionByUuid(conditionId);
             return Response.ok().build();
         } catch (APIManagementException e) {
@@ -88,7 +93,6 @@ public class BlacklistApiServiceImpl extends BlacklistApiService {
             log.debug("Received BlockCondition GET request with id: " + conditionId);
         }
         try {
-            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             //This will give BlockConditionNotFoundException if there's no block condition exists with UUID
             BlockConditions blockCondition = apiMgtAdminService.getBlockConditionByUUID(conditionId);
             BlockingConditionDTO dto = BlockingConditionMappingUtil.fromBlockingConditionToDTO(blockCondition);
@@ -119,7 +123,6 @@ public class BlacklistApiServiceImpl extends BlacklistApiService {
             log.debug("Received BlockCondition GET request with id: " + conditionId);
         }
         try {
-            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             //This will give BlockConditionNotFoundException if there's no block condition exists with UUID
             Boolean status = apiMgtAdminService.updateBlockConditionStateByUUID(conditionId, body.getStatus());
             BlockingConditionDTO dto = null;
@@ -151,7 +154,6 @@ public class BlacklistApiServiceImpl extends BlacklistApiService {
             log.debug("Received BlockCondition GET request");
         }
         try {
-            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             List<BlockConditions> blockConditions = apiMgtAdminService.getBlockConditions();
             BlockingConditionListDTO listDTO = BlockingConditionMappingUtil
                     .fromBlockConditionListToListDTO(blockConditions);
@@ -178,7 +180,6 @@ public class BlacklistApiServiceImpl extends BlacklistApiService {
             log.debug("Received BlockCondition POST request with body: " + body);
         }
         try {
-            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             //Add the block condition. It will throw BlockConditionAlreadyExistsException if the condition already
             //  exists in the system
             BlockConditions blockConditions = BlockingConditionMappingUtil

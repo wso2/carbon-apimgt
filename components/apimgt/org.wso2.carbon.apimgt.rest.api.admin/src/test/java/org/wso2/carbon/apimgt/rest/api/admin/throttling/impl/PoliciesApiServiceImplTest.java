@@ -21,57 +21,40 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.throttling.impl;
 
-import org.junit.Assert;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.junit.Test;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
-import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.impl.APIMgtAdminServiceImpl;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.CustomPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
-import org.wso2.carbon.apimgt.rest.api.admin.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.AdvancedThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomRuleDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.SubscriptionThrottlePolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.exceptions.UnsupportedThrottleLimitTypeException;
 import org.wso2.carbon.apimgt.rest.api.admin.impl.PoliciesApiServiceImpl;
 import org.wso2.carbon.apimgt.rest.api.admin.mappings.AdvancedThrottlePolicyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.mappings.ApplicationThrottlePolicyMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.admin.mappings.BlockingConditionMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.mappings.CustomPolicyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.mappings.SubscriptionThrottlePolicyMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.common.exception.APIMgtSecurityException;
-import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
-import org.wso2.carbon.messaging.CarbonMessage;
 import org.wso2.msf4j.Request;
-import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({RestApiUtil.class, CustomPolicyMappingUtil.class, ApplicationThrottlePolicyMappingUtil.class,
-                 SubscriptionThrottlePolicyMappingUtil.class, AdvancedThrottlePolicyMappingUtil.class})
 public class PoliciesApiServiceImplTest {
     private final static Logger logger = LoggerFactory.getLogger(PoliciesApiServiceImplTest.class);
 
     @Test
-    public void policiesThrottlingAdvancedGetTest() throws APIManagementException, NotFoundException {
-        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl();
-        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
+    public void policiesThrottlingAdvancedGetTest() throws Exception {
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
+        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl(adminService);
+
         APIPolicy policy1 = new APIPolicy("samplePolicy1");
         APIPolicy policy2 = new APIPolicy("samplePolicy2");
         List<APIPolicy> policies = new ArrayList<>();
@@ -84,13 +67,12 @@ public class PoliciesApiServiceImplTest {
     }
 
     @Test
-    public void policiesThrottlingAdvancedPolicyIdDeleteTest()  throws APIManagementException, NotFoundException {
+    public void policiesThrottlingAdvancedPolicyIdDeleteTest() throws Exception {
         printTestMethodName();
-        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl();
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
+        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl(adminService);
         String uuid = UUID.randomUUID().toString();
-        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
+
         Mockito.doNothing().doThrow(new IllegalArgumentException()).when(adminService)
                 .deletePolicyByUuid(uuid, APIMgtAdminService.PolicyLevel.api);
         Response response = policiesApiService.policiesThrottlingAdvancedIdDelete(uuid, null, null, getRequest());
@@ -98,14 +80,12 @@ public class PoliciesApiServiceImplTest {
     }
 
     @Test
-    public void policiesThrottlingAdvancedPolicyIdGetTest() throws APIManagementException, NotFoundException  {
+    public void policiesThrottlingAdvancedPolicyIdGetTest() throws Exception {
         printTestMethodName();
-        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl();
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
+        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl(adminService);
         String uuid = UUID.randomUUID().toString();
 
-        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
         APIPolicy policy1 = new APIPolicy(uuid, "samplePolicy1");
         policy1.setDescription("Sample Policy");
         policy1.setDeployed(true);
@@ -117,15 +97,13 @@ public class PoliciesApiServiceImplTest {
     }
 
     @Test
-    public void policiesThrottlingAdvancedPolicyIdPutTest() throws APIManagementException, NotFoundException   {
+    public void policiesThrottlingAdvancedPolicyIdPutTest() throws Exception {
         printTestMethodName();
-        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl();
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
+        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl(adminService);
         String uuid = UUID.randomUUID().toString();
         AdvancedThrottlePolicyDTO dto = new AdvancedThrottlePolicyDTO();
 
-        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
         APIPolicy policy1 = new APIPolicy(uuid, "samplePolicy1");
         Mockito.doReturn(policy1).doThrow(new IllegalArgumentException()).when(adminService).getApiPolicyByUuid(uuid);
 
@@ -134,9 +112,10 @@ public class PoliciesApiServiceImplTest {
     }
 
     @Test
-    public void policiesThrottlingAdvancedPostTest()    throws APIManagementException, NotFoundException {
+    public void policiesThrottlingAdvancedPostTest()  throws Exception {
         printTestMethodName();
-        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl();
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
+        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl(adminService);
         AdvancedThrottlePolicyDTO dto = new AdvancedThrottlePolicyDTO();
         String uuid = UUID.randomUUID().toString();
         dto.setId(uuid);
@@ -145,28 +124,19 @@ public class PoliciesApiServiceImplTest {
         dto.setPolicyName("Simple Policy Name");
         dto.setIsDeployed(true);
 
-
-        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.mockStatic(AdvancedThrottlePolicyMappingUtil.class);
-        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
         APIPolicy policy1 = AdvancedThrottlePolicyMappingUtil.fromAdvancedPolicyDTOToPolicy(dto);
-        Mockito.doReturn(uuid).doThrow(new IllegalArgumentException()).when(adminService).addApiPolicy(policy1);
-        Mockito.doReturn(policy1).doThrow(new IllegalArgumentException()).when(adminService).getApiPolicyByUuid(uuid);
-        PowerMockito.when(AdvancedThrottlePolicyMappingUtil.fromAdvancedPolicyDTOToPolicy(dto)).thenReturn(policy1);
-        PowerMockito.when(AdvancedThrottlePolicyMappingUtil.fromAdvancedPolicyToDTO(policy1)).thenReturn(dto);
+        Mockito.when(adminService.addApiPolicy(Mockito.any(APIPolicy.class))).thenReturn(uuid);
+        Mockito.when(adminService.getApiPolicyByUuid(uuid)).thenReturn(policy1);
         Response response = policiesApiService.policiesThrottlingAdvancedPost(dto, getRequest());
         Assert.assertEquals(201, response.getStatus());
     }
 
     @Test
-    public void policiesThrottlingApplicationGetTest()   throws APIManagementException, NotFoundException {
+    public void policiesThrottlingApplicationGetTest() throws Exception {
         printTestMethodName();
-        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl();
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
+        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl(adminService);
 
-        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
         ApplicationPolicy policy1 = new ApplicationPolicy("sampleAppPolicy1");
         ApplicationPolicy policy2 = new ApplicationPolicy("sampleAppPolicy2");
         List<ApplicationPolicy> policies = new ArrayList<>();
@@ -179,14 +149,12 @@ public class PoliciesApiServiceImplTest {
     }
 
     @Test
-    public void policiesThrottlingApplicationPolicyIdDeleteTest() throws APIManagementException, NotFoundException {
+    public void policiesThrottlingApplicationPolicyIdDeleteTest() throws Exception {
         printTestMethodName();
-        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl();
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
+        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl(adminService);
         String uuid = UUID.randomUUID().toString();
 
-        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
         Mockito.doNothing().doThrow(new IllegalArgumentException()).when(adminService)
                 .deletePolicyByUuid(uuid, APIMgtAdminService.PolicyLevel.application);
 
@@ -195,15 +163,13 @@ public class PoliciesApiServiceImplTest {
     }
 
     @Test
-    public void policiesThrottlingApplicationPolicyIdGetTest()  throws APIManagementException, NotFoundException {
+    public void policiesThrottlingApplicationPolicyIdGetTest() throws Exception {
         printTestMethodName();
-        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl();
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
+        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl(adminService);
         String uuid = UUID.randomUUID().toString();
         ApplicationPolicy policy = new ApplicationPolicy(uuid, "SampleApplicationPolicy");
 
-        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
         Mockito.doReturn(policy).doThrow(new IllegalArgumentException()).when(adminService)
                 .getApplicationPolicyByUuid(uuid);
 
@@ -212,17 +178,15 @@ public class PoliciesApiServiceImplTest {
     }
 
     @Test
-    public void policiesThrottlingApplicationPolicyIdPutTest()   throws APIManagementException, NotFoundException {
+    public void policiesThrottlingApplicationPolicyIdPutTest() throws Exception {
         printTestMethodName();
-        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl();
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
+        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl(adminService);
         String uuid = UUID.randomUUID().toString();
         ApplicationThrottlePolicyDTO dto = new ApplicationThrottlePolicyDTO();
 
         ApplicationPolicy policy = ApplicationThrottlePolicyMappingUtil.fromApplicationThrottlePolicyDTOToModel(dto);
 
-        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
         Mockito.doNothing().doThrow(new IllegalArgumentException()).when(adminService)
                 .updateApplicationPolicy(policy);
         Mockito.doReturn(policy).doThrow(new IllegalArgumentException()).when(adminService)
@@ -233,18 +197,16 @@ public class PoliciesApiServiceImplTest {
     }
 
     @Test
-    public void policiesThrottlingCustomGetTest() throws APIManagementException, NotFoundException  {
+    public void policiesThrottlingCustomGetTest() throws Exception {
         printTestMethodName();
-        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl();
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
+        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl(adminService);
         CustomPolicy policy1 = new CustomPolicy(UUID.randomUUID().toString(), "SamplePolicy1");
         CustomPolicy policy2 = new CustomPolicy(UUID.randomUUID().toString(), "SamplePolicy2");
         List<CustomPolicy> policies = new ArrayList<>();
         policies.add(policy1);
         policies.add(policy2);
 
-        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
         Mockito.doReturn(policies).doThrow(new IllegalArgumentException()).when(adminService).getCustomRules();
 
 
@@ -254,35 +216,29 @@ public class PoliciesApiServiceImplTest {
     }
 
     @Test
-    public void policiesThrottlingCustomPostTest()  throws APIManagementException, NotFoundException    {
+    public void policiesThrottlingCustomPostTest() throws Exception {
         printTestMethodName();
-        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl();
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
+        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl(adminService);
         CustomRuleDTO dto = new CustomRuleDTO();
         String uuid = UUID.randomUUID().toString();
         dto.setId(uuid);
 
         CustomPolicy policy = CustomPolicyMappingUtil.fromCustomPolicyDTOToModel(dto);
 
-        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.mockStatic(CustomPolicyMappingUtil.class);
-        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
-        Mockito.doReturn(uuid).doThrow(new IllegalArgumentException()).when(adminService).addCustomRule(policy);
-        Mockito.doReturn(policy).doThrow(new IllegalArgumentException()).when(adminService).getCustomRuleByUUID(uuid);
-        PowerMockito.when(CustomPolicyMappingUtil.fromCustomPolicyToDTO(policy)).thenReturn(dto);
+        Mockito.when(adminService.addCustomRule(Mockito.any(CustomPolicy.class))).thenReturn(uuid);
+        Mockito.when(adminService.getCustomRuleByUUID(uuid)).thenReturn(policy);
         Response response = policiesApiService.policiesThrottlingCustomPost(dto, getRequest());
         Assert.assertEquals(201, response.getStatus());
     }
 
     @Test
-    public void policiesThrottlingCustomRuleIdDeleteTest()  throws APIManagementException, NotFoundException {
+    public void policiesThrottlingCustomRuleIdDeleteTest() throws Exception {
         printTestMethodName();
-        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl();
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
+        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl(adminService);
         String uuid = UUID.randomUUID().toString();
 
-        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
         Mockito.doNothing().doThrow(new IllegalArgumentException()).when(adminService).deleteCustomRule(uuid);
 
         Response response = policiesApiService.policiesThrottlingCustomRuleIdDelete(uuid, null, null, getRequest());
@@ -290,15 +246,13 @@ public class PoliciesApiServiceImplTest {
     }
 
     @Test
-    public void policiesThrottlingCustomRuleIdGetTest() throws APIManagementException, NotFoundException {
+    public void policiesThrottlingCustomRuleIdGetTest() throws Exception {
         printTestMethodName();
-        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl();
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
+        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl(adminService);
         String uuid = UUID.randomUUID().toString();
         CustomPolicy policy = new CustomPolicy(uuid, "Policy");
 
-        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
         Mockito.doReturn(policy).doThrow(new IllegalArgumentException()).when(adminService).getCustomRuleByUUID(uuid);
 
         Response response = policiesApiService.policiesThrottlingCustomRuleIdGet(uuid, null,
@@ -307,14 +261,12 @@ public class PoliciesApiServiceImplTest {
     }
 
     @Test
-    public void policiesThrottlingCustomRuleIdPutTest() throws APIManagementException, NotFoundException {
+    public void policiesThrottlingCustomRuleIdPutTest() throws Exception {
         printTestMethodName();
-        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl();
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
+        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl(adminService);
         String uuid = UUID.randomUUID().toString();
         CustomPolicy policy = new CustomPolicy(uuid, "Policy");
-        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
         Mockito.doNothing().doThrow(new IllegalArgumentException()).when(adminService).updateCustomRule(policy);
         Mockito.doReturn(policy).doThrow(new IllegalArgumentException()).when(adminService).getCustomRuleByUUID(uuid);
         CustomRuleDTO dto = CustomPolicyMappingUtil.fromCustomPolicyToDTO(policy);
@@ -323,9 +275,10 @@ public class PoliciesApiServiceImplTest {
     }
 
     @Test
-    public void policiesThrottlingApplicationPostTest() throws APIManagementException, NotFoundException {
+    public void policiesThrottlingApplicationPostTest() throws Exception {
         printTestMethodName();
-        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl();
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
+        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl(adminService);
         ApplicationThrottlePolicyDTO dto = new ApplicationThrottlePolicyDTO();
         String uuid = UUID.randomUUID().toString();
         dto.setId(uuid);
@@ -334,33 +287,22 @@ public class PoliciesApiServiceImplTest {
         dto.setDescription("Policy Description");
         dto.setIsDeployed(true);
         ApplicationPolicy policy = ApplicationThrottlePolicyMappingUtil.fromApplicationThrottlePolicyDTOToModel(dto);
-
-        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.mockStatic(ApplicationThrottlePolicyMappingUtil.class);
-        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
-        Mockito.doReturn(uuid).doThrow(new IllegalArgumentException()).when(adminService).addApplicationPolicy(policy);
-        Mockito.doReturn(policy).doThrow(new IllegalArgumentException()).when(adminService).getApplicationPolicyByUuid(uuid);
-        PowerMockito.when(ApplicationThrottlePolicyMappingUtil.fromApplicationThrottlePolicyToDTO(policy))
-                .thenReturn(dto);
-        PowerMockito.when(ApplicationThrottlePolicyMappingUtil.fromApplicationThrottlePolicyDTOToModel(dto))
-                .thenReturn(policy);
+        Mockito.when(adminService.addApplicationPolicy(Mockito.any(ApplicationPolicy.class))).thenReturn(uuid);
+        Mockito.when(adminService.getApplicationPolicyByUuid(uuid)).thenReturn(policy);
 
         Response response = policiesApiService.policiesThrottlingApplicationPost(dto, getRequest());
         Assert.assertEquals(201, response.getStatus());
     }
 
     @Test
-    public void policiesThrottlingSubscriptionGetTest() throws APIManagementException, NotFoundException {
+    public void policiesThrottlingSubscriptionGetTest() throws Exception {
         printTestMethodName();
-        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl();
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
+        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl(adminService);
         List<SubscriptionPolicy> policies = new ArrayList<>();
         policies.add(new SubscriptionPolicy("Policy1"));
         policies.add(new SubscriptionPolicy("Policy2"));
 
-        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
         Mockito.doReturn(policies).doThrow(new IllegalArgumentException()).when(adminService).getSubscriptionPolicies();
 
         Response response = policiesApiService.policiesThrottlingSubscriptionGet(null, null, getRequest());
@@ -368,14 +310,12 @@ public class PoliciesApiServiceImplTest {
     }
 
     @Test
-    public void policiesThrottlingSubscriptionPolicyIdDeleteTest()  throws APIManagementException, NotFoundException {
+    public void policiesThrottlingSubscriptionPolicyIdDeleteTest() throws Exception {
         printTestMethodName();
-        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl();
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
+        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl(adminService);
         String uuid = UUID.randomUUID().toString();
 
-        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
         Mockito.doNothing().doThrow(new IllegalArgumentException()).when(adminService)
                 .deletePolicyByUuid(uuid, APIMgtAdminService.PolicyLevel.subscription);
 
@@ -384,14 +324,12 @@ public class PoliciesApiServiceImplTest {
     }
 
     @Test
-    public void policiesThrottlingSubscriptionPolicyIdGetTest() throws APIManagementException, NotFoundException  {
+    public void policiesThrottlingSubscriptionPolicyIdGetTest() throws Exception  {
         printTestMethodName();
-        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl();
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
+        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl(adminService);
         String uuid = UUID.randomUUID().toString();
         SubscriptionPolicy policy = new SubscriptionPolicy(uuid, "Policy");
-        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
         Mockito.doReturn(policy).doThrow(new IllegalArgumentException()).when(adminService)
                 .getSubscriptionPolicyByUuid(uuid);
 
@@ -400,9 +338,10 @@ public class PoliciesApiServiceImplTest {
     }
 
     @Test
-    public void policiesThrottlingSubscriptionPolicyIdPutTest() throws APIManagementException, NotFoundException {
+    public void policiesThrottlingSubscriptionPolicyIdPutTest() throws Exception {
         printTestMethodName();
-        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl();
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
+        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl(adminService);
         String uuid = UUID.randomUUID().toString();
         SubscriptionThrottlePolicyDTO dto = new SubscriptionThrottlePolicyDTO();
         dto.setRateLimitTimeUnit("m");
@@ -410,29 +349,21 @@ public class PoliciesApiServiceImplTest {
         dto.setStopOnQuotaReach(true);
 
         SubscriptionPolicy policy = SubscriptionThrottlePolicyMappingUtil.fromSubscriptionThrottlePolicyDTOToModel(dto);
-        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.mockStatic(SubscriptionThrottlePolicyMappingUtil.class);
 
-        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
         Mockito.doNothing().doThrow(new IllegalArgumentException()).when(adminService)
                 .updateSubscriptionPolicy(policy);
         Mockito.doReturn(policy).doThrow(new IllegalArgumentException()).when(adminService)
                 .getSubscriptionPolicyByUuid(uuid);
-
-        PowerMockito.when(SubscriptionThrottlePolicyMappingUtil.fromSubscriptionThrottlePolicyDTOToModel(dto))
-                .thenReturn(policy);
-        PowerMockito.when(SubscriptionThrottlePolicyMappingUtil.fromSubscriptionThrottlePolicyToDTO(policy))
-                .thenReturn(dto);
 
         Response response = policiesApiService.policiesThrottlingSubscriptionIdPut(uuid, dto, null, null, getRequest());
         Assert.assertEquals(201, response.getStatus());
     }
 
     @Test
-    public void policiesThrottlingSubscriptionPostTest()    throws APIManagementException, NotFoundException {
+    public void policiesThrottlingSubscriptionPostTest() throws Exception {
         printTestMethodName();
-        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl();
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
+        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl(adminService);
         String uuid = UUID.randomUUID().toString();
         SubscriptionThrottlePolicyDTO dto = new SubscriptionThrottlePolicyDTO();
         dto.setRateLimitTimeUnit("m");
@@ -440,34 +371,15 @@ public class PoliciesApiServiceImplTest {
         dto.setStopOnQuotaReach(true);
         SubscriptionPolicy policy = SubscriptionThrottlePolicyMappingUtil.fromSubscriptionThrottlePolicyDTOToModel(dto);
 
-        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.mockStatic(SubscriptionThrottlePolicyMappingUtil.class);
-
-        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
-        Mockito.doReturn(uuid).doThrow(new IllegalArgumentException()).when(adminService).addSubscriptionPolicy(policy);
-        Mockito.doReturn(policy).doThrow(new IllegalArgumentException()).when(adminService)
-                .getSubscriptionPolicyByUuid(uuid);
-
-        PowerMockito.when(SubscriptionThrottlePolicyMappingUtil.fromSubscriptionThrottlePolicyDTOToModel(dto))
-                .thenReturn(policy);
-        PowerMockito.when(SubscriptionThrottlePolicyMappingUtil.fromSubscriptionThrottlePolicyToDTO(policy))
-                .thenReturn(dto);
+        Mockito.when(adminService.addSubscriptionPolicy(Mockito.any(SubscriptionPolicy.class))).thenReturn(uuid);
+        Mockito.when(adminService.getSubscriptionPolicyByUuid(uuid)).thenReturn(policy);
 
         Response response = policiesApiService.policiesThrottlingSubscriptionPost(dto, getRequest());
         Assert.assertEquals(201, response.getStatus());
     }
 
-    private Request getRequest() throws APIMgtSecurityException {
-        HTTPCarbonMessage carbonMessage = Mockito.mock(HTTPCarbonMessage.class);
-        Request request = new Request(carbonMessage);
-
-        try {
-            PowerMockito.whenNew(Request.class).withArguments(carbonMessage).thenReturn(request);
-        } catch (Exception e) {
-            throw new APIMgtSecurityException("Error while mocking Request Object ", e);
-        }
-        return request;
+    private Request getRequest() {
+        return Mockito.mock(Request.class);
     }
 
     private static void printTestMethodName() {

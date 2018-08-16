@@ -19,53 +19,40 @@
  */
 package org.wso2.carbon.apimgt.rest.api.admin.impl;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.annotations.Test;
+import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
-import org.wso2.carbon.apimgt.core.impl.APIMgtAdminServiceImpl;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
 import org.wso2.carbon.apimgt.core.workflow.APIStateChangeWorkflow;
 import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationWorkflow;
 import org.wso2.carbon.apimgt.core.workflow.Workflow;
-import org.wso2.carbon.apimgt.core.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.WorkflowRequestDTO;
-import org.wso2.carbon.apimgt.rest.api.common.exception.APIMgtSecurityException;
-import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.msf4j.Request;
-import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
 import javax.ws.rs.core.Response;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.testng.Assert.assertEquals;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({RestApiUtil.class, WorkflowExecutorFactory.class})
 public class WorkflowsApiServiceImplTestCase {
 
     private static final Logger log = LoggerFactory.getLogger(WorkflowsApiServiceImplTestCase.class);
 
-    
     @Test
     public void testWorkflowsWorkflowReferenceIdPutException() throws Exception {
         printTestMethodName();
-        WorkflowsApiServiceImpl workflowsApiService = new WorkflowsApiServiceImpl();
-        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
+
+        WorkflowsApiServiceImpl workflowsApiService = new WorkflowsApiServiceImpl(adminService);
         String workflowRefId = UUID.randomUUID().toString();
         String message = "Error while retrieving workflow entry for :" + workflowRefId;
         Mockito.doThrow(new APIManagementException(message, ExceptionCodes.APIMGT_DAO_EXCEPTION)).when(adminService)
@@ -83,10 +70,10 @@ public class WorkflowsApiServiceImplTestCase {
     @Test
     public void testWorkflowsWorkflowReferenceIdPutNotExist() throws Exception {
         printTestMethodName();
-        WorkflowsApiServiceImpl workflowsApiService = new WorkflowsApiServiceImpl();
-        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
+
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
+        WorkflowsApiServiceImpl workflowsApiService = new WorkflowsApiServiceImpl(adminService);
+
         String workflowRefId = UUID.randomUUID().toString();
         WorkflowRequestDTO workflowRequestDTO = new WorkflowRequestDTO();
         workflowRequestDTO.setDescription("Test Desc");
@@ -101,10 +88,9 @@ public class WorkflowsApiServiceImplTestCase {
     @Test
     public void testWorkflowsWorkflowReferenceIdPutAlreadyPublished() throws Exception {
         printTestMethodName();
-        WorkflowsApiServiceImpl workflowsApiService = new WorkflowsApiServiceImpl();
-        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
+        WorkflowsApiServiceImpl workflowsApiService = new WorkflowsApiServiceImpl(adminService);
+
         String workflowRefId = UUID.randomUUID().toString();
         WorkflowRequestDTO workflowRequestDTO = new WorkflowRequestDTO();
         workflowRequestDTO.setDescription("Test Desc");
@@ -122,10 +108,9 @@ public class WorkflowsApiServiceImplTestCase {
     @Test
     public void testWorkflowsWorkflowReferenceIdGet() throws Exception {
         printTestMethodName();
-        WorkflowsApiServiceImpl workflowsApiService = new WorkflowsApiServiceImpl();
-        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
+        WorkflowsApiServiceImpl workflowsApiService = new WorkflowsApiServiceImpl(adminService);
+
         String workflowRefId = UUID.randomUUID().toString();
         WorkflowRequestDTO workflowRequestDTO = new WorkflowRequestDTO();
         workflowRequestDTO.setDescription("Test Desc");
@@ -148,10 +133,9 @@ public class WorkflowsApiServiceImplTestCase {
     @Test
     public void testWorkflowsWorkflowReferenceIdGetException() throws Exception {
         printTestMethodName();
-        WorkflowsApiServiceImpl workflowsApiService = new WorkflowsApiServiceImpl();
-        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
+        WorkflowsApiServiceImpl workflowsApiService = new WorkflowsApiServiceImpl(adminService);
+
         String workflowRefId = UUID.randomUUID().toString();
         String message = "Error while retrieving workflow entry for :" + workflowRefId;
         Mockito.doThrow(new APIManagementException(message, ExceptionCodes.APIMGT_DAO_EXCEPTION)).when(adminService)
@@ -166,10 +150,9 @@ public class WorkflowsApiServiceImplTestCase {
     @Test
     public void testWorkflowsWorkflowReferenceIdGetForInvalidReference() throws Exception {
         printTestMethodName();
-        WorkflowsApiServiceImpl workflowsApiService = new WorkflowsApiServiceImpl();
-        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
+        WorkflowsApiServiceImpl workflowsApiService = new WorkflowsApiServiceImpl(adminService);
+
         String workflowRefId = UUID.randomUUID().toString();
 
         String message = "Workflow not found for : " + workflowRefId;
@@ -183,10 +166,9 @@ public class WorkflowsApiServiceImplTestCase {
     @Test
     public void testWorkflowsGetWithoutType() throws Exception {
         printTestMethodName();
-        WorkflowsApiServiceImpl workflowsApiService = new WorkflowsApiServiceImpl();
-        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
+        WorkflowsApiServiceImpl workflowsApiService = new WorkflowsApiServiceImpl(adminService);
+
         List<Workflow> workflowList = new ArrayList<>();
         Mockito.doReturn(workflowList).doThrow(new IllegalArgumentException()).when(adminService)
                 .retrieveUncompletedWorkflows();
@@ -198,10 +180,9 @@ public class WorkflowsApiServiceImplTestCase {
     @Test
     public void testWorkflowsGetWithType() throws Exception {
         printTestMethodName();
-        WorkflowsApiServiceImpl workflowsApiService = new WorkflowsApiServiceImpl();
-        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
+        WorkflowsApiServiceImpl workflowsApiService = new WorkflowsApiServiceImpl(adminService);
+
         List<Workflow> workflowList = new ArrayList<>();
         Mockito.doReturn(workflowList).doThrow(new IllegalArgumentException()).when(adminService)
                 .retrieveUncompletedWorkflowsByType(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
@@ -214,10 +195,9 @@ public class WorkflowsApiServiceImplTestCase {
     @Test
     public void testWorkflowsGetException() throws Exception {
         printTestMethodName();
-        WorkflowsApiServiceImpl workflowsApiService = new WorkflowsApiServiceImpl();
-        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
+        WorkflowsApiServiceImpl workflowsApiService = new WorkflowsApiServiceImpl(adminService);
+
         String message = "Error while retrieving workflow information";
         Mockito.doThrow(new APIManagementException(message, ExceptionCodes.APIMGT_DAO_EXCEPTION)).when(adminService)
                 .retrieveUncompletedWorkflows();
@@ -228,15 +208,7 @@ public class WorkflowsApiServiceImplTestCase {
     
     // Sample request to be used by tests
     private Request getRequest() throws Exception {
-        HTTPCarbonMessage carbonMessage = Mockito.mock(HTTPCarbonMessage.class);
-        Request request = new Request(carbonMessage);
-
-        try {
-            PowerMockito.whenNew(Request.class).withArguments(carbonMessage).thenReturn(request);
-        } catch (Exception e) {
-            throw new APIMgtSecurityException("Error while mocking Request Object ", e);
-        }
-        return request;
+        return Mockito.mock(Request.class);
     }
 
     private static void printTestMethodName () {

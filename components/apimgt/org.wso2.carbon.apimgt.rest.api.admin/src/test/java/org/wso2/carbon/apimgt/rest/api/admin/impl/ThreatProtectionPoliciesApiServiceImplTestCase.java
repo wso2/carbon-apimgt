@@ -18,38 +18,26 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.impl;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.core.impl.APIMgtAdminServiceImpl;
 import org.wso2.carbon.apimgt.core.models.policy.ThreatProtectionPolicy;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ThreatProtectionPolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.msf4j.Request;
-import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({RestApiUtil.class, APIManagerFactory.class})
+
 public class ThreatProtectionPoliciesApiServiceImplTestCase {
 
     @Test
     public void testThreatProtectionPoliciesGet() throws Exception {
-        PowerMockito.mockStatic(APIManagerFactory.class);
-        APIManagerFactory apiManagerFactory = Mockito.mock(APIManagerFactory.class);
-        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(apiManagerFactory);
-        Mockito.when(apiManagerFactory.getAPIMgtAdminService()).thenReturn(adminService);
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
 
         List<ThreatProtectionPolicy> policyList = new ArrayList<>();
         policyList.add(createThreatProtectionPolicy());
@@ -58,7 +46,7 @@ public class ThreatProtectionPoliciesApiServiceImplTestCase {
 
         Mockito.when(adminService.getThreatProtectionPolicyList()).thenReturn(policyList);
 
-        ThreatProtectionPoliciesApiServiceImpl apiService = new ThreatProtectionPoliciesApiServiceImpl();
+        ThreatProtectionPoliciesApiServiceImpl apiService = new ThreatProtectionPoliciesApiServiceImpl(adminService);
         Response response = apiService.threatProtectionPoliciesGet(getRequest());
         Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 
@@ -70,14 +58,10 @@ public class ThreatProtectionPoliciesApiServiceImplTestCase {
 
     @Test
     public void testThreatProtectionPoliciesPost() throws Exception {
-        PowerMockito.mockStatic(APIManagerFactory.class);
-        APIManagerFactory apiManagerFactory = Mockito.mock(APIManagerFactory.class);
-        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(apiManagerFactory);
-        Mockito.when(apiManagerFactory.getAPIMgtAdminService()).thenReturn(adminService);
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
 
         ThreatProtectionPolicyDTO dto = createThreatProtectionPolicyDTO();
-        ThreatProtectionPoliciesApiServiceImpl apiService = new ThreatProtectionPoliciesApiServiceImpl();
+        ThreatProtectionPoliciesApiServiceImpl apiService = new ThreatProtectionPoliciesApiServiceImpl(adminService);
         Response response = apiService.threatProtectionPoliciesPost(dto, getRequest());
         Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 
@@ -89,13 +73,9 @@ public class ThreatProtectionPoliciesApiServiceImplTestCase {
 
     @Test
     public void testThreatProtectionPoliciesThreatProtectionPolicyIdDelete() throws Exception {
-        PowerMockito.mockStatic(APIManagerFactory.class);
-        APIManagerFactory apiManagerFactory = Mockito.mock(APIManagerFactory.class);
-        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(apiManagerFactory);
-        Mockito.when(apiManagerFactory.getAPIMgtAdminService()).thenReturn(adminService);
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
 
-        ThreatProtectionPoliciesApiServiceImpl apiService = new ThreatProtectionPoliciesApiServiceImpl();
+        ThreatProtectionPoliciesApiServiceImpl apiService = new ThreatProtectionPoliciesApiServiceImpl(adminService);
         Response response = apiService.threatProtectionPoliciesThreatProtectionPolicyIdDelete("ID",
                 getRequest());
         Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
@@ -110,16 +90,12 @@ public class ThreatProtectionPoliciesApiServiceImplTestCase {
 
     @Test
     public void testThreatProtectionPoliciesThreatProtectionPolicyIdGet() throws Exception {
-        PowerMockito.mockStatic(APIManagerFactory.class);
-        APIManagerFactory apiManagerFactory = Mockito.mock(APIManagerFactory.class);
-        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
-        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(apiManagerFactory);
-        Mockito.when(apiManagerFactory.getAPIMgtAdminService()).thenReturn(adminService);
+        APIMgtAdminService adminService = Mockito.mock(APIMgtAdminService.class);
 
         ThreatProtectionPolicy policy = createThreatProtectionPolicy();
         Mockito.when(adminService.getThreatProtectionPolicy(policy.getUuid())).thenReturn(policy);
 
-        ThreatProtectionPoliciesApiServiceImpl apiService = new ThreatProtectionPoliciesApiServiceImpl();
+        ThreatProtectionPoliciesApiServiceImpl apiService = new ThreatProtectionPoliciesApiServiceImpl(adminService);
         Response response = apiService.threatProtectionPoliciesThreatProtectionPolicyIdGet(policy.getUuid(),
                 getRequest());
         Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
@@ -152,9 +128,6 @@ public class ThreatProtectionPoliciesApiServiceImplTestCase {
     }
 
     private Request getRequest() throws Exception {
-        HTTPCarbonMessage carbonMessage = Mockito.mock(HTTPCarbonMessage.class);
-        Request request = new Request(carbonMessage);
-        PowerMockito.whenNew(Request.class).withArguments(carbonMessage).thenReturn(request);
-        return request;
+        return Mockito.mock(Request.class);
     }
 }

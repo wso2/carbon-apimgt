@@ -23,7 +23,13 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 public class ThreatProtectionPoliciesApiServiceImpl extends ThreatProtectionPoliciesApiService {
+    private APIMgtAdminService apiMgtAdminService;
+
     private static final Logger log = LoggerFactory.getLogger(ThreatProtectionPoliciesApiServiceImpl.class);
+
+    public ThreatProtectionPoliciesApiServiceImpl(APIMgtAdminService apiMgtAdminService) {
+        this.apiMgtAdminService = apiMgtAdminService;
+    }
 
     /**
      * Get a list of all threat protection policies
@@ -35,7 +41,6 @@ public class ThreatProtectionPoliciesApiServiceImpl extends ThreatProtectionPoli
     @Override
     public Response threatProtectionPoliciesGet(Request request) throws NotFoundException {
         try {
-            APIMgtAdminService apiMgtAdminService = APIManagerFactory.getInstance().getAPIMgtAdminService();
             List<ThreatProtectionPolicy> policyList = apiMgtAdminService.getThreatProtectionPolicyList();
             ThreatProtectionPolicyListDTO listDTO = new ThreatProtectionPolicyListDTO();
             for (ThreatProtectionPolicy policy : policyList) {
@@ -60,8 +65,8 @@ public class ThreatProtectionPoliciesApiServiceImpl extends ThreatProtectionPoli
     public Response threatProtectionPoliciesPost(ThreatProtectionPolicyDTO threatProtectionPolicy
             , Request request) throws NotFoundException {
         try {
-            APIMgtAdminService apiMgtAdminService = APIManagerFactory.getInstance().getAPIMgtAdminService();
-            apiMgtAdminService.addThreatProtectionPolicy(ThreatProtectionMappingUtil.toThreatProtectionPolicy(threatProtectionPolicy));
+            apiMgtAdminService.addThreatProtectionPolicy(
+                    ThreatProtectionMappingUtil.toThreatProtectionPolicy(threatProtectionPolicy));
             return Response.ok().build();
         } catch (APIManagementException e) {
             log.error(e.getMessage(), e);
@@ -81,7 +86,6 @@ public class ThreatProtectionPoliciesApiServiceImpl extends ThreatProtectionPoli
     public Response threatProtectionPoliciesThreatProtectionPolicyIdDelete(String threatProtectionPolicyId
             , Request request) throws NotFoundException {
         try {
-            APIMgtAdminService apiMgtAdminService = APIManagerFactory.getInstance().getAPIMgtAdminService();
             apiMgtAdminService.deleteThreatProtectionPolicy(threatProtectionPolicyId);
             return Response.ok().build();
         } catch (APIManagementException e) {
@@ -102,7 +106,6 @@ public class ThreatProtectionPoliciesApiServiceImpl extends ThreatProtectionPoli
     public Response threatProtectionPoliciesThreatProtectionPolicyIdGet(String threatProtectionPolicyId
             , Request request) throws NotFoundException {
         try {
-            APIMgtAdminService apiMgtAdminService = APIManagerFactory.getInstance().getAPIMgtAdminService();
             ThreatProtectionPolicyDTO dto = ThreatProtectionMappingUtil.toThreatProtectionPolicyDTO(
                     apiMgtAdminService.getThreatProtectionPolicy(threatProtectionPolicyId));
             return Response.ok().entity(dto).build();
