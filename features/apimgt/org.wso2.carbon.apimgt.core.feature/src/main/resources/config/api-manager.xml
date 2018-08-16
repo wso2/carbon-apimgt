@@ -159,7 +159,7 @@
         <DASPassword>${admin.password}</DASPassword>
 
         <!-- For APIM implemented Statistic client for RDBMS -->
-        <StatsProviderImpl>org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRdbmsClientImpl</StatsProviderImpl>
+        <StatsProviderImpl>org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRestClientImpl</StatsProviderImpl>
 
         <!-- DAS REST API configuration -->
         <DASRestApiURL>https://localhost:9444</DASRestApiURL>
