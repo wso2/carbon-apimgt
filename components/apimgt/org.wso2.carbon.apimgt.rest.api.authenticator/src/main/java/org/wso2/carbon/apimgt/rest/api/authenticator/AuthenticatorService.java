@@ -108,6 +108,7 @@ public class AuthenticatorService {
         grantTypes.add(KeyManagerConstants.PASSWORD_GRANT_TYPE);
         grantTypes.add(KeyManagerConstants.AUTHORIZATION_CODE_GRANT_TYPE);
         grantTypes.add(KeyManagerConstants.REFRESH_GRANT_TYPE);
+        grantTypes.add(KeyManagerConstants.CLIENT_CREDENTIALS_GRANT_TYPE);
 
         if (isMultiEnvironmentOverviewEnabled) {
             grantTypes.add(KeyManagerConstants.JWT_GRANT_TYPE);
@@ -174,7 +175,16 @@ public class AuthenticatorService {
         Map<String, String> consumerKeySecretMap = getConsumerKeySecret(appName);
         log.debug("Received consumer key & secret for {} application.", appName);
         try {
-            if (KeyManagerConstants.AUTHORIZATION_CODE_GRANT_TYPE.equals(grantType)) {
+            if (KeyManagerConstants.PASSWORD_GRANT_TYPE.equals(grantType) ||
+                    KeyManagerConstants.REFRESH_GRANT_TYPE.equals(grantType) ||
+                    KeyManagerConstants.CLIENT_CREDENTIALS_GRANT_TYPE.equals(grantType)) {
+                accessTokenRequest = AuthUtil
+                        .createAccessTokenRequest(userName, password, grantType, refreshToken,
+                                null, validityPeriod, scopesList,
+                                consumerKeySecretMap.get("CONSUMER_KEY"), consumerKeySecretMap.get("CONSUMER_SECRET"));
+                accessTokenInfo = getKeyManager().getNewAccessToken(accessTokenRequest);
+            }
+            else if (KeyManagerConstants.AUTHORIZATION_CODE_GRANT_TYPE.equals(grantType)) {
                 // Access token for authorization code grant type
                 APIMAppConfigurations appConfigs = apimAppConfigurationService.getApimAppConfigurations();
                 String callBackURL = appConfigs.getApimBaseUrl() + AuthenticatorConstants.AUTHORIZATION_CODE_CALLBACK_URL + appName;
@@ -194,19 +204,6 @@ public class AuthenticatorService {
                     log.error(errorMsg, ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);
                     throw new APIManagementException(errorMsg, ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);
                 }
-            } else if (KeyManagerConstants.PASSWORD_GRANT_TYPE.equals(grantType)) {
-                // Access token for password code grant type
-                accessTokenRequest = AuthUtil
-                        .createAccessTokenRequest(userName, password, grantType, refreshToken,
-                                null, validityPeriod, scopesList,
-                                consumerKeySecretMap.get("CONSUMER_KEY"), consumerKeySecretMap.get("CONSUMER_SECRET"));
-                accessTokenInfo = getKeyManager().getNewAccessToken(accessTokenRequest);
-            } else if (KeyManagerConstants.REFRESH_GRANT_TYPE.equals(grantType)) {
-                accessTokenRequest = AuthUtil
-                        .createAccessTokenRequest(userName, password, grantType, refreshToken,
-                                null, validityPeriod, scopesList,
-                                consumerKeySecretMap.get("CONSUMER_KEY"), consumerKeySecretMap.get("CONSUMER_SECRET"));
-                accessTokenInfo = getKeyManager().getNewAccessToken(accessTokenRequest);
             } else if (isMultiEnvironmentOverviewEnabled) { // JWT or Custom grant type
                 accessTokenRequest.setClientId(consumerKeySecretMap.get("CONSUMER_KEY"));
                 accessTokenRequest.setClientSecret(consumerKeySecretMap.get("CONSUMER_SECRET"));
@@ -224,12 +221,6 @@ public class AuthenticatorService {
                     String errorMsg = "User " + usernameFromJWT + " does not exists in this environment.";
                     throw new APIManagementException(errorMsg, e, ExceptionCodes.USER_NOT_AUTHENTICATED);
                 }
-            } else if (KeyManagerConstants.CLIENT_CREDENTIALS_GRANT_TYPE.equals(grantType)) {
-                accessTokenRequest = AuthUtil.createAccessTokenRequest(userName, password, grantType,
-                        refreshToken, null, validityPeriod, scopesList,
-                        consumerKeySecretMap.get(KeyManagerConstants.KeyDetails.CONSUMER_KEY),
-                        consumerKeySecretMap.get(KeyManagerConstants.KeyDetails.CONSUMER_SECRET));
-                accessTokenInfo = getKeyManager().getNewAccessToken(accessTokenRequest);
             }
         } catch (KeyManagementException e) {
             String errorMsg = "Error while receiving tokens for OAuth application : " + appName;

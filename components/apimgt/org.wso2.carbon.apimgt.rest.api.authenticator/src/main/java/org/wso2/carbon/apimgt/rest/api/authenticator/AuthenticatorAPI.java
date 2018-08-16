@@ -154,6 +154,9 @@ public class AuthenticatorAPI implements Microservice {
         }
     }
 
+    /**
+     * This method authenticate user for self registration.
+     */
     @OPTIONS
     @POST
     @Path("/signup/{appName}")
