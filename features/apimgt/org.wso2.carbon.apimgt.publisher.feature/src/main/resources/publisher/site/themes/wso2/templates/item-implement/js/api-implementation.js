@@ -308,6 +308,10 @@ $(document).ready(function(){
         }
     });
 
+    $('#sequence_file').click(function (event) {
+                event.target.value = '';
+    });
+
     $('#sequence_file').change(function (event) {
         var file = event.target.files[0];
         var fileReader = new FileReader();
