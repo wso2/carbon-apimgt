@@ -286,7 +286,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             }
             query.append(";");
             JSONObject jsonObj = APIUtil
-                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.API_ACCESS_SUMMARY_SIDDHI_APP,
+                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_ACCESS_SUMMARY_SIDDHI_APP,
                             query.toString());
             String applicationId;
             String username;
@@ -405,7 +405,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                     + APIUsageStatisticsClientConstants.API_CREATOR + " order by net_total_requests DESC;");
 
             JSONObject jsonObj = APIUtil
-                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.API_ACCESS_SUMMARY_SIDDHI_APP,
+                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_ACCESS_SUMMARY_SIDDHI_APP,
                             topApiUserQuery.toString());
 
             String username;
@@ -580,7 +580,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                     + ", " + APIUsageStatisticsClientConstants.API_METHOD + ", "
                     + APIUsageStatisticsClientConstants.API_RESOURCE_TEMPLATE + ";";
             JSONObject jsonObj = APIUtil
-                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.API_ACCESS_SUMMARY_SIDDHI_APP,
+                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_ACCESS_SUMMARY_SIDDHI_APP,
                             query);
             String apiName;
             String apiCreator;
@@ -685,7 +685,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                     + APIUsageStatisticsClientConstants.API_NAME + ", " + APIUsageStatisticsClientConstants.API_CREATOR
                     + ", " + APIUsageStatisticsClientConstants.APPLICATION_ID + ";";
             JSONObject jsonObj = APIUtil
-                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.API_ACCESS_SUMMARY_SIDDHI_APP,
+                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_ACCESS_SUMMARY_SIDDHI_APP,
                             query);
             String apiName;
             String apiCreator;
@@ -803,7 +803,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                     + APIUsageStatisticsClientConstants.API_NAME + ", " + APIUsageStatisticsClientConstants.API_CONTEXT
                     + ", " + APIUsageStatisticsClientConstants.API_VERSION + ";";
             JSONObject jsonObj = APIUtil
-                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.API_ACCESS_SUMMARY_SIDDHI_APP,
+                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_ACCESS_SUMMARY_SIDDHI_APP,
                             query);
 
             String apiName;
@@ -1069,7 +1069,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                     + APIUsageStatisticsClientConstants.LAST_ACCESS_TIME + " DESC;");
 
             JSONObject jsonObj = APIUtil
-                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.API_ACCESS_SUMMARY_SIDDHI_APP,
+                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_ACCESS_SUMMARY_SIDDHI_APP,
                             lastAccessQuery.toString());
 
             String apiName;
@@ -1418,7 +1418,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                     + APIUsageStatisticsClientConstants.TIME_STAMP + ";";
 
             JSONObject jsonObj = APIUtil
-                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.API_ACCESS_SUMMARY_SIDDHI_APP,
+                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_ACCESS_SUMMARY_SIDDHI_APP,
                             query);
             String apiName;
             String version;
@@ -1492,7 +1492,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                     + APIUsageStatisticsClientConstants.API_CONTEXT + ", "
                     + APIUsageStatisticsClientConstants.DESTINATION + ";";
             JSONObject jsonObj = APIUtil
-                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.API_ACCESS_SUMMARY_SIDDHI_APP,
+                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_ACCESS_SUMMARY_SIDDHI_APP,
                             query);
             String apiName;
             String version;
@@ -1616,7 +1616,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             }
 
             JSONObject jsonObj = APIUtil
-                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.API_ACCESS_SUMMARY_SIDDHI_APP,
+                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_ACCESS_SUMMARY_SIDDHI_APP,
                             query);
 
             String apiContext;
@@ -1703,7 +1703,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             }
 
             JSONObject jsonObj = APIUtil
-                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.API_ACCESS_SUMMARY_SIDDHI_APP,
+                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_ACCESS_SUMMARY_SIDDHI_APP,
                             query);
             String apiName;
             String apiVersion;
@@ -1848,7 +1848,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             String query = "from " + columnFamily + "_SECONDS select " + APIUsageStatisticsClientConstants.TIME_STAMP
                     + " order by " + APIUsageStatisticsClientConstants.TIME_STAMP + " limit 1;";
             JSONObject jsonObj = APIUtil
-                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.API_ACCESS_SUMMARY_SIDDHI_APP,
+                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_ACCESS_SUMMARY_SIDDHI_APP,
                             query);
             APIFirstAccess firstAccess = null;
             Date date;
@@ -1902,7 +1902,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                     + ", " + APIUsageStatisticsClientConstants.API_VERSION + ";");
 
             JSONObject jsonObj = APIUtil
-                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.API_ACCESS_SUMMARY_SIDDHI_APP,
+                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_ACCESS_SUMMARY_SIDDHI_APP,
                             query.toString());
             String apiContext;
             String username;
@@ -2098,7 +2098,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 query.append(" on " + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='" + tenantDomain
                         + "'");
             }
-            query.append(" select " + APIUsageStatisticsClientConstants.API_NAME + " order by "
+            query.append(" select " + APIUsageStatisticsClientConstants.API_NAME + " group by "
+                    + APIUsageStatisticsClientConstants.API_NAME + " order by "
                     + APIUsageStatisticsClientConstants.API_NAME + " ASC;");
 
             JSONObject jsonObj = APIUtil.executeQueryOnStreamProcessor(
@@ -2147,7 +2148,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 query.append(" on " + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='" + tenantDomain
                         + "' AND " + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName + "'");
             }
-            query.append(" select " + APIUsageStatisticsClientConstants.APPLICATION_NAME + " order by "
+            query.append(" select " + APIUsageStatisticsClientConstants.APPLICATION_NAME + " group by "
+                    + APIUsageStatisticsClientConstants.APPLICATION_NAME + " order by "
                     + APIUsageStatisticsClientConstants.APPLICATION_NAME + " DESC;");
             JSONObject jsonObj = APIUtil.executeQueryOnStreamProcessor(
                     APIUsageStatisticsClientConstants.APIM_THROTTLED_OUT_SUMMARY_SIDDHI_APP, query.toString());
@@ -2246,7 +2248,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                         + APIUsageStatisticsClientConstants.AGG_SUM_OTHER_LATENCY + ";");
             }
             JSONObject jsonObj = APIUtil
-                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.API_ACCESS_SUMMARY_SIDDHI_APP,
+                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_ACCESS_SUMMARY_SIDDHI_APP,
                             query.toString());
             long timeStamp;
             if (jsonObj != null) {
@@ -2339,7 +2341,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             }
             query.append(";");
             JSONObject jsonObj = APIUtil
-                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.API_ACCESS_SUMMARY_SIDDHI_APP,
+                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_ACCESS_SUMMARY_SIDDHI_APP,
                             query.toString());
             long count;
             String country;
@@ -2418,7 +2420,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                     + APIUsageStatisticsClientConstants.BROWSER + ";");
 
             JSONObject jsonObj = APIUtil
-                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.API_ACCESS_SUMMARY_SIDDHI_APP,
+                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_ACCESS_SUMMARY_SIDDHI_APP,
                             query.toString());
             long count;
             String operatingSystem;

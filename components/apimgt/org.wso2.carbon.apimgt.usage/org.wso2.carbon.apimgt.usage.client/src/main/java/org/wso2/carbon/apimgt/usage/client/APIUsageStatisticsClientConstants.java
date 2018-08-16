@@ -163,7 +163,7 @@ public final class APIUsageStatisticsClientConstants {
     public static final String CITY = "apiVersion"; //change to city
 
     //------Siddhi app names----
-    public static final String API_ACCESS_SUMMARY_SIDDHI_APP = "API_ACCESS_SUMMARY";
+    public static final String APIM_ACCESS_SUMMARY_SIDDHI_APP = "APIM_ACCESS_SUMMARY";
     public static final String APIM_THROTTLED_OUT_SUMMARY_SIDDHI_APP = "APIM_THROTTLED_OUT_SUMMARY";
     public static final String APIM_FAULT_SUMMARY_SIDDHI_APP = "APIM_FAULT_SUMMARY";
 
