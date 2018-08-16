@@ -129,6 +129,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
     /**
      * Initialize the Rest client with logged user
+     *
      * @param username logged user ID
      * @throws APIMgtUsageQueryServiceClientException throws when error occurred
      */
@@ -161,6 +162,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
     /**
      * This method Initialises the datasource
+     *
      * @throws APIMgtUsageQueryServiceClientException throws if error occurred
      */
     @Override
@@ -170,6 +172,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
     /**
      * This method read XML content from the given stream
+     *
      * @param inputStream Stream to read XML
      * @return XML represented by OMElement
      * @throws Exception throws generic exception
@@ -254,7 +257,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * This method gets the app usage data for invoking APIs
      *
      * @param tableName name of the required table in the database
-     * @param idString concatenated Ids of applications
+     * @param idString  concatenated Ids of applications
      * @return a collection containing the data related to App usage
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
@@ -449,7 +452,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * This method gets the API faulty invocation data
      *
      * @param tableName name of the required table in the database
-     * @param idString concatenated Ids of applications
+     * @param idString  concatenated Ids of applications
      * @return a collection containing the data related to API faulty invocations
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
@@ -519,6 +522,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
     /**
      * This method retrieve and return the usage path invocations per applications
+     *
      * @param subscriberName subscriber name
      * @param groupId        group id of the subscriber
      * @param fromDate       starting date
@@ -659,7 +663,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * This method gets the API usage data per application
      *
      * @param tableName name of the required table in the database
-     * @param idString concatenated Ids of applications
+     * @param idString  concatenated Ids of applications
      * @return a collection containing the data related to per App API usage
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
@@ -736,7 +740,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @param providerName Name of the API provider
      * @return a List of APIUsageDTO objects - possibly empty
      * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException if an error occurs
-     *             while contacting backend services
+     *                                                                                              while contacting
+     *                                                                                              backend services
      */
     @Override
     public List<APIUsageDTO> getProviderAPIUsage(String providerName, String fromDate, String toDate, int limit)
@@ -748,9 +753,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         Map<String, APIUsageDTO> usageByAPIs = new TreeMap<String, APIUsageDTO>();
         for (APIUsage usage : usageData) {
             for (API providerAPI : providerAPIs) {
-                if (providerAPI.getId().getApiName().equals(usage.getApiName()) &&
-                        providerAPI.getId().getVersion().equals(usage.getApiVersion()) &&
-                        providerAPI.getContext().equals(usage.getContext())) {
+                if (providerAPI.getId().getApiName().equals(usage.getApiName()) && providerAPI.getId().getVersion()
+                        .equals(usage.getApiVersion()) && providerAPI.getContext().equals(usage.getContext())) {
                     String[] apiData = { usage.getApiName(), usage.getApiVersion(),
                             providerAPI.getId().getProviderName() };
 
@@ -835,9 +839,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * by each version of that API for a particular time preriod.
      *
      * @param providerName API publisher username
-     * @param apiName API name
-     * @param fromDate Starting date
-     * @param toDate Ending date
+     * @param apiName      API name
+     * @param fromDate     Starting date
+     * @param toDate       Ending date
      * @return list of APIVersionUsageDTO
      * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException if error occurred
      */
@@ -846,15 +850,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             String toDate) throws APIMgtUsageQueryServiceClientException {
 
         List<APIUsage> usageData = this
-                .getUsageByAPIVersionsData(APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG, fromDate,
-                        toDate, apiName);
+                .getUsageByAPIVersionsData(APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG, fromDate, toDate,
+                        apiName);
         List<API> providerAPIs = getAPIsByProvider(providerName);
         Map<String, APIVersionUsageDTO> usageByVersions = new TreeMap<String, APIVersionUsageDTO>();
         for (APIUsage usage : usageData) {
             for (API providerAPI : providerAPIs) {
-                if (providerAPI.getId().getApiName().equals(usage.getApiName()) &&
-                        providerAPI.getId().getVersion().equals(usage.getApiVersion()) &&
-                        providerAPI.getContext().equals(usage.getContext())) {
+                if (providerAPI.getId().getApiName().equals(usage.getApiName()) && providerAPI.getId().getVersion()
+                        .equals(usage.getApiVersion()) && providerAPI.getContext().equals(usage.getContext())) {
 
                     APIVersionUsageDTO usageDTO = new APIVersionUsageDTO();
                     usageDTO.setVersion(usage.getApiVersion());
@@ -906,6 +909,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
     /**
      * This method finds the destination of the apis
+     *
      * @param providerName Name of the API provider
      * @param fromDate     starting date of the results
      * @param toDate       ending date of the results
@@ -917,16 +921,15 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             throws APIMgtUsageQueryServiceClientException {
 
         List<APIUsageByDestination> usageData = this
-                .getAPIUsageByDestinationData(APIUsageStatisticsClientConstants.API_PER_DESTINATION_AGG,
-                        fromDate, toDate);
+                .getAPIUsageByDestinationData(APIUsageStatisticsClientConstants.API_PER_DESTINATION_AGG, fromDate,
+                        toDate);
         List<API> providerAPIs = getAPIsByProvider(providerName);
         List<APIDestinationUsageDTO> usageByDestination = new ArrayList<APIDestinationUsageDTO>();
 
         for (APIUsageByDestination usage : usageData) {
             for (API providerAPI : providerAPIs) {
-                if (providerAPI.getId().getApiName().equals(usage.getApiName()) &&
-                        providerAPI.getId().getVersion().equals(usage.getApiVersion()) &&
-                        providerAPI.getContext().equals(usage.getContext())) {
+                if (providerAPI.getId().getApiName().equals(usage.getApiName()) && providerAPI.getId().getVersion()
+                        .equals(usage.getApiVersion()) && providerAPI.getContext().equals(usage.getContext())) {
                     APIDestinationUsageDTO usageDTO = new APIDestinationUsageDTO();
                     usageDTO.setApiName(usage.getApiName());
                     usageDTO.setVersion(usage.getApiVersion());
@@ -952,8 +955,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     public List<APIUsageByUserDTO> getAPIUsageByUser(String providerName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
-        List<APIUsageByUserName> usageData = this
-                .getAPIUsageByUserData(providerName, fromDate, toDate, null);
+        List<APIUsageByUserName> usageData = this.getAPIUsageByUserData(providerName, fromDate, toDate, null);
         String tenantDomain = MultitenantUtils.getTenantDomain(providerName);
         List<APIUsageByUserDTO> usageByName = new ArrayList<APIUsageByUserDTO>();
 
@@ -1022,9 +1024,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         APIVersionLastAccessTimeDTO accessTimeDTO;
         for (APIAccessTime accessTime : accessTimes) {
             for (API providerAPI : providerAPIs) {
-                if (providerAPI.getId().getApiName().equals(accessTime.getApiName()) &&
-                        providerAPI.getId().getVersion().equals(accessTime.getApiVersion()) &&
-                        providerAPI.getContext().equals(accessTime.getContext())) {
+                if (providerAPI.getId().getApiName().equals(accessTime.getApiName()) && providerAPI.getId().getVersion()
+                        .equals(accessTime.getApiVersion()) && providerAPI.getContext()
+                        .equals(accessTime.getContext())) {
 
                     accessTimeDTO = new APIVersionLastAccessTimeDTO();
                     String apiName = accessTime.getApiName() + " (" + providerAPI.getId().getProviderName() + ")";
@@ -1194,11 +1196,12 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
     /**
      * find the API usage
+     *
      * @param providerName API provider name
      * @param apiName      Name of the API
      * @param apiVersion   API version
      * @param limit        Number of sorted entries to return
-     * @return  list of PerUserAPIUsageDTO
+     * @return list of PerUserAPIUsageDTO
      * @throws APIMgtUsageQueryServiceClientException throws if error occurred
      */
     @Override
@@ -1210,10 +1213,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         List<API> apiList = getAPIsByProvider(providerName);
         for (APIUsageByUser usageEntry : usageData) {
             for (API api : apiList) {
-                if (api.getContext().equals(usageEntry.getContext()) &&
-                        api.getId().getApiName().equals(apiName) &&
-                        api.getId().getVersion().equals(apiVersion) &&
-                        apiVersion.equals(usageEntry.getApiVersion())) {
+                if (api.getContext().equals(usageEntry.getContext()) && api.getId().getApiName().equals(apiName) && api
+                        .getId().getVersion().equals(apiVersion) && apiVersion.equals(usageEntry.getApiVersion())) {
                     PerUserAPIUsageDTO usageDTO = usageByUsername.get(usageEntry.getUsername());
                     if (usageDTO != null) {
                         usageDTO.setCount(usageDTO.getCount() + usageEntry.getRequestCount());
@@ -1292,7 +1293,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * This method sort and limit the result size for API Response time data
      *
      * @param usageData data to be sort and limit
-     * @param limit value to be limited
+     * @param limit     value to be limited
      * @return list of APIResponseTimeDTO
      */
     private List<APIResponseTimeDTO> getResponseTimeTopEntries(List<APIResponseTimeDTO> usageData, int limit) {
@@ -1304,7 +1305,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * This method sort and limit the result size for API Last access time data
      *
      * @param usageData data to be sort and limit
-     * @param limit value to be limited
+     * @param limit     value to be limited
      * @return list of APIVersionLastAccessTimeDTO
      */
     private List<APIVersionLastAccessTimeDTO> getLastAccessTimeTopEntries(List<APIVersionLastAccessTimeDTO> usageData,
@@ -1741,6 +1742,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
     /**
      * This method find the list of API published by particular Pulisher
+     *
      * @param providerId Provider username
      * @return list of APIs
      * @throws APIMgtUsageQueryServiceClientException throws if error occurred
@@ -2183,9 +2185,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     }
 
     @Override
-    public List<Result<ExecutionTimeOfAPIValues>> getExecutionTimeByAPI(String apiName, String version, String
-            tenantDomain, String fromDate, String toDate, String drillDown) throws
-            APIMgtUsageQueryServiceClientException {
+    public List<Result<ExecutionTimeOfAPIValues>> getExecutionTimeByAPI(String apiName, String version,
+            String tenantDomain, String fromDate, String toDate, String drillDown)
+            throws APIMgtUsageQueryServiceClientException {
 
         return getExecutionTimeByAPI(apiName, version, tenantDomain, fromDate, toDate, drillDown, "ALL");
     }
@@ -2296,9 +2298,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     }
 
     @Override
-    public List<Result<PerGeoLocationUsageCount>> getGeoLocationsByApi(String apiName, String version, String
-            tenantDomain, String fromDate, String toDate, String drillDown) throws
-            APIMgtUsageQueryServiceClientException {
+    public List<Result<PerGeoLocationUsageCount>> getGeoLocationsByApi(String apiName, String version,
+            String tenantDomain, String fromDate, String toDate, String drillDown)
+            throws APIMgtUsageQueryServiceClientException {
         List<Result<PerGeoLocationUsageCount>> result = new ArrayList<Result<PerGeoLocationUsageCount>>();
         try {
             String tableName = APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG;
@@ -2306,12 +2308,15 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             if (fromDate == null || toDate == null) {
                 tableName = tableName + "_SECONDS";
             }
-            query = new StringBuilder("from " + tableName + " on(" + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName + "'");
+            query = new StringBuilder(
+                    "from " + tableName + " on(" + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName + "'");
             if (version != null && !"ALL".equals(version)) {
                 query.append(" AND " + APIUsageStatisticsClientConstants.API_VERSION + "=='" + version + "'");
             }
             if (tenantDomain != null) {
-                query.append(" AND " + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='" + tenantDomain + "'");
+                query.append(
+                        " AND " + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='" + tenantDomain
+                                + "'");
             }
             if (!"ALL".equals(drillDown)) {
                 query.append(" AND " + APIUsageStatisticsClientConstants.COUNTRY + "=='" + drillDown + "'");
