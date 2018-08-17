@@ -178,10 +178,10 @@ public class AuthenticatorService {
             if (KeyManagerConstants.PASSWORD_GRANT_TYPE.equals(grantType) ||
                     KeyManagerConstants.REFRESH_GRANT_TYPE.equals(grantType) ||
                     KeyManagerConstants.CLIENT_CREDENTIALS_GRANT_TYPE.equals(grantType)) {
-                accessTokenRequest = AuthUtil
-                        .createAccessTokenRequest(userName, password, grantType, refreshToken,
-                                null, validityPeriod, scopesList,
-                                consumerKeySecretMap.get("CONSUMER_KEY"), consumerKeySecretMap.get("CONSUMER_SECRET"));
+                accessTokenRequest = AuthUtil.createAccessTokenRequest(userName, password, grantType, refreshToken,
+                        null, validityPeriod, scopesList,
+                        consumerKeySecretMap.get(KeyManagerConstants.KeyDetails.CONSUMER_KEY),
+                        consumerKeySecretMap.get(KeyManagerConstants.KeyDetails.CONSUMER_SECRET));
                 accessTokenInfo = getKeyManager().getNewAccessToken(accessTokenRequest);
             }
             else if (KeyManagerConstants.AUTHORIZATION_CODE_GRANT_TYPE.equals(grantType)) {
