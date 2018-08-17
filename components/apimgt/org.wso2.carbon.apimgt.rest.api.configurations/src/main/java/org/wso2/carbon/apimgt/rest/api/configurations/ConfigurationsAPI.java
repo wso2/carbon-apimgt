@@ -81,8 +81,7 @@ public class ConfigurationsAPI implements Microservice {
     @GET
     @Path("/policyRoutes")
     @Produces(MediaType.APPLICATION_JSON)
-    public  Response policyRoutes() {
-
+    public Response policyRoutes() {
         PolicyRoutes policyRoutes = ConfigurationService.getInstance().getApimUIConfigurations().getPolicyRoutes();
         return Response.ok(policyRoutes, MediaType.APPLICATION_JSON).build();
     }

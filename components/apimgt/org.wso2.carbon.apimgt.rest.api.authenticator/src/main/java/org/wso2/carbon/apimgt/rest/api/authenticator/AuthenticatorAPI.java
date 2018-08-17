@@ -199,7 +199,6 @@ public class AuthenticatorAPI implements Microservice {
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO)
                     .build();
         }
-
     }
 
     @OPTIONS
