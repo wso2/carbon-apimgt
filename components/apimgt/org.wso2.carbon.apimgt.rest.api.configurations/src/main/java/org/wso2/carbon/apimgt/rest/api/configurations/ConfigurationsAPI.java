@@ -78,6 +78,11 @@ public class ConfigurationsAPI implements Microservice {
         return Response.ok(featureMap, MediaType.APPLICATION_JSON).build();
     }
 
+    /**
+     * Get routes for policy pages defined in deployment.yaml
+     *
+     * @return Response {"privacyPolicyUrl" : "/policy/privacy-policy", "cookiePolicyUrl": "/policy/cookie-policy"}
+     */
     @GET
     @Path("/policyRoutes")
     @Produces(MediaType.APPLICATION_JSON)
