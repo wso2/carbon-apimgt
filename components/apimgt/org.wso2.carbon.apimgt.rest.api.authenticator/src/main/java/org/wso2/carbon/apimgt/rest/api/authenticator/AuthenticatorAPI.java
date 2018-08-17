@@ -192,7 +192,6 @@ public class AuthenticatorAPI implements Microservice {
                                             request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) :
                                             "")
                     .build();
-
         } catch (APIManagementException e) {
             ErrorDTO errorDTO = AuthUtil.getErrorDTO(e.getErrorHandler(), null);
             log.error(e.getMessage(), e);
