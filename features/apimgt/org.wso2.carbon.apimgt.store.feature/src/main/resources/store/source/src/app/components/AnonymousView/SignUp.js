@@ -38,7 +38,6 @@ import LoadingAnimation from "../Base/Loading/Loading";
 import API from "../../data/api";
 import Checkbox from 'material-ui/Checkbox';
 import Alert from '../Shared/Alert';
-import { PRIVACY_POLICY_URL, COOKIE_POLICY_URL } from "../../constants/constants";
 
 const styles = theme => ({
     buttonsWrapper: {
@@ -73,6 +72,9 @@ class SignUp extends React.Component{
             validation: false,
             validationError: "",
             policy: false,
+            privacyPolicyUrl: '',
+            cookiePolicyUrl: '',
+            isExternal: false
         };
     }
 
@@ -91,6 +93,18 @@ class SignUp extends React.Component{
             Utils.setEnvironment(environment);
         }).catch(() => {
             console.error('Error while receiving environment configurations');
+        });
+        ConfigManager.getConfigs().policyRoutes.then(response => {
+            this.setState({
+                privacyPolicyUrl: response.data.privacyPolicyUrl,
+                cookiePolicyUrl: response.data.cookiePolicyUrl
+            });
+            if (this.state.privacyPolicyUrl !== '/policy/privacy-policy' ||
+                this.state.cookiePolicyUrl !== '/policy/cookie-policy'){
+                this.setState({ isExternal:true })
+            }
+        }).catch(() => {
+            console.error('Error while receiving policy routes configurations');
         });
     };
 
@@ -182,7 +196,8 @@ class SignUp extends React.Component{
 
     render(){
         const { classes } = this.props;
-        const { environments, error, errorMessage, policy, environmentId, validation, validationError } = this.state;
+        const { environments, error, errorMessage, policy, environmentId, validation, validationError,
+            privacyPolicyUrl, cookiePolicyUrl, isExternal } = this.state;
         if (!environments[environmentId]) {
             return <LoadingAnimation/>
         }
@@ -316,9 +331,14 @@ class SignUp extends React.Component{
                                                     <FormControl>
                                                     <Typography>
                                                         After successfully signing in, a cookie is placed in your browser to track your session. See our {' '}
-                                                        <Link to={ COOKIE_POLICY_URL } target="_blank">
-                                                              Cookie Policy
-                                                        </Link>
+                                                        { isExternal ?
+                                                            <a href={ cookiePolicyUrl } target="_blank">
+                                                                Cookie Policy
+                                                            </a> :
+                                                            <Link to={ cookiePolicyUrl } target="_blank">
+                                                                Cookie Policy
+                                                            </Link>
+                                                        }
                                                         {' '} for more details.
                                                     </Typography>
                                                     </FormControl>
@@ -330,9 +350,14 @@ class SignUp extends React.Component{
                                                             <p>
                                                                 <strong>
                                                                     I hereby confirm that I have read and understood the {''}
-                                                                    <Link to={ PRIVACY_POLICY_URL } target="_blank" className={classes.linkDisplay}>
-                                                                        Privacy Policy.
-                                                                    </Link>
+                                                                    { isExternal ?
+                                                                        <a href={ privacyPolicyUrl } target="_blank" className={classes.linkDisplay}>
+                                                                            Privacy Policy.
+                                                                        </a> :
+                                                                        <Link to={ '/policy/privacy-policy' } target="_blank" className={classes.linkDisplay}>
+                                                                            Privacy Policy.
+                                                                        </Link>
+                                                                    }
                                                                 </strong>
                                                             </p>
                                                         }

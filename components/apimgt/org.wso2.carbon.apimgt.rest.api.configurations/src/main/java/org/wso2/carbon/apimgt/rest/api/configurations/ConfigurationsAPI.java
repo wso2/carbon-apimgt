@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.rest.api.configurations;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.rest.api.configurations.models.APIMUIConfigurations;
 import org.wso2.carbon.apimgt.rest.api.configurations.models.Feature;
+import org.wso2.carbon.apimgt.rest.api.configurations.models.PolicyRoutes;
 import org.wso2.carbon.apimgt.rest.api.configurations.utils.bean.EnvironmentConfigBean;
 import org.wso2.msf4j.Microservice;
 
@@ -75,5 +76,14 @@ public class ConfigurationsAPI implements Microservice {
 
         Map<String, Feature> featureMap = ConfigurationService.getInstance().getAvailableFeatures();
         return Response.ok(featureMap, MediaType.APPLICATION_JSON).build();
+    }
+
+    @GET
+    @Path("/policyRoutes")
+    @Produces(MediaType.APPLICATION_JSON)
+    public  Response policyRoutes() {
+
+        PolicyRoutes policyRoutes = ConfigurationService.getInstance().getApimUIConfigurations().getPolicyRoutes();
+        return Response.ok(policyRoutes, MediaType.APPLICATION_JSON).build();
     }
 }

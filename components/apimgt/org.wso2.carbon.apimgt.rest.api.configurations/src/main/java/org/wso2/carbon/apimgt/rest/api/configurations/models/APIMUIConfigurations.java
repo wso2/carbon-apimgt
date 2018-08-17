@@ -42,4 +42,13 @@ public class APIMUIConfigurations {
     public void setEnvironments(List<EnvironmentConfigurations> environments) {
         this.environments = environments;
     }
+
+    @Element(description = "Routes for policy pages\n" +
+            "  ◆ privacyPolicyUrl - URL for privacy policy page\n" +
+            "  ◆ cookiePolicyUrl - URL for cookie policy page")
+    private PolicyRoutes policyRoutes = new PolicyRoutes();
+
+    public PolicyRoutes getPolicyRoutes() { return policyRoutes; }
+
+    public void setPolicyRoutes(PolicyRoutes policyRoutes) { this.policyRoutes = policyRoutes; }
 }
