@@ -45,7 +45,8 @@ class ConfigManager {
      */
     static getConfigs() {
         return {
-            'environments': ConfigManager._getPromisedConfigs(ConfigRequestPaths.ENVIRONMENT_CONFIG_PATH)
+            'environments': ConfigManager._getPromisedConfigs(ConfigRequestPaths.ENVIRONMENT_CONFIG_PATH),
+            'policyRoutes' : ConfigManager._getPromisedConfigs(ConfigRequestPaths.POLICY_CONFIG_PATH)
         };
     }
 }
@@ -54,7 +55,8 @@ class ConfigManager {
  * @type {{ConstPath: StringPath}} ConfigRequestPaths: Configuration requesting url paths
  */
 const ConfigRequestPaths = {
-    ENVIRONMENT_CONFIG_PATH: "/api/am/config/v1.0/environments"
+    ENVIRONMENT_CONFIG_PATH: "/api/am/config/v1.0/environments",
+    POLICY_CONFIG_PATH: "/api/am/config/v1.0/policyRoutes"
 };
 
 /**

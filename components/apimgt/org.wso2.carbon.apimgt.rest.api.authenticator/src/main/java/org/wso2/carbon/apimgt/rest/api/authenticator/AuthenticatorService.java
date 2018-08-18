@@ -108,6 +108,7 @@ public class AuthenticatorService {
         grantTypes.add(KeyManagerConstants.PASSWORD_GRANT_TYPE);
         grantTypes.add(KeyManagerConstants.AUTHORIZATION_CODE_GRANT_TYPE);
         grantTypes.add(KeyManagerConstants.REFRESH_GRANT_TYPE);
+        grantTypes.add(KeyManagerConstants.CLIENT_CREDENTIALS_GRANT_TYPE);
 
         if (isMultiEnvironmentOverviewEnabled) {
             grantTypes.add(KeyManagerConstants.JWT_GRANT_TYPE);
@@ -161,7 +162,7 @@ public class AuthenticatorService {
     public AccessTokenInfo getTokens(String appName, String grantType,
                                      String userName, String password, String refreshToken,
                                      long validityPeriod, String authorizationCode, String assertion,
-                                     IdentityProvider identityProvider)
+                                     IdentityProvider identityProvider, String scopesList)
             throws APIManagementException {
         AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
         AccessTokenRequest accessTokenRequest = new AccessTokenRequest();
@@ -169,14 +170,21 @@ public class AuthenticatorService {
                 .getEnvironmentConfigurations().getMultiEnvironmentOverview();
         boolean isMultiEnvironmentOverviewEnabled = multiEnvironmentOverviewConfigs.isEnabled();
 
-        // Get scopes of the application
-        String scopes = getApplicationScopes(appName);
         log.debug("Set scopes for {} application using swagger definition.", appName);
         // TODO: Get Consumer Key & Secret without creating a new app, from the IS side
         Map<String, String> consumerKeySecretMap = getConsumerKeySecret(appName);
         log.debug("Received consumer key & secret for {} application.", appName);
         try {
-            if (KeyManagerConstants.AUTHORIZATION_CODE_GRANT_TYPE.equals(grantType)) {
+            if (KeyManagerConstants.PASSWORD_GRANT_TYPE.equals(grantType) ||
+                    KeyManagerConstants.REFRESH_GRANT_TYPE.equals(grantType) ||
+                    KeyManagerConstants.CLIENT_CREDENTIALS_GRANT_TYPE.equals(grantType)) {
+                accessTokenRequest = AuthUtil.createAccessTokenRequest(userName, password, grantType, refreshToken,
+                        null, validityPeriod, scopesList,
+                        consumerKeySecretMap.get(KeyManagerConstants.KeyDetails.CONSUMER_KEY),
+                        consumerKeySecretMap.get(KeyManagerConstants.KeyDetails.CONSUMER_SECRET));
+                accessTokenInfo = getKeyManager().getNewAccessToken(accessTokenRequest);
+            }
+            else if (KeyManagerConstants.AUTHORIZATION_CODE_GRANT_TYPE.equals(grantType)) {
                 // Access token for authorization code grant type
                 APIMAppConfigurations appConfigs = apimAppConfigurationService.getApimAppConfigurations();
                 String callBackURL = appConfigs.getApimBaseUrl() + AuthenticatorConstants.AUTHORIZATION_CODE_CALLBACK_URL + appName;
@@ -187,7 +195,7 @@ public class AuthenticatorService {
                     accessTokenRequest.setClientSecret(consumerKeySecretMap.get("CONSUMER_SECRET"));
                     accessTokenRequest.setGrantType(grantType);
                     accessTokenRequest.setAuthorizationCode(authorizationCode);
-                    accessTokenRequest.setScopes(scopes);
+                    accessTokenRequest.setScopes(scopesList);
                     accessTokenRequest.setValidityPeriod(validityPeriod);
                     accessTokenRequest.setCallbackURI(callBackURL);
                     accessTokenInfo = getKeyManager().getNewAccessToken(accessTokenRequest);
@@ -196,26 +204,13 @@ public class AuthenticatorService {
                     log.error(errorMsg, ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);
                     throw new APIManagementException(errorMsg, ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);
                 }
-            } else if (KeyManagerConstants.PASSWORD_GRANT_TYPE.equals(grantType)) {
-                // Access token for password code grant type
-                accessTokenRequest = AuthUtil
-                        .createAccessTokenRequest(userName, password, grantType, refreshToken,
-                                null, validityPeriod, scopes,
-                                consumerKeySecretMap.get("CONSUMER_KEY"), consumerKeySecretMap.get("CONSUMER_SECRET"));
-                accessTokenInfo = getKeyManager().getNewAccessToken(accessTokenRequest);
-            } else if (KeyManagerConstants.REFRESH_GRANT_TYPE.equals(grantType)) {
-                accessTokenRequest = AuthUtil
-                        .createAccessTokenRequest(userName, password, grantType, refreshToken,
-                                null, validityPeriod, scopes,
-                                consumerKeySecretMap.get("CONSUMER_KEY"), consumerKeySecretMap.get("CONSUMER_SECRET"));
-                accessTokenInfo = getKeyManager().getNewAccessToken(accessTokenRequest);
             } else if (isMultiEnvironmentOverviewEnabled) { // JWT or Custom grant type
                 accessTokenRequest.setClientId(consumerKeySecretMap.get("CONSUMER_KEY"));
                 accessTokenRequest.setClientSecret(consumerKeySecretMap.get("CONSUMER_SECRET"));
                 accessTokenRequest.setAssertion(assertion);
                 // Pass grant type to extend a custom grant instead of JWT grant in the future
                 accessTokenRequest.setGrantType(KeyManagerConstants.JWT_GRANT_TYPE);
-                accessTokenRequest.setScopes(scopes);
+                accessTokenRequest.setScopes(scopesList);
                 accessTokenRequest.setValidityPeriod(validityPeriod);
                 accessTokenInfo = getKeyManager().getNewAccessToken(accessTokenRequest);
 
@@ -401,6 +396,7 @@ public class AuthenticatorService {
             List<String> grantTypes = new ArrayList<>();
             grantTypes.add(KeyManagerConstants.PASSWORD_GRANT_TYPE);
             grantTypes.add(KeyManagerConstants.REFRESH_GRANT_TYPE);
+            grantTypes.add(KeyManagerConstants.CLIENT_CREDENTIALS_GRANT_TYPE);
             OAuthApplicationInfo oAuthApplicationInfo;
             oAuthApplicationInfo = createDCRApplication(appName, "http://temporary.callback/url", grantTypes);
 
@@ -421,7 +417,7 @@ public class AuthenticatorService {
      * @return scopes - A space separated list of scope keys
      * @throws APIManagementException When retrieving scopes from swagger definition fails
      */
-    private String getApplicationScopes(String appName) throws APIManagementException {
+    protected String getApplicationScopes(String appName) throws APIManagementException {
         String scopes;
         String applicationRestAPI = null;
         if (AuthenticatorConstants.STORE_APPLICATION.equals(appName)) {

@@ -315,12 +315,14 @@ class Layout extends React.Component {
                                             label="Night Mode"
                                         />
                                     </ListItem>
-                                    <ListItem button className={classes.listItem}>
-                                        <Avatar>
-                                            <Person />
-                                        </Avatar>
-                                        <ListItemText secondary="Chanage Password" primary={this.state.user}/>
-                                    </ListItem>
+                                    <Link to={"/user"}>
+                                        <ListItem button className={classes.listItem}>
+                                            <Avatar>
+                                                <Person />
+                                            </Avatar>
+                                            <ListItemText secondary="Change Password" primary={this.state.user}/>
+                                        </ListItem>
+                                    </Link>
                                     <Link to={"/profile"} className={classes.textDisplayLink}>
                                         <ListItem button className={classes.listItem}>
 

@@ -218,6 +218,40 @@ class AuthManager {
         return axios.post(url, qs.stringify(params), {headers: headers});
     }
 
+    /**
+     * Register anonymous user by generating token using client_credentials grant type
+     * @param {Object} environment : environment object
+     * @returns {AxiosPromise} : Promise object with the request made
+     */
+    registerUser(environment) {
+        const headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded'
+        };
+        const data = {
+            grant_type: 'client_credentials',
+            validity_period: 3600,
+            scopes: 'apim:self-signup'
+        };
+        let promised_response = axios(Utils.getSignUpTokenPath(environment), {
+            method: "POST",
+            data: qs.stringify(data),
+            headers: headers,
+            withCredentials: false
+        });
+
+        promised_response.then(response => {
+            const validityPeriod = response.data.validityPeriod;
+            const WSO2_AM_TOKEN_1 = response.data.partialToken;
+            const user = new User(Utils.getEnvironment().label, response.data.authUser, response.data.idToken);
+            user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, Utils.CONST.CONTEXT_PATH);
+            user.scopes = response.data.scopes;
+            AuthManager.setUser(user);
+        }).catch(error => {
+            console.error("Authentication Error: ", error);
+        });
+        return promised_response;
+    }
 }
 
 export default AuthManager;

@@ -158,6 +158,10 @@ class Utils {
         return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.LOGIN_TOKEN_PATH}${Utils.CONST.CONTEXT_PATH}`;
     }
 
+    static getSignUpTokenPath(environment) {
+        return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.LOGIN_SIGN_UP_PATH}${Utils.CONST.CONTEXT_PATH}`;
+    }
+
     static getSwaggerURL() {
         return "https://" + Utils.getEnvironment().host + Utils.CONST.SWAGGER_YAML;
     }
@@ -177,6 +181,7 @@ Utils.CONST = {
     DCR_APP_INFO: '/login/login',
     LOGOUT: '/login/logout',
     LOGIN_TOKEN_PATH: '/login/token',
+    LOGIN_SIGN_UP_PATH: '/login/signup',
     SWAGGER_YAML: '/api/am/store/v1.0/apis/swagger.yaml',
     PROTOCOL: 'https://',
     CONTEXT_PATH: '/store'

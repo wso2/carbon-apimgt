@@ -85,6 +85,7 @@ public class KeyManagerConstants {
     public static final String APPLICATION_CLIENT_ID = "client_id";
     public static final String APPLICATION_CLIENT_SECRET = "client_secret";
     public static final String APPLICATION_CLIENT_NAME = "client_name";
+    public static final String SELF_SIGN_UP_SCOPE = "apim:self-signup";
 
     /**
      * Status codes used in key-validation process
@@ -113,8 +114,8 @@ public class KeyManagerConstants {
     public static class KeyDetails {
         public static final String VALIDITY_TIME = "validityTime";
         public static final String ACCESS_TOKEN = "accessToken";
-        public static final String CONSUMER_KEY = "consumerKey";
-        public static final String CONSUMER_SECRET = "consumerSecret";
+        public static final String CONSUMER_KEY = "CONSUMER_KEY";
+        public static final String CONSUMER_SECRET = "CONSUMER_SECRET";
         public static final String APP_DETAILS = "appDetails";
         public static final String SUPPORTED_GRANT_TYPES = "supportedGrantTypes";
         public static final String TOKEN_SCOPES = "tokenScopes";

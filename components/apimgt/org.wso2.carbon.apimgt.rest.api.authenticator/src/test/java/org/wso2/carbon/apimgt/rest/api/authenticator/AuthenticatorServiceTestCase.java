@@ -206,9 +206,10 @@ public class AuthenticatorServiceTestCase {
 
         //// Actual response - When authorization code is not null
         Mockito.when(keyManager.getNewAccessToken(Mockito.any())).thenReturn(tokenInfo);
+        String scopes = authenticatorService.getApplicationScopes("store");
         AccessTokenInfo tokenInfoResponseForValidAuthCode = authenticatorService.getTokens("store",
                 "authorization_code", null, null, null, 0,
-                "xxx-auth-code-xxx", null, null);
+                "xxx-auth-code-xxx", null, null, scopes);
         Assert.assertEquals(tokenInfoResponseForValidAuthCode, tokenInfo);
 
         // Error Path - 500 - Authorization code grant type
@@ -218,7 +219,8 @@ public class AuthenticatorServiceTestCase {
         AccessTokenInfo tokenInfoResponseForInvalidAuthCode = new AccessTokenInfo();
         try {
             tokenInfoResponseForInvalidAuthCode = authenticatorService.getTokens("store",
-                    "authorization_code", null, null, null, 0, null, null, null);
+                    "authorization_code", null, null, null, 0,
+                    null, null, null, scopes);
         } catch (APIManagementException e) {
             Assert.assertEquals(e.getMessage(), "No Authorization Code available.");
             Assert.assertEquals(tokenInfoResponseForInvalidAuthCode, emptyTokenInfo);
@@ -227,7 +229,8 @@ public class AuthenticatorServiceTestCase {
         // Happy Path - 200 - Password grant type
         Mockito.when(keyManager.getNewAccessToken(Mockito.any())).thenReturn(tokenInfo);
         AccessTokenInfo tokenInfoResponseForPasswordGrant = authenticatorService.getTokens("store", "password",
-                "admin", "admin", null, 0, null, null, null);
+                "admin", "admin", null, 0, null,
+                null, null, scopes);
         Assert.assertEquals(tokenInfoResponseForPasswordGrant, tokenInfo);
 
         // Error Path - When token generation fails and throws APIManagementException
@@ -235,7 +238,8 @@ public class AuthenticatorServiceTestCase {
                 .thenReturn(tokenInfo);
         try {
             authenticatorService.getTokens("store", "password",
-                    "admin", "admin", null, 0, null, null, null);
+                    "admin", "admin", null, 0, null,
+                    null, null, scopes);
         } catch (APIManagementException e) {
             Assert.assertEquals(e.getMessage(), "Error while receiving tokens for OAuth application : store");
         }
@@ -243,7 +247,8 @@ public class AuthenticatorServiceTestCase {
         // Happy Path - 200 - Refresh grant type
         Mockito.when(keyManager.getNewAccessToken(Mockito.any())).thenReturn(tokenInfo);
         AccessTokenInfo tokenInfoResponseForRefreshGrant = authenticatorService.getTokens("store", "refresh_token",
-                null, null, null, 0, null, null, null);
+                null, null, null, 0, null, null,
+                null, scopes);
         Assert.assertEquals(tokenInfoResponseForPasswordGrant, tokenInfo);
 
         // Happy Path - 200 - JWT grant type
@@ -259,7 +264,8 @@ public class AuthenticatorServiceTestCase {
         Mockito.when(keyManager.getNewAccessToken(Mockito.any())).thenReturn(tokenInfo);
 
         AccessTokenInfo tokenInfoResponseForValidJWTGrant = authenticatorService.getTokens("store",
-                "urn:ietf:params:oauth:grant-type:jwt-bearer", null, null, null, 0, null, "xxx-assertion-xxx", identityProvider);
+                "urn:ietf:params:oauth:grant-type:jwt-bearer", null, null, null,
+                0, null, "xxx-assertion-xxx", identityProvider, scopes);
         Assert.assertEquals(tokenInfoResponseForValidJWTGrant, tokenInfo);
 
         // Error Path - When invalid user in JWT Token
@@ -269,7 +275,8 @@ public class AuthenticatorServiceTestCase {
         Mockito.when(keyManager.getNewAccessToken(Mockito.any())).thenReturn(tokenInfo);
         try {
             AccessTokenInfo tokenInfoResponseForInvalidJWTGrant = authenticatorService.getTokens("store",
-                    "urn:ietf:params:oauth:grant-type:jwt-bearer", null, null, null, 0, null, "xxx-assertion-xxx", identityProvider);
+                    "urn:ietf:params:oauth:grant-type:jwt-bearer", null, null, null,
+                    0, null, "xxx-assertion-xxx", identityProvider, scopes);
             Assert.assertEquals(tokenInfoResponseForInvalidJWTGrant, tokenInfo);
         } catch (APIManagementException e) {
             Assert.assertEquals(e.getMessage(), "User John does not exists in this environment.");

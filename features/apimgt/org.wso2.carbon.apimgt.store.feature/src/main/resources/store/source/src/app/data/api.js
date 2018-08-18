@@ -486,4 +486,19 @@ export default class API extends Resource {
             return promise_get;
         }
     }
+
+    /**
+     * Create new user
+     * @param body {JSON object} {username:"", password:"", firstName:"", lastName:"", email:""}
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    createUser(body) {
+        let payload = {body: body};
+        const promise = this.client.then(
+            (client) => {
+                return client.apis["Sign Up"].post_self_signup(payload, {'Content-Type': 'application/json'});
+            }
+        );
+        return promise;
+    }
 }

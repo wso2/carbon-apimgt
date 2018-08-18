@@ -31,6 +31,10 @@ import ConfigManager from "./app/data/ConfigManager";
 import {MuiThemeProvider, createMuiTheme} from 'material-ui/styles';
 import DarkTheme from './app/components/Shared/DarkTheme'
 import LightTheme from './app/components/Shared/LightTheme'
+import AnonymousView from "./app/components/AnonymousView/AnonymousView";
+import SignUp from "./app/components/AnonymousView/SignUp";
+import PrivacyPolicy from "./app/components/Policy/PrivacyPolicy";
+import CookiePolicy from "./app/components/Policy/CookiePolicy";
 const themes = [];
 
 themes.push(createMuiTheme(LightTheme));
@@ -120,6 +124,10 @@ class Protected extends Component {
                     </Base>
                 </MuiThemeProvider>
             );
+        } else {
+            return (
+                <Route path={"/"} component={AnonymousView}/>
+            );
         }
 
         let params = qs.stringify({referrer: this.props.location.pathname});
@@ -139,10 +147,13 @@ const Store = (props) => {
             <Switch>
                 <Route path={"/login"} render={() => <Login appName={"store"} appLabel={"STORE"}/>}/>
                 <Route path={"/logout"} component={Logout}/>
+                <Route path={"/sign-up"} component={SignUp}/>
+                <Route path={"/policy/privacy-policy"} component={PrivacyPolicy}/>
+                <Route path={"/policy/cookie-policy"} component={CookiePolicy}/>
                 <Route component={Protected}/>
             </Switch>
         </Router>
     );
-}
+};
 
 export default Store;
