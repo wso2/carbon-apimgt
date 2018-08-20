@@ -16,47 +16,63 @@
  * under the License.
  */
 
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import {BrowserRouter as Router, Redirect, Route, Switch} from 'react-router-dom';
+import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom';
 import qs from 'qs';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import Log from 'log4javascript';
 import './App.css';
 import Utils from './app/data/Utils';
 import ConfigManager from './app/data/ConfigManager';
-import MaterialDesignCustomTheme from './app/components/Shared/CustomTheme';
-import {PageNotFound} from './app/components/Base/Errors';
+// import MaterialDesignCustomTheme from './app/components/Shared/CustomTheme';
+import { PageNotFound } from './app/components/Base/Errors';
 import AuthManager from './app/data/AuthManager';
 import {addLocaleData, defineMessages, IntlProvider} from 'react-intl';
-import ApiCreate from './app/components/Apis/Create/ApiCreate';
 import Apis from './app/components/Apis/Apis';
 import Endpoints from './app/components/Endpoints';
 import Base from './app/components/Base';
 import Login from './app/components/Login/Login';
 import Logout from './app/components/Logout';
 import AppErrorBoundary from './app/components/Shared/AppErrorBoundary';
+import Header from './app/components/Base/Header';
+import Avatar from './app/components/Base/Header/avatar/Avatar';
 
 const themes = [];
 const darkTheme = createMuiTheme({
     palette: {
         type: 'dark', // Switching the dark mode on is a single property value change.
+        background: {
+            active: 'rgba(27, 94, 32, 1)',
+            navBar: '#29434e',
+            container: '#001114',
+            paper: '#29434e',
+        },
+        primary: {
+            light: '#315564',
+            main: '#002c3a',
+            dark: '#000115',
+            contrastText: '#fff',
+        },
     },
 });
 const lightTheme = createMuiTheme({
     palette: {
         type: 'light', // Switching the dark mode on is a single property value change.
+        background: {
+            active: 'rgba(165, 214, 167, 1)',
+            navBar: '#fafafa',
+            container: '#e8e7e7',
+            contentFrame: 'rgba(227, 242, 253, 1)',
+        },
+        text: {
+            brand: 'rgba(255,255,255,1)',
+        },
     },
 });
-darkTheme.palette.background.active = 'rgba(27, 94, 32, 1)';
-darkTheme.palette.background.appBar = 'rgba(63, 81, 181, 1)';
-lightTheme.palette.background.active = 'rgba(165, 214, 167, 1)';
-lightTheme.palette.background.appBar = 'rgb(59, 120, 231,1)';
-lightTheme.palette.background.contentFrame = 'rgba(227, 242, 253, 1)';
-lightTheme.palette.text.brand = 'rgba(255,255,255,1)';
 themes.push(darkTheme);
 themes.push(lightTheme);
-themes.push(createMuiTheme(MaterialDesignCustomTheme));
+// themes.push(createMuiTheme(MaterialDesignCustomTheme));
 
 
 /**
@@ -71,7 +87,7 @@ const language = (navigator.languages && navigator.languages[0]) || navigator.la
 const languageWithoutRegionCode = language.toLowerCase().split(/[_-]+/)[0];
 
 /**
- * Render protected application paths
+ * Render protected application paths, Implements container presenter pattern
  */
 class Protected extends Component {
     /**
@@ -82,10 +98,11 @@ class Protected extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            themeIndex: 0,
+            themeIndex: 1,
             messages: {},
         };
         this.environments = [];
+        this.toggleTheme = this.toggleTheme.bind(this);
         this.loadLocale = this.loadLocale.bind(this);
     }
 
@@ -135,11 +152,11 @@ class Protected extends Component {
     /**
      * Change the theme index incrementally
      */
-    setTheme() {
-        let { themeIndex } = this.state;
-        themeIndex++;
-        localStorage.setItem('themeIndex', themeIndex);
-        this.setState({ themeIndex });
+    toggleTheme() {
+        this.setState(
+            ({ themeIndex }) => ({ themeIndex: (themeIndex + 1) % 2 }),
+            () => localStorage.setItem('themeIndex', this.state.themeIndex),
+        );
     }
 
     /**
@@ -177,18 +194,18 @@ class Protected extends Component {
         // Note: AuthManager.getUser() method is a passive check, which simply check the user availability in browser
         // storage,
         // Not actively check validity of access token from back-end
-
-        if (AuthManager.getUser(environmentName)) {
+        const currentUser = AuthManager.getUser(environmentName);
+        if (currentUser) {
+            const header = <Header avatar={<Avatar toggleTheme={this.toggleTheme} />} user={currentUser} />;
             return (
                 <IntlProvider locale={language} messages={this.state.messages}>
-                    <MuiThemeProvider theme={themes[this.state.themeIndex % 3]}>
-                        <Base setTheme={() => this.setTheme()}>
+                    <MuiThemeProvider theme={themes[this.state.themeIndex]}>
+                        <Base header={header}>
                             <Switch>
-                                <Redirect exact from='/' to='/apis'/>
-                                <Route path='/apis' component={Apis}/>
-                                <Route path='/endpoints' component={Endpoints}/>
-                                <Route path='/api/create' component={ApiCreate}/>
-                                <Route component={PageNotFound}/>
+                                <Redirect exact from='/' to='/apis' />
+                                <Route path='/apis' component={Apis} />
+                                <Route path='/endpoints' component={Endpoints} />
+                                <Route component={PageNotFound} />
                             </Switch>
                         </Base>
                     </MuiThemeProvider>

@@ -29,16 +29,16 @@ import { withStyles } from '@material-ui/core/styles';
 import IconButton from '@material-ui/core/IconButton';
 import List from '@material-ui/icons/List';
 import GridIcon from '@material-ui/icons/GridOn';
-import AddNewMenu from './AddNewMenu';
+import AddNewMenu from './components/AddNewMenu';
 import Alert from '../../Shared/Alert';
 
 import { ScopeValidation, resourceMethod, resourcePath } from '../../../data/ScopeValidation';
-import ApiThumb from './ApiThumb';
+import ApiThumb from './components/ApiThumb';
 import '../Apis.css';
 import API from '../../../data/api.js';
 import { Progress } from '../../Shared';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
-import SampleAPI from './SampleAPI';
+import SampleAPI from './initial/SampleAPI';
 
 const styles = theme => ({
     rightIcon: {
@@ -87,6 +87,12 @@ const menu = (
         </Link>
     </Menu>
 );
+
+/**
+ * Render the APIs Listing page, This is the Default Publisher Landing page as well
+ * @class Listing
+ * @extends {React.Component} @inheritdoc
+ */
 class Listing extends React.Component {
     constructor(props) {
         super(props);
@@ -157,7 +163,7 @@ class Listing extends React.Component {
         this.setState({ newMenuOpen: false });
     };
     render() {
-        const classes = this.props.classes;
+        const { classes } = this.props;
         const { apis } = this.state;
         if (this.state.notFound) {
             return <ResourceNotFound />;

@@ -19,14 +19,16 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
-import Listing from './Listing/Listing';
+import Listing from './Listing';
 import Details from './Details';
+import ApiCreate from './Create/ApiCreate';
 import { PageNotFound } from '../Base/Errors';
 
 const Apis = () => {
     return (
         <Switch>
             <Route exact path='/apis' component={Listing} />
+            <Route path='/api/create' component={ApiCreate} />
             <Route path='/apis/:apiUUID/' render={props => <Details {...props} />} />
             <Route component={PageNotFound} />
         </Switch>

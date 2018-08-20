@@ -16,12 +16,19 @@
  * under the License.
  */
 
-import React, {Component} from 'react'
-import Base from './Base/index'
-import Landing from './Landing/Landing'
-import Apis from './Apis/Apis'
-import Login from './Login/Login'
-import Logout from './Logout'
-import Endpoints from './Endpoints'
+import React from 'react';
+import Base from './Base/index';
+import Landing from './Landing/Landing';
+import Apis from './Apis/Apis';
+import Login from './Login/Login';
+import Logout from './Logout';
+import Endpoints from './Endpoints';
 
-export {Base, Landing, Apis, Login, Logout, Endpoints}
+export {
+    Base,
+    Landing,
+    Apis,
+    Login,
+    Logout,
+    Endpoints,
+};

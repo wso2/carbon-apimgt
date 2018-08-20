@@ -17,7 +17,6 @@
  */
 
 import 'typeface-roboto';
-import 'material-design-icons';
 import '@material-ui/icons/';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import ReactDOM from 'react-dom';

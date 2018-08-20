@@ -26,11 +26,11 @@ import Delete from '@material-ui/icons/Delete';
 import PropTypes from 'prop-types';
 
 import ImageGenerator from './ImageGenerator';
-import API from '../../../data/api';
-import { resourceMethod, resourcePath, ScopeValidation } from '../../../data/ScopeValidation';
-import Utils from '../../../data/Utils';
-import ConfirmDialog from '../../Shared/ConfirmDialog';
-import Alert from '../../Shared/Alert';
+import API from '../../../../data/api';
+import { resourceMethod, resourcePath, ScopeValidation } from '../../../../data/ScopeValidation';
+import Utils from '../../../../data/Utils';
+import ConfirmDialog from '../../../Shared/ConfirmDialog';
+import Alert from '../../../Shared/Alert';
 
 const styles = theme => ({
     lifeCycleState: {
