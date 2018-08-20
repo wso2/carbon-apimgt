@@ -34,7 +34,6 @@ import Alert from '../../Shared/Alert';
 
 import { ScopeValidation, resourceMethod, resourcePath } from '../../../data/ScopeValidation';
 import ApiThumb from './components/ApiThumb';
-import '../Apis.css';
 import API from '../../../data/api.js';
 import { Progress } from '../../Shared';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';

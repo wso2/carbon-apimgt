@@ -366,6 +366,7 @@ class Overview extends Component {
                                     <a
                                         href={JSON.parse(ep.inline.endpointConfig).serviceUrl}
                                         target='_blank'
+                                        rel='noopener noreferrer'
                                         className={classes.openNewIcon}
                                     >
                                         <OpenInNew />

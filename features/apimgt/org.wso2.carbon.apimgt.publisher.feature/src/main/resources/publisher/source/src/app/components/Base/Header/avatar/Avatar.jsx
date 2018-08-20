@@ -29,7 +29,7 @@ const styles = theme => ({
 });
 
 /**
- * Render the User Avatar with thir name inside the Top AppBar component
+ * Render the User Avatar with their name inside the Top AppBar component
  *
  * @class Avatar
  * @extends {Component}

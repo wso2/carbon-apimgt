@@ -10,7 +10,7 @@ const NavItem = (props) => {
         listItemProps, listItemTextProps, iconProps, ...other
     } = props;
     const {
-        name, onClick, linkTo, NavIcon, classes,
+        name, onClick, linkTo, NavIcon,
     } = other;
 
     const listItem = (

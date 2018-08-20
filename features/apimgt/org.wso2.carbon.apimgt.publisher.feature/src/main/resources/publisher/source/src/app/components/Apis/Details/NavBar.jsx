@@ -272,6 +272,7 @@ class NavBar extends Component {
                 <a
                     href={`/store/apis/${apiUUID}/overview?environment=${Utils.getCurrentEnvironment().label}`}
                     target='_blank'
+                    rel='noopener noreferrer'
                     title='Store'
                     className={classes.storeButton}
                 >
