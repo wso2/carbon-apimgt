@@ -97,4 +97,5 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 
         return true;
     }
+
 }
