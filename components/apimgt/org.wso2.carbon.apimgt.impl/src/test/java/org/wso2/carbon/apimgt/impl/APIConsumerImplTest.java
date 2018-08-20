@@ -840,7 +840,6 @@ public class APIConsumerImplTest {
         Mockito.when(apiMgtDAO.addApplication(application, "userID")).thenReturn(1);
         assertEquals(1, apiConsumer.addApplication(application, "userID"));
     }
-
     @Test
     public void testGetScopesBySubscribedAPIs() throws APIManagementException {
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);

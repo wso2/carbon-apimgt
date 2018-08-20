@@ -25,12 +25,15 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
+import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.gateway.mediators.APIMgtCommonExecutionPublisher;
-import org.wso2.carbon.apimgt.usage.publisher.dto.ResponsePublisherDTO;
+import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
+import org.wso2.carbon.apimgt.usage.publisher.dto.RequestResponseStreamDTO;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -42,9 +45,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
-/*
-* This mediator is to publish events upon success API invocations
-*/
+/**
+ * This mediator is to publish events upon success API invocations
+ */
 
 public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
 
@@ -53,7 +56,7 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
     }
 
     public boolean mediate(MessageContext mc) {
-        super.mediate(mc);
+        
         if (publisher == null) {
             this.initializeDataPublisher();
         }
@@ -130,55 +133,87 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
             }
             String keyType = (String) mc.getProperty(APIConstants.API_KEY_TYPE);
             String correlationID = GatewayUtils.getAndSetCorrelationID(mc);
-
-            ResponsePublisherDTO responsePublisherDTO = new ResponsePublisherDTO();
-            responsePublisherDTO.setConsumerKey((String) mc.getProperty(APIMgtGatewayConstants.CONSUMER_KEY));
-            responsePublisherDTO.setUsername((String) mc.getProperty(APIMgtGatewayConstants.USER_ID));
             String fullRequestPath = (String) mc.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
             String tenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(fullRequestPath);
-            responsePublisherDTO.setContext((String) mc.getProperty(APIMgtGatewayConstants.CONTEXT));
             String apiVersion = (String) mc.getProperty(RESTConstants.SYNAPSE_REST_API);
-            responsePublisherDTO.setApiVersion(apiVersion);
-            responsePublisherDTO.setApi((String) mc.getProperty(APIMgtGatewayConstants.API));
-            responsePublisherDTO.setVersion((String) mc.getProperty(APIMgtGatewayConstants.VERSION));
-            responsePublisherDTO.setResourcePath((String) mc.getProperty(APIMgtGatewayConstants.RESOURCE));
-            responsePublisherDTO.setResourceTemplate((String) mc.getProperty(APIConstants.API_ELECTED_RESOURCE));
-            responsePublisherDTO.setMethod((String) mc.getProperty(APIMgtGatewayConstants.HTTP_METHOD));
-            responsePublisherDTO.setResponseTime(responseTime);
-            responsePublisherDTO.setServiceTime(serviceTime);
-            responsePublisherDTO.setBackendTime(backendTime);
-            responsePublisherDTO.setHostName((String) mc.getProperty(APIMgtGatewayConstants.HOST_NAME));
-            String apiPublisher = (String) mc.getProperty(APIMgtGatewayConstants.API_PUBLISHER);
-            if (apiPublisher == null) {
-                apiPublisher = APIUtil.getAPIProviderFromRESTAPI(apiVersion, tenantDomain);
+            String creator = (String) mc.getProperty(APIMgtGatewayConstants.API_PUBLISHER);
+            if (creator == null) {
+                creator = APIUtil.getAPIProviderFromRESTAPI(apiVersion, tenantDomain);
             }
-            responsePublisherDTO.setApiPublisher(apiPublisher);
-            responsePublisherDTO.setTenantDomain(MultitenantUtils.getTenantDomain(apiPublisher));
-            responsePublisherDTO.setApplicationName((String) mc.getProperty(APIMgtGatewayConstants.APPLICATION_NAME));
-            responsePublisherDTO.setApplicationId((String) mc.getProperty(APIMgtGatewayConstants.APPLICATION_ID));
-            responsePublisherDTO.setCacheHit(cacheHit);
-            responsePublisherDTO.setResponseSize(responseSize);
-            responsePublisherDTO.setEventTime(endTime);//This is the timestamp response event published
-            responsePublisherDTO
-                    .setDestination((String) mc.getProperty(APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS));
-            responsePublisherDTO.setResponseCode((Integer) axis2MC.getProperty(SynapseConstants.HTTP_SC));
-
+            //get the version
+            apiVersion = apiVersion.split(":v")[1];
             String url = (String) mc.getProperty(RESTConstants.REST_URL_PREFIX);
 
             URL apiurl = new URL(url);
             int port = apiurl.getPort();
-            String protocol = mc.getProperty(
-                    SynapseConstants.TRANSPORT_IN_NAME) + "-" + port;
-            responsePublisherDTO.setProtocol(protocol);
-            responsePublisherDTO.setKeyType(keyType);
-            responsePublisherDTO.setCorrelationID(correlationID);
+            String protocol = mc.getProperty(SynapseConstants.TRANSPORT_IN_NAME) + "-" + port;
+
+            //taken from request added new
+            Object throttleOutProperty = mc.getProperty(APIConstants.API_USAGE_THROTTLE_OUT_PROPERTY_KEY);
+            boolean throttleOutHappened = false;
+            if (throttleOutProperty instanceof Boolean) {
+                throttleOutHappened = (Boolean) throttleOutProperty;
+            }
+            
+            String consumerKey = "";
+            String username = "";
+            String applicationName = "";
+            String applicationId = "";
+            String applicationOwner = "";
+            String tier = "";
+            AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(mc);
+            if (authContext != null) {
+                consumerKey = authContext.getConsumerKey();
+                username = authContext.getUsername();
+                applicationName = authContext.getApplicationName();
+                applicationId = authContext.getApplicationId();
+                tier = authContext.getTier();
+                applicationOwner = authContext.getSubscriber();
+            }
+
+            RequestResponseStreamDTO stream = new RequestResponseStreamDTO();
+            stream.setApiContext((String) mc.getProperty(APIMgtGatewayConstants.CONTEXT));
+            stream.setApiHostname((String) mc.getProperty(APIMgtGatewayConstants.HOST_NAME));
+            stream.setApiMethod((String) mc.getProperty(APIMgtGatewayConstants.HTTP_METHOD));
+            stream.setApiName((String) mc.getProperty(APIMgtGatewayConstants.API));
+            stream.setApiCreatorTenantDomain(MultitenantUtils.getTenantDomain(creator));
+            stream.setApiCreator(creator);
+            stream.setApiResourcePath(GatewayUtils.extractResource(mc));
+            stream.setApiResourceTemplate((String) mc.getProperty(APIConstants.API_ELECTED_RESOURCE));
+            stream.setApiTier(tier);
+            stream.setApiVersion(apiVersion);
+            stream.setApplicationConsumerKey((String) mc.getProperty(APIMgtGatewayConstants.CONSUMER_KEY));
+            stream.setApplicationId(applicationId);
+            stream.setApplicationName(applicationName);
+            stream.setApplicationOwner(applicationOwner);
+            stream.setBackendTime(backendTime);
+            stream.setDestination((String) mc.getProperty(APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS));
+            stream.setExecutionTime(GatewayUtils.getExecutionTime(mc));
+            stream.setMetaClientType(keyType); // check meta type
+            stream.setProtocol(protocol);
+            stream.setRequestTimestamp(
+                    Long.parseLong((String) mc.getProperty(APIMgtGatewayConstants.REQUEST_START_TIME)));
+            stream.setResponseCacheHit(cacheHit);
+            stream.setResponseCode((Integer) axis2MC.getProperty(SynapseConstants.HTTP_SC));
+            stream.setResponseSize(responseSize);
+            stream.setServiceTime(serviceTime);
+            stream.setThrottledOut(throttleOutHappened);
+            stream.setUserAgent((String) mc.getProperty(APIMgtGatewayConstants.CLIENT_USER_AGENT));
+            stream.setUserIp((String) mc.getProperty(APIMgtGatewayConstants.CLIENT_IP));
+            stream.setUsername(username);
+            stream.setUserTenantDomain(MultitenantUtils.getTenantDomain(username));
+            stream.setResponseTime(responseTime);
+            stream.setCorrelationID(correlationID);
+            stream.setGatewayType(APIMgtGatewayConstants.GATEWAY_TYPE);
+            stream.setLabel(APIMgtGatewayConstants.SYNAPDE_GW_LABEL);
+            
             if (log.isDebugEnabled()) {
                 log.debug("Publishing success API invocation event from gateway to analytics for: "
                         + mc.getProperty(APIMgtGatewayConstants.CONTEXT) + " with ID: " +
                         mc.getMessageID() + " started" + " at "
                         + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
             }
-            publisher.publishEvent(responsePublisherDTO);
+            publisher.publishEvent(stream);
             if (log.isDebugEnabled()) {
                 log.debug("Publishing success API invocation event from gateway to analytics for: "
                         + mc.getProperty(APIMgtGatewayConstants.CONTEXT) + " with ID: " +

@@ -105,8 +105,12 @@ public abstract class AbstractKeyManager implements KeyManager {
                 Map<String, Object> params = (Map) jsonObject;
 
                 //set client Id
-                if (params.get("client_id") != null) {
-                    oAuthApplicationInfo.setClientId((String) params.get("client_id"));
+                if (params.get(APIConstants.JSON_CLIENT_ID) != null) {
+                    oAuthApplicationInfo.setClientId((String) params.get(APIConstants.JSON_CLIENT_ID));
+                }
+                //set client secret
+                if (params.get(APIConstants.JSON_CLIENT_SECRET) != null) {
+                    oAuthApplicationInfo.setClientSecret((String) params.get(APIConstants.JSON_CLIENT_SECRET));
                 }
                 //copy all params map in to OAuthApplicationInfo's Map object.
                 oAuthApplicationInfo.putAll(params);

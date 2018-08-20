@@ -24,11 +24,13 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import org.apache.axiom.util.UIDGenerator;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
@@ -39,16 +41,16 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageDataBridgeDataPublisher;
 import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageDataPublisher;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
-import org.wso2.carbon.apimgt.usage.publisher.dto.RequestPublisherDTO;
+import org.wso2.carbon.apimgt.usage.publisher.dto.RequestResponseStreamDTO;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsData;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.net.InetSocketAddress;
+import java.net.URI;
 import java.util.UUID;
 
 /**
@@ -61,9 +63,11 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 	private String tenantDomain;
 	private static APIMgtUsageDataPublisher usageDataPublisher;
 	private String uri;
+	private String apiContextUri;
 	private String version;
 	private APIKeyValidationInfoDTO infoDTO = new APIKeyValidationInfoDTO();
 	private io.netty.handler.codec.http.HttpHeaders headers = new DefaultHttpHeaders();
+	private String token;
 
 	public WebsocketInboundHandler() {
         if (throttleDataPublisher == null) {
@@ -131,6 +135,10 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
         if (msg instanceof FullHttpRequest) {
             FullHttpRequest req = (FullHttpRequest) msg;
             uri = req.getUri();
+            URI uriTemp = new URI(uri);
+            apiContextUri = new URI(uriTemp.getScheme(), uriTemp.getAuthority(), uriTemp.getPath(),
+                     null, uriTemp.getFragment()).toString();
+
             if (req.getUri().contains("/t/")) {
                 tenantDomain = MultitenantUtils.getTenantDomainFromUrl(req.getUri());
             } else {
@@ -157,6 +165,10 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                     msg = req;
                 } else {
                     req.setUri(uri); // Setting endpoint appended uri
+                }
+
+                if (StringUtils.isNotEmpty(token)) {
+                    ((FullHttpRequest) msg).headers().set(APIMgtGatewayConstants.WS_JWT_TOKEN_HEADER, token);
                 }
                 ctx.fireChannelRead(msg);
 
@@ -251,6 +263,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                     cacheKey = WebsocketUtil.getAccessTokenCacheKey(apiKey, uri);
                     WebsocketUtil.putCache(info, apiKey, cacheKey);
                 }
+                token = info.getEndUserToken();
                 infoDTO = info;
                 return true;
             } else {
@@ -262,11 +275,11 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
     }
 
     protected APIKeyValidationInfoDTO getApiKeyDataForThriftClient(String apiKey) throws APISecurityException {
-        return new WebsocketThriftClient().getAPIKeyData(uri, version, apiKey);
+        return new WebsocketThriftClient().getAPIKeyData(apiContextUri, version, apiKey);
     }
 
     protected APIKeyValidationInfoDTO getApiKeyDataForWSClient(String apiKey) throws APISecurityException {
-        return new WebsocketWSClient().getAPIKeyData(uri, version, apiKey);
+        return new WebsocketWSClient().getAPIKeyData(apiContextUri, version, apiKey);
     }
 
     protected APIManagerAnalyticsConfiguration getApiManagerAnalyticsConfiguration() {
@@ -295,7 +308,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             authorizedUser = infoDTO.getSubscriber();
         }
         String apiName = infoDTO.getApiName();
-        String apiContext = uri;
+        String apiContext = apiContextUri;
         String apiVersion = version;
         String appTenant = infoDTO.getSubscriberTenantDomain();
         String apiTenant = tenantDomain;
@@ -361,30 +374,37 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             String keyType = infoDTO.getType();
             String correlationID = UUID.randomUUID().toString();
 
-            RequestPublisherDTO requestPublisherDTO = new RequestPublisherDTO();
-            requestPublisherDTO.setApi(infoDTO.getApiName());
-            requestPublisherDTO.setApiPublisher(infoDTO.getApiPublisher());
+            RequestResponseStreamDTO requestPublisherDTO = new RequestResponseStreamDTO();
+            requestPublisherDTO.setApiName(infoDTO.getApiName());
+            requestPublisherDTO.setApiCreator(infoDTO.getApiPublisher());
+            requestPublisherDTO.setApiCreatorTenantDomain(MultitenantUtils.getTenantDomain(infoDTO.getApiPublisher()));
             requestPublisherDTO.setApiVersion(infoDTO.getApiName() + ':' + version);
             requestPublisherDTO.setApplicationId(infoDTO.getApplicationId());
             requestPublisherDTO.setApplicationName(infoDTO.getApplicationName());
             requestPublisherDTO.setApplicationOwner(appOwner);
-            requestPublisherDTO.setClientIp(clientIp);
-            requestPublisherDTO.setConsumerKey(infoDTO.getConsumerKey());
+            requestPublisherDTO.setUserIp(clientIp);
+            requestPublisherDTO.setApplicationConsumerKey(infoDTO.getConsumerKey());
             //context will always be empty as this method will call only for WebSocketFrame and url is null
-            requestPublisherDTO.setContext("");
-            requestPublisherDTO.setContinuedOnThrottleOut(isThrottledOut);
-            requestPublisherDTO.setHostName(DataPublisherUtil.getHostAddress());
-            requestPublisherDTO.setMethod("-");
-            requestPublisherDTO.setRequestTime(requestTime);
-            requestPublisherDTO.setResourcePath("-");
-            requestPublisherDTO.setResourceTemplate("-");
+            requestPublisherDTO.setApiContext("");
+            requestPublisherDTO.setThrottledOut(isThrottledOut);
+            requestPublisherDTO.setApiHostname(DataPublisherUtil.getHostAddress());
+            requestPublisherDTO.setApiMethod("-");
+            requestPublisherDTO.setRequestTimestamp(requestTime);
+            requestPublisherDTO.setApiResourcePath("-");
+            requestPublisherDTO.setApiResourceTemplate("-");
             requestPublisherDTO.setUserAgent(useragent);
             requestPublisherDTO.setUsername(infoDTO.getEndUserName());
-            requestPublisherDTO.setTenantDomain(tenantDomain);
-            requestPublisherDTO.setTier(infoDTO.getTier());
-            requestPublisherDTO.setVersion(version);
-            requestPublisherDTO.setKeyType(keyType);
+            requestPublisherDTO.setUserTenantDomain(tenantDomain);
+            requestPublisherDTO.setApiTier(infoDTO.getTier());
+            requestPublisherDTO.setApiVersion(version);
+            requestPublisherDTO.setMetaClientType(keyType);
             requestPublisherDTO.setCorrelationID(correlationID);
+            requestPublisherDTO.setUserAgent(useragent);
+            requestPublisherDTO.setCorrelationID(correlationID);
+            requestPublisherDTO.setGatewayType(APIMgtGatewayConstants.GATEWAY_TYPE);
+            requestPublisherDTO.setLabel(APIMgtGatewayConstants.SYNAPDE_GW_LABEL);
+            requestPublisherDTO.setProtocol("WebSocket");
+            requestPublisherDTO.setDestination("");
             usageDataPublisher.publishEvent(requestPublisherDTO);
         } catch (Exception e) {
             // flow should not break if event publishing failed

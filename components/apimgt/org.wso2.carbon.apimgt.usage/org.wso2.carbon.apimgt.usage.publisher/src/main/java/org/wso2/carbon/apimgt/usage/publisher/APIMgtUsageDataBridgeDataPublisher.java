@@ -48,38 +48,6 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
         }
     }
 
-    public void publishEvent(RequestPublisherDTO requestPublisherDTO) {
-        DataBridgeRequestPublisherDTO dataBridgeRequestPublisherDTO = new DataBridgeRequestPublisherDTO(requestPublisherDTO);
-        try {
-
-            String streamID= DataPublisherUtil.getApiManagerAnalyticsConfiguration().getRequestStreamName()+":"
-                             +DataPublisherUtil.getApiManagerAnalyticsConfiguration().getRequestStreamVersion();
-            //Publish Request Data
-            dataPublisher.tryPublish(streamID, System.currentTimeMillis(),
-                    (Object[]) dataBridgeRequestPublisherDTO.createMetaData(), null,
-                    (Object[]) dataBridgeRequestPublisherDTO.createPayload());
-        } catch(Exception e){
-            log.error("Error while publishing Request event", e);
-        }
-
-    }
-
-    public void publishEvent(ResponsePublisherDTO responsePublisherDTO) {
-        DataBridgeResponsePublisherDTO dataBridgeResponsePublisherDTO = new DataBridgeResponsePublisherDTO(responsePublisherDTO);
-        try {
-            String streamID = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getResponseStreamName() + ":"
-                              + DataPublisherUtil.getApiManagerAnalyticsConfiguration().getResponseStreamVersion();
-            dataBridgeResponsePublisherDTO.createPayload();
-            //Publish Response Data
-            dataPublisher.tryPublish(streamID, System.currentTimeMillis(),
-                    (Object[]) dataBridgeResponsePublisherDTO.createMetaData(), null,
-                    (Object[]) dataBridgeResponsePublisherDTO.createPayload());
-
-        } catch (Exception e) {
-            log.error("Error while publishing Response event", e);
-        }
-    }
-
     public void publishEvent(FaultPublisherDTO faultPublisherDTO) {
         DataBridgeFaultPublisherDTO dataBridgeFaultPublisherDTO = new DataBridgeFaultPublisherDTO(faultPublisherDTO);
         try {
@@ -112,21 +80,7 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
             log.error("Error while publishing Throttle exceed event", e);
         }
     }
-    @Override
-    public void publishEvent(ExecutionTimePublisherDTO executionTimePublisherDTO) {
-        DataBridgeExecutionTimePublisherDTO dataBridgeExecutionTimePublisherDTO = new
-                DataBridgeExecutionTimePublisherDTO(executionTimePublisherDTO);
-        try {
-            String streamID = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getExecutionTimeStreamName() + ":" +
-                    DataPublisherUtil.getApiManagerAnalyticsConfiguration().getExecutionTimeStreamVersion();
 
-            dataPublisher.tryPublish(streamID, System.currentTimeMillis(),
-                    (Object[]) dataBridgeExecutionTimePublisherDTO.createMetaData(), null,
-                    (Object[]) dataBridgeExecutionTimePublisherDTO.createPayload());
-        } catch (Exception e) {
-            log.error("Error while publishing Execution time events", e);
-        }
-    }
     private static DataPublisher getDataPublisher() {
 
         //If a DataPublisher had not been registered for the tenant.
@@ -185,6 +139,23 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
             log.error("Error while publishing alert types events.", e);
             throw new APIManagementException("Error while publishing alert types events");
         }
+    }
+
+    @Override
+    public void publishEvent(RequestResponseStreamDTO requestStream) {
+        DataBridgeRequestResponseStreamPublisherDTO dataBridgeRequestStreamPublisherDTO = new DataBridgeRequestResponseStreamPublisherDTO(requestStream);
+        try {
+
+            String streamID = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getRequestStreamName() + ":"
+                    + DataPublisherUtil.getApiManagerAnalyticsConfiguration().getRequestStreamVersion();
+            //Publish Request Data
+            dataPublisher.tryPublish(streamID, System.currentTimeMillis(),
+                    (Object[]) dataBridgeRequestStreamPublisherDTO.createMetaData(), null,
+                    (Object[]) dataBridgeRequestStreamPublisherDTO.createPayload());
+        } catch(Exception e){
+            log.error("Error while publishing Request event", e);
+        }
+        
     }
 
 }

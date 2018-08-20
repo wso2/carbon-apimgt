@@ -996,7 +996,7 @@ public class APIMgtDAOTest {
         assertEquals(subscribedAPIFromUuid.getApiId(), apiId);
         assertEquals(subscribedAPIFromUuid.getApplication().getId(), application.getId());
         List<AccessTokenInfo> accessTokenInfoList = apiMgtDAO.getAccessTokenListForUser(subscriber.getName(),
-                application.getName());
+                application.getName(), subscriber.getName());
         assertTrue(accessTokenInfoList.size()==2);
         apiMgtDAO.updateApplicationStatus(application.getId(), APIConstants.ApplicationStatus.APPLICATION_APPROVED);
         String status = apiMgtDAO.getApplicationStatus("testCreateApplicationRegistrationEntry",

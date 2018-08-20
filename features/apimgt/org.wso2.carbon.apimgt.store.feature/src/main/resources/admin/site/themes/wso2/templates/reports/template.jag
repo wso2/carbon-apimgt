@@ -1,0 +1,23 @@
+<% jagg.template("reports", function(inputs, outputs, jagg) {
+%>
+<div id="listing">
+	<div class="page-header">
+      <h2><%=i18n.localize("Microgateway request summary report")%></h2>
+  </div>
+</div>
+<form class="form-horizontal apim-form" method="POST" id="downloadPDFForm">
+   <input type='hidden' name='month_name' id="month_name" value=""/>
+   <!--<input type="text" name="birthday" value="10/2018" /> -->
+   
+   Generate report for the month  <input type="text" name="datepickerVal" id="datepickerVal" value="" disabled />
+
+   <button id="date-range" type="button" class="btn btn-default date-range last-child" >
+                     <i class="fw fw-calendar" title="date-range"></i>
+                     <span></span> <b class="caret"></b>
+   </button>
+   <br /><br />
+   <div class="copy-buttons" id="saveButtons">
+	 <button type="submit" class="btn btn-primary copy-button"><%=i18n.localize("Generate")%></button>
+   </div>
+</form>
+<% }); %>

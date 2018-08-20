@@ -47,15 +47,13 @@ $( document ).ready(function() {
             tableName = "ORG_WSO2_ANALYTICS_APIM_ABNORMALRESPONSETIMEALERTSTREAM";
         } else if(selectedOptionKey== 5){
             tableName = "ORG_WSO2_ANALYTICS_APIM_ALERT_ABNORMALTIERUSAGEALERT";
-        } else if(selectedOptionKey== 6){
-            tableName = "ORG_WSO2_ANALYTICS_APIM_ALERT_ABNORMALTOKENREFRESH";
-        } else if(selectedOptionKey== 7){
+        }  else if(selectedOptionKey== 6){
             tableName = "ORG_WSO2_ANALYTICS_APIM_TIERLIMITHITTINGALERT";
-        } else if(selectedOptionKey== 8){
+        } else if(selectedOptionKey== 7){
             tableName = "ORG_WSO2_ANALYTICS_APIM_ABNORMALBACKENDTIMEALERTSTREAM";
-        } else if(selectedOptionKey== 9){
+        } else if(selectedOptionKey== 8){
             tableName = "ORG_WSO2_ANALYTICS_APIM_APIHEALTHMONITORALERTSTREAM";
-        } else if(selectedOptionKey== 10){
+        } else if(selectedOptionKey== 9){
             tableName = "ORG_WSO2_ANALYTICS_APIM_REQUESTPATTERNCHANGEDSTREAM";
         }
 

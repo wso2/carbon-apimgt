@@ -695,14 +695,14 @@ APIDesigner.prototype.load_api_document = function(api_document){
     this.load_swagger_editor_content();
     this.render_resources();
     this.render_scopes();
-    if (api_document != null) {
-        $("#version").val(api_document.info.version);
-        $("#name").val(api_document.info.title);
-        if (api_document.info.description) {
-            $("#description").val(api_document.info.description);
+    if (this.api_doc != null) {
+        $("#version").val(this.api_doc.info.version);
+        $("#name").val(this.api_doc.info.title);
+        if (this.api_doc.info.description) {
+            $("#description").val(this.api_doc.info.description);
         }
-        if (api_document.basePath) {
-            $("#context").val(api_document.basePath);
+        if (this.api_doc.basePath) {
+            $("#context").val(this.api_doc.basePath);
         }
     }
 };
@@ -1136,7 +1136,19 @@ APIDesigner.prototype.render_resource = function(container){
     };
 
 APIDesigner.prototype.query = function(path){
-    return JSONPath(path, this.api_doc);
+    var operation = JSONPath(path, this.api_doc);
+    // Check for $ref element in all available parameters and resolve to actual definition else return inline definition
+    if (operation[0].parameters) {
+        operation[0].parameters = operation[0].parameters.map(function (param) {
+                if (param["$ref"] !== undefined) {
+                    return this.query(param["$ref"].replace("#","$").replace(/\//g,"."), this.api_doc)[0];
+                } else {
+                    return param;
+                }
+            }.bind(this));
+    }
+
+    return operation;
 }
 
 APIDesigner.prototype.add_resource = function(resource, path){

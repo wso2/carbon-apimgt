@@ -26,7 +26,6 @@ import java.util.Map;
 
 public class JwtTokenInfoDTO implements Serializable {
 
-    private String subject;
     private String subscriber;
     private long expirationTime;
     private long issuedTime;
@@ -36,16 +35,10 @@ public class JwtTokenInfoDTO implements Serializable {
     private String scopes;
     private String keyType;
     private ApplicationDTO application;
+    private String consumerKey;
     private List<SubscribedApiDTO> subscribedApiDTOList = new ArrayList<SubscribedApiDTO>();
     private Map<String, SubscriptionPolicyDTO> subscriptionPolicyDTOList = new HashMap<String, SubscriptionPolicyDTO>();
 
-    public String getSubject() {
-        return subject;
-    }
-
-    public void setSubject(String subject) {
-        this.subject = subject;
-    }
 
     public String getSubscriber() {
         return subscriber;
@@ -135,4 +128,11 @@ public class JwtTokenInfoDTO implements Serializable {
         this.subscriptionPolicyDTOList = subscriptionPolicyDTOList;
     }
 
+    public String getConsumerKey() {
+        return consumerKey;
+    }
+
+    public void setConsumerKey(String consumerKey) {
+        this.consumerKey = consumerKey;
+    }
 }

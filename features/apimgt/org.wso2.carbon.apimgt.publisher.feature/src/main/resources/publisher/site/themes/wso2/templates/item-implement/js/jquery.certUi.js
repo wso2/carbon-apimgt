@@ -83,7 +83,7 @@
          * */
         getCertsForEndpoint: function (certs, eps) {
             if (eps === undefined) {
-                return certs || [];
+                return [];
             }
             var productionEndpoints = eps.production_endpoints;
             var sandboxEndpoints = eps.sandbox_endpoints;
@@ -256,20 +256,6 @@
                     type: "error",
                     content: i18n.t("Could not add certificate for alias") + ", '" + alias + "'. " +
                     i18n.t("Alias exists in trust store")
-                });
-                return;
-            } else if (aliasMatched.length === 0 && endpointMatched.length > 0) {
-                jagg.message({
-                    type: "error",
-                    content: i18n.t("Could not add certificate for Endpoint") + ", '" + ep +
-                    "'. " + i18n.t("Certificate for the endpoint") + "'" + ep + "'" + i18n.t("already exists")
-                });
-                return;
-            } else if (aliasMatched.length > 0 && endpointMatched.length > 0) {
-                jagg.message({
-                    type: "error",
-                    content: i18n.t("Could not add certificate for alias and endpoint") + "'" + alias + "' '" + ep +
-                    "'. <br/> " + i18n.t("Certificate exists for Alias : Endpoint combination")
                 });
                 return;
             } else {

@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public class APIMJWTGenerator extends JWTGenerator {
 
@@ -158,7 +159,7 @@ public class APIMJWTGenerator extends JWTGenerator {
         //generating expiring timestamp
         long currentTime = System.currentTimeMillis();
         // jwtTokenInfoDTO.getExpirationTime() gives the token validity time given when the token is generated.
-        long expireIn = currentTime + jwtTokenInfoDTO.getExpirationTime() * 1000;
+        long expireIn = TimeUnit.MILLISECONDS.toSeconds(currentTime) + jwtTokenInfoDTO.getExpirationTime();
 
         String endUserName = jwtTokenInfoDTO.getEndUserName();
 
@@ -179,6 +180,7 @@ public class APIMJWTGenerator extends JWTGenerator {
         claims.put("subscribedAPIs", jwtTokenInfoDTO.getSubscribedApiDTOList());
         claims.put("application", jwtTokenInfoDTO.getApplication());
         claims.put("keytype", jwtTokenInfoDTO.getKeyType());
+        claims.put("consumerKey" , jwtTokenInfoDTO.getConsumerKey());
 
         return claims;
     }

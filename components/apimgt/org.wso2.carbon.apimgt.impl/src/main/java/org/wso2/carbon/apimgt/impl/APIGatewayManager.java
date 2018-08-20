@@ -403,12 +403,33 @@ public class APIGatewayManager {
                 "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"" +
                 context.replace('/', '-') + "\">\n" +
                 "   <property name=\"OUT_ONLY\" value=\"true\"/>\n" +
+                "   <script language=\"js\">var sub_path = mc.getProperty(\"websocket.subscriber.path\");\t    \n" +
+                "        \tvar queryParamString = sub_path.split(\"\\\\?\")[1];\n" +
+                "                if(queryParamString != undefined) {\t    \n" +
+                "\t\tmc.setProperty('queryparams', \"?\" + queryParamString);\n" +
+                "\t\t}\t\t\n" +
+                "   </script>\n" +
+                "   <property xmlns:soapenv=\"http://www.w3.org/2003/05/soap-envelope\"\n" +
+                "             xmlns:ns=\"http://org.apache.synapse/xsd\"\n" +
+                "             xmlns:ns3=\"http://org.apache.synapse/xsd\"\n" +
+                "             name=\"queryparams\"\n" +
+                "             expression=\"$ctx:queryparams\"/>\n" +
+                "   <property name=\"urlVal\" value=\""+ url + "\"/>\n" +
+                "   <property xmlns:soapenv=\"http://www.w3.org/2003/05/soap-envelope\"\n" +
+                "             xmlns:ns3=\"http://org.apache.synapse/xsd\"\n" +
+                "             name=\"fullUrl\"\n" +
+                "             expression=\"fn:concat(get-property('urlVal'), get-property('queryparams'))\"\n" +
+                "             type=\"STRING\"/>\n" +
+                "   <header xmlns:soapenv=\"http://www.w3.org/2003/05/soap-envelope\"\n" +
+                "           xmlns:ns3=\"http://org.apache.synapse/xsd\"\n" +
+                "           name=\"To\"\n" +
+                "           expression=\"$ctx:fullUrl\"/>\n" +
                 "   <send>\n" +
-                "       <endpoint>\n" +
-                "           <address uri=\"" + url + "\"/>\n" +
-                "       </endpoint>\n" +
+                "      <endpoint>\n" +
+                "         <default/>\n" +
+                "      </endpoint>\n" +
                 "   </send>\n" +
-                "</sequence>\n";
+                "</sequence>";
         return seq;
     }
 

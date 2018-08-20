@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.api.Registry;
 import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.api.Resource;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 
 import java.nio.charset.Charset;
 import java.util.Date;
@@ -203,8 +204,14 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
             resource.setMediaType("application/json");
             registry.put(resourcePath, resource);
 
+            String[] visibleRoles = null;
+            if (api.getVisibleRoles() != null) {
+                visibleRoles = api.getVisibleRoles().split(",");
+            }
+
             //Need to set anonymous if the visibility is public
-            APIUtil.setResourcePermissions(apiProviderName, null, null, resourcePath);
+            APIUtil.clearResourcePermissions(resourcePath, api.getId(), ((UserRegistry) registry).getTenantId());
+            APIUtil.setResourcePermissions(apiProviderName, api.getVisibility(), visibleRoles, resourcePath);
 
         } catch (RegistryException e) {
             handleException("Error while adding Swagger Definition for " + apiName + '-' + apiVersion, e);

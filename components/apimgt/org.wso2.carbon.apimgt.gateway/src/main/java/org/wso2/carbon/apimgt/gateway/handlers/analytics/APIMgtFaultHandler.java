@@ -37,7 +37,7 @@ public class APIMgtFaultHandler extends APIMgtCommonExecutionPublisher {
     }
 
     public boolean mediate(MessageContext messageContext) {
-        super.mediate(messageContext);
+        
         if (publisher == null) {
             initDataPublisher();
         }
@@ -51,28 +51,29 @@ public class APIMgtFaultHandler extends APIMgtCommonExecutionPublisher {
             String correlationID = GatewayUtils.getAndSetCorrelationID(messageContext);
 
             FaultPublisherDTO faultPublisherDTO = new FaultPublisherDTO();
-            faultPublisherDTO.setConsumerKey((String) messageContext.getProperty(
+            faultPublisherDTO.setApplicationConsumerKey((String) messageContext.getProperty(
                     APIMgtGatewayConstants.CONSUMER_KEY));
-            faultPublisherDTO.setContext((String) messageContext.getProperty(
+            faultPublisherDTO.setApiContext((String) messageContext.getProperty(
                     APIMgtGatewayConstants.CONTEXT));
-            faultPublisherDTO.setApiVersion((String) messageContext.getProperty(
-                    APIMgtGatewayConstants.API_VERSION));
-            faultPublisherDTO.setApi((String) messageContext.getProperty(
+            faultPublisherDTO.setApiVersion(((String) messageContext.getProperty(
+                    APIMgtGatewayConstants.API_VERSION)).split(":v")[1]);
+            faultPublisherDTO.setApiName((String) messageContext.getProperty(
                     APIMgtGatewayConstants.API));
-            faultPublisherDTO.setResourcePath((String) messageContext.getProperty(
+            faultPublisherDTO.setApiResourcePath((String) messageContext.getProperty(
                     APIMgtGatewayConstants.RESOURCE));
-            faultPublisherDTO.setMethod((String) messageContext.getProperty(
+            faultPublisherDTO.setApiMethod((String) messageContext.getProperty(
                     APIMgtGatewayConstants.HTTP_METHOD));
-            faultPublisherDTO.setVersion((String) messageContext.getProperty(
+            faultPublisherDTO.setApiVersion((String) messageContext.getProperty(
                     APIMgtGatewayConstants.VERSION));
             faultPublisherDTO.setErrorCode(String.valueOf(messageContext.getProperty(
                     SynapseConstants.ERROR_CODE)));
             faultPublisherDTO.setErrorMessage((String) messageContext.getProperty(
                     SynapseConstants.ERROR_MESSAGE));
-            faultPublisherDTO.setRequestTime(requestTime);
+            faultPublisherDTO.setRequestTimestamp(requestTime);
             faultPublisherDTO.setUsername((String) messageContext.getProperty(
                     APIMgtGatewayConstants.USER_ID));
-            faultPublisherDTO.setHostName((String) messageContext.getProperty(
+            faultPublisherDTO.setUserTenantDomain(MultitenantUtils.getTenantDomain(faultPublisherDTO.getUsername()));
+            faultPublisherDTO.setHostname((String) messageContext.getProperty(
                     APIMgtGatewayConstants.HOST_NAME));
             String apiPublisher = (String) messageContext.getProperty(
                     APIMgtGatewayConstants.API_PUBLISHER);
@@ -82,8 +83,8 @@ public class APIMgtFaultHandler extends APIMgtCommonExecutionPublisher {
                 String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
                 apiPublisher = APIUtil.getAPIProviderFromRESTAPI(apiVersion, tenantDomain);
             }
-            faultPublisherDTO.setApiPublisher(apiPublisher);
-            faultPublisherDTO.setTenantDomain(MultitenantUtils.getTenantDomain(apiPublisher));
+            faultPublisherDTO.setApiCreator(apiPublisher);
+            faultPublisherDTO.setApiCreatorTenantDomain(MultitenantUtils.getTenantDomain(apiPublisher));
             faultPublisherDTO.setApplicationName((String) messageContext.getProperty(
                     APIMgtGatewayConstants.APPLICATION_NAME));
             faultPublisherDTO.setApplicationId((String) messageContext.getProperty(
@@ -91,8 +92,8 @@ public class APIMgtFaultHandler extends APIMgtCommonExecutionPublisher {
             String protocol = (String) messageContext.getProperty(
                     SynapseConstants.TRANSPORT_IN_NAME);
             faultPublisherDTO.setProtocol(protocol);
-            faultPublisherDTO.setKeyType(keyType);
-            faultPublisherDTO.setCorrelationID(correlationID);
+            faultPublisherDTO.setMetaClientType(keyType);
+            faultPublisherDTO.setGatewaType(APIMgtGatewayConstants.SYNAPDE_GW_LABEL);
             if (log.isDebugEnabled()) {
                 log.debug("Publishing fault event from gateway to analytics for: " + messageContext.getProperty(
                         APIMgtGatewayConstants.CONTEXT) + " with ID: " + messageContext.getMessageID() + " started"

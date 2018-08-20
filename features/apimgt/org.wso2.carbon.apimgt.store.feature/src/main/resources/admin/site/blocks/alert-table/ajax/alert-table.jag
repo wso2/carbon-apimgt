@@ -83,11 +83,11 @@ i18n.init(request,localeResourcesBasePath);
             }
 
 
-            dataResult = mod.getDataFromTable(tableName, fullSearchQuery, startindex, count, sortColumn, sortOrderBool);
-            countResult = result = mod.getCountFromTable(tableName, fullSearchQuery);
+            dataResult = mod.getDataFromTable(tableName, tenantDomain, startindex, count, sortColumn, sortOrder);
+            countResult = result = mod.getCountFromTable(tableName, tenantDomain);
 
-            parsedDataResult = JSON.parse(dataResult);
-
+            parsedDataResult = dataResult;
+            
             if (parsedDataResult["status"] == "failed") {
                 obj = {
                     "draw":draw,
@@ -115,7 +115,6 @@ i18n.init(request,localeResourcesBasePath);
                     type = "Abnormal Resource Access Pattern";
                 }
 
-                var log = new Log();
                 var arr = new Array(parsedDataResult.length);
                 for (i=0; i<parsedDataResult.length ;i++) {
 

@@ -64,10 +64,10 @@ include("/jagg/jagg.jag");
                 fullSearchQuery += ' AND ' + searchEntry;
             }
 
+            
+            dataResult = mod.getDataFromTable(tableName, tenantDomain, startindex, count, "apiVersion", sortOrder);
 
-            dataResult = mod.getDataFromTable(tableName, fullSearchQuery, startindex, count, "api_version", sortOrderBool);
-
-            parsedDataResult = JSON.parse(dataResult);
+            parsedDataResult = dataResult;
 
             var hyphenSeperated, colonSeperated;
             var apiDetails, apiProvider, apiName, apiVersion, apiId;
@@ -78,12 +78,13 @@ include("/jagg/jagg.jag");
             var APIIdentifier = Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier;
 
             for (i = 0; i < parsedDataResult.length; i++) {
-                apiDetails= parsedDataResult[i]["values"]["api_version"];
-                hyphenSeperated = apiDetails.split("--");
-                apiProvider = hyphenSeperated[0];
-                colonSeperated = hyphenSeperated[1].split(":");
-                apiName = colonSeperated[0];
-                apiVersion = colonSeperated[1].substring(1);
+                apiName = parsedDataResult[i]["values"]["api"];
+                apiVersion = parsedDataResult[i]["values"]["api_version"];
+                apiProvider = parsedDataResult[i]["values"]["apiPublisher"]
+
+                var providerNameSpltArr = apiProvider.split("@");
+                apiProvider = providerNameSpltArr[providerNameSpltArr.length -2]
+                
 
                 isExists = APIManagerFactory.getInstance().getAPIProvider(provider).isAPIAvailable(
                         new APIIdentifier(apiProvider, apiName, apiVersion));
@@ -108,8 +109,12 @@ include("/jagg/jagg.jag");
                 for (i=0; i<parsedDataResult.length ;i++) {
 
                     arr[i] = new Array(2);
+                    //creating the api information
+                    var name = parsedDataResult[i]["values"]["apiPublisher"] + "--" + 
+                                parsedDataResult[i]["values"]["api"] + ":v" + 
+                                parsedDataResult[i]["values"]["api_version"]
 
-                    arr[i][0] = parsedDataResult[i]["values"]["api_version"];
+                    arr[i][0] = name;
                     var status = parsedDataResult[i]["values"]["status"];
                     if (status != 'Available') {
                         arr[i][1] = "Limited [" + status +"]";

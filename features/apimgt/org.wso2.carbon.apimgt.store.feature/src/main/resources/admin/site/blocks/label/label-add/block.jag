@@ -10,8 +10,7 @@ jagg.block("label/label-add", {
         var labelList, result;
         result = jagg.module("label").getAllLabels();
         labelList = result.labelList;
-      
-       
+
         // we put results to the session.
         session.put("labelList", labelList);
      

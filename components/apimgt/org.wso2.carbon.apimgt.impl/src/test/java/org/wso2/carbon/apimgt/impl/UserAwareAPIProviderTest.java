@@ -220,7 +220,7 @@ public class UserAwareAPIProviderTest {
                     .getProperty(APIConstants.ACCESS_CONTROL);
             PowerMockito.when(APIUtil.hasPermission(ADMIN_ROLE_NAME, APIConstants.Permissions.APIM_ADMIN))
                     .thenReturn(false);
-            Mockito.doReturn(ADMIN_ROLE_NAME).when(resource).getProperty(APIConstants.PUBLISHER_ROLES);
+            Mockito.doReturn(ADMIN_ROLE_NAME).when(resource).getProperty(APIConstants.DISPLAY_PUBLISHER_ROLES);
             PowerMockito.when(APIUtil.getListOfRoles(ADMIN_ROLE_NAME))
                     .thenReturn(new String[] { "Internal/everyone" });
             userAwareAPIProvider.checkAccessControlPermission(apiIdentifier);

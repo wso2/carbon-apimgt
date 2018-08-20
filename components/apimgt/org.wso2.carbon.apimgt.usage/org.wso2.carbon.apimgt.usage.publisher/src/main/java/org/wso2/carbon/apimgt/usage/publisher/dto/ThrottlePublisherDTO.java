@@ -23,13 +23,14 @@ public class ThrottlePublisherDTO {
     private String apiname;
     private String context;
     private String version;
-    private String provider;
+    private String apiCreator;
+    private String apiCreatorTenantDomain;
     private String applicationName;
     private String applicationId;
     private String subscriber;
     private long throttledTime; //The timestamp which throttle out event triggers
+    private String gatewayType;
     private String throttledOutReason;
-
     private String username;
     private String keyType;
     private String correlationID;
@@ -83,12 +84,12 @@ public class ThrottlePublisherDTO {
         this.context = context;
     }
 
-    public String getProvider() {
-        return provider;
+    public String getApiCreator() {
+        return apiCreator;
     }
 
-    public void setProvider(String provider) {
-        this.provider = provider;
+    public void setApiCreator(String creator) {
+        this.apiCreator = creator;
     }
 
     public String getTenantDomain() {
@@ -123,14 +124,6 @@ public class ThrottlePublisherDTO {
         this.throttledOutReason = throttledOutReason;
     }
 
-    public String getSubscriber() {
-        return subscriber;
-    }
-
-    public void setSubscriber(String subscriber) {
-        this.subscriber = subscriber;
-    }
-
     public String getKeyType() {
         return keyType;
     }
@@ -146,4 +139,29 @@ public class ThrottlePublisherDTO {
     public void setCorrelationID(String correlationID) {
         this.correlationID = correlationID;
     }
+
+    public String getSubscriber() {
+        return subscriber;
+    }
+
+    public void setSubscriber(String subscriber) {
+        this.subscriber = subscriber;
+    }
+
+    public String getGatewayType() {
+        return gatewayType;
+    }
+
+    public void setGatewayType(String gatewayType) {
+        this.gatewayType = gatewayType;
+    }
+
+    public String getApiCreatorTenantDomain() {
+        return apiCreatorTenantDomain;
+    }
+
+    public void setApiCreatorTenantDomain(String apiProviderTenantDomain) {
+        this.apiCreatorTenantDomain = apiProviderTenantDomain;
+    }
+    
 }

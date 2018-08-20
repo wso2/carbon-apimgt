@@ -186,6 +186,21 @@
                     </tr>
                     <tr>
                         <td class="parameter">
+                            <p>authorizationHeader</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked">Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified in tenant or system level will be used.  </p></td>
+                        <td class="parameter">
+                                <a href="#!/models#string">string</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked"></p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
                             <p>tags</p>
                             <p class="param-required">
                                 
@@ -288,6 +303,21 @@
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
                         <td class="parameter"> <p class="marked"></p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <p>environmentList</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked">The environment list configured with non empty endpoint URLs for the particular API.</p></td>
+                        <td class="parameter">
+                                <a href="#!/models#array">array</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">[&quot;PRODUCTION&quot;,&quot;SANDBOX&quot;]</p></td>
                     </tr>
                 </tbody>
             </table>

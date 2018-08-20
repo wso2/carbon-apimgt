@@ -97,6 +97,7 @@ import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.impl.reportgen.util.ReportGenUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -922,7 +923,7 @@ public class APIProviderHostObject extends ScriptableObject {
         if (publisherAccessControl != null && publisherAccessControl.equals(APIConstants.API_RESTRICTED_VISIBILITY)) {
             publisherAccessControlRoles = (String) apiData.get(APIConstants.ACCESS_CONTROL_ROLES_PARAMETER, apiData);
             if (publisherAccessControlRoles != null) {
-                publisherAccessControlRoles = publisherAccessControlRoles.toLowerCase().trim();
+                publisherAccessControlRoles = publisherAccessControlRoles.trim();
             }
         }
 
@@ -964,16 +965,6 @@ public class APIProviderHostObject extends ScriptableObject {
             }
         }
 
-        if (apiData.get("swagger", apiData) != null) {
-            // Read URI Templates from swagger resource and set it to api object
-            Set<URITemplate> uriTemplates = definitionFromOpenAPISpec.getURITemplates(api,
-                    (String) apiData.get("swagger", apiData));
-            api.setUriTemplates(uriTemplates);
-
-            // Save the swagger definition in the registry
-            apiProvider.saveSwagger20Definition(api.getId(), (String) apiData.get("swagger", apiData));
-        }
-
         api.setDescription(StringEscapeUtils.unescapeHtml(description));
         HashSet<String> deletedTags = new HashSet<String>(api.getTags());
         deletedTags.removeAll(tag);
@@ -989,6 +980,16 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setLastUpdated(new Date());
         api.setAccessControl(publisherAccessControl);
         api.setAccessControlRoles(publisherAccessControlRoles);
+
+        if (apiData.get("swagger", apiData) != null) {
+            // Read URI Templates from swagger resource and set it to api object
+            Set<URITemplate> uriTemplates = definitionFromOpenAPISpec.getURITemplates(api,
+                    (String) apiData.get("swagger", apiData));
+            api.setUriTemplates(uriTemplates);
+
+            // Save the swagger definition in the registry
+            apiProvider.saveSwaggerDefinition(api, (String) apiData.get("swagger", apiData));
+        }
         return saveAPI(apiProvider, api, fileHostObject, false);
     }
 
@@ -5481,6 +5482,36 @@ public class APIProviderHostObject extends ScriptableObject {
 
         swagger.setPaths(paths);
         return Json.pretty(swagger);
+    }
+    
+    /**
+     * Download microgateway usage report
+     *
+     * @param cx      Rhino context
+     * @param thisObj Scriptable object
+     * @param args    Passing arguments
+     * @param funObj  Function object
+     * @return NativeObject that contains Input stream of Downloaded File
+     * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public static NativeObject jsFunction_getMicroGatewayRequestSummeryReport(Context cx, Scriptable thisObj,
+            Object[] args, Function funObj) throws ScriptException, APIManagementException {
+        NativeObject data = new NativeObject();
+        if (args == null || args.length != 2 || !isStringArray(args)) {
+            handleException("Invalid input parameters expected username and date");
+        }
+
+        String date = (String) args[1];
+        String username = (String) args[0];
+        //TODO implement for multitenant use case
+        InputStream stream = ReportGenUtil.getMicroGatewayRequestSummaryReport(username, date);
+        if (stream != null) {
+            data.put("Data", data, cx.newObject(thisObj, "Stream", new Object[] { stream }));
+        } else {
+            handleException("Resource strean couldn't be found to generate report");
+        }
+
+        return data;
     }
 
 }

@@ -495,6 +495,7 @@ public final class APIConstants {
     public static final String GATEWAY_TOKEN_CACHE_ENABLED = CACHE_CONFIGS + "EnableGatewayTokenCache";
     public static final String GATEWAY_RESOURCE_CACHE_ENABLED = CACHE_CONFIGS + "EnableGatewayResourceCache";
     public static final String JWT_CLAIM_CACHE_EXPIRY = CACHE_CONFIGS + "JWTClaimCacheExpiry";
+    public static final String ENABLED_JWT_CLAIM_CACHE = CACHE_CONFIGS + "EnableJWTClaimCache";
     public static final String KEY_MANAGER_TOKEN_CACHE = CACHE_CONFIGS + "EnableKeyManagerTokenCache";
     public static final String TOKEN_CACHE_EXPIRY = CACHE_CONFIGS + "TokenCacheExpiry";
     public static final String STORE_TAG_CACHE_DURATION = CACHE_CONFIGS + "TagCacheDuration";
@@ -1385,11 +1386,14 @@ public final class APIConstants {
     public static final String JSON_GRANT_TYPES = "grant_types";
     public static final String JSON_USERNAME = "username";
     public static final String REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA = "[~!@#;%^*()+={}|<>\"\',\\[\\]&/$\\\\]";
+    public static final String JSON_CLIENT_ID = "client_id";
+    public static final String JSON_CLIENT_SECRET = "client_secret";
 
     /**
      * Publisher Access Control related registry properties and values.
      */
     public static final String PUBLISHER_ROLES = "publisher_roles";
+    public static final String DISPLAY_PUBLISHER_ROLES = "display_publisher_roles";
     public static final String ACCESS_CONTROL = "publisher_access_control";
     public static final String NO_ACCESS_CONTROL = "all";
     public static final String NULL_USER_ROLE_LIST = "null";

@@ -549,6 +549,7 @@ $("#application-actions").each(function(){
             "dataSrc": function ( json ) {
                 if(json.applications.length > 0){
                     $('#application-table-wrap').removeClass("hide");
+                    $('#application-table-nodata').addClass("hide");
                 }
                 else{
                     $('#application-table-nodata').removeClass("hide");

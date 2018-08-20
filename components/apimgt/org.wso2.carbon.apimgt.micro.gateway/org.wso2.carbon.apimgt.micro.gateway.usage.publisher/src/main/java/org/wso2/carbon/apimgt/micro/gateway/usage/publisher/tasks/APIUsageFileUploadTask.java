@@ -43,6 +43,7 @@ import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -134,19 +135,9 @@ public class APIUsageFileUploadTask implements Task {
             String uploadServiceUrl = configManager.getProperty(MicroGatewayAPIUsageConstants.USAGE_UPLOAD_SERVICE_URL);
             uploadServiceUrl = (uploadServiceUrl != null && !uploadServiceUrl.isEmpty()) ? uploadServiceUrl :
                     MicroGatewayAPIUsageConstants.DEFAULT_UPLOAD_SERVICE_URL;
-            String[] fileUploadServiceUrl = uploadServiceUrl.split(":");
-            String uploadServicePort = null;
-            Integer uploadServicePortValue = 0;
-            if (fileUploadServiceUrl.length > 3) {
-                uploadServicePort = fileUploadServiceUrl[2].split("/")[0];
-            }
-            if (uploadServicePort != null) {
-                uploadServicePortValue =  Integer.valueOf(uploadServicePort);
-            }
-            else {
-                uploadServicePortValue = OnPremiseGatewayConstants.DEFAULT_PORT;
-            }
-            HttpClient httpClient = APIUtil.getHttpClient(uploadServicePortValue, uploadServiceUrl.split(":")[0]);
+            URL uploadServiceUrlValue = MicroGatewayCommonUtil.getURLFromStringUrlValue(uploadServiceUrl);
+            HttpClient httpClient = APIUtil.getHttpClient(uploadServiceUrlValue.getPort(), uploadServiceUrlValue
+                    .getProtocol());
             HttpPost httppost = new HttpPost(uploadServiceUrl);
 
             HttpEntity reqEntity = MultipartEntityBuilder.create()

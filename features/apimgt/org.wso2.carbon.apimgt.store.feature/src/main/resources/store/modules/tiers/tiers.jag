@@ -66,13 +66,17 @@ var getApplicationTiers = function () {
     }
 };
 
-var getDeniedTiers = function () {
+var getDeniedTiers = function (providerTenantDomain) {
     var tiers,
-            log = new Log(),
-            store = jagg.module("manager").getAPIStoreObj();
+    log = new Log(),
+    store = jagg.module("manager").getAPIStoreObj();
 
     try {
-        tiers = store.getDeniedTiers();
+        if (providerTenantDomain) {
+            tiers = store.getDeniedTiers(providerTenantDomain);
+        } else {
+            tiers = store.getDeniedTiers();
+        }
         if (log.isDebugEnabled()) {
             log.debug("getDeniedTiers : " + stringify(tiers));
         }

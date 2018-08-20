@@ -125,6 +125,12 @@
              only be created when this element is uncommented. When the specified
              time duration gets elapsed ,tag cache will get re-generated. -->
         <!--TagCacheDuration>120000</TagCacheDuration-->
+        <!-- JWT Claim cache can be disabled only if below config <EnableJWTClaimCache> is set as 'false'. The default
+          value is 'true'.
+          Other than this config, also <EnableGatewayTokenCache> and <EnableKeyManagerTokenCache> should have been set
+          as 'false' to completely disable JWTClaimCache.
+         -->
+        <EnableJWTClaimCache>true</EnableJWTClaimCache>
     </CacheConfigurations>
 
     <!--
@@ -153,7 +159,7 @@
         <DASPassword>${admin.password}</DASPassword>
 
         <!-- For APIM implemented Statistic client for RDBMS -->
-        <StatsProviderImpl>org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRdbmsClientImpl</StatsProviderImpl>
+        <StatsProviderImpl>org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRestClientImpl</StatsProviderImpl>
 
         <!-- DAS REST API configuration -->
         <DASRestApiURL>https://localhost:9444</DASRestApiURL>
@@ -178,29 +184,21 @@
         <Streams>
             <Request>
                 <Name>org.wso2.apimgt.statistics.request</Name>
-                <Version>1.1.0</Version>
+                <Version>3.0.0</Version>
             </Request>
-            <Response>
-                <Name>org.wso2.apimgt.statistics.response</Name>
-                <Version>1.1.0</Version>
-            </Response>
             <Fault>
                 <Name>org.wso2.apimgt.statistics.fault</Name>
-                <Version>1.0.0</Version>
+                <Version>3.0.0</Version>
             </Fault>
             <Throttle>
                 <Name>org.wso2.apimgt.statistics.throttle</Name>
-                <Version>1.0.0</Version>
+                <Version>3.0.0</Version>
             </Throttle>
             <Workflow>
                 <Name>org.wso2.apimgt.statistics.workflow</Name>
                 <Version>1.0.0</Version>
             </Workflow>
-            <ExecutionTime>
-                <Name>org.wso2.apimgt.statistics.execution.time</Name>
-                <Version>1.0.0</Version>
-            </ExecutionTime>
-	    <AlertTypes>
+	        <AlertTypes>
                 <Name>org.wso2.analytics.apim.alertStakeholderInfo</Name>
                 <Version>1.0.1</Version>
             </AlertTypes>

@@ -38,17 +38,25 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
+import org.apache.http.util.EntityUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.xerces.util.SecurityManager;
@@ -105,8 +113,10 @@ import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.reportgen.ReportGenerator;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
 import org.apache.xerces.util.SecurityManager;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
 import org.wso2.carbon.base.MultitenantConstants;
@@ -3160,6 +3170,35 @@ public final class APIUtil {
             throw new APIManagementException("Error while adding role permissions to API", e);
         } catch (RegistryException e) {
             throw new APIManagementException("Registry exception while adding role permissions to API", e);
+        }
+    }
+
+    /**
+     * This function is to set resource permissions based on its visibility
+     *
+     * @param artifactPath API resource path
+     * @throws APIManagementException Throwing exception
+     */
+    public static void clearResourcePermissions(String artifactPath, APIIdentifier apiId, int tenantId)
+            throws APIManagementException {
+        try {
+            String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+                    APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+                            RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + artifactPath);
+            String tenantDomain = MultitenantUtils
+                    .getTenantDomain(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
+            if (!org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
+                    .equals(tenantDomain)) {
+                org.wso2.carbon.user.api.AuthorizationManager authManager = ServiceReferenceHolder.getInstance()
+                        .getRealmService().getTenantUserRealm(tenantId).getAuthorizationManager();
+                authManager.clearResourceAuthorizations(resourcePath);
+            } else {
+                RegistryAuthorizationManager authorizationManager = new RegistryAuthorizationManager(
+                        ServiceReferenceHolder.getUserRealm());
+                authorizationManager.clearResourceAuthorizations(resourcePath);
+            }
+        } catch (UserStoreException e) {
+            handleException("Error while adding role permissions to API", e);
         }
     }
 
@@ -6751,6 +6790,9 @@ public final class APIUtil {
                     tier.setRequestsPerMin(bandwidthLimit.getDataAmount());
                     tier.setRequestCount(bandwidthLimit.getDataAmount());
                 }
+                if (PolicyConstants.POLICY_LEVEL_SUB.equalsIgnoreCase(policyLevel)) {
+                    tier.setTierPlan(((SubscriptionPolicy) policy).getBillingPlan());
+                }
                 tierMap.put(policy.getPolicyName(), tier);
             } else {
                 if (APIUtil.isEnabledUnlimitedTier()) {
@@ -7225,10 +7267,25 @@ public final class APIUtil {
             }
         }
         api.setAccessControl(apiResource.getProperty(APIConstants.ACCESS_CONTROL));
-        api.setAccessControlRoles(
-                APIConstants.NULL_USER_ROLE_LIST.equals(apiResource.getProperty(APIConstants.PUBLISHER_ROLES)) ?
-                        null :
-                        apiResource.getProperty(APIConstants.PUBLISHER_ROLES));
+
+        String accessControlRoles = null;
+
+        String displayPublisherRoles = apiResource.getProperty(APIConstants.DISPLAY_PUBLISHER_ROLES);
+        if (displayPublisherRoles == null) {
+
+            String publisherRoles = apiResource.getProperty(APIConstants.PUBLISHER_ROLES);
+
+            if (publisherRoles != null) {
+                accessControlRoles = APIConstants.NULL_USER_ROLE_LIST.equals(
+                        apiResource.getProperty(APIConstants.PUBLISHER_ROLES)) ?
+                        null : apiResource.getProperty(APIConstants.PUBLISHER_ROLES);
+            }
+        } else {
+            accessControlRoles = APIConstants.NULL_USER_ROLE_LIST.equals(displayPublisherRoles) ?
+                    null : displayPublisherRoles;
+        }
+
+        api.setAccessControlRoles(accessControlRoles);
         return api;
     }
 
@@ -7513,4 +7570,69 @@ public final class APIUtil {
             return role;
         }
     }
+
+    /**
+     * Util method to call SP rest api to invoke queries. 
+     * 
+     * @param appName SP app name that the query should run against
+     * @param query query 
+     * @return jsonObj JSONObject of the response
+     * @throws APIManagementException
+     */
+    public static JSONObject executeQueryOnStreamProcessor(String appName, String query) throws APIManagementException {
+        String spEndpoint = APIManagerAnalyticsConfiguration.getInstance().getDasServerUrl() + "/stores/query";
+        String spUserName = APIManagerAnalyticsConfiguration.getInstance().getDasServerUser();
+        String spPassword = APIManagerAnalyticsConfiguration.getInstance().getDasServerPassword();
+        byte[] encodedAuth = Base64
+                .encodeBase64((spUserName + ":" + spPassword).getBytes(Charset.forName("ISO-8859-1")));
+        String authHeader = "Basic " + new String(encodedAuth);
+        URL spURL;
+        try {
+            spURL = new URL(spEndpoint);
+
+            HttpClient httpClient = APIUtil.getHttpClient(spURL.getPort(), spURL.getProtocol());
+            HttpPost httpPost = new HttpPost(spEndpoint);
+
+            httpPost.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
+            JSONObject obj = new JSONObject();
+            obj.put("appName", appName);
+            obj.put("query", query);
+
+            StringEntity requestEntity = new StringEntity(obj.toJSONString(), ContentType.APPLICATION_JSON);
+
+            httpPost.setEntity(requestEntity);
+
+            HttpResponse response;
+            try {
+                response = httpClient.execute(httpPost);
+                HttpEntity entity = response.getEntity();
+                if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+                    String error = "Error while invoking SP rest api :  " + response.getStatusLine().getStatusCode()
+                            + " " + response.getStatusLine().getReasonPhrase();
+                    log.error(error);
+                    throw new APIManagementException(error);
+                }
+                String responseStr = EntityUtils.toString(entity);
+                JSONParser parser = new JSONParser();
+                return (JSONObject) parser.parse(responseStr);
+
+            } catch (ClientProtocolException e) {
+                handleException("Error while connecting to the server ", e);
+            } catch (IOException e) {
+                handleException("Error while connecting to the server ", e);
+            } catch (ParseException e) {
+                handleException("Error while parsing the response ", e);
+            } finally {
+                httpPost.reset();
+            }
+
+        } catch (MalformedURLException e) {
+            handleException("Error while parsing the stream processor url", e);
+        }
+
+        return null;
+
+    }
+    
+    
 }
