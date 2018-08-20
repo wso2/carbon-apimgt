@@ -23,7 +23,12 @@ import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.client.bean.ExecutionTimeOfAPIValues;
@@ -83,6 +88,7 @@ public abstract class APIUsageStatisticsClient {
     protected final Map<String, String> subscriberAppsMap = new HashMap<String, String>();
     private static final Log log = LogFactory.getLog(APIUsageStatisticsClient.class);
     private DASRestClient alertRestClient;
+    protected ApiMgtDAO apiMgtDAO;
 
 
     /**
@@ -398,75 +404,30 @@ public abstract class APIUsageStatisticsClient {
     protected List<String> getAppsBySubscriber(String subscriberName, String groupId)
             throws APIMgtUsageQueryServiceClientException {
 
-        Connection connection = null;
-        PreparedStatement statement = null;
-        ResultSet rs = null;
+        apiMgtDAO = ApiMgtDAO.getInstance();
         try {
-            //get the connection
-            connection = APIMgtDBUtil.getConnection();
-
-            //make query
-            String query = "SELECT CONSUMER_KEY, NAME FROM AM_APPLICATION_KEY_MAPPING INNER JOIN AM_APPLICATION ON " +
-                    "AM_APPLICATION_KEY_MAPPING.APPLICATION_ID=AM_APPLICATION.APPLICATION_ID INNER JOIN " +
-                    "AM_SUBSCRIBER" +
-                    " ON AM_APPLICATION.SUBSCRIBER_ID = AM_SUBSCRIBER.SUBSCRIBER_ID WHERE ";
-
-            //check is it shared application
-            boolean sharedApp;
-            if (!StringUtils.isEmpty(groupId)) {
-                query = query + "AM_APPLICATION.GROUP_ID = ? ";
-                sharedApp = true;
-            } else {
-                query = query + "AM_SUBSCRIBER.USER_ID = ? ";
-                sharedApp = false;
-            }
-
-            statement = connection.prepareStatement(query);
-
-            if (!sharedApp) {
-                statement.setString(1, subscriberName);
-            } else {
-                statement.setString(1, groupId);
-            }
-
-            //execute
-            rs = statement.executeQuery();
-
+            Application[] applications = apiMgtDAO.getApplications(new Subscriber(subscriberName), groupId);
             List<String> consumerKeys = new ArrayList<String>();
 
-            //iterate over the results
-            while (rs.next()) {
-                String consumerKey = rs.getString("CONSUMER_KEY");
-                String appName = rs.getString("NAME");
-                consumerKeys.add(consumerKey);
-                subscriberAppsMap.put(consumerKey, appName);
+            // iterate over the applications
+            for (Application application : applications) {
+                OAuthApplicationInfo prodOAuthAppInfo =
+                        application.getOAuthApp(APIUsageStatisticsClientConstants.PRODUCTION_KEY_TYPE);
+                OAuthApplicationInfo sandboxAuthAppInfo =
+                        application.getOAuthApp(APIUsageStatisticsClientConstants.SANDBOX_KEY_TYPE);
+                if (prodOAuthAppInfo != null) {
+                    consumerKeys.add(prodOAuthAppInfo.getClientId());
+                    subscriberAppsMap.put(prodOAuthAppInfo.getClientId(), application.getName());
+                }
+                if (sandboxAuthAppInfo != null) {
+                    consumerKeys.add(sandboxAuthAppInfo.getClientId());
+                    subscriberAppsMap.put(sandboxAuthAppInfo.getClientId(), application.getName());
+                }
             }
             return consumerKeys;
 
-        } catch (Exception e) {
+        } catch (APIManagementException e) {
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
-        } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException ignore) {
-
-                }
-            }
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-
-                }
-            }
         }
     }
 

@@ -189,4 +189,7 @@ public final class APIUsageStatisticsClientConstants {
     public static final String RES_MEDIATION_LATENCY = "responseMediationLatency";
     public static final String BACKEND_LATENCY = "backendLatency";
     public static final String OTHER_LATENCY = "otherLatency";
+
+    public static final String PRODUCTION_KEY_TYPE = "PRODUCTION";
+    public static final String SANDBOX_KEY_TYPE = "SANDBOX";
 }
