@@ -182,5 +182,6 @@ public final class APIUsageStatisticsClientConstants {
     public static final String TIMESTAMP_PATTERN = "yyyy-MM-dd HH:mm:ss";
     public static final String RECORDS_DELIMITER = "records";
 
-
+    public static final String PRODUCTION_KEY_TYPE = "PRODUCTION";
+    public static final String SANDBOX_KEY_TYPE = "SANDBOX";
 }
