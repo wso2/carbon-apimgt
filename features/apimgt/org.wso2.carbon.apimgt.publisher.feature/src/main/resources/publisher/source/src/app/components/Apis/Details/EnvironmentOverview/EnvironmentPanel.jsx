@@ -59,7 +59,7 @@ class EnvironmentPanel extends Component {
             return;
         }
 
-        const promisedAPIs = api.getAll({ query: `name:${rootAPI.name}` });
+        const promisedAPIs = API.all({ query: `name:${rootAPI.name}` });
         promisedAPIs
             .then((response) => {
                 // Filter more since getAll({query: name:apiName}) is not filtering with exact name

@@ -19,18 +19,19 @@
 import React, { Component } from 'react';
 
 import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import Redirect from 'react-router-dom/Redirect';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { withStyles } from '@material-ui/core/styles';
 import green from '@material-ui/core/colors/green';
+import { Divider, Card, CardContent, CardActions } from '@material-ui/core/';
 import { Create, GetApp } from '@material-ui/icons';
-import { Link } from 'react-router-dom';
+import { PropTypes } from 'prop-types';
 
 import API from '../../../../data/api';
 import Alert from '../../../Shared/Alert';
+import APICreateMenu from '../components/APICreateMenu';
 
 const styles = {
     buttonProgress: {
@@ -140,7 +141,6 @@ class SampleAPI extends Component {
         });
     }
 
-
     /**
      * Change the life cycle state of the sample API
      *
@@ -164,7 +164,6 @@ class SampleAPI extends Component {
             });
     }
 
-
     /**
      *
      * @inheritdoc
@@ -172,9 +171,7 @@ class SampleAPI extends Component {
      * @memberof SampleAPI
      */
     render() {
-        const {
-            message, published, api, deploying,
-        } = this.state;
+        const { published, api, deploying } = this.state;
         const { classes } = this.props;
 
         if (published && api) {
@@ -182,38 +179,51 @@ class SampleAPI extends Component {
             return <Redirect to={url} />;
         }
         return (
-            <Grid container spacing={16} justify='center'>
-                <Grid item xs={6} style={{ textAlign: 'center' }}>
-                    <Paper elevation={0}>
-                        <Typography align='center' type='headline' gutterBottom>
+            <Grid container justify='center'>
+                <Grid item sm={4}>
+                    <Card className={classes.card}>
+                        <Typography
+                            style={{ paddingTop: '5px', paddingLeft: '10px' }}
+                            gutterBottom
+                            variant='headline'
+                            component='h2'
+                        >
                             Welcome to WSO2 API Manager
                         </Typography>
-
-                        <Typography align='center' type='title' gutterBottom>
-                            To get started with API Manager, do any of the following:
-                        </Typography>
-                        <Grid container spacing={24} justify='center'>
-                            <Grid item xs={3}>
-                                <Link to='/api/create/home'>
-                                    <Button variant='raised'>
-                                        <Create style={{ fontSize: 50 }} />
-                                        Create New API
-                                    </Button>
-                                </Link>
-                            </Grid>
-                            <Grid item xs={3}>
-                                <Button disabled={deploying} variant='raised' onClick={this.handleDeploySample}>
-                                    <GetApp style={{ fontSize: 50 }} />
-                                    Deploy Sample API
-                                </Button>
-                                {deploying && <CircularProgress size={24} className={classes.buttonProgress} />}
-                            </Grid>
-                        </Grid>
-                    </Paper>
+                        <Divider />
+                        <CardContent>
+                            <Typography align='justify' component='p'>
+                                WSO2 API Publisher enables API providers to publish APIs, share documentation, provision
+                                API keys and gather feedback on features, quality and usage. To get started, Create an
+                                API or Publish a sample API.
+                            </Typography>
+                        </CardContent>
+                        <CardActions>
+                            <APICreateMenu buttonProps={{ size: 'small', color: 'primary', variant: 'outlined' }}>
+                                <Create />
+                                Create New API
+                            </APICreateMenu>
+                            <Button
+                                size='small'
+                                color='primary'
+                                disabled={deploying}
+                                variant='outlined'
+                                onClick={this.handleDeploySample}
+                            >
+                                <GetApp />
+                                Deploy Sample API
+                            </Button>
+                            {deploying && <CircularProgress size={24} className={classes.buttonProgress} />}
+                        </CardActions>
+                    </Card>
                 </Grid>
             </Grid>
         );
     }
 }
+
+SampleAPI.propTypes = {
+    classes: PropTypes.shape({}).isRequired,
+};
 
 export default withStyles(styles)(SampleAPI);

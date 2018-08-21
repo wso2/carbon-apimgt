@@ -22,7 +22,6 @@ import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-d
 import qs from 'qs';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import Log from 'log4javascript';
-import './App.css';
 import Utils from './app/data/Utils';
 import ConfigManager from './app/data/ConfigManager';
 // import MaterialDesignCustomTheme from './app/components/Shared/CustomTheme';
@@ -52,7 +51,16 @@ const darkTheme = createMuiTheme({
             light: '#315564',
             main: '#002c3a',
             dark: '#000115',
-            contrastText: '#fff',
+        },
+    },
+    overrides: {
+        MuiButton: {
+            textPrimary: {
+                color: '#00ffe0',
+                '&:hover': {
+                    backgroundColor: '##00c1ff36',
+                },
+            },
         },
     },
 });

@@ -42,8 +42,19 @@ const PageNav = (props) => {
                 }}
             >
                 <div className={classes.toolbar} />
-                <List>{section}</List>
-                <Divider />
+                {/* todo: move styling to constant ~tmkb */}
+                <List
+                    style={{
+                        boxSizing: 'border-box',
+                        padding: 0,
+                        height: '100px',
+                        'vertical-align': 'middle',
+                        display: 'flex',
+                        borderBottom: '1px solid',
+                    }}
+                >
+                    {section}
+                </List>
                 <List>{navItems}</List>
             </Drawer>
         </div>

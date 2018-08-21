@@ -29,7 +29,7 @@ import { withStyles } from '@material-ui/core/styles';
 import IconButton from '@material-ui/core/IconButton';
 import List from '@material-ui/icons/List';
 import GridIcon from '@material-ui/icons/GridOn';
-import AddNewMenu from './components/AddNewMenu';
+import APICreateMenu from './components/APICreateMenu';
 import Alert from '../../Shared/Alert';
 
 import { ScopeValidation, resourceMethod, resourcePath } from '../../../data/ScopeValidation';
@@ -37,7 +37,7 @@ import ApiThumb from './components/ApiThumb';
 import API from '../../../data/api.js';
 import { Progress } from '../../Shared';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
-import SampleAPI from './initial/SampleAPI';
+import SampleAPI from './SampleAPI/SampleAPI';
 
 const styles = theme => ({
     rightIcon: {
@@ -93,6 +93,11 @@ const menu = (
  * @extends {React.Component} @inheritdoc
  */
 class Listing extends React.Component {
+    /**
+     *Creates an instance of Listing.
+     * @param {*} props
+     * @memberof Listing
+     */
     constructor(props) {
         super(props);
         this.state = { listType: 'grid', apis: null };
@@ -100,9 +105,13 @@ class Listing extends React.Component {
         this.updateApi = this.updateApi.bind(this);
     }
 
+    /**
+     *
+     * @inheritdoc
+     * @memberof Listing
+     */
     componentDidMount() {
-        const api = new API();
-        const promisedApis = api.getAll();
+        const promisedApis = API.all();
         promisedApis
             .then((response) => {
                 this.setState({ apis: response.obj });
@@ -123,10 +132,16 @@ class Listing extends React.Component {
         this.setState({ listType: value });
     };
 
-    updateApi(api_uuid) {
+    /**
+     * Update Sample API
+     *
+     * @param {String} apiUUID
+     * @memberof Listing
+     */
+    updateApi(apiUUID) {
         const api = this.state.apis;
         for (const apiIndex in api.list) {
-            if (api.list.hasOwnProperty(apiIndex) && api.list[apiIndex].id === api_uuid) {
+            if (api.list.apiIndex && api.list[apiIndex].id === apiUUID) {
                 api.list.splice(apiIndex, 1);
                 break;
             }
@@ -134,10 +149,17 @@ class Listing extends React.Component {
         this.setState({ apis: api });
     }
 
-    handleApiDelete(apiUUID, name) {
+    /**
+     *
+     * Delete an API listed in the listing page
+     * @param {String} apiUUID API UUID
+     * @param {String} [name=''] API Name use for alerting purpose only
+     * @memberof Listing
+     */
+    handleApiDelete(apiUUID, name = '') {
         Alert.info('Deleting the API ...');
-        const api = new API();
-        const promisedDelete = api.deleteAPI(apiUUID);
+        const apiObj = new API();
+        const promisedDelete = apiObj.deleteAPI(apiUUID);
         promisedDelete.then((response) => {
             if (response.status !== 200) {
                 console.log(response);
@@ -147,7 +169,7 @@ class Listing extends React.Component {
             Alert.info(name + ' API deleted Successfully');
             const { api } = this.state;
             for (const apiIndex in api.list) {
-                if (api.list.hasOwnProperty(apiIndex) && api.list[apiIndex].id === apiUUID) {
+                if (api.list.apiIndex && api.list[apiIndex].id === apiUUID) {
                     api.list.splice(apiIndex, 1);
                     break;
                 }
@@ -155,12 +177,13 @@ class Listing extends React.Component {
             this.setState({ active: false, apis: api });
         });
     }
-    handleClickNew = () => {
-        this.setState({ newMenuOpen: true });
-    };
-    handleCloseNew = () => {
-        this.setState({ newMenuOpen: false });
-    };
+
+    /**
+     *
+     * @inheritdoc
+     * @returns {React.Component} @inheritdoc
+     * @memberof Listing
+     */
     render() {
         const { classes } = this.props;
         const { apis } = this.state;
@@ -207,14 +230,16 @@ class Listing extends React.Component {
         } else {
             return (
                 <Grid container spacing={0} justify='center'>
-                    <Grid item xs={12} className={classes.titleBar}>
+                    <Grid item md={12} className={classes.titleBar}>
                         <div className={classes.buttonLeft}>
                             <div className={classes.title}>
                                 <Typography variant='display2' gutterBottom>
                                     APIs
                                 </Typography>
                             </div>
-                            <AddNewMenu />
+                            <APICreateMenu buttonProps={{ size: 'small', color: 'primary', variant: 'outlined' }}>
+                                Create API
+                            </APICreateMenu>
                         </div>
                         <div className={classes.buttonRight}>
                             <IconButton
@@ -268,8 +293,8 @@ class Listing extends React.Component {
 }
 
 Listing.propTypes = {
-    classes: PropTypes.object.isRequired,
-    theme: PropTypes.object.isRequired,
+    classes: PropTypes.shape({}).isRequired,
+    theme: PropTypes.shape({}).isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(Listing);

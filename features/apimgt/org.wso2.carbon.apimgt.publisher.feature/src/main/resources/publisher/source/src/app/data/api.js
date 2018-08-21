@@ -17,33 +17,20 @@
 /* eslint-disable */
 import APIClientFactory from './APIClientFactory';
 import Utils from './Utils';
+import Resource from './Resource';
 
 /**
  * An abstract representation of an API
  */
-class API {
-    /**
-     * @constructor
-     * @param {Object} environment - Environment object - Default current environment.
-     */
-    constructor(environment = Utils.getCurrentEnvironment()) {
-        this.client = APIClientFactory.getInstance().getAPIClient(environment).client;
-    }
-
+class API extends Resource {
     /**
      *
      * @param data
      * @returns {object} Metadata for API request
      * @private
      */
-    _requestMetaData(data = {}) {
-        const metaData = {
-            requestContentType: data['Content-Type'] || 'application/json',
-        };
-        if (data.Accept) {
-            metaData.responseContentType = data.Accept;
-        }
-        return metaData;
+    _requestMetaData() {
+        Resource._requestMetaData();
     }
 
     /**
@@ -151,24 +138,6 @@ class API {
             return promise_create.then(callback);
         } else {
             return promise_create;
-        }
-    }
-
-    /**
-     * Get list of all the available APIs, If the call back is given (TODO: need to ask for fallback sequence as well tmkb)
-     * It will be invoked upon receiving the response from REST service.Else will return a promise.
-     * @param {Object} params - Parameters to filter APIs.
-     * @param {function} callback - A callback function to invoke after receiving successful response.
-     * @returns {promise} With given callback attached to the success chain else API invoke promise.
-     */
-    getAll(params, callback = null) {
-        const promise_get_all = this.client.then((client) => {
-            return client.apis['API (Collection)'].get_apis(params, this._requestMetaData());
-        });
-        if (callback) {
-            return promise_get_all.then(callback);
-        } else {
-            return promise_get_all;
         }
     }
 
@@ -940,6 +909,22 @@ class API {
         sandbox.type = 'sandbox';
         sandbox.inline.name += '_sandbox';
         return [production, sandbox];
+    }
+
+
+    /**
+     *
+     * Static method for get all APIs for current environment user.
+     * @static
+     * @param {Object} params APIs filtering parameters i:e { "name": "MyBank API"}
+     * @returns {Promise} promise object return from SwaggerClient-js
+     * @memberof API
+     */
+    static all(params) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then((client) => {
+            return client.apis['API (Collection)'].get_apis(params, Resource._requestMetaData());
+        });
     }
 }
 

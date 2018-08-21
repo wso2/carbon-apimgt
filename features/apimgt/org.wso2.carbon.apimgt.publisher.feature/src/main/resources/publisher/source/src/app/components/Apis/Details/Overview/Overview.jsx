@@ -35,11 +35,11 @@ import EditIcon from '@material-ui/icons/EditAttributes';
 import { FormControl } from '@material-ui/core/';
 import IconButton from '@material-ui/core/IconButton';
 
-import { Progress } from '../../Shared';
-import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
-import Api from '../../../data/api';
-import ImageGenerator from '../Listing/components/ImageGenerator';
-import Alert from '../../Shared/Alert';
+import { Progress } from '../../../Shared';
+import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
+import Api from '../../../../data/api';
+import ImageGenerator from '../../Listing/components/ImageGenerator';
+import Alert from '../../../Shared/Alert';
 
 const styles = () => ({
     imageSideContent: {

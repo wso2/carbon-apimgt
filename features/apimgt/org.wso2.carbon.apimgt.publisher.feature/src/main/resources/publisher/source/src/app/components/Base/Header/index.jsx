@@ -5,6 +5,7 @@ import { Menu as MenuIcon } from '@material-ui/icons';
 import SearchIcon from '@material-ui/icons/SearchOutlined';
 import Hidden from '@material-ui/core/Hidden';
 import PropTypes from 'prop-types';
+import { Link } from 'react-router-dom';
 
 import Avatar from './avatar/Avatar';
 import HeaderSearch from './headersearch/HeaderSearch';
@@ -18,6 +19,9 @@ const styles = theme => ({
     typoRoot: {
         marginLeft: theme.spacing.unit * 3,
         marginRight: theme.spacing.unit * 3,
+    },
+    brandLink: {
+        color: theme.palette.primary.contrastText,
     },
 });
 
@@ -75,8 +79,11 @@ class Header extends React.Component {
                             <MenuIcon style={{ fontSize: 35 }} />
                         </IconButton>
                         <Typography style={{ flexGrow: '1' }} color='inherit' variant='title'>
-                            WSO2 API Publisher
+                            <Link className={classes.brandLink} to='/'>
+                                WSO2 API Publisher
+                            </Link>
                         </Typography>
+
                         <Hidden smDown>
                             <HeaderSearch />
                         </Hidden>
