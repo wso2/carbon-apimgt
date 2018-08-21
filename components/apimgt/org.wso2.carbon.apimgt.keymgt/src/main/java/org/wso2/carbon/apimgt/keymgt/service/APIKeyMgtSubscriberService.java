@@ -381,6 +381,14 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 
             if (applicationName != null && !applicationName.isEmpty()) {
                 // Append the username before Application name to make application name unique across two users.
+                String displayName;
+                if (applicationName.endsWith("_" + APIConstants.API_KEY_TYPE_PRODUCTION) || applicationName.endsWith("_"
+                        + APIConstants.API_KEY_TYPE_SANDBOX)) {
+                    displayName = applicationName.substring(0, applicationName.lastIndexOf("_"));
+                } else {
+                    displayName = applicationName;
+                }
+
                 applicationName = APIUtil.replaceEmailDomain(userNameForSP) + "_" + applicationName;
                 log.debug("Application Name has changed, hence updating Service Provider Name..");
 
@@ -389,7 +397,16 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
                 String appName = appMgtService.getServiceProviderNameByClientId(consumerKey, "oauth2", tenantDomain);
                 ServiceProvider serviceProvider =
                                         appMgtService.getApplicationExcludingFileBasedSPs(appName, tenantDomain);
-                if (serviceProvider != null && !appName.equals(applicationName)) {
+                if (serviceProvider != null) {
+                    serviceProvider.setApplicationName(applicationName);
+                    serviceProvider.setDescription("Service Provider for application " + applicationName);
+                    ServiceProviderProperty[] serviceProviderProperties = new ServiceProviderProperty[1];
+                    ServiceProviderProperty serviceProviderProperty = new ServiceProviderProperty();
+                    serviceProviderProperty.setName(APIConstants.APP_DISPLAY_NAME);
+                    serviceProviderProperty.setValue(displayName);
+                    serviceProviderProperties[0] = serviceProviderProperty;
+                    serviceProvider.setSpProperties(serviceProviderProperties);
+
                     serviceProvider.setApplicationName(applicationName);
                     serviceProvider.setDescription("Service Provider for application " + applicationName);
                     appMgtService.updateApplication(serviceProvider, tenantDomain, userName);
