@@ -1,6 +1,6 @@
 {
   "welcome.to.wso2.api.manager": "Welcome to WSO2 API Manager",
-  "to.get.started.with.api.manager.do.any.of.the.following:": "To get started with API Manager, do any of the following:",
+  "wso2.api.publisher.enables.api.providers.to.publish.apis,.share.documentation,.provision.api.keys.and.gather.feedback.on.features,.quality.and.usage..to.get.started,.create.an.api.or.publish.a.sample.api..": "WSO2 API Publisher enables API providers to publish APIs, share documentation, provision API keys and gather feedback on features, quality and usage. To get started, Create an API or Publish a sample API.",
   "create.new.api": "Create New API",
   "deploy.sample.api": "Deploy Sample API",
   "i.have.an.existing.api": "I Have an Existing API",

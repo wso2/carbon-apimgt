@@ -28,6 +28,7 @@ import green from '@material-ui/core/colors/green';
 import { Divider, Card, CardContent, CardActions } from '@material-ui/core/';
 import { Create, GetApp } from '@material-ui/icons';
 import { PropTypes } from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 
 import API from '../../../../data/api';
 import Alert from '../../../Shared/Alert';
@@ -188,20 +189,27 @@ class SampleAPI extends Component {
                             variant='headline'
                             component='h2'
                         >
-                            Welcome to WSO2 API Manager
+                            <FormattedMessage
+                                id='welcome.to.wso2.api.manager'
+                                defaultMessage='Welcome to WSO2 API Manager'
+                            />
                         </Typography>
                         <Divider />
                         <CardContent>
                             <Typography align='justify' component='p'>
-                                WSO2 API Publisher enables API providers to publish APIs, share documentation, provision
-                                API keys and gather feedback on features, quality and usage. To get started, Create an
-                                API or Publish a sample API.
+                                <FormattedMessage
+                                    id={
+                                        'wso2.api.publisher.enables.api.providers.to.publish.apis,.share.' +
+                                        'documentation,.provision.api.keys.and.gather.feedback.on.features,.quality' +
+                                        '.and.usage..to.get.started,.create.an.api.or.publish.a.sample.api..'
+                                    }
+                                />
                             </Typography>
                         </CardContent>
                         <CardActions>
                             <APICreateMenu buttonProps={{ size: 'small', color: 'primary', variant: 'outlined' }}>
                                 <Create />
-                                Create New API
+                                <FormattedMessage id='create.new.api' defaultMessage='Create New API' />
                             </APICreateMenu>
                             <Button
                                 size='small'
@@ -211,7 +219,7 @@ class SampleAPI extends Component {
                                 onClick={this.handleDeploySample}
                             >
                                 <GetApp />
-                                Deploy Sample API
+                                <FormattedMessage id='deploy.sample.api' defaultMessage='Deploy Sample API' />
                             </Button>
                             {deploying && <CircularProgress size={24} className={classes.buttonProgress} />}
                         </CardActions>
