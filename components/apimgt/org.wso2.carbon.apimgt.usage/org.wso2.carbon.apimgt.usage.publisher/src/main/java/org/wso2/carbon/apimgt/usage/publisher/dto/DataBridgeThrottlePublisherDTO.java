@@ -41,7 +41,7 @@ public class DataBridgeThrottlePublisherDTO extends ThrottlePublisherDTO {
     }
 
     public Object createPayload() {
-        return new Object[] { getAccessToken(), getUsername(), getTenantDomain(), getApiname(),
+        return new Object[] { getUsername(), getTenantDomain(), getApiname(),
                 getVersion(), getContext(), getApiCreator(), getApiCreatorTenantDomain(), getApplicationId(),
                 getApplicationName(), getSubscriber(), getThrottledOutReason(), getGatewayType(), getThrottledTime() };
     }
