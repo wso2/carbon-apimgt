@@ -103,8 +103,6 @@ i18n.init(request,localeResourcesBasePath);
                     type = "Abnormal Request Count";
                 } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ABNORMALRESPONSETIMEALERTSTREAM") {
                     type = "Abnormal Response Time";
-                } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ALERT_ABNORMALTIERUSAGEALERT") {
-                    type = "Abnormal API Usage";
                 } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_TIERLIMITHITTINGALERT") {
                     type = "Tier Crossing";
                 } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ABNORMALBACKENDTIMEALERTSTREAM") {
