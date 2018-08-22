@@ -83,7 +83,11 @@ include("/jagg/jagg.jag");
                 apiProvider = parsedDataResult[i]["values"]["apiPublisher"]
 
                 var providerNameSpltArr = apiProvider.split("@");
-                apiProvider = providerNameSpltArr[providerNameSpltArr.length -2]
+                if (providerNameSpltArr[providerNameSpltArr.length -1] == 'carbon.super') { //if super tenant
+                    apiProvider = providerNameSpltArr[0]; //remove carbon.super 
+                } else {
+                    apiProvider = apiProvider.replace(new RegExp('@', 'g'), '-AT-'); //replace all @ with -AT-
+                }
                 
 
                 isExists = APIManagerFactory.getInstance().getAPIProvider(provider).isAPIAvailable(
