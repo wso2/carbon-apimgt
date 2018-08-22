@@ -146,10 +146,10 @@ var getDataFromTable = function (tableName, tenantDomain, startIndex,count, sort
 
     } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ALERT_UNUSUALIPACCESS") {
 
-        var appName = "APIM_UNUSUAL_IP_ACCES_ALERT";
+        var appName = "APIM_UNUSUAL_IP_ACCESS_ALERT";
         var query = "from ApimIPAccessAbnormalityAlert " +
                         "SELECT * " +  // use the commented select query below once https://github.com/wso2/product-sp/issues/753 fixed
-                        //"SELECT type, message, severity, alertTimestamp, ip, applicationName, applicationOwner, username, tenantDomain, requestTimestamp " +
+                        //"SELECT type, message, severity, ip, applicationName, applicationOwner, username, tenantDomain, requestTimestamp, alertTimestamp " +
                         "having tenantDomain=='" + tenantDomain + "' " + 
                         "order by " + sortableColumn + " " + isAscending + ";";
 
@@ -165,11 +165,11 @@ var getDataFromTable = function (tableName, tenantDomain, startIndex,count, sort
                               "values":{  
                                  "msg": record[1],
                                  "severity": record[2],
-                                 "alertTimestamp": record[3] ,
-                                 "ip" : record[4],
-                                 "applicationName": record[5],   
-                                 "applicationOwner" : record[6],
-                                 "userId": record[7]              
+                                 "alertTimestamp": record[8] ,
+                                 "ip" : record[3],
+                                 "applicationName": record[4],   
+                                 "applicationOwner" : record[5],
+                                 "userId": record[6]              
 
                                  }
                               }
@@ -385,7 +385,7 @@ var getCountFromTable = function (tableName, tenantDomain) {
 
     } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ALERT_UNUSUALIPACCESS") {
 
-        appName = "APIM_UNUSUAL_IP_ACCES_ALERT";
+        appName = "APIM_UNUSUAL_IP_ACCESS_ALERT";
         query = "from ApimIPAccessAbnormalityAlert " +
                         "SELECT count(alertTimestamp) as count " +
                         "having tenantDomain=='" + tenantDomain + "' ;"
