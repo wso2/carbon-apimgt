@@ -1,0 +1,33 @@
+<%
+include("/jagg/jagg.jag");
+
+	var user = jagg.getUser();
+	var log = new Log();
+	if(user == null) {
+		response.status = 401;
+	} 
+
+	var month = request.getParameter("month");
+	if (month == null || month == "") {
+		month = "1"; //set default as 1 to get previous month report
+	}
+
+	var publisher = jagg.module("manager").getAPIProviderObj();
+	try{
+	var object = publisher.getMicroGatewayRequestSummeryReport("", month);
+		if (object == null) {
+		    response.status=500;
+		} else {
+		    response.contentType = "application/force-download";
+		    response.addHeader("Content-Disposition","attachment; filename=\"Report.pdf\"");
+
+		    print(object.Data);
+		}
+	} catch(e){
+		//TODO redirect to error page
+			log.error("Error while generating the report " + e);
+	}
+
+%>
+
+

@@ -22,6 +22,7 @@ public class SSOConstants {
     public static final String ERROR_CODE = "errorCode";
 
     public static final String IDP_URL = "identityProviderURL";
+    public static final String IDP_LOGOUT_URL = "identityProviderLogoutURL";
     public static final String KEY_STORE_NAME = "keyStoreName";
     public static final String KEY_STORE_PASSWORD = "keyStorePassword";
     public static final String IDP_ALIAS = "identityAlias";

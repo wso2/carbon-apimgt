@@ -2679,7 +2679,8 @@ public class SQLConstants {
             "FROM " +
             "IDN_OAUTH_CONSUMER_APPS CON_APP, AM_APPLICATION APP, IDN_OAUTH2_ACCESS_TOKEN  TOKEN, AM_APPLICATION_KEY_MAPPING AKM " +
             "WHERE TOKEN.AUTHZ_USER =? " +
-            "AND APP.NAME=? " +
+            "AND APP.NAME =? " +
+            "AND APP.CREATED_BY =? " +
             "AND TOKEN.TOKEN_STATE = 'ACTIVE' " +
             "AND TOKEN.CONSUMER_KEY_ID = CON_APP.ID " +
             "AND CON_APP.CONSUMER_KEY=AKM.CONSUMER_KEY " +
@@ -2826,7 +2827,7 @@ public class SQLConstants {
 				+ " INNER JOIN  AM_API API ON AUM.API_ID = API.API_ID"
 				+ " LEFT OUTER JOIN AM_API_THROTTLE_POLICY pol ON AUM.THROTTLING_TIER = pol.NAME "
 				+ " LEFT OUTER JOIN AM_CONDITION_GROUP grp ON pol.POLICY_ID  = grp.POLICY_ID"
-				+ " where API.CONTEXT= ? AND API.API_VERSION = ?"
+				+ " where API.CONTEXT= ? AND API.API_VERSION = ? AND pol.TENANT_ID = ?"
 				/*+ " GROUP BY AUM.HTTP_METHOD,AUM.URL_PATTERN, AUM.URL_MAPPING_ID"*/
 				+ " ORDER BY AUM.URL_MAPPING_ID";
         public static final String ADD_BLOCK_CONDITIONS_SQL =

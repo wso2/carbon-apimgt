@@ -4,6 +4,7 @@ log = new Log(),
         usageClient = jagg.module("manager").getUsageClient(),
         user = jagg.getUser();
 var gson = com.google.gson.Gson();
+var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 function isDataPublishingEnabled(providerName, server) {
     var usage = [];
@@ -35,20 +36,406 @@ function isDataPublishingEnabled(providerName, server) {
     }
 }
 
-var getDataFromTable = function (tableName, searchEntry, startIndex,count, sortableColumn,isAscending) {
+var getDataFromTable = function (tableName, tenantDomain, startIndex,count, sortableColumn,isAscending) {
 
-    if (searchEntry == "") {
-        return usageClient.searchTable(tableName,"*:*", startIndex, count, sortableColumn, isAscending);
-    } else {
-        return usageClient.searchTable(tableName, searchEntry, startIndex, count, sortableColumn, isAscending);
+    if (tableName == "ORG_WSO2_ANALYTICS_APIM_ALLAPIMALERTSSTREAM") {
+
+        var appName = "APIM_ABNORMAL_REQUEST_PATTERN"; //call any alert app since it has a definition to all alert table
+        var query = "from ApimAllAlert " +
+                        "SELECT * " +  // use the commented select query below once https://github.com/wso2/product-sp/issues/753 fixed
+                        //"SELECT type, tenantDomain, message, severity, alertTimestamp " +
+                        "having tenantDomain=='" + tenantDomain + "' " + 
+                        "order by " + sortableColumn + " " + isAscending + ";";
+
+        var result = APIUtil.executeQueryOnStreamProcessor(appName, query);
+        var objArr = [];
+        if(result != null ) {
+            var parsedDataResult = JSON.parse(result);
+            if(parsedDataResult.records != null) {              
+              var items = parsedDataResult.records;
+              for (var i = 0; i < items.length; i ++){
+                    var record = items[i];
+                    var obj =  {  
+                              "values":{  
+                                 "type": record[0],
+                                 "tenantDomain" : record[1],
+                                 "msg" : record[2],
+                                 "severity":record[3],                       
+                                 "alertTimestamp":record[4]
+                                 }
+                              }
+                    objArr.push(obj);
+              }
+              
+            }
+        }
+        return objArr;
+
+    } else if(tableName == "ORG_WSO2_ANALYTICS_APIM_REQUESTPATTERNCHANGEDSTREAM") {
+
+        var appName = "APIM_ABNORMAL_REQUEST_PATTERN";
+        var query = "from ApimRequestPatternChangedAlert " +
+                        "SELECT * " +  // use the commented select query below once https://github.com/wso2/product-sp/issues/753 fixed
+                        //"SELECT username, applicationName, applicationOwner, tenantDomain, message, severity, alertTimestamp " +
+                        "having tenantDomain=='" + tenantDomain + "' " + 
+                        "order by " + sortableColumn + " " + isAscending + ";";
+
+        var result = APIUtil.executeQueryOnStreamProcessor(appName, query);
+        var objArr = [];
+        if(result != null ) {
+            var parsedDataResult = JSON.parse(result);
+            if(parsedDataResult.records != null) {              
+              var items = parsedDataResult.records;
+              for (var i = 0; i < items.length; i ++){
+                    var record = items[i];
+                    var obj =  {  
+                              "values":{  
+                                 "userId": record[0],
+                                 "applicationName" : record[1],
+                                 "applicationOwner" : record[2],
+                                 "tenantDomain":record[3],                       
+                                 "msg":record[4],
+                                 "severity":record[5],
+                                 "alertTimestamp":record[6],
+                                 }
+                              }
+                    objArr.push(obj);
+              }
+              
+            }
+        }
+        return objArr;
+
+    } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_TIERLIMITHITTINGALERT") {
+
+        var appName = "APIM_FREQUENT_TIER_LIMIT_HITTING_ALERT";
+        var query = "from ApimTierLimitHittingAlert " +
+                        "SELECT * " +  // use the commented select query below once https://github.com/wso2/product-sp/issues/753 fixed
+                        //"SELECT subscriber, apiCreator, apiName, applicationId, applicationName, apiCreatorTenantDomain, userTenantDomain, message, severity, alertTimestamp " +
+                        "having apiCreatorTenantDomain=='" + tenantDomain + "' " + 
+                        "order by " + sortableColumn + " " + isAscending + ";";
+
+        var result = APIUtil.executeQueryOnStreamProcessor(appName, query);
+        var objArr = [];
+        if(result != null ) {
+            var parsedDataResult = JSON.parse(result);
+            if(parsedDataResult.records != null) {              
+              var items = parsedDataResult.records;
+              for (var i = 0; i < items.length; i ++){
+                    var record = items[i];
+                    var obj =  {  
+                              "values":{  
+                                 "subscriber": record[0],
+                                 "apiPublisher" : record[1],
+                                 "api" : record[2],
+                                 "applicationId" : record[3],
+                                 "applicationName": record[4],   
+                                 "apiCreatorTenantDomain":record[5],
+                                 "userTenantDomain" : record[6],                   
+                                 "msg": record[7],
+                                 "severity": record[8],
+                                 "alertTimestamp": record[9] 
+                                 }
+                              }
+                    objArr.push(obj);
+              }
+              
+            }
+        }
+        return objArr;
+
+    } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ALERT_UNUSUALIPACCESS") {
+
+        var appName = "APIM_UNUSUAL_IP_ACCES_ALERT";
+        var query = "from ApimIPAccessAbnormalityAlert " +
+                        "SELECT * " +  // use the commented select query below once https://github.com/wso2/product-sp/issues/753 fixed
+                        //"SELECT type, message, severity, alertTimestamp, ip, applicationName, applicationOwner, username, tenantDomain, requestTimestamp " +
+                        "having tenantDomain=='" + tenantDomain + "' " + 
+                        "order by " + sortableColumn + " " + isAscending + ";";
+
+        var result = APIUtil.executeQueryOnStreamProcessor(appName, query);
+        var objArr = [];
+        if(result != null ) {
+            var parsedDataResult = JSON.parse(result);
+            if(parsedDataResult.records != null) {              
+              var items = parsedDataResult.records;
+              for (var i = 0; i < items.length; i ++){
+                    var record = items[i];
+                    var obj =  {  
+                              "values":{  
+                                 "msg": record[1],
+                                 "severity": record[2],
+                                 "alertTimestamp": record[3] ,
+                                 "ip" : record[4],
+                                 "applicationName": record[5],   
+                                 "applicationOwner" : record[6],
+                                 "userId": record[7]              
+
+                                 }
+                              }
+                    objArr.push(obj);
+              }
+              
+            }
+        }
+        return objArr;
+
+    } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ABNORMALREQUESTSPERMINALERTSTREAM") { 
+
+        var appName = "APIM_ABNORMAL_REQUEST_COUNT";
+        var query = "from ApimAbnormalRequestsPerMinAlert " +
+                        "SELECT * " +  // use the commented select query below once https://github.com/wso2/product-sp/issues/753 fixed
+                        //"SELECT applicationName, applicationOwner, tenantDomain, apiName, apiVersion, requestCountPerMin, thresholdRequestCountPerMin, message, severity, alertTimestamp " +
+                        "having tenantDomain=='" + tenantDomain + "' " + 
+                        "order by " + sortableColumn + " " + isAscending + ";";
+
+        var result = APIUtil.executeQueryOnStreamProcessor(appName, query);
+        var objArr = [];
+        if(result != null ) {
+            var parsedDataResult = JSON.parse(result);
+            if(parsedDataResult.records != null) {              
+              var items = parsedDataResult.records;
+              for (var i = 0; i < items.length; i ++){
+                    var record = items[i];
+                    var obj =  {  
+                              "values":{  
+                                 "applicationName": record[0],   
+                                 "applicationOwner" : record[1],
+                                 "api" : record[3],
+                                 "api_version" : record[4],
+                                 "msg": record[7],
+                                 "severity": record[8],
+                                 "alertTimestamp": record[9] 
+                                 }
+                              }
+                    objArr.push(obj);
+              }
+              
+            }
+        }
+        return objArr;
+
+    } else if(tableName == "ORG_WSO2_ANALYTICS_APIM_ABNORMALRESPONSETIMEALERTSTREAM") {
+
+        var appName = "APIM_ABNORMAL_RESPONSE_TIME";
+        var query = "from ApimAbnormalResponseTimeAlert " +
+                        "SELECT * " +  // use the commented select query below once https://github.com/wso2/product-sp/issues/753 fixed
+                        //"SELECT apiName, apiVersion, apiCreator, apiCreatorTenantDomain, apiResourceTemplate, apiMethod, responseTime, thresholdResponseTime, message, severity, alertTimestamp " +
+                        "having apiCreatorTenantDomain=='" + tenantDomain + "' " + 
+                        "order by " + sortableColumn + " " + isAscending + ";";
+                        
+        var result = APIUtil.executeQueryOnStreamProcessor(appName, query);
+        var objArr = [];
+        if(result != null ) {
+            var parsedDataResult = JSON.parse(result);
+            if(parsedDataResult.records != null) {              
+              var items = parsedDataResult.records;
+              for (var i = 0; i < items.length; i ++){
+                    var record = items[i];
+                    var obj =  {  
+                              "values":{  
+                                 "api" : record[0],
+                                 "api_version" : record[1],
+                                 "apiPublisher" : record[2],
+                                 "resourceTemplate" : record[4],
+                                 "method" : record[5],                     
+                                 "msg":record[8],
+                                 "severity":record[9],
+                                 "alertTimestamp":record[10],
+                                 }
+                              }
+                    objArr.push(obj);
+              }
+              
+            }
+        }
+        return objArr;
+
+    } else if(tableName == "ORG_WSO2_ANALYTICS_APIM_APIHEALTHMONITORALERTSTREAM") {
+
+        var appName = "APIM_HEALTH_AVAILABILITY_ALERT";
+        var query = "from ApimApiHealthMonitorAlert " +
+                        "SELECT * " +  // use the commented select query below once https://github.com/wso2/product-sp/issues/753 fixed
+                        //"SELECT apiName, apiVersion, apiCreator, apiCreatorTenantDomain, message, severity, alertTimestamp " +
+                        "having apiCreatorTenantDomain=='" + tenantDomain + "' " + 
+                        "order by " + sortableColumn + " " + isAscending + ";";
+                        
+        var result = APIUtil.executeQueryOnStreamProcessor(appName, query);
+        var objArr = [];
+        if(result != null ) {
+            var parsedDataResult = JSON.parse(result);
+            if(parsedDataResult.records != null) {              
+              var items = parsedDataResult.records;
+              for (var i = 0; i < items.length; i ++){
+                    var record = items[i];
+                    var obj =  {  
+                              "values":{  
+                                 "api" : record[0],
+                                 "api_version" : record[1],
+                                 "apiPublisher" : record[2],                   
+                                 "msg":record[4],
+                                 "severity":record[5],
+                                 "alertTimestamp":record[6]
+                                 }
+                              }
+                    objArr.push(obj);
+              }
+              
+            }
+        }
+        return objArr;
+
+    } else if(tableName == "ORG_WSO2_ANALYTICS_APIM_ABNORMALBACKENDTIMEALERTSTREAM") {
+
+        var appName = "APIM_ABNORMAL_BACKEND_TIME";
+        var query = "from ApimAbnormalBackendTimeAlert " +
+                        "SELECT * " +  // use the commented select query below once https://github.com/wso2/product-sp/issues/753 fixed
+                        //"SELECT apiName, apiVersion, apiCreator, apiCreatorTenantDomain, apiResourceTemplate, apiMethod, backendTime, thresholdBackendTime, message, severity, alertTimestamp " +
+                        "having apiCreatorTenantDomain=='" + tenantDomain + "' " + 
+                        "order by " + sortableColumn + " " + isAscending + ";";
+                        
+        var result = APIUtil.executeQueryOnStreamProcessor(appName, query);
+        var objArr = [];
+        if(result != null ) {
+            var parsedDataResult = JSON.parse(result);
+            if(parsedDataResult.records != null) {              
+              var items = parsedDataResult.records;
+              for (var i = 0; i < items.length; i ++){
+                    var record = items[i];
+                    var obj =  {  
+                              "values":{  
+                                 "api" : record[0],
+                                 "api_version" : record[1],
+                                 "apiPublisher" : record[2],   
+                                 "resourceTemplate" : record[4],
+                                 "method" : record[5],                  
+                                 "msg":record[8],
+                                 "severity":record[9],
+                                 "alertTimestamp":record[10]
+                                 }
+                              }
+                    objArr.push(obj);
+              }
+              
+            }
+        }
+        return objArr;
+
+    } else if(tableName == "ORG_WSO2_ANALYTICS_APIM_APIAVAILABILITY") {
+
+        var appName = "APIM_HEALTH_AVAILABILITY_ALERT";
+        var query = "from ApimApiAvailabilityInfo " +
+                        "SELECT * " +  // use the commented select query below once https://github.com/wso2/product-sp/issues/753 fixed
+                        //"SELECT apiName, apiVersion, apiCreator, tenantDomain, status " +
+                        "having tenantDomain=='" + tenantDomain + "' " + 
+                        "order by " + sortableColumn + " " + isAscending + ";";
+                        
+        var result = APIUtil.executeQueryOnStreamProcessor(appName, query);
+        var objArr = [];
+        if(result != null ) {
+            var parsedDataResult = JSON.parse(result);
+            if(parsedDataResult.records != null) {              
+              var items = parsedDataResult.records;
+              for (var i = 0; i < items.length; i ++){
+                    var record = items[i];
+                    var obj =  {  
+                              "values":{  
+                                 "api" : record[0],
+                                 "api_version" : record[1],
+                                 "apiPublisher" : record[2],
+                                 "status" : record[4]                             
+                                 }
+                              }
+                    objArr.push(obj);
+              }
+              
+            }
+        }
+        return objArr;
+
     }
+
 };
 
-var getCountFromTable = function (tableName, searchEntry) {
-    if (searchEntry == "null") {
-        searchEntry = null;
+var getCountFromTable = function (tableName, tenantDomain) {
+
+    var appName;
+    var query;
+
+    if (tableName == "ORG_WSO2_ANALYTICS_APIM_ALLAPIMALERTSSTREAM") {
+
+        appName = "APIM_ABNORMAL_REQUEST_PATTERN"; //call any alert app since it has a definition to all alert table
+        query = "from ApimAllAlert " +
+                        "SELECT count(alertTimestamp) as count " +
+                        "having tenantDomain=='" + tenantDomain + "' ;" 
+
+    } else if(tableName == "ORG_WSO2_ANALYTICS_APIM_REQUESTPATTERNCHANGEDSTREAM") {
+
+        appName = "APIM_ABNORMAL_REQUEST_PATTERN";
+        query = "from ApimRequestPatternChangedAlert " +
+                        "SELECT count(alertTimestamp) as count " +
+                        "having tenantDomain=='" + tenantDomain + "' ;" 
+
+    } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_TIERLIMITHITTINGALERT") {
+
+        appName = "APIM_FREQUENT_TIER_LIMIT_HITTING_ALERT";
+        query = "from ApimTierLimitHittingAlert " +
+                        "SELECT count(alertTimestamp) as count " +
+                        "having apiCreatorTenantDomain=='" + tenantDomain + "' ;" 
+
+    } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ALERT_UNUSUALIPACCESS") {
+
+        appName = "APIM_UNUSUAL_IP_ACCES_ALERT";
+        query = "from ApimIPAccessAbnormalityAlert " +
+                        "SELECT count(alertTimestamp) as count " +
+                        "having tenantDomain=='" + tenantDomain + "' ;"
+
+    } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ABNORMALREQUESTSPERMINALERTSTREAM") { 
+
+        appName = "APIM_ABNORMAL_REQUEST_COUNT";
+        query = "from ApimAbnormalRequestsPerMinAlert " +
+                        "SELECT count(alertTimestamp) as count " +
+                        "having tenantDomain=='" + tenantDomain + "' ;" 
+
+    } else if(tableName == "ORG_WSO2_ANALYTICS_APIM_ABNORMALRESPONSETIMEALERTSTREAM") {
+
+        appName = "APIM_ABNORMAL_RESPONSE_TIME";
+        query = "from ApimAbnormalResponseTimeAlert " +
+                        "SELECT count(alertTimestamp) as count " +
+                        "having apiCreatorTenantDomain=='" + tenantDomain + "' ;"                  
+
+    } else if(tableName == "ORG_WSO2_ANALYTICS_APIM_APIHEALTHMONITORALERTSTREAM") {
+
+        appName = "APIM_HEALTH_AVAILABILITY_ALERT";
+        query = "from ApimApiHealthMonitorAlert " +
+                        "SELECT count(alertTimestamp) as count " +
+                        "having apiCreatorTenantDomain=='" + tenantDomain + "' ;" 
+
+    } else if(tableName == "ORG_WSO2_ANALYTICS_APIM_ABNORMALBACKENDTIMEALERTSTREAM") {
+
+        appName = "APIM_ABNORMAL_BACKEND_TIME";
+        query = "from ApimAbnormalBackendTimeAlert " +
+                        "SELECT count(alertTimestamp) as count " +
+                        "having apiCreatorTenantDomain=='" + tenantDomain + "' ;" 
+
+    } else if(tableName == "ORG_WSO2_ANALYTICS_APIM_ABNORMALBACKENDTIMEALERTSTREAM") {
+        appName = "APIM_HEALTH_AVAILABILITY_ALERT";
+        query = "from ApimApiAvailabilityInfo " +
+                        "SELECT count(apiName) as count " +
+                        "having tenantDomain=='" + tenantDomain + "' ;" 
     }
-    return usageClient.searchCount(tableName,searchEntry);
+    var result = APIUtil.executeQueryOnStreamProcessor(appName, query);
+    var totalCount = 0;
+    if (result != null ) {
+        var parsedDataResult = JSON.parse(result);
+        if(parsedDataResult.records != null && parsedDataResult.records[0] != null) {    
+           totalCount = parsedDataResult.records[0]
+        }
+    }
+    return totalCount;
+
 };
+
+
 
 %>

@@ -484,13 +484,17 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         String nameIdFormat = relyingPartyObject.getSSOProperty(SSOConstants.NAME_ID_POLICY);
         log.debug("SAMLLogoutRequest is going to get session details");
         if (relyingPartyObject.getSessionInfo((String) args[1]) != null) {
+            String idpLogoutURL = relyingPartyObject.getSSOProperty(SSOConstants.IDP_LOGOUT_URL);
+            if (StringUtils.isEmpty(idpLogoutURL)) {
+                idpLogoutURL = relyingPartyObject.getSSOProperty(SSOConstants.IDP_URL);
+            }
             String sessionIndexId = relyingPartyObject.getSessionInfo((String) args[1]).getSessionIndex();
             if (sessionIndexId != null && sessionIndexId.length() > 0) {
                 if (!Boolean.parseBoolean(relyingPartyObject.getSSOProperty(SSOConstants.SIGN_REQUESTS))) {
                     return Util.marshall(new LogoutRequestBuilder().
                             buildLogoutRequest((String) args[0], sessionIndexId,
                                     SSOConstants.LOGOUT_USER,
-                                    relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID), nameIdFormat));
+                                    relyingPartyObject.getSSOProperty(idpLogoutURL), nameIdFormat));
                 } else {
                     return Util.marshall(new LogoutRequestBuilder().
                             buildSignedLogoutRequest((String) args[0], sessionIndexId,
@@ -498,7 +502,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                                     relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID),
                                     MultitenantConstants.SUPER_TENANT_ID,
                                     MultitenantConstants.SUPER_TENANT_DOMAIN_NAME,
-                                    relyingPartyObject.getSSOProperty(SSOConstants.IDP_URL), nameIdFormat));
+                                    relyingPartyObject.getSSOProperty(idpLogoutURL), nameIdFormat));
                 }
             } else {
                 if (!Boolean.parseBoolean(relyingPartyObject.getSSOProperty(SSOConstants.SIGN_REQUESTS))) {

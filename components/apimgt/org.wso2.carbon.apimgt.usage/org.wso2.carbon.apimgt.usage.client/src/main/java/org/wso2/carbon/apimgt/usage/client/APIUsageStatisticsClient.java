@@ -23,7 +23,12 @@ import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.client.bean.ExecutionTimeOfAPIValues;
@@ -76,13 +81,15 @@ import static java.util.Collections.sort;
 /**
  * Abstract class and act as a interface for the Statistic usage client for APIM.
  * Known implementations are,
- * org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRdbmsClientImpl
+ * org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRdbmsClientImpl and
+ * org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRestClientImpl
  */
 public abstract class APIUsageStatisticsClient {
 
     protected final Map<String, String> subscriberAppsMap = new HashMap<String, String>();
     private static final Log log = LogFactory.getLog(APIUsageStatisticsClient.class);
     private DASRestClient alertRestClient;
+    protected ApiMgtDAO apiMgtDAO;
 
 
     /**
@@ -398,6 +405,44 @@ public abstract class APIUsageStatisticsClient {
     protected List<String> getAppsBySubscriber(String subscriberName, String groupId)
             throws APIMgtUsageQueryServiceClientException {
 
+        apiMgtDAO = ApiMgtDAO.getInstance();
+        try {
+            Application[] applications = apiMgtDAO.getApplications(new Subscriber(subscriberName), groupId);
+            List<String> consumerKeys = new ArrayList<String>();
+
+            // iterate over the applications
+            for (Application application : applications) {
+                OAuthApplicationInfo prodOAuthAppInfo =
+                        application.getOAuthApp(APIUsageStatisticsClientConstants.PRODUCTION_KEY_TYPE);
+                OAuthApplicationInfo sandboxAuthAppInfo =
+                        application.getOAuthApp(APIUsageStatisticsClientConstants.SANDBOX_KEY_TYPE);
+                if (prodOAuthAppInfo != null) {
+                    consumerKeys.add(prodOAuthAppInfo.getClientId());
+                    subscriberAppsMap.put(prodOAuthAppInfo.getClientId(), application.getName());
+                }
+                if (sandboxAuthAppInfo != null) {
+                    consumerKeys.add(sandboxAuthAppInfo.getClientId());
+                    subscriberAppsMap.put(sandboxAuthAppInfo.getClientId(), application.getName());
+                }
+            }
+            return consumerKeys;
+
+        } catch (APIManagementException e) {
+            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
+        }
+    }
+
+    /**
+     * get the list if application of subscribers with Ids
+     *
+     * @param subscriberName subscriber name
+     * @param groupId        group of the subscriber
+     * @return list of string contain the application name
+     * @throws APIMgtUsageQueryServiceClientException
+     */
+    protected List<String> getAppsAndIdsBySubscriber(String subscriberName, String groupId)
+            throws APIMgtUsageQueryServiceClientException {
+
         Connection connection = null;
         PreparedStatement statement = null;
         ResultSet rs = null;
@@ -406,7 +451,7 @@ public abstract class APIUsageStatisticsClient {
             connection = APIMgtDBUtil.getConnection();
 
             //make query
-            String query = "SELECT CONSUMER_KEY, NAME FROM AM_APPLICATION_KEY_MAPPING INNER JOIN AM_APPLICATION ON " +
+            String query = "SELECT AM_APPLICATION.APPLICATION_ID, NAME FROM AM_APPLICATION_KEY_MAPPING INNER JOIN AM_APPLICATION ON " +
                     "AM_APPLICATION_KEY_MAPPING.APPLICATION_ID=AM_APPLICATION.APPLICATION_ID INNER JOIN " +
                     "AM_SUBSCRIBER" +
                     " ON AM_APPLICATION.SUBSCRIBER_ID = AM_SUBSCRIBER.SUBSCRIBER_ID WHERE ";
@@ -436,7 +481,7 @@ public abstract class APIUsageStatisticsClient {
 
             //iterate over the results
             while (rs.next()) {
-                String consumerKey = rs.getString("CONSUMER_KEY");
+                String consumerKey = rs.getString("APPLICATION_ID");
                 String appName = rs.getString("NAME");
                 consumerKeys.add(consumerKey);
                 subscriberAppsMap.put(consumerKey, appName);
