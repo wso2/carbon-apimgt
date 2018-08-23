@@ -23,6 +23,7 @@ import Message from './Message';
 /**
  * Common alerting/message displaying component for Store application, Pre-set vertical: 'top',
  horizontal: 'center' and close action for consistent UX through out the app.
+ Alert messages are mounted outside the app's root DOM element
  */
 class Alert {
     /**
@@ -94,7 +95,7 @@ class Alert {
                 Notification.newInstance(
                     {
                         transitionName: 'move-down',
-                        style: { top: 0, marginLeft: '45%', position: 'absolute' },
+                        style: { bottom: 0, marginLeft: '2%', position: 'absolute' },
                     },
                     (instance) => {
                         Alert.messageInstance = instance;

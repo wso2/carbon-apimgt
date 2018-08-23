@@ -22,11 +22,11 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
 import Input from '@material-ui/core/Input';
 
-import Api from '../../../data/api';
-import { Progress } from '../../Shared';
-import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
-import ApiPermissionValidation from '../../../data/ApiPermissionValidation';
-import { ScopeValidation, resourceMethod, resourcePath } from '../../../data/ScopeValidation';
+import Api from '../../../../data/api';
+import { Progress } from '../../../Shared';
+import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
+import ApiPermissionValidation from '../../../../data/ApiPermissionValidation';
+import { ScopeValidation, resourceMethod, resourcePath } from '../../../../data/ScopeValidation';
 
 class Permission extends Component {
     constructor(props) {

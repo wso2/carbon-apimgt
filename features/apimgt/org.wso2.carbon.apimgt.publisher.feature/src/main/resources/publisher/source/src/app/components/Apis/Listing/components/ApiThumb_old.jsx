@@ -26,11 +26,11 @@ import Delete from '@material-ui/icons/Delete';
 import PropTypes from 'prop-types';
 
 import ImageGenerator from './ImageGenerator';
-import API from '../../../data/api';
-import { resourceMethod, resourcePath, ScopeValidation } from '../../../data/ScopeValidation';
-import Utils from '../../../data/Utils';
-import ConfirmDialog from '../../Shared/ConfirmDialog';
-import Alert from '../../Shared/Alert';
+import API from '../../../../data/api';
+import { resourceMethod, resourcePath, ScopeValidation } from '../../../../data/ScopeValidation';
+import Utils from '../../../../data/Utils';
+import ConfirmDialog from '../../../Shared/ConfirmDialog';
+import Alert from '../../../Shared/Alert';
 
 const styles = theme => ({
     lifeCycleState: {
@@ -127,7 +127,7 @@ const styles = theme => ({
  */
 class ApiThumb extends React.Component {
     /**
-     * Util method to get confirmation dialuge
+     * Util method to get confirmation dialogue
      * @static
      * @param {any} details
      * @returns {Object} Dialogue object
@@ -287,19 +287,6 @@ class ApiThumb extends React.Component {
                 lg: 3,
                 xl: 2,
             };
-
-        if (!this.state.active) {
-            // Controls the delete state, We set the state to inactive on delete success call
-            return null;
-        }
-
-        if (this.state.isRedirect) {
-            return (
-                <Switch>
-                    <Redirect to={this.state.overview_link} />
-                </Switch>
-            );
-        }
 
         return (
             <Grid item {...gridItemSizes} className={classes.thumbWrapper}>

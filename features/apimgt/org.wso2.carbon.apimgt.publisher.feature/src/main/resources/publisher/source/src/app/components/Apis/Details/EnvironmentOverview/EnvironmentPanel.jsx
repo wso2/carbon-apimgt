@@ -23,7 +23,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { withStyles } from '@material-ui/core/styles';
 
 import Grid from '@material-ui/core/Grid';
-import ApiThumb from '../../Listing/ApiThumb';
+import ApiThumb from '../../Listing/components/ApiThumb';
 import API from '../../../../data/api';
 import { Progress } from '../../../Shared';
 import AuthManager from '../../../../data/AuthManager';
@@ -59,7 +59,7 @@ class EnvironmentPanel extends Component {
             return;
         }
 
-        const promisedAPIs = api.getAll({ query: `name:${rootAPI.name}` });
+        const promisedAPIs = API.all({ query: `name:${rootAPI.name}` });
         promisedAPIs
             .then((response) => {
                 // Filter more since getAll({query: name:apiName}) is not filtering with exact name

@@ -29,10 +29,10 @@ const styles = theme => ({
 /**
  *
  *
- * @class AddNewMenu
+ * @class CreateNewMenu
  * @extends {React.Component}
  */
-class AddNewMenu extends React.Component {
+class CreateNewMenu extends React.Component {
     state = {
         open: false,
     };
@@ -49,7 +49,7 @@ class AddNewMenu extends React.Component {
      *
      *
      * @returns
-     * @memberof AddNewMenu
+     * @memberof CreateNewMenu
      */
     render() {
         const { classes } = this.props;
@@ -107,8 +107,8 @@ class AddNewMenu extends React.Component {
     }
 }
 
-AddNewMenu.propTypes = {
+CreateNewMenu.propTypes = {
     classes: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles)(AddNewMenu);
+export default withStyles(styles)(CreateNewMenu);

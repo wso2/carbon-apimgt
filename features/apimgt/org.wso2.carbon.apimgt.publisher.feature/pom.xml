@@ -180,7 +180,7 @@
     <properties>
         <maven.test.skip>false</maven.test.skip>
         <npm.executable>npm</npm.executable>
-        <npm.build.command>build_prod</npm.build.command>
+        <npm.build.command>build:prod</npm.build.command>
         <npm.working.dir>./src/main/</npm.working.dir>
     </properties>
 </project>

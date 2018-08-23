@@ -23,12 +23,12 @@ import Button from '@material-ui/core/Button';
 import Log from 'log4javascript';
 import PropTypes from 'prop-types';
 
-import Overview from './Overview';
+import Overview from './Overview/Overview';
 import LifeCycle from './LifeCycle/LifeCycle';
 import Documents from './Documents/Documents';
 import { PageNotFound } from '../../Base/Errors/index';
 import Resources from './Resources/Resources';
-import PermissionFormWrapper from './Permission';
+import PermissionFormWrapper from './Permissions/Permission';
 import Endpoints from './Endpoints';
 import Subscriptions from './Subscriptions/Subscriptions';
 import Scopes from './Scopes/Scopes';

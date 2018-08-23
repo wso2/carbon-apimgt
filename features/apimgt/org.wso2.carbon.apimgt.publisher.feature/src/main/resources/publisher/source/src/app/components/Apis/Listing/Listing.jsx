@@ -18,86 +18,46 @@
 
 import React from 'react';
 import qs from 'qs';
-
-import { Link } from 'react-router-dom';
-import { Col, Menu, Row, Table } from 'antd';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
 import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
-import IconButton from '@material-ui/core/IconButton';
-import List from '@material-ui/icons/List';
-import GridIcon from '@material-ui/icons/GridOn';
-import AddNewMenu from './AddNewMenu';
-import Alert from '../../Shared/Alert';
 
-import { ScopeValidation, resourceMethod, resourcePath } from '../../../data/ScopeValidation';
-import ApiThumb from './ApiThumb';
-import '../Apis.css';
+import Alert from '../../Shared/Alert';
+import PageNavigation from '../APIsNavigation';
+import PageContainer from '../../Base/container/';
 import API from '../../../data/api.js';
 import { Progress } from '../../Shared';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
-import SampleAPI from './SampleAPI';
+import SampleAPI from './SampleAPI/SampleAPI';
+import CardView from './CardView/CardView';
+// import TableView from './TableView/TableView';
+import TopMenu from './components/TopMenu';
 
-const styles = theme => ({
-    rightIcon: {
-        marginLeft: theme.spacing.unit,
-    },
-    button: {
-        margin: theme.spacing.unit,
-        marginBottom: 20,
-    },
-    titleBar: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        borderBottomWidth: '1px',
-        borderBottomStyle: 'solid',
-        borderColor: theme.palette.text.secondary,
-        marginBottom: 20,
-    },
-    buttonLeft: {
-        alignSelf: 'flex-start',
-        display: 'flex',
-    },
-    buttonRight: {
-        alignSelf: 'flex-end',
-        display: 'flex',
-    },
-    title: {
-        display: 'inline-block',
-        marginRight: 50,
-    },
-    addButton: {
-        display: 'inline-block',
-        marginBottom: 20,
-        zIndex: 1,
-    },
-    popperClose: {
-        pointerEvents: 'none',
-    },
-});
-const menu = (
-    <Menu>
-        <Link to='/api/create/swagger'>
-            <Menu.Item>Create new API with Swagger</Menu.Item>
-        </Link>
-        <Link to='/api/create/rest'>
-            <Menu.Item>Create new API</Menu.Item>
-        </Link>
-    </Menu>
-);
+/**
+ * Render the APIs Listing page, This is the Default Publisher Landing page as well
+ *
+ * @class Listing
+ * @extends {React.Component}
+ */
 class Listing extends React.Component {
+    /**
+     *Creates an instance of Listing.
+     * @param {*} props
+     * @memberof Listing
+     */
     constructor(props) {
         super(props);
-        this.state = { listType: 'grid', apis: null };
+        this.state = { isCardView: true, apis: null };
         this.handleApiDelete = this.handleApiDelete.bind(this);
         this.updateApi = this.updateApi.bind(this);
+        this.toggleView = this.toggleView.bind(this);
     }
 
+    /**
+     *
+     * @inheritdoc
+     * @memberof Listing
+     */
     componentDidMount() {
-        const api = new API();
-        const promisedApis = api.getAll();
+        const promisedApis = API.all();
         promisedApis
             .then((response) => {
                 this.setState({ apis: response.obj });
@@ -114,14 +74,25 @@ class Listing extends React.Component {
             });
     }
 
-    setListType = (value) => {
-        this.setState({ listType: value });
-    };
+    /**
+     *
+     *
+     * @memberof Listing
+     */
+    toggleView() {
+        this.setState({ isCardView: !this.state.isCardView });
+    }
 
-    updateApi(api_uuid) {
+    /**
+     * Update Sample API
+     *
+     * @param {String} apiUUID
+     * @memberof Listing
+     */
+    updateApi(apiUUID) {
         const api = this.state.apis;
         for (const apiIndex in api.list) {
-            if (api.list.hasOwnProperty(apiIndex) && api.list[apiIndex].id === api_uuid) {
+            if (api.list.apiIndex && api.list[apiIndex].id === apiUUID) {
                 api.list.splice(apiIndex, 1);
                 break;
             }
@@ -129,142 +100,86 @@ class Listing extends React.Component {
         this.setState({ apis: api });
     }
 
-    handleApiDelete(apiUUID, name) {
+    /**
+     *
+     * Delete an API listed in the listing page
+     * @param {String} apiUUID API UUID
+     * @param {String} [name=''] API Name use for alerting purpose only
+     * @memberof Listing
+     */
+    handleApiDelete(event) {
+        const apiUUID = event.currentTarget.id;
+        const { apis } = this.state;
         Alert.info('Deleting the API ...');
-        const api = new API();
-        const promisedDelete = api.deleteAPI(apiUUID);
+        const apiObj = new API();
+        const promisedDelete = apiObj.deleteAPI(apiUUID);
         promisedDelete.then((response) => {
             if (response.status !== 200) {
                 console.log(response);
-                Alert.info('Something went wrong while deleting the ' + name + ' API!');
+                Alert.info('Something went wrong while deleting the API!');
                 return;
             }
-            Alert.info(name + ' API deleted Successfully');
-            const { api } = this.state;
-            for (const apiIndex in api.list) {
-                if (api.list.hasOwnProperty(apiIndex) && api.list[apiIndex].id === apiUUID) {
-                    api.list.splice(apiIndex, 1);
+            Alert.info('API deleted Successfully');
+            for (const apiIndex in apis.list) {
+                if (apis.list[apiIndex].id === apiUUID) {
+                    apis.list.splice(apiIndex, 1);
                     break;
                 }
             }
-            this.setState({ active: false, apis: api });
+            this.setState({ apis });
         });
     }
-    handleClickNew = () => {
-        this.setState({ newMenuOpen: true });
-    };
-    handleCloseNew = () => {
-        this.setState({ newMenuOpen: false });
-    };
-    render() {
-        const classes = this.props.classes;
-        const { apis } = this.state;
-        if (this.state.notFound) {
-            return <ResourceNotFound />;
-        }
-        const columns = [
-            {
-                title: 'Name',
-                dataIndex: 'name',
-                key: 'name',
-                render: (text, record) => <Link to={'/apis/' + record.id}>{text}</Link>,
-            },
-            {
-                title: 'Context',
-                dataIndex: 'context',
-                key: 'context',
-            },
-            {
-                title: 'Version',
-                dataIndex: 'version',
-                key: 'version',
-            },
-            {
-                title: 'Action',
-                key: 'action',
-                render: record => (
-                    <ScopeValidation resourcePath={resourcePath.SINGLE_API} resourceMethod={resourceMethod.DELETE}>
-                        <Button
-                            style={{ fontSize: 10, padding: '0px', margin: '0px' }}
-                            color='primary'
-                            onClick={() => this.handleApiDelete(record.id, record.name)}
-                        >
-                            Delete
-                        </Button>
-                    </ScopeValidation>
-                ),
-            },
-        ];
-        if (!apis) {
-            return <Progress />;
-        } else if (apis.count === 0) {
-            return <SampleAPI />;
-        } else {
-            return (
-                <Grid container spacing={0} justify='center'>
-                    <Grid item xs={12} className={classes.titleBar}>
-                        <div className={classes.buttonLeft}>
-                            <div className={classes.title}>
-                                <Typography variant='display2' gutterBottom>
-                                    APIs
-                                </Typography>
-                            </div>
-                            <AddNewMenu />
-                        </div>
-                        <div className={classes.buttonRight}>
-                            <IconButton
-                                className={classes.button}
-                                aria-label='Delete'
-                                onClick={() => this.setListType('list')}
-                            >
-                                <List />
-                            </IconButton>
-                            <IconButton
-                                className={classes.button}
-                                aria-label='Delete'
-                                onClick={() => this.setListType('grid')}
-                            >
-                                <GridIcon />
-                            </IconButton>
-                        </div>
-                    </Grid>
 
-                    <Grid item xs={12}>
-                        {this.state.listType === 'list' ? (
-                            <Row type='flex' justify='start'>
-                                <Col span={24}>
-                                    <Table
-                                        columns={columns}
-                                        dataSource={this.state.apis.list}
-                                        bordered
-                                        locale={{ emptyText: 'There is no data to display' }}
-                                    />
-                                </Col>
-                            </Row>
-                        ) : (
-                            <Grid container spacing={8}>
-                                {this.state.apis.list.map((api, i) => {
-                                    return (
-                                        <ApiThumb
-                                            key={api.id}
-                                            listType={this.state.listType}
-                                            api={api}
-                                            updateApi={this.updateApi}
-                                        />
-                                    );
-                                })}
-                            </Grid>
-                        )}
-                    </Grid>
-                </Grid>
+    /**
+     *
+     * @inheritdoc
+     * @returns {React.Component} @inheritdoc
+     * @memberof Listing
+     */
+    render() {
+        const { apis, notFound, isCardView } = this.state;
+        if (notFound) {
+            return (
+                <PageContainer pageNav={<PageNavigation />}>
+                    <ResourceNotFound />
+                </PageContainer>
             );
         }
+        if (!apis) {
+            return (
+                <PageContainer pageNav={<PageNavigation />}>
+                    <Progress />
+                </PageContainer>
+            );
+        }
+        if (apis.count === 0) {
+            return (
+                <PageContainer pageNav={<PageNavigation />}>
+                    <SampleAPI />
+                </PageContainer>
+            );
+        }
+
+        return (
+            <PageContainer
+                pageTopMenu={<TopMenu toggleView={this.toggleView} isCardView={isCardView} />}
+                pageNav={<PageNavigation />}
+            >
+                {isCardView ? <CardView handleApiDelete={this.handleApiDelete} apis={apis} /> : 'Table view here'}
+            </PageContainer>
+        );
     }
 }
 
 Listing.propTypes = {
-    classes: PropTypes.object.isRequired,
-    theme: PropTypes.object.isRequired,
+    classes: PropTypes.shape({}).isRequired,
+    theme: PropTypes.shape({}).isRequired,
+    history: PropTypes.shape({
+        push: PropTypes.func,
+    }).isRequired,
+    location: PropTypes.shape({
+        pathname: PropTypes.string,
+    }).isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(Listing);
+export default Listing;

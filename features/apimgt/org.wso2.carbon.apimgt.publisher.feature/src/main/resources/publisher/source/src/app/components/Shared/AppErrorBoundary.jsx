@@ -1,25 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import Typography from '@material-ui/core/Typography';
-import { withStyles } from '@material-ui/core/styles';
-import Card, { CardContent, CardActions, CardHeader } from '@material-ui/core/Card';
-import { ErrorOutline, Refresh } from '@material-ui/icons/';
-import IconButton from '@material-ui/core/IconButton';
-import Avatar from '@material-ui/core/Avatar';
-import red from '@material-ui/core/colors/red';
-import Divider from '@material-ui/core/Divider';
 
-const styles = () => ({
-    cardContent: { color: 'pink', backgroundColor: 'black' },
-    avatar: {
-        margin: 10,
-        color: '#fff',
-        backgroundColor: red[500],
-    },
-    subheader: {
-        color: red[500],
-    },
-});
 /**
  * Error boundary for the application.catch JavaScript errors anywhere in their child component tree,
  * log those errors, and display a fallback UI instead of the component tree that crashed.
@@ -59,45 +40,33 @@ class AppErrorBoundary extends Component {
      */
     render() {
         const { hasError, error, info } = this.state;
-        const { children, appName, classes } = this.props;
+        const { children, appName } = this.props;
+        const errorStackStyle = {
+            background: '#fff8dc',
+            width: '50%',
+            fontFamily: 'monospace',
+        };
         if (hasError) {
             return (
                 <div>
-                    <Card>
-                        <CardHeader
-                            avatar={
-                                <Avatar aria-label='Error' className={classes.avatar}>
-                                    <ErrorOutline />
-                                </Avatar>
-                            }
-                            title={
-                                <Typography variant='headline'>
-                                    Aaaah! Something went wrong while rendering the {appName}
-                                </Typography>
-                            }
-                            subheader={<Typography color='error'>{error.message}</Typography>}
-                        />
-                        <Divider />
-                        <CardContent className={classes.cardContent}>
-                            <pre>
-                                <u>{error.stack}</u>
-                            </pre>
-                            <pre>
-                                <u>{info.componentStack}</u>
-                            </pre>
-                        </CardContent>
-                        <CardActions className={classes.actions} disableActionSpacing>
-                            <Typography color='primary'>You may refresh the page or try again later</Typography>
-                            <IconButton
-                                onClick={() => {
-                                    window.location.reload(true);
-                                }}
-                                aria-label='Refresh'
-                            >
-                                <Refresh />
-                            </IconButton>
-                        </CardActions>
-                    </Card>
+                    <h2>Something went wrong while rendering the</h2> <b>{appName}</b>
+                    <hr />
+                    <h3 style={{ color: 'red' }}>{error.message}</h3>
+                    <pre style={errorStackStyle}>
+                        <u>{error.stack}</u>
+                    </pre>
+                    <pre style={errorStackStyle}>
+                        <u>{info.componentStack}</u>
+                    </pre>
+                    <span>You may refresh the page now or try again later</span>
+                    <button
+                        onClick={() => {
+                            window.location.reload(true);
+                        }}
+                        aria-label='Refresh'
+                    >
+                        Refresh
+                    </button>
                 </div>
             );
         } else {
@@ -113,9 +82,6 @@ AppErrorBoundary.defaultProps = {
 AppErrorBoundary.propTypes = {
     children: PropTypes.node.isRequired,
     appName: PropTypes.string,
-    classes: PropTypes.shape({
-        root: PropTypes.string,
-    }).isRequired,
 };
 
-export default withStyles(styles)(AppErrorBoundary);
+export default AppErrorBoundary;
