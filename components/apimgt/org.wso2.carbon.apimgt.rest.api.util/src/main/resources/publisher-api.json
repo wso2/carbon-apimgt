@@ -2631,6 +2631,370 @@
                     }
                 }
             }
+        },
+        "/certificates": {
+            "get": {
+                "x-scope": "apim:api_create",
+                "produces": [
+                    "application/json"
+                ],
+                "x-wso2-curl": "curl -X GET -H \"Authorization: Bearer\nae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type:\napplication/json\"\n\"https://localhost:9443/api/am/publisher/v0.13/certificates\"\n",
+                "x-wso2-request": "GET\nhttps://localhost:9443/api/am/publisher/v0.13/certificates?limit=2&offset=0&alias=wso2carbon&endpoint=https://www.abc.com\n",
+                "x-wso2-response": "HTTP/1.1 200 OK {\"count\":2,\"next\":\"\",\"previous\":\"\",\"certificates\":[{\"alias\":\"wso2carbon\",\"endpoint\":\"https://www.abc.com\"}],\"pagination\":{\"total\":5,\"offset\":0,\"limit\":2}}",
+                "summary": "Retrieve/ search the uploaded Certificates.",
+                "description": "This operation can be used to retrieve and search the uploaded\ncertificates.\n",
+                "tags": [
+                    "Certificates (Collection)"
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/limit"
+                    },
+                    {
+                        "$ref": "#/parameters/offset"
+                    },
+                    {
+                        "in": "query",
+                        "name": "alias",
+                        "required": false,
+                        "type": "string",
+                        "description": "Alias for the certificate"
+                    },
+                    {
+                        "in": "query",
+                        "name": "endpoint",
+                        "required": false,
+                        "type": "string",
+                        "description": "Endpoint of which the certificate is uploaded"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK. Successful response with the list of matching certificate information in the body.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Certificates"
+                        },
+                        "headers": {
+                            "Content-Type": {
+                                "description": "The content type of the body.\n",
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request.\nInvalid request or validation error.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "x-scope": "apim:api_create",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "x-wso2-curl": "curl -X POST -H \"Authorization: Bearer\nae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type:\nmultipart/form-data\"  -F 'certificate=@/home/user/wso2carbon.cert' -F\n'alias=wso2carbon' -F 'endpoint=https://www.abc.com'\n\"https://localhost:9443/api/am/publisher/v0.13/certificates/certificate\"\n",
+                "x-wso2-request": "POST\nhttps://localhost:9443/api/am/publisher/v0.13/certificates/certificate\n\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8 -F\n'certificate=/home/user/wso2carbon.cert' -F 'alias=wso2' -F\n'endpoint=https://www.abc.com'\n",
+                "x-wso2-response": "HTTP/1.1 201 Created. Location:certificates?alias=wso2\n {\"alias\":wso2carbon,\"endpoint\":\"abc.com\"}",
+                "summary": "Upload a new Certificate.",
+                "description": "This operation can be used to upload a new certificate for an endpoint.\n",
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "name": "certificate",
+                        "description": "The certificate that needs to be uploaded.",
+                        "required": true,
+                        "type": "file"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "alias",
+                        "description": "Alias for the certificate",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "endpoint",
+                        "description": "Endpoint to which the certificate should be applied.",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "Certificates (Individual)"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK.\nThe Certificate added successfully.\n",
+                        "headers": {
+                            "Location": {
+                                "description": "The URL of the newly created resource.\n",
+                                "type": "string"
+                            },
+                            "Content-Type": {
+                                "description": "The content type of the body.\n",
+                                "type": "string"
+                            }
+                        },
+                        "schema": {
+                            "$ref": "#/definitions/CertMetadata"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request.\nInvalid request or validation error.\n* Failures due to existing alias or expired certificate.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error\n* Failed to add the Certificate due to an Internal Server Error\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/certificates/{alias}": {
+            "put": {
+                "x-scope": "apim:api_create",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "x-wso2-curl": "curl -X PUT -H \"Authorization: Bearer\nae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type:\nmultipart/form-data\" -F 'certificate=@/home/user/wso2carbon.cert' -F\n'alias=wso2carbon'\n\"https://localhost:9443/api/am/publisher/v0.13/certificates/wso2carbon\"\n",
+                "x-wso2-request": "PUT https://localhost:9443/api/am/publisher/v0.13/certificates/wso2carbon\n\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8 -F\n'certificate=@/home/user/wso2carbon.cert' -F 'alias=wso2carbon'\n",
+                "x-wso2-response": "HTTP/1.1 200 OK\n Content-Type:application/json\n {\"alias\":wso2carbon,\"endpoint\":\"abc.com\"}",
+                "summary": "Update a certificate.",
+                "description": "This operation can be used to update an uploaded certificate.\n",
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "name": "certificate",
+                        "description": "The certificate that needs to be uploaded.",
+                        "required": true,
+                        "type": "file"
+                    },
+                    {
+                        "in": "path",
+                        "name": "alias",
+                        "description": "Alias for the certificate",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "Certificates (Individual)"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK.\nThe Certificate updated successfully.\n",
+                        "schema": {
+                            "$ref": "#/definitions/CertMetadata"
+                        },
+                        "headers": {
+                            "Location": {
+                                "description": "The URL of the newly created resource.\n",
+                                "type": "string"
+                            },
+                            "Content-Type": {
+                                "description": "The content type of the body.\n",
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request.\nInvalid request or validation error.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found.\n * Updating certificat failed. Alias not found\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "x-scope": "apim:api_create",
+                "x-wso2-curl": "curl -X DELETE -H \"Authorization: Bearer\nae4eae22-3f65-387b-a171-d37eaa366fa8\"\n\"https://localhost:9443/api/am/publisher/v0.13/certificates/wso2carbon\"\n",
+                "x-wso2-request": "DELETE\nhttps://localhost:9443/api/am/publisher/v0.13/certificates/wso2carbon\n\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+                "x-wso2-response": "HTTP/1.1 200 OK",
+                "summary": "Delete a certificate.",
+                "description": "This operation can be used to delete an uploaded certificate.\n",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "alias",
+                        "description": "The alias of the certificate that should be deleted.\n",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "Certificates (Individual)"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK.\nThe Certificate deleted successfully.\n",
+                        "headers": {
+                            "Content-Type": {
+                                "description": "The content type of the body.\n",
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request.\n\nInvalid request or validation error.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found. |\nFailed to delete the certificate. Certificate could not found for\nthe given alias\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "get": {
+                "x-scope": "apim:api_create",
+                "produces": [
+                    "application/json"
+                ],
+                "x-wso2-curl": "curl -X POST\n\"https://apis.wso2.com/api/am/publisher/v0.13/certificates/wso2carbon\"\n-H  \"accept: application/json\"\n",
+                "x-wso2-request": "POST\nhttps://apis.wso2.com/api/am/publisher/v0.13/certificates/wso2carbon\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+                "x-wso2-response": "HTTP/1.1 200 OK \nContent-Type: application/json\n{\n\"status\":\"Active\",\n\"from\":\"Fri May 04 19:01:01 IST 2018\",\n\"to\":\"Thu Aug 02 19:01:01 IST 2018\",\n\"version\":\"3\",\n\"subject\":\"CN=foitt2.com, OU=wso2, O=wso2, L=Colombo, ST=Western, C=LK\"}\"",
+                "summary": "Get the certificate information.",
+                "description": "This operation can be used to get the information about the certificate.\n",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "alias",
+                        "type": "string",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "Certificates (Individual)"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK.\n",
+                        "schema": {
+                            "$ref": "#/definitions/CertificateInfo"
+                        },
+                        "headers": {
+                            "Content-Type": {
+                                "description": "The content type of the body.\n",
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request.\nInvalid request or validation error.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found.\nAlias not found\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/certificates/{alias}/content": {
+            "get": {
+                "x-scope": "apim:api_create",
+                "x-wso2-curl": "curl -X POST\n\"https://apis.wso2.com/api/am/publisher/v0.13/certificates/wso2carbon/content\"\n-H  \"accept: application/json\"",
+                "x-wso2-request": "POST\nhttps://apis.wso2.com/api/am/publisher/v0.13/certificates/wso2carbon/content\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+                "x-wso2-response": "HTTP/1.1 200 OK",
+                "summary": "Download the certificate defined by the given alias.",
+                "description": "This operation can be used to download the certificate which matches the given alias.\n",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "alias",
+                        "type": "string",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "Certificates (Individual)"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK.\n",
+                        "headers": {
+                            "Content-Type": {
+                                "description": "The content type of the body.\n",
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request.\nInvalid request or validation error.\n*\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found. Certificate for the Alias not found.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
         }
     },
     "parameters": {
@@ -3797,6 +4161,93 @@
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "Certificates": {
+            "title": "Certificates",
+            "description": "Representation of a list of certificates",
+            "properties": {
+                "count": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "next": {
+                    "type": "string",
+                    "example": "/certificates?limit=1&offset=2"
+                },
+                "previous": {
+                    "type": "string",
+                    "example": "/certificates?limit=1&offset=0"
+                },
+                "certificates": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/CertMetadata"
+                    }
+                },
+                "pagination": {
+                    "properties": {
+                        "offset": {
+                            "type": "integer",
+                            "example": 12
+                        },
+                        "limit": {
+                            "type": "integer",
+                            "example": 25
+                        },
+                        "total": {
+                            "type": "integer",
+                            "example": 1290
+                        }
+                    }
+                }
+            }
+        },
+        "CertMetadata": {
+            "title": "Certificate",
+            "description": "Representation of the details of a certificate",
+            "properties": {
+                "alias": {
+                    "type": "string",
+                    "example": "wso2carbon"
+                },
+                "endpoint": {
+                    "type": "string",
+                    "example": "www.abc.com"
+                }
+            }
+        },
+        "CertificateInfo": {
+            "title": "Certificate information",
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "example": "Active"
+                },
+                "validity": {
+                    "$ref": "#/definitions/CertificateValidity"
+                },
+                "version": {
+                    "type": "string",
+                    "example": "V3"
+                },
+                "subject": {
+                    "type": "string",
+                    "example": "CN=wso2.com, OU=wso2, O=wso2, L=Colombo, ST=Western, C=LK"
+                }
+            }
+        },
+        "CertificateValidity": {
+            "title": "Certificate valid period",
+            "properties": {
+                "from": {
+                    "type": "string",
+                    "example": "12-12-2017"
+                },
+                "to": {
+                    "type": "string",
+                    "example": "01-01-2019"
                 }
             }
         }

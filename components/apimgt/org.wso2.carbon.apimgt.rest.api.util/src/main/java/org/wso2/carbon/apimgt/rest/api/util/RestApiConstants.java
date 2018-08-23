@@ -162,4 +162,8 @@ public final class RestApiConstants {
     public static final String ETAG = "ETag";
     public static final String PUT = "PUT";
     public static final String DELETE = "DELETE";
+
+    public static final String CERTS_BASE_PATH = "/certificates";
+    public static final String CERTS_GET_PAGINATED_URL =
+            CERTS_BASE_PATH + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM + QUERY_PARAM;
 }
