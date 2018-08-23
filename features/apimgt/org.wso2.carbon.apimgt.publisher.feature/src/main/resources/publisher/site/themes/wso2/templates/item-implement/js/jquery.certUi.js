@@ -95,28 +95,22 @@
                         if (containInCertUrl) {
                             return containInCertUrl;
                         }
-                    }
+                            }
                 } else if (productionEndpoints) {
                     // Skip if productionEndpoints is `undefined`
-                    var containInCertUrl = productionEndpoints.url.toLowerCase().indexOf(certUrl) !== -1;
-                    if (containInCertUrl) {
-                        return containInCertUrl;
-                    }
-                }
+                    return productionEndpoints.url.toLowerCase().indexOf(certUrl) !== -1;
+                        }
                 if (Array.isArray(sandboxEndpoints)) {
                     for (var index in sandboxEndpoints) {
                         var containInCertUrl = sandboxEndpoints[index].url.toLowerCase().indexOf(certUrl) !== -1;
                         if (containInCertUrl) {
                             return containInCertUrl;
-                        }
-                    }
-                } else if (sandboxEndpoints) {
-                    // Skip if sandboxEndpoints is `undefined`
-                    var containInCertUrl = sandboxEndpoints.url.toLowerCase().indexOf(certUrl) !== -1;
-                    if (containInCertUrl) {
-                        return containInCertUrl;
                     }
                 }
+                } else if (sandboxEndpoints) {
+                    // Skip if sandboxEndpoints is `undefined`
+                    return sandboxEndpoints.url.toLowerCase().indexOf(certUrl) !== -1;
+            }
             });
             return newCerts;
         },
