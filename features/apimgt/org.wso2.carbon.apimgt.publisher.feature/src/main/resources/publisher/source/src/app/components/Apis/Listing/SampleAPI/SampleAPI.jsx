@@ -93,7 +93,9 @@ class SampleAPI extends Component {
         const production = {
             type: 'production',
             inline: {
-                name: data.name.replace(/ /g, '_') + data.version.replace(/\./g, '_'), // TODO: It's better to add this name property from the REST api itself, making sure no name conflicts with other inline endpoint definitions ~tmkb
+                name: data.name.replace(/ /g, '_') + data.version.replace(/\./g, '_'),
+                // TODO: It's better to add this name property from the REST api itself,
+                // making sure no name conflicts with other inline endpoint definitions ~tmkb
                 endpointConfig: JSON.stringify({ serviceUrl }),
                 endpointSecurity: { enabled: false },
                 type: 'http',

@@ -174,6 +174,12 @@ class Listing extends React.Component {
 Listing.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,
+    history: PropTypes.shape({
+        push: PropTypes.func,
+    }).isRequired,
+    location: PropTypes.shape({
+        pathname: PropTypes.string,
+    }).isRequired,
 };
 
 export default Listing;
