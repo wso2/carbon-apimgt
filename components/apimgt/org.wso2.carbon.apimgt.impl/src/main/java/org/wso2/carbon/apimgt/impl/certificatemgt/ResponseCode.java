@@ -37,7 +37,8 @@ public enum ResponseCode {
     ALIAS_EXISTS_IN_TRUST_STORE(3),
     CERTIFICATE_NOT_FOUND(4),
     FAILED_TO_REMOVE_FROM_DB(5),
-    CERTIFICATE_EXPIRED(6);
+    CERTIFICATE_EXPIRED(6),
+    CERTIFICATE_FOR_ENDPOINT_EXISTS(7);
 
     private final int responseCode;
 
