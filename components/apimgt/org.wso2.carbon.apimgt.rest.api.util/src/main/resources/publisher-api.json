@@ -2760,12 +2760,6 @@
                             "$ref": "#/definitions/Error"
                         }
                     },
-                    "404": {
-                        "description": "Not Found.\n",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
                     "500": {
                         "description": "Internal Server Error\n* Failed to add the Certificate due to an Internal Server Error\n",
                         "schema": {
@@ -2896,8 +2890,8 @@
                 "produces": [
                     "application/json"
                 ],
-                "x-wso2-curl": "curl -X POST\n\"https://apis.wso2.com/api/am/publisher/v0.13/certificates/wso2carbon\"\n-H  \"accept: application/json\"\n",
-                "x-wso2-request": "POST\nhttps://apis.wso2.com/api/am/publisher/v0.13/certificates/wso2carbon\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+                "x-wso2-curl": "curl -X GET\n\"https://apis.wso2.com/api/am/publisher/v0.13/certificates/wso2carbon\"\n-H  \"accept: application/json\"\n",
+                "x-wso2-request": "GET\nhttps://apis.wso2.com/api/am/publisher/v0.13/certificates/wso2carbon\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
                 "x-wso2-response": "HTTP/1.1 200 OK \nContent-Type: application/json\n{\n\"status\":\"Active\",\n\"from\":\"Fri May 04 19:01:01 IST 2018\",\n\"to\":\"Thu Aug 02 19:01:01 IST 2018\",\n\"version\":\"3\",\n\"subject\":\"CN=foitt2.com, OU=wso2, O=wso2, L=Colombo, ST=Western, C=LK\"}\"",
                 "summary": "Get the certificate information.",
                 "description": "This operation can be used to get the information about the certificate.\n",
@@ -2949,8 +2943,8 @@
         "/certificates/{alias}/content": {
             "get": {
                 "x-scope": "apim:api_create",
-                "x-wso2-curl": "curl -X POST\n\"https://apis.wso2.com/api/am/publisher/v0.13/certificates/wso2carbon/content\"\n-H  \"accept: application/json\"",
-                "x-wso2-request": "POST\nhttps://apis.wso2.com/api/am/publisher/v0.13/certificates/wso2carbon/content\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+                "x-wso2-curl": "curl -X GET\n\"https://apis.wso2.com/api/am/publisher/v0.13/certificates/wso2carbon/content\"\n-H  \"accept: application/json\"",
+                "x-wso2-request": "GET\nhttps://apis.wso2.com/api/am/publisher/v0.13/certificates/wso2carbon/content\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
                 "x-wso2-response": "HTTP/1.1 200 OK",
                 "summary": "Download the certificate defined by the given alias.",
                 "description": "This operation can be used to download the certificate which matches the given alias.\n",
