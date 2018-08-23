@@ -43,7 +43,7 @@ include("/jagg/jagg.jag");
             var searchEntry = request.getParameter("search[value]");
             var sortOrder = (request.getParameter("order[0][dir]"));
 
-            var tableName = "ORG_WSO2_ANALYTICS_APIM_APIAVAILABILITY";
+            var tableName = "ApimApiAvailabilityInfo";
 
             var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
             var tenantDomain = MultitenantUtils.getTenantDomain(jagg.getUser().username);

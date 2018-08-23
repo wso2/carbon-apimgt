@@ -38,21 +38,21 @@ $( document ).ready(function() {
 
     function changeActiveTableName() {
         if(selectedOptionKey == 1){
-            tableName = "ORG_WSO2_ANALYTICS_APIM_ALLAPIMALERTSSTREAM"
+            tableName = "ApimAllAlert"
         } else if(selectedOptionKey== 2){
-            tableName = "ORG_WSO2_ANALYTICS_APIM_ALERT_UNUSUALIPACCESS";
+            tableName = "ApimIPAccessAbnormalityAlert";
         } else if(selectedOptionKey== 3){
-            tableName = "ORG_WSO2_ANALYTICS_APIM_ABNORMALREQUESTSPERMINALERTSTREAM";
+            tableName = "ApimAbnormalRequestsPerMinAlert";
         } else if(selectedOptionKey== 4){
-            tableName = "ORG_WSO2_ANALYTICS_APIM_ABNORMALRESPONSETIMEALERTSTREAM";
+            tableName = "ApimAbnormalResponseTimeAlert";
         } else if(selectedOptionKey== 5){
-            tableName = "ORG_WSO2_ANALYTICS_APIM_TIERLIMITHITTINGALERT";
+            tableName = "ApimTierLimitHittingAlert";
         } else if(selectedOptionKey== 6){
-            tableName = "ORG_WSO2_ANALYTICS_APIM_ABNORMALBACKENDTIMEALERTSTREAM";
+            tableName = "ApimAbnormalBackendTimeAlert";
         } else if(selectedOptionKey== 7){
-            tableName = "ORG_WSO2_ANALYTICS_APIM_APIHEALTHMONITORALERTSTREAM";
+            tableName = "ApimApiHealthMonitorAlert";
         } else if(selectedOptionKey== 8){
-            tableName = "ORG_WSO2_ANALYTICS_APIM_REQUESTPATTERNCHANGEDSTREAM";
+            tableName = "ApimRequestPatternChangedAlert";
         }
 
     }
