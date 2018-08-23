@@ -19,7 +19,6 @@
 import React from 'react';
 import qs from 'qs';
 import PropTypes from 'prop-types';
-import Grid from '@material-ui/core/Grid';
 
 import Alert from '../../Shared/Alert';
 import PageNavigation from '../APIsNavigation';
@@ -108,25 +107,26 @@ class Listing extends React.Component {
      * @param {String} [name=''] API Name use for alerting purpose only
      * @memberof Listing
      */
-    handleApiDelete(apiUUID, name = '') {
+    handleApiDelete(event) {
+        const apiUUID = event.currentTarget.id;
+        const { apis } = this.state;
         Alert.info('Deleting the API ...');
         const apiObj = new API();
         const promisedDelete = apiObj.deleteAPI(apiUUID);
         promisedDelete.then((response) => {
             if (response.status !== 200) {
                 console.log(response);
-                Alert.info('Something went wrong while deleting the ' + name + ' API!');
+                Alert.info('Something went wrong while deleting the API!');
                 return;
             }
-            Alert.info(name + ' API deleted Successfully');
-            const { api } = this.state;
-            for (const apiIndex in api.list) {
-                if (api.list.apiIndex && api.list[apiIndex].id === apiUUID) {
-                    api.list.splice(apiIndex, 1);
+            Alert.info('API deleted Successfully');
+            for (const apiIndex in apis.list) {
+                if (apis.list[apiIndex].id === apiUUID) {
+                    apis.list.splice(apiIndex, 1);
                     break;
                 }
             }
-            this.setState({ active: false, apis: api });
+            this.setState({ apis });
         });
     }
 
@@ -165,7 +165,7 @@ class Listing extends React.Component {
                 pageTopMenu={<TopMenu toggleView={this.toggleView} isCardView={isCardView} />}
                 pageNav={<PageNavigation />}
             >
-                {isCardView ? <CardView apis={apis} /> : 'Table view here'}
+                {isCardView ? <CardView handleApiDelete={this.handleApiDelete} apis={apis} /> : 'Table view here'}
             </PageContainer>
         );
     }

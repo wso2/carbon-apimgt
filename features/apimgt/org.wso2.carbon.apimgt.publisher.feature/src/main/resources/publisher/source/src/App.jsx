@@ -27,7 +27,7 @@ import ConfigManager from './app/data/ConfigManager';
 // import MaterialDesignCustomTheme from './app/components/Shared/CustomTheme';
 import { PageNotFound } from './app/components/Base/Errors';
 import AuthManager from './app/data/AuthManager';
-import {addLocaleData, defineMessages, IntlProvider} from 'react-intl';
+import { addLocaleData, defineMessages, IntlProvider } from 'react-intl';
 import Apis from './app/components/Apis/Apis';
 import Endpoints from './app/components/Endpoints';
 import Base from './app/components/Base';
@@ -82,7 +82,6 @@ themes.push(darkTheme);
 themes.push(lightTheme);
 // themes.push(createMuiTheme(MaterialDesignCustomTheme));
 
-
 /**
  * Language.
  * @type {string}
@@ -118,24 +117,8 @@ class Protected extends Component {
      * Initialize i18n.
      */
     componentWillMount() {
-        const locale = (languageWithoutRegionCode || language || 'en');
+        const locale = languageWithoutRegionCode || language || 'en';
         this.loadLocale(locale);
-    }
-
-    /**
-     * Load locale file.
-     *
-     * @param {string} locale Locale name
-     * @returns {Promise} Promise
-     */
-    loadLocale(locale = 'en') {
-        fetch(`${Utils.CONST.CONTEXT_PATH}/public/app/locales/${locale}.json`)
-            .then((resp) => resp.json())
-            .then((data) => {
-                // eslint-disable-next-line global-require, import/no-dynamic-require
-                addLocaleData(require(`react-intl/locale-data/${locale}`));
-                this.setState({messages: defineMessages(data)});
-            })
     }
 
     /**
@@ -154,6 +137,22 @@ class Protected extends Component {
             })
             .catch((error) => {
                 Log.error('Error while receiving environment configurations : ', error);
+            });
+    }
+
+    /**
+     * Load locale file.
+     *
+     * @param {string} locale Locale name
+     * @returns {Promise} Promise
+     */
+    loadLocale(locale = 'en') {
+        fetch(`${Utils.CONST.CONTEXT_PATH}/public/app/locales/${locale}.json`)
+            .then(resp => resp.json())
+            .then((data) => {
+                // eslint-disable-next-line global-require, import/no-dynamic-require
+                addLocaleData(require(`react-intl/locale-data/${locale}`));
+                this.setState({ messages: defineMessages(data) });
             });
     }
 

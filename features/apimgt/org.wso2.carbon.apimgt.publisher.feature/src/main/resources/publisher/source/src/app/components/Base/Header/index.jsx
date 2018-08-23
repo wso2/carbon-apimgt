@@ -19,6 +19,7 @@ const styles = theme => ({
     typoRoot: {
         marginLeft: theme.spacing.unit * 3,
         marginRight: theme.spacing.unit * 3,
+        textTransform: 'capitalize',
     },
     brandLink: {
         color: theme.palette.primary.contrastText,
