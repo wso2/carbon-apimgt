@@ -97,7 +97,7 @@ $( document ).ready(function() {
         });
                    //date picker
         $('#date-range').daterangepicker({
-                        timePicker: false,
+                        timePicker: true,
                         timePickerIncrement: 30,
                         format: 'YYYY-MM-DD h:mm',
                         opens: 'left'
@@ -108,7 +108,7 @@ $( document ).ready(function() {
                         to = picker.endDate;
                         var fromStr = convertDate(from).split(" ");
                         var toStr = convertDate(to).split(" ");
-                        var dateStr = fromStr[0] + " <b>to</b> " + toStr[0];
+                        var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
                         $("#date-range span").html(dateStr);
                         if ((to-from)>(3600000*24*2)) {
                            depth = "DAY";
@@ -365,7 +365,7 @@ function getDateTime(currentDay,fromDay){
     fromStr = convertTimeString(fromDay);
     var toDate = toStr.split(" ");
     var fromDate = fromStr.split(" ");
-    var dateStr= fromDate[0] + "<b>to</b> " + toDate[0];
+    var dateStr = fromDate[0] + " <i>" + fromDate[1] + "</i> <b>to</b> " + toDate[0] + " <i>" + toDate[1] + "</i>";
     $("#date-range span").html(dateStr);
     $('#date-range').data('daterangepicker').setStartDate(from);
     $('#date-range').data('daterangepicker').setEndDate(to);

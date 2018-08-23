@@ -2214,7 +2214,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                                 + "'");
             }
             if (fromDate != null && toDate != null) {
-                String granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;//default granularity
+                String granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;//default granularity
 
                 Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
 
@@ -2222,6 +2222,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                     granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
                 } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
                     granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
+                } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
+                    granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
                 }
                 query.append(") within '" + fromDate + "', '" + toDate + "' per '" + granularity + "'");
             } else {
