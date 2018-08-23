@@ -38,7 +38,7 @@ function isDataPublishingEnabled(providerName, server) {
 
 var getDataFromTable = function (tableName, tenantDomain, startIndex,count, sortableColumn,isAscending) {
 
-    if (tableName == "ORG_WSO2_ANALYTICS_APIM_ALLAPIMALERTSSTREAM") {
+    if (tableName == "ApimAllAlert") {
 
         var appName = "APIM_ABNORMAL_REQUEST_PATTERN"; //call any alert app since it has a definition to all alert table
         var query = "from ApimAllAlert " +
@@ -71,7 +71,7 @@ var getDataFromTable = function (tableName, tenantDomain, startIndex,count, sort
         }
         return objArr;
 
-    } else if(tableName == "ORG_WSO2_ANALYTICS_APIM_REQUESTPATTERNCHANGEDSTREAM") {
+    } else if(tableName == "ApimRequestPatternChangedAlert") {
 
         var appName = "APIM_ABNORMAL_REQUEST_PATTERN";
         var query = "from ApimRequestPatternChangedAlert " +
@@ -106,7 +106,7 @@ var getDataFromTable = function (tableName, tenantDomain, startIndex,count, sort
         }
         return objArr;
 
-    } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_TIERLIMITHITTINGALERT") {
+    } else if (tableName == "ApimTierLimitHittingAlert") {
 
         var appName = "APIM_FREQUENT_TIER_LIMIT_HITTING_ALERT";
         var query = "from ApimTierLimitHittingAlert " +
@@ -144,12 +144,12 @@ var getDataFromTable = function (tableName, tenantDomain, startIndex,count, sort
         }
         return objArr;
 
-    } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ALERT_UNUSUALIPACCESS") {
+    } else if (tableName == "ApimIPAccessAbnormalityAlert") {
 
-        var appName = "APIM_UNUSUAL_IP_ACCES_ALERT";
+        var appName = "APIM_UNUSUAL_IP_ACCESS_ALERT";
         var query = "from ApimIPAccessAbnormalityAlert " +
                         "SELECT * " +  // use the commented select query below once https://github.com/wso2/product-sp/issues/753 fixed
-                        //"SELECT type, message, severity, alertTimestamp, ip, applicationName, applicationOwner, username, tenantDomain, requestTimestamp " +
+                        //"SELECT type, message, severity, ip, applicationName, applicationOwner, username, tenantDomain, requestTimestamp, alertTimestamp " +
                         "having tenantDomain=='" + tenantDomain + "' " + 
                         "order by " + sortableColumn + " " + isAscending + ";";
 
@@ -165,11 +165,11 @@ var getDataFromTable = function (tableName, tenantDomain, startIndex,count, sort
                               "values":{  
                                  "msg": record[1],
                                  "severity": record[2],
-                                 "alertTimestamp": record[3] ,
-                                 "ip" : record[4],
-                                 "applicationName": record[5],   
-                                 "applicationOwner" : record[6],
-                                 "userId": record[7]              
+                                 "alertTimestamp": record[8] ,
+                                 "ip" : record[3],
+                                 "applicationName": record[4],   
+                                 "applicationOwner" : record[5],
+                                 "userId": record[6]              
 
                                  }
                               }
@@ -180,7 +180,7 @@ var getDataFromTable = function (tableName, tenantDomain, startIndex,count, sort
         }
         return objArr;
 
-    } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ABNORMALREQUESTSPERMINALERTSTREAM") { 
+    } else if (tableName == "ApimAbnormalRequestsPerMinAlert") { 
 
         var appName = "APIM_ABNORMAL_REQUEST_COUNT";
         var query = "from ApimAbnormalRequestsPerMinAlert " +
@@ -215,7 +215,7 @@ var getDataFromTable = function (tableName, tenantDomain, startIndex,count, sort
         }
         return objArr;
 
-    } else if(tableName == "ORG_WSO2_ANALYTICS_APIM_ABNORMALRESPONSETIMEALERTSTREAM") {
+    } else if(tableName == "ApimAbnormalResponseTimeAlert") {
 
         var appName = "APIM_ABNORMAL_RESPONSE_TIME";
         var query = "from ApimAbnormalResponseTimeAlert " +
@@ -251,7 +251,7 @@ var getDataFromTable = function (tableName, tenantDomain, startIndex,count, sort
         }
         return objArr;
 
-    } else if(tableName == "ORG_WSO2_ANALYTICS_APIM_APIHEALTHMONITORALERTSTREAM") {
+    } else if(tableName == "ApimApiHealthMonitorAlert") {
 
         var appName = "APIM_HEALTH_AVAILABILITY_ALERT";
         var query = "from ApimApiHealthMonitorAlert " +
@@ -285,7 +285,7 @@ var getDataFromTable = function (tableName, tenantDomain, startIndex,count, sort
         }
         return objArr;
 
-    } else if(tableName == "ORG_WSO2_ANALYTICS_APIM_ABNORMALBACKENDTIMEALERTSTREAM") {
+    } else if(tableName == "ApimAbnormalBackendTimeAlert") {
 
         var appName = "APIM_ABNORMAL_BACKEND_TIME";
         var query = "from ApimAbnormalBackendTimeAlert " +
@@ -321,7 +321,7 @@ var getDataFromTable = function (tableName, tenantDomain, startIndex,count, sort
         }
         return objArr;
 
-    } else if(tableName == "ORG_WSO2_ANALYTICS_APIM_APIAVAILABILITY") {
+    } else if(tableName == "ApimApiAvailabilityInfo") {
 
         var appName = "APIM_HEALTH_AVAILABILITY_ALERT";
         var query = "from ApimApiAvailabilityInfo " +
@@ -362,63 +362,63 @@ var getCountFromTable = function (tableName, tenantDomain) {
     var appName;
     var query;
 
-    if (tableName == "ORG_WSO2_ANALYTICS_APIM_ALLAPIMALERTSSTREAM") {
+    if (tableName == "ApimAllAlert") {
 
         appName = "APIM_ABNORMAL_REQUEST_PATTERN"; //call any alert app since it has a definition to all alert table
         query = "from ApimAllAlert " +
                         "SELECT count(alertTimestamp) as count " +
                         "having tenantDomain=='" + tenantDomain + "' ;" 
 
-    } else if(tableName == "ORG_WSO2_ANALYTICS_APIM_REQUESTPATTERNCHANGEDSTREAM") {
+    } else if(tableName == "ApimRequestPatternChangedAlert") {
 
         appName = "APIM_ABNORMAL_REQUEST_PATTERN";
         query = "from ApimRequestPatternChangedAlert " +
                         "SELECT count(alertTimestamp) as count " +
                         "having tenantDomain=='" + tenantDomain + "' ;" 
 
-    } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_TIERLIMITHITTINGALERT") {
+    } else if (tableName == "ApimTierLimitHittingAlert") {
 
         appName = "APIM_FREQUENT_TIER_LIMIT_HITTING_ALERT";
         query = "from ApimTierLimitHittingAlert " +
                         "SELECT count(alertTimestamp) as count " +
                         "having apiCreatorTenantDomain=='" + tenantDomain + "' ;" 
 
-    } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ALERT_UNUSUALIPACCESS") {
+    } else if (tableName == "ApimIPAccessAbnormalityAlert") {
 
-        appName = "APIM_UNUSUAL_IP_ACCES_ALERT";
+        appName = "APIM_UNUSUAL_IP_ACCESS_ALERT";
         query = "from ApimIPAccessAbnormalityAlert " +
                         "SELECT count(alertTimestamp) as count " +
                         "having tenantDomain=='" + tenantDomain + "' ;"
 
-    } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ABNORMALREQUESTSPERMINALERTSTREAM") { 
+    } else if (tableName == "ApimAbnormalRequestsPerMinAlert") { 
 
         appName = "APIM_ABNORMAL_REQUEST_COUNT";
         query = "from ApimAbnormalRequestsPerMinAlert " +
                         "SELECT count(alertTimestamp) as count " +
                         "having tenantDomain=='" + tenantDomain + "' ;" 
 
-    } else if(tableName == "ORG_WSO2_ANALYTICS_APIM_ABNORMALRESPONSETIMEALERTSTREAM") {
+    } else if(tableName == "ApimAbnormalResponseTimeAlert") {
 
         appName = "APIM_ABNORMAL_RESPONSE_TIME";
         query = "from ApimAbnormalResponseTimeAlert " +
                         "SELECT count(alertTimestamp) as count " +
                         "having apiCreatorTenantDomain=='" + tenantDomain + "' ;"                  
 
-    } else if(tableName == "ORG_WSO2_ANALYTICS_APIM_APIHEALTHMONITORALERTSTREAM") {
+    } else if(tableName == "ApimApiHealthMonitorAlert") {
 
         appName = "APIM_HEALTH_AVAILABILITY_ALERT";
         query = "from ApimApiHealthMonitorAlert " +
                         "SELECT count(alertTimestamp) as count " +
                         "having apiCreatorTenantDomain=='" + tenantDomain + "' ;" 
 
-    } else if(tableName == "ORG_WSO2_ANALYTICS_APIM_ABNORMALBACKENDTIMEALERTSTREAM") {
+    } else if(tableName == "ApimAbnormalBackendTimeAlert") {
 
         appName = "APIM_ABNORMAL_BACKEND_TIME";
         query = "from ApimAbnormalBackendTimeAlert " +
                         "SELECT count(alertTimestamp) as count " +
                         "having apiCreatorTenantDomain=='" + tenantDomain + "' ;" 
 
-    } else if(tableName == "ORG_WSO2_ANALYTICS_APIM_ABNORMALBACKENDTIMEALERTSTREAM") {
+    } else if(tableName == "ApimAbnormalBackendTimeAlert") {
         appName = "APIM_HEALTH_AVAILABILITY_ALERT";
         query = "from ApimApiAvailabilityInfo " +
                         "SELECT count(apiName) as count " +
