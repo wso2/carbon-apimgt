@@ -17,6 +17,7 @@
 */
 package org.wso2.carbon.apimgt.api;
 
+import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
@@ -26,6 +27,7 @@ import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
@@ -922,6 +924,64 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     List<CertificateMetadataDTO> getCertificates(String userName) throws APIManagementException;
+
+    /**
+     * Method to search the certificate metadata database for the provided alias and endpoints.
+     *
+     * @param tenantId : The id of the tenant which the certificates are belongs to.
+     * @param alias : The alias of the certificate.
+     * @param endpoint : Endpoint which the certificate is applied to
+     * @return : Results as a CertificateMetadataDTO list.
+     * @throws APIManagementException :
+     */
+    List<CertificateMetadataDTO> searchCertificates(int tenantId, String alias, String endpoint) throws
+            APIManagementException;
+
+    /**
+     * Retrieve the total number of certificates which a specified tenant has.
+     *
+     * @param tenantId : The id of the tenant
+     * @return : The certificate count.
+     */
+    int getCertificateCountPerTenant(int tenantId) throws APIManagementException;
+
+    /**
+     * Method to check whether an certificate for the given alias is present in the trust store and the database.
+     *
+     * @param alias : The alias of the certificate.
+     * @return : True if a certificate is present, false otherwise.
+     * @throws APIManagementException :
+     */
+    boolean isCertificatePresent(int tenantId, String alias) throws APIManagementException;
+
+    /**
+     * Method to get the status of the certificate which matches the given alias.
+     * This method can me modified to get other necessary information as well. Such as CN etc.
+     *
+     * @param alias : The alias of the certificate.
+     * @return : The status and the expiry date as a parameter map.
+     * @throws APIManagementException :
+     */
+    CertificateInformationDTO getCertificateStatus(String alias) throws APIManagementException;
+
+    /**
+     * Method to update an existing certificate.
+     *
+     * @param certificateString : The base64 encoded string of the uploaded certificate.
+     * @param alias : Alias of the certificate that should be updated.
+     * @return : Integer value which represent the operation status.
+     * @throws APIManagementException :
+     */
+    int updateCertificate(String certificateString, String alias) throws APIManagementException;
+
+    /**
+     * Retrieve the certificate which matches the given alias.
+     *
+     * @param alias : The alias of the certificate.
+     * @return : The certificate input stream.
+     * @throws APIManagementException :
+     */
+    ByteArrayInputStream getCertificateContent(String alias) throws APIManagementException;
 
     /**
      * Method to get the selected mediation sequence as a String.
