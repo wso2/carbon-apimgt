@@ -22,8 +22,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.utils;
 
-
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -63,6 +63,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPointDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPoint_endpointSecurityDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndpointConfigDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ScopeDTO;
@@ -460,12 +461,15 @@ public class MappingUtil {
         EndPointDTO endPointDTO = new EndPointDTO();
         endPointDTO.setId(endpoint.getId());
         endPointDTO.setName(endpoint.getName());
-        endPointDTO.setEndpointConfig(endpoint.getEndpointConfig());
         EndPoint_endpointSecurityDTO endpointSecurityDTO = new Gson().fromJson(endpoint.getSecurity(),
                 EndPoint_endpointSecurityDTO.class);
+        List<EndpointConfigDTO> endpointConfigDTOS = new Gson()
+                .fromJson(endpoint.getEndpointConfig(), new TypeToken<List<EndpointConfigDTO>>() {
+                }.getType());
         if (endpointSecurityDTO.getEnabled()) {
             endpointSecurityDTO.setPassword("");
         }
+        endPointDTO.setEndpointConfig(endpointConfigDTOS);
         endPointDTO.setEndpointSecurity(endpointSecurityDTO);
         endPointDTO.setMaxTps(endpoint.getMaxTps());
         endPointDTO.setType(endpoint.getType());
@@ -481,7 +485,7 @@ public class MappingUtil {
     public static Endpoint toEndpoint(EndPointDTO endPointDTO) {
 
         Endpoint.Builder endPointBuilder = new Endpoint.Builder();
-        endPointBuilder.endpointConfig(endPointDTO.getEndpointConfig());
+        endPointBuilder.endpointConfig(new Gson().toJson(endPointDTO.getEndpointConfig()));
         endPointBuilder.name(endPointDTO.getName());
         if (!StringUtils.isEmpty(endPointDTO.getId())) {
             endPointBuilder.id(endPointDTO.getId());

@@ -4,7 +4,10 @@ package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.ArrayList;
+import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPoint_endpointSecurityDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndpointConfigDTO;
 import java.util.Objects;
 
 /**
@@ -18,7 +21,7 @@ public class EndPointDTO   {
   private String name = null;
 
   @SerializedName("endpointConfig")
-  private String endpointConfig = null;
+  private List<EndpointConfigDTO> endpointConfig = new ArrayList<EndpointConfigDTO>();
 
   @SerializedName("endpointSecurity")
   private EndPoint_endpointSecurityDTO endpointSecurity = null;
@@ -65,21 +68,26 @@ public class EndPointDTO   {
     this.name = name;
   }
 
-  public EndPointDTO endpointConfig(String endpointConfig) {
+  public EndPointDTO endpointConfig(List<EndpointConfigDTO> endpointConfig) {
     this.endpointConfig = endpointConfig;
     return this;
   }
 
+  public EndPointDTO addEndpointConfigItem(EndpointConfigDTO endpointConfigItem) {
+    this.endpointConfig.add(endpointConfigItem);
+    return this;
+  }
+
    /**
-   * Endpoint Configuration
+   * Get endpointConfig
    * @return endpointConfig
   **/
-  @ApiModelProperty(example = "{url: http://localhost:8280, timeout: 1000}", value = "Endpoint Configuration")
-  public String getEndpointConfig() {
+  @ApiModelProperty(value = "")
+  public List<EndpointConfigDTO> getEndpointConfig() {
     return endpointConfig;
   }
 
-  public void setEndpointConfig(String endpointConfig) {
+  public void setEndpointConfig(List<EndpointConfigDTO> endpointConfig) {
     this.endpointConfig = endpointConfig;
   }
 

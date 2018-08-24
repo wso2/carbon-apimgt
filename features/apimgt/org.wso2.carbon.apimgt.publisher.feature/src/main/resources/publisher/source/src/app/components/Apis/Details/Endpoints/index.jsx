@@ -25,6 +25,10 @@ import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
 import { Alert, InteractiveButton, Progress } from '../../../Shared';
 import EndpointDAO from '../../../../data/Endpoint';
 import EndpointsSelector from './EndpointsSelector';
+import EndpointDetail from './EndpointDetail.jsx';
+import Button from '@material-ui/core/Button';
+import Icon from '@material-ui/core/Icon';
+import { FormattedMessage } from 'react-intl';
 /**
  * API Details Endpoint page component
  * @class Endpoint
@@ -44,11 +48,13 @@ class Endpoint extends Component {
             sandboxEndpoint: new EndpointDAO('', 'https', 10),
             isInline: true,
             notFound: false,
+            readOnly: true,
         };
         this.handleProductionInputs = this.handleProductionInputs.bind(this);
         this.handleSandboxInputs = this.handleSandboxInputs.bind(this);
         this.updateEndpoints = this.updateEndpoints.bind(this);
         this.switchEndpoint = this.switchEndpoint.bind(this);
+        this.makeEditable = this.makeEditable.bind(this);
     }
 
     /**
@@ -63,12 +69,11 @@ class Endpoint extends Component {
 
         // Populate endpoint details
         const promisedAPI = api.get(apiUUID);
-
         const setSelectedEp = Promise.all([promisedEndpoints, promisedAPI]);
         setSelectedEp
             .then((responses) => {
                 const epMap = new Map();
-                for (const endpoint of responses[0]) {
+                for (const endpoint of responses[1].body.endpoint) {
                     epMap.set(endpoint.id, endpoint);
                 }
 
@@ -80,25 +85,24 @@ class Endpoint extends Component {
                 // let selectedSandboxEP = null;
                 // let isGlobalEPSelectedSand = false;
                 // let isGlobalEPSelectedProd = false;
-
                 const endpointInAPI = responses[1].body.endpoint;
                 for (const i in endpointInAPI) {
                     if (endpointInAPI[i].inline !== undefined) {
                         inline = true;
                         const endpointJSON = endpointInAPI[i].inline;
-                        if (endpointInAPI[i].type === 'production') {
+                        if (endpointInAPI[i].type === 'Production') {
                             currentProdEP = new EndpointDAO(endpointJSON); // JSON.parse(endpointElement).serviceUrl;
-                        } else if (endpointInAPI[i].type === 'sandbox') {
+                        } else if (endpointInAPI[i].type === 'Sandbox') {
                             currentSandboxEP = new EndpointDAO(endpointJSON); // JSON.parse(endpoint).serviceUrl;
                         }
                     } else {
                         // global endpoint with key
                         const endpointKey = endpointInAPI[i].key;
-                        if (endpointInAPI[i].type === 'production') {
+                        if (endpointInAPI[i].type === 'Production') {
                             currentProdEP = epMap[endpointKey].name;
                             // currentProdEP = JSON.parse(epMap[endpointKey].endpointConfig).serviceUrl;
                             // isGlobalEPSelectedProd = true;
-                        } else if (endpointInAPI[i].type === 'sandbox') {
+                        } else if (endpointInAPI[i].type === 'Sandbox') {
                             currentSandboxEP = epMap[endpointKey].name;
                             // currentSandboxEP = JSON.parse(epMap[endpointKey].endpointConfig).serviceUrl;
                             // isGlobalEPSelectedSand = true;
@@ -108,8 +112,8 @@ class Endpoint extends Component {
 
                 this.setState({
                     api: responses[1].data,
-                    productionEndpoint: currentSandboxEP,
-                    sandboxEndpoint: currentProdEP,
+                    productionEndpoint: currentProdEP,
+                    sandboxEndpoint: currentSandboxEP,
                     isInline: inline,
                     endpointsMap: epMap,
                 });
@@ -205,6 +209,13 @@ class Endpoint extends Component {
             });
     }
 
+
+
+    makeEditable() {
+        this.state.readOnly = false;  ///calling a child function here
+        this.setState(this.state);
+    }
+
     /**
      * Event handler for endpoints selector
      * @param {React.SyntheticEvent} event user select event
@@ -238,50 +249,35 @@ class Endpoint extends Component {
             return <Progress />;
         }
 
+
         return (
             <Paper>
-                <Grid container spacing={16} justify='center'>
-                    <Grid item md={6}>
-                        <Typography variant='subheading' gutterBottom>
-                            Production Endpoint
-                        </Typography>
-                        <EndpointsSelector
-                            type='production'
-                            onChange={this.switchEndpoint}
-                            currentValue={isInline ? 'inline' : productionEndpoint.id}
-                            endpoints={globalEndpoints}
-                        />
-                        <EndpointForm
-                            endpoint={productionEndpoint}
-                            handleInputs={isInline && this.handleProductionInputs}
-                        />
-                    </Grid>
-                    <Grid item md={6}>
-                        <Typography variant='subheading' gutterBottom>
-                            Sandbox Endpoint
-                        </Typography>
-                        <EndpointsSelector
-                            type='sandbox'
-                            onChange={this.switchEndpoint}
-                            currentValue={isInline ? 'inline' : sandboxEndpoint.id}
-                            endpoints={globalEndpoints}
-                        />
-                        <EndpointForm endpoint={sandboxEndpoint} handleInputs={isInline && this.handleSandboxInputs} />
-                    </Grid>
-                </Grid>
+                <Button variant="fab" color="secondary" aria-label="Edit" onClick={this.makeEditable}>
+                    <Icon>edit_icon</Icon>
+                </Button>
+                <Button variant="fab" color="secondary" disabled aria-label="Save" >
+                    <Icon>save_icon</Icon>
+                </Button>
+                {productionEndpoint &&
+                    <EndpointDetail
+                        type={<FormattedMessage
+                            id='production'
+                            defaultMessage='Production'
+                        />} endpoint={productionEndpoint} isInline={isInline} readOnly={this.state.readOnly}
+                    />
+                }
+                {sandboxEndpoint &&
+                    <EndpointDetail
+                        type={<FormattedMessage
+                            id='sandbox'
+                            defaultMessage='Sandbox'
+                        />} endpoint={sandboxEndpoint} isInline={isInline} readOnly={this.state.readOnly}
+                    />
+                }
+
+
                 <Divider />
-                <Grid container justify='flex-end'>
-                    <Grid item md={5}>
-                        {/* Allowing create endpoints based on scopes */}
-                        <ScopeValidation resourcePath={resourcePath.ENDPOINTS} resourceMethod={resourceMethod.POST}>
-                            <ApiPermissionValidation userPermissions={JSON.parse(this.state.api).userPermissionsForApi}>
-                                <InteractiveButton variant='raised' color='primary' onClick={this.updateEndpoints}>
-                                    Save
-                                </InteractiveButton>
-                            </ApiPermissionValidation>
-                        </ScopeValidation>
-                    </Grid>
-                </Grid>
+
             </Paper>
         );
     }

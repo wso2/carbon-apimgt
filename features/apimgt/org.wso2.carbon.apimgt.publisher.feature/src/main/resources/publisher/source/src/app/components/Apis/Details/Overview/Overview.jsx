@@ -288,7 +288,7 @@ class Overview extends Component {
         return (
             <Grid container>
                 <Grid item xs={12} sm={6} md={6} lg={4} className={classes.imageWrapper}>
-                    <ImageGenerator apiName={api.name} />
+                    <ImageGenerator name={api.name} />
                     <div className={classes.imageSideContent}>
                         <Typography variant='headline'>
                             {api.version} {api.isDefaultVersion && <span>( Default )</span>}
@@ -360,11 +360,11 @@ class Overview extends Component {
                                 <div className={classes.endpointsWrapper + ' ' + classes.headline}>
                                     <Link to={'/apis/' + api.id + '/endpoints'} title='Edit endpoint'>
                                         <Typography variant='subheading' align='left'>
-                                            {JSON.parse(ep.inline.endpointConfig).serviceUrl}
+                                            {ep.inline.endpointConfig[0].url}
                                         </Typography>
                                     </Link>
                                     <a
-                                        href={JSON.parse(ep.inline.endpointConfig).serviceUrl}
+                                        href={ep.inline.endpointConfig[0].url}
                                         target='_blank'
                                         rel='noopener noreferrer'
                                         className={classes.openNewIcon}
