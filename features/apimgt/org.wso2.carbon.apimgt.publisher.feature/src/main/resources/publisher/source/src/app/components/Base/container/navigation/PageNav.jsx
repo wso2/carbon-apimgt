@@ -27,8 +27,21 @@ const styles = theme => ({
         }, // This is because of the container grid sizing when sm (navbar sm1 content sm11 = 1/12)
         backgroundColor: theme.palette.background.navBar,
     },
+    section: {
+        boxSizing: 'border-box',
+        padding: 0,
+        height: '100px',
+        'vertical-align': 'middle',
+        display: 'flex',
+        borderBottom: '1px solid',
+    },
 });
 
+/**
+ * Left navigation panel for individual pages
+ * @param {Object} props @inheritdoc
+ * @returns {React.Component} @inheritdoc
+ */
 const PageNav = (props) => {
     const { classes, section, navItems } = props;
     return (
@@ -40,19 +53,7 @@ const PageNav = (props) => {
                 }}
             >
                 <div className={classes.toolbar} />
-                {/* todo: move styling to constant ~tmkb */}
-                <List
-                    style={{
-                        boxSizing: 'border-box',
-                        padding: 0,
-                        height: '100px',
-                        'vertical-align': 'middle',
-                        display: 'flex',
-                        borderBottom: '1px solid',
-                    }}
-                >
-                    {section}
-                </List>
+                <List className={classes.section}>{section}</List>
                 <List>{navItems}</List>
             </Drawer>
         </div>

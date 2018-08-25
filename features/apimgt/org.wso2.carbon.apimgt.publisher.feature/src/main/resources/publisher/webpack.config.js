@@ -88,7 +88,6 @@ if (process.env.NODE_ENV === 'development') {
             /.*\/components\/Login\/*/,
             /.*\/Apis\/Create\/*/,
             /.*\/Apis\/Listing\/*/,
-
             /.*\/Apis\/Details\/NavBar.jsx/,
             /.*\/Apis\/Details\/index.jsx/,
             /.*\/Apis\/Details\/Overview\/Overview.jsx/,
