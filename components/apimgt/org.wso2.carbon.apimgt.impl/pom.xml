@@ -383,13 +383,7 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Private-Package>
-                            org.wso2.carbon.apimgt.impl.internal.*,
-                            zipkin2.reporter.*,
-                            zipkin2.*,
-                            io.opentracing.*,
-                            okio.*,
-                            okhttp3.*,
-                            brave.*,
+                            org.wso2.carbon.apimgt.impl.internal.*
                         </Private-Package>
                         <Export-Package>
                             !org.apache.commons.codec.*,
