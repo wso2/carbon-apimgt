@@ -215,7 +215,6 @@
             <groupId>com.fasterxml.woodstox</groupId>
             <artifactId>woodstox-core</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.tracing</artifactId>
@@ -275,12 +274,12 @@
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Private-Package>
                             org.wso2.carbon.apimgt.gateway.internal,
-                            zipkin2.reporter.*,
-                            zipkin2.*,
-                            io.opentracing.*,
-                            okio.*,
-                            okhttp3.*,
-                            brave.*,
+                            <!--zipkin2.reporter.*,-->
+                            <!--zipkin2.*,-->
+                            <!--io.opentracing.*,-->
+                            <!--okio.*,-->
+                            <!--okhttp3.*,-->
+                            <!--brave.*,-->
                         </Private-Package>
                         <Export-Package>
                             !javax.servlet,
@@ -289,9 +288,9 @@
                             !org.wso2.carbon.apimgt.gateway.stub.*,
                             org.wso2.carbon.apimgt.gateway.*;version="${carbon.apimgt.version}",
                             org.wso2.throttle.*,
-                            io.opentracing.*,
-                            brave.*,
-                            zipkin2.*,
+                            <!--io.opentracing.*,-->
+                            <!--brave.*,-->
+                            <!--zipkin2.*,-->
                         </Export-Package>
                         <Import-Package>
                             !javax.xml.soap,
