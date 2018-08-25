@@ -1,6 +1,5 @@
 package org.wso2.carbon.apimgt.gateway.handlers.common;
 
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.AbstractSynapseHandler;
@@ -8,7 +7,6 @@ import org.apache.synapse.MessageContext;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.tracing.OpenTracer;
-import org.wso2.carbon.apimgt.tracing.TracingService;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 
@@ -22,25 +20,21 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
     private long handleRequestOutFlowTime;
     private long handleResponseInFlowTime;
     private long handleResponseOutFlowTime;
-    private String requestId;
-    private TracingService tracingService;
     private TracingTracer tracer;
 
 
     public APIMgtLatencySynapseHandler() {
-        ServiceReferenceHolder serviceReferenceHolder = ServiceReferenceHolder.getInstance();
-        tracingService = serviceReferenceHolder.getTracingService();
-        tracer = tracingService.buildTracer("Latency");
+        tracer = ServiceReferenceHolder.getInstance().getTracingService().buildTracer("Latency");
     }
 
     @Override
     public boolean handleRequestInFlow(MessageContext messageContext) {
 
-        requestId = UUID.randomUUID().toString();
+        String requestId = UUID.randomUUID().toString();
         messageContext.setProperty(APIMgtGatewayConstants.REQUEST_ID, requestId);
 
         TracingSpan responseLatencySpan = OpenTracer.startSpan("ResponseLatency", null, tracer);
-        OpenTracer.setTag(responseLatencySpan,"RequestID",requestId);
+        OpenTracer.setTag(responseLatencySpan,"RequestID", requestId);
         messageContext.setProperty("ResponseLatency", responseLatencySpan);
         messageContext.setProperty("Tracer",tracer);
 
@@ -48,7 +42,6 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
         if (messageContext.getProperty(APIMgtGatewayConstants.HANDLE_REQUEST_INFLOW_TIME) == null) {
             messageContext.setProperty(APIMgtGatewayConstants.HANDLE_REQUEST_INFLOW_TIME, Long.toString(handleRequestInFlowTime));
         }
-
         return true;
     }
 
