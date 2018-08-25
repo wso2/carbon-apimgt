@@ -1,17 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { withStyles } from 'material-ui/styles';
-import List, { ListItem, ListItemText } from 'material-ui/List';
-import Avatar from 'material-ui/Avatar';
-import Typography from 'material-ui/Typography';
-import { Link, FileDownload } from 'material-ui-icons';
-import WorkIcon from 'material-ui-icons/Work';
-import BeachAccessIcon from 'material-ui-icons/BeachAccess';
+import { withStyles } from '@material-ui/core/styles';
+import List, { ListItem, ListItemText } from '@material-ui/core/List';
+import Avatar from '@material-ui/core/Avatar';
+import Typography from '@material-ui/core/Typography';
+import { Link, FileDownload } from '@material-ui/icons';
 import ExpansionPanel, {
     ExpansionPanelSummary,
     ExpansionPanelDetails,
-  } from 'material-ui/ExpansionPanel';
-  import ExpandMoreIcon from 'material-ui-icons/ExpandMore';
+  } from '@material-ui/core/ExpansionPanel';
+  import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import API from '../../../../data/api.js'
 import Loading from '../../../Base/Loading/Loading'
 import DocumentView from './DocumentView'

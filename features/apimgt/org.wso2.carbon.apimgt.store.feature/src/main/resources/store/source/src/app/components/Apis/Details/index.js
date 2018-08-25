@@ -26,17 +26,18 @@ import Forum from './Forum'
 import Sdk from './Sdk'
 import BasicInfo from './BasicInfo'
 import {PageNotFound} from '../../Base/Errors/index'
-import AppBar from 'material-ui/AppBar';
-import Tabs, { Tab } from 'material-ui/Tabs';
-import ComputerIcon from 'material-ui-icons/Computer';
-import ChromeReaderModeIcon from 'material-ui-icons/ChromeReaderMode';
-import Grid from 'material-ui/Grid';
-import LibraryBooksIcon from 'material-ui-icons/LibraryBooks';
-import ForumIcon from 'material-ui-icons/Forum';
-import GavelIcon from 'material-ui-icons/Gavel';
-import Typography from 'material-ui/Typography';
-import Paper from 'material-ui/Paper';
-import {withStyles} from 'material-ui/styles';
+import AppBar from '@material-ui/core/AppBar';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+import ComputerIcon from '@material-ui/icons/Computer';
+import ChromeReaderModeIcon from '@material-ui/icons/ChromeReaderMode';
+import Grid from '@material-ui/core/Grid';
+import LibraryBooksIcon from '@material-ui/icons/LibraryBooks';
+import ForumIcon from '@material-ui/icons/Forum';
+import GavelIcon from '@material-ui/icons/Gavel';
+import Typography from '@material-ui/core/Typography';
+import Paper from '@material-ui/core/Paper';
+import {withStyles} from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 
 const styles = theme => ({

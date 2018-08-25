@@ -17,8 +17,8 @@
  */
 
 import React from "react";
-import Button from 'material-ui/Button';
-import Menu, {MenuItem} from 'material-ui/Menu';
+import Button from '@material-ui/core/Button';
+import Menu, {MenuItem} from '@material-ui/core/Menu';
 
 class EnvironmentMenu extends React.Component {
 

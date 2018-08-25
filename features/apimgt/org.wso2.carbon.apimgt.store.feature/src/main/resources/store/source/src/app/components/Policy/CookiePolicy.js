@@ -17,18 +17,18 @@
  */
 
 import React from 'react';
-import AppBar from 'material-ui/AppBar';
-import Typography from 'material-ui/Typography';
+import AppBar from '@material-ui/core/AppBar';
+import Typography from '@material-ui/core/Typography';
 import Footer from '../Base/Footer/Footer';
-import Grid from 'material-ui/Grid';
+import Grid from '@material-ui/core/Grid';
 import PropTypes from 'prop-types';
-import {withStyles} from 'material-ui/styles';
-import { MenuList, MenuItem} from 'material-ui/Menu';
-import { ListItemIcon } from 'material-ui/List'
+import {withStyles} from '@material-ui/core/styles';
+import { MenuList, MenuItem} from '@material-ui/core/Menu';
+import { ListItemIcon } from '@material-ui/core/List'
 import Label from '@material-ui/icons/Label';
 import { Link } from 'react-router-dom';
-import ToolBar from 'material-ui/Toolbar';
-import Table, {TableBody, TableHead, TableRow, TableCell} from 'material-ui/Table';
+import ToolBar from '@material-ui/core/Toolbar';
+import Table, {TableBody, TableHead, TableRow, TableCell} from '@material-ui/core/Table';
 
 const styles = {
     header: {

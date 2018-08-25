@@ -22,13 +22,13 @@ import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import Api from '../../../data/api'
 
-import Grid from 'material-ui/Grid';
-import Typography from 'material-ui/Typography';
+import Grid from '@material-ui/core/Grid';
+import Typography from '@material-ui/core/Typography';
 
 import ImageGenerator from "../Listing/ImageGenerator"
-import {withStyles} from 'material-ui/styles';
+import {withStyles} from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
-import Chip from 'material-ui/Chip';
+import Chip from '@material-ui/core/Chip';
 import Subscribe from './Subscribe'
 
 

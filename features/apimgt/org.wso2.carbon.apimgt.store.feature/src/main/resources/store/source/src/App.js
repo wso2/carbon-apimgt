@@ -28,7 +28,7 @@ import ApplicationEdit from './app/components/Applications/Edit/ApplicationEdit'
 // import 'typeface-roboto'
 import Utils from "./app/data/Utils";
 import ConfigManager from "./app/data/ConfigManager";
-import {MuiThemeProvider, createMuiTheme} from 'material-ui/styles';
+import {MuiThemeProvider, createMuiTheme} from '@material-ui/core/styles';
 import DarkTheme from './app/components/Shared/DarkTheme'
 import LightTheme from './app/components/Shared/LightTheme'
 import AnonymousView from "./app/components/AnonymousView/AnonymousView";

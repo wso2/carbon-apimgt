@@ -4,7 +4,7 @@ import Dialog, {
     DialogContent,
     DialogContentText,
     DialogTitle,
-} from 'material-ui/Dialog';
+} from '@material-ui/core/Dialog';
 
 class Confirm extends React.Component{
     constructor(props){

@@ -18,24 +18,27 @@
 
 import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
-import Button from 'material-ui/Button';
+import Button from '@material-ui/core/Button';
 import Application from '../../../data/Application'
 
-import Grid from 'material-ui/Grid';
-import Typography from 'material-ui/Typography';
-import {withStyles} from 'material-ui/styles';
+import Grid from '@material-ui/core/Grid';
+import Typography from '@material-ui/core/Typography';
+import {withStyles} from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
-import Table, {TableCell, TableHead, TableRow, TableSortLabel} from 'material-ui/Table';
-import Paper from 'material-ui/Paper';
-import AddIcon from 'material-ui-icons/Add';
+import Table from '@material-ui/core/Table';
+import TableCell from '@material-ui/core/TableCell';
+import TableHead from '@material-ui/core/TableHead';
+import TableRow from '@material-ui/core/TableRow';
+import TableSortLabel from '@material-ui/core/TableSortLabel';
 import Loading from "../../Base/Loading/Loading";
 import AppsTableContent from "./AppsTableContent";
-import Tooltip from 'material-ui/Tooltip';
 import Alert from "../../Base/Alert";
-import Card, { CardActions, CardContent } from 'material-ui/Card';
-import Divider from 'material-ui/Divider';
+import Card from '@material-ui/core/Card';
+import CardActions from '@material-ui/core/CardActions';
+import CardContent from '@material-ui/core/CardContent';
+import Divider from '@material-ui/core/Divider';
 import qs from 'qs';
-import TablePagination from 'material-ui/Table/TablePagination';
+import TablePagination from '@material-ui/core/TablePagination';
 
 const styles = theme => ({
         card: {

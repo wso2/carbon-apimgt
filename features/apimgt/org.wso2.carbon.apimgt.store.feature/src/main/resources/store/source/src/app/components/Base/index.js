@@ -1,36 +1,41 @@
 import React from 'react';
-import Drawer from 'material-ui/Drawer';
-import Divider from 'material-ui/Divider';
-import ChevronLeftIcon from 'material-ui-icons/ChevronLeft';
-import ChevronRightIcon from 'material-ui-icons/ChevronRight';
-import FolderOpen from 'material-ui-icons/FolderOpen';
-import Dns from 'material-ui-icons/Dns';
+import Drawer from '@material-ui/core/Drawer';
+import Divider from '@material-ui/core/Divider';
+import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
+import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import FolderOpen from '@material-ui/icons/FolderOpen';
+import Dns from '@material-ui/icons/Dns';
 import Footer from './Footer/Footer'
 import {Link} from "react-router-dom";
 import AuthManager from '../../data/AuthManager.js';
-import Input from 'material-ui/Input';
-import AppBar from 'material-ui/AppBar';
-import Toolbar from 'material-ui/Toolbar';
-import IconButton from 'material-ui/IconButton';
-import Button from 'material-ui/Button';
-import Menu from 'material-ui/Menu';
-import InfoIcon from 'material-ui-icons/Info';
-import Info from 'material-ui-icons/Info';
-import Avatar from 'material-ui/Avatar';
-import List, {ListItem, ListItemIcon, ListItemText,} from 'material-ui/List';
+import Input from '@material-ui/core/Input';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import IconButton from '@material-ui/core/IconButton';
+import Button from '@material-ui/core/Button';
+import Menu from '@material-ui/core/Menu';
+import InfoIcon from '@material-ui/icons/Info';
+import Info from '@material-ui/icons/Info';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+
 import ConfigManager from "../../data/ConfigManager";
 import EnvironmentMenu from "./Header/EnvironmentMenu";
 import Utils from "../../data/Utils";
-import MenuIcon from 'material-ui-icons/Menu';
-import Card, { CardActions, CardContent } from 'material-ui/Card';
-import Person from 'material-ui-icons/Person';
-import Popover from 'material-ui/Popover';
+import MenuIcon from '@material-ui/core/Menu';
+import Card from '@material-ui/core/Card';
+import CardActions from '@material-ui/core/CardActions';
+import CardContent from '@material-ui/core/CardContent';
+
+import Popover from '@material-ui/core/Popover';
 import PropTypes from 'prop-types';
-import { withStyles } from 'material-ui/styles';
+import { withStyles } from '@material-ui/core/styles';
 import {findDOMNode} from 'react-dom';
-import { FormControlLabel } from 'material-ui/Form';
-import Switch from 'material-ui/Switch';
-import Typography from 'material-ui/Typography';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Switch from '@material-ui/core/Switch';
+import Typography from '@material-ui/core/Typography';
 import classNames from 'classnames';
 
 
@@ -316,30 +321,16 @@ class Layout extends React.Component {
                                         />
                                     </ListItem>
                                     <Link to={"/user"}>
-                                        <ListItem button className={classes.listItem}>
-                                            <Avatar>
-                                                <Person />
-                                            </Avatar>
-                                            <ListItemText secondary="Change Password" primary={this.state.user}/>
-                                        </ListItem>
+                                        Change Password
                                     </Link>
                                     <Link to={"/profile"} className={classes.textDisplayLink}>
-                                        <ListItem button className={classes.listItem}>
-
-                                            <ListItemText
-                                                className={classes.textDisplay}
-                                                primary="Profile"
-                                                secondary="Go here"/>
-
-                                        </ListItem>
+                                        Profile
                                     </Link>
 
                                 </CardContent>
                                 <CardActions>
                                     <Link to="/logout">
-                                        <Button color="default" onClick={this.handleRequestCloseUserMenu}>
-                                            Logout
-                                        </Button>
+                                        Logout
                                     </Link>
 
                                 </CardActions>
@@ -363,21 +354,15 @@ class Layout extends React.Component {
                     <Divider />
                         {user &&
                             <List>
+                                <br />
+                                <br />
+
                                 <Link to="/">
-                                    <ListItem button>
-                                        <ListItemIcon>
-                                            <FolderOpen />
-                                        </ListItemIcon>
-                                        <ListItemText primary="APIs" />
-                                    </ListItem>
+                                APIs
                                 </Link>
+                                <br />
                                 <Link to="/applications">
-                                    <ListItem button>
-                                        <ListItemIcon>
-                                            <Dns />
-                                        </ListItemIcon>
-                                        <ListItemText primary="Applications" />
-                                    </ListItem>
+                                    Applications
                                 </Link>
                             </List>
                             }

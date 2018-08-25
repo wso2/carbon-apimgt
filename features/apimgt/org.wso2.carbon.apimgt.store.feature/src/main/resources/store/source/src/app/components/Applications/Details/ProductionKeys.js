@@ -2,22 +2,31 @@ import React from 'react'
 
 import Application from '../../../data/Application';
 
-import Paper from 'material-ui/Paper';
-import Button from 'material-ui/Button';
-import Grid from 'material-ui/Grid';
-import { withStyles } from 'material-ui/styles';
+import Paper from '@material-ui/core/Paper';
+import Button from '@material-ui/core/Button';
+import Grid from '@material-ui/core/Grid';
+import { withStyles } from '@material-ui/core/styles';
 import Loading from '../../Base/Loading/Loading'
-import TextField from 'material-ui/TextField';
+import TextField from '@material-ui/core/TextField';
 
-import IconButton from 'material-ui/IconButton';
-import Input, { InputLabel, InputAdornment } from 'material-ui/Input';
-import { FormControl, FormHelperText } from 'material-ui/Form';
-import Visibility from 'material-ui-icons/Visibility';
-import VisibilityOff from 'material-ui-icons/VisibilityOff';
+import IconButton from '@material-ui/core/IconButton';
+import Input from '@material-ui/core/Input';
+import InputLabel from '@material-ui/core/InputLabel';
+import InputAdornment from '@material-ui/core/InputAdornment';
+
+import FormControl from '@material-ui/core/FormControl';
+import FormHelperText from '@material-ui/core/FormHelperText';
+import Checkbox from '@material-ui/core/Checkbox';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormGroup from '@material-ui/core/FormGroup';
+
+
+
+import Visibility from '@material-ui/icons/Visibility';
+import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
-import { Checkbox, FormControlLabel, FormGroup } from "material-ui";
-import Divider from 'material-ui/Divider';
-import Typography from 'material-ui/Typography';
+import Divider from '@material-ui/core/Divider';
+import Typography from '@material-ui/core/Typography';
 
 
 // Styles for Grid and Paper elements

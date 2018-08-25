@@ -17,11 +17,14 @@
  */
 
 import React from 'react'
-import Paper from 'material-ui/Paper';
-import Grid from 'material-ui/Grid';
-import Typography from 'material-ui/Typography';
-import Table, { TableCell, TableHead, TableRow, TableSortLabel, TableBody } from 'material-ui/Table';
-import PropTypes from 'prop-types';
+import Paper from '@material-ui/core/Paper';
+import Grid from '@material-ui/core/Grid';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableHead from '@material-ui/core/TableHead';
+import TableRow from '@material-ui/core/TableRow';
+
 import SubscriptionTableData from './SubscriptionTableData'
 import Alert from '../../Shared/Alert';
 

@@ -17,10 +17,9 @@
  */
 
 import React from 'react'
-import Typography from 'material-ui/Typography';
-import Grid from 'material-ui/Grid';
-import {withStyles} from 'material-ui/styles';
-import { Manager, Target, Popper } from 'react-popper';
+import Typography from '@material-ui/core/Typography';
+import Grid from '@material-ui/core/Grid';
+import {withStyles} from '@material-ui/core/styles';
 import ImageGenerator from './ImageGenerator';
 import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types';

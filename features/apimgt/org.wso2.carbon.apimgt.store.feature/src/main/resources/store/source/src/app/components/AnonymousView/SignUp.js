@@ -17,15 +17,16 @@
  */
 
 import React from 'react'
-import Grid from 'material-ui/Grid';
-import TextField from 'material-ui/TextField';
-import Typography from 'material-ui/Typography';
-import Button from 'material-ui/Button';
+import Grid from '@material-ui/core/Grid';
+import TextField from '@material-ui/core/TextField';
+import Typography from '@material-ui/core/Typography';
+import Button from '@material-ui/core/Button';
 import PropTypes from 'prop-types';
-import {withStyles} from 'material-ui/styles';
-import {FormControl, FormControlLabel} from 'material-ui/Form';
-import Paper from 'material-ui/Paper';
-import { InputAdornment} from 'material-ui/Input';
+import {withStyles} from '@material-ui/core/styles';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormControl from '@material-ui/core/FormControl';
+import Paper from '@material-ui/core/Paper';
+import InputAdornment from '@material-ui/core/InputAdornment';
 import User from '@material-ui/icons/AccountCircle';
 import Lock from '@material-ui/icons/Lock';
 import Person from '@material-ui/icons/Person';
@@ -36,7 +37,7 @@ import Utils from "../../data/Utils";
 import ConfigManager from "../../data/ConfigManager";
 import LoadingAnimation from "../Base/Loading/Loading";
 import API from "../../data/api";
-import Checkbox from 'material-ui/Checkbox';
+import Checkbox from '@material-ui/core/Checkbox';
 import Alert from '../Shared/Alert';
 
 const styles = theme => ({

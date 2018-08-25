@@ -1,5 +1,5 @@
-import grey from 'material-ui/colors/grey';
-import common from 'material-ui/colors/common';
+import grey from '@material-ui/core/colors/grey';
+import common from '@material-ui/core/colors/common';
 
 export default {
     palette: {

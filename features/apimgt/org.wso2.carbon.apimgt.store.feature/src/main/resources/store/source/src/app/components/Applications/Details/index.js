@@ -25,20 +25,16 @@ import Subscriptions from './Subscriptions'
 import {Route, Switch, Redirect} from 'react-router-dom'
 import API from '../../../data/api'
 import {PageNotFound} from '../../Base/Errors/index'
-import Grid from 'material-ui/Grid';
-import Typography from 'material-ui/Typography';
-import AppBar from 'material-ui/AppBar';
-import Tabs, {Tab} from 'material-ui/Tabs';
-import PhoneIcon from 'material-ui-icons/Phone';
-import ComputerIcon from 'material-ui-icons/Computer';
-import SubscriptionsIcon  from 'material-ui-icons/Subscriptions';
-import KeysIcon  from 'material-ui-icons/VpnKey';
-import FavoriteIcon from 'material-ui-icons/Favorite';
-import BasicInfo from './BasicInfo'
-import PersonPinIcon from 'material-ui-icons/PersonPin';
+import Grid from '@material-ui/core/Grid';
+import Typography from '@material-ui/core/Typography';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+import ComputerIcon from '@material-ui/icons/Computer';
+import SubscriptionsIcon  from '@material-ui/icons/Subscriptions';
+import KeysIcon  from '@material-ui/icons/VpnKey';
 import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
-import Paper from 'material-ui/Paper';
+import Paper from '@material-ui/core/Paper';
 
 
 export default class Details extends Component {

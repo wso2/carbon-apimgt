@@ -20,21 +20,17 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import API from '../../../data/api'
 
-import Button from 'material-ui/Button';
-import { MenuItem } from 'material-ui/Menu';
-import {Form} from 'material-ui/Form'
-import { FormGroup, FormControlLabel, FormControl, FormHelperText, FormLabel } from 'material-ui/Form';
-import Grid from 'material-ui/Grid';
-import Typography from 'material-ui/Typography';
-import { Delete, Edit, CreateNewFolder, Description  }from 'material-ui-icons';
-import TextField from 'material-ui/TextField';
-import IconButton from 'material-ui/IconButton';
-import Paper from 'material-ui/Paper';
-import Input, { InputLabel } from 'material-ui/Input';
-import Select from 'material-ui/Select';
-import ArrowBack from 'material-ui-icons/ArrowBack';
-import Divider from 'material-ui/Divider';
-import {withStyles} from 'material-ui/styles';
+import Button from '@material-ui/core/Button';
+import MenuItem from '@material-ui/core/MenuItem';
+import FormControl from '@material-ui/core/FormControl';
+import Grid from '@material-ui/core/Grid';
+import Typography from '@material-ui/core/Typography';
+import TextField from '@material-ui/core/TextField';
+import Input from '@material-ui/core/Input';
+import InputLabel from '@material-ui/core/InputLabel';
+import Select from '@material-ui/core/Select';
+import ArrowBack from '@material-ui/icons/ArrowBack';
+import {withStyles} from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import Alert from '../../Shared/Alert';
 
@@ -216,8 +212,8 @@ class ApplicationCreate extends Component {
                             >
                                 {this.state.tiers.map((tier) => <MenuItem key={tier} value={tier}>{tier}</MenuItem>)}
                             </Select>
-                            <FormHelperText>Assign API request quota per access token. Allocated quota will be
-                            shared among all the subscribed APIs of the application.</FormHelperText>
+                            <div>Assign API request quota per access token. Allocated quota will be
+                            shared among all the subscribed APIs of the application.</div>
                         </FormControl>
                         }
 
