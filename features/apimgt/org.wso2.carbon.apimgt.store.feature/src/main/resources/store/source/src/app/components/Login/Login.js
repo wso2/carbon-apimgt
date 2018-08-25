@@ -21,19 +21,19 @@ import './login.css'
 import {Redirect, Switch, withRouter} from 'react-router-dom'
 import AuthManager from '../../data/AuthManager'
 import qs from 'qs'
-import TextField from 'material-ui/TextField';
-import Paper from 'material-ui/Paper';
-import Button from 'material-ui/Button';
-import Typography from 'material-ui/Typography';
-import Snackbar from 'material-ui/Snackbar';
+import TextField from '@material-ui/core/TextField';
+import Paper from '@material-ui/core/Paper';
+import Button from '@material-ui/core/Button';
+import Typography from '@material-ui/core/Typography';
+import Snackbar from '@material-ui/core/Snackbar';
 import User from '../../data/User'
 import ConfigManager from "../../data/ConfigManager";
 import Utils from "../../data/Utils";
-import Input, {InputLabel} from 'material-ui/Input';
-import Select from 'material-ui/Select';
-import {FormControl} from 'material-ui/Form';
-import {MenuItem} from 'material-ui/Menu';
-import Grid from 'material-ui/Grid';
+import Input, {InputLabel} from '@material-ui/core/Input';
+import Select from '@material-ui/core/Select';
+import FormControl from '@material-ui/core/FormControl';
+import {MenuItem} from '@material-ui/core/Menu';
+import Grid from '@material-ui/core/Grid';
 import Loading from "../Base/Loading/Loading";
 import Redirecting from "../Shared/Redirecting";
 import { Link } from 'react-router-dom';

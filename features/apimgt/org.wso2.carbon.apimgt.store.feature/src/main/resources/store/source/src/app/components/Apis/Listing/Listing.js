@@ -24,15 +24,21 @@ import APiTableRow from './ApiTableRow'
 import API from '../../../data/api.js'
 import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
-import Grid from 'material-ui/Grid';
-import Typography from 'material-ui/Typography';
+import Grid from '@material-ui/core/Grid';
+import Typography from '@material-ui/core/Typography';
 
-import Table, { TableBody, TableCell, TableHead, TableRow, TableSortLabel } from 'material-ui/Table';
-import IconButton from 'material-ui/IconButton';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableHead from '@material-ui/core/TableHead';
+import TableRow from '@material-ui/core/TableRow';
+import TableSortLabel from '@material-ui/core/TableSortLabel';
+
+import IconButton from '@material-ui/core/IconButton';
 import PropTypes from 'prop-types';
-import { withStyles } from 'material-ui/styles';
-import List from 'material-ui-icons/List';
-import GridIcon from 'material-ui-icons/GridOn';
+import { withStyles } from '@material-ui/core/styles';
+import List from '@material-ui/core/List';
+import GridIcon from '@material-ui/icons/GridOn';
 
 const styles = theme => ({
     rightIcon: {

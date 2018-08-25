@@ -17,13 +17,13 @@
  */
 
 import React from 'react';
-import Grid from 'material-ui/Grid';
-import Typography from 'material-ui/Typography';
-import ToolBar from 'material-ui/Toolbar';
-import AppBar from 'material-ui/AppBar';
-import Button from 'material-ui/Button';
+import Grid from '@material-ui/core/Grid';
+import Typography from '@material-ui/core/Typography';
+import ToolBar from '@material-ui/core/Toolbar';
+import AppBar from '@material-ui/core/AppBar';
+import Button from '@material-ui/core/Button';
 import PropTypes from 'prop-types';
-import {withStyles} from 'material-ui/styles';
+import {withStyles} from '@material-ui/core/styles';
 import Footer from '../Base/Footer/Footer';
 import Utils from "../../data/Utils";
 import classNames from 'classnames';

@@ -22,26 +22,22 @@ import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import Api from '../../../data/api'
 import { Link } from 'react-router-dom'
 
-import {withStyles} from 'material-ui/styles';
-import Button from 'material-ui/Button';
-import Dialog, {DialogActions, DialogContent, DialogContentText, DialogTitle} from 'material-ui/Dialog';
-import {MenuItem} from 'material-ui/Menu';
-import Select from 'material-ui/Select';
-import {FormControl} from 'material-ui/Form';
-import NotificationSystem from 'react-notification-system';
-import {InputLabel} from 'material-ui/Input';
-import Slide from "material-ui/transitions/Slide";
-import Typography from 'material-ui/Typography';
-import ListSubheader from 'material-ui/List/ListSubheader';
-import List, { ListItem, ListItemText, ListItemIcon } from 'material-ui/List';
-import Dns from 'material-ui-icons/Dns'
-import AppBar from 'material-ui/AppBar';
-import Toolbar from 'material-ui/Toolbar';
-import Divider from 'material-ui/Divider';
-import IconButton from 'material-ui/IconButton';
-import CloseIcon from 'material-ui-icons/Close';
+import {withStyles} from '@material-ui/core/styles';
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import Select from '@material-ui/core/Select';
+import FormControl from '@material-ui/core/FormControl';
+import InputLabel from '@material-ui/core/InputLabel';
+import Slide from "@material-ui/core/Slide";
+import Typography from '@material-ui/core/Typography';
+import IconButton from '@material-ui/core/IconButton';
+import CloseIcon from '@material-ui/icons/Close';
 import ApplicationCreate from '../../Applications/Create/ApplicationCreate'
-import Grid from 'material-ui/Grid'
+import Grid from '@material-ui/core/Grid'
 import PropTypes from 'prop-types';
 
 

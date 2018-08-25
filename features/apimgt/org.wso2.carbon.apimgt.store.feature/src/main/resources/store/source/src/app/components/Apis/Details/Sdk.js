@@ -19,17 +19,19 @@
 import  React from 'react'
 
 import Api from '../../../data/api';
-import Button from 'material-ui/Button';
-import Card, { CardActions, CardMedia } from 'material-ui/Card';
-import Divider from 'material-ui/Divider';
-import FileDownload from 'material-ui-icons/FileDownload';
-import Grid from 'material-ui/Grid';
-import InfoOutline from 'material-ui-icons/InfoOutline';
+import Button from '@material-ui/core/Button';
+import Card from '@material-ui/core/Card';
+import CardActions from '@material-ui/core/CardActions';
+import CardMedia from '@material-ui/core/CardMedia';
+
+import Divider from '@material-ui/core/Divider';
+import FileDownload from '@material-ui/icons/ArrowDownward';
+import Grid from '@material-ui/core/Grid';
+import InfoOutline from '@material-ui/icons/InfoOutlined';
 import JSFileDownload from 'js-file-download';
-import Paper from 'material-ui/Paper';
-import SubHeader from 'material-ui/List/ListSubheader';
-import TextField from 'material-ui/TextField';
-import Typography from 'material-ui/Typography';
+import Paper from '@material-ui/core/Paper';
+import TextField from '@material-ui/core/TextField';
+import Typography from '@material-ui/core/Typography';
 
 class Sdk extends React.Component {
 
@@ -147,7 +149,7 @@ class Sdk extends React.Component {
                                     <Grid key={index} item>
                                         <div style={{width:"auto", textAlign:"center"}}>
                                             <Card>
-                                                <SubHeader>{language.toString().toUpperCase()}</SubHeader>
+                                                <div>{language.toString().toUpperCase()}</div>
                                                 <Divider/>
                                                 <CardMedia
                                                     title={language.toString().toUpperCase()}

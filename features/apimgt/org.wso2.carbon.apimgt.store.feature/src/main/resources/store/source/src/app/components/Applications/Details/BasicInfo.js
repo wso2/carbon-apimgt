@@ -23,14 +23,7 @@ import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import API from '../../../data/api'
 
-import Paper from 'material-ui/Paper';
-import Grid from 'material-ui/Grid';
-import Typography from 'material-ui/Typography';
-import Button from 'material-ui/Button';
-import Card, { CardActions, CardContent, CardMedia } from 'material-ui/Card';
-import { Delete, Edit, CreateNewFolder, Description  }from 'material-ui-icons';
-import Table, { TableBody, TableCell, TableRow } from 'material-ui/Table';
-import Subscriptions  from 'material-ui-icons/Subscriptions';
+import Typography from '@material-ui/core/Typography';
 
 class BasicInfo extends Component {
     constructor(props) {

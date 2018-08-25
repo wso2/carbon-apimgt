@@ -21,8 +21,7 @@ import React from 'react'
 import Store from "./src/App.js"
 // import 'typeface-roboto'
 import 'material-design-icons'
-import 'material-ui-icons'
-import {MuiThemeProvider, createMuiTheme} from 'material-ui/styles';
+import {MuiThemeProvider, createMuiTheme} from '@material-ui/core/styles';
 import Config from 'Config';
 
 const theme = createMuiTheme(Config);

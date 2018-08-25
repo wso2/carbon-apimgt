@@ -1,7 +1,7 @@
 import  React from 'react'
-import Paper from 'material-ui/Paper';
-import Grid from 'material-ui/Grid';
-import Typography from 'material-ui/Typography';
+import Paper from '@material-ui/core/Paper';
+import Grid from '@material-ui/core/Grid';
+import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
 
 import SwaggerUI from "swagger-ui";

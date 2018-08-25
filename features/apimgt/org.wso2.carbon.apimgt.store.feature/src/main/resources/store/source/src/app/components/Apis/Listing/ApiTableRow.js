@@ -20,10 +20,10 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import API from '../../../data/api';
 
-import { TableCell, TableRow } from 'material-ui/Table';
-import { withStyles } from 'material-ui/styles';
+import { TableCell, TableRow } from '@material-ui/core/Table';
+import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
-import Typography from 'material-ui/Typography';
+import Typography from '@material-ui/core/Typography';
 import StarRatingBar from './StarRating';
 
 const styles = theme => ({

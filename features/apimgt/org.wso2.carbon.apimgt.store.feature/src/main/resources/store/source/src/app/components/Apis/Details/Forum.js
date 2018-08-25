@@ -1,17 +1,19 @@
 import  React from 'react'
-import Paper from 'material-ui/Paper';
-import Grid from 'material-ui/Grid';
-import Button from 'material-ui/Button';
-import Card from 'material-ui/Card';
-import TextField from 'material-ui/TextField';
-import Typography from 'material-ui/Typography'
+import Paper from '@material-ui/core/Paper';
+import Grid from '@material-ui/core/Grid';
+import Button from '@material-ui/core/Button';
+import Card from '@material-ui/core/Card';
+import TextField from '@material-ui/core/TextField';
+import Typography from '@material-ui/core/Typography'
 import Api from '../../../data/api'
-import {CircularProgress} from "material-ui/Progress";
-import {withStyles} from 'material-ui/styles';
+import CircularProgress from "@material-ui/core/CircularProgress";
+import {withStyles} from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
-import List, { ListItem, ListItemText } from 'material-ui/List';
-import Avatar from 'material-ui/Avatar';
-import ImageIcon from 'material-ui-icons/Image';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import Avatar from '@material-ui/core/Avatar';
+import ImageIcon from '@material-ui/icons/Image';
 // TODO: need to add alert library to store as well
 // import Alert from '../../Shared/alert'
 
