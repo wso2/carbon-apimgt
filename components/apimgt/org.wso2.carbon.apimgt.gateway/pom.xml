@@ -273,7 +273,7 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Private-Package>
-                            org.wso2.carbon.apimgt.gateway.internal,
+                            org.wso2.carbon.apimgt.gateway.internal
                         </Private-Package>
                         <Export-Package>
                             !javax.servlet,
@@ -281,7 +281,7 @@
                             !org.wso2.carbon.apimgt.gateway.internal,
                             !org.wso2.carbon.apimgt.gateway.stub.*,
                             org.wso2.carbon.apimgt.gateway.*;version="${carbon.apimgt.version}",
-                            org.wso2.throttle.*,
+                            org.wso2.throttle.*
                         </Export-Package>
                         <Import-Package>
                             !javax.xml.soap,
