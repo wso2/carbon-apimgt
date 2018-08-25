@@ -1,7 +1,6 @@
 package org.wso2.carbon.apimgt.tracing.jaeger;
 
 import io.jaegertracing.Configuration;
-import io.opentracing.Span;
 import io.opentracing.Tracer;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.tracing.OpenTracer;

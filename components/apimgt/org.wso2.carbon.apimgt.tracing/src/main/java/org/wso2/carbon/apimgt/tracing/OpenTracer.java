@@ -22,7 +22,12 @@ public abstract class OpenTracer {
         }
     }
 
+    public static void setTag(TracingSpan span, String key, String value) {
+        span.getSpan().setTag(key, value);
+    }
+
     public static void finishSpan(TracingSpan span) {
+
         span.getSpan().finish();
     }
 

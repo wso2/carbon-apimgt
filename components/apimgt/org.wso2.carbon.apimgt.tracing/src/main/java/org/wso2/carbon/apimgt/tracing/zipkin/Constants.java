@@ -10,6 +10,6 @@ public class Constants {
 
     static final int DEFAULT_PORT = 9411;
     static final String DEFAULT_HOST = "localhost";
-    static final String DEFAULT_API_CONTEXT = "/api/v1/spans";
+    static final String DEFAULT_API_CONTEXT = "/api/v2/spans";
 
 }

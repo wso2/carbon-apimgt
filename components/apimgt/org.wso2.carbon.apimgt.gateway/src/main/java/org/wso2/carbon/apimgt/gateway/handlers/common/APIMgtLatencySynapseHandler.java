@@ -35,7 +35,12 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 
     @Override
     public boolean handleRequestInFlow(MessageContext messageContext) {
+
+        requestId = UUID.randomUUID().toString();
+        messageContext.setProperty(APIMgtGatewayConstants.REQUEST_ID, requestId);
+
         TracingSpan responseLatencySpan = OpenTracer.startSpan("ResponseLatency", null, tracer);
+        OpenTracer.setTag(responseLatencySpan,"RequestID",requestId);
         messageContext.setProperty("ResponseLatency", responseLatencySpan);
         messageContext.setProperty("Tracer",tracer);
 
@@ -43,9 +48,6 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
         if (messageContext.getProperty(APIMgtGatewayConstants.HANDLE_REQUEST_INFLOW_TIME) == null) {
             messageContext.setProperty(APIMgtGatewayConstants.HANDLE_REQUEST_INFLOW_TIME, Long.toString(handleRequestInFlowTime));
         }
-
-        requestId = UUID.randomUUID().toString();
-        messageContext.setProperty(APIMgtGatewayConstants.REQUEST_ID, requestId);
 
         return true;
     }
@@ -55,6 +57,7 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 
         TracingSpan parentSpan = (TracingSpan) messageContext.getProperty("ResponseLatency");
         TracingSpan backendLatencySpan = OpenTracer.startSpan("BackendLatency", parentSpan, tracer);
+        OpenTracer.setTag(backendLatencySpan,"RequestID", String.valueOf(messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID)));
         messageContext.setProperty("BackendLatency", backendLatencySpan);
 
         handleRequestOutFlowTime = System.currentTimeMillis();
