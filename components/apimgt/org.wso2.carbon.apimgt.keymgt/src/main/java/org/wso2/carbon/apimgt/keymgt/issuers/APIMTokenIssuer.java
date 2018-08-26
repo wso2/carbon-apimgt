@@ -23,7 +23,6 @@ import com.nimbusds.jwt.JWTParser;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.oltu.oauth2.as.issuer.OAuthIssuer;
 import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
@@ -38,12 +37,9 @@ import org.wso2.carbon.apimgt.keymgt.util.APIMTokenIssuerUtil;
 import org.wso2.carbon.identity.base.IdentityConstants;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.oauth.common.exception.InvalidOAuthClientException;
-import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.oauth.dao.OAuthAppDO;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
-import org.wso2.carbon.identity.oauth2.authz.OAuthAuthzReqMessageContext;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
-import org.wso2.carbon.identity.oauth2.token.OauthTokenIssuer;
 import org.wso2.carbon.identity.oauth2.token.OauthTokenIssuerImpl;
 import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
 
@@ -51,11 +47,10 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
 
-public class APIMTokenIssuer implements OauthTokenIssuer {
+public class APIMTokenIssuer extends OauthTokenIssuerImpl {
 
     private static final Log log = LogFactory.getLog(APIMTokenIssuer.class);
 
-    private OAuthIssuer oAuthIssuerImpl = OAuthServerConfiguration.getInstance().getOAuthTokenGenerator();
 
     @Override
     public String accessToken(OAuthTokenReqMessageContext tokReqMsgCtx) throws OAuthSystemException {
@@ -120,27 +115,7 @@ public class APIMTokenIssuer implements OauthTokenIssuer {
                     "information", e);
             throw new OAuthSystemException("Error occurred while getting JWT Token client ID : " + clientId, e);
         }
-        return this.oAuthIssuerImpl.accessToken();
-    }
-
-    @Override
-    public String refreshToken(OAuthTokenReqMessageContext oAuthTokenReqMessageContext) throws OAuthSystemException {
-        return this.oAuthIssuerImpl.refreshToken();
-    }
-
-    @Override
-    public String authorizationCode(OAuthAuthzReqMessageContext oAuthAuthzReqMessageContext) throws OAuthSystemException {
-        return this.oAuthIssuerImpl.authorizationCode();
-    }
-
-    @Override
-    public String accessToken(OAuthAuthzReqMessageContext oAuthAuthzReqMessageContext) throws OAuthSystemException {
-        return this.oAuthIssuerImpl.accessToken();
-    }
-
-    @Override
-    public String refreshToken(OAuthAuthzReqMessageContext oAuthAuthzReqMessageContext) throws OAuthSystemException {
-        return this.oAuthIssuerImpl.refreshToken();
+        return super.accessToken(tokReqMsgCtx);
     }
 
     private long getSecondsTillExpiry(long validityPeriod) throws APIManagementException {
