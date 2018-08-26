@@ -888,15 +888,15 @@
 
 							            </div>
 
-										<div id="save-prototype-success" class="alert alert-success" role="alert" style="display:none">
-											<i class="icon fw fw-success fade out"></i><strong><%=i18n.localize("Success!")%></strong>
-                    							<%=i18n.localize("You have successfully saved the API.")%>
-								    			<button type="button" class="close" aria-label="close" data-dismiss="alert">
-													<span aria-hidden="true">
-									    				<i class="fw fw-cancel"></i>
-													</span>
-								    			</button>
-								    	</div>
+							            <div id="save-prototype-success" class="alert alert-success" role="alert" style="display:none">
+							                <i class="icon fw fw-success fade out"></i><strong><%=i18n.localize("Success!")%></strong>
+							                <%=i18n.localize("You have successfully saved the API.")%>
+							                <button type="button" class="close" aria-label="close" data-dismiss="alert">
+							                    <span aria-hidden="true">
+							                        <i class="fw fw-cancel"></i>
+							                    </span>
+							                </button>
+							            </div>
 
 							            <div id="prototype-success" class="modal fade">
 							            <div class="modal-dialog">
