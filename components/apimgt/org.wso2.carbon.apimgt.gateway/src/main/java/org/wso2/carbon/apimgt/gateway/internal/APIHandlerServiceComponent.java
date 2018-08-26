@@ -189,7 +189,6 @@ public class APIHandlerServiceComponent {
         return axis2ClientXml;
     }
     protected void setTracingService(TracingService tracingService) {
-
         ServiceReferenceHolder.getInstance().setTracingService(tracingService);
     }
     protected void unsetTracingService(TracingService tracingService) {

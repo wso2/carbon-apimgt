@@ -15,12 +15,47 @@
     <url>http://wso2.org</url>
 
     <description>
-        This feature contains the core bundles required for Tracing functionalities.
+        This feature contains the bundles required for Tracing functionalities.
     </description>
 
     <dependencies>
-
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.tracing</artifactId>
+        </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.wso2.maven</groupId>
+                <artifactId>carbon-p2-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>4-p2-feature-generation</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>p2-feature-gen</goal>
+                        </goals>
+                        <configuration>
+                            <id>org.wso2.carbon.apimgt.tracing</id>
+                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <adviceFile>
+                                <properties>
+                                    <propertyDef>org.wso2.carbon.p2.category.type:server</propertyDef>
+                                    <propertyDef>org.eclipse.equinox.p2.type.group:false</propertyDef>
+                                </properties>
+                            </adviceFile>
+                            <bundles>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.tracing:${carbon.apimgt.version}</bundleDef>
+                                <!--<bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.broker.lifecycle:${carbon.apimgt.version}</bundleDef>-->
+                            </bundles>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 
 </project>
