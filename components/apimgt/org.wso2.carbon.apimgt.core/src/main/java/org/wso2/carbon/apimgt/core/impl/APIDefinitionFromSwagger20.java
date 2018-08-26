@@ -680,7 +680,6 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         Info info = new Info();
         info.setTitle(api.getName());
         info.setDescription(api.getDescription());
-        info.license()
         Contact contact = new Contact();
         if (api.getBusinessInformation() != null) {
             BusinessInformation businessInformation = api.getBusinessInformation();

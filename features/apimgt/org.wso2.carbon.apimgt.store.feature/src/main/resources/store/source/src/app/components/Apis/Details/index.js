@@ -20,7 +20,7 @@ import React, {Component} from 'react'
 import {Route, Switch, Redirect} from 'react-router-dom'
 
 import Overview from './Overview'
-import ApiConsole from './ApiConsole'
+import ApiConsole from './ApiConsole/ApiConsole'
 import Documentation from './Documents/Documentation'
 import Forum from './Forum'
 import Sdk from './Sdk'
