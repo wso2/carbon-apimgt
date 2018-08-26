@@ -256,8 +256,17 @@ $(document).ready(function(){
         $("#prototype_form").submit();
 	return false;                         
     });    
-    
 
+    $("#savePrototypeBtn").click(function(e){
+        var n = noty({
+                            theme: 'wso2',
+                            text: $('#save-prototype-success').text(),
+                            layout:'top',
+                            type:'success',
+                            timeout : '1000'
+        });
+    });
+    
     if( $("#toggleCorsPrototyped").attr('checked') ) {
         $('#corsTablePrototyped').show();
     }
