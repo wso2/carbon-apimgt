@@ -9,16 +9,31 @@ import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Chip from '@material-ui/core/Chip';
 import { FormattedMessage } from 'react-intl';
+import IconButton from '@material-ui/core/IconButton';
+import DeleteIcon from '@material-ui/icons/Delete';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import green from '@material-ui/core/colors/green';
 
 import ImageGenerator from './ImageGenerator';
+import Alert from '../../../Shared/Alert';
+import API from '../../../../data/api.js';
 
-const styles = {
+const styles = theme => ({
     card: {
-        margin: '10px',
-        maxWidth: '250px',
+        margin: theme.spacing.unit * (3 / 2),
+        maxWidth: theme.spacing.unit * 32,
         transition: 'box-shadow 0.3s ease-in-out',
     },
-};
+    providerText: {
+        textTransform: 'capitalize',
+    },
+    apiDetails: { padding: theme.spacing.unit },
+    apiActions: { justifyContent: 'space-between', padding: 0 },
+    deleteProgress: {
+        color: green[200],
+        position: 'absolute',
+    },
+});
 
 /**
  *
@@ -34,17 +49,43 @@ class APIThumb extends Component {
      */
     constructor(props) {
         super(props);
-        this.state = { isHover: false };
+        this.state = { isHover: false, loading: false };
         this.toggleMouseOver = this.toggleMouseOver.bind(this);
+        this.handleApiDelete = this.handleApiDelete.bind(this);
     }
 
     /**
      *
-     *
-     * @memberof ImgMediaCard
+     * Delete an API listed in the listing page
+     * @param {React.SyntheticEvent} event OnClick event of delete button
+     * @param {String} [name=''] API Name use for alerting purpose only
+     * @memberof Listing
      */
-    toggleMouseOver() {
-        this.setState({ isHover: !this.state.isHover });
+    handleApiDelete(event) {
+        const apiUUID = event.currentTarget.id;
+        this.setState({ loading: true });
+        const { updateAPIsList } = this.props;
+        const apiObj = new API();
+        const promisedDelete = apiObj.deleteAPI(apiUUID);
+        promisedDelete.then((response) => {
+            if (response.status !== 200) {
+                Alert.info('Something went wrong while deleting the API!');
+                return;
+            }
+            updateAPIsList(apiUUID);
+            Alert.info(`API ${apiUUID} deleted Successfully`);
+            this.setState({ loading: false });
+        });
+    }
+
+    /**
+     * Toggle mouse Hover state to set the card `raised` property
+     *
+     * @param {React.SyntheticEvent} event mouseover and mouseout
+     * @memberof APIThumb
+     */
+    toggleMouseOver(event) {
+        this.setState({ isHover: event.type === 'mouseover' });
     }
     /**
      * @inheritdoc
@@ -52,8 +93,8 @@ class APIThumb extends Component {
      * @memberof ImgMediaCard
      */
     render() {
-        const { classes, api, deleteButton } = this.props;
-        const { isHover } = this.state;
+        const { classes, api } = this.props;
+        const { isHover, loading } = this.state;
 
         return (
             <Card
@@ -72,14 +113,14 @@ class APIThumb extends Component {
                     name={api.name}
                     id={api.id}
                 />
-                <CardContent style={{ padding: '10px' }}>
+                <CardContent className={classes.apiDetails}>
                     <Typography gutterBottom variant='headline' component='h2'>
                         {api.name}
                     </Typography>
                     <Grid container>
                         <Grid item md={6}>
                             <FormattedMessage id='by' defaultMessage='By' />:
-                            <Typography style={{ textTransform: 'capitalize' }} variant='body2' gutterBottom>
+                            <Typography className={classes.providerText} variant='body2' gutterBottom>
                                 {api.provider}
                             </Typography>
                         </Grid>
@@ -95,23 +136,28 @@ class APIThumb extends Component {
                         </Grid>
                     </Grid>
                 </CardContent>
-                <CardActions style={{ justifyContent: 'space-between', padding: 0 }}>
+                <CardActions className={classes.apiActions}>
                     <Chip label={api.lifeCycleStatus} color='default' />
-                    {deleteButton}
+                    <IconButton
+                        disabled={loading}
+                        onClick={this.handleApiDelete}
+                        id={api.id}
+                        color='secondary'
+                        aria-label='Delete'
+                    >
+                        <DeleteIcon />
+                        {loading && <CircularProgress className={classes.deleteProgress} />}
+                    </IconButton>
                 </CardActions>
             </Card>
         );
     }
 }
 
-APIThumb.defaultProps = {
-    deleteButton: null,
-};
-
 APIThumb.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     api: PropTypes.shape({}).isRequired,
-    deleteButton: PropTypes.element,
+    updateAPIsList: PropTypes.func.isRequired,
 };
 
 export default withStyles(styles)(APIThumb);

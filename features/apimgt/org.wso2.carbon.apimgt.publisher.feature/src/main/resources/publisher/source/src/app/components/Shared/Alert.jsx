@@ -95,7 +95,9 @@ class Alert {
                 Notification.newInstance(
                     {
                         transitionName: 'move-down',
-                        style: { bottom: 0, marginLeft: '2%', position: 'absolute' },
+                        style: {
+                            zIndex: '2000', bottom: 0, marginLeft: '2%', position: 'fixed',
+                        },
                     },
                     (instance) => {
                         Alert.messageInstance = instance;

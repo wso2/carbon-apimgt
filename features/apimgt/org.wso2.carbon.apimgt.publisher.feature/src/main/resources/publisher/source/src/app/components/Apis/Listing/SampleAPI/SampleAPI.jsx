@@ -39,6 +39,7 @@ const styles = {
         color: green[500],
         position: 'relative',
     },
+    headline: { paddingTop: '5px', paddingLeft: '10px' },
 };
 
 /**
@@ -185,12 +186,7 @@ class SampleAPI extends Component {
             <Grid container justify='center'>
                 <Grid item sm={4}>
                     <Card className={classes.card}>
-                        <Typography
-                            style={{ paddingTop: '5px', paddingLeft: '10px' }}
-                            gutterBottom
-                            variant='headline'
-                            component='h2'
-                        >
+                        <Typography className={classes.headline} gutterBottom variant='headline' component='h2'>
                             <FormattedMessage
                                 id='welcome.to.wso2.api.manager'
                                 defaultMessage='Welcome to WSO2 API Manager'

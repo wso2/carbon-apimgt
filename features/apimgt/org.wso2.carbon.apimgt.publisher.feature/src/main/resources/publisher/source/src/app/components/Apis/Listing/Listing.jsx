@@ -20,7 +20,6 @@ import React from 'react';
 import qs from 'qs';
 import PropTypes from 'prop-types';
 
-import Alert from '../../Shared/Alert';
 import PageNavigation from '../APIsNavigation';
 import PageContainer from '../../Base/container/';
 import API from '../../../data/api.js';
@@ -28,7 +27,7 @@ import { Progress } from '../../Shared';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 import SampleAPI from './SampleAPI/SampleAPI';
 import CardView from './CardView/CardView';
-// import TableView from './TableView/TableView';
+import TableView from './TableView/TableView';
 import TopMenu from './components/TopMenu';
 
 /**
@@ -46,7 +45,7 @@ class Listing extends React.Component {
     constructor(props) {
         super(props);
         this.state = { isCardView: true, apis: null };
-        this.handleApiDelete = this.handleApiDelete.bind(this);
+        this.updateAPIsList = this.updateAPIsList.bind(this);
         this.updateApi = this.updateApi.bind(this);
         this.toggleView = this.toggleView.bind(this);
     }
@@ -102,31 +101,20 @@ class Listing extends React.Component {
 
     /**
      *
-     * Delete an API listed in the listing page
-     * @param {String} apiUUID API UUID
-     * @param {String} [name=''] API Name use for alerting purpose only
+     * Update APIs list if an API get deleted in card or table view
+     * @param {String} apiUUID UUID(ID) of the deleted API
      * @memberof Listing
      */
-    handleApiDelete(event) {
-        const apiUUID = event.currentTarget.id;
-        const { apis } = this.state;
-        Alert.info('Deleting the API ...');
-        const apiObj = new API();
-        const promisedDelete = apiObj.deleteAPI(apiUUID);
-        promisedDelete.then((response) => {
-            if (response.status !== 200) {
-                console.log(response);
-                Alert.info('Something went wrong while deleting the API!');
-                return;
-            }
-            Alert.info('API deleted Successfully');
+    updateAPIsList(apiUUID) {
+        this.setState((currentState) => {
+            const { apis } = currentState;
             for (const apiIndex in apis.list) {
                 if (apis.list[apiIndex].id === apiUUID) {
                     apis.list.splice(apiIndex, 1);
+                    this.setState({ apis });
                     break;
                 }
             }
-            this.setState({ apis });
         });
     }
 
@@ -152,7 +140,7 @@ class Listing extends React.Component {
                 </PageContainer>
             );
         }
-        if (apis.count === 0) {
+        if (apis.list.length === 0) {
             return (
                 <PageContainer pageNav={<PageNavigation />}>
                     <SampleAPI />
@@ -165,7 +153,11 @@ class Listing extends React.Component {
                 pageTopMenu={<TopMenu toggleView={this.toggleView} isCardView={isCardView} />}
                 pageNav={<PageNavigation />}
             >
-                {isCardView ? <CardView handleApiDelete={this.handleApiDelete} apis={apis} /> : 'Table view here'}
+                {isCardView ? (
+                    <CardView updateAPIsList={this.updateAPIsList} apis={apis} />
+                ) : (
+                    <TableView updateAPIsList={this.updateAPIsList} apis={apis} />
+                )}
             </PageContainer>
         );
     }
