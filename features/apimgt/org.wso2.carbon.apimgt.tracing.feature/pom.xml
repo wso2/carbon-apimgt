@@ -48,7 +48,6 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.tracing:${carbon.apimgt.version}</bundleDef>
-                                <!--<bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.broker.lifecycle:${carbon.apimgt.version}</bundleDef>-->
                             </bundles>
                         </configuration>
                     </execution>

@@ -29,10 +29,8 @@ import org.wso2.carbon.apimgt.tracing.TracingServiceImpl;
 
 /**
  * @scr.component name="org.wso2.carbon.apimgt.tracing.internal.TracingServiceComponent" immediate="true"
- * @scr.reference name="api.manager.config.service"
- * interface="org.wso2.carbon.apimgt.impl.APIManagerConfigurationService" cardinality="1..1"
- * policy="dynamic" bind="setAPIManagerConfigurationService" unbind="unsetAPIManagerConfigurationService"
  */
+
 public class TracingServiceComponent {
 
     private static final Log log = LogFactory.getLog(TracingServiceComponent.class);
@@ -51,11 +49,4 @@ public class TracingServiceComponent {
         log.info("*******Tracing Component deactivated**********");
     }
 
-    protected void setAPIManagerConfigurationService(APIManagerConfigurationService amcService) {
-        ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(amcService);
-    }
-
-    protected void unsetAPIManagerConfigurationService(APIManagerConfigurationService amcService) {
-        ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(null);
-    }
 }
