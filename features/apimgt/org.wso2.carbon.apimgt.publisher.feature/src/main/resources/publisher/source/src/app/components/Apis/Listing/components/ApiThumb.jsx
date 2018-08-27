@@ -57,13 +57,12 @@ class APIThumb extends Component {
     /**
      *
      * Delete an API listed in the listing page
-     * @param {String} apiUUID API UUID
+     * @param {React.SyntheticEvent} event OnClick event of delete button
      * @param {String} [name=''] API Name use for alerting purpose only
      * @memberof Listing
      */
     handleApiDelete(event) {
         const apiUUID = event.currentTarget.id;
-        const { apis } = this.state;
         this.setState({ loading: true });
         const { updateAPIsList } = this.props;
         const apiObj = new API();
@@ -74,10 +73,10 @@ class APIThumb extends Component {
                 return;
             }
             updateAPIsList(apiUUID);
-            this.setState({ apis, loading: false });
+            Alert.info(`API ${apiUUID} deleted Successfully`);
+            this.setState({ loading: false });
         });
     }
-
 
     /**
      * Toggle mouse Hover state to set the card `raised` property

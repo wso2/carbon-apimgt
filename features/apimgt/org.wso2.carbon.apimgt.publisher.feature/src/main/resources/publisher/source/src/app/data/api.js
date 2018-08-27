@@ -329,6 +329,7 @@ class API extends Resource {
      * @param id {String} UUID of the API which want to delete
      * @param callback {function} Function which needs to be called upon success of the API deletion
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     * @deprecated Use the static delete method instead
      */
     deleteAPI(id) {
         const promised_delete = this.client.then((client) => {
@@ -924,6 +925,24 @@ class API extends Resource {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
         return apiClient.then((client) => {
             return client.apis['API (Collection)'].get_apis(params, Resource._requestMetaData());
+        });
+    }
+
+
+    /**
+     *
+     * Delete an API given its UUID
+     * @static
+     * @param {String} id API UUID
+     * @returns {Promise} Swagger-Js promise object resolve to NT response object
+     * @memberof API
+     */
+    static delete(id) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then((client) => {
+            return client.apis['API (Individual)'].delete_apis__apiId_({
+                apiId: id
+            }, this._requestMetaData());
         });
     }
 }

@@ -20,7 +20,6 @@ import React from 'react';
 import qs from 'qs';
 import PropTypes from 'prop-types';
 
-import Alert from '../../Shared/Alert';
 import PageNavigation from '../APIsNavigation';
 import PageContainer from '../../Base/container/';
 import API from '../../../data/api.js';
@@ -113,7 +112,6 @@ class Listing extends React.Component {
                 if (apis.list[apiIndex].id === apiUUID) {
                     apis.list.splice(apiIndex, 1);
                     this.setState({ apis });
-                    Alert.info(`API ${apis.list[apiIndex].name} deleted Successfully`);
                     break;
                 }
             }
@@ -155,7 +153,11 @@ class Listing extends React.Component {
                 pageTopMenu={<TopMenu toggleView={this.toggleView} isCardView={isCardView} />}
                 pageNav={<PageNavigation />}
             >
-                {isCardView ? <CardView updateAPIsList={this.updateAPIsList} apis={apis} /> : <TableView apis={apis} />}
+                {isCardView ? (
+                    <CardView updateAPIsList={this.updateAPIsList} apis={apis} />
+                ) : (
+                    <TableView updateAPIsList={this.updateAPIsList} apis={apis} />
+                )}
             </PageContainer>
         );
     }

@@ -8,9 +8,12 @@ import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import Checkbox from '@material-ui/core/Checkbox';
+import { Link } from 'react-router-dom';
 
 import APITableHeader from './APITableHeader';
-// import APITableToolBar from './APITableToolBar';
+import APITableToolBar from './APITableToolBar';
+import API from '../../../../data/api';
+import Alert from '../../../Shared/Alert';
 
 const styles = theme => ({
     root: {
@@ -59,13 +62,26 @@ function createData(name, calories, fat, carbs, protein) {
  * @extends {React.Component}
  */
 class TableView extends React.Component {
-    state = {
-        order: 'asc',
-        orderBy: 'calories',
-        selected: [],
-        page: 0,
-        rowsPerPage: 5,
-    };
+    /**
+     *Creates an instance of TableView.
+     * @param {*} props
+     * @memberof TableView
+     */
+    constructor(props) {
+        super(props);
+        this.state = {
+            order: 'asc',
+            orderBy: 'calories',
+            selected: [],
+            page: 0,
+            rowsPerPage: 5,
+            isDeleting: false,
+        };
+        this.isSelected = this.isSelected.bind(this);
+        this.handleSelectAnAPI = this.handleSelectAnAPI.bind(this);
+        this.handleSelectAllClick = this.handleSelectAllClick.bind(this);
+        this.handleDeleteAPIs = this.handleDeleteAPIs.bind(this);
+    }
 
     handleRequestSort = (event, property) => {
         const orderBy = property;
@@ -78,15 +94,29 @@ class TableView extends React.Component {
         this.setState({ order, orderBy });
     };
 
-    handleSelectAllClick = (event, checked) => {
+    /**
+     * Handle select all api checkbox in header
+     *
+     * @param {React.SyntheticEvent} event ignored
+     * @param {Boolean} checked is the select all checkbox is selected
+     * @memberof TableView
+     */
+    handleSelectAllClick(event, checked) {
+        let selected = [];
         if (checked) {
-            this.setState(state => ({ selected: state.data.map(n => n.id) }));
-            return;
+            selected = this.props.apis.list.map(api => api.id);
         }
-        this.setState({ selected: [] });
-    };
+        this.setState({ selected });
+    }
 
-    handleClick = (event, id) => {
+    /**
+     *
+     *
+     * @param {*} event
+     * @memberof TableView
+     */
+    handleSelectAnAPI(event) {
+        const { id } = event.currentTarget;
         const { selected } = this.state;
         const selectedIndex = selected.indexOf(id);
         let newSelected = [];
@@ -102,7 +132,7 @@ class TableView extends React.Component {
         }
 
         this.setState({ selected: newSelected });
-    };
+    }
 
     handleChangePage = (event, page) => {
         this.setState({ page });
@@ -112,7 +142,41 @@ class TableView extends React.Component {
         this.setState({ rowsPerPage: event.target.value });
     };
 
-    isSelected = id => this.state.selected.indexOf(id) !== -1;
+    /**
+     *
+     * Delete API in selected list
+     * @memberof TableView
+     */
+    handleDeleteAPIs() {
+        this.setState({ isDeleting: true });
+        const { selected } = this.state;
+        const { updateAPIsList } = this.props;
+        const promisedDeleteAll = selected.map(apiUUID =>
+            API.delete(apiUUID)
+                .then(() => {
+                    updateAPIsList(apiUUID);
+                    const index = selected.indexOf(apiUUID);
+                    if (index !== -1) selected.splice(index, 1);
+                })
+                .catch(() => Alert.info(`Error while deleting the ${apiUUID}`)));
+
+        Promise.all(promisedDeleteAll).then((response) => {
+            Alert.info(`${response.length} API(s) deleted successfully!`);
+            this.setState({ isDeleting: false, selected });
+        });
+    }
+
+    /**
+     *
+     * Helper method to check is the given API UUID is in the selected APIs array
+     * @param {String} id UUID of the API which needs to be checked for selected
+     * @returns {Boolean} is the given API uuid in selected list
+     * @memberof TableView
+     */
+    isSelected(id) {
+        const { selected } = this.state;
+        return selected.indexOf(id) !== -1;
+    }
 
     /**
      *
@@ -123,13 +187,22 @@ class TableView extends React.Component {
     render() {
         const { classes, apis } = this.props;
         const {
-            order, orderBy, selected, rowsPerPage, page,
+            order, orderBy, selected, rowsPerPage, page, isDeleting,
         } = this.state;
         const emptyRows = rowsPerPage - Math.min(rowsPerPage, apis.list.length - (page * rowsPerPage));
 
         return (
             <Paper className={classes.root}>
-                {/* <APITableToolBar numSelected={selected.length} /> */}
+                <APITableToolBar
+                    loading={isDeleting}
+                    handleDeleteAPIs={this.handleDeleteAPIs}
+                    numSelected={selected.length}
+                    totalAPIsCount={apis.list.length}
+                />
+                {/*
+                todo: totalAPIsCount verify /apis GET all .count returns the total number of APIs,
+                If so use that property ~tmkb
+                */}
                 <div className={classes.tableWrapper}>
                     <Table className={classes.table} aria-labelledby='tableTitle'>
                         <APITableHeader
@@ -145,27 +218,30 @@ class TableView extends React.Component {
                                 // .sort(getSorting(order, orderBy))
                                 .slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage)
                                 .map((api) => {
-                                    const isSelected = this.isSelected(api.id);
+                                    const { id } = api;
+                                    const isSelected = this.isSelected(id);
+                                    const overviewPath = `apis/${id}/overview`;
                                     return (
                                         <TableRow
                                             hover
-                                            // onClick={event => this.handleClick(event, n.id)}
                                             role='checkbox'
                                             aria-checked={isSelected}
                                             tabIndex={-1}
-                                            key={api.id}
+                                            key={id}
                                             selected={isSelected}
                                         >
-                                            <TableCell padding='checkbox'>
+                                            <TableCell onClick={this.handleSelectAnAPI} id={id} padding='checkbox'>
                                                 <Checkbox checked={isSelected} />
                                             </TableCell>
-                                            <TableCell component='th' scope='row' padding='none'>
-                                                {api.name}
-                                            </TableCell>
-                                            <TableCell numeric>{api.version}</TableCell>
-                                            <TableCell numeric>{api.context}</TableCell>
-                                            <TableCell numeric>{Math.floor(Math.random() * 20)}</TableCell>
-                                            <TableCell numeric>{api.provider}</TableCell>
+                                            <Link to={overviewPath} style={{ display: 'contents' }}>
+                                                <TableCell component='th' scope='row' padding='none'>
+                                                    {api.name}
+                                                </TableCell>
+                                                <TableCell numeric>{api.version}</TableCell>
+                                                <TableCell numeric>{api.context}</TableCell>
+                                                <TableCell numeric>{Math.floor(Math.random() * 20)}</TableCell>
+                                                <TableCell numeric>{api.provider}</TableCell>
+                                            </Link>
                                         </TableRow>
                                     );
                                 })}
@@ -198,7 +274,8 @@ class TableView extends React.Component {
 
 TableView.propTypes = {
     classes: PropTypes.shape({}).isRequired,
-    apis: PropTypes.shape({}).isRequired,
+    apis: PropTypes.shape({ list: PropTypes.array }).isRequired,
+    updateAPIsList: PropTypes.func.isRequired,
 };
 
 export default withStyles(styles)(TableView);

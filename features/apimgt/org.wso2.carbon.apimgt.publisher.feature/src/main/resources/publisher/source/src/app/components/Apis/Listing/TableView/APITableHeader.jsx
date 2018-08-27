@@ -40,6 +40,14 @@ const rows = [
     },
 ];
 
+
+/**
+ * API Listing table view header of the table
+ *
+ * @export
+ * @class APITableHeader
+ * @extends {React.Component}
+ */
 export default class APITableHeader extends React.Component {
     constructor(props) {
         super(props);
@@ -52,6 +60,13 @@ export default class APITableHeader extends React.Component {
         };
     }
 
+
+    /**
+     *
+     * @inheritdoc
+     * @returns {React.Component} @inheritdoc
+     * @memberof APITableHeader
+     */
     render() {
         const {
             onSelectAllClick, order, orderBy, numSelected, rowCount,

@@ -6,6 +6,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import { lighten } from '@material-ui/core/styles/colorManipulator';
@@ -33,10 +34,16 @@ const toolbarStyles = theme => ({
     title: {
         flex: '0 0 auto',
     },
+    deleteProgress: {
+        color: 'green',
+        position: 'absolute',
+    },
 });
 
 const EnhancedTableToolbar = (props) => {
-    const { numSelected, classes } = props;
+    const {
+        numSelected, classes, handleDeleteAPIs, loading, totalAPIsCount,
+    } = props;
 
     return (
         <Toolbar
@@ -51,7 +58,7 @@ const EnhancedTableToolbar = (props) => {
                     </Typography>
                 ) : (
                     <Typography variant='title' id='tableTitle'>
-                        Nutrition
+                        APIS ({totalAPIsCount})
                     </Typography>
                 )}
             </div>
@@ -59,8 +66,9 @@ const EnhancedTableToolbar = (props) => {
             <div className={classes.actions}>
                 {numSelected > 0 ? (
                     <Tooltip title='Delete'>
-                        <IconButton aria-label='Delete'>
+                        <IconButton disabled={loading} onClick={handleDeleteAPIs} aria-label='Delete'>
                             <DeleteIcon />
+                            {loading && <CircularProgress className={classes.deleteProgress} />}
                         </IconButton>
                     </Tooltip>
                 ) : (
@@ -75,9 +83,15 @@ const EnhancedTableToolbar = (props) => {
     );
 };
 
+EnhancedTableToolbar.defaultProps = {
+    loading: false,
+};
 EnhancedTableToolbar.propTypes = {
-    classes: PropTypes.object.isRequired,
+    classes: PropTypes.shape({}).isRequired,
     numSelected: PropTypes.number.isRequired,
+    loading: PropTypes.bool,
+    totalAPIsCount: PropTypes.number.isRequired,
+    handleDeleteAPIs: PropTypes.func.isRequired,
 };
 
 export default withStyles(toolbarStyles)(EnhancedTableToolbar);
