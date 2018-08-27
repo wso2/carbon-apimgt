@@ -1,7 +1,25 @@
+  /*
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import React from 'react'
-import Paper from 'material-ui/Paper';
-import Grid from 'material-ui/Grid';
-import Typography from 'material-ui/Typography';
+import Paper from '@material-ui/core/Paper';
+import Grid from '@material-ui/core/Grid';
+import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
 
 import SwaggerUI from "swagger-ui";
@@ -11,16 +29,15 @@ import Api from '../../../../data/api'
 import AuthManager from '../../../../data/AuthManager'
 import 'swagger-ui/dist/swagger-ui.css';
 
-import Input, {InputLabel} from 'material-ui/Input';
-import {MenuItem} from 'material-ui/Menu';
-import {FormControl} from 'material-ui/Form';
-import Select from 'material-ui/Select';
+import Input, {InputLabel} from '@material-ui/core/Input';
+import {MenuItem} from '@material-ui/core/Menu';
+import Select from '@material-ui/core/Select';
 import Progress from '../../../Shared/Progress';
-import TextField from 'material-ui/TextField';
-import CommonColors from 'material-ui/colors/common';
-import { withStyles } from 'material-ui/styles';
+import TextField from '@material-ui/core/TextField';
+import CommonColors from '@material-ui/core/colors/common';
+import { withStyles } from '@material-ui/core/styles';
 
-const styles = () => ({
+const styles = theme => ({
     inputText: {
         marginLeft: '145px',
         minWidth: '400px'
@@ -36,8 +53,13 @@ const styles = () => ({
         marginLeft: '275px',
         minWidth: '360px',
         marginRight: '10px'
+    },
+    grid: {
+        spacing: 2,
+        justifyContent: 'center',
+        marginTop: '30px',
+        marginBottom: '30px'
     }
-
 
 });
 
@@ -45,8 +67,8 @@ class ApiConsole extends React.Component {
     constructor(props){
         super(props);
         this.state = {
-            applications: null,
-            selectedApplication: null,
+            subscribedApplications: null,
+            applicationId: '',
         };
         this.api_uuid = this.props.match.params.api_uuid;
     }
@@ -62,15 +84,39 @@ class ApiConsole extends React.Component {
         };
         let promised_swagger = api.getSwaggerByAPIId(this.api_uuid);
         let promised_applications = api.getAllApplications();
+        let promised_subscriptions = api.getSubscriptions(this.api_uuid, null);
 
-        Promise.all([promised_swagger, promised_applications]).then(responses => {
+        Promise.all([promised_swagger, promised_applications, promised_subscriptions]).then(responses => {
 
-          let swaggerResponse = responses[0];
-          let url = swaggerResponse.url;
-          this.setState({applications: responses[1].obj.list});
+          let swagger = responses[0];
+          let applications = responses[1].obj.list;
+          let subscriptions = responses[2].obj.list;
+          let url = swagger.url;
+
+          let subscribedApplications = [];
+          //get the application IDs of existing subscriptions
+          subscriptions.map(element => subscribedApplications.push({applicationId: element.applicationId}));
+
+          //Get application names of the subscribed applications
+          for (let i = 0; i < applications.length; i++) {
+              let applicationId = applications[i].applicationId;
+              let applicationName = applications[i].name;
+
+              for ( var j =0; j < subscribedApplications.length; j++ ) {
+                  if(subscribedApplications[j].applicationId === applicationId) {
+                    subscribedApplications[j].name = applicationName;
+                  }
+              }
+          }
+
+          if (subscribedApplications && subscribedApplications.length > 0) {
+            this.setState({applicationId: subscribedApplications[0].applicationId});
+          }
+          this.setState({subscribedApplications: subscribedApplications});
+
           const swaggerUI = SwaggerUI({
               dom_id: "#ui",
-              url: swaggerResponse.url,
+              url: swagger.url,
               requestInterceptor: (req) => {
                   // Only set Authorization header if the request matches the spec URL
                   if (req.url === url) {
@@ -101,12 +147,9 @@ class ApiConsole extends React.Component {
 
     }
 
-    handleChange(e) {
-        this.setState({selectedApplication: e.target.value});
-        if (this.props.handlePolicies) {
-            this.props.handlePolicies(e.target.value);
-        }
-    }
+    handleChange = name => event => {
+        this.setState({[name]: event.target.value});
+    };
 
     render() {
 
@@ -114,82 +157,36 @@ class ApiConsole extends React.Component {
         let { handleInputs } = this.props;
         const isReadOnly = !handleInputs; // Showing the endpoint details
         handleInputs = handleInputs || null;
-        console.info("printing in render");
-        console.info(this.state.applications);
-        console.info(this.state.setSwagger);
-        if (this.state.applications == null) {
+        if (this.state.subscribedApplications == null) {
               return <Progress />;
         }
 
-        console.info("apps are null");
-
         return (
             <React.Fragment>
-                <Grid container spacing={2} justify='center'>
+                <Grid container className={classes.grid}>
                     <Grid item md={6}>
                         <div>
                             <Typography variant='subheading'>
                                Try
-                            <Select
-                                margin="none"
-                                className={classes.appSelect}
-                                value={this.state.selectedApplication}
-                                onChange={this.handleChange}
-                                input={<Input id="name-multiple"/>}
-                                MenuProps={{
-                                    PaperProps: {
-                                        style: {
-                                            width: 200,
-                                        },
-                                    },
-                                }}
-                            >
-                                {this.state.applications.map(app => (
-                                    <MenuItem
-                                        key={app.applicationId}
-                                        value={app.name}
-                                        style={{
-                                            fontWeight: this.state.applications.indexOf(app.name) !== -1 ? '500' : '400',
-                                        }}
-                                    >
-                                        {app.name}
-                                    </MenuItem>
-                                ))}
-                            </Select></Typography>
-                        </div>
-                        <div>
-                            <Typography variant='subheading' gutterLeft>
-                                Using
-                                <Select
-                                    margin="none"
-                                    className={classes.keySelect}
-                                    value={this.state.selectedApplication}
-                                    onChange={this.handleChange}
-                                    input={<Input id="name-multiple"/>}
-                                    MenuProps={{
-                                        PaperProps: {
-                                            style: {
-                                                width: 200,
-                                            },
-                                        },
-                                    }}
-                                >
-                                    {this.state.applications.map(app => (
-                                        <MenuItem
-                                            key={app.applicationId}
-                                            value={app.name}
-                                            style={{
-                                                fontWeight: this.state.applications.indexOf(app.name) !== -1 ? '500' : '400',
-                                            }}
-                                        >
-                                            {app.name}
-                                        </MenuItem>
-                                    ))}
-                                </Select>Key
+                               <Select
+                                   value={this.state.applicationId}
+                                   onChange={this.handleChange('applicationId')}
+                                   className={classes.appSelect}
+                               >
+                                   {this.state.subscribedApplications.map((app) => <option value={app.applicationId} key={app.applicationId}>
+                                       {app.name}
+                                   </option>)}
+                               </Select>
                             </Typography>
                         </div>
                         <div>
-                            <Typography variant='subheading' gutterLeft>
+                            <Typography variant='subheading' gutterleft>
+                                Using
+                                Key
+                            </Typography>
+                        </div>
+                        <div>
+                            <Typography variant='subheading' gutterleft>
                                 Set Request Header
                                 <TextField
                                     className={classes.inputText}
@@ -218,8 +215,8 @@ ApiConsole.defaultProps = {
 
 ApiConsole.propTypes = {
     handleInputs: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]),
-    classes: PropTypes.shape({}).isRequired,
-	optionalArray: PropTypes.array
+	optionalArray: PropTypes.array,
+	classes: PropTypes.object.isRequired
 }
 
 export default withStyles(styles)(ApiConsole);
