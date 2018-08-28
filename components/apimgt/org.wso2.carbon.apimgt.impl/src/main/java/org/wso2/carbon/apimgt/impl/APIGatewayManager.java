@@ -254,9 +254,14 @@ public class APIGatewayManager {
                                 log.debug("Removing API " + api.getId().getApiName() + " From environment " +
                                         environment.getName());
                             }
-                            client.deleteEndpoint(api, tenantDomain);
-                            client.deleteApi(tenantDomain, api.getId());
-                            undeployCustomSequences(client, api, tenantDomain, environment);
+                            if ("INLINE".equals(api.getImplementation())) {
+                                client.deleteApi(tenantDomain, api.getId());
+                                undeployCustomSequences(client, api, tenantDomain, environment);
+                            } else {
+                                client.deleteEndpoint(api, tenantDomain);
+                                client.deleteApi(tenantDomain, api.getId());
+                                undeployCustomSequences(client, api, tenantDomain, environment);
+                            }
                         }
                     } else {
                         String fileName = api.getContext().replace('/', '-');
