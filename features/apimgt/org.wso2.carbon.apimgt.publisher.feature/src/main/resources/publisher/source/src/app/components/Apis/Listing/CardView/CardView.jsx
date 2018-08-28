@@ -8,14 +8,14 @@ const CardView = ({ apis, updateAPIsList }) => {
     return (
         <Grid container justify='flex-start' spacing={8}>
             {apis.list.map((api) => {
-                return <ApiThumb updateAPIsList={updateAPIsList} api={api} />;
+                return <ApiThumb key={api.id} updateAPIsList={updateAPIsList} api={api} />;
             })}
         </Grid>
     );
 };
 
 CardView.propTypes = {
-    apis: PropTypes.arrayOf(PropTypes.object).isRequired,
+    apis: PropTypes.shape({ list: PropTypes.array, count: PropTypes.number }).isRequired,
     updateAPIsList: PropTypes.func.isRequired,
 };
 

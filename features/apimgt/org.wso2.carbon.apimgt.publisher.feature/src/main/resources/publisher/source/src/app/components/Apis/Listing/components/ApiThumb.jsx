@@ -110,7 +110,7 @@ class APIThumb extends Component {
                     component={ImageGenerator}
                     height='140'
                     title='Contemplative Reptile'
-                    name={api.name}
+                    apiName={api.name}
                     id={api.id}
                 />
                 <CardContent className={classes.apiDetails}>

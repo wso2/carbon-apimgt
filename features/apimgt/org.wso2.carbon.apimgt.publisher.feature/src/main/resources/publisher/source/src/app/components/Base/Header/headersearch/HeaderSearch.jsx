@@ -2,14 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Autosuggest from 'react-autosuggest';
 import { withStyles } from '@material-ui/core/styles';
+import Paper from '@material-ui/core/Paper';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
-import {
-    renderInput,
-    renderSuggestion,
-    renderSuggestionsContainer,
-    getSuggestions,
-    getSuggestionValue,
-} from './searchUtils';
+import { renderInput, renderSuggestion, getSuggestions, getSuggestionValue } from './searchUtils';
 
 const styles = theme => ({
     container: {
@@ -48,6 +44,10 @@ const styles = theme => ({
         background: '#6573c3',
         padding: '5px 5px 5px 5px',
     },
+    buttonProgress: {
+        color: theme.palette.secondary.main,
+        marginLeft: -50,
+    },
 });
 
 /**
@@ -67,11 +67,13 @@ class HeaderSearch extends React.Component {
         this.state = {
             searchText: '',
             suggestions: [],
+            isLoading: false,
         };
         this.handleSuggestionsFetchRequested = this.handleSuggestionsFetchRequested.bind(this);
         this.handleSuggestionsClearRequested = this.handleSuggestionsClearRequested.bind(this);
         this.handleChange = this.handleChange.bind(this);
         this.clearOnBlur = this.clearOnBlur.bind(this);
+        this.renderSuggestionsContainer = this.renderSuggestionsContainer.bind(this);
     }
 
     /**
@@ -81,8 +83,9 @@ class HeaderSearch extends React.Component {
      * @memberof HeaderSearch
      */
     handleSuggestionsFetchRequested({ value }) {
-        this.setState({
-            suggestions: getSuggestions(value),
+        this.setState({ isLoading: true });
+        getSuggestions(value).then(({ body }) => {
+            this.setState({ suggestions: body.list, isLoading: false });
         });
     }
 
@@ -127,13 +130,34 @@ class HeaderSearch extends React.Component {
 
     /**
      *
+     *
+     * @param {*} options
+     * @returns
+     * @memberof HeaderSearch
+     */
+    renderSuggestionsContainer(options) {
+        const { containerProps, children } = options;
+        const { isLoading } = this.state;
+        const { classes } = this.props;
+
+        return isLoading ? (
+            <CircularProgress size={24} className={classes.buttonProgress} />
+        ) : (
+            <Paper {...containerProps} square>
+                {children}
+            </Paper>
+        );
+    }
+
+    /**
+     *
      * @inheritdoc
      * @returns {React.Component} @inheritdoc
      * @memberof HeaderSearch
      */
     render() {
         const { classes, smSearch } = this.props;
-        const { searchText } = this.state;
+        const { searchText, isLoading } = this.state;
         let autoFocus = false;
         let responsiveContainer = classes.container;
         if (smSearch) {
@@ -154,7 +178,7 @@ class HeaderSearch extends React.Component {
                 onSuggestionsClearRequested={this.handleSuggestionsClearRequested}
                 getSuggestionValue={getSuggestionValue}
                 renderSuggestion={renderSuggestion}
-                renderSuggestionsContainer={renderSuggestionsContainer}
+                renderSuggestionsContainer={this.renderSuggestionsContainer}
                 inputProps={{
                     autoFocus,
                     classes,
@@ -162,6 +186,7 @@ class HeaderSearch extends React.Component {
                     value: searchText,
                     onChange: this.handleChange,
                     onBlur: this.clearOnBlur,
+                    isLoading,
                 }}
             />
         );

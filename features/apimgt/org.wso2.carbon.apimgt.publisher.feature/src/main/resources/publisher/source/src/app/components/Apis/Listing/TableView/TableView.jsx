@@ -57,14 +57,13 @@ function createData(name, calories, fat, carbs, protein) {
 
 /**
  * Table view of the API listing
- *
- * @class TableView
- * @extends {React.Component}
+ * @class TableView @inheritdoc
+ * @extends {React.Component} @inheritdoc
  */
 class TableView extends React.Component {
     /**
      *Creates an instance of TableView.
-     * @param {*} props
+     * @param {Object} props @inheritdoc
      * @memberof TableView
      */
     constructor(props) {
@@ -81,6 +80,8 @@ class TableView extends React.Component {
         this.handleSelectAnAPI = this.handleSelectAnAPI.bind(this);
         this.handleSelectAllClick = this.handleSelectAllClick.bind(this);
         this.handleDeleteAPIs = this.handleDeleteAPIs.bind(this);
+        this.handleChangePage = this.handleChangePage.bind(this);
+        this.handleChangeRowsPerPage = this.handleChangeRowsPerPage.bind(this);
     }
 
     handleRequestSort = (event, property) => {
@@ -111,8 +112,8 @@ class TableView extends React.Component {
 
     /**
      *
-     *
-     * @param {*} event
+     * Handle onClick event of checkbox for single API (One row in the APIs listing table view)
+     * @param {React.SyntheticEvent} event onClick event
      * @memberof TableView
      */
     handleSelectAnAPI(event) {
@@ -134,17 +135,32 @@ class TableView extends React.Component {
         this.setState({ selected: newSelected });
     }
 
-    handleChangePage = (event, page) => {
+    /**
+     * Provide implementation for Material UI standard TablePagination callback prop
+     * Switch to the next/previous page from the current page according to the passed page number
+     *
+     * @param {React.SyntheticEvent} event
+     * @param {Number} page Next/Previous page number
+     * @memberof TableView
+     */
+    handleChangePage(event, page) {
         this.setState({ page });
-    };
-
-    handleChangeRowsPerPage = (event) => {
-        this.setState({ rowsPerPage: event.target.value });
-    };
+    }
 
     /**
      *
-     * Delete API in selected list
+     * Provide implementation for Material UI standard TablePagination callback prop
+     * Change the number of rows(APIs) shown in single page
+     * @param {React.SyntheticEvent} event Synthetic event for number of rows dropdown menu
+     * @memberof TableView
+     */
+    handleChangeRowsPerPage(event) {
+        this.setState({ rowsPerPage: event.target.value });
+    }
+
+    /**
+     *
+     * Delete API in `selected` list
      * @memberof TableView
      */
     handleDeleteAPIs() {
@@ -233,15 +249,14 @@ class TableView extends React.Component {
                                             <TableCell onClick={this.handleSelectAnAPI} id={id} padding='checkbox'>
                                                 <Checkbox checked={isSelected} />
                                             </TableCell>
-                                            <Link to={overviewPath} style={{ display: 'contents' }}>
-                                                <TableCell component='th' scope='row' padding='none'>
-                                                    {api.name}
-                                                </TableCell>
-                                                <TableCell numeric>{api.version}</TableCell>
-                                                <TableCell numeric>{api.context}</TableCell>
-                                                <TableCell numeric>{Math.floor(Math.random() * 20)}</TableCell>
-                                                <TableCell numeric>{api.provider}</TableCell>
-                                            </Link>
+
+                                            <TableCell component='th' scope='row' padding='none'>
+                                                <Link to={overviewPath}>{api.name}</Link>
+                                            </TableCell>
+                                            <TableCell numeric>{api.version}</TableCell>
+                                            <TableCell numeric>{api.context}</TableCell>
+                                            <TableCell numeric>{Math.floor(Math.random() * 20)}</TableCell>
+                                            <TableCell numeric>{api.provider}</TableCell>
                                         </TableRow>
                                     );
                                 })}
