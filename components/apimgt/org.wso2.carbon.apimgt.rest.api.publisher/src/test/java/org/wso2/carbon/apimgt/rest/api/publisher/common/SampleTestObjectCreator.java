@@ -241,13 +241,13 @@ public class SampleTestObjectCreator {
     }
 
     public static Endpoint createMockEndpoint() {
-        return new Endpoint.Builder().endpointConfig("{'type':'http','url':'http://localhost:8280'}").id(endpointId)
+        return new Endpoint.Builder().endpointConfig("[{'type':'http','url':'http://localhost:8280'}]").id(endpointId)
                 .maxTps(1000L).security("{\"enabled\":false}").name("Endpoint1")
                 .applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).type("http").build();
     }
 
     public static Endpoint.Builder createMockEndpointBuilder() {
-        return new Endpoint.Builder().endpointConfig("{'type':'http','url':'http://localhost:8280'}").id(endpointId)
+        return new Endpoint.Builder().endpointConfig("[{'type':'http','url':'http://localhost:8280'}]").id(endpointId)
                 .maxTps(1000L).security("{\"enabled\":false}").name("Endpoint1")
                 .applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).type("http");
     }

@@ -10,5 +10,13 @@
   "designa.a.new.rest.api": "Design a New REST API",
   "design.and.prototype.a.new.rest.api": "Design and prototype a new REST API",
   "design.new.websocket.api": "Design New Websocket API",
-  "design.and.prototype.a.new.websocket.api": "Design and prototype a new Websocket API"
+  "design.and.prototype.a.new.websocket.api": "Design and prototype a new Websocket API",
+  "endpoint": "Endpoint",
+  "production": "Production",
+  "sandbox": "Sandbox",
+  "type" : "Type",
+  "service.url": "Service URL",
+  "timeout": "Timeout",
+  "max.tps": "Max TPS",
+  "endpoint.type": "Endpoint Type"
 }

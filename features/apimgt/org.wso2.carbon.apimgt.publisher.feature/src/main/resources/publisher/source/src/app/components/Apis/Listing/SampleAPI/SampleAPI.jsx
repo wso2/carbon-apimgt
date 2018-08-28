@@ -92,18 +92,18 @@ class SampleAPI extends Component {
         };
         const serviceUrl = 'https://localhost:9443/publisher/public/app/petstore/pet/1.json';
         const production = {
-            type: 'production',
+            type: 'Production',
             inline: {
                 name: data.name.replace(/ /g, '_') + data.version.replace(/\./g, '_'),
                 // TODO: It's better to add this name property from the REST api itself,
                 // making sure no name conflicts with other inline endpoint definitions ~tmkb
-                endpointConfig: JSON.stringify({ serviceUrl }),
+                endpointConfig: [{ url: serviceUrl, timeout: '1000' }],
                 endpointSecurity: { enabled: false },
                 type: 'http',
             },
         };
         const sandbox = JSON.parse(JSON.stringify(production)); // deep coping the object
-        sandbox.type = 'sandbox';
+        sandbox.type = 'Sandbox';
         sandbox.inline.name += '_sandbox';
         data.endpoint = [production, sandbox];
         Alert.info('Creating sample Pet-Store API . . .');

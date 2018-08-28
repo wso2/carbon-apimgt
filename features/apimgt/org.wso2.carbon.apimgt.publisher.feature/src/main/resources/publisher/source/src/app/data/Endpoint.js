@@ -48,11 +48,7 @@ export default class Endpoint extends Resource {
         this.endpointConfig = {};
         for (const key in properties) {
             if (Object.prototype.hasOwnProperty.call(properties, key)) {
-                if (key === 'endpointConfig') {
-                    this[key] = JSON.parse(properties[key]);
-                } else {
-                    this[key] = properties[key];
-                }
+                this[key] = properties[key];
             }
         }
     }
@@ -94,11 +90,7 @@ export default class Endpoint extends Resource {
             const data = {};
             for (const property in this) {
                 if (property in properties) {
-                    if (property === 'endpointConfig') {
-                        data[property] = JSON.stringify(this[property]);
-                    } else {
-                        data[property] = this[property];
-                    }
+                    data[property] = this[property];
                 }
             }
             return data;

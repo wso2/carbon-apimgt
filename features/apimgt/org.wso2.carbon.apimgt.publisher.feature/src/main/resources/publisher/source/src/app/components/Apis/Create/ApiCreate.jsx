@@ -56,7 +56,7 @@ const ApiCreate = () => {
                                                                 swagger.definition.to.create.an.api'
                                                                 defaultMessage='Use an existing API
                                                                 endpoint or the API Swagger definition
-                                                            to create an API'
+                                                                                             to create an API'
                                                             />
                                                         </p>
                                                     </div>

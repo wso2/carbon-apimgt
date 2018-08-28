@@ -46,7 +46,7 @@ const EndpointsSelector = (props) => {
                 <MenuItem key='inline' value='inline'>
                     Inline
                 </MenuItem>
-                {getMenuItems(endpoints)}
+                {/* {getMenuItems(endpoints)} */}
             </Select>
         </FormControl>
     );
