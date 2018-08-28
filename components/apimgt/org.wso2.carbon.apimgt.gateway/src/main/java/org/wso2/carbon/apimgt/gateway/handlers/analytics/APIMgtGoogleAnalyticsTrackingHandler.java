@@ -194,7 +194,7 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
         TracingSpan responseLatencySpan = (TracingSpan) msgCtx.getProperty("ResponseLatency");
         TracingTracer tracer = (TracingTracer) msgCtx.getProperty("Tracer");
         TracingSpan googleAnalyticsSpan = OpenTracer.startSpan("GoogleAnalyticsLatency", responseLatencySpan, tracer);
-        OpenTracer.setTag(googleAnalyticsSpan,"RequestID", String.valueOf(msgCtx.getProperty(APIMgtGatewayConstants.REQUEST_ID)));
+        OpenTracer.setTag(googleAnalyticsSpan, "RequestID", String.valueOf(msgCtx.getProperty(APIMgtGatewayConstants.REQUEST_ID)));
         msgCtx.setProperty("GoogleAnalyticsSpan", googleAnalyticsSpan);
 
         GoogleAnalyticsDataPublisher.publishGET(payload, userAgent, false);

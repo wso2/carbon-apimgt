@@ -26,7 +26,6 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.tracing.TracingService;
 import org.wso2.carbon.apimgt.tracing.TracingServiceImpl;
 
-
 /**
  * @scr.component name="org.wso2.carbon.apimgt.tracing.internal.TracingServiceComponent" immediate="true"
  */
@@ -36,6 +35,7 @@ public class TracingServiceComponent {
     private static final Log log = LogFactory.getLog(TracingServiceComponent.class);
 
     protected void activate(ComponentContext componentContext) {
+
         try {
             log.info("*******Tracing Component activated**********");
             BundleContext bundleContext = componentContext.getBundleContext();
@@ -45,7 +45,9 @@ public class TracingServiceComponent {
             log.error("Error occured in tracing component activation", t);
         }
     }
+
     protected void deactivate(ComponentContext componentContext) {
+
         log.info("*******Tracing Component deactivated**********");
     }
 

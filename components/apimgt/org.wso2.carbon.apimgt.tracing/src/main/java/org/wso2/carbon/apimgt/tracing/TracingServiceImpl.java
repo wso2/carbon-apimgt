@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.tracing.jaeger.JaegerTracerImpl;
 import org.wso2.carbon.apimgt.tracing.zipkin.ZipkinTracerImpl;
 import org.wso2.carbon.utils.CarbonUtils;
+
 import java.io.File;
 
 public class TracingServiceImpl implements TracingService {
@@ -36,6 +37,7 @@ public class TracingServiceImpl implements TracingService {
 
     @Override
     public TracingTracer buildTracer(String serviceName) {
+
         try {
             String filePath = CarbonUtils.getCarbonConfigDirPath() + File.separator + "api-manager.xml";
             configuration.load(filePath);

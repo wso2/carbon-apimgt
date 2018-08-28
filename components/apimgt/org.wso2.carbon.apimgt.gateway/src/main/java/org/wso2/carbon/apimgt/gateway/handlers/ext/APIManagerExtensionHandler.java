@@ -78,7 +78,7 @@ public class APIManagerExtensionHandler extends AbstractHandler {
         TracingSpan responseLatencySpan = (TracingSpan) messageContext.getProperty("ResponseLatency");
         TracingTracer tracer = (TracingTracer) messageContext.getProperty("Tracer");
         TracingSpan requestMediationLatencySpan = OpenTracer.startSpan("Request_Mediation_Latency", responseLatencySpan, tracer);
-        OpenTracer.setTag(requestMediationLatencySpan,"RequestID", String.valueOf(messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID)));
+        OpenTracer.setTag(requestMediationLatencySpan, "RequestID", String.valueOf(messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID)));
         messageContext.setProperty("Request_Mediation_Latency", requestMediationLatencySpan);
 
         try {
@@ -99,7 +99,7 @@ public class APIManagerExtensionHandler extends AbstractHandler {
         TracingSpan responseLatencySpan = (TracingSpan) messageContext.getProperty("ResponseLatency");
         TracingTracer tracer = (TracingTracer) messageContext.getProperty("Tracer");
         TracingSpan responseMediationLatencySpan = OpenTracer.startSpan("Response_Mediation_Latency", responseLatencySpan, tracer);
-        OpenTracer.setTag(responseMediationLatencySpan,"RequestID", String.valueOf(messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID)));
+        OpenTracer.setTag(responseMediationLatencySpan, "RequestID", String.valueOf(messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID)));
         messageContext.setProperty("ResponseMediationLatencySpan", responseMediationLatencySpan);
 
         try {

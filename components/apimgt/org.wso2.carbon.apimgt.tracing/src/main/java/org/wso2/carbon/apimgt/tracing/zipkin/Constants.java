@@ -18,12 +18,14 @@
 
 package org.wso2.carbon.apimgt.tracing.zipkin;
 
+/**
+ * ZIPKIN dependent constants
+ */
+
 public class Constants {
 
-    static final String CONFIG_NAME = "OpenTracer.Name";
     static final String CONFIG_PORT = "OpenTracer.Port";
     static final String CONFIG_HOST = "OpenTracer.Hostname";
-    static final String CONFIG_ENABLED = "OpenTracer.Enabled";
     static final String CONFIG_API_CONTEXT = "OpenTracer.APIContext";
 
     static final int DEFAULT_PORT = 9411;

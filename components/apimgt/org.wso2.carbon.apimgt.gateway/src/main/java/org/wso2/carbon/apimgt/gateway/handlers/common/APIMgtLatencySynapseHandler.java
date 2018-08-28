@@ -30,6 +30,10 @@ import org.wso2.carbon.apimgt.tracing.TracingTracer;
 
 import java.util.UUID;
 
+/**
+ * Class which used to trace Overall latency and backend latency
+ */
+
 public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 
     private static final Log log = LogFactory.getLog(APIMgtLatencySynapseHandler.class);
@@ -41,6 +45,7 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
     private TracingTracer tracer;
 
     public APIMgtLatencySynapseHandler() {
+
         tracer = ServiceReferenceHolder.getInstance().getTracingService().buildTracer("Latency");
     }
 
@@ -50,13 +55,11 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
         String requestId = UUID.randomUUID().toString();
         messageContext.setProperty(APIMgtGatewayConstants.REQUEST_ID, requestId);
 
-        TracingSpan responseLatencySpan = OpenTracer.startSpan("ResponseLatency", null, tracer);
-        OpenTracer.setTag(responseLatencySpan,"RequestID", requestId);
-        messageContext.setProperty("ResponseLatency", responseLatencySpan);
-        messageContext.setProperty("Tracer",tracer);
-
         handleRequestInFlowTime = System.currentTimeMillis();
-//        messageContext.setProperty(APIMgtGatewayConstants.HANDLE_REQUEST_INFLOW_TIME, Long.toString(handleRequestInFlowTime));
+        TracingSpan responseLatencySpan = OpenTracer.startSpan("ResponseLatency", null, tracer);
+        OpenTracer.setTag(responseLatencySpan, "RequestID", requestId);
+        messageContext.setProperty("ResponseLatency", responseLatencySpan);
+        messageContext.setProperty("Tracer", tracer);
 
         return true;
     }
@@ -64,13 +67,11 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
     @Override
     public boolean handleRequestOutFlow(MessageContext messageContext) {
 
+        handleRequestOutFlowTime = System.currentTimeMillis();
         TracingSpan parentSpan = (TracingSpan) messageContext.getProperty("ResponseLatency");
         TracingSpan backendLatencySpan = OpenTracer.startSpan("BackendLatency", parentSpan, tracer);
-        OpenTracer.setTag(backendLatencySpan,"RequestID", String.valueOf(messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID)));
+        OpenTracer.setTag(backendLatencySpan, "RequestID", String.valueOf(messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID)));
         messageContext.setProperty("BackendLatency", backendLatencySpan);
-
-        handleRequestOutFlowTime = System.currentTimeMillis();
-//        messageContext.setProperty(APIMgtGatewayConstants.HANDLE_REQUEST_OUTFLOW_TIME, Long.toString(handleRequestOutFlowTime));
 
         return true;
     }
@@ -79,8 +80,6 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
     public boolean handleResponseInFlow(MessageContext messageContext) {
 
         handleResponseInFlowTime = System.currentTimeMillis();
-//        messageContext.setProperty(APIMgtGatewayConstants.HANDLE_RESPONSE_INFLOW_TIME, Long.toString(handleResponseInFlowTime));
-
         TracingSpan backendLatencySpan = (TracingSpan) messageContext.getProperty("BackendLatency");
         OpenTracer.finishSpan(backendLatencySpan);
 
@@ -91,18 +90,14 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
     public boolean handleResponseOutFlow(MessageContext messageContext) {
 
         handleResponseOutFlowTime = System.currentTimeMillis();
-//        messageContext.setProperty(APIMgtGatewayConstants.HANDLE_RESPONSE_OUTFLOW_TIME, Long.toString(handleResponseOutFlowTime));
+        TracingSpan responseLatencySpan = (TracingSpan) messageContext.getProperty("ResponseLatency");
+        OpenTracer.finishSpan(responseLatencySpan);
 
         long backendLatency = handleResponseInFlowTime - handleRequestOutFlowTime;
         long responseLatency = handleResponseOutFlowTime - handleRequestInFlowTime;
-
         messageContext.setProperty(APIMgtGatewayConstants.SYNAPSE_BACKEND_LATENCY, Long.toString(backendLatency));
         messageContext.setProperty(APIMgtGatewayConstants.SYNAPSE_RESPONSE_LATENCY, Long.toString(responseLatency));
-
         log.info(messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID) + " Backend Latency : " + backendLatency + " - Response Latency : " + responseLatency);
-
-        TracingSpan responseLatencySpan = (TracingSpan) messageContext.getProperty("ResponseLatency");
-        OpenTracer.finishSpan(responseLatencySpan);
 
         return true;
     }

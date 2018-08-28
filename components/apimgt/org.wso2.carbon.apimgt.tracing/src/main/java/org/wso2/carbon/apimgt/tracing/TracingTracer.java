@@ -24,11 +24,13 @@ public class TracingTracer {
 
     private Tracer tracer;
 
-    public TracingTracer( Tracer tracer ) {
+    public TracingTracer(Tracer tracer) {
+
         this.tracer = tracer;
     }
 
-    public Tracer getTracingTracer(){
+    public Tracer getTracingTracer() {
+
         return this.tracer;
     }
 }
