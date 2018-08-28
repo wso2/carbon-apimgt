@@ -45,7 +45,8 @@ var getDataFromTable = function (tableName, tenantDomain, startIndex,count, sort
                         "SELECT * " +  // use the commented select query below once https://github.com/wso2/product-sp/issues/753 fixed
                         //"SELECT type, tenantDomain, message, severity, alertTimestamp " +
                         "having tenantDomain=='" + tenantDomain + "' " + 
-                        "order by " + sortableColumn + " " + isAscending + ";";
+                        "order by " + sortableColumn + " " + isAscending + " " + 
+                        "limit " + count + " offset " + startIndex + " ;";
 
         var result = APIUtil.executeQueryOnStreamProcessor(appName, query);
         var objArr = [];
@@ -78,7 +79,8 @@ var getDataFromTable = function (tableName, tenantDomain, startIndex,count, sort
                         "SELECT * " +  // use the commented select query below once https://github.com/wso2/product-sp/issues/753 fixed
                         //"SELECT username, applicationName, applicationOwner, tenantDomain, message, severity, alertTimestamp " +
                         "having tenantDomain=='" + tenantDomain + "' " + 
-                        "order by " + sortableColumn + " " + isAscending + ";";
+                        "order by " + sortableColumn + " " + isAscending + " " + 
+                        "limit " + count + " offset " + startIndex + " ;";
 
         var result = APIUtil.executeQueryOnStreamProcessor(appName, query);
         var objArr = [];
@@ -113,7 +115,8 @@ var getDataFromTable = function (tableName, tenantDomain, startIndex,count, sort
                         "SELECT * " +  // use the commented select query below once https://github.com/wso2/product-sp/issues/753 fixed
                         //"SELECT subscriber, apiCreator, apiName, applicationId, applicationName, apiCreatorTenantDomain, userTenantDomain, message, severity, alertTimestamp " +
                         "having apiCreatorTenantDomain=='" + tenantDomain + "' " + 
-                        "order by " + sortableColumn + " " + isAscending + ";";
+                        "order by " + sortableColumn + " " + isAscending + " " + 
+                        "limit " + count + " offset " + startIndex + " ;";
 
         var result = APIUtil.executeQueryOnStreamProcessor(appName, query);
         var objArr = [];
@@ -151,7 +154,8 @@ var getDataFromTable = function (tableName, tenantDomain, startIndex,count, sort
                         "SELECT * " +  // use the commented select query below once https://github.com/wso2/product-sp/issues/753 fixed
                         //"SELECT type, message, severity, ip, applicationName, applicationOwner, username, tenantDomain, requestTimestamp, alertTimestamp " +
                         "having tenantDomain=='" + tenantDomain + "' " + 
-                        "order by " + sortableColumn + " " + isAscending + ";";
+                        "order by " + sortableColumn + " " + isAscending + " " + 
+                        "limit " + count + " offset " + startIndex + " ;";
 
         var result = APIUtil.executeQueryOnStreamProcessor(appName, query);
         var objArr = [];
@@ -187,7 +191,8 @@ var getDataFromTable = function (tableName, tenantDomain, startIndex,count, sort
                         "SELECT * " +  // use the commented select query below once https://github.com/wso2/product-sp/issues/753 fixed
                         //"SELECT applicationName, applicationOwner, tenantDomain, apiName, apiVersion, requestCountPerMin, thresholdRequestCountPerMin, message, severity, alertTimestamp " +
                         "having tenantDomain=='" + tenantDomain + "' " + 
-                        "order by " + sortableColumn + " " + isAscending + ";";
+                        "order by " + sortableColumn + " " + isAscending + " " + 
+                        "limit " + count + " offset " + startIndex + " ;";
 
         var result = APIUtil.executeQueryOnStreamProcessor(appName, query);
         var objArr = [];
@@ -222,7 +227,8 @@ var getDataFromTable = function (tableName, tenantDomain, startIndex,count, sort
                         "SELECT * " +  // use the commented select query below once https://github.com/wso2/product-sp/issues/753 fixed
                         //"SELECT apiName, apiVersion, apiCreator, apiCreatorTenantDomain, apiResourceTemplate, apiMethod, responseTime, thresholdResponseTime, message, severity, alertTimestamp " +
                         "having apiCreatorTenantDomain=='" + tenantDomain + "' " + 
-                        "order by " + sortableColumn + " " + isAscending + ";";
+                        "order by " + sortableColumn + " " + isAscending + " " + 
+                        "limit " + count + " offset " + startIndex + " ;";
                         
         var result = APIUtil.executeQueryOnStreamProcessor(appName, query);
         var objArr = [];
@@ -258,7 +264,8 @@ var getDataFromTable = function (tableName, tenantDomain, startIndex,count, sort
                         "SELECT * " +  // use the commented select query below once https://github.com/wso2/product-sp/issues/753 fixed
                         //"SELECT apiName, apiVersion, apiCreator, apiCreatorTenantDomain, message, severity, alertTimestamp " +
                         "having apiCreatorTenantDomain=='" + tenantDomain + "' " + 
-                        "order by " + sortableColumn + " " + isAscending + ";";
+                        "order by " + sortableColumn + " " + isAscending + " " + 
+                        "limit " + count + " offset " + startIndex + " ;";
                         
         var result = APIUtil.executeQueryOnStreamProcessor(appName, query);
         var objArr = [];
@@ -292,7 +299,8 @@ var getDataFromTable = function (tableName, tenantDomain, startIndex,count, sort
                         "SELECT * " +  // use the commented select query below once https://github.com/wso2/product-sp/issues/753 fixed
                         //"SELECT apiName, apiVersion, apiCreator, apiCreatorTenantDomain, apiResourceTemplate, apiMethod, backendTime, thresholdBackendTime, message, severity, alertTimestamp " +
                         "having apiCreatorTenantDomain=='" + tenantDomain + "' " + 
-                        "order by " + sortableColumn + " " + isAscending + ";";
+                        "order by " + sortableColumn + " " + isAscending + " " + 
+                        "limit " + count + " offset " + startIndex + " ;";
                         
         var result = APIUtil.executeQueryOnStreamProcessor(appName, query);
         var objArr = [];
@@ -328,7 +336,8 @@ var getDataFromTable = function (tableName, tenantDomain, startIndex,count, sort
                         "SELECT * " +  // use the commented select query below once https://github.com/wso2/product-sp/issues/753 fixed
                         //"SELECT apiName, apiVersion, apiCreator, tenantDomain, status " +
                         "having tenantDomain=='" + tenantDomain + "' " + 
-                        "order by " + sortableColumn + " " + isAscending + ";";
+                        "order by " + sortableColumn + " " + isAscending + " " + 
+                        "limit " + count + " offset " + startIndex + " ;";
                         
         var result = APIUtil.executeQueryOnStreamProcessor(appName, query);
         var objArr = [];
