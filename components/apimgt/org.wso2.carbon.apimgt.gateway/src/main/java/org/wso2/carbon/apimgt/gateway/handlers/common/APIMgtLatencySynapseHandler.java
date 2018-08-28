@@ -40,7 +40,6 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
     private long handleResponseOutFlowTime;
     private TracingTracer tracer;
 
-
     public APIMgtLatencySynapseHandler() {
         tracer = ServiceReferenceHolder.getInstance().getTracingService().buildTracer("Latency");
     }
@@ -57,9 +56,8 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
         messageContext.setProperty("Tracer",tracer);
 
         handleRequestInFlowTime = System.currentTimeMillis();
-        if (messageContext.getProperty(APIMgtGatewayConstants.HANDLE_REQUEST_INFLOW_TIME) == null) {
-            messageContext.setProperty(APIMgtGatewayConstants.HANDLE_REQUEST_INFLOW_TIME, Long.toString(handleRequestInFlowTime));
-        }
+//        messageContext.setProperty(APIMgtGatewayConstants.HANDLE_REQUEST_INFLOW_TIME, Long.toString(handleRequestInFlowTime));
+
         return true;
     }
 
@@ -72,9 +70,8 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
         messageContext.setProperty("BackendLatency", backendLatencySpan);
 
         handleRequestOutFlowTime = System.currentTimeMillis();
-        if (messageContext.getProperty(APIMgtGatewayConstants.HANDLE_REQUEST_OUTFLOW_TIME) == null) {
-            messageContext.setProperty(APIMgtGatewayConstants.HANDLE_REQUEST_OUTFLOW_TIME, Long.toString(handleRequestOutFlowTime));
-        }
+//        messageContext.setProperty(APIMgtGatewayConstants.HANDLE_REQUEST_OUTFLOW_TIME, Long.toString(handleRequestOutFlowTime));
+
         return true;
     }
 
@@ -82,12 +79,11 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
     public boolean handleResponseInFlow(MessageContext messageContext) {
 
         handleResponseInFlowTime = System.currentTimeMillis();
-        if (messageContext.getProperty(APIMgtGatewayConstants.HANDLE_RESPONSE_INFLOW_TIME) == null) {
-            messageContext.setProperty(APIMgtGatewayConstants.HANDLE_RESPONSE_INFLOW_TIME, Long.toString(handleResponseInFlowTime));
-        }
+//        messageContext.setProperty(APIMgtGatewayConstants.HANDLE_RESPONSE_INFLOW_TIME, Long.toString(handleResponseInFlowTime));
 
         TracingSpan backendLatencySpan = (TracingSpan) messageContext.getProperty("BackendLatency");
         OpenTracer.finishSpan(backendLatencySpan);
+
         return true;
     }
 
@@ -95,9 +91,8 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
     public boolean handleResponseOutFlow(MessageContext messageContext) {
 
         handleResponseOutFlowTime = System.currentTimeMillis();
-        if (messageContext.getProperty(APIMgtGatewayConstants.HANDLE_RESPONSE_OUTFLOW_TIME) == null) {
-            messageContext.setProperty(APIMgtGatewayConstants.HANDLE_RESPONSE_OUTFLOW_TIME, Long.toString(handleResponseOutFlowTime));
-        }
+//        messageContext.setProperty(APIMgtGatewayConstants.HANDLE_RESPONSE_OUTFLOW_TIME, Long.toString(handleResponseOutFlowTime));
+
         long backendLatency = handleResponseInFlowTime - handleRequestOutFlowTime;
         long responseLatency = handleResponseOutFlowTime - handleRequestInFlowTime;
 

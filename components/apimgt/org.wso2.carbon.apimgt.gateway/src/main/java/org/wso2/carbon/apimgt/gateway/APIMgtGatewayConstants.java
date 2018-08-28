@@ -90,11 +90,6 @@ public class APIMgtGatewayConstants {
     public static final String XSD_URL = "xsdURL";
     public static final String UTF8 = "UTF-8";
 
-    public static final String HANDLE_REQUEST_INFLOW_TIME ="handle.request.inflow.time";
-    public static final String HANDLE_REQUEST_OUTFLOW_TIME ="handle.request.outflow.time";
-    public static final String HANDLE_RESPONSE_INFLOW_TIME ="handle.response.inflow.time";
-    public static final String HANDLE_RESPONSE_OUTFLOW_TIME ="handle.response.outflow.time";
-
     public static final String SYNAPSE_BACKEND_LATENCY = "synapse.backend.latency";
     public static final String SYNAPSE_RESPONSE_LATENCY = "synapse.response.latency";
     public static final String REQUEST_ID = "request.id";
