@@ -61,6 +61,9 @@ import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIDescriptionGenUtil;
+import org.wso2.carbon.apimgt.tracing.OpenTracer;
+import org.wso2.carbon.apimgt.tracing.TracingSpan;
+import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
@@ -160,12 +163,22 @@ public class APIThrottleHandler extends AbstractHandler {
         Timer timer = getTimer();
         Timer.Context context = timer.start();
         long executionStartTime = System.nanoTime();
+
+        TracingSpan responseLatencySpan = (TracingSpan) messageContext.getProperty("ResponseLatency");
+        TracingTracer tracer = (TracingTracer) messageContext.getProperty("Tracer");
+        TracingSpan throttlingLatencySpan = OpenTracer.startSpan("Throttling_Latency-APIThrottleHandler", responseLatencySpan, tracer);
+        OpenTracer.setTag(throttlingLatencySpan,"RequestID", String.valueOf(messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID)));
+        messageContext.setProperty("ThrottlingLatencySpan-APIThrottleHandler", throttlingLatencySpan);
+
         try {
             return doThrottle(messageContext);
         } finally {
             messageContext.setProperty(APIMgtGatewayConstants.THROTTLING_LATENCY,
                     TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - executionStartTime));
             context.stop();
+
+            TracingSpan span = (TracingSpan) messageContext.getProperty("ThrottlingLatencySpan-APIThrottleHandler");
+            OpenTracer.finishSpan(span);
         }
     }
 
