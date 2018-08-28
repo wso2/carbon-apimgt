@@ -73,8 +73,7 @@ public class APIMgtFaultHandler extends APIMgtCommonExecutionPublisher {
             faultPublisherDTO.setUsername((String) messageContext.getProperty(
                     APIMgtGatewayConstants.USER_ID));
             faultPublisherDTO.setUserTenantDomain(MultitenantUtils.getTenantDomain(faultPublisherDTO.getUsername()));
-            faultPublisherDTO.setHostname((String) messageContext.getProperty(
-                    APIMgtGatewayConstants.HOST_NAME));
+            faultPublisherDTO.setHostname(GatewayUtils.getHostName(messageContext));
             String apiPublisher = (String) messageContext.getProperty(
                     APIMgtGatewayConstants.API_PUBLISHER);
             if (apiPublisher == null) {
