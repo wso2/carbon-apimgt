@@ -2809,6 +2809,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String environments = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             String type = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
             String context_val = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
+            String implementation = apiArtifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION);
             //Delete the dependencies associated  with the api artifact
             GovernanceArtifact[] dependenciesArray = apiArtifact.getDependencies();
 
@@ -2843,6 +2844,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             api.setAsPublishedDefaultVersion(api.getId().getVersion().equals(apiMgtDAO.getPublishedDefaultVersion(api.getId())));
             api.setType(type);
             api.setContext(context_val);
+            api.setImplementation(implementation);
             // gatewayType check is required when API Management is deployed on
             // other servers to avoid synapse
             if (gatewayExists && "Synapse".equals(gatewayType)) {
