@@ -20,9 +20,9 @@ package org.wso2.carbon.apimgt.rest.api.authenticator;
 
 import com.google.gson.JsonObject;
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.junit.Assert;
-import org.junit.Test;
 import org.mockito.Mockito;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
 import org.wso2.carbon.apimgt.core.configuration.APIMConfigurationService;
@@ -44,7 +44,6 @@ import org.wso2.carbon.apimgt.rest.api.authenticator.utils.bean.AuthResponseBean
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -364,7 +363,8 @@ public class AuthenticatorServiceTestCase {
         expectedAuthResponseBean.setPartialToken("xxx-access_token_part_1-xxx-");
 
         authenticatorService.setupAccessTokenParts(cookies, authResponseBean, accessToken, contextPaths, false);
-        Assert.assertEquals(expectedCookies, cookies);
+        Assert.assertEquals(expectedCookies.get("REST_API_CONTEXT").getValue(), cookies.get("REST_API_CONTEXT").getValue());
+        Assert.assertEquals(expectedCookies.get("LOGOUT_CONTEXT").getValue(), cookies.get("LOGOUT_CONTEXT").getValue());
         Assert.assertEquals(expectedAuthResponseBean.getPartialToken(), authResponseBean.getPartialToken());
 
         //// sso enabled
@@ -374,7 +374,7 @@ public class AuthenticatorServiceTestCase {
         expectedCookies.put("LOGGED_IN_USER", new NewCookie("LOGGED_IN_USER_Production",
                 "John; path=/publisher; Secure; "));
         authenticatorService.setupAccessTokenParts(cookies, authResponseBean, accessToken, contextPaths, true);
-        Assert.assertEquals(expectedCookies, cookies);
+        Assert.assertEquals(expectedCookies.get("LOGGED_IN_USER").getValue(), cookies.get("LOGGED_IN_USER").getValue());
         Assert.assertEquals(expectedAuthResponseBean.getPartialToken(), authResponseBean.getPartialToken());
     }
 
@@ -407,7 +407,8 @@ public class AuthenticatorServiceTestCase {
                 "xxx-refresh_token_part_2-xxx-; path=/login/token/store; HttpOnly; Secure; "));
 
         authenticatorService.setupRefreshTokenParts(cookies, refreshToken, contextPaths);
-        Assert.assertEquals(expectedCookies, cookies);
+        Assert.assertEquals(expectedCookies.get("APP_CONTEXT").getValue(), cookies.get("APP_CONTEXT").getValue());
+        Assert.assertEquals(expectedCookies.get("LOGIN_CONTEXT").getValue(), cookies.get("LOGIN_CONTEXT").getValue());
     }
 
     @Test

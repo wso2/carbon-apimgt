@@ -18,9 +18,9 @@
 
 package org.wso2.carbon.apimgt.rest.api.authenticator.utils;
 
-import org.junit.Assert;
-import org.junit.Test;
 import org.mockito.Mockito;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.rest.api.authenticator.constants.AuthenticatorConstants;
 import org.wso2.carbon.apimgt.rest.api.authenticator.dto.ErrorDTO;
