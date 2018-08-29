@@ -48,6 +48,7 @@ public class APIManagerAnalyticsConfiguration {
     private String alertTypeStreamName;
     private String alertTypeStreamVersion;
     private boolean skipWorkFlowEventReceiverConnection;
+    private String datacenterId;
     
     private APIManagerAnalyticsConfiguration() {
     }
@@ -114,6 +115,7 @@ public class APIManagerAnalyticsConfiguration {
             dasServerPassword = config.getFirstProperty(APIConstants.API_USAGE_DAS_REST_API_PASSWORD);
             String build = config.getFirstProperty(APIConstants.API_USAGE_BUILD_MSG);
             buildMsg = build != null && JavaUtils.isTrueExplicitly(build);
+            datacenterId = System.getProperty("datacenterId");
         }
     }
 
@@ -244,4 +246,13 @@ public class APIManagerAnalyticsConfiguration {
     public boolean isSkipWorkFlowEventReceiverConnection() {
         return skipWorkFlowEventReceiverConnection;
     }
+
+    public String getDatacenterId() {
+        return datacenterId;
+    }
+
+    public void setDatacenterId(String datacenterId) {
+        this.datacenterId = datacenterId;
+    }
+    
 }

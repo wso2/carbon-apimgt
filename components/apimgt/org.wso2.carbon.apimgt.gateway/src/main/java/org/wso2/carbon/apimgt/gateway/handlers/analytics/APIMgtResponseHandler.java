@@ -173,7 +173,7 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
 
             RequestResponseStreamDTO stream = new RequestResponseStreamDTO();
             stream.setApiContext((String) mc.getProperty(APIMgtGatewayConstants.CONTEXT));
-            stream.setApiHostname((String) mc.getProperty(APIMgtGatewayConstants.HOST_NAME));
+            stream.setApiHostname(GatewayUtils.getHostName(mc));
             stream.setApiMethod((String) mc.getProperty(APIMgtGatewayConstants.HTTP_METHOD));
             stream.setApiName((String) mc.getProperty(APIMgtGatewayConstants.API));
             stream.setApiCreatorTenantDomain(MultitenantUtils.getTenantDomain(creator));
