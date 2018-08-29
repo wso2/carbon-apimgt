@@ -11,11 +11,6 @@
     padding-top: 100px;
     padding-bottom: 100px;
 }
-
-.hr-divider {
-    margin: 2em 0em;
-}
-
 .might-overflow {
     width:500px;
     text-overflow: ellipsis;
@@ -306,6 +301,7 @@ table.table-bordered th:last-child, table.table-bordered td:last-child {
     white-space: pre-wrap;
 }
 
-#year-selector {
-    width: 5em;
+.table-condensed thead tr:nth-child(2),
+.table-condensed tbody {
+  display: none
 }
