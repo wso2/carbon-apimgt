@@ -20,6 +20,10 @@ package org.wso2.carbon.apimgt.tracing;
 
 import io.opentracing.Span;
 
+/**
+ * A Wrapper class for io.opentracing Span
+ */
+
 public class TracingSpan {
 
     private Span span;

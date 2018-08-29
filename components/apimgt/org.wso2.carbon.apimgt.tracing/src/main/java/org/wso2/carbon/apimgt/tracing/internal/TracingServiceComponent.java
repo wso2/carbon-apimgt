@@ -37,7 +37,7 @@ public class TracingServiceComponent {
     protected void activate(ComponentContext componentContext) {
 
         try {
-            log.info("*******Tracing Component activated**********");
+            log.info(" Tracing Component activated ");
             BundleContext bundleContext = componentContext.getBundleContext();
             bundleContext.registerService(TracingService.class, new TracingServiceImpl(), null);
 
@@ -48,7 +48,7 @@ public class TracingServiceComponent {
 
     protected void deactivate(ComponentContext componentContext) {
 
-        log.info("*******Tracing Component deactivated**********");
+        log.info(" Tracing Component deactivated ");
     }
 
 }

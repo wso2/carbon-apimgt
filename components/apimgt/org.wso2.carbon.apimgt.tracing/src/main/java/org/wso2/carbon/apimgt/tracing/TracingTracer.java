@@ -20,6 +20,10 @@ package org.wso2.carbon.apimgt.tracing;
 
 import io.opentracing.Tracer;
 
+/**
+ * A Wrapper class for io.opentracing Tracer
+ */
+
 public class TracingTracer {
 
     private Tracer tracer;
