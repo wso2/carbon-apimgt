@@ -17,61 +17,64 @@
  */
 
 import React from 'react'
-import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
 
 import SwaggerUI from "swagger-ui";
 import StandalonePreset from 'swagger-ui/dist/swagger-ui-standalone-preset';
-import Utils from "../../../../data/Utils";
 import Api from '../../../../data/api'
 import AuthManager from '../../../../data/AuthManager'
 import 'swagger-ui/dist/swagger-ui.css';
 
-import Input, {InputLabel} from '@material-ui/core/Input';
-import {MenuItem} from '@material-ui/core/Menu';
 import Select from '@material-ui/core/Select';
 import Progress from '../../../Shared/Progress';
 import TextField from '@material-ui/core/TextField';
-import CommonColors from '@material-ui/core/colors/common';
 import { withStyles } from '@material-ui/core/styles';
+import Application from '../../../../data/Application'
 
 const styles = theme => ({
+    authHeader: {
+        marginLeft: '105px',
+        color: '#555555',
+        backgroundColor: '#eeeeee',
+        border: '1px solid #ccc'
+    },
     inputText: {
-        marginLeft: '145px',
+        marginLeft: '40px',
         minWidth: '400px'
     },
-    appSelect: {
-        marginLeft: '300px',
+    gatewaySelect: {
+        marginLeft: '173px',
         minWidth: '400px'
     },
-    disabled: {
-        color: CommonColors.black
-    },
-    keySelect: {
-        marginLeft: '275px',
-        minWidth: '360px',
+    credentialSelect: {
+        marginLeft: '150px',
+        minWidth: '400px',
         marginRight: '10px'
     },
     grid: {
-        spacing: 2,
-        justifyContent: 'center',
+        spacing: 20,
         marginTop: '30px',
-        marginBottom: '30px'
+        marginBottom: '30px',
+        paddingLeft: '90px'
     }
-
 });
 
 class ApiConsole extends React.Component {
     constructor(props){
         super(props);
         this.state = {
-            subscribedApplications: null,
-            applicationId: '',
+            apiGateways: null,
+            apiGateway: '',
+            credentialTypes: [],
+            credentialType: '',
+            accessToken: '',
+            setSwagger: null
         };
         this.api_uuid = this.props.match.params.api_uuid;
     }
+
     componentDidMount() {
         const api = new Api();
         const disableAuthorizeAndInfoPlugin = function() {
@@ -82,37 +85,22 @@ class ApiConsole extends React.Component {
             }
           };
         };
-        let promised_swagger = api.getSwaggerByAPIId(this.api_uuid);
-        let promised_applications = api.getAllApplications();
-        let promised_subscriptions = api.getSubscriptions(this.api_uuid, null);
 
-        Promise.all([promised_swagger, promised_applications, promised_subscriptions]).then(responses => {
+        let credentialTypes = [];
+        let apiGateways = [];
+        credentialTypes.push('OAuth2');
+        apiGateways.push('Default');
+
+        this.setState({apiGateways: apiGateways, apiGateway: apiGateways[0], credentialTypes: credentialTypes,
+         credentialType: credentialTypes[0]});
+
+        let promised_swagger = api.getSwaggerByAPIId(this.api_uuid);
+
+        Promise.all([promised_swagger]).then(responses => {
 
           let swagger = responses[0];
-          let applications = responses[1].obj.list;
-          let subscriptions = responses[2].obj.list;
           let url = swagger.url;
-
-          let subscribedApplications = [];
-          //get the application IDs of existing subscriptions
-          subscriptions.map(element => subscribedApplications.push({applicationId: element.applicationId}));
-
-          //Get application names of the subscribed applications
-          for (let i = 0; i < applications.length; i++) {
-              let applicationId = applications[i].applicationId;
-              let applicationName = applications[i].name;
-
-              for ( var j =0; j < subscribedApplications.length; j++ ) {
-                  if(subscribedApplications[j].applicationId === applicationId) {
-                    subscribedApplications[j].name = applicationName;
-                  }
-              }
-          }
-
-          if (subscribedApplications && subscribedApplications.length > 0) {
-            this.setState({applicationId: subscribedApplications[0].applicationId});
-          }
-          this.setState({subscribedApplications: subscribedApplications});
+          this.setState({setSwagger: true});
 
           const swaggerUI = SwaggerUI({
               dom_id: "#ui",
@@ -153,51 +141,59 @@ class ApiConsole extends React.Component {
 
     render() {
 
-        const { classes, endpoint } = this.props;
+        const { classes } = this.props;
         let { handleInputs } = this.props;
-        const isReadOnly = !handleInputs; // Showing the endpoint details
-        handleInputs = handleInputs || null;
-        if (this.state.subscribedApplications == null) {
+
+        if (this.state.setSwagger == null) {
               return <Progress />;
         }
 
         return (
             <React.Fragment>
                 <Grid container className={classes.grid}>
-                    <Grid item md={6}>
+                    <Grid item md={12}>
                         <div>
                             <Typography variant='subheading'>
-                               Try
+                               API Gateway
                                <Select
-                                   value={this.state.applicationId}
-                                   onChange={this.handleChange('applicationId')}
-                                   className={classes.appSelect}
+                                   value={this.state.apiGateway}
+                                   onChange={this.handleChange('apiGateway')}
+                                   className={classes.gatewaySelect}
                                >
-                                   {this.state.subscribedApplications.map((app) => <option value={app.applicationId} key={app.applicationId}>
-                                       {app.name}
+                                   {this.state.apiGateways.map((apiGateway) => <option value={apiGateway} key={apiGateway}>
+                                       {apiGateway}
                                    </option>)}
                                </Select>
                             </Typography>
                         </div>
                         <div>
                             <Typography variant='subheading' gutterleft>
-                                Using
-                                Key
+                                API Credentials
+                                <Select
+                                   value={this.state.credentialType}
+                                   onChange={this.handleChange('credentialType')}
+                                   className={classes.credentialSelect}
+                                >
+                                   {this.state.credentialTypes.map((type) => <option value={type} key={type}>
+                                       {type}
+                                   </option>)}
+                               </Select>
                             </Typography>
                         </div>
                         <div>
                             <Typography variant='subheading' gutterleft>
                                 Set Request Header
-                                <TextField
-                                    className={classes.inputText}
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                    name='maxTps'
-                                    defaultValue=''
-                                    onChange={handleInputs}
-                                    InputProps={{ classes: { disabled: classes.disabled } }}
-                                />
+                                  <span className={classes.authHeader} >Authorization : Bearer</span>
+                                    <TextField
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        className={classes.inputText}
+                                        label="Access Token"
+                                        name='accessToken'
+                                        defaultValue=''
+                                        onChange={this.handleChange('accessToken')}
+                                    />
                             </Typography>
                         </div>
                     </Grid>
@@ -215,7 +211,6 @@ ApiConsole.defaultProps = {
 
 ApiConsole.propTypes = {
     handleInputs: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]),
-	optionalArray: PropTypes.array,
 	classes: PropTypes.object.isRequired
 }
 
