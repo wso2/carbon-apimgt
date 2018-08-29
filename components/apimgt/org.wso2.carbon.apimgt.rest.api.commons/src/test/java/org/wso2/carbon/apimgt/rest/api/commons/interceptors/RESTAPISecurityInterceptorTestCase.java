@@ -19,13 +19,11 @@
 package org.wso2.carbon.apimgt.rest.api.commons.interceptors;
 
 
-import org.junit.Test;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
 import org.testng.Assert;
+import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.common.exception.APIMgtSecurityException;
 import org.wso2.carbon.apimgt.rest.api.common.interceptors.RESTAPISecurityInterceptor;
 import org.wso2.msf4j.Request;
 import org.wso2.msf4j.Response;
@@ -39,12 +37,6 @@ public class RESTAPISecurityInterceptorTestCase {
 
         HTTPCarbonMessage carbonMessage = Mockito.mock(HTTPCarbonMessage.class);
         Request requestObj = Mockito.mock(Request.class);
-
-        try {
-            PowerMockito.whenNew(Request.class).withArguments(carbonMessage).thenReturn(requestObj);
-        } catch (Exception e) {
-            throw new APIMgtSecurityException("Error while mocking Request Object ", e);
-        }
 
         Response responseObj = Mockito.mock(Response.class);
         Mockito.when(requestObj.getHeader(RestApiConstants.AUTHORIZATION_HTTP_HEADER)).
@@ -63,15 +55,7 @@ public class RESTAPISecurityInterceptorTestCase {
 
     @Test
     public void testGetTiersByLevelSuccess() throws APIManagementException {
-
-        HTTPCarbonMessage carbonMessage = Mockito.mock(HTTPCarbonMessage.class);
         Request requestObj = Mockito.mock(Request.class);
-
-        try {
-            PowerMockito.whenNew(Request.class).withArguments(carbonMessage).thenReturn(requestObj);
-        } catch (Exception e) {
-            throw new APIMgtSecurityException("Error while mocking Request Object ", e);
-        }
 
         Response responseObj = Mockito.mock(Response.class);
         Mockito.when(requestObj.getHeader("REQUEST_URL")).
