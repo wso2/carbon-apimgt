@@ -5,37 +5,19 @@
       <h2><%=i18n.localize("Microgateway request summary report")%></h2>
   </div>
 </div>
-<form method="POST" id="downloadPDFForm" class="form-horizontal">
-    <div class="row">
-        <div class="col-xs-8 col-sm-8 col-lg-6">
-            <h4><%=i18n.localize("Select a Month to Generate the Report")%></h4>
-        </div>
-        <div class="col-xs-6 col-sm-2 col-lg-2">
-            <select class="-menu form-control" role="menu" id="month-selector">
-                <option value="01">Jan</option>
-                <option value="02">Feb</option>
-                <option value="03">Mar</option>
-                <option value="04">Apr</option>
-                <option value="05">May</option>
-                <option value="06">Jun</option>
-                <option value="07">Jul</option>
-                <option value="08">Aug</option>
-                <option value="09">Sep</option>
-                <option value="10">Oct</option>
-                <option value="11">Nov</option>
-                <option value="12">Dec</option>
-            </select>
-        </div>
-        <div class="col-xs-6 col-sm-2 col-lg-2">
-            <input type="number" id="year-selector" min="2017" class="form-control" step="1" />
-        </div>
-    </div>
-    <div class="hr-divider"></div>
-    <div class="row">
-        <div class="col-xs-12 col-sm-12 col-lg-12">
-            <button type="submit" class="btn btn-primary"><%=i18n.localize("Generate")%></button>
-        </div>
-    </div>
+<form class="form-horizontal apim-form" method="POST" id="downloadPDFForm">
+   <input type='hidden' name='month_name' id="month_name" value=""/>
+   <!--<input type="text" name="birthday" value="10/2018" /> -->
+   
+   Generate report for the month  <input type="text" name="datepickerVal" id="datepickerVal" value="" disabled />
+
+   <button id="date-range" type="button" class="btn btn-default date-range last-child" >
+                     <i class="fw fw-calendar" title="date-range"></i>
+                     <span></span> <b class="caret"></b>
+   </button>
+   <br /><br />
+   <div class="copy-buttons" id="saveButtons">
+	 <button type="submit" class="btn btn-primary copy-button"><%=i18n.localize("Generate")%></button>
    </div>
 </form>
 <% }); %>
