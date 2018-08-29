@@ -32,6 +32,7 @@
     "react": "^16.4.2",
     "react-autosuggest": "^9.3.4",
     "react-dom": "^16.4.2",
+    "react-intl": "^2.4.0",
     "react-notification-system": "^0.2.16",
     "react-router": "^4.2.0",
     "react-router-dom": "^4.4.0-alpha.1",
