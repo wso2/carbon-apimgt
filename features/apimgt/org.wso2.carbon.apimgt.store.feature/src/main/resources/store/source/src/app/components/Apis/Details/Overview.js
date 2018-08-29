@@ -30,6 +30,7 @@ import {withStyles} from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import Chip from '@material-ui/core/Chip';
 import Subscribe from './Subscribe'
+import { FormattedMessage } from 'react-intl';
 
 
 const styles = theme => ({
@@ -155,10 +156,10 @@ class Overview extends Component {
             <Grid container>
                 <Grid item xs={12}>
                     <Typography variant="subheading" align="left">
-                        Created by {api.provider} : {api.createdTime}
+                        <FormattedMessage id='created.by' defaultMessage='Created by'/> {api.provider} : {api.createdTime}
                     </Typography>
                     <Typography variant="caption" gutterBottom align="left">
-                        Last update : {api.lastUpdatedTime}
+                        <FormattedMessage id='last.update' defaultMessage='Last update'/> : {api.lastUpdatedTime}
                     </Typography>
 
                     <Typography variant="subheading" align="left">
@@ -178,7 +179,7 @@ class Overview extends Component {
                                     </Typography>
                             }
                             <Typography variant="caption" gutterBottom align="left">
-                                Throttling Policies
+                                <FormattedMessage id='throttling.policies' defaultMessage='Throttling Policies'/>
                             </Typography>
                         </Grid>
 
@@ -191,11 +192,11 @@ class Overview extends Component {
                                 </div>
                                 :
                                     <Typography variant="subheading" align="left" className={classes.headline}>
-                                        &lt; NOT SET FOR THIS API &gt;
+                                        &lt; <FormattedMessage id='not.set.for.this.api' defaultMessage='NOT SET FOR THIS API'/> &gt;
                                     </Typography>
                             }
                             <Typography variant="caption" gutterBottom align="left">
-                                Tags
+                                <FormattedMessage id='tags' defaultMessage='Tags'/>
                             </Typography>
 
                         </Grid>
@@ -207,11 +208,11 @@ class Overview extends Component {
                                 </Typography>
                                 :
                                 <Typography variant="subheading" align="left" className={classes.headline}>
-                                    &lt; NOT SET FOR THIS API &gt;
+                                    &lt; <FormattedMessage id='not.set.for.this.api' defaultMessage='NOT SET FOR THIS API'/> &gt;
                                 </Typography>
                             }
                             <Typography variant="caption" gutterBottom align="left">
-                                Transport
+                                <FormattedMessage id='transport' defaultMessage='Transport'/>
                             </Typography>
 
                         </Grid>
