@@ -29,6 +29,7 @@ import io.swagger.models.ModelImpl;
 import io.swagger.models.Operation;
 import io.swagger.models.Path;
 import io.swagger.models.Response;
+import io.swagger.models.Scheme;
 import io.swagger.models.SecurityRequirement;
 import io.swagger.models.Swagger;
 import io.swagger.models.auth.ApiKeyAuthDefinition;
@@ -68,6 +69,7 @@ import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.msf4j.Request;
 import org.wso2.msf4j.ServiceMethodInfo;
 
+import java.io.File;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -80,6 +82,8 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Implementation for Swagger 2.0
@@ -422,6 +426,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         SwaggerParser swaggerParser = new SwaggerParser();
         Swagger swagger = swaggerParser.parse(resourceConfigJson);
         addSecuritySchemeToSwaggerDefinition(swagger, api);
+        setSwaggerSchemes(swagger, api.getTransport());
         String securityName = getOauthSecurityName(swagger);
         if (!StringUtils.isEmpty(securityName)) {
             List<SecurityRequirement> securityRequirements = swagger.getSecurity();
@@ -684,6 +689,9 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         info.setContact(contact);
         info.setVersion(api.getVersion());
         swagger.setInfo(info);
+        String basePath = api.getContext() + File.separator + api.getVersion();
+        swagger.setBasePath(basePath);
+        setSwaggerSchemes(swagger, api.getTransport());
 
         addSecuritySchemeToSwaggerDefinition(swagger, api.build());
         Map<String, Path> stringPathMap = new HashMap();
@@ -739,6 +747,25 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         swagger.setPaths(stringPathMap);
         swagger.setPaths(stringPathMap);
         return Json.pretty(swagger);
+    }
+
+    private void setSwaggerSchemes(Swagger swagger, Set<String> transports) {
+
+        List<String> swaggerSchemes = Stream.of(Scheme.values()).map(Scheme::name).collect(Collectors.toList());
+        List<Scheme> schemes = new ArrayList<>();
+
+        if (transports.size() != 0) {
+
+            for (String transport: transports) {
+                if (swaggerSchemes.contains(transport)) {
+                    schemes.add(Scheme.forValue(transport));
+                }
+            }
+        }
+
+        if (!schemes.isEmpty()) {
+            swagger.setSchemes(schemes);
+        }
     }
 
     @Override

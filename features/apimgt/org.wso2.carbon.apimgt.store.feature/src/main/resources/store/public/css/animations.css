@@ -134,3 +134,7 @@ body {
 .tab-container{
     padding: 40px;
 }
+
+.swagger-ui .scheme-container {
+    display: none;
+}
