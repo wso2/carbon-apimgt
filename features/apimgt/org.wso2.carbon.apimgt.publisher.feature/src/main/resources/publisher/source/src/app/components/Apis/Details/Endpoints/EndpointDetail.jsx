@@ -30,7 +30,9 @@ import green from '@material-ui/core/colors/green';
 import Button from '@material-ui/core/Button';
 import { FormattedMessage } from 'react-intl';
 import EndpointForm from './EndpointForm.jsx';
-
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 
 /**
  * API Details Endpoint page component
@@ -61,6 +63,10 @@ const styles = theme => ({
     },
     button: {
         margin: theme.spacing.unit,
+        maxHeight: '25px',
+    },
+    group: {
+        margin: `${theme.spacing.unit}px 0`,
     },
 });
 class EndpointDetail extends Component {
@@ -70,12 +76,27 @@ class EndpointDetail extends Component {
         this.state = {
             isInline: this.props.isInline,
             selectedEndpointConfig: this.props.endpoint.endpointConfig[0],
+            maxTps: null,
+            type: null,
         };
         this.handleEpClick = this.handleEpClick.bind(this);
+        this.handleTextFieldChange = this.handleTextFieldChange.bind(this);
+        this.handleRadioButtonChange = this.handleRadioButtonChange.bind(this);
     }
 
     handleEpClick(e) {
         this.setState({ selectedEndpointConfig: this.props.endpoint.endpointConfig[e.currentTarget.getAttribute('name')] });
+    }
+
+    handleTextFieldChange(event) {
+        this.props.endpoint[event.target.id] = event.currentTarget.value
+        this.setState({ [event.target.id]: event.currentTarget.value });
+    }
+
+    handleRadioButtonChange(event) {
+        debugger;
+        const selectedVal = event.target.value === 'inline' ? true : false;
+        this.setState({ isInline: selectedVal })
     }
 
     render() {
@@ -92,7 +113,7 @@ class EndpointDetail extends Component {
         };
         return (
             <div className={classes.root}>
-                <Grid container spacing={24} justify='center'>
+                <Grid container spacing={12} justify='center'>
                     <Grid item md={12}>
                         <Typography variant='heading' gutterBottom>
                             {this.props.type} <FormattedMessage
@@ -105,9 +126,46 @@ class EndpointDetail extends Component {
 
                         <Paper className={classes.paper}>
                             <div className={classes.container}>
-
+                                <RadioGroup
+                                    aria-label="Endpoint type"
+                                    name="epType"
+                                    className={classes.group}
+                                    value={this.state.isInline ? 'inline' : 'global'}
+                                    onChange={this.handleRadioButtonChange}
+                                    disabled
+                                >
+                                    <FormControlLabel value="inline" control={<Radio />} label="Inline" disabled={this.props.readOnly} />
+                                    <FormControlLabel value="global" control={<Radio />} label="Global" disabled={this.props.readOnly} />
+                                </RadioGroup>
+                                <Divider />
                                 {epUrls}
                             </div>
+                        </Paper>
+                        <Paper className={classes.paper}>
+                            <Grid item xs={6}>
+                                <TextField
+                                    id="maxTps"
+                                    label={<FormattedMessage id="max.tps" defaultMessage="Max TPS" />}
+                                    className={classes.textField}
+                                    value={this.props.endpoint.maxTps}
+                                    fullWidth
+                                    margin="normal"
+                                    onChange={this.handleTextFieldChange}
+                                    disabled={this.props.readOnly}
+                                />
+                            </Grid>
+                            <Grid item xs={6}>
+                                <TextField
+                                    id="type"
+                                    label={<FormattedMessage id="endpoint.type" defaultMessage="Endpoint Type" />}
+                                    className={classes.textField}
+                                    value={this.props.endpoint.type}
+                                    fullWidth
+                                    margin="normal"
+                                    onChange={this.handleTextFieldChange}
+                                    disabled={this.props.readOnly}
+                                />
+                            </Grid>
                         </Paper>
 
                     </Grid>

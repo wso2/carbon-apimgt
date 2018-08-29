@@ -32,6 +32,42 @@ public class EndPointDTO   {
   @SerializedName("type")
   private String type = null;
 
+  /**
+   * Gets or Sets endpointType
+   */
+  public enum EndpointTypeEnum {
+    @SerializedName("SINGLE")
+    SINGLE("SINGLE"),
+    
+    @SerializedName("LOAD_BALANCED")
+    LOAD_BALANCED("LOAD_BALANCED"),
+    
+    @SerializedName("FAIL_OVER")
+    FAIL_OVER("FAIL_OVER");
+
+    private String value;
+
+    EndpointTypeEnum(String value) {
+      this.value = value;
+    }
+
+    @Override
+    public String toString() {
+      return String.valueOf(value);
+    }
+    public static EndpointTypeEnum fromValue(String text) {
+      for (EndpointTypeEnum b : EndpointTypeEnum.values()) {
+        if (String.valueOf(b.value).equals(text)) {
+          return b;
+        }
+      }
+      return null;
+    }
+  }
+
+  @SerializedName("endpointType")
+  private EndpointTypeEnum endpointType = null;
+
   public EndPointDTO id(String id) {
     this.id = id;
     return this;
@@ -145,6 +181,24 @@ public class EndPointDTO   {
     this.type = type;
   }
 
+  public EndPointDTO endpointType(EndpointTypeEnum endpointType) {
+    this.endpointType = endpointType;
+    return this;
+  }
+
+   /**
+   * Get endpointType
+   * @return endpointType
+  **/
+  @ApiModelProperty(example = "FAIL_OVER", value = "")
+  public EndpointTypeEnum getEndpointType() {
+    return endpointType;
+  }
+
+  public void setEndpointType(EndpointTypeEnum endpointType) {
+    this.endpointType = endpointType;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -160,12 +214,13 @@ public class EndPointDTO   {
         Objects.equals(this.endpointConfig, endPoint.endpointConfig) &&
         Objects.equals(this.endpointSecurity, endPoint.endpointSecurity) &&
         Objects.equals(this.maxTps, endPoint.maxTps) &&
-        Objects.equals(this.type, endPoint.type);
+        Objects.equals(this.type, endPoint.type) &&
+        Objects.equals(this.endpointType, endPoint.endpointType);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, endpointConfig, endpointSecurity, maxTps, type);
+    return Objects.hash(id, name, endpointConfig, endpointSecurity, maxTps, type, endpointType);
   }
 
   @Override
@@ -179,6 +234,7 @@ public class EndPointDTO   {
     sb.append("    endpointSecurity: ").append(toIndentedString(endpointSecurity)).append("\n");
     sb.append("    maxTps: ").append(toIndentedString(maxTps)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
+    sb.append("    endpointType: ").append(toIndentedString(endpointType)).append("\n");
     sb.append("}");
     return sb.toString();
   }

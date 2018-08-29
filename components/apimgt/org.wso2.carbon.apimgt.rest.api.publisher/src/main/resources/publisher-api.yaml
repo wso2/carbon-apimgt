@@ -4454,6 +4454,21 @@ definitions:
         description: |
           Time out of the endpoint
         example: 1000
+      isPrimary:
+        type: boolean
+        description: |
+          Defines whether the endpoint is primary when used in fail over.
+        example: true
+      attributes:
+        type: array
+        items:
+          properties:
+            name:
+              type: string
+              example: "Suspension time"
+            value:
+              type: string
+              example: "2s"
 
 #-----------------------------------------------------
 # The Environment Endpoint resource
@@ -4497,6 +4512,13 @@ definitions:
       type:
         type: string
         example: "http"
+      endpointType:
+        type: string
+        enum:
+          - SINGLE
+          - LOAD_BALANCED
+          - FAIL_OVER
+        example: "FAIL_OVER"
 #-----------------------------------------------------
 # The Environment List resource
 #-----------------------------------------------------

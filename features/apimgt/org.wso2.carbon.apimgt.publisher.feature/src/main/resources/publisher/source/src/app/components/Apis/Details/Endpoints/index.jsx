@@ -21,6 +21,7 @@ import EndpointForm from '../../../Endpoints/Create/EndpointForm';
 import Api from '../../../../data/api';
 import ApiPermissionValidation from '../../../../data/ApiPermissionValidation';
 import { resourceMethod, resourcePath, ScopeValidation } from '../../../../data/ScopeValidation';
+import { withStyles } from '@material-ui/core/styles';
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
 import { Alert, InteractiveButton, Progress } from '../../../Shared';
 import EndpointDAO from '../../../../data/Endpoint';
@@ -29,6 +30,20 @@ import EndpointDetail from './EndpointDetail.jsx';
 import Button from '@material-ui/core/Button';
 import Icon from '@material-ui/core/Icon';
 import { FormattedMessage } from 'react-intl';
+import IconButton from '@material-ui/core/IconButton';
+import SaveIcon from '@material-ui/icons/Save';
+import EditIcon from '@material-ui/icons/Edit';
+import CancelIcon from '@material-ui/icons/Cancel';
+
+const styles = theme => ({
+    button: {
+        margin: theme.spacing.unit,
+        float: 'right',
+    },
+    input: {
+        display: 'none',
+    },
+});
 /**
  * API Details Endpoint page component
  * @class Endpoint
@@ -40,6 +55,7 @@ class Endpoint extends Component {
      * @param {any} props @inheritDoc
      * @memberof Endpoint
      */
+
     constructor(props) {
         super(props);
         this.state = {
@@ -55,6 +71,7 @@ class Endpoint extends Component {
         this.updateEndpoints = this.updateEndpoints.bind(this);
         this.switchEndpoint = this.switchEndpoint.bind(this);
         this.makeEditable = this.makeEditable.bind(this);
+        this.makeNonEditable = this.makeNonEditable.bind(this);
     }
 
     /**
@@ -158,35 +175,37 @@ class Endpoint extends Component {
 
     updateEndpoints() {
         // this.setState({loading: true});
+        debugger;
         const prod = this.state.productionEndpoint;
         const sandbox = this.state.sandboxEndpoint;
-        const prodJSON = { type: 'production' };
-        const sandboxJSON = { type: 'sandbox' };
+        const prodJSON = { type: 'Production' };
+        const sandboxJSON = { type: 'Sandbox' };
 
-        if (prod.url === undefined) {
+        if (prod.id === undefined) {
             prodJSON.key = prod;
-        } else if (prod.url != null) {
+        } else if (prod.id != null) {
             const inline = {};
-            inline.endpointConfig = JSON.stringify({ serviceUrl: prod.url });
+            inline.endpointConfig = prod.endpointConfig;
             inline.endpointSecurity = { enabled: false };
-            inline.type = this.getURLType(prod.url);
-            inline.maxTps = 1000;
+            inline.type = prod.type;
+            inline.maxTps = prod.maxTps;
             prodJSON.inline = inline;
         }
 
-        if (sandbox.url === undefined) {
+        if (sandbox.id === undefined) {
             sandboxJSON.key = sandbox;
-        } else if (sandbox.url != null) {
+        } else if (sandbox.id != null) {
             const inline = {};
-            inline.endpointConfig = JSON.stringify({ serviceUrl: sandbox.url });
+            inline.endpointConfig = sandbox.endpointConfig;
             inline.endpointSecurity = { enabled: false };
-            inline.type = this.getURLType(sandbox.url);
-            inline.maxTps = 1000;
+            inline.type = sandbox.type;
+            inline.maxTps = sandbox.maxTps;
             sandboxJSON.inline = inline;
         }
 
         const api = new Api();
-        const promisedAPI = api.get(this.apiUUID);
+        const { apiUUID } = this.props.match.params;
+        const promisedAPI = api.get(apiUUID);
 
         const endpointArray = [];
         endpointArray.push(prodJSON);
@@ -209,10 +228,13 @@ class Endpoint extends Component {
             });
     }
 
-
-
     makeEditable() {
-        this.state.readOnly = false;  ///calling a child function here
+        this.state.readOnly = false;
+        this.setState(this.state);
+    }
+
+    makeNonEditable() {
+        this.state.readOnly = true;
         this.setState(this.state);
     }
 
@@ -241,6 +263,7 @@ class Endpoint extends Component {
         const {
             api, endpointsMap, productionEndpoint, sandboxEndpoint, isInline,
         } = this.state;
+        const { classes } = this.props;
         const globalEndpoints = endpointsMap.values();
         if (this.state.notFound) {
             return <ResourceNotFound message={this.props.resourceNotFountMessage} />;
@@ -248,16 +271,17 @@ class Endpoint extends Component {
         if (!api) {
             return <Progress />;
         }
-
-
         return (
             <Paper>
-                <Button variant="fab" color="secondary" aria-label="Edit" onClick={this.makeEditable}>
-                    <Icon>edit_icon</Icon>
-                </Button>
-                <Button variant="fab" color="secondary" disabled aria-label="Save" >
-                    <Icon>save_icon</Icon>
-                </Button>
+                {(this.state.readOnly && <IconButton className={classes.button} aria-label="Edit" color="primary" onClick={this.makeEditable}>
+                    <EditIcon />
+                </IconButton>)}
+                {(!this.state.readOnly && <IconButton className={classes.button} aria-label="Cancel" onClick={this.makeNonEditable}>
+                    <CancelIcon />
+                </IconButton>)}
+                <IconButton className={classes.button} aria-label="Save" color="primary" onClick={this.updateEndpoints} disabled={this.state.readOnly}>
+                    <SaveIcon />
+                </IconButton>
                 {productionEndpoint &&
                     <EndpointDetail
                         type={<FormattedMessage
@@ -274,10 +298,7 @@ class Endpoint extends Component {
                         />} endpoint={sandboxEndpoint} isInline={isInline} readOnly={this.state.readOnly}
                     />
                 }
-
-
                 <Divider />
-
             </Paper>
         );
     }
@@ -301,4 +322,5 @@ Endpoint.propTypes = {
         }),
     }).isRequired,
 };
-export default Endpoint;
+
+export default withStyles(styles)(Endpoint);
