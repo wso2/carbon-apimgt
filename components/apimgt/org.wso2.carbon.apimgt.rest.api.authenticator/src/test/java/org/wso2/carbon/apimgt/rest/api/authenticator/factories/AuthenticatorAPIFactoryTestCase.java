@@ -18,8 +18,9 @@
 
 package org.wso2.carbon.apimgt.rest.api.authenticator.factories;
 
-import org.junit.Assert;
-import org.junit.Test;
+
+import org.testng.Assert;
+import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.IdentityProviderException;
 import org.wso2.carbon.apimgt.rest.api.authenticator.AuthenticatorService;

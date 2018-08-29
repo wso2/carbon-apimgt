@@ -18,9 +18,9 @@
 
 package org.wso2.carbon.apimgt.rest.api.authenticator.internal;
 
-import org.junit.Assert;
-import org.junit.Test;
 import org.mockito.Mockito;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.rest.api.authenticator.configuration.models.APIMAppConfigurations;
 import org.wso2.carbon.config.ConfigurationException;
 import org.wso2.carbon.config.provider.ConfigProvider;
