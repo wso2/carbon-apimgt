@@ -91,10 +91,6 @@ import javax.xml.stream.XMLStreamReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -267,7 +263,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         try {
             String startDate = fromDate + ":00";
             String endDate = toDate + ":00";
-            String granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;//default granularity
+            String granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;//default granularity
 
             Map<String, Integer> durationBreakdown = this.getDurationBreakdown(startDate, endDate);
 
@@ -275,6 +271,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
             } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
                 granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
+            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
+                granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
             }
             StringBuilder query = new StringBuilder(
                     "from " + tableName + " within '" + startDate + "', '" + endDate + "' per '" + granularity
@@ -381,7 +379,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             long totalRequestCount = getTotalRequestCountOfAPIVersion(tableName, apiName, tenantDomain, version,
                     fromDate, toDate);
 
-            String granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;//default granularity
+            String granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;//default granularity
 
             Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
 
@@ -389,6 +387,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
             } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
                 granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
+            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
+                granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
             }
 
             topApiUserQuery = new StringBuilder(
@@ -462,7 +462,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         try {
             String startDate = fromDate + ":00";
             String endDate = toDate + ":00";
-            String granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;//default granularity
+            String granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;//default granularity
 
             Map<String, Integer> durationBreakdown = this.getDurationBreakdown(startDate, endDate);
 
@@ -470,6 +470,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
             } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
                 granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
+            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
+                granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
             }
             String query = "from " + tableName + " within '" + startDate + "', '" + endDate + "' per '" + granularity
                     + "' select " + APIUsageStatisticsClientConstants.APPLICATION_ID + ", "
@@ -564,7 +566,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         try {
             String startDate = fromDate + ":00";
             String endDate = toDate + ":00";
-            String granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;//default granularity
+            String granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;//default granularity
 
             Map<String, Integer> durationBreakdown = this.getDurationBreakdown(startDate, endDate);
 
@@ -572,6 +574,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
             } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
                 granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
+            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
+                granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
             }
             String query = "from " + tableName + " within '" + startDate + "', '" + endDate + "' per '" + granularity
                     + "' select " + APIUsageStatisticsClientConstants.API_NAME + ", "
@@ -673,13 +677,15 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         try {
             String startDate = fromDate + ":00";
             String endDate = toDate + ":00";
-            String granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;//default granularity
+            String granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;//default granularity
             Map<String, Integer> durationBreakdown = this.getDurationBreakdown(startDate, endDate);
 
             if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
                 granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
             } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
                 granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
+            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
+                granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
             }
             String query = "from " + tableName + " within '" + startDate + "', '" + endDate + "' per '" + granularity
                     + "' select " + APIUsageStatisticsClientConstants.API_NAME + ", "
@@ -790,7 +796,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         Collection<APIUsage> usageDataList = new ArrayList<APIUsage>();
         try {
-            String granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;//default granularity
+            String granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;//default granularity
 
             Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
 
@@ -798,6 +804,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
             } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
                 granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
+            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
+                granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
             }
             String query = "from " + tableName + " within '" + fromDate + "', '" + toDate + "' per '" + granularity
                     + "' select " + APIUsageStatisticsClientConstants.API_NAME + ", "
@@ -1338,7 +1346,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             throws APIMgtUsageQueryServiceClientException {
         List<APIResponseFaultCount> faultUsage = new ArrayList<APIResponseFaultCount>();
         try {
-            String granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;//default granularity
+            String granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;//default granularity
 
             Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
 
@@ -1346,6 +1354,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
             } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
                 granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
+            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
+                granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
             }
             String query = "from " + tableName + " within '" + fromDate + "', '" + toDate + "' per '" + granularity
                     + "' select " + APIUsageStatisticsClientConstants.API_NAME + ", "
@@ -1398,7 +1408,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             throws APIMgtUsageQueryServiceClientException {
         List<APIUsageByResourcePath> usage = new ArrayList<APIUsageByResourcePath>();
         try {
-            String granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;//default granularity
+            String granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;//default granularity
 
             Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
 
@@ -1406,6 +1416,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
             } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
                 granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
+            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
+                granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
             }
 
             String query = "from " + tableName + " within '" + fromDate + "', '" + toDate + "' per '" + granularity
@@ -1471,7 +1483,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         List<APIUsageByDestination> usageByDestination = new ArrayList<APIUsageByDestination>();
         try {
-            String granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;//default granularity
+            String granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;//default granularity
 
             Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
 
@@ -1479,6 +1491,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
             } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
                 granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
+            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
+                granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
             }
 
             String query = "from " + tableName + " within '" + fromDate + "', '" + toDate + "' per '" + granularity
@@ -1581,7 +1595,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         try {
             String query;
             if (fromDate != null && toDate != null) {
-                String granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;//default granularity
+                String granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;//default granularity
 
                 Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
 
@@ -1589,6 +1603,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                     granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
                 } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
                     granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
+                } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
+                    granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
                 }
 
                 query = "from " + tableName + " on " + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName
@@ -1666,7 +1682,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             }
 
             if (fromDate != null && toDate != null) {
-                String granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;//default granularity
+                String granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;//default granularity
 
                 Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
 
@@ -1674,6 +1690,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                     granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
                 } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
                     granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
+                } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
+                    granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
                 }
                 query = "from " + APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG + " on " + filter + " within '"
                         + fromDate + "', '" + toDate + "' per '" + granularity + "' select "
@@ -1950,7 +1968,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         try {
             List<APIThrottlingOverTimeDTO> throttlingData = new ArrayList<APIThrottlingOverTimeDTO>();
             String tenantDomain = MultitenantUtils.getTenantDomain(provider);
-            String granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;//default granularity
+            String granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;//default granularity
 
             Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
 
@@ -1958,6 +1976,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
             } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
                 granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
+            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
+                granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
             }
             StringBuilder query = new StringBuilder(
                     "from " + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_AGG + " on("
@@ -2023,7 +2043,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             List<APIThrottlingOverTimeDTO> throttlingData = new ArrayList<APIThrottlingOverTimeDTO>();
             String tenantDomain = MultitenantUtils.getTenantDomain(provider);
 
-            String granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;//default granularity
+            String granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;//default granularity
 
             Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
 
@@ -2031,6 +2051,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
             } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
                 granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
+            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
+                granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
             }
 
             StringBuilder query = new StringBuilder(
@@ -2214,7 +2236,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                                 + "'");
             }
             if (fromDate != null && toDate != null) {
-                String granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;//default granularity
+                String granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;//default granularity
 
                 Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
 
@@ -2222,6 +2244,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                     granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
                 } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
                     granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
+                } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
+                    granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
                 }
                 query.append(") within '" + fromDate + "', '" + toDate + "' per '" + granularity + "'");
             } else {
@@ -2322,7 +2346,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 query.append(" AND " + APIUsageStatisticsClientConstants.COUNTRY + "=='" + drillDown + "'");
             }
             if (fromDate != null && toDate != null) {
-                String granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;//default granularity
+                String granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;//default granularity
 
                 Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
 
@@ -2330,6 +2354,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                     granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
                 } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
                     granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
+                } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
+                    granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
                 }
                 query.append(") within '" + fromDate + "', '" + toDate + "' per '" + granularity + "' select sum("
                         + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT);
@@ -2405,7 +2431,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 query.append(" AND " + APIUsageStatisticsClientConstants.OPERATING_SYSTEM + "=='" + drillDown + "'");
             }
             if (fromDate != null && toDate != null) {
-                String granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;//default granularity
+                String granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;//default granularity
 
                 Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
 
@@ -2413,6 +2439,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                     granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
                 } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
                     granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
+                } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
+                    granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
                 }
                 query.append(") within '" + fromDate + "', '" + toDate + "' per '" + granularity + "' select sum("
                         + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT);
