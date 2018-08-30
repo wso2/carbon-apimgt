@@ -34,6 +34,7 @@ public class ThrottlePublisherDTO {
     private String username;
     private String keyType;
     private String correlationID;
+    private String hostName;
 
     public String getAccessToken() {
         return accessToken;
@@ -162,6 +163,14 @@ public class ThrottlePublisherDTO {
 
     public void setApiCreatorTenantDomain(String apiProviderTenantDomain) {
         this.apiCreatorTenantDomain = apiProviderTenantDomain;
+    }
+
+    public String getHostName() {
+        return hostName;
+    }
+
+    public void setHostName(String hostName) {
+        this.hostName = hostName;
     }
     
 }

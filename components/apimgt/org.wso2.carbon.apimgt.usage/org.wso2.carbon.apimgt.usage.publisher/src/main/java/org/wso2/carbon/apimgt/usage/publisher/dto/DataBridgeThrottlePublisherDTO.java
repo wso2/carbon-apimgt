@@ -38,12 +38,14 @@ public class DataBridgeThrottlePublisherDTO extends ThrottlePublisherDTO {
         setCorrelationID(throttlePublisherDTO.getCorrelationID());
         setGatewayType(throttlePublisherDTO.getGatewayType());
         setSubscriber(throttlePublisherDTO.getSubscriber());
+        setHostName(throttlePublisherDTO.getHostName());
     }
 
     public Object createPayload() {
         return new Object[] { getUsername(), getTenantDomain(), getApiname(),
                 getVersion(), getContext(), getApiCreator(), getApiCreatorTenantDomain(), getApplicationId(),
-                getApplicationName(), getSubscriber(), getThrottledOutReason(), getGatewayType(), getThrottledTime() };
+                getApplicationName(), getSubscriber(), getThrottledOutReason(), getGatewayType(), getThrottledTime(),
+                getHostName() };
     }
 
     public Object createMetaData() {

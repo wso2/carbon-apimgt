@@ -92,6 +92,8 @@ public class APIMgtThrottleUsageHandler extends APIMgtCommonExecutionPublisher {
                 throttlePublisherDTO.setKeyType(keyType);
                 throttlePublisherDTO.setCorrelationID(correlationID);
                 throttlePublisherDTO.setGatewayType(APIMgtGatewayConstants.GATEWAY_TYPE);
+                throttlePublisherDTO.setHostName(GatewayUtils.getHostName(messageContext));
+                
                 if (log.isDebugEnabled()) {
                     log.debug("Publishing throttling event from gateway to analytics for: "
                             + messageContext.getProperty(APIMgtGatewayConstants.CONTEXT) + " with ID: "
