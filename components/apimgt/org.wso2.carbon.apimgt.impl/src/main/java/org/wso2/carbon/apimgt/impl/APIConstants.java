@@ -822,6 +822,7 @@ public final class APIConstants {
     public static final Set<String> SUPPORTED_METHODS =
             Collections.unmodifiableSet(new HashSet<String>(
                     Arrays.asList(new String[]{"get", "put", "post", "delete", "patch", "head", "options"})));
+    public static final String PARAMETERS = "parameters";
     public static final String AUTH_NO_AUTHENTICATION = "None";
     public static final String AUTH_APPLICATION_LEVEL_TOKEN = "Application";
     public static final String AUTH_APPLICATION_USER_LEVEL_TOKEN = "Application_User";
