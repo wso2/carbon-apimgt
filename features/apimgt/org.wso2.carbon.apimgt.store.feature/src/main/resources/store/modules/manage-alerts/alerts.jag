@@ -190,22 +190,15 @@ var getStoreAlertConfigs  = function () {
                               }
                     objArr.push(obj);
               }
-              
             }
         }
         return objArr;
-
-
-
     } catch (e) {
-
         log.error(e.message);
         return {
             error:true
         };
     }
-
-
 };
 
 var addOrUpdateStoreAlertConfigs  = function (applicationId, apiName, apiVersion, thresholdRequestCountPerMin) {
@@ -231,11 +224,7 @@ var addOrUpdateStoreAlertConfigs  = function (applicationId, apiName, apiVersion
             objArr = parsedDataResult;
         }
         return objArr;
-
-
-
     } catch (e) {
-
         log.error(e.message);
         return {
             error:true
@@ -262,20 +251,13 @@ var deleteStoreAlertConfigs  = function (applicationId, apiName, apiVersion) {
         if(result != null ) {
             var parsedDataResult = JSON.parse(result);
             objArr = parsedDataResult;
-
         }
         return objArr;
-
-
-
     } catch (e) {
-
         log.error(e.message);
         return {
             error:true
         };
     }
-
-
 };
 %>

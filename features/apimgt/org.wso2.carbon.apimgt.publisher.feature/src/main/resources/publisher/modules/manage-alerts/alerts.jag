@@ -209,23 +209,16 @@ var getPublisherAlertConfigs  = function (type) {
                                  }
                               }
                     objArr.push(obj);
-              }
-              
+              }        
             }
         }
         return objArr;
-
-
-
     } catch (e) {
-
         log.error(e.message);
         return {
             error:true
         };
     }
-
-
 };
 
 var addOrUpdatePublisherAlertConfigs  = function (apiName, apiVersion, type, value) {
@@ -255,7 +248,6 @@ var addOrUpdatePublisherAlertConfigs  = function (apiName, apiVersion, type, val
                     + conditionQuery + "on ApiCreatorAlertConfiguration.apiName == apiName " 
                     + "and ApiCreatorAlertConfiguration.apiVersion == apiVersion";
 
-      
         var result = APIUtil.executeQueryOnStreamProcessor(appName, query);
         var objArr = [];
         if(result != null ) {
@@ -263,18 +255,12 @@ var addOrUpdatePublisherAlertConfigs  = function (apiName, apiVersion, type, val
             objArr = parsedDataResult;
         }
         return objArr;
-
-
-
     } catch (e) {
-
         log.error(e.message);
         return {
             error:true
         };
     }
-
-
 };
 
 var deletePublisherAlertConfigs  = function (apiName, apiVersion) {
@@ -299,20 +285,13 @@ var deletePublisherAlertConfigs  = function (apiName, apiVersion) {
         if(result != null ) {
             var parsedDataResult = JSON.parse(result);
             objArr = parsedDataResult;
-
         }
         return objArr;
-
-
-
     } catch (e) {
-
         log.error(e.message);
         return {
             error:true
         };
     }
-
-
 };
 %>
