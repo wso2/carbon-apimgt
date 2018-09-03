@@ -9,9 +9,7 @@ var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
 currentLocation=window.location.pathname;
     jagg.post("/site/blocks/stats/faulty-invocations/ajax/stats.jag", { action:"getFirstAccessTime",currentLocation:currentLocation  },
         function (json) {
-
             if (!json.error) {
-
                 if( json.usage && json.usage.length > 0){
                     var d = new Date();
                     from = new Date(json.usage[0].year, json.usage[0].month-1, json.usage[0].day);
@@ -76,16 +74,7 @@ currentLocation=window.location.pathname;
                         $(this).siblings().removeClass('active');
                         $(this).addClass('active');
                     });
-
-
-                }
-
-                else if (json.usage && json.usage.length == 0 && statsEnabled) {
-                    $('.stat-page').html("");
-                    showNoDataAnalyticsMsg();
-                }
-
-                else{
+                } else {
                     $('.stat-page').html("");
                     showEnableAnalyticsMsg();
                 }

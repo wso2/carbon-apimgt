@@ -76,10 +76,7 @@ $( document ).ready(function() {
                         appName = this.value;
                         getDateTime(to, from);
                     });
-                } else if (json.usage && json.usage.length == 0 && statsEnabled) {
-                        $('.stat-page').html("");
-                        showNoDataAnalyticsMsg();
-                } else{
+                } else {
                     $('.stat-page').html("");
                     showEnableAnalyticsMsg();
                 }

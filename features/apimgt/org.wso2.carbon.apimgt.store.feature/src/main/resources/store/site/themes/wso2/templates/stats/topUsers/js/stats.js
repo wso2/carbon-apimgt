@@ -3,8 +3,7 @@ var statsEnabled = isDataPublishingEnabled();
 
     currentLocation=window.location.pathname;
     jagg.post("/site/blocks/stats/topUsers/ajax/stats.jag", { action:"getFirstAccessTime",currentLocation:currentLocation  },
-        function (json) {            
-
+        function (json) {
             if (!json.error) {
                 if( json.usage && json.usage.length > 0){
                     var d = new Date();
@@ -64,14 +63,7 @@ var statsEnabled = isDataPublishingEnabled();
                         $(this).addClass('active');
                         $(this).siblings().removeClass('active');
                     });
-                }
-
-                else if (json.usage && json.usage.length == 0 && statsEnabled) {
-                    $('.stat-page').html("");
-                    showNoDataAnalyticsMsg();
-                }
-
-                else{
+                } else {
                     $('.stat-page').html("");
                     showEnableAnalyticsMsg();
                 }

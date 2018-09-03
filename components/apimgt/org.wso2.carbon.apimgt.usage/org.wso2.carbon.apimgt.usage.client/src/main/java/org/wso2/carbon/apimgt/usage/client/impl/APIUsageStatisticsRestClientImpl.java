@@ -1836,7 +1836,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     }
 
     /**
-     * This method find the first access time of the API
+     * This method returns a default first access time for the API
      *
      * @param providerName provider name
      * @return APIFirstAccess
@@ -1844,7 +1844,12 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     @Override
     public List<APIFirstAccess> getFirstAccessTime(String providerName) throws APIMgtUsageQueryServiceClientException {
-        APIFirstAccess firstAccess = this.queryFirstAccess(APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG);
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MONTH, -1); //get 1 month from the current date
+        String year = Integer.toString(calendar.get(Calendar.YEAR));
+        String month = Integer.toString(calendar.get(Calendar.MONTH) + 1); //Month is 0 based
+        String day = Integer.toString(calendar.get(Calendar.DAY_OF_MONTH));
+        APIFirstAccess firstAccess = new APIFirstAccess(year, month, day);
         List<APIFirstAccess> APIFirstAccessList = new ArrayList<APIFirstAccess>();
         APIFirstAccess fTime;
 
@@ -1853,48 +1858,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             APIFirstAccessList.add(fTime);
         }
         return APIFirstAccessList;
-    }
-
-    /**
-     * Find first accesstime from the database
-     *
-     * @param columnFamily aggregate table name in the RDBMS
-     * @return APIFirstAccess representing the time
-     * @throws APIMgtUsageQueryServiceClientException throws if database error occurred
-     */
-    private APIFirstAccess queryFirstAccess(String columnFamily) throws APIMgtUsageQueryServiceClientException {
-
-        try {
-            String query = "from " + columnFamily + "_SECONDS select " + APIUsageStatisticsClientConstants.TIME_STAMP
-                    + " order by " + APIUsageStatisticsClientConstants.TIME_STAMP + " limit 1;";
-            JSONObject jsonObj = APIUtil
-                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_ACCESS_SUMMARY_SIDDHI_APP,
-                            query);
-            APIFirstAccess firstAccess = null;
-            Date date;
-            Calendar calendar;
-            String year;
-            String month;
-            String day;
-            if (jsonObj != null) {
-                JSONArray jArray = (JSONArray) jsonObj.get("records");
-                for (Object record : jArray) {
-                    Long timeStamp = (Long) ((JSONArray) record).get(0);
-                    date = new Date(timeStamp);
-                    calendar = Calendar.getInstance();
-                    calendar.setTime(date);
-                    year = Integer.toString(calendar.get(Calendar.YEAR));
-                    month = Integer.toString(calendar.get(Calendar.MONTH)); //Month is 0 based
-                    day = Integer.toString(calendar.get(Calendar.DAY_OF_MONTH));
-                    firstAccess = new APIFirstAccess(year, month, day);
-                }
-            }
-            return firstAccess;
-        } catch (APIManagementException e) {
-            log.error("Error occurred while querying from the stream processor " + e.getMessage(), e);
-            throw new APIMgtUsageQueryServiceClientException(
-                    "Error occurred while querying from the stream processor " + e.getMessage(), e);
-        }
     }
 
     /**
