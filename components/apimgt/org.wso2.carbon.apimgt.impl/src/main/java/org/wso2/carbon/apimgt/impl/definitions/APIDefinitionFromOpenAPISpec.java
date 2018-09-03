@@ -136,7 +136,7 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
                     }
 
                     if (isGlobalParameterDefined && !isHttpVerbDefined) {
-                        handleException("Provided for resource '" + uriTempVal + "' has global parameters without " +
+                        handleException("Resource '" + uriTempVal + "' has global parameters without " +
                                 "HTTP methods");
                     }
                 }
