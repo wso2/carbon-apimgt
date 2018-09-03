@@ -85,11 +85,19 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
                                 "for api \"" + api.getId().getApiName() + '\"');
                         continue;
                     }
+
+                    boolean isGlobalParameterDefined = false;
+                    boolean isHttpVerbDefined = false;
+
                     for (Object o1 : path.keySet()) {
                         String httpVerb = (String) o1;
 
+                        if (APIConstants.PARAMETERS.equals(httpVerb.toLowerCase())) {
+                            isGlobalParameterDefined = true;
+                        }
                         //Only continue for supported operations
-                        if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase())) {
+                        else if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase())) {
+                            isHttpVerbDefined = true;
                             JSONObject operation = (JSONObject) path.get(httpVerb);
                             URITemplate template = new URITemplate();
                             Scope scope = APIUtil.findScopeByKey(scopes, (String) operation.get(APIConstants
@@ -125,6 +133,11 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
                             handleException("The HTTP method '" + httpVerb + "' provided for resource '" + uriTempVal
                                     + "' is invalid");
                         }
+                    }
+
+                    if (isGlobalParameterDefined && !isHttpVerbDefined) {
+                        handleException("Provided for resource '" + uriTempVal + "' has global parameters without " +
+                                "HTTP methods");
                     }
                 }
             }
