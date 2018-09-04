@@ -123,18 +123,18 @@ if(jagg.isCSRFTokenValid())
                                 errorMsg = getSwaggerError(swaggerErrors);
                                 print({
                                     error: true,
-                                    message: "<div><div> Input URL contains invalid swagger definition" + "</div>" +
+                                    message: "<div><div> Input URL contains an invalid swagger definition." + "</div>" +
                                     errorMsg
                                 });
                                 return;
                             }
                         } else {
-                            print({error: true, message: "Input URL contains invalid swagger definition"});
+                            print({error: true, message: "Input URL contains an invalid swagger definition."});
                             return;
                         }
 
                     } catch (e) {
-                        print({error: true, message: "Input URL contains invalid swagger definition"});
+                        print({error: true, message: "Input URL contains an invalid swagger definition."});
                         return;
                     }
                 }
@@ -185,16 +185,16 @@ if(jagg.isCSRFTokenValid())
                                 errorMsg = getSwaggerError(swaggerErrors);
                                 print({
                                     error: true,
-                                    message: "<div><div>" + file.getName() + " contains invalid swagger definition" + "</div>" + errorMsg
+                                    message: "<div><div>" + file.getName() + " contains an invalid swagger definition." + "</div>" + errorMsg
                                 });
                                 return;
                             }
                         } else {
-                            print({error: true, message: file.getName() + " contains invalid swagger definition"});
+                            print({error: true, message: file.getName() + " contains an invalid swagger definition."});
                             return;
                         }
                     } catch (e) {
-                        print({error: true, message: file.getName() + " contains invalid swagger definition"});
+                        print({error: true, message: file.getName() + " contains an invalid swagger definition."});
                         return;
                     }
                 } else {

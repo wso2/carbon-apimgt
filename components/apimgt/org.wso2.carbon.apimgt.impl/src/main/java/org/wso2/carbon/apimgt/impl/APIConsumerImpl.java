@@ -24,7 +24,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.util.ClientUtils;
-import org.json.JSONException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -2324,6 +2323,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 workflowDTO.setApiProvider(identifier.getProviderName());
                 workflowDTO.setTierName(identifier.getTier());
                 workflowDTO.setApplicationName(apiMgtDAO.getApplicationNameFromId(applicationId));
+                workflowDTO.setApplicationId(applicationId);
                 workflowDTO.setSubscriber(userId);
                 workflowResponse = addSubscriptionWFExecutor.execute(workflowDTO);
             } catch (WorkflowException e) {
