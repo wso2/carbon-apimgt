@@ -33,8 +33,8 @@ import org.wso2.carbon.apimgt.gateway.mediators.APIMgtCommonExecutionPublisher;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ResponsePublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import javax.xml.stream.XMLStreamException;
 
+import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
