@@ -122,9 +122,9 @@ public class CertificateMgtDaoTest {
 
     @Test
     public void testGetCertificateWithNoCertificate() throws CertificateManagementException {
-        CertificateMetadataDTO certificateDTO =
-                certificateMgtDAO.getCertificate(TEST_ALIAS_2, TEST_ENDPOINT_2, TENANT_ID);
-        Assert.assertNull(certificateDTO);
+        List<CertificateMetadataDTO> certificateDTO =
+                certificateMgtDAO.getCertificates(TEST_ALIAS_2, TEST_ENDPOINT_2, TENANT_ID);
+        Assert.assertEquals(0, certificateDTO.size());
     }
 
     @Test
@@ -136,8 +136,8 @@ public class CertificateMgtDaoTest {
 
     @Test
     public void testGetCertificate() throws CertificateManagementException {
-        CertificateMetadataDTO certificateDTO =
-                certificateMgtDAO.getCertificate("ALIAS_1", "EP_1", TENANT_2);
+        List<CertificateMetadataDTO> certificateDTO =
+                certificateMgtDAO.getCertificates("ALIAS_1", "EP_1", TENANT_2);
         Assert.assertNotNull(certificateDTO);
     }
 
@@ -149,7 +149,7 @@ public class CertificateMgtDaoTest {
 
     @Test
     public void testGetCertificates() throws CertificateManagementException {
-        List<CertificateMetadataDTO> certificates = certificateMgtDAO.getCertificates(TENANT_ID);
+        List<CertificateMetadataDTO> certificates = certificateMgtDAO.getCertificates(null, null, TENANT_ID);
         Assert.assertNotNull(certificates);
         Assert.assertTrue(certificates.size() > 0);
     }

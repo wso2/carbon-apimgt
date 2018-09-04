@@ -37,12 +37,14 @@ import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.threatprotection.utils.ThreatProtectorConstants;
+import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ExecutionTimeDTO;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.mediation.registry.RegistryServiceHolder;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.InputStream;
@@ -424,5 +426,13 @@ public class GatewayUtils {
             resource = matcher.group(1);
         }
         return resource;
+    }
+    
+    public static String getHostName(org.apache.synapse.MessageContext messageContext) {
+        String hostname = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getDatacenterId();
+        if (hostname == null) {
+            hostname = (String) messageContext.getProperty(APIMgtGatewayConstants.HOST_NAME);
+        }
+        return hostname;
     }
 }

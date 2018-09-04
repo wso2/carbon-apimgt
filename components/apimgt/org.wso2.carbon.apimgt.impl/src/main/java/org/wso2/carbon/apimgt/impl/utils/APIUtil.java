@@ -7600,6 +7600,10 @@ public final class APIUtil {
             JSONObject obj = new JSONObject();
             obj.put("appName", appName);
             obj.put("query", query);
+            
+            if (log.isDebugEnabled()) {
+                log.debug("Request from SP: " + obj.toJSONString());
+            }
 
             StringEntity requestEntity = new StringEntity(obj.toJSONString(), ContentType.APPLICATION_JSON);
 

@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.3.137-SNAPSHOT</version>
+        <version>6.4.2-SNAPSHOT</version>
 	    <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -103,6 +103,22 @@
             <groupId>org.wso2.orbit.org.everit.json</groupId>
             <artifactId>org.everit.json.schema</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -169,6 +185,10 @@
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt.stub:${carbon.apimgt.version}</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.handlers.security.stub</bundleDef>
                                 <bundleDef>com.googlecode.json-simple.wso2:json-simple</bundleDef>
+                                <bundleDef>com.fasterxml.jackson.dataformat:jackson-dataformat-yaml</bundleDef>
+                                <bundleDef>com.fasterxml.jackson.core:jackson-core</bundleDef>
+                                <bundleDef>com.fasterxml.jackson.core:jackson-annotations</bundleDef>
+                                <bundleDef>com.fasterxml.jackson.core:jackson-databind</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.usage.publisher:${carbon.apimgt.version}</bundleDef>
                                 <bundleDef>org.wso2.carbon.mediation:org.wso2.carbon.sequences.stub:${carbon.mediation.version}</bundleDef>
                                 <bundleDef>org.wso2.carbon.mediation:org.wso2.carbon.endpoint.stub:${carbon.mediation.version}</bundleDef>
