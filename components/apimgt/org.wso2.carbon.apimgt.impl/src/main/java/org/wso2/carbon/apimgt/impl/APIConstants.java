@@ -701,11 +701,11 @@ public final class APIConstants {
 
     public static final String API_ANALYTICS = "Analytics.";
     public static final String API_USAGE_ENABLED = API_ANALYTICS + "Enabled";
-    public static final String API_USAGE_BAM_SERVER_URL_GROUPS = API_ANALYTICS + "DASServerURL";
-    public static final String API_USAGE_BAM_SERVER_AUTH_URL_GROUPS = API_ANALYTICS + "DASAuthServerURL";
+    public static final String API_USAGE_BAM_SERVER_URL_GROUPS = API_ANALYTICS + "StreamProcessorServerURL";
+    public static final String API_USAGE_BAM_SERVER_AUTH_URL_GROUPS = API_ANALYTICS + "StreamProcessorAuthServerURL";
     public static final String API_USAGE_BUILD_MSG = API_ANALYTICS + "PublishResponseMessageSize";
-    public static final String API_USAGE_BAM_SERVER_USER = API_ANALYTICS + "DASUsername";
-    public static final String API_USAGE_BAM_SERVER_PASSWORD = API_ANALYTICS + "DASPassword";
+    public static final String API_USAGE_BAM_SERVER_USER = API_ANALYTICS + "StreamProcessorUsername";
+    public static final String API_USAGE_BAM_SERVER_PASSWORD = API_ANALYTICS + "StreamProcessorPassword";
     public static final String API_USAGE_SKIP_EVENT_RECEIVER_CONN = API_ANALYTICS + "SkipEventReceiverConnection";
     public static final String API_USAGE_PUBLISHER_CLASS = API_ANALYTICS + "PublisherClass";
     public static final String API_USAGE_DATA_SOURCE_NAME = "WSO2AM_STATS_DB";
@@ -736,9 +736,9 @@ public final class APIConstants {
     public static final String API_WF_STREAM_NAME = API_USAGE_WF_STREAM + "Name";
     public static final String API_WF_STREAM_VERSION = API_USAGE_WF_STREAM + "Version";
     //Rest API Config data in api-config.xml
-    public static final String API_USAGE_DAS_REST_API_URL = API_ANALYTICS + "DASRestApiURL";
-    public static final String API_USAGE_DAS_REST_API_USER = API_ANALYTICS + "DASRestApiUsername";
-    public static final String API_USAGE_DAS_REST_API_PASSWORD = API_ANALYTICS + "DASRestApiPassword";
+    public static final String API_USAGE_DAS_REST_API_URL = API_ANALYTICS + "StreamProcessorRestApiURL";
+    public static final String API_USAGE_DAS_REST_API_USER = API_ANALYTICS + "StreamProcessorRestApiUsername";
+    public static final String API_USAGE_DAS_REST_API_PASSWORD = API_ANALYTICS + "StreamProcessorRestApiPassword";
 
     public static final String UNLIMITED_TIER = "Unlimited";
     public static final String UNLIMITED_TIER_DESC = "Allows unlimited requests";
