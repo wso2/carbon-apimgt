@@ -7617,6 +7617,9 @@ public final class APIUtil {
                     throw new APIManagementException(error);
                 }
                 String responseStr = EntityUtils.toString(entity);
+                if (log.isDebugEnabled()) {
+                    log.debug("Response from SP: " + responseStr);
+                }
                 JSONParser parser = new JSONParser();
                 return (JSONObject) parser.parse(responseStr);
 
