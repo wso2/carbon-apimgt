@@ -102,17 +102,10 @@ jagg.post("/site/blocks/stats/api-usage-resource-path/ajax/stats.jag", { action:
                         $(this).addClass('active');
                     });
 
-                }
-                else if (json.usage && json.usage.length == 0 && statsEnabled) {
-                    $('.stat-page').html("");
-                    showNoDataAnalyticsMsg();
-                }
-
-                else{
+                } else {
                     $('.stat-page').html("");
                     showEnableAnalyticsMsg();
                 }
-
             }
             else {
                 if (json.message == "AuthenticateError") {

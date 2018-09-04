@@ -97,9 +97,6 @@ $(document).ready(function () {
                     getDateTime(currentDay, currentDay - (604800000 * 4));
                     populateAPIList();
                     drawTopAPIUsersTable();
-                } else if (json.usage && json.usage.length == 0 && statsEnabled) {
-                    $('.stat-page').html("");
-                    showNoDataAnalyticsMsg();
                 } else {
                     $('.stat-page').html("");
                     showEnableAnalyticsMsg();

@@ -79,14 +79,7 @@ currentLocation=window.location.pathname;
                         $(this).siblings().removeClass('active');
                     });
 
-                }
-
-                else if (json.usage && json.usage.length == 0 && statsEnabled) {
-                    $('.stat-page').html("");
-                    showNoDataAnalyticsMsg();
-                }
-
-                else{
+                } else {
                     $('.stat-page').html("");
                     showEnableAnalyticsMsg();
                 }

@@ -5,10 +5,8 @@ var statsEnabled = isDataPublishingEnabled();
 
     currentLocation=window.location.pathname;
     jagg.post("/site/blocks/stats/perAppAPICount/ajax/stats.jag", { action:"getFirstAccessTime",currentLocation:currentLocation  },
-        function (json) {            
-
+        function (json) {
             if (!json.error) {
-
                 if( json.usage && json.usage.length > 0){
                     var d = new Date();
                     var firstAccessDay = new Date(json.usage[0].year, json.usage[0].month, json.usage[0].day);
@@ -69,14 +67,7 @@ var statsEnabled = isDataPublishingEnabled();
                         $(this).siblings().removeClass('active');
                     });
 
-                }
-
-                else if (json.usage && json.usage.length == 0 && statsEnabled) {
-                    $('.stat-page').html("");
-                    showNoDataAnalyticsMsg();
-                }
-
-                else{
+                } else {
                     $('.stat-page').html("");
                     showEnableAnalyticsMsg();
                 }

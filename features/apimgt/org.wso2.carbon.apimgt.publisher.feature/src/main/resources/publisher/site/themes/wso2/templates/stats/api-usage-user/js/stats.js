@@ -66,10 +66,8 @@ var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
                        $("#date-range span").html(dateStr);
                        drawAPIUsage(from,to,apiFilter);
                     });
-                    
 
                     getDateTime(to,from);
-
 
                     $('#date-range').click(function (event) {
                     event.stopPropagation();
@@ -80,14 +78,7 @@ var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
                         $(this).siblings().removeClass('active');
                     });
 
-                }
-
-                else if (json.usage && json.usage.length == 0 && statsEnabled) {
-                    $('.stat-page').html("");
-                    showNoDataAnalyticsMsg();
-                }
-
-                else{
+                } else {
                     $('.stat-page').html("");
                     showEnableAnalyticsMsg();
                 }
