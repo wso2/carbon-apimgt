@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.usage.publisher.dto.ResponsePublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import javax.xml.stream.XMLStreamException;
+
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -177,7 +178,6 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
                         mc.getMessageID() + " started" + " at "
                         + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
             }
-
             publisher.publishEvent(responsePublisherDTO);
             if (log.isDebugEnabled()) {
                 log.debug("Publishing success API invocation event from gateway to analytics for: "
@@ -185,7 +185,6 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
                         mc.getMessageID() + " ended" + " at "
                         + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
             }
-
         } catch (Exception e) {
             log.error("Cannot publish response event. " + e.getMessage(), e);
         }

@@ -98,14 +98,12 @@ public class APIMgtFaultHandler extends APIMgtCommonExecutionPublisher {
                         APIMgtGatewayConstants.CONTEXT) + " with ID: " + messageContext.getMessageID() + " started"
                         + " at " + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
             }
-
             publisher.publishEvent(faultPublisherDTO);
             if (log.isDebugEnabled()) {
                 log.debug("Publishing fault event from gateway to analytics for: " + messageContext.getProperty(
                         APIMgtGatewayConstants.CONTEXT) + " with ID: " + messageContext.getMessageID() + " ended"
                         + " at " + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
             }
-
 
         } catch (Exception e) {
             log.error("Cannot publish event. " + e.getMessage(), e);
