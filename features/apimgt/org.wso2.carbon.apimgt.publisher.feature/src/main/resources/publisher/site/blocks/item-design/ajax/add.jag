@@ -969,7 +969,6 @@ if(jagg.isCSRFTokenValid())
                                 print({
                                     error: true,
                                     message: "The HTTP method '" + httpMethod + "' provided for resource '" + pathKey + "' is invalid"
-
                                 });
                                 return;
                             }
