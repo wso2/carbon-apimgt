@@ -922,11 +922,20 @@ if(jagg.isCSRFTokenValid())
             var swagger = request.getParameter("swaggerDefinition");
             var apiDefinition = parseSwaggerDefinition(swagger);
 
-            var swaggerDeserializationResult = parser.readWithInfo(swagger);
-            var swaggerObj = swaggerDeserializationResult.getSwagger();
-            var swaggerErrors = swaggerDeserializationResult.getMessages();
-
             if (apiDefinition.swagger) {
+                var swaggerDeserializationResult = parser.readWithInfo(swagger);
+                var swaggerObj = swaggerDeserializationResult.getSwagger();
+                var swaggerErrors = swaggerDeserializationResult.getMessages();
+
+                //Supported swagger version check
+                if (swaggerObj.swagger != supportedSwaggerVersion) {
+                    print({
+                        error: true,
+                        message: "Unsupported swagger version provided. Please re-import with swagger " + supportedSwaggerVersion
+                    });
+                    return;
+                }
+
                 if (swaggerErrors.size() > 0) {
                     print({
                         error: true,
@@ -939,15 +948,30 @@ if(jagg.isCSRFTokenValid())
                         var swaggerPaths = swaggerJSON.paths;
                         for (var pathKey in swaggerPaths) {
                             var path = swaggerPaths[pathKey];
+                            var globalParametersDefined = false;
+                            var httpMethodsDefined = false;
                             for (var httpMethod in path) {
-                                if (supportedHTTPMethods.indexOf(httpMethod.toLowerCase()) === -1) {
+                                if (httpMethod == "parameters") {
+                                    globalParametersDefined = true;
+                                    continue;
+                                } else if (supportedHTTPMethods.indexOf(httpMethod.toLowerCase()) === -1) {
                                     print({
                                         error: true,
                                         message: "The HTTP method '" + httpMethod + "' provided for resource '" + pathKey + "' is invalid"
 
                                     });
                                     return;
+                                } else {
+                                    httpMethodsDefined = true;
                                 }
+                            }
+                            if (globalParametersDefined && !httpMethodsDefined) {
+                                print({
+                                    error: true,
+                                    message: "The HTTP method '" + httpMethod + "' provided for resource '" + pathKey + "' is invalid"
+
+                                });
+                                return;
                             }
                         }
                     }
