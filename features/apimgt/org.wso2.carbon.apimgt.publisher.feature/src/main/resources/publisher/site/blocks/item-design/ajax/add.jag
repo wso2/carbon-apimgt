@@ -61,6 +61,8 @@ if(jagg.isCSRFTokenValid())
     site = require("/site/conf/site.json"),
     msg = require("/site/conf/ui-messages.jag"),
     parser = new SwaggerParser(),
+    supportedSwaggerVersion = "2.0",
+    supportedOpenAPIVersion = "3.0.0",
     supportedHTTPMethods = ["get", "put", "post", "delete", "patch", "head", "options"];
 
     if(jagg.getUser() == null){
@@ -74,8 +76,6 @@ if(jagg.isCSRFTokenValid())
             var type = request.getParameter("type");
             var swagger = null;
             var wsdl = null;
-            var supportedSwaggerVersion = "2.0";
-            var supportedOpenAPIVersion = "3.0.0";
             var apiDefinitionVersion = request.getParameter("apiDefinitionVersion");
 
             if(type == "rest"){
@@ -920,37 +920,67 @@ if(jagg.isCSRFTokenValid())
             print(apiDefinitionVersion);
         } else if (request.getMethod() === 'POST' && action === 'validateSwagger') {
             var swagger = request.getParameter("swaggerDefinition");
+            var apiDefinition = parseSwaggerDefinition(swagger);
+
             var swaggerDeserializationResult = parser.readWithInfo(swagger);
             var swaggerObj = swaggerDeserializationResult.getSwagger();
             var swaggerErrors = swaggerDeserializationResult.getMessages();
-            if (swaggerErrors.size() > 0) {
-                print({
-                    error: true,
-                    message: "API swagger definition is invalid. Please fix the suggested validation issues"
-                });
-                return;
-            } else {
-                var swaggerJSON = JSON.parse(swagger);
-                if (swaggerJSON.paths) {
-                    var swaggerPaths = swaggerJSON.paths;
-                    for (var pathKey in swaggerPaths) {
-                        var path = swaggerPaths[pathKey];
-                        for(var httpMethod in path){
-                            if(supportedHTTPMethods.indexOf(httpMethod.toLowerCase()) === -1){
-                                print({
-                                    error: true,
-                                    message: "The HTTP method '" + httpMethod + "' provided for resource '" + pathKey + "' is invalid"
 
-                                });
-                                return;
+            if (apiDefinition.swagger) {
+                if (swaggerErrors.size() > 0) {
+                    print({
+                        error: true,
+                        message: "API swagger definition is invalid. Please fix the suggested validation issues"
+                    });
+                    return;
+                } else {
+                    var swaggerJSON = JSON.parse(swagger);
+                    if (swaggerJSON.paths) {
+                        var swaggerPaths = swaggerJSON.paths;
+                        for (var pathKey in swaggerPaths) {
+                            var path = swaggerPaths[pathKey];
+                            for (var httpMethod in path) {
+                                if (supportedHTTPMethods.indexOf(httpMethod.toLowerCase()) === -1) {
+                                    print({
+                                        error: true,
+                                        message: "The HTTP method '" + httpMethod + "' provided for resource '" + pathKey + "' is invalid"
+
+                                    });
+                                    return;
+                                }
                             }
                         }
                     }
+                    print({
+                        error: false
+                    })
+                }
+            } else if (apiDefinition.openapi){
+                //Supported Open API Version check
+                if (apiDefinition.openapi.trim() != supportedOpenAPIVersion) {
+                    print({
+                        error: true,
+                        message: "Unsupported OpenAPI version provided. Please re-import with OpenAPI " +
+                        supportedOpenAPIVersion
+                    });
+                    return;
+                }
+
+                if (apiDefinition.info == null || apiDefinition.paths == null) {
+                    print({
+                        error: true,
+                        message: "Required property 'info' or 'paths' are not provided"
+                    });
+                    return;
                 }
                 print({
                     error: false
                 })
+            } else {
+                print({error: true, message: "Invalid Open API definition provided"});
+                return;
             }
+
         } else {
             print({
                       error:true,
