@@ -204,19 +204,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
 
         List<String> subscriberApps = getAppsAndIdsBySubscriber(subscriberName, groupId);
-        StringBuilder concatenatedIdString = new StringBuilder();
-
-        int size = subscriberApps.size();
-        if (size > 0) {
-            concatenatedIdString.append("'").append(subscriberApps.get(0)).append("'");
-        } else {
-            return Collections.emptyList();
-        }
-        for (int i = 1; i < subscriberApps.size(); i++) {
-            concatenatedIdString.append(",'").append(subscriberApps.get(i)).append("'");
-        }
         return getFaultAppUsageData(APIUsageStatisticsClientConstants.API_FAULTY_INVOCATION_AGG,
-                concatenatedIdString.toString(), fromDate, toDate, limit);
+                subscriberApps, fromDate, toDate, limit);
     }
 
     /**
@@ -235,29 +224,19 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             int limit) throws APIMgtUsageQueryServiceClientException {
 
         List<String> subscriberApps = getAppsAndIdsBySubscriber(subscriberName, groupId);
-        StringBuilder concatenatedIdString = new StringBuilder();
-        int size = subscriberApps.size();
-        if (size > 0) {
-            concatenatedIdString.append("'").append(subscriberApps.get(0)).append("'");
-        } else {
-            return Collections.emptyList();
-        }
-        for (int i = 1; i < subscriberApps.size(); i++) {
-            concatenatedIdString.append(",'").append(subscriberApps.get(i)).append("'");
-        }
         return getTopAppUsageData(APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG,
-                concatenatedIdString.toString(), fromDate, toDate, limit);
+                subscriberApps, fromDate, toDate, limit);
     }
 
     /**
      * This method gets the app usage data for invoking APIs
      *
      * @param tableName name of the required table in the database
-     * @param idString  concatenated Ids of applications
+     * @param idList    Id list of applications
      * @return a collection containing the data related to App usage
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
-    private List<AppUsageDTO> getTopAppUsageData(String tableName, String idString, String fromDate, String toDate,
+    private List<AppUsageDTO> getTopAppUsageData(String tableName, List<String> idList, String fromDate, String toDate,
             int limit) throws APIMgtUsageQueryServiceClientException {
         List<AppUsageDTO> topAppUsageDataList = new ArrayList<AppUsageDTO>();
         try {
@@ -274,10 +253,18 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
                 granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
             }
+            StringBuilder idListQuery = new StringBuilder();
+            for (int i = 0; i < idList.size(); i++) {
+                if (i > 0) {
+                    idListQuery.append(" or ");
+                }
+                idListQuery.append(APIUsageStatisticsClientConstants.APPLICATION_ID + "==");
+                idListQuery.append("'" + idList.get(i) + "'");
+            }
             StringBuilder query = new StringBuilder(
-                    "from " + tableName + " within '" + startDate + "', '" + endDate + "' per '" + granularity
-                            + "' select " + APIUsageStatisticsClientConstants.APPLICATION_ID + ", "
-                            + APIUsageStatisticsClientConstants.USERNAME + ", sum("
+                    "from " + tableName + " on " + idListQuery.toString() + " within '" + startDate + "', '" + endDate
+                            + "' per '" + granularity + "' select " + APIUsageStatisticsClientConstants.APPLICATION_ID
+                            + ", " + APIUsageStatisticsClientConstants.USERNAME + ", sum("
                             + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT
                             + ") as net_total_requests group by " + APIUsageStatisticsClientConstants.APPLICATION_ID
                             + ", " + APIUsageStatisticsClientConstants.USERNAME + " order by net_total_requests DESC");
@@ -452,12 +439,12 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * This method gets the API faulty invocation data
      *
      * @param tableName name of the required table in the database
-     * @param idString  concatenated Ids of applications
+     * @param idList    Ids List of applications
      * @return a collection containing the data related to API faulty invocations
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
-    private List<FaultCountDTO> getFaultAppUsageData(String tableName, String idString, String fromDate, String toDate,
-            int limit) throws APIMgtUsageQueryServiceClientException {
+    private List<FaultCountDTO> getFaultAppUsageData(String tableName, List<String> idList, String fromDate,
+            String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
         List<FaultCountDTO> falseAppUsageDataList = new ArrayList<FaultCountDTO>();
         try {
             String startDate = fromDate + ":00";
@@ -473,13 +460,23 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
                 granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
             }
-            String query = "from " + tableName + " within '" + startDate + "', '" + endDate + "' per '" + granularity
-                    + "' select " + APIUsageStatisticsClientConstants.APPLICATION_ID + ", "
-                    + APIUsageStatisticsClientConstants.API_NAME + ", " + APIUsageStatisticsClientConstants.API_CREATOR
-                    + ", sum(" + APIUsageStatisticsClientConstants.TOTAL_FAULT_COUNT + ") as total_faults group by "
-                    + APIUsageStatisticsClientConstants.APPLICATION_ID + ", "
-                    + APIUsageStatisticsClientConstants.API_CREATOR + ", " + APIUsageStatisticsClientConstants.API_NAME
-                    + ";";
+            StringBuilder idListQuery = new StringBuilder();
+            for (int i = 0; i < idList.size(); i++) {
+                if (i > 0) {
+                    idListQuery.append(" or ");
+                }
+                idListQuery.append(APIUsageStatisticsClientConstants.APPLICATION_ID + "==");
+                idListQuery.append("'" + idList.get(i) + "'");
+            }
+            String query =
+                    "from " + tableName + " on " + idListQuery.toString() + " within '" + startDate + "', '" + endDate
+                            + "' per '" + granularity + "' select " + APIUsageStatisticsClientConstants.APPLICATION_ID
+                            + ", " + APIUsageStatisticsClientConstants.API_NAME + ", "
+                            + APIUsageStatisticsClientConstants.API_CREATOR + ", sum("
+                            + APIUsageStatisticsClientConstants.TOTAL_FAULT_COUNT + ") as total_faults group by "
+                            + APIUsageStatisticsClientConstants.APPLICATION_ID + ", "
+                            + APIUsageStatisticsClientConstants.API_CREATOR + ", "
+                            + APIUsageStatisticsClientConstants.API_NAME + ";";
             JSONObject jsonObj = APIUtil
                     .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_FAULT_SUMMARY_SIDDHI_APP,
                             query);
@@ -538,29 +535,19 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             int limit) throws APIMgtUsageQueryServiceClientException {
 
         List<String> subscriberApps = getAppsAndIdsBySubscriber(subscriberName, groupId);
-        StringBuilder concatenatedIds = new StringBuilder();
-        int size = subscriberApps.size();
-        if (size > 0) {
-            concatenatedIds.append("'").append(subscriberApps.get(0)).append("'");
-        } else {
-            return Collections.emptyList();
-        }
-        for (int i = 1; i < subscriberApps.size(); i++) {
-            concatenatedIds.append(",'").append(subscriberApps.get(i)).append("'");
-        }
         return getAPICallTypeUsageData(APIUsageStatisticsClientConstants.API_RESOURCE_PATH_PER_APP_AGG,
-                concatenatedIds.toString(), fromDate, toDate, limit);
+                subscriberApps, fromDate, toDate, limit);
     }
 
     /**
      * This method gets the API usage data per API call type
      *
      * @param tableName name of the required table in the database
-     * @param idString  concatenated Ids of applications
+     * @param idList    Ids List of applications
      * @return a collection containing the data related to API call types
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
-    private List<AppCallTypeDTO> getAPICallTypeUsageData(String tableName, String idString, String fromDate,
+    private List<AppCallTypeDTO> getAPICallTypeUsageData(String tableName, List<String> idList, String fromDate,
             String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
         List<AppCallTypeDTO> appApiCallTypeList = new ArrayList<AppCallTypeDTO>();
         try {
@@ -577,16 +564,26 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
                 granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
             }
-            String query = "from " + tableName + " within '" + startDate + "', '" + endDate + "' per '" + granularity
-                    + "' select " + APIUsageStatisticsClientConstants.API_NAME + ", "
-                    + APIUsageStatisticsClientConstants.API_CREATOR + ", "
-                    + APIUsageStatisticsClientConstants.API_METHOD + ", "
-                    + APIUsageStatisticsClientConstants.APPLICATION_ID + ", "
-                    + APIUsageStatisticsClientConstants.API_RESOURCE_TEMPLATE + " group by "
-                    + APIUsageStatisticsClientConstants.APPLICATION_ID + ", "
-                    + APIUsageStatisticsClientConstants.API_NAME + ", " + APIUsageStatisticsClientConstants.API_CREATOR
-                    + ", " + APIUsageStatisticsClientConstants.API_METHOD + ", "
-                    + APIUsageStatisticsClientConstants.API_RESOURCE_TEMPLATE + ";";
+            StringBuilder idListQuery = new StringBuilder();
+            for (int i = 0; i < idList.size(); i++) {
+                if (i > 0) {
+                    idListQuery.append(" or ");
+                }
+                idListQuery.append(APIUsageStatisticsClientConstants.APPLICATION_ID + "==");
+                idListQuery.append("'" + idList.get(i) + "'");
+            }
+            String query =
+                    "from " + tableName + " on " + idListQuery.toString() + " within '" + startDate + "', '" + endDate
+                            + "' per '" + granularity + "' select " + APIUsageStatisticsClientConstants.API_NAME + ", "
+                            + APIUsageStatisticsClientConstants.API_CREATOR + ", "
+                            + APIUsageStatisticsClientConstants.API_METHOD + ", "
+                            + APIUsageStatisticsClientConstants.APPLICATION_ID + ", "
+                            + APIUsageStatisticsClientConstants.API_RESOURCE_TEMPLATE + " group by "
+                            + APIUsageStatisticsClientConstants.APPLICATION_ID + ", "
+                            + APIUsageStatisticsClientConstants.API_NAME + ", "
+                            + APIUsageStatisticsClientConstants.API_CREATOR + ", "
+                            + APIUsageStatisticsClientConstants.API_METHOD + ", "
+                            + APIUsageStatisticsClientConstants.API_RESOURCE_TEMPLATE + ";";
             JSONObject jsonObj = APIUtil
                     .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_ACCESS_SUMMARY_SIDDHI_APP,
                             query);
@@ -649,17 +646,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
 
         List<String> subscriberApps = getAppsAndIdsBySubscriber(subscriberName, groupId);
-        StringBuilder concatenatedIds = new StringBuilder();
-        int size = subscriberApps.size();
-        if (size > 0) {
-            concatenatedIds.append("'").append(subscriberApps.get(0)).append("'");
-        } else {
-            return Collections.emptyList();
-        }
-        for (int i = 1; i < subscriberApps.size(); i++) {
-            concatenatedIds.append(",'").append(subscriberApps.get(i)).append("'");
-        }
-        return getPerAppAPIUsageData(APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG, concatenatedIds.toString(),
+        return getPerAppAPIUsageData(APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG, subscriberApps,
                 fromDate, toDate, limit);
     }
 
@@ -667,11 +654,11 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * This method gets the API usage data per application
      *
      * @param tableName name of the required table in the database
-     * @param idString  concatenated Ids of applications
+     * @param idList    Ids list of applications
      * @return a collection containing the data related to per App API usage
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
-    private List<PerAppApiCountDTO> getPerAppAPIUsageData(String tableName, String idString, String fromDate,
+    private List<PerAppApiCountDTO> getPerAppAPIUsageData(String tableName, List<String> idList, String fromDate,
             String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
         List<PerAppApiCountDTO> perAppUsageDataList = new ArrayList<PerAppApiCountDTO>();
         try {
@@ -687,13 +674,23 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
                 granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
             }
-            String query = "from " + tableName + " within '" + startDate + "', '" + endDate + "' per '" + granularity
-                    + "' select " + APIUsageStatisticsClientConstants.API_NAME + ", "
-                    + APIUsageStatisticsClientConstants.API_CREATOR + ", "
-                    + APIUsageStatisticsClientConstants.APPLICATION_ID + ", sum("
-                    + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") as total_calls group by "
-                    + APIUsageStatisticsClientConstants.API_NAME + ", " + APIUsageStatisticsClientConstants.API_CREATOR
-                    + ", " + APIUsageStatisticsClientConstants.APPLICATION_ID + ";";
+            StringBuilder idListQuery = new StringBuilder();
+            for (int i = 0; i < idList.size(); i++) {
+                if (i > 0) {
+                    idListQuery.append(" or ");
+                }
+                idListQuery.append(APIUsageStatisticsClientConstants.APPLICATION_ID + "==");
+                idListQuery.append("'" + idList.get(i) + "'");
+            }
+            String query =
+                    "from " + tableName + " on " + idListQuery.toString() + " within '" + startDate + "', '" + endDate
+                            + "' per '" + granularity + "' select " + APIUsageStatisticsClientConstants.API_NAME + ", "
+                            + APIUsageStatisticsClientConstants.API_CREATOR + ", "
+                            + APIUsageStatisticsClientConstants.APPLICATION_ID + ", sum("
+                            + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") as total_calls group by "
+                            + APIUsageStatisticsClientConstants.API_NAME + ", "
+                            + APIUsageStatisticsClientConstants.API_CREATOR + ", "
+                            + APIUsageStatisticsClientConstants.APPLICATION_ID + ";";
             JSONObject jsonObj = APIUtil
                     .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_ACCESS_SUMMARY_SIDDHI_APP,
                             query);
