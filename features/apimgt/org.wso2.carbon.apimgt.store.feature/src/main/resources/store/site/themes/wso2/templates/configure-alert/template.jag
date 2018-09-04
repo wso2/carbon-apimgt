@@ -1,0 +1,76 @@
+<% jagg.template("configure-alert", function(inputs, outputs, jagg) { %>
+    <div>
+        <%
+            var alert = request.getParameter("alertType");
+            var error = outputs.configuration.error;
+        %>
+        <div class="page-header">
+            <h2><%=i18n.localize("Configure") + " '" + i18n.localize(alert) + "' " + i18n.localize("Alert")%></h2>
+        </div>
+        <div class="white-wrapper add-padding-4x">
+        <%
+            if(error == false) {
+        %>
+            <div class="form-horizontal">
+                <h3><%=i18n.localize("New Alert")%></h3>
+                <hr/>
+                <form method="POST" >
+                    <div class="form-group">
+                        <label class="control-label col-sm-3"><%=i18n.localize("Application Name")%>  <span class="requiredAstrix">*</span></label>
+                        <div class="col-md-9">
+                            <select class="form-control selectpicker" id="appName" data-live-search="true"></select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3"><%=i18n.localize("API Name")%>  <span class="requiredAstrix">*</span></label>
+                        <div class="col-md-9">
+                            <select class="form-control" id="apiName" data-live-search="true"></select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3"><%=i18n.localize("Threshold Value")%>  <span class="requiredAstrix">*</span></label>
+                        <div class="col-md-9 col-lg-9">
+                            <input class="form-control" type="text" id="threshold" />
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="form-group">
+                        <div class="col-md-3 col-lg-3"></div>
+                        <div class="col-md-9 col-lg-9">
+                            <submit type="button" id="submitConfig" onclick="" class="btn btn-primary has-spinner">
+                                <span class="icon fw-stack">
+                                    <i class="fw fw-save fw-stack-1x"></i>
+                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+                                </span>
+                                <%=i18n.localize("Save")%>
+                            </submit>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <hr/>
+
+            <div class="form-horizontal">
+                <h3><%=i18n.localize("Subscriptions")%></h3>
+                <hr/>
+            </div>
+            <table class="table">
+                <tr>
+                    <th><%=i18n.localize("Application Name")%></th>
+                    <th><%=i18n.localize("API Name")%></th>
+                    <th><%=i18n.localize("API Version")%></th>
+                    <th><%=i18n.localize("Threshold Value")%></th>
+                </tr>
+            </table>
+        <%
+            } else {
+        %>
+            <div class="message message-warning">
+                <h4><i class="icon fw fw-warning"></i><%= i18n.localize("Not Configured")%></h4>
+            </div>
+        <%
+            }
+        %>
+        </div>
+    </div>
+<%});%>

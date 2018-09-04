@@ -16,27 +16,45 @@
                 for (var key in allAlertType) {
                     if (allAlertType.hasOwnProperty(key)) {
                         var isChecked;
+                        var alertType = allAlertType[key];
                         for (var savedAlertTypesKey in savedAlertTypes) {
                             if (savedAlertTypes.hasOwnProperty(savedAlertTypesKey)) {
-
-                                if(savedAlertTypes[savedAlertTypesKey] == key){
+                                if(savedAlertTypes[savedAlertTypesKey] == key) {
                                     isChecked = "checked";
                                     break;
-                                }else{
+                                } else {
                                     isChecked = "";
                                 }
                             }
                         }
                        %>
-                       <div class="form-group">
-                          <div class="col-sm-12">
-                              <label class="checkbox">
-                                <input type="checkbox" title="alertTypes" id="<%=allAlertType[key]%>" value="<%=encode.forHtml(key)%>" <%=encode.forHtml(isChecked) %>>
-                                <span class="helper"><strong><%= i18n.localize(encode.forHtml(allAlertType[key])) %></strong></span>
-                                <p><%= i18n.localize(encode.forHtml(allAlertType[key]) + "_Desc") %></p>
-                              </label>
-                          </div>
-                        </div>
+                            <div class="form-group">
+                                <div class="col-sm-12">
+                                    <div class="row">
+                                        <div class="col-xs-10 col-sm-10 col-lg-11">
+                                            <label class="checkbox">
+                                                <input type="checkbox" title="alertTypes" id="<%=allAlertType[key]%>" value="<%=encode.forHtml(key)%>" <%=encode.forHtml(isChecked) %>>
+                                                <span class="helper"><strong><%= i18n.localize(encode.forHtml(allAlertType[key])) %></strong></span>
+                                                <p><%= i18n.localize(encode.forHtml(allAlertType[key]) + "_Desc") %></p>
+                                            </label>
+                                        </div>
+                                        <div class="col-xs-2 col-sm-2 col-lg-1">
+                                        <%
+                                            if ("AbnormalRequestsPerMin" == allAlertType[key]) {
+                                        %>
+                                            <div id="editButton<%=key%>" onclick="configureAlertType('<%=alertType%>')" class="btn padding-reduce-on-grid-view">
+                                                <span class="fw-stack">
+                                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+                                                    <i class="fw fw-settings fw-stack-1x"></i>
+                                                </span>
+                                            </div>
+                                        <%
+                                            }
+                                        %>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                        <%
                     }
                 }
@@ -66,7 +84,7 @@
                     </div>
                     </div>
                 <%
-            }else{
+            } else {
                 %>
                     <div class="message message-warning">
                         <h4><i class="icon fw fw-warning"></i><%= i18n.localize("Not Configured")%></h4>

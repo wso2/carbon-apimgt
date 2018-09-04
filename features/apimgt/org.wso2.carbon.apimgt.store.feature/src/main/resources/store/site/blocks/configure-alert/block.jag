@@ -1,0 +1,17 @@
+<%
+jagg.block("configure-alert", {
+    initializer:function (data) {
+    },
+    getInputs:function () {
+        return {};
+    },
+    getOutputs: function () {
+        // var mod = jagg.module("configure-alert");
+        var config = {error: false};
+
+        return {
+            "configuration": config
+        };
+    }
+});
+%>
