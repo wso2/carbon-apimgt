@@ -38,6 +38,9 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.tracing.TracingSpan;
+import org.wso2.carbon.apimgt.tracing.TracingTracer;
+import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 
@@ -114,6 +117,11 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
     public boolean handleRequest(MessageContext messageContext) {
 
         Timer.Context context = startMetricTimer();
+
+        TracingSpan responseLatencySpan = (TracingSpan) messageContext.getProperty("ResponseLatency");
+        TracingTracer tracer = (TracingTracer) messageContext.getProperty("Tracer");
+        TracingSpan CORSRequestHandlerSpan = Util.startSpan("CORSRequestHandler", responseLatencySpan, tracer);
+        messageContext.setProperty("CORSRequestHandler", CORSRequestHandlerSpan);
 
         try {
             if (!initializeHeaderValues) {
@@ -213,6 +221,9 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             return true;
         } finally {
             stopMetricTimer(context);
+
+            TracingSpan span = (TracingSpan) messageContext.getProperty("CORSRequestHandler");
+            Util.finishSpan(span);
         }
     }
 

@@ -63,6 +63,7 @@ import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.tracing.OpenTracer;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
+import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.metrics.manager.Level;
 import org.wso2.carbon.metrics.manager.MetricManager;
@@ -496,8 +497,8 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
 
         TracingSpan responseLatencySpan = (TracingSpan) messageContext.getProperty("ResponseLatency");
         TracingTracer tracer = (TracingTracer) messageContext.getProperty("Tracer");
-        TracingSpan throttlingLatencySpan = OpenTracer.startSpan("Throttling_Latency-ThrottleHandler", responseLatencySpan, tracer);
-        OpenTracer.setTag(throttlingLatencySpan,"RequestID", String.valueOf(messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID)));
+        TracingSpan throttlingLatencySpan = Util.startSpan("Throttling_Latency-ThrottleHandler", responseLatencySpan, tracer);
+        Util.setTag(throttlingLatencySpan,"RequestID", String.valueOf(messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID)));
         messageContext.setProperty("ThrottlingLatencySpan-ThrottleHandler", throttlingLatencySpan);
 
         long executionStartTime = System.currentTimeMillis();
@@ -509,7 +510,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
             context3.stop();
 
             TracingSpan span = (TracingSpan) messageContext.getProperty("ThrottlingLatencySpan-ThrottleHandler");
-            OpenTracer.finishSpan(span);
+            Util.finishSpan(span);
         }
     }
 

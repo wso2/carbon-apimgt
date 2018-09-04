@@ -47,6 +47,7 @@ import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
 import org.wso2.carbon.apimgt.tracing.OpenTracer;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
+import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsagePublisherConstants;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsConstants;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsData;
@@ -193,8 +194,8 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
 
         TracingSpan responseLatencySpan = (TracingSpan) msgCtx.getProperty("ResponseLatency");
         TracingTracer tracer = (TracingTracer) msgCtx.getProperty("Tracer");
-        TracingSpan googleAnalyticsSpan = OpenTracer.startSpan("GoogleAnalyticsLatency", responseLatencySpan, tracer);
-        OpenTracer.setTag(googleAnalyticsSpan, "RequestID", String.valueOf(msgCtx.getProperty(APIMgtGatewayConstants.REQUEST_ID)));
+        TracingSpan googleAnalyticsSpan = Util.startSpan("GoogleAnalyticsLatency", responseLatencySpan, tracer);
+        Util.setTag(googleAnalyticsSpan, "RequestID", String.valueOf(msgCtx.getProperty(APIMgtGatewayConstants.REQUEST_ID)));
         msgCtx.setProperty("GoogleAnalyticsSpan", googleAnalyticsSpan);
 
         GoogleAnalyticsDataPublisher.publishGET(payload, userAgent, false);
@@ -204,7 +205,7 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
         }
 
         TracingSpan span = (TracingSpan) msgCtx.getProperty("GoogleAnalyticsSpan");
-        OpenTracer.finishSpan(span);
+        Util.finishSpan(span);
 	}
 
 	/**

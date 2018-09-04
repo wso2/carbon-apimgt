@@ -43,25 +43,29 @@ public class TracingServiceImpl implements TracingService {
             configuration.load(filePath);
 
         } catch (APIManagementException e) {
-            e.printStackTrace();
+            log.error("Error in reading configuration file", e);
         }
 
-        String openTracerName = configuration.getFirstProperty("OpenTracer.Name");
-        String enabled = configuration.getFirstProperty("OpenTracer.Enabled");
+        String openTracerName = getConfiguration().getFirstProperty(TracingConstants.OPEN_TRACER_NAME);
+        String enabled = getConfiguration().getFirstProperty(TracingConstants.OPEN_TRACER_ENABLED);
 
         if (openTracerName.equalsIgnoreCase("JAEGER") && enabled.equalsIgnoreCase("TRUE")) {
 
-            tracer = new JaegerTracerImpl().getTracer(configuration, serviceName);
+            tracer = new JaegerTracerImpl().getTracer(serviceName);
             return new TracingTracer(tracer);
         } else if (openTracerName.equalsIgnoreCase("ZIPKIN") && enabled.equalsIgnoreCase("TRUE")) {
 
-            tracer = new ZipkinTracerImpl().getTracer(configuration, serviceName);
+            tracer = new ZipkinTracerImpl().getTracer(serviceName);
             return new TracingTracer(tracer);
         } else {
             log.error("Invalid Configuration");
         }
 
         return null;
+    }
+
+    public APIManagerConfiguration getConfiguration() {
+        return configuration;
     }
 
 }

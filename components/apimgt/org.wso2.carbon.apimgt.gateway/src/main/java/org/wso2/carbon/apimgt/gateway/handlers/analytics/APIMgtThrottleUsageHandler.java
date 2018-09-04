@@ -95,6 +95,8 @@ public class APIMgtThrottleUsageHandler extends APIMgtCommonExecutionPublisher {
                             + messageContext.getMessageID() + " started" + " at "
                             + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
                 }
+
+
                 publisher.publishEvent(throttlePublisherDTO);
                 if (log.isDebugEnabled()) {
                     log.debug("Publishing throttling event from gateway to analytics for: "

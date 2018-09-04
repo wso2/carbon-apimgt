@@ -20,19 +20,20 @@ package org.wso2.carbon.apimgt.tracing.zipkin;
 
 import brave.Tracing;
 import brave.opentracing.BraveTracer;
-import io.opentracing.Span;
 import io.opentracing.Tracer;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.tracing.OpenTracer;
+import org.wso2.carbon.apimgt.tracing.TracingServiceImpl;
 import zipkin2.reporter.AsyncReporter;
 import zipkin2.reporter.okhttp3.OkHttpSender;
 
 public class ZipkinTracerImpl extends OpenTracer {
 
     private static final String NAME = "zipkin";
+    APIManagerConfiguration configuration = new TracingServiceImpl().getConfiguration();
 
     @Override
-    public Tracer getTracer(APIManagerConfiguration configuration, String serviceName) {
+    public Tracer getTracer(String serviceName) {
 
         String hostname = configuration.getFirstProperty(Constants.CONFIG_HOST) != null ?
                 configuration.getFirstProperty(Constants.CONFIG_HOST) : Constants.DEFAULT_HOST;

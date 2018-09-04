@@ -32,6 +32,9 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.tracing.TracingSpan;
+import org.wso2.carbon.apimgt.tracing.TracingTracer;
+import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.metrics.manager.Level;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
@@ -116,7 +119,12 @@ public class OAuthAuthenticator implements Authenticator {
         String httpMethod = (String)((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(Constants.Configuration.HTTP_METHOD);
 
+        TracingSpan keySpan = (TracingSpan) synCtx.getProperty("KeySpan");
+        TracingTracer tracer = (TracingTracer) synCtx.getProperty("Tracer");
+        TracingSpan getClientDomainSpan = Util.startSpan("GetClientDomain", keySpan, tracer);
         String clientDomain = getClientDomain(synCtx);
+        Util.finishSpan(getClientDomainSpan);
+
         if(log.isDebugEnabled() && null != clientDomain) {
             log.debug("Received Client Domain ".concat(clientDomain));
         }
@@ -124,7 +132,10 @@ public class OAuthAuthenticator implements Authenticator {
         Timer timer = getTimer(MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "GET_RESOURCE_AUTH"));
         Timer.Context context = timer.start();
+
+        TracingSpan authenticationSchemeSpan = Util.startSpan("AuthenticationScheme", keySpan, tracer);
         String authenticationScheme = getAPIKeyValidator().getResourceAuthenticationScheme(synCtx);
+        Util.finishSpan(authenticationSchemeSpan);
         context.stop();
         APIKeyValidationInfoDTO info;
         if(APIConstants.AUTH_NO_AUTHENTICATION.equals(authenticationScheme)){
@@ -203,8 +214,10 @@ public class OAuthAuthenticator implements Authenticator {
                     APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "GET_KEY_VALIDATION_INFO"));
             context = timer.start();
 
+            TracingSpan keyInfo = Util.startSpan("Key_Info", keySpan, tracer);
             info = getAPIKeyValidator().getKeyValidationInfo(apiContext, apiKey, apiVersion, authenticationScheme, clientDomain,
                     matchingResource, httpMethod, defaultVersionInvoked);
+            Util.finishSpan(keyInfo);
             context.stop();
             synCtx.setProperty(APIMgtGatewayConstants.APPLICATION_NAME, info.getApplicationName());
             synCtx.setProperty(APIMgtGatewayConstants.END_USER_NAME, info.getEndUserName());
@@ -213,6 +226,7 @@ public class OAuthAuthenticator implements Authenticator {
         }
 
         if (info.isAuthorized()) {
+            TracingSpan isAuthorizedSpan = Util.startSpan("isAuthorizedSpan", keySpan, tracer);
             AuthenticationContext authContext = new AuthenticationContext();
             authContext.setAuthenticated(true);
             authContext.setTier(info.getTier());
@@ -242,6 +256,7 @@ public class OAuthAuthenticator implements Authenticator {
             //String tenantDomain = MultitenantUtils.getTenantDomain(info.getApiPublisher());
             synCtx.setProperty("api.ut.apiPublisher", info.getApiPublisher());
             synCtx.setProperty("API_NAME", info.getApiName());
+            Util.finishSpan(isAuthorizedSpan);
 
             if(log.isDebugEnabled()){
                 log.debug("User is authorized to access the Resource");

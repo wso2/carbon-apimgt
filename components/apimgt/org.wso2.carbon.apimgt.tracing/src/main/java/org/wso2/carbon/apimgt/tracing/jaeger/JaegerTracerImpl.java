@@ -22,13 +22,15 @@ import io.jaegertracing.Configuration;
 import io.opentracing.Tracer;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.tracing.OpenTracer;
+import org.wso2.carbon.apimgt.tracing.TracingServiceImpl;
 
 public class JaegerTracerImpl extends OpenTracer {
 
     private static final String NAME = "jaeger";
+    APIManagerConfiguration configuration = new TracingServiceImpl().getConfiguration();
 
     @Override
-    public Tracer getTracer(APIManagerConfiguration configuration, String serviceName) {
+    public Tracer getTracer(String serviceName) {
 
         String hostname = configuration.getFirstProperty(Constants.CONFIG_HOST) != null ?
                 configuration.getFirstProperty(Constants.CONFIG_HOST) : Constants.DEFAULT_HOST;

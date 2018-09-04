@@ -22,7 +22,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.tracing.TracingService;
 import org.wso2.carbon.apimgt.tracing.TracingServiceImpl;
 
@@ -37,7 +36,7 @@ public class TracingServiceComponent {
     protected void activate(ComponentContext componentContext) {
 
         try {
-            log.info(" Tracing Component activated ");
+            log.debug("Tracing Component activated");
             BundleContext bundleContext = componentContext.getBundleContext();
             bundleContext.registerService(TracingService.class, new TracingServiceImpl(), null);
 
@@ -48,7 +47,7 @@ public class TracingServiceComponent {
 
     protected void deactivate(ComponentContext componentContext) {
 
-        log.info(" Tracing Component deactivated ");
+        log.debug("Tracing Component deactivated");
     }
 
 }

@@ -49,6 +49,7 @@ import org.wso2.carbon.apimgt.tracing.OpenTracer;
 import org.wso2.carbon.apimgt.tracing.TracingService;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
+import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 
@@ -148,11 +149,12 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             justification = "Error is sent through payload")
     public boolean handleRequest(MessageContext messageContext) {
 
+        org.apache.axis2.context.MessageContext msgCtx = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         TracingSpan responseLatencySpan = (TracingSpan) messageContext.getProperty("ResponseLatency");
         TracingTracer tracer = (TracingTracer) messageContext.getProperty("Tracer");
-        TracingSpan keySpan = OpenTracer.startSpan("KeyValidationLatency", responseLatencySpan, tracer);
-        OpenTracer.setTag(keySpan, "RequestID", String.valueOf(messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID)));
+        TracingSpan keySpan = Util.startSpan("KeyValidationLatency", responseLatencySpan, tracer);
         messageContext.setProperty("KeySpan", keySpan);
+        msgCtx.setProperty("KeySpan", keySpan);
 
         Timer.Context context = startMetricTimer();
         long startTime = System.nanoTime();
@@ -200,7 +202,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             handleAuthFailure(messageContext, e);
         } finally {
             TracingSpan span = (TracingSpan) messageContext.getProperty("KeySpan");
-            OpenTracer.finishSpan(span);
+            Util.finishSpan(span);
             messageContext.setProperty(APIMgtGatewayConstants.SECURITY_LATENCY,
                     TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime));
             stopMetricTimer(context);

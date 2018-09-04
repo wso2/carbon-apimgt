@@ -90,9 +90,10 @@ public class APIMgtGatewayConstants {
     public static final String XSD_URL = "xsdURL";
     public static final String UTF8 = "UTF-8";
 
-    public static final String SYNAPSE_BACKEND_LATENCY = "synapse.backend.latency";
-    public static final String SYNAPSE_RESPONSE_LATENCY = "synapse.response.latency";
     public static final String REQUEST_ID = "request.id";
+    public static final String TRACER = "Tracer";
+    public static final String RESPONSE_LATENCY_SPAN = "ResponseLatency";
+    public static final String BACKEND_LATENCY_SPAN = "BackendLatency";
 
 }
 
