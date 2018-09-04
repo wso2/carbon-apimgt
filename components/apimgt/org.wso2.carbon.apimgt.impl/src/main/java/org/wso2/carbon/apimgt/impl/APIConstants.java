@@ -284,6 +284,9 @@ public final class APIConstants {
     public static final String PROVIDER_OVERVIEW_EMAIL = "overview_email";
     public static final String PROVIDER_OVERVIEW_DESCRIPTION = "overview_description";
 
+    //Json schema validator
+    public static final String API_OVERVIEW_ENABLE_JSON_SCHEMA = "overview_enableSchemaValidation";
+
     public static final String API_LABELS_GATEWAY_LABELS = "labels_labelName";
     public static final String LABEL_NAME = "labelName";
     public static final String LABEL_DESCRIPTION = "labelDescription";

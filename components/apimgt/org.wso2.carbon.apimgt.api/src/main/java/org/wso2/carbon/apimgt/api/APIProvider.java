@@ -20,11 +20,7 @@ package org.wso2.carbon.apimgt.api;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
-import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
-import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
-import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
-import org.wso2.carbon.apimgt.api.model.policy.Policy;
-import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.*;
 
 import java.io.InputStream;
 import java.util.List;
@@ -932,5 +928,20 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     String getSequenceFileContent(APIIdentifier apiIdentifier, String type, String name) throws APIManagementException;
+
+    /**
+     * Method to create a Local Entry by adding the swagger content for the API.
+     *
+     * @param apiId    APIIdentifier
+     * @param jsonText json text to be saved in the registry
+     */
+    void addSwaggerToLocalEntry(API apiId, String jsonText);
+
+    /**
+     * Method to remove the Local Entry from the synapse local entries.
+     *
+     * @param apiId API Identifier to be deleted the Local Entry
+     */
+    void deleteSwaggerLocalEntry(APIIdentifier apiId);
 
 }

@@ -45,6 +45,13 @@
         <field type="text">
             <name>Transports</name>
         </field>
+        <field type="options">
+            <name label="enableSchemaValidation">enable Schema Validation</name>
+            <values>
+                <value>false</value>
+                <value>true</value>
+            </values>
+        </field>
         <field type="text">
             <name>Redirect URL</name>
         </field>

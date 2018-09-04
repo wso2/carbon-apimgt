@@ -306,13 +306,16 @@ public class GatewayUtils {
                                        String errorCode, String desc) {
         messageContext.setProperty(APIMgtGatewayConstants.THREAT_FOUND, true);
         messageContext.setProperty(APIMgtGatewayConstants.THREAT_CODE, errorCode);
-        messageContext.setProperty(APIMgtGatewayConstants.THREAT_MSG, APIMgtGatewayConstants.BAD_REQUEST);
+        if (messageContext.isResponse()) {
+            messageContext.setProperty(APIMgtGatewayConstants.THREAT_MSG, APIMgtGatewayConstants.BAD_RESPONSE);
+        } else {
+            messageContext.setProperty(APIMgtGatewayConstants.THREAT_MSG, APIMgtGatewayConstants.BAD_REQUEST);
+        }
         messageContext.setProperty(APIMgtGatewayConstants.THREAT_DESC, desc);
         Mediator sequence = messageContext.getSequence(APIMgtGatewayConstants.THREAT_FAULT);
         // Invoke the custom error handler specified by the user
-        if (sequence != null && !sequence.mediate(messageContext)) {
-            // If needed user should be able to prevent the rest of the fault handling
-            // logic from getting executed
+        if (sequence != null ) {
+            sequence.mediate(messageContext);
         }
         return true;
     }
@@ -333,6 +336,7 @@ public class GatewayUtils {
         InputStream inputStreamXml;
         InputStream inputStreamJSON;
         InputStream inputStreamOriginal;
+        InputStream inputStreamSwagger;
         int requestBufferSize = 1024;
         org.apache.axis2.context.MessageContext axis2MC;
         Pipe pipe;
@@ -356,6 +360,7 @@ public class GatewayUtils {
             }
             byteArrayOutputStream.flush();
             inputStreamMap = new HashMap<>();
+            inputStreamSwagger = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
             inputStreamSchema = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
             inputStreamXml = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
             inputStreamOriginal = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
@@ -364,6 +369,7 @@ public class GatewayUtils {
             inputStreamMap.put(ThreatProtectorConstants.XML, inputStreamXml);
             inputStreamMap.put(ThreatProtectorConstants.ORIGINAL, inputStreamOriginal);
             inputStreamMap.put(ThreatProtectorConstants.JSON, inputStreamJSON);
+            inputStreamMap.put(ThreatProtectorConstants.SWAGGER, inputStreamSwagger);
         }
         return  inputStreamMap;
     }

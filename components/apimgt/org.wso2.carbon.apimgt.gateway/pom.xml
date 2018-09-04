@@ -215,6 +215,25 @@
             <groupId>com.fasterxml.woodstox</groupId>
             <artifactId>woodstox-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.mediation</groupId>
+            <artifactId>org.wso2.carbon.localentry.stub</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.org.everit.json</groupId>
+            <artifactId>org.everit.json.schema</artifactId>
+            <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.json</groupId>
+                    <artifactId>json</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.json.wso2</groupId>
+            <artifactId>json</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -323,6 +342,7 @@
                             org.osgi.framework.*,
                             org.wso2.carbon.rest.api.stub.*,
                             org.wso2.carbon.sequences.stub.types,
+                            org.wso2.carbon.localentry.stub.*,
                             org.wso2.carbon.context,
                             org.wso2.carbon.mediation.*; version="${carbon.mediation.imp.pkg.version}",
                             *;resolution:=optional

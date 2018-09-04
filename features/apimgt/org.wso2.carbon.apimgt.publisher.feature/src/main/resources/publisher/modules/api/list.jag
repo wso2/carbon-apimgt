@@ -71,7 +71,8 @@ var getAPI = function (api) {
             accessControlRoles:result[54],
             additionalProperties:result[55],
             authorizationHeader:result[56],
-            gatewayLabels:result[57]
+            gatewayLabels:result[57],
+            enableSchemaValidation:result[58]
         };
         return {
             error:false,

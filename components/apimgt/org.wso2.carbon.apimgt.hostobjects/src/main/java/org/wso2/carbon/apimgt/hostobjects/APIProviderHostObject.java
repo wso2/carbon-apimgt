@@ -426,6 +426,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String responseCache = (String) apiData.get("responseCache", apiData);
         String corsConfiguraion = (String) apiData.get("corsConfiguration", apiData);
         String additionalProperties = (String) apiData.get("additionalProperties", apiData);
+        String swagger =  (String) apiData.get("swagger", apiData);
         JSONObject properties = null;
         if (!StringUtils.isEmpty(additionalProperties)) {
             JSONParser parser = new JSONParser();
@@ -569,9 +570,11 @@ public class APIProviderHostObject extends ScriptableObject {
                 handleException("Error while reading tenant information ", e);
             }
 
-
             //Save swagger in the registry
             apiProvider.saveSwagger20Definition(api.getId(), (String) apiData.get("swagger", apiData));
+            if (api.isEnabledSchemaValidation()) {
+                apiProvider.addSwaggerToLocalEntry(api, (String) apiData.get("swagger", apiData));
+            }
         }
 
         //get new key manager instance for  resource registration.
@@ -889,6 +892,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String techOwnerEmail = (String) apiData.get("techOwnerEmail", apiData);
         String bizOwner = (String) apiData.get("bizOwner", apiData);
         String bizOwnerEmail = (String) apiData.get("bizOwnerEmail", apiData);
+        String schemaValidation = (String) apiData.get("schemaValidation", apiData);
 //        String context = contextVal.startsWith("/") ? contextVal : ("/" + contextVal);
 //        String providerDomain = MultitenantUtils.getTenantDomain(provider);
 
@@ -980,6 +984,7 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setLastUpdated(new Date());
         api.setAccessControl(publisherAccessControl);
         api.setAccessControlRoles(publisherAccessControlRoles);
+        api.setEnableSchemaValidation("schemaValidation".equals(schemaValidation));
 
         if (apiData.get("swagger", apiData) != null) {
             // Read URI Templates from swagger resource and set it to api object
@@ -1214,6 +1219,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String publisherAccessControl = (String) apiData.get(APIConstants.ACCESS_CONTROL_PARAMETER, apiData);
         String publisherAccessControlRoles = "";
         String additionalProperties = (String) apiData.get("additionalProperties", apiData);
+        String schemaValidation = (String) apiData.get("schemaValidation", apiData);
         JSONObject properties = null;
         if (!StringUtils.isEmpty(additionalProperties)) {
             JSONParser parser = new JSONParser();
@@ -1516,6 +1522,8 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setResponseCache(responseCache);
         api.setCacheTimeout(cacheTimeOut);
         api.setAsDefaultVersion("default_version".equals(defaultVersion));
+        api.setEnableSchemaValidation("schemaValidation".equals(schemaValidation));
+
 
         api.setProductionMaxTps((String) apiData.get("productionTps", apiData));
         api.setSandboxMaxTps((String) apiData.get("sandboxTps", apiData));
@@ -1793,6 +1801,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String corsConfiguraion = (String) apiData.get("corsConfiguration", apiData);
         String visibleRoles = "";
         String additionalProperties = (String) apiData.get("additionalProperties", apiData);
+        String schemaValidation = (String) apiData.get("schemaValidation", apiData);
         JSONObject properties = null;
         if (!StringUtils.isEmpty(additionalProperties)) {
             JSONParser parser = new JSONParser();
@@ -2089,6 +2098,7 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setTechnicalOwner(techOwner);
         api.setTechnicalOwnerEmail(techOwnerEmail);
         api.setTransports(transport);
+        api.setEnableSchemaValidation("schemaValidation".equals(schemaValidation));
         if (!"none".equals(inSequence)) {
             api.setInSequence(inSequence);
         }
@@ -2878,6 +2888,7 @@ public class APIProviderHostObject extends ScriptableObject {
                     }
                     myn.put(57, myn, apiLabelsArray);
                 }
+                myn.put(58, myn, checkValue(Boolean.toString(api.isEnabledSchemaValidation())));
             } else {
                 handleException("Cannot find the requested API- " + apiName +
                         "-" + version);
@@ -4097,8 +4108,12 @@ public class APIProviderHostObject extends ScriptableObject {
         provider = APIUtil.replaceEmailDomain(provider);
         String name = (String) apiData.get("name", apiData);
         String version = (String) apiData.get("version", apiData);
+        API api = null;
         APIIdentifier apiId = new APIIdentifier(provider, name, version);
+
         boolean isTenantFlowStarted = false;
+
+        // delete the local Entry
         try {
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -4106,7 +4121,12 @@ public class APIProviderHostObject extends ScriptableObject {
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
+
             APIProvider apiProvider = getAPIProvider(thisObj);
+            api = apiProvider.getAPI(apiId);
+            if (api.isEnabledSchemaValidation()) {
+                apiProvider.deleteSwaggerLocalEntry(apiId);
+            }
             apiProvider.deleteAPI(apiId);
             KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
 

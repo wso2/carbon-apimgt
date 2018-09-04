@@ -1388,6 +1388,27 @@
                 <artifactId>siddhi-query-api</artifactId>
                 <version>${ballerina.lang.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.mediation</groupId>
+                <artifactId>org.wso2.carbon.localentry.stub</artifactId>
+                <version>${carbon.mediation.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.json.wso2</groupId>
+                <artifactId>json</artifactId>
+                <version>${json.orbit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.org.everit.json</groupId>
+                <artifactId>org.everit.json.schema</artifactId>
+                <version>${everit.version}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.localentry.stub</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -1585,6 +1606,10 @@
         <maven-site-plugin.version>3.3</maven-site-plugin.version>
         <maven-project-info-reports-plugin.version>2.7</maven-project-info-reports-plugin.version>
         <swagger-codegen-maven-plugin.version>2.3.1</swagger-codegen-maven-plugin.version>
+
+        <everit.version>1.5.0.wso2.v1</everit.version>
+        <json.orbit.version>3.0.0.wso2v1</json.orbit.version>
+        <flatterner.version>0.1.0</flatterner.version>
     </properties>
 </project>
 

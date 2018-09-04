@@ -53,6 +53,7 @@ public class ThreatProtectorConstants {
     public static final String ORIGINAL = "Original";
     public static final String SCHEMA = "Schema";
     public static final String JSON = "JSON";
+    public static final String SWAGGER = "swagger";
 
     /**
      * Constants for JSON protector
@@ -74,5 +75,12 @@ public class ThreatProtectorConstants {
     public static final String MAX_ATTRIBUTE_LENGTH = "maxAttributeLength";
     public static final String ENTITY_EXPANSION_LIMIT = "entityExpansionLimit";
     public static final String CHILDREN_PER_ELEMENT = "maxChildrenPerElement";
+
+    /**
+     * Constants for schema validator
+     */
+    public static final String REST_CONTENT_TYPE = "ContentType";
+    public static final String HTTP_RESPONSE_METHOD = "api.ut.HTTP_METHOD";
+    public static final String LOCALENTRY_ID = "LocalEntryId";
 
 }

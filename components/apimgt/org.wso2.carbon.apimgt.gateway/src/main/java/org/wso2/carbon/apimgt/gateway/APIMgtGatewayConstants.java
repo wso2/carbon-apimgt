@@ -19,6 +19,8 @@
 
 package org.wso2.carbon.apimgt.gateway;
 
+import java.util.EnumMap;
+
 public class APIMgtGatewayConstants {
 
     public static final String CONSUMER_KEY = "api.ut.consumerKey";
@@ -83,6 +85,7 @@ public class APIMgtGatewayConstants {
     public static final String THREAT_MSG = "THREAT_MSG";
     public static final String THREAT_DESC = "THREAT_DESC";
     public static final String BAD_REQUEST = "Bad Request";
+    public static final String BAD_RESPONSE = "Bad Response";
     public static final String THREAT_TYPE = "threatType";
     public static final String THREAT_FAULT = "_threat_fault_";
     public static final String XML_VALIDATION = "xmlValidation";
@@ -99,6 +102,63 @@ public class APIMgtGatewayConstants {
     public static final String SYNAPDE_GW_LABEL = "Synapse";
     public static final String CLIENT_USER_AGENT = "clientUserAgent";
     public static final String CLIENT_IP = "clientIp";
-    
+
+    /**
+     * Constants for swagger schema validator
+     */
+    public static final String API_ELECTED_RESOURCE = "API_ELECTED_RESOURCE";
+    public static final String LOCAL_ENTRY = "localentry";
+    public static final String ELECTED_REQUEST_METHOD ="api.ut.HTTP_METHOD";
+    public static final String SWAGGER_PATH = "paths";
+    public static final String RESPONSE = "responses";
+    public static final String SUCCESS_RESPONSE = "200";
+    public static final String SCHEMA = "schema";
+    public static final String SCHEMA_REFERENCE = "$ref";
+    public static final char LAST_INDEX = '/';
+    public static final String DEFINITIONS = "definitions";
+    public static final String KEY_WORD_ALLOF = "allOf";
+    public static final String KEY_WORD_ONEOF = "oneOf";
+    public static final String KEY_WORD_ANYOF = "anyOf";
+    public static final String REST_URL = "REST_URL_POSTFIX";
+    public static final String PARAMETERS = "parameters";
+    public static final String REQUEST_BODY = "requestBody";
+    public static final String UTF = "UTF-8";
+    public static final String SCHEMA_HANDLER = "_json_schema_validator_handler_";
+    public static final String API_SWAGGER_SCHEMA = "swaggerSchemaCache";
+    public static final String COMPONENTS = "components";
+    public static final String SCHEMAS = "schemas";
+    public static final String CONTENT = "content";
+    public enum HttpStatusCode {
+        OK("200"),
+        CREATED("201"),
+        ACCEPTED("202"),
+        NON_AUTHORITATIVE_INFORMATION("203"),
+        NO_CONTENT("204"),
+        RESET_CONTENT("205"),
+        PARTIAL_CONTENT("206"),
+        MULTI_STATUS("207"),
+        ALREADY_REPORTED("208"),
+        IM_USED("226");
+        private final String code;
+        HttpStatusCode(String code) {
+            this.code = code;
+        }
+        public String getCode() {
+            return this.code;
+        }
+    }
+    public enum CombineSchema {
+        ALL_OF("allOf"),
+        ANY_OF("anyOf"),
+        ONE_OF("oneOf");
+        private final String code;
+        CombineSchema(String code) {this.code = code; }
+        public String getCode() { return this.code; }
+    }
+    public static EnumMap<CombineSchema, String> combineSchema =
+            new EnumMap<>(APIMgtGatewayConstants.CombineSchema.class);
+
+
+
 }
 

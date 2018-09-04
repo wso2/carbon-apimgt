@@ -21,11 +21,7 @@ import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.Date;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Provider's & system's view of API
@@ -124,6 +120,11 @@ public class API implements Serializable {
      */
     private JSONObject additionalProperties;
 
+    /**
+     *  Property to hold the enable/disable status of the json schema validation.
+     */
+    private boolean enableSchemaValidation = false;
+
     // Used for endpoint environments configured with non empty URLs
     private Set<String> environmentList;
 
@@ -151,6 +152,24 @@ public class API implements Serializable {
      */
     public void setAdditionalProperties(JSONObject properties) {
         this.additionalProperties = properties;
+    }
+
+    /**
+     * Check the status of the Json schema validation property.
+     *
+     * @return Status of the validator property.
+     */
+    public boolean isEnabledSchemaValidation() {
+        return enableSchemaValidation;
+    }
+
+    /**
+     * To set the Jeson schema validation enable/disable.
+     *
+     * @param enableSchemaValidation Given Status.
+     */
+    public void setEnableSchemaValidation(boolean enableSchemaValidation) {
+        this.enableSchemaValidation = enableSchemaValidation;
     }
 
     /**
