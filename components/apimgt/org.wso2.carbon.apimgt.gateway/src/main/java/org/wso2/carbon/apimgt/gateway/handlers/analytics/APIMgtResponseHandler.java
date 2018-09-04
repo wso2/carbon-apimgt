@@ -30,14 +30,9 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.gateway.mediators.APIMgtCommonExecutionPublisher;
-import org.wso2.carbon.apimgt.tracing.OpenTracer;
-import org.wso2.carbon.apimgt.tracing.TracingSpan;
-import org.wso2.carbon.apimgt.tracing.TracingTracer;
-import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ResponsePublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.net.URL;
@@ -183,11 +178,6 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
                         + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
             }
 
-            TracingSpan responseLatencySpan = (TracingSpan) mc.getProperty("ResponseLatency");
-            TracingTracer tracer = (TracingTracer) mc.getProperty("Tracer");
-            TracingSpan keySpan = Util.startSpan("APIMgtResponseHandler", responseLatencySpan, tracer);
-            mc.setProperty("APIMgtResponseHandler", keySpan);
-
             publisher.publishEvent(responsePublisherDTO);
             if (log.isDebugEnabled()) {
                 log.debug("Publishing success API invocation event from gateway to analytics for: "
@@ -195,9 +185,6 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
                         mc.getMessageID() + " ended" + " at "
                         + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
             }
-
-            TracingSpan span = (TracingSpan) mc.getProperty("APIMgtResponseHandler");
-            Util.finishSpan(span);
 
         } catch (Exception e) {
             log.error("Cannot publish response event. " + e.getMessage(), e);

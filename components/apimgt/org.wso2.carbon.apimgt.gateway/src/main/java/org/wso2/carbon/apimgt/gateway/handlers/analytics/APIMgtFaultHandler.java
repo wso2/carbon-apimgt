@@ -24,10 +24,6 @@ import org.wso2.carbon.apimgt.gateway.mediators.APIMgtCommonExecutionPublisher;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.tracing.OpenTracer;
-import org.wso2.carbon.apimgt.tracing.TracingSpan;
-import org.wso2.carbon.apimgt.tracing.TracingTracer;
-import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.apimgt.usage.publisher.dto.FaultPublisherDTO;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -103,11 +99,6 @@ public class APIMgtFaultHandler extends APIMgtCommonExecutionPublisher {
                         + " at " + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
             }
 
-            TracingSpan responseLatencySpan = (TracingSpan) messageContext.getProperty("ResponseLatency");
-            TracingTracer tracer = (TracingTracer) messageContext.getProperty("Tracer");
-            TracingSpan faultHandlerSpan = Util.startSpan("APIMgtFaultHandler", responseLatencySpan, tracer);
-            messageContext.setProperty("APIMgtFaultHandler", faultHandlerSpan);
-
             publisher.publishEvent(faultPublisherDTO);
             if (log.isDebugEnabled()) {
                 log.debug("Publishing fault event from gateway to analytics for: " + messageContext.getProperty(
@@ -115,8 +106,6 @@ public class APIMgtFaultHandler extends APIMgtCommonExecutionPublisher {
                         + " at " + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
             }
 
-            TracingSpan span = (TracingSpan) messageContext.getProperty("APIMgtFaultHandler");
-            Util.finishSpan(span);
 
         } catch (Exception e) {
             log.error("Cannot publish event. " + e.getMessage(), e);
