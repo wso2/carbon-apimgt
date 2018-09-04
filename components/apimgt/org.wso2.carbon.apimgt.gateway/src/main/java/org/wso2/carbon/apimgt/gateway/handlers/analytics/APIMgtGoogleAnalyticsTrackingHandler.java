@@ -191,7 +191,7 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
             log.debug("Publishing https GET from gateway to Google analytics" + " with ID: " + msgCtx.getMessageID()
                     + " ended at " + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
         }
-    }
+       }
 
 	/**
 	 * A string is empty in our terms, if it is null, empty or a dash.
