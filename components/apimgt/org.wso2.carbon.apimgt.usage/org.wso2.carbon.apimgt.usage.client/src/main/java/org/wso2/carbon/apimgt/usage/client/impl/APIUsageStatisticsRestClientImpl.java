@@ -2309,7 +2309,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             throws APIMgtUsageQueryServiceClientException {
         List<Result<PerGeoLocationUsageCount>> result = new ArrayList<Result<PerGeoLocationUsageCount>>();
         try {
-            String tableName = APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG;
+            String tableName = APIUsageStatisticsClientConstants.GEO_LOCATION_AGG;
             StringBuilder query;
             if (fromDate == null || toDate == null) {
                 tableName = tableName + "_SECONDS";
@@ -2343,7 +2343,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                         ") within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate) + "L per '" + granularity
                                 + "' select sum(" + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT);
             } else {
-                query.append(") select sum(" + APIUsageStatisticsClientConstants.AGG_COUNT);
+                query.append(") select sum(" + APIUsageStatisticsClientConstants.TOTAL_COUNT);
             }
             query.append(") as count, " + APIUsageStatisticsClientConstants.COUNTRY);
             if (!"ALL".equals(drillDown)) {
