@@ -80,9 +80,7 @@ public class APIManagerAnalyticsConfiguration {
             }
             responseStreamName = config.getFirstProperty(APIConstants.API_RESPONSE_STREAM_NAME);
             responseStreamVersion = config.getFirstProperty(APIConstants.API_RESPONSE_STREAM_VERSION);
-            if (responseStreamName == null || responseStreamVersion == null) {
-                log.error("Response stream name or version is null. Check api-manager.xml");
-            }
+
             faultStreamName = config.getFirstProperty(APIConstants.API_FAULT_STREAM_NAME);
             faultStreamVersion = config.getFirstProperty(APIConstants.API_FAULT_STREAM_VERSION);
             if (faultStreamName == null || faultStreamVersion == null) {
@@ -95,9 +93,6 @@ public class APIManagerAnalyticsConfiguration {
             }
             executionTimeStreamName = config.getFirstProperty(APIConstants.API_EXECUTION_TIME_STREAM_NAME);
             executionTimeStreamVersion = config.getFirstProperty(APIConstants.API_EXECUTION_TIME_STREAM_VERSION);
-            if (executionTimeStreamName == null || executionTimeStreamVersion == null) {
-                log.error("Execution Time stream name or version is null. Check api-manager.xml");
-            }
 
             alertTypeStreamName = config.getFirstProperty(APIConstants.API_ALERT_TYPES_STREAM_NAME);
             alertTypeStreamVersion = config.getFirstProperty(APIConstants.API_ALERT_TYPES_STREAM_VERSION);

@@ -22,7 +22,7 @@ i18n.init(request,localeResourcesBasePath);
     jagg.render({
         "name":"page/base",
         "inputs":{
-            "title":"API Availability",
+            "title":"Usage Reports",
             "header":{
                 "name":"menu/primary"
             },
