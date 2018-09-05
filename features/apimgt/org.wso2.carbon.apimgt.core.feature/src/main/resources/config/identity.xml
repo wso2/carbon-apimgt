@@ -76,6 +76,14 @@
 	</OpenID>
 
 	<OAuth>
+       <!-- Token cleanup feature config to clean IDN_OAUTH2_ACCESS_TOKEN table-->
+       <TokenCleanup>
+          <!--If true old access token cleaning feature is enabled -->
+          <EnableTokenCleanup>true</EnableTokenCleanup>
+          <!--If true  old access token retained in audit table  -->
+          <RetainOldAccessToken>true</RetainOldAccessToken>
+       </TokenCleanup>
+  
 		<AppInfoCacheTimeout>-1</AppInfoCacheTimeout>
 		<AuthorizationGrantCacheTimeout>-1</AuthorizationGrantCacheTimeout>
 		<SessionDataCacheTimeout>-1</SessionDataCacheTimeout>
