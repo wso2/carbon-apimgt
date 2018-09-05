@@ -298,7 +298,7 @@ APIDesigner.prototype.load_api_base_document = function (api_doc_version) {
 
 APIDesigner.prototype.is_openapi3 = function () {
     var isOpenAPI3 = false;
-    if (this.api_doc.openapi != undefined && this.api_doc.openapi == supportedOpenAPI3Version) {
+    if (this.api_doc.openapi != undefined && this.api_doc.openapi.trim() == supportedOpenAPI3Version) {
         isOpenAPI3 = true;
     }
     return isOpenAPI3;
