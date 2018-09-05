@@ -36,9 +36,7 @@ import { FormControl } from '@material-ui/core/';
 import IconButton from '@material-ui/core/IconButton';
 
 import { Progress } from '../../../Shared';
-import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
 import Api from '../../../../data/api';
-import ImageGenerator from '../../Listing/components/ImageGenerator';
 import Alert from '../../../Shared/Alert';
 
 const styles = () => ({
@@ -106,7 +104,6 @@ class Overview extends Component {
             editDescription: false,
             editableDescriptionText: null,
         };
-        this.apiUUID = this.props.match.params.apiUUID;
         this.downloadWSDL = this.downloadWSDL.bind(this);
         this.handleTagChange = this.handleTagChange.bind(this);
         this.handleTransportChange = this.handleTransportChange.bind(this);
@@ -114,37 +111,10 @@ class Overview extends Component {
         this.handleInput = this.handleInput.bind(this);
     }
 
-    /**
-     * @inheritDoc
-     * @memberof Overview
-     */
-    componentDidMount() {
-        const api = new Api();
-        const promisedApi = api.get(this.apiUUID);
-        promisedApi
-            .then((response) => {
-                let apiDescription;
-                if (response.body.description && response.body.description.length) {
-                    apiDescription = response.body.description;
-                } else {
-                    apiDescription = '< NOT SET FOR THIS API >';
-                }
-                this.setState({ api: response.body, editableDescriptionText: apiDescription });
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-                const { status } = error;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                }
-            });
-    }
-
     downloadWSDL() {
+        const { id } = this.props.api;
         const api = new Api();
-        const promisedWSDL = api.getWSDL(this.apiUUID);
+        const promisedWSDL = api.getWSDL(id);
         promisedWSDL.then((response) => {
             const windowUrl = window.URL || window.webkitURL;
             const binary = new Blob([response.data]);
@@ -171,9 +141,9 @@ class Overview extends Component {
      */
     handleTagChange(tags) {
         const api = new Api();
-        const { apiUUID } = this;
+        const { id } = this.props.api;
         const currentAPI = this.state.api;
-        const promisedApi = api.get(apiUUID);
+        const promisedApi = api.get(id);
         promisedApi
             .then((getResponse) => {
                 const apiData = getResponse.body;
@@ -203,9 +173,9 @@ class Overview extends Component {
      */
     handleTransportChange(event) {
         const api = new Api();
-        const { apiUUID } = this;
+        const { id } = this.props.api;
         const currentAPI = this.state.api;
-        const promisedApi = api.get(apiUUID);
+        const promisedApi = api.get(id);
         promisedApi
             .then((getResponse) => {
                 const apiData = getResponse.body;
@@ -241,9 +211,9 @@ class Overview extends Component {
         } else {
             this.setState({ editDescription: false });
             const api = new Api();
-            const { apiUUID } = this;
+            const apiId = this.props.api.id;
             const { editableDescriptionText } = this.state;
-            const promisedApi = api.get(apiUUID);
+            const promisedApi = api.get(apiId);
             promisedApi
                 .then((getResponse) => {
                     const apiData = getResponse.body;
@@ -276,330 +246,26 @@ class Overview extends Component {
 
     /** @inheritDoc */
     render() {
-        const { api, editDescription, editableDescriptionText } = this.state;
-        if (this.state.notFound) {
-            return <ResourceNotFound message={this.props.resourceNotFountMessage} />;
-        }
+        const { editDescription, editableDescriptionText } = this.state;
+        const { api, classes } = this.props;
         if (!api) {
             return <Progress />;
         }
-        const { classes } = this.props;
 
         return (
             <Grid container>
-                <Grid item xs={12} sm={6} md={6} lg={4} className={classes.imageWrapper}>
-                    <ImageGenerator name={api.name} />
-                    <div className={classes.imageSideContent}>
-                        <Typography variant='headline'>
-                            {api.version} {api.isDefaultVersion && <span>( Default )</span>}
-                            {/* TODO We need to show the default verison and a link to it here if this
-                            is not the default version */}
-                        </Typography>
-                        <Typography variant='caption' gutterBottom align='left'>
-                            Version
-                        </Typography>
-                        {/* Context */}
-                        <Typography variant='headline' className={classes.headline}>
-                            {api.context}
-                        </Typography>
-                        <Typography variant='caption' gutterBottom align='left'>
-                            Context
-                        </Typography>
-                        {/* Visibility */}
-                        <Typography variant='headline' className={classes.headline}>
-                            {api.lifeCycleStatus}
-                        </Typography>
-                        <Typography variant='caption' gutterBottom align='left'>
-                            Lifecycle Status
-                        </Typography>
-                    </div>
-                </Grid>
-                <Grid item xs={12} sm={6} md={6} lg={8} className={classes.headline}>
-                    {/* Description */}
-                    <div>
-                        {editDescription ? (
-                            <FormControl fullWidth>
-                                <Input
-                                    id='editableDescriptionText'
-                                    multiline
-                                    autoFocus
-                                    rowsMax='5'
-                                    value={editableDescriptionText}
-                                    onChange={this.handleInput}
-                                    onBlur={this.editDescription}
-                                />
-                            </FormControl>
-                        ) : (
-                            <Typography variant='subheading' gutterBottom align='left'>
-                                {editableDescriptionText}
-                                <IconButton
-                                    id='edit-description-button'
-                                    onClick={this.editDescription}
-                                    aria-label='Edit Description'
-                                >
-                                    <EditIcon />
-                                </IconButton>
-                            </Typography>
-                        )}
-                        <Typography variant='caption' gutterBottom align='left'>
-                            Description
-                        </Typography>
-                    </div>
-                </Grid>
-                <Grid item xs={12}>
-                    <Typography variant='subheading' align='left'>
-                        Created by {api.provider} : {api.createdTime}
-                    </Typography>
-                    <Typography variant='caption' gutterBottom align='left'>
-                        Last update : {api.lastUpdatedTime}
-                    </Typography>
-                    {/* Endpoints */}
-                    {api.endpoint &&
-                        api.endpoint.map(ep => (
-                            ep.inline &&
-                            <div key={ep.inline.id}>
-                                <div className={classes.endpointsWrapper + ' ' + classes.headline}>
-                                    <Link to={'/apis/' + api.id + '/endpoints'} title='Edit endpoint'>
-                                        <Typography variant='subheading' align='left'>
-                                            {ep.inline.endpointConfig.list[0].url}
-                                        </Typography>
-                                    </Link>
-                                    <a
-                                        href={ep.inline.endpointConfig.list[0].url}
-                                        target='_blank'
-                                        rel='noopener noreferrer'
-                                        className={classes.openNewIcon}
-                                    >
-                                        <OpenInNew />
-                                    </a>
-                                </div>
-                                <Typography variant='caption' gutterBottom align='left'>
-                                    <span className={classes.titleCase}>{ep.type}</span> Endpoint
-                                </Typography>
-                            </div>
-                        ))}
-                    {api.wsdlUri && (
-                        <div>
-                            <div className={classes.endpointsWrapper + ' ' + classes.headline}>
-                                <a onClick={this.downloadWSDL} onKeyDown={this.downloadWSDL}>
-                                    <Typography variant='subheading' align='left'>
-                                        {api.wsdlUri}
-                                    </Typography>
-                                </a>
-                            </div>
-                            <Typography variant='caption' gutterBottom align='left'>
-                                WSDL
-                            </Typography>
-                        </div>
-                    )}
-                    <Grid container>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
-                            {api.policies && api.policies.length ? (
-                                <Link to={'/apis/' + api.id + '/policies'}>
-                                    <Typography variant='subheading' align='left' className={classes.headline}>
-                                        {api.policies.map(policy => policy + ', ')}
-                                    </Typography>
-                                </Link>
-                            ) : (
-                                <Link to={'/apis/' + api.id + '/policies'}>
-                                    <Typography variant='subheading' align='left' className={classes.headline}>
-                                        &lt; NOT SET FOR THIS API &gt;
-                                    </Typography>
-                                </Link>
-                            )}
-                            <Typography variant='caption' gutterBottom align='left'>
-                                Throttling Policies
-                            </Typography>
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
-                            {api.securityScheme && api.securityScheme.length ? (
-                                <Link to={'/apis/' + api.id + '/securityScheme'}>
-                                    <Typography variant='subheading' align='left' className={classes.headline}>
-                                        {api.securityScheme.map(policy => policy + ', ')}
-                                    </Typography>
-                                </Link>
-                            ) : (
-                                <Link to={'/apis/' + api.id + '/securityScheme'}>
-                                    <Typography variant='subheading' align='left' className={classes.headline}>
-                                        &lt; NOT SET FOR THIS API &gt;
-                                    </Typography>
-                                </Link>
-                            )}
-                            <Typography variant='caption' gutterBottom align='left'>
-                                Security Scheme
-                            </Typography>
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
-                            {api.tags && api.tags.length ? (
-                                <div className={classes.headline}>
-                                    <Tooltip
-                                        id='tooltip-controlled'
-                                        title='Type and hit <Enter> to add Tags'
-                                        enterDelay={300}
-                                        leaveDelay={300}
-                                        placement='top'
-                                    >
-                                        <ChipInput defaultValue={api.tags} onChange={this.handleTagChange} />
-                                    </Tooltip>
-                                </div>
-                            ) : (
-                                <div className={classes.headline}>
-                                    <Tooltip
-                                        id='tooltip-controlled'
-                                        title='Type and hit <Enter> to add Tags'
-                                        onClose={this.handleTooltipClose}
-                                        enterDelay={300}
-                                        leaveDelay={300}
-                                        placement='top'
-                                    >
-                                        <ChipInput
-                                            placeholder='< CLICK TO ADD TAGS >'
-                                            onChange={this.handleTagChange}
-                                        />
-                                    </Tooltip>
-                                </div>
-                            )}
-                            <Typography variant='caption' gutterBottom align='left'>
-                                Tags
-                            </Typography>
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
-                            {api.threatProtectionPolicies && api.threatProtectionPolicies.length ? (
-                                <Link to={'/apis/' + api.id + '/security'}>
-                                    <Typography variant='subheading' align='left' className={classes.headline}>
-                                        {api.threatProtectionPolicies.map(policy => policy + ', ')}
-                                    </Typography>
-                                </Link>
-                            ) : (
-                                <Link to={'/apis/' + api.id + '/security'}>
-                                    <Typography variant='subheading' align='left' className={classes.headline}>
-                                        &lt; NOT SET FOR THIS API &gt;
-                                    </Typography>
-                                </Link>
-                            )}
-                            <Typography variant='caption' gutterBottom align='left'>
-                                Threat Protection Policies
-                            </Typography>
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
-                            <InputLabel htmlFor='transport-checkbox' />
-                            {/* TODO:Set placeholder 'Select Transports' */}
-                            <Select
-                                multiple
-                                autoWidth
-                                value={api.transport}
-                                onChange={this.handleTransportChange}
-                                input={<Input id='transport-checkbox' />}
-                                renderValue={selected => selected.join(',  ')}
-                            >
-                                <MenuItem key='HTTP' value='HTTP'>
-                                    <Checkbox
-                                        checked={api.transport && api.transport.includes('HTTP')}
-                                        color='primary'
-                                    />
-                                    <ListItemText primary='HTTP' />
-                                </MenuItem>
-                                <MenuItem key='HTTPS' value='HTTPS'>
-                                    <Checkbox
-                                        checked={api.transport && api.transport.includes('HTTPS')}
-                                        color='primary'
-                                    />
-                                    <ListItemText primary='HTTPS' />
-                                </MenuItem>
-                            </Select>
-                            <Typography variant='caption' gutterBottom align='left'>
-                                Transports
-                            </Typography>
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
-                            {api.userPermissionsForApi && api.userPermissionsForApi.length ? (
-                                <Link to={'/apis/' + api.id + '/userPermissions'}>
-                                    <Typography variant='subheading' align='left' className={classes.headline}>
-                                        {api.userPermissionsForApi.map(permission => permission + ', ')}
-                                    </Typography>
-                                </Link>
-                            ) : (
-                                <Link to={'/apis/' + api.id + '/userPermissions'}>
-                                    <Typography variant='subheading' align='left' className={classes.headline}>
-                                        &lt; NOT SET FOR THIS API &gt;
-                                    </Typography>
-                                </Link>
-                            )}
-                            <Typography variant='caption' gutterBottom align='left'>
-                                User Permissions
-                            </Typography>
-                        </Grid>
-                        {api.visibility === 'PUBLIC' ? (
-                            <Grid item xs={12} sm={6} md={4} lg={3}>
-                                <Link to={'/apis/' + api.id + '/visibility'}>
-                                    <Typography variant='subheading' align='left' className={classes.headline}>
-                                        PUBLIC
-                                    </Typography>
-                                </Link>
-                                <Typography variant='caption' gutterBottom align='left'>
-                                    Visibility ( You can restrict visibility by role or tenant )
-                                </Typography>
-                            </Grid>
-                        ) : (
-                            <Grid item xs={12} sm={6} md={4} lg={3}>
-                                {api.visibleRoles && api.visibleRoles.length ? (
-                                    <Link to={'/apis/' + api.id + '/visibility'}>
-                                        <Typography variant='subheading' align='left' className={classes.headline}>
-                                            {api.visibleRoles.map(role => role + ', ')}
-                                        </Typography>
-                                    </Link>
-                                ) : (
-                                    <Link to={'/apis/' + api.id + '/visibility'}>
-                                        <Typography variant='subheading' align='left' className={classes.headline}>
-                                            &lt; NOT SET FOR THIS API &gt;
-                                        </Typography>
-                                    </Link>
-                                )}
-                                <Typography variant='caption' gutterBottom align='left'>
-                                    Visible Roles
-                                </Typography>
-                            </Grid>
-                        )}
-
-                        {api.visibility !== 'PUBLIC' && (
-                            <Grid item xs={12} sm={6} md={4} lg={3}>
-                                {api.visibleTenants && api.visibleTenants.length ? (
-                                    <Link to={'/apis/' + api.id + '/visibility'}>
-                                        <Typography variant='subheading' align='left' className={classes.headline}>
-                                            {api.visibleTenants.map(tenant => tenant + ', ')}
-                                        </Typography>
-                                    </Link>
-                                ) : (
-                                    <Link to={'/apis/' + api.id + '/visibility'}>
-                                        <Typography variant='subheading' align='left' className={classes.headline}>
-                                            &lt; NOT SET FOR THIS API &gt;
-                                        </Typography>
-                                    </Link>
-                                )}
-                                <Typography variant='caption' gutterBottom align='left'>
-                                    Visible Tenant
-                                </Typography>
-                            </Grid>
-                        )}
-                    </Grid>
+                <Grid item>Name</Grid>
+                <Grid item lg={8} md={8} sm={8} xs={8}>
+                    Value
                 </Grid>
             </Grid>
         );
     }
 }
 
-Overview.defaultProps = {
-    resourceNotFountMessage: 'Resource not found!',
-};
-
 Overview.propTypes = {
     classes: PropTypes.shape({}).isRequired,
-    match: PropTypes.shape({
-        params: PropTypes.shape({
-            apiUUID: PropTypes.string,
-        }),
-    }).isRequired,
-    resourceNotFountMessage: PropTypes.string,
+    api: PropTypes.shape({}).isRequired,
 };
 
 export default withStyles(styles)(Overview);

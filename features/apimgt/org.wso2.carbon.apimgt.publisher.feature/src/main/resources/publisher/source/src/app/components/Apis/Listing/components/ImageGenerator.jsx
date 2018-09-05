@@ -26,11 +26,13 @@ class ImageGenerator extends PureComponent {
     /**
      *
      * @inheritdoc
-     * @returns {React.Component} @inheritdoc
+     * @returns {React.PureComponent} @inheritdoc
      * @memberof ImageGenerator
      */
     render() {
-        const { classes, apiName, id } = this.props;
+        const {
+            classes, apiName, id, width, height,
+        } = this.props;
         const str = apiName;
         const overviewPath = `apis/${id}/overview`;
 
@@ -62,7 +64,7 @@ class ImageGenerator extends PureComponent {
             colorIndex -= 6;
         }
         // let colorIndex = Math.floor(Math.random() * Math.floor(colorPairs.length)); //Get a random color combination
-        const randomIndex = Math.floor(Math.random() * colorIndex);
+        const randomIndex = colorIndex; // Math.floor(Math.random() * colorIndex);
         // returns a random integer from 0 to API name length
         const colorPair = colorPairs[randomIndex];
         // let iconIndex = Math.floor(Math.random() * Math.floor(Object.keys(icons).length)); // Get a random icon index
@@ -83,15 +85,15 @@ class ImageGenerator extends PureComponent {
                 rects.push(<rect
                     key={i + '_' + j}
                     {...thumbnailBoxChild}
-                    fill={'#' + (colorPair.sub - (0x00000025 * i) - (j * 0x00000015)).toString(16)}
-                    x={200 - (i * 54)}
+                    fill={'#' + (colorPair.sub - 0x00000025 * i - j * 0x00000015).toString(16)}
+                    x={200 - i * 54}
                     y={54 * j}
                 />);
             }
         }
         return (
             <Link className={classes.suppressLinkStyles} to={overviewPath}>
-                <svg width='250' height='190' className={classes.svgImage}>
+                <svg width={width} height={height} className={classes.svgImage}>
                     <rect {...thumbnailBox} fill={'#' + colorPair.prime.toString(16)} />
                     {rects}
                     <Icon />
@@ -100,8 +102,16 @@ class ImageGenerator extends PureComponent {
         );
     }
 }
+
+ImageGenerator.defaultProps = {
+    height: 190,
+    width: 250,
+};
+
 ImageGenerator.propTypes = {
     classes: PropTypes.shape({}).isRequired,
+    height: PropTypes.number,
+    width: PropTypes.number,
 };
 
 export default withStyles(styles)(ImageGenerator);

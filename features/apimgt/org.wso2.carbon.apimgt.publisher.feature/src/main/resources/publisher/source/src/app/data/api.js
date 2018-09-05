@@ -146,6 +146,7 @@ class API extends Resource {
      * @param id {string} UUID of the api.
      * @param callback {function} A callback function to invoke after receiving successful response.
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     * @deprecated use static API.get() method instead
      */
     get(id, callback = null) {
         const promise_get = this.client.then((client) => {
@@ -935,6 +936,20 @@ class API extends Resource {
         });
     }
 
+    /**
+     * Get details of a given API
+     * @param id {string} UUID of the api.
+     * @param callback {function} A callback function to invoke after receiving successful response.
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    static get(id) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then((client) => {
+            return client.apis['API (Individual)'].get_apis__apiId_({
+                apiId: id
+            }, this._requestMetaData());
+        });
+    }
 
     /**
      *

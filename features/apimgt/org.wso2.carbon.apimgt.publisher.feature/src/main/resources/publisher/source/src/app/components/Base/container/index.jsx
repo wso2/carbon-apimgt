@@ -34,10 +34,10 @@ const Container = (props) => {
     } = props;
     return (
         <Fragment>
-            <Grid item xs={2} sm={1} md={2} lg={1}>
+            <Grid item xs={2} sm={1} md={2} lg={2}>
                 {pageNav}
             </Grid>
-            <Grid item className={classes.pageContainer} xs={10} sm={11} md={10} lg={11}>
+            <Grid item className={classes.pageContainer} xs={10} sm={11} md={10} lg={10}>
                 <Grid className={classes.pageContainer} container>
                     {pageTopMenu && (
                         <Grid className={classes.pageTopMenu} item xs={12} sm={12} md={12} lg={12}>
