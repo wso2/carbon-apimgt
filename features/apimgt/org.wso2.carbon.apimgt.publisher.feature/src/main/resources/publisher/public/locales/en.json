@@ -23,4 +23,13 @@
   "by": "by",
   "context": "context",
   "version": "version"
+  "username": "Username",
+  "password": "Password",
+  "endpoint.security.scheme": "Endpoint Security Scheme",
+  "endpoint.auth.type": "Endpoint Auth Type",
+  "select.a.global.endpoint": "Select a Global Endpoint",
+  "load.balanced.endpints": "Load balanced endpints",
+  "fail.over.endpints": "Fail over endpints",
+  "add.another.load.balanced.endpoint": "Add another load balanced endpoint",
+  "add.another.fail.over.endpoint": "Add another fail over endpoint"
 }

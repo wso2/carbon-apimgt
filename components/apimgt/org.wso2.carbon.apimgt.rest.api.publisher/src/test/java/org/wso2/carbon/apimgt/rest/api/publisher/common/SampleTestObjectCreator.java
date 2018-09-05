@@ -43,7 +43,6 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -241,15 +240,17 @@ public class SampleTestObjectCreator {
     }
 
     public static Endpoint createMockEndpoint() {
-        return new Endpoint.Builder().endpointConfig("[{'type':'http','url':'http://localhost:8280'}]").id(endpointId)
-                .maxTps(1000L).security("{\"enabled\":false}").name("Endpoint1")
-                .applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).type("http").build();
+        return new Endpoint.Builder().endpointConfig(
+                "{\"list\": [{\"timeout\":\"1000\",\"url\":\"http://localhost:8280\"}],\"endpointType\": "
+                        + "\"SINGLE\"}").id(endpointId).maxTps(1000L).security("{\"enabled\":false}").name("Endpoint1")
+                .type("http").applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).build();
     }
 
     public static Endpoint.Builder createMockEndpointBuilder() {
-        return new Endpoint.Builder().endpointConfig("[{'type':'http','url':'http://localhost:8280'}]").id(endpointId)
-                .maxTps(1000L).security("{\"enabled\":false}").name("Endpoint1")
-                .applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).type("http");
+        return new Endpoint.Builder().endpointConfig(
+                "{\"list\": [{\"timeout\":\"1000\",\"url\":\"http://localhost:8280\"}],\"endpointType\": "
+                        + "\"SINGLE\"}").id(endpointId).maxTps(1000L).security("{\"enabled\":false}").name("Endpoint1")
+                .type("http").applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT);
     }
 
     public static DocumentInfo.Builder createDefaultDocumentationInfo() {

@@ -65,6 +65,7 @@ class Endpoint extends Component {
             isInline: true,
             notFound: false,
             readOnly: true,
+            disableSave: true,
         };
         this.handleProductionInputs = this.handleProductionInputs.bind(this);
         this.handleSandboxInputs = this.handleSandboxInputs.bind(this);
@@ -90,7 +91,7 @@ class Endpoint extends Component {
         setSelectedEp
             .then((responses) => {
                 const epMap = new Map();
-                for (const endpoint of responses[1].body.endpoint) {
+                for (const endpoint of responses[0]) {
                     epMap.set(endpoint.id, endpoint);
                 }
 
@@ -98,10 +99,6 @@ class Endpoint extends Component {
                 let inline = false;
                 let currentProdEP = null;
                 let currentSandboxEP = null;
-                // let selectedProdEP = null;
-                // let selectedSandboxEP = null;
-                // let isGlobalEPSelectedSand = false;
-                // let isGlobalEPSelectedProd = false;
                 const endpointInAPI = responses[1].body.endpoint;
                 for (const i in endpointInAPI) {
                     if (endpointInAPI[i].inline !== undefined) {
@@ -109,20 +106,20 @@ class Endpoint extends Component {
                         const endpointJSON = endpointInAPI[i].inline;
                         if (endpointInAPI[i].type === 'Production') {
                             currentProdEP = new EndpointDAO(endpointJSON); // JSON.parse(endpointElement).serviceUrl;
+                            currentProdEP.inline = true;
                         } else if (endpointInAPI[i].type === 'Sandbox') {
                             currentSandboxEP = new EndpointDAO(endpointJSON); // JSON.parse(endpoint).serviceUrl;
+                            currentSandboxEP.inline = true;
                         }
                     } else {
                         // global endpoint with key
                         const endpointKey = endpointInAPI[i].key;
                         if (endpointInAPI[i].type === 'Production') {
-                            currentProdEP = epMap[endpointKey].name;
-                            // currentProdEP = JSON.parse(epMap[endpointKey].endpointConfig).serviceUrl;
-                            // isGlobalEPSelectedProd = true;
+                            currentProdEP = epMap.get(endpointKey);
+                            currentProdEP.inline = false;
                         } else if (endpointInAPI[i].type === 'Sandbox') {
-                            currentSandboxEP = epMap[endpointKey].name;
-                            // currentSandboxEP = JSON.parse(epMap[endpointKey].endpointConfig).serviceUrl;
-                            // isGlobalEPSelectedSand = true;
+                            currentSandboxEP = epMap.get(endpointKey);
+                            currentSandboxEP.inline = false;
                         }
                     }
                 }
@@ -133,6 +130,7 @@ class Endpoint extends Component {
                     sandboxEndpoint: currentSandboxEP,
                     isInline: inline,
                     endpointsMap: epMap,
+                    disableSave: true,
                 });
             })
             .catch((error) => {
@@ -181,23 +179,23 @@ class Endpoint extends Component {
         const prodJSON = { type: 'Production' };
         const sandboxJSON = { type: 'Sandbox' };
 
-        if (prod.id === undefined) {
-            prodJSON.key = prod;
+        if (prod && !prod.inline) {
+            prodJSON.key = prod.id;
         } else if (prod.id != null) {
             const inline = {};
             inline.endpointConfig = prod.endpointConfig;
-            inline.endpointSecurity = { enabled: false };
+            inline.endpointSecurity = prod.endpointSecurity;
             inline.type = prod.type;
             inline.maxTps = prod.maxTps;
             prodJSON.inline = inline;
         }
 
-        if (sandbox.id === undefined) {
-            sandboxJSON.key = sandbox;
+        if (sandbox && !sandbox.inline) {
+            sandboxJSON.key = sandbox.id;
         } else if (sandbox.id != null) {
             const inline = {};
             inline.endpointConfig = sandbox.endpointConfig;
-            inline.endpointSecurity = { enabled: false };
+            inline.endpointSecurity = sandbox.endpointSecurity;
             inline.type = sandbox.type;
             inline.maxTps = sandbox.maxTps;
             sandboxJSON.inline = inline;
@@ -228,13 +226,15 @@ class Endpoint extends Component {
             });
     }
 
-    makeEditable() {
+    makeEditable(disableSave) {
         this.state.readOnly = false;
+        this.state.disableSave = disableSave;
         this.setState(this.state);
     }
 
-    makeNonEditable() {
+    makeNonEditable(disableSave) {
         this.state.readOnly = true;
+        this.state.disableSave = disableSave;
         this.setState(this.state);
     }
 
@@ -273,13 +273,13 @@ class Endpoint extends Component {
         }
         return (
             <Paper>
-                {(this.state.readOnly && <IconButton className={classes.button} aria-label="Edit" color="primary" onClick={this.makeEditable}>
+                {(this.state.readOnly && <IconButton className={classes.button} aria-label="Edit" color="primary" onClick={() => this.makeEditable(false)}>
                     <EditIcon />
                 </IconButton>)}
-                {(!this.state.readOnly && <IconButton className={classes.button} aria-label="Cancel" onClick={this.makeNonEditable}>
+                {(!this.state.readOnly && <IconButton className={classes.button} aria-label="Cancel" onClick={() => this.makeNonEditable(true)}>
                     <CancelIcon />
                 </IconButton>)}
-                <IconButton className={classes.button} aria-label="Save" color="primary" onClick={this.updateEndpoints} disabled={this.state.readOnly}>
+                <IconButton className={classes.button} aria-label="Save" color="primary" onClick={this.updateEndpoints} disabled={this.state.disableSave}>
                     <SaveIcon />
                 </IconButton>
                 {productionEndpoint &&
@@ -287,7 +287,7 @@ class Endpoint extends Component {
                         type={<FormattedMessage
                             id='production'
                             defaultMessage='Production'
-                        />} endpoint={productionEndpoint} isInline={isInline} readOnly={this.state.readOnly}
+                        />} endpoint={productionEndpoint} isInline={productionEndpoint.inline} readOnly={this.state.readOnly} makeNonEditable={this.makeNonEditable}
                     />
                 }
                 {sandboxEndpoint &&
@@ -295,7 +295,7 @@ class Endpoint extends Component {
                         type={<FormattedMessage
                             id='sandbox'
                             defaultMessage='Sandbox'
-                        />} endpoint={sandboxEndpoint} isInline={isInline} readOnly={this.state.readOnly}
+                        />} endpoint={sandboxEndpoint} isInline={sandboxEndpoint.inline} readOnly={this.state.readOnly} makeNonEditable={this.makeNonEditable}
                     />
                 }
                 <Divider />

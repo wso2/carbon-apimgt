@@ -46,6 +46,7 @@ const styles = theme => ({
         padding: theme.spacing.unit * 2,
         textAlign: 'center',
         color: theme.palette.text.secondary,
+        backgroundColor: theme.palette.grey[300],
     },
     textField: {
         marginLeft: theme.spacing.unit,
@@ -77,11 +78,11 @@ class EndpointForm extends Component {
      * @memberof EndpointForm
      */
     componentDidMount() {
-        this.setState({serviceUrl:this.props.selectedEndpointConfig.url, timeout:this.props.selectedEndpointConfig.timeout})
+        this.setState({ serviceUrl: this.props.selectedEndpointConfig.url, timeout: this.props.selectedEndpointConfig.timeout })
     }
 
     handleEndpointConfigTextFieldChange(event) {
-        this.props.selectedEndpointConfig[event.target.id]= event.currentTarget.value
+        this.props.selectedEndpointConfig[event.target.id] = event.currentTarget.value
         this.setState({ [event.target.id]: event.currentTarget.value });
     }
 
@@ -92,7 +93,7 @@ class EndpointForm extends Component {
 
     render() {
         const { classes } = this.props;
-        if(!this.state.serviceUrl){
+        if (!this.state.serviceUrl) {
             return <Progress />;
         }
         return (
@@ -108,7 +109,7 @@ class EndpointForm extends Component {
                                 fullWidth
                                 margin="normal"
                                 onChange={this.handleEndpointConfigTextFieldChange}
-                                disabled={this.props.readOnly}
+                                disabled={this.props.readOnly || (!this.props.readOnly && !this.props.isInline)}
                             />
                         </Grid>
                         <Grid item xs={6}>
@@ -120,7 +121,7 @@ class EndpointForm extends Component {
                                 fullWidth
                                 margin="normal"
                                 onChange={this.handleEndpointConfigTextFieldChange}
-                                disabled={this.props.readOnly}
+                                disabled={this.props.readOnly || (!this.props.readOnly && !this.props.isInline)}
                             />
                         </Grid>
                     </form>

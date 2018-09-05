@@ -97,7 +97,7 @@ class SampleAPI extends Component {
                 name: data.name.replace(/ /g, '_') + data.version.replace(/\./g, '_'),
                 // TODO: It's better to add this name property from the REST api itself,
                 // making sure no name conflicts with other inline endpoint definitions ~tmkb
-                endpointConfig: [{ url: serviceUrl, timeout: '1000' }],
+                endpointConfig: { list: [{ url: serviceUrl, timeout: '1000' }], endpointType: 'SINGLE' },
                 endpointSecurity: { enabled: false },
                 type: 'http',
             },

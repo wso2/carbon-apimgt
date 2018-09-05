@@ -63,7 +63,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPointDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPoint_endpointSecurityDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndpointConfigDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPoint_endpointConfigDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ScopeDTO;
@@ -463,13 +463,12 @@ public class MappingUtil {
         endPointDTO.setName(endpoint.getName());
         EndPoint_endpointSecurityDTO endpointSecurityDTO = new Gson().fromJson(endpoint.getSecurity(),
                 EndPoint_endpointSecurityDTO.class);
-        List<EndpointConfigDTO> endpointConfigDTOS = new Gson()
-                .fromJson(endpoint.getEndpointConfig(), new TypeToken<List<EndpointConfigDTO>>() {
-                }.getType());
+        EndPoint_endpointConfigDTO endpointConfigDTO = new Gson().fromJson(endpoint.getEndpointConfig(),
+                EndPoint_endpointConfigDTO.class);
         if (endpointSecurityDTO.getEnabled()) {
             endpointSecurityDTO.setPassword("");
         }
-        endPointDTO.setEndpointConfig(endpointConfigDTOS);
+        endPointDTO.setEndpointConfig(endpointConfigDTO);
         endPointDTO.setEndpointSecurity(endpointSecurityDTO);
         endPointDTO.setMaxTps(endpoint.getMaxTps());
         endPointDTO.setType(endpoint.getType());
