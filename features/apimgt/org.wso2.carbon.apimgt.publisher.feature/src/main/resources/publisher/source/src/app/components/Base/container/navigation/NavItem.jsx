@@ -3,11 +3,15 @@ import PropTypes from 'prop-types';
 import { ListItem, ListItemIcon, ListItemText, withStyles } from '@material-ui/core/';
 import { Link } from 'react-router-dom';
 
-const styles = () => {};
+const styles = () => ({
+    navLink: {
+        display: 'contents',
+    },
+});
 
 const NavItem = (props) => {
     const {
-        listItemProps, listItemTextProps, iconProps, ...other
+        listItemProps, listItemTextProps, iconProps, classes, ...other
     } = props;
     const {
         name, onClick, linkTo, NavIcon,
@@ -19,23 +23,30 @@ const NavItem = (props) => {
             <ListItemText {...listItemTextProps} primary={name} />
         </ListItem>
     );
-    return linkTo ? <Link to={linkTo}> {listItem} </Link> : listItem;
+    return linkTo ? (
+        <Link className={classes.navLink} to={linkTo}>
+            {' '}
+            {listItem}{' '}
+        </Link>
+    ) : (
+        listItem
+    );
 };
 
 NavItem.defaultProps = {
     listItemProps: {},
     listItemTextProps: {},
     iconProps: {},
-    onClick: {},
+    onClick: () => {},
     linkTo: undefined,
 };
 
 NavItem.propTypes = {
-    listItemProps: PropTypes.string,
-    listItemTextProps: PropTypes.string,
-    iconProps: PropTypes.string,
+    listItemProps: PropTypes.shape({}),
+    listItemTextProps: PropTypes.shape({}),
+    iconProps: PropTypes.shape({}),
     name: PropTypes.string.isRequired,
-    onClick: PropTypes.string,
+    onClick: PropTypes.func,
     linkTo: PropTypes.string,
     classes: PropTypes.shape({}).isRequired,
 };

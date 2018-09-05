@@ -11,8 +11,8 @@ import NavItem from '../Base/container/navigation/NavItem';
  */
 const NavBar = () => {
     const items = [{ name: 'Alerts', linkTo: '/alerts', NavIcon: <AlertsIcon /> }];
-    const section = <NavItem name='APIs' NavIcon={<APIsIcon />} />;
-    const navItems = items.map(item => <NavItem {...item} />);
+    const navItems = items.map(item => <NavItem key={item.name} {...item} />);
+    const section = <NavItem name='APIs' linkTo='/apis' NavIcon={<APIsIcon />} />;
     return <PageNav section={section} navItems={navItems} />;
 };
 

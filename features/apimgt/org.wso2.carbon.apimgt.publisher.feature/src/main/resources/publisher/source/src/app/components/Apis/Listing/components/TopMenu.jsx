@@ -5,6 +5,7 @@ import IconButton from '@material-ui/core/IconButton';
 import List from '@material-ui/icons/List';
 import GridIcon from '@material-ui/icons/GridOn';
 import { withStyles } from '@material-ui/core/styles';
+import { FormattedMessage } from 'react-intl';
 
 import APICreateMenu from '../components/APICreateMenu';
 
@@ -42,7 +43,7 @@ const TopMenu = ({ classes, isCardView, toggleView }) => {
                     </Typography>
                 </div>
                 <APICreateMenu buttonProps={{ size: 'medium', color: 'secondary', variant: 'contained' }}>
-                    Create API
+                    <FormattedMessage id='create.an.api' defaultMessage='Create API' />
                 </APICreateMenu>
             </div>
             <div className={classes.buttonRight}>

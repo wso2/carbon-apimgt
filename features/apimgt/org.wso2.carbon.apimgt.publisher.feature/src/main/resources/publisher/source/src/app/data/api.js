@@ -922,6 +922,13 @@ class API extends Resource {
      * @memberof API
      */
     static all(params) {
+        let query = "";
+        if (params && 'query' in params) {
+            for (const [key, value] of Object.entries(params.query)) {
+                query += `${key}:${value},`;
+            }
+            params.query = query;
+        }
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
         return apiClient.then((client) => {
             return client.apis['API (Collection)'].get_apis(params, Resource._requestMetaData());

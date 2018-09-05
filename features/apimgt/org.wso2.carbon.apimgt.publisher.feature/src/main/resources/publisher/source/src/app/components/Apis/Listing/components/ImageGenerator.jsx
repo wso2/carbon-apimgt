@@ -30,8 +30,8 @@ class ImageGenerator extends PureComponent {
      * @memberof ImageGenerator
      */
     render() {
-        const { classes, name, id } = this.props;
-        const str = name;
+        const { classes, apiName, id } = this.props;
+        const str = apiName;
         const overviewPath = `apis/${id}/overview`;
 
         const colorPairs = [
