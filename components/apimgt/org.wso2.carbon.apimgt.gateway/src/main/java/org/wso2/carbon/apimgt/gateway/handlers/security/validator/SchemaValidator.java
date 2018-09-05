@@ -40,7 +40,6 @@ public class SchemaValidator extends AbstractHandler {
     }
 
     public boolean mediate(MessageContext messageContext) {
-
         String apiId = getLocalentry();
         messageContext.setProperty("LocalEntryId", apiId);
 

@@ -28,7 +28,7 @@ import javax.cache.Cache;
 import javax.cache.Caching;
 
 /**
- * This Class is to Cache the schemas.
+ * This Class is to Cache the json schemas.
  */
 public class SchemaCacheUtils {
     private static Logger log = LoggerFactory.getLogger(SchemaCacheUtils.class);
@@ -41,19 +41,16 @@ public class SchemaCacheUtils {
     protected static Cache getSchemaCache() {
         Cache cache = null;
         try {
-            javax.cache.CacheManager manager =
-                    Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER);
+            javax.cache.CacheManager manager = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER);
             cache = manager.getCache(APIMgtGatewayConstants.API_SWAGGER_SCHEMA);
         } catch (NullPointerException e) {
-            log.error(
-                    "Did not found valid API Validation Information cache configuration. " +
-                            e.getMessage(), e);
+            log.error("Did not found valid API Validation Information cache configuration: " + e.getMessage(), e);
         }
         return cache;
     }
 
     /**
-     * Put the Schemas into Cache.
+     * Put the Schema into the Cache.
      *
      * @param key   Schema name.
      * @param value Schema content.
@@ -64,7 +61,7 @@ public class SchemaCacheUtils {
     }
 
     /**
-     * Get Schema for given name.
+     * Get Schema for given Schema definition.
      *
      * @param key Schema name.
      * @return Schema content.

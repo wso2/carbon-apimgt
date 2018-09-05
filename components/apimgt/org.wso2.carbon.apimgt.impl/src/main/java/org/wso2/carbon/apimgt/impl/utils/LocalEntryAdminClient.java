@@ -51,8 +51,6 @@ public class LocalEntryAdminClient {
                 localEntryAdminServiceStub._getServiceClient());
     }
 
-
-
     protected final void setup(Stub stub, Environment environment) throws AxisFault {
         String cookie = gatewayLogin(environment);
         ServiceClient serviceClient = stub._getServiceClient();
@@ -73,11 +71,8 @@ public class LocalEntryAdminClient {
         if (serverURL == null || userName == null || password == null) {
             throw new AxisFault("Required API gateway admin configuration unspecified");
         }
-
         String host;
-
         host = new URL(serverURL).getHost();
-
         AuthenticationAdminStub authAdminStub = new AuthenticationAdminStub(null,
                 serverURL + "AuthenticationAdmin");
         ServiceClient client = authAdminStub._getServiceClient();
@@ -103,7 +98,6 @@ public class LocalEntryAdminClient {
      * @throws AxisFault If error occurs when adding Local Entry.
      */
     public void addLocalEntry(String content) throws AxisFault {
-
         try {
             localEntryAdminServiceStub.addLocalEntry(content);
         } catch (RemoteException e) {
