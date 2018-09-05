@@ -29,6 +29,7 @@ import purple from '@material-ui/core/colors/purple';
 import green from '@material-ui/core/colors/green';
 import Button from '@material-ui/core/Button';
 import { FormattedMessage } from 'react-intl';
+import { Progress } from '../../../Shared';
 
 const styles = theme => ({
     root: {
@@ -45,6 +46,7 @@ const styles = theme => ({
         padding: theme.spacing.unit * 2,
         textAlign: 'center',
         color: theme.palette.text.secondary,
+        backgroundColor: theme.palette.grey[300],
     },
     textField: {
         marginLeft: theme.spacing.unit,
@@ -61,46 +63,53 @@ class EndpointForm extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            serviceUrl: '',
-            timeout: '',
+            serviceUrl: null,
+            timeout: null,
+            maxTps: null,
+            type: null,
 
         };
         this.handleTextFieldChange = this.handleTextFieldChange.bind(this);
+        this.handleEndpointConfigTextFieldChange = this.handleEndpointConfigTextFieldChange.bind(this);
+    }
+
+    /**
+     * @inheritDoc
+     * @memberof EndpointForm
+     */
+    componentDidMount() {
+        this.setState({ serviceUrl: this.props.selectedEndpointConfig.url, timeout: this.props.selectedEndpointConfig.timeout })
+    }
+
+    handleEndpointConfigTextFieldChange(event) {
+        this.props.selectedEndpointConfig[event.target.id] = event.currentTarget.value
+        this.setState({ [event.target.id]: event.currentTarget.value });
     }
 
     handleTextFieldChange(event) {
-        const id = event.currentTarget.id;
-        this.setState({ id: event.currentTarget.value });
+        this.props.endpoint[event.target.id] = event.currentTarget.value
+        this.setState({ [event.target.id]: event.currentTarget.value });
     }
 
     render() {
         const { classes } = this.props;
+        if (!this.state.serviceUrl) {
+            return <Progress />;
+        }
         return (
             <Grid item xs={6}>
-
                 <Paper className={classes.paper}>
                     <form className={classes.container} noValidate autoComplete="off">
                         <Grid item xs={6}>
                             <TextField
-                                id="epType"
-                                label={<FormattedMessage id="type" defaultMessage="Type" />}
-                                className={classes.textField}
-                                defaultValue={this.props.isInline ? 'Inline' : 'Global'}
-                                fullWidth
-                                margin="normal"
-                                onChange={this.handleTextFieldChange}
-                                disabled={this.props.readOnly}
-                            />
-                        </Grid>
-                        <Grid item xs={6}>
-                            <TextField
-                                id="serviceUrl"
+                                id="url"
                                 label={<FormattedMessage id="service.url" defaultMessage="Service URL" />}
                                 className={classes.textField}
                                 value={this.props.selectedEndpointConfig.url}
                                 fullWidth
                                 margin="normal"
-                                disabled={this.props.readOnly}
+                                onChange={this.handleEndpointConfigTextFieldChange}
+                                disabled={this.props.readOnly || (!this.props.readOnly && !this.props.isInline)}
                             />
                         </Grid>
                         <Grid item xs={6}>
@@ -111,36 +120,13 @@ class EndpointForm extends Component {
                                 value={this.props.selectedEndpointConfig.timeout}
                                 fullWidth
                                 margin="normal"
-                                disabled={this.props.readOnly}
+                                onChange={this.handleEndpointConfigTextFieldChange}
+                                disabled={this.props.readOnly || (!this.props.readOnly && !this.props.isInline)}
                             />
                         </Grid>
                     </form>
                 </Paper>
                 <Divider />
-                <Paper className={classes.paper}>
-                    <Grid item xs={6}>
-                        <TextField
-                            id="maxTPS"
-                            label={<FormattedMessage id="max.tps" defaultMessage="Max TPS" />}
-                            className={classes.textField}
-                            value={this.props.endpoint.maxTps}
-                            fullWidth
-                            margin="normal"
-                            disabled={this.props.readOnly}
-                        />
-                    </Grid>
-                    <Grid item xs={6}>
-                        <TextField
-                            id="endpointType"
-                            label={<FormattedMessage id="endpoint.type" defaultMessage="Endpoint Type" />}
-                            className={classes.textField}
-                            value={this.props.endpoint.type}
-                            fullWidth
-                            margin="normal"
-                            disabled={this.props.readOnly}
-                        />
-                    </Grid>
-                </Paper>
             </Grid>
 
         )

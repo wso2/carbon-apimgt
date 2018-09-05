@@ -4,6 +4,9 @@ package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.ArrayList;
+import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndpointConfig_attributesDTO;
 import java.util.Objects;
 
 /**
@@ -15,6 +18,12 @@ public class EndpointConfigDTO   {
 
   @SerializedName("timeout")
   private String timeout = null;
+
+  @SerializedName("isPrimary")
+  private Boolean isPrimary = null;
+
+  @SerializedName("attributes")
+  private List<EndpointConfig_attributesDTO> attributes = new ArrayList<EndpointConfig_attributesDTO>();
 
   public EndpointConfigDTO url(String url) {
     this.url = url;
@@ -52,6 +61,47 @@ public class EndpointConfigDTO   {
     this.timeout = timeout;
   }
 
+  public EndpointConfigDTO isPrimary(Boolean isPrimary) {
+    this.isPrimary = isPrimary;
+    return this;
+  }
+
+   /**
+   * Defines whether the endpoint is primary when used in fail over. 
+   * @return isPrimary
+  **/
+  @ApiModelProperty(example = "true", value = "Defines whether the endpoint is primary when used in fail over. ")
+  public Boolean getIsPrimary() {
+    return isPrimary;
+  }
+
+  public void setIsPrimary(Boolean isPrimary) {
+    this.isPrimary = isPrimary;
+  }
+
+  public EndpointConfigDTO attributes(List<EndpointConfig_attributesDTO> attributes) {
+    this.attributes = attributes;
+    return this;
+  }
+
+  public EndpointConfigDTO addAttributesItem(EndpointConfig_attributesDTO attributesItem) {
+    this.attributes.add(attributesItem);
+    return this;
+  }
+
+   /**
+   * Get attributes
+   * @return attributes
+  **/
+  @ApiModelProperty(value = "")
+  public List<EndpointConfig_attributesDTO> getAttributes() {
+    return attributes;
+  }
+
+  public void setAttributes(List<EndpointConfig_attributesDTO> attributes) {
+    this.attributes = attributes;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -63,12 +113,14 @@ public class EndpointConfigDTO   {
     }
     EndpointConfigDTO endpointConfig = (EndpointConfigDTO) o;
     return Objects.equals(this.url, endpointConfig.url) &&
-        Objects.equals(this.timeout, endpointConfig.timeout);
+        Objects.equals(this.timeout, endpointConfig.timeout) &&
+        Objects.equals(this.isPrimary, endpointConfig.isPrimary) &&
+        Objects.equals(this.attributes, endpointConfig.attributes);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(url, timeout);
+    return Objects.hash(url, timeout, isPrimary, attributes);
   }
 
   @Override
@@ -78,6 +130,8 @@ public class EndpointConfigDTO   {
     
     sb.append("    url: ").append(toIndentedString(url)).append("\n");
     sb.append("    timeout: ").append(toIndentedString(timeout)).append("\n");
+    sb.append("    isPrimary: ").append(toIndentedString(isPrimary)).append("\n");
+    sb.append("    attributes: ").append(toIndentedString(attributes)).append("\n");
     sb.append("}");
     return sb.toString();
   }

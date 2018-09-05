@@ -356,15 +356,16 @@ class Overview extends Component {
                     {/* Endpoints */}
                     {api.endpoint &&
                         api.endpoint.map(ep => (
+                            ep.inline &&
                             <div key={ep.inline.id}>
                                 <div className={classes.endpointsWrapper + ' ' + classes.headline}>
                                     <Link to={'/apis/' + api.id + '/endpoints'} title='Edit endpoint'>
                                         <Typography variant='subheading' align='left'>
-                                            {ep.inline.endpointConfig[0].url}
+                                            {ep.inline.endpointConfig.list[0].url}
                                         </Typography>
                                     </Link>
                                     <a
-                                        href={ep.inline.endpointConfig[0].url}
+                                        href={ep.inline.endpointConfig.list[0].url}
                                         target='_blank'
                                         rel='noopener noreferrer'
                                         className={classes.openNewIcon}
