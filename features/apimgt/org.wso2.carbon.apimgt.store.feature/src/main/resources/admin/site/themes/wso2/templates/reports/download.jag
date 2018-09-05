@@ -6,11 +6,18 @@ include("/jagg/jagg.jag");
 	if(user == null) {
 		response.status = 401;
 	} 
+        var username = jagg.getUser().username;
+        var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+        var domainName = MultitenantUtils.getTenantDomain(username);
+        if(domainName != 'carbon.super') {
+		response.status = 403;
+	} 
 
 	var month = request.getParameter("month");
 	if (month == null || month == "") {
 		month = "1"; //set default as 1 to get previous month report
 	}
+	var timestamp = Math.round((new Date()).getTime() / 1000)
 
 	var publisher = jagg.module("manager").getAPIProviderObj();
 	try{
@@ -19,7 +26,7 @@ include("/jagg/jagg.jag");
 		    response.status=500;
 		} else {
 		    response.contentType = "application/force-download";
-		    response.addHeader("Content-Disposition","attachment; filename=\"Report.pdf\"");
+		    response.addHeader("Content-Disposition","attachment; filename=\"Report-"+timestamp+".pdf\"");
 
 		    print(object.Data);
 		}

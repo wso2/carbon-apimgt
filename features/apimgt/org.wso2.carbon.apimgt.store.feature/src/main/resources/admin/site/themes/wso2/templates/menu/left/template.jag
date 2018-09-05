@@ -133,7 +133,7 @@
               <%
               var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
               var isAnalyticsEnabled = APIUtil.isAnalyticsEnabled();
-              if(isAnalyticsEnabled) {
+              if(isAnalyticsEnabled && tenantDomain == 'carbon.super') {
               %>
               <li <%if (reqUrl.match("reports")){%> class="active" <% } %>><a
                 href="<%= jagg.url("/reports") %>"
