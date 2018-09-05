@@ -3,8 +3,6 @@ import Drawer from '@material-ui/core/Drawer';
 import Divider from '@material-ui/core/Divider';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import FolderOpen from '@material-ui/icons/FolderOpen';
-import Dns from '@material-ui/icons/Dns';
 import Footer from './Footer/Footer'
 import {Link} from "react-router-dom";
 import AuthManager from '../../data/AuthManager.js';
@@ -24,7 +22,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import ConfigManager from "../../data/ConfigManager";
 import EnvironmentMenu from "./Header/EnvironmentMenu";
 import Utils from "../../data/Utils";
-import MenuIcon from '@material-ui/core/Menu';
+import { Menu as MenuIcon } from "@material-ui/icons";
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
@@ -38,6 +36,21 @@ import Switch from '@material-ui/core/Switch';
 import Typography from '@material-ui/core/Typography';
 import classNames from 'classnames';
 
+import CssBaseline from '@material-ui/core/CssBaseline';
+import GlobalNavBar from "../new/GlobalNavbar";
+import GenericSearch from '../new/GenericSearch';
+import UserMenu from '../new/UserMenu';
+import LeftMenu from '../new/LeftMenu';
+import InfoBar from '../new/InfoBar';
+import APIDetail from '../new/APIDetail';
+import RightPanel from '../new/RightPanel';
+import Person from '@material-ui/icons/Person';
+import Popper from '@material-ui/core/Popper';
+import Grow from '@material-ui/core/Grow';
+import Paper from '@material-ui/core/Paper';
+import ClickAwayListener from '@material-ui/core/ClickAwayListener';
+
+
 
 const helpTips = [
     "By API Name [Default]",
@@ -49,9 +62,7 @@ const helpTips = [
     "By Sub-Context [ Syntax - subcontext:xxxx ] or",
     "By Documentation Content [ Syntax - doc:xxxx ]"
 ];
-
-
-const drawerWidth = 240;
+  
 
 const styles = theme => ({
     root: {
@@ -71,8 +82,6 @@ const styles = theme => ({
         display: 'flex',
     },
     appBarShift: {
-        marginLeft: drawerWidth,
-        width: `calc(100% - ${drawerWidth}px)`,
         transition: theme.transitions.create(['width', 'margin'], {
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.enteringScreen,
@@ -87,7 +96,6 @@ const styles = theme => ({
     },
     drawerPaper: {
         position: 'relative',
-        width: drawerWidth,
         transition: theme.transitions.create('width', {
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.enteringScreen,
@@ -106,14 +114,6 @@ const styles = theme => ({
         alignItems: 'center',
         justifyContent: 'flex-end',
         padding: '0 8px',
-    },
-    content: {
-        flexGrow: 1,
-        backgroundColor: theme.palette.background.default,
-        padding: theme.spacing.unit * 3,
-        marginTop: 64,
-        paddingBottom: 50,
-        overflowY: 'auto'
     },
     brandText: {
         marginRight: 10,
@@ -140,9 +140,57 @@ const styles = theme => ({
         margin: '0 20 0 20',
         flex: 1,
     },
+    // New styles ..........
+    ///////////////////////////////////
+    ///////////////////////////////////
+    appBar: {
+        position: 'relative',
+        background: theme.palette.background.appBar,
+      },
+      icon: {
+        marginRight: theme.spacing.unit * 2,
+      },
+      footer: {
+        backgroundColor: theme.palette.grey['A100'],
+        padding: theme.spacing.unit * 3,
+        height: 50,
+      },
+      toolbar: { 
+        minHeight: 56, 
+        [`${theme.breakpoints.up('xs')} and (orientation: landscape)`]: { 
+          minHeight: 48, 
+        }, 
+        [theme.breakpoints.up('sm')]: { 
+          minHeight: 64, 
+        }, 
+      }, 
+      drawer: {
+        top: 64,
+      },
+      menuIcon: {
+        color: theme.palette.getContrastText(theme.palette.background.appBar),
+        fontSize: 35
+      },
+      mainContent: {
+        display: 'flex',
+      },
+      userLink: {
+        color: theme.palette.getContrastText(theme.palette.background.appBar),
+      },
+      wrapper: {
+        minHeight: '100%',
+        marginBottom: -50,
+      },
+      push : {
+        height: 50,
+      },
 });
 
 class Layout extends React.Component {
+    constructor(props){
+        super(props);
+        this.toggleGlobalNavBar = this.toggleGlobalNavBar.bind(this);
+    }
     state = {
         open: false,
         anchorElUserMenu: undefined,
@@ -159,6 +207,9 @@ class Layout extends React.Component {
         openPopB: false,
         nightMode: false,
         themeIndex: 0,
+        left: false,
+        openNavBar: false,
+        openUserMenu: false,
     };
 
     handleDrawerOpen = () => {
@@ -227,74 +278,55 @@ class Layout extends React.Component {
         this.setState({ [name]: event.target.checked });
         this.props.setTheme();
     };
-
+    toggleGlobalNavBar(event) {
+        this.setState({ openNavBar: !this.state.openNavBar });
+    }
+    handleToggleUserMenu = () => {
+        this.setState(state => ({ openUserMenu: !state.openUserMenu }));
+    };
+    handleCloseUserMenu = event => {
+        if (this.anchorEl.contains(event.target)) {
+          return;
+        }
+    
+        this.setState({ openUserMenu: false });
+      };
+    
     render() {
         const { classes, theme } = this.props;
         let user = AuthManager.getUser();
 
         return (
-            <div className={classes.root}>
-                <AppBar
-                    position="absolute"
-                    className={classNames(classes.appBar, this.state.open && classes.appBarShift)}
-                >
-                    <Toolbar disableGutters={!this.state.open}>
-                        <IconButton
-                            color="inherit"
-                            aria-label="open drawer"
-                            onClick={this.handleDrawerOpen}
-                            className={classNames(classes.menuButton, this.state.open && classes.hide)}
-                        >
-                            <MenuIcon />
-                        </IconButton>
 
-                        <Link to="/"  className={classes.brandWrapper}>
-                                <Typography variant="title"  noWrap className={classes.brand}>
-                                <img className={classes.siteLogo} src="/store/public/app/images/logo.png"
-                                     alt="wso2-logo"/> <span>API STORE</span>
-                            </Typography>
-                        </Link>
+        <React.Fragment>
+            <CssBaseline />
+            <div className={classes.wrapper}>
 
-                        <Input
-                            placeholder="Search APIs"
-                            className={classes.input}
-                            inputProps={{
-                                'aria-label': 'Apis',
-                            }}
-                        />
-                        <IconButton aria-label="Search Info" color="default">
-                            <Info onClick={this.handleClickTips}/>
-                        </IconButton>
-                        <Menu
-                            id="tip-menu"
-                            anchorEl={this.state.anchorElTips}
-                            open={this.state.openTips}
-                            onClose={this.handleRequestCloseTips}
-                        >
-                            <List dense={true}>
-                                {helpTips.map((tip) => {
-                                    return <ListItem button key={tip}>
-                                        <ListItemIcon><InfoIcon/></ListItemIcon>
-                                        <ListItemText primary={tip}/>
-                                    </ListItem>
-                                })}
-                            </List>
-                        </Menu>
-                        {/* Environment menu */}
-                        <EnvironmentMenu environments={this.state.environments}
+      <AppBar position="fixed" className={classes.appBar}>
+              <Toolbar className={classes.toolbar}>
+              <IconButton onClick={this.toggleGlobalNavBar} color="inherit">
+                  <MenuIcon className={classes.menuIcon} />
+                </IconButton>
+                <Link to="/"><div className="main-logo"></div></Link>
+                <div className="vertical-divider"></div>
+                <GenericSearch  />
+                <div className="vertical-divider"></div>
+                {/* Environment menu */}
+                <EnvironmentMenu environments={this.state.environments}
                                          environmentLabel={Utils.getEnvironment().label}
                                          handleEnvironmentChange={this.handleEnvironmentChange}/>
-                        {/* User menu */}
-                        <Button color="inherit"
-                                ref={node => {
-                                    this.button = node;
-                                }}
-                                onClick={() => this.handleClickButton("openPopB")}
-                        >{user.name}</Button>
-                        <Popover
-                            open={this.state.openPopB}
-                            anchorEl={this.state.anchorEl}
-                            onClose={() => this.handleRequestClose("openPopB")}
+                <Button
+                    buttonRef={node => {
+                    this.anchorEl = node;
+                    }}
+                    aria-owns={open ? 'menu-list-grow' : null}
+                    aria-haspopup="true"
+                    onClick={this.handleToggleUserMenu}
+                    className={classes.userLink}
+                >
+                    <Person  /> {user.name}
+                </Button>
+                <Popper open={this.state.openUserMenu} anchorEl={this.anchorEl} transition disablePortal 
                             anchorOrigin={{
                                 vertical: 'bottom',
                                 horizontal: 'center',
@@ -303,8 +335,16 @@ class Layout extends React.Component {
                                 vertical: 'top',
                                 horizontal: 'center',
                             }}
-                        >
-                            <Card>
+>
+                    {({ TransitionProps, placement }) => (
+                    <Grow
+                        {...TransitionProps}
+                        id="menu-list-grow"
+                        style={{ transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom' }}
+                    >
+                        <Paper>
+                        <ClickAwayListener onClickAway={this.handleCloseUserMenu}>
+                        <Card>
                                 <CardContent>
 
                                     <ListItem button className={classes.listItem}>
@@ -335,47 +375,43 @@ class Layout extends React.Component {
 
                                 </CardActions>
                             </Card>
-                        </Popover>
-                    </Toolbar>
-                </AppBar>
+                        </ClickAwayListener>
+                        </Paper>
+                    </Grow>
+                    )}
+                </Popper>
+              </Toolbar>
+            </AppBar>
+           <GlobalNavBar
+              toggleGlobalNavBar={this.toggleGlobalNavBar}
+              open={this.state.openNavBar}
+            />
+            <div className={classes.mainContent}>
+              {/* <LeftMenu /> */}
+              {this.props.children}
 
-                <Drawer
-                    variant="permanent"
-                    classes={{
-                        paper: classNames(classes.drawerPaper, !this.state.open && classes.drawerPaperClose),
-                    }}
-                    open={this.state.open}
-                >
-                    <div className={classes.toolbar}>
-                        <IconButton onClick={this.handleDrawerClose}>
-                            {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-                        </IconButton>
-                    </div>
-                    <Divider />
-                        {user &&
-                            <List>
-                                <br />
-                                <br />
-
-                                <Link to="/">
-                                APIs
-                                </Link>
-                                <br />
-                                <Link to="/applications">
-                                    Applications
-                                </Link>
-                            </List>
-                            }
-
-                    <Divider />
-                </Drawer>
-                <main className={classes.content}>
-                    {this.props.children}
-
-                </main>
-                <Footer />
-
+              {/* <main className={classes.content}> */}
+                {/* <InfoBar /> */}
+                {/* <APIDetail /> */}
+              {/* </main> */}
+              {/* <RightPanel /> */}
             </div>
+            {/* Footer */}
+
+    <div className={classes.push}></div>
+  </div>
+    <footer className={classes.footer}>
+            <Typography noWrap>{'WSO2 APIM v3.0.0 | © 2018 WSO2 Inc'}</Typography>
+    </footer>
+
+
+            
+           
+            {/* End footer */}
+          </React.Fragment>
+
+
+
         );
     }
 }

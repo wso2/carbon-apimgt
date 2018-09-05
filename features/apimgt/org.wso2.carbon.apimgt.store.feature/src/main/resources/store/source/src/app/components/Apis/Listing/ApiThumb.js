@@ -43,14 +43,8 @@ const styles = theme => ({
         lineHeight: '30px',
         position: 'absolute',
     },
-    lifeCycleState_Created: {backgroundColor: "#0000ff"},
-    lifeCycleState_Prototyped: {backgroundColor: "#42dfff"},
-    lifeCycleState_Published: {backgroundColor: "#41830A"},
-    lifeCycleState_Maintenance: {backgroundColor: "#cecece"},
-    lifeCycleState_Deprecated: {backgroundColor: "#D7C850"},
-    lifeCycleState_Retired: {backgroundColor: "#000000"},
     thumbContent: {
-        width: 230,
+        width: 250,
         backgroundColor: theme.palette.background.paper,
         padding: 10
     },

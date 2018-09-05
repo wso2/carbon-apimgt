@@ -20,7 +20,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import API from '../../../data/api';
 
-import { TableCell, TableRow } from '@material-ui/core/Table';
+import TableRow from '@material-ui/core/TableRow';
+import TableCell from '@material-ui/core/TableCell';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';

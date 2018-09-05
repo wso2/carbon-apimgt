@@ -129,7 +129,7 @@ class Subscribe extends Component {
             createAppOpen: false,
             openSubsConfirm: false,
         };
-        this.api_uuid = this.props.uuid;
+        this.api_uuid = this.props.api_uuid;
         this.logChange = this.logChange.bind(this);
         this.openSubscribeMenu = this.openSubscribeMenu.bind(this);
         this.closeSubscribeMenu = this.closeSubscribeMenu.bind(this);

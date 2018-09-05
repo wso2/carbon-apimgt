@@ -1,0 +1,31 @@
+body{
+    background: url(../images/back-light.png);
+}
+html, body {
+    height: 100%;
+    margin: 0;
+  }
+.main-logo{
+    background: url(../images/logo.png) no-repeat left top transparent;
+    width: 208px;
+    height: 18px;
+}
+.vertical-divider{
+    border-left:solid 1px #4e5670;
+    height: 32px;
+    margin-right:20px;
+    margin-left:20px;
+}
+.vertical-divider-70{
+    border-left:solid 1px #4e5670;
+    height: 70px;
+    margin-right:20px;
+    margin-left:20px;
+}
+.vertical-divider-midway{
+    border-left:solid 1px #4e5670;
+    height: 40px;
+    margin-right:20px;
+    margin-left:20px;
+}
+
