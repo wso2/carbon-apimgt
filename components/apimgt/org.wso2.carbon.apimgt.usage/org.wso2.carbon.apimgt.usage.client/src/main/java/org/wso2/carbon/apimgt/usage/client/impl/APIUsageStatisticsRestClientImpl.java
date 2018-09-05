@@ -1961,7 +1961,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
             }
             StringBuilder query = new StringBuilder(
-                    "from " + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_AGG + " on("
+                    "from " + APIUsageStatisticsClientConstants.APIM_REQ_COUNT_AGG + " on("
                             + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='" + tenantDomain
                             + "' AND " + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName + "'");
             if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
@@ -1970,13 +1970,12 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             if (!StringUtils.isEmpty(appName)) {
                 query.append(" AND " + APIUsageStatisticsClientConstants.APPLICATION_NAME + "=='" + appName + "'");
             }
-            query.append(") within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate) + "L per '" + granularity
-                    + "' select " + APIUsageStatisticsClientConstants.TIME_STAMP
-                    + ", sum(coalesce(2L,0L)) as success_request_count, sum(coalesce("
-                    + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_COUNT
-                    + ",0L)) as throttled_out_count group by " + APIUsageStatisticsClientConstants.TIME_STAMP
-                    + " order by " + APIUsageStatisticsClientConstants.TIME_STAMP + " ASC;");
-
+            query.append(") within '" + fromDate + "', '" + toDate + "' per '" + granularity + "' select "
+                    + APIUsageStatisticsClientConstants.TIME_STAMP + ", sum(coalesce("
+                    + APIUsageStatisticsClientConstants.SUCCESS_COUNT + ",0L)) as success_request_count, sum(coalesce("
+                    + APIUsageStatisticsClientConstants.THROTTLE_COUNT + ",0L)) as throttled_out_count group by "
+                    + APIUsageStatisticsClientConstants.TIME_STAMP + " order by "
+                    + APIUsageStatisticsClientConstants.TIME_STAMP + " ASC;");
             JSONObject jsonObj = APIUtil.executeQueryOnStreamProcessor(
                     APIUsageStatisticsClientConstants.APIM_THROTTLED_OUT_SUMMARY_SIDDHI_APP, query.toString());
             Long timeStamp;
@@ -2037,20 +2036,19 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             }
 
             StringBuilder query = new StringBuilder(
-                    "from " + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_AGG + " on ("
+                    "from " + APIUsageStatisticsClientConstants.APIM_REQ_COUNT_AGG + " on ("
                             + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='" + tenantDomain
                             + "' AND " + APIUsageStatisticsClientConstants.APPLICATION_NAME + "=='" + appName + "'");
             if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
                 query.append("AND " + APIUsageStatisticsClientConstants.API_CREATOR + "=='" + provider + "'");
             }
-            query.append(") within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate) + "L per '" + granularity
-                    + "' select " + APIUsageStatisticsClientConstants.API_NAME + ", "
-                    + APIUsageStatisticsClientConstants.API_CREATOR
-                    + ", sum(coalesce(2L,0L)) as success_request_count, sum(coalesce("
-                    + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_COUNT + ",0L)) as throttleout_count group by "
+            query.append(") within '" + fromDate + "', '" + toDate + "' per '" + granularity + "' select "
                     + APIUsageStatisticsClientConstants.API_NAME + ", " + APIUsageStatisticsClientConstants.API_CREATOR
-                    + " order by " + APIUsageStatisticsClientConstants.API_NAME + " ASC;");
-
+                    + ", sum(coalesce(" + APIUsageStatisticsClientConstants.SUCCESS_COUNT
+                    + ",0L)) as success_request_count, sum(coalesce(" + APIUsageStatisticsClientConstants.THROTTLE_COUNT
+                    + ",0L)) as throttleout_count group by " + APIUsageStatisticsClientConstants.API_NAME + ", "
+                    + APIUsageStatisticsClientConstants.API_CREATOR + " order by "
+                    + APIUsageStatisticsClientConstants.API_NAME + " ASC;");
             JSONObject jsonObj = APIUtil.executeQueryOnStreamProcessor(
                     APIUsageStatisticsClientConstants.APIM_THROTTLED_OUT_SUMMARY_SIDDHI_APP, query.toString());
 

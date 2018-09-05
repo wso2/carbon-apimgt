@@ -122,6 +122,7 @@ public final class APIUsageStatisticsClientConstants {
     public static final String API_FAULTY_INVOCATION_AGG = "ApiFaultyInvocationAgg";
     public static final String API_USER_BROWSER_AGG = "ApiUserBrowserAgg";
     public static final String API_EXECUTION_TIME_AGG = "ApiExecutionTimeAgg";
+    public static final String APIM_REQ_COUNT_AGG= "APIM_ReqCountAgg";
 
     //------Field names-------
     public static final String TIME_STAMP = "AGG_TIMESTAMP";
@@ -131,7 +132,8 @@ public final class APIUsageStatisticsClientConstants {
     public static final String API_CONTEXT = "apiContext";
     public static final String DESTINATION = "destination";
     public static final String TOTAL_REQUEST_COUNT = "totalRequestCount";
-    public static final String API_THROTTLED_OUT_COUNT = "throttledOutCount";
+    public static final String THROTTLE_COUNT = "throttleCount";
+    public static final String SUCCESS_COUNT = "successCount";
     public static final String TOTAL_FAULT_COUNT = "totalFaultCount";
     public static final String API_METHOD = "apiMethod";
     public static final String API_RESOURCE_TEMPLATE = "apiResourceTemplate";
