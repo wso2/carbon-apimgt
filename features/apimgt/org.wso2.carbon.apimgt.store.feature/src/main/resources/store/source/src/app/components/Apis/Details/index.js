@@ -16,7 +16,7 @@ import CustomIcon from '../../Shared/CustomIcon';
 import {Route, Switch, Redirect} from 'react-router-dom'
 
 import Subscribe from './Subscribe'
-import ApiConsole from './ApiConsole'
+import ApiConsole from '../ApiConsole/ApiConsole'
 import Documentation from './Documents/Documentation'
 import Forum from './Forum'
 import Sdk from './Sdk'
