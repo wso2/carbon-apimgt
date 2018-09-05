@@ -21,7 +21,11 @@ import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Set;
+import java.util.LinkedHashSet;
+import java.util.Date;
+import java.util.List;
+import java.util.Collections;
 
 /**
  * Provider's & system's view of API

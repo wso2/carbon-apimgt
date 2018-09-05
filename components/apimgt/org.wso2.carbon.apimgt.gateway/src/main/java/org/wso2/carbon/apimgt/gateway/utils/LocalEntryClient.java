@@ -24,7 +24,9 @@ import org.wso2.carbon.localentry.stub.types.LocalEntryAdminServiceStub;
 
 import java.rmi.RemoteException;
 
-
+/**
+ * This LocalEntryClient class for operating the synapse localEntries
+ */
 public class LocalEntryClient {
 
     private LocalEntryAdminServiceStub localEntryAdminServiceStub;
@@ -37,9 +39,10 @@ public class LocalEntryClient {
     }
 
     /**
-     *  Add Local entry
-     * @param content
-     * @return
+     * Add Local entry
+     *
+     * @param content Swagger Content
+     * @return Status of the add operation
      * @throws AxisFault
      */
 
@@ -51,16 +54,17 @@ public class LocalEntryClient {
         } catch (RemoteException e) {
             throw new AxisFault("Error occurred while generating the response ", e.getMessage(), e);
         } catch (LocalEntryAdminException e) {
-            throw new AxisFault("Error occurred while adding the local entry", e.getMessage(),e);
+            throw new AxisFault("Error occurred while adding the local entry", e.getMessage(), e);
         }
         return value;
 
     }
 
     /**
-     * Get Local entry
-     * @param key
-     * @return
+     * Get Local entry for given API
+     *
+     * @param key API Id to be retrived
+     * @return LocalEntry for the given API
      * @throws AxisFault
      */
     public Object getEntry(String key) throws AxisFault {
@@ -72,13 +76,14 @@ public class LocalEntryClient {
         } catch (LocalEntryAdminException e) {
             throw new AxisFault("Error occurred while create the admin client", e.getMessage(), e);
         }
-            return object;
+        return object;
     }
 
     /**
      * Delete the local entry
-     * @param key
-     * @return
+     *
+     * @param key APT Id to be deleted
+     * @return Stataus of the delete operation
      * @throws AxisFault
      */
 

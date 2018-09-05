@@ -19,8 +19,6 @@
 
 package org.wso2.carbon.apimgt.gateway;
 
-import java.util.EnumMap;
-
 public class APIMgtGatewayConstants {
 
     public static final String CONSUMER_KEY = "api.ut.consumerKey";
@@ -45,8 +43,9 @@ public class APIMgtGatewayConstants {
     public static final String REVOKED_ACCESS_TOKEN = "RevokedAccessToken";
     public static final String DEACTIVATED_ACCESS_TOKEN = "DeactivatedAccessToken";
     public static final String SCOPES = "Scopes";
-    public static final String REQUEST_EXECUTION_START_TIME ="request.execution.start.time";
+    public static final String REQUEST_EXECUTION_START_TIME = "request.execution.start.time";
     public static final String SYNAPSE_ENDPOINT_ADDRESS = "ENDPOINT_ADDRESS";
+    public final static String JSON_CONTENT_TYPE = "application/json";
 
     public static final String RESOURCE_PATTERN = "^/.+?/.+?([/?].+)$";
 
@@ -54,7 +53,7 @@ public class APIMgtGatewayConstants {
     public static final String RESOURCE_NOT_FOUND_ERROR_MSG = "No matching resource found for given API Request";
     public static final String REQUEST_TYPE_FAIL_MSG = "Neither request method nor content type is matched with" +
             " the validator.";
-    
+
     public static final String BACKEND_LATENCY = "backend_latency";
     public static final String SECURITY_LATENCY = "security_latency";
     public static final String THROTTLING_LATENCY = "throttling_latency";
@@ -69,7 +68,7 @@ public class APIMgtGatewayConstants {
     public static final String REGEX_PATTERN = "regex";
     public static final String ENABLED_CHECK_BODY = "enabledCheckBody";
     public static final String ENABLED_CHECK_PATHPARAM = "enabledCheckPathParams";
-    public static final String ENABLED_CHECK_HEADERS  = "enabledCheckHeaders";
+    public static final String ENABLED_CHECK_HEADERS = "enabledCheckHeaders";
     public static final String REST_URL_POSTFIX = "REST_URL_POSTFIX";
     public static final String TRANSPORT_HEADERS = "TRANSPORT_HEADERS";
 
@@ -95,9 +94,9 @@ public class APIMgtGatewayConstants {
 
     /**
      * Web socket header for jwt assertion.
-     * */
+     */
     public static final String WS_JWT_TOKEN_HEADER = "websocket.custom.header.X-JWT-Assertion";
-    
+
     public static final String GATEWAY_TYPE = "SYNAPSE";
     public static final String SYNAPDE_GW_LABEL = "Synapse";
     public static final String CLIENT_USER_AGENT = "clientUserAgent";
@@ -108,11 +107,12 @@ public class APIMgtGatewayConstants {
      */
     public static final String API_ELECTED_RESOURCE = "API_ELECTED_RESOURCE";
     public static final String LOCAL_ENTRY = "localentry";
-    public static final String ELECTED_REQUEST_METHOD ="api.ut.HTTP_METHOD";
+    public static final String ELECTED_REQUEST_METHOD = "api.ut.HTTP_METHOD";
     public static final String SWAGGER_PATH = "paths";
     public static final String RESPONSE = "responses";
     public static final String SUCCESS_RESPONSE = "200";
     public static final String SCHEMA = "schema";
+    public static final String DEFINITION = "definition";
     public static final String SCHEMA_REFERENCE = "$ref";
     public static final char LAST_INDEX = '/';
     public static final String DEFINITIONS = "definitions";
@@ -128,6 +128,7 @@ public class APIMgtGatewayConstants {
     public static final String COMPONENTS = "components";
     public static final String SCHEMAS = "schemas";
     public static final String CONTENT = "content";
+
     public enum HttpStatusCode {
         OK("200"),
         CREATED("201"),
@@ -140,25 +141,30 @@ public class APIMgtGatewayConstants {
         ALREADY_REPORTED("208"),
         IM_USED("226");
         private final String code;
+
         HttpStatusCode(String code) {
             this.code = code;
         }
+
         public String getCode() {
             return this.code;
         }
     }
+
     public enum CombineSchema {
         ALL_OF("allOf"),
         ANY_OF("anyOf"),
         ONE_OF("oneOf");
         private final String code;
-        CombineSchema(String code) {this.code = code; }
-        public String getCode() { return this.code; }
+
+        CombineSchema(String code) {
+            this.code = code;
+        }
+
+        public String getCode() {
+            return this.code;
+        }
     }
-    public static EnumMap<CombineSchema, String> combineSchema =
-            new EnumMap<>(APIMgtGatewayConstants.CombineSchema.class);
-
-
 
 }
 

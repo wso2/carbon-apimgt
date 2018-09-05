@@ -25,7 +25,7 @@ import org.apache.synapse.rest.AbstractHandler;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 
 /**
- * Schema validator to validate Json request/response.
+ * This handler is to validate Json request/response message content against specified schemas.
  */
 public class SchemaValidator extends AbstractHandler {
 
@@ -45,11 +45,9 @@ public class SchemaValidator extends AbstractHandler {
         messageContext.setProperty("LocalEntryId", apiId);
 
         Mediator sequence = messageContext.getSequence(APIMgtGatewayConstants.SCHEMA_HANDLER);
-        // Invoke the custom error handler specified by the user
         if (sequence != null) {
             sequence.mediate(messageContext);
         }
-
         return true;
     }
 
