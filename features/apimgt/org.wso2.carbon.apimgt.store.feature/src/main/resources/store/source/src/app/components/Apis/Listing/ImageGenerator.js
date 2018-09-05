@@ -6,7 +6,6 @@ import * as icons from '@material-ui/icons';
 const styles = theme => ({
     svgImage: {
         cursor: 'pointer',
-        minWidth: 250,
     },
 });
 
@@ -69,8 +68,10 @@ class ImageGenerator extends React.Component{
         }
         const Icon = icon;
         const { classes } = this.props;
+        const width = this.props.width ? this.props.width : 250;
+        const height = this.props.height ? this.props.height : 190;
         return (
-            <svg width="250" height="190" className={classes.svgImage}>
+            <svg width={width} height={height} className={classes.svgImage}>
                 <rect
                     {...thumbnailBox}
                     fill={"#" + colorPair.prime.toString(16)}

@@ -1,141 +1,172 @@
-/*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- *
- * WSO2 Inc. licenses this file to you under the Apache License,
- * Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-
-import React, {Component} from 'react'
+import React from 'react';
+import PropTypes from 'prop-types';
+import classNames from 'classnames';
+import { withStyles } from '@material-ui/core/styles';
+import Drawer from '@material-ui/core/Drawer';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import List from '@material-ui/core/List';
+import Typography from '@material-ui/core/Typography';
+import Divider from '@material-ui/core/Divider';
+import IconButton from '@material-ui/core/IconButton';
+import MenuIcon from '@material-ui/icons/Menu';
+import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
+import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import CustomIcon from '../../Shared/CustomIcon';
 import {Route, Switch, Redirect} from 'react-router-dom'
 
-import Overview from './Overview'
-import ApiConsole from './ApiConsole/ApiConsole'
+import Subscribe from './Subscribe'
+import ApiConsole from './ApiConsole'
 import Documentation from './Documents/Documentation'
 import Forum from './Forum'
 import Sdk from './Sdk'
 import BasicInfo from './BasicInfo'
 import {PageNotFound} from '../../Base/Errors/index'
-import AppBar from '@material-ui/core/AppBar';
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
-import ComputerIcon from '@material-ui/icons/Computer';
-import ChromeReaderModeIcon from '@material-ui/icons/ChromeReaderMode';
 import Grid from '@material-ui/core/Grid';
-import LibraryBooksIcon from '@material-ui/icons/LibraryBooks';
-import ForumIcon from '@material-ui/icons/Forum';
-import GavelIcon from '@material-ui/icons/Gavel';
-import Typography from '@material-ui/core/Typography';
-import Paper from '@material-ui/core/Paper';
-import {withStyles} from '@material-ui/core/styles';
-import PropTypes from 'prop-types';
+import InfoBar from './InfoBar';
+import RightPanel from './RightPanel';
+
+
 
 const styles = theme => ({
-    imageSideContent: {
-        display: 'inline-block',
-        paddingLeft: 20,
+    linkColor: {
+        color: theme.palette.getContrastText(theme.palette.background.leftMenu),
     },
-    imageWrapper: {
-        display: 'flex',
-        flexAlign: 'top',
+    linkColorMain: {
+        color: theme.palette.secondary.main,
     },
-    headline: {
-        marginTop: 20
+    LeftMenu: {
+        backgroundColor: theme.palette.background.leftMenu,
+        width: 90,
+        textAlign: 'center',
+        height: '100vh',
+        fontFamily: theme.typography.fontFamily,
     },
-    titleCase: {
-        textTransform: 'capitalize',
+    leftLInk: {
+        paddingTop: 10,
+        paddingBottom: 10,  
+        paddingLeft: 5,
+        paddingRight: 5,
+        fontSize: 11,
+        cursor: 'pointer'
     },
-    chip: {
-        marginLeft: 0,
+    leftLInkMain: {
+        borderBottom: 'solid 1px ' + theme.palette.grey['A200'],
+        paddingBottom: 5,
+        paddingTop: 5,
+        height: 70,
+        fontSize: 12,
         cursor: 'pointer',
-    },
-    openNewIcon: {
-        display: 'inline-block',
-        marginLeft: 20,
-    },
-    endpointsWrapper: {
-        display: 'flex',
-        justifyContent: 'flex-start',
-    },
-    paper: {
-        marginBottom: 20,
     }
+
 });
 
-class Details extends Component {
+class Details extends React.Component {
     constructor(props){
         super(props);
         this.state = {
-            value: 'overview',
+            active: 'overview',
             api: null,
         };
         this.setDetailsAPI = this.setDetailsAPI.bind(this);
     }
+    
 
-    setDetailsAPI(api){
-        this.setState({api: api});
-    }
+  setDetailsAPI(api){
+    this.setState({api: api});
+}
 
-    handleChange = (event, value) => {
-        this.setState({ value });
-        this.props.history.push({pathname: "/apis/" + this.props.match.params.api_uuid + "/" + value});
-    };
 
-    componentDidMount() {
-        let currentTab = this.props.location.pathname.match(/[^\/]+(?=\/$|$)/g);
-        if( currentTab && currentTab.length > 0){
-            this.setState({ value: currentTab[0] });
-        }
+componentDidMount() {
+    let currentLink = this.props.location.pathname.match(/[^\/]+(?=\/$|$)/g);
+    if( currentLink && currentLink.length > 0){
+        this.setState({ active: currentLink[0] });
     }
-    render() {
-        let redirect_url = "/apis/" + this.props.match.params.api_uuid + "/overview";
-        const classes = this.props.classes;
-        return (
-            <Grid container spacing={0} justify="center">
-                <Grid item xs={12} sm={12} md={12} lg={11} xl={10} >
-                    <BasicInfo api_uuid={this.props.match.params.api_uuid} />
-                    <Paper className={classes.paper}>
-                        <Tabs
-                            value={this.state.value}
-                            onChange={this.handleChange}
-                            fullWidth
-                            indicatorColor="primary"
-                            textColor="primary"
-                        >
-                            <Tab value="overview" icon={<ComputerIcon />} label="Overview" />
-                            <Tab value="console" icon={<ChromeReaderModeIcon />} label="API Console" />
-                            <Tab value="documentation" icon={<LibraryBooksIcon />} label="Documentation" />
-                            <Tab value="forum" icon={<ForumIcon />} label="Forum" />
-                            <Tab value="sdk" icon={<GavelIcon />} label="SDKs" />
-                        </Tabs>
-                    </Paper>
-                    <Switch>
-                        <Redirect exact from="/apis/:api_uuid" to={redirect_url}/>
-                        <Route path="/apis/:api_uuid/overview" render={props => <Overview {...props} setDetailsAPI={this.setDetailsAPI}/>}/>
-                        <Route path="/apis/:api_uuid/console" component={ApiConsole}/>
-                        <Route path="/apis/:api_uuid/documentation" component={Documentation}/>
-                        <Route path="/apis/:api_uuid/forum" component={Forum}/>
-                        <Route path="/apis/:api_uuid/sdk" component={Sdk}/>
-                        <Route component={PageNotFound}/>
-                    </Switch>
-                </Grid>
-            </Grid>
-        );
-    }
+}
+handleMenuSelect(menuLink) {
+    this.setState({active:menuLink});
+    this.props.history.push({pathname: "/apis/" + this.props.match.params.api_uuid + "/" + menuLink});
+}
+
+  render() {
+    const { classes, theme } = this.props;
+    const strokeColor = theme.palette.getContrastText(theme.palette.background.leftMenu);
+    const strokeColorMain = theme.palette.secondary.main;
+    let redirect_url = "/apis/" + this.props.match.params.api_uuid + "/overview";
+    return (
+        <React.Fragment>
+            <div className={classes.LeftMenu}>
+                <div className={classes.leftLInkMain}>
+                    <CustomIcon strokeColor={strokeColorMain} width={32} height={32} icon="api" />
+                    <div className={classes.linkColorMain}>APIs</div>
+                </div>
+                <div className={classes.leftLInk} 
+                    onClick={( () => this.handleMenuSelect('overview') ) }
+                    style={{backgroundColor: this.state.active === "overview" ? theme.palette.background.appBar : ''}}
+                    >
+                    <CustomIcon strokeColor={strokeColor}  width={32} height={32} icon="overview" />
+                    <div className={classes.linkColor}>OVERVIEW</div>
+                </div>
+                <div className={classes.leftLInk} 
+                    onClick={( () => this.handleMenuSelect('credentials') ) }
+                    style={{backgroundColor: this.state.active === "credentials" ? theme.palette.background.appBar : ''}}
+                    >
+                    <CustomIcon strokeColor={strokeColor}  width={32} height={32} icon="credentials" />
+                    <div className={classes.linkColor}>CREDENTIALS</div>
+                </div>
+                <div className={classes.leftLInk}
+                    onClick={( () => this.handleMenuSelect('comments') ) }
+                    style={{backgroundColor: this.state.active === "comments" ? theme.palette.background.appBar : ''}}
+                    >
+                    <CustomIcon strokeColor={strokeColor}  width={32} height={32} icon="comments" />
+                    <div className={classes.linkColor}>COMMENTS</div>
+                </div>
+                <div className={classes.leftLInk}
+                    onClick={( () => this.handleMenuSelect('test') ) }
+                    style={{backgroundColor: this.state.active === "test" ? theme.palette.background.appBar : ''}}
+                    >
+                    <CustomIcon strokeColor={strokeColor}  width={32} height={32} icon="test" />
+                    <div className={classes.linkColor}>TEST</div>
+                </div>
+                <div className={classes.leftLInk}
+                    onClick={( () => this.handleMenuSelect('docs') ) }
+                    style={{backgroundColor: this.state.active === "docs" ? theme.palette.background.appBar : ''}}
+                    >
+                    <CustomIcon strokeColor={strokeColor}  width={32} height={32} icon="docs" />
+                    <div className={classes.linkColor}>DOCS</div>
+                </div>
+                <div className={classes.leftLInk}
+                    onClick={( () => this.handleMenuSelect('sdk') ) }
+                    style={{backgroundColor: this.state.active === "sdk" ? theme.palette.background.appBar : ''}}
+                    >
+                    <CustomIcon strokeColor={strokeColor}  width={32} height={32} icon="sdk" />
+                    <div className={classes.linkColor}>SDK</div>
+                </div>
+            </div>
+            <div style={{width:'100%'}}>
+                <InfoBar api_uuid={this.props.match.params.api_uuid} />
+                <Switch>
+                    <Redirect exact from="/apis/:api_uuid" to={redirect_url}/>
+                    <Route path="/apis/:api_uuid/overview" render={props => <Subscribe  api_uuid={this.props.match.params.api_uuid } />}/>
+                    <Route path="/apis/:api_uuid/credentials" render={props => <div>credentials</div>} />
+                    <Route path="/apis/:api_uuid/comments" render={props => <div>comments</div>} />
+                    <Route path="/apis/:api_uuid/test" component={ApiConsole}/>
+                    <Route path="/apis/:api_uuid/docs" component={Documentation}/>
+                    <Route path="/apis/:api_uuid/forum" component={Forum}/>
+                    <Route path="/apis/:api_uuid/sdk" component={Sdk}/>
+                    <Route component={PageNotFound}/>
+                </Switch>
+            </div>
+            <RightPanel />
+        </React.Fragment>
+    );
+  }
 }
 
 Details.propTypes = {
-    classes: PropTypes.object.isRequired,
+  classes: PropTypes.object.isRequired,
+  theme: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(Details);
+export default withStyles(styles, { withTheme: true })(Details);
+

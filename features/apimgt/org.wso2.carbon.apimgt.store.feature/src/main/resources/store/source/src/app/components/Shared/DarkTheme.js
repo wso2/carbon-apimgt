@@ -1,37 +1,33 @@
-import grey from '@material-ui/core/colors/grey';
-import common from '@material-ui/core/colors/common';
-
 export default {
     palette: {
-        text: {
-            primary: 'rgba(255, 255, 255, 1)',
-            secondary: 'rgba(255, 255, 255, 0.7)',
-            disabled: 'rgba(255, 255, 255, 0.5)',
-            hint: 'rgba(255, 255, 255, 0.5)',
-            icon: 'rgba(255, 255, 255, 0.5)',
-            divider: 'rgba(255, 255, 255, 0.12)',
-            lightDivider: 'rgba(255, 255, 255, 0.075)',
+        primary: {
+          // light: will be calculated from palette.primary.main,
+          main: '#15b8cf',
+          // dark: will be calculated from palette.primary.main,
+          // contrastText: will be calculated to contrast with palette.primary.main
         },
-        input: {
-            bottomLine: 'rgba(255, 255, 255, 0.7)',
-            helperText: 'rgba(255, 255, 255, 0.7)',
-            labelText: 'rgba(255, 255, 255, 0.7)',
-            inputText: 'rgba(255, 255, 255, 1)',
-            disabled: 'rgba(255, 255, 255, 0.5)',
-        },
-        action: {
-            active: 'rgba(255, 255, 255, 1)',
-            disabled: 'rgba(255, 255, 255, 0.3)',
+        secondary: {
+          light: '#0066ff',
+          main: '#a2ecf5',
+          // dark: will be calculated from palette.secondary.main,
+          contrastText: '#ffcc00',
         },
         background: {
-            default: '#303030',
-            paper: grey[800],
-            appBar: grey[900],
-            contentFrame: grey[900],
-            status: common.black,
+          default: '#1c2233ff',
+          paper: '#ffffff',
+          appBar: '#1d344f',
+          leftMenu: '#1a1f2f',
         },
         custom: {
-            imageIconColor: grey[50]
-        }
+          leftMenuText: '#8b8e95',
+          leftMenuActive: '#1d344f',
+          starColor: '#f2c73a',
+          leftMenuWidth: 90,
+          contentAreaWidth: 1240,
+        },
+    },
+    typography: {
+      fontFamily: '"Open Sans", "Helvetica", "Arial", sans-serif',
+      fontSize: 12,
     }
 };

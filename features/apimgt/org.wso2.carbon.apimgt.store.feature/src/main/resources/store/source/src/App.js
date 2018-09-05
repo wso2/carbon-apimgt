@@ -35,23 +35,10 @@ import AnonymousView from "./app/components/AnonymousView/AnonymousView";
 import SignUp from "./app/components/AnonymousView/SignUp";
 import PrivacyPolicy from "./app/components/Policy/PrivacyPolicy";
 import CookiePolicy from "./app/components/Policy/CookiePolicy";
-import {addLocaleData, defineMessages, IntlProvider} from 'react-intl';
-
 const themes = [];
 
 themes.push(createMuiTheme(LightTheme));
 themes.push(createMuiTheme(DarkTheme));
-
-/**
- * Language.
- * @type {string}
- */
-const language = (navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage;
-
-/**
- * Language without region code.
- */
-const languageWithoutRegionCode = language.toLowerCase().split(/[_-]+/)[0];
 
 // import './materialize.css'
 
@@ -64,27 +51,9 @@ class Protected extends Component {
         this.state = {
             showLeftMenu: false,
             themeIndex: 0,
-            messages: {}
         };
         this.environments = [];
-        this.loadLocale = this.loadLocale.bind(this);
         /* TODO: need to fix the header to avoid conflicting with messages ~tmkb*/
-    }
-
-    /**
-     * Load locale file.
-     *
-     * @param {string} locale Locale name
-     * @returns {Promise} Promise
-     */
-    loadLocale(locale = 'en') {
-        fetch(`${Utils.CONST.CONTEXT_PATH}/public/app/locales/${locale}.json`)
-            .then((resp) => resp.json())
-            .then((data) => {
-                // eslint-disable-next-line global-require, import/no-dynamic-require
-                addLocaleData(require(`react-intl/locale-data/${locale}`));
-                this.setState({messages: defineMessages(data)});
-            })
     }
 
     componentDidMount() {
@@ -129,8 +98,6 @@ class Protected extends Component {
         if (storedThemeIndex) {
             this.setState({themeIndex: parseInt(storedThemeIndex)})
         }
-        const locale = (languageWithoutRegionCode || language || 'en');
-        this.loadLocale(locale);
     }
     setTheme() {
         this.setState({theme: themes[this.state.themeIndex % 3]});
@@ -144,20 +111,18 @@ class Protected extends Component {
         // Not actively check validity of access token from backend
         if (AuthManager.getUser(environmentName)) {
             return (
-                <IntlProvider locale={language} messages={this.state.messages}>
-                    <MuiThemeProvider theme={themes[this.state.themeIndex % 2]}>
-                        <Base setTheme={() => this.setTheme()}>
-                            <Switch>
-                                <Redirect exact from="/" to="/apis"/>
-                                <Route path={"/apis"} component={Apis}/>
-                                <Route path={"/applications"} component={Applications}/>
-                                <Route path={"/application/create"} component={ApplicationCreate}/>
-                                <Route path={"/application/edit/:application_id"} component={ApplicationEdit}/>
-                                <Route component={PageNotFound}/>
-                            </Switch>
-                        </Base>
-                    </MuiThemeProvider>
-                </IntlProvider>
+                <MuiThemeProvider theme={themes[this.state.themeIndex % 2]}>
+                    <Base setTheme={() => this.setTheme()}>
+                        <Switch>
+                            <Redirect exact from="/" to="/apis"/>
+                            <Route path={"/apis"} component={Apis}/>
+                            <Route path={"/applications"} component={Applications}/>
+                            <Route path={"/application/create"} component={ApplicationCreate}/>
+                            <Route path={"/application/edit/:application_id"} component={ApplicationEdit}/>
+                            <Route component={PageNotFound}/>
+                        </Switch>
+                    </Base>
+                </MuiThemeProvider>
             );
         } else {
             return (

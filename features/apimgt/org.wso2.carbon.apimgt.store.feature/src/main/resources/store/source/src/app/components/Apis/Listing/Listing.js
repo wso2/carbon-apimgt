@@ -37,8 +37,11 @@ import TableSortLabel from '@material-ui/core/TableSortLabel';
 import IconButton from '@material-ui/core/IconButton';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import List from '@material-ui/core/List';
+import List from '@material-ui/icons/List';
 import GridIcon from '@material-ui/icons/GridOn';
+import CustomIcon from '../../Shared/CustomIcon';
+
+import {KeyboardArrowLeft, StarRate } from '@material-ui/icons'
 
 const styles = theme => ({
     rightIcon: {
@@ -78,7 +81,54 @@ const styles = theme => ({
     },
     ListingWrapper: {
         paddingTop: 10,
-    }
+        paddingLeft: 35,
+    },
+    root: {
+        height: 70,
+        background: theme.palette.background.paper,
+        borderBottom: 'solid 1px ' + theme.palette.grey['A200'],
+        display: 'flex',
+    },
+    backIcon: {
+        color: theme.palette.primary.main,
+        fontSize: 56,
+        cursor: 'pointer',
+    },
+    backText: {
+        color: theme.palette.primary.main,
+        paddingTop: 10,
+        cursor: 'pointer',
+    },
+    apiIcon: {
+        height: 45,
+        marginTop: 10,
+        marginRight: 10,
+    },
+    starRate: {
+        fontSize: 70,
+        color: theme.palette.custom.starColor,
+    },
+    ratingSummery: {
+        marginTop: 15,
+    },
+    rateLink: {
+        cursor: 'pointer',
+        lineHeight: '70px',
+    },
+    mainIconWrapper: {
+        paddingTop: 13,
+        paddingLeft: 35,
+        paddingRight: 20,
+    },
+    mainTitle:{
+        paddingTop: 10,
+    },
+    mainTitleWrapper: {
+        flexGrow: 1,
+    },
+    content: {
+        flexGrow: 1,
+    },
 });
 
 function getSorting(order, orderBy) {
@@ -182,29 +232,37 @@ class Listing extends React.Component {
             return <ResourceNotFound />
         }
 
-        const classes = this.props.classes;
         const { order, orderBy } = this.state;
-        return (
-            <div>
-                <Grid container spacing={0} justify="center">
-                    <Grid item xs={12} className={classes.titleBar}>
-                        <div className={classes.buttonLeft}>
-                            <div className={classes.title}>
-                                <Typography variant="display1" gutterBottom>
-                                    APIs
-                                </Typography>
-                            </div>
-                        </div>
-                        <div className={classes.buttonRight}>
-                            <IconButton className={classes.button} onClick={() => this.setListType('list')}>
-                                <List />
-                            </IconButton>
-                            <IconButton className={classes.button} onClick={() => this.setListType('grid')}>
-                                <GridIcon />
-                            </IconButton>
-                        </div>
-                    </Grid>
+        const { theme, classes } = this.props;
+        const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
 
+        return (
+            <main className={classes.content}>
+                <div className={classes.root}>
+                    <div className={classes.mainIconWrapper}>
+                        <CustomIcon strokeColor={strokeColorMain} width={42} height={42} icon="api" />
+                    </div>
+                    <div className={classes.mainTitleWrapper}>
+                        <Typography variant="display1" className={classes.mainTitle} >
+                            APIs
+                        </Typography>
+                        { this.state.apis &&
+                        <Typography variant="caption" gutterBottom align="left">
+                             Displaying {this.state.apis.count} API
+                        </Typography>
+                        }
+                    </div>
+                    <div className={classes.buttonRight}>
+                        <IconButton className={classes.button} onClick={() => this.setListType('list')} >
+                            <List color={this.state.listType === "list" ? "primary" : "default" } />
+                        </IconButton>
+                        <IconButton className={classes.button} onClick={() => this.setListType('grid')}>
+                            <GridIcon color={this.state.listType === "grid" ? "primary" : "default" } />
+                        </IconButton>
+                    </div>
+                </div>
+
+                <Grid container spacing={0} justify="center">
                     <Grid item xs={12}>
                         {
                             this.state.apis ?
@@ -227,7 +285,7 @@ class Listing extends React.Component {
                         }
                     </Grid>
                 </Grid>
-            </div>
+            </main>
         );
     }
 }
