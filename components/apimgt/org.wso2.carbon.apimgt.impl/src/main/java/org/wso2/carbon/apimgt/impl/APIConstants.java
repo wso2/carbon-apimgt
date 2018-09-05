@@ -94,6 +94,10 @@ public final class APIConstants {
 
     public static final String APPLICATION_WSDL_MEDIA_TYPE = "application/wsdl";
 
+    public static final String WSDL_NAMESPACE_URI = "http://www.w3.org/2005/08/addressing";
+
+    public static final String WSDL_ELEMENT_LOCAL_NAME = "Address";
+
     public static final String API_TENANT_CONF = "tenant-conf.json";
 
     public static final String API_TENANT_CONF_LOCATION = API_APPLICATION_DATA_LOCATION + "/" + API_TENANT_CONF;
