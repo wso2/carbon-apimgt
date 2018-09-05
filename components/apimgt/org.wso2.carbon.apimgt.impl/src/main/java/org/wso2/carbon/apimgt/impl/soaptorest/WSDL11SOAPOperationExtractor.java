@@ -219,7 +219,12 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
                     for (Object obj : map.entrySet()) {
                         Map.Entry entry = (Map.Entry) obj;
                         Part part = (Part) entry.getValue();
-                        String partElement = part.getElementName().getLocalPart();
+                        String partElement;
+                        if (part.getElementName() != null) {
+                            partElement = part.getElementName().getLocalPart();
+                        } else {
+                            partElement = part.getTypeName().getLocalPart();
+                        }
                         this.getParameters(partElement, params);
                     }
                 }
@@ -248,7 +253,12 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
                     for (Object obj : map.entrySet()) {
                         Map.Entry entry = (Map.Entry) obj;
                         Part part = (Part) entry.getValue();
-                        String partElement = part.getElementName().getLocalPart();
+                        String partElement;
+                        if (part.getElementName() != null) {
+                            partElement = part.getElementName().getLocalPart();
+                        } else {
+                            partElement=part.getTypeName().getLocalPart();
+                        }
                         this.getParameters(partElement, params);
                     }
                 }
