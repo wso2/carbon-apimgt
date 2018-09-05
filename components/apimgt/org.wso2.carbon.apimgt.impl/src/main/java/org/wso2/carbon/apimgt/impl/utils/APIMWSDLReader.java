@@ -649,9 +649,9 @@ public class APIMWSDLReader {
 			return ((HTTPAddressImpl) exElement).getLocationURI();
         } else if (exElement instanceof UnknownExtensibilityElement) {
             NodeList nodeList = ((UnknownExtensibilityElement) exElement).getElement().
-                    getElementsByTagNameNS("http://www.w3.org/2005/08/addressing", "Address");
+                    getElementsByTagNameNS(APIConstants.WSDL_NAMESPACE_URI, APIConstants.WSDL_ELEMENT_LOCAL_NAME);
             String url = "";
-            if (nodeList.getLength() > 0) {
+            if (nodeList != null && nodeList.getLength() > 0) {
                 url = nodeList.item(0).getTextContent();
             }
             return url;
@@ -677,11 +677,9 @@ public class APIMWSDLReader {
             ((HTTPAddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint(transports) + api.getContext());
         } else if (exElement instanceof UnknownExtensibilityElement) {
             NodeList nodeList = ((UnknownExtensibilityElement) exElement).getElement().
-                    getElementsByTagNameNS("http://www.w3.org/2005/08/addressing", "Address");
-            if (nodeList.getLength() > 0) {
-                ((UnknownExtensibilityElement) exElement).getElement().
-                        getElementsByTagNameNS("http://www.w3.org/2005/08/addressing", "Address").item(0).
-                        setTextContent(APIUtil.getGatewayendpoint(transports) + api.getContext());
+                    getElementsByTagNameNS(APIConstants.WSDL_NAMESPACE_URI, APIConstants.WSDL_ELEMENT_LOCAL_NAME);
+            if (nodeList != null && nodeList.getLength() > 0) {
+                nodeList.item(0).setTextContent(APIUtil.getGatewayendpoint(transports) + api.getContext());
             }
         } else {
 			String msg = "Unsupported WSDL errors!";
