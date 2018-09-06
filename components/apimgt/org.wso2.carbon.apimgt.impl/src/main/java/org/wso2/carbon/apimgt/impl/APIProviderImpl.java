@@ -5620,7 +5620,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 localEntryAdminClient = new LocalEntryAdminClient(apiId.getId(), environment);
                 localEntryAdminClient.deleteEntry(apiId.getId().toString());
                 localEntryAdminClient.addLocalEntry("<localEntry key=\"" + apiId.getId() + "\">" +
-                        jsonText.replaceAll("&(?!amp;)", "&amp;") + "</localEntry>");
+                        jsonText.replaceAll("&(?!amp;)", "&amp;").
+                                replaceAll("<","&lt;").replaceAll(">","&gt;") + "</localEntry>");
             } catch (AxisFault e) {
                 log.error("Error occurred while Deleting the local entry ", e);
             }
