@@ -172,26 +172,27 @@ var getStoreAlertConfigs  = function () {
         var query =  "from ApiSubscriberAlertConfiguration select applicationId ,apiName , apiVersion , thresholdRequestCountPerMin;";
 
         var result = APIUtil.executeQueryOnStreamProcessor(appName, query);
-
         var objArr = [];
+
         if(result != null ) {
             var parsedDataResult = JSON.parse(result);
-            if(parsedDataResult.records != null) {              
-              var items = parsedDataResult.records;
-              for (var i = 0; i < items.length; i ++){
+
+            if(parsedDataResult.records != null) {
+                var items = parsedDataResult.records;
+                for (var i = 0; i < items.length; i ++){
                     var record = items[i];
-                    var obj =  {  
-                              "values":{  
-                                 "applicationId": record[0],
-                                 "apiName" : record[1],
-                                 "apiVersion" : record[2],
-                                 "thresholdRequestCountPerMin":record[3]                      
-                                 }
-                              }
+                    var obj = {
+                        "applicationId": record[0],
+                        "apiName" : record[1],
+                        "apiVersion" : record[2],
+                        "thresholdRequestCountPerMin":record[3]
+                    }
+
                     objArr.push(obj);
-              }
+                }
             }
         }
+
         return objArr;
     } catch (e) {
         log.error(e.message);
@@ -227,7 +228,8 @@ var addOrUpdateStoreAlertConfigs  = function (applicationId, apiName, apiVersion
     } catch (e) {
         log.error(e.message);
         return {
-            error:true
+            error:true,
+            message: e.message
         };
     }
 

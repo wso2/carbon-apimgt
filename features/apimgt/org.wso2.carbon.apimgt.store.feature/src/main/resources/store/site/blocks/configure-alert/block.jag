@@ -7,10 +7,10 @@ jagg.block("configure-alert", {
     },
     getOutputs: function () {
         // var mod = jagg.module("configure-alert");
-        var config = {error: false};
+        var configs = {error: false};
 
         return {
-            "configuration": config
+            "configurations": configs
         };
     }
 });
