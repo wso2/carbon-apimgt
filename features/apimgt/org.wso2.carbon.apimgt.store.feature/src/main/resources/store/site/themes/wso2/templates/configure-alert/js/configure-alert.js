@@ -47,6 +47,24 @@ $(function() {
         });
     }
 
+    /**
+     * Remove an alert configuration
+    **/
+    function deleteConfig(appId, apiName, apiVersion) {
+        jagg.post("/site/blocks/configure-alert/ajax/configure-alert.jag", {
+            action:"removeAlertConfig",
+            applicationId:appId,
+            apiName: apiName,
+            apiVersion: apiVersion,
+        }, function (result) {
+            if (!result.error) {
+                window.location.reload(true);
+            } else {
+                jagg.message({content:result.message,type:"error"});
+            }
+        }, "json");
+    }
+
     // Validate and submit the form
     var validator = $("#submitConfigForm").validate({
         rules: {
@@ -74,6 +92,21 @@ $(function() {
                 }
             });
         }
+    });
+
+    // Button click listener for remove alert config button
+    $('#configTable').on( 'click', 'a.deleteConfig', function () {
+        var appId = $(this).attr("data-id");
+        var apiName = $(this).attr("data-name");
+        var apiVersion = $(this).attr("data-version");
+
+        jagg.message({
+            content: i18n.t('Are you sure you want to remove the configuration?'),
+            type: 'confirm',
+            okCallback: function () {
+                deleteConfig(appId, apiName, apiVersion);
+            }
+        });
     });
 
     // Data table configuration for loading configured alert information

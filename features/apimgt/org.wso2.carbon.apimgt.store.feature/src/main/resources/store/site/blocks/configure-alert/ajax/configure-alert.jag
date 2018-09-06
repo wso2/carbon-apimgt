@@ -54,6 +54,27 @@ include("/jagg/jagg.jag");
                 }
 
                 print(obj);
+            } else if (action === 'removeAlertConfig' && request.getMethod() == 'POST') {
+                mod = jagg.module("manage-alerts");
+                var appId = request.getParameter("applicationId");
+                var apiName= request.getParameter("apiName");
+                var apiVersion= request.getParameter("apiVersion");
+
+                var result = mod.deleteStoreAlertConfigs(appId, apiName, apiVersion);
+
+                if (result.error) {
+                    obj = {
+                        error: result.error,
+                        message: result.message
+                    };
+                } else {
+                    obj = {
+                        error: false,
+                        list: result
+                    }
+                }
+
+                print(obj);
             }
         }
     }

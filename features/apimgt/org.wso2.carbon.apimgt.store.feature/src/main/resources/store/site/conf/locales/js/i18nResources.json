@@ -9,6 +9,7 @@
     "AbnormalTierUsage_Desc": "This alert type gets triggered if there is a drastic reduction in API usage for a given API for a given user. These types of alerts should be treated as an indication of a failure of the application  using the altered API.",
     "Application Name: ": "Application Name: ",
     "Are you sure you want to remove the application ": "Are you sure you want to remove the application ",
+    "Are you sure you want to remove the configuration?": "Are you sure you want to remove the configuration?",
     "Are you sure you want to unsubscribe from ": "Are you sure you want to unsubscribe from ",
     "Callback URLs cannot be empty": "Callback URLs cannot be empty",
     "Cancel Subscription": "Cancel Subscription",
