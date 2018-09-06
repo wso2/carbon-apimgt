@@ -1,6 +1,7 @@
 $(function() {
     var appsElement = $("#appName");
     var apisElement = $("#apiName");
+    var submitForm = $("#submitConfigForm");
     var applicationList = {};
     populateAppList();
 
@@ -46,6 +47,34 @@ $(function() {
         });
     }
 
+    // Validate and submit the form
+    var validator = $("#submitConfigForm").validate({
+        rules: {
+            threshold: {
+                required: true,
+                number: true
+            }
+        },
+        submitHandler: function (form) {
+            var api = apisElement.val();
+            var splitApi = apisElement.val().split('--');
+            var threshold = $("#threshold").val();
+
+            jagg.post("/site/blocks/configure-alert/ajax/configure-alert.jag", {
+                action: "configureAlert",
+                applicationId: appsElement.val(),
+                apiName: splitApi[0],
+                apiVersion: splitApi[1],
+                threshold: threshold
+            }, function(result) {
+                if (result.error) {
+                    jagg.message({content:result.message,type:"error"});
+                } else {
+                    window.location.reload();
+                }
+            });
+        }
+    });
 
     // Data table configuration for loading configured alert information
     $('#configTable').datatables_extended({

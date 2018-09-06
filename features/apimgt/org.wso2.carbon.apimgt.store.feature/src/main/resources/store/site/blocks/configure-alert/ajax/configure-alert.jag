@@ -15,7 +15,29 @@ include("/jagg/jagg.jag");
                 message: 'AuthenticateError'
             });
         } else {
-            if (action === 'getAlertConfigs' && request.getMethod() == 'GET') {
+            if (action === 'configureAlert' && request.getMethod() == 'POST') {
+                mod = jagg.module("manage-alerts");
+                var appId = request.getParameter("applicationId");
+                var apiName= request.getParameter("apiName");
+                var apiVersion= request.getParameter("apiVersion");
+                var threshold = request.getParameter("threshold");
+
+                var result = mod.addOrUpdateStoreAlertConfigs(appId, apiName, apiVersion, threshold);
+
+                if (result.error) {
+                    obj = {
+                        error: result.error,
+                        message: result.message
+                    };
+                } else {
+                    obj = {
+                        error: false,
+                        list: result
+                    }
+                }
+
+                print(obj);
+            } else if (action === 'getAlertConfigs' && request.getMethod() == 'GET') {
                 mod = jagg.module("manage-alerts");
                 var result = mod.getStoreAlertConfigs();
 

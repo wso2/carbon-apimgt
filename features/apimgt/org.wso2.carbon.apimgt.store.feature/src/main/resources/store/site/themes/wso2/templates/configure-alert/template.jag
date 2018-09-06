@@ -14,36 +14,36 @@
             <div class="form-horizontal">
                 <h3><%=i18n.localize("New Alert")%></h3>
                 <hr/>
-                <form method="POST" >
+                <form method="POST" id="submitConfigForm" >
                     <div class="form-group">
                         <label class="control-label col-sm-3"><%=i18n.localize("Application Name")%>  <span class="requiredAstrix">*</span></label>
                         <div class="col-md-9">
-                            <select class="form-control selectpicker" id="appName" data-live-search="true"></select>
+                            <select class="form-control selectpicker" id="appName" name="application" data-live-search="true" required></select>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="control-label col-sm-3"><%=i18n.localize("API Name")%>  <span class="requiredAstrix">*</span></label>
+                        <label class="control-label col-sm-3"><%=i18n.localize("API")%>  <span class="requiredAstrix">*</span></label>
                         <div class="col-md-9">
-                            <select class="form-control" id="apiName" data-live-search="true"></select>
+                            <select class="form-control" id="apiName" data-live-search="true" required></select>
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="control-label col-sm-3"><%=i18n.localize("Threshold Value")%>  <span class="requiredAstrix">*</span></label>
                         <div class="col-md-9 col-lg-9">
-                            <input class="form-control" type="text" id="threshold" />
+                            <input class="form-control" type="text" name="threshold" id="threshold" autocomplete="off" />
                         </div>
                     </div>
                     <hr />
                     <div class="form-group">
                         <div class="col-md-3 col-lg-3"></div>
                         <div class="col-md-9 col-lg-9">
-                            <submit type="button" id="submitConfig" onclick="" class="btn btn-primary has-spinner">
+                            <button type="submit" id="submitConfig" class="btn btn-primary has-spinner">
                                 <span class="icon fw-stack">
                                     <i class="fw fw-save fw-stack-1x"></i>
                                     <i class="fw fw-circle-outline fw-stack-2x"></i>
                                 </span>
                                 <%=i18n.localize("Save")%>
-                            </submit>
+                            </button>
                         </div>
                     </div>
                 </form>
