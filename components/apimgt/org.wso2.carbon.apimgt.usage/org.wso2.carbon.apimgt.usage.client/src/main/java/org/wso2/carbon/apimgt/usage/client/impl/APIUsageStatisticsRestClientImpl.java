@@ -2080,8 +2080,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         try {
             List<String> throttlingAPIData = new ArrayList<String>();
             String tenantDomain = MultitenantUtils.getTenantDomain(provider);
-            StringBuilder query = new StringBuilder(
-                    "from " + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_AGG + "_SECONDS");
+            StringBuilder query = new StringBuilder("from " + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_AGG);
 
             if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
                 query.append(
@@ -2092,7 +2091,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 query.append(" on " + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='" + tenantDomain
                         + "'");
             }
-            query.append(" select " + APIUsageStatisticsClientConstants.API_NAME + " group by "
+            query.append(" within " + 0 + "L, " + new Date().getTime() + "L per 'months' select "
+                    + APIUsageStatisticsClientConstants.API_NAME + " group by "
                     + APIUsageStatisticsClientConstants.API_NAME + " order by "
                     + APIUsageStatisticsClientConstants.API_NAME + " ASC;");
 
@@ -2131,8 +2131,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         try {
             List<String> throttlingAppData = new ArrayList<String>();
             String tenantDomain = MultitenantUtils.getTenantDomain(provider);
-            StringBuilder query = new StringBuilder(
-                    "from " + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_AGG + "_SECONDS");
+            StringBuilder query = new StringBuilder("from " + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_AGG);
             if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
                 query.append(" on " + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='" + tenantDomain
                         + "' AND " + APIUsageStatisticsClientConstants.API_CREATOR + "=='" + APIUtil
@@ -2142,7 +2141,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 query.append(" on " + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='" + tenantDomain
                         + "' AND " + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName + "'");
             }
-            query.append(" select " + APIUsageStatisticsClientConstants.APPLICATION_NAME + " group by "
+            query.append(" within " + 0 + "L, " + new Date().getTime() + "L per 'months' select "
+                    + APIUsageStatisticsClientConstants.APPLICATION_NAME + " group by "
                     + APIUsageStatisticsClientConstants.APPLICATION_NAME + " order by "
                     + APIUsageStatisticsClientConstants.APPLICATION_NAME + " DESC;");
             JSONObject jsonObj = APIUtil.executeQueryOnStreamProcessor(
