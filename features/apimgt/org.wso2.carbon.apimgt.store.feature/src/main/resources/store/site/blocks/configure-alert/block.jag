@@ -6,8 +6,18 @@ jagg.block("configure-alert", {
         return {};
     },
     getOutputs: function () {
-        // var mod = jagg.module("configure-alert");
+        var mod = jagg.module("manage-alerts");
+        var result = mod.getStoreAlertConfigs();
         var configs = {error: false};
+
+        if (result.error) {
+            configs = {error: result.error};
+        } else {
+            configs = {
+                error: false,
+                list: result
+            }
+        }
 
         return {
             "configurations": configs

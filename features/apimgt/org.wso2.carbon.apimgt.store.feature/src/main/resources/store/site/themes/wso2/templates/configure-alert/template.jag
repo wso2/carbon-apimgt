@@ -2,7 +2,8 @@
     <div>
         <%
             var alert = request.getParameter("alertType");
-            var error = outputs.configuration.error;
+            var configs = outputs.configurations;
+            var error = configs.error;
         %>
         <div class="page-header">
             <h2><%=i18n.localize("Configure") + " '" + i18n.localize(alert) + "' " + i18n.localize("Alert")%></h2>
@@ -50,6 +51,9 @@
             </div>
             <hr/>
 
+            <%
+                if (!configs.error && configs.list.length > 0) {
+            %>
             <div class="form-horizontal">
                 <h3><%=i18n.localize("Alert Configurations")%></h3>
                 <hr/>
@@ -64,6 +68,16 @@
                     </tr>
                 </thead>
             </table>
+            <%
+                } else {
+            %>
+            <div class="message message-info">
+                <h4><i class="icon fw fw-info"></i><%=i18n.localize("Alert Configurations")%></h4>
+                <p><%=i18n.localize("Not Configured")%></p>
+            </div>
+            <%
+                }
+            %>
         <%
             } else {
         %>
