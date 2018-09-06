@@ -40,7 +40,7 @@ const DetailsTopMenu = ({ classes, api }) => {
                 </Link>
             </Grid>
             <Grid item>
-                <ImageGenerator width={80} height={80} apiName={api.name} />
+                <ImageGenerator width={80} height={80} api={api} />
             </Grid>
             <Grid
                 item
@@ -92,7 +92,7 @@ const DetailsTopMenu = ({ classes, api }) => {
                 justify='space-between'
             >
                 <Grid item>
-                    <Button size='small' className={classes.viewInStoreLauncher}>
+                    <Button disabled size='small' className={classes.viewInStoreLauncher}>
                         <EditIcon />
                         Edit
                     </Button>

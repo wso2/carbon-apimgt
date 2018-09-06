@@ -266,7 +266,7 @@ class Login extends Component {
                         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
                         open={this.state.messageOpen}
                         onClose={this.handleRequestClose}
-                        SnackbarContentProps={{
+                        ContentProps={{
                             'aria-describedby': 'message-id',
                         }}
                         message={<span id='message-id'>{this.state.message}</span>}

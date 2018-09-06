@@ -49,6 +49,6 @@ const APICreateMenu = (props) => {
 };
 
 APICreateMenu.propTypes = {
-    children: PropTypes.element.isRequired,
+    children: PropTypes.oneOfType([PropTypes.element, PropTypes.array]).isRequired,
 };
 export default APICreateMenu;
