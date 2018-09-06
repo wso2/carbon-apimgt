@@ -1836,23 +1836,33 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * This method returns a default first access time for the API
      *
      * @param providerName provider name
-     * @return APIFirstAccess
-     * @throws APIMgtUsageQueryServiceClientException
+     * @return APIFirstAccess Object with the first access data
+     * @throws APIMgtUsageQueryServiceClientException when error occurs while connecting to the stream processor
      */
     @Override
     public List<APIFirstAccess> getFirstAccessTime(String providerName) throws APIMgtUsageQueryServiceClientException {
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.MONTH, -1); //get 1 month from the current date
-        String year = Integer.toString(calendar.get(Calendar.YEAR));
-        String month = Integer.toString(calendar.get(Calendar.MONTH) + 1); //Month is 0 based
-        String day = Integer.toString(calendar.get(Calendar.DAY_OF_MONTH));
-        APIFirstAccess firstAccess = new APIFirstAccess(year, month, day);
         List<APIFirstAccess> APIFirstAccessList = new ArrayList<APIFirstAccess>();
-        APIFirstAccess fTime;
-
-        if (firstAccess != null) {
-            fTime = new APIFirstAccess(firstAccess.getYear(), firstAccess.getMonth(), firstAccess.getDay());
-            APIFirstAccessList.add(fTime);
+        try {
+            //Check availability of the analytics server
+            String query = "from " + APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG + "_SECONDS select "
+                    + APIUsageStatisticsClientConstants.TIME_STAMP + " limit 1;";
+            APIUtil.executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_ACCESS_SUMMARY_SIDDHI_APP,
+                    query);
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.MONTH, -1); //get 1 month from the current date
+            String year = Integer.toString(calendar.get(Calendar.YEAR));
+            String month = Integer.toString(calendar.get(Calendar.MONTH) + 1); //Month is 0 based
+            String day = Integer.toString(calendar.get(Calendar.DAY_OF_MONTH));
+            APIFirstAccess firstAccess = new APIFirstAccess(year, month, day);
+            APIFirstAccess fTime;
+            if (firstAccess != null) {
+                fTime = new APIFirstAccess(firstAccess.getYear(), firstAccess.getMonth(), firstAccess.getDay());
+                APIFirstAccessList.add(fTime);
+            }
+        } catch (APIManagementException e) {
+            log.error("Error occurred while querying from the stream processor " + e.getMessage(), e);
+            throw new APIMgtUsageQueryServiceClientException(
+                    "Error occurred while querying from the stream processor " + e.getMessage(), e);
         }
         return APIFirstAccessList;
     }
