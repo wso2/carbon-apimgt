@@ -53,28 +53,6 @@ class API extends Resource {
     }
 
     /**
-     * Intend to be a private static method in API class,Update the API template with given parameter values.
-     * @param {Object} api_data - API data which need to fill the placeholder values in the @get_template
-     */
-    _updateTemplate(api_data) {
-        let payload;
-        const template = {
-            name: null,
-            context: null,
-            version: null,
-            endpoint: [],
-        };
-        const user_keys = Object.keys(api_data);
-        for (const index in user_keys) {
-            if (!(user_keys[index] in template)) {
-                throw 'Invalid key provided, Valid keys are `' + Object.keys(template) + '`';
-            }
-        }
-        payload = Object.assign(template, api_data);
-        return payload;
-    }
-
-    /**
      * Create an API with the given parameters in template and call the callback method given optional.
      * @param {Object} api_data - API data which need to fill the placeholder values in the @get_template
      * @param {function} callback - An optional callback method
@@ -111,7 +89,7 @@ class API extends Resource {
             });
         } else {
             payload = {
-                body: this._updateTemplate(api_data),
+                body: api_data,
                 'Content-Type': 'application/json'
             };
             promise_create = this.client.then((client) => {
@@ -125,6 +103,12 @@ class API extends Resource {
         }
     }
 
+
+    /**
+     * Get detailed policy information of the API
+     * @returns {Promise} Promise containing policy detail request calls for all the available policies
+     * @memberof API
+     */
     getPolicies() {
         const promisedPolicies = this.policies.map(policy => {
             return this.client.then(
@@ -138,7 +122,28 @@ class API extends Resource {
         })
         return Promise.all(promisedPolicies).then(policies => policies.map(response => response.body));
     }
+    getProductionEndpoint() {
+        const productionEndpoint = this.endpoint.filter(endpoint => endpoint.type.toLowerCase() === 'production').pop();
+        if (!productionEndpoint) {
+            return null;
+        } else if (productionEndpoint.inline) {
+            return productionEndpoint.inline;
+        } else {
+            throw new Exception('Not Implemented for global Endpoints');
+        }
+    }
 
+    getSandboxEndpoint() {
+        const sandboxEndpoint = this.endpoint.filter(endpoint => endpoint.type.toLowerCase() === 'sandbox').pop();
+        if (!sandboxEndpoint) {
+            return null;
+        } else if (sandboxEndpoint.inline) {
+            return sandboxEndpoint.inline;
+        } else {
+            throw new Exception('Not Implemented for global Endpoints');
+        }
+
+    }
     /**
      * Create an API from WSDL with the given parameters and call the callback method given optional.
      * @param {Object} api_data - API data which need to fill the placeholder values in the @get_template

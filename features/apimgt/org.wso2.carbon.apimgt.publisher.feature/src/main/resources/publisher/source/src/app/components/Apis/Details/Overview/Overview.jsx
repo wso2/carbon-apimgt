@@ -266,37 +266,45 @@ class Overview extends Component {
                     />
                 </APIPropertyField>
                 <APIPropertyField name='Endpoints'>
-                    <TextField
-                        id='api-endpoint-production'
-                        label={isEditable && 'Endpoint'}
-                        defaultValue={api.description}
-                        placeholder='No Value!'
-                        helperText='Production'
-                        margin='normal'
-                        InputProps={{
-                            readOnly: !isEditable,
-                        }}
-                    />
-                    <TextField
-                        id='api-endpoint-sandbox'
-                        label={isEditable && 'Endpoint'}
-                        defaultValue={api.description}
-                        placeholder='No Value!'
-                        helperText='Sandbox'
-                        margin='normal'
-                        InputProps={{
-                            readOnly: !isEditable,
-                        }}
-                    />
+                    <Grid item lg={5}>
+                        <TextField
+                            fullWidth
+                            id='api-endpoint-production'
+                            label={isEditable && 'Endpoint'}
+                            value={
+                                api.getProductionEndpoint() && api.getProductionEndpoint().endpointConfig.list[0].url
+                            }
+                            placeholder='No Value!'
+                            helperText='Production'
+                            margin='normal'
+                            InputProps={{
+                                readOnly: !isEditable,
+                            }}
+                        />
+                    </Grid>
+                    <Grid item lg={5}>
+                        <TextField
+                            fullWidth
+                            id='api-endpoint-sandbox'
+                            label={isEditable && 'Endpoint'}
+                            value={api.getSandboxEndpoint() && api.getSandboxEndpoint().endpointConfig.list[0].url}
+                            placeholder='No Value!'
+                            helperText='Sandbox'
+                            margin='normal'
+                            InputProps={{
+                                readOnly: !isEditable,
+                            }}
+                        />
+                    </Grid>
                 </APIPropertyField>
                 <APIPropertyField name='Tags'>
-                    <ChipInput value={api.tags} />
+                    <ChipInput disabled value={api.tags} />
                 </APIPropertyField>
                 <APIPropertyField name='Context'>
                     <TextField
                         id='api-context'
                         label={isEditable && 'Context'}
-                        defaultValue={api.context}
+                        value={api.context}
                         placeholder='No Value!'
                         helperText='Context of the API'
                         margin='normal'

@@ -4,6 +4,7 @@ import { withStyles } from '@material-ui/core/styles';
 import * as icons from '@material-ui/icons/';
 import { Link } from 'react-router-dom';
 
+const iconNames = Object.keys(icons);
 const styles = theme => ({
     svgImage: {
         cursor: 'pointer',
@@ -31,10 +32,10 @@ class ImageGenerator extends PureComponent {
      */
     render() {
         const {
-            classes, apiName, id, width, height,
+            classes, api, width, height,
         } = this.props;
-        const str = apiName;
-        const overviewPath = `/apis/${id}/overview`;
+        const str = api.name;
+        const overviewPath = `/apis/${api.id}/overview`;
 
         const colorPairs = [
             { prime: 0x8f6bcaff, sub: 0x4fc2f8ff },
@@ -54,10 +55,10 @@ class ImageGenerator extends PureComponent {
             height: 50,
         };
         const randomIndex = (str.charCodeAt(0) + str.charCodeAt(str.length - 1)) % 5;
-        const randomIcon = (str.charCodeAt(0) + str.charCodeAt(str.length - 1)) % 40;
+        const randomIcon = (str.charCodeAt(0) + str.charCodeAt(str.length - 1)) % iconNames.length;
         const colorPair = colorPairs[randomIndex];
         const rects = [];
-        const Icon = icons[Object.keys(icons)[randomIcon]];
+        const Icon = icons[iconNames[randomIcon]];
         for (let i = 0; i <= 4; i++) {
             for (let j = 0; j <= 4; j++) {
                 rects.push(<rect

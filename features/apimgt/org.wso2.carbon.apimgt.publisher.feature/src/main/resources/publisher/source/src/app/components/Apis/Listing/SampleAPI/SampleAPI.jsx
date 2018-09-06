@@ -89,6 +89,26 @@ class SampleAPI extends Component {
             name: 'Swagger Petstore',
             context: '/v2',
             version: '1.0.0',
+            description:
+                'This is a sample server Petstore server.  You can find out more about Swagger at' +
+                '[http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).' +
+                '  For this sample, you can use the api key `special-key` to test the authorization filters.',
+            isDefaultVersion: true,
+            responseCaching: 'Disabled',
+            cacheTimeout: 300,
+            destinationStatsEnabled: 'Disabled',
+            businessInformation: {
+                businessOwner: 'APIM Team',
+                businessOwnerEmail: 'hello@wso2.com',
+                technicalOwner: 'WSO2 APIM Team',
+                technicalOwnerEmail: 'dev@wso2.org',
+            },
+            tags: ['Pet', 'Store', 'Cat', 'Hippopotamus'],
+            transport: ['http', 'https'],
+            labels: ['pets', 'shop'],
+            visibility: 'PUBLIC',
+            securityScheme: ['OAuth'],
+            scopes: ['read:pets', 'write:pets'],
         };
         const serviceUrl = 'https://localhost:9443/publisher/public/app/petstore/pet/1.json';
         const production = {

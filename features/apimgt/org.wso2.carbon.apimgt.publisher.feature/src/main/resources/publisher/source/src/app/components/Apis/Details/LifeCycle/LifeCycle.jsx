@@ -28,14 +28,24 @@ import { Progress } from '../../../Shared';
 import LifeCycleHistory from './LifeCycleHistory';
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
 
+/**
+ *
+ *
+ * @class LifeCycle
+ * @extends {Component}
+ */
 class LifeCycle extends Component {
+    /**
+     *Creates an instance of LifeCycle.
+     * @param {*} props
+     * @memberof LifeCycle
+     */
     constructor(props) {
         super(props);
         this.api = new Api();
         this.state = {
-            notFound: false,
+            lcHistory: null,
         };
-        this.api_uuid = props.match.params.api_uuid;
         this.updateData = this.updateData.bind(this);
     }
 
@@ -43,17 +53,23 @@ class LifeCycle extends Component {
         this.updateData();
     }
 
+    /**
+     *
+     *
+     * @memberof LifeCycle
+     */
     updateData() {
-        const promised_api = this.api.get(this.api_uuid);
+        const { id } = this.props.api;
+        const promised_api = Api.get(id);
         const promised_tiers = Api.policies('api');
-        const promised_lcState = this.api.getLcState(this.api_uuid);
+        const promised_lcState = this.api.getLcState(id);
         let privateJetModeEnabled = false;
 
         ConfigManager.getConfigs().features.then((response) => {
             privateJetModeEnabled = response.data.privateJetMode.isEnabled;
         });
 
-        const promised_lcHistory = this.api.getLcHistory(this.api_uuid);
+        const promised_lcHistory = this.api.getLcHistory(id);
         const promised_labels = this.api.labels();
         Promise.all([promised_api, promised_tiers, promised_lcState, promised_lcHistory, promised_labels])
             .then((response) => {
@@ -65,7 +81,7 @@ class LifeCycle extends Component {
                         const PUBLISHED = 'Published';
 
                         for (const transition of transitions) {
-                            if (transition.targetState == PUBLISHED && lcState.state != PUBLISHED) {
+                            if (transition.targetState === PUBLISHED && lcState.state !== PUBLISHED) {
                                 const publish_in_private_jet_mode = {
                                     event: 'Publish In Private Jet Mode',
                                     targetState: 'Published In Private Jet Mode',
@@ -96,12 +112,17 @@ class LifeCycle extends Component {
             });
     }
 
+    /**
+     *
+     *
+     * @returns
+     * @memberof LifeCycle
+     */
     render() {
-        const api = this.state.api;
-        if (this.state.notFound) {
-            return <ResourceNotFound message={this.props.resourceNotFountMessage} />;
-        }
-        if (!api) {
+        const { api } = this.props;
+        const { lcHistory } = this.state;
+
+        if (!lcHistory) {
             return <Progress />;
         }
         return (
@@ -115,13 +136,13 @@ class LifeCycle extends Component {
                     />
                 </Grid>
                 <Grid item xs={12}>
-                    {this.state.lcHistory.length > 1 && (
+                    {lcHistory.length > 1 && (
                         <div>
                             <Typography variant='headline' gutterBottom>
                                 History
                             </Typography>
                             <Paper>
-                                <LifeCycleHistory lcHistory={this.state.lcHistory} />
+                                <LifeCycleHistory lcHistory={lcHistory} />
                             </Paper>
                         </div>
                     )}

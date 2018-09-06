@@ -255,7 +255,7 @@ class ApiCreateSwagger extends React.Component {
                         open={this.state.open}
                         autoHideDuration={6e3}
                         onClose={this.handleRequestClose}
-                        SnackbarContentProps={{
+                        ContentProps={{
                             'aria-describedby': 'message-id',
                         }}
                         message={<span id='message-id'>{this.state.message}</span>}

@@ -34,7 +34,7 @@ const APIDetailsRoutes = ({ api, apiDetailPages }) => {
             {apiDetailPages.map(({ pathName, PageComponent }) => (
                 <Route
                     key={pathName}
-                    pathname={`/apis/:apiUUID/${pathName}`}
+                    path={`/apis/:apiUUID/${pathName}`}
                     render={routeProps => <PageComponent api={api} {...routeProps} />}
                 />
             ))}

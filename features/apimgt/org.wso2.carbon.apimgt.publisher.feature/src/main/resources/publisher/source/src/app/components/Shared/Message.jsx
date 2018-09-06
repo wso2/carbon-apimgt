@@ -52,7 +52,7 @@ const Message = (props) => {
                     vertical: 'top',
                     horizontal: 'center',
                 }}
-                SnackbarContentProps={{
+                ContentProps={{
                     'aria-describedby': 'message-id',
                 }}
                 message={
