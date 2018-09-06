@@ -1,0 +1,39 @@
+<%
+include("/jagg/jagg.jag");
+(function () {
+    if (jagg.isCSRFTokenValid()) {
+        response.contentType = "application/json; charset=UTF-8";
+        var log = new Log();
+        var mod, obj, username,
+            action = request.getParameter("action"),
+            site = require("/site/conf/site.json"),
+            msg = require("/site/conf/ui-messages.jag");
+
+        if (jagg.getUser() == null) {
+            print({
+                error: true,
+                message: 'AuthenticateError'
+            });
+        } else {
+            if (action === 'getAlertConfigs' && request.getMethod() == 'GET') {
+                mod = jagg.module("manage-alerts");
+                var result = mod.getStoreAlertConfigs();
+
+                if (result.error) {
+                    obj = {
+                        error: result.error,
+                        message: result.message
+                    };
+                } else {
+                    obj = {
+                        error: false,
+                        list: result
+                    }
+                }
+
+                print(obj);
+            }
+        }
+    }
+})();
+%>
