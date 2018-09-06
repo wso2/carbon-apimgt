@@ -23,6 +23,25 @@ import Resource from './Resource';
  * An abstract representation of an API
  */
 class API extends Resource {
+
+    constructor(name, version, context, kwargs) {
+        super();
+        let properties = kwargs;
+        if (name instanceof Object) {
+            properties = name;
+        } else {
+            this.name = name;
+            this.version = version;
+            this.context = context;
+        }
+        this._data = properties;
+        for (const key in properties) {
+            if (Object.prototype.hasOwnProperty.call(properties, key)) {
+                this[key] = properties[key];
+            }
+        }
+    }
+
     /**
      *
      * @param data
@@ -104,6 +123,20 @@ class API extends Resource {
         } else {
             return promise_create;
         }
+    }
+
+    getPolicies() {
+        const promisedPolicies = this.policies.map(policy => {
+            return this.client.then(
+                client => client.apis["Throttling Tier (Individual)"].get_policies__tierLevel___tierName_({
+                        tierLevel: 'subscription',
+                        tierName: policy
+                    },
+                    this._requestMetaData(),
+                )
+            )
+        })
+        return Promise.all(promisedPolicies).then(policies => policies.map(response => response.body));
     }
 
     /**
@@ -310,35 +343,17 @@ class API extends Resource {
     }
 
     /**
-     * Get the available policies information by tier level.
-     * @param {String} tier_level List API or Application or Resource type policies.parameter should be one of api, application and resource
-     * @returns {Promise.<TResult>}
-     */
-    policies(tier_level) {
-        const promise_policies = this.client.then((client) => {
-            return client.apis['Throttling Tier (Collection)'].get_policies__tierLevel_({
-                    tierLevel: 'subscription'
-                },
-                this._requestMetaData(),
-            );
-        });
-        return promise_policies;
-    }
-
-    /**
-     * Delete an API given an api identifier
+     * Delete the current api instance
      * @param id {String} UUID of the API which want to delete
      * @param callback {function} Function which needs to be called upon success of the API deletion
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
-     * @deprecated Use the static delete method instead
      */
-    deleteAPI(id) {
-        const promised_delete = this.client.then((client) => {
+    delete() {
+        return this.client.then((client) => {
             return client.apis['API (Individual)'].delete_apis__apiId_({
-                apiId: id
+                apiId: this.id
             }, this._requestMetaData());
         });
-        return promised_delete;
     }
 
     /**
@@ -944,10 +959,13 @@ class API extends Resource {
      */
     static get(id) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
-        return apiClient.then((client) => {
+        const promisedAPI = apiClient.then((client) => {
             return client.apis['API (Individual)'].get_apis__apiId_({
                 apiId: id
             }, this._requestMetaData());
+        });
+        return promisedAPI.then(response => {
+            return new API(response.body);
         });
     }
 
@@ -965,6 +983,24 @@ class API extends Resource {
             return client.apis['API (Individual)'].delete_apis__apiId_({
                 apiId: id
             }, this._requestMetaData());
+        });
+    }
+
+    /**
+     * Get the available policies information by tier level.
+     * @param {String} tierLevel List API or Application or Resource type policies.parameter should be one
+     * of api, application, subscription and resource
+     * @returns {Promise}
+     *
+     */
+    static policies(tierLevel) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then((client) => {
+            return client.apis['Throttling Tier (Collection)'].get_policies__tierLevel_({
+                    tierLevel: 'subscription'
+                },
+                this._requestMetaData(),
+            );
         });
     }
 }

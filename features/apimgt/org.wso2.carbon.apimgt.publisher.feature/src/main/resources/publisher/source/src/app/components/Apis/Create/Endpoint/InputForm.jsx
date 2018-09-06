@@ -48,7 +48,7 @@ export default class InputForm extends Component {
      * @memberof InputForm
      */
     componentDidMount() {
-        const promisedTier = this.api.policies('api');
+        const promisedTier = API.policies('api');
         promisedTier.then((response) => {
             const tiers = response.obj;
             this.setState({ policies: tiers });

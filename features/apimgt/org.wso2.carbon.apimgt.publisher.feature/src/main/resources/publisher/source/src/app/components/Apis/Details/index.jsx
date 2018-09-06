@@ -167,8 +167,8 @@ export default class Details extends Component {
         const { apiUUID } = this.props.match.params;
         const promisedApi = Api.get(apiUUID);
         promisedApi
-            .then((response) => {
-                this.setState({ api: response.body });
+            .then((api) => {
+                this.setState({ api });
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -190,16 +190,17 @@ export default class Details extends Component {
     render() {
         const { api, apiNotFound } = this.state;
 
-        if (!api) {
-            return <Progress />;
-        }
-
         if (apiNotFound) {
+            const { apiUUID } = this.props.match.params;
             const resourceNotFountMessage = {
                 title: `API is Not Found in the "${Utils.getCurrentEnvironment().label}" Environment`,
-                body: `Can't find the API with the id "${api.id}"`,
+                body: `Can't find the API with the id "${apiUUID}"`,
             };
             return <ResourceNotFound message={resourceNotFountMessage} />;
+        }
+
+        if (!api) {
+            return <Progress />;
         }
 
         return (

@@ -45,7 +45,7 @@ class LifeCycle extends Component {
 
     updateData() {
         const promised_api = this.api.get(this.api_uuid);
-        const promised_tiers = this.api.policies('api');
+        const promised_tiers = Api.policies('api');
         const promised_lcState = this.api.getLcState(this.api_uuid);
         let privateJetModeEnabled = false;
 

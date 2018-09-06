@@ -17,27 +17,22 @@
  */
 
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
+import TextField from '@material-ui/core/TextField';
 import ChipInput from 'material-ui-chip-input';
-import OpenInNew from '@material-ui/icons/OpenInNew';
-import Tooltip from '@material-ui/core/Tooltip';
-import Select from '@material-ui/core/Select';
-import Input from '@material-ui/core/Input';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import Checkbox from '@material-ui/core/Checkbox';
-import EditIcon from '@material-ui/icons/EditAttributes';
-import { FormControl } from '@material-ui/core/';
-import IconButton from '@material-ui/core/IconButton';
+import Typography from '@material-ui/core/Typography';
+import Divider from '@material-ui/core/Divider';
+import moment from 'moment';
 
 import { Progress } from '../../../Shared';
 import Api from '../../../../data/api';
 import Alert from '../../../Shared/Alert';
+import APIPropertyField from './APIPropertyField';
+import BusinessPlans from './BusinessPlans';
 
 const styles = () => ({
     imageSideContent: {
@@ -100,7 +95,6 @@ class Overview extends Component {
         super(props);
         this.state = {
             api: null,
-            notFound: false,
             editDescription: false,
             editableDescriptionText: null,
         };
@@ -247,25 +241,158 @@ class Overview extends Component {
     /** @inheritDoc */
     render() {
         const { editDescription, editableDescriptionText } = this.state;
-        const { api, classes } = this.props;
+        const { api, classes, isEditable } = this.props;
         if (!api) {
             return <Progress />;
         }
 
         return (
-            <Grid container>
-                <Grid item>Name</Grid>
-                <Grid item lg={8} md={8} sm={8} xs={8}>
-                    Value
+            <Grid container spacing={0} direction='column' justify='flex-start' alignItems='stretch'>
+                <Grid item container direction='row' justify='flex-end'>
+                    <span>Last Updated : {moment(api.lastUpdatedTime).fromNow()}</span>
+                </Grid>
+                <APIPropertyField name='Description'>
+                    <TextField
+                        style={{
+                            border: '#3f50b5 1px solid',
+                            padding: '8px',
+                            borderRadius: '15px',
+                            width: '50%',
+                        }}
+                        id='api-description'
+                        label={isEditable && 'Description'}
+                        value={api.description}
+                        placeholder='No Value!'
+                        helperText='A short description about the API'
+                        margin='normal'
+                        multiline
+                        rows={2}
+                        rowsMax={8}
+                        InputProps={{
+                            readOnly: !isEditable,
+                        }}
+                    />
+                </APIPropertyField>
+                <APIPropertyField name='Endpoints'>
+                    <TextField
+                        id='api-endpoint-production'
+                        label={isEditable && 'Endpoint'}
+                        defaultValue={api.description}
+                        placeholder='No Value!'
+                        helperText='Production'
+                        margin='normal'
+                        InputProps={{
+                            readOnly: !isEditable,
+                        }}
+                    />
+                    <TextField
+                        id='api-endpoint-sandbox'
+                        label={isEditable && 'Endpoint'}
+                        defaultValue={api.description}
+                        placeholder='No Value!'
+                        helperText='Sandbox'
+                        margin='normal'
+                        InputProps={{
+                            readOnly: !isEditable,
+                        }}
+                    />
+                </APIPropertyField>
+                <APIPropertyField name='Tags'>
+                    <ChipInput value={api.tags} />
+                </APIPropertyField>
+                <APIPropertyField name='Context'>
+                    <TextField
+                        id='api-context'
+                        label={isEditable && 'Context'}
+                        defaultValue={api.context}
+                        placeholder='No Value!'
+                        helperText='Context of the API'
+                        margin='normal'
+                        InputProps={{
+                            readOnly: !isEditable,
+                        }}
+                    />
+                </APIPropertyField>
+                <APIPropertyField name='Default API Version'>
+                    <FormControlLabel
+                        control={<Checkbox checked={api.isDefaultVersion} value='isDefaultVersion' color='primary' />}
+                        label='Default Version'
+                    />
+                </APIPropertyField>
+                <BusinessPlans api={api} />
+                <Grid item>
+                    <Typography variant='headline'> Business Information</Typography>
+                    <Divider />
+                </Grid>
+                <APIPropertyField name='Business Owner'>
+                    <TextField
+                        id='api-business-owner'
+                        label={isEditable && 'Business Owner'}
+                        defaultValue={api.businessInformation.businessOwner}
+                        placeholder='No Value!'
+                        helperText='Business Owner'
+                        margin='normal'
+                        InputProps={{
+                            readOnly: !isEditable,
+                        }}
+                    />
+                </APIPropertyField>
+                <APIPropertyField name='Business Owner Email'>
+                    <TextField
+                        id='api-business-owner-email'
+                        label={isEditable && 'Business Owner Email'}
+                        defaultValue={api.businessInformation.businessOwnerEmail}
+                        placeholder='No Value!'
+                        helperText='Business Owner Email'
+                        margin='normal'
+                        InputProps={{
+                            readOnly: !isEditable,
+                        }}
+                    />
+                </APIPropertyField>
+                <APIPropertyField name='Technical Owner'>
+                    <TextField
+                        id='api-technical-owner'
+                        label={isEditable && 'Technical Owner'}
+                        defaultValue={api.businessInformation.technicalOwner}
+                        placeholder='No Value!'
+                        helperText='Technical Owner'
+                        margin='normal'
+                        InputProps={{
+                            readOnly: !isEditable,
+                        }}
+                    />
+                </APIPropertyField>
+                <APIPropertyField name='Technical Owner Email'>
+                    <TextField
+                        id='api-technical-owner-email'
+                        label={isEditable && 'Technical Owner Email'}
+                        defaultValue={api.businessInformation.technicalOwnerEmail}
+                        placeholder='No Value!'
+                        helperText='Technical Owner Email'
+                        margin='normal'
+                        InputProps={{
+                            readOnly: !isEditable,
+                        }}
+                    />
+                </APIPropertyField>
+                <Grid item>
+                    <Typography variant='headline'> Additional Fields</Typography>
+                    <Divider />
                 </Grid>
             </Grid>
         );
     }
 }
 
+Overview.defaultProps = {
+    isEditable: false,
+};
+
 Overview.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     api: PropTypes.shape({}).isRequired,
+    isEditable: PropTypes.bool,
 };
 
 export default withStyles(styles)(Overview);

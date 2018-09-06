@@ -34,7 +34,7 @@ class ImageGenerator extends PureComponent {
             classes, apiName, id, width, height,
         } = this.props;
         const str = apiName;
-        const overviewPath = `apis/${id}/overview`;
+        const overviewPath = `/apis/${id}/overview`;
 
         const colorPairs = [
             { prime: 0x8f6bcaff, sub: 0x4fc2f8ff },
@@ -53,33 +53,11 @@ class ImageGenerator extends PureComponent {
             width: 50,
             height: 50,
         };
-        // Get a random color pair
-        const allChars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_&!#$';
-        let iconIndex = 0;
-        let colorIndex = str.length;
-        for (let i = 0; i < str.length; i++) {
-            iconIndex += allChars.indexOf(str[i]);
-        }
-        while (colorIndex > 5) {
-            colorIndex -= 6;
-        }
-        // let colorIndex = Math.floor(Math.random() * Math.floor(colorPairs.length)); //Get a random color combination
-        const randomIndex = colorIndex; // Math.floor(Math.random() * colorIndex);
-        // returns a random integer from 0 to API name length
+        const randomIndex = (str.charCodeAt(0) + str.charCodeAt(str.length - 1)) % 5;
+        const randomIcon = (str.charCodeAt(0) + str.charCodeAt(str.length - 1)) % 40;
         const colorPair = colorPairs[randomIndex];
-        // let iconIndex = Math.floor(Math.random() * Math.floor(Object.keys(icons).length)); // Get a random icon index
-        let tmpIndex = 0;
-        let icon = null;
-        for (const i in icons) {
-            if (Object.prototype.hasOwnProperty.call(icons, i)) {
-                tmpIndex++;
-                if (tmpIndex === iconIndex) {
-                    icon = icons[i];
-                }
-            }
-        }
         const rects = [];
-        const Icon = icon;
+        const Icon = icons[Object.keys(icons)[randomIcon]];
         for (let i = 0; i <= 4; i++) {
             for (let j = 0; j <= 4; j++) {
                 rects.push(<rect

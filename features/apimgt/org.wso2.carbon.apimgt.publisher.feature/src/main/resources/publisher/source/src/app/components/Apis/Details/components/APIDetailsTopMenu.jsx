@@ -5,7 +5,7 @@ import Button from '@material-ui/core/Button';
 import LaunchIcon from '@material-ui/icons/Launch';
 import EditIcon from '@material-ui/icons/Edit';
 import BackIcon from '@material-ui/icons/KeyboardBackspace';
-import DeleteIcon from '@material-ui/icons/Delete';
+
 import Grid from '@material-ui/core/Grid';
 import { withStyles } from '@material-ui/core/styles';
 import Chip from '@material-ui/core/Chip';
@@ -13,6 +13,7 @@ import { Link } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 
 import ImageGenerator from '../../Listing/components/ImageGenerator';
+import DeleteApiButton from './DeleteApiButton';
 
 const styles = theme => ({
     root: {
@@ -31,7 +32,7 @@ const DetailsTopMenu = ({ classes, api }) => {
     const storeURL = `${window.location.origin}/store/${api.id}/overview`; // todo: need to support rev proxy ~tmkb
     return (
         <Grid container alignItems='center' className={classes.root}>
-            <Grid item >
+            <Grid item>
                 <Link to='/'>
                     <Button aria-label='Back'>
                         <BackIcon />
@@ -95,10 +96,7 @@ const DetailsTopMenu = ({ classes, api }) => {
                         <EditIcon />
                         Edit
                     </Button>
-                    <Button size='small' className={classes.viewInStoreLauncher}>
-                        <DeleteIcon color='secondary' />
-                        Delete
-                    </Button>
+                    <DeleteApiButton buttonClass={classes.viewInStoreLauncher} api={api} />
                 </Grid>
             </Grid>
         </Grid>

@@ -65,8 +65,7 @@ class APIThumb extends Component {
         const apiUUID = event.currentTarget.id;
         this.setState({ loading: true });
         const { updateAPIsList } = this.props;
-        const apiObj = new API();
-        const promisedDelete = apiObj.deleteAPI(apiUUID);
+        const promisedDelete = API.delete(apiUUID);
         promisedDelete.then((response) => {
             if (response.status !== 200) {
                 Alert.info('Something went wrong while deleting the API!');
@@ -108,7 +107,7 @@ class APIThumb extends Component {
                 <CardMedia
                     src='None'
                     component={ImageGenerator}
-                    height='140'
+                    height={140}
                     title='Contemplative Reptile'
                     apiName={api.name}
                     id={api.id}
