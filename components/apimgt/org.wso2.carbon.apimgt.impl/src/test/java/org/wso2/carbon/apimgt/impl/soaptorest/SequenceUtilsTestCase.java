@@ -116,7 +116,7 @@ import java.util.List;
         }
     }
 
-    @Test public void testGetRestToSoapConvertedSequence() throws Exception {
+    public void testGetRestToSoapConvertedSequence() throws Exception {
         String provider = "admin";
         String apiName = "test-api";
         String version = "1.0.0";
@@ -129,8 +129,7 @@ import java.util.List;
         byte[] content = new byte[1];
         PowerMockito.when(MultitenantUtils.getTenantDomain(Mockito.anyString())).thenReturn("carbon.super");
         PowerMockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
-        Mockito.when(userRegistry.get(Mockito.anyString(), Math.abs(Mockito.anyInt()), Math.abs(Mockito.anyInt())))
-                .thenReturn(collection);
+        Mockito.when((Collection)userRegistry.get(Mockito.anyString())).thenReturn(collection);
         Mockito.when(collection.getChildren()).thenReturn(paths);
         Mockito.when(userRegistry.get(Mockito.anyString())).thenReturn(resource);
         Mockito.when(resource.getContent()).thenReturn(content);

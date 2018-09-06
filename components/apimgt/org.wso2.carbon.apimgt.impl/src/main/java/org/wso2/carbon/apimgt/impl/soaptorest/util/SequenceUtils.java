@@ -198,7 +198,7 @@ public class SequenceUtils {
                         + RegistryConstants.PATH_SEPARATOR + SOAPToRESTConstants.SOAP_TO_REST_RESOURCE
                         + RegistryConstants.PATH_SEPARATOR + seqType;
 
-                Collection collection = registry.get(resourcePath, 0, Integer.MAX_VALUE);
+                Collection collection = (Collection) registry.get(resourcePath);
                 String[] resources = collection.getChildren();
 
                 if (log.isDebugEnabled()) {
