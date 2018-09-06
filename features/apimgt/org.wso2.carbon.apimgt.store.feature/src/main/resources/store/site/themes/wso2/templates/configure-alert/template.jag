@@ -51,16 +51,18 @@
             <hr/>
 
             <div class="form-horizontal">
-                <h3><%=i18n.localize("Subscriptions")%></h3>
+                <h3><%=i18n.localize("Alert Configurations")%></h3>
                 <hr/>
             </div>
-            <table class="table">
-                <tr>
-                    <th><%=i18n.localize("Application Name")%></th>
-                    <th><%=i18n.localize("API Name")%></th>
-                    <th><%=i18n.localize("API Version")%></th>
-                    <th><%=i18n.localize("Threshold Value")%></th>
-                </tr>
+            <table class="table table-striped table-hover table-bordered display data-table" id="configTable">
+                <thead>
+                    <tr>
+                        <th><%=i18n.localize("Application Name")%></th>
+                        <th><%=i18n.localize("API Name")%></th>
+                        <th><%=i18n.localize("API Version")%></th>
+                        <th><%=i18n.localize("Threshold Value")%></th>
+                    </tr>
+                </thead>
             </table>
         <%
             } else {

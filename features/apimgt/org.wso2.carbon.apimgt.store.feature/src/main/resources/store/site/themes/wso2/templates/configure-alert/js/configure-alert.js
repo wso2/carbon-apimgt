@@ -34,7 +34,7 @@ $(function() {
         $.get("../blocks/subscription/subscription-list/ajax/subscription-list.jag", params, function(data) {
             if (data && data.error == false) {
                 $.each(data.apis, function() {
-                    var apiId = this.apiProvider + '--' + this.apiName + '--' + this.apiVersion;
+                    var apiId = this.apiName + '--' + this.apiVersion;
                     apisElement.append($("<option />").val(apiId).text(apiId));
                 });
 

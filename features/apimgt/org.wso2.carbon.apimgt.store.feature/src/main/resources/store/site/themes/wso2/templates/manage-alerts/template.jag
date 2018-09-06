@@ -42,10 +42,10 @@
                                         <%
                                             if ("AbnormalRequestsPerMin" == allAlertType[key]) {
                                         %>
-                                            <div id="editButton<%=key%>" onclick="configureAlertType('<%=alertType%>')" class="btn padding-reduce-on-grid-view">
+                                            <div id="configButton<%=key%>" onclick="configureAlertType('<%=alertType%>')" class="btn">
                                                 <span class="fw-stack">
                                                     <i class="fw fw-circle-outline fw-stack-2x"></i>
-                                                    <i class="fw fw-settings fw-stack-1x"></i>
+                                                    <i class="fw fw-configarations fw-stack-1x"></i>
                                                 </span>
                                             </div>
                                         <%
