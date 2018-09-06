@@ -16,7 +16,7 @@ include("/jagg/jagg.jag");
             });
         } else {
             if (action === 'configureAlert' && request.getMethod() == 'POST') {
-                mod = jagg.module("manage-alerts");
+                mod = jagg.module("configure-alert");
                 var appId = request.getParameter("applicationId");
                 var apiName= request.getParameter("apiName");
                 var apiVersion= request.getParameter("apiVersion");
@@ -33,12 +33,12 @@ include("/jagg/jagg.jag");
                     obj = {
                         error: false,
                         list: result
-                    }
+                    };
                 }
 
                 print(obj);
             } else if (action === 'getAlertConfigs' && request.getMethod() == 'GET') {
-                mod = jagg.module("manage-alerts");
+                mod = jagg.module("configure-alert");
                 var result = mod.getStoreAlertConfigs();
 
                 if (result.error) {
@@ -50,12 +50,12 @@ include("/jagg/jagg.jag");
                     obj = {
                         error: false,
                         list: result
-                    }
+                    };
                 }
 
                 print(obj);
             } else if (action === 'removeAlertConfig' && request.getMethod() == 'POST') {
-                mod = jagg.module("manage-alerts");
+                mod = jagg.module("configure-alert");
                 var appId = request.getParameter("applicationId");
                 var apiName= request.getParameter("apiName");
                 var apiVersion= request.getParameter("apiVersion");
@@ -71,7 +71,7 @@ include("/jagg/jagg.jag");
                     obj = {
                         error: false,
                         list: result
-                    }
+                    };
                 }
 
                 print(obj);

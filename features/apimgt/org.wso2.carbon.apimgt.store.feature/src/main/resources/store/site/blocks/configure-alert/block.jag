@@ -6,7 +6,7 @@ jagg.block("configure-alert", {
         return {};
     },
     getOutputs: function () {
-        var mod = jagg.module("manage-alerts");
+        var mod = jagg.module("configure-alert");
         var result = mod.getStoreAlertConfigs();
         var configs = {error: false};
 
@@ -16,7 +16,7 @@ jagg.block("configure-alert", {
             configs = {
                 error: false,
                 list: result
-            }
+            };
         }
 
         return {
