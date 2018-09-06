@@ -260,7 +260,6 @@ var select_environment = function() {
     var selectedEnvironment = $("#environment_name");
     var gatewayType = $("#environment_name option:selected").attr('data-attr');
     var name = selectedEnvironment.val();
-    debugger;
 
     if(gatewayType == "microGW"){
          $("#sub_app_list").hide();
