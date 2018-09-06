@@ -124,7 +124,9 @@ class API extends Resource {
     }
     getProductionEndpoint() {
         const productionEndpoint = this.endpoint.filter(endpoint => endpoint.type === 'Production').pop();
-        if (productionEndpoint.inline) {
+        if (!productionEndpoint) {
+            return null;
+        } else if (productionEndpoint.inline) {
             return productionEndpoint.inline;
         } else {
             throw new Exception('Not Implemented for global Endpoints');
@@ -133,7 +135,9 @@ class API extends Resource {
 
     getSandboxEndpoint() {
         const sandboxEndpoint = this.endpoint.filter(endpoint => endpoint.type === 'Sandbox').pop();
-        if (sandboxEndpoint.inline) {
+        if (!sandboxEndpoint) {
+            return null;
+        } else if (sandboxEndpoint.inline) {
             return sandboxEndpoint.inline;
         } else {
             throw new Exception('Not Implemented for global Endpoints');
