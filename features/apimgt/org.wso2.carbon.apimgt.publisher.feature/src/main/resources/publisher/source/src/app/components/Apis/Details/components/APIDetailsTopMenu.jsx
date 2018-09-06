@@ -10,7 +10,7 @@ import Grid from '@material-ui/core/Grid';
 import { withStyles } from '@material-ui/core/styles';
 import Chip from '@material-ui/core/Chip';
 import { Link } from 'react-router-dom';
-import { FormattedMessage } from 'react-intl';
+// import { FormattedMessage } from 'react-intl';
 
 import ImageGenerator from '../../Listing/components/ImageGenerator';
 import DeleteApiButton from './DeleteApiButton';

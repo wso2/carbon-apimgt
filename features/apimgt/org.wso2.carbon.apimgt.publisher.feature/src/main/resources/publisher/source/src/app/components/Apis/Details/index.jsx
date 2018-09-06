@@ -17,8 +17,6 @@
  */
 
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
-import Button from '@material-ui/core/Button';
 import Log from 'log4javascript';
 import PropTypes from 'prop-types';
 
@@ -113,7 +111,6 @@ export default class Details extends Component {
         this.state = {
             api: null,
             apiNotFound: false,
-            multi_environments: false,
         };
         this.setAPI = this.setAPI.bind(this);
     }
@@ -124,18 +121,18 @@ export default class Details extends Component {
      */
     componentDidMount() {
         ConfigManager.getConfigs()
-            .environments.then((response) => {
-                const multiEnvironments = response.data.environments.length > 1;
-                const more = multiEnvironments && (
-                    <Link to='/apis'>
-                        <Button variant='raised' color='secondary'>
-                            Go Home
-                        </Button>
-                    </Link>
-                );
-                this.setState({
-                    resourceNotFountMessage: { more, multiEnvironments },
-                });
+            .environments.then(() => {
+                // const multiEnvironments = response.data.environments.length > 1;
+                // const more = multiEnvironments && (
+                //     <Link to='/apis'>
+                //         <Button variant='raised' color='secondary'>
+                //             Go Home
+                //         </Button>
+                //     </Link>
+                // );
+                // this.setState({
+                //     resourceNotFountMessage: { more, multiEnvironments },
+                // });
             })
             .catch((error) => {
                 Log.error('Error while receiving environment configurations : ', error);

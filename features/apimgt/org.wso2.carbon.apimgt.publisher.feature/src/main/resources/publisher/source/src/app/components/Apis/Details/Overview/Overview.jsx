@@ -95,7 +95,6 @@ class Overview extends Component {
         super(props);
         this.state = {
             api: null,
-            editDescription: false,
             editableDescriptionText: null,
         };
         this.downloadWSDL = this.downloadWSDL.bind(this);
@@ -198,35 +197,29 @@ class Overview extends Component {
      *
      * @param {SyntheticEvent} sEvent Synthetic Event
      */
-    editDescription(sEvent) {
-        const { id } = sEvent.currentTarget;
-        if (id === 'edit-description-button') {
-            this.setState({ editDescription: true });
-        } else {
-            this.setState({ editDescription: false });
-            const api = new Api();
-            const apiId = this.props.api.id;
-            const { editableDescriptionText } = this.state;
-            const promisedApi = api.get(apiId);
-            promisedApi
-                .then((getResponse) => {
-                    const apiData = getResponse.body;
-                    apiData.description = editableDescriptionText;
-                    const promisedUpdate = api.update(apiData);
-                    promisedUpdate
-                        .then((updateResponse) => {
-                            this.setState({ api: updateResponse.body });
-                        })
-                        .catch((errorResponse) => {
-                            console.error(errorResponse);
-                            Alert.error('Error occurred while updating API description');
-                        });
-                })
-                .catch((errorResponse) => {
-                    console.error(errorResponse);
-                    Alert.error('Error occurred while retrieving API');
-                });
-        }
+    editDescription() {
+        const api = new Api();
+        const apiId = this.props.api.id;
+        const { editableDescriptionText } = this.state;
+        const promisedApi = api.get(apiId);
+        promisedApi
+            .then((getResponse) => {
+                const apiData = getResponse.body;
+                apiData.description = editableDescriptionText;
+                const promisedUpdate = api.update(apiData);
+                promisedUpdate
+                    .then((updateResponse) => {
+                        this.setState({ api: updateResponse.body });
+                    })
+                    .catch((errorResponse) => {
+                        console.error(errorResponse);
+                        Alert.error('Error occurred while updating API description');
+                    });
+            })
+            .catch((errorResponse) => {
+                console.error(errorResponse);
+                Alert.error('Error occurred while retrieving API');
+            });
     }
 
     /**
@@ -240,8 +233,7 @@ class Overview extends Component {
 
     /** @inheritDoc */
     render() {
-        const { editDescription, editableDescriptionText } = this.state;
-        const { api, classes, isEditable } = this.props;
+        const { api, isEditable } = this.props;
         if (!api) {
             return <Progress />;
         }
@@ -391,7 +383,9 @@ Overview.defaultProps = {
 
 Overview.propTypes = {
     classes: PropTypes.shape({}).isRequired,
-    api: PropTypes.shape({}).isRequired,
+    api: PropTypes.shape({
+        id: PropTypes.string,
+    }).isRequired,
     isEditable: PropTypes.bool,
 };
 

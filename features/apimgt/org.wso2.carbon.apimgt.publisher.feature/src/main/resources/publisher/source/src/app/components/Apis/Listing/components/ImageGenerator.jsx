@@ -63,8 +63,8 @@ class ImageGenerator extends PureComponent {
                 rects.push(<rect
                     key={i + '_' + j}
                     {...thumbnailBoxChild}
-                    fill={'#' + (colorPair.sub - 0x00000025 * i - j * 0x00000015).toString(16)}
-                    x={200 - i * 54}
+                    fill={'#' + (colorPair.sub - (0x00000025 * i) - (j * 0x00000015)).toString(16)}
+                    x={200 - (i * 54)}
                     y={54 * j}
                 />);
             }

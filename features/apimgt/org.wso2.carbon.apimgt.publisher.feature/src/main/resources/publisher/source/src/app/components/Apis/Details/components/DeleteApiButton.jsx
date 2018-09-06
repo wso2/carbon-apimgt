@@ -4,11 +4,11 @@ import { Button, Dialog, DialogActions, DialogContent, DialogContentText, Dialog
 import DeleteIcon from '@material-ui/icons/Delete';
 import Slide from '@material-ui/core/Slide';
 import PropTypes from 'prop-types';
+import { withRouter } from 'react-router-dom';
 
 import { resourceMethod, resourcePath, ScopeValidation } from '../../../../data/ScopeValidation';
 import ApiPermissionValidation from '../../../../data/ApiPermissionValidation';
 import Alert from '../../../Shared/Alert';
-import { withRouter } from 'react-router-dom';
 
 /**
  * Handle Delete an API from API Overview/Details page
