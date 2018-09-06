@@ -322,7 +322,7 @@ public class APIStoreImplTestCase {
         Label label = SampleTestObjectCreator.createLabel(labelName, SampleTestObjectCreator.LABEL_TYPE_STORE).build();
         List<String> labels = new ArrayList<>();
         labels.add(label.getName());
-        API api = SampleTestObjectCreator.createDefaultAPI().labels(labels).build();
+        API api = SampleTestObjectCreator.createDefaultAPI().gatewayLabels(labels).build();
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
@@ -346,7 +346,7 @@ public class APIStoreImplTestCase {
         Label label = SampleTestObjectCreator.createLabel(labelName, SampleTestObjectCreator.LABEL_TYPE_STORE).build();
         List<String> labels = new ArrayList<>();
         labels.add(label.getName());
-        API api = SampleTestObjectCreator.createDefaultAPI().labels(labels).build();
+        API api = SampleTestObjectCreator.createDefaultAPI().gatewayLabels(labels).build();
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);

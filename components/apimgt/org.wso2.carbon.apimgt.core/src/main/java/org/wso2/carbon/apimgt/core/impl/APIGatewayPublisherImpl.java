@@ -76,7 +76,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
 
         // build the message to send
         APIEvent apiCreateEvent = new APIEvent(APIMgtConstants.GatewayEventTypes.API_CREATE);
-        apiCreateEvent.setLabels(api.getLabels());
+        apiCreateEvent.setLabels(api.getGatewayLabels());
         apiCreateEvent.setApiSummary(toAPISummary(api));
         publishToPublisherTopic(apiCreateEvent);
         if (log.isDebugEnabled()) {
@@ -92,7 +92,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
 
         // build the message to send
         APIEvent gatewayDTO = new APIEvent(APIMgtConstants.GatewayEventTypes.API_CREATE);
-        gatewayDTO.setLabels(api.getLabels());
+        gatewayDTO.setLabels(api.getGatewayLabels());
         APISummary apiSummary = new APISummary();
         apiSummary.setName(api.getName());
         apiSummary.setVersion(api.getVersion());
@@ -107,7 +107,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
 
         // build the message to send
         APIEvent apiUpdateEvent = new APIEvent(APIMgtConstants.GatewayEventTypes.API_UPDATE);
-        apiUpdateEvent.setLabels(api.getLabels());
+        apiUpdateEvent.setLabels(api.getGatewayLabels());
         apiUpdateEvent.setApiSummary(toAPISummary(api));
         publishToPublisherTopic(apiUpdateEvent);
         if (log.isDebugEnabled()) {
@@ -119,7 +119,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
     public void deleteAPI(API api) throws GatewayException {
         // build the message to send
         APIEvent apiDeleteEvent = new APIEvent(APIMgtConstants.GatewayEventTypes.API_DELETE);
-        apiDeleteEvent.setLabels(api.getLabels());
+        apiDeleteEvent.setLabels(api.getGatewayLabels());
         apiDeleteEvent.setApiSummary(toAPISummary(api));
         publishToPublisherTopic(apiDeleteEvent);
         if (log.isDebugEnabled()) {
@@ -128,7 +128,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
         if (api.hasOwnGateway()) {
             // Delete the Gateway - check how we can assume that we complete the deletion
             try {
-                List<String> labels = api.getLabels();
+                List<String> labels = api.getGatewayLabels();
                 if (labels != null && !labels.isEmpty()) {
                     removeContainerBasedGateway(labels.toArray()[0].toString(), api);
                 } else {
@@ -145,7 +145,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
     public void deleteCompositeAPI(CompositeAPI api) throws GatewayException {
         // build the message to send
         APIEvent gatewayDTO = new APIEvent(APIMgtConstants.GatewayEventTypes.API_DELETE);
-        gatewayDTO.setLabels(api.getLabels());
+        gatewayDTO.setLabels(api.getGatewayLabels());
         APISummary apiSummary = new APISummary();
         apiSummary.setName(api.getName());
         apiSummary.setVersion(api.getVersion());
@@ -268,7 +268,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
         //create the message to be sent to the gateway. This contains the basic details of the API and target
         //lifecycle state.
         APIEvent gatewayDTO = new APIEvent(APIMgtConstants.GatewayEventTypes.API_STATE_CHANGE);
-        gatewayDTO.setLabels(api.getLabels());
+        gatewayDTO.setLabels(api.getGatewayLabels());
         gatewayDTO.setApiSummary(toAPISummary(api));
         publishToPublisherTopic(gatewayDTO);
 

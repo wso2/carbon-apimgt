@@ -3504,7 +3504,7 @@ public class APIPublisherImplTestCase {
         List<String> labels = new ArrayList<>();
         labels.add("default");
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().id(UUID.randomUUID().toString())
-                .endpoint(Collections.emptyMap()).hasOwnGateway(true).labels(labels);
+                .endpoint(Collections.emptyMap()).hasOwnGateway(true).gatewayLabels(labels);
         apiBuilder.apiPermission("");
         apiBuilder.permissionMap(null);
         apiBuilder.policies(Collections.emptySet());

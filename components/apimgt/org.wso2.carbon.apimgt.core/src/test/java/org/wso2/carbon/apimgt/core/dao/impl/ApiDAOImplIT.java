@@ -421,7 +421,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         duplicateAPIBuilder.provider(api.getProvider());
         duplicateAPIBuilder.name(api.getName());
         duplicateAPIBuilder.version(api.getVersion());
-        duplicateAPIBuilder.labels(api.getLabels());
+        duplicateAPIBuilder.gatewayLabels(api.getGatewayLabels());
         API duplicateAPI = duplicateAPIBuilder.build();
         try {
             apiDAO.addAPI(duplicateAPI);
@@ -812,7 +812,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         testAddGetEndpoint();
         for (int i = 0; i < numberOfPublishedWithLabelPublicPrivate; ++i) {
             API api = SampleTestObjectCreator.createUniqueAPI().lifeCycleStatus(publishedStatus)
-                    .labels(labelsPublicPrivate)
+                    .gatewayLabels(labelsPublicPrivate)
                     .build();
             publishedAPIsPublicPrivateSummary.add(SampleTestObjectCreator.getSummaryFromAPI(api));
             apiDAO.addAPI(api);
@@ -823,7 +823,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         List<String> labelsPrivate = new ArrayList<>(Collections.singletonList(privateLabelId));
         for (int i = 0; i < numberOfPublishedWithLabelPrivate; ++i) {
             API api = SampleTestObjectCreator.createUniqueAPI().lifeCycleStatus(publishedStatus)
-                    .labels(labelsPrivate)
+                    .gatewayLabels(labelsPrivate)
                     .build();
             publishedAPIsPrivateSummary.add(SampleTestObjectCreator.getSummaryFromAPI(api));
             apiDAO.addAPI(api);
@@ -834,7 +834,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         List<String> labelsPublic = new ArrayList<>(Collections.singletonList(publicLabelId));
         for (int i = 0; i < numberOfCreatedWithLabelPublic; ++i) {
             API api = SampleTestObjectCreator.createUniqueAPI().lifeCycleStatus(createdStatus)
-                    .labels(labelsPublic)
+                    .gatewayLabels(labelsPublic)
                     .build();
             createdAPIsPublicSummary.add(SampleTestObjectCreator.getSummaryFromAPI(api));
             apiDAO.addAPI(api);
@@ -1398,7 +1398,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         labelIds.add(privateLabelFromDB);
         Collections.sort(labelIds);
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
-        API apiWithBothLabels = builder.labels(labelIds).build();
+        API apiWithBothLabels = builder.gatewayLabels(labelIds).build();
 
         testAddGetEndpoint();
         apiDAO.addAPI(apiWithBothLabels);
@@ -1406,15 +1406,14 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         List<String> publicLabelOnly = new ArrayList<>();
         publicLabelOnly.add(publicLabelFromDB);
         API.APIBuilder builder2 = SampleTestObjectCreator.createAlternativeAPI();
-        API apiWithPublicLabel = builder2.labels(publicLabelOnly).build();
+        API apiWithPublicLabel = builder2.gatewayLabels(publicLabelOnly).build();
         apiDAO.addAPI(apiWithPublicLabel);
 
         API apiFromDB = apiDAO.getAPI(apiWithBothLabels.getId());
         Assert.assertNotNull(apiFromDB);
-        Assert.assertEquals(apiFromDB.getLabels().size(), 2);
-        Assert.assertTrue(apiWithBothLabels.getLabels().equals(apiFromDB.getLabels()), TestUtil.printDiff
-                (apiWithBothLabels.getLabels(),
-                        apiFromDB.getLabels()));
+        Assert.assertEquals(apiFromDB.getGatewayLabels().size(), 2);
+        Assert.assertTrue(apiWithBothLabels.getGatewayLabels().equals(apiFromDB.getGatewayLabels()), TestUtil.printDiff
+                (apiWithBothLabels.getGatewayLabels(), apiFromDB.getGatewayLabels()));
 
         List<API> apiListPublicPrivate = apiDAO
                 .getAPIsByGatewayLabel(Arrays.asList(labelPublic.getName(), labelPrivate.getName()));
@@ -1445,7 +1444,8 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         apiDAO.addAPI(api);
         API apiFromDB = apiDAO.getAPI(api.getId());
         Assert.assertNotNull(apiFromDB);
-        Assert.assertEquals(apiFromDB.getLabels().size(), 2);
+        Assert.assertEquals(apiFromDB.getGatewayLabels().size(), 1);
+        Assert.assertEquals(apiFromDB.getStoreLabels().size(), 1);
 
     }
 
@@ -1463,20 +1463,20 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         List<String> labelIds = new ArrayList<>();
         labelIds.add(label1.getId());
         API.APIBuilder builder1 = SampleTestObjectCreator.createDefaultAPI();
-        API api = builder1.labels(labelIds).build();
+        API api = builder1.storeLabels(labelIds).build();
         testAddGetEndpoint();
         apiDAO.addAPI(api);
         API apiFromDBWithOneLabel = apiDAO.getAPI(api.getId());
-        Assert.assertEquals(apiFromDBWithOneLabel.getLabels().size(), builder1.getLabels().size());
+        Assert.assertEquals(apiFromDBWithOneLabel.getStoreLabels().size(), builder1.getStoreLabels().size());
 
         labelIds.add(label2.getId());
-        API substituteAPI = new API.APIBuilder(api).labels(labelIds).build();
+        API substituteAPI = new API.APIBuilder(api).storeLabels(labelIds).build();
         apiDAO.updateAPI(api.getId(), substituteAPI);
         API apiFromDB = apiDAO.getAPI(api.getId());
 
         API expectedAPI = SampleTestObjectCreator.copyAPIIgnoringNonEditableFields(api, substituteAPI);
         Assert.assertNotNull(apiFromDB);
-        Assert.assertEquals(apiFromDB.getLabels().size(), expectedAPI.getLabels().size());
+        Assert.assertEquals(apiFromDB.getStoreLabels().size(), expectedAPI.getStoreLabels().size());
 
     }
 

@@ -43,7 +43,8 @@ public class CompositeAPI {
     private final String description;
     private final String gatewayConfig;
     private final Set<String> transport;
-    private final List<String> labels;
+    private final List<String> gatewayLabels;
+    private final List<String> storeLabels;
     private final String applicationId;
     private final Instant createdTime;
     private final String createdBy;
@@ -67,7 +68,8 @@ public class CompositeAPI {
         description = builder.description;
         gatewayConfig = builder.gatewayConfig;
         transport = builder.transport;
-        labels = builder.labels;
+        gatewayLabels = builder.gatewayLabels;
+        storeLabels = builder.storeLabels;
         applicationId = builder.applicationId;
         createdTime = builder.createdTime;
         createdBy = builder.createdBy;
@@ -116,8 +118,12 @@ public class CompositeAPI {
         return transport;
     }
 
-    public List<String> getLabels() {
-        return labels;
+    public List<String> getGatewayLabels() {
+        return gatewayLabels;
+    }
+
+    public List<String> getStoreLabels() {
+        return storeLabels;
     }
 
     public String getApplicationId() {
@@ -189,7 +195,8 @@ public class CompositeAPI {
                 Objects.equals(description, that.description) &&
                 Objects.equals(gatewayConfig, that.gatewayConfig) &&
                 Objects.equals(transport, that.transport) &&
-                Objects.equals(labels, that.labels) &&
+                Objects.equals(gatewayLabels, that.gatewayLabels) &&
+                Objects.equals(storeLabels, that.storeLabels) &&
                 Objects.equals(applicationId, that.applicationId) &&
                 Objects.equals(createdTime, that.createdTime) &&
                 Objects.equals(createdBy, that.createdBy) &&
@@ -207,9 +214,10 @@ public class CompositeAPI {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, provider, name, version, context, description, gatewayConfig, transport, labels,
-                applicationId, createdTime, createdBy, updatedBy, lastUpdatedTime, uriTemplates, copiedFromApiId,
-                apiDefinition, permissionMap, apiPermission, workflowStatus, threatProtectionPolicies, hasOwnGateway);
+        return Objects.hash(id, provider, name, version, context, description, gatewayConfig, transport, gatewayLabels,
+                storeLabels, applicationId, createdTime, createdBy, updatedBy, lastUpdatedTime, uriTemplates,
+                copiedFromApiId, apiDefinition, permissionMap, apiPermission, workflowStatus, threatProtectionPolicies,
+                hasOwnGateway);
     }
 
     /**
@@ -224,7 +232,8 @@ public class CompositeAPI {
         private String description;
         private String gatewayConfig;
         private Set<String> transport;
-        private List<String> labels;
+        private List<String> gatewayLabels;
+        private List<String> storeLabels;
         private String applicationId;
         private Instant createdTime;
         private String createdBy;
@@ -251,7 +260,8 @@ public class CompositeAPI {
             this.description = copy.description;
             this.gatewayConfig = copy.gatewayConfig;
             this.transport = copy.transport;
-            this.labels = copy.labels;
+            this.gatewayLabels = copy.gatewayLabels;
+            this.storeLabels = copy.storeLabels;
             this.hasOwnGateway = copy.hasOwnGateway;
             this.applicationId = copy.applicationId;
             this.createdTime = copy.createdTime;
@@ -362,11 +372,22 @@ public class CompositeAPI {
         /**
          * Sets the {@code labels} and returns a reference to this Builder so that the methods can be chained together.
          *
-         * @param labels the {@code labels} to set
+         * @param gatewayLabels the {@code labels} to set
          * @return a reference to this Builder
          */
-        public Builder labels(List<String> labels) {
-            this.labels = labels;
+        public Builder gatewayLabels(List<String> gatewayLabels) {
+            this.gatewayLabels = gatewayLabels;
+            return this;
+        }
+
+        /**
+         * Sets the {@code labels} and returns a reference to this Builder so that the methods can be chained together.
+         *
+         * @param storeLabels the {@code labels} to set
+         * @return a reference to this Builder
+         */
+        public Builder storeLabels(List<String> storeLabels) {
+            this.storeLabels = storeLabels;
             return this;
         }
 
@@ -559,8 +580,12 @@ public class CompositeAPI {
             return transport;
         }
 
-        public List<String> getLabels() {
-            return labels;
+        public List<String> getGatewayLabels() {
+            return gatewayLabels;
+        }
+
+        public List<String> getStoreLabels() {
+            return storeLabels;
         }
 
         public String getApplicationId() {

@@ -1341,7 +1341,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         }
 
         //api.getLabels() should not be null and the labels should contain labelName
-        if ((api.getLabels() == null || !api.getLabels().contains(labelName))) {
+        if ((api.getGatewayLabels() == null || !api.getGatewayLabels().contains(labelName))) {
             throw new LabelException("API with id " + apiId + " does not contain label " + labelName,
                     ExceptionCodes.LABEL_NOT_FOUND_IN_API);
         }
@@ -1372,7 +1372,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         }
 
         //api.getLabels() should not be null and the labels should contain labelName
-        if ((api.getLabels() == null || !api.getLabels().contains(labelName))) {
+        if ((api.getGatewayLabels() == null || !api.getGatewayLabels().contains(labelName))) {
             throw new LabelException("API with id " + apiId + " does not contain label " + labelName,
                     ExceptionCodes.LABEL_NOT_FOUND_IN_API);
         }

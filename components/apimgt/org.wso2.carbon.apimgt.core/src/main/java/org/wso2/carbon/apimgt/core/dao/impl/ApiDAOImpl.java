@@ -740,7 +740,8 @@ public class ApiDAOImpl implements ApiDAO {
         }
 
         addTagsMapping(connection, apiPrimaryKey, api.getTags());
-        addLabelMapping(connection, apiPrimaryKey, api.getLabels());
+        addLabelMapping(connection, apiPrimaryKey, api.getGatewayLabels(), APIMgtConstants.LABEL_TYPE_GATEWAY);
+        addLabelMapping(connection, apiPrimaryKey, api.getStoreLabels(), APIMgtConstants.LABEL_TYPE_STORE);
         addGatewayConfig(connection, apiPrimaryKey, api.getGatewayConfig(), api.getCreatedBy());
         addTransports(connection, apiPrimaryKey, api.getTransport());
         addUrlMappings(connection, api.getUriTemplates().values(), apiPrimaryKey);
@@ -786,7 +787,8 @@ public class ApiDAOImpl implements ApiDAO {
         statement.setString(13, APILCWorkflowStatus.APPROVED.toString());
         statement.execute();
 
-        addLabelMapping(connection, apiPrimaryKey, api.getLabels());
+        addLabelMapping(connection, apiPrimaryKey, api.getGatewayLabels(), APIMgtConstants.LABEL_TYPE_GATEWAY);
+        addLabelMapping(connection, apiPrimaryKey, api.getStoreLabels(), APIMgtConstants.LABEL_TYPE_STORE);
         addGatewayConfig(connection, apiPrimaryKey, api.getGatewayConfig(), api.getCreatedBy());
         addTransports(connection, apiPrimaryKey, api.getTransport());
         addUrlMappings(connection, api.getUriTemplates().values(), apiPrimaryKey);
@@ -865,7 +867,9 @@ public class ApiDAOImpl implements ApiDAO {
                 deleteTagsMapping(connection, apiID); // Delete current tag mappings if they exist
                 addTagsMapping(connection, apiID, substituteAPI.getTags());
                 deleteLabelsMapping(connection, apiID);
-                addLabelMapping(connection, apiID, substituteAPI.getLabels());
+                addLabelMapping(connection, apiID, substituteAPI.getGatewayLabels(),
+                        APIMgtConstants.LABEL_TYPE_GATEWAY);
+                addLabelMapping(connection, apiID, substituteAPI.getStoreLabels(), APIMgtConstants.LABEL_TYPE_STORE);
                 deleteSubscriptionPolicies(connection, apiID);
                 addSubscriptionPolicies(connection, substituteAPI.getPolicies(), apiID);
                 deleteEndPointsForApi(connection, apiID);
@@ -1666,7 +1670,7 @@ public class ApiDAOImpl implements ApiDAO {
                 // if the labels are not null or not empty
                 if (labels != null && !labels.isEmpty()) {
                     deleteLabelsMapping(connection, apiId);
-                    addLabelMapping(connection, apiId, labels);
+                    addLabelMapping(connection, apiId, labels, APIMgtConstants.LABEL_TYPE_GATEWAY);
                 }
                 statement.execute();
                 connection.commit();
@@ -2149,7 +2153,8 @@ public class ApiDAOImpl implements ApiDAO {
                         cacheTimeout(rs.getInt("CACHE_TIMEOUT")).
                         hasOwnGateway(rs.getBoolean("HAS_OWN_GATEWAY")).
                         tags(getTags(connection, apiPrimaryKey)).
-                        labels(getLabelIdsForAPI(connection, apiPrimaryKey)).
+                        gatewayLabels(getLabelIdsForAPI(connection, apiPrimaryKey, APIMgtConstants.LABEL_TYPE_GATEWAY)).
+                        storeLabels(getLabelIdsForAPI(connection, apiPrimaryKey, APIMgtConstants.LABEL_TYPE_STORE)).
                         wsdlUri(ApiResourceDAO.
                                 getTextValueForCategory(connection, apiPrimaryKey,
                                         ResourceCategory.WSDL_TEXT)).
@@ -2215,7 +2220,8 @@ public class ApiDAOImpl implements ApiDAO {
                         version(rs.getString("VERSION")).
                         context(rs.getString("CONTEXT")).
                         description(rs.getString("DESCRIPTION")).
-                        labels(getLabelIdsForAPI(connection, apiPrimaryKey)).
+                        gatewayLabels(getLabelIdsForAPI(connection, apiPrimaryKey, APIMgtConstants.LABEL_TYPE_GATEWAY)).
+                        storeLabels(getLabelIdsForAPI(connection, apiPrimaryKey, APIMgtConstants.LABEL_TYPE_STORE)).
                         transport(getTransports(connection, apiPrimaryKey)).
                         applicationId(getCompositeAPIApplicationId(connection, apiPrimaryKey)).
                         createdBy(rs.getString("CREATED_BY")).
@@ -3285,7 +3291,7 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-    private void addLabelMapping(Connection connection, String apiID, java.util.List<String> labels)
+    private void addLabelMapping(Connection connection, String apiID, java.util.List<String> labels, String labelType)
             throws SQLException, org.wso2.carbon.apimgt.core.exception.APIMgtDAOException {
         final String query = "INSERT INTO AM_API_LABEL_MAPPING (API_ID, LABEL_ID) VALUES (?,?)";
 
@@ -3300,19 +3306,13 @@ public class ApiDAOImpl implements ApiDAO {
             }
         } else {
             try (PreparedStatement statement2 = connection.prepareStatement(query)) {
-                String defaultGatewayLabel = new LabelDAOImpl().getLabelIdByNameAndType(APIMgtConstants
-                        .DEFAULT_LABEL_NAME, APIMgtConstants.LABEL_TYPE_GATEWAY);
-                String defaultStoreLabel = new LabelDAOImpl().getLabelIdByNameAndType(APIMgtConstants
-                        .DEFAULT_LABEL_NAME, APIMgtConstants.LABEL_TYPE_STORE);
+                String defaultLabel = new LabelDAOImpl().getLabelIdByNameAndType(APIMgtConstants
+                        .DEFAULT_LABEL_NAME, labelType);
                 statement2.setString(1, apiID);
-                statement2.setString(2, defaultGatewayLabel);
-                statement2.addBatch();
-                statement2.setString(1, apiID);
-                statement2.setString(2, defaultStoreLabel);
+                statement2.setString(2, defaultLabel);
                 statement2.addBatch();
                 statement2.executeBatch();
             }
-
         }
 
     }
@@ -3325,12 +3325,15 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-    private List<String> getLabelIdsForAPI(Connection connection, String apiID) throws SQLException {
+    private List<String> getLabelIdsForAPI(Connection connection, String apiID, String type) throws SQLException {
         List<String> labelIDs = new ArrayList<>();
 
-        final String query = "SELECT LABEL_ID FROM AM_API_LABEL_MAPPING WHERE API_ID = ?";
+        final String query = "SELECT AM_API_LABEL_MAPPING.LABEL_ID FROM AM_API_LABEL_MAPPING INNER JOIN AM_LABELS " +
+                "ON AM_API_LABEL_MAPPING.LABEL_ID = AM_LABELS.LABEL_ID AND AM_API_LABEL_MAPPING.API_ID = ? " +
+                "AND AM_LABELS.TYPE_NAME = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, apiID);
+            statement.setString(2, type);
             statement.execute();
 
             try (ResultSet rs = statement.getResultSet()) {

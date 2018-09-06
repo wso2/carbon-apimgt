@@ -25,7 +25,7 @@ public class CompositeAPIMappingUtil {
         compositeAPIDTO.setVersion(api.getVersion());
         compositeAPIDTO.setContext(api.getContext());
         compositeAPIDTO.setDescription(api.getDescription());
-        compositeAPIDTO.setLabels(new ArrayList<>(api.getLabels()));
+        compositeAPIDTO.setLabels(new ArrayList<>(api.getGatewayLabels()));
         compositeAPIDTO.setApplicationId(api.getApplicationId());
         compositeAPIDTO.hasOwnGateway(api.hasOwnGateway());
         return compositeAPIDTO;
@@ -44,7 +44,7 @@ public class CompositeAPIMappingUtil {
                 version(apidto.getVersion()).
                 context(apidto.getContext()).
                 description(apidto.getDescription()).
-                labels(new ArrayList<>(apidto.getLabels())).
+                gatewayLabels(new ArrayList<>(apidto.getLabels())).
                 hasOwnGateway(apidto.getHasOwnGateway()).
                 transport(new HashSet<>(apidto.getTransport())).
                 apiDefinition(apidto.getApiDefinition()).

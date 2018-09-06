@@ -365,13 +365,18 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         apiBuilder.createdBy(getUsername());
         apiBuilder.updatedBy(getUsername());
 
-        if (apiBuilder.getLabels().isEmpty()) {
-            List<String> labelSet = new ArrayList<>();
-            labelSet.add(getLabelIdByNameAndType(APIMgtConstants.DEFAULT_LABEL_NAME, APIMgtConstants
+        if (apiBuilder.getGatewayLabels().isEmpty()) {
+            List<String> gatewayLabelSet = new ArrayList<>();
+            gatewayLabelSet.add(getLabelIdByNameAndType(APIMgtConstants.DEFAULT_LABEL_NAME, APIMgtConstants
                     .LABEL_TYPE_GATEWAY));
-            labelSet.add(getLabelIdByNameAndType(APIMgtConstants.DEFAULT_LABEL_NAME, APIMgtConstants
+            apiBuilder.gatewayLabels(gatewayLabelSet);
+        }
+
+        if (apiBuilder.getStoreLabels().isEmpty()) {
+            List<String> storeLabelSet = new ArrayList<>();
+            storeLabelSet.add(getLabelIdByNameAndType(APIMgtConstants.DEFAULT_LABEL_NAME, APIMgtConstants
                     .LABEL_TYPE_STORE));
-            apiBuilder.labels(labelSet);
+            apiBuilder.gatewayLabels(storeLabelSet);
         }
 
         try {
@@ -611,7 +616,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     }
                     Map<String, Endpoint> apiEndpointMap = apiBuilder.getEndpoint();
                     validateEndpoints(apiEndpointMap, true);
-                    validateLabels(apiBuilder.getLabels(), originalAPI.hasOwnGateway());
+                    validateLabels(apiBuilder.getGatewayLabels(), originalAPI.hasOwnGateway());
                     createUriTemplateList(apiBuilder, true);
                     validateApiPolicy(apiBuilder.getApiPolicy());
                     validateSubscriptionPolicies(apiBuilder);
@@ -991,7 +996,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         String.valueOf(originalAPI.hasOwnGateway()));
 
                 if (originalAPI.hasOwnGateway()) {
-                    List<String> gwLabels = originalAPI.getLabels();
+                    List<String> gwLabels = originalAPI.getGatewayLabels();
                     for (String label : gwLabels) {
                         if (label.contains(ContainerBasedGatewayConstants.PRIVATE_JET_API_PREFIX)) {
                             workflow.setAttribute(WorkflowConstants.ATTRIBUTE_API_AUTOGEN_LABEL, label);

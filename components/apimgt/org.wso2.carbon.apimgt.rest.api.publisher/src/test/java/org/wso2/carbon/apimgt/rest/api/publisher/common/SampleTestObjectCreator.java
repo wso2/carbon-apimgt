@@ -219,7 +219,7 @@ public class SampleTestObjectCreator {
                 apiPermission(permissionJson).
                 uriTemplates(getMockUriTemplates()).
                 apiDefinition(apiDefinition).workflowStatus(WORKFLOW_STATUS).
-                labels(labels).endpoint(endpointMap);
+                gatewayLabels(labels).endpoint(endpointMap);
         Map map = new HashMap();
         map.put(DEVELOPER_ROLE_ID, 6);
         map.put(ADMIN_ROLE_ID, 15);
