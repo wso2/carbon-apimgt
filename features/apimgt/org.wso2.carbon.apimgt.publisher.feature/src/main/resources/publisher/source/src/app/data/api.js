@@ -123,7 +123,7 @@ class API extends Resource {
         return Promise.all(promisedPolicies).then(policies => policies.map(response => response.body));
     }
     getProductionEndpoint() {
-        const productionEndpoint = this.endpoint.filter(endpoint => endpoint.type === 'Production').pop();
+        const productionEndpoint = this.endpoint.filter(endpoint => endpoint.type.toLowerCase() === 'production').pop();
         if (!productionEndpoint) {
             return null;
         } else if (productionEndpoint.inline) {
@@ -134,7 +134,7 @@ class API extends Resource {
     }
 
     getSandboxEndpoint() {
-        const sandboxEndpoint = this.endpoint.filter(endpoint => endpoint.type === 'Sandbox').pop();
+        const sandboxEndpoint = this.endpoint.filter(endpoint => endpoint.type.toLowerCase() === 'sandbox').pop();
         if (!sandboxEndpoint) {
             return null;
         } else if (sandboxEndpoint.inline) {
