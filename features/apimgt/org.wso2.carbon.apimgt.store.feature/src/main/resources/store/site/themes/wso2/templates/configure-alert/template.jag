@@ -29,7 +29,17 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="control-label col-sm-3"><%=i18n.localize("Threshold Value")%>  <span class="requiredAstrix">*</span></label>
+                        <label class="control-label col-sm-3"><%=i18n.localize("Request Count")%>
+                            <span class="requiredAstrix">*</span>
+
+                            <a class="help_popup" rel="popover" data-popover-content="#name_help" data-placement="bottom">
+                                <span class="icon fw-stack fw-lg" style="font-size:6px">
+                                    <i class="fw fw-circle fw-stack-2x" data-original-title="" title=""></i>
+                                    <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px" data-original-title="" title=""></i>
+                                </span>
+                            </a>
+                            <p id="name_help" class="hide"><%=i18n.localize("Receiving this number of requests within the configured time period in Analytics Engine will trigger the alert")%></p>
+                        </label>
                         <div class="col-md-9 col-lg-9">
                             <input class="form-control" type="text" name="threshold" id="threshold" autocomplete="off" />
                         </div>
@@ -64,7 +74,8 @@
                         <th><%=i18n.localize("Application Name")%></th>
                         <th><%=i18n.localize("API Name")%></th>
                         <th><%=i18n.localize("API Version")%></th>
-                        <th><%=i18n.localize("Threshold Value")%></th>
+                        <th><%=i18n.localize("Request Count")%></th>
+                        <th><%=i18n.localize("Actions")%></th>
                     </tr>
                 </thead>
             </table>
