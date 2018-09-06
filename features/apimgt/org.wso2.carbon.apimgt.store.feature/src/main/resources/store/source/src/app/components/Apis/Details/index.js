@@ -2,16 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
-import Drawer from '@material-ui/core/Drawer';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import List from '@material-ui/core/List';
-import Typography from '@material-ui/core/Typography';
-import Divider from '@material-ui/core/Divider';
-import IconButton from '@material-ui/core/IconButton';
-import MenuIcon from '@material-ui/icons/Menu';
-import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import CustomIcon from '../../Shared/CustomIcon';
 import {Route, Switch, Redirect} from 'react-router-dom'
 
@@ -20,9 +10,7 @@ import ApiConsole from './ApiConsole/ApiConsole'
 import Documentation from './Documents/Documentation'
 import Forum from './Forum'
 import Sdk from './Sdk'
-import BasicInfo from './BasicInfo'
 import {PageNotFound} from '../../Base/Errors/index'
-import Grid from '@material-ui/core/Grid';
 import InfoBar from './InfoBar';
 import RightPanel from './RightPanel';
 

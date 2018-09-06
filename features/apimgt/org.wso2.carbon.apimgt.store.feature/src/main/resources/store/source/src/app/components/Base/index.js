@@ -1,23 +1,11 @@
 import React from 'react';
-import Drawer from '@material-ui/core/Drawer';
-import Divider from '@material-ui/core/Divider';
-import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import Footer from './Footer/Footer'
 import {Link} from "react-router-dom";
 import AuthManager from '../../data/AuthManager.js';
-import Input from '@material-ui/core/Input';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
-import Menu from '@material-ui/core/Menu';
-import InfoIcon from '@material-ui/icons/Info';
-import Info from '@material-ui/icons/Info';
-import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
 
 import ConfigManager from "../../data/ConfigManager";
 import EnvironmentMenu from "./Header/EnvironmentMenu";
@@ -27,23 +15,16 @@ import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 
-import Popover from '@material-ui/core/Popover';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import {findDOMNode} from 'react-dom';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import Typography from '@material-ui/core/Typography';
-import classNames from 'classnames';
 
 import CssBaseline from '@material-ui/core/CssBaseline';
 import GlobalNavBar from "../new/GlobalNavbar";
 import GenericSearch from '../new/GenericSearch';
-import UserMenu from '../new/UserMenu';
-import LeftMenu from '../new/LeftMenu';
-import InfoBar from '../new/InfoBar';
-import APIDetail from '../new/APIDetail';
-import RightPanel from '../new/RightPanel';
 import Person from '@material-ui/icons/Person';
 import Popper from '@material-ui/core/Popper';
 import Grow from '@material-ui/core/Grow';
