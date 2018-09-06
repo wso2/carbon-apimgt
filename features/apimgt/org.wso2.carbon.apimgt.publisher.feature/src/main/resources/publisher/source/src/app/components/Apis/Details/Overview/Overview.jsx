@@ -17,29 +17,22 @@
  */
 
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
+import TextField from '@material-ui/core/TextField';
 import ChipInput from 'material-ui-chip-input';
-import OpenInNew from '@material-ui/icons/OpenInNew';
-import Tooltip from '@material-ui/core/Tooltip';
-import Select from '@material-ui/core/Select';
-import Input from '@material-ui/core/Input';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import Checkbox from '@material-ui/core/Checkbox';
-import EditIcon from '@material-ui/icons/EditAttributes';
-import { FormControl } from '@material-ui/core/';
-import IconButton from '@material-ui/core/IconButton';
+import Typography from '@material-ui/core/Typography';
+import Divider from '@material-ui/core/Divider';
+import moment from 'moment';
 
 import { Progress } from '../../../Shared';
-import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
 import Api from '../../../../data/api';
-import ImageGenerator from '../../Listing/components/ImageGenerator';
 import Alert from '../../../Shared/Alert';
+import APIPropertyField from './APIPropertyField';
+import BusinessPlans from './BusinessPlans';
 
 const styles = () => ({
     imageSideContent: {
@@ -102,11 +95,8 @@ class Overview extends Component {
         super(props);
         this.state = {
             api: null,
-            notFound: false,
-            editDescription: false,
             editableDescriptionText: null,
         };
-        this.apiUUID = this.props.match.params.apiUUID;
         this.downloadWSDL = this.downloadWSDL.bind(this);
         this.handleTagChange = this.handleTagChange.bind(this);
         this.handleTransportChange = this.handleTransportChange.bind(this);
@@ -114,37 +104,10 @@ class Overview extends Component {
         this.handleInput = this.handleInput.bind(this);
     }
 
-    /**
-     * @inheritDoc
-     * @memberof Overview
-     */
-    componentDidMount() {
-        const api = new Api();
-        const promisedApi = api.get(this.apiUUID);
-        promisedApi
-            .then((response) => {
-                let apiDescription;
-                if (response.body.description && response.body.description.length) {
-                    apiDescription = response.body.description;
-                } else {
-                    apiDescription = '< NOT SET FOR THIS API >';
-                }
-                this.setState({ api: response.body, editableDescriptionText: apiDescription });
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-                const { status } = error;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                }
-            });
-    }
-
     downloadWSDL() {
+        const { id } = this.props.api;
         const api = new Api();
-        const promisedWSDL = api.getWSDL(this.apiUUID);
+        const promisedWSDL = api.getWSDL(id);
         promisedWSDL.then((response) => {
             const windowUrl = window.URL || window.webkitURL;
             const binary = new Blob([response.data]);
@@ -171,9 +134,9 @@ class Overview extends Component {
      */
     handleTagChange(tags) {
         const api = new Api();
-        const { apiUUID } = this;
+        const { id } = this.props.api;
         const currentAPI = this.state.api;
-        const promisedApi = api.get(apiUUID);
+        const promisedApi = api.get(id);
         promisedApi
             .then((getResponse) => {
                 const apiData = getResponse.body;
@@ -203,9 +166,9 @@ class Overview extends Component {
      */
     handleTransportChange(event) {
         const api = new Api();
-        const { apiUUID } = this;
+        const { id } = this.props.api;
         const currentAPI = this.state.api;
-        const promisedApi = api.get(apiUUID);
+        const promisedApi = api.get(id);
         promisedApi
             .then((getResponse) => {
                 const apiData = getResponse.body;
@@ -234,35 +197,29 @@ class Overview extends Component {
      *
      * @param {SyntheticEvent} sEvent Synthetic Event
      */
-    editDescription(sEvent) {
-        const { id } = sEvent.currentTarget;
-        if (id === 'edit-description-button') {
-            this.setState({ editDescription: true });
-        } else {
-            this.setState({ editDescription: false });
-            const api = new Api();
-            const { apiUUID } = this;
-            const { editableDescriptionText } = this.state;
-            const promisedApi = api.get(apiUUID);
-            promisedApi
-                .then((getResponse) => {
-                    const apiData = getResponse.body;
-                    apiData.description = editableDescriptionText;
-                    const promisedUpdate = api.update(apiData);
-                    promisedUpdate
-                        .then((updateResponse) => {
-                            this.setState({ api: updateResponse.body });
-                        })
-                        .catch((errorResponse) => {
-                            console.error(errorResponse);
-                            Alert.error('Error occurred while updating API description');
-                        });
-                })
-                .catch((errorResponse) => {
-                    console.error(errorResponse);
-                    Alert.error('Error occurred while retrieving API');
-                });
-        }
+    editDescription() {
+        const api = new Api();
+        const apiId = this.props.api.id;
+        const { editableDescriptionText } = this.state;
+        const promisedApi = api.get(apiId);
+        promisedApi
+            .then((getResponse) => {
+                const apiData = getResponse.body;
+                apiData.description = editableDescriptionText;
+                const promisedUpdate = api.update(apiData);
+                promisedUpdate
+                    .then((updateResponse) => {
+                        this.setState({ api: updateResponse.body });
+                    })
+                    .catch((errorResponse) => {
+                        console.error(errorResponse);
+                        Alert.error('Error occurred while updating API description');
+                    });
+            })
+            .catch((errorResponse) => {
+                console.error(errorResponse);
+                Alert.error('Error occurred while retrieving API');
+            });
     }
 
     /**
@@ -276,312 +233,144 @@ class Overview extends Component {
 
     /** @inheritDoc */
     render() {
-        const { api, editDescription, editableDescriptionText } = this.state;
-        if (this.state.notFound) {
-            return <ResourceNotFound message={this.props.resourceNotFountMessage} />;
-        }
+        const { api, isEditable } = this.props;
         if (!api) {
             return <Progress />;
         }
-        const { classes } = this.props;
 
         return (
-            <Grid container>
-                <Grid item xs={12} sm={6} md={6} lg={4} className={classes.imageWrapper}>
-                    <ImageGenerator name={api.name} />
-                    <div className={classes.imageSideContent}>
-                        <Typography variant='headline'>
-                            {api.version} {api.isDefaultVersion && <span>( Default )</span>}
-                            {/* TODO We need to show the default verison and a link to it here if this
-                            is not the default version */}
-                        </Typography>
-                        <Typography variant='caption' gutterBottom align='left'>
-                            Version
-                        </Typography>
-                        {/* Context */}
-                        <Typography variant='headline' className={classes.headline}>
-                            {api.context}
-                        </Typography>
-                        <Typography variant='caption' gutterBottom align='left'>
-                            Context
-                        </Typography>
-                        {/* Visibility */}
-                        <Typography variant='headline' className={classes.headline}>
-                            {api.lifeCycleStatus}
-                        </Typography>
-                        <Typography variant='caption' gutterBottom align='left'>
-                            Lifecycle Status
-                        </Typography>
-                    </div>
+            <Grid container spacing={0} direction='column' justify='flex-start' alignItems='stretch'>
+                <Grid item container direction='row' justify='flex-end'>
+                    <span>Last Updated : {moment(api.lastUpdatedTime).fromNow()}</span>
                 </Grid>
-                <Grid item xs={12} sm={6} md={6} lg={8} className={classes.headline}>
-                    {/* Description */}
-                    <div>
-                        {editDescription ? (
-                            <FormControl fullWidth>
-                                <Input
-                                    id='editableDescriptionText'
-                                    multiline
-                                    autoFocus
-                                    rowsMax='5'
-                                    value={editableDescriptionText}
-                                    onChange={this.handleInput}
-                                    onBlur={this.editDescription}
-                                />
-                            </FormControl>
-                        ) : (
-                            <Typography variant='subheading' gutterBottom align='left'>
-                                {editableDescriptionText}
-                                <IconButton
-                                    id='edit-description-button'
-                                    onClick={this.editDescription}
-                                    aria-label='Edit Description'
-                                >
-                                    <EditIcon />
-                                </IconButton>
-                            </Typography>
-                        )}
-                        <Typography variant='caption' gutterBottom align='left'>
-                            Description
-                        </Typography>
-                    </div>
+                <APIPropertyField name='Description'>
+                    <TextField
+                        style={{
+                            border: '#3f50b5 1px solid',
+                            padding: '8px',
+                            borderRadius: '15px',
+                            width: '50%',
+                        }}
+                        id='api-description'
+                        label={isEditable && 'Description'}
+                        value={api.description}
+                        placeholder='No Value!'
+                        helperText='A short description about the API'
+                        margin='normal'
+                        multiline
+                        rows={2}
+                        rowsMax={8}
+                        InputProps={{
+                            readOnly: !isEditable,
+                        }}
+                    />
+                </APIPropertyField>
+                <APIPropertyField name='Endpoints'>
+                    <TextField
+                        id='api-endpoint-production'
+                        label={isEditable && 'Endpoint'}
+                        defaultValue={api.description}
+                        placeholder='No Value!'
+                        helperText='Production'
+                        margin='normal'
+                        InputProps={{
+                            readOnly: !isEditable,
+                        }}
+                    />
+                    <TextField
+                        id='api-endpoint-sandbox'
+                        label={isEditable && 'Endpoint'}
+                        defaultValue={api.description}
+                        placeholder='No Value!'
+                        helperText='Sandbox'
+                        margin='normal'
+                        InputProps={{
+                            readOnly: !isEditable,
+                        }}
+                    />
+                </APIPropertyField>
+                <APIPropertyField name='Tags'>
+                    <ChipInput value={api.tags} />
+                </APIPropertyField>
+                <APIPropertyField name='Context'>
+                    <TextField
+                        id='api-context'
+                        label={isEditable && 'Context'}
+                        defaultValue={api.context}
+                        placeholder='No Value!'
+                        helperText='Context of the API'
+                        margin='normal'
+                        InputProps={{
+                            readOnly: !isEditable,
+                        }}
+                    />
+                </APIPropertyField>
+                <APIPropertyField name='Default API Version'>
+                    <FormControlLabel
+                        control={<Checkbox checked={api.isDefaultVersion} value='isDefaultVersion' color='primary' />}
+                        label='Default Version'
+                    />
+                </APIPropertyField>
+                <BusinessPlans api={api} />
+                <Grid item>
+                    <Typography variant='headline'> Business Information</Typography>
+                    <Divider />
                 </Grid>
-                <Grid item xs={12}>
-                    <Typography variant='subheading' align='left'>
-                        Created by {api.provider} : {api.createdTime}
-                    </Typography>
-                    <Typography variant='caption' gutterBottom align='left'>
-                        Last update : {api.lastUpdatedTime}
-                    </Typography>
-                    {/* Endpoints */}
-                    {api.endpoint &&
-                        api.endpoint.map(ep => (
-                            ep.inline &&
-                            <div key={ep.inline.id}>
-                                <div className={classes.endpointsWrapper + ' ' + classes.headline}>
-                                    <Link to={'/apis/' + api.id + '/endpoints'} title='Edit endpoint'>
-                                        <Typography variant='subheading' align='left'>
-                                            {ep.inline.endpointConfig.list[0].url}
-                                        </Typography>
-                                    </Link>
-                                    <a
-                                        href={ep.inline.endpointConfig.list[0].url}
-                                        target='_blank'
-                                        rel='noopener noreferrer'
-                                        className={classes.openNewIcon}
-                                    >
-                                        <OpenInNew />
-                                    </a>
-                                </div>
-                                <Typography variant='caption' gutterBottom align='left'>
-                                    <span className={classes.titleCase}>{ep.type}</span> Endpoint
-                                </Typography>
-                            </div>
-                        ))}
-                    {api.wsdlUri && (
-                        <div>
-                            <div className={classes.endpointsWrapper + ' ' + classes.headline}>
-                                <a onClick={this.downloadWSDL} onKeyDown={this.downloadWSDL}>
-                                    <Typography variant='subheading' align='left'>
-                                        {api.wsdlUri}
-                                    </Typography>
-                                </a>
-                            </div>
-                            <Typography variant='caption' gutterBottom align='left'>
-                                WSDL
-                            </Typography>
-                        </div>
-                    )}
-                    <Grid container>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
-                            {api.policies && api.policies.length ? (
-                                <Link to={'/apis/' + api.id + '/policies'}>
-                                    <Typography variant='subheading' align='left' className={classes.headline}>
-                                        {api.policies.map(policy => policy + ', ')}
-                                    </Typography>
-                                </Link>
-                            ) : (
-                                <Link to={'/apis/' + api.id + '/policies'}>
-                                    <Typography variant='subheading' align='left' className={classes.headline}>
-                                        &lt; NOT SET FOR THIS API &gt;
-                                    </Typography>
-                                </Link>
-                            )}
-                            <Typography variant='caption' gutterBottom align='left'>
-                                Throttling Policies
-                            </Typography>
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
-                            {api.securityScheme && api.securityScheme.length ? (
-                                <Link to={'/apis/' + api.id + '/securityScheme'}>
-                                    <Typography variant='subheading' align='left' className={classes.headline}>
-                                        {api.securityScheme.map(policy => policy + ', ')}
-                                    </Typography>
-                                </Link>
-                            ) : (
-                                <Link to={'/apis/' + api.id + '/securityScheme'}>
-                                    <Typography variant='subheading' align='left' className={classes.headline}>
-                                        &lt; NOT SET FOR THIS API &gt;
-                                    </Typography>
-                                </Link>
-                            )}
-                            <Typography variant='caption' gutterBottom align='left'>
-                                Security Scheme
-                            </Typography>
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
-                            {api.tags && api.tags.length ? (
-                                <div className={classes.headline}>
-                                    <Tooltip
-                                        id='tooltip-controlled'
-                                        title='Type and hit <Enter> to add Tags'
-                                        enterDelay={300}
-                                        leaveDelay={300}
-                                        placement='top'
-                                    >
-                                        <ChipInput defaultValue={api.tags} onChange={this.handleTagChange} />
-                                    </Tooltip>
-                                </div>
-                            ) : (
-                                <div className={classes.headline}>
-                                    <Tooltip
-                                        id='tooltip-controlled'
-                                        title='Type and hit <Enter> to add Tags'
-                                        onClose={this.handleTooltipClose}
-                                        enterDelay={300}
-                                        leaveDelay={300}
-                                        placement='top'
-                                    >
-                                        <ChipInput
-                                            placeholder='< CLICK TO ADD TAGS >'
-                                            onChange={this.handleTagChange}
-                                        />
-                                    </Tooltip>
-                                </div>
-                            )}
-                            <Typography variant='caption' gutterBottom align='left'>
-                                Tags
-                            </Typography>
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
-                            {api.threatProtectionPolicies && api.threatProtectionPolicies.length ? (
-                                <Link to={'/apis/' + api.id + '/security'}>
-                                    <Typography variant='subheading' align='left' className={classes.headline}>
-                                        {api.threatProtectionPolicies.map(policy => policy + ', ')}
-                                    </Typography>
-                                </Link>
-                            ) : (
-                                <Link to={'/apis/' + api.id + '/security'}>
-                                    <Typography variant='subheading' align='left' className={classes.headline}>
-                                        &lt; NOT SET FOR THIS API &gt;
-                                    </Typography>
-                                </Link>
-                            )}
-                            <Typography variant='caption' gutterBottom align='left'>
-                                Threat Protection Policies
-                            </Typography>
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
-                            <InputLabel htmlFor='transport-checkbox' />
-                            {/* TODO:Set placeholder 'Select Transports' */}
-                            <Select
-                                multiple
-                                autoWidth
-                                value={api.transport}
-                                onChange={this.handleTransportChange}
-                                input={<Input id='transport-checkbox' />}
-                                renderValue={selected => selected.join(',  ')}
-                            >
-                                <MenuItem key='HTTP' value='HTTP'>
-                                    <Checkbox
-                                        checked={api.transport && api.transport.includes('HTTP')}
-                                        color='primary'
-                                    />
-                                    <ListItemText primary='HTTP' />
-                                </MenuItem>
-                                <MenuItem key='HTTPS' value='HTTPS'>
-                                    <Checkbox
-                                        checked={api.transport && api.transport.includes('HTTPS')}
-                                        color='primary'
-                                    />
-                                    <ListItemText primary='HTTPS' />
-                                </MenuItem>
-                            </Select>
-                            <Typography variant='caption' gutterBottom align='left'>
-                                Transports
-                            </Typography>
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
-                            {api.userPermissionsForApi && api.userPermissionsForApi.length ? (
-                                <Link to={'/apis/' + api.id + '/userPermissions'}>
-                                    <Typography variant='subheading' align='left' className={classes.headline}>
-                                        {api.userPermissionsForApi.map(permission => permission + ', ')}
-                                    </Typography>
-                                </Link>
-                            ) : (
-                                <Link to={'/apis/' + api.id + '/userPermissions'}>
-                                    <Typography variant='subheading' align='left' className={classes.headline}>
-                                        &lt; NOT SET FOR THIS API &gt;
-                                    </Typography>
-                                </Link>
-                            )}
-                            <Typography variant='caption' gutterBottom align='left'>
-                                User Permissions
-                            </Typography>
-                        </Grid>
-                        {api.visibility === 'PUBLIC' ? (
-                            <Grid item xs={12} sm={6} md={4} lg={3}>
-                                <Link to={'/apis/' + api.id + '/visibility'}>
-                                    <Typography variant='subheading' align='left' className={classes.headline}>
-                                        PUBLIC
-                                    </Typography>
-                                </Link>
-                                <Typography variant='caption' gutterBottom align='left'>
-                                    Visibility ( You can restrict visibility by role or tenant )
-                                </Typography>
-                            </Grid>
-                        ) : (
-                            <Grid item xs={12} sm={6} md={4} lg={3}>
-                                {api.visibleRoles && api.visibleRoles.length ? (
-                                    <Link to={'/apis/' + api.id + '/visibility'}>
-                                        <Typography variant='subheading' align='left' className={classes.headline}>
-                                            {api.visibleRoles.map(role => role + ', ')}
-                                        </Typography>
-                                    </Link>
-                                ) : (
-                                    <Link to={'/apis/' + api.id + '/visibility'}>
-                                        <Typography variant='subheading' align='left' className={classes.headline}>
-                                            &lt; NOT SET FOR THIS API &gt;
-                                        </Typography>
-                                    </Link>
-                                )}
-                                <Typography variant='caption' gutterBottom align='left'>
-                                    Visible Roles
-                                </Typography>
-                            </Grid>
-                        )}
-
-                        {api.visibility !== 'PUBLIC' && (
-                            <Grid item xs={12} sm={6} md={4} lg={3}>
-                                {api.visibleTenants && api.visibleTenants.length ? (
-                                    <Link to={'/apis/' + api.id + '/visibility'}>
-                                        <Typography variant='subheading' align='left' className={classes.headline}>
-                                            {api.visibleTenants.map(tenant => tenant + ', ')}
-                                        </Typography>
-                                    </Link>
-                                ) : (
-                                    <Link to={'/apis/' + api.id + '/visibility'}>
-                                        <Typography variant='subheading' align='left' className={classes.headline}>
-                                            &lt; NOT SET FOR THIS API &gt;
-                                        </Typography>
-                                    </Link>
-                                )}
-                                <Typography variant='caption' gutterBottom align='left'>
-                                    Visible Tenant
-                                </Typography>
-                            </Grid>
-                        )}
-                    </Grid>
+                <APIPropertyField name='Business Owner'>
+                    <TextField
+                        id='api-business-owner'
+                        label={isEditable && 'Business Owner'}
+                        defaultValue={api.businessInformation.businessOwner}
+                        placeholder='No Value!'
+                        helperText='Business Owner'
+                        margin='normal'
+                        InputProps={{
+                            readOnly: !isEditable,
+                        }}
+                    />
+                </APIPropertyField>
+                <APIPropertyField name='Business Owner Email'>
+                    <TextField
+                        id='api-business-owner-email'
+                        label={isEditable && 'Business Owner Email'}
+                        defaultValue={api.businessInformation.businessOwnerEmail}
+                        placeholder='No Value!'
+                        helperText='Business Owner Email'
+                        margin='normal'
+                        InputProps={{
+                            readOnly: !isEditable,
+                        }}
+                    />
+                </APIPropertyField>
+                <APIPropertyField name='Technical Owner'>
+                    <TextField
+                        id='api-technical-owner'
+                        label={isEditable && 'Technical Owner'}
+                        defaultValue={api.businessInformation.technicalOwner}
+                        placeholder='No Value!'
+                        helperText='Technical Owner'
+                        margin='normal'
+                        InputProps={{
+                            readOnly: !isEditable,
+                        }}
+                    />
+                </APIPropertyField>
+                <APIPropertyField name='Technical Owner Email'>
+                    <TextField
+                        id='api-technical-owner-email'
+                        label={isEditable && 'Technical Owner Email'}
+                        defaultValue={api.businessInformation.technicalOwnerEmail}
+                        placeholder='No Value!'
+                        helperText='Technical Owner Email'
+                        margin='normal'
+                        InputProps={{
+                            readOnly: !isEditable,
+                        }}
+                    />
+                </APIPropertyField>
+                <Grid item>
+                    <Typography variant='headline'> Additional Fields</Typography>
+                    <Divider />
                 </Grid>
             </Grid>
         );
@@ -589,17 +378,15 @@ class Overview extends Component {
 }
 
 Overview.defaultProps = {
-    resourceNotFountMessage: 'Resource not found!',
+    isEditable: false,
 };
 
 Overview.propTypes = {
     classes: PropTypes.shape({}).isRequired,
-    match: PropTypes.shape({
-        params: PropTypes.shape({
-            apiUUID: PropTypes.string,
-        }),
+    api: PropTypes.shape({
+        id: PropTypes.string,
     }).isRequired,
-    resourceNotFountMessage: PropTypes.string,
+    isEditable: PropTypes.bool,
 };
 
 export default withStyles(styles)(Overview);

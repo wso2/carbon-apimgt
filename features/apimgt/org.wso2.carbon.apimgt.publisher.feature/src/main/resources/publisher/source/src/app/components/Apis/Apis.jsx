@@ -29,7 +29,7 @@ const Apis = () => {
         <Switch>
             <Route exact path='/apis' component={Listing} />
             <Route path='/api/create' component={ApiCreate} />
-            <Route path='/apis/:apiUUID/' render={props => <Details {...props} />} />
+            <Route path='/apis/:apiUUID/' component={Details} />
             <Route component={PageNotFound} />
         </Switch>
     );

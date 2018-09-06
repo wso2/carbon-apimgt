@@ -7,6 +7,9 @@ const styles = () => ({
     navLink: {
         display: 'contents',
     },
+    selected: {
+        backgroundColor: 'red',
+    },
 });
 
 const NavItem = (props) => {
@@ -14,19 +17,23 @@ const NavItem = (props) => {
         listItemProps, listItemTextProps, iconProps, classes, ...other
     } = props;
     const {
-        name, onClick, linkTo, NavIcon,
+        selected, name, onClick, linkTo, NavIcon,
     } = other;
 
     const listItem = (
-        <ListItem {...listItemProps} onClick={onClick} button>
+        <ListItem
+            selected={selected}
+            {...listItemProps}
+            onClick={onClick}
+            button
+        >
             <ListItemIcon>{NavIcon}</ListItemIcon>
             <ListItemText {...listItemTextProps} primary={name} />
         </ListItem>
     );
     return linkTo ? (
         <Link className={classes.navLink} to={linkTo}>
-            {' '}
-            {listItem}{' '}
+            {listItem}
         </Link>
     ) : (
         listItem
@@ -39,6 +46,7 @@ NavItem.defaultProps = {
     iconProps: {},
     onClick: () => {},
     linkTo: undefined,
+    selected: false,
 };
 
 NavItem.propTypes = {
@@ -49,6 +57,7 @@ NavItem.propTypes = {
     onClick: PropTypes.func,
     linkTo: PropTypes.string,
     classes: PropTypes.shape({}).isRequired,
+    selected: PropTypes.bool,
 };
 
 export default withStyles(styles)(NavItem);

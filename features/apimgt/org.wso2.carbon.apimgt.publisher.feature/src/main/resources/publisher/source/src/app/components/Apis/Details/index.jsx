@@ -17,27 +17,86 @@
  */
 
 import React, { Component } from 'react';
-import { Link, Redirect, Route, Switch } from 'react-router-dom';
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
 import Log from 'log4javascript';
 import PropTypes from 'prop-types';
 
+import OverviewIcon from '@material-ui/icons/SettingsOverscan';
+import LifeCycleIcon from '@material-ui/icons/Autorenew';
+import EndpointIcon from '@material-ui/icons/GamesOutlined';
+import ResourcesIcon from '@material-ui/icons/VerticalSplit';
+import ScopesIcon from '@material-ui/icons/VpnKey';
+import SecurityIcon from '@material-ui/icons/Security';
+import DocumentsIcon from '@material-ui/icons/LibraryBooks';
+import SubscriptionsIcon from '@material-ui/icons/Bookmarks';
 import Overview from './Overview/Overview';
 import LifeCycle from './LifeCycle/LifeCycle';
 import Documents from './Documents/Documents';
-import { PageNotFound } from '../../Base/Errors/index';
 import Resources from './Resources/Resources';
-import PermissionFormWrapper from './Permissions/Permission';
 import Endpoints from './Endpoints';
 import Subscriptions from './Subscriptions/Subscriptions';
 import Scopes from './Scopes/Scopes';
 import Security from './Security';
-import NavBar from './NavBar';
-import EnvironmentOverview from './EnvironmentOverview/EnvironmentOverview';
+
+import PageContainer from '../../Base/container/';
+import APIDetailsNavBar from './components/APIDetailsNavBar';
 import Utils from '../../../data/Utils';
 import ConfigManager from '../../../data/ConfigManager';
+import APIDetailsTopMenu from './components/APIDetailsTopMenu';
+import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
+import Api from '../../../data/api';
+import APIDetailsRoutes from './components/APIDetailsRoutes';
+import { Progress } from '../../Shared';
 
+const apiDetailPages = [
+    {
+        name: 'Overview',
+        pathName: 'overview',
+        PageComponent: Overview,
+        NavIcon: <OverviewIcon />,
+    },
+    {
+        name: 'LifeCycle',
+        pathName: 'lifecycle',
+        PageComponent: LifeCycle,
+        NavIcon: <LifeCycleIcon />,
+    },
+    {
+        name: 'Endpoints',
+        pathName: 'endpoints',
+        PageComponent: Endpoints,
+        NavIcon: <EndpointIcon />,
+    },
+    {
+        name: 'Resources',
+        pathName: 'resources',
+        PageComponent: Resources,
+        NavIcon: <ResourcesIcon />,
+    },
+    {
+        name: 'Scopes',
+        pathName: 'scopes',
+        PageComponent: Scopes,
+        NavIcon: <ScopesIcon />,
+    },
+    {
+        name: 'Documents',
+        pathName: 'documents',
+        PageComponent: Documents,
+        NavIcon: <DocumentsIcon />,
+    },
+    {
+        name: 'Subscription',
+        pathName: 'subscription',
+        PageComponent: Subscriptions,
+        NavIcon: <SubscriptionsIcon />,
+    },
+    {
+        name: 'Security',
+        pathName: 'security',
+        PageComponent: Security,
+        NavIcon: <SecurityIcon />,
+    },
+];
 /**
  * Base component for API specific Details page, This component will be mount for any request coming for /apis/:api_uuid
  */
@@ -50,8 +109,10 @@ export default class Details extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            resourceNotFountMessage: { multi_environments: false },
+            api: null,
+            apiNotFound: false,
         };
+        this.setAPI = this.setAPI.bind(this);
     }
 
     /**
@@ -60,21 +121,60 @@ export default class Details extends Component {
      */
     componentDidMount() {
         ConfigManager.getConfigs()
-            .environments.then((response) => {
-                const multiEnvironments = response.data.environments.length > 1;
-                const more = multiEnvironments && (
-                    <Link to='/apis'>
-                        <Button variant='raised' color='secondary'>
-                            Go Home
-                        </Button>
-                    </Link>
-                );
-                this.setState({
-                    resourceNotFountMessage: { more, multiEnvironments },
-                });
+            .environments.then(() => {
+                // const multiEnvironments = response.data.environments.length > 1;
+                // const more = multiEnvironments && (
+                //     <Link to='/apis'>
+                //         <Button variant='raised' color='secondary'>
+                //             Go Home
+                //         </Button>
+                //     </Link>
+                // );
+                // this.setState({
+                //     resourceNotFountMessage: { more, multiEnvironments },
+                // });
             })
             .catch((error) => {
                 Log.error('Error while receiving environment configurations : ', error);
+            });
+        this.setAPI();
+    }
+
+    /**
+     *
+     *
+     * @returns
+     * @memberof Details
+     */
+    componentDidUpdate() {
+        const { api } = this.state;
+        const { apiUUID } = this.props.match.params;
+        if (!api || api.id === apiUUID) {
+            return;
+        }
+        this.setAPI();
+    }
+
+    /**
+     *
+     *
+     * @memberof Details
+     */
+    setAPI() {
+        const { apiUUID } = this.props.match.params;
+        const promisedApi = Api.get(apiUUID);
+        promisedApi
+            .then((api) => {
+                this.setState({ api });
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
+                const { status } = error;
+                if (status === 404) {
+                    this.setState({ apiNotFound: true });
+                }
             });
     }
 
@@ -85,78 +185,28 @@ export default class Details extends Component {
      * @returns {Component} Render API Details page
      */
     render() {
-        const { apiUUID } = this.props.match.params;
-        const redirectUrl = `/apis/${apiUUID}/overview`;
-        const environmentOverview = Utils.isMultiEnvironmentOverviewEnabled();
-        const { resourceNotFountMessage } = this.state;
+        const { api, apiNotFound } = this.state;
 
-        if (resourceNotFountMessage.multi_environments) {
-            resourceNotFountMessage.title = `API is Not Found in the "${
-                Utils.getCurrentEnvironment().label
-            }" Environment`;
-            resourceNotFountMessage.body = `Can't find the API with the id "${apiUUID}"`;
+        if (apiNotFound) {
+            const { apiUUID } = this.props.match.params;
+            const resourceNotFountMessage = {
+                title: `API is Not Found in the "${Utils.getCurrentEnvironment().label}" Environment`,
+                body: `Can't find the API with the id "${apiUUID}"`,
+            };
+            return <ResourceNotFound message={resourceNotFountMessage} />;
+        }
+
+        if (!api) {
+            return <Progress />;
         }
 
         return (
-            <Grid container spacing={0}>
-                <Grid item xs={12}>
-                    <NavBar apiUUID={apiUUID} />
-                </Grid>
-                <Grid item xs={12}>
-                    <Switch>
-                        <Redirect exact from='/apis/:api_uuid' to={redirectUrl} />
-                        <Route
-                            path='/apis/:apiUUID/overview'
-                            render={props => <Overview resourceNotFountMessage={resourceNotFountMessage} {...props} />}
-                        />
-                        {environmentOverview ? (
-                            <Route
-                                path='/apis/:api_uuid/environment view'
-                                render={props => (
-                                    <EnvironmentOverview resourceNotFountMessage={resourceNotFountMessage} {...props} />
-                                )}
-                            />
-                        ) : null}
-                        <Route
-                            path='/apis/:api_uuid/lifecycle'
-                            render={props => <LifeCycle resourceNotFountMessage={resourceNotFountMessage} {...props} />}
-                        />
-                        <Route
-                            path='/apis/:api_uuid/resources'
-                            render={props => <Resources resourceNotFountMessage={resourceNotFountMessage} {...props} />}
-                        />
-                        <Route
-                            path='/apis/:api_uuid/permission'
-                            render={props => (
-                                <PermissionFormWrapper resourceNotFountMessage={resourceNotFountMessage} {...props} />
-                            )}
-                        />
-                        <Route
-                            path='/apis/:api_uuid/documents'
-                            render={props => <Documents resourceNotFountMessage={resourceNotFountMessage} {...props} />}
-                        />
-                        <Route
-                            path='/apis/:apiUUID/endpoints'
-                            render={props => <Endpoints resourceNotFountMessage={resourceNotFountMessage} {...props} />}
-                        />
-                        <Route
-                            path='/apis/:api_uuid/subscriptions'
-                            render={props => (
-                                <Subscriptions resourceNotFountMessage={resourceNotFountMessage} {...props} />
-                            )}
-                        />
-                        <Route
-                            path='/apis/:api_uuid/security'
-                            render={props => <Security resourceNotFountMessage={resourceNotFountMessage} {...props} />}
-                        />
-                        <Route
-                            path='/apis/:api_uuid/scopes'
-                            render={props => <Scopes resourceNotFountMessage={resourceNotFountMessage} {...props} />}
-                        />
-                        <Route component={PageNotFound} />
-                    </Switch>
-                </Grid>
-            </Grid>
+            <PageContainer
+                pageNav={<APIDetailsNavBar apiDetailPages={apiDetailPages} />}
+                pageTopMenu={<APIDetailsTopMenu api={api} />}
+            >
+                <APIDetailsRoutes apiDetailPages={apiDetailPages} api={api} />
+            </PageContainer>
         );
     }
 }

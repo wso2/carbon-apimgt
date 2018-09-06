@@ -20,7 +20,9 @@ import API from '../../../../data/api';
  * @returns {React.Component} @inheritdoc
  */
 function renderInput(inputProps) {
-    const { classes, ref, ...other } = inputProps;
+    const {
+        classes, ref, isLoading, ...other
+    } = inputProps; // `isLoading` has destructured here to prevent passing unintended prop to TextField
     return (
         <TextField
             InputProps={{

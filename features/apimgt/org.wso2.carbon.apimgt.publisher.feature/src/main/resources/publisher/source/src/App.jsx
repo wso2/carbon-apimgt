@@ -70,7 +70,7 @@ const lightTheme = createMuiTheme({
         background: {
             active: 'rgba(165, 214, 167, 1)',
             navBar: '#fafafa',
-            container: '#e8e7e7',
+            container: '#fefefe',
             contentFrame: 'rgba(227, 242, 253, 1)',
         },
         text: {

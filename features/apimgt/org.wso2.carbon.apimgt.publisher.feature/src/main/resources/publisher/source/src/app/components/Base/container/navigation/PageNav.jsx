@@ -15,7 +15,7 @@ const styles = theme => ({
     },
     drawerPaper: {
         position: 'relative',
-        width: 'calc(100vw*1/12)', // This is because of the container grid sizing (navbar md2 content md10 = 2/12)
+        width: 'calc(100vw*2/12)', // This is because of the container grid sizing (navbar md2 content md10 = 2/12)
         [theme.breakpoints.down('md')]: {
             width: 'calc(100vw*2/12)',
         },

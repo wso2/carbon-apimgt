@@ -109,7 +109,7 @@ class SampleAPI extends Component {
         Alert.info('Creating sample Pet-Store API . . .');
         return this.sampleApi
             .create(data)
-            .then(response => response.obj)
+            .then(response => response.body)
             .catch((error) => {
                 console.error(error);
                 this.setState({ deploying: false });

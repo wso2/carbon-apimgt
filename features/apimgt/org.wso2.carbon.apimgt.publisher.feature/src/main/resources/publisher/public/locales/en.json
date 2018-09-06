@@ -22,7 +22,7 @@
   "create.an.api": "Create an API",
   "by": "by",
   "context": "context",
-  "version": "version"
+  "version": "version",
   "username": "Username",
   "password": "Password",
   "endpoint.security.scheme": "Endpoint Security Scheme",
