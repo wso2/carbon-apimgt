@@ -72,6 +72,24 @@ include("/jagg/jagg.jag");
                 }
 
                 print(obj);
+            } else if (action === 'getApplicationsForUser' && request.getMethod() == 'GET') {
+                mod = jagg.module("application");
+                var provider = jagg.getUser().username;
+                var result = mod.getApplicationsByOwner(provider);
+
+                if (result.error) {
+                    obj = {
+                        error: result.error,
+                        message: result.message
+                    };
+                } else {
+                    obj = {
+                        error: false,
+                        applications: result.applications
+                    };
+                }
+
+                print(obj);
             }
         }
     }

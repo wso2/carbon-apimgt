@@ -14,7 +14,9 @@ jagg.module("application", {
     getApplicationByName: function () {
         return jagg.require(jagg.getModulesDir() + "application/list.jag").getApplicationByName.apply(this, arguments);
     },
-
+    getApplicationsByOwner: function () {
+        return jagg.require(jagg.getModulesDir() + "application/list.jag").getApplicationsByOwner.apply(this, arguments);
+    },
     updateApplication:function () {
         return jagg.require(jagg.getModulesDir() + "application/update.jag").updateApplication.apply(this, arguments);
     },

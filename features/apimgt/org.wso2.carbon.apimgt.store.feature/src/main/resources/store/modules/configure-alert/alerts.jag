@@ -5,9 +5,9 @@ var getStoreAlertConfigs  = function () {
     try {
         var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
         var tenantAwareUserName = jagg.getUser().username;
-        //TODO add subscriber name to query
+
         var appName = "APIM_ALERT_CONFIGURATION"; 
-        var query =  "from ApiSubscriberAlertConfiguration select applicationId ,apiName , apiVersion , thresholdRequestCountPerMin;";
+        var query =  "from ApiSubscriberAlertConfiguration on subscriber == '" + tenantAwareUserName + "' select applicationId ,apiName , apiVersion , thresholdRequestCountPerMin;";
         var objArr = [];
 
         var result = APIUtil.executeQueryOnStreamProcessor(appName, query);
@@ -46,15 +46,15 @@ var addOrUpdateStoreAlertConfigs  = function (applicationId, apiName, apiVersion
     try {
         var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
         var tenantAwareUserName = jagg.getUser().username;
-        //TODO add subscriber name to query
-        var appName = "APIM_ALERT_CONFIGURATION";
-        var query =  "select '" + applicationId + "' as applicationId, '" + apiName + "' as apiName, '" 
-                     + apiVersion + "' as apiVersion, " + parseInt(thresholdRequestCountPerMin) 
-                     + " as thresholdRequestCountPerMin update or insert into ApiSubscriberAlertConfiguration " 
-                     + "set ApiSubscriberAlertConfiguration.thresholdRequestCountPerMin = thresholdRequestCountPerMin "
-                     + "on ApiSubscriberAlertConfiguration.applicationId == applicationId and " 
-                     + "ApiSubscriberAlertConfiguration.apiName == apiName and ApiSubscriberAlertConfiguration.apiVersion == apiVersion";
 
+        var appName = "APIM_ALERT_CONFIGURATION";
+        var query = "select '" + applicationId + "' as applicationId, '" + tenantAwareUserName + "' as subscriber, '" + apiName + "' as apiName,'"
+            + apiVersion + "' as apiVersion, " + parseInt(thresholdRequestCountPerMin)
+            + " as thresholdRequestCountPerMin update or insert into ApiSubscriberAlertConfiguration "
+            + "set ApiSubscriberAlertConfiguration.thresholdRequestCountPerMin = thresholdRequestCountPerMin "
+            + "on ApiSubscriberAlertConfiguration.applicationId == applicationId and "
+            + "ApiSubscriberAlertConfiguration.subscriber == subscriber and "
+            + "ApiSubscriberAlertConfiguration.apiName == apiName and ApiSubscriberAlertConfiguration.apiVersion == apiVersion";
         var result = APIUtil.executeQueryOnStreamProcessor(appName, query);
         var objArr = [];
         if(result != null ) {
@@ -79,11 +79,13 @@ var deleteStoreAlertConfigs  = function (applicationId, apiName, apiVersion) {
     try {
         var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
         var tenantAwareUserName = jagg.getUser().username;
-        //TODO add subscriber name to query
+
         var appName = "APIM_ALERT_CONFIGURATION"; 
-        var query =  "delete ApiSubscriberAlertConfiguration on ApiSubscriberAlertConfiguration.applicationId == '" 
-                     + applicationId + "' and ApiSubscriberAlertConfiguration.apiName == '"
-                     + apiName + "' and ApiSubscriberAlertConfiguration.apiVersion == '"+apiVersion+"'";
+        var query = "delete ApiSubscriberAlertConfiguration on ApiSubscriberAlertConfiguration.applicationId == '"
+            + applicationId + "' and ApiSubscriberAlertConfiguration.apiName == '" + apiName
+            + "' and ApiSubscriberAlertConfiguration.subscriber == '" + tenantAwareUserName
+            + "' and ApiSubscriberAlertConfiguration.apiVersion == '"+apiVersion+"'";
+
         var result = APIUtil.executeQueryOnStreamProcessor(appName, query);
         var objArr = [];
         if(result != null ) {
