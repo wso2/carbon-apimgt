@@ -4,10 +4,7 @@ include("/jagg/jagg.jag");
     if (jagg.isCSRFTokenValid()) {
         response.contentType = "application/json; charset=UTF-8";
         var log = new Log();
-        var mod, obj, username,
-            action = request.getParameter("action"),
-            site = require("/site/conf/site.json"),
-            msg = require("/site/conf/ui-messages.jag");
+        var mod, obj, action = request.getParameter("action");
 
         if (jagg.getUser() == null) {
             print({

@@ -27,7 +27,7 @@ $(function() {
 
     /**
      * Populate API Name 'select' element with subscribed list of APIs
-     * provider--apiName--apiVersion format is used to list the APIs. This is to
+     * apiName--apiVersion format is used to list the APIs. This is to
      * avoid complexity in the UI and the logic required to show the API list
     **/
     function populateApiList() {
