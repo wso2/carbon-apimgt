@@ -222,10 +222,10 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
                         String partElement;
                         if (part.getElementName() != null) {
                             partElement = part.getElementName().getLocalPart();
-                            this.getParameters(partElement, params,false);
+                            this.getParameters(partElement, params, false);
                         } else {
                             partElement = part.getTypeName().getLocalPart();
-                            this.getParameters(partElement, params,true);
+                            this.getParameters(partElement, params, true);
                         }
                     }
                 }
@@ -257,10 +257,10 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
                         String partElement;
                         if (part.getElementName() != null) {
                             partElement = part.getElementName().getLocalPart();
-                            this.getParameters(partElement, params,false);
+                            this.getParameters(partElement, params, false);
                         } else {
-                            partElement=part.getTypeName().getLocalPart();
-                            this.getParameters(partElement, params,true);
+                            partElement = part.getTypeName().getLocalPart();
+                            this.getParameters(partElement, params, true);
                         }
                     }
                 }
