@@ -1970,8 +1970,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             if (!StringUtils.isEmpty(appName)) {
                 query.append(" AND " + APIUsageStatisticsClientConstants.APPLICATION_NAME + "=='" + appName + "'");
             }
-            query.append(") within '" + fromDate + "', '" + toDate + "' per '" + granularity + "' select "
-                    + APIUsageStatisticsClientConstants.TIME_STAMP + ", sum(coalesce("
+            query.append(") within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate) + "L per '" + granularity
+                    + "' select " + APIUsageStatisticsClientConstants.TIME_STAMP + ", sum(coalesce("
                     + APIUsageStatisticsClientConstants.SUCCESS_COUNT + ",0L)) as success_request_count, sum(coalesce("
                     + APIUsageStatisticsClientConstants.THROTTLE_COUNT + ",0L)) as throttled_out_count group by "
                     + APIUsageStatisticsClientConstants.TIME_STAMP + " order by "
@@ -2042,13 +2042,13 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
                 query.append("AND " + APIUsageStatisticsClientConstants.API_CREATOR + "=='" + provider + "'");
             }
-            query.append(") within '" + fromDate + "', '" + toDate + "' per '" + granularity + "' select "
+            query.append(") within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate) + "L per '" + granularity
+                    + "' select " + APIUsageStatisticsClientConstants.API_NAME + ", "
+                    + APIUsageStatisticsClientConstants.API_CREATOR + ", sum(coalesce("
+                    + APIUsageStatisticsClientConstants.SUCCESS_COUNT + ",0L)) as success_request_count, sum(coalesce("
+                    + APIUsageStatisticsClientConstants.THROTTLE_COUNT + ",0L)) as throttleout_count group by "
                     + APIUsageStatisticsClientConstants.API_NAME + ", " + APIUsageStatisticsClientConstants.API_CREATOR
-                    + ", sum(coalesce(" + APIUsageStatisticsClientConstants.SUCCESS_COUNT
-                    + ",0L)) as success_request_count, sum(coalesce(" + APIUsageStatisticsClientConstants.THROTTLE_COUNT
-                    + ",0L)) as throttleout_count group by " + APIUsageStatisticsClientConstants.API_NAME + ", "
-                    + APIUsageStatisticsClientConstants.API_CREATOR + " order by "
-                    + APIUsageStatisticsClientConstants.API_NAME + " ASC;");
+                    + " order by " + APIUsageStatisticsClientConstants.API_NAME + " ASC;");
             JSONObject jsonObj = APIUtil.executeQueryOnStreamProcessor(
                     APIUsageStatisticsClientConstants.APIM_THROTTLED_OUT_SUMMARY_SIDDHI_APP, query.toString());
 
@@ -2341,7 +2341,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 }
                 query.append(
                         ") within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate) + "L per '" + granularity
-                                + "' select sum(" + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT);
+                                + "' select sum(" + APIUsageStatisticsClientConstants.TOTAL_COUNT);
             } else {
                 query.append(") select sum(" + APIUsageStatisticsClientConstants.TOTAL_COUNT);
             }
