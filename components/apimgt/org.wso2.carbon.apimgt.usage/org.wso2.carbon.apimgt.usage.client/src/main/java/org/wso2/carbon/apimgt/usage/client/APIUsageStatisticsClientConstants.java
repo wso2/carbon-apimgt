@@ -122,6 +122,8 @@ public final class APIUsageStatisticsClientConstants {
     public static final String API_FAULTY_INVOCATION_AGG = "ApiFaultyInvocationAgg";
     public static final String API_USER_BROWSER_AGG = "ApiUserBrowserAgg";
     public static final String API_EXECUTION_TIME_AGG = "ApiExecutionTimeAgg";
+    public static final String APIM_REQ_COUNT_AGG= "APIM_ReqCountAgg";
+    public static final String GEO_LOCATION_AGG = "GeoLocationAgg";
 
     //------Field names-------
     public static final String TIME_STAMP = "AGG_TIMESTAMP";
@@ -130,8 +132,10 @@ public final class APIUsageStatisticsClientConstants {
     public static final String API_CREATOR = "apiCreator";
     public static final String API_CONTEXT = "apiContext";
     public static final String DESTINATION = "destination";
+    public static final String TOTAL_COUNT = "totalCount";
     public static final String TOTAL_REQUEST_COUNT = "totalRequestCount";
-    public static final String API_THROTTLED_OUT_COUNT = "throttledOutCount";
+    public static final String THROTTLE_COUNT = "throttleCount";
+    public static final String SUCCESS_COUNT = "successCount";
     public static final String TOTAL_FAULT_COUNT = "totalFaultCount";
     public static final String API_METHOD = "apiMethod";
     public static final String API_RESOURCE_TEMPLATE = "apiResourceTemplate";
@@ -159,8 +163,8 @@ public final class APIUsageStatisticsClientConstants {
     public static final String BACKEND_LATENCY = "backendLatency";
     public static final String OTHER_LATENCY = "otherLatency";
     public static final String APPLICATION_ID = "applicationId";
-    public static final String COUNTRY = "apiName"; //change to country
-    public static final String CITY = "apiVersion"; //change to city
+    public static final String COUNTRY = "country";
+    public static final String CITY = "city";
 
     //------Siddhi app names----
     public static final String APIM_ACCESS_SUMMARY_SIDDHI_APP = "APIM_ACCESS_SUMMARY";
