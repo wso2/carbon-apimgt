@@ -29,7 +29,7 @@ import PropTypes from 'prop-types';
 import APIInputForm from './APIInputForm';
 import API from '../../../../data/api.js';
 import { ScopeValidation, resourceMethod, resourcePath } from '../../../../data/ScopeValidation';
-import Alert from '../../../Shared/Alert';
+// import Alert from '../../../Shared/Alert';
 
 const styles = theme => ({
     root: {
@@ -86,7 +86,7 @@ class ApiCreateEndpoint extends Component {
             } else {
                 updatedAPI[name] = value;
             }
-            return updatedAPI;
+            return { api: updatedAPI };
         });
     }
 
@@ -107,7 +107,7 @@ class ApiCreateEndpoint extends Component {
         const { api } = this.state;
         api.version = 'v1.0.0';
         api.save().then(newAPI => this.setState({ api: newAPI }));
-        return;
+        /*
         const values = this.state.apiFields;
         // Check for form errors manually
         if (!values.apiName || !values.apiVersion || !values.apiContext) {
@@ -154,6 +154,7 @@ class ApiCreateEndpoint extends Component {
             });
 
         console.log('Send this in a POST request:', apiData);
+        */
     }
 
     /**
