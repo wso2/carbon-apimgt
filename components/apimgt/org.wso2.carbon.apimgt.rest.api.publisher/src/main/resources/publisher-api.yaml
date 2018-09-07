@@ -3938,7 +3938,12 @@ definitions:
       hasOwnGateway:
         type: boolean
         example : false
-      labels:
+      gatewayLabels:
+        type: array
+        items:
+          type: string
+        example: ["public","private"]
+      storeLabels:
         type: array
         items:
           type: string

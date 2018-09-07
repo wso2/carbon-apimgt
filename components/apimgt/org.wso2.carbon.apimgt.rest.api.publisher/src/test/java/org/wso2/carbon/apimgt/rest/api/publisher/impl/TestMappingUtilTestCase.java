@@ -91,7 +91,8 @@ public class TestMappingUtilTestCase {
         assertEquals(api.getWorkflowStatus(), apidto.getWorkflowStatus());
         assertEquals(MappingUtil.mapSecuritySchemeIntToList(api.getSecurityScheme()), apidto.getSecurityScheme());
         assertEquals(api.getTags().size(), apidto.getTags().size());
-        assertEquals(api.getGatewayLabels().size(), apidto.getLabels().size());
+        assertEquals(api.getGatewayLabels().size(), apidto.getGatewayLabels().size());
+        assertEquals(api.getStoreLabels().size(), apidto.getStoreLabels().size());
         assertEquals(api.getTransport().size(), apidto.getTransport().size());
         assertEquals(api.getUserSpecificApiPermissions().size(), apidto.getUserPermissionsForApi().size());
         assertEquals(api.getPolicies().size(), apidto.getPolicies().size());
@@ -151,7 +152,8 @@ public class TestMappingUtilTestCase {
         //Npt mapped it's intentional
         assertNull(mappedAPI.getWorkflowStatus());
         assertEquals(apidto.getTags().size(), mappedAPI.getTags().size());
-        assertEquals(apidto.getLabels().size(), mappedAPI.getGatewayLabels().size());
+        assertEquals(apidto.getGatewayLabels().size(), mappedAPI.getGatewayLabels().size());
+        assertEquals(apidto.getStoreLabels().size(), mappedAPI.getStoreLabels().size());
         assertEquals(apidto.getTransport().size(), mappedAPI.getTransport().size());
         //Npt mapped it's intentional
         assertNull(mappedAPI.getUserSpecificApiPermissions());

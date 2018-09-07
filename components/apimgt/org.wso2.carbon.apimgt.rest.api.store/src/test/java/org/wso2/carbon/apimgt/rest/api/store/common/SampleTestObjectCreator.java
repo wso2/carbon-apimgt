@@ -144,7 +144,8 @@ public class SampleTestObjectCreator {
         CompositeAPI.Builder compositeAPIBuilder = new CompositeAPI.Builder();
         compositeAPIBuilder.id(UUID.randomUUID().toString()).name("CompisteAPI").apiDefinition("definition").
                 applicationId(UUID.randomUUID().toString()).context("testcontext").provider("provider")
-                .version("1.0.0").context("testcontext").description("testdesc").gatewayLabels(new ArrayList<>());
+                .version("1.0.0").context("testcontext").description("testdesc").gatewayLabels(new ArrayList<>())
+                .storeLabels(new ArrayList<>());
         return compositeAPIBuilder;
     }
 
