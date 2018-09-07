@@ -51,8 +51,6 @@ public class APIMTokenIssuer extends OauthTokenIssuerImpl {
 
     private static final Log log = LogFactory.getLog(APIMTokenIssuer.class);
 
-    public APIMTokenIssuer() throws IdentityOAuth2Exception {
-    }
 
     @Override
     public String accessToken(OAuthTokenReqMessageContext tokReqMsgCtx) throws OAuthSystemException {
@@ -148,5 +146,23 @@ public class APIMTokenIssuer extends OauthTokenIssuerImpl {
         } else {
             return accessToken;
         }
+    }
+
+    @Override
+    public boolean renewAccessTokenPerRequest(OAuthTokenReqMessageContext tokReqMsgCtx) {
+
+        String clientId = tokReqMsgCtx.getOauth2AccessTokenReqDTO().getClientId();
+        Application application;
+        try {
+            application = APIUtil.getApplicationByClientId(clientId);
+            if (null != application) {
+                if (APIConstants.JWT.equals(application.getTokenType())) {
+                    return true;
+                }
+            }
+        } catch (APIManagementException e) {
+            log.error("Error occurred while getting Token type.", e);
+        }
+        return false;
     }
 }
