@@ -48,7 +48,7 @@
 	                        </ul>
 	                    </li>
 	                    <li class="blue"><a title="<%=i18n.localize("Manage Alert Types")%>" href="<%=jagg.urlTenanted("/site/pages/manage-alert-type.jag")%>" class="<%if(!user){%>need-login<%}%>"><i class="fw fw-notification icon"></i><span class="left-menu-item"><%=i18n.localize("Manage Alert Types")%></span></a></li>
-	                  <%} else if (inputs.pagePath == "manage-alerts") { %>
+	                  <%} else if (inputs.pagePath == "manage-alerts" || inputs.pagePath == "configure-alert") { %>
 	                  	<li class="blue active"><a title="<%=i18n.localize("Manage Alert Types")%>" href="<%=jagg.urlTenanted("/site/pages/manage-alert-type.jag")%>" class="<%if(!user){%>need-login<%}%>"><i class="fw fw-notification icon"></i><span class="left-menu-item"><%=i18n.localize("Manage Alert Types")%></span></a></li>
 	                  	<li class="orange"><a title="forum" href="<%= jagg.urlTenanted("/forum")%>"><i class="fw fw-forum icon"></i><span class="left-menu-item"><%=i18n.localize("Forum")%></span></a></li>
 	                  	<li class="purple"><a title="APIs" href="<%= jagg.urlTenanted("/")%>"><i class="fw fw-api icon"></i><span class="left-menu-item "><%=i18n.localize("APIs")%></span></a></li>
