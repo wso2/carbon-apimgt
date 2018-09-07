@@ -5,6 +5,7 @@ import EndpointsIcon from '@material-ui/icons/ZoomOutMapOutlined';
 import HomeIcon from '@material-ui/icons/Home';
 import withWidth, { isWidthDown } from '@material-ui/core/withWidth';
 import PropTypes from 'prop-types';
+import { Link } from 'react-router-dom';
 
 const styles = theme => ({
     list: {
@@ -22,31 +23,35 @@ const styles = theme => ({
 });
 
 const homeIcon = (
-    <div>
+    <Link to='/'>
         <ListItem button>
             <ListItemIcon>
                 <HomeIcon />
             </ListItemIcon>
             <ListItemText primary='Home' />
         </ListItem>
-    </div>
+    </Link>
 );
 
 const globalPages = (
-    <div>
-        <ListItem button>
-            <ListItemIcon>
-                <APIsIcon />
-            </ListItemIcon>
-            <ListItemText primary='APIs' />
-        </ListItem>
-        <ListItem button>
-            <ListItemIcon>
-                <EndpointsIcon />
-            </ListItemIcon>
-            <ListItemText primary='Endpoints' />
-        </ListItem>
-    </div>
+    <React.Fragment>
+        <Link to='/apis'>
+            <ListItem button>
+                <ListItemIcon>
+                    <APIsIcon />
+                </ListItemIcon>
+                <ListItemText primary='APIs' />
+            </ListItem>
+        </Link>
+        <Link to='/endpoints'>
+            <ListItem button>
+                <ListItemIcon>
+                    <EndpointsIcon />
+                </ListItemIcon>
+                <ListItemText primary='Endpoints' />
+            </ListItem>
+        </Link>
+    </React.Fragment>
 );
 
 const GlobalNavBar = (props) => {

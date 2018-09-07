@@ -9,13 +9,12 @@ import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Chip from '@material-ui/core/Chip';
 import { FormattedMessage } from 'react-intl';
-import IconButton from '@material-ui/core/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import green from '@material-ui/core/colors/green';
 
 import ImageGenerator from './ImageGenerator';
 import Alert from '../../../Shared/Alert';
+import DeleteApiButton from '../../Details/components/DeleteApiButton';
 import API from '../../../../data/api.js';
 
 const styles = theme => ({
@@ -28,10 +27,11 @@ const styles = theme => ({
         textTransform: 'capitalize',
     },
     apiDetails: { padding: theme.spacing.unit },
-    apiActions: { justifyContent: 'space-between', padding: 0 },
+    apiActions: { justifyContent: 'space-between', padding: `0px 0px ${theme.spacing.unit}px 0px` },
     deleteProgress: {
         color: green[200],
         position: 'absolute',
+        marginLeft: '200px',
     },
 });
 
@@ -43,9 +43,9 @@ const styles = theme => ({
  */
 class APIThumb extends Component {
     /**
-     *Creates an instance of ImgMediaCard.
+     *Creates an instance of APIThumb.
      * @param {*} props
-     * @memberof ImgMediaCard
+     * @memberof APIThumb
      */
     constructor(props) {
         super(props);
@@ -61,18 +61,18 @@ class APIThumb extends Component {
      * @param {String} [name=''] API Name use for alerting purpose only
      * @memberof Listing
      */
-    handleApiDelete(event) {
-        const apiUUID = event.currentTarget.id;
+    handleApiDelete() {
+        const { id } = this.props.api;
         this.setState({ loading: true });
         const { updateAPIsList } = this.props;
-        const promisedDelete = API.delete(apiUUID);
+        const promisedDelete = API.delete(id);
         promisedDelete.then((response) => {
             if (response.status !== 200) {
                 Alert.info('Something went wrong while deleting the API!');
                 return;
             }
-            updateAPIsList(apiUUID);
-            Alert.info(`API ${apiUUID} deleted Successfully`);
+            updateAPIsList(id);
+            Alert.info(`API ${id} deleted Successfully`);
             this.setState({ loading: false });
         });
     }
@@ -89,7 +89,7 @@ class APIThumb extends Component {
     /**
      * @inheritdoc
      * @returns {React.Component} @inheritdoc
-     * @memberof ImgMediaCard
+     * @memberof APIThumb
      */
     render() {
         const { classes, api } = this.props;
@@ -104,13 +104,7 @@ class APIThumb extends Component {
                 raised={isHover}
                 className={classes.card}
             >
-                <CardMedia
-                    src='None'
-                    component={ImageGenerator}
-                    height={140}
-                    title='Contemplative Reptile'
-                    api={api}
-                />
+                <CardMedia src='None' component={ImageGenerator} height={140} title='Contemplative Reptile' api={api} />
                 <CardContent className={classes.apiDetails}>
                     <Typography gutterBottom variant='headline' component='h2'>
                         {api.name}
@@ -136,16 +130,8 @@ class APIThumb extends Component {
                 </CardContent>
                 <CardActions className={classes.apiActions}>
                     <Chip label={api.lifeCycleStatus} color='default' />
-                    <IconButton
-                        disabled={loading}
-                        onClick={this.handleApiDelete}
-                        id={api.id}
-                        color='secondary'
-                        aria-label='Delete'
-                    >
-                        <DeleteIcon />
-                        {loading && <CircularProgress className={classes.deleteProgress} />}
-                    </IconButton>
+                    <DeleteApiButton onClick={this.handleApiDelete} api={api} />
+                    {loading && <CircularProgress className={classes.deleteProgress} />}
                 </CardActions>
             </Card>
         );
@@ -154,7 +140,9 @@ class APIThumb extends Component {
 
 APIThumb.propTypes = {
     classes: PropTypes.shape({}).isRequired,
-    api: PropTypes.shape({}).isRequired,
+    api: PropTypes.shape({
+        id: PropTypes.string,
+    }).isRequired,
     updateAPIsList: PropTypes.func.isRequired,
 };
 

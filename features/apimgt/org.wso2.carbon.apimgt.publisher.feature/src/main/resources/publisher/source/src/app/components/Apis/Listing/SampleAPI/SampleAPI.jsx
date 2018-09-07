@@ -105,7 +105,6 @@ class SampleAPI extends Component {
             },
             tags: ['Pet', 'Store', 'Cat', 'Hippopotamus'],
             transport: ['http', 'https'],
-            labels: ['pets', 'shop'],
             visibility: 'PUBLIC',
             securityScheme: ['OAuth'],
             scopes: ['read:pets', 'write:pets'],

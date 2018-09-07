@@ -60,10 +60,13 @@ const PageNav = (props) => {
     );
 };
 
+PageNav.defaultProps = {
+    navItems: null,
+};
 PageNav.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     section: PropTypes.element.isRequired,
-    navItems: PropTypes.arrayOf(PropTypes.element).isRequired,
+    navItems: PropTypes.arrayOf(PropTypes.element),
 };
 
 export default withStyles(styles)(PageNav);

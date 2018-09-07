@@ -20,16 +20,16 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
 
-import Policies from '../../Details/LifeCycle/Policies.js';
+import Policies from '../../Details/LifeCycle/Policies';
 import { ScopeValidation, resourceMethod, resourcePath } from '../../../../data/ScopeValidation';
-import API from '../../../../data/api.js';
+import API from '../../../../data/api';
 
 /**
  * @export @inheritDoc
  * @class InputForm
  * @extends {Component}
  */
-export default class InputForm extends Component {
+export default class APIInputForm extends Component {
     /**
      * Creates an instance of InputForm.
      * @param {any} props @inheritDoc
@@ -37,7 +37,6 @@ export default class InputForm extends Component {
      */
     constructor(props) {
         super(props);
-        this.api = new API();
         this.state = {
             policies: [],
         };
@@ -62,29 +61,21 @@ export default class InputForm extends Component {
      */
     render() {
         const { policies } = this.state;
-        const { apiFields, validate, handleInputChange } = this.props;
-        const SuperScriptAsterisk = () => <sup style={{ color: 'red' }}>*</sup>;
-        const props = {
-            policies: this.state.policies,
-            handlePolicies: handleInputChange,
-            selectedPolicies: apiFields && apiFields.selectedPolicies,
-        };
+        const { api, handleInputChange } = this.props;
+        const policiesProps = { handleInputChange, api, policies };
+        const endpoints = api.getProductionEndpoint().endpointConfig.list;
+        const endpoint = endpoints && endpoints.pop();
         return (
-            <div>
+            <React.Fragment>
                 <TextField
-                    error={!apiFields.apiName && validate}
-                    id='apiName'
-                    label={
-                        <div>
-                            <span>Name </span>
-                            <SuperScriptAsterisk />
-                        </div>
-                    }
+                    fullWidth
+                    id='name'
+                    label='Name'
+                    required
                     type='text'
-                    name='apiName'
+                    name='name'
                     margin='normal'
-                    style={{ width: '100%' }}
-                    value={apiFields.apiName || ''}
+                    value={api.name || ''}
                     onChange={handleInputChange}
                 />
                 <TextField
@@ -94,59 +85,50 @@ export default class InputForm extends Component {
                     // provide version numbers. ~tmkb
                     // InputLabelProps={inputLabelClass}
                     // value={this.state.apiFields.apiVersion}
-                    label={
-                        <div>
-                            <span>Version </span>
-                            <SuperScriptAsterisk />
-                        </div>
-                    }
-                    id='apiVersion'
+                    fullWidth
+                    label='Version'
+                    required
+                    id='version'
                     helperText='**Version input is not support in this release'
                     type='text'
-                    name='apiVersion'
+                    name='version'
                     margin='normal'
-                    style={{ width: '100%' }}
                     disabled
                 />
                 <TextField
-                    error={!apiFields.apiContext && validate}
-                    id='apiContext'
-                    label={
-                        <div>
-                            <span>Context </span>
-                            <SuperScriptAsterisk />
-                        </div>
-                    }
+                    fullWidth
+                    id='context'
+                    required
+                    label='Context'
                     type='text'
-                    name='apiContext'
+                    name='context'
                     margin='normal'
-                    style={{ width: '100%' }}
-                    value={apiFields.apiContext}
+                    value={api.context}
                     onChange={handleInputChange}
                 />
                 <TextField
-                    id='apiEndpoint'
+                    fullWidth
+                    id='endpoint'
                     label='Endpoint'
                     type='text'
-                    name='apiEndpoint'
+                    name='endpoint'
                     margin='normal'
-                    style={{ width: '100%' }}
-                    value={apiFields.apiEndpoint}
+                    value={endpoint && endpoint.url}
                     onChange={handleInputChange}
                 />
                 <ScopeValidation resourcePath={resourcePath.API_CHANGE_LC} resourceMethod={resourceMethod.POST}>
-                    {policies ? <Policies {...props} /> : ''}
+                    {policies && <Policies {...policiesProps} />}
                 </ScopeValidation>
-            </div>
+            </React.Fragment>
         );
     }
 }
 
-InputForm.defaultProps = {
+APIInputForm.defaultProps = {
     validate: false,
 };
 
-InputForm.propTypes = {
+APIInputForm.propTypes = {
     validate: PropTypes.bool,
     apiFields: PropTypes.shape({}).isRequired,
     handleInputChange: PropTypes.func.isRequired,
