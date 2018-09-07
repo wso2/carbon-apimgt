@@ -16,18 +16,6 @@ jagg.module("manage-alerts", {
     unSubscribe:function () {
 
         return jagg.require(jagg.getModulesDir() + "manage-alerts/alerts.jag").unSubscribe.apply(this, arguments);
-    },
-    getPublisherAlertConfigs:function () {
-
-        return jagg.require(jagg.getModulesDir() + "manage-alerts/alerts.jag").getPublisherAlertConfigs.apply(this, arguments);
-    },
-    addOrUpdatePublisherAlertConfigs:function () {
-
-        return jagg.require(jagg.getModulesDir() + "manage-alerts/alerts.jag").addOrUpdatePublisherAlertConfigs.apply(this, arguments);
-    },
-    deletePublisherAlertConfigs:function () {
-
-        return jagg.require(jagg.getModulesDir() + "manage-alerts/alerts.jag").deletePublisherAlertConfigs.apply(this, arguments);
     }
 
 });
