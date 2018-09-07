@@ -4,9 +4,10 @@ include("/jagg/jagg.jag");
     if (jagg.isCSRFTokenValid()) {
         response.contentType = "application/json; charset=UTF-8";
         var log = new Log();
+        isCreatePermitted = jagg.getCreatePermitted().permitted;
         var mod, obj, action = request.getParameter("action");
 
-        if (jagg.getUser() == null) {
+        if (jagg.getUser() == null || !isCreatePermitted) {
             print({
                 error: true,
                 message: 'AuthenticateError'
@@ -14,12 +15,12 @@ include("/jagg/jagg.jag");
         } else {
             if (action === 'configureAlert' && request.getMethod() == 'POST') {
                 mod = jagg.module("configure-alert");
-                var appId = request.getParameter("applicationId");
                 var apiName= request.getParameter("apiName");
                 var apiVersion= request.getParameter("apiVersion");
-                var threshold = request.getParameter("threshold");
+                var time = request.getParameter("threshold");
+                var type = request.getParameter("alertType");
 
-                var result = mod.addOrUpdateStoreAlertConfigs(appId, apiName, apiVersion, threshold);
+                var result = mod.addOrUpdatePublisherAlertConfigs(apiName, apiVersion, type, time);
 
                 if (result.error) {
                     obj = {
@@ -36,7 +37,8 @@ include("/jagg/jagg.jag");
                 print(obj);
             } else if (action === 'getAlertConfigs' && request.getMethod() == 'GET') {
                 mod = jagg.module("configure-alert");
-                var result = mod.getStoreAlertConfigs();
+                var type = request.getParameter("alertType");
+                var result = mod.getPublisherAlertConfigs(type);
 
                 if (result.error) {
                     obj = {
@@ -53,11 +55,9 @@ include("/jagg/jagg.jag");
                 print(obj);
             } else if (action === 'removeAlertConfig' && request.getMethod() == 'POST') {
                 mod = jagg.module("configure-alert");
-                var appId = request.getParameter("applicationId");
                 var apiName= request.getParameter("apiName");
                 var apiVersion= request.getParameter("apiVersion");
-
-                var result = mod.deleteStoreAlertConfigs(appId, apiName, apiVersion);
+                var result = mod.deletePublisherAlertConfigs(apiName, apiVersion);
 
                 if (result.error) {
                     obj = {
@@ -68,6 +68,24 @@ include("/jagg/jagg.jag");
                     obj = {
                         error: false,
                         list: result
+                    };
+                }
+
+                print(obj);
+            } else if (action === 'getAPIs' && request.getMethod() == 'GET') {
+                mod = jagg.module("api");
+                var provider = jagg.getUser().username;
+                var result = mod.getAPIsByProvider(provider);
+
+                if (result.error) {
+                    obj = {
+                        error: result.error,
+                        message: result.message
+                    };
+                } else {
+                    obj = {
+                        error: false,
+                        apis: result.apis
                     };
                 }
 
