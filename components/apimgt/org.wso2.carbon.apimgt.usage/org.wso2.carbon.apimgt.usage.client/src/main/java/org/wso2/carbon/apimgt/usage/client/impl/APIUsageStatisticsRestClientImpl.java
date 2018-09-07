@@ -2142,14 +2142,13 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             List<String> throttlingAppData = new ArrayList<String>();
             String tenantDomain = MultitenantUtils.getTenantDomain(provider);
             StringBuilder query = new StringBuilder("from " + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_AGG);
+            query.append(" on " + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='" + tenantDomain + "'");
             if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
-                query.append(" on " + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='" + tenantDomain
-                        + "' AND " + APIUsageStatisticsClientConstants.API_CREATOR + "=='" + APIUtil
+                query.append(" AND " + APIUsageStatisticsClientConstants.API_CREATOR + "=='" + APIUtil
                         .getUserNameWithTenantSuffix(provider) + "'");
             }
             if (apiName != null) {
-                query.append(" on " + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='" + tenantDomain
-                        + "' AND " + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName + "'");
+                query.append(" AND " + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName + "'");
             }
             query.append(" within " + 0 + "L, " + new Date().getTime() + "L per 'months' select "
                     + APIUsageStatisticsClientConstants.APPLICATION_NAME + " group by "
