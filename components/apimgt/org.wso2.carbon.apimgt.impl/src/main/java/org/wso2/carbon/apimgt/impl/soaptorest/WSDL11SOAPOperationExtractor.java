@@ -219,13 +219,15 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
                     for (Object obj : map.entrySet()) {
                         Map.Entry entry = (Map.Entry) obj;
                         Part part = (Part) entry.getValue();
-                        String partElement;
-                        if (part.getElementName() != null) {
-                            partElement = part.getElementName().getLocalPart();
-                            this.getParameters(partElement, params, false);
-                        } else {
-                            partElement = part.getTypeName().getLocalPart();
-                            this.getParameters(partElement, params, true);
+                        if (part != null) {
+                            String partElement;
+                            if (part.getElementName() != null) {
+                                partElement = part.getElementName().getLocalPart();
+                                this.getParameters(partElement, params, false);
+                            } else {
+                                partElement = part.getTypeName().getLocalPart();
+                                this.getParameters(partElement, params, true);
+                            }
                         }
                     }
                 }
@@ -254,13 +256,15 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
                     for (Object obj : map.entrySet()) {
                         Map.Entry entry = (Map.Entry) obj;
                         Part part = (Part) entry.getValue();
-                        String partElement;
-                        if (part.getElementName() != null) {
-                            partElement = part.getElementName().getLocalPart();
-                            this.getParameters(partElement, params, false);
-                        } else {
-                            partElement = part.getTypeName().getLocalPart();
-                            this.getParameters(partElement, params, true);
+                        if (part != null) {
+                            String partElement;
+                            if (part.getElementName() != null) {
+                                partElement = part.getElementName().getLocalPart();
+                                this.getParameters(partElement, params, false);
+                            } else {
+                                partElement = part.getTypeName().getLocalPart();
+                                this.getParameters(partElement, params, true);
+                            }
                         }
                     }
                 }
