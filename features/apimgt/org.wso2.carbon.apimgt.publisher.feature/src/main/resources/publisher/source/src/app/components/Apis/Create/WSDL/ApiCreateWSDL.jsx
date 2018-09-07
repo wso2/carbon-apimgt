@@ -22,7 +22,7 @@ import Stepper, { Step, StepLabel, StepContent } from '@material-ui/core/Stepper
 import Card, { CardContent } from '@material-ui/core/Card';
 import PropTypes from 'prop-types';
 
-import InputForm from '../Endpoint/InputForm';
+import InputForm from '../Endpoint/APIInputForm';
 import ProvideWSDL from './Steps/ProvideWSDL';
 import API from '../../../../data/api';
 import Alert from '../../../Shared/Alert';

@@ -26,7 +26,7 @@ import green from '@material-ui/core/colors/green';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import PropTypes from 'prop-types';
 
-import InputForm from './InputForm';
+import APIInputForm from './APIInputForm';
 import API from '../../../../data/api.js';
 import { ScopeValidation, resourceMethod, resourcePath } from '../../../../data/ScopeValidation';
 import Alert from '../../../Shared/Alert';
@@ -34,15 +34,9 @@ import Alert from '../../../Shared/Alert';
 const styles = theme => ({
     root: {
         flexGrow: 1,
-        marginTop: 30,
     },
     paper: {
         padding: theme.spacing.unit * 2,
-    },
-    subHeadings: {
-        fontWeight: '300',
-        padding: '10px 0 10px 30px',
-        margin: '0px',
     },
     buttonProgress: {
         color: green[500],
@@ -73,6 +67,8 @@ class ApiCreateEndpoint extends Component {
             loading: false,
         };
         this.inputChange = this.inputChange.bind(this);
+        this.createAPICallback = this.createAPICallback.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
     }
 
     /**
@@ -91,11 +87,11 @@ class ApiCreateEndpoint extends Component {
         apiFields[name] = value;
     }
 
-    createAPICallback = (response) => {
+    createAPICallback(response) {
         const uuid = JSON.parse(response.data).id;
         const redirectURL = '/apis/' + uuid + '/overview';
         this.props.history.push(redirectURL);
-    };
+    }
 
     /**
      * Do create API from either swagger URL or swagger file upload.In case of URL pre fetch the swagger file and make
@@ -103,7 +99,7 @@ class ApiCreateEndpoint extends Component {
      * and the send it over REST API.
      * @param e {Event}
      */
-    handleSubmit = (e) => {
+    handleSubmit(e) {
         e.preventDefault();
         const values = this.state.apiFields;
         // Check for form errors manually
@@ -152,7 +148,7 @@ class ApiCreateEndpoint extends Component {
             });
 
         console.log('Send this in a POST request:', apiData);
-    };
+    }
 
     /**
      * @inheritDoc
@@ -164,52 +160,50 @@ class ApiCreateEndpoint extends Component {
         const { apiFields, loading } = this.state;
 
         return (
-            <div className={classes.root}>
-                <Grid container spacing={0} justify='center'>
-                    <Grid item md={10}>
-                        <Paper className={classes.paper}>
-                            <Typography type='headline' gutterBottom>
-                                Create New API
-                            </Typography>
-                            <Typography type='subheading' gutterBottom align='left' className={classes.subHeadings}>
-                                Fill the mandatory fields (Name, Version, Context) and create the API. Configure
-                                advanced configurations later.
-                            </Typography>
-                            <form onSubmit={this.handleSubmit}>
-                                <InputForm apiFields={apiFields} handleInputChange={this.inputChange} />
-                                <Grid container direction='row' justify='flex-end' alignItems='flex-end' spacing={16}>
-                                    <Grid item>
-                                        <Button raised onClick={() => this.props.history.push('/api/create/home')}>
-                                            Cancel
-                                        </Button>
-                                    </Grid>
-                                    <Grid item>
-                                        <ScopeValidation
-                                            resourcePath={resourcePath.APIS}
-                                            resourceMethod={resourceMethod.POST}
-                                        >
-                                            <div>
-                                                <Button
-                                                    disabled={loading}
-                                                    raised
-                                                    color='primary'
-                                                    id='action-create'
-                                                    type='primary'
-                                                >
-                                                    Create
-                                                </Button>
-                                                {loading && (
-                                                    <CircularProgress size={24} className={classes.buttonProgress} />
-                                                )}
-                                            </div>
-                                        </ScopeValidation>
-                                    </Grid>
+            <Grid container className={classes.root} spacing={0} justify='center'>
+                <Grid item md={10}>
+                    <Paper className={classes.paper}>
+                        <Typography type='title' gutterBottom>
+                            Create New API
+                        </Typography>
+                        <Typography type='subheading' gutterBottom align='left'>
+                            Fill the mandatory fields (Name, Version, Context) and create the API. Configure advanced
+                            configurations later.
+                        </Typography>
+                        <form onSubmit={this.handleSubmit}>
+                            <APIInputForm apiFields={apiFields} handleInputChange={this.inputChange} />
+                            <Grid container direction='row' justify='flex-end' alignItems='flex-end' spacing={16}>
+                                <Grid item>
+                                    <Button raised onClick={() => this.props.history.push('/api/create/home')}>
+                                        Cancel
+                                    </Button>
                                 </Grid>
-                            </form>
-                        </Paper>
-                    </Grid>
+                                <Grid item>
+                                    <ScopeValidation
+                                        resourcePath={resourcePath.APIS}
+                                        resourceMethod={resourceMethod.POST}
+                                    >
+                                        <div>
+                                            <Button
+                                                disabled={loading}
+                                                raised
+                                                color='primary'
+                                                id='action-create'
+                                                type='primary'
+                                            >
+                                                Create
+                                            </Button>
+                                            {loading && (
+                                                <CircularProgress size={24} className={classes.buttonProgress} />
+                                            )}
+                                        </div>
+                                    </ScopeValidation>
+                                </Grid>
+                            </Grid>
+                        </form>
+                    </Paper>
                 </Grid>
-            </div>
+            </Grid>
         );
     }
 }

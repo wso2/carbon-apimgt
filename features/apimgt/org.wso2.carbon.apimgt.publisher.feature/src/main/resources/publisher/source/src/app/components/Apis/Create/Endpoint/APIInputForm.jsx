@@ -20,16 +20,16 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
 
-import Policies from '../../Details/LifeCycle/Policies.js';
+import Policies from '../../Details/LifeCycle/Policies';
 import { ScopeValidation, resourceMethod, resourcePath } from '../../../../data/ScopeValidation';
-import API from '../../../../data/api.js';
+import API from '../../../../data/api';
 
 /**
  * @export @inheritDoc
  * @class InputForm
  * @extends {Component}
  */
-export default class InputForm extends Component {
+export default class APIInputForm extends Component {
     /**
      * Creates an instance of InputForm.
      * @param {any} props @inheritDoc
@@ -63,7 +63,6 @@ export default class InputForm extends Component {
     render() {
         const { policies } = this.state;
         const { apiFields, validate, handleInputChange } = this.props;
-        const SuperScriptAsterisk = () => <sup style={{ color: 'red' }}>*</sup>;
         const props = {
             policies: this.state.policies,
             handlePolicies: handleInputChange,
@@ -72,18 +71,14 @@ export default class InputForm extends Component {
         return (
             <div>
                 <TextField
+                    fullWidth
                     error={!apiFields.apiName && validate}
                     id='apiName'
-                    label={
-                        <div>
-                            <span>Name </span>
-                            <SuperScriptAsterisk />
-                        </div>
-                    }
+                    label='Name'
+                    required
                     type='text'
                     name='apiName'
                     margin='normal'
-                    style={{ width: '100%' }}
                     value={apiFields.apiName || ''}
                     onChange={handleInputChange}
                 />
@@ -94,59 +89,51 @@ export default class InputForm extends Component {
                     // provide version numbers. ~tmkb
                     // InputLabelProps={inputLabelClass}
                     // value={this.state.apiFields.apiVersion}
-                    label={
-                        <div>
-                            <span>Version </span>
-                            <SuperScriptAsterisk />
-                        </div>
-                    }
+                    fullWidth
+                    label='Version'
+                    required
                     id='apiVersion'
                     helperText='**Version input is not support in this release'
                     type='text'
                     name='apiVersion'
                     margin='normal'
-                    style={{ width: '100%' }}
                     disabled
                 />
                 <TextField
+                    fullWidth
                     error={!apiFields.apiContext && validate}
                     id='apiContext'
-                    label={
-                        <div>
-                            <span>Context </span>
-                            <SuperScriptAsterisk />
-                        </div>
-                    }
+                    required
+                    label='Context'
                     type='text'
                     name='apiContext'
                     margin='normal'
-                    style={{ width: '100%' }}
                     value={apiFields.apiContext}
                     onChange={handleInputChange}
                 />
                 <TextField
+                    fullWidth
                     id='apiEndpoint'
                     label='Endpoint'
                     type='text'
                     name='apiEndpoint'
                     margin='normal'
-                    style={{ width: '100%' }}
                     value={apiFields.apiEndpoint}
                     onChange={handleInputChange}
                 />
                 <ScopeValidation resourcePath={resourcePath.API_CHANGE_LC} resourceMethod={resourceMethod.POST}>
-                    {policies ? <Policies {...props} /> : ''}
+                    {policies && <Policies {...props} />}
                 </ScopeValidation>
             </div>
         );
     }
 }
 
-InputForm.defaultProps = {
+APIInputForm.defaultProps = {
     validate: false,
 };
 
-InputForm.propTypes = {
+APIInputForm.propTypes = {
     validate: PropTypes.bool,
     apiFields: PropTypes.shape({}).isRequired,
     handleInputChange: PropTypes.func.isRequired,

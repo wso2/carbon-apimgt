@@ -16,6 +16,7 @@ import green from '@material-ui/core/colors/green';
 
 import ImageGenerator from './ImageGenerator';
 import Alert from '../../../Shared/Alert';
+import DeleteApiButton from '../../Details/components/DeleteApiButton';
 import API from '../../../../data/api.js';
 
 const styles = theme => ({
@@ -28,7 +29,7 @@ const styles = theme => ({
         textTransform: 'capitalize',
     },
     apiDetails: { padding: theme.spacing.unit },
-    apiActions: { justifyContent: 'space-between', padding: 0 },
+    apiActions: { justifyContent: 'space-between', padding: `0px 0px ${theme.spacing.unit}px 0px` },
     deleteProgress: {
         color: green[200],
         position: 'absolute',
@@ -43,9 +44,9 @@ const styles = theme => ({
  */
 class APIThumb extends Component {
     /**
-     *Creates an instance of ImgMediaCard.
+     *Creates an instance of APIThumb.
      * @param {*} props
-     * @memberof ImgMediaCard
+     * @memberof APIThumb
      */
     constructor(props) {
         super(props);
@@ -89,7 +90,7 @@ class APIThumb extends Component {
     /**
      * @inheritdoc
      * @returns {React.Component} @inheritdoc
-     * @memberof ImgMediaCard
+     * @memberof APIThumb
      */
     render() {
         const { classes, api } = this.props;
@@ -104,13 +105,7 @@ class APIThumb extends Component {
                 raised={isHover}
                 className={classes.card}
             >
-                <CardMedia
-                    src='None'
-                    component={ImageGenerator}
-                    height={140}
-                    title='Contemplative Reptile'
-                    api={api}
-                />
+                <CardMedia src='None' component={ImageGenerator} height={140} title='Contemplative Reptile' api={api} />
                 <CardContent className={classes.apiDetails}>
                     <Typography gutterBottom variant='headline' component='h2'>
                         {api.name}
@@ -136,16 +131,7 @@ class APIThumb extends Component {
                 </CardContent>
                 <CardActions className={classes.apiActions}>
                     <Chip label={api.lifeCycleStatus} color='default' />
-                    <IconButton
-                        disabled={loading}
-                        onClick={this.handleApiDelete}
-                        id={api.id}
-                        color='secondary'
-                        aria-label='Delete'
-                    >
-                        <DeleteIcon />
-                        {loading && <CircularProgress className={classes.deleteProgress} />}
-                    </IconButton>
+                    <DeleteApiButton api={api} />
                 </CardActions>
             </Card>
         );

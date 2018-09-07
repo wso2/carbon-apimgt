@@ -40,7 +40,7 @@ const Container = (props) => {
             <Grid item className={classes.pageContainer} xs={10} sm={11} md={10} lg={10}>
                 <Grid className={classes.pageContainer} container>
                     {pageTopMenu && (
-                        <Grid className={classes.pageTopMenu} item xs={12} sm={12} md={12} lg={12}>
+                        <Grid className={classes.pageTopMenu} item container xs={12} sm={12} md={12} lg={12}>
                             {pageTopMenu}
                         </Grid>
                     )}

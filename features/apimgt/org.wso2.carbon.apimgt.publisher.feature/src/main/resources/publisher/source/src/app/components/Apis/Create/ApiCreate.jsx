@@ -16,151 +16,25 @@
  * under the License.
  */
 import React from 'react';
-import { getAsyncComponent } from 'async-react-component';
 
-import { Link, Route, Switch } from 'react-router-dom';
-import { FormattedMessage } from 'react-intl';
-import './ApiCreate.css';
+import { Route, Switch } from 'react-router-dom';
 import ApiCreateEndpoint from './Endpoint/ApiCreateEndpoint';
+import ApiCreateSwagger from './Swagger/ApiCreateSwagger';
+import ApiCreateWSDL from './WSDL/ApiCreateWSDL';
 
-const ApiCreateWSDL = () => import(/* webpackChunkName: "ApiCreateWSDL" */ './WSDL/ApiCreateWSDL');
-const ApiCreateSwagger = () => import(/* webpackChunkName: "ApiCreateSwagger" */ './Swagger/ApiCreateSwagger');
+import APICreateNavBar from './Components/APICreateNavBar';
+import APICreateTopMenu from './Components/APICreateTopMenu';
+import PageContainer from '../../Base/container/';
 
 const ApiCreate = () => {
     return (
-        <div>
+        <PageContainer pageNav={<APICreateNavBar />} pageTopMenu={<APICreateTopMenu />}>
             <Switch>
-                <Route
-                    path='/api/create/home'
-                    render={() => (
-                        <div className='ch-grid-container'>
-                            <ul className='ch-grid'>
-                                <li>
-                                    <Link to='/api/create/swagger'>
-                                        <div className='test_button ch-item depth-1'>
-                                            <div className='ch-info-wrap'>
-                                                <div className='ch-info'>
-                                                    <div className='ch-info-front ch-img-1'>
-                                                        <i className='fw fw-document fw-4x' />
-                                                        <span>
-                                                            <FormattedMessage
-                                                                id='i.have.an.existing.api'
-                                                                defaultMessage='I Have an Existing API'
-                                                            />
-                                                        </span>
-                                                    </div>
-                                                    <div className='ch-info-back'>
-                                                        <p className='unselectable'>
-                                                            <FormattedMessage
-                                                                id='use.an.existing.api.endpoint.or.the.api.
-                                                                swagger.definition.to.create.an.api'
-                                                                defaultMessage='Use an existing API
-                                                                endpoint or the API Swagger definition
-                                                                                             to create an API'
-                                                            />
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link to='/api/create/wsdl'>
-                                        <div className='test_button ch-item depth-1 ripple-effect'>
-                                            <div className='ch-info-wrap'>
-                                                <div className='ch-info'>
-                                                    <div className='ch-info-front ch-img-2'>
-                                                        <i className='fw fw-endpoint fw-4x' />
-                                                        <span>
-                                                            <FormattedMessage
-                                                                id='i.have.a.soap.endpoint'
-                                                                defaultMessage='I Have a SOAP Endpoint'
-                                                            />
-                                                        </span>
-                                                    </div>
-                                                    <div className='ch-info-back'>
-                                                        <p className='unselectable'>
-                                                            <FormattedMessage
-                                                                id={'use.an.existing.soap.endpoint.\
-                                                            to.create.a.managed.api.import.the.wsdl.of.\
-                                                            the.soap.service'}
-                                                                defaultMessage={'Use an existing SOAP endpoint to \
-                                                                create a \
-                                                          managed API. Import the WSDL of the SOAP service'}
-                                                            />
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link to='/api/create/rest'>
-                                        <div className='test_button ch-item depth-1 ripple-effect'>
-                                            <div className='ch-info-wrap'>
-                                                <div className='ch-info'>
-                                                    <div className='ch-info-front ch-img-3'>
-                                                        <i className='fw fw-rest-api fw-4x' />
-                                                        <span>
-                                                            <FormattedMessage
-                                                                id='designa.a.new.rest.api'
-                                                                defaultMessage='Design a New REST API'
-                                                            />
-                                                        </span>
-                                                    </div>
-                                                    <div className='ch-info-back'>
-                                                        <p className='unselectable'>
-                                                            <FormattedMessage
-                                                                id='design.and.prototype.a.new.rest.api'
-                                                                defaultMessage='Design and prototype a new REST API'
-                                                            />
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link to='/api/create/rest'>
-                                        <div className='test_button ch-item depth-1 ripple-effect'>
-                                            <div className='ch-info-wrap'>
-                                                <div className='ch-info'>
-                                                    <div className='ch-info-front ch-img-4'>
-                                                        <i className='fw fw-web-clip fw-4x' />
-                                                        <span>
-                                                            <FormattedMessage
-                                                                id='design.new.websocket.api'
-                                                                defaultMessage='Design New Websocket API'
-                                                            />
-                                                        </span>
-                                                    </div>
-                                                    <div className='ch-info-back'>
-                                                        <p className='unselectable'>
-                                                            <FormattedMessage
-                                                                id={'design.and.prototype.a.new. \
-                                                            websocket.api'}
-                                                                defaultMessage={'Design and prototype a new \
-                                                                Websocket API'}
-                                                            />
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </Link>
-                                </li>
-                            </ul>
-                        </div>
-                    )}
-                />
-                <Route path='/api/create/rest' component={ApiCreateEndpoint} />
-                <Route path='/api/create/swagger' component={getAsyncComponent(ApiCreateSwagger)} />
-                <Route path='/api/create/wsdl' component={getAsyncComponent(ApiCreateWSDL)} />
+                <Route path='/apis/create/rest' component={ApiCreateEndpoint} />
+                <Route path='/apis/create/swagger' component={ApiCreateSwagger} />
+                <Route path='/apis/create/wsdl' component={ApiCreateWSDL} />
             </Switch>
-        </div>
+        </PageContainer>
     );
 };
 

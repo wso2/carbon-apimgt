@@ -21,7 +21,7 @@ import PropTypes from 'prop-types';
 
 const ApiPermissionValidation = (props) => {
     const { checkingPermissionType, userPermissions } = props;
-    if (userPermissions.includes(checkingPermissionType)) {
+    if (userPermissions && userPermissions.includes(checkingPermissionType)) {
         return <React.Fragment>{props.children}</React.Fragment>;
     }
     return null;
