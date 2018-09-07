@@ -75,7 +75,8 @@ class DeleteApiButton extends React.Component {
      * @memberof DeleteApiButton
      */
     render() {
-        const { api, buttonClass } = this.props;
+        const { api, buttonClass, onClick } = this.props;
+        const deleteHandler = onClick || this.handleApiDelete;
         return (
             <React.Fragment>
                 {/* allowing delete based on scopes */}
@@ -104,7 +105,7 @@ class DeleteApiButton extends React.Component {
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
-                        <Button dense variant='outlined' color='secondary' onClick={this.handleApiDelete}>
+                        <Button dense variant='outlined' color='secondary' onClick={deleteHandler}>
                             Delete
                         </Button>
                         <Button dense onClick={this.handleRequestClose}>
@@ -119,6 +120,7 @@ class DeleteApiButton extends React.Component {
 
 DeleteApiButton.defaultProps = {
     buttonClass: '',
+    onClick: false,
 };
 
 DeleteApiButton.propTypes = {
@@ -127,6 +129,7 @@ DeleteApiButton.propTypes = {
     }).isRequired,
     history: PropTypes.shape({ push: PropTypes.func }).isRequired,
     buttonClass: PropTypes.string,
+    onClick: PropTypes.func,
 };
 
 export default withRouter(DeleteApiButton);

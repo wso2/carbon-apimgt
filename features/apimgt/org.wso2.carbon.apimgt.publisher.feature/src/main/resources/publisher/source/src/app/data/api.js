@@ -33,6 +33,14 @@ class API extends Resource {
             this.name = name;
             this.version = version;
             this.context = context;
+            this.endpoint = [{
+                inline: {
+                    endpointConfig: {
+
+                    }
+                },
+                type: 'Production'
+            }]
         }
         this._data = properties;
         for (const key in properties) {
@@ -122,6 +130,18 @@ class API extends Resource {
         })
         return Promise.all(promisedPolicies).then(policies => policies.map(response => response.body));
     }
+
+    setInlineProductionEndpoint(serviceURL) {
+        this.endpoint = this.endpoint.map(endpoint => {
+            if (endpoint.type.toLowerCase() === 'production') {
+                endpoint.inline.endpointConfig.list = [{
+                    url: serviceURL
+                }]
+            }
+            return endpoint;
+        })
+    }
+
     getProductionEndpoint() {
         const productionEndpoint = this.endpoint.filter(endpoint => endpoint.type.toLowerCase() === 'production').pop();
         if (!productionEndpoint) {
@@ -142,6 +162,28 @@ class API extends Resource {
         } else {
             throw new Exception('Not Implemented for global Endpoints');
         }
+
+    }
+
+    save() {
+        const promisedAPIResponse = this.client.then((client) => {
+            const properties = client.spec.definitions.API.properties;
+            const data = {};
+            Object.keys(this).forEach(apiAttribute => {
+                if (apiAttribute in properties) {
+                    data[apiAttribute] = this[apiAttribute];
+                }
+            });
+            const payload = {
+                body: data,
+                'Content-Type': 'application/json'
+            };
+            debugger;
+            return client.apis['API (Collection)'].post_apis(payload, this._requestMetaData());
+        });
+        return promisedAPIResponse.then(response => {
+            debugger
+        });
 
     }
     /**

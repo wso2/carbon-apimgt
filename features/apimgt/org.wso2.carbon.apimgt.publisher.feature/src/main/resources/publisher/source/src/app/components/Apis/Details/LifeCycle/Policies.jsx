@@ -28,6 +28,13 @@ import API from '../../../../data/api';
 
 const Option = Select.Option;
 
+/**
+ *
+ *
+ * @export
+ * @class Policies
+ * @extends {Component}
+ */
 export default class Policies extends Component {
     constructor() {
         super();
@@ -68,8 +75,14 @@ export default class Policies extends Component {
         });
     }
 
+    /**
+     *
+     *
+     * @returns
+     * @memberof Policies
+     */
     render() {
-        const policies = this.props.policies;
+        const { handleInputChange, api, policies } = this.props;
         const { classes } = this.props;
         return (
             <div>
@@ -78,8 +91,9 @@ export default class Policies extends Component {
                     <Select
                         margin='none'
                         multiple
-                        value={this.state.selectedPolicies}
-                        onChange={this.handleChange}
+                        name='policies'
+                        value={api.policies || []}
+                        onChange={handleInputChange}
                         input={<Input id='name-multiple' />}
                         MenuProps={{
                             PaperProps: {

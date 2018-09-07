@@ -37,7 +37,6 @@ export default class APIInputForm extends Component {
      */
     constructor(props) {
         super(props);
-        this.api = new API();
         this.state = {
             policies: [],
         };
@@ -62,24 +61,21 @@ export default class APIInputForm extends Component {
      */
     render() {
         const { policies } = this.state;
-        const { apiFields, validate, handleInputChange } = this.props;
-        const props = {
-            policies: this.state.policies,
-            handlePolicies: handleInputChange,
-            selectedPolicies: apiFields && apiFields.selectedPolicies,
-        };
+        const { api, handleInputChange } = this.props;
+        const policiesProps = { handleInputChange, api, policies };
+        const endpoints = api.getProductionEndpoint().endpointConfig.list;
+        const endpoint = endpoints && endpoints.pop();
         return (
-            <div>
+            <React.Fragment>
                 <TextField
                     fullWidth
-                    error={!apiFields.apiName && validate}
-                    id='apiName'
+                    id='name'
                     label='Name'
                     required
                     type='text'
-                    name='apiName'
+                    name='name'
                     margin='normal'
-                    value={apiFields.apiName || ''}
+                    value={api.name || ''}
                     onChange={handleInputChange}
                 />
                 <TextField
@@ -92,39 +88,38 @@ export default class APIInputForm extends Component {
                     fullWidth
                     label='Version'
                     required
-                    id='apiVersion'
+                    id='version'
                     helperText='**Version input is not support in this release'
                     type='text'
-                    name='apiVersion'
+                    name='version'
                     margin='normal'
                     disabled
                 />
                 <TextField
                     fullWidth
-                    error={!apiFields.apiContext && validate}
-                    id='apiContext'
+                    id='context'
                     required
                     label='Context'
                     type='text'
-                    name='apiContext'
+                    name='context'
                     margin='normal'
-                    value={apiFields.apiContext}
+                    value={api.context}
                     onChange={handleInputChange}
                 />
                 <TextField
                     fullWidth
-                    id='apiEndpoint'
+                    id='endpoint'
                     label='Endpoint'
                     type='text'
-                    name='apiEndpoint'
+                    name='endpoint'
                     margin='normal'
-                    value={apiFields.apiEndpoint}
+                    value={endpoint && endpoint.url}
                     onChange={handleInputChange}
                 />
                 <ScopeValidation resourcePath={resourcePath.API_CHANGE_LC} resourceMethod={resourceMethod.POST}>
-                    {policies && <Policies {...props} />}
+                    {policies && <Policies {...policiesProps} />}
                 </ScopeValidation>
-            </div>
+            </React.Fragment>
         );
     }
 }

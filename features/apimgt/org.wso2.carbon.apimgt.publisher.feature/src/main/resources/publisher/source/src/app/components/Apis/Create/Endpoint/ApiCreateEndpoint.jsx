@@ -59,11 +59,8 @@ class ApiCreateEndpoint extends Component {
      */
     constructor(props) {
         super(props);
-        this.api = new API();
         this.state = {
-            apiFields: {
-                apiVersion: '1.0.0',
-            },
+            api: new API(),
             loading: false,
         };
         this.inputChange = this.inputChange.bind(this);
@@ -82,9 +79,15 @@ class ApiCreateEndpoint extends Component {
         if (!Array.isArray(e)) {
             ({ name, value } = e.target);
         }
-        const { apiFields } = this.state;
-        this.setState({ apiFields });
-        apiFields[name] = value;
+        this.setState(({ api }) => {
+            const updatedAPI = api;
+            if (name === 'endpoint') {
+                updatedAPI.setInlineProductionEndpoint(value);
+            } else {
+                updatedAPI[name] = value;
+            }
+            return updatedAPI;
+        });
     }
 
     createAPICallback(response) {
@@ -101,11 +104,14 @@ class ApiCreateEndpoint extends Component {
      */
     handleSubmit(e) {
         e.preventDefault();
+        const { api } = this.state;
+        api.version = 'v1.0.0';
+        api.save().then(newAPI => this.setState({ api: newAPI }));
+        return;
         const values = this.state.apiFields;
         // Check for form errors manually
         if (!values.apiName || !values.apiVersion || !values.apiContext) {
             Alert.warning('Please fill all required fields');
-            return;
         }
         this.setState({ loading: true });
 
@@ -157,7 +163,7 @@ class ApiCreateEndpoint extends Component {
      */
     render() {
         const { classes } = this.props;
-        const { apiFields, loading } = this.state;
+        const { api, loading } = this.state;
 
         return (
             <Grid container className={classes.root} spacing={0} justify='center'>
@@ -171,7 +177,7 @@ class ApiCreateEndpoint extends Component {
                             configurations later.
                         </Typography>
                         <form onSubmit={this.handleSubmit}>
-                            <APIInputForm apiFields={apiFields} handleInputChange={this.inputChange} />
+                            <APIInputForm api={api} handleInputChange={this.inputChange} />
                             <Grid container direction='row' justify='flex-end' alignItems='flex-end' spacing={16}>
                                 <Grid item>
                                     <Button raised onClick={() => this.props.history.push('/api/create/home')}>

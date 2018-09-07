@@ -9,8 +9,6 @@ import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Chip from '@material-ui/core/Chip';
 import { FormattedMessage } from 'react-intl';
-import IconButton from '@material-ui/core/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import green from '@material-ui/core/colors/green';
 
@@ -33,6 +31,7 @@ const styles = theme => ({
     deleteProgress: {
         color: green[200],
         position: 'absolute',
+        marginLeft: '200px',
     },
 });
 
@@ -62,18 +61,18 @@ class APIThumb extends Component {
      * @param {String} [name=''] API Name use for alerting purpose only
      * @memberof Listing
      */
-    handleApiDelete(event) {
-        const apiUUID = event.currentTarget.id;
+    handleApiDelete() {
+        const { id } = this.props.api;
         this.setState({ loading: true });
         const { updateAPIsList } = this.props;
-        const promisedDelete = API.delete(apiUUID);
+        const promisedDelete = API.delete(id);
         promisedDelete.then((response) => {
             if (response.status !== 200) {
                 Alert.info('Something went wrong while deleting the API!');
                 return;
             }
-            updateAPIsList(apiUUID);
-            Alert.info(`API ${apiUUID} deleted Successfully`);
+            updateAPIsList(id);
+            Alert.info(`API ${id} deleted Successfully`);
             this.setState({ loading: false });
         });
     }
@@ -131,7 +130,8 @@ class APIThumb extends Component {
                 </CardContent>
                 <CardActions className={classes.apiActions}>
                     <Chip label={api.lifeCycleStatus} color='default' />
-                    <DeleteApiButton api={api} />
+                    <DeleteApiButton onClick={this.handleApiDelete} api={api} />
+                    {loading && <CircularProgress className={classes.deleteProgress} />}
                 </CardActions>
             </Card>
         );
@@ -140,7 +140,9 @@ class APIThumb extends Component {
 
 APIThumb.propTypes = {
     classes: PropTypes.shape({}).isRequired,
-    api: PropTypes.shape({}).isRequired,
+    api: PropTypes.shape({
+        id: PropTypes.string,
+    }).isRequired,
     updateAPIsList: PropTypes.func.isRequired,
 };
 
