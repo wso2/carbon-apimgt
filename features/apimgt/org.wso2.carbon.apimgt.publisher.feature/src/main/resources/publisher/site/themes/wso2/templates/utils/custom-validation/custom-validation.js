@@ -33,7 +33,7 @@ $(document).ready(function() {
 
     $.validator.addMethod('validContext', function (value, element) {
         return value != "/";
-    }, i18n.t('Only / is not allowed as context.'));
+    }, i18n.t('Invalid context format'));
 
     $.validator.addMethod('selected', function(value, element) {
         return value!="";
@@ -59,11 +59,11 @@ $(document).ready(function() {
             return false;
         }
         return true;
-    }, i18n.t('"{version}" or "/{version}" cannot be used solely in the context field.'));
+    }, i18n.t('Invalid context format'));
 
     $.validator.addMethod('validTemplate', function(value, element) {
         return value.indexOf("{}") == -1
-    }, i18n.t('Empty curly brackets "{}" are not allowed in the context field.'));
+    }, i18n.t('Invalid context format'));
 
     $.validator.addMethod('validateUrl', function(value, element){
         var validUrlRegex = /^(http|https):\/\/(.)+/g;
@@ -128,7 +128,7 @@ $(document).ready(function() {
     	} 
     	return true;        
     }, i18n.t('Service Name must be provided for WSDL endpoint.'));
-    
+
     $.validator.addMethod('validateProdWSDLPort', function (value, element){
     	if (APP.is_production_endpoint_specified()) {
     		return APP.is_production_wsdl_endpoint_port_specified();
