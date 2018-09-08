@@ -11791,10 +11791,10 @@ public class ApiMgtDAO {
 
         try {
             connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
             ps = connection.prepareStatement(SQLConstants.REMOVE_APPLICATION_ATTRIBUTES_BY_ATTRIBUTE_NAME_SQL);
             ps.setString(1, attributeKey);
             ps.setInt(2, applicationId);
-
             ps.execute();
             connection.commit();
         } catch (SQLException e) {
