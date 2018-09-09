@@ -15,6 +15,7 @@
  */
 package org.wso2.carbon.apimgt.gateway.alert;
 
+import org.json.simple.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,13 +27,14 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageDataPublisher;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 
 import java.sql.SQLException;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest( {APIManagerAnalyticsConfiguration.class, DataPublisherUtil.class})
+@PrepareForTest( {APIManagerAnalyticsConfiguration.class, DataPublisherUtil.class, APIUtil.class})
 public class AlertTypesPublisher1Test {
     @Test
     public void saveAndPublishAlertTypesEvent() throws Exception {
@@ -42,9 +44,27 @@ public class AlertTypesPublisher1Test {
                 (APIManagerAnalyticsConfiguration.class);
         PowerMockito.mockStatic(APIManagerAnalyticsConfiguration.class);
         PowerMockito.mockStatic(DataPublisherUtil.class);
+        PowerMockito.mockStatic(APIUtil.class);
         BDDMockito.given(APIManagerAnalyticsConfiguration.getInstance()).willReturn(apiManagerAnalyticsConfiguration);
         BDDMockito.given(DataPublisherUtil.getApiManagerAnalyticsConfiguration()).willReturn
                 (apiManagerAnalyticsConfiguration);
+        JSONObject obj = null; //retun obj is not validated.
+        String query1 = "select 'admin' as userId, 'abc' as alertTypes, 'abc@de.com' as emails, true as isSubscriber, "
+                + "false as isPublisher, false as isAdmin update or insert into ApimAlertStakeholderInfo"
+                + " set ApimAlertStakeholderInfo.userId = userId, "
+                + "ApimAlertStakeholderInfo.alertTypes = alertTypes , ApimAlertStakeholderInfo.emails = emails ,"
+                + " ApimAlertStakeholderInfo.isSubscriber = isSubscriber, ApimAlertStakeholderInfo.isPublisher = isPublisher, "
+                + "ApimAlertStakeholderInfo.isAdmin = isAdmin on ApimAlertStakeholderInfo.userId == userId and "
+                + "ApimAlertStakeholderInfo.isSubscriber == isSubscriber";
+        String query2 = "select 'admin' as userId, 'abc' as alertTypes, 'abc@de.com' as emails, false as isSubscriber, "
+                + "false as isPublisher, true as isAdmin update or insert into ApimAlertStakeholderInfo set "
+                + "ApimAlertStakeholderInfo.userId = userId, "
+                + "ApimAlertStakeholderInfo.alertTypes = alertTypes , ApimAlertStakeholderInfo.emails = emails ,"
+                + " ApimAlertStakeholderInfo.isSubscriber = isSubscriber, ApimAlertStakeholderInfo.isPublisher = isPublisher, "
+                + "ApimAlertStakeholderInfo.isAdmin = isAdmin on ApimAlertStakeholderInfo.userId == userId and "
+                + "ApimAlertStakeholderInfo.isAdmin == isAdmin";
+        BDDMockito.given(APIUtil.executeQueryOnStreamProcessor("APIM_ALERT_STAKEHOLDER", query1)).willReturn(obj);
+        BDDMockito.given(APIUtil.executeQueryOnStreamProcessor("APIM_ALERT_STAKEHOLDER", query2)).willReturn(obj);
         AlertTypesPublisher alertTypesPublisher = new AlertTypesPublisherWrapper(apiMgtDAO);
         alertTypesPublisher.publisher = apiMgtUsageDataPublisher;
         alertTypesPublisher.enabled = true;
