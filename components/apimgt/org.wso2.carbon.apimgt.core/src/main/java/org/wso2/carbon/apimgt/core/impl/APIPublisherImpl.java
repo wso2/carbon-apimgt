@@ -367,15 +367,13 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
         if (apiBuilder.getGatewayLabels().isEmpty()) {
             List<String> gatewayLabelSet = new ArrayList<>();
-            gatewayLabelSet.add(getLabelIdByNameAndType(APIMgtConstants.DEFAULT_LABEL_NAME, APIMgtConstants
-                    .LABEL_TYPE_GATEWAY));
+            gatewayLabelSet.add(APIMgtConstants.DEFAULT_LABEL_NAME);
             apiBuilder.gatewayLabels(gatewayLabelSet);
         }
 
         if (apiBuilder.getStoreLabels().isEmpty()) {
             List<String> storeLabelSet = new ArrayList<>();
-            storeLabelSet.add(getLabelIdByNameAndType(APIMgtConstants.DEFAULT_LABEL_NAME, APIMgtConstants
-                    .LABEL_TYPE_STORE));
+            storeLabelSet.add(APIMgtConstants.DEFAULT_LABEL_NAME);
             apiBuilder.gatewayLabels(storeLabelSet);
         }
 

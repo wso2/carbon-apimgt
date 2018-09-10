@@ -783,21 +783,12 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         final String privateLabel = "private";
 
         //Add labels
-        LabelDAO labelDAO = new DAOFactory().getLabelDAO();
         Label label1 = SampleTestObjectCreator.createLabel(publicLabel, SampleTestObjectCreator.LABEL_TYPE_GATEWAY)
                 .build();
         Label label2 = SampleTestObjectCreator.createLabel(privateLabel, SampleTestObjectCreator.LABEL_TYPE_GATEWAY)
                 .build();
-        List<Label> labelList = new ArrayList<>();
-        labelList.add(label1);
-        labelList.add(label2);
         LabelDAOImpl.addLabel(label1);
         LabelDAOImpl.addLabel(label2);
-
-        String publicLabelId = labelDAO.getLabelIdByNameAndType(publicLabel, SampleTestObjectCreator
-                .LABEL_TYPE_GATEWAY);
-        String privateLabelId = labelDAO.getLabelIdByNameAndType(privateLabel, SampleTestObjectCreator
-                .LABEL_TYPE_GATEWAY);
 
         ApiDAO apiDAO = new DAOFactory().getApiDAO();
 
@@ -808,7 +799,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         // Add APIs with Status = PUBLISHED having labels "public" and "private" 
         List<API> publishedAPIsPublicPrivateSummary = new ArrayList<>();
-        List<String> labelsPublicPrivate = new ArrayList<>(Arrays.asList(publicLabelId, privateLabelId));
+        List<String> labelsPublicPrivate = new ArrayList<>(Arrays.asList(publicLabel, privateLabel));
         testAddGetEndpoint();
         for (int i = 0; i < numberOfPublishedWithLabelPublicPrivate; ++i) {
             API api = SampleTestObjectCreator.createUniqueAPI().lifeCycleStatus(publishedStatus)
@@ -820,7 +811,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         // Add APIs with Status = PUBLISHED having label "private"
         List<API> publishedAPIsPrivateSummary = new ArrayList<>();
-        List<String> labelsPrivate = new ArrayList<>(Collections.singletonList(privateLabelId));
+        List<String> labelsPrivate = new ArrayList<>(Collections.singletonList(privateLabel));
         for (int i = 0; i < numberOfPublishedWithLabelPrivate; ++i) {
             API api = SampleTestObjectCreator.createUniqueAPI().lifeCycleStatus(publishedStatus)
                     .gatewayLabels(labelsPrivate)
@@ -831,7 +822,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         // Add APIs with Status = CREATED having labels "public"
         List<API> createdAPIsPublicSummary = new ArrayList<>();
-        List<String> labelsPublic = new ArrayList<>(Collections.singletonList(publicLabelId));
+        List<String> labelsPublic = new ArrayList<>(Collections.singletonList(publicLabel));
         for (int i = 0; i < numberOfCreatedWithLabelPublic; ++i) {
             API api = SampleTestObjectCreator.createUniqueAPI().lifeCycleStatus(createdStatus)
                     .gatewayLabels(labelsPublic)
@@ -1376,35 +1367,28 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     @Test
     public void testAddGetAPIWithLabels() throws Exception {
 
-        LabelDAO labelDAO = new DAOFactory().getLabelDAO();
-        Label labelPublic = SampleTestObjectCreator.createLabel("public", SampleTestObjectCreator.LABEL_TYPE_GATEWAY)
+        String publicLabel = "public";
+        String privateLabel = "private";
+        Label labelPublic = SampleTestObjectCreator.createLabel(publicLabel, SampleTestObjectCreator.LABEL_TYPE_GATEWAY)
                 .build();
-        Label labelPrivate = SampleTestObjectCreator.createLabel("private", SampleTestObjectCreator.LABEL_TYPE_GATEWAY)
-                .build();
-        List<Label> labelList = new ArrayList<>();
-        labelList.add(labelPublic);
-        labelList.add(labelPrivate);
+        Label labelPrivate = SampleTestObjectCreator.createLabel(privateLabel, SampleTestObjectCreator
+                .LABEL_TYPE_GATEWAY).build();
         LabelDAOImpl.addLabel(labelPublic);
         LabelDAOImpl.addLabel(labelPrivate);
 
-        String publicLabelFromDB = labelDAO.getLabelIdByNameAndType("public", SampleTestObjectCreator
-                .LABEL_TYPE_GATEWAY);
-        String privateLabelFromDB = labelDAO.getLabelIdByNameAndType("private", SampleTestObjectCreator
-                .LABEL_TYPE_GATEWAY);
-
         ApiDAO apiDAO = new DAOFactory().getApiDAO();
-        List<String> labelIds = new ArrayList<>();
-        labelIds.add(publicLabelFromDB);
-        labelIds.add(privateLabelFromDB);
-        Collections.sort(labelIds);
+        List<String> labelNames = new ArrayList<>();
+        labelNames.add(publicLabel);
+        labelNames.add(privateLabel);
+        Collections.sort(labelNames);
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
-        API apiWithBothLabels = builder.gatewayLabels(labelIds).build();
+        API apiWithBothLabels = builder.gatewayLabels(labelNames).build();
 
         testAddGetEndpoint();
         apiDAO.addAPI(apiWithBothLabels);
 
         List<String> publicLabelOnly = new ArrayList<>();
-        publicLabelOnly.add(publicLabelFromDB);
+        publicLabelOnly.add(publicLabel);
         API.APIBuilder builder2 = SampleTestObjectCreator.createAlternativeAPI();
         API apiWithPublicLabel = builder2.gatewayLabels(publicLabelOnly).build();
         apiDAO.addAPI(apiWithPublicLabel);
@@ -1452,25 +1436,27 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     @Test
     public void testUpdateAPIWithLabels() throws Exception {
 
-        LabelDAO labelDAO = new DAOFactory().getLabelDAO();
-        Label label1 = SampleTestObjectCreator.createLabel("public", SampleTestObjectCreator.LABEL_TYPE_STORE).build();
-        Label label2 = SampleTestObjectCreator.createLabel("private", SampleTestObjectCreator.LABEL_TYPE_STORE).build();
+        String publicLabel = "public";
+        String privateLabel = "private";
+        Label label1 = SampleTestObjectCreator.createLabel(publicLabel, SampleTestObjectCreator.LABEL_TYPE_STORE)
+                .build();
+        Label label2 = SampleTestObjectCreator.createLabel(privateLabel, SampleTestObjectCreator.LABEL_TYPE_STORE)
+                .build();
 
         LabelDAOImpl.addLabel(label1);
         LabelDAOImpl.addLabel(label2);
-
         ApiDAO apiDAO = new DAOFactory().getApiDAO();
-        List<String> labelIds = new ArrayList<>();
-        labelIds.add(label1.getId());
+        List<String> labelNames = new ArrayList<>();
+        labelNames.add(publicLabel);
         API.APIBuilder builder1 = SampleTestObjectCreator.createDefaultAPI();
-        API api = builder1.storeLabels(labelIds).build();
+        API api = builder1.storeLabels(labelNames).build();
         testAddGetEndpoint();
         apiDAO.addAPI(api);
         API apiFromDBWithOneLabel = apiDAO.getAPI(api.getId());
         Assert.assertEquals(apiFromDBWithOneLabel.getStoreLabels().size(), builder1.getStoreLabels().size());
 
-        labelIds.add(label2.getId());
-        API substituteAPI = new API.APIBuilder(api).storeLabels(labelIds).build();
+        labelNames.add(privateLabel);
+        API substituteAPI = new API.APIBuilder(api).storeLabels(labelNames).build();
         apiDAO.updateAPI(api.getId(), substituteAPI);
         API apiFromDB = apiDAO.getAPI(api.getId());
 
@@ -2088,7 +2074,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         List<Label> labelList = new ArrayList<>();
         LabelDAO labelDAO = new DAOFactory().getLabelDAO();
         Label autoGenLabel = new Label.Builder().id(UUID.randomUUID().toString()).
-                name(autoGeneratedLabelName).
+                name(autoGeneratedLabelName).type(APIMgtConstants.LABEL_TYPE_GATEWAY).
                 accessUrls(null).build();
         labelList.add(autoGenLabel);
         labelDAO.addLabels(labelList);

@@ -213,8 +213,8 @@ public class SampleTestObjectCreator {
                 + "[\"READ\",\"UPDATE\"]},{\"groupId\" : \"admin\", \"permission\" : [\"READ\",\"UPDATE\"," +
                 "\"DELETE\", \"MANAGE_SUBSCRIPTION\"]}]";
 
-        List<String> gatewayDefaultLabel = getDefaultLabel(APIMgtConstants.LABEL_TYPE_GATEWAY);
-        List<String> storeDefaultLabel = getDefaultLabel(APIMgtConstants.LABEL_TYPE_STORE);
+        List<String> labelList = new ArrayList<>();
+        labelList.add(APIMgtConstants.DEFAULT_LABEL_NAME);
 
         Instant time = APIUtils.getCurrentUTCTime();
         API.APIBuilder apiBuilder = new API.APIBuilder(ADMIN, "WeatherAPI", API_VERSION).
@@ -230,8 +230,8 @@ public class SampleTestObjectCreator {
                 apiPolicy(unlimitedApiPolicy).
                 transport(transport).
                 tags(tags).
-                gatewayLabels(gatewayDefaultLabel).
-                storeLabels(storeDefaultLabel).
+                gatewayLabels(labelList).
+                storeLabels(labelList).
                 policies(policies).
                 visibility(API.Visibility.PUBLIC).
                 visibleRoles(new HashSet<>()).
@@ -328,8 +328,8 @@ public class SampleTestObjectCreator {
         permissionMap.put(DEVELOPER_ROLE_ID, 6);
         permissionMap.put(ADMIN_ROLE_ID, 15);
 
-        List<String> gatewayDefaultLabel = getDefaultLabel(APIMgtConstants.LABEL_TYPE_GATEWAY);
-        List<String> storeDefaultLabel = getDefaultLabel(APIMgtConstants.LABEL_TYPE_STORE);
+        List<String> labelList = new ArrayList<>();
+        labelList.add(APIMgtConstants.DEFAULT_LABEL_NAME);
 
         Instant time = APIUtils.getCurrentUTCTime();
         API.APIBuilder apiBuilder = new API.APIBuilder(ADMIN, "restaurantAPI", "0.9").
@@ -344,8 +344,8 @@ public class SampleTestObjectCreator {
                 apiPolicy(goldApiPolicy).
                 transport(transport).
                 tags(tags).
-                gatewayLabels(gatewayDefaultLabel).
-                storeLabels(storeDefaultLabel).
+                gatewayLabels(labelList).
+                storeLabels(labelList).
                 policies(policies).
                 visibility(API.Visibility.RESTRICTED).
                 visibleRoles(new HashSet<>(Arrays.asList(CUSTOMER_ROLE, MANAGER_ROLE, EMPLOYEE_ROLE))).
@@ -398,8 +398,8 @@ public class SampleTestObjectCreator {
         permissionMap.put(DEVELOPER_ROLE_ID, 6);
         permissionMap.put(ADMIN_ROLE_ID, 15);
 
-        List<String> gatewayDefaultLabel = getDefaultLabel(APIMgtConstants.LABEL_TYPE_GATEWAY);
-        List<String> storeDefaultLabel = getDefaultLabel(APIMgtConstants.LABEL_TYPE_STORE);
+        List<String> labelList = new ArrayList<>();
+        labelList.add(APIMgtConstants.DEFAULT_LABEL_NAME);
         Instant time = APIUtils.getCurrentUTCTime();
 
         API.APIBuilder apiBuilder = new API.APIBuilder(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
@@ -415,8 +415,8 @@ public class SampleTestObjectCreator {
                 apiPolicy(goldApiPolicy).
                 transport(transport).
                 tags(tags).
-                gatewayLabels(gatewayDefaultLabel).
-                storeLabels(storeDefaultLabel).
+                gatewayLabels(labelList).
+                storeLabels(labelList).
                 policies(policies).
                 visibility(API.Visibility.RESTRICTED).
                 visibleRoles(new HashSet<>(Arrays.asList(CUSTOMER_ROLE, MANAGER_ROLE, EMPLOYEE_ROLE))).
@@ -1516,17 +1516,4 @@ public class SampleTestObjectCreator {
         return policy;
     }
 
-    private static List<String> getDefaultLabel(String type) {
-
-        List<String> defaultLabelList = new ArrayList<>();
-
-        try {
-            String defaultGatewayLabel = new DAOFactory().getLabelDAO().getLabelIdByNameAndType(APIMgtConstants
-                    .DEFAULT_LABEL_NAME, type);
-            defaultLabelList.add(defaultGatewayLabel);
-        } catch (APIMgtDAOException e) {
-            log.error("Could not retrieve default labels");
-        }
-        return defaultLabelList;
-    }
 }

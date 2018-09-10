@@ -74,7 +74,7 @@ public class LabelDAOImpl implements LabelDAO {
 
         if (!labels.isEmpty()) {
 
-            final String query = "INSERT INTO AM_LABELS (LABEL_ID, NAME) VALUES (?,?)";
+            final String query = "INSERT INTO AM_LABELS (LABEL_ID, NAME, TYPE_NAME) VALUES (?,?,?)";
             Map<String, List<String>> urlMap = new HashMap<>();
 
             try (Connection connection = DAOUtil.getConnection();
@@ -85,6 +85,7 @@ public class LabelDAOImpl implements LabelDAO {
                     for (Label label : labels) {
                         statement.setString(1, label.getId());
                         statement.setString(2, label.getName());
+                        statement.setString(3, label.getType());
                         statement.addBatch();
                         urlMap.put(label.getId(), label.getAccessUrls());
                     }
