@@ -19,13 +19,14 @@
 import { Button, message } from 'antd';
 
 import React, { Component } from 'react';
-import API from '../../../../data/api.js';
+import API from 'AppData/api.js';
+import ApiPermissionValidation from 'AppData/ApiPermissionValidation';
+import { ScopeValidation, resourcePath, resourceMethod } from 'AppData/ScopeValidation';
+import { Progress } from 'AppComponents/Shared/';
+import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
+
 import DocumentsTable from './DocumentsTable';
 import NewDocDiv from './NewDocDiv';
-import { Progress } from '../../../Shared/';
-import ApiPermissionValidation from '../../../../data/ApiPermissionValidation';
-import { ScopeValidation, resourcePath, resourceMethod } from '../../../../data/ScopeValidation';
-import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
 
 /**
  * Documents tab related React components.

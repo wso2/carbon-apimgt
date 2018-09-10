@@ -21,11 +21,11 @@ import { Grid, Button, Typography, withStyles } from '@material-ui/core';
 import Stepper, { Step, StepLabel, StepContent } from '@material-ui/core/Stepper';
 import Card, { CardContent } from '@material-ui/core/Card';
 import PropTypes from 'prop-types';
+import API from 'AppData/api';
+import Alert from 'AppComponents/Shared/Alert';
 
 import InputForm from '../Endpoint/APIInputForm';
 import ProvideWSDL from './Steps/ProvideWSDL';
-import API from '../../../../data/api';
-import Alert from '../../../Shared/Alert';
 import BindingInfo from './BindingInfo';
 
 const styles = theme => ({

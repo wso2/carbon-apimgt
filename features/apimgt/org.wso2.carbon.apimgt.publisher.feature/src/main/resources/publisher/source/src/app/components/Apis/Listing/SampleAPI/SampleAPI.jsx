@@ -65,8 +65,6 @@ class SampleAPI extends Component {
         this.sampleApi = new API();
         this.handleDeploySample = this.handleDeploySample.bind(this);
         this.createSampleAPI = this.createSampleAPI.bind(this);
-        this.publishSampleAPI = this.publishSampleAPI.bind(this);
-        this.updatePolicies = this.updatePolicies.bind(this);
     }
 
     /**
@@ -75,8 +73,21 @@ class SampleAPI extends Component {
      */
     handleDeploySample() {
         this.setState({ deploying: true });
-        const sampleAPI = this.createSampleAPI();
-        sampleAPI.then(this.updatePolicies).then(this.publishSampleAPI);
+        const promisedSampleAPI = this.createSampleAPI();
+        promisedSampleAPI.then((sampleAPI) => {
+            sampleAPI
+                .publish()
+                .then(() => {
+                    const message = 'Pet-Store API Published successfully';
+                    this.setState({ published: true, api: sampleAPI });
+                    Alert.info(message);
+                })
+                .catch((error) => {
+                    console.error(error);
+                    this.setState({ deploying: false });
+                    Alert.error(error);
+                });
+        });
     }
 
     /**
@@ -108,6 +119,7 @@ class SampleAPI extends Component {
             visibility: 'PUBLIC',
             securityScheme: ['OAuth'],
             scopes: ['read:pets', 'write:pets'],
+            policies: ['Bronze', 'Unlimited', 'Gold'],
         };
         const serviceUrl = 'https://localhost:9443/publisher/public/app/petstore/pet/1.json';
         const production = {
@@ -126,65 +138,16 @@ class SampleAPI extends Component {
         sandbox.inline.name += '_sandbox';
         data.endpoint = [production, sandbox];
         Alert.info('Creating sample Pet-Store API . . .');
-        return this.sampleApi
-            .create(data)
-            .then(response => response.body)
-            .catch((error) => {
-                console.error(error);
-                this.setState({ deploying: false });
-                Alert.error(error);
-                const errorData = JSON.parse(error.data);
-                const messageTxt =
-                    'Error[' + errorData.code + ']: ' + errorData.description + ' | ' + errorData.message + '.';
-                Alert.info(messageTxt);
-            });
-    }
-
-    /**
-     * Update the policies of the sample API
-     * @param {Object} api Response object from REST API
-     * @returns {Promise} SwaggerJS-client returned promise maping resolve value to response.obj
-     */
-    updatePolicies(api) {
-        const uuid = api.id;
-        const promisedApi = this.sampleApi.get(uuid);
-        this.setState({ api });
-        Alert.info('API Created with UUID :' + uuid);
-        return promisedApi.then((response) => {
-            Alert.info('Updating API policies with Bronze, Unlimited & Gold. . .');
-            const fetchedApi = response.obj;
-            fetchedApi.policies = ['Bronze', 'Unlimited', 'Gold'];
-            fetchedApi.securityScheme = ['Oauth'];
-
-            const promisedUpdate = this.sampleApi.update(fetchedApi);
-            return promisedUpdate.then((updateResponse) => {
-                Alert.info('Policies updated successfully!');
-                return updateResponse.obj;
-            });
+        const sampleAPI = new API(data);
+        return sampleAPI.save().catch((error) => {
+            console.error(error);
+            this.setState({ deploying: false });
+            Alert.error(error);
+            const errorData = JSON.parse(error.data);
+            const messageTxt =
+                'Error[' + errorData.code + ']: ' + errorData.description + ' | ' + errorData.message + '.';
+            Alert.info(messageTxt);
         });
-    }
-
-    /**
-     * Change the life cycle state of the sample API
-     *
-     * @param {Object} api API response object returned from previous promise
-     * @memberof SampleAPI
-     */
-    publishSampleAPI(api) {
-        const newState = 'Published';
-        const apiUUID = api.id;
-        const promisedUpdate = this.sampleApi.updateLcState(apiUUID, newState);
-        promisedUpdate
-            .then(() => {
-                const message = 'Pet-Store API Published successfully';
-                this.setState({ published: true });
-                Alert.info(message);
-            })
-            .catch((error) => {
-                console.error(error);
-                this.setState({ deploying: false });
-                Alert.error(error);
-            });
     }
 
     /**

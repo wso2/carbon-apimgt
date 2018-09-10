@@ -33,6 +33,10 @@ const config = {
     watch: false,
     devtool: 'source-map',
     resolve: {
+        alias: {
+            AppData: path.resolve(__dirname, 'source/src/app/data/'),
+            AppComponents: path.resolve(__dirname, 'source/src/app/components/'),
+        },
         extensions: ['.js', '.jsx'],
     },
     module: {

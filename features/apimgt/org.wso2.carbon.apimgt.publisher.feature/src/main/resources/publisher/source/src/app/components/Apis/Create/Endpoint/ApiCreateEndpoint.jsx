@@ -25,11 +25,10 @@ import { withStyles } from '@material-ui/core/styles';
 import green from '@material-ui/core/colors/green';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import PropTypes from 'prop-types';
-
+import Alert from 'AppComponents/Shared/Alert';
+import API from 'AppData/api.js';
+import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
 import APIInputForm from './APIInputForm';
-import API from '../../../../data/api.js';
-import { ScopeValidation, resourceMethod, resourcePath } from '../../../../data/ScopeValidation';
-// import Alert from '../../../Shared/Alert';
 
 const styles = theme => ({
     root: {
@@ -64,7 +63,6 @@ class ApiCreateEndpoint extends Component {
             loading: false,
         };
         this.inputChange = this.inputChange.bind(this);
-        this.createAPICallback = this.createAPICallback.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
     }
 
@@ -73,27 +71,56 @@ class ApiCreateEndpoint extends Component {
      * @param {any} e Synthetic React Event
      * @memberof ApiCreateEndpoint
      */
-    inputChange(e) {
-        let name = 'selectedPolicies';
-        let value = e;
-        if (!Array.isArray(e)) {
-            ({ name, value } = e.target);
-        }
+    inputChange({ target }) {
+        const { name, value } = target;
         this.setState(({ api }) => {
-            const updatedAPI = api;
+            const changes = api;
             if (name === 'endpoint') {
-                updatedAPI.setInlineProductionEndpoint(value);
+                changes[name] = [
+                    {
+                        inline: {
+                            name: `${api.name}_inline_prod`,
+                            endpointConfig: {
+                                list: [
+                                    {
+                                        url: value,
+                                        timeout: '1000',
+                                    },
+                                ],
+                                endpointType: 'SINGLE',
+                            },
+                            type: 'http',
+                            endpointSecurity: {
+                                enabled: false,
+                            },
+                        },
+                        type: 'Production',
+                    },
+                    {
+                        inline: {
+                            name: `${api.name}_inline_sandbx`,
+                            endpointConfig: {
+                                list: [
+                                    {
+                                        url: value,
+                                        timeout: '1000',
+                                    },
+                                ],
+                                endpointType: 'SINGLE',
+                            },
+                            type: 'http',
+                            endpointSecurity: {
+                                enabled: false,
+                            },
+                        },
+                        type: 'Sandbox',
+                    },
+                ];
             } else {
-                updatedAPI[name] = value;
+                changes[name] = value;
             }
-            return { api: updatedAPI };
+            return { api: changes };
         });
-    }
-
-    createAPICallback(response) {
-        const uuid = JSON.parse(response.data).id;
-        const redirectURL = '/apis/' + uuid + '/overview';
-        this.props.history.push(redirectURL);
     }
 
     /**
@@ -106,55 +133,20 @@ class ApiCreateEndpoint extends Component {
         e.preventDefault();
         const { api } = this.state;
         api.version = 'v1.0.0';
-        api.save().then(newAPI => this.setState({ api: newAPI }));
-        /*
-        const values = this.state.apiFields;
-        // Check for form errors manually
-        if (!values.apiName || !values.apiVersion || !values.apiContext) {
-            Alert.warning('Please fill all required fields');
-        }
-        this.setState({ loading: true });
-
-        const apiData = {
-            name: values.apiName,
-            context: values.apiContext,
-            version: values.apiVersion,
-        };
-        if (values.apiEndpoint) {
-            apiData.endpoint = API.getEndpoints(apiData.name, apiData.version, values.apiEndpoint);
-        }
-        const newAPI = new API();
-        const promisedCreate = newAPI.create(apiData);
-        promisedCreate
-            .then((createResponse) => {
-                const uuid = JSON.parse(createResponse.data).id;
-                const promisedApi = this.api.get(uuid);
-                Alert.info('API Created with UUID :' + uuid);
-                promisedApi.then((apiResponse) => {
-                    Alert.info('Updating API policies . . .');
-                    const apiJSON = JSON.parse(apiResponse.data);
-                    apiJSON.policies = this.state.apiFields.selectedPolicies;
-                    console.info('Adding policies to the api', this.state.apiFields.selectedPolicies);
-                    const promisedUpdate = this.api.update(apiJSON);
-                    promisedUpdate.then((response) => {
-                        Alert.info('Policies updated successfully!');
-                        this.createAPICallback(response);
-                    });
-                });
+        api.save()
+            .then((newAPI) => {
+                const redirectURL = '/apis/' + newAPI.id + '/overview';
+                Alert.info(`${newAPI.name} created.`);
+                this.props.history.push(redirectURL);
             })
             .catch((error) => {
                 console.error(error);
-                this.setState({ loading: false });
-                Alert.error('Error occurred while creating the API');
-                if (error.response && error.response.obj) {
-                    const data = error.response.obj;
-                    const message = '[' + data.code + ']: ' + data.description;
-                    Alert.error(message);
+                if (error.response) {
+                    Alert.error(error.response.body.message);
+                } else {
+                    Alert.error(`Something went wrong while creating ${api.name}`);
                 }
             });
-
-        console.log('Send this in a POST request:', apiData);
-        */
     }
 
     /**
@@ -179,25 +171,14 @@ class ApiCreateEndpoint extends Component {
                         </Typography>
                         <form onSubmit={this.handleSubmit}>
                             <APIInputForm api={api} handleInputChange={this.inputChange} />
-                            <Grid container direction='row' justify='flex-end' alignItems='flex-end' spacing={16}>
-                                <Grid item>
-                                    <Button raised onClick={() => this.props.history.push('/api/create/home')}>
-                                        Cancel
-                                    </Button>
-                                </Grid>
+                            <Grid container direction='row' alignItems='flex-start' spacing={16}>
                                 <Grid item>
                                     <ScopeValidation
                                         resourcePath={resourcePath.APIS}
                                         resourceMethod={resourceMethod.POST}
                                     >
                                         <div>
-                                            <Button
-                                                disabled={loading}
-                                                raised
-                                                color='primary'
-                                                id='action-create'
-                                                type='primary'
-                                            >
+                                            <Button variant='outlined' disabled={loading} color='primary'>
                                                 Create
                                             </Button>
                                             {loading && (
@@ -205,6 +186,11 @@ class ApiCreateEndpoint extends Component {
                                             )}
                                         </div>
                                     </ScopeValidation>
+                                </Grid>
+                                <Grid item>
+                                    <Button raised onClick={() => this.props.history.push('/api/create/home')}>
+                                        Cancel
+                                    </Button>
                                 </Grid>
                             </Grid>
                         </form>
