@@ -64,7 +64,7 @@ export default class APIInputForm extends Component {
         const { api, handleInputChange } = this.props;
         const policiesProps = { handleInputChange, api, policies };
         const endpoints = api.getProductionEndpoint().endpointConfig.list;
-        const endpoint = endpoints && endpoints.pop();
+        const endpoint = endpoints && endpoints[0];
         return (
             <React.Fragment>
                 <TextField

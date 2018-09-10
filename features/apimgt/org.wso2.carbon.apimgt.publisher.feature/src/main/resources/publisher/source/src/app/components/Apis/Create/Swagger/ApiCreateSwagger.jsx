@@ -17,25 +17,38 @@
  */
 import React from 'react';
 import Dropzone from 'react-dropzone';
-
-import Radio, { RadioGroup } from '@material-ui/core/Radio';
-import { FormControl, FormControlLabel } from '@material-ui/core/';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import FormControl from '@material-ui/core/FormControl';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import Snackbar from '@material-ui/core/Snackbar';
-import IconButton from '@material-ui/core/IconButton';
-import CloseIcon from '@material-ui/icons/Close';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import PropTypes from 'prop-types';
+import Alert from 'AppComponents/Shared/Alert';
 
-import API from '../../../../data/api.js';
-import './ApiCreateSwagger.css';
-import { ScopeValidation, resourceMethod, resourcePath } from '../../../../data/ScopeValidation';
+import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
+import { withStyles } from '@material-ui/core/styles';
 
+import API from 'AppData/api.js';
+
+const styles = theme => ({
+    root: {
+        flexGrow: 1,
+    },
+    paper: {
+        padding: theme.spacing.unit * 2,
+    },
+    buttonProgress: {
+        color: 'green',
+        position: 'relative',
+        marginTop: -20,
+        marginLeft: -50,
+    },
+});
 /**
  * @inheritDoc
  * @class ApiCreateSwagger
@@ -53,8 +66,7 @@ class ApiCreateSwagger extends React.Component {
             uploadMethod: 'file',
             files: [],
             swaggerUrl: '',
-            open: false,
-            message: '',
+            loading: false,
         };
         this.onDrop = this.onDrop.bind(this);
         this.swaggerUrlChange = this.swaggerUrlChange.bind(this);
@@ -89,34 +101,29 @@ class ApiCreateSwagger extends React.Component {
      */
     handleSubmit = (e) => {
         e.preventDefault();
+        this.setState({ loading: true });
         const inputType = this.state.uploadMethod;
         if (inputType === 'url') {
             const url = this.state.swaggerUrl;
-            if (url === '') {
-                console.debug('Swagger Url is empty.');
-                this.setState({ message: 'Swagger Url is empty.' });
-                this.setState({ open: true });
-                return;
-            }
-            const data = {};
-            data.url = url;
-            data.type = 'swagger-url';
+            const data = { url, type: 'swagger-url' };
             const newApi = new API();
             newApi
                 .create(data)
                 .then(this.createAPICallback)
                 .catch((errorResponse) => {
-                    const errorData = JSON.parse(errorResponse.data);
-                    const messageTxt =
-                        'Error[' + errorData.code + ']: ' + errorData.description + ' | ' + errorData.message + '.';
-                    this.setState({ message: messageTxt });
-                    this.setState({ open: true });
-                    console.debug(errorResponse);
+                    Alert.error('Something went wrong while creating the API!');
+                    this.setState({ loading: false });
+                    const { response } = errorResponse;
+                    if (response.body) {
+                        const { code, description, message } = response.body;
+                        const messageTxt = 'Error[' + code + ']: ' + description + ' | ' + message + '.';
+                        Alert.error(messageTxt);
+                    }
+                    console.log(errorResponse);
                 });
         } else if (inputType === 'file') {
             if (this.state.files.length === 0) {
-                this.setState({ message: 'Select a swagger file to upload.' });
-                this.setState({ open: true });
+                Alert.error('Select a swagger file to upload.');
                 console.log('Select a swagger file to upload.');
                 return;
             }
@@ -126,19 +133,15 @@ class ApiCreateSwagger extends React.Component {
                 .create(swagger)
                 .then(this.createAPICallback)
                 .catch((errorResponse) => {
-                    let errorData;
-                    let messageTxt;
-                    if (errorResponse.obj) {
-                        errorData = errorResponse.obj;
-                        messageTxt =
-                            'Error[' + errorData.code + ']: ' + errorData.description + ' | ' + errorData.message + '.';
-                    } else {
-                        errorData = errorResponse.data;
-                        messageTxt = 'Error: ' + errorData + '.';
+                    Alert.error('Something went wrong while creating the API!');
+                    this.setState({ loading: false });
+                    const { response } = errorResponse;
+                    if (response.body) {
+                        const { code, description, message } = response.body;
+                        const messageTxt = 'Error[' + code + ']: ' + description + ' | ' + message + '.';
+                        Alert.error(messageTxt);
                     }
-                    this.setState({ message: messageTxt });
-                    this.setState({ open: true });
-                    console.debug(errorResponse);
+                    console.log(errorResponse);
                 });
         }
     };
@@ -153,24 +156,20 @@ class ApiCreateSwagger extends React.Component {
         this.props.history.push(redirectURL);
     };
 
-    handleRequestClose = (event, reason) => {
-        if (reason === 'clickaway') {
-            return;
-        }
-
-        this.setState({ open: false });
-    };
-
     /**
      *
      * @returns {React.Component} @inheritDoc
      * @memberof ApiCreateSwagger
      */
     render() {
+        const {
+            uploadMethod, files, swaggerUrl, loading,
+        } = this.state;
+        const { classes } = this.props;
         return (
-            <Grid container>
-                <Grid item xs={12}>
-                    <Paper>
+            <Grid container className={classes.root} spacing={0} justify='center'>
+                <Grid item md={10}>
+                    <Paper className={classes.paper}>
                         <Typography className='page-title' type='display2' gutterBottom>
                             Create New API -
                             {this.state.uploadMethod === 'file' ? (
@@ -183,93 +182,89 @@ class ApiCreateSwagger extends React.Component {
                             Fill the mandatory fields (Name, Version, Context) and create the API. Configure advanced
                             configurations later.
                         </Typography>
-                    </Paper>
-                </Grid>
-                <Grid item xs={12} className='page-content'>
-                    <form onSubmit={this.handleSubmit} className='login-form'>
-                        <AppBar position='static' color='default'>
-                            <Toolbar>
+
+                        <form onSubmit={this.handleSubmit} className='login-form'>
+                            <Grid item>
                                 <RadioGroup
                                     aria-label='inputType'
                                     name='inputType'
-                                    value={this.state.uploadMethod}
+                                    value={uploadMethod}
                                     onChange={this.handleUploadMethodChange}
                                     className='horizontal'
                                 >
                                     <FormControlLabel value='file' control={<Radio />} label='File' />
                                     <FormControlLabel value='url' control={<Radio />} label='Url' />
                                 </RadioGroup>
-                            </Toolbar>
-                        </AppBar>
+                            </Grid>
+                            <Grid item>
+                                {uploadMethod === 'file' && (
+                                    <FormControl className='horizontal dropzone-wrapper'>
+                                        <div className='dropzone'>
+                                            <Dropzone onDrop={this.onDrop} multiple={false}>
+                                                <p>Try dropping some files here, or click to select files to upload.</p>
+                                            </Dropzone>
+                                        </div>
+                                        <aside>
+                                            <h2>Uploaded files</h2>
+                                            <ul>
+                                                {files.map(f => (
+                                                    <li key={f.name}>
+                                                        {f.name} - {f.size} bytes
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </aside>
+                                    </FormControl>
+                                )}
+                                {uploadMethod === 'url' && (
+                                    <FormControl className='horizontal full-width'>
+                                        <TextField
+                                            id='swaggerUrl'
+                                            label='Swagger Url'
+                                            type='text'
+                                            name='swaggerUrl'
+                                            required
+                                            margin='normal'
+                                            value={swaggerUrl}
+                                            onChange={this.swaggerUrlChange}
+                                        />
+                                    </FormControl>
+                                )}
+                            </Grid>
 
-                        {this.state.uploadMethod === 'file' && (
-                            <FormControl className='horizontal dropzone-wrapper'>
-                                <div className='dropzone'>
-                                    <Dropzone onDrop={this.onDrop} multiple={false}>
-                                        <p>Try dropping some files here, or click to select files to upload.</p>
-                                    </Dropzone>
-                                </div>
-                                <aside>
-                                    <h2>Uploaded files</h2>
-                                    <ul>
-                                        {this.state.files.map(f => (
-                                            <li key={f.name}>
-                                                {f.name} - {f.size} bytes
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </aside>
-                            </FormControl>
-                        )}
-                        {this.state.uploadMethod === 'url' && (
-                            <FormControl className='horizontal full-width'>
-                                <TextField
-                                    id='swaggerUrl'
-                                    label='Swagger Url'
-                                    type='text'
-                                    name='swaggerUrl'
-                                    margin='normal'
-                                    style={{ width: '100%' }}
-                                    value={this.state.swaggerUrl}
-                                    onChange={this.swaggerUrlChange}
-                                />
-                            </FormControl>
-                        )}
-                        <FormControl className='horizontal'>
-                            {/* Allowing to create an API from swagger definition, based on scopes */}
-                            <ScopeValidation resourceMethod={resourceMethod.POST} resourcePath={resourcePath.APIS}>
-                                <Button raised color='primary' type='submit' className='button-left'>
-                                    Create
-                                </Button>
-                            </ScopeValidation>
-                            <Button raised onClick={() => this.props.history.push('/api/create/home')}>
-                                Cancel
-                            </Button>
-                        </FormControl>
-                    </form>
-                    <Snackbar
-                        anchorOrigin={{
-                            vertical: 'top',
-                            horizontal: 'center',
-                        }}
-                        open={this.state.open}
-                        autoHideDuration={6e3}
-                        onClose={this.handleRequestClose}
-                        ContentProps={{
-                            'aria-describedby': 'message-id',
-                        }}
-                        message={<span id='message-id'>{this.state.message}</span>}
-                        action={[
-                            <IconButton
-                                key='close'
-                                aria-label='Close'
-                                color='inherit'
-                                onClick={this.handleRequestClose}
-                            >
-                                <CloseIcon />
-                            </IconButton>,
-                        ]}
-                    />
+                            <Grid item>
+                                <FormControl>
+                                    <Grid container direction='row' alignItems='flex-start' spacing={16}>
+                                        <Grid item>
+                                            {/* Allowing to create an API from swagger definition, based on scopes */}
+                                            <ScopeValidation
+                                                resourceMethod={resourceMethod.POST}
+                                                resourcePath={resourcePath.APIS}
+                                            >
+                                                <Button
+                                                    variant='outlined'
+                                                    disabled={loading}
+                                                    color='primary'
+                                                    type='submit'
+                                                >
+                                                    Create
+                                                </Button>
+                                                {loading && (
+                                                    <CircularProgress size={24} className={classes.buttonProgress} />
+                                                )}
+                                            </ScopeValidation>
+                                        </Grid>
+
+                                        <Grid item>
+                                            <Button raised onClick={() => this.props.history.push('/api/create/home')}>
+                                                Cancel
+                                            </Button>
+                                        </Grid>
+                                    </Grid>
+                                </FormControl>
+                            </Grid>
+                        </form>
+                    </Paper>
                 </Grid>
             </Grid>
         );
@@ -280,6 +275,7 @@ ApiCreateSwagger.propTypes = {
     history: PropTypes.shape({
         push: PropTypes.func.isRequired,
     }).isRequired,
+    classes: PropTypes.shape({}).isRequired,
 };
 
-export default ApiCreateSwagger;
+export default withStyles(styles)(ApiCreateSwagger);

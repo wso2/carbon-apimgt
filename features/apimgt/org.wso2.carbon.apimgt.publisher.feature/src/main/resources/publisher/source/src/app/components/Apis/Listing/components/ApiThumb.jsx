@@ -11,11 +11,11 @@ import Chip from '@material-ui/core/Chip';
 import { FormattedMessage } from 'react-intl';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import green from '@material-ui/core/colors/green';
+import API from 'AppData/api.js';
 
 import ImageGenerator from './ImageGenerator';
 import Alert from '../../../Shared/Alert';
 import DeleteApiButton from '../../Details/components/DeleteApiButton';
-import API from '../../../../data/api.js';
 
 const styles = theme => ({
     card: {

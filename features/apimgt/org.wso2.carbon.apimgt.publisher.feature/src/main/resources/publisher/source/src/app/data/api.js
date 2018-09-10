@@ -33,10 +33,19 @@ class API extends Resource {
             this.name = name;
             this.version = version;
             this.context = context;
+            this.isDefaultVersion = false;
+            this.transport = [
+                "http",
+                "https"
+            ];
+            this.visibility = "PUBLIC";
+            this.context = context;
             this.endpoint = [{
                 inline: {
                     endpointConfig: {
+                        list: [
 
+                        ]
                     }
                 },
                 type: 'Production'
@@ -143,7 +152,7 @@ class API extends Resource {
     }
 
     getProductionEndpoint() {
-        const productionEndpoint = this.endpoint.filter(endpoint => endpoint.type.toLowerCase() === 'production').pop();
+        const productionEndpoint = this.endpoint.filter(endpoint => endpoint.type.toLowerCase() === 'production')[0];
         if (!productionEndpoint) {
             return null;
         } else if (productionEndpoint.inline) {
@@ -154,7 +163,7 @@ class API extends Resource {
     }
 
     getSandboxEndpoint() {
-        const sandboxEndpoint = this.endpoint.filter(endpoint => endpoint.type.toLowerCase() === 'sandbox').pop();
+        const sandboxEndpoint = this.endpoint.filter(endpoint => endpoint.type.toLowerCase() === 'sandbox')[0];
         if (!sandboxEndpoint) {
             return null;
         } else if (sandboxEndpoint.inline) {
@@ -178,11 +187,10 @@ class API extends Resource {
                 body: data,
                 'Content-Type': 'application/json'
             };
-            debugger;
             return client.apis['API (Collection)'].post_apis(payload, this._requestMetaData());
         });
         return promisedAPIResponse.then(response => {
-            debugger
+            return new API(response.body);
         });
 
     }
@@ -439,6 +447,27 @@ class API extends Resource {
         } else {
             return promise_lc_history_get;
         }
+    }
+
+
+    /**
+     *
+     * Shortcut method to publish `this` API instance
+     *
+     * @param {Object} checkedItems State change checklist items
+     * @returns {Promise}
+     * @memberof API
+     */
+    publish(checkedItems) {
+        const payload = {
+            action: 'Published',
+            apiId: this.id,
+            lifecycleChecklist: checkedItems,
+            'Content-Type': 'application/json',
+        };
+        return this.client.then((client) => {
+            return client.apis['API (Individual)'].post_apis_change_lifecycle(payload, this._requestMetaData());
+        });
     }
 
     /**

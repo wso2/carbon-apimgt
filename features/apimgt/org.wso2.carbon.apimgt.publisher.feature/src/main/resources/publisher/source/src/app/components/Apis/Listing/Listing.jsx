@@ -19,12 +19,12 @@
 import React from 'react';
 import qs from 'qs';
 import PropTypes from 'prop-types';
+import API from 'AppData/api.js';
+import PageContainer from 'AppComponents/Base/container/';
+import { Progress } from 'AppComponents/Shared';
+import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 
 import PageNavigation from '../APIsNavigation';
-import PageContainer from '../../Base/container/';
-import API from '../../../data/api.js';
-import { Progress } from '../../Shared';
-import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 import SampleAPI from './SampleAPI/SampleAPI';
 import CardView from './CardView/CardView';
 import TableView from './TableView/TableView';
