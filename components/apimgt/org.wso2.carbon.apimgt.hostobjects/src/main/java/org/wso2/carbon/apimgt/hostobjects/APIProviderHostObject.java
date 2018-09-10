@@ -267,8 +267,6 @@ public class APIProviderHostObject extends ScriptableObject {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-            CommonUtil.addDefaultLifecyclesIfNotAvailable(registryService.getConfigSystemRegistry(tenantId),
-                    CommonUtil.getRootSystemRegistry(tenantId));
 
             String host = new URL(url).getHost();
             if (!authAdminStub.login(username, password, host)) {
