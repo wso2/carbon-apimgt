@@ -2211,16 +2211,16 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                                 + "'");
             }
             if (fromDate != null && toDate != null) {
-                String granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;//default granularity
+                String granularity = APIUsageStatisticsClientConstants.MINUTES_GRANULARITY;//default granularity
 
                 Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
 
                 if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
-                    granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
-                } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
                     granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
-                } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
+                } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
                     granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
+                } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
+                    granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;
                 }
                 query.append(
                         ") within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate) + "L per '" + granularity
