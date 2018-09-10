@@ -177,6 +177,7 @@ public final class APIUsageStatisticsClientConstants {
     public static final String YEARS_GRANULARITY = "years";
     public static final String HOURS_GRANULARITY = "hours";
     public static final String MINUTES_GRANULARITY = "minutes";
+    public static final String SECONDS_GRANULARITY = "seconds";
 
     public static final String DURATION_SECONDS = "SECONDS";
     public static final String DURATION_MINUTES = "MINUTES";
