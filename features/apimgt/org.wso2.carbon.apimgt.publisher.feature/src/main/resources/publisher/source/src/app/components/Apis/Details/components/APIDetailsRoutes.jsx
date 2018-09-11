@@ -27,7 +27,7 @@ const APIDetailsRoutes = ({ api, apiDetailPages }) => {
                 <Route
                     path='/apis/:api_uuid/environment view'
                     render={routeProps => (
-                        <EnvironmentOverview resourceNotFountMessage={resourceNotFountMessage} {...routeProps} />
+                        <EnvironmentOverview resourceNotFountMessage='' {...routeProps} />
                     )}
                 />
             )}

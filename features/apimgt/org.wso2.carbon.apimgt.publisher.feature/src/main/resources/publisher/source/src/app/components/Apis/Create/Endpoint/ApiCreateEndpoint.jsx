@@ -188,7 +188,7 @@ class ApiCreateEndpoint extends Component {
                                     </ScopeValidation>
                                 </Grid>
                                 <Grid item>
-                                    <Button raised onClick={() => this.props.history.push('/api/create/home')}>
+                                    <Button raised onClick={() => this.props.history.push('/apis')}>
                                         Cancel
                                     </Button>
                                 </Grid>

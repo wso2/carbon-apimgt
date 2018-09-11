@@ -975,35 +975,6 @@ class API extends Resource {
         return promised_getDedicatedGateway;
     }
 
-    /** *
-     * Get inline-endpoint definitions(both prodution and sandbox due to : https://github.com/wso2/product-apim/issues/2590)
-     * giving the API parameter(name,version & endpoint url)
-     * @param apiName {String} Name of the endpoint which is going to have prod & sandbox inline-endpoints
-     * @param apiVersion {String} Version
-     * @param apiEndpoint {String} Endpoint URL
-     * @param secured {Boolean} is endpoint is secured with Basic or Digest security methods
-     * @returns {[*,*]} an Array containing Production and Sandbox endpoints
-     */
-    static getEndpoints(apiName, apiVersion, apiEndpoint, secured = false) {
-        const production = {
-            type: 'production',
-            inline: {
-                name: apiName + apiVersion.replace(/\./g, '_'), // TODO: It's better to add this name property from the REST api itself, making sure no name conflicts with other inline endpoint definitions ~tmkb
-                endpointConfig: JSON.stringify({
-                    serviceUrl: apiEndpoint
-                }),
-                endpointSecurity: {
-                    enabled: secured
-                },
-                type: 'http',
-            },
-        };
-        const sandbox = JSON.parse(JSON.stringify(production)); // deep coping the object
-        sandbox.type = 'sandbox';
-        sandbox.inline.name += '_sandbox';
-        return [production, sandbox];
-    }
-
 
     /**
      *

@@ -21,13 +21,14 @@ import PropTypes from 'prop-types';
 import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom';
 import qs from 'qs';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import { addLocaleData, defineMessages, IntlProvider } from 'react-intl';
+
 import Log from 'log4javascript';
 import Utils from './app/data/Utils';
 import ConfigManager from './app/data/ConfigManager';
 // import MaterialDesignCustomTheme from './app/components/Shared/CustomTheme';
 import { PageNotFound } from './app/components/Base/Errors';
 import AuthManager from './app/data/AuthManager';
-import { addLocaleData, defineMessages, IntlProvider } from 'react-intl';
 import Apis from './app/components/Apis/Apis';
 import Endpoints from './app/components/Endpoints';
 import Base from './app/components/Base';

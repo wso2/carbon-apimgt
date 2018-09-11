@@ -17,7 +17,7 @@
  */
 
 
-import { FormControl } from '@material-ui/core';
+import FormControl from '@material-ui/core/FormControl';
 import Dropzone from 'react-dropzone';
 import PropTypes from 'prop-types';
 

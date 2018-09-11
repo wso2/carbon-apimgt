@@ -20,6 +20,7 @@ import React, { Component } from 'react';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
+import PropTypes from 'prop-types';
 
 import Api from '../../../../data/api';
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
@@ -34,15 +35,14 @@ class EnvironmentOverview extends Component {
             environments: [],
             api: null,
             notFound: false,
-            openMenu: false,
         };
         this.api_uuid = this.props.match.params.api_uuid;
     }
 
     componentDidMount() {
         const api = new Api();
-        const promised_api = api.get(this.api_uuid);
-        promised_api
+        const promisedApi = api.get(this.api_uuid);
+        promisedApi
             .then((response) => {
                 this.setState({ api: response.obj });
             })
@@ -50,7 +50,7 @@ class EnvironmentOverview extends Component {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                 }
-                const status = error.status;
+                const { status } = error;
                 if (status === 404) {
                     this.setState({ notFound: true });
                 }
@@ -58,7 +58,7 @@ class EnvironmentOverview extends Component {
 
         ConfigManager.getConfigs()
             .environments.then((response) => {
-                const environments = response.data.environments;
+                const { environments } = response.data;
                 this.setState({ environments });
             })
             .catch((error) => {
@@ -67,7 +67,7 @@ class EnvironmentOverview extends Component {
     }
 
     render() {
-        const api = this.state.api;
+        const { api } = this.state;
 
         if (this.state.notFound) {
             return <ResourceNotFound message={this.props.resourceNotFountMessage} />;
@@ -86,8 +86,8 @@ class EnvironmentOverview extends Component {
                     </Paper>
                 </Grid>
                 <Grid item xs={12}>
-                    {this.state.environments.map((environment, index) => (
-                        <EnvironmentPanel rootAPI={api} environment={environment} key={index} />
+                    {this.state.environments.map(environment => (
+                        <EnvironmentPanel rootAPI={api} environment={environment} key={environment.name} />
                     ))}
                 </Grid>
             </Grid>
@@ -95,4 +95,16 @@ class EnvironmentOverview extends Component {
     }
 }
 
+EnvironmentOverview.defaultProps = {
+    resourceNotFountMessage: '',
+};
+
+EnvironmentOverview.propTypes = {
+    match: PropTypes.shape({
+        params: PropTypes.shape({
+            api_uuid: PropTypes.shape({}),
+        }),
+    }).isRequired,
+    resourceNotFountMessage: PropTypes.string,
+};
 export default EnvironmentOverview;

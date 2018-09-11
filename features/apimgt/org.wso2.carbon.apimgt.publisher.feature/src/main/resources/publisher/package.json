@@ -5,9 +5,10 @@
   "main": "app.jsx",
   "scripts": {
     "test": "NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED='0' mocha --recursive --require babel-register  -r mock-local-storage \"./source/test/**/*.test.js\"",
-    "build:prod": "NODE_ENV=production webpack -p --progress --colors --config webpack.config.js",
+    "build:prod": "NODE_ENV=production node --max_old_space_size=4096 node_modules/webpack/bin/webpack -p --progress --colors --config webpack.config.js",
     "build:dev": "NODE_ENV=development webpack -d --config webpack.config.js --watch ",
-    "analysis": "NODE_ENV=development webpack --env.analysis -d --progress --config webpack.config.js"
+    "analysis": "NODE_ENV=development webpack --env.analysis -d --progress --config webpack.config.js",
+    "lint": "eslint source"
   },
   "repository": {
     "type": "git",
