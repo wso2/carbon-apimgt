@@ -284,7 +284,7 @@ function renderCompareGraph(fromDate,toDate,drillDown,mediationName){
         }, "json");
 }
 
-function drawGraphInArea(rdata,drilldown){
+function drawGraphInArea(rdata,drilldown) {
     $('#chartContainer').show();
     $('#chartContainer').empty();
     $('#noData').empty();
@@ -329,33 +329,39 @@ nv.addGraph(function() {
       .datum(renderdata)         //Populate the <svg> element with chart data...
       .call(chart);          //Finally, render the chart!
 
-  //Update the chart when window resizes.
-  nv.utils.windowResize(function() { chart.update() });
- d3.selectAll(".nv-point").on("click", function (e) {
-    var date = new Date(e.x);
-    if (depth == "DAY"){
-     from = new Date(e.x).setDate(date.getDate()-1);
-     to = new Date(e.x).setDate(date.getDate()+1);
-    depth = "HOUR";
-    }else if (depth == "HOUR"){
-     from = new Date(e.x).setHours(date.getHours()-1);
-     to = new Date(e.x).setHours(date.getHours()+1);
-    depth = "MINUTES";
-    }else if (depth == "MINUTES"){
-     from = new Date(e.x).setMinutes(date.getMinutes()-1);
-     to = new Date(e.x).setMinutes(date.getMinutes()+1);
-    depth = "SECONDS";
-    }else if (depth == "SECONDS"){
-    depth = "HOUR";
-     from = new Date(e.x).setHours(date.getHours()-1);
-     to = new Date(e.x).setHours(date.getHours()+1);
-    }
-    if (versionComparison) {
-       renderCompareGraph(from,to,depth,encodeURIComponent(mediationName));
-    }else{
-    renderGraph(from,to,depth);
-    }
-  });
+    //Update the chart when window resizes.
+    nv.utils.windowResize(function() { chart.update() });
+
+    d3.selectAll(".nv-point").on("click", function (e) {
+        var date = new Date(e.x);
+
+        if (depth == "DAY") {
+            from = new Date(e.x).setDate(date.getDate() - 1);
+            to = new Date(e.x).setDate(date.getDate() + 1);
+            btnActiveToggle($('#hour-btn'));
+            depth = "HOUR";
+        } else if (depth == "HOUR") {
+            from = new Date(e.x).setHours(date.getHours() - 1);
+            to = new Date(e.x).setHours(date.getHours() + 1);
+            $("#dateRangePickerContainer .btn-group").children().removeClass('active');
+            depth = "MINUTES";
+        } else if (depth == "MINUTES") {
+            from = new Date(e.x).setMinutes(date.getMinutes() - 1);
+            to = new Date(e.x).setMinutes(date.getMinutes() + 1);
+            $("#dateRangePickerContainer .btn-group").children().removeClass('active');
+            depth = "SECONDS";
+        } else if (depth == "SECONDS") {
+            depth = "HOUR";
+            from = new Date(e.x).setHours(date.getHours() - 1);
+            to = new Date(e.x).setHours(date.getHours() + 1);
+        }
+
+        if (versionComparison) {
+            renderCompareGraph(from,to,depth,encodeURIComponent(mediationName));
+        } else {
+            renderGraph(from,to,depth);
+        }
+    });
 });
 $('#chartContainer').append($('<div id="latencytTime"><svg style="height:600px;"></svg></div>'));
 $('#latencytTime svg').show();
