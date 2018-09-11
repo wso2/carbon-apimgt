@@ -1409,7 +1409,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             Map<String, Tag> tagsData = new HashMap<String, Tag>();
             try {
             	PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(((UserRegistry)userRegistry).getUserName());
-                if (requestedTenant != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenant)) {
+                if (requestedTenant != null ) {//fix https://github.com/wso2/product-apim/issues/3449
                     isTenantFlowStarted = startTenantFlowForTenantDomain(requestedTenant);
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(((UserRegistry)userRegistry).getUserName());
                 }
