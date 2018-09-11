@@ -279,7 +279,7 @@ $(document).ready(function(){
             $(this).text(i18n.t("Show More Options"));
         }
         else{
-            $(this).text(i18n.t("Show Fewer Options"));
+            $(this).text(i18n.t("Show fewer options"));
         }
         div.toggle('fast');
         return false; 

@@ -98,7 +98,7 @@ var populateAppList = function() {
                 var  apps = '';
 
                 if (json.usage.length == 0) {
-                    apps = '<option data-hidden="true">' + i18n.t('No Apps Available')+ '</option>';
+                    apps = '<option data-hidden="true">' + i18n.t('No apps available')+ '</option>';
                 }
                 for ( var i=0; i < json.usage.length ; i++){
                     if ( i == 0){

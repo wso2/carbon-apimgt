@@ -249,7 +249,7 @@ function APIDesigner(){
             }
         });
         if(vc==0){
-            jagg.message({content: i18n.t("You should select at least one HTTP verb."), type: "error"});
+            jagg.message({content: i18n.t("You must select at least one HTTP verb."), type: "error"});
             return;
         }
         event.data.add_resource(resource, path);
@@ -1387,7 +1387,7 @@ $(document).ready(function(){
             jagg.message({
                 content: i18n.t("At least one resource should be specified. Do you want to add a wildcard resource (/*)?"),
                 type:"confirm",
-                title: i18n.t("Resource not specified"),
+                title: i18n.t("Resource Not Specified"),
                 anotherDialog:true,
                 okCallback:function(){
                     var designer = APIDesigner();
@@ -1468,7 +1468,7 @@ $(document).ready(function(){
 
             if(tagName.length > 30){
                 $tag.val(tagName.substring(0, 30));
-                $('.tags-error').html(i18n.t('The tag can only have a maximum of 30 characters.'));
+                $('.tags-error').html(i18n.t('A tag can have a maximum of 30 characters.'));
             }
 
         });

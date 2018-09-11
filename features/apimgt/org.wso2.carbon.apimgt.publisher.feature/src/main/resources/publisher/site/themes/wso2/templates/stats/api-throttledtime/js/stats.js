@@ -133,8 +133,8 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                     $('#middle').html("");
                     $('#middle').append($('<div class="errorWrapper"><span class="label top-level-warning"><i class="icon-warning-sign icon-white" title="Stats-not-configured"></i>' +
                         '<a href=\'https://docs.wso2.com/display/AM260/Configuring+APIM+Analytics\' target=\'_blank\'' +
-		       	        'title=' + i18n.t('Refer our documentation to configure API Manager Analytics correctly') + ' class=\'warningLink\'>' +
-	                    i18n.t('Refer our documentation to configure API Manager Analytics correctly') + '</a></span><br/>' +
+		       	        'title=' + i18n.t('Refer our documentation to correctly configure API Manager Analytics') + ' class=\'warningLink\'>' +
+	                    i18n.t('Refer our documentation to correctly configure API Manager Analytics') + '</a></span><br/>' +
 			            '<img src="../themes/wso2/images/statsThumb.png" alt="'+ i18n.t('Thumbnail image when stats are not configured') + '"></div>'));
                 }
             }
