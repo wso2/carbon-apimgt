@@ -130,6 +130,6 @@ APIInputForm.defaultProps = {
 
 APIInputForm.propTypes = {
     validate: PropTypes.bool,
-    apiFields: PropTypes.shape({}).isRequired,
+    api: PropTypes.shape({}).isRequired,
     handleInputChange: PropTypes.func.isRequired,
 };

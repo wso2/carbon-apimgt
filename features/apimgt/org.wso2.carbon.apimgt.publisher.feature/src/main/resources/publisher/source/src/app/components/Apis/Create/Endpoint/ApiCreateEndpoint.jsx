@@ -178,7 +178,7 @@ class ApiCreateEndpoint extends Component {
                                         resourceMethod={resourceMethod.POST}
                                     >
                                         <div>
-                                            <Button variant='outlined' disabled={loading} color='primary'>
+                                            <Button type='submit' variant='outlined' disabled={loading} color='primary'>
                                                 Create
                                             </Button>
                                             {loading && (
@@ -188,9 +188,7 @@ class ApiCreateEndpoint extends Component {
                                     </ScopeValidation>
                                 </Grid>
                                 <Grid item>
-                                    <Button raised onClick={() => this.props.history.push('/apis')}>
-                                        Cancel
-                                    </Button>
+                                    <Button onClick={() => this.props.history.push('/apis')}>Cancel</Button>
                                 </Grid>
                             </Grid>
                         </form>
