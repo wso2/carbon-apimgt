@@ -17,55 +17,37 @@
  */
 import React, { Component } from 'react';
 /* MUI Imports */
-import { Grid, Button, Typography, withStyles } from '@material-ui/core';
-import Stepper, { Step, StepLabel, StepContent } from '@material-ui/core/Stepper';
-import Card, { CardContent } from '@material-ui/core/Card';
+import { Grid, Button, Typography } from '@material-ui/core';
+import { withStyles } from '@material-ui/core/styles';
+import Stepper from '@material-ui/core/Stepper';
+import Step from '@material-ui/core/Step';
+import StepLabel from '@material-ui/core/StepLabel';
+import StepContent from '@material-ui/core/StepContent';
+import Paper from '@material-ui/core/Paper';
 import PropTypes from 'prop-types';
 import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
+import InputForm from 'AppComponents/Apis/Create/Endpoint/APIInputForm';
+import Progress from 'AppComponents/Shared/Progress';
 
-import InputForm from '../Endpoint/APIInputForm';
 import ProvideWSDL from './Steps/ProvideWSDL';
 import BindingInfo from './BindingInfo';
 
 const styles = theme => ({
-    button: {
-        margin: theme.spacing.unit,
-    },
-    leftIcon: {
-        marginRight: theme.spacing.unit,
-    },
-    rightIcon: {
-        marginLeft: theme.spacing.unit,
+    root: {
+        flexGrow: 1,
     },
     paper: {
         padding: theme.spacing.unit * 2,
     },
-    actionsContainer: {
-        marginTop: theme.spacing.unit,
-        marginBottom: theme.spacing.unit,
-    },
-    resetContainer: {
-        marginTop: 0,
-        padding: theme.spacing.unit * 3,
-    },
-    mainCol: {
-        'margin-top': '6em',
-    },
     textWelcome: {
         'font-weight': 300,
-    },
-    apiCreate: {
-        'margin-top': '30px',
     },
     stepLabel: {
         'font-weight': 300,
         'font-size': '24px',
         color: 'rgba(0, 0, 0, 0.87)',
         'line-height': '1.35417em',
-    },
-    radioGroup: {
-        'margin-left': '0px',
     },
     optionAction: {
         'margin-top': '1.5em',
@@ -97,9 +79,8 @@ class ApiCreateWSDL extends Component {
             doValidate: false,
             wsdlBean: {},
             currentStep: 0,
-            apiFields: {
-                apiVersion: '1.0.0',
-            },
+            api: new API('', 'v1.0.0'),
+            loading: false,
         };
         this.updateWSDLValidity = this.updateWSDLValidity.bind(this);
         this.updateApiInputs = this.updateApiInputs.bind(this);
@@ -156,16 +137,56 @@ class ApiCreateWSDL extends Component {
      * @param {React.SyntheticEvent} event Event containing user action
      * @memberof ApiCreateWSDL
      */
-    updateApiInputs(event) {
-        let name = 'selectedPolicies';
-        let value = event;
-        // If event is an Synthetic event , extract the input name and its value from event.target object
-        if (!Array.isArray(event)) {
-            ({ name, value } = event.target);
-        }
-        const { apiFields } = this.state;
-        apiFields[name] = value;
-        this.setState({ apiFields });
+    updateApiInputs({ target }) {
+        const { name, value } = target;
+        this.setState(({ api }) => {
+            const changes = api;
+            if (name === 'endpoint') {
+                changes[name] = [
+                    {
+                        inline: {
+                            name: `${api.name}_inline_prod`,
+                            endpointConfig: {
+                                list: [
+                                    {
+                                        url: value,
+                                        timeout: '1000',
+                                    },
+                                ],
+                                endpointType: 'SINGLE',
+                            },
+                            type: 'soap',
+                            endpointSecurity: {
+                                enabled: false,
+                            },
+                        },
+                        type: 'Production',
+                    },
+                    {
+                        inline: {
+                            name: `${api.name}_inline_sandbx`,
+                            endpointConfig: {
+                                list: [
+                                    {
+                                        url: value,
+                                        timeout: '1000',
+                                    },
+                                ],
+                                endpointType: 'SINGLE',
+                            },
+                            type: 'soap',
+                            endpointSecurity: {
+                                enabled: false,
+                            },
+                        },
+                        type: 'Sandbox',
+                    },
+                ];
+            } else {
+                changes[name] = value;
+            }
+            return { api: changes };
+        });
     }
 
     /**
@@ -173,17 +194,18 @@ class ApiCreateWSDL extends Component {
      * @memberof ApiCreateWSDL
      */
     createWSDLAPI() {
+        this.setState({ loading: true });
         const newApi = new API();
-        const { wsdlBean, apiFields } = this.state;
+        const { wsdlBean, api } = this.state;
         const {
-            apiName, apiVersion, apiContext, apiEndpoint, implementationType,
-        } = apiFields;
+            name, version, context, endpoint, implementationType,
+        } = api;
         const uploadMethod = wsdlBean.url ? 'url' : 'file';
         const apiAttributes = {
-            name: apiName,
-            version: apiVersion,
-            context: apiContext,
-            endpoint: API.getEndpoints(apiName, apiVersion, apiEndpoint),
+            name,
+            version,
+            context,
+            endpoint,
         };
         const apiData = {
             additionalProperties: JSON.stringify(apiAttributes),
@@ -194,12 +216,14 @@ class ApiCreateWSDL extends Component {
         newApi
             .importWSDL(apiData)
             .then((response) => {
-                Alert.success('API Created Successfully. Now you can add/modify resources, define endpoints etc..');
+                Alert.success(`${name} API Created Successfully.`);
                 const uuid = response.obj.id;
                 const redirectURL = '/apis/' + uuid + '/overview';
+                this.setState({ loading: false });
                 this.props.history.push(redirectURL);
             })
             .catch((errorResponse) => {
+                this.setState({ loading: false });
                 console.error(errorResponse);
                 const error = errorResponse.response.obj;
                 const messageTxt = 'Error[' + error.code + ']: ' + error.description + ' | ' + error.message + '.';
@@ -215,7 +239,7 @@ class ApiCreateWSDL extends Component {
     render() {
         const { classes } = this.props;
         const {
-            doValidate, currentStep, wsdlBean, apiFields,
+            doValidate, currentStep, wsdlBean, api, loading,
         } = this.state;
         const uploadMethod = wsdlBean.url ? 'url' : 'file';
         const provideWSDLProps = {
@@ -225,72 +249,72 @@ class ApiCreateWSDL extends Component {
             validate: doValidate,
         };
         return (
-            <Grid container spacing={0} justify='center'>
-                <Grid item xs={8}>
-                    <Typography type='display1' className={classes.textWelcome}>
-                        Design a new REST API using WSDL
-                    </Typography>
-                    <Card className={classes.apiCreate}>
-                        <CardContent>
-                            <Stepper activeStep={currentStep} orientation='vertical'>
-                                <Step key='provideWSDL'>
-                                    <StepLabel>
-                                        <Typography
-                                            type='headline'
-                                            gutterBottom
-                                            className={classes.stepLabel}
-                                            component='span'
-                                        >
-                                            Select WSDL
-                                        </Typography>
-                                    </StepLabel>
-                                    <StepContent>
-                                        <ProvideWSDL {...provideWSDLProps} />
-                                        <div className={classes.optionAction}>
-                                            <Button>Cancel</Button>
-                                            <Button raised color='primary' onClick={this.nextStep}>
-                                                Next
-                                            </Button>
-                                        </div>
-                                    </StepContent>
-                                </Step>
-                                <Step key='createAPI'>
-                                    <StepLabel className={classes.stepLabel}>
-                                        <Typography
-                                            type='headline'
-                                            gutterBottom
-                                            className={classes.stepLabel}
-                                            component='span'
-                                        >
-                                            Create API
-                                        </Typography>
-                                    </StepLabel>
-                                    <StepContent>
-                                        <Typography type='caption' gutterBottom align='left'>
-                                            You can configure the advanced configurations later
-                                        </Typography>
-                                        <InputForm apiFields={apiFields} handleInputChange={this.updateApiInputs} />
-                                        <Grid item xs={10}>
-                                            <BindingInfo
-                                                updateApiInputs={this.updateApiInputs}
-                                                wsdlBean={wsdlBean}
-                                                classes={classes}
-                                                apiFields={apiFields}
-                                            />
-                                        </Grid>
-                                        <div className={classes.optionAction}>
-                                            <Button color='primary' onClick={this.stepBack}>
-                                                Back
-                                            </Button>
-                                            <Button raised color='primary' onClick={this.createWSDLAPI}>
-                                                Create
-                                            </Button>
-                                        </div>
-                                    </StepContent>
-                                </Step>
-                            </Stepper>
-                        </CardContent>
-                    </Card>
+            <Grid container className={classes.root} spacing={0} justify='center'>
+                <Grid item md={10}>
+                    <Paper className={classes.paper}>
+                        <Typography type='display1' className={classes.textWelcome}>
+                            Design a new REST API using WSDL
+                        </Typography>
+
+                        <Stepper activeStep={currentStep} orientation='vertical'>
+                            <Step key='provideWSDL'>
+                                <StepLabel>
+                                    <Typography
+                                        type='headline'
+                                        gutterBottom
+                                        className={classes.stepLabel}
+                                        component='span'
+                                    >
+                                        Select WSDL
+                                    </Typography>
+                                </StepLabel>
+                                <StepContent>
+                                    <ProvideWSDL {...provideWSDLProps} />
+                                    <div className={classes.optionAction}>
+                                        <Button color='primary' onClick={this.nextStep}>
+                                            Next
+                                        </Button>
+                                        <Button>Cancel</Button>
+                                    </div>
+                                </StepContent>
+                            </Step>
+                            <Step key='createAPI'>
+                                <StepLabel className={classes.stepLabel}>
+                                    <Typography
+                                        type='headline'
+                                        gutterBottom
+                                        className={classes.stepLabel}
+                                        component='span'
+                                    >
+                                        Create API
+                                    </Typography>
+                                </StepLabel>
+                                <StepContent>
+                                    <Typography type='caption' gutterBottom align='left'>
+                                        You can configure the advanced configurations later
+                                    </Typography>
+                                    <InputForm api={api} handleInputChange={this.updateApiInputs} />
+                                    <Grid item xs={10}>
+                                        <BindingInfo
+                                            updateApiInputs={this.updateApiInputs}
+                                            wsdlBean={wsdlBean}
+                                            classes={classes}
+                                            api={api}
+                                        />
+                                    </Grid>
+                                    <div className={classes.optionAction}>
+                                        <Button disabled={loading} color='primary' onClick={this.createWSDLAPI}>
+                                            {loading && <Progress />}
+                                            Create
+                                        </Button>
+                                        <Button color='primary' onClick={this.stepBack}>
+                                            Back
+                                        </Button>
+                                    </div>
+                                </StepContent>
+                            </Step>
+                        </Stepper>
+                    </Paper>
                 </Grid>
             </Grid>
         );

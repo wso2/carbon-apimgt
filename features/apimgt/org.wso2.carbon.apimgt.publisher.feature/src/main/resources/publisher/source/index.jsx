@@ -29,6 +29,9 @@ const theme = createMuiTheme({
         type: 'light', // Switching the dark mode on is a single property value change.
     },
 });
-ReactDOM.render((<MuiThemeProvider theme={theme}><Publisher /></MuiThemeProvider>),
+ReactDOM.render(
+    <MuiThemeProvider theme={theme}>
+        <Publisher />
+    </MuiThemeProvider>,
     document.getElementById('react-root'),
 );

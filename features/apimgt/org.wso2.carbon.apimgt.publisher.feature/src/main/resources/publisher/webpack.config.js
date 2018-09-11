@@ -83,24 +83,6 @@ if (process.env.NODE_ENV === 'development') {
     const esLintLoader = {
         enforce: 'pre',
         test: /\.(js|jsx)$/,
-        /* exclude: /node_modules/, */
-        include: [
-            /.*\/components\/Endpoints\/*/,
-            /.*\/components\/Shared\/*/,
-            /.*\/components\/Landing\/*/,
-            /.*\/components\/Base\/*/,
-            /.*\/components\/Login\/*/,
-            /.*\/Apis\/Create\/*/,
-            /.*\/Apis\/Listing\/*/,
-            /.*\/Apis\/Details\/NavBar.jsx/,
-            /.*\/Apis\/Details\/index.jsx/,
-            /.*\/Apis\/Details\/Overview\/Overview.jsx/,
-            /.*\/Apis\/Details\/DeleteApi.jsx/,
-            // /.*\/Apis\/Details\/Endpoints\/*/,
-            /.*\/Apis\/Details\/Scopes\/*/,
-            /.*\/Apis\/Details\/Subscriptions\/*/,
-            /.*\/data\/*/,
-        ],
         loader: 'eslint-loader',
         options: {
             failOnError: true,

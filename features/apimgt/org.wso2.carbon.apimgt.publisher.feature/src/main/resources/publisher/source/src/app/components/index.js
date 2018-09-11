@@ -16,7 +16,6 @@
  * under the License.
  */
 
-import React from 'react';
 import Base from './Base/index';
 import Landing from './Landing/Landing';
 import Apis from './Apis/Apis';

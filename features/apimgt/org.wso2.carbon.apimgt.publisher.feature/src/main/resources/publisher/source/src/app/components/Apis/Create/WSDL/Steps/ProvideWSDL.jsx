@@ -31,7 +31,7 @@ import {
 } from '@material-ui/core';
 import { Done, ErrorOutline } from '@material-ui/icons/';
 import PropTypes from 'prop-types';
-
+import Progress from 'AppComponents/Shared/Progress';
 import FileUpload from './FileUpload';
 import Alert from '../../../../Shared/Alert';
 import API from '../../../../../data/api';
@@ -62,9 +62,11 @@ class ProvideWSDL extends Component {
             url,
             isValid: null,
             errorMessage: '',
+            loading: false,
         };
         this.validateWSDL = this.validateWSDL.bind(this);
         this.updateURL = this.updateURL.bind(this);
+        this.handleValidateWSDL = this.handleValidateWSDL.bind(this);
     }
 
     /**
@@ -99,13 +101,20 @@ class ProvideWSDL extends Component {
 
     /**
      *
+     *
+     * @memberof ProvideWSDL
+     */
+    handleValidateWSDL() {
+        this.validateWSDL();
+    }
+    /**
+     *
      * @param validity {Function} Call back function to trigger after pass/fail the validation
      */
-    validateWSDL(updateWSDLValidity) {
+    validateWSDL(updateHandler) {
         // do not invoke callback in case of React SyntheticMouseEvent
-        const updateHandler =
-            updateWSDLValidity.constructor.name === 'SyntheticMouseEvent' ? false : updateWSDLValidity;
         const { uploadMethod, url, file } = this.state;
+        this.setState({ loading: true });
         const newAPI = new API();
         let promisedValidation;
         const wsdlBean = {};
@@ -128,7 +137,7 @@ class ProvideWSDL extends Component {
             .then((response) => {
                 const { isValid, wsdlInfo } = response.obj;
                 wsdlBean.info = wsdlInfo;
-                this.setState({ isValid });
+                this.setState({ isValid, loading: false });
                 if (updateHandler) {
                     updateHandler(isValid, wsdlBean);
                 }
@@ -139,8 +148,9 @@ class ProvideWSDL extends Component {
                 }
                 const response = error.response && error.response.obj;
                 const message =
-                    'Error while validating WSDL!! ' + response && '[' + response.message + '] ' + response.description;
-                this.setState({ isValid: false, errorMessage: message });
+                    'Error while validating WSDL!! '
+                    + response && '[' + response.message + '] ' + response.description;
+                this.setState({ isValid: false, errorMessage: message, loading: false });
                 console.error(error);
                 Alert.error(message);
             });
@@ -153,7 +163,7 @@ class ProvideWSDL extends Component {
      */
     render() {
         const {
-            isValid, errorMessage, uploadMethod, file, url,
+            loading, isValid, errorMessage, uploadMethod, file, url,
         } = this.state;
         const { classes } = this.props;
         const currentFile = file ? [file] : [];
@@ -203,7 +213,12 @@ class ProvideWSDL extends Component {
                             <Grid container>
                                 <Grid item xs={12}>
                                     <Tooltip title={'Validates WSDL ' + uploadMethod} placement='bottom'>
-                                        <Button color={error ? 'accent' : 'primary'} onClick={this.validateWSDL}>
+                                        <Button
+                                            disabled={loading}
+                                            color={error ? 'accent' : 'primary'}
+                                            onClick={this.handleValidateWSDL}
+                                        >
+                                            {loading && <Progress />}
                                             Validate {isValid && <Done />}
                                         </Button>
                                     </Tooltip>
@@ -226,14 +241,16 @@ class ProvideWSDL extends Component {
 
 ProvideWSDL.defaultProps = {
     uploadMethod: 'file',
+    url: '',
+    file: {},
 };
 
 ProvideWSDL.propTypes = {
-    url: PropTypes.string.isRequired,
+    url: PropTypes.string,
     updateWSDLValidity: PropTypes.func.isRequired,
     uploadMethod: PropTypes.string,
     validate: PropTypes.bool.isRequired,
-    file: PropTypes.shape({}).isRequired,
+    file: PropTypes.shape({}),
     classes: PropTypes.shape({}).isRequired,
 };
 

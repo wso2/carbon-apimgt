@@ -14,26 +14,21 @@
  * limitations under the License.
  */
 import React, { Component } from 'react';
-import { Grid, Paper, Typography, Divider } from '@material-ui/core';
+import { Paper, Divider } from '@material-ui/core';
 import PropTypes from 'prop-types';
-
-import EndpointForm from '../../../Endpoints/Create/EndpointForm';
-import Api from '../../../../data/api';
-import ApiPermissionValidation from '../../../../data/ApiPermissionValidation';
-import { resourceMethod, resourcePath, ScopeValidation } from '../../../../data/ScopeValidation';
-import { withStyles } from '@material-ui/core/styles';
-import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
-import { Alert, InteractiveButton, Progress } from '../../../Shared';
-import EndpointDAO from '../../../../data/Endpoint';
-import EndpointsSelector from './EndpointsSelector';
-import EndpointDetail from './EndpointDetail.jsx';
-import Button from '@material-ui/core/Button';
-import Icon from '@material-ui/core/Icon';
-import { FormattedMessage } from 'react-intl';
 import IconButton from '@material-ui/core/IconButton';
 import SaveIcon from '@material-ui/icons/Save';
 import EditIcon from '@material-ui/icons/Edit';
 import CancelIcon from '@material-ui/icons/Cancel';
+import { withStyles } from '@material-ui/core/styles';
+import { FormattedMessage } from 'react-intl';
+
+import EndpointDAO from 'AppData/Endpoint';
+import Api from 'AppData/api';
+import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
+import { Alert, Progress } from 'AppComponents/Shared';
+
+import EndpointDetail from './EndpointDetail.jsx';
 
 const styles = theme => ({
     button: {
@@ -173,7 +168,7 @@ class Endpoint extends Component {
 
     updateEndpoints() {
         // this.setState({loading: true});
-        debugger;
+
         const prod = this.state.productionEndpoint;
         const sandbox = this.state.sandboxEndpoint;
         const prodJSON = { type: 'Production' };
@@ -261,10 +256,9 @@ class Endpoint extends Component {
      */
     render() {
         const {
-            api, endpointsMap, productionEndpoint, sandboxEndpoint, isInline,
+            api, productionEndpoint, sandboxEndpoint,
         } = this.state;
         const { classes } = this.props;
-        const globalEndpoints = endpointsMap.values();
         if (this.state.notFound) {
             return <ResourceNotFound message={this.props.resourceNotFountMessage} />;
         }
@@ -273,31 +267,52 @@ class Endpoint extends Component {
         }
         return (
             <Paper>
-                {(this.state.readOnly && <IconButton className={classes.button} aria-label="Edit" color="primary" onClick={() => this.makeEditable(false)}>
-                    <EditIcon />
-                </IconButton>)}
-                {(!this.state.readOnly && <IconButton className={classes.button} aria-label="Cancel" onClick={() => this.makeNonEditable(true)}>
-                    <CancelIcon />
-                </IconButton>)}
-                <IconButton className={classes.button} aria-label="Save" color="primary" onClick={this.updateEndpoints} disabled={this.state.disableSave}>
+                {this.state.readOnly && (
+                    <IconButton
+                        className={classes.button}
+                        aria-label='Edit'
+                        color='primary'
+                        onClick={() => this.makeEditable(false)}
+                    >
+                        <EditIcon />
+                    </IconButton>
+                )}
+                {!this.state.readOnly && (
+                    <IconButton
+                        className={classes.button}
+                        aria-label='Cancel'
+                        onClick={() => this.makeNonEditable(true)}
+                    >
+                        <CancelIcon />
+                    </IconButton>
+                )}
+                <IconButton
+                    className={classes.button}
+                    aria-label='Save'
+                    color='primary'
+                    onClick={this.updateEndpoints}
+                    disabled={this.state.disableSave}
+                >
                     <SaveIcon />
                 </IconButton>
-                {productionEndpoint &&
+                {productionEndpoint && (
                     <EndpointDetail
-                        type={<FormattedMessage
-                            id='production'
-                            defaultMessage='Production'
-                        />} endpoint={productionEndpoint} isInline={productionEndpoint.inline} readOnly={this.state.readOnly} makeNonEditable={this.makeNonEditable}
+                        type={<FormattedMessage id='production' defaultMessage='Production' />}
+                        endpoint={productionEndpoint}
+                        isInline={productionEndpoint.inline}
+                        readOnly={this.state.readOnly}
+                        makeNonEditable={this.makeNonEditable}
                     />
-                }
-                {sandboxEndpoint &&
+                )}
+                {sandboxEndpoint && (
                     <EndpointDetail
-                        type={<FormattedMessage
-                            id='sandbox'
-                            defaultMessage='Sandbox'
-                        />} endpoint={sandboxEndpoint} isInline={sandboxEndpoint.inline} readOnly={this.state.readOnly} makeNonEditable={this.makeNonEditable}
+                        type={<FormattedMessage id='sandbox' defaultMessage='Sandbox' />}
+                        endpoint={sandboxEndpoint}
+                        isInline={sandboxEndpoint.inline}
+                        readOnly={this.state.readOnly}
+                        makeNonEditable={this.makeNonEditable}
                     />
-                }
+                )}
                 <Divider />
             </Paper>
         );
@@ -321,6 +336,7 @@ Endpoint.propTypes = {
             apiUUID: PropTypes.string,
         }),
     }).isRequired,
+    classes: PropTypes.shape({}).isRequired,
 };
 
 export default withStyles(styles)(Endpoint);

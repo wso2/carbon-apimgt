@@ -1,11 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormControl, FormControlLabel, FormLabel } from '@material-ui/core/';
-import Radio, { RadioGroup } from '@material-ui/core/Radio';
+import FormControl from '@material-ui/core/FormControl';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormLabel from '@material-ui/core/FormLabel';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
 
 const BindingInfo = (props) => {
     const {
-        apiFields, wsdlBean, classes, updateApiInputs,
+        api, wsdlBean, classes, updateApiInputs,
     } = props;
     if (wsdlBean.info && (wsdlBean.info.bindingInfo.hasHttpBinding || wsdlBean.info.bindingInfo.hasSoapBinding)) {
         return (
@@ -14,7 +17,7 @@ const BindingInfo = (props) => {
                 <RadioGroup
                     aria-label='Implementation-Type'
                     name='implementationType'
-                    value={apiFields.implementationType}
+                    value={api.implementationType}
                     onChange={updateApiInputs}
                 >
                     <FormControlLabel
@@ -40,7 +43,7 @@ const BindingInfo = (props) => {
 
 BindingInfo.propTypes = {
     updateApiInputs: PropTypes.func.isRequired,
-    apiFields: PropTypes.shape({
+    api: PropTypes.shape({
         implementationType: PropTypes.string,
     }).isRequired,
     wsdlBean: PropTypes.shape({

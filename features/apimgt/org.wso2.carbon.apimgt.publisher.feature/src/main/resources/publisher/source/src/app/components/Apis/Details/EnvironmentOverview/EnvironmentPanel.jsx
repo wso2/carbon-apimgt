@@ -21,6 +21,7 @@ import Typography from '@material-ui/core/Typography';
 import ExpansionPanel, { ExpansionPanelDetails, ExpansionPanelSummary } from '@material-ui/core/ExpansionPanel';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { withStyles } from '@material-ui/core/styles';
+import PropTypes from 'prop-types';
 
 import Grid from '@material-ui/core/Grid';
 import ApiThumb from '../../Listing/components/ApiThumb';
@@ -51,10 +52,7 @@ class EnvironmentPanel extends Component {
     componentDidMount() {
         const { rootAPI, environment } = this.props;
 
-        let api;
-        if (AuthManager.getUser(environment.label)) {
-            api = new API(environment);
-        } else {
+        if (!AuthManager.getUser(environment.label)) {
             this.setState({ isAuthorize: false });
             return;
         }
@@ -71,9 +69,7 @@ class EnvironmentPanel extends Component {
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') console.log(error);
                 const { status } = error;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                } else if (status === 401) {
+                if (status === 401) {
                     this.setState({ isAuthorize: false });
                 }
             });
@@ -95,13 +91,16 @@ class EnvironmentPanel extends Component {
                 <ExpansionPanelDetails className={classes.header}>
                     <Grid container>
                         <Grid item xs={12}>
-                            {!isFeatureEnabled ? (
-                                <EnvironmentPanelMessage message='Multi-Environment Overview Feature is not enabled in this environment.' />
-                            ) : !isAuthorize ? (
+                            {!isFeatureEnabled && (
+                                <EnvironmentPanelMessage
+                                    message='Multi-Environment Overview Feature is not enabled in this environment.'
+                                />
+                            )}
+                            {!isAuthorize && (
                                 <EnvironmentPanelMessage message='You are not login to this environment.' />
-                            ) : !apis ? (
-                                <Progress />
-                            ) : apis.length === 0 ? (
+                            )}
+                            {!apis && <Progress />}
+                            {apis && apis.length === 0 ? (
                                 <EnvironmentPanelMessage message='No APIs Found...' />
                             ) : (
                                 <Grid container>
@@ -126,5 +125,17 @@ class EnvironmentPanel extends Component {
         );
     }
 }
+
+EnvironmentPanel.defaultProps = {};
+
+EnvironmentPanel.propTypes = {
+    environment: PropTypes.shape({
+        label: PropTypes.string,
+    }).isRequired,
+    rootAPI: PropTypes.shape({
+        name: PropTypes.string,
+    }).isRequired,
+    classes: PropTypes.shape({}).isRequired,
+};
 
 export default withStyles(styles)(EnvironmentPanel);

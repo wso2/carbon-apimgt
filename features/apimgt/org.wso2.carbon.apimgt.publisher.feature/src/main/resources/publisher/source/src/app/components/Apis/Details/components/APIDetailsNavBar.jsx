@@ -32,5 +32,5 @@ APIDetailsNavBar.propTypes = {
     apiDetailPages: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
     location: PropTypes.shape({}).isRequired,
     match: PropTypes.shape({}).isRequired,
-}
+};
 export default withRouter(APIDetailsNavBar);

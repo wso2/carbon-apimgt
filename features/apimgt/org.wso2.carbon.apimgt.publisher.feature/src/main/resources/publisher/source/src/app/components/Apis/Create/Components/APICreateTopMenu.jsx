@@ -41,7 +41,6 @@ const APICreateTopMenu = ({ classes }) => {
 
 APICreateTopMenu.propTypes = {
     classes: PropTypes.shape({}).isRequired,
-    api: PropTypes.shape({}).isRequired,
 };
 
 export default withStyles(styles)(APICreateTopMenu);

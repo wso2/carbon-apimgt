@@ -16,33 +16,31 @@
  * under the License.
  */
 
-import React, {Component} from 'react'
+import React, { Component } from 'react';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
-import {withStyles} from '@material-ui/core/styles';
+import { withStyles } from '@material-ui/core/styles';
+import PropTypes from 'prop-types';
 
-const styles = theme => ({
+const styles = () => ({
     messageLabel: {
-        fontSize: '1.5em'
-    }
+        fontSize: '1.5em',
+    },
 });
 
 class EnvironmentPanelMessage extends Component {
     constructor(props) {
         super(props);
-        this.state = {
-            isAuthorize: true,
-        };
+        this.state = {};
     }
 
     render() {
-        const {message, classes} = this.props;
+        const { message, classes } = this.props;
 
         return (
-            <Grid container justify={'center'} alignItems={'center'}>
+            <Grid container justify='center' alignItems='center'>
                 <Grid item>
-                    <Typography variant="display1" gutterBottom
-                                className={classes.messageLabel}>
+                    <Typography variant='display1' gutterBottom className={classes.messageLabel}>
                         {message}
                     </Typography>
                 </Grid>
@@ -50,5 +48,8 @@ class EnvironmentPanelMessage extends Component {
         );
     }
 }
-
+EnvironmentPanelMessage.propTypes = {
+    classes: PropTypes.shape({}).isRequired,
+    message: PropTypes.string.isRequired,
+};
 export default withStyles(styles)(EnvironmentPanelMessage);
