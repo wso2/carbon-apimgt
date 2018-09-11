@@ -227,7 +227,7 @@ var log = new Log();
                 "type": "oauth2",
                 "flows": {
                     "implicit": {
-                        "authorizationUrl": gatewayURL[0] + "/authorize",
+                        "authorizationUrl": urlArr[0] + "/authorize",
                         "scopes": {}
                     }
                 }
@@ -269,7 +269,7 @@ var log = new Log();
             //populate the security definitions
             var default_implicit_swagger = {
                 "type": "oauth2",
-                "authorizationUrl": gatewayURL[0] + "/authorize",
+                "authorizationUrl": urlArr[0] + "/authorize",
                 "flow": "implicit",
                 "scopes": {}
             };

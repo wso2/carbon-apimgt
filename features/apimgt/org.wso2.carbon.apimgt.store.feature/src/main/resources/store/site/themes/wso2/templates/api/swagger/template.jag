@@ -291,6 +291,7 @@ var select_environment = function() {
 
     //Load swagger spec for given environment
     load_swagger_ui(envSwaggerURL);
+    $("#swagger-api").attr("href", window.swaggerUI.getConfigs().url);
     change_token();
 };
 
@@ -445,7 +446,7 @@ function checkOnKeyPress(e) {
 <div class="col-md-12 col-lg-12">
     <div class="swagger-section">
     <div id="message-bar" class="swagger-ui-wrap">&nbsp;</div>
-    <div id="Download" style="float:right;font-size:14px"><a title="swagger" href='<%=encode.forHtmlAttribute(swaggerAPI)%>' target="_blank" style="font-size:14px"><i class="icon-share-alt" ></i> Swagger ( /swagger.json )</a></div>
+    <div id="Download" style="float:right;font-size:14px"><a title="swagger" id="swagger-api" href='<%=encode.forHtmlAttribute(swaggerAPI)%>' target="_blank" style="font-size:14px"><i class="icon-share-alt" ></i> Swagger ( /swagger.json )</a></div>
     <div id="message-bar" class="swagger-ui-wrap">&nbsp;</div>
     <div id="swagger-ui-container" class="swagger-ui-wrap"></div>
 </div>
