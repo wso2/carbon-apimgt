@@ -19,7 +19,6 @@
 package org.wso2.carbon.apimgt.rest.api.commons.impl;
 
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -44,11 +43,7 @@ public class BasicAuthAuthenticatorTestCase {
         HTTPCarbonMessage carbonMessage = Mockito.mock(HTTPCarbonMessage.class);
         Request requestObj = new Request(carbonMessage);
 
-        try {
-            PowerMockito.whenNew(Request.class).withArguments(carbonMessage).thenReturn(requestObj);
-        } catch (Exception e) {
-            throw new APIMgtSecurityException("Error while mocking Request Object ", e);
-        }
+
 
         try {
             BasicAuthAuthenticator basicAuthAuthenticator = new BasicAuthAuthenticator();

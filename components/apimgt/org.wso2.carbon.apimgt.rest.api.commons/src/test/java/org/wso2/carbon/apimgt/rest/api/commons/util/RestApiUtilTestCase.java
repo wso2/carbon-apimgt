@@ -16,10 +16,7 @@
 package org.wso2.carbon.apimgt.rest.api.commons.util;
 
 
-import org.apache.commons.io.IOUtils;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -43,7 +40,6 @@ import java.util.Map;
 
 import static org.mockito.Mockito.when;
 
-@PrepareForTest(IOUtils.class)
 public class RestApiUtilTestCase {
 
     private static final Logger log = LoggerFactory.getLogger(RestApiUtil.class);
@@ -58,7 +54,6 @@ public class RestApiUtilTestCase {
 
         final String message = "Test Message";
 
-        PowerMockito.mockStatic(RestApiUtil.class);
         try {
             RestApiUtil.handleBadRequest(message, log);
         } catch (BadRequestException e) {
@@ -219,7 +214,6 @@ public class RestApiUtilTestCase {
     @Test(description = "Test get Publisher REST API Resource")
     public void testGetPublisherRestAPIResource() throws Exception {
 
-        PowerMockito.mockStatic(IOUtils.class);
         try {
             RestApiUtil.getPublisherRestAPIResource();
 
@@ -231,7 +225,6 @@ public class RestApiUtilTestCase {
     @Test(description = "Test get Store REST API Resource")
     public void testGetStoreRestAPIResource() throws Exception {
 
-        PowerMockito.mockStatic(IOUtils.class);
         try {
             RestApiUtil.getStoreRestAPIResource();
 
@@ -243,7 +236,6 @@ public class RestApiUtilTestCase {
     @Test(description = "Test get Admin REST API Resource")
     public void testGetAdminRestAPIResource() throws Exception {
 
-        PowerMockito.mockStatic(IOUtils.class);
         try {
             RestApiUtil.getAdminRestAPIResource();
 
