@@ -187,18 +187,24 @@ public class APIStoreImplTestCase {
     @Test(description = "Search APIs with labels")
     public void searchAPIsByStoreLabels() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDAO);
         APIStore apiStore = getApiStoreImpl(daoFactory);
         List<API> apimResultsFromDAO = new ArrayList<>();
-        Set<String> labelList = new HashSet<>();
-        labelList.add("Default");
+        Set<String> labelNames = new HashSet<>();
+        labelNames.add("Default");
+        Set<String> labelIds = new HashSet<>();
+        labelIds.add("labelId1");
+        Mockito.when(labelDAO.getLabelIdByNameAndType("Default", APIMgtConstants.LABEL_TYPE_STORE))
+                .thenReturn("labelId1");
         Mockito.when(apiDAO.searchAPIsByStoreLabel(new HashSet<>(), "admin", "pizza",
-                1, 2, labelList)).thenReturn(apimResultsFromDAO);
-        List<API> apis = apiStore.searchAPIsByStoreLabels("pizza", 1, 2, labelList);
+                1, 2, labelIds)).thenReturn(apimResultsFromDAO);
+        List<API> apis = apiStore.searchAPIsByStoreLabels("pizza", 1, 2, labelNames);
         Assert.assertNotNull(apis);
         Mockito.verify(apiDAO, Mockito.atLeastOnce()).searchAPIsByStoreLabel(APIUtils.getAllRolesOfUser("admin"),
-                "admin", "pizza", 1, 2, labelList);
+                "admin", "pizza", 1, 2, labelIds);
     }
 
     @Test(description = "Search APIs with an empty query")
