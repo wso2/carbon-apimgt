@@ -186,6 +186,7 @@
     "Request Count": "Request Count",
     "Request Count :": "Request Count :",
     "Request Count:": "Request Count:",
+    "Request Rate": "Request Rate",
     "Request/min": "Request/min",
     "Request/s": "Request/s",
     "RequestPatternChanged": "Abnormal Resource Access",
