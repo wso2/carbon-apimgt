@@ -532,7 +532,7 @@
                                                                                     <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
                                                                                 </span>
                                                                 </a>
-                                                                <p id="alias-help" class="hide"><%=i18n.localize("Enter an Alias for the certificate")%>.</p>
+                                                                <p id="alias-help" class="hide"><%=i18n.localize("Enter an alias for the certificate")%>.</p>
                                                             </label>
                                                             <div class="col-sm-6">
                                                                 <input type="text" class="form-control certAlias" id="certAlias" name="certificate_alias"
