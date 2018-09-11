@@ -16,13 +16,8 @@
  */
 package org.wso2.carbon.apimgt.impl.reportgen;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Date;
-import java.util.List;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.exceptions.COSVisitorException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -34,7 +29,28 @@ import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.reportgen.model.RowEntry;
 import org.wso2.carbon.apimgt.impl.reportgen.model.TableData;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.SecretKeySpec;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
+import java.util.Date;
+import java.util.List;
+
 public class ReportGenerator {
+    private static final Log log = LogFactory.getLog(ReportGenerator.class);
+
+    private static final String MGW_META = "MGW_CODE";
+    private static final String MGW_KEY = "dmMzU0R5MTI4N2ExRlNnMQ==";
+    private static final String MGW_ALGO = "AES";
+
     private static final float[] COLUMN_WIDTH = { 50, 200, 150 };
     private static final float ROW_HEIGHT = 25;
     private static final float CELL_PADDING = 10;
@@ -48,7 +64,7 @@ public class ReportGenerator {
 
     /**
      * Generate PDF file for API microgateway request summary
-     * 
+     *
      * @param table object containing table headers and row data
      * @return InputStream pdf as a stream
      * @throws IOException
@@ -85,6 +101,11 @@ public class ReportGenerator {
         drowTableGrid(contentStream, table.getRows().size());
         writeRowsContent(contentStream, columnHeaders, table.getRows());
 
+        // Add meta data
+        // Whenever the summary report structure is updated this should be changed
+        String requestCount = table.getRows().get(0).getEntries().get(2);
+        document.getDocumentInformation().setCustomMetadataValue(MGW_META, getMetaCount(requestCount));
+
         contentStream.close();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         document.save(out);
@@ -92,6 +113,24 @@ public class ReportGenerator {
 
         return new ByteArrayInputStream(out.toByteArray());
 
+    }
+
+    private String getMetaCount(String origCount) {
+        String count = origCount;
+        Cipher cipher;
+
+        try {
+            cipher = Cipher.getInstance(MGW_ALGO);
+            SecretKeySpec key = new SecretKeySpec(Base64.getDecoder().decode(MGW_KEY), "AES");
+            cipher.init(Cipher.ENCRYPT_MODE, key);
+            byte[] bytes = cipher.doFinal(origCount.getBytes());
+            count = new String(Base64.getEncoder().encode(bytes));
+        } catch (NoSuchAlgorithmException | InvalidKeyException | NoSuchPaddingException | BadPaddingException |
+                IllegalBlockSizeException e) {
+            log.info("Couldn't generate the value for Summary report meta field.", e);
+        }
+
+        return count;
     }
 
     private void drowTableGrid(PDPageContentStream contentStream, int numberOfRows) throws IOException {
