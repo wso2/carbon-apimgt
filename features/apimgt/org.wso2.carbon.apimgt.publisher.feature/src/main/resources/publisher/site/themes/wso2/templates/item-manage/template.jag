@@ -12,6 +12,7 @@
     var resourceTiers = mod.getResourceTiers().tiers;
     var default_tier = resourceTiers[resourceTiers.length -1].tierName;
     var isWSAPI = api.type.toUpperCase() == "WS";
+    var certificates = [];
 
     var hasCustomSequences = false;
     if((api.inSequence && (!"none".equals(api.inSequence))) || (api.outSequence && (!"none".equals(api.outSequence)))
@@ -36,11 +37,11 @@
 
     var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
     var tenantDomain = MultitenantUtils.getTenantDomain(jagg.getUser().username);
-%>
-<script language="javascript">
-    var VERBS = [ 'GET' , 'POST' , 'PUT' , 'DELETE', 'PATCH', 'OPTIONS'];
-    var AUTH_TYPES = [
-      { "value": "None", "text":"<%=i18n.localize("None")%>"} ,
+    %>
+    <script language="javascript">
+        var VERBS = [ 'GET' , 'POST' , 'PUT' , 'DELETE', 'PATCH', 'OPTIONS'];
+        var AUTH_TYPES = [
+          { "value": "None", "text":"<%=i18n.localize("None")%>"} ,
       { "value": "Application", "text":"<%=i18n.localize("Application")%>"},
       { "value": "Application User", "text":"<%=i18n.localize("Application User")%>"},
       { "value": "Application & Application User", "text":"<%=i18n.localize("Application & Application User")%>"}
@@ -49,7 +50,7 @@
         <% for (var i = 0; i < resourceTiers.length; i++) {
         %>{ "value": "<%= encode.forJavaScript(String(resourceTiers[i].tierName)) %>", "text": "<%= encode.forJavaScript(String(resourceTiers[i].tierDisplayName)) %>"
         }<% if(
-        (i+1) != resourceTiers.length){%>,<%}%>
+            (i+1) != resourceTiers.length){%>,<%}%>
         <% } %>
     ];
 
@@ -71,9 +72,9 @@
     var design_w_link = jagg.url('/design?'+apiUrlId);
     var implement_w_link = jagg.url('/implement?'+apiUrlId);
     var manage_w_link = jagg.url('/manage?'+apiUrlId);
-%>
-<!-- <center>
-<%if(createPermitted){%>
+    %>
+    <!-- <center>
+    <%if(createPermitted){%>
 <ul class="new-sub-menu-wizard" style="margin:0 auto">
     <li>
         <a href="<%= design_w_link %>" class="wizard-done" title="<%=i18n.localize("Design")%>">
@@ -232,9 +233,9 @@
 
 
                                             <% mod = jagg.module("api");
-                                                result = mod.isMultipleTenantsAvailable();
-                                                var isMultipleTenantsAvailable = result.status;
-                                                if(api.visibility == "public" && isMultipleTenantsAvailable == true){%>
+        result = mod.isMultipleTenantsAvailable();
+        var isMultipleTenantsAvailable = result.status;
+        if(api.visibility == "public" && isMultipleTenantsAvailable == true){%>
                                                     <div class="form-group">
                                                         <label class="control-label col-sm-3" for="subscriptions"><%=i18n.localize("Subscriptions")%>:
                                                             <a class="help_popup" help_data="subscriptions_help" title="subscriptions_help" data-trigger="hover" data-placement="bottom">
@@ -294,6 +295,179 @@
                                                                 </div>
                                                            </div>
                                         <!--Custom Authorization Header End-->
+                                                      <!--Gateway Security Start-->
+                                                           <div id="gatewaySecurity form-control">
+                                                                <div class="form-group">
+                                                                    <label class="control-label col-sm-3"
+                                                                    for="gatewaySecurity"><%=i18n.localize("Gateway Security")%>:
+                                                                        <a class="help_popup"
+                                                                        help_data="gatewaysecurity_header_help"
+                                                                        title="gatewaysecurity_header_help" data-trigger="hover" data-placement="bottom">
+                                                                            <span class="icon fw-stack fw-lg" style="font-size:6px">
+                                                                                <i class="fw fw-circle fw-stack-2x"></i>
+                                                                                <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+                                                                            </span>
+                                                                        </a>
+                                                                    <p id="gatewaysecurity_header_help" class="hide"><%=i18n.localize("Here a custom authorization header can be defined as a replacement to the default <strong>Authorization</strong> header used to send a request. If a value is specified here, that will be used as the header field to send the access token in a request to consume the API")%></p>
+                                                                    </label>
+                                                                     <div class="controls col-sm-8
+                                                                     gatewaySecuritySelect">
+
+            <label id="oauth2" class="gatewaysecurity_checkbox_label checkbox add-padding-bottom-1x">
+                                                                <input type="checkbox" class="gatewaysecurity_check"
+        name="gatewaysecurity_oauth2" value="oauth2" <%if(api.gatewaysecurity_oauth2 =="checked"){%>checked<%}%>>
+                                                                <span class="helper">oauth2</span>
+                                                        </label>
+                                                         <label class="gatewaysecurity_checkbox_label
+                                                         checkbox add-padding-bottom-1x">
+                                                                <input id="mutualssl" type="checkbox"
+                                                                class="gatewaysecurity_check"
+        name="gatewaysecurity_mutualssl" value="mutualssl" <%if(api.gatewaysecurity_mutualssl =="checked")
+        {%>checked<%}%>>
+                                                                <span class="helper">Mutual SSL</span>
+                                                        </label>
+
+        %>
+       <label id="gatewaysecurity_error" class="error hide" style="display: block;"><%=i18n.localize("Please select at least one subscription tier.")%></label>
+
+                                                </div>
+                                            </div>
+                                       </div>
+                                        <!--Gateway Security End-->
+                                        <!--Manage Certificates - main-->
+                                        <div class="form-group" id="manage-certificates" hidden>
+                                            <div class="control-label col-sm-3"></div>
+                                                <div class="col-sm-4">
+                                                        <a href="#" class="manage-certs but"
+                                                        ref="manage-endpoint-certs" title="Manage Certificates"><%=i18n.localize("Manage Certificates")%></a>
+                                                </div>
+                                                <div id="manage-endpoint-certs" style="display: none">
+                                                    <div id="cert-config"></div>
+                                                </div>
+                                        </div>
+                                         <!--Manage Endpoint Certificate templates -->
+
+                    <!--Manage Endpoint Certificates-->
+       <input hidden id="cert-data" value="<%=encode.forHtmlAttribute(certificates)%>"/>
+
+
+                    <script id="certificate-ui-template" type="text/x-handlebars-template">
+                        <div class="row">
+                            <span id="#delete-failed"></span>
+                            <div class="col-sm-6 col-lg-offset-3">
+                            {{#if certificates}}
+                            <table class="certificates-table table table-striped">
+                            <thead>
+                                <tr class="certificate-table-header ">
+                                <td align="center"><strong><%=i18n.localize("Endpoint")%></strong></td>
+                                <td align="center"><strong><%=i18n.localize("Alias")%></strong></td>
+                                <td></td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{#each certificates}}
+                                <tr>
+                                    <td align="center">{{endpoint}}</td>
+                                    <td align="center">{{alias}}</td>
+                                    <% if (outputs.isCreatePermitted) { %>
+                                    <td align="right">
+                                        <a class="delete-cert" data-alias="{{alias}}" data-ep="{{endpoint}}">
+                                            <span class="fw-stack" style="font-size:10px">
+                                                <i class="fw fw-delete fw-stack-1x"></i>
+                                                <i class="fw fw-circle-outline fw-stack-2x"></i>
+                                            </span>
+                                        </a>
+                                    </td>
+                                    <%}%>
+                                </tr>
+                                {{/each}}
+                                </tbody>
+                            </table>
+
+                            {{else}}
+                            <div class="message message-info">
+                                <h4><i class="icon fw fw-info"></i><%=i18n.localize("No uploaded certificates for the endpoints")%></h4>
+                                    <p><%=i18n.localize("Click the button below to add certificates.")%></p>
+                            </div>
+                            {{/if}}
+                            <% if (outputs.isCreatePermitted) { %>
+                            <span class="btn btn-primary add-cert-btn"><%=i18n.localize("Add New Certificate")%></span>
+                            <%}%>
+                        </div>
+                        </div>
+                        <br/>
+                        <div id="upload-cert-modal" class="modal fade">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close modal-close" aria-hidden="true"><i class="fw fw-cancel"></i>
+                                        </button>
+                                        <h3 class="modal-title"><%=i18n.localize("Upload Endpoint Certificates")%></h3>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="cert-upload-form"></div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <div id="res" style="color:red;float:left"></div>
+                                        <a href="#" class="btn btn-primary cert-upload-btn" id="cert-upload"
+                                           title='<%=i18n.localize("Upload")%>"'><%=i18n.localize("Upload")%></a>
+                                        <a href="#" class="btn btn-secondary modal-close" title='<%=i18n.localize("Close")%>"'><%=i18n.localize("Close")%></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </script>
+                    <script class="cert-upload-form-content" type="text/x-handlebars-template">
+                        <div class="form-group">
+                            <label class="control-label col-sm-3" for="certAlias"><%=i18n.localize("Alias")%>:
+                            <span class="requiredAstrix">*</span>
+                                <a class="help_popup" help_data="alias-help" data-trigger="hover" title="Alias"
+                                data-placement="bottom">
+                                    <span class="icon fw-stack fw-lg" style="font-size:6px">
+                            <i class="fw fw-circle fw-stack-2x"></i>
+                                        <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+                                    </span>
+                                </a>
+                                <p id="alias-help" class="hide"><%=i18n.localize("Enter an Alias for the certificate")%>.</p>
+                            </label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control certAlias" id="certAlias" name="certificate_alias"
+                                       placeholder="Certificate Alias" value="" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-3"
+                                   for="certUpload"><%=i18n.localize("Certificate")%>:<span
+                                    class="requiredAstrix">*</span>
+                                <a class="help_popup" help_data="cert-help"
+                                   data-trigger="hover" title="Alias" data-placement="bottom">
+                                        <span class="icon fw-stack fw-lg" style="font-size:6px">
+                                            <i class="fw fw-circle fw-stack-2x"></i>
+                                            <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+                                        </span>
+                                </a>
+                                <p id="cert-help" class="hide"><%=i18n.localize("Upload the certificate file")%>.</p>
+                            </label>
+                            <div class="col-sm-6">
+                                <div class="input-group input-wrap file-upload-control">
+                                    <input class="form-control cert-content" readonly type="text" required>
+                                    <input class="form-control cert-upload" id="certUpload"
+                                           name="certificate-upload"
+                                           type="file"
+                                           required
+                                           accept="application/pkcs8, application/pkcs10, application/pkix-crl, application/pkcs7-mime, application/x-x509-ca-cert, application/x-x509-user-cert, application/x-pkcs7-crl, application/x-pkcs12, application/x-pkcs7-certificates, application/x-pkcs7-certreqresp, .p8, .p10, .csr, .cer, .crl, .p7c, .crt, .der, .p12, .pfx, .p7b, .spc, .p7r">
+                                    <div class="input-group-btn">
+                                        <button class="btn btn-secondary browse" title="Browse File" type="button">
+                                            <i aria-hidden="true" class="fw fw-file-browse"></i>
+                                            <span class="hidden-xs"><%=i18n.localize("Browse")%></span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </script>
+
+                                        <!--Manage Certificate - form-->
                             </div>
                         </div>
                     </div>
@@ -341,9 +515,9 @@
 
 
                     <% mod = jagg.module("api");
-                    result = mod.isMultipleTenantsAvailable();
-                    var isMultipleTenantsAvailable = result.status;
-                    if(api.visibility == "public" && isMultipleTenantsAvailable == true){%>
+        result = mod.isMultipleTenantsAvailable();
+        var isMultipleTenantsAvailable = result.status;
+        if(api.visibility == "public" && isMultipleTenantsAvailable == true){%>
                     <div class="form-group">
                         <label class="control-label col-sm-3" for="subscriptions"><%=i18n.localize("Subscriptions")%>:
                             <a class="help_popup" help_data="subscriptions_help" title="subscriptions_help" data-trigger="hover" data-placement="bottom">
@@ -380,7 +554,7 @@
                     </div>
                     <% } %>
                 <%}%>
-                    
+
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             <h4 class="panel-title">
@@ -451,17 +625,17 @@
                                                 </label>
                                                 <div class="controls col-sm-4 tierSelect">
                                         			<%
-                                                        for (var i = 0; i < tiers.length; i++) {
-                                                            var isSelected = api.availableTiers.indexOf(tiers[i].tierName) > -1;
-                                                        %>
-                                                        <label id="<%=tiers[i].tierName%>" class="tier_checkbox_label checkbox add-padding-bottom-1x">
+    for (var i = 0; i < tiers.length; i++) {
+        var isSelected = api.availableTiers.indexOf(tiers[i].tierName) > -1;
+        %>
+        <label id="<%=tiers[i].tierName%>" class="tier_checkbox_label checkbox add-padding-bottom-1x">
                                                                 <input type="checkbox" class="tier_check" name="tier" value="<%= encode.forHtmlAttribute(String(tiers[i].tierName))%>" <%if(isSelected){%>checked<%}%>>
                                                                 <span class="helper"><strong><%= encode.forHtml(String(tiers[i].tierDisplayName)) %></strong> : <%= encode.forHtml(String(tiers[i].tierDescription)) %></span>
                                                         </label>
                                                         <%
-                                                        }
-                                                    %>
-                                                   <label id="tier_error" class="error hide" style="display: block;"><%=i18n.localize("Please select at least one subscription tier.")%></label>
+    }
+    %>
+   <label id="tier_error" class="error hide" style="display: block;"><%=i18n.localize("Please select at least one subscription tier.")%></label>
                                                 </div>
                                         	</div>
 
@@ -504,7 +678,7 @@
                                                             <span class="helper"><%=i18n.localize("Apply to API")%></span>
                                                     </label>
                                                 </div>
-                                                        
+
                                                         <%}%>
                                             </div>
                                             <%if(!isWSAPI){%>
@@ -520,21 +694,21 @@
                                                          <%}%>
                                                     <select id="apiTier" name="apiTier"  class="form-control selected required">
                                                     <%
-                                                    for (var i = 0; i < resourceTiers.length; i++) {
-                                                        var isSelectedAPITier = api.availableTiers.indexOf(resourceTiers[i].tierName) > -1;
-                                                        var isSelected = false;
-                                                        if(resourceTiers[i].tierName == api.apiLevelPolicy){
-                                                            isSelected = true;
-                                                        }
-                                                        %><option value="<%= encode.forHtmlAttribute(String(resourceTiers[i].tierName))%>"
+        for (var i = 0; i < resourceTiers.length; i++) {
+            var isSelectedAPITier = api.availableTiers.indexOf(resourceTiers[i].tierName) > -1;
+            var isSelected = false;
+            if(resourceTiers[i].tierName == api.apiLevelPolicy){
+                isSelected = true;
+            }
+            %><option value="<%= encode.forHtmlAttribute(String(resourceTiers[i].tierName))%>"
                                                         <%if
-                                                        (isSelected){%>selected="selected"<%}%>><%= encode.forHtml(String(resourceTiers[i].tierDisplayName)) %></option>
+            (isSelected){%>selected="selected"<%}%>><%= encode.forHtml(String(resourceTiers[i].tierDisplayName)) %></option>
                                                         <%
-                                                    }
-                                                    %>
-                                                    </select>
-                                                </div>
-                                                         <%if(!isWSAPI){%>
+        }
+        %>
+        </select>
+    </div>
+             <%if(!isWSAPI){%>
                                                 <div id="resource-policy-select" class="col-sm-4 <%if(api.apiLevelPolicy != null && api.apiLevelPolicy != ""){%>hide<%}%>"  >
                                                     <script id="resource-policy-ui-template" language="text/x-handlebars-template">
                                                         <a class="select_adv_policy_for_resource btn btn-secondary"><%=i18n.localize("Select Policy per Resource")%></a>
@@ -701,15 +875,15 @@
                          <tbody>
 
                          <%
-                         var environmentsJson=api.environments;
-                         if(environmentsJson=="none"){
-                                for(i=0 ;i<environmentsList.length;i++){
-                         %>
-                            <tr data-type="selectable">
-                                <td>
-                                    <div class="environments_checkbox">
-                                        <label class="checkbox">
-                                            <input type="checkbox" value="<%=environmentsList[i].name%>" class="env" name="gateways">
+    var environmentsJson=api.environments;
+    if(environmentsJson=="none"){
+        for(i=0 ;i<environmentsList.length;i++){
+            %>
+               <tr data-type="selectable">
+                   <td>
+                       <div class="environments_checkbox">
+                           <label class="checkbox">
+                               <input type="checkbox" value="<%=environmentsList[i].name%>" class="env" name="gateways">
                                             <span class="helper"></span>
                                         </label>
                                     </div>
@@ -719,9 +893,9 @@
                                 <td><div class="environments_data"><%=encode.forHtml(environmentsList[i].description)%></div></td>
                             </tr>
                          <%}}
-                         else{
-                             for(i=0 ;i<environmentsList.length;i++){
-                                    if(environmentsJson.split(",").indexOf(environmentsList[i].name)>=0){%>
+    else{
+        for(i=0 ;i<environmentsList.length;i++){
+            if(environmentsJson.split(",").indexOf(environmentsList[i].name)>=0){%>
                                         <tr data-type="selectable">
                                              <td>
                                                 <div class="environments_checkbox">
@@ -769,18 +943,18 @@
                                     </thead>
                                     <tbody>
                                         <%  var currentLabels = "";
-                                            for (var i in labels) {
-                                                var isLabelAttached = false;
-                                                if (attachedLabels != null) {
-                                                    var attachedLabelObj = parse(stringify(attachedLabels));
-                                                    for (var j=0; j< attachedLabelObj.length; j++){
-                                                        if (labels[i].name == attachedLabelObj[j].labelName){
-                                                            currentLabels += labels[i].name + ",";
-                                                            isLabelAttached = true;
-                                                            break;
-                                                        }
-                                                    }
-                                                }%>
+        for (var i in labels) {
+            var isLabelAttached = false;
+            if (attachedLabels != null) {
+                var attachedLabelObj = parse(stringify(attachedLabels));
+                for (var j=0; j< attachedLabelObj.length; j++){
+                    if (labels[i].name == attachedLabelObj[j].labelName){
+                        currentLabels += labels[i].name + ",";
+                        isLabelAttached = true;
+                        break;
+                    }
+                }
+            }%>
                                                 <tr data-type="selectable">
                                                     <td>
                                                         <div class="label_checkbox">
@@ -801,8 +975,8 @@
                                    <p><%=i18n.localize("You have selected Microgateways for this API. The mediation policies selected here will not be applied in Microgateway environments.")%></p>
                                </div>
                                 <% if (currentLabels.length > 1) {
-                                    currentLabels = currentLabels.substring(0, currentLabels.length-1);
-                                }%>
+            currentLabels = currentLabels.substring(0, currentLabels.length-1);
+        }%>
                                 <input type="hidden" id="gatewayLabels" name="gatewayLabels" value="<%=encode.forHtml("" + currentLabels)%>"/>
                                     <script type="text/javascript">
                                     function appendLabels() {
@@ -953,13 +1127,13 @@
 
                                 <button class="btn btn-secondary has-spinner" id="save_api"><%=i18n.localize("Save")%></button>
                                 <% if(outputs.isPermitted) {
-                                   var status=outputs.lcStatus;
-                                   var wfStatus = "";
-                                   if(outputs.wfStatus != null && outputs.wfStatus.status != null){
-                                     wfStatus = outputs.wfStatus.status;               
-                                   }
-                                %>
-                                     <% if(status=="BLOCKED" || status=="DEPRECATED" || status=="RETIRED" || wfStatus=="CREATED"){ %>
+        var status=outputs.lcStatus;
+        var wfStatus = "";
+        if(outputs.wfStatus != null && outputs.wfStatus.status != null){
+            wfStatus = outputs.wfStatus.status;
+        }
+        %>
+             <% if(status=="BLOCKED" || status=="DEPRECATED" || status=="RETIRED" || wfStatus=="CREATED"){ %>
                                      <a class="btn btn-primary" id="publish_api_disabled" disabled title="<%=i18n.localize("Save & Publish")%>"><%=i18n.localize("Save & Publish")%></a>
                                      <%} else{%>
                                      <a class="btn btn-primary has-spinner" id="publish_api" title="<%=i18n.localize("Save & Publish")%>"><%=i18n.localize("Save & Publish")%></a>
@@ -969,7 +1143,7 @@
                                 <input type="reset" class="btn btn-secondary" value="<%=i18n.localize("Cancel")%>" onclick="javascript:window.location.href='./'" />
                                 <label id="gateway_error" class="bg-warning hide" style="display: block;padding:
                                 10px; border-radius: 5px;margin-top:10px;"><%=i18n
-                                .localize("Some of the gateway environments are not selected.")%></label>
+        .localize("Some of the gateway environments are not selected.")%></label>
                             </div>
                     </div>
                 </div>
@@ -1245,7 +1419,7 @@
     }
 
 
-   
+
 
     var enjoyhint_instance_item_manage = null;
     var enjoyhint_instance_onMessage = null;
@@ -1265,6 +1439,24 @@
             showHideResourceLevelTierSelection();
         });
 
+           var certificate_data;
+
+  /*  if ($('#cert-data').val() != "") {
+        certificate_data = jQuery.parseJSON($('#cert-data').val());
+    }*/
+    $("#cert-config").certUi({
+        config: {"cert_data": [], "ep_data": "<%=api.name%>"}
+    });
+
+
+       // Manage certificates
+       $("#mutualssl").change(function() {
+             if(this.checked) {
+                $("#manage-certificates").removeAttr("hidden");
+             } else {
+                $("#manage-certificates").attr("hidden", "");
+             }
+       });
         var publish_api = function(e){
             $.ajax({
                 type: "POST",

@@ -432,6 +432,12 @@ public class APIProviderHostObject extends ScriptableObject {
             properties = (JSONObject) parser.parse(additionalProperties);
         }
         String authorizationHeader = (String) apiData.get("authorizationHeader", apiData);
+        String gatewaySecurity = APIConstants.DEFAULT_GATEWAY_SECUIRTY_OAUTH2;
+        Object gatewaySecurityObject = apiData.get("gatewaySecurity", apiData);
+
+        if (gatewaySecurityObject != null) {
+            gatewaySecurity = String.valueOf(apiData.get("gatewaySecurity", apiData));
+        }
 
         int cacheTimeOut = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
         if (APIConstants.ENABLED.equalsIgnoreCase(responseCache)) {
@@ -519,6 +525,7 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         api.setAdditionalProperties(properties);
         api.setAuthorizationHeader(authorizationHeader);
+        api.setGatewaySecurity(gatewaySecurity);
 
         Set<Tier> availableTier = new HashSet<Tier>();
         String[] tierNames;
@@ -2878,6 +2885,9 @@ public class APIProviderHostObject extends ScriptableObject {
                     }
                     myn.put(57, myn, apiLabelsArray);
                 }
+                myn.put(58, myn, checkTransport("oauth2", api.getGatewaySecurity()));
+                myn.put(59, myn, checkTransport("mutualssl", api.getGatewaySecurity()));
+
             } else {
                 handleException("Cannot find the requested API- " + apiName +
                         "-" + version);

@@ -75,6 +75,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     private SynapseEnvironment synapseEnvironment;
 
     private String authorizationHeader;
+    private String gatewaySecurity;
     private boolean removeOAuthHeadersFromOutMessage = true;
 
     public void init(SynapseEnvironment synapseEnvironment) {
@@ -93,6 +94,14 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
     public void setAuthorizationHeader(String authorizationHeader) {
         this.authorizationHeader = authorizationHeader;
+    }
+
+    public String getGatewaySecurity() {
+        return gatewaySecurity;
+    }
+
+    public void setGatewaySecurity(String gatewaySecurity) {
+        this.gatewaySecurity = gatewaySecurity;
     }
 
     public boolean getRemoveOAuthHeadersFromOutMessage() {
