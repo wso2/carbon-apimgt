@@ -526,8 +526,10 @@ if(jagg.isCSRFTokenValid())
                 }
                 if(isSoapToRestApi) {
                     mappingJson = session.get("mappingJson");
-                    var sequenceGenerator = Packages.org.wso2.carbon.apimgt.impl.soaptorest.SequenceGenerator;
-                    sequenceGenerator.generateSequences(stringify(apiData), stringify(mappingJson));
+                    if (mappingJson) {
+                        var sequenceGenerator = Packages.org.wso2.carbon.apimgt.impl.soaptorest.SequenceGenerator;
+                        sequenceGenerator.generateSequences(stringify(apiData), stringify(mappingJson));
+                    }
                 }
             }
             if (result.error == true) {

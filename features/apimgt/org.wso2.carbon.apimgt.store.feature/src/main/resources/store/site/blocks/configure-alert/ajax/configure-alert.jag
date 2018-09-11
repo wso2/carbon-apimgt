@@ -4,10 +4,7 @@ include("/jagg/jagg.jag");
     if (jagg.isCSRFTokenValid()) {
         response.contentType = "application/json; charset=UTF-8";
         var log = new Log();
-        var mod, obj, username,
-            action = request.getParameter("action"),
-            site = require("/site/conf/site.json"),
-            msg = require("/site/conf/ui-messages.jag");
+        var mod, obj, action = request.getParameter("action");
 
         if (jagg.getUser() == null) {
             print({
@@ -71,6 +68,24 @@ include("/jagg/jagg.jag");
                     obj = {
                         error: false,
                         list: result
+                    };
+                }
+
+                print(obj);
+            } else if (action === 'getApplicationsForUser' && request.getMethod() == 'GET') {
+                mod = jagg.module("application");
+                var provider = jagg.getUser().username;
+                var result = mod.getApplicationsByOwner(provider);
+
+                if (result.error) {
+                    obj = {
+                        error: result.error,
+                        message: result.message
+                    };
+                } else {
+                    obj = {
+                        error: false,
+                        applications: result.applications
                     };
                 }
 

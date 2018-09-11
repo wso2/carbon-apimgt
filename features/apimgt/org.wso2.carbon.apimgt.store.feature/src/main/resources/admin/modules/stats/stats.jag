@@ -374,64 +374,56 @@ var getCountFromTable = function (tableName, tenantDomain) {
     if (tableName == "ApimAllAlert") {
 
         appName = "APIM_ABNORMAL_REQUEST_PATTERN"; //call any alert app since it has a definition to all alert table
-        query = "from ApimAllAlert " +
-                        "SELECT count(alertTimestamp) as count " +
-                        "having tenantDomain=='" + tenantDomain + "' ;" 
+        query = "from ApimAllAlert on tenantDomain=='" + tenantDomain + "' " +
+                        "SELECT count(alertTimestamp) as count" ;
 
     } else if(tableName == "ApimRequestPatternChangedAlert") {
 
         appName = "APIM_ABNORMAL_REQUEST_PATTERN";
-        query = "from ApimRequestPatternChangedAlert " +
-                        "SELECT count(alertTimestamp) as count " +
-                        "having tenantDomain=='" + tenantDomain + "' ;" 
+        query = "from ApimRequestPatternChangedAlert on tenantDomain=='" + tenantDomain + "' " +
+                        "SELECT count(alertTimestamp) as count " ;
 
     } else if (tableName == "ApimTierLimitHittingAlert") {
 
         appName = "APIM_FREQUENT_TIER_LIMIT_HITTING_ALERT";
-        query = "from ApimTierLimitHittingAlert " +
-                        "SELECT count(alertTimestamp) as count " +
-                        "having apiCreatorTenantDomain=='" + tenantDomain + "' ;" 
+        query = "from ApimTierLimitHittingAlert on apiCreatorTenantDomain=='" + tenantDomain + "' " +
+                        "SELECT count(alertTimestamp) as count ";
 
     } else if (tableName == "ApimIPAccessAbnormalityAlert") {
 
         appName = "APIM_UNUSUAL_IP_ACCESS_ALERT";
-        query = "from ApimIPAccessAbnormalityAlert " +
-                        "SELECT count(alertTimestamp) as count " +
-                        "having tenantDomain=='" + tenantDomain + "' ;"
+        query = "from ApimIPAccessAbnormalityAlert on tenantDomain=='" + tenantDomain + "' " +
+                        "SELECT count(alertTimestamp) as count ";
 
     } else if (tableName == "ApimAbnormalRequestsPerMinAlert") { 
 
         appName = "APIM_ABNORMAL_REQUEST_COUNT";
-        query = "from ApimAbnormalRequestsPerMinAlert " +
-                        "SELECT count(alertTimestamp) as count " +
-                        "having tenantDomain=='" + tenantDomain + "' ;" 
+        query = "from ApimAbnormalRequestsPerMinAlert on tenantDomain=='" + tenantDomain + "' " +
+                        "SELECT count(alertTimestamp) as count ";
 
     } else if(tableName == "ApimAbnormalResponseTimeAlert") {
 
         appName = "APIM_ABNORMAL_RESPONSE_TIME";
-        query = "from ApimAbnormalResponseTimeAlert " +
-                        "SELECT count(alertTimestamp) as count " +
-                        "having apiCreatorTenantDomain=='" + tenantDomain + "' ;"                  
+        query = "from ApimAbnormalResponseTimeAlert on apiCreatorTenantDomain=='" + tenantDomain + "' " +
+                        "SELECT count(alertTimestamp) as count";                                    
 
     } else if(tableName == "ApimApiHealthMonitorAlert") {
 
         appName = "APIM_HEALTH_AVAILABILITY_ALERT";
-        query = "from ApimApiHealthMonitorAlert " +
-                        "SELECT count(alertTimestamp) as count " +
-                        "having apiCreatorTenantDomain=='" + tenantDomain + "' ;" 
-
+        query = "from ApimApiHealthMonitorAlert on apiCreatorTenantDomain=='" + tenantDomain + "' " +
+                        "SELECT count(alertTimestamp) as count";
+                        
     } else if(tableName == "ApimAbnormalBackendTimeAlert") {
 
         appName = "APIM_ABNORMAL_BACKEND_TIME";
-        query = "from ApimAbnormalBackendTimeAlert " +
-                        "SELECT count(alertTimestamp) as count " +
-                        "having apiCreatorTenantDomain=='" + tenantDomain + "' ;" 
+        query = "from ApimAbnormalBackendTimeAlert on apiCreatorTenantDomain=='" + tenantDomain + "' "+
+                        "SELECT count(alertTimestamp) as count" ;
 
     } else if(tableName == "ApimAbnormalBackendTimeAlert") {
         appName = "APIM_HEALTH_AVAILABILITY_ALERT";
-        query = "from ApimApiAvailabilityInfo " +
-                        "SELECT count(apiName) as count " +
-                        "having tenantDomain=='" + tenantDomain + "' ;" 
+        query = "from ApimApiAvailabilityInfo on tenantDomain=='" + tenantDomain + "' " +
+                        "SELECT count(apiName) as count" ;
+
     }
     var result = APIUtil.executeQueryOnStreamProcessor(appName, query);
     var totalCount = 0;

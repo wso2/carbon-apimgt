@@ -9,9 +9,9 @@ $(function() {
      * Populate Application Name 'select' element with subscribed application list
     **/
     function populateAppList() {
-        var params = {action: "getApplications"};
+        var params = {action: "getApplicationsForUser"};
         
-        $.get("../blocks/application/application-list/ajax/application-list.jag", params, function(data) {
+        $.get("../blocks/configure-alert/ajax/configure-alert.jag", params, function(data) {
             if (data && data.error == false) {
                 applicationList = data.applications;
 
@@ -27,7 +27,7 @@ $(function() {
 
     /**
      * Populate API Name 'select' element with subscribed list of APIs
-     * provider--apiName--apiVersion format is used to list the APIs. This is to
+     * apiName--apiVersion format is used to list the APIs. This is to
      * avoid complexity in the UI and the logic required to show the API list
     **/
     function populateApiList() {

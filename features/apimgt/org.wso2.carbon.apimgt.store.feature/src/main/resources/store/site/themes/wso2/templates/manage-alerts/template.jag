@@ -42,12 +42,12 @@
                                         <%
                                             if ("AbnormalRequestsPerMin" == allAlertType[key]) {
                                         %>
-                                            <div id="configButton<%=key%>" onclick="configureAlertType('<%=alertType%>')" class="btn">
+                                            <a id="configButton<%=key%>" onclick="configureAlertType('<%=alertType%>')">
                                                 <span class="fw-stack">
                                                     <i class="fw fw-circle-outline fw-stack-2x"></i>
                                                     <i class="fw fw-configarations fw-stack-1x"></i>
                                                 </span>
-                                            </div>
+                                            </a>
                                         <%
                                             }
                                         %>
