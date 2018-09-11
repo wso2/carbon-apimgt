@@ -2211,7 +2211,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                                 + "'");
             }
             if (fromDate != null && toDate != null) {
-                String granularity = APIUsageStatisticsClientConstants.SECONDS_GRANULARITY;//default granularity
+                String granularity = APIUsageStatisticsClientConstants.SECONDS_GRANULARITY;
 
                 Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
 
