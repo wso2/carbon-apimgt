@@ -452,16 +452,16 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         try {
             String startDate = fromDate + ":00";
             String endDate = toDate + ":00";
-            String granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;//default granularity
+            String granularity = APIUsageStatisticsClientConstants.MINUTES_GRANULARITY;//default granularity
 
             Map<String, Integer> durationBreakdown = this.getDurationBreakdown(startDate, endDate);
 
             if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
-                granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
-            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
                 granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
-            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
+            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
                 granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
+            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
+                granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;
             }
             StringBuilder idListQuery = new StringBuilder();
             for (int i = 0; i < idList.size(); i++) {
@@ -1349,16 +1349,16 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             throws APIMgtUsageQueryServiceClientException {
         List<APIResponseFaultCount> faultUsage = new ArrayList<APIResponseFaultCount>();
         try {
-            String granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;//default granularity
+            String granularity = APIUsageStatisticsClientConstants.MINUTES_GRANULARITY;//default granularity
 
             Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
 
             if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
-                granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
-            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
                 granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
-            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
+            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
                 granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
+            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
+                granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;
             }
             String query =
                     "from " + tableName + " within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate) + "L per '"
@@ -1949,16 +1949,16 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         try {
             List<APIThrottlingOverTimeDTO> throttlingData = new ArrayList<APIThrottlingOverTimeDTO>();
             String tenantDomain = MultitenantUtils.getTenantDomain(provider);
-            String granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;//default granularity
+            String granularity = APIUsageStatisticsClientConstants.MINUTES_GRANULARITY;//default granularity
 
             Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
 
             if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
-                granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
-            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
                 granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
-            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
+            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
                 granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
+            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
+                granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;
             }
             StringBuilder query = new StringBuilder(
                     "from " + APIUsageStatisticsClientConstants.APIM_REQ_COUNT_AGG + " on("
@@ -2023,16 +2023,16 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             List<APIThrottlingOverTimeDTO> throttlingData = new ArrayList<APIThrottlingOverTimeDTO>();
             String tenantDomain = MultitenantUtils.getTenantDomain(provider);
 
-            String granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;//default granularity
+            String granularity = APIUsageStatisticsClientConstants.MINUTES_GRANULARITY;//default granularity
 
             Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
 
             if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
-                granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
-            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
                 granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
-            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
+            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
                 granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
+            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
+                granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;
             }
 
             StringBuilder query = new StringBuilder(
