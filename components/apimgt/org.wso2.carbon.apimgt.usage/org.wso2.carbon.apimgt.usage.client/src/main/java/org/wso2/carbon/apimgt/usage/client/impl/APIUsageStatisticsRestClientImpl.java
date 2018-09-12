@@ -1067,13 +1067,13 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         try {
             StringBuilder lastAccessQuery = new StringBuilder("from " + tableName);
             if (!providerName.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
-                lastAccessQuery.append(" on(" + APIUsageStatisticsClientConstants.TENANT_DOMAIN + "=='" + tenantDomain
+                lastAccessQuery.append(" on(" + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='" + tenantDomain
                         + "' AND (" + APIUsageStatisticsClientConstants.API_CREATOR + "=='" + providerName + "' OR "
                         + APIUsageStatisticsClientConstants.API_CREATOR + "=='" + APIUtil
                         .getUserNameWithTenantSuffix(providerName) + "'))");
             } else {
                 lastAccessQuery
-                        .append(" on " + APIUsageStatisticsClientConstants.TENANT_DOMAIN + "=='" + tenantDomain + "'");
+                        .append(" on " + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='" + tenantDomain + "'");
             }
             lastAccessQuery.append(" select " + APIUsageStatisticsClientConstants.API_NAME + ", "
                     + APIUsageStatisticsClientConstants.API_VERSION + ", "
