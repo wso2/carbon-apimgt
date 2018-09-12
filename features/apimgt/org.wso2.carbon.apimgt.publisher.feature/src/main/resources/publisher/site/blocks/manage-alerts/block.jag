@@ -16,9 +16,11 @@ jagg.block("manage-alerts", {
         };
     },
     getOutputs: function () {
-
         var log = new Log()
         var mod = jagg.module("manage-alerts");
+        var configMod = jagg.module("configure-alert");
+        var responseConfigs = configMod.getPublisherAlertConfigs("AbnormalResponseTime");
+        var backendConfigs = configMod.getPublisherAlertConfigs("AbnormalBackendTime");
 
 
         var savedAlertTypes = mod.retrieveSavedAlertsTypes();
@@ -26,7 +28,9 @@ jagg.block("manage-alerts", {
 
         return {
             "alertTypesInformations": savedAlertTypes,
-            "emailList": savedEmaillList
+            "emailList": savedEmaillList,
+            "backendConfigs": backendConfigs,
+            "responseConfigs": responseConfigs
         };
     }
 
