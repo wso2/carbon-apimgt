@@ -4,7 +4,7 @@ function showEnableAnalyticsMsg() {
             "<h4><i class='icon fw fw-warning'></i>" + i18n.t('Not Configured') + "</h4>" +
             "<p> <a href='https://docs.wso2.com/display/AM260/Configuring+APIM+Analytics' target='_blank'" +
             "title= '"+i18n.t("WSO2 wiki documentation on APIM Analytics")+"' class='warningLink'>" +
-            i18n.t('Refer our documentation to configure API Manager Analytics correctly') + "</a></p>" +
+            i18n.t('Refer our documentation to correctly configure API Manager Analytics ') + "</a></p>" +
             "</div>";
     $('.stat-page').append($(msg));
 }
