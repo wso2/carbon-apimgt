@@ -20,6 +20,10 @@ package org.wso2.carbon.apimgt.tracing.jaeger;
 
 import io.jaegertracing.Configuration;
 import io.opentracing.Tracer;
+import io.opentracing.contrib.reporter.TracerR;
+import io.opentracing.contrib.reporter.slf4j.Slf4jReporter;
+import io.opentracing.util.ThreadLocalScopeManager;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.tracing.OpenTracer;
 import org.wso2.carbon.apimgt.tracing.TracingServiceImpl;
@@ -63,7 +67,11 @@ public class JaegerTracerImpl extends OpenTracer {
                 .withSender(senderConfig);
 
         Tracer tracer = new Configuration(serviceName).withSampler(samplerConfig).withReporter(reporterConfig).getTracer();
-        return tracer;
+
+        io.opentracing.contrib.reporter.Reporter reporter = new Slf4jReporter(LoggerFactory.getLogger("tracer"), true);
+        Tracer tracer1 = new TracerR(tracer, reporter, new ThreadLocalScopeManager());
+
+        return tracer1;
     }
 
     @Override

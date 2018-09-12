@@ -52,11 +52,15 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
         String requestId = UUID.randomUUID().toString();
         messageContext.setProperty(APIMgtGatewayConstants.REQUEST_ID, requestId);
 
-        TracingSpan responseLatencySpan = Util.startSpan("API:ResponseLatency", null, tracer);
+        TracingSpan responseLatencySpan = Util.startSpan("API:Response_Latency", null, tracer, null);
         Util.setTag(responseLatencySpan, APIMgtGatewayConstants.REQUEST_ID, requestId);
         Util.setLog(responseLatencySpan, "API:ResponseLatency", "responseLatency");
         messageContext.setProperty(APIMgtGatewayConstants.RESPONSE_LATENCY_SPAN, responseLatencySpan);
         messageContext.setProperty(APIMgtGatewayConstants.TRACER, tracer);
+
+        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
+                getAxis2MessageContext();
+        axis2MC.setProperty(APIMgtGatewayConstants.RESPONSE_LATENCY_SPAN, responseLatencySpan);
         return true;
     }
 
@@ -64,7 +68,7 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
     public boolean handleRequestOutFlow(MessageContext messageContext) {
 
         TracingSpan parentSpan = (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY_SPAN);
-        TracingSpan backendLatencySpan = Util.startSpan("BackendLatency", parentSpan, tracer);
+        TracingSpan backendLatencySpan = Util.startSpan("BackendLatency", parentSpan, tracer, null);
         messageContext.setProperty(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN, backendLatencySpan);
         return true;
     }

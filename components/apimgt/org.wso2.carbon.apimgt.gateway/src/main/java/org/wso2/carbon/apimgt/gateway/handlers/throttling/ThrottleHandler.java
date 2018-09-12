@@ -497,7 +497,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
 
         TracingSpan responseLatencySpan = (TracingSpan) messageContext.getProperty("ResponseLatency");
         TracingTracer tracer = (TracingTracer) messageContext.getProperty("Tracer");
-        TracingSpan throttlingLatencySpan = Util.startSpan("Throttling_Latency-ThrottleHandler", responseLatencySpan, tracer);
+        TracingSpan throttlingLatencySpan = Util.startSpan("Throttling_Latency-ThrottleHandler", responseLatencySpan, tracer, null);
         Util.setTag(throttlingLatencySpan,"RequestID", String.valueOf(messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID)));
         messageContext.setProperty("ThrottlingLatencySpan-ThrottleHandler", throttlingLatencySpan);
 

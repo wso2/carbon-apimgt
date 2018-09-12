@@ -149,12 +149,14 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             justification = "Error is sent through payload")
     public boolean handleRequest(MessageContext messageContext) {
 
-        org.apache.axis2.context.MessageContext msgCtx = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-        TracingSpan responseLatencySpan = (TracingSpan) messageContext.getProperty("ResponseLatency");
-        TracingTracer tracer = (TracingTracer) messageContext.getProperty("Tracer");
-        TracingSpan keySpan = Util.startSpan("KeyValidationLatency", responseLatencySpan, tracer);
-        messageContext.setProperty("KeySpan", keySpan);
-        msgCtx.setProperty("KeySpan", keySpan);
+        TracingSpan responseLatencySpan = (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY_SPAN);
+        TracingTracer tracer = Util.getGlobalTracer();
+        TracingSpan keySpan = Util.startSpan("Key_Validation_Latency", responseLatencySpan, tracer, null);
+        Util.setLog(keySpan, "Hello" , "Praveen");
+        messageContext.setProperty(APIMgtGatewayConstants.KEY_VALIDATION_LATENCY_SPAN, keySpan);
+        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
+                getAxis2MessageContext();
+        axis2MC.setProperty(APIMgtGatewayConstants.KEY_VALIDATION_LATENCY_SPAN, keySpan);
 
         Timer.Context context = startMetricTimer();
         long startTime = System.nanoTime();
@@ -201,8 +203,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
             handleAuthFailure(messageContext, e);
         } finally {
-            TracingSpan span = (TracingSpan) messageContext.getProperty("KeySpan");
-            Util.finishSpan(span);
+            Util.finishSpan(keySpan);
             messageContext.setProperty(APIMgtGatewayConstants.SECURITY_LATENCY,
                     TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime));
             stopMetricTimer(context);

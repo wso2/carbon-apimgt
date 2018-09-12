@@ -28,9 +28,12 @@ import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.wso2.carbon.apimgt.api.dto.xsd.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.xsd.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.common.APIMgtLatencySynapseHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -38,12 +41,17 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.keymgt.stub.validator.APIKeyValidationServiceStub;
+import org.wso2.carbon.apimgt.tracing.TracingServiceImpl;
+import org.wso2.carbon.apimgt.tracing.TracingSpan;
+import org.wso2.carbon.apimgt.tracing.TracingTracer;
+import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -95,6 +103,16 @@ public class APIKeyValidatorClient {
             List headerList = (List) keyValidationServiceStub._getServiceClient().getOptions().getProperty(org.apache.axis2.transport.http.HTTPConstants.HTTP_HEADERS);
             Map headers = (Map) MessageContext.getCurrentMessageContext().getProperty(
                     org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+
+            TracingSpan keySpan = (TracingSpan) MessageContext.getCurrentMessageContext().getProperty(APIMgtGatewayConstants.KEY_VALIDATION_LATENCY_SPAN);
+            TracingTracer tracer = Util.getGlobalTracer();
+            Map<String, String> tracerSpecificCarrier = new HashMap<>();
+            TracingSpan tspan= Util.startSpan("API_Key_Validation_Info_dto", keySpan, tracer, null);
+
+            Util.inject(keySpan, tracer, tracerSpecificCarrier);
+            for (Map.Entry<String, String> entry: tracerSpecificCarrier.entrySet()) {
+                headerList.add(new Header(entry.getKey(), entry.getValue()));
+            }
             if (headers != null) {
                 headerList.add(new Header(APIConstants.ACTIVITY_ID, (String) headers.get(APIConstants.ACTIVITY_ID)));
             }
@@ -114,7 +132,7 @@ public class APIKeyValidatorClient {
                         + context + " with ID: " + MessageContext.getCurrentMessageContext().getMessageID() + " at "
                         + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
             }
-
+            Util.finishSpan(tspan);
             ServiceContext serviceContext = keyValidationServiceStub.
                     _getServiceClient().getLastOperationContext().getServiceContext();
             cookie = (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
@@ -164,11 +182,30 @@ public class APIKeyValidatorClient {
             keyValidationServiceStub._getServiceClient().getOptions().setProperty(HTTPConstants.COOKIE_STRING, cookie);
         }
         try {
+//            List headerList = (List) keyValidationServiceStub._getServiceClient().getOptions().getProperty(org.apache.axis2.transport.http.HTTPConstants.HTTP_HEADERS);
+//            Map headers = (Map) MessageContext.getCurrentMessageContext().getProperty(
+//                    org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+//
+//            TracingSpan keySpan = (TracingSpan) MessageContext.getCurrentMessageContext().getProperty("KeySpan");
+//            TracingTracer tracer = Util.getGlobalTracer();
+//            Map<String, String> tracerSpecificCarrier = new HashMap<>();
+//            TracingSpan tspan= Util.startSpan("APIKeyData1111", keySpan, tracer);
+//
+//            Util.inject(tspan, tracer, tracerSpecificCarrier);
+//            for (Map.Entry<String, String> entry: tracerSpecificCarrier.entrySet()) {
+//                headerList.add(new Header(entry.getKey(), entry.getValue()));
+//            }
+//            if (headers != null) {
+//                headerList.add(new Header(APIConstants.ACTIVITY_ID, (String) headers.get(APIConstants.ACTIVITY_ID)));
+//            }
+//            keyValidationServiceStub._getServiceClient().getOptions().setProperty(org.apache.axis2.transport.http.HTTPConstants.HTTP_HEADERS, headerList);
             if (log.isDebugEnabled()) {
                 log.debug("Get all URI templates request from gateway to keymanager via web service call for:"
                         + context + " at "
                         + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
             }
+//            TracingTracer tracer = Util.getGlobalTracer();
+//            TracingSpan firstDBCallSpan = Util.startSpan("first_DB_Call", null, tracer);
             org.wso2.carbon.apimgt.api.model.xsd.URITemplate[] dto =
                     keyValidationServiceStub.getAllURITemplates(context, apiVersion);
             if (log.isDebugEnabled()) {
@@ -176,6 +213,7 @@ public class APIKeyValidatorClient {
                         + " call for:" + context + " at "
                         + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
             }
+//            Util.finishSpan(tspan);
             ServiceContext serviceContext = keyValidationServiceStub.
                     _getServiceClient().getLastOperationContext().getServiceContext();
             cookie = (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);

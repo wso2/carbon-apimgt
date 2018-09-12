@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.keymgt.service;
 
 
+import io.opentracing.SpanContext;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.transport.http.HTTPConstants;
@@ -40,6 +41,10 @@ import org.wso2.carbon.apimgt.keymgt.handlers.KeyValidationHandler;
 import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
+import org.wso2.carbon.apimgt.tracing.TracingServiceImpl;
+import org.wso2.carbon.apimgt.tracing.TracingSpan;
+import org.wso2.carbon.apimgt.tracing.TracingTracer;
+import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.metrics.manager.MetricManager;
@@ -60,6 +65,9 @@ import java.util.*;
 public class APIKeyValidationService extends AbstractAdmin {
     private static final Log log = LogFactory.getLog(APIKeyValidationService.class);
     private static KeyValidationHandler keyValidationHandler;
+    private TracingSpan spanContext;
+    TracingSpan validateMainspan;
+    TracingTracer tracer = Util.getGlobalTracer();
 
     public APIKeyValidationService() {
         try {
@@ -104,6 +112,8 @@ public class APIKeyValidationService extends AbstractAdmin {
         Timer.Context timerContext = timer.start();
 
         MessageContext axis2MessageContext = MessageContext.getCurrentMessageContext();
+//        TracingTracer tracer = Util.getGlobalTracer();
+//        Map<String, String> tracerSpecificCarrier = new HashMap<String, String>();
         Map headersMap = null;
         String activityID = null;
         try {
@@ -116,6 +126,7 @@ public class APIKeyValidationService extends AbstractAdmin {
                     if (headers != null && headers instanceof Map) {
                         headersMap = (Map) headers;
                         activityID = (String) headersMap.get("activityID");
+                        spanContext = Util.extract(tracer, headersMap);
                     }
                     if(headersMap != null) {
                         headersList.add(new Header("activityID", (String) headersMap.get("activityID")));
@@ -127,7 +138,20 @@ public class APIKeyValidationService extends AbstractAdmin {
         } catch (AxisFault axisFault) {
             throw new APIKeyMgtException("Error while building response messageContext: " + axisFault.getLocalizedMessage());
         }
-
+        validateMainspan = Util.startSpan("Validate_Main", spanContext, tracer, null);
+//        Util.setTag(validateMainspan, "span.kind", "server");
+        Util.setTag(validateMainspan, "span.kind", "client");
+        Util.setTag(validateMainspan, "span.kind", "server");
+        Util.setTag(validateMainspan, "component", "GRPC");
+        Util.setTag(validateMainspan,"http.method", "GET");
+        Util.setTag(validateMainspan, "http.url", "https://domain.net/path/to?resource=here");
+        Util.setTag(validateMainspan, "message_bus.destination", "topic name");
+        Util.setTag(validateMainspan,"peer.address", "address");
+        Util.setTag(validateMainspan,"peer.hostname", "opentracing.io");
+        Util.setTag(validateMainspan,"peer.ipv4", "127.0.0.1");
+        Util.setTag(validateMainspan,"peer.ipv6", "2001:0db8:85a3:0000:0000:8a2e:0370:7334");
+        Util.setTag(validateMainspan,"peer.hostname", "peer.service");
+        Util.setTag(validateMainspan, "service", "yololo");
         if (log.isDebugEnabled()) {
             String logMsg = "KeyValidation request from gateway: requestTime= "
                     + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()) + " , for:"
@@ -137,7 +161,6 @@ public class APIKeyValidationService extends AbstractAdmin {
             }
             log.debug(logMsg);
         }
-
         TokenValidationContext validationContext = new TokenValidationContext();
         validationContext.setAccessToken(accessToken);
         validationContext.setClientDomain(clientDomain);
@@ -148,12 +171,16 @@ public class APIKeyValidationService extends AbstractAdmin {
         validationContext.setValidationInfoDTO(new APIKeyValidationInfoDTO());
         validationContext.setVersion(version);
 
+        TracingSpan span = Util.startSpan("Get_Access_Token_Cache_Key", validateMainspan,tracer, null);
         String cacheKey = APIUtil.getAccessTokenCacheKey(accessToken,
                                                          context, version, matchingResource, httpVerb, requiredAuthenticationLevel);
 
         validationContext.setCacheKey(cacheKey);
+        Util.finishSpan(span);
 
+        TracingSpan keyValDTO = Util.startSpan("Fetching_API_Key_Validation_DTO", validateMainspan, tracer, null);
         APIKeyValidationInfoDTO infoDTO = APIKeyMgtUtil.getFromKeyManagerCache(cacheKey);
+        Util.finishSpan(keyValDTO);
 
         if (infoDTO != null) {
             validationContext.setCacheHit(true);
@@ -166,16 +193,20 @@ public class APIKeyValidationService extends AbstractAdmin {
         Timer timer2 = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "VALIDATE_TOKEN"));
         Timer.Context timerContext2 = timer2.start();
+        TracingSpan validateTokenSpan = Util.startSpan("Validate_Token", validateMainspan, tracer, null);
         boolean state = keyValidationHandler.validateToken(validationContext);
         timerContext2.stop();
+        Util.finishSpan(validateTokenSpan);
         log.debug("State after calling validateToken ... " + state);
 
         if (state) {
             Timer timer3 = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                     APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "VALIDATE_SUBSCRIPTION"));
             Timer.Context timerContext3 = timer3.start();
+            TracingSpan validateSubscriptionSpan = Util.startSpan("Validate_Subscription", validateMainspan, tracer, null);
             state = keyValidationHandler.validateSubscription(validationContext);
             timerContext3.stop();
+            Util.finishSpan(validateSubscriptionSpan);
         }
 
         log.debug("State after calling validateSubscription... " + state);
@@ -184,8 +215,10 @@ public class APIKeyValidationService extends AbstractAdmin {
             Timer timer4 = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                     APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "VALIDATE_SCOPES"));
             Timer.Context timerContext4 = timer4.start();
+            TracingSpan validateScopeSpan = Util.startSpan("Validate_Scopes", validateMainspan, tracer, null);
             state = keyValidationHandler.validateScopes(validationContext);
             timerContext4.stop();
+            Util.finishSpan(validateScopeSpan);
         }
 
         log.debug("State after calling validateScopes... " + state);
@@ -195,15 +228,20 @@ public class APIKeyValidationService extends AbstractAdmin {
             Timer timer5 = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                     APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "GENERATE_JWT"));
             Timer.Context timerContext5 = timer5.start();
+            TracingSpan generateJWTSpan = Util.startSpan("Generate_JWT", validateMainspan, tracer, null);
             keyValidationHandler.generateConsumerToken(validationContext);
             timerContext5.stop();
+            Util.finishSpan(generateJWTSpan);
         }
         log.debug("State after calling generateConsumerToken... " + state);
 
         if (!validationContext.isCacheHit()) {
+            TracingSpan keyCache = Util.startSpan("Write_to_key_manager_cache", validateMainspan, tracer, null);
             APIKeyMgtUtil.writeToKeyManagerCache(cacheKey, validationContext.getValidationInfoDTO());
+            Util.finishSpan(keyCache);
         }
 
+        TracingSpan span1 = Util.startSpan("publishing_from KM _to_gateway", validateMainspan, tracer, null);
         if (log.isDebugEnabled() && axis2MessageContext != null) {
             logMessageDetails(axis2MessageContext, validationContext.getValidationInfoDTO());
         }
@@ -213,8 +251,9 @@ public class APIKeyValidationService extends AbstractAdmin {
             log.debug("KeyValidation response from keymanager to gateway for access token:" + accessToken + " at "
                     + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
         }
-
+        Util.finishSpan(span1);
         timerContext.stop();
+        Util.finishSpan(validateMainspan);
         return validationContext.getValidationInfoDTO();
     }
 
@@ -232,6 +271,15 @@ public class APIKeyValidationService extends AbstractAdmin {
         Timer timer6 = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "GET_URI_TEMPLATE"));
         Timer.Context timerContext6 = timer6.start();
+//        MessageContext axis2MessageContext = MessageContext.getCurrentMessageContext();
+//        Map headersMap = null;
+//        Object headers = axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+//        if (headers != null && headers instanceof Map) {
+//            headersMap = (Map) headers;
+//            spanContext = Util.extract(tracer, headersMap);
+//        }
+//        spanContext = Util.extract(tracer, headersMap);
+//        TracingSpan getAllURITemplatesSpan = Util.startSpan("get_All_URI_Templates", spanContext, tracer);
         if (log.isDebugEnabled()) {
             log.debug("getAllURITemplates request from gateway to keymanager: requestTime="
                     + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date())
@@ -243,6 +291,7 @@ public class APIKeyValidationService extends AbstractAdmin {
                     + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
         }
         timerContext6.stop();
+//        Util.finishSpan(getAllURITemplatesSpan);
         return templates;
     }
 

@@ -30,6 +30,7 @@ import org.apache.synapse.rest.RESTUtils;
 import org.apache.synapse.rest.Resource;
 import org.apache.synapse.rest.dispatch.RESTDispatcher;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyDataStore;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.WSAPIKeyDataStore;
 import org.wso2.carbon.apimgt.gateway.handlers.security.thrift.ThriftAPIDataStore;
@@ -41,6 +42,9 @@ import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ResourceInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.tracing.TracingSpan;
+import org.wso2.carbon.apimgt.tracing.TracingTracer;
+import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -564,14 +568,15 @@ public class APIKeyValidator {
         if (isGatewayAPIResourceValidationEnabled) {
             apiInfoDTO = (APIInfoDTO) getResourceCache().get(apiCacheKey);
         }
-
         //Cache miss
         if (apiInfoDTO == null) {
             if (log.isDebugEnabled()) {
                 log.debug("Could not find API object in cache for key: " + apiCacheKey);
             }
+            TracingSpan span = (TracingSpan) synCtx.getProperty("KeySpan");
+            TracingSpan apiInfoDTOSpan = Util.startSpan("API_INFO_DTO", span, Util.getGlobalTracer(), null);
             apiInfoDTO = doGetAPIInfo(apiContext, apiVersion);
-
+            Util.finishSpan(apiInfoDTOSpan);
             if (isGatewayAPIResourceValidationEnabled) {
                 getResourceCache().put(apiCacheKey, apiInfoDTO);
             }

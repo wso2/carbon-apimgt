@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.tracing;
 
 import io.opentracing.Tracer;
+import io.opentracing.util.GlobalTracer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -33,6 +34,11 @@ public class TracingServiceImpl implements TracingService {
 
     private static final Log log = LogFactory.getLog(TracingServiceImpl.class);
     private APIManagerConfiguration configuration = new APIManagerConfiguration();
+    private static TracingServiceImpl instance = new TracingServiceImpl();
+
+    public static TracingServiceImpl getInstance() {
+        return instance;
+    }
     private Tracer tracer;
 
     @Override

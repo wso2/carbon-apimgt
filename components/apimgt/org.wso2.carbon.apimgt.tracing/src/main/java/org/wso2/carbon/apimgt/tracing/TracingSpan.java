@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.tracing;
 
 import io.opentracing.Span;
+import io.opentracing.SpanContext;
 
 /**
  * A Wrapper class for io.opentracing Span
@@ -27,15 +28,19 @@ import io.opentracing.Span;
 public class TracingSpan {
 
     private Span span;
+    private SpanContext spanContext;
 
     public TracingSpan(Span span) {
 
         this.span = span;
     }
 
-    public Span getSpan() {
+    public TracingSpan(SpanContext spanContext) {
 
-        return this.span;
+        this.spanContext = spanContext;
     }
 
+    public Object getSpan() {
+        return span == null ? spanContext : span;
+    }
 }
