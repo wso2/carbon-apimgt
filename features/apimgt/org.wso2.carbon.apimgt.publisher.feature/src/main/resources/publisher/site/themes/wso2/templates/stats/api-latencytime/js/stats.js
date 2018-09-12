@@ -348,7 +348,6 @@ nv.addGraph(function() {
             var purgedDate = new Date();
             purgedDate = purgedDate.setDate(purgedDate.getDate() - 1);
 
-
             // Prevent loading seconds drill down view if
             // requested date is older than 1 day. 1 day is the
             // default data purge config for seconds table

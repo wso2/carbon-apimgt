@@ -98,8 +98,9 @@ var addOrUpdatePublisherAlertConfigs  = function (apiName, apiVersion, type, val
     }
 };
 
-var deletePublisherAlertConfigs = function (apiName, apiVersion) {
+var deletePublisherAlertConfigs = function (apiName, apiVersion, type) {
     var log = new Log();
+    var typeColName = alertTypeMap[type];
 
     try {
         var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;

@@ -30,6 +30,7 @@ $(function() {
             action:"removeAlertConfig",
             apiName: apiName,
             apiVersion: apiVersion,
+            alertType: alertType
         }, function (result) {
             if (!result.error) {
                 window.location.reload(true);
