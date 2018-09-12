@@ -138,6 +138,7 @@ public class APIKeyValidationService extends AbstractAdmin {
         } catch (AxisFault axisFault) {
             throw new APIKeyMgtException("Error while building response messageContext: " + axisFault.getLocalizedMessage());
         }
+
         validateMainspan = Util.startSpan("Validate_Main", spanContext, tracer, null);
 //        Util.setTag(validateMainspan, "span.kind", "server");
         Util.setTag(validateMainspan, "span.kind", "client");
@@ -160,6 +161,7 @@ public class APIKeyValidationService extends AbstractAdmin {
                 logMsg = logMsg + " , transactionId=" + activityID;
             }
             log.debug(logMsg);
+
         }
         TokenValidationContext validationContext = new TokenValidationContext();
         validationContext.setAccessToken(accessToken);
@@ -251,6 +253,7 @@ public class APIKeyValidationService extends AbstractAdmin {
             log.debug("KeyValidation response from keymanager to gateway for access token:" + accessToken + " at "
                     + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
         }
+
         Util.finishSpan(span1);
         timerContext.stop();
         Util.finishSpan(validateMainspan);

@@ -568,6 +568,7 @@ public class APIKeyValidator {
         if (isGatewayAPIResourceValidationEnabled) {
             apiInfoDTO = (APIInfoDTO) getResourceCache().get(apiCacheKey);
         }
+
         //Cache miss
         if (apiInfoDTO == null) {
             if (log.isDebugEnabled()) {
@@ -576,6 +577,7 @@ public class APIKeyValidator {
             TracingSpan span = (TracingSpan) synCtx.getProperty("KeySpan");
             TracingSpan apiInfoDTOSpan = Util.startSpan("API_INFO_DTO", span, Util.getGlobalTracer(), null);
             apiInfoDTO = doGetAPIInfo(apiContext, apiVersion);
+
             Util.finishSpan(apiInfoDTOSpan);
             if (isGatewayAPIResourceValidationEnabled) {
                 getResourceCache().put(apiCacheKey, apiInfoDTO);
