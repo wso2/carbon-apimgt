@@ -108,12 +108,15 @@ var deletePublisherAlertConfigs = function (apiName, apiVersion, type) {
         var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
         var domainName = MultitenantUtils.getTenantDomain(username);
         var appName = "APIM_ALERT_CONFIGURATION"; 
-        var query =  "delete ApiCreatorAlertConfiguration on ApiCreatorAlertConfiguration.apiName == '" 
-                    + apiName + "' and ApiCreatorAlertConfiguration.apiVersion == '"
-                    + apiVersion + "' and ApiCreatorAlertConfiguration.apiCreator == '" 
-                    + username + "' and ApiCreatorAlertConfiguration.apiCreatorTenantDomain == '"
-                    + domainName + "'; "
-                    
+
+        var query = "select '"+apiName+"' as apiName, '"+apiVersion+"' as apiVersion, '"
+            + username + "' as apiCreator, '" + domainName + "' as apiCreatorTenantDomain,"
+            + "0L as "+typeColName+" "
+            + "update ApiCreatorAlertConfiguration "
+            + "set ApiCreatorAlertConfiguration."+typeColName+" = "+typeColName+" " 
+            + "on ApiCreatorAlertConfiguration.apiName == apiName "
+            + "and ApiCreatorAlertConfiguration.apiVersion == apiVersion";
+
         var result = APIUtil.executeQueryOnStreamProcessor(appName, query);
         var objArr = [];
 
