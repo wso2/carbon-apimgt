@@ -251,9 +251,7 @@ function renderGraph(fromDate,toDate,drillDown){
                     $('#noData').append('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="No Data Available"></i>'+i18n.t("No Data Available")+'</h4>'+ "<p> " + i18n.t('Generate some traffic to see statistics') + "</p>" +'</div></div>');
                     $('#chartContainer').hide();
                     $('#apiLatencyTimeNote').addClass('hide');
-
-                }
-                else{
+                } else {
                     $('.stat-page').html("");
                     $('#apiLatencyTimeNote').addClass('hide');
                     showEnableAnalyticsMsg();
@@ -346,14 +344,38 @@ nv.addGraph(function() {
             $("#dateRangePickerContainer .btn-group").children().removeClass('active');
             depth = "MINUTES";
         } else if (depth == "MINUTES") {
-            from = new Date(e.x).setMinutes(date.getMinutes() - 1);
-            to = new Date(e.x).setMinutes(date.getMinutes() + 1);
+            var selDate = new Date(e.x);
+            var purgedDate = new Date();
+            purgedDate = purgedDate.setDate(purgedDate.getDate() - 1);
+
+
+            // Prevent loading seconds drill down view if
+            // requested date is older than 1 day. 1 day is the
+            // default data purge config for seconds table
+            if (selDate < purgedDate) {
+                $('#noData').html('');
+                $('#noData').append('<div class="center-wrapper">' +
+                        '<div class="col-sm-4"/>' +
+                            '<div class="col-sm-4 message message-info">' +
+                            '<h4>' +
+                                '<i class="icon fw fw-info" title="No Data Available"></i>' +
+                                i18n.t("No Data Available") +
+                            '</h4>' +
+                            '<p>' + i18n.t("Data for this selection is already purged") + '</p>' +
+                        '</div>' +
+                    '</div>');
+                $('#chartContainer').hide();
+                $('#apiLatencyTimeNote').addClass('hide');
+
+                return;
+            }
+
+            from = selDate.setMinutes(date.getMinutes() - 1);
+            to = selDate.setMinutes(date.getMinutes() + 1);
             $("#dateRangePickerContainer .btn-group").children().removeClass('active');
             depth = "SECONDS";
-        } else if (depth == "SECONDS") {
-            depth = "HOUR";
-            from = new Date(e.x).setHours(date.getHours() - 1);
-            to = new Date(e.x).setHours(date.getHours() + 1);
+        } else {
+            return;
         }
 
         if (versionComparison) {

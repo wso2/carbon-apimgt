@@ -36,6 +36,7 @@
     "Could not save. You have entered an invalid email address.": "API Not saved. Invalid email address.",
     "Count": "Count",
     "Created API Count": "Created API Count",
+    "Data for this selection is already purged": "Data for this selection is already purged",
     "Data publishing is enabled": "Data publishing is enabled",
     "Delete Certificate for Alias": "Delete certificate for alias",
     "Delete certificate for endpoint": "Delete certificate for endpoint",
