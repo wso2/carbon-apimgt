@@ -58,8 +58,17 @@ var jagg = jagg || (function () {
         //if jaggery allow session reset
         if (typeof request.getSession == "function") {
             var groupId = session.get("groupId");
-            if (session && !session.isNew()) {
-                   session.invalidate();
+            try {
+                if (session && !session.isNew()) {
+                    session.invalidate();
+                }
+            } catch (e) {
+                var log = new Log();
+                if (e.message != null && e.message.indexOf("Session already invalidated") != -1){
+                    log.info("Session is already invalidated, continuing the flow...");
+                } else {
+                    log.error(e);
+                }
             }
             session = request.getSession(true);
             session.put("groupId", groupId);
