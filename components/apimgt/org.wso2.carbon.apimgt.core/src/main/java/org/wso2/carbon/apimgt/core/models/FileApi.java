@@ -50,7 +50,8 @@ public class FileApi {
     private Set<String> transport;
     private Set<String> tags;
     private boolean hasOwnGateway;
-    private List<String> labels;
+    private List<String> gatewayLabels;
+    private List<String> storeLabels;
     private Set<String> policies;
     private API.Visibility visibility;
     private Set<String> visibleRoles;
@@ -227,7 +228,8 @@ public class FileApi {
         isDefaultVersion = api.isDefaultVersion();
         transport = api.getTransport();
         tags = api.getTags();
-        labels = api.getLabels();
+        gatewayLabels = api.getGatewayLabels();
+        storeLabels = api.getStoreLabels();
         policies = new HashSet<>();
         api.getPolicies().forEach((Policy policy) -> policies.add(policy.getPolicyName()));
         visibility = api.getVisibility();
@@ -261,12 +263,20 @@ public class FileApi {
         this.threatProtectionPolicies = api.getThreatProtectionPolicies();
     }
 
-    public List<String> getLabels() {
-        return labels;
+    public List<String> getGatewayLabels() {
+        return gatewayLabels;
     }
 
-    public void setLabels(List<String> labels) {
-        this.labels = labels;
+    public List<String> getStoreLabels() {
+        return storeLabels;
+    }
+
+    public void setGatewayLabels(List<String> labels) {
+        this.gatewayLabels = labels;
+    }
+
+    public void setStoreLabels(List<String> labels) {
+        this.storeLabels = labels;
     }
 
     public void hasOwnGateway(boolean hasOwnGateway) {

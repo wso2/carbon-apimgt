@@ -2,8 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 
 import com.google.gson.annotations.SerializedName;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -36,8 +36,11 @@ public class BaseAPIDTO   {
   @SerializedName("transport")
   private List<String> transport = new ArrayList<String>();
 
-  @SerializedName("labels")
-  private List<String> labels = new ArrayList<String>();
+  @SerializedName("gatewayLabels")
+  private List<String> gatewayLabels = new ArrayList<String>();
+
+  @SerializedName("storeLabels")
+  private List<String> storeLabels = new ArrayList<String>();
 
   @SerializedName("hasOwnGateway")
   private Boolean hasOwnGateway = null;
@@ -224,27 +227,50 @@ public class BaseAPIDTO   {
     this.transport = transport;
   }
 
-  public BaseAPIDTO labels(List<String> labels) {
-    this.labels = labels;
+  public BaseAPIDTO gatewayLabels(List<String> gatewayLabels) {
+    this.gatewayLabels = gatewayLabels;
     return this;
   }
 
-  public BaseAPIDTO addLabelsItem(String labelsItem) {
-    this.labels.add(labelsItem);
+  public BaseAPIDTO addGatewayLabelsItem(String gatewayLabelsItem) {
+    this.gatewayLabels.add(gatewayLabelsItem);
     return this;
   }
 
    /**
-   * Get labels
-   * @return labels
+   * Get gatewayLabels
+   * @return gatewayLabels
   **/
   @ApiModelProperty(value = "")
-  public List<String> getLabels() {
-    return labels;
+  public List<String> getGatewayLabels() {
+    return gatewayLabels;
   }
 
-  public void setLabels(List<String> labels) {
-    this.labels = labels;
+  public void setGatewayLabels(List<String> gatewayLabels) {
+    this.gatewayLabels = gatewayLabels;
+  }
+
+  public BaseAPIDTO storeLabels(List<String> storeLabels) {
+    this.storeLabels = storeLabels;
+    return this;
+  }
+
+  public BaseAPIDTO addStoreLabelsItem(String storeLabelsItem) {
+    this.storeLabels.add(storeLabelsItem);
+    return this;
+  }
+
+   /**
+   * Get storeLabels
+   * @return storeLabels
+  **/
+  @ApiModelProperty(value = "")
+  public List<String> getStoreLabels() {
+    return storeLabels;
+  }
+
+  public void setStoreLabels(List<String> storeLabels) {
+    this.storeLabels = storeLabels;
   }
 
   public BaseAPIDTO hasOwnGateway(Boolean hasOwnGateway) {
@@ -301,14 +327,15 @@ public class BaseAPIDTO   {
         Objects.equals(this.provider, baseAPI.provider) &&
         Objects.equals(this.apiDefinition, baseAPI.apiDefinition) &&
         Objects.equals(this.transport, baseAPI.transport) &&
-        Objects.equals(this.labels, baseAPI.labels) &&
+        Objects.equals(this.gatewayLabels, baseAPI.gatewayLabels) &&
+        Objects.equals(this.storeLabels, baseAPI.storeLabels) &&
         Objects.equals(this.hasOwnGateway, baseAPI.hasOwnGateway) &&
         Objects.equals(this.type, baseAPI.type);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, apiDefinition, transport, labels, hasOwnGateway, type);
+    return Objects.hash(id, name, description, context, version, provider, apiDefinition, transport, gatewayLabels, storeLabels, hasOwnGateway, type);
   }
 
   @Override
@@ -324,7 +351,8 @@ public class BaseAPIDTO   {
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    apiDefinition: ").append(toIndentedString(apiDefinition)).append("\n");
     sb.append("    transport: ").append(toIndentedString(transport)).append("\n");
-    sb.append("    labels: ").append(toIndentedString(labels)).append("\n");
+    sb.append("    gatewayLabels: ").append(toIndentedString(gatewayLabels)).append("\n");
+    sb.append("    storeLabels: ").append(toIndentedString(storeLabels)).append("\n");
     sb.append("    hasOwnGateway: ").append(toIndentedString(hasOwnGateway)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("}");

@@ -114,6 +114,7 @@ import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -1341,7 +1342,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         }
 
         //api.getLabels() should not be null and the labels should contain labelName
-        if ((api.getLabels() == null || !api.getLabels().contains(labelName))) {
+        if ((api.getGatewayLabels() == null || !api.getGatewayLabels().contains(labelName))) {
             throw new LabelException("API with id " + apiId + " does not contain label " + labelName,
                     ExceptionCodes.LABEL_NOT_FOUND_IN_API);
         }
@@ -1372,7 +1373,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         }
 
         //api.getLabels() should not be null and the labels should contain labelName
-        if ((api.getLabels() == null || !api.getLabels().contains(labelName))) {
+        if ((api.getGatewayLabels() == null || !api.getGatewayLabels().contains(labelName))) {
             throw new LabelException("API with id " + apiId + " does not contain label " + labelName,
                     ExceptionCodes.LABEL_NOT_FOUND_IN_API);
         }
@@ -1418,6 +1419,11 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         List<API> apiResults = null;
 
         try {
+            Set<String> labelIds = new HashSet<>();
+            for (String label : labels) {
+                String labelId = getLabelDAO().getLabelIdByNameAndType(label, APIMgtConstants.LABEL_TYPE_STORE);
+                labelIds.add(labelId);
+            }
 
             // TODO: Need to validate users roles against results returned
             //this should be current logged in user
@@ -1439,15 +1445,15 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 }
 
                 if (isFullTextSearch) {
-                    apiResults = getApiDAO().searchAPIsByStoreLabel(roles, user, query, offset, limit, labels);
+                    apiResults = getApiDAO().searchAPIsByStoreLabel(roles, user, query, offset, limit, labelIds);
                 } else {
-                    apiResults = getApiDAO().searchAPIsByAttributeInStore(roles, labels,
+                    apiResults = getApiDAO().searchAPIsByAttributeInStore(roles, labelIds,
                             attributeMap,
                             offset, limit);
                 }
             } else {
                 Set<APIStatus> statuses = EnumSet.of(APIStatus.PUBLISHED, APIStatus.PROTOTYPED);
-                apiResults = getApiDAO().getAPIsByStatus(roles, statuses, labels);
+                apiResults = getApiDAO().getAPIsByStatus(roles, statuses, labelIds);
             }
 
         } catch (APIMgtDAOException e) {

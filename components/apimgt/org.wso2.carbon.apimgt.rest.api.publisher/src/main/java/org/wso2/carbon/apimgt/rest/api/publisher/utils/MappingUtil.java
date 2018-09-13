@@ -114,7 +114,8 @@ public class MappingUtil {
         apidto.setWorkflowStatus(api.getWorkflowStatus());
         apidto.setTags(new ArrayList<>(api.getTags()));
         apidto.hasOwnGateway(api.hasOwnGateway());
-        apidto.setLabels(new ArrayList<>(api.getLabels()));
+        apidto.setGatewayLabels(api.getGatewayLabels());
+        apidto.setStoreLabels(api.getStoreLabels());
         apidto.setTransport(new ArrayList<>(api.getTransport()));
         apidto.setUserPermissionsForApi(api.getUserSpecificApiPermissions());
         apidto.setSecurityScheme(mapSecuritySchemeIntToList(api.getSecurityScheme()));
@@ -248,7 +249,8 @@ public class MappingUtil {
                 policies(subscriptionPolicies).
                 apiPermission(apidto.getPermission()).
                 tags(new HashSet<>(apidto.getTags())).
-                labels(new ArrayList<>(apidto.getLabels())).
+                gatewayLabels(new ArrayList<>(apidto.getGatewayLabels())).
+                storeLabels(new ArrayList<>(apidto.getGatewayLabels())).
                 transport(new HashSet<>(apidto.getTransport())).
                 isResponseCachingEnabled(Boolean.valueOf(apidto.getResponseCaching())).
                 businessInformation(businessInformation).

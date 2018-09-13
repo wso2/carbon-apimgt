@@ -3350,7 +3350,11 @@ definitions:
           description: |
             Supported transports for the API (http and/or https).
           type: string
-      labels:
+      gatewayLabels:
+        type: array
+        items:
+          type: string
+      storeLabels:
         type: array
         items:
           type: string

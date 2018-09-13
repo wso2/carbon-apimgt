@@ -63,7 +63,8 @@ public final class API {
         transport = builder.transport;
         tags = builder.tags;
         hasOwnGateway = builder.hasOwnGateway;
-        labels = builder.labels;
+        gatewayLabels = builder.gatewayLabels;
+        storeLabels = builder.storeLabels;
         policies = builder.policies;
         visibility = builder.visibility;
         visibleRoles = builder.visibleRoles;
@@ -165,8 +166,12 @@ public final class API {
         return tags;
     }
 
-    public List<String> getLabels() {
-        return labels;
+    public List<String> getGatewayLabels() {
+        return gatewayLabels;
+    }
+
+    public List<String> getStoreLabels() {
+        return storeLabels;
     }
 
     public boolean hasOwnGateway() {
@@ -281,7 +286,8 @@ public final class API {
                 Objects.equals(transport, api.transport) &&
                 Objects.equals(tags, api.tags) &&
                 Objects.equals(hasOwnGateway, api.hasOwnGateway) &&
-                Objects.equals(labels, api.labels) &&
+                Objects.equals(gatewayLabels, api.gatewayLabels) &&
+                Objects.equals(storeLabels, api.storeLabels) &&
                 visibility == api.visibility &&
                 Objects.equals(visibleRoles, api.visibleRoles) &&
                 Objects.equals(businessInformation, api.businessInformation) &&
@@ -303,8 +309,8 @@ public final class API {
     public int hashCode() {
         return Objects.hash(id, provider, name, version, context, description, lifeCycleStatus, lifecycleInstanceId,
                 endpoint, gatewayConfig, wsdlUri, isResponseCachingEnabled, cacheTimeout, isDefaultVersion,
-                transport, tags, labels, visibility, visibleRoles, businessInformation, corsConfiguration,
-                applicationId, createdTime, createdBy, updatedBy, lastUpdatedTime, lifecycleState,
+                transport, tags, gatewayLabels, storeLabels, visibility, visibleRoles, businessInformation,
+                corsConfiguration, applicationId, createdTime, createdBy, updatedBy, lastUpdatedTime, lifecycleState,
                 uriTemplates, copiedFromApiId, workflowStatus, securityScheme, threatProtectionPolicies);
     }
 
@@ -333,7 +339,8 @@ public final class API {
     private final Set<String> transport;
     private final Set<String> tags;
     private final boolean hasOwnGateway;
-    private final List<String> labels;
+    private final List<String> gatewayLabels;
+    private final List<String> storeLabels;
     private final Set<Policy> policies;
     private final Visibility visibility;
     private final Set<String> visibleRoles;
@@ -388,7 +395,8 @@ public final class API {
             transport = api.getTransport();
             tags = api.getTags();
             hasOwnGateway = api.hasOwnGateway();
-            labels = api.getLabels();
+            gatewayLabels = api.getGatewayLabels();
+            storeLabels = api.getStoreLabels();
             policies = new HashSet<>();
             api.getPolicies().forEach(v -> policies.add(new SubscriptionPolicy(v)));
             visibility = api.getVisibility();
@@ -490,8 +498,12 @@ public final class API {
             return tags;
         }
         
-        public List<String> getLabels() {
-            return labels;
+        public List<String> getGatewayLabels() {
+            return gatewayLabels;
+        }
+
+        public List<String> getStoreLabels() {
+            return storeLabels;
         }
 
         public boolean hasOwnGateway() {
@@ -547,7 +559,8 @@ public final class API {
         private Set<String> transport = Collections.emptySet();
         private Set<String> tags = Collections.emptySet();
         private boolean hasOwnGateway = false;
-        private List<String> labels =  new ArrayList<String>();
+        private List<String> gatewayLabels =  new ArrayList<String>();
+        private List<String> storeLabels =  new ArrayList<String>();
         private Set<Policy> policies = Collections.emptySet();
         private Visibility visibility = Visibility.PUBLIC;
         private Set<String> visibleRoles = Collections.emptySet();
@@ -591,7 +604,8 @@ public final class API {
             this.transport = copy.transport;
             this.tags = copy.tags;
             this.hasOwnGateway = copy.hasOwnGateway;
-            this.labels = copy.labels;
+            this.gatewayLabels = copy.gatewayLabels;
+            this.storeLabels = copy.storeLabels;
             this.policies = copy.policies;
             this.visibility = copy.visibility;
             this.visibleRoles = copy.visibleRoles;
@@ -840,11 +854,23 @@ public final class API {
          * Sets the {@code labels} and returns a reference to this APIBuilder so that the methods can be chained
          * together.
          *
-         * @param labels the {@code labels} to set
+         * @param gatewayLabels the {@code labels} to set
          * @return a reference to this APIBuilder
          */
-        public APIBuilder labels(List<String> labels) {
-            this.labels = labels;
+        public APIBuilder gatewayLabels(List<String> gatewayLabels) {
+            this.gatewayLabels = gatewayLabels;
+            return this;
+        }
+
+        /**
+         * Sets the {@code labels} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
+         *
+         * @param storeLabels the {@code labels} to set
+         * @return a reference to this APIBuilder
+         */
+        public APIBuilder storeLabels(List<String> storeLabels) {
+            this.storeLabels = storeLabels;
             return this;
         }
 

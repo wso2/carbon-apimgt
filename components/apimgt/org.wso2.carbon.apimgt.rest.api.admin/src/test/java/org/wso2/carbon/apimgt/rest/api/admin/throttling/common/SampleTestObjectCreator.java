@@ -142,9 +142,9 @@ public class SampleTestObjectCreator {
 
     public static CompositeAPI.Builder createCompositeAPIModelBuilder() {
         CompositeAPI.Builder compositeAPIBuilder = new CompositeAPI.Builder();
-        compositeAPIBuilder.id(UUID.randomUUID().toString()).name("CompisteAPI").apiDefinition("definition").
-                            applicationId(UUID.randomUUID().toString()).context("testcontext").provider("provider")
-                            .version("1.0.0").context("testcontext").description("testdesc").labels(new ArrayList<>());
+        compositeAPIBuilder.id(UUID.randomUUID().toString()).name("CompisteAPI").apiDefinition("definition")
+                .applicationId(UUID.randomUUID().toString()).context("testcontext").provider("provider")
+                .version("1.0.0").context("testcontext").description("testdesc").gatewayLabels(new ArrayList<>());
         return compositeAPIBuilder;
     }
 
@@ -236,7 +236,7 @@ public class SampleTestObjectCreator {
                 apiPermission(permissionJson).
                 uriTemplates(getMockUriTemplates()).
                 apiDefinition(apiDefinition).workflowStatus(WORKFLOW_STATUS).
-                labels(labels).endpoint(endpointMap);
+                gatewayLabels(labels).endpoint(endpointMap);
         Map map = new HashMap();
         map.put(DEVELOPER_ROLE_ID, 6);
         map.put(ADMIN_ROLE_ID, 15);

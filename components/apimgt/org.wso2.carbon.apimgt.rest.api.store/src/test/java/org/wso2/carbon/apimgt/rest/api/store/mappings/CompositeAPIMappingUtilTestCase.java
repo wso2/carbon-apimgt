@@ -41,7 +41,8 @@ public class CompositeAPIMappingUtilTestCase {
         List<String> labels = new ArrayList<>();
         labels.add("label1");
         //Test compositeAPI to CompositeAPIDTO
-        CompositeAPI compositeAPI = SampleTestObjectCreator.createCompositeAPIModelBuilder().labels(labels).build();
+        CompositeAPI compositeAPI = SampleTestObjectCreator.createCompositeAPIModelBuilder().gatewayLabels(labels)
+                .build();
         CompositeAPIDTO compositeAPIDTO = CompositeAPIMappingUtil.toCompositeAPIDTO(compositeAPI);
         assertEquals(compositeAPI.getId(), compositeAPIDTO.getId());
         assertEquals(compositeAPI.getName(), compositeAPIDTO.getName());
@@ -49,7 +50,8 @@ public class CompositeAPIMappingUtilTestCase {
         assertEquals(compositeAPI.getVersion(), compositeAPIDTO.getVersion());
         assertEquals(compositeAPI.getContext(), compositeAPIDTO.getContext());
         assertEquals(compositeAPI.getDescription(), compositeAPIDTO.getDescription());
-        assertEquals(compositeAPI.getLabels().size(), compositeAPIDTO.getLabels().size());
+        assertEquals(compositeAPI.getGatewayLabels().size(), compositeAPIDTO.getGatewayLabels().size());
+        assertEquals(compositeAPI.getStoreLabels().size(), compositeAPIDTO.getStoreLabels().size());
         assertEquals(compositeAPI.getApplicationId(), compositeAPIDTO.getApplicationId());
 
         //Test CompositeAPIDTO to compositeAPI
@@ -60,7 +62,8 @@ public class CompositeAPIMappingUtilTestCase {
         assertEquals(compositeAPIGenerated.getVersion(), compositeAPIDTO.getVersion());
         assertEquals(compositeAPIGenerated.getContext(), compositeAPIDTO.getContext());
         assertEquals(compositeAPIGenerated.getDescription(), compositeAPIDTO.getDescription());
-        assertEquals(compositeAPIGenerated.getLabels().size(), compositeAPIDTO.getLabels().size());
+        assertEquals(compositeAPIGenerated.getGatewayLabels().size(), compositeAPIDTO.getGatewayLabels().size());
+        assertEquals(compositeAPIGenerated.getStoreLabels().size(), compositeAPIDTO.getStoreLabels().size());
         assertEquals(compositeAPIGenerated.getApplicationId(), compositeAPIDTO.getApplicationId());
     }
 

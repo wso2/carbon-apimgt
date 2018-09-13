@@ -2,10 +2,12 @@ package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 
 import com.google.gson.annotations.SerializedName;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.store.dto.API_businessInformationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.BaseAPIDTO;
 import java.util.Objects;
 
 /**

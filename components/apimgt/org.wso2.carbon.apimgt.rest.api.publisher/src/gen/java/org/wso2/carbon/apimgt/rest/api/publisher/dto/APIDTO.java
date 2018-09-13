@@ -75,8 +75,11 @@ public class APIDTO   {
   @SerializedName("hasOwnGateway")
   private Boolean hasOwnGateway = null;
 
-  @SerializedName("labels")
-  private List<String> labels = new ArrayList<String>();
+  @SerializedName("gatewayLabels")
+  private List<String> gatewayLabels = new ArrayList<String>();
+
+  @SerializedName("storeLabels")
+  private List<String> storeLabels = new ArrayList<String>();
 
   @SerializedName("policies")
   private List<String> policies = new ArrayList<String>();
@@ -508,27 +511,50 @@ public class APIDTO   {
     this.hasOwnGateway = hasOwnGateway;
   }
 
-  public APIDTO labels(List<String> labels) {
-    this.labels = labels;
+  public APIDTO gatewayLabels(List<String> gatewayLabels) {
+    this.gatewayLabels = gatewayLabels;
     return this;
   }
 
-  public APIDTO addLabelsItem(String labelsItem) {
-    this.labels.add(labelsItem);
+  public APIDTO addGatewayLabelsItem(String gatewayLabelsItem) {
+    this.gatewayLabels.add(gatewayLabelsItem);
     return this;
   }
 
    /**
-   * Get labels
-   * @return labels
+   * Get gatewayLabels
+   * @return gatewayLabels
   **/
   @ApiModelProperty(example = "[\"public\",\"private\"]", value = "")
-  public List<String> getLabels() {
-    return labels;
+  public List<String> getGatewayLabels() {
+    return gatewayLabels;
   }
 
-  public void setLabels(List<String> labels) {
-    this.labels = labels;
+  public void setGatewayLabels(List<String> gatewayLabels) {
+    this.gatewayLabels = gatewayLabels;
+  }
+
+  public APIDTO storeLabels(List<String> storeLabels) {
+    this.storeLabels = storeLabels;
+    return this;
+  }
+
+  public APIDTO addStoreLabelsItem(String storeLabelsItem) {
+    this.storeLabels.add(storeLabelsItem);
+    return this;
+  }
+
+   /**
+   * Get storeLabels
+   * @return storeLabels
+  **/
+  @ApiModelProperty(example = "[\"public\",\"private\"]", value = "")
+  public List<String> getStoreLabels() {
+    return storeLabels;
+  }
+
+  public void setStoreLabels(List<String> storeLabels) {
+    this.storeLabels = storeLabels;
   }
 
   public APIDTO policies(List<String> policies) {
@@ -875,7 +901,8 @@ public class APIDTO   {
         Objects.equals(this.transport, API.transport) &&
         Objects.equals(this.tags, API.tags) &&
         Objects.equals(this.hasOwnGateway, API.hasOwnGateway) &&
-        Objects.equals(this.labels, API.labels) &&
+        Objects.equals(this.gatewayLabels, API.gatewayLabels) &&
+        Objects.equals(this.storeLabels, API.storeLabels) &&
         Objects.equals(this.policies, API.policies) &&
         Objects.equals(this.visibility, API.visibility) &&
         Objects.equals(this.visibleRoles, API.visibleRoles) &&
@@ -895,7 +922,7 @@ public class APIDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, wsdlUri, lifeCycleStatus, workflowStatus, createdTime, apiPolicy, lastUpdatedTime, responseCaching, cacheTimeout, destinationStatsEnabled, isDefaultVersion, transport, tags, hasOwnGateway, labels, policies, visibility, visibleRoles, permission, userPermissionsForApi, visibleTenants, gatewayEnvironments, sequences, businessInformation, corsConfiguration, endpoint, securityScheme, scopes, operations, threatProtectionPolicies);
+    return Objects.hash(id, name, description, context, version, provider, wsdlUri, lifeCycleStatus, workflowStatus, createdTime, apiPolicy, lastUpdatedTime, responseCaching, cacheTimeout, destinationStatsEnabled, isDefaultVersion, transport, tags, hasOwnGateway, gatewayLabels, storeLabels, policies, visibility, visibleRoles, permission, userPermissionsForApi, visibleTenants, gatewayEnvironments, sequences, businessInformation, corsConfiguration, endpoint, securityScheme, scopes, operations, threatProtectionPolicies);
   }
 
   @Override
@@ -922,7 +949,8 @@ public class APIDTO   {
     sb.append("    transport: ").append(toIndentedString(transport)).append("\n");
     sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
     sb.append("    hasOwnGateway: ").append(toIndentedString(hasOwnGateway)).append("\n");
-    sb.append("    labels: ").append(toIndentedString(labels)).append("\n");
+    sb.append("    gatewayLabels: ").append(toIndentedString(gatewayLabels)).append("\n");
+    sb.append("    storeLabels: ").append(toIndentedString(storeLabels)).append("\n");
     sb.append("    policies: ").append(toIndentedString(policies)).append("\n");
     sb.append("    visibility: ").append(toIndentedString(visibility)).append("\n");
     sb.append("    visibleRoles: ").append(toIndentedString(visibleRoles)).append("\n");

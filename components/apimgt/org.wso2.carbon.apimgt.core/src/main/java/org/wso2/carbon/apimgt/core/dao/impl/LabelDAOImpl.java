@@ -53,7 +53,7 @@ public class LabelDAOImpl implements LabelDAO {
                             id(rs.getString("LABEL_ID")).
                             name(rs.getString("NAME")).
                             type(rs.getString("TYPE_NAME")).
-                            accessUrls(getLabelAccessUrls(rs.getString("LABEL_ID"))).build();
+                            accessUrls(getLabelAccessUrls(connection, rs.getString("LABEL_ID"))).build();
 
                     labels.add(label);
                 }
@@ -74,27 +74,39 @@ public class LabelDAOImpl implements LabelDAO {
 
         if (!labels.isEmpty()) {
 
-            final String query = "INSERT INTO AM_LABELS (LABEL_ID, NAME) VALUES (?,?)";
+            final String query = "INSERT INTO AM_LABELS (LABEL_ID, NAME, TYPE_NAME) VALUES (?,?,?)";
             Map<String, List<String>> urlMap = new HashMap<>();
 
             try (Connection connection = DAOUtil.getConnection();
                  PreparedStatement statement = connection.prepareStatement(query)) {
 
-                for (Label label : labels) {
-                    statement.setString(1, label.getId());
-                    statement.setString(2, label.getName());
-                    statement.addBatch();
-                    urlMap.put(label.getId(), label.getAccessUrls());
-                }
-                statement.executeBatch();
+                try {
+                    connection.setAutoCommit(false);
+                    for (Label label : labels) {
+                        statement.setString(1, label.getId());
+                        statement.setString(2, label.getName());
+                        statement.setString(3, label.getType());
+                        statement.addBatch();
+                        urlMap.put(label.getId(), label.getAccessUrls());
+                    }
+                    statement.executeBatch();
 
-                if (!urlMap.isEmpty()) {
-                    for (Map.Entry<String, List<String>> entry : urlMap.entrySet()) {
-                        if (entry.getValue() != null) {
-                            insertAccessUrlMappings(entry.getKey(), entry.getValue());
+                    if (!urlMap.isEmpty()) {
+                        for (Map.Entry<String, List<String>> entry : urlMap.entrySet()) {
+                            if (entry.getValue() != null) {
+                                insertAccessUrlMappings(connection, entry.getKey(), entry.getValue());
+                            }
                         }
                     }
+                    connection.commit();
+                } catch (SQLException e) {
+                    connection.rollback();
+                    String message = DAOUtil.DAO_ERROR_PREFIX + "adding the labels";
+                    throw new APIMgtDAOException(message, e);
+                } finally {
+                    connection.setAutoCommit(DAOUtil.isAutoCommit());
                 }
+
             } catch (SQLException e) {
                 String message = DAOUtil.DAO_ERROR_PREFIX + "adding label data";
                 throw new APIMgtDAOException(message, e);
@@ -115,16 +127,24 @@ public class LabelDAOImpl implements LabelDAO {
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
-            connection.setAutoCommit(false);
-            labelId = UUID.randomUUID().toString();
-            statement.setString(1, labelId);
-            statement.setString(2, label.getName());
-            statement.setString(3, label.getType().toUpperCase(Locale.ENGLISH));
-            statement.executeUpdate();
+            try {
+                connection.setAutoCommit(false);
+                labelId = UUID.randomUUID().toString();
+                statement.setString(1, labelId);
+                statement.setString(2, label.getName());
+                statement.setString(3, label.getType().toUpperCase(Locale.ENGLISH));
+                statement.executeUpdate();
 
-            connection.commit();
-            if (!label.getAccessUrls().isEmpty()) {
-                insertAccessUrlMappings(labelId, label.getAccessUrls());
+                if (!label.getAccessUrls().isEmpty()) {
+                    insertAccessUrlMappings(connection, labelId, label.getAccessUrls());
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                String message = DAOUtil.DAO_ERROR_PREFIX + "adding the label [label id] " + labelId;
+                throw new APIMgtDAOException(message, e);
+            } finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
             return new Label.Builder().id(labelId).name(label.getName()).description(label.getDescription()).
                     accessUrls(label.getAccessUrls()).type(label.getType()).build();
@@ -137,15 +157,17 @@ public class LabelDAOImpl implements LabelDAO {
     /**
      * Add access url mappings
      *
+     * @param connection Connection
      * @param labelId    Id of the label
      * @param accessUrls List of access urls
      * @throws APIMgtDAOException if error occurs while adding access url mappings
      */
-    private static void insertAccessUrlMappings(String labelId, List<String> accessUrls) throws APIMgtDAOException {
+    private static void insertAccessUrlMappings(Connection connection, String labelId, List<String> accessUrls)
+            throws APIMgtDAOException {
 
         if (!accessUrls.isEmpty()) {
 
-            List<String> existingAccessUrls = getLabelAccessUrls(labelId);
+            List<String> existingAccessUrls = getLabelAccessUrls(connection, labelId);
             if (!existingAccessUrls.isEmpty()) {
                 accessUrls.removeAll(existingAccessUrls);
             }
@@ -153,8 +175,7 @@ public class LabelDAOImpl implements LabelDAO {
             final String query = "INSERT INTO AM_LABEL_ACCESS_URL_MAPPING (LABEL_ID, ACCESS_URL) " +
                     "VALUES (?,?)";
 
-            try (Connection connection = DAOUtil.getConnection();
-                 PreparedStatement statement = connection.prepareStatement(query)) {
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
 
                 for (String accessUrl : accessUrls) {
                     statement.setString(1, labelId);
@@ -173,17 +194,17 @@ public class LabelDAOImpl implements LabelDAO {
     /**
      * Retrieve access urls of a label by label Id
      *
-     * @param labelId Id of the label
+     * @param connection Connection
+     * @param labelId    Id of the label
      * @return List of access urls of the label
      * @throws APIMgtDAOException if error occurs while retrieving access urls
      */
-    private static List<String> getLabelAccessUrls(String labelId) throws APIMgtDAOException {
+    private static List<String> getLabelAccessUrls(Connection connection, String labelId) throws APIMgtDAOException {
 
         final String query = "SELECT ACCESS_URL FROM AM_LABEL_ACCESS_URL_MAPPING WHERE LABEL_ID = ?";
         List<String> accessUrls = new ArrayList<>();
 
-        try (Connection connection = DAOUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, labelId);
 
             try (ResultSet rs = statement.executeQuery()) {
@@ -216,7 +237,7 @@ public class LabelDAOImpl implements LabelDAO {
                             id(rs.getString("LABEL_ID")).
                             name(rs.getString("NAME")).
                             type(rs.getString("TYPE_NAME")).
-                            accessUrls(getLabelAccessUrls(rs.getString("LABEL_ID"))).build();
+                            accessUrls(getLabelAccessUrls(connection, rs.getString("LABEL_ID"))).build();
                 } else {
                     return null;
                 }
@@ -280,7 +301,7 @@ public class LabelDAOImpl implements LabelDAO {
                         Label label = new Label.Builder().
                                 id(rs.getString("LABEL_ID")).
                                 name(rs.getString("NAME")).
-                                accessUrls(getLabelAccessUrls(rs.getString("LABEL_ID"))).build();
+                                accessUrls(getLabelAccessUrls(connection, rs.getString("LABEL_ID"))).build();
 
                         matchingLabels.add(label);
                     }
@@ -402,13 +423,13 @@ public class LabelDAOImpl implements LabelDAO {
                 }
                 statement.setString(3, updatedLabel.getId());
                 statement.executeUpdate();
-                connection.commit();
-                deleteLabelAccessUrlMappings(labelId);
+                deleteLabelAccessUrlMappings(connection, labelId);
                 if (APIMgtConstants.LABEL_TYPE_GATEWAY.equalsIgnoreCase(updatedLabel.getType())) {
-                    insertAccessUrlMappings(labelId, accessURLs);
+                    insertAccessUrlMappings(connection, labelId, accessURLs);
                 } else {
                     accessURLs = new ArrayList<>();
                 }
+                connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
                 String message = "Error while updating the label" +
@@ -430,28 +451,17 @@ public class LabelDAOImpl implements LabelDAO {
     /**
      * Delete access urls of a label by label id
      *
-     * @param labelId Id of the label
+     * @param connection Connection
+     * @param labelId    Id of the label
      * @throws APIMgtDAOException if error occurs while deleting label access urls
      */
-    private void deleteLabelAccessUrlMappings(String labelId) throws APIMgtDAOException {
+    private void deleteLabelAccessUrlMappings(Connection connection, String labelId) throws APIMgtDAOException {
 
         final String query = "DELETE FROM AM_LABEL_ACCESS_URL_MAPPING WHERE LABEL_ID = ?";
 
-        try (Connection connection = DAOUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
-            try {
-                connection.setAutoCommit(false);
-                statement.setString(1, labelId);
-                statement.execute();
-                connection.commit();
-            } catch (SQLException e) {
-                connection.rollback();
-                String message = DAOUtil.DAO_ERROR_PREFIX + "deleting the label access url mappings [label id] "
-                        + labelId;
-                throw new APIMgtDAOException(message, e);
-            } finally {
-                connection.setAutoCommit(DAOUtil.isAutoCommit());
-            }
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, labelId);
+            statement.execute();
         } catch (SQLException e) {
             String message = DAOUtil.DAO_ERROR_PREFIX + "deleting the label access url mappings [label id] " + labelId;
             throw new APIMgtDAOException(message, e);
@@ -527,7 +537,7 @@ public class LabelDAOImpl implements LabelDAO {
                             id(rs.getString("LABEL_ID")).
                             name(rs.getString("NAME")).
                             type(rs.getString("TYPE_NAME")).
-                            accessUrls(getLabelAccessUrls(rs.getString("LABEL_ID"))).build());
+                            accessUrls(getLabelAccessUrls(connection, rs.getString("LABEL_ID"))).build());
                 }
             }
             return labels;
@@ -554,7 +564,7 @@ public class LabelDAOImpl implements LabelDAO {
                     return new Label.Builder().
                             id(rs.getString("LABEL_ID")).
                             name(rs.getString("NAME")).
-                            accessUrls(getLabelAccessUrls(rs.getString("LABEL_ID"))).build();
+                            accessUrls(getLabelAccessUrls(connection, rs.getString("LABEL_ID"))).build();
                 } else {
                     return null;
                 }

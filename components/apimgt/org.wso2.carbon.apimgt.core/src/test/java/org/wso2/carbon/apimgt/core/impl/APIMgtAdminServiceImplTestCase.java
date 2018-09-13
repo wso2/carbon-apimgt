@@ -711,7 +711,7 @@ public class APIMgtAdminServiceImplTestCase {
         List<String> gatewayLabels = new ArrayList<>();
         gatewayLabels.add("Label1");
         List<API> apiListExpected = new ArrayList<>();
-        API api = SampleTestObjectCreator.createDefaultAPI().labels(new ArrayList<>(gatewayLabels)).build();
+        API api = SampleTestObjectCreator.createDefaultAPI().gatewayLabels(new ArrayList<>(gatewayLabels)).build();
         apiListExpected.add(api);
         Mockito.when(apiDAO.getAPIsByGatewayLabel(gatewayLabels)).thenReturn(apiListExpected);
         APIMgtAdminServiceImpl adminService = getAPIMgtAdminServiceImpl(daoFactory, null);
