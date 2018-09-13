@@ -258,6 +258,8 @@ class Endpoint extends Component {
         const {
             api, productionEndpoint, sandboxEndpoint,
         } = this.state;
+        const copyOfProdEndpoint = JSON.parse(JSON.stringify(productionEndpoint));
+        const copyOfSandboxEndpoint = JSON.parse(JSON.stringify(sandboxEndpoint));
         const { classes } = this.props;
         if (this.state.notFound) {
             return <ResourceNotFound message={this.props.resourceNotFountMessage} />;
@@ -297,20 +299,18 @@ class Endpoint extends Component {
                 </IconButton>
                 {productionEndpoint && (
                     <EndpointDetail
-                        type={<FormattedMessage id='production' defaultMessage='Production' />}
-                        endpoint={productionEndpoint}
-                        isInline={productionEndpoint.inline}
-                        readOnly={this.state.readOnly}
-                        makeNonEditable={this.makeNonEditable}
+                        type={<FormattedMessage
+                            id='production'
+                            defaultMessage='Production'
+                        />} endpoint={productionEndpoint} initialValue={copyOfProdEndpoint} isInline={productionEndpoint.inline} readOnly={this.state.readOnly} makeNonEditable={this.makeNonEditable}
                     />
                 )}
                 {sandboxEndpoint && (
                     <EndpointDetail
-                        type={<FormattedMessage id='sandbox' defaultMessage='Sandbox' />}
-                        endpoint={sandboxEndpoint}
-                        isInline={sandboxEndpoint.inline}
-                        readOnly={this.state.readOnly}
-                        makeNonEditable={this.makeNonEditable}
+                        type={<FormattedMessage
+                            id='sandbox'
+                            defaultMessage='Sandbox'
+                        />} endpoint={sandboxEndpoint} initialValue={copyOfSandboxEndpoint} isInline={sandboxEndpoint.inline} readOnly={this.state.readOnly} makeNonEditable={this.makeNonEditable}
                     />
                 )}
                 <Divider />

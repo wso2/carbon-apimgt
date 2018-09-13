@@ -31,5 +31,14 @@
   "load.balanced.endpints": "Load balanced endpints",
   "fail.over.endpints": "Fail over endpints",
   "add.another.load.balanced.endpoint": "Add another load balanced endpoint",
-  "add.another.fail.over.endpoint": "Add another fail over endpoint"
+  "add.another.fail.over.endpoint": "Add another fail over endpoint",
+  "endpoint.advance.configuration": "Endpoint Advance Configuration",
+  "endpoint.url": "Endpoint URL",
+  "you.can.define.endpoint.inline.or.pick.from.a.list.of.global.endpoints" : "You can define endpoint inline or pick from a list of global endpoints",
+  "global.endpoints.can.be.only.edited.from.global.endpoint.page": "Global endpoints can be only edited from Global Endpoint Page",
+  "here.you.can.only.attach.a.global.endpoint.to.api": "Here you can only attach a global endpoint to API.",
+  "initial.duration.ms": "Initial Duration(ms)",
+  "maximum.duration.ms": "Maximum Duration(ms)",
+  "endpoint.suspend.state": "Endpoint Suspend State",
+  "suspend.factor": "Suspend Factor"
 }

@@ -16,22 +16,15 @@
 
 import React from 'react';
 import { Component } from 'react';
-import Api from '../../../../data/api';
 import { Grid, Paper, Typography, Divider } from '@material-ui/core';
-import EndpointsSelector from './EndpointsSelector';
-import PropTypes from 'prop-types';
-import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
-import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
 import { withStyles, MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import { FormattedMessage } from 'react-intl';
 
-import FormControlLabel from '@material-ui/core/FormControlLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
-import IconButton from '@material-ui/core/IconButton';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
@@ -62,7 +55,6 @@ const styles = theme => ({
     textField: {
         marginLeft: theme.spacing.unit,
         marginRight: theme.spacing.unit,
-
     },
     selectEmpty: {
         marginTop: theme.spacing.unit * 2,
@@ -70,107 +62,217 @@ const styles = theme => ({
     },
 });
 
+/**
+ *
+ *
+ * @class AdvanceEndpointDetail
+ * @extends {Component}
+ */
 class AdvanceEndpointDetail extends Component {
-
+    /**
+     *Creates an instance of AdvanceEndpointDetail.
+     * @param {*} props
+     * @memberof AdvanceEndpointDetail
+     */
     constructor(props) {
         super(props);
         this.state = {
+            maxTps: this.props.endpoint.maxTps,
+            type: this.props.endpoint.type,
             securityEnabled: this.props.endpointSecurity.enabled,
             securityType: 'basic',
             username: '',
             password: '',
-        }
+        };
 
         this.handleScurityChange = this.handleScurityChange.bind(this);
         this.handleScurityTypeChange = this.handleScurityTypeChange.bind(this);
         this.handleTextFieldChange = this.handleTextFieldChange.bind(this);
+        this.handleAdvanceTextFieldChange = this.handleAdvanceTextFieldChange.bind(this);
     }
 
+    /**
+     * Triggered when security type is changed. Update the state with selected value.
+     *
+     * @param {*} event Event that fired the function call
+     * @memberof AdvanceEndpointDetail
+     */
     handleScurityChange(event) {
         this.props.endpointSecurity.enabled = event.target.value;
-        this.setState({ securityEnabled: event.target.value })
+        this.setState({ securityEnabled: event.target.value });
     }
 
+    /**
+     * Set the security related values to the state.
+     *
+     * @param {*} event Event that fired the function call
+     * @memberof AdvanceEndpointDetail
+     */
     handleScurityTypeChange(event) {
         this.props.endpointSecurity.type = event.target.value;
-        this.setState({ securityType: event.target.value })
+        this.setState({ securityType: event.target.value });
     }
 
+    /**
+     * Set the advance configuration related values to the state.
+     *
+     * @param {*} event Event that fired the function call
+     * @memberof AdvanceEndpointDetail
+     */
+    handleAdvanceTextFieldChange(event) {
+        this.props.endpoint[event.target.id] = event.currentTarget.value;
+        this.setState({ [event.target.id]: event.currentTarget.value });
+    }
+
+
+    /**
+     * Set the text field value to the state.
+     *
+     * @param {*} event Event that fired the function call
+     * @memberof AdvanceEndpointDetail
+     */
     handleTextFieldChange(event) {
         const inputField = event.target.id;
         const value = event.target.value;
         this.props.endpointSecurity[inputField] = value;
-        this.setState({inputField : value})
+        this.setState({ inputField: value });
     }
 
+    /**
+     *
+     *
+     * @returns {React.Component} HTML content
+     * @memberof AdvanceEndpointDetail
+     */
     render() {
         const { classes } = this.props;
 
         return (
-            <ExpansionPanel>
-                <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-                    <Typography className={classes.heading}>Security</Typography>
-                </ExpansionPanelSummary>
-                <ExpansionPanelDetails>
-                    <Grid container>
-                        <FormControl variant="subheading" disabled={this.props.readOnly || (!this.props.readOnly && !this.props.isInline)}>
-                            <InputLabel htmlFor="security"><FormattedMessage id="endpoint.security.scheme" defaultMessage="Endpoint Security Scheme" /></InputLabel>
-                            <Select
-                                value={this.props.endpointSecurity.enabled}
-                                onChange={this.handleScurityChange}
-                                fullwidth
-                                inputProps={{
-                                    name: 'security',
-                                    id: 'security',
-                                }}
-                            >
-
-                                <MenuItem value={false}>Un secured</MenuItem>
-                                <MenuItem value={true}>Secured</MenuItem>
-                            </Select>
-                        </FormControl>
-                    </Grid>
-                    {this.state.securityEnabled &&
-                        <Grid container>
-                            <FormControl className={classes.formControl} disabled={this.props.readOnly || (!this.props.readOnly && !this.props.isInline)}>
-                                <InputLabel htmlFor="securityType"><FormattedMessage id="endpoint.auth.type" defaultMessage="Endpoint Auth Type" /></InputLabel>
-                                <Select
-                                    value={this.props.endpointSecurity.type}
-                                    onChange={this.handleScurityTypeChange}
-                                    inputProps={{
-                                        name: 'securityType',
-                                        id: 'securityType',
-                                    }}
-                                >
-                                    <MenuItem value="basic">Basic Auth</MenuItem>
-                                    <MenuItem value="digest">Digest Auth</MenuItem>
-                                </Select>
-                            </FormControl>
-                            <Grid container>
-                                <TextField
-                                    id="username"
-                                    label={<FormattedMessage id="username" defaultMessage="Username" />}
-                                    className={classes.textField}
-                                    value={this.props.endpointSecurity.username}
-                                    margin="normal"
-                                    onChange={this.handleTextFieldChange}
-                                    disabled={this.props.readOnly || (!this.props.readOnly && !this.props.isInline)}
+            <Grid container>
+                <Grid item xs={12}>
+                    <ExpansionPanel>
+                        <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+                            <Typography className={classes.heading}>
+                                <FormattedMessage
+                                    id='endpoint.advance.configuration'
+                                    defaultMessage='Endpoint Advance Configuration'
                                 />
+                            </Typography>
+                        </ExpansionPanelSummary>
+                        <ExpansionPanelDetails>
+                            <Grid item xs={12}>
                                 <TextField
-                                    id="password"
-                                    label={<FormattedMessage id="password" defaultMessage="Password" />}
+                                    id='maxTps'
+                                    label={<FormattedMessage id='max.tps' defaultMessage='Max TPS' />}
                                     className={classes.textField}
-                                    value={this.props.endpointSecurity.password}
-                                    margin="normal"
-                                    onChange={this.handleTextFieldChange}
+                                    value={this.props.endpoint.maxTps}
+                                    fullWidth
+                                    margin='normal'
+                                    onChange={this.handleAdvanceTextFieldChange}
                                     disabled={this.props.readOnly || (!this.props.readOnly && !this.props.isInline)}
                                 />
                             </Grid>
-                        </Grid>
-                    }
-                </ExpansionPanelDetails>
-            </ExpansionPanel>
-        )
+                            <Grid item xs={12}>
+                                <TextField
+                                    id='type'
+                                    label={<FormattedMessage id='endpoint.type' defaultMessage='Endpoint Type' />}
+                                    className={classes.textField}
+                                    value={this.props.endpoint.type}
+                                    fullWidth
+                                    margin='normal'
+                                    onChange={this.handleAdvanceTextFieldChange}
+                                    disabled={this.props.readOnly || (!this.props.readOnly && !this.props.isInline)}
+                                />
+                            </Grid>
+                        </ExpansionPanelDetails>
+                    </ExpansionPanel>
+                </Grid>
+                <Grid item xs={12}>
+                    <ExpansionPanel>
+                        <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+                            <Typography className={classes.heading}>Security</Typography>
+                        </ExpansionPanelSummary>
+                        <ExpansionPanelDetails>
+                            <Grid container>
+                                <FormControl
+                                    variant='subheading'
+                                    disabled={this.props.readOnly || (!this.props.readOnly && !this.props.isInline)}
+                                >
+                                    <InputLabel htmlFor='security'>
+                                        <FormattedMessage
+                                            id='endpoint.security.scheme'
+                                            defaultMessage='Endpoint Security Scheme'
+                                        />
+                                    </InputLabel>
+                                    <Select
+                                        value={this.props.endpointSecurity.enabled}
+                                        onChange={this.handleScurityChange}
+                                        fullwidth
+                                        inputProps={{
+                                            name: 'security',
+                                            id: 'security',
+                                        }}
+                                    >
+                                        <MenuItem value={false}>Un secured</MenuItem>
+                                        <MenuItem value>Secured</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+                            {this.props.endpointSecurity.enabled && (
+                                <Grid container>
+                                    <FormControl
+                                        className={classes.formControl}
+                                        disabled={this.props.readOnly || (!this.props.readOnly && !this.props.isInline)}
+                                    >
+                                        <InputLabel htmlFor='securityType'>
+                                            <FormattedMessage
+                                                id='endpoint.auth.type'
+                                                defaultMessage='Endpoint Auth Type'
+                                            />
+                                        </InputLabel>
+                                        <Select
+                                            value={this.props.endpointSecurity.type}
+                                            onChange={this.handleScurityTypeChange}
+                                            inputProps={{
+                                                name: 'securityType',
+                                                id: 'securityType',
+                                            }}
+                                        >
+                                            <MenuItem value='basic'>Basic Auth</MenuItem>
+                                            <MenuItem value='digest'>Digest Auth</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                    <Grid container>
+                                        <TextField
+                                            id='username'
+                                            label={<FormattedMessage id='username' defaultMessage='Username' />}
+                                            className={classes.textField}
+                                            value={this.props.endpointSecurity.username}
+                                            margin='normal'
+                                            onChange={this.handleTextFieldChange}
+                                            disabled={
+                                                this.props.readOnly || (!this.props.readOnly && !this.props.isInline)
+                                            }
+                                        />
+                                        <TextField
+                                            id='password'
+                                            label={<FormattedMessage id='password' defaultMessage='Password' />}
+                                            className={classes.textField}
+                                            value={this.props.endpointSecurity.password}
+                                            margin='normal'
+                                            onChange={this.handleTextFieldChange}
+                                            disabled={
+                                                this.props.readOnly || (!this.props.readOnly && !this.props.isInline)
+                                            }
+                                        />
+                                    </Grid>
+                                </Grid>
+                            )}
+                        </ExpansionPanelDetails>
+                    </ExpansionPanel>
+                </Grid>
+            </Grid>
+        );
     }
 }
 
