@@ -81,6 +81,7 @@ import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.hostobjects.internal.HostObjectComponent;
@@ -99,6 +100,7 @@ import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.reportgen.util.ReportGenUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
+import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
@@ -135,6 +137,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.cache.Caching;
@@ -978,6 +981,37 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setLastUpdated(new Date());
         api.setAccessControl(publisherAccessControl);
         api.setAccessControlRoles(publisherAccessControlRoles);
+
+        FileHostObject wsdlFile;
+        if (apiData.containsKey(APIConstants.WSDL_FILE)) {
+            wsdlFile = (FileHostObject) apiData.get(APIConstants.WSDL_FILE, apiData);
+            if (wsdlFile != null) {
+                if (wsdlFile.getName().endsWith(APIConstants.ZIP_FILE_EXTENSION)) {
+                    WSDLArchiveInfo archiveInfo = APIUtil.extractAndValidateWSDLArchive(wsdlFile.getInputStream());
+                    if (archiveInfo != null) {
+                        api.setWsdlArchivePath(archiveInfo.getAbsoluteFilePath());
+                        if (log.isDebugEnabled()) {
+                            log.debug("WSDL Archive in the file path " + archiveInfo.getAbsoluteFilePath()
+                                    + "is extracted and validated.");
+                        }
+                        ResourceFile wsdlResource = new ResourceFile(wsdlFile.getInputStream(),
+                                wsdlFile.getJavaScriptFile().getContentType());
+                        api.setWsdlArchive(wsdlResource);
+                        APIFileUtil.deleteDirectory(archiveInfo.getLocation());
+                    }
+                } else if (wsdlFile.getName().endsWith(APIConstants.WSDL_FILE_EXTENSION)) {
+                    String path = System.getProperty(APIConstants.JAVA_IO_TMPDIR) + File.separator
+                            + APIConstants.WSDL_ARCHIVES_TEMP_FOLDER + File.separator + UUID.randomUUID().toString();
+                    String wsdlFilePath = path + File.separator + APIConstants.WSDL_FILE
+                            + APIConstants.WSDL_FILE_EXTENSION;
+                    APIFileUtil.extractSingleWSDLFile(wsdlFile.getInputStream(), path, wsdlFilePath);
+                    api.setWsdlUrl(APIConstants.FILE_URI_PREFIX + wsdlFilePath);
+                } else {
+                    throw new APIManagementException("Invalid file archive file extension: Use .zip format");
+                }
+            }
+        }
+
 
         if (apiData.get("swagger", apiData) != null) {
             // Read URI Templates from swagger resource and set it to api object

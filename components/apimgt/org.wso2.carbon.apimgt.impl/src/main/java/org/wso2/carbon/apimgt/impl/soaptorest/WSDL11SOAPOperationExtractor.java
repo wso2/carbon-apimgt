@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.impl.soaptorest.model.WSDLOperationParam;
 import org.wso2.carbon.apimgt.impl.soaptorest.model.WSDLSOAPOperation;
 import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPOperationBindingUtils;
 import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPToRESTConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 
 import javax.wsdl.Binding;
@@ -43,12 +44,16 @@ import javax.wsdl.Operation;
 import javax.wsdl.Output;
 import javax.wsdl.Part;
 import javax.wsdl.Types;
+import javax.wsdl.WSDLException;
 import javax.wsdl.extensions.schema.Schema;
 import javax.wsdl.extensions.soap.SOAPBinding;
 import javax.wsdl.extensions.soap.SOAPOperation;
 import javax.wsdl.extensions.soap12.SOAP12Binding;
+import javax.wsdl.xml.WSDLReader;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -63,6 +68,10 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
 
     private String[] primitiveTypes = { "string", "byte", "short", "int", "long", "float", "double", "boolean" };
     private List primitiveTypeList = Arrays.asList(primitiveTypes);
+    private boolean canProcess = false;
+
+    private static final String JAVAX_WSDL_VERBOSE_MODE = "javax.wsdl.verbose";
+    private static final String JAVAX_WSDL_IMPORT_DOCUMENTS = "javax.wsdl.importDocuments";
 
     private final String WSDL_ELEMENT_NODE = "element";
     private static final String WSDL_VERSION_11 = "1.1";
@@ -74,6 +83,11 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
     private List<Node> elemList = new ArrayList<>();
 
     private static volatile APIMWSDLReader wsdlReader;
+
+    protected Map<String, Definition> pathToDefinitionMap;
+
+    public WSDL11SOAPOperationExtractor() {
+    }
 
     public WSDL11SOAPOperationExtractor(APIMWSDLReader wsdlReader) {
         WSDL11SOAPOperationExtractor.wsdlReader = wsdlReader;
@@ -111,7 +125,41 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
         return canProcess;
     }
 
-    @Override public WSDLInfo getWsdlInfo() throws APIMgtWSDLException {
+    @Override
+    public boolean initPath(String path) throws APIMgtWSDLException {
+        pathToDefinitionMap = new HashMap<>();
+        try {
+            WSDLReader wsdlReader = APIMWSDLReader.getWsdlFactoryInstance().newWSDLReader();
+            // switch off the verbose mode
+            wsdlReader.setFeature(JAVAX_WSDL_VERBOSE_MODE, false);
+            wsdlReader.setFeature(JAVAX_WSDL_IMPORT_DOCUMENTS, false);
+            File folderToImport = new File(path);
+            Collection<File> foundWSDLFiles = APIFileUtil.searchFilesWithMatchingExtension(folderToImport, "wsdl");
+            if (log.isDebugEnabled()) {
+                log.debug("Found " + foundWSDLFiles.size() + " WSDL file(s) in path " + path);
+            }
+            for (File file : foundWSDLFiles) {
+                String absWSDLPath = file.getAbsolutePath();
+                if (log.isDebugEnabled()) {
+                    log.debug("Processing WSDL file: " + absWSDLPath);
+                }
+                Definition definition = wsdlReader.readWSDL(null, absWSDLPath);
+                pathToDefinitionMap.put(absWSDLPath, definition);
+            }
+            if (foundWSDLFiles.size() > 0) {
+                canProcess = true;
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully processed all WSDL files in path " + path);
+            }
+        } catch (WSDLException e) {
+            throw new APIMgtWSDLException("Cannot process the WSDL by " + this.getClass().getName(), e);
+        }
+        return canProcess;
+    }
+
+    @Override
+    public WSDLInfo getWsdlInfo() throws APIMgtWSDLException {
         WSDLInfo wsdlInfo = new WSDLInfo();
         if (wsdlDefinition != null) {
             Set<WSDLSOAPOperation> soapOperations = getSoapBindingOperations(wsdlDefinition);
@@ -128,6 +176,11 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
             throw new APIMgtWSDLException("WSDL Definition is not initialized.");
         }
         return wsdlInfo;
+    }
+
+    @Override
+    public boolean canProcess() {
+        return canProcess;
     }
 
     /**

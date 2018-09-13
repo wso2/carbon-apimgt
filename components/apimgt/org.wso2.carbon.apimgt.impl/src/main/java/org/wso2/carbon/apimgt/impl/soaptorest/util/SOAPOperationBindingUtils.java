@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.soaptorest.WSDL11SOAPOperationExtractor;
+import org.wso2.carbon.apimgt.impl.soaptorest.WSDL20SOAPOperationExtractor;
 import org.wso2.carbon.apimgt.impl.soaptorest.WSDLSOAPOperationExtractor;
 import org.wso2.carbon.apimgt.impl.soaptorest.exceptions.APIMgtWSDLException;
 import org.wso2.carbon.apimgt.impl.soaptorest.model.WSDLOperationParam;
@@ -44,6 +45,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.AbstractList;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -203,6 +205,31 @@ public class SOAPOperationBindingUtils {
         } catch (APIMgtWSDLException e) {
             throw new APIManagementException("Error while instantiating wsdl processor class", e);
         }
+    }
+
+    /**
+     * Returns the appropriate WSDL 1.1/WSDL 2.0 based on the file path {@code wsdlPath}.
+     *
+     * @param wsdlPath File path containing WSDL files and dependant files
+     * @return WSDL 1.1 processor for the provided content
+     * @throws APIManagementException If an error occurs while determining the processor
+     */
+    public static WSDLSOAPOperationExtractor getWSDLProcessor(String wsdlPath) throws APIManagementException {
+        WSDLSOAPOperationExtractor wsdl11Processor = new WSDL11SOAPOperationExtractor();
+        WSDLSOAPOperationExtractor wsdl20Processor = new WSDL20SOAPOperationExtractor();
+        boolean canProcess;
+        try {
+            canProcess = wsdl11Processor.initPath(wsdlPath);
+            if (canProcess) {
+                return wsdl11Processor;
+            } else if (wsdl20Processor.initPath(wsdlPath)){
+                return wsdl20Processor;
+            }
+        } catch (APIMgtWSDLException e) {
+            handleException("Error while instantiating wsdl processor class.", e);
+        }
+        //no processors found if this line reaches
+        throw new APIManagementException("No WSDL processor found to process WSDL content.");
     }
 
     /**

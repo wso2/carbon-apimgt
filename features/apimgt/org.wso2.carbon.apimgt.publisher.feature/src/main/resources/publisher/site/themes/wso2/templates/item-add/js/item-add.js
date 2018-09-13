@@ -147,7 +147,8 @@ $( document ).ready(function() {
 
     $("#startFromExistingSOAPEndpoint").click(function(){
         var wsdlURL = $('#wsdl-url').val();
-        if (wsdlURL.trim() == "" || wsdlURL.toLowerCase().indexOf("wsdl") < 0) {
+        var wsdlFile = $('#wsdl-file').val();
+        if ( wsdlFile.trim() == "" && (wsdlURL.trim() == "" || wsdlURL.toLowerCase().indexOf("wsdl") < 0)) {
                 $('#wsdl-url').addClass('error');
                 $('.wsdlError').show();
                 console.log("Wrong endpoint.");
@@ -230,6 +231,19 @@ $( document ).ready(function() {
            }
        });
     });
+
+    $('input[type=radio][name=wsdl-options-select]').change(function() {
+        if(this.value === 'url') {
+            $('#wsdl-url-section').show();
+            $('#wsdl-file-section').hide();
+            $('input[name=soap-options-rest]').attr("disabled",false);
+        } else if(this.value === 'archive') {
+            $('#wsdl-url-section').hide();
+            $('#wsdl-file-section').show();
+            $('input[name=soap-options-rest]').attr("disabled",true);
+        }
+    });
+
 
     $('.toggleContainers .controls').hide();
     $('.toggleRadios input[type=radio]').prop('checked', false);
