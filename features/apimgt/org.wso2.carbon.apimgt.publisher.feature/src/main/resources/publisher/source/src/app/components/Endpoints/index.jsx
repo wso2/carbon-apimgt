@@ -16,25 +16,29 @@
  * under the License.
  */
 
-
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
+import PageContainer from 'AppComponents/Base/container/';
+import { PageNotFound } from 'AppComponents/Base/Errors';
 
 import EndpointsListing from './Listing';
 import EndpointDetails from './Details';
 import EndpointCreate from './Create';
 import EndpointsDiscover from './Discover';
-import { PageNotFound } from '../Base/Errors';
+import EndpointsTopMenu from './components/EndpointsTopMenu';
+import EndpointsNavigation from './EndpointsNavigation';
 
 const Endpoints = () => {
     return (
-        <Switch>
-            <Route exact path='/endpoints' component={EndpointsListing} />
-            <Route path='/endpoints/create' component={EndpointCreate} />
-            <Route path='/endpoints/discover' component={EndpointsDiscover} />
-            <Route path='/endpoints/:endpointUUID/' component={EndpointDetails} />
-            <Route component={PageNotFound} />
-        </Switch>
+        <PageContainer pageTopMenu={<EndpointsTopMenu />} pageNav={<EndpointsNavigation />}>
+            <Switch>
+                <Route exact path='/endpoints' component={EndpointsListing} />
+                <Route path='/endpoints/create' component={EndpointCreate} />
+                <Route path='/endpoints/discover' component={EndpointsDiscover} />
+                <Route path='/endpoints/:endpointUUID/' component={EndpointDetails} />
+                <Route component={PageNotFound} />
+            </Switch>
+        </PageContainer>
     );
 };
 

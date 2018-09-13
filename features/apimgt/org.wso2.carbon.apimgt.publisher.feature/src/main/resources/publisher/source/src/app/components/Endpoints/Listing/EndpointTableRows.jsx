@@ -18,26 +18,29 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { TableCell, TableRow } from '@material-ui/core/Table';
-import Dialog, { DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core/Dialog';
+import TableCell from '@material-ui/core/TableCell';
+import TableRow from '@material-ui/core/TableRow';
+import Dialog from '@material-ui/core/Dialog';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
 import Delete from '@material-ui/icons/Delete';
 import Slide from '@material-ui/core/Slide';
 import IconButton from '@material-ui/core/IconButton';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
+import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
 
-import { ScopeValidation, resourceMethod, resourcePath } from '../../../data/ScopeValidation';
+const styles = () => ({});
 
-const styles = theme => ({
-    button: {
-        margin: theme.spacing.unit,
-    },
-    input: {
-        display: 'none',
-    },
-});
-
+/**
+ *
+ *
+ * @class EndpointTableRows
+ * @extends {React.Component}
+ */
 class EndpointTableRows extends React.Component {
     constructor(props) {
         super(props);
@@ -56,6 +59,12 @@ class EndpointTableRows extends React.Component {
         this.setState({ openMenu: true });
     }
 
+    /**
+     *
+     *
+     * @returns
+     * @memberof EndpointTableRows
+     */
     render() {
         const {
             name, type, maxTps, endpointConfig, id,
@@ -66,7 +75,7 @@ class EndpointTableRows extends React.Component {
                     <Link to={'/endpoints/' + id}>{name}</Link>
                 </TableCell>
                 <TableCell>{type}</TableCell>
-                <TableCell>{JSON.parse(endpointConfig).serviceUrl}</TableCell>
+                <TableCell>{endpointConfig.list[0].url}</TableCell>
                 <TableCell>{maxTps}</TableCell>
                 <TableCell>
                     <div>
@@ -101,7 +110,7 @@ EndpointTableRows.propTypes = {
         maxTps: PropTypes.number,
         name: PropTypes.string,
         type: PropTypes.string,
-        endpointConfig: PropTypes.string,
+        endpointConfig: PropTypes.shape({}),
     }).isRequired,
     handleEndpointDelete: PropTypes.func.isRequired,
 };
