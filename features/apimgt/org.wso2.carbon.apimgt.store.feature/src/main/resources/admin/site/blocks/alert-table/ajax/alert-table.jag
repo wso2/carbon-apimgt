@@ -99,7 +99,7 @@ i18n.init(request,localeResourcesBasePath);
                 var type = null;
                 if (tableName == "ApimIPAccessAbnormalityAlert") {
                     type = "Unseen Source IP Address";
-                } else if (tableName == "ApimAbnormalRequestsPerMinAlert") {
+                } else if (tableName == "ApimAbnormalReqAlert") {
                     type = "Abnormal Request Count";
                 } else if (tableName == "ApimAbnormalResponseTimeAlert") {
                     type = "Abnormal Response Time";
