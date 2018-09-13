@@ -33,6 +33,7 @@ import org.apache.synapse.rest.RESTUtils;
 import org.apache.synapse.rest.Resource;
 import org.apache.synapse.rest.dispatch.RESTDispatcher;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -114,6 +115,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
         }
     }
 
+    @MethodStats
     public boolean handleRequest(MessageContext messageContext) {
 
         Timer.Context context = startMetricTimer();
@@ -249,6 +251,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
         context.stop();
     }
 
+    @MethodStats
     public boolean handleResponse(MessageContext messageContext) {
         Mediator corsSequence = messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME);
         if (corsSequence != null) {

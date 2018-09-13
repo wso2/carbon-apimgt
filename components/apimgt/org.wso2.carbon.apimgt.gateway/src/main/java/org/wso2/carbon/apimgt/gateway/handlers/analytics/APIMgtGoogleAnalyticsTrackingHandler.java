@@ -42,6 +42,7 @@ import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
@@ -70,7 +71,8 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
 
     protected GoogleAnalyticsConfig config = null;
 
-	@Override
+    @MethodStats
+    @Override
 	public boolean handleRequest(MessageContext msgCtx) {
         TracingSpan span = null;
         TracingTracer tracer = null;
@@ -268,6 +270,7 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
 		return "0x" + md5String.substring(0, 16);
 	}
 
+    @MethodStats
 	@Override
 	public boolean handleResponse(MessageContext arg0) {
         return true;

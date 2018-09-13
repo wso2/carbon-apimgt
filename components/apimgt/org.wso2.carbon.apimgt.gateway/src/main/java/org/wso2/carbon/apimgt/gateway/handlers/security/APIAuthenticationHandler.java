@@ -38,6 +38,7 @@ import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.authenticator.MultiAuthenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.authenticator.MutualSSLAuthenticator;
@@ -219,6 +220,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         return authenticator;
     }
 
+    @MethodStats
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "EXS_EXCEPTION_SOFTENING_RETURN_FALSE",
             justification = "Error is sent through payload")
     public boolean handleRequest(MessageContext messageContext) {
@@ -312,6 +314,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         return APIUtil.isAnalyticsEnabled();
     }
 
+    @MethodStats
     public boolean handleResponse(MessageContext messageContext) {
         return true;
     }
