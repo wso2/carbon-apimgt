@@ -1388,6 +1388,11 @@
                 <artifactId>siddhi-query-api</artifactId>
                 <version>${ballerina.lang.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.tracing</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

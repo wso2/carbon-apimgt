@@ -99,6 +99,13 @@ public class APIMgtGatewayConstants {
     public static final String SYNAPDE_GW_LABEL = "Synapse";
     public static final String CLIENT_USER_AGENT = "clientUserAgent";
     public static final String CLIENT_IP = "clientIp";
+
+    public static final String REQUEST_ID = "request.id";
+    public static final String TRACER = "Tracer";
+    public static final String RESPONSE_LATENCY_SPAN = "ResponseLatency";
+    public static final String BACKEND_LATENCY_SPAN = "BackendLatency";
+    public static final String KEY_VALIDATION_LATENCY_SPAN = "KeySpan";
+    public static final String GET_RESOURCE_AUTHENTICATION_SCHEME_SPAN = "GetResourceAuthenticationScheme";
     
 }
 
