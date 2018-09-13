@@ -1063,6 +1063,77 @@
     },
     "/applications/scopes/{applicationId}": {
       "get": {
+        "deprecated": true,
+        "x-scope": "apim:subscribe",
+        "x-wso2-request": "GET https://127.0.0.1:9443/api/am/store/v0.14/applications/scopes/896658a0-b4ee-4535-bbfa-806c894a4015\nAuthorization: Beareraa0ddec1ac656744234477f20fafcb0d",
+        "x-wso2-curl": "curl -k -H \"Authorization: Bearer aa0ddec1ac656744234477f20fafcb0d\" \"https://127.0.0.1:9443/api/am/store/v0.14/applications/scopes/896658a0-b4ee-4535-bbfa-806c894a4015\"",
+        "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"groupId\": \"\",\n   \"callbackUrl\": null,\n   \"subscriber\": \"admin\",\n   \"throttlingTier\": \"Unlimited\",\n   \"applicationId\": \"896658a0-b4ee-4535-bbfa-806c894a4015\",\n   \"description\": null,\n   \"status\": \"APPROVED\",\n   \"name\": \"DefaultApplication\",\n   \"keys\": [   {\n      \"consumerKey\": \"AVoREWiB16kY_GTIzscl40GYYZQa\",\n      \"consumerSecret\": \"KXQxmS8W3xDvvJH4AfR6xrhKIeIa\",\n      \"keyState\": \"COMPLETED\",\n      \"keyType\": \"PRODUCTION\",\n      \"supportedGrantTypes\": null,\n      \"token\":       {\n         \"validityTime\": 3600,\n         \"accessToken\": \"3887da6d111f0429c6dff47a46e87209\",\n         \"tokenScopes\":          [\n            \"am_application_scope\",\n            \"default\"\n         ]\n      }\n   }]\n}",
+        "summary": "Get scopes associated with a particular application based on subscribed APIs\n",
+        "description": "Get scopes associated with a particular application based on subscribed APIs\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/applicationId"
+          },
+          {
+            "$ref": "#/parameters/filterByUserRoles"
+          },
+          {
+            "$ref": "#/parameters/If-None-Match"
+          },
+          {
+            "$ref": "#/parameters/If-Modified-Since"
+          }
+        ],
+        "tags": [
+          "Application (Individual)"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nScope returned.\n",
+            "schema": {
+              "$ref": "#/definitions/ScopeList"
+            },
+            "headers": {
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "Entity Tag of the response resource. Used by caches, or in conditional requests.\n",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "Date and time the resource has been modifed the last time.\nUsed by caches, or in conditional reuquests.\n",
+                "type": "string"
+              }
+            }
+          },
+          "304": {
+            "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n"
+          },
+          "401": {
+            "description": "Un authorized.\nThe user is not authorized to view the application .\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found.\nRequested application does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "406": {
+            "description": "Not Acceptable.\nThe requested media type is not supported\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/applications/{applicationId}/scopes": {
+      "get": {
         "x-scope": "apim:subscribe",
         "x-wso2-request": "GET https://127.0.0.1:9443/api/am/store/v0.14/applications/scopes/896658a0-b4ee-4535-bbfa-806c894a4015\nAuthorization: Beareraa0ddec1ac656744234477f20fafcb0d",
         "x-wso2-curl": "curl -k -H \"Authorization: Bearer aa0ddec1ac656744234477f20fafcb0d\" \"https://127.0.0.1:9443/api/am/store/v0.14/applications/scopes/896658a0-b4ee-4535-bbfa-806c894a4015\"",

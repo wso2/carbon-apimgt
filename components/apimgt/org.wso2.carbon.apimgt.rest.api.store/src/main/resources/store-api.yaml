@@ -1135,6 +1135,98 @@ paths:
             $ref: '#/definitions/Error'
   '/applications/scopes/{applicationId}':
     get:
+      deprecated: true
+      x-scope: 'apim:subscribe'
+      x-wso2-request: |-
+        GET https://127.0.0.1:9443/api/am/store/v0.14/applications/scopes/896658a0-b4ee-4535-bbfa-806c894a4015
+        Authorization: Beareraa0ddec1ac656744234477f20fafcb0d
+      x-wso2-curl: 'curl -k -H "Authorization: Bearer aa0ddec1ac656744234477f20fafcb0d" "https://127.0.0.1:9443/api/am/store/v0.14/applications/scopes/896658a0-b4ee-4535-bbfa-806c894a4015"'
+      x-wso2-response: |-
+        HTTP/1.1 200 OK
+        Content-Type: application/json
+
+        {
+           "groupId": "",
+           "callbackUrl": null,
+           "subscriber": "admin",
+           "throttlingTier": "Unlimited",
+           "applicationId": "896658a0-b4ee-4535-bbfa-806c894a4015",
+           "description": null,
+           "status": "APPROVED",
+           "name": "DefaultApplication",
+           "keys": [   {
+              "consumerKey": "AVoREWiB16kY_GTIzscl40GYYZQa",
+              "consumerSecret": "KXQxmS8W3xDvvJH4AfR6xrhKIeIa",
+              "keyState": "COMPLETED",
+              "keyType": "PRODUCTION",
+              "supportedGrantTypes": null,
+              "token":       {
+                 "validityTime": 3600,
+                 "accessToken": "3887da6d111f0429c6dff47a46e87209",
+                 "tokenScopes":          [
+                    "am_application_scope",
+                    "default"
+                 ]
+              }
+           }]
+        }
+      summary: |
+        Get scopes associated with a particular application based on subscribed APIs
+      description: |
+        Get scopes associated with a particular application based on subscribed APIs
+      parameters:
+        - $ref: '#/parameters/applicationId'
+        - $ref: '#/parameters/filterByUserRoles'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
+      tags:
+        - Application (Individual)
+      responses:
+        '200':
+          description: |
+            OK.
+            Scope returned.
+          schema:
+            $ref: '#/definitions/ScopeList'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests.
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional reuquests.
+              type: string
+        '304':
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource.
+        '401':
+          description: |
+            Un authorized.
+            The user is not authorized to view the application .
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: |
+            Not Found.
+            Requested application does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        '406':
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+  '/applications/{applicationId}/scopes':
+    get:
       x-scope: 'apim:subscribe'
       x-wso2-request: |-
         GET https://127.0.0.1:9443/api/am/store/v0.14/applications/scopes/896658a0-b4ee-4535-bbfa-806c894a4015
