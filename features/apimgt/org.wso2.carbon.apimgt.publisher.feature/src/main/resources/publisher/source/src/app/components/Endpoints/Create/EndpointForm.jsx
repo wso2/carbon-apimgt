@@ -62,6 +62,7 @@ class EndpointForm extends Component {
         let { handleInputs } = this.props;
         const isReadOnly = !handleInputs; // Showing the endpoint details
         handleInputs = handleInputs || null;
+        const isSecured = !!(endpointSecurity && endpointSecurity.enabled);
         return (
             <div>
                 <form className={classes.container} noValidate autoComplete='off'>
@@ -93,8 +94,8 @@ class EndpointForm extends Component {
                         name='type'
                         onChange={handleInputs}
                     >
-                        <FormControlLabel value='http' control={<Radio color='primary' />} label='HTTP' />
-                        <FormControlLabel value='https' control={<Radio color='primary' />} label='HTTPS' />
+                        <FormControlLabel value='http' control={<Radio color='primary' />} label='HTTP(S)' />
+                        <FormControlLabel value='soap' control={<Radio color='primary' />} label='SOAP' />
                     </RadioGroup>
                     <TextField
                         className={classes.inputText}
@@ -113,14 +114,14 @@ class EndpointForm extends Component {
                     />
                     <TextField
                         className={classes.inputText}
-                        name='serviceUrl'
-                        label='Service URL'
+                        name='url'
+                        label='Endpoint URL'
                         InputLabelProps={{
                             shrink: true,
                         }}
-                        helperText='Provide Service URL'
+                        helperText='Provide Endpoint URL'
                         onChange={handleInputs}
-                        placeholder='https://forecast-v3.weather.gov'
+                        placeholder='https://banking.sample.com/apis/'
                         fullWidth
                         defaultValue={endpointConfig && endpointConfig.serviceUrl}
                         disabled={isReadOnly}
@@ -130,12 +131,12 @@ class EndpointForm extends Component {
                         className={classes.inputText}
                         control={
                             isReadOnly ? (
-                                <Checkbox checked={endpointSecurity && endpointSecurity.enabled} />
+                                <Checkbox checked={isSecured} />
                             ) : (
                                 <Switch
                                     id='enabled'
                                     name='endpointSecurity'
-                                    checked={endpointSecurity && endpointSecurity.enabled}
+                                    checked={isSecured}
                                     onChange={handleInputs}
                                     color='primary'
                                 />
@@ -143,8 +144,7 @@ class EndpointForm extends Component {
                         }
                         label='Secured'
                     />
-                    {endpointSecurity &&
-                        endpointSecurity.enabled && (
+                    {isSecured && (
                         <div className={classes.secured}>
                                 Type
                             <RadioGroup
