@@ -115,13 +115,13 @@ public final class APIUsageStatisticsClientConstants {
     //-------Aggregation names-----
     public static final String API_USER_PER_APP_AGG = "ApiUserPerAppAgg";
     public static final String API_PER_DESTINATION_AGG = "ApiPerDestinationAgg";
-    public static final String API_RESOURCE_PATH_PER_APP_AGG = "ApiResourcePathPerAppAgg";
+    public static final String API_RESOURCE_PATH_PER_APP_AGG = "ApiResPathPerApp";
     public static final String API_LAST_ACCESS_SUMMARY= "ApiLastAccessSummary";
     public static final String API_VERSION_PER_APP_AGG = "ApiVersionPerAppAgg";
     public static final String API_THROTTLED_OUT_AGG = "ApiThrottledOutAgg";
     public static final String API_FAULTY_INVOCATION_AGG = "ApiFaultyInvocationAgg";
     public static final String API_USER_BROWSER_AGG = "ApiUserBrowserAgg";
-    public static final String API_EXECUTION_TIME_AGG = "ApiExecutionTimeAgg";
+    public static final String API_EXECUTION_TIME_AGG = "ApiExeTime";
     public static final String APIM_REQ_COUNT_AGG= "APIM_ReqCountAgg";
     public static final String GEO_LOCATION_AGG = "GeoLocationAgg";
 
@@ -158,8 +158,8 @@ public final class APIUsageStatisticsClientConstants {
     public static final String SERVICE_TIME = "serviceTime";
     public static final String SECURITY_LATENCY = "securityLatency";
     public static final String THROTTLING_LATENCY = "throttlingLatency";
-    public static final String REQUEST_MEDIATION_LATENCY = "requestMediationLatency";
-    public static final String RESPONSE_MEDIATION_LATENCY = "responseMediationLatency";
+    public static final String REQUEST_MEDIATION_LATENCY = "requestMedLat";
+    public static final String RESPONSE_MEDIATION_LATENCY = "responseMedLat";
     public static final String BACKEND_LATENCY = "backendLatency";
     public static final String OTHER_LATENCY = "otherLatency";
     public static final String APPLICATION_ID = "applicationId";
