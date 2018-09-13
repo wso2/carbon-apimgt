@@ -992,7 +992,7 @@
         "x-wso2-request": "POST https://localhost:9443/api/am/store/v0.14/applications/generate-keys?applicationId=c30f3a6e-ffa4-4ae7-afce-224d1f820524\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{\n  \"validityTime\": \"3600\",\n  \"keyType\": \"PRODUCTION\",\n  \"accessAllowDomains\": [ \"ALL\" ],\n  \"scopes\": [ \"am_application_scope\", \"default\" ],\n  \"supportedGrantTypes\": [ \"urn:ietf:params:oauth:grant-type:saml2-bearer\", \"iwa:ntlm\", \"refresh_token\", \"client_credentials\", \"password\" ]\n}",
         "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"consumerSecret\": \"8V7DDKtKGtuG_9GDjaOJ5sijdX0a\",\n   \"consumerKey\": \"LOFL8He72MSGVil4SS_bsh9O8MQa\",\n   \"keyState\": \"APPROVED\",\n   \"keyType\": \"PRODUCTION\",\n   \"supportedGrantTypes\":    [\n      \"urn:ietf:params:oauth:grant-type:saml2-bearer\",\n      \"iwa:ntlm\",\n      \"refresh_token\",\n      \"client_credentials\",\n      \"password\"\n   ],\n   \"token\":    {\n      \"validityTime\": 3600,\n      \"accessToken\": \"fd2cdc4906fbc162e033d57f85a71c21\",\n      \"tokenScopes\":       [\n         \"am_application_scope\",\n         \"default\"\n      ]\n   }\n}",
         "summary": "Generate keys for application\n",
-        "description": "This operation can be used to generate client Id and client secret for an application\n",
+        "description": "This operation can be used to generate client ID and client secret for an application\n\n**NOTE**\n\n* This operation does not require the client ID and the client secret by default.\n* When using credentials from a third party key manager, you can generate access tokens by providing only the client ID or both the client ID and the client secret.\n",
         "parameters": [
           {
             "$ref": "#/parameters/applicationId-Q"
@@ -2646,7 +2646,7 @@
       "properties": {
         "consumerKey": {
           "type": "string",
-          "description": "The consumer key associated with the application and identifying the client",
+          "description": "The consumer key associated with the application, used to indetify the client",
           "example": "vYDoc9s7IgAFdkSyNDaswBX7ejoa"
         },
         "consumerSecret": {
@@ -2712,6 +2712,16 @@
             "am_application_scope",
             "default"
           ]
+        },
+        "clientId": {
+          "type": "string",
+          "description": "Client ID for generating access token.",
+          "example": ""
+        },
+        "clientSecret": {
+          "type": "string",
+          "description": "Client secret for generating access token. This is given together with the client Id.",
+          "example": ""
         }
       }
     },
@@ -2723,7 +2733,7 @@
       "properties": {
         "consumerKey": {
           "type": "string",
-          "description": "The consumer key associated with the application and identifying the client",
+          "description": "The consumer key associated with the application, used to identify the client",
           "example": "vYDoc9s7IgAFdkSyNDaswBX7ejoa"
         }
       }

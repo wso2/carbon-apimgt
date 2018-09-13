@@ -162,7 +162,7 @@ public class ApplicationsApi  {
     @Path("/generate-keys")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Generate keys for application\n", notes = "This operation can be used to generate client Id and client secret for an application\n", response = ApplicationKeyDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "Generate keys for application\n", notes = "This operation can be used to generate client ID and client secret for an application\n\n**NOTE**\n\n* This operation does not require the client ID and the client secret by default.\n* When using credentials from a third party key manager, you can generate access tokens by providing only the client ID or both the client ID and the client secret.\n", response = ApplicationKeyDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nKeys are generated.\n"),
         

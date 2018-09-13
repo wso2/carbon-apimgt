@@ -49,9 +49,9 @@ public class ApplicationKeyReGenerateResponseDTO  {
 
   
   /**
-   * The consumer key associated with the application and identifying the client
+   * The consumer key associated with the application, used to indetify the client
    **/
-  @ApiModelProperty(value = "The consumer key associated with the application and identifying the client")
+  @ApiModelProperty(value = "The consumer key associated with the application, used to indetify the client")
   @JsonProperty("consumerKey")
   public String getConsumerKey() {
     return consumerKey;
