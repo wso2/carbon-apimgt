@@ -175,7 +175,7 @@ var addAPI = function (api) {
         } else {
             return {
                 error: true,
-                message: "A duplicate API name already exists for " + api.apiName
+                message: "A duplicate API already exists for " + api.apiName
             };
         }
 

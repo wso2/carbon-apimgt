@@ -992,7 +992,7 @@
         "x-wso2-request": "POST https://localhost:9443/api/am/store/v0.14/applications/generate-keys?applicationId=c30f3a6e-ffa4-4ae7-afce-224d1f820524\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{\n  \"validityTime\": \"3600\",\n  \"keyType\": \"PRODUCTION\",\n  \"accessAllowDomains\": [ \"ALL\" ],\n  \"scopes\": [ \"am_application_scope\", \"default\" ],\n  \"supportedGrantTypes\": [ \"urn:ietf:params:oauth:grant-type:saml2-bearer\", \"iwa:ntlm\", \"refresh_token\", \"client_credentials\", \"password\" ]\n}",
         "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"consumerSecret\": \"8V7DDKtKGtuG_9GDjaOJ5sijdX0a\",\n   \"consumerKey\": \"LOFL8He72MSGVil4SS_bsh9O8MQa\",\n   \"keyState\": \"APPROVED\",\n   \"keyType\": \"PRODUCTION\",\n   \"supportedGrantTypes\":    [\n      \"urn:ietf:params:oauth:grant-type:saml2-bearer\",\n      \"iwa:ntlm\",\n      \"refresh_token\",\n      \"client_credentials\",\n      \"password\"\n   ],\n   \"token\":    {\n      \"validityTime\": 3600,\n      \"accessToken\": \"fd2cdc4906fbc162e033d57f85a71c21\",\n      \"tokenScopes\":       [\n         \"am_application_scope\",\n         \"default\"\n      ]\n   }\n}",
         "summary": "Generate keys for application\n",
-        "description": "This operation can be used to generate client Id and client secret for an application\n",
+        "description": "This operation can be used to generate client ID and client secret for an application\n\n**NOTE**\n\n* This operation does not require the client ID and the client secret by default.\n* When using credentials from a third party key manager, you can generate access tokens by providing only the client ID or both the client ID and the client secret.\n",
         "parameters": [
           {
             "$ref": "#/parameters/applicationId-Q"
@@ -1062,6 +1062,77 @@
       }
     },
     "/applications/scopes/{applicationId}": {
+      "get": {
+        "deprecated": true,
+        "x-scope": "apim:subscribe",
+        "x-wso2-request": "GET https://127.0.0.1:9443/api/am/store/v0.14/applications/scopes/896658a0-b4ee-4535-bbfa-806c894a4015\nAuthorization: Beareraa0ddec1ac656744234477f20fafcb0d",
+        "x-wso2-curl": "curl -k -H \"Authorization: Bearer aa0ddec1ac656744234477f20fafcb0d\" \"https://127.0.0.1:9443/api/am/store/v0.14/applications/scopes/896658a0-b4ee-4535-bbfa-806c894a4015\"",
+        "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"groupId\": \"\",\n   \"callbackUrl\": null,\n   \"subscriber\": \"admin\",\n   \"throttlingTier\": \"Unlimited\",\n   \"applicationId\": \"896658a0-b4ee-4535-bbfa-806c894a4015\",\n   \"description\": null,\n   \"status\": \"APPROVED\",\n   \"name\": \"DefaultApplication\",\n   \"keys\": [   {\n      \"consumerKey\": \"AVoREWiB16kY_GTIzscl40GYYZQa\",\n      \"consumerSecret\": \"KXQxmS8W3xDvvJH4AfR6xrhKIeIa\",\n      \"keyState\": \"COMPLETED\",\n      \"keyType\": \"PRODUCTION\",\n      \"supportedGrantTypes\": null,\n      \"token\":       {\n         \"validityTime\": 3600,\n         \"accessToken\": \"3887da6d111f0429c6dff47a46e87209\",\n         \"tokenScopes\":          [\n            \"am_application_scope\",\n            \"default\"\n         ]\n      }\n   }]\n}",
+        "summary": "Get scopes associated with a particular application based on subscribed APIs\n",
+        "description": "Get scopes associated with a particular application based on subscribed APIs\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/applicationId"
+          },
+          {
+            "$ref": "#/parameters/filterByUserRoles"
+          },
+          {
+            "$ref": "#/parameters/If-None-Match"
+          },
+          {
+            "$ref": "#/parameters/If-Modified-Since"
+          }
+        ],
+        "tags": [
+          "Application (Individual)"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nScope returned.\n",
+            "schema": {
+              "$ref": "#/definitions/ScopeList"
+            },
+            "headers": {
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "Entity Tag of the response resource. Used by caches, or in conditional requests.\n",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "Date and time the resource has been modifed the last time.\nUsed by caches, or in conditional reuquests.\n",
+                "type": "string"
+              }
+            }
+          },
+          "304": {
+            "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n"
+          },
+          "401": {
+            "description": "Un authorized.\nThe user is not authorized to view the application .\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found.\nRequested application does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "406": {
+            "description": "Not Acceptable.\nThe requested media type is not supported\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/applications/{applicationId}/scopes": {
       "get": {
         "x-scope": "apim:subscribe",
         "x-wso2-request": "GET https://127.0.0.1:9443/api/am/store/v0.14/applications/scopes/896658a0-b4ee-4535-bbfa-806c894a4015\nAuthorization: Beareraa0ddec1ac656744234477f20fafcb0d",
@@ -2646,7 +2717,7 @@
       "properties": {
         "consumerKey": {
           "type": "string",
-          "description": "The consumer key associated with the application and identifying the client",
+          "description": "The consumer key associated with the application, used to indetify the client",
           "example": "vYDoc9s7IgAFdkSyNDaswBX7ejoa"
         },
         "consumerSecret": {
@@ -2712,6 +2783,16 @@
             "am_application_scope",
             "default"
           ]
+        },
+        "clientId": {
+          "type": "string",
+          "description": "Client ID for generating access token.",
+          "example": ""
+        },
+        "clientSecret": {
+          "type": "string",
+          "description": "Client secret for generating access token. This is given together with the client Id.",
+          "example": ""
         }
       }
     },
@@ -2723,7 +2804,7 @@
       "properties": {
         "consumerKey": {
           "type": "string",
-          "description": "The consumer key associated with the application and identifying the client",
+          "description": "The consumer key associated with the application, used to identify the client",
           "example": "vYDoc9s7IgAFdkSyNDaswBX7ejoa"
         }
       }

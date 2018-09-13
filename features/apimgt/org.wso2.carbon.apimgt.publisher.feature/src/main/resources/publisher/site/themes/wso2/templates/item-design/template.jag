@@ -113,6 +113,9 @@
 					  id="design_form"
 					  enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?" + apiUrlId ) %>">
                           <input type="hidden" name="type" value="<%= encode.forHtmlAttribute(ws_session) %>" />
+                          <% if(session.get("paths")) {%>
+                          <input type="hidden" name="type" value="SOAPToREST" />
+                          <%}%>
 					<div class="panel-group accordion">
                     	<div class="panel panel-default">
 							<div class="panel-heading">
@@ -423,7 +426,9 @@
 											    <input type="hidden" id="conversion-obj" name="conversion-obj"  value='<%=conversionObj%>' />
 											    <input type="hidden" id="rest-paths" name="rest-paths" value='<%=restPaths%>' />
 											    <input type="hidden" id="definitions" name="rest-paths" value='<%=definitions%>' />
-
+                                                <% if (api && api.wsdl && api.templates[0][0] != "/*") {%>
+                                                <input type="hidden" id="soapToRestCheck" name="soapToRestCheck" value="true" />
+                                                <% } %>
 											<div id="soap-swagger-editor" class="pull-right add-margin-right-3x" style="padding-bottom: 10px; display: none;">
 												<a href="#" id="swaggerEditor" class="btn btn-secondary"><i class="fw fw-edit"></i><%=i18n.localize("Edit Source")%></a>
 											</div>
@@ -861,7 +866,8 @@
             var designer = APIDesigner();
             designer.load_api_document(data);
             $("#swaggerUpload").modal('hide');
-            if(typeof $("#rest-paths").val() != "undefined" && $("#rest-paths").val() != "null") {
+            if ((typeof $("#rest-paths").val() != "undefined" &&
+            $("#rest-paths").val() != "null") || $("#soapToRestCheck").val() === "true") {
                 $("#wsdl-content").hide();
                 $(".resource_create").hide();
                 $('#resource_details').show();

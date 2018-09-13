@@ -134,7 +134,7 @@ function deleteApp(linkObj) {
     if(apiCount > 0){
         $('#messageModal h3.modal-title').html(i18n.t("Confirm Delete"));
         $('#messageModal div.modal-body').text('\n\n' +i18n.t("This application is subscribed to ")
-            + apiCount + i18n.t(" APIs. ") +i18n.t("Confirm Delete")+'"' + appName + '"'+i18n.t("? This will cancel all the existing subscriptions and keys associated with the application. "));
+            + apiCount + i18n.t(" APIs. ") +i18n.t("Confirm Delete")+'"' + appName + '"'+i18n.t("? This will dissociate all the existing subscriptions and keys associated with the application. "));
     } else {
         $('#messageModal h3.modal-title').html(i18n.t("Confirm Delete"));
         $('#messageModal div.modal-body').text('\n\n'+i18n.t("Are you sure you want to remove the application ")+'"' + appName + '" ?');

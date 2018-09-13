@@ -251,9 +251,7 @@ function renderGraph(fromDate,toDate,drillDown){
                     $('#noData').append('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="No Data Available"></i>'+i18n.t("No Data Available")+'</h4>'+ "<p> " + i18n.t('Generate some traffic to see statistics') + "</p>" +'</div></div>');
                     $('#chartContainer').hide();
                     $('#apiLatencyTimeNote').addClass('hide');
-
-                }
-                else{
+                } else {
                     $('.stat-page').html("");
                     $('#apiLatencyTimeNote').addClass('hide');
                     showEnableAnalyticsMsg();
@@ -284,7 +282,7 @@ function renderCompareGraph(fromDate,toDate,drillDown,mediationName){
         }, "json");
 }
 
-function drawGraphInArea(rdata,drilldown){
+function drawGraphInArea(rdata,drilldown) {
     $('#chartContainer').show();
     $('#chartContainer').empty();
     $('#noData').empty();
@@ -329,33 +327,62 @@ nv.addGraph(function() {
       .datum(renderdata)         //Populate the <svg> element with chart data...
       .call(chart);          //Finally, render the chart!
 
-  //Update the chart when window resizes.
-  nv.utils.windowResize(function() { chart.update() });
- d3.selectAll(".nv-point").on("click", function (e) {
-    var date = new Date(e.x);
-    if (depth == "DAY"){
-     from = new Date(e.x).setDate(date.getDate()-1);
-     to = new Date(e.x).setDate(date.getDate()+1);
-    depth = "HOUR";
-    }else if (depth == "HOUR"){
-     from = new Date(e.x).setHours(date.getHours()-1);
-     to = new Date(e.x).setHours(date.getHours()+1);
-    depth = "MINUTES";
-    }else if (depth == "MINUTES"){
-     from = new Date(e.x).setMinutes(date.getMinutes()-1);
-     to = new Date(e.x).setMinutes(date.getMinutes()+1);
-    depth = "SECONDS";
-    }else if (depth == "SECONDS"){
-    depth = "HOUR";
-     from = new Date(e.x).setHours(date.getHours()-1);
-     to = new Date(e.x).setHours(date.getHours()+1);
-    }
-    if (versionComparison) {
-       renderCompareGraph(from,to,depth,encodeURIComponent(mediationName));
-    }else{
-    renderGraph(from,to,depth);
-    }
-  });
+    //Update the chart when window resizes.
+    nv.utils.windowResize(function() { chart.update() });
+
+    d3.selectAll(".nv-point").on("click", function (e) {
+        var date = new Date(e.x);
+
+        if (depth == "DAY") {
+            from = new Date(e.x).setDate(date.getDate() - 1);
+            to = new Date(e.x).setDate(date.getDate() + 1);
+            btnActiveToggle($('#hour-btn'));
+            depth = "HOUR";
+        } else if (depth == "HOUR") {
+            from = new Date(e.x).setHours(date.getHours() - 1);
+            to = new Date(e.x).setHours(date.getHours() + 1);
+            $("#dateRangePickerContainer .btn-group").children().removeClass('active');
+            depth = "MINUTES";
+        } else if (depth == "MINUTES") {
+            var selDate = new Date(e.x);
+            var purgedDate = new Date();
+            purgedDate = purgedDate.setDate(purgedDate.getDate() - 1);
+
+            // Prevent loading seconds drill down view if
+            // requested date is older than 1 day. 1 day is the
+            // default data purge config for seconds table
+            if (selDate < purgedDate) {
+                $('#noData').html('');
+                $('#noData').append('<div class="center-wrapper">' +
+                        '<div class="col-sm-4"/>' +
+                            '<div class="col-sm-4 message message-info">' +
+                            '<h4>' +
+                                '<i class="icon fw fw-info" title="No Data Available"></i>' +
+                                i18n.t("No Data Available") +
+                            '</h4>' +
+                            '<p>' + i18n.t("Data for this selection is already purged") + '</p>' +
+                        '</div>' +
+                    '</div>');
+                $('#chartContainer').hide();
+                $('#apiLatencyTimeNote').addClass('hide');
+
+                return;
+            }
+
+            from = selDate.setMinutes(date.getMinutes() - 1);
+            to = selDate.setMinutes(date.getMinutes() + 1);
+            $("#dateRangePickerContainer .btn-group").children().removeClass('active');
+            depth = "SECONDS";
+        } else {
+            return;
+        }
+
+        if (versionComparison) {
+            renderCompareGraph(from,to,depth,encodeURIComponent(mediationName));
+        } else {
+            renderGraph(from,to,depth);
+        }
+    });
 });
 $('#chartContainer').append($('<div id="latencytTime"><svg style="height:600px;"></svg></div>'));
 $('#latencytTime svg').show();

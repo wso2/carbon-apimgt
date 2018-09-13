@@ -44,7 +44,7 @@ $( document ).ready(function() {
             }
         });
         if(vc==0){
-            alert("You should select at least one HTTP verb.")
+            alert("You must select at least one HTTP verb.")
             return;
         }
         RESOURCES.unshift(resource);
@@ -213,10 +213,10 @@ var validateResourceTable = function(){
             }
         });
         if(foundMyVal > 1){ //todo param_string
-            errors += i18n.t("URL Pattern has to be unique.") + "<strong>" + myVal + "</strong>" + i18n.t("has duplicated entries.") + "<br/>";
+            errors += i18n.t("URL pattern has to be unique.") + "<strong>" + myVal + "</strong>" + i18n.t("has duplicate entries.") + "<br/>";
         }
         if(myVal == ""){
-            errors += i18n.t("URL Pattern cannot be empty.") + "<br />";
+            errors += i18n.t("URL pattern cannot be empty.") + "<br />";
         }
     });
 

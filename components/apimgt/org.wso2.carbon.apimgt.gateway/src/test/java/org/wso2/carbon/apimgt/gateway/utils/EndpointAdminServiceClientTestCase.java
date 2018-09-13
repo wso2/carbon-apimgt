@@ -17,12 +17,14 @@
 */
 package org.wso2.carbon.apimgt.gateway.utils;
 
-import org.apache.axis2.*;
-import org.junit.*;
-import org.mockito.*;
-import org.wso2.carbon.apimgt.api.model.*;
-import org.wso2.carbon.endpoint.stub.types.*;
-import org.wso2.carbon.utils.multitenancy.*;
+import org.apache.axis2.AxisFault;
+import org.junit.Assert;
+import org.junit.Test;
+import org.mockito.Mockito;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.endpoint.stub.types.EndpointAdminStub;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 public class EndpointAdminServiceClientTestCase {
 
@@ -76,19 +78,45 @@ public class EndpointAdminServiceClientTestCase {
             endpointAdminServiceClient = new EndpointAdminServiceClient();
             EndpointAdminStub endpointAdminStub = Mockito.mock(EndpointAdminStub.class);
             Mockito.when(endpointAdminStub.deleteEndpoint(Mockito.anyString())).thenReturn(true);
+            Mockito.when(endpointAdminStub.getEndPointsNames()).thenReturn(null);
+            Mockito.when(endpointAdminStub.getEndPointsNamesForTenant(Mockito.anyString())).thenReturn(null);
             endpointAdminServiceClient.setEndpointAdminStub(endpointAdminStub);
         } catch (Exception e) {
             Assert.fail("Exception while testing deleteEndpoint");
         }
         try {
-            endpointAdminServiceClient.deleteEndpoint(Mockito.anyString());
+            endpointAdminServiceClient.deleteEndpoint("PizzaShackAPI--v1.0.0_APIproductionEndpoint");
         } catch (AxisFault e) {
             Assert.fail("AxisFault while testing deleteEndpoint");
         }
         try {
-            endpointAdminServiceClient.deleteEndpoint(Mockito.anyString(), Mockito.anyString());
+            endpointAdminServiceClient.deleteEndpoint("PizzaShackAPI--v1.0.0_APIproductionEndpoint", "wso2.com");
         } catch (AxisFault e) {
             Assert.fail("AxisFault while testing deleteEndpoint");
+        }
+    }
+
+    @Test
+    public void testCheckEndpointExistBeforeDelete() {
+        EndpointAdminServiceClient endpointAdminServiceClient = null;
+        String endpointName = "PizzaShackAPI--v1.0.0_APIproductionEndpoint";
+        String[] endpointArray = { "PizzaShackAPI--v1.0.0_APIproductionEndpoint",
+                "PizzaShackAPI--v1.0.0_APIsandboxEndpoint" };
+        String tenantDomain = "wso2.com";
+        try {
+            endpointAdminServiceClient = new EndpointAdminServiceClient();
+            EndpointAdminStub endpointAdminStub = Mockito.mock(EndpointAdminStub.class);
+            Mockito.when(endpointAdminStub.deleteEndpoint(endpointName)).thenReturn(true);
+            Mockito.when(endpointAdminStub.deleteEndpointForTenant(endpointName, tenantDomain)).thenReturn(true);
+            Mockito.when(endpointAdminStub.getEndPointsNames()).thenReturn(endpointArray);
+            Mockito.when(endpointAdminStub.getEndPointsNamesForTenant(tenantDomain)).thenReturn(endpointArray);
+            endpointAdminServiceClient.setEndpointAdminStub(endpointAdminStub);
+            Assert.assertTrue(endpointAdminServiceClient.deleteEndpoint(endpointName));
+            Assert.assertTrue(endpointAdminServiceClient.deleteEndpoint(endpointName, tenantDomain));
+            Assert.assertTrue(endpointAdminServiceClient.deleteEndpoint("nonExistEndpoint"));
+            Assert.assertTrue(endpointAdminServiceClient.deleteEndpoint("nonExistEndpoint", tenantDomain));
+        } catch (Exception e) {
+            Assert.fail("Exception while testing CheckEndpointExistBeforeDelete");
         }
     }
 

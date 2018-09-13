@@ -9,11 +9,11 @@ import io.swagger.annotations.ApiParam;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ScopeListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyReGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyReGenerateResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.ScopeListDTO;
 
 import java.util.List;
 
@@ -158,11 +158,39 @@ public class ApplicationsApi  {
     {
         return delegate.applicationsApplicationIdPutGetLastUpdatedTime(applicationId,body,contentType,ifMatch,ifUnmodifiedSince);
     }
+    @GET
+    @Path("/{applicationId}/scopes")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Get scopes associated with a particular application based on subscribed APIs\n", notes = "Get scopes associated with a particular application based on subscribed APIs\n", response = ScopeListDTO.class)
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nScope returned.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 401, message = "Un authorized.\nThe user is not authorized to view the application .\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nRequested application does not exist.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported\n") })
+
+    public Response applicationsApplicationIdScopesGet(@ApiParam(value = "Application Identifier consisting of the UUID of the Application.\n",required=true ) @PathParam("applicationId")  String applicationId,
+    @ApiParam(value = "Filter user by roles.\n") @QueryParam("filterByUserRoles")  Boolean filterByUserRoles,
+    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
+    @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource (Will be supported in future).\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
+    {
+    return delegate.applicationsApplicationIdScopesGet(applicationId,filterByUserRoles,ifNoneMatch,ifModifiedSince);
+    }
+
+    public String applicationsApplicationIdScopesGetGetLastUpdatedTime(String applicationId,Boolean filterByUserRoles,String ifNoneMatch,String ifModifiedSince)
+    {
+        return delegate.applicationsApplicationIdScopesGetGetLastUpdatedTime(applicationId,filterByUserRoles,ifNoneMatch,ifModifiedSince);
+    }
     @POST
     @Path("/generate-keys")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Generate keys for application\n", notes = "This operation can be used to generate client Id and client secret for an application\n", response = ApplicationKeyDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "Generate keys for application\n", notes = "This operation can be used to generate client ID and client secret for an application\n\n**NOTE**\n\n* This operation does not require the client ID and the client secret by default.\n* When using credentials from a third party key manager, you can generate access tokens by providing only the client ID or both the client ID and the client secret.\n", response = ApplicationKeyDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nKeys are generated.\n"),
         

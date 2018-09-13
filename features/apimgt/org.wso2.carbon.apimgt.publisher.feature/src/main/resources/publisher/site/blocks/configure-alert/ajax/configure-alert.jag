@@ -57,7 +57,8 @@ include("/jagg/jagg.jag");
                 mod = jagg.module("configure-alert");
                 var apiName= request.getParameter("apiName");
                 var apiVersion= request.getParameter("apiVersion");
-                var result = mod.deletePublisherAlertConfigs(apiName, apiVersion);
+                var type = request.getParameter("alertType");
+                var result = mod.deletePublisherAlertConfigs(apiName, apiVersion, type);
 
                 if (result.error) {
                     obj = {

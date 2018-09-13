@@ -219,8 +219,16 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
                     for (Object obj : map.entrySet()) {
                         Map.Entry entry = (Map.Entry) obj;
                         Part part = (Part) entry.getValue();
-                        String partElement = part.getElementName().getLocalPart();
-                        this.getParameters(partElement, params);
+                        if (part != null) {
+                            String partElement;
+                            if (part.getElementName() != null) {
+                                partElement = part.getElementName().getLocalPart();
+                                this.getParameters(partElement, params, false);
+                            } else {
+                                partElement = part.getTypeName().getLocalPart();
+                                this.getParameters(partElement, params, true);
+                            }
+                        }
                     }
                 }
             }
@@ -248,8 +256,16 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
                     for (Object obj : map.entrySet()) {
                         Map.Entry entry = (Map.Entry) obj;
                         Part part = (Part) entry.getValue();
-                        String partElement = part.getElementName().getLocalPart();
-                        this.getParameters(partElement, params);
+                        if (part != null) {
+                            String partElement;
+                            if (part.getElementName() != null) {
+                                partElement = part.getElementName().getLocalPart();
+                                this.getParameters(partElement, params, false);
+                            } else {
+                                partElement = part.getTypeName().getLocalPart();
+                                this.getParameters(partElement, params, true);
+                            }
+                        }
                     }
                 }
             }
@@ -264,7 +280,7 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
      * @param params      reference parameter list to populate from the parameter nodes
      * @throws APIMgtWSDLException
      */
-    private void getParameters(String partElement, List<WSDLOperationParam> params) throws APIMgtWSDLException {
+    private void getParameters(String partElement, List<WSDLOperationParam> params, boolean isRpc) throws APIMgtWSDLException {
         if (typeList != null) {
             Map<String, WSDLComplexType> typeMap = this.getComplexTypeMap(elemList);
             if (log.isDebugEnabled()) {
@@ -280,32 +296,44 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
                             + parentElement.getNodeName());
                 }
                 if (parentElement.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE).getNodeValue()
-                        .equals(partElement)) {
-                    NodeList childNodes = element.getChildNodes().item(1).getChildNodes();
-                    for (int j = 0; j < childNodes.getLength(); j++) {
-                        if (childNodes.item(j).getLocalName() != null && WSDL_ELEMENT_NODE
-                                .equals(childNodes.item(j).getLocalName())) {
-                            WSDLOperationParam param = new WSDLOperationParam();
-                            NamedNodeMap attributes = childNodes.item(j).getAttributes();
-                            param.setName(attributes.getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE).getNodeValue());
-                            String dataType = attributes.getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE).getNodeValue()
-                                    .split(SOAPToRESTConstants.SequenceGen.NAMESPACE_SEPARATOR)[1];
-                            Node maxOccursNode = attributes.getNamedItem(SOAPToRESTConstants.MAX_OCCURS_ATTRIBUTE);
-                            if (maxOccursNode != null && (
-                                    maxOccursNode.getNodeValue().equals(SOAPToRESTConstants.UNBOUNDED) || !maxOccursNode
-                                            .getNodeValue().equals("1"))) {
-                                param.setArray(true);
-                            }
-                            if (!primitiveTypeList.contains(dataType)) {
-                                WSDLComplexType complexType = typeMap.get(dataType);
-                                if (complexType != null) {
-                                    param.setWsdlComplexType(complexType);
+                        .equals(partElement) || isRpc) {
+                    if (element.getChildNodes() != null) {
+                        if (element.getChildNodes().item(1) != null) {
+                            if (element.getChildNodes().item(1).getChildNodes() != null) {
+                                NodeList childNodes = element.getChildNodes().item(1).getChildNodes();
+                                for (int j = 0; j < childNodes.getLength(); j++) {
+                                    if (childNodes.item(j).getLocalName() != null && WSDL_ELEMENT_NODE
+                                            .equals(childNodes.item(j).getLocalName())) {
+                                        WSDLOperationParam param = new WSDLOperationParam();
+                                        NamedNodeMap attributes = childNodes.item(j).getAttributes();
+                                        param.setName(attributes.getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE)
+                                                .getNodeValue());
+                                        if (attributes.getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE) != null) {
+                                            String dataType = attributes.getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE)
+                                                    .getNodeValue()
+                                                    .split(SOAPToRESTConstants.SequenceGen.NAMESPACE_SEPARATOR)[1];
+                                            Node maxOccursNode = attributes
+                                                    .getNamedItem(SOAPToRESTConstants.MAX_OCCURS_ATTRIBUTE);
+                                            if (maxOccursNode != null &&
+                                                    (maxOccursNode.getNodeValue().equals(SOAPToRESTConstants.UNBOUNDED)
+                                                            || !maxOccursNode.getNodeValue().equals("1"))) {
+                                                param.setArray(true);
+                                            }
+                                            if (!primitiveTypeList.contains(dataType)) {
+                                                WSDLComplexType complexType = typeMap.get(dataType);
+                                                if (complexType != null) {
+                                                    param.setWsdlComplexType(complexType);
+                                                }
+                                                param.setComplexType(true);
+                                            }
+                                            param.setDataType(
+                                                    attributes.getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE)
+                                                            .getNodeValue());
+                                            params.add(param);
+                                        }
+                                    }
                                 }
-                                param.setComplexType(true);
                             }
-                            param.setDataType(
-                                    attributes.getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE).getNodeValue());
-                            params.add(param);
                         }
                     }
                 }
