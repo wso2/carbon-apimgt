@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang.StringUtils;
@@ -55,6 +56,7 @@ import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
+import org.wso2.carbon.apimgt.api.model.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidator;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
@@ -63,6 +65,7 @@ import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -103,12 +106,19 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -123,6 +133,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import javax.cache.Caching;
 import javax.wsdl.Definition;
 
@@ -4625,9 +4637,39 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     log.debug("Published SOAP api gateway environment name: " + environmentName + " environment type: "
                             + environmentType);
                 }
-                byte[] updatedWSDLContent = this.getUpdatedWSDLByEnvironment(resourceUrl,
-                        arrayOutputStream.toByteArray(), environmentName, environmentType, apiName, apiVersion, apiProvider);
-                wsdlContent = new String(updatedWSDLContent);
+                if (resourceUrl.endsWith(APIConstants.ZIP_FILE_EXTENSION)) {
+                    WSDLArchiveInfo archiveInfo = APIUtil
+                            .extractAndValidateWSDLArchive((InputStream) docResourceMap.get("Data"));
+                    File folderToImport = new File(
+                            archiveInfo.getLocation() + File.separator + APIConstants.API_WSDL_EXTRACTED_DIRECTORY);
+                    Collection<File> wsdlFiles = APIFileUtil
+                            .searchFilesWithMatchingExtension(folderToImport, APIFileUtil.WSDL_FILE_EXTENSION);
+                    Collection<File> xsdFiles = APIFileUtil
+                            .searchFilesWithMatchingExtension(folderToImport, APIFileUtil.XSD_FILE_EXTENSION);
+                    if (wsdlFiles != null) {
+                        for (File foundWSDLFile : wsdlFiles) {
+                            Path fileLocation = Paths.get(foundWSDLFile.getAbsolutePath());
+                            byte[] updatedWSDLContent = this
+                                    .getUpdatedWSDLByEnvironment(resourceUrl, Files.readAllBytes(fileLocation),
+                                            environmentName, environmentType, apiName, apiVersion, apiProvider);
+                            File updatedWSDLFile = new File(foundWSDLFile.getPath());
+                            wsdlFiles.remove(foundWSDLFile);
+                            FileUtils.writeByteArrayToFile(updatedWSDLFile, updatedWSDLContent);
+                            wsdlFiles.add(updatedWSDLFile);
+                        }
+                        wsdlFiles.addAll(xsdFiles);
+                        getZipFileFromFileList(folderToImport.getCanonicalPath() + APIConstants.UPDATED_WSDL_ZIP,
+                                wsdlFiles);
+                        wsdlContent = folderToImport.getCanonicalPath() + APIConstants.UPDATED_WSDL_ZIP;
+                    }
+                } else {
+                    arrayOutputStream = new ByteArrayOutputStream();
+                    IOUtils.copy((InputStream) docResourceMap.get("Data"), arrayOutputStream);
+                    byte[] updatedWSDLContent = this
+                            .getUpdatedWSDLByEnvironment(resourceUrl, arrayOutputStream.toByteArray(), environmentName,
+                                    environmentType, apiName, apiVersion, apiProvider);
+                    wsdlContent = new String(updatedWSDLContent);
+                }
             } catch (IOException e) {
                 handleException("Error occurred while copying wsdl content into byte array stream for resource: "
                         + resourceUrl, e);
@@ -4647,6 +4689,32 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         return data.toJSONString();
     }
+
+    private void getZipFileFromFileList(String zipFile, Collection<File> fileList) throws APIManagementException {
+        byte[] buffer = new byte[1024];
+        try {
+            FileOutputStream fos = new FileOutputStream(zipFile);
+            ZipOutputStream zos = new ZipOutputStream(fos);
+            for (File file : fileList) {
+                String path = file.getAbsolutePath().substring(
+                        file.getAbsolutePath().indexOf(APIConstants.API_WSDL_EXTRACTED_DIRECTORY)
+                                + APIConstants.API_WSDL_EXTRACTED_DIRECTORY.length() + 1);
+                ZipEntry ze = new ZipEntry(path);
+                zos.putNextEntry(ze);
+                try (FileInputStream in = new FileInputStream(file)) {
+                    int len;
+                    while ((len = in.read(buffer)) > 0) {
+                        zos.write(buffer, 0, len);
+                    }
+                }
+            }
+            zos.closeEntry();
+            zos.close();
+        } catch (IOException e) {
+            handleException("Error occurred while creating the ZIP file: " + zipFile, e);
+        }
+    }
+
 
     /**
      * To check authorization of the API against current logged in user. If the user is not authorized an exception
