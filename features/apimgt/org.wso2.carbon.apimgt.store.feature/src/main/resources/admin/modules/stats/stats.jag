@@ -184,10 +184,10 @@ var getDataFromTable = function (tableName, tenantDomain, startIndex,count, sort
         }
         return objArr;
 
-    } else if (tableName == "ApimAbnormalRequestsPerMinAlert") { 
+    } else if (tableName == "ApimAbnormalReqAlert") { 
 
         var appName = "apim_abnormal_request_count_alert_0";
-        var query = "from ApimAbnormalRequestsPerMinAlert " +
+        var query = "from ApimAbnormalReqAlert " +
                         "SELECT * " +  // use the commented select query below once https://github.com/wso2/product-sp/issues/753 fixed
                         //"SELECT applicationName, applicationOwner, tenantDomain, apiName, apiVersion, requestCountPerMin, thresholdRequestCountPerMin, message, severity, alertTimestamp " +
                         "having tenantDomain=='" + tenantDomain + "' " + 
@@ -395,10 +395,10 @@ var getCountFromTable = function (tableName, tenantDomain) {
         query = "from ApimIPAccessAbnormalityAlert on tenantDomain=='" + tenantDomain + "' " +
                         "SELECT count(alertTimestamp) as count ";
 
-    } else if (tableName == "ApimAbnormalRequestsPerMinAlert") { 
+    } else if (tableName == "ApimAbnormalReqAlert") { 
 
         appName = "apim_abnormal_request_count_alert_0";
-        query = "from ApimAbnormalRequestsPerMinAlert on tenantDomain=='" + tenantDomain + "' " +
+        query = "from ApimAbnormalReqAlert on tenantDomain=='" + tenantDomain + "' " +
                         "SELECT count(alertTimestamp) as count ";
 
     } else if(tableName == "ApimAbnormalResponseTimeAlert") {
