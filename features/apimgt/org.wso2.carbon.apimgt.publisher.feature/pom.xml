@@ -60,7 +60,7 @@
                                 </advice>
                             </adviceFileContents>
                             <bundles>
-                                
+
                             </bundles>
                         </configuration>
                     </execution>
@@ -82,6 +82,7 @@
                             <executable>${npm.executable}</executable>
                             <arguments>
                                 <argument>install</argument>
+                                <argument>--silent</argument>
                             </arguments>
                         </configuration>
                     </execution>

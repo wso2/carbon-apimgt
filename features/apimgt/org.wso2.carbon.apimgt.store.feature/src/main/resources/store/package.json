@@ -5,8 +5,8 @@
   "main": "app.js",
   "scripts": {
     "test": "NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED='0' mocha --recursive --require babel-register  -r mock-local-storage \"./source/test/**/*.test.js\"",
-    "build_prod": "NODE_ENV=production webpack -p --progress --colors --config webpack.config.js",
-    "build_dev": "NODE_ENV=development webpack -d --config webpack.config.js --watch "
+    "build:prod": "NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack -p --display errors-only --hide-modules",
+    "build:dev": "NODE_ENV=development webpack -d --watch "
   },
   "repository": {
     "type": "git",
@@ -56,6 +56,6 @@
     "mocha": "^3.5.3",
     "mock-local-storage": "^1.0.5",
     "style-loader": "^0.18.1",
-    "webpack": "^2.5.0"
+    "webpack": "^3.12.0"
   }
 }
