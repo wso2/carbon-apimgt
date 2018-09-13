@@ -23,9 +23,11 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.endpoint.stub.types.EndpointAdminEndpointAdminException;
 import org.wso2.carbon.endpoint.stub.types.EndpointAdminStub;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -81,7 +83,12 @@ public class EndpointAdminServiceClient {
      */
     public boolean deleteEndpoint(String endpointName) throws AxisFault {
         try {
-            return endpointAdminStub.deleteEndpoint(endpointName);
+            // This check was added due to endpoint was saved in endpoint directory instead of saving inline with api
+            // synapse file.
+            if (checkEndpointExistBeforeDelete(endpointName, null)) {
+                return endpointAdminStub.deleteEndpoint(endpointName);
+            }
+            return true;
         } catch (Exception e) {
             log.error("Error deleting endpoint from gateway", e);
             throw new AxisFault("Error while deleting the endpoint file" + e.getMessage(), e);
@@ -98,7 +105,12 @@ public class EndpointAdminServiceClient {
      */
     public boolean deleteEndpoint(String endpointName, String tenantDomain) throws AxisFault {
         try {
-            return endpointAdminStub.deleteEndpointForTenant(endpointName, tenantDomain);
+            // This check was added due to endpoint was saved in endpoint directory instead of saving inline with api
+            // synapse file.
+            if (checkEndpointExistBeforeDelete(endpointName, tenantDomain)) {
+                return endpointAdminStub.deleteEndpointForTenant(endpointName, tenantDomain);
+            }
+            return true;
         } catch (Exception e) {
             log.error("Error deleting endpoint file from gateway", e);
             throw new AxisFault("Error while deleting the endpoint file from tenant" + e.getMessage(), e);
@@ -155,5 +167,23 @@ public class EndpointAdminServiceClient {
 
     protected void setEndpointAdminStub(EndpointAdminStub endpointAdminStub) {
         this.endpointAdminStub = endpointAdminStub;
+    }
+
+    private boolean checkEndpointExistBeforeDelete(String endpointName, String tenantDomain)
+            throws RemoteException, EndpointAdminEndpointAdminException {
+        String[] endpointNames;
+        if (tenantDomain != null) {
+            endpointNames = endpointAdminStub.getEndPointsNamesForTenant(tenantDomain);
+        } else {
+            endpointNames = endpointAdminStub.getEndPointsNames();
+        }
+        if (endpointNames != null) {
+            for (String name : endpointNames) {
+                if (name.equals(endpointName)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
