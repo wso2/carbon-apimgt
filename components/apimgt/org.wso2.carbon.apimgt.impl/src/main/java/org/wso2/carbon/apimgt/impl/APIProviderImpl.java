@@ -1809,6 +1809,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         String gatewaySecurity = api.getGatewaySecurity();
+        String apiLevelPolicy = api.getApiLevelPolicy();
 
         if (!StringUtils.isBlank(authorizationHeader)) {
             corsProperties.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
@@ -1863,6 +1864,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 authProperties.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
             }
             authProperties.put(APIConstants.GATEWAY_SECURITY, gatewaySecurity);
+            authProperties.put(APIConstants.API_LEVEL_POLICY, apiLevelPolicy);
             //Get RemoveHeaderFromOutMessage from tenant registry or api-manager.xml
             String removeHeaderFromOutMessage = APIUtil
                     .getOAuthConfiguration(tenantId, APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE);

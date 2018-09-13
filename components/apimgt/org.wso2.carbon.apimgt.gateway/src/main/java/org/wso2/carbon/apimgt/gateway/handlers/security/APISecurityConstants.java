@@ -61,6 +61,9 @@ public class APISecurityConstants {
     public static final int INVALID_SCOPE = 900910;
     public static final String INVALID_SCOPE_MESSAGE = "The access token does not allow you to access the requested resource";
 
+    public static final int MUTUAL_SSL_VALIDATION_FAILURE = 900911;
+    public static final String MUTUAL_SSL_VALIDATION_FAILURE_MESSAGE = "The mutual SSL authentication has not happened";
+
     // We have added this because we need to add an additional description to the original one and we need to
     // separate the 2 messages
     public static final String DESCRIPTION_SEPARATOR = ". ";
@@ -106,9 +109,12 @@ public class APISecurityConstants {
             case INVALID_SCOPE:
                 errorMessage = INVALID_SCOPE_MESSAGE;
                 break;
+            case MUTUAL_SSL_VALIDATION_FAILURE:
+                errorMessage = MUTUAL_SSL_VALIDATION_FAILURE_MESSAGE;
+                break;
             default:
                 errorMessage = API_AUTH_GENERAL_ERROR_MESSAGE;
-            break;
+                break;
         }
         return errorMessage;
     }

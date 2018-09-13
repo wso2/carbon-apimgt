@@ -189,10 +189,16 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         String apiTenantDomain = getTenantDomain();
         List<String> resourceLevelThrottleConditions;
         ConditionGroupDTO[] conditionGroupDTOs;
-        String applicationId = authContext.getApplicationId();
+        String applicationId = null;
+        boolean isMutualSSLRequest = false;
         //If Authz context is not null only we can proceed with throttling
         if (authContext != null) {
+            applicationId = authContext.getApplicationId();
             authorizedUser = authContext.getUsername();
+
+            if (StringUtils.isEmpty(applicationId)) {
+                isMutualSSLRequest = true;
+            }
             //Check if request is blocked. If request is blocked then will not proceed further and
             //inform to client.
 
@@ -242,7 +248,6 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                     resourceLevelThrottleKey = apiLevelThrottleKey;
                     apiLevelThrottledTriggered = true;
                 }
-
 
                 //If verbInfo is present then only we will do resource level throttling
                 if (APIConstants.UNLIMITED_TIER.equalsIgnoreCase(verbInfoDTO.getThrottling()) && !apiLevelThrottledTriggered) {
@@ -351,7 +356,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                     //Here check resource level throttled. If throttled then call handler throttled and pass.
                     //Else go for subscription level and application level throttling
                     //if resource level not throttled then move to subscription level
-                    if (!isResourceLevelThrottled) {
+                    if (!isResourceLevelThrottled && !isMutualSSLRequest) {
                         //Subscription Level Throttling
                         subscriptionLevelThrottleKey = authContext.getApplicationId() + ":" + apiContext + ":"
                                                        + apiVersion;
@@ -437,7 +442,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                 isThrottled = true;
                             }
                         }
-                    } else {
+                    } else if (isResourceLevelThrottled){
                         if (log.isDebugEnabled()) {
                             log.debug("Request throttled at resource level for throttle key" +
                                       verbInfoDTO.getRequestKey());
@@ -445,6 +450,13 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                         //is throttled and resource level throttling
                         synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,
                                            APIThrottleConstants.RESOURCE_LIMIT_EXCEEDED);
+                    } else {
+                        String notExisting = "NotExisting";
+                        throttleDataPublisher
+                                .publishNonThrottledEvent(notExisting, notExisting, apiLevelThrottleKey, apiLevelTier,
+                                        "", notExisting, resourceLevelThrottleKey, resourceLevelTier, notExisting,
+                                        apiContext, apiVersion, notExisting, apiTenantDomain, applicationId, synCtx,
+                                        authContext);
                     }
                     context2.stop();
                 } else {

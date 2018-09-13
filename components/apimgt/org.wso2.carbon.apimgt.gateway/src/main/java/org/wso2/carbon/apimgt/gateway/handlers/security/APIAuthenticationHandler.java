@@ -22,6 +22,7 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
@@ -43,10 +44,12 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.oauth.OAuthAuthenticator
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 
+import javax.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
@@ -71,11 +74,22 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     private static final Log log = LogFactory.getLog(APIAuthenticationHandler.class);
 
     private volatile Authenticator authenticator;
+    private volatile  APIKeyValidator keyValidator;
 
     private SynapseEnvironment synapseEnvironment;
 
     private String authorizationHeader;
     private String gatewaySecurity;
+    private String apiLevelPolicy;
+
+    public String getAPILevelPolicy() {
+        return apiLevelPolicy;
+    }
+
+    public void setAPILevelPolicy(String apiLevelPolicy) {
+        this.apiLevelPolicy = apiLevelPolicy;
+    }
+
     private boolean removeOAuthHeadersFromOutMessage = true;
 
     public void init(SynapseEnvironment synapseEnvironment) {
@@ -86,6 +100,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         if (getApiManagerConfigurationService() != null) {
             initializeAuthenticator();
         }
+        keyValidator = new APIKeyValidator(synapseEnvironment.getSynapseConfiguration().getAxisConfiguration());
     }
 
     public String getAuthorizationHeader() {
@@ -164,7 +179,9 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             if (authenticator == null) {
                 initializeAuthenticator();
             }
-            if (isAuthenticate(messageContext)) {
+
+            if ((!isMutualSSLProtected() || isMutalSSLAuthenticationSucceeded(messageContext)) && (!isOauthProtected()
+                    || isAuthenticate(messageContext))) {
                 setAPIParametersToMessageContext(messageContext);
                 return true;
             }
@@ -203,6 +220,85 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         }
 
         return false;
+    }
+
+    /**
+     * To check whether API is oauth2 token protected or not.
+     *
+     * @return true if the API is oauth2 token protected, otherwise false.
+     */
+    private boolean isOauthProtected() {
+
+        boolean isOauthProtected = false;
+        if (StringUtils.isEmpty(gatewaySecurity)) {
+            gatewaySecurity = APIConstants.DEFAULT_GATEWAY_SECURITY_OAUTH2;
+            isOauthProtected = true;
+        } else if (gatewaySecurity.contains(APIConstants.DEFAULT_GATEWAY_SECURITY_OAUTH2)) {
+            isOauthProtected = true;
+        }
+        return isOauthProtected;
+    }
+
+    /**
+     * To check whether particular API is mutual ssl protected or not.
+     *
+     * @return true if the API is mutual SSL protected.
+     */
+    private boolean isMutualSSLProtected() {
+
+        boolean isMutualSSLProtected = false;
+        if (gatewaySecurity.contains(APIConstants.GATEWAY_SECURITY_MUTUAL_SSL)) {
+            isMutualSSLProtected = true;
+        }
+        return isMutualSSLProtected;
+    }
+
+    /**
+     * To check whether mutual SSL authentication succeeded for current API invocation.
+     *
+     * @param messageContext Message context
+     * @return true if mutual SSL authentication succeeded.
+     * @throws APISecurityException API Security Exception will be thrown in the event of mutual SSL authentication
+     *                              failure.
+     */
+    private boolean isMutalSSLAuthenticationSucceeded(MessageContext messageContext) throws APISecurityException {
+
+        org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
+                .getAxis2MessageContext();
+
+        // try to retrieve the certificate
+        Object sslCertObject = axis2MessageContext.getProperty("ssl.client.auth.cert.X509");
+
+        /* If the certificate cannot be retrieved from the axis2Message context, then mutual SSL authentication has
+         not happened in transport level.*/
+        if (sslCertObject == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Mutual SSL authentication has not happened in the transport level, hence API invocation is"
+                        + " not allowed");
+            }
+            throw new APISecurityException(APISecurityConstants.MUTUAL_SSL_VALIDATION_FAILURE,
+                    APISecurityConstants.MUTUAL_SSL_VALIDATION_FAILURE_MESSAGE);
+        } else {
+            if (!gatewaySecurity.contains(APIConstants.DEFAULT_GATEWAY_SECURITY_OAUTH2)) {
+                AuthenticationContext authContext = new AuthenticationContext();
+                authContext.setAuthenticated(true);
+                APISecurityUtils.setAuthenticationContext(messageContext, authContext, null);
+                X509Certificate[] certs = (X509Certificate[]) sslCertObject;
+                X509Certificate x509Certificate = certs[0];
+                String subjectDN = x509Certificate.getSubjectDN().getName();
+                authContext.setUsername(subjectDN);
+                try {
+                    VerbInfoDTO verb = keyValidator.findMatchingVerb(messageContext);
+                    if (verb != null) {
+                        messageContext.setProperty(APIConstants.VERB_INFO_DTO, verb);
+                    }
+                } catch (ResourceNotFoundException e) {
+                    log.error("Could not find matching resource for the request", e);
+                }
+                authContext.setApiTier(apiLevelPolicy);
+            }
+        }
+        return true;
     }
 
     protected void stopMetricTimer(Timer.Context context) {

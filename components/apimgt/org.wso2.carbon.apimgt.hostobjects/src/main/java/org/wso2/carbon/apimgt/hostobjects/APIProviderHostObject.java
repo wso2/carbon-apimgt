@@ -51,12 +51,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.NativeArray;
-import org.mozilla.javascript.NativeObject;
-import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.ScriptableObject;
+import org.mozilla.javascript.*;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -432,10 +427,10 @@ public class APIProviderHostObject extends ScriptableObject {
             properties = (JSONObject) parser.parse(additionalProperties);
         }
         String authorizationHeader = (String) apiData.get("authorizationHeader", apiData);
-        String gatewaySecurity = APIConstants.DEFAULT_GATEWAY_SECUIRTY_OAUTH2;
+        String gatewaySecurity = APIConstants.DEFAULT_GATEWAY_SECURITY_OAUTH2;
         Object gatewaySecurityObject = apiData.get("gatewaySecurity", apiData);
 
-        if (gatewaySecurityObject != null) {
+        if (gatewaySecurityObject instanceof String || gatewaySecurityObject instanceof ConsString) {
             gatewaySecurity = String.valueOf(apiData.get("gatewaySecurity", apiData));
         }
 
