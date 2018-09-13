@@ -18,15 +18,16 @@
 
 import React, { Component } from 'react';
 import Grid from '@material-ui/core/Grid';
-import Table, { TableBody, TableCell, TableRow, TableHead } from '@material-ui/core/Table';
-import Typography from '@material-ui/core/Typography';
-import PropTypes from 'prop-types';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableRow from '@material-ui/core/TableRow';
+import TableHead from '@material-ui/core/TableHead';
 import { withStyles } from '@material-ui/core/styles';
-import Alert from '../../Shared/Alert';
+import Alert from 'AppComponents/Shared/Alert';
+import API from 'AppData/api';
 
 import EndpointTableRows from './EndpointTableRows';
-import API from '../../../data/api';
-import AddNewMenu from './AddNewMenu';
 
 const styles = theme => ({
     root: {
@@ -134,51 +135,35 @@ class EndpointsListing extends Component {
      * @memberof EndpointsListing
      */
     render() {
-        const { classes } = this.props;
         return (
-            <Grid container spacing={0} justify='center'>
-                <Grid item xs={12} className={classes.titleBar}>
-                    <div className={classes.buttonLeft}>
-                        <div className={classes.title}>
-                            <Typography variant='display2' gutterBottom>
-                                Global Endpoints
-                            </Typography>
-                        </div>
-                        <AddNewMenu />
-                    </div>
-                </Grid>
-
-                <Grid item xs={12}>
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>Name</TableCell>
-                                <TableCell>Type</TableCell>
-                                <TableCell>Service URL</TableCell>
-                                <TableCell>Max TPS</TableCell>
-                                <TableCell>Action</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {this.state.endpoints &&
-                                this.state.endpoints.map((endpoint) => {
-                                    return (
-                                        <EndpointTableRows
-                                            endpoint={endpoint}
-                                            key={endpoint.id}
-                                            handleEndpointDelete={this.handleEndpointDelete}
-                                        />
-                                    );
-                                })}
-                        </TableBody>
-                    </Table>
-                </Grid>
+            <Grid item xs={12}>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>Name</TableCell>
+                            <TableCell>Type</TableCell>
+                            <TableCell>Service URL</TableCell>
+                            <TableCell>Max TPS</TableCell>
+                            <TableCell>Action</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {this.state.endpoints &&
+                            this.state.endpoints.map((endpoint) => {
+                                return (
+                                    <EndpointTableRows
+                                        endpoint={endpoint}
+                                        key={endpoint.id}
+                                        handleEndpointDelete={this.handleEndpointDelete}
+                                    />
+                                );
+                            })}
+                    </TableBody>
+                </Table>
             </Grid>
         );
     }
 }
-EndpointsListing.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
-};
+EndpointsListing.propTypes = {};
 
 export default withStyles(styles)(EndpointsListing);

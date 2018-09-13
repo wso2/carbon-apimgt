@@ -1,13 +1,15 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import Radio, { RadioGroup } from '@material-ui/core/Radio';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
 import TextField from '@material-ui/core/TextField';
-import { FormControlLabel, FormLabel } from '@material-ui/core/';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormLabel from '@material-ui/core/FormLabel';
 import Switch from '@material-ui/core/Switch';
 import Checkbox from '@material-ui/core/Checkbox';
 import { withStyles } from '@material-ui/core/styles';
 import CommonColors from '@material-ui/core/colors/common';
-import Endpoint from '../../../data/Endpoint';
+import Endpoint from 'AppData/Endpoint';
 
 const styles = () => ({
     textField: {

@@ -40,5 +40,7 @@
   "initial.duration.ms": "Initial Duration(ms)",
   "maximum.duration.ms": "Maximum Duration(ms)",
   "endpoint.suspend.state": "Endpoint Suspend State",
-  "suspend.factor": "Suspend Factor"
+  "suspend.factor": "Suspend Factor",
+  "create.an.endpoint": "Create An Endpoint",
+  "global.endpoints": "Global Endpoints"
 }

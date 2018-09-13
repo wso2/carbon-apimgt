@@ -24,10 +24,10 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
+import Endpoint from 'AppData/Endpoint';
+import Alert from 'AppComponents/Shared/Alert';
 
-import Alert from '../../Shared/Alert';
 import EndpointForm from './EndpointForm';
-import Endpoint from '../../../data/Endpoint';
 
 const styles = theme => ({
     buttonLeft: {
