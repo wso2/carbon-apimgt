@@ -1603,8 +1603,7 @@ public class SQLConstants {
             " UPDATE AM_WORKFLOWS " +
             " SET " +
             "   WF_STATUS = ?, " +
-            "   WF_STATUS_DESC = ?, " +
-            "   WF_UPDATED_TIME = ? " +
+            "   WF_STATUS_DESC = ? " +
             " WHERE " +
            "    WF_EXTERNAL_REFERENCE = ?";
 
