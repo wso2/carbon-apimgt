@@ -477,16 +477,16 @@ public abstract class APIUsageStatisticsClient {
             //execute
             rs = statement.executeQuery();
 
-            List<String> consumerKeys = new ArrayList<String>();
+            List<String> applicationIds = new ArrayList<String>();
 
             //iterate over the results
             while (rs.next()) {
-                String consumerKey = rs.getString("APPLICATION_ID");
+                String applicationId = rs.getString("APPLICATION_ID");
                 String appName = rs.getString("NAME");
-                consumerKeys.add(consumerKey);
-                subscriberAppsMap.put(consumerKey, appName);
+                applicationIds.add(applicationId);
+                subscriberAppsMap.put(applicationId, appName);
             }
-            return consumerKeys;
+            return applicationIds;
 
         } catch (Exception e) {
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
