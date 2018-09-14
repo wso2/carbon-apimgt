@@ -10986,7 +10986,7 @@ public class ApiMgtDAO {
             ps.setString(1, context);
 
             rs = ps.executeQuery();
-            if (rs.first()) {
+            if (rs.next()) {
                 apiName = rs.getString("API_NAME");
                 apiProvider = rs.getString("API_PROVIDER");
             }
