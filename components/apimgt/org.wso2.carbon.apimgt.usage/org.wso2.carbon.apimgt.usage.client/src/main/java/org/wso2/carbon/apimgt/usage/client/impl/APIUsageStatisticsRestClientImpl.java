@@ -253,16 +253,19 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
                 granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
             }
-            StringBuilder idListQuery = new StringBuilder();
-            for (int i = 0; i < idList.size(); i++) {
-                if (i > 0) {
-                    idListQuery.append(" or ");
+            StringBuilder query = new StringBuilder("from " + tableName);
+            if (!idList.isEmpty()) {
+                StringBuilder idListQuery = new StringBuilder();
+                for (int i = 0; i < idList.size(); i++) {
+                    if (i > 0) {
+                        idListQuery.append(" or ");
+                    }
+                    idListQuery.append(APIUsageStatisticsClientConstants.APPLICATION_ID + "==");
+                    idListQuery.append("'" + idList.get(i) + "'");
                 }
-                idListQuery.append(APIUsageStatisticsClientConstants.APPLICATION_ID + "==");
-                idListQuery.append("'" + idList.get(i) + "'");
+                query.append(" on " + idListQuery.toString());
             }
-            StringBuilder query = new StringBuilder(
-                    "from " + tableName + " on " + idListQuery.toString() + " within " + getTimestamp(startDate) + "L, "
+            query.append(" within " + getTimestamp(startDate) + "L, "
                             + getTimestamp(endDate) + "L per '" + granularity + "' select "
                             + APIUsageStatisticsClientConstants.APPLICATION_ID + ", "
                             + APIUsageStatisticsClientConstants.USERNAME + ", sum("
@@ -463,16 +466,19 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
                 granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;
             }
-            StringBuilder idListQuery = new StringBuilder();
-            for (int i = 0; i < idList.size(); i++) {
-                if (i > 0) {
-                    idListQuery.append(" or ");
+            StringBuilder query = new StringBuilder("from " + tableName);
+            if (!idList.isEmpty()) {
+                StringBuilder idListQuery = new StringBuilder();
+                for (int i = 0; i < idList.size(); i++) {
+                    if (i > 0) {
+                        idListQuery.append(" or ");
+                    }
+                    idListQuery.append(APIUsageStatisticsClientConstants.APPLICATION_ID + "==");
+                    idListQuery.append("'" + idList.get(i) + "'");
                 }
-                idListQuery.append(APIUsageStatisticsClientConstants.APPLICATION_ID + "==");
-                idListQuery.append("'" + idList.get(i) + "'");
+                query.append(" on " + idListQuery.toString());
             }
-            String query =
-                    "from " + tableName + " on " + idListQuery.toString() + " within " + getTimestamp(startDate) + "L, "
+            query.append(" within " + getTimestamp(startDate) + "L, "
                             + getTimestamp(endDate) + "L per '" + granularity + "' select "
                             + APIUsageStatisticsClientConstants.APPLICATION_ID + ", "
                             + APIUsageStatisticsClientConstants.API_NAME + ", "
@@ -480,10 +486,10 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                             + APIUsageStatisticsClientConstants.TOTAL_FAULT_COUNT + ") as total_faults group by "
                             + APIUsageStatisticsClientConstants.APPLICATION_ID + ", "
                             + APIUsageStatisticsClientConstants.API_CREATOR + ", "
-                            + APIUsageStatisticsClientConstants.API_NAME + ";";
+                            + APIUsageStatisticsClientConstants.API_NAME + ";");
             JSONObject jsonObj = APIUtil
                     .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_FAULT_SUMMARY_SIDDHI_APP,
-                            query);
+                            query.toString());
             String applicationId;
             String apiName;
             String apiCreator;
@@ -568,16 +574,19 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
                 granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
             }
-            StringBuilder idListQuery = new StringBuilder();
-            for (int i = 0; i < idList.size(); i++) {
-                if (i > 0) {
-                    idListQuery.append(" or ");
+            StringBuilder query = new StringBuilder("from " + tableName);
+            if (!idList.isEmpty()) {
+                StringBuilder idListQuery = new StringBuilder();
+                for (int i = 0; i < idList.size(); i++) {
+                    if (i > 0) {
+                        idListQuery.append(" or ");
+                    }
+                    idListQuery.append(APIUsageStatisticsClientConstants.APPLICATION_ID + "==");
+                    idListQuery.append("'" + idList.get(i) + "'");
                 }
-                idListQuery.append(APIUsageStatisticsClientConstants.APPLICATION_ID + "==");
-                idListQuery.append("'" + idList.get(i) + "'");
+                query.append(" on " + idListQuery.toString());
             }
-            String query =
-                    "from " + tableName + " on " + idListQuery.toString() + " within " + getTimestamp(startDate) + "L, "
+            query.append(" within " + getTimestamp(startDate) + "L, "
                             + getTimestamp(endDate) + "L per '" + granularity + "' select "
                             + APIUsageStatisticsClientConstants.API_NAME + ", "
                             + APIUsageStatisticsClientConstants.API_CREATOR + ", "
@@ -588,10 +597,10 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                             + APIUsageStatisticsClientConstants.API_NAME + ", "
                             + APIUsageStatisticsClientConstants.API_CREATOR + ", "
                             + APIUsageStatisticsClientConstants.API_METHOD + ", "
-                            + APIUsageStatisticsClientConstants.API_RESOURCE_TEMPLATE + ";";
+                            + APIUsageStatisticsClientConstants.API_RESOURCE_TEMPLATE + ";");
             JSONObject jsonObj = APIUtil
                     .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_ACCESS_SUMMARY_SIDDHI_APP,
-                            query);
+                            query.toString());
             String apiName;
             String apiCreator;
             String callType;
@@ -679,16 +688,19 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
                 granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
             }
-            StringBuilder idListQuery = new StringBuilder();
-            for (int i = 0; i < idList.size(); i++) {
-                if (i > 0) {
-                    idListQuery.append(" or ");
+            StringBuilder query = new StringBuilder("from " + tableName);
+            if (!idList.isEmpty()) {
+                StringBuilder idListQuery = new StringBuilder();
+                for (int i = 0; i < idList.size(); i++) {
+                    if (i > 0) {
+                        idListQuery.append(" or ");
+                    }
+                    idListQuery.append(APIUsageStatisticsClientConstants.APPLICATION_ID + "==");
+                    idListQuery.append("'" + idList.get(i) + "'");
                 }
-                idListQuery.append(APIUsageStatisticsClientConstants.APPLICATION_ID + "==");
-                idListQuery.append("'" + idList.get(i) + "'");
+                query.append(" on " + idListQuery.toString());
             }
-            String query =
-                    "from " + tableName + " on " + idListQuery.toString() + " within " + getTimestamp(startDate) + "L, "
+            query.append(" within " + getTimestamp(startDate) + "L, "
                             + getTimestamp(endDate) + "L per '" + granularity + "' select "
                             + APIUsageStatisticsClientConstants.API_NAME + ", "
                             + APIUsageStatisticsClientConstants.API_CREATOR + ", "
@@ -696,10 +708,10 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                             + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") as total_calls group by "
                             + APIUsageStatisticsClientConstants.API_NAME + ", "
                             + APIUsageStatisticsClientConstants.API_CREATOR + ", "
-                            + APIUsageStatisticsClientConstants.APPLICATION_ID + ";";
+                            + APIUsageStatisticsClientConstants.APPLICATION_ID + ";");
             JSONObject jsonObj = APIUtil
                     .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_ACCESS_SUMMARY_SIDDHI_APP,
-                            query);
+                            query.toString());
             String apiName;
             String apiCreator;
             String applicationId;
