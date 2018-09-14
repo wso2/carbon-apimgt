@@ -5198,6 +5198,36 @@ public class APIProviderHostObject extends ScriptableObject {
     }
 
     /**
+     * This method is used to upload client certificate to support mutual ssl.
+     *
+     * @param cx      Rhino context
+     * @param thisObj Scriptable object
+     * @param args    Passing arguments {userName, api name, version, provider, certificate, alias}
+     * @param funObj  Function object
+     * @return : True if uploading certificate is successful. False otherwise.
+     */
+    public static int jsFunction_uploadClientCertificate(Context cx, Scriptable thisObj, Object[] args, Function funObj)
+            throws APIManagementException {
+        if ((args == null) || (args.length != 6) || !isStringValues(args)) {
+            handleException(
+                    "Invalid number of arguments. Expect User Name, api name, version, provider, Alias, Endpoint "
+                            + "and Certificate String .");
+        }
+
+        String userName = (String) args[0];
+        String apiName = (String) args[1];
+        String version = (String) args[2];
+        String provider = (String) args[3];
+        String alias = (String) args[4];
+        String certificate = (String) args[5];
+
+        APIProvider apiProvider = getAPIProvider(thisObj);
+
+        APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), apiName, version);
+        return apiProvider.addClientCertificate(userName, apiIdentifier, certificate, alias);
+    }
+
+    /**
      * This method is used to remove backend certificate for the given alias and endpoint.
      *
      * @param cx      Rhino context
@@ -5262,6 +5292,41 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         return certificateMetaDataArray;
     }
+
+
+
+    public static NativeArray jsFunction_getClientCertificateAlias(Context cx, Scriptable thisObj, Object[] args, Function funObj)
+            throws APIManagementException {
+        NativeArray certificateMetaDataArray = new NativeArray(0);
+
+        NativeObject certificateMetaData = new NativeObject();
+        CertificateManager certificateManager = new CertificateManagerImpl();
+        if ((args == null) || (args.length != 4) || !isStringValues(args)) {
+            log.error("Invalid arguments. Expect User Name and Endpoint");
+            return null;
+        }
+
+        String userName = (String) args[0];
+        String apiName = (String) args[1];
+        String provider = (String) args[2];
+        String apiVersion = (String)args[3];
+
+        APIProvider apiProvider = getAPIProvider(thisObj);
+        APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), apiName, apiVersion);
+        List<String> aliases = apiProvider.getClientCertificateAlias(userName, apiIdentifier);
+
+        String tenantDomain = MultitenantUtils.getTenantDomain(userName);
+        int i = 0;
+
+        if (aliases != null) {
+            for (String alias : aliases) {
+                certificateMetaDataArray.put(i, certificateMetaDataArray, alias);
+                i++;
+            }
+        }
+        return certificateMetaDataArray;
+    }
+
 
     /**
      * This method is to check whether the required configuration is done in the AM distribution.

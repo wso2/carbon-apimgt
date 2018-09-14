@@ -287,6 +287,25 @@ var uploadCertificate = function (certificate, alias, endpoint) {
     }
 }
 
+var uploadClientCertificate = function (api, certificate, alias) {
+    var result, log = new Log(), provider = jagg.module("manager").getAPIProviderObj(), userName = user.username;
+    try {
+        result = provider.uploadClientCertificate(userName, api.name, api.version, api.provider, alias, certificate);
+        if (log.isDebugEnabled()) {
+            log.debug("Invoke upload certificate");
+        }
+        return {
+            error: false,
+            response: result
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e
+        };
+    }
+}
+
 var deleteCertificate = function (alias, endpoint) {
     var result, log = new Log(), provider = jagg.module("manager").getAPIProviderObj(), userName = user.username;
     try {
@@ -335,6 +354,25 @@ var getCertificates = function () {
         return {
             error: false,
             certificates: result
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e
+        };
+    }
+}
+
+var getClientCertificates = function (apiName, apiVersion, apiProvider) {
+    var result, log = new Log(), provider = jagg.module("manager").getAPIProviderObj(), userName = user.username;
+    try {
+        result = provider.getClientCertificateAlias(userName, apiName, apiProvider, apiVersion);
+        if (log.isDebugEnabled()) {
+            log.debug("Invoke get client certificates");
+        }
+        return {
+            error: false,
+            aliasList: result
         };
     } catch (e) {
         log.error(e.message);

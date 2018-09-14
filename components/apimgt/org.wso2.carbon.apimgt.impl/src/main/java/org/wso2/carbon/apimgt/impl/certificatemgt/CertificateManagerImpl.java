@@ -22,6 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateAliasExistsException;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
 import org.wso2.carbon.apimgt.impl.dao.CertificateMgtDAO;
@@ -38,11 +39,14 @@ public class CertificateManagerImpl implements CertificateManager {
 
     private static Log log = LogFactory.getLog(CertificateManagerImpl.class);
     private static final String PROFILE_CONFIG = "sslprofiles.xml";
+    private static final String LISTENER_PROFILE_CONFIG = "listenerprofiles.xml";
     private static final String CARBON_HOME_STRING = "carbon.home";
     private static final char SEP = File.separatorChar;
     private static String CARBON_HOME = System.getProperty(CARBON_HOME_STRING);
     private static String SSL_PROFILE_FILE_PATH = CARBON_HOME + SEP + "repository" + SEP + "resources" + SEP
             + "security" + SEP + PROFILE_CONFIG;
+    private static String LISTENER_PROFILE_FILE_PATH = CARBON_HOME + SEP + "repository" + SEP + "resources" + SEP
+            + "security" + SEP + LISTENER_PROFILE_CONFIG;
     private static CertificateMgtDAO certificateMgtDAO = CertificateMgtDAO.getInstance();
     private CertificateMgtUtils certificateMgtUtils = new CertificateMgtUtils();
 
@@ -79,6 +83,35 @@ public class CertificateManagerImpl implements CertificateManager {
         } catch (CertificateAliasExistsException e) {
             return ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE;
         }
+    }
+
+    @Override
+    public ResponseCode addClientCertificateToParentNode(APIIdentifier apiIdentifier, String certificate,
+            String alias, int tenantId) {
+        ResponseCode responseCode = certificateMgtUtils.addCertificateToTrustStore(certificate, alias);
+
+        if (responseCode.getResponseCode() == ResponseCode.SUCCESS.getResponseCode()) {
+            try {
+                certificateMgtDAO.addClientCertificate(apiIdentifier, alias, tenantId);
+            } catch (CertificateManagementException e) {
+                log.error("Error when adding client certificate with alias " + alias + " to database for the API "
+                        + apiIdentifier.toString(), e);
+                responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
+            }
+        } else if (responseCode.getResponseCode() == ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode()) {
+            log.error("Internal server error while adding client certificate with alias " + alias
+                    + " to database for the API " + apiIdentifier.toString());
+        } else if (responseCode.getResponseCode() == ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE
+                .getResponseCode()) {
+            log.error(
+                    "Could not add client certificate with alias " + alias + " for the API " + apiIdentifier.toString()
+                            + ", same alias exist already");
+        } else if (responseCode.getResponseCode() == ResponseCode.CERTIFICATE_EXPIRED.getResponseCode()) {
+            log.error(
+                    "Client certificate addition with alias " + alias + " for the API " + apiIdentifier.toString()
+                            + " failed, as the certificate provided is in expired state");
+        }
+        return responseCode;
     }
 
     @Override
@@ -171,6 +204,16 @@ public class CertificateManagerImpl implements CertificateManager {
             log.error("Error when retrieving certificate metadata for endpoint '" + endpoint + "'", e);
         }
         return certificateMetadataList;
+    }
+
+    public List<String> getClientCertificateAlias(APIIdentifier apiIdentifier, int tenantId) {
+        List<String> clientCertificateAlias = null;
+        try {
+            clientCertificateAlias = certificateMgtDAO.getClientCertificateAlias(apiIdentifier, tenantId);
+        } catch (CertificateManagementException e) {
+            e.printStackTrace();
+        }
+        return clientCertificateAlias;
     }
 
     @Override
@@ -287,6 +330,18 @@ public class CertificateManagerImpl implements CertificateManager {
             success = file.setLastModified(System.currentTimeMillis());
             if (success) {
                 log.info("The Transport Sender will be re-initialized in few minutes.");
+                file = new File(LISTENER_PROFILE_FILE_PATH);
+                if (file.exists()) {
+                    success = file.setLastModified(System.currentTimeMillis());
+                    if (success) {
+                        log.info("The Transport listener will be re-initialized in few minutes.");
+                    } else {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Error when modifying " + LISTENER_PROFILE_CONFIG + " file");
+                        }
+                        log.error("Could not modify the file '" + LISTENER_PROFILE_CONFIG + "'");
+                    }
+                }
             } else {
                 if (log.isDebugEnabled()) {
                     log.debug("Error when modifying the sslprofiles.xml file");

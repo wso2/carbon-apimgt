@@ -25,6 +25,7 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
@@ -44,6 +45,8 @@ import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
+
+import static org.wso2.carbon.apimgt.gateway.handlers.Utils.handleValue;
 
 /**
  * This mediator is to publish events upon success API invocations
@@ -235,11 +238,5 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
         return false;
     }
 
-    private String handleValue(String value) {
-        if (value == null) {
-            value = " ";
-        }
-        return value;
-    }
 }
 

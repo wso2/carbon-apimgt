@@ -264,6 +264,7 @@ public final class APIConstants {
     public static final String AUTHORIZATION_HEADER_BASIC = "Basic";
     public static final String DEFAULT_GATEWAY_SECURITY_OAUTH2 = "oauth2";
     public static final String GATEWAY_SECURITY_MUTUAL_SSL = "mutualssl";
+    public static final String CERTIFICATE_COMMON_NAME = "CN";
 
     public static final String API_OVERVIEW_RESPONSE_CACHING = "overview_responseCaching";
     public static final String API_OVERVIEW_CACHE_TIMEOUT = "overview_cacheTimeout";

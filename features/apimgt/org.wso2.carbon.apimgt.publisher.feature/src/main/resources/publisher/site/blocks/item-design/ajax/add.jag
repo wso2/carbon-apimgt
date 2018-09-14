@@ -928,6 +928,26 @@ if(jagg.isCSRFTokenValid())
             } else {
                 print({error: false, message: {"action": "add", "code": result.response}});
             }
+        } else if (request.getMethod() == 'POST' && action === 'addClientCertificate') {
+            mod = jagg.module('api');
+            var alias = request.getParameter('alias');
+            var certificate = request.getParameter('certificate');
+            var name = request.getParameter('name');
+            var version = request.getParameter('version');
+            var provider = request.getParameter('provider');
+
+            var api = {};
+            api.name = name;
+            api.version = version;
+            api.provider = provider;
+
+            result = mod.uploadClientCertificate(api, certificate, alias);
+
+            if (result.response == false) {
+                print({error: true, message: "Inserting certificate failed!"});
+            } else {
+                print({error: false, message: {"action": "add", "code": result.response}});
+            }
         } else if (request.getMethod() == 'GET' && action === 'getAPIDefinitionVersion') {
 
             var apiDefinitionVersion = session.get("apiDefinitionVersion");

@@ -37,6 +37,7 @@ import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
+import org.bouncycastle.jce.PrincipalUtil;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
@@ -49,6 +50,9 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 
+import javax.naming.InvalidNameException;
+import javax.naming.ldap.LdapName;
+import javax.naming.ldap.Rdn;
 import javax.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.Map;
@@ -288,6 +292,17 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 String subjectDN = x509Certificate.getSubjectDN().getName();
                 authContext.setUsername(subjectDN);
                 try {
+                    LdapName ldapDN = new LdapName(subjectDN);
+                    for(Rdn rdn: ldapDN.getRdns()) {
+                        if (APIConstants.CERTIFICATE_COMMON_NAME.equalsIgnoreCase(rdn.getType())) {
+                            authContext.setUsername((String) rdn.getValue());
+                        }
+                    }
+                } catch (InvalidNameException e) {
+                    log.warn("Cannot get the CN name from certificate:" + e.getMessage());
+                    authContext.setUsername(subjectDN);
+                }
+                try {
                     VerbInfoDTO verb = keyValidator.findMatchingVerb(messageContext);
                     if (verb != null) {
                         messageContext.setProperty(APIConstants.VERB_INFO_DTO, verb);
@@ -464,10 +479,10 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         String applicationName = "";
         String applicationId = "";
         if (authContext != null) {
-            consumerKey = authContext.getConsumerKey();
-            username = authContext.getUsername();
-            applicationName = authContext.getApplicationName();
-            applicationId = authContext.getApplicationId();
+            consumerKey = Utils.handleValue(authContext.getConsumerKey());
+            username = Utils.handleValue(authContext.getUsername());
+            applicationName = Utils.handleValue(authContext.getApplicationName());
+            applicationId = Utils.handleValue(authContext.getApplicationId());
         }
 
         String context = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);

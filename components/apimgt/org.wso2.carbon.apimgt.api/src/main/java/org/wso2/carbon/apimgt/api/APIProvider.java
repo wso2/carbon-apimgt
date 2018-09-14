@@ -902,6 +902,18 @@ public interface APIProvider extends APIManager {
     int addCertificate(String userName, String certificate, String alias, String endpoint) throws APIManagementException;
 
     /**
+     * Method to add client certificate to gateway nodes to support mutual SSL based authentication.
+     *
+     * @param userName      User name of the logged in user.
+     * @param apiIdentifier Relevant API identifier which the certificate is added against.
+     * @param certificate   Relevant public certificate.
+     * @param alias         Alias of the certificate.
+     * @return a response code.
+     * @throws APIManagementException API Management Exception.
+     */
+    int addClientCertificate(String userName, APIIdentifier apiIdentifier, String certificate, String alias) throws APIManagementException;
+
+    /**
      * Method to remove the certificate which mapped to the given alias, endpoint from publisher and gateway nodes.
      * @param userName : UserName of the logged in user.
      * @param alias  : Alias of the certificate which needs to be deleted.
@@ -924,6 +936,8 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     List<CertificateMetadataDTO> getCertificates(String userName) throws APIManagementException;
+
+    List<String> getClientCertificateAlias(String userName, APIIdentifier apiIdentifier) throws APIManagementException;
 
     /**
      * Method to search the certificate metadata database for the provided alias and endpoints.

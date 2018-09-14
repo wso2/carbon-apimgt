@@ -24,8 +24,7 @@
     function CertUi(element, options) {
         this.element = $(element);
         this.options = $.extend({}, defaults, options);
-        var filteredCerts = this.getCertsForAPI(this.options.config.cert_data, this.options.config.ep_data);
-        this.config = {"certificates": filteredCerts};
+        this.config = {"certificates": this.options.config.cert_data};
         this._name = name;
         certUi = this;
         this.init();
@@ -70,48 +69,6 @@
             this.element.find('#upload-cert-modal').modal({backdrop: 'static', keyboard: false});
         },
 
-        /**
-         * When loading the page, check for the user entered endpoints and retrieve the certificates.
-         * */
-        getCertsForAPI: function (certs, eps) {
-            if (eps === undefined) {
-                return [];
-            }
-            var productionEndpoints = eps.production_endpoints;
-            var sandboxEndpoints = eps.sandbox_endpoints;
-            var newCerts = certs.filter(function (cert) {
-                var certUrl = cert.endpoint.toLowerCase();
-                if (Array.isArray(productionEndpoints)) {
-                    for (var index in productionEndpoints) {
-                        var containInCertUrl = productionEndpoints[index].url.toLowerCase().indexOf(certUrl) !== -1;
-                        if (containInCertUrl) {
-                            return containInCertUrl;
-                        }
-                    }
-                } else if (productionEndpoints) {
-                    // Skip if productionEndpoints is `undefined`
-                    var containInCertUrl = productionEndpoints.url.toLowerCase().indexOf(certUrl) !== -1;
-                    if (containInCertUrl) {
-                        return containInCertUrl;
-                    }
-                }
-                if (Array.isArray(sandboxEndpoints)) {
-                    for (var index in sandboxEndpoints) {
-                        var containInCertUrl = sandboxEndpoints[index].url.toLowerCase().indexOf(certUrl) !== -1;
-                        if (containInCertUrl) {
-                            return containInCertUrl;
-                        }
-                    }
-                } else if (sandboxEndpoints) {
-                    // Skip if sandboxEndpoints is `undefined`
-                    var containInCertUrl = sandboxEndpoints.url.toLowerCase().indexOf(certUrl) !== -1;
-                    if (containInCertUrl) {
-                        return containInCertUrl;
-                    }
-                }
-            });
-            return newCerts;
-        },
 
         /**
          * Handles the Browse button click. This will trigger the input onClick event to open the file browser.
@@ -147,7 +104,6 @@
          * */
         _on_modal_close: function (e) {
             $('.certAlias').val('');
-            $('#certEP').val('');
             $('.cert-content').val("");
             file = null;
             this.element.find('#upload-cert-modal').modal('hide');
@@ -211,7 +167,9 @@
         _on_upload_click: function () {
             $("#messageModal div.modal-footer").html("");
             var alias = $('.certAlias').val();
-            var ep = $('#certEP').find(":selected").text();
+            var name = $('#certificate_api_name').val();
+            var version = $('#certificate_api_version').val();
+            var provider = $('#certificate_api_provider').val();
             var existingCertificates = certUi.config.certificates;
 
             /**
@@ -236,7 +194,7 @@
                 return;
             }
 
-            var cert_payload = {"alias": alias, "endpoint": ep};
+            var cert_payload = alias;
 
             /**
              * Checks whether a certificate is already uploaded for the given alias and endpoint.
@@ -245,11 +203,8 @@
                 return certificate.alias === alias;
             });
 
-            var endpointMatched = existingCertificates.filter(function (certificate) {
-                return certificate.endpoint === ep;
-            });
 
-            if (aliasMatched.length > 0 && endpointMatched.length === 0) {
+            if (aliasMatched.length > 0) {
                 jagg.message({
                     type: "error",
                     content: i18n.t("Could not add certificate for alias") + ", '" + alias + "'. " +
@@ -264,10 +219,12 @@
              * */
             jagg.post("/site/blocks/item-design/ajax/add.jag",
                 {
-                    action: "addCertificate",
+                    action: "addClientCertificate",
                     alias: alias,
-                    ep: ep,
-                    certificate: certString
+                    certificate: certString,
+                    name : name,
+                    version : version,
+                    provider : provider
                 },
                 function (result) {
                     if (!result.error) {

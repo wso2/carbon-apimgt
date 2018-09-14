@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl.certificatemgt;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 
 import java.io.ByteArrayInputStream;
 import java.util.List;
@@ -45,6 +46,20 @@ public interface CertificateManager {
      */
     ResponseCode addCertificateToParentNode(String certificate, String alias, String endpoint, int tenantId);
 
+    /**
+     * Method to add client certificate (i.e. Client certificate that can be used to connect the client with gateway)
+     * to publisher node.
+     *
+     * @param apiIdentifier : Identifier of the relevant API, which the client certificate is added against.
+     * @param certificate   : Base64 encoded certificate string.
+     * @param alias         : Alias of the certificate.
+     * @param tenantId      : The tenant which the client certificate is added against
+     * @return SUCCESS : If Operation succeeded, INTERNAL_SERVER_ERROR : If any internal error occurred,
+     * ALIAS_EXISTS_IN_TRUST_STORE : If the alias already present in the trust store,CERTIFICATE_EXPIRED : If the
+     * certificate is expired.
+     */
+    ResponseCode addClientCertificateToParentNode(APIIdentifier apiIdentifier, String certificate, String alias,
+            int tenantId);
     /**
      * Method to delete certificate from publisher trust store.
      *
@@ -91,6 +106,16 @@ public interface CertificateManager {
      */
     @Deprecated
     List<CertificateMetadataDTO> getCertificates(String endpoint, int tenantId);
+
+    /**
+     * This method will return the Certificate Metadata object which maps to the api and belongs to the particular
+     * tenant.
+     *
+     * @param apiIdentifier : Identifier of the API
+     * @param tenantId : The Id of the tenant that endpoint belongs to.
+     * @return CertificateMetadataDTO object which contains the certificate meta data.
+     */
+    List<String> getClientCertificateAlias(APIIdentifier apiIdentifier, int tenantId);
 
     /**
      * This method is used to retrieve all the certificates which belong to the given tenant.

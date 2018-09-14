@@ -146,7 +146,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
     // The zero-argument constructor used for create instances for runtime
     public APIStoreHostObject() throws APIManagementException {
-        //apiConsumer = APIManagerFactory.getInstance().getAPIConsumer();
+        //apiConsumer = APIManagerFactory.getCertificateManagerInstance().getAPIConsumer();
     }
 
     public APIStoreHostObject(String loggedUser) throws APIManagementException {

@@ -72,10 +72,7 @@ import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
-import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
-import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
-import org.wso2.carbon.apimgt.impl.certificatemgt.GatewayCertificateManager;
-import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
+import org.wso2.carbon.apimgt.impl.certificatemgt.*;
 import org.wso2.carbon.apimgt.impl.clients.RegistryCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -148,7 +145,6 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.rmi.RemoteException;
-import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -2935,7 +2931,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             cleanUpPendingAPIStateChangeTask(apiId);
             //Run cleanup task for workflow
             /*
-            WorkflowExecutor apiStateChangeWFExecutor = WorkflowExecutorFactory.getInstance().
+            WorkflowExecutor apiStateChangeWFExecutor = WorkflowExecutorFactory.getCertificateManagerInstance().
                     getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_STATE);
   
             WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
@@ -5173,7 +5169,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         ResponseCode responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
         CertificateManager certificateManager = new CertificateManagerImpl();
         String tenantDomain = MultitenantUtils.getTenantDomain(userName);
-        ;
+
         try {
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
@@ -5190,6 +5186,29 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         } catch (UserStoreException e) {
             handleException("Error while reading tenant information", e);
+        }
+        return responseCode.getResponseCode();
+    }
+
+    public int addClientCertificate(String userName, APIIdentifier apiIdentifier, String certificate, String alias)
+            throws APIManagementException {
+        ResponseCode responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
+        String tenantDomain = MultitenantUtils.getTenantDomain(userName);
+        CertificateManager certificateManager = CertificateManagerFactory.getCertificateManagerInstance();
+
+        try {
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+            responseCode = certificateManager
+                    .addClientCertificateToParentNode(apiIdentifier, certificate, alias, tenantId);
+
+            if (responseCode == ResponseCode.SUCCESS) {
+                //Get the gateway manager and add the certificate to gateways.
+                GatewayCertificateManager.getInstance().addToGateways(certificate, alias);
+            }
+        } catch (UserStoreException e) {
+            handleException("Error while reading tenant information, client certificate addition failed for the API "
+                    + apiIdentifier.toString(), e);
         }
         return responseCode.getResponseCode();
     }
@@ -5239,6 +5258,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handleException("Error while reading tenant information", e);
         }
         return certificateManager.getCertificates(tenantId);
+    }
+
+    public List<String> getClientCertificateAlias(String userName, APIIdentifier apiIdentifier) throws APIManagementException {
+        int tenantId = -1;
+        try {
+            tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+
+        } catch (UserStoreException e) {
+            handleException("Error while reading tenant information", e);
+        }
+        return CertificateManagerFactory.getCertificateManagerInstance()
+                .getClientCertificateAlias(apiIdentifier, tenantId);
     }
 
     @Override

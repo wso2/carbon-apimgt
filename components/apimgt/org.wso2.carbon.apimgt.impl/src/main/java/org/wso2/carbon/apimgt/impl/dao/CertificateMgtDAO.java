@@ -20,7 +20,9 @@ package org.wso2.carbon.apimgt.impl.dao;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateAliasExistsException;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
@@ -101,6 +103,68 @@ public class CertificateMgtDAO {
     }
 
     /**
+     * Method to add a new client certificate to the database.
+     *
+     * @param apiIdentifier : API which the client certificate is uploaded against.
+     * @param alias    : Alias for the new certificate.
+     * @param tenantId : The Id of the tenant who uploaded the certificate.
+     * @return : True if the information is added successfully, false otherwise.
+     * @throws CertificateManagementException if existing entry is found for the given endpoint or alias.
+     */
+    public boolean addClientCertificate(APIIdentifier apiIdentifier, String alias, int tenantId) throws CertificateManagementException {
+
+        boolean result = false;
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        String addCertQuery = SQLConstants.ClientCertificateConstants.INSERT_CERTIFICATE;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            initialAutoCommit = connection.getAutoCommit();
+            connection.setAutoCommit(false);
+            int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier, connection);
+
+            preparedStatement = connection.prepareStatement(addCertQuery);
+            preparedStatement.setInt(1, tenantId);
+            preparedStatement.setString(2, alias);
+            preparedStatement.setInt(3, apiId);
+            result = preparedStatement.executeUpdate() == 1;
+            connection.commit();
+        } catch (SQLException e) {
+            handleConnectionRollBack(connection);
+            if (log.isDebugEnabled()) {
+                log.debug("Error occurred while adding client certificate details to database for the API "
+                        + apiIdentifier.toString(), e);
+            }
+            handleException("Error while persisting client certificate for the API " + apiIdentifier.toString(), e);
+        } catch (APIManagementException e) {
+            handleException("Error getting API details of the API " + apiIdentifier.toString() + " when storing "
+                    + "client certificate", e);
+        } finally {
+            APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, null);
+        }
+        return result;
+    }
+
+    /**
+     * This method handles the connection roll back.
+     *
+     * @param connection Relevant database connection that need to be rolled back.
+     */
+    private void handleConnectionRollBack(Connection connection) {
+        try {
+            if (connection != null) {
+                connection.rollback();
+            } else {
+                log.warn("Could not perform rollback since the connection is null.");
+            }
+        } catch (SQLException e1) {
+            log.error("Error while rolling back the transaction.", e1);
+        }
+    }
+
+    /**
      * Method to add a new certificate to the database.
      *
      * @param alias    : Alias for the new certificate.
@@ -142,15 +206,7 @@ public class CertificateMgtDAO {
             result = preparedStatement.executeUpdate() == 1;
             connection.commit();
         } catch (SQLException e) {
-            try {
-                if (connection != null) {
-                    connection.rollback();
-                } else {
-                    log.warn("Could not perform rollback since the connection is null.");
-                }
-            } catch (SQLException e1) {
-                log.error("Error while rolling back the transaction.", e1);
-            }
+            handleConnectionRollBack(connection);
             if (log.isDebugEnabled()) {
                 log.debug("Error occurred while adding certificate metadata to database.", e);
             }
@@ -161,6 +217,8 @@ public class CertificateMgtDAO {
         }
         return result;
     }
+
+
 
     /**
      * Method to retrieve certificate metadata from db for specific alias or endpoint.
@@ -268,6 +326,41 @@ public class CertificateMgtDAO {
         return certificateMetadataList;
     }
 
+
+    public List<String> getClientCertificateAlias(APIIdentifier apiIdentifier, int tenantId)
+            throws CertificateManagementException {
+
+        Connection connection = null;
+        String getCertQuery = SQLConstants.ClientCertificateConstants.GET_CERTIFICATES_FOR_API;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        List<String> aliasList = new ArrayList<>();
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            initialAutoCommit = connection.getAutoCommit();
+            connection.setAutoCommit(false);
+            int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier, connection);
+            preparedStatement = connection.prepareStatement(getCertQuery);
+            preparedStatement.setInt(1, tenantId);
+            preparedStatement.setInt(2, apiId);
+            resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                aliasList.add(resultSet.getString("ALIAS"));
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving certificate metadata.", e);
+        } catch (APIManagementException e) {
+            e.printStackTrace();
+        } finally {
+            APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
+        }
+        return aliasList;
+    }
+
+
     /**
      * Method to delete a certificate from the database.
      *
@@ -295,15 +388,7 @@ public class CertificateMgtDAO {
             connection.commit();
             connection.setAutoCommit(initialAutoCommit);
         } catch (SQLException e) {
-            try {
-                if (connection != null) {
-                    connection.rollback();
-                } else {
-                    log.error("Could not perform rollback since the connection is Null.");
-                }
-            } catch (SQLException e1) {
-                log.error("Error while rolling back the transaction.", e1);
-            }
+            handleConnectionRollBack(connection);
             handleException("Error while deleting certificate metadata. ", e);
         } finally {
             APIMgtDBUtil.closeStatement(preparedStatement);

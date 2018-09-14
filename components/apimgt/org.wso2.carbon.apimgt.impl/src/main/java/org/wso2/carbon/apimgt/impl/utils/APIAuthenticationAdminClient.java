@@ -155,7 +155,7 @@ public class APIAuthenticationAdminClient {
      * @throws AxisFault if an error occurs while logging in
      */
     private String loginGateway(Environment environment) throws AxisFault {
-        //APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+        //APIManagerConfiguration config = ServiceReferenceHolder.getCertificateManagerInstance().
                 //getAPIManagerConfigurationService().getAPIManagerConfiguration();
         String user = environment.getUserName();
         String password = environment.getPassword();

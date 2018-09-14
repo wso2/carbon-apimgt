@@ -2879,4 +2879,23 @@ public class SQLConstants {
         public static final String CERTIFICATE_COUNT_QUERY = "SELECT COUNT(*) AS count FROM AM_CERTIFICATE_METADATA " +
                 "WHERE TENANT_ID=?";
     }
+
+    public static class ClientCertificateConstants{
+        public static final String INSERT_CERTIFICATE = "INSERT INTO AM_API_CLIENT_CERTIFICATE_METADATA " +
+                "(TENANT_ID, ALIAS, API_ID) VALUES(?, ?, ?)";
+
+        public static final String GET_CERTIFICATES_FOR_API = "SELECT * FROM AM_API_CLIENT_CERTIFICATE_METADATA WHERE "
+                + "TENANT_ID=? and API_ID=?";
+
+        public static final String GET_CERTIFICATE_ALL_TENANTS = "SELECT * FROM AM_CERTIFICATE_METADATA WHERE " +
+                "(ALIAS=?)";
+        public static final String GET_CERTIFICATE_TENANT = "SELECT * FROM AM_CERTIFICATE_METADATA WHERE TENANT_ID=? " +
+                "AND (ALIAS=? OR END_POINT=?)";
+
+        public static final String DELETE_CERTIFICATES = "DELETE FROM AM_CERTIFICATE_METADATA WHERE TENANT_ID=? " +
+                "AND ALIAS=?";
+
+        public static final String CERTIFICATE_COUNT_QUERY = "SELECT COUNT(*) AS count FROM AM_CERTIFICATE_METADATA " +
+                "WHERE TENANT_ID=?";
+    }
 }

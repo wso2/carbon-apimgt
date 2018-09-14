@@ -151,7 +151,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         //applicationLevelThrottleKey key is combination of {applicationId}:{authorizedUser}
         String applicationLevelThrottleKey;
         //subscriptionLevelThrottleKey key is combination of {applicationId}:{apiContext}:{apiVersion}
-        String subscriptionLevelThrottleKey;
+        String subscriptionLevelThrottleKey = null;
         // The key is combination of {apiContext}/ {apiVersion}{resourceUri}:{httpMethod} if policy is user level then authorized user will append at end
         String resourceLevelThrottleKey;
         //apiLevelThrottleKey key is combination of {apiContext}:{apiVersion}
@@ -451,12 +451,13 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                         synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,
                                            APIThrottleConstants.RESOURCE_LIMIT_EXCEEDED);
                     } else {
-                        String notExisting = "NotExisting";
-                        throttleDataPublisher
-                                .publishNonThrottledEvent(notExisting, notExisting, apiLevelThrottleKey, apiLevelTier,
-                                        "", notExisting, resourceLevelThrottleKey, resourceLevelTier, notExisting,
-                                        apiContext, apiVersion, notExisting, apiTenantDomain, applicationId, synCtx,
-                                        authContext);
+                        throttleDataPublisher.publishNonThrottledEvent(
+                                applicationLevelThrottleKey, applicationLevelTier,
+                                apiLevelThrottleKey, apiLevelTier,
+                                subscriptionLevelThrottleKey, subscriptionLevelTier,
+                                resourceLevelThrottleKey, resourceLevelTier,
+                                authorizedUser, apiContext, apiVersion, subscriberTenantDomain,
+                                apiTenantDomain, Utils.handleValue(applicationId), synCtx, authContext);
                     }
                     context2.stop();
                 } else {
