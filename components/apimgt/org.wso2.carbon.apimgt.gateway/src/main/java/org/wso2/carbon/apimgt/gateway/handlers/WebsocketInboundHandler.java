@@ -43,6 +43,7 @@ import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageDataPublisher;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
+import org.wso2.carbon.apimgt.usage.publisher.dto.ExecutionTimeDTO;
 import org.wso2.carbon.apimgt.usage.publisher.dto.RequestResponseStreamDTO;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsData;
@@ -385,7 +386,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             requestPublisherDTO.setUserIp(clientIp);
             requestPublisherDTO.setApplicationConsumerKey(infoDTO.getConsumerKey());
             //context will always be empty as this method will call only for WebSocketFrame and url is null
-            requestPublisherDTO.setApiContext("");
+            requestPublisherDTO.setApiContext("-");
             requestPublisherDTO.setThrottledOut(isThrottledOut);
             requestPublisherDTO.setApiHostname(DataPublisherUtil.getHostAddress());
             requestPublisherDTO.setApiMethod("-");
@@ -404,7 +405,21 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             requestPublisherDTO.setGatewayType(APIMgtGatewayConstants.GATEWAY_TYPE);
             requestPublisherDTO.setLabel(APIMgtGatewayConstants.SYNAPDE_GW_LABEL);
             requestPublisherDTO.setProtocol("WebSocket");
-            requestPublisherDTO.setDestination("");
+            requestPublisherDTO.setDestination("-");
+            requestPublisherDTO.setBackendTime(0);
+            requestPublisherDTO.setResponseCacheHit(false);
+            requestPublisherDTO.setResponseCode(0);
+            requestPublisherDTO.setResponseSize(0);
+            requestPublisherDTO.setServiceTime(0);
+            requestPublisherDTO.setResponseTime(0);
+            ExecutionTimeDTO executionTime = new ExecutionTimeDTO();
+            executionTime.setBackEndLatency(0);
+            executionTime.setOtherLatency(0);
+            executionTime.setRequestMediationLatency(0);
+            executionTime.setResponseMediationLatency(0);
+            executionTime.setSecurityLatency(0);
+            executionTime.setThrottlingLatency(0);
+            requestPublisherDTO.setExecutionTime(executionTime);
             usageDataPublisher.publishEvent(requestPublisherDTO);
         } catch (Exception e) {
             // flow should not break if event publishing failed
