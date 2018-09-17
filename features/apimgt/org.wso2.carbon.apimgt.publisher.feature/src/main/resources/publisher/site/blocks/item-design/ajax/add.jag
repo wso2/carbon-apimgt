@@ -915,6 +915,30 @@ if(jagg.isCSRFTokenValid())
                     message: {"action": "delete", "code": result.response}
                 })
             }
+        } else if (request.getMethod() == 'POST' && action === 'deleteClientCert') {
+            mod = jagg.module('api');
+            var alias = request.getParameter('alias');
+            var name = request.getParameter('name');
+            var version = request.getParameter('version');
+            var provider = request.getParameter('provider');
+
+            var api = {};
+            api.name = name;
+            api.version = version;
+            api.provider = provider;
+
+            result = mod.deleteClientCertificate(alias, api);
+            if (result.response == false) {
+                print({
+                    error: true,
+                    message: "Deleting certificate failed."
+                })
+            } else {
+                print({
+                    error: false,
+                    message: {"action": "delete", "code": result.response}
+                })
+            }
         } else if (request.getMethod() == 'POST' && action === 'addCertificate') {
             mod = jagg.module('api');
             var alias = request.getParameter('alias');

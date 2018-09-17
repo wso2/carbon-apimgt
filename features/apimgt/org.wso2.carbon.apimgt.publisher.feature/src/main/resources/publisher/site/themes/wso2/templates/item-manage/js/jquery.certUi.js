@@ -1,5 +1,5 @@
 (function ($, window, document, undefined) {
-    var deleteConfirmation = i18n.t("Do you really want to delete the certificate for Endpoint");
+    var deleteConfirmation = i18n.t("Do you really want to delete the certificate with alias");
     var aliasEPValidationMessage = i18n.t("Alias should not be empty");
     var certFileError = i18n.t("You must upload a Certificate file");
     var certSource = $("#certificate-ui-template").html();
@@ -62,7 +62,6 @@
          * If the user has not entered any endpoint, an alert will be shown,
          * */
         renderForm: function () {
-            this.context = {"enteredEndpoints": getEnteredEndpoints()};
             var context = $.extend({}, this.context);
 
             var x = this.element.find('.cert-upload-form').html(certFormTemplate(context));
@@ -115,20 +114,24 @@
         _on_click_delete: function (e) {
             $("#messageModal div.modal-footer").html("");
             var dataAlias = $(e.currentTarget).attr("data-alias");
-            var dataEp = $(e.currentTarget).attr("data-ep");
+            var apiName = $(e.currentTarget).attr("data-apiname");
+            var apiVersion = $(e.currentTarget).attr("data-apiversion");
+            var apiProvider = $(e.currentTarget).attr("data-apiprovider");
             var certUi = this;
 
             jagg.message({
-                content: deleteConfirmation + " " + dataEp + "? <br/> <strong>" +
+                content: deleteConfirmation + " " + dataAlias + "? <br/> <strong>" +
                 i18n.t("This action cannot be undone") + ".</strong>",
                 type: "confirm",
-                title: i18n.t("Delete Certificate for Endpoint") + " " + dataEp,
+                title: i18n.t("Delete Certificate with alias") + " " + dataAlias,
                 okCallback: function () {
                     jagg.post("/site/blocks/item-design/ajax/add.jag",
                         {
-                            action: "deleteCert",
-                            endpoint: dataEp,
-                            alias: dataAlias
+                            action: "deleteClientCert",
+                            alias: dataAlias,
+                            name : apiName,
+                            version : apiVersion,
+                            provider : apiProvider
                         },
                         function (result) {
                             $("#messageModal div.modal-footer").html("");
@@ -141,7 +144,7 @@
                                     return;
                                 }
                                 certUi.config.certificates = certUi.config.certificates.filter(function (certificate) {
-                                    return certificate.alias !== dataAlias;
+                                    return certificate !== dataAlias;
                                 });
                                 jagg.message({
                                     content: getMessage(result.message),
@@ -300,53 +303,4 @@
             }
         }
     };
-
-    /**
-     * Extracts the endpoint protocol, host and port number.
-     * */
-    var getAddress = function (url) {
-        var a = document.createElement('a');
-        a.href = url;
-
-        if (!isValidURL(url)) {
-            return undefined;
-        }
-
-        var hostname = a.hostname;
-        var port = a.port;
-        var protocol = a.protocol;
-        var address;
-
-        if (port) {
-            address = protocol + "//" + hostname + ":" + port;
-        } else {
-            address = protocol + "//" + hostname;
-        }
-        return {"host": address};
-    };
-
-    /**
-     * Returns the endpoints entered by the user for Production and Sandbox environments.
-     * */
-    var getEnteredEndpoints = function () {
-        var endpoints = [];
-        $('.endpoint_input').each(function (i, obj) {
-            var host = getAddress(obj.value);
-            if (host) {
-                endpoints.push(host);
-            }
-        });
-        return endpoints;
-    };
-
-    //Check whether the endpoints are valid.
-    var isValidURL = function (url) {
-        var pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
-            '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.?)+[a-z]{2,}|' + // domain name
-            '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
-            '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
-            '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
-            '(\\#[-a-z\\d_]*)?$', 'i'); // fragment locator
-        return pattern.test(url);
-    }
 })(jQuery, window, document);

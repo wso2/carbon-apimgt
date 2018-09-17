@@ -145,6 +145,36 @@ public class CertificateManagerImpl implements CertificateManager {
     }
 
     @Override
+    public ResponseCode deleteClientCertificateFromParentNode(APIIdentifier apiIdentifier, String alias, int tenantId) {
+        try {
+            boolean removeFromDB = certificateMgtDAO.deleteClientCertificate(apiIdentifier, alias, tenantId);
+            if (removeFromDB) {
+                ResponseCode responseCode = certificateMgtUtils.removeCertificateFromTrustStore(alias);
+                if (responseCode == ResponseCode.INTERNAL_SERVER_ERROR) {
+                    certificateMgtDAO.addClientCertificate(apiIdentifier, alias, tenantId);
+                    log.error(
+                            "Error removing the certificate alias " + alias + " for the API " + apiIdentifier.toString()
+                                    + " from the trust store. Hence Rolling back...");
+                } else if (responseCode.getResponseCode() == ResponseCode.CERTIFICATE_NOT_FOUND.getResponseCode()) {
+                    log.warn("The Certificate for Alias '" + alias + "' for API " + apiIdentifier.toString() + " has "
+                            + "been previously removed from trust store. Hence DB entry is removed.");
+                } else {
+                    log.info("Certificate is successfully removed from the Publisher Trust Store with Alias '" + alias
+                            + "' for the API " + apiIdentifier.toString());
+                }
+                return responseCode;
+            } else {
+                log.error("Failed to remove certificate with alias " + alias + " from the data base for the API "
+                        + apiIdentifier.toString() + "  No certificate changes will be affected.");
+                return ResponseCode.INTERNAL_SERVER_ERROR;
+            }
+        } catch (CertificateManagementException e) {
+            log.error("Error persisting/ deleting certificate metadata. ", e);
+            return ResponseCode.INTERNAL_SERVER_ERROR;
+        }
+    }
+
+    @Override
     public boolean addCertificateToGateway(String certificate, String alias) {
 
         boolean result;
@@ -330,18 +360,6 @@ public class CertificateManagerImpl implements CertificateManager {
             success = file.setLastModified(System.currentTimeMillis());
             if (success) {
                 log.info("The Transport Sender will be re-initialized in few minutes.");
-                file = new File(LISTENER_PROFILE_FILE_PATH);
-                if (file.exists()) {
-                    success = file.setLastModified(System.currentTimeMillis());
-                    if (success) {
-                        log.info("The Transport listener will be re-initialized in few minutes.");
-                    } else {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Error when modifying " + LISTENER_PROFILE_CONFIG + " file");
-                        }
-                        log.error("Could not modify the file '" + LISTENER_PROFILE_CONFIG + "'");
-                    }
-                }
             } else {
                 if (log.isDebugEnabled()) {
                     log.debug("Error when modifying the sslprofiles.xml file");
@@ -354,6 +372,20 @@ public class CertificateManagerImpl implements CertificateManager {
             }
             log.error("Could not find the file '" + PROFILE_CONFIG + "'");
         }
-        return success;
+
+        boolean successForListener = false;
+        file = new File(LISTENER_PROFILE_FILE_PATH);
+        if (file.exists()) {
+            successForListener = file.setLastModified(System.currentTimeMillis());
+            if (successForListener) {
+                log.info("The Transport listener will be re-initialized in few minutes.");
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Error when modifying " + LISTENER_PROFILE_CONFIG + " file");
+                }
+                log.error("Could not modify the file '" + LISTENER_PROFILE_CONFIG + "'");
+            }
+        }
+        return success && successForListener;
     }
 }

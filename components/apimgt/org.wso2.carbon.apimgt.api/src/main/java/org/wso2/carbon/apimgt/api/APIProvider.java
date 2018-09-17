@@ -915,13 +915,27 @@ public interface APIProvider extends APIManager {
 
     /**
      * Method to remove the certificate which mapped to the given alias, endpoint from publisher and gateway nodes.
+     *
      * @param userName : UserName of the logged in user.
-     * @param alias  : Alias of the certificate which needs to be deleted.
+     * @param alias    : Alias of the certificate which needs to be deleted.
      * @param endpoint : Endpoint which the certificate is mapped to.
      * @return Integer which represents the operation status.
      * @throws APIManagementException
      */
     int deleteCertificate(String userName, String alias, String endpoint) throws APIManagementException;
+
+    /**
+     * Method to remove the client certificates which is mapped to given alias and api identifier from publisher and
+     * gateway nodes.
+     *
+     * @param userName      : Name of the logged in user.
+     * @param apiIdentifier : Identifier of API for which the certificate need to be deleted.
+     * @param alias         : Alias of the certificate which needs to be deleted.
+     * @return Integer which represents the operation status.
+     * @throws APIManagementException API Management Exception.
+     */
+    int deleteClientCertificate(String userName, APIIdentifier apiIdentifier, String alias)
+            throws APIManagementException;
 
     /**
      * Method to get the server is configured to Dynamic SSL Profile feature.

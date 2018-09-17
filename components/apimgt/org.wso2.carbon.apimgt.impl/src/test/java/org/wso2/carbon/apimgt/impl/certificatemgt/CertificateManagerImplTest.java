@@ -206,6 +206,9 @@ public class CertificateManagerImplTest {
         Field field = CertificateManagerImpl.class.getDeclaredField("SSL_PROFILE_FILE_PATH");
         field.setAccessible(true);
         field.set(certificateManager, TEST_PATH);
+        field = CertificateManagerImpl.class.getDeclaredField("LISTENER_PROFILE_FILE_PATH");
+        field.setAccessible(true);
+        field.set(certificateManager, TEST_PATH);
         boolean result = certificateManager.addCertificateToGateway(BASE64_ENCODED_CERT, ALIAS);
         Assert.assertTrue(result);
     }
@@ -215,6 +218,9 @@ public class CertificateManagerImplTest {
         PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "addCertificateToTrustStore"))
                 .toReturn(ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE);
         Field field = CertificateManagerImpl.class.getDeclaredField("SSL_PROFILE_FILE_PATH");
+        field.setAccessible(true);
+        field.set(certificateManager, TEST_PATH);
+        field = CertificateManagerImpl.class.getDeclaredField("LISTENER_PROFILE_FILE_PATH");
         field.setAccessible(true);
         field.set(certificateManager, TEST_PATH);
         boolean result = certificateManager.addCertificateToGateway(BASE64_ENCODED_CERT, ALIAS);

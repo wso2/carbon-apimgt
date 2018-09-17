@@ -35,6 +35,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.oauth.OAuthAuthenticator;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -48,7 +49,8 @@ import java.util.TreeMap;
 * Test class for APIAuthenticationhandler
 * */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Util.class, MetricManager.class, Timer.Context.class, APIUtil.class})
+@PrepareForTest({Util.class, MetricManager.class, Timer.Context.class, APIUtil.class,
+        ServiceReferenceHolder.class })
 public class APIAuthenticationHandlerTestCase {
     private Timer.Context context;
     private SynapseEnvironment synapseEnvironment;
@@ -66,6 +68,12 @@ public class APIAuthenticationHandlerTestCase {
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
 
         PowerMockito.mockStatic(Timer.Context.class);
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        APIManagerConfigurationService apiManagerConfigurationService =
+                Mockito.mock(APIManagerConfigurationService.class);
+        serviceReferenceHolder.setAPIManagerConfigurationService(apiManagerConfigurationService);
         context = Mockito.mock(Timer.Context.class);
     }
 

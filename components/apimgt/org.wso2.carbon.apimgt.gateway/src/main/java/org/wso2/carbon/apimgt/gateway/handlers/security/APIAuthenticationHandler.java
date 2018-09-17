@@ -104,7 +104,6 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         if (getApiManagerConfigurationService() != null) {
             initializeAuthenticator();
         }
-        keyValidator = new APIKeyValidator(synapseEnvironment.getSynapseConfiguration().getAxisConfiguration());
     }
 
     public String getAuthorizationHeader() {
@@ -251,7 +250,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     private boolean isMutualSSLProtected() {
 
         boolean isMutualSSLProtected = false;
-        if (gatewaySecurity.contains(APIConstants.GATEWAY_SECURITY_MUTUAL_SSL)) {
+        if (gatewaySecurity != null && gatewaySecurity.contains(APIConstants.GATEWAY_SECURITY_MUTUAL_SSL)) {
             isMutualSSLProtected = true;
         }
         return isMutualSSLProtected;
@@ -303,6 +302,11 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                     authContext.setUsername(subjectDN);
                 }
                 try {
+                    if (keyValidator == null) {
+                        keyValidator = new APIKeyValidator(
+                                synapseEnvironment.getSynapseConfiguration().getAxisConfiguration());
+
+                    }
                     VerbInfoDTO verb = keyValidator.findMatchingVerb(messageContext);
                     if (verb != null) {
                         messageContext.setProperty(APIConstants.VERB_INFO_DTO, verb);

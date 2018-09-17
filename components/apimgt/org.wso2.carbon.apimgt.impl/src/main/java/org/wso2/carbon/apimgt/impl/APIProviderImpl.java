@@ -5240,6 +5240,35 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
+    public int deleteClientCertificate(String userName, APIIdentifier apiIdentifier, String alias)
+            throws APIManagementException {
+
+        ResponseCode responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
+        CertificateManager certificateManager = CertificateManagerFactory.getCertificateManagerInstance();
+        String tenantDomain = MultitenantUtils.getTenantDomain(userName);
+
+        try {
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+            responseCode = certificateManager.deleteClientCertificateFromParentNode(apiIdentifier, alias, tenantId);
+
+            if (responseCode == ResponseCode.SUCCESS) {
+                //Get the gateway manager and remove the certificate from gateways.
+                GatewayCertificateManager gatewayCertificateManager = new GatewayCertificateManager();
+                gatewayCertificateManager.removeFromGateways(alias);
+            } else {
+                log.error("Removing the certificate from Publisher node is failed. No client certificate changes will "
+                        + "be affected for the API " + apiIdentifier.toString());
+            }
+        } catch (UserStoreException e) {
+            handleException(
+                    "Error while reading tenant information while trying to delete client certificate with alias "
+                            + alias + " for the API " + apiIdentifier.toString(), e);
+        }
+        return responseCode.getResponseCode();
+    }
+
+    @Override
     public boolean isConfigured() {
 
         CertificateManager certificateManager = new CertificateManagerImpl();

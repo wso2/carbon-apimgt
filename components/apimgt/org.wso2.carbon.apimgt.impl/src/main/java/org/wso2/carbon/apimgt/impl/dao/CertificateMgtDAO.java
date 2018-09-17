@@ -398,6 +398,50 @@ public class CertificateMgtDAO {
     }
 
     /**
+     * Method to delete client certificate from the database.
+     *
+     * @param apiIdentifier : Identifier of the API.
+     * @param alias         : Alias for the certificate.
+     * @param tenantId      : The Id of the tenant who owns the certificate.
+     * @return : true if certificate deletion is successful, false otherwise.
+     */
+    public boolean deleteClientCertificate(APIIdentifier apiIdentifier, String alias, int tenantId)
+            throws CertificateManagementException {
+
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        boolean result = false;
+        String deleteCertQuery = SQLConstants.ClientCertificateConstants.DELETE_CERTIFICATES;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            initialAutoCommit = connection.getAutoCommit();
+            connection.setAutoCommit(false);
+            int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier, connection);
+            preparedStatement = connection.prepareStatement(deleteCertQuery);
+            preparedStatement.setInt(1, tenantId);
+            preparedStatement.setString(2, alias);
+            preparedStatement.setInt(3, apiId);
+            result = preparedStatement.executeUpdate() == 1;
+            connection.commit();
+            connection.setAutoCommit(initialAutoCommit);
+        } catch (SQLException e) {
+            handleConnectionRollBack(connection);
+            handleException("Database exception while deleting client certificate metadata for the api " + apiIdentifier
+                    .toString(), e);
+        } catch (APIManagementException e) {
+            handleConnectionRollBack(connection);
+            handleException(
+                    "API Management exception while trying deleting certificate metadata with the alias " + alias
+                            + " for the API " + apiIdentifier.toString(), e);
+        } finally {
+            APIMgtDBUtil.closeStatement(preparedStatement);
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, null);
+        }
+        return result;
+    }
+
+    /**
      * Retrieve the number of total certificates which a tenant has uploaded.
      *
      * @param tenantId : The id of the tenant.

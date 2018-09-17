@@ -73,6 +73,18 @@ public interface CertificateManager {
     ResponseCode deleteCertificateFromParentNode(String alias, String endpoint, int tenantId);
 
     /**
+     * Method to delete the client certificate from publisher trust store.
+     *
+     * @param apiIdentifier : Identifier of the API which particular client certificate is added against.
+     * @param alias         : Alias of the certificate which needs to be removed.
+     * @param tenantId      : The owner tenant id.
+     * @return : SUCCESS: If operation success
+     * INTERNAL_SERVER_ERROR: If any internal error occurred
+     * CERTIFICATE_NOT_FOUND : If Certificate is not found in the trust store.
+     */
+    ResponseCode deleteClientCertificateFromParentNode(APIIdentifier apiIdentifier, String alias, int tenantId);
+
+    /**
      * Method to add the certificate to gateway nodes.
      *
      * @param certificate : The Base64 encoded certificate string.

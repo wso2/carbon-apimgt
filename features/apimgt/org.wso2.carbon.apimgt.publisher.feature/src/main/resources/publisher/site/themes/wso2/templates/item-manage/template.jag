@@ -335,7 +335,8 @@
                                        </div>
                                         <!--Gateway Security End-->
                                         <!--Manage Certificates - main-->
-                                        <div class="form-group" id="manage-certificates" hidden>
+                                        <div class="form-group" id="manage-certificates" <%if(api
+            .gatewaysecurity_mutualssl !="checked") { %> hidden <% } %>>
                                             <div class="control-label col-sm-3"></div>
                                                 <div class="col-sm-4">
                                                         <a href="#" class="manage-certs but"
@@ -369,7 +370,8 @@
                                     <td align="center">{{this}}</td>
                                     <% if (outputs.isCreatePermitted) { %>
                                     <td align="right">
-                                        <a class="delete-cert" data-alias="{{this}}">
+                                        <a class="delete-cert" data-alias="{{this}}" data-apiname="<%= api.name%>"
+                                        data-apiversion="<%= api.version%>" data-apiprovider="<%= api.provider%>">
                                             <span class="fw-stack" style="font-size:10px">
                                                 <i class="fw fw-delete fw-stack-1x"></i>
                                                 <i class="fw fw-circle-outline fw-stack-2x"></i>

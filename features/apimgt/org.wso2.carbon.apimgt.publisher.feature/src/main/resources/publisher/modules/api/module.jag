@@ -183,6 +183,9 @@ jagg.module("api", {
     deleteCertificate:function () {
         return jagg.require(jagg.getModulesDir() + "api/add.jag").deleteCertificate.apply(this, arguments);
     },
+    deleteClientCertificate:function () {
+        return jagg.require(jagg.getModulesDir() + "api/add.jag").deleteClientCertificate.apply(this, arguments);
+    },
     getCertificate:function () {
         return jagg.require(jagg.getModulesDir() + "api/add.jag").getCertificate.apply(this, arguments);
     },

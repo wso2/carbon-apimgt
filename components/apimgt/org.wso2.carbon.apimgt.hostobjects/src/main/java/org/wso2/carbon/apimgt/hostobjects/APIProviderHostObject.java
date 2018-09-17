@@ -5253,6 +5253,34 @@ public class APIProviderHostObject extends ScriptableObject {
     }
 
     /**
+     * This method is used to remove client certificate for the given alias and API.
+     *
+     * @param cx      Rhino context
+     * @param thisObj Scriptable object
+     * @param args    Passing arguments {userName, alias, api name, version, provider}
+     * @param funObj  Function object
+     * @return : True if deleting certificate is successful. False otherwise.
+     */
+    public static int jsFunction_deleteClientCertificate(Context cx, Scriptable thisObj, Object[] args,
+            Function funObj) throws APIManagementException {
+        ResponseCode responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
+        CertificateManager certificateManager = new CertificateManagerImpl();
+        if ((args == null) || (args.length != 5) || !isStringValues(args)) {
+            handleException("Invalid number of arguments. Expect User Name, Alias and Endpoint.");
+        }
+
+        String userName = (String) args[0];
+        String alias = (String) args[1];
+        String apiName = (String) args[2];
+        String apiVersion = (String) args[3];
+        String providerName = (String) args[4];
+
+        APIProvider apiProvider = getAPIProvider(thisObj);
+        return apiProvider
+                .deleteClientCertificate(userName, new APIIdentifier(providerName, apiName, apiVersion), alias);
+    }
+
+    /**
      * This method is to retrieve all the certificates belongs to the given tenant.
      *
      * @param cx      Rhino context
@@ -5292,8 +5320,6 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         return certificateMetaDataArray;
     }
-
-
 
     public static NativeArray jsFunction_getClientCertificateAlias(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException {
