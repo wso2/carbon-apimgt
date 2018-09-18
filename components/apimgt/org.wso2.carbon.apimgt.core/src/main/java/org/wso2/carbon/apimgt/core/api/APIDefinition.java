@@ -17,14 +17,15 @@
 */
 package org.wso2.carbon.apimgt.core.api;
 
+import io.swagger.models.Swagger;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIResource;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.msf4j.Request;
-import org.wso2.msf4j.ServiceMethodInfo;
 
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
@@ -70,7 +71,7 @@ public interface APIDefinition {
      * @return request   HttpRequest being processed.
      * @throws APIManagementException If error occurs while parsing swagger resources.
      */
-    String getScopeOfResourcePath(String resourceConfigsJSON, Request request, ServiceMethodInfo serviceMethodInfo)
+    String getScopeOfResourcePath(Swagger resourceConfigsJSON, Request request, Method resourceMethod)
             throws APIManagementException;
 
     /**

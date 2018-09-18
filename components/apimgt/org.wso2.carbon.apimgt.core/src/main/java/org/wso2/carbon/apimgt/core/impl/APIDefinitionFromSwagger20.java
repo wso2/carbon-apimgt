@@ -67,7 +67,6 @@ import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.msf4j.Request;
-import org.wso2.msf4j.ServiceMethodInfo;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -96,15 +95,11 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
     private static Map<String, Map<String, Object>> localConfigMap = new ConcurrentHashMap<>();
 
     @Override
-    public String getScopeOfResourcePath(String resourceConfigsJSON, Request request,
-                                         ServiceMethodInfo serviceMethodInfo) throws APIManagementException {
-        SwaggerParser swaggerParser = new SwaggerParser();
-        Swagger swagger = swaggerParser.parse(resourceConfigsJSON);
-        String basepath = swagger.getBasePath();
+    public String getScopeOfResourcePath(Swagger resourceConfigsJSON, Request request,
+                                         Method resourceMethod) throws APIManagementException {
+
+        String basepath = resourceConfigsJSON.getBasePath();
         String verb = (String) request.getProperty(APIMgtConstants.HTTP_METHOD);
-        //TODO change to this if msf4j2.3.0-m2 or higher
-//        Method resourceMethod = (Method) request.getProperty("method");
-        Method resourceMethod = serviceMethodInfo.getMethod();
 
         if (resourceMethod == null || verb == null) {
             String message = "Could not read required properties from HTTP Request. HTTP_METHOD=" + verb +
@@ -134,7 +129,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         }
 
         if (nameSpace != null && localConfigMap.containsKey(nameSpace) && localConfigMap.get(nameSpace).isEmpty()) {
-            populateConfigMapForScopes(swagger, nameSpace);
+            populateConfigMapForScopes(resourceConfigsJSON, nameSpace);
         }
 
         String resourceConfig = verb + "_" + apiPrefix + pathTemplate;
@@ -145,13 +140,14 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
     }
 
     /*
-    * This method populates resource to scope mappings into localConfigMap
-    *
-    * @param swagger swagger oc of the apis
-    * @param String namespacee unigue identifier of the api
-    *
-    * */
+     * This method populates resource to scope mappings into localConfigMap
+     *
+     * @param swagger swagger oc of the apis
+     * @param String namespacee unigue identifier of the api
+     *
+     * */
     private void populateConfigMapForScopes(Swagger swagger, String namespace) {
+
         Map<String, String> configMap = ServiceReferenceHolder.getInstance().getRestAPIConfigurationMap(namespace);
         //update local cache with configs defined in configuration file(dep.yaml)
         if (!localConfigMap.containsKey(namespace)) {
@@ -240,6 +236,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
     @Override
     public List<APIResource> parseSwaggerAPIResources(StringBuilder resourceConfigsJSON)
             throws APIManagementException {
+
         List<APIResource> apiResources = new ArrayList<>();
         SwaggerParser swaggerParser = new SwaggerParser();
         Swagger swagger = swaggerParser.parse(resourceConfigsJSON.toString());
@@ -284,6 +281,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
     private APIResource.Builder setApiResourceBuilderProperties(Map.Entry<HttpMethod, Operation> operationEntry,
                                                                 UriTemplate.UriTemplateBuilder uriTemplateBuilder,
                                                                 String resourcePath) {
+
         Operation operation = operationEntry.getValue();
         APIResource.Builder apiResourceBuilder = new APIResource.Builder();
         List<String> producesList = operation.getProduces();
@@ -312,6 +310,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
     @Override
     public Map<String, String> getScopesFromSecurityDefinition(String resourceConfigJSON) throws
             APIManagementException {
+
         SwaggerParser swaggerParser = new SwaggerParser();
         Swagger swagger = swaggerParser.parse(resourceConfigJSON);
         Map<String, String> scopes = new HashMap<>();
@@ -332,6 +331,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
     }
 
     private String getOauthSecurityName(Swagger swagger) {
+
         String oauthSecurityName = null;
         Map<String, SecuritySchemeDefinition> securityDefinitions = swagger.getSecurityDefinitions();
         if (securityDefinitions != null) {
@@ -349,6 +349,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
     @Override
     public Map<String, Scope> getScopesFromSecurityDefinitionForWebApps(String resourceConfigJSON) throws
             APIManagementException {
+
         SwaggerParser swaggerParser = new SwaggerParser();
         Swagger swagger = swaggerParser.parse(resourceConfigJSON);
         String basePath = swagger.getBasePath();
@@ -383,6 +384,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
 
     @Override
     public List<String> getGlobalAssignedScopes(String resourceConfigJson) throws APIManagementException {
+
         SwaggerParser swaggerParser = new SwaggerParser();
         Swagger swagger = swaggerParser.parse(resourceConfigJson);
         String securityName = getOauthSecurityName(swagger);
@@ -399,8 +401,8 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         return new ArrayList<>(scopes);
     }
 
-
     private void assignScopesToOperation(Operation operation, String securityName, List<String> scopes) {
+
         List<Map<String, List<String>>> securityList = operation.getSecurity();
         if (securityList != null) {
             for (Map<String, List<String>> securityRequirement : securityList) {
@@ -423,6 +425,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
 
     @Override
     public String generateMergedResourceDefinition(String resourceConfigJson, API api) {
+
         SwaggerParser swaggerParser = new SwaggerParser();
         Swagger swagger = swaggerParser.parse(resourceConfigJson);
         addSecuritySchemeToSwaggerDefinition(swagger, api);
@@ -481,6 +484,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
     }
 
     private void addSecuritySchemeToSwaggerDefinition(Swagger swagger, API api) {
+
         KeyMgtConfigurations keyMgtConfigurations = ServiceReferenceHolder.getInstance().
                 getAPIMConfiguration().getKeyManagerConfigs();
         if ((api.getSecurityScheme() & 2) == 2) { //apikey
@@ -505,6 +509,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
 
     private boolean isPathNotExist(Map<String, UriTemplate> uriTemplateMap, String securityName, Map.Entry<String,
             Path> entry) {
+
         Path path = entry.getValue();
         String uri = entry.getKey();
         path.getOperationMap().entrySet().forEach(httpMethodOperationEntry -> {
@@ -517,6 +522,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
 
     private boolean isOperationNotExist(Map.Entry<HttpMethod, Operation> entry, String uri, Map<String, UriTemplate>
             uriTemplateMap, String securityName) {
+
         HttpMethod httpMethod = entry.getKey();
         Operation operation = entry.getValue();
         String operationId = APIUtils.generateOperationIdFromPath(uri, httpMethod.name());
@@ -530,6 +536,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
     }
 
     private HttpMethod getHttpMethodForVerb(String verb) {
+
         HttpMethod httpMethod = null;
         switch (verb) {
             case "GET":
@@ -566,6 +573,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
      * @return Scope object map
      */
     private Map<String, Scope> populateScopeMap(Map<String, String> oAuth2SecurityDefinitionMap) {
+
         Map<String, Scope> scopeMap = new HashMap<>();
         for (Map.Entry<String, String> scopeEntry : oAuth2SecurityDefinitionMap.entrySet()) {
             Scope scope = new Scope();
@@ -624,13 +632,14 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
     }
 
     /*
-    *  This method extracts scopes from scoped json defined
-    *
-    *  @param  JSONObject scopes as a json object
-    *  @return Map<String, Scope> map of scopes
-    *
-    * */
+     *  This method extracts scopes from scoped json defined
+     *
+     *  @param  JSONObject scopes as a json object
+     *  @return Map<String, Scope> map of scopes
+     *
+     * */
     private Map<String, Scope> extractScopesFromJson(JSONObject scopesJson) {
+
         Map<String, Scope> scopeMap = new HashMap<>();
         if (scopesJson != null) {
             Iterator<?> scopesIterator = ((JSONArray) ((JSONObject) scopesJson
@@ -651,13 +660,14 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
     }
 
     /*
-    * Method to get namespace based on the specified basepath
-    *
-    * @param String basepath defined in sswagger definition
-    * @return String namespace value
-    *
-    * */
+     * Method to get namespace based on the specified basepath
+     *
+     * @param String basepath defined in sswagger definition
+     * @return String namespace value
+     *
+     * */
     private String getNamespaceFromBasePath(String basePath) {
+
         if (basePath.contains(APIMgtConstants.APPType.PUBLISHER)) {
             return APIMgtConstants.NAMESPACE_PUBLISHER_API;
         } else if (basePath.contains(APIMgtConstants.APPType.STORE)) {
@@ -676,6 +686,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
      */
     @Override
     public String generateSwaggerFromResources(API.APIBuilder api) {
+
         Swagger swagger = new Swagger();
         Info info = new Info();
         info.setTitle(api.getName());
@@ -770,6 +781,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
 
     @Override
     public String generateSwaggerFromResources(CompositeAPI.Builder api) {
+
         Swagger swagger = new Swagger();
         Info info = new Info();
         info.setTitle(api.getName());
@@ -816,6 +828,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
     @Override
     public API.APIBuilder generateApiFromSwaggerResource(String provider, String apiDefinition) throws
             APIManagementException {
+
         SwaggerParser swaggerParser = new SwaggerParser();
         Swagger swagger = swaggerParser.parse(apiDefinition);
 
@@ -854,6 +867,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
     @Override
     public CompositeAPI.Builder generateCompositeApiFromSwaggerResource(String provider, String apiDefinition)
             throws APIManagementException {
+
         SwaggerParser swaggerParser = new SwaggerParser();
         Swagger swagger = swaggerParser.parse(apiDefinition);
 
@@ -888,6 +902,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
 
     @Override
     public String removeScopeFromSwaggerDefinition(String resourceConfigJSON, String name) {
+
         SwaggerParser swaggerParser = new SwaggerParser();
         Swagger swagger = swaggerParser.parse(resourceConfigJSON);
         Map<String, SecuritySchemeDefinition> securitySchemeDefinitionMap = swagger.getSecurityDefinitions();
@@ -956,6 +971,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
 
     @Override
     public String updateScopesOnSwaggerDefinition(String resourceConfigJSON, Scope scope) {
+
         SwaggerParser swaggerParser = new SwaggerParser();
         Swagger swagger = swaggerParser.parse(resourceConfigJSON);
         Map<String, SecuritySchemeDefinition> securitySchemeDefinitionMap = swagger.getSecurityDefinitions();
@@ -975,12 +991,12 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
 
     @Override
     public String addScopeToSwaggerDefinition(String resourceConfigJSON, Scope scope) {
+
         KeyMgtConfigurations keyManagerConfigs = ServiceReferenceHolder.getInstance().getAPIMConfiguration()
                 .getKeyManagerConfigs();
         SwaggerParser swaggerParser = new SwaggerParser();
         Swagger swagger = swaggerParser.parse(resourceConfigJSON);
         Map<String, SecuritySchemeDefinition> securitySchemeDefinitionMap = swagger.getSecurityDefinitions();
-
 
         if (securitySchemeDefinitionMap != null && !securitySchemeDefinitionMap.isEmpty() &&
                 securitySchemeDefinitionMap.containsKey(APIMgtConstants.OAUTH2SECURITY)) {
@@ -1011,8 +1027,8 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
 
     }
 
-
     public static List<Parameter> getParameters(String uriTemplate) {
+
         List<Parameter> parameters = new ArrayList<>();
         StringTokenizer stringTokenizer = new StringTokenizer(uriTemplate, "/");
         while (stringTokenizer.hasMoreElements()) {
@@ -1029,12 +1045,14 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
     }
 
     private Response getDefaultResponse() {
+
         Response response = new Response();
         response.setDescription("OK");
         return response;
     }
 
     private BodyParameter getDefaultBodyParameter() {
+
         BodyParameter bodyParameter = new BodyParameter();
         bodyParameter.setName("Payload");
         bodyParameter.setDescription("Request Body");
@@ -1049,6 +1067,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
     }
 
     private Parameter getParameterFromURITemplateParam(URITemplateParam uriTemplateParam) {
+
         switch (uriTemplateParam.getParamType()) {
             case BODY:
                 return getDefaultBodyParameter();
@@ -1073,6 +1092,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
     }
 
     public static String convertListTostring(List<String> stringList) {
+
         StringBuilder stringBuilder = new StringBuilder();
         for (String s : stringList) {
             stringBuilder.append(s + " ");
