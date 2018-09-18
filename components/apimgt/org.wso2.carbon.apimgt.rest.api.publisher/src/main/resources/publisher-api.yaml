@@ -3669,43 +3669,60 @@ definitions:
     - type
     - apiDefinition
     allOf:
-    - $ref: '#/definitions/APIInfo'
-    - properties:
-        apiDefinition:
-          description: |
-            Swagger definition of the API which contains details about URI templates and scopes
-          type: string
-          example: "{\"paths\":{\"/substract\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\",\"parameters\":[{\"name\":\"x\",\"required\":true,\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}},\"/add\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\",\"parameters\":[{\"name\":\"x\",\"required\":true,\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}}},\"swagger\":\"2.0\",\"info\":{\"title\":\"CalculatorAPI\",\"version\":\"1.0.0\"}}"
-        wsdlUri:
-          description: |
-            WSDL URL if the API is based on a WSDL endpoint
-          type: string
-          example: "http://www.webservicex.com/globalweather.asmx?wsdl"
-        responseCaching:
-          type: string
-          example: Disabled
-        cacheTimeout:
-          type: integer
-          example: 300
-        destinationStatsEnabled:
-          type: string
-          example: Disabled
-        isDefaultVersion:
-          type: boolean
-          example: false
-        type:
-          type: string
-          description: The transport to be set. Accepted values are HTTP, WS
-          enum:
-          - HTTP
-          - WS
-          example: HTTP
-          default: HTTP
-        transport:
-          description: |
-            Supported transports for the API (http and/or https).
-          type: array
-          items:
+      - $ref: '#/definitions/APIInfo'
+      - properties:
+          apiDefinition:
+            description: |
+              Swagger definition of the API which contains details about URI templates and scopes
+            type: string
+            example: "{\"paths\":{\"/substract\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\",\"parameters\":[{\"name\":\"x\",\"required\":true,\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}},\"/add\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\",\"parameters\":[{\"name\":\"x\",\"required\":true,\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}}},\"swagger\":\"2.0\",\"info\":{\"title\":\"CalculatorAPI\",\"version\":\"1.0.0\"}}"
+          wsdlUri:
+            description: |
+              WSDL URL if the API is based on a WSDL endpoint
+            type: string
+            example: "http://www.webservicex.com/globalweather.asmx?wsdl"
+          responseCaching:
+            type: string
+            example: Disabled
+          cacheTimeout:
+            type: integer
+            example: 300
+          destinationStatsEnabled:
+            type: string
+            example: Disabled
+          isDefaultVersion:
+            type: boolean
+            example: false
+          type:
+            type: string
+            description: The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST
+            enum:
+              - HTTP
+              - WS
+              - SOAPTOREST
+            example: HTTP
+            default: HTTP
+          transport:
+            description: |
+              Supported transports for the API (http and/or https).
+            type: array
+            items:
+              type: string
+            example: ["http","https"]
+          tags:
+            type: array
+            description: Search keywords related to the API
+            items:
+              type: string
+            example: ["substract","add"]
+          tiers:
+            type: array
+            description: The subscription tiers selected for the particular API
+            items:
+              type: string
+            example: ["Unlimited"]
+          apiLevelPolicy:
+            description: The policy selected for the particular API
             type: string
           example: ["http","https"]
         tags:

@@ -1200,6 +1200,11 @@
                 <version>${swagger.codegen.version}</version>
             </dependency>
             <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-inflector</artifactId>
+                <version>${swagger.inflector.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.fasterxml.jackson.dataformat</groupId>
                 <artifactId>jackson-dataformat-yaml</artifactId>
                 <version>${fasterxml.jackson.version}</version>
@@ -1549,6 +1554,7 @@
 
         <event.processor.stub.version>2.1.23</event.processor.stub.version>
         <swagger.codegen.version>2.2.3.wso2v1</swagger.codegen.version>
+        <swagger.inflector.version>1.0.15</swagger.inflector.version>
         <swagger.parser.version>1.0.32.wso2v1</swagger.parser.version>
         <swagger.core.version>1.5.16</swagger.core.version>
         <swagger.models.version>1.5.16</swagger.models.version>

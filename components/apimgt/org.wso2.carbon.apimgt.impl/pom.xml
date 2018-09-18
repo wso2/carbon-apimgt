@@ -271,6 +271,10 @@
             <artifactId>swagger-models</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-inflector</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.wso2.orbit.io.swagger</groupId>
             <artifactId>swagger-parser</artifactId>
         </dependency>

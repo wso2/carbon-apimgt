@@ -17,6 +17,8 @@
  */
 package org.wso2.carbon.apimgt.impl.soaptorest.model;
 
+import io.swagger.models.ModelImpl;
+
 import java.util.List;
 
 /**
@@ -24,6 +26,7 @@ import java.util.List;
  */
 public class WSDLSOAPOperation {
     private String name;
+    private String msgName;
     private String soapBindingOpName;
     private String soapAction;
     private String targetNamespace;
@@ -31,12 +34,22 @@ public class WSDLSOAPOperation {
     private String httpVerb;
     private List<WSDLOperationParam> parameters;
     private List<WSDLOperationParam> outputParams;
+    private List<ModelImpl> inputParameterModel;
+    private List<ModelImpl> outputParameterModel;
 
     public WSDLSOAPOperation() {
     }
 
     public String getName() {
         return name;
+    }
+
+    public String getMsgName() {
+        return msgName;
+    }
+
+    public void setMsgName(String msgName) {
+        this.msgName = msgName;
     }
 
     public void setName(String name) {
@@ -97,5 +110,21 @@ public class WSDLSOAPOperation {
 
     public void setSoapBindingOpName(String soapBindingOpName) {
         this.soapBindingOpName = soapBindingOpName;
+    }
+
+    public List<ModelImpl> getInputParameterModel() {
+        return inputParameterModel;
+    }
+
+    public void setInputParameterModel(List<ModelImpl> inputParameterModel) {
+        this.inputParameterModel = inputParameterModel;
+    }
+
+    public List<ModelImpl> getOutputParameterModel() {
+        return outputParameterModel;
+    }
+
+    public void setOutputParameterModel(List<ModelImpl> outputParameterModel) {
+        this.outputParameterModel = outputParameterModel;
     }
 }

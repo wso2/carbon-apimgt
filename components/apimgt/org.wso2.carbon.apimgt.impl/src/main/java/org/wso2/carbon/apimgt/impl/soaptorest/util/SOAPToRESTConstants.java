@@ -24,9 +24,13 @@ public class SOAPToRESTConstants {
 
     public static final String SOAP_TO_REST_RESOURCE = "soap_to_rest";
 
-    public static final String COMPLEX_TYPE_NODE_NAME = ":complexType";
+    public static final String COMPLEX_TYPE_NODE_NAME = "complexType";
+    public static final String SIMPLE_TYPE_NODE_NAME = "simpleType";
+    public static final String RESTRICTION_ATTR = "restriction";
+    public static final String BASE_ATTR = "base";
     public static final String TYPE_ATTRIBUTE = "type";
     public static final String NAME_ATTRIBUTE = "name";
+    public static final String REF_ATTRIBUTE = "ref";
     public static final String MAX_OCCURS_ATTRIBUTE = "maxOccurs";
     public static final String UNBOUNDED = "unbounded";
     public static final String METHOD = "method";
@@ -47,6 +51,16 @@ public class SOAPToRESTConstants {
         public static final String TYPE = "type";
         public static final String PATHS = "paths";
         public static final String ITEMS = "items";
+
+        public static final String INPUT_POSTFIX = "Input";
+        public static final String OUTPUT_POSTFIX = "Output";
+
+        //vendor extension specific
+        public static final String SOAP_ACTION = "soap-action";
+        public static final String SOAP_OPERATION = "soap-operation";
+        public static final String NAMESPACE = "namespace";
+        public static final String WSO2_SOAP = "x-wso2-soap";
+
     }
 
     public final class ParamTypes {
