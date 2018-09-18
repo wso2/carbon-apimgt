@@ -22,16 +22,15 @@ import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.exception.APIMgtSecurityException;
 import org.wso2.carbon.apimgt.rest.api.common.impl.BasicAuthAuthenticator;
-import org.wso2.carbon.apimgt.rest.api.commons.service.ApisApi;
-import org.wso2.carbon.auth.rest.api.authenticators.exceptions.RestAPIAuthSecurityException;
 import org.wso2.msf4j.Request;
 import org.wso2.msf4j.Response;
+import org.wso2.msf4j.ServiceMethodInfo;
 import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
-import java.lang.reflect.Method;
-
 import static org.mockito.Mockito.when;
+
 
 public class BasicAuthAuthenticatorTestCase {
 
@@ -49,19 +48,19 @@ public class BasicAuthAuthenticatorTestCase {
         try {
             BasicAuthAuthenticator basicAuthAuthenticator = new BasicAuthAuthenticator();
             basicAuthAuthenticator.authenticate(requestObj, null, null);
-        } catch (RestAPIAuthSecurityException e) {
+        } catch (APIMgtSecurityException e) {
             Assert.assertEquals(e.getMessage(), "Missing Authorization header in the request.`");
         }
+
 
         when(requestObj.getHeader(RestApiConstants.AUTHORIZATION_HTTP_HEADER)).thenReturn(authorizationHttpHeader1);
 
         Response responseObj = Mockito.mock(Response.class);
-        Method serviceMethodInfoObj = ApisApi.class.getMethod("apisApiIdDelete", String.class, String.class, String
-                .class, Request.class);
+        ServiceMethodInfo serviceMethodInfoObj = Mockito.mock(ServiceMethodInfo.class);
         try {
             BasicAuthAuthenticator basicAuthAuthenticator = new BasicAuthAuthenticator();
             basicAuthAuthenticator.authenticate(requestObj, responseObj, serviceMethodInfoObj);
-        } catch (RestAPIAuthSecurityException e) {
+        } catch (APIMgtSecurityException e) {
             Assert.assertEquals(e.getMessage(), "Missing 'Authorization : Basic' header in the request.`");
         }
 
