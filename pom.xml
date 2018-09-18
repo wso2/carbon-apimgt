@@ -613,11 +613,6 @@
                 <artifactId>broker-core</artifactId>
                 <version>${broker.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon.auth</groupId>
-                <artifactId>org.wso2.carbon.auth.rest.api.authenticators</artifactId>
-                <version>${carbon.auth.version}</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -1015,6 +1010,5 @@
         <joda.time.version>2.9.9</joda.time.version>
         <broker.version>0.1.44</broker.version>
         <broker.package.import.version.range>[0.1.44,1.0.0)</broker.package.import.version.range>
-        <carbon.auth.version>1.0.49</carbon.auth.version>
     </properties>
 </project>
