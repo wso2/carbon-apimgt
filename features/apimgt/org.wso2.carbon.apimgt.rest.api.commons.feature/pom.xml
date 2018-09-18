@@ -56,6 +56,10 @@
 									<id>org.wso2.carbon.apimgt.core.feature</id>
 									<version>${carbon.apimgt.version}</version>
 								</feature>
+								<feature>
+									<id>org.wso2.carbon.auth.rest.api.authenticators.feature</id>
+									<version>${carbon.auth.version}</version>
+								</feature>
 							</importFeatures>
 						</configuration>
 					</execution>
