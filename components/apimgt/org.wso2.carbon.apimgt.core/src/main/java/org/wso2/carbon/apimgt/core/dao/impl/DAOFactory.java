@@ -99,8 +99,6 @@ public class DAOFactory {
             throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "getting ApiDAO", e);
         }
 
-        setup();
-
         return apiDAO;
     }
 
@@ -127,8 +125,6 @@ public class DAOFactory {
         } catch (SQLException e) {
             throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "getting ApplicationDAO", e);
         }
-
-        setup();
 
         return appDAO;
     }
@@ -159,8 +155,6 @@ public class DAOFactory {
             throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "getting APISubscriptionDAO", e);
         }
 
-        setup();
-
         return apiSubscriptionDAO;
     }
 
@@ -190,8 +184,6 @@ public class DAOFactory {
             throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "getting PolicyDAO", e);
         }
 
-        setup();
-
         return policyDAO;
     }
 
@@ -218,8 +210,6 @@ public class DAOFactory {
         } catch (SQLException e) {
             throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "getting TagDAO", e);
         }
-
-        setup();
 
         return tagDAO;
     }
@@ -248,8 +238,6 @@ public class DAOFactory {
             throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "getting LabelDAO", e);
         }
 
-        setup();
-
         return labelDAO;
     }
 
@@ -276,8 +264,6 @@ public class DAOFactory {
         } catch (SQLException e) {
             throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "getting WorkflowDAO", e);
         }
-
-        setup();
 
         return workflowDAO;
     }
@@ -313,8 +299,6 @@ public class DAOFactory {
         } catch (SQLException e) {
             throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "getting FunctionDAO", e);
         }
-
-        setup();
 
         return functionDAO;
     }
@@ -376,7 +360,7 @@ public class DAOFactory {
         return new SystemApplicationDaoImpl();
     }
 
-    private void setup() throws APIMgtDAOException {
+    public void setup() throws APIMgtDAOException {
         ApiDAOImpl.initResourceCategories();
         ApiDAOImpl.initApiTypes();
         LabelDAOImpl.initDefaultLabels();

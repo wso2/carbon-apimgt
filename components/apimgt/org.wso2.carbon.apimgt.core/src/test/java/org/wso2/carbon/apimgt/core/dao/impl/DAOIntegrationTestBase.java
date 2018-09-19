@@ -127,6 +127,7 @@ public class DAOIntegrationTestBase {
         }
         PolicyDAO policyDAO = new DAOFactory().getPolicyDAO();
         SampleTestObjectCreator.createDefaultPolicy(policyDAO);
+        new DAOFactory().setup();
     }
 
     @AfterClass

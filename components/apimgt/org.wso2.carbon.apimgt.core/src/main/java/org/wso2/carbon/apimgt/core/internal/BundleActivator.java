@@ -32,6 +32,7 @@ import org.osgi.service.jndi.JNDIContextManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.Broker;
+import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOUtil;
 import org.wso2.carbon.apimgt.core.dao.impl.DataSource;
 import org.wso2.carbon.apimgt.core.dao.impl.DataSourceImpl;
@@ -73,6 +74,7 @@ public class BundleActivator {
             DataSource dataSourceAMDB = new DataSourceImpl(
                     (HikariDataSource) ctx.lookup("java:comp/env/jdbc/WSO2AMDB"));
             DAOUtil.initialize(dataSourceAMDB);
+            new DAOFactory().setup();
             boolean isAnalyticsEnabled = ServiceReferenceHolder.getInstance().getAPIMConfiguration()
                     .getAnalyticsConfigurations().isEnabled();
             if (isAnalyticsEnabled) {

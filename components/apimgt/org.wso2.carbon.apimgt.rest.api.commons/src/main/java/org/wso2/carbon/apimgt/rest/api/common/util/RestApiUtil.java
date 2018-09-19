@@ -74,8 +74,6 @@ public class RestApiUtil {
     private static String adminRestAPIDefinition;
     private static String analyticsRestApiDefinition;
     private static Map<String, Swagger> swaggerRestAPIDefinitions = new HashMap<>();
-    private static APIMConfigurations apimConfigurations = APIMConfigurationService.getInstance()
-            .getApimConfigurations();
 
     static {
         try {
@@ -451,6 +449,7 @@ public class RestApiUtil {
     }
 
     public static String getHost(String protocol) {
+        APIMConfigurations apimConfigurations = APIMConfigurationService.getInstance().getApimConfigurations();
         TransportsConfiguration transportsConfiguration = YAMLTransportConfigurationBuilder.build();
         Set<ListenerConfiguration> listenerConfigurationSet = transportsConfiguration.getListenerConfigurations();
         String host = apimConfigurations.getHostname();
