@@ -1136,7 +1136,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Set<String> roles = new HashSet<>();
         Map<SearchType, String> attributeMap = new EnumMap<>(SearchType.class);
         attributeMap.put(SearchType.fromString("name"), api.getName());
-        List<API> apiList = apiDAO.attributeSearchAPIs(roles, api.getProvider(), attributeMap, 0, 2);
+        List<API> apiList = apiDAO.attributeSearchAPIs(roles, api.getProvider(), attributeMap, 0, 2, false);
         Assert.assertTrue(apiList.size() > 0);
     }
 

@@ -953,12 +953,14 @@ public class ApisApi implements Microservice  {
 ,@ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset
 ,@ApiParam(value = "**Search condition**.  You can search in attributes by using an **\"<attribute>:\"** modifier.  Eg. \"provider:wso2\" will match an API if the provider of the API is exactly \"wso2\".  Additionally you can use wildcards.  Eg. \"provider:wso2*\" will match an API if the provider of the API starts with \"wso2\".  Supported attribute modifiers are [**version, context, lifeCycleStatus, description, subcontext, doc, provider**]  If no advanced attribute modifier has been specified, search will match the given query string against API Name. ") @QueryParam("query") String query
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
+,@ApiParam(value = "Defines whether the returned response should contain full details of API ", defaultValue="false") @DefaultValue("false") @QueryParam("expand") Boolean expand
  ,@Context Request request)
     throws NotFoundException {
         limit=limit==null?Integer.valueOf("25"):limit;
         offset=offset==null?Integer.valueOf("0"):offset;
+        expand=expand==null?Boolean.valueOf("false"):expand;
         
-        return delegate.apisGet(limit,offset,query,ifNoneMatch,request);
+        return delegate.apisGet(limit,offset,query,ifNoneMatch,expand,request);
     }
     @OPTIONS
     @HEAD

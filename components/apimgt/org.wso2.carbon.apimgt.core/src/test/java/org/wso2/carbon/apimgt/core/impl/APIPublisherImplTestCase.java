@@ -713,7 +713,7 @@ public class APIPublisherImplTestCase {
                 thenReturn(apimResultsFromDAO);
         Mockito.when(identityProvider.getIdOfUser(ALTERNATIVE_USER)).thenReturn(USER_ID);
         Mockito.when(identityProvider.getRoleIdsOfUser(USER_ID)).thenReturn(roleIdsOfUser);
-        List<API> apis = apiPublisher.searchAPIs(2, 1, api1.getName());
+        List<API> apis = apiPublisher.searchAPIs(2, 1, api1.getName(), false);
         Assert.assertNotNull(apis);
         Mockito.verify(apiDAO, Mockito.atLeastOnce())
                 .searchAPIs(new HashSet<>(roleIdsOfUser), ALTERNATIVE_USER, api1.getName(), 1, 2);
@@ -727,7 +727,7 @@ public class APIPublisherImplTestCase {
         APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         List<API> apimResultsFromDAO = new ArrayList<>();
         Mockito.when(apiDAO.searchAPIs(new HashSet<>(), USER, null, 1, 2)).thenReturn(apimResultsFromDAO);
-        apiPublisher.searchAPIs(2, 1, null);
+        apiPublisher.searchAPIs(2, 1, null, false);
         Mockito.verify(apiDAO, Mockito.times(1)).getAPIs(new HashSet<String>(), USER);
     }
 
@@ -744,7 +744,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiDAO.searchAPIs(new HashSet<>(), ALTERNATIVE_USER, QUERY_STRING, 1, 2))
                 .thenThrow(APIMgtDAOException.class);
         try {
-            apiPublisher.searchAPIs(2, 1, QUERY_STRING);
+            apiPublisher.searchAPIs(2, 1, QUERY_STRING, false);
         } catch (APIManagementException e) {
             Assert.assertEquals(e.getMessage(), "Error occurred while Searching the API with query " + QUERY_STRING);
         }
@@ -753,7 +753,7 @@ public class APIPublisherImplTestCase {
         //IdentityProviderException
         Mockito.when(identityProvider.getIdOfUser(ALTERNATIVE_USER)).thenThrow(IdentityProviderException.class);
         try {
-            apiPublisher.searchAPIs(2, 1, QUERY_STRING);
+            apiPublisher.searchAPIs(2, 1, QUERY_STRING, false);
         } catch (APIManagementException e) {
             Assert.assertEquals(e.getMessage(),
                     "Error occurred while calling SCIM endpoint to retrieve user " + ALTERNATIVE_USER
