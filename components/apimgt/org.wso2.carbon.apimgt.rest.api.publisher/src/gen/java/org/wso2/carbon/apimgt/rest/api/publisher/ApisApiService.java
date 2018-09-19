@@ -181,6 +181,7 @@ public abstract class ApisApiService {
  ,Integer offset
  ,String query
  ,String ifNoneMatch
+ ,Boolean expand
   ,Request request) throws NotFoundException;
     public abstract Response apisHead(String query
  ,String ifNoneMatch

@@ -23,7 +23,6 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.utils;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -330,17 +329,36 @@ public class MappingUtil {
     }
 
     /**
+     * Converts {@link API} List to an {@link APIDTO} List.
+     *
+     * @param apiSummaryList
+     * @return
+     */
+    private static List<APIInfoDTO> toAPI(List<API> apiSummaryList) {
+        List<APIInfoDTO> apiInfoList = new ArrayList<>();
+        for (API api : apiSummaryList) {
+            apiInfoList.add(toAPIDto(api));
+        }
+        return apiInfoList;
+    }
+
+    /**
      * Converts API list to APIListDTO list.
      *
      * @param apisResult List of APIs
+     * @param expand Specify whether to get detail API or summary API
      * @return APIListDTO object
      */
-    public static APIListDTO toAPIListDTO(List<API> apisResult) {
+    public static APIListDTO toAPIListDTO(List<API> apisResult, boolean expand) {
         APIListDTO apiListDTO = new APIListDTO();
         apiListDTO.setCount(apisResult.size());
         // apiListDTO.setNext(next);
         // apiListDTO.setPrevious(previous);
-        apiListDTO.setList(toAPIInfo(apisResult));
+        if (expand) {
+            apiListDTO.setList(toAPI(apisResult));
+        } else {
+            apiListDTO.setList(toAPIInfo(apisResult));
+        }
         return apiListDTO;
     }
 

@@ -254,10 +254,11 @@ public interface APIPublisher extends APIManager {
      * @param limit  Number of search results returned
      * @param offset Starting index of the search results
      * @param query  Search query
+     * @param expand specify whether to return detailed API instead of summary of API
      * @return List of APIs
      * @throws APIManagementException If failed to search for apis with given query.
      */
-    List<API> searchAPIs(Integer limit, Integer offset, String query) throws APIManagementException;
+    List<API> searchAPIs(Integer limit, Integer offset, String query, boolean expand) throws APIManagementException;
 
     /**
      * Update the subscription status

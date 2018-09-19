@@ -225,12 +225,13 @@ public interface ApiDAO {
      * @param attributeMap Map containing the attributes and search queries for those attributes
      * @param offset  The starting point of the formatApiSearch results.
      * @param limit   Number of formatApiSearch results that will be returned.
+     * @param expand specify whether to return detailed API instead of summary of API
      * @return {@code List<API>} matching results
      * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    List<API> attributeSearchAPIs(Set<String> roles, String user, Map<SearchType, String> attributeMap,
-                                  int offset, int limit) throws APIMgtDAOException;
+    List<API> attributeSearchAPIs(Set<String> roles, String user, Map<SearchType, String> attributeMap, int offset,
+            int limit, boolean expand) throws APIMgtDAOException;
 
     /**
      * Retrieves summary of paginated data of APIs based on visibility (in store), that match the

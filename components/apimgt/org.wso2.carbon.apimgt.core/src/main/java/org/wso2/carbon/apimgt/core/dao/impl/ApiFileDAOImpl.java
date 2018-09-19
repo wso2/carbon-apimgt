@@ -689,11 +689,11 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     /**
-     * @see ApiDAO#attributeSearchAPIs(Set, String, Map, int, int)
+     * @see ApiDAO#attributeSearchAPIs(Set, String, Map, int, int, boolean)
      */
     @Override
     public List<API> attributeSearchAPIs(Set<String> roles, String user, Map<SearchType, String> attributeMap,
-                                         int offset, int limit) throws APIMgtDAOException {
+                                         int offset, int limit, boolean expand) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 

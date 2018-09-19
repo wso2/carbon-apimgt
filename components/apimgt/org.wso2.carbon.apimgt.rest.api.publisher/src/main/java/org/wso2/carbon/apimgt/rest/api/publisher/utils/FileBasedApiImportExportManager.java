@@ -228,7 +228,7 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
             throw new APIMgtEntityImportExportException(errorMsg, ExceptionCodes.API_IMPORT_ERROR);
         }
 
-        return MappingUtil.toAPIListDTO(apis);
+        return MappingUtil.toAPIListDTO(apis, false);
     }
 
     /**
@@ -282,7 +282,7 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
             throw new APIMgtEntityImportExportException(errorMsg, ExceptionCodes.API_IMPORT_ERROR);
         }
 
-        return MappingUtil.toAPIListDTO(apis);
+        return MappingUtil.toAPIListDTO(apis, false);
     }
 
     /**

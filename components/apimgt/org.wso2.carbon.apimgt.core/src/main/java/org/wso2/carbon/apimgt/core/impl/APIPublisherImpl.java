@@ -1454,11 +1454,13 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * @param limit  Limit
      * @param offset Offset
      * @param query  Search query
+     * @param expand specify whether to return detailed API instead of summary of API
      * @return List of APIS.
      * @throws APIManagementException If failed to formatApiSearch APIs.
      */
     @Override
-    public List<API> searchAPIs(Integer limit, Integer offset, String query) throws APIManagementException {
+    public List<API> searchAPIs(Integer limit, Integer offset, String query, boolean expand) throws
+            APIManagementException {
 
         List<API> apiResults;
         String user = getUsername();
@@ -1494,7 +1496,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     apiResults = getApiDAO().searchAPIs(roles, user, query, offset, limit);
                 } else {
                     log.debug("Attributes:", attributeMap.toString());
-                    apiResults = getApiDAO().attributeSearchAPIs(roles, user, attributeMap, offset, limit);
+                    apiResults = getApiDAO().attributeSearchAPIs(roles, user, attributeMap, offset, limit, expand);
                 }
 
             } else {

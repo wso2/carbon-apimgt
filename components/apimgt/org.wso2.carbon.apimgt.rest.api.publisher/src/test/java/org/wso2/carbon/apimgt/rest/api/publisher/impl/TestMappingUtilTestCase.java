@@ -207,7 +207,7 @@ public class TestMappingUtilTestCase {
         List<API> apis = new ArrayList<>();
         apis.add(api1);
         apis.add(api2);
-        APIListDTO apiListDTO = MappingUtil.toAPIListDTO(apis);
+        APIListDTO apiListDTO = MappingUtil.toAPIListDTO(apis, false);
         assertEquals((Integer) apis.size(), apiListDTO.getCount());
         assertEquals(api1.getId(), apiListDTO.getList().get(0).getId());
         assertEquals(api1.getName(), apiListDTO.getList().get(0).getName());
