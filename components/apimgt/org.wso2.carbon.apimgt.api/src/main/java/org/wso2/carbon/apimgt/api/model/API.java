@@ -168,7 +168,7 @@ public class API implements Serializable {
     }
 
     /**
-     * To set the Jeson schema validation enable/disable.
+     * To set the JSON schema validation enable/disable.
      *
      * @param enableSchemaValidation Given Status.
      */

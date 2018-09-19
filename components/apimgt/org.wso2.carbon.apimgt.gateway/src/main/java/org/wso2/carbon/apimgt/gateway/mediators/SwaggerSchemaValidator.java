@@ -41,7 +41,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import java.util.EnumMap;
 import java.util.Iterator;
 
-
 /**
  * This mediator validate the JSON request and response messages against JSON schema which is defined in the swagger
  * file.
@@ -490,5 +489,4 @@ public class SwaggerSchemaValidator extends AbstractMediator {
             }
         }
     }
-
 }

@@ -1007,7 +1007,7 @@ public interface APIProvider extends APIManager {
     String getSequenceFileContent(APIIdentifier apiIdentifier, String type, String name) throws APIManagementException;
 
     /**
-     * Method to create a Local Entry by adding the swagger content for the API.
+     * Method to create a Local Entry by adding the swagger content.
      *
      * @param apiId    APIIdentifier
      * @param jsonText json text to be saved in the registry
