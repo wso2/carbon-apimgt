@@ -55,21 +55,9 @@ import java.util.Map;
  * This is responsible for handling API gateway related operations
  */
 public class APIGatewayPublisherImpl implements APIGateway {
-    private static final Logger log = LoggerFactory.getLogger(APIGatewayPublisherImpl.class);
-    private APIMConfigurations config;
-    private String publisherTopic;
-    private String storeTopic;
-    private String throttleTopic;
-    private String threatProtectionTopic;
-    private ContainerBasedGatewayGenerator containerBasedGatewayGenerator;
 
-    public APIGatewayPublisherImpl() {
-        config = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
-        publisherTopic = config.getBrokerConfigurations().getPublisherTopic();
-        storeTopic = config.getBrokerConfigurations().getStoreTopic();
-        throttleTopic = config.getBrokerConfigurations().getThrottleTopic();
-        threatProtectionTopic = config.getBrokerConfigurations().getThreatProtectionTopic();
-    }
+    private static final Logger log = LoggerFactory.getLogger(APIGatewayPublisherImpl.class);
+    private ContainerBasedGatewayGenerator containerBasedGatewayGenerator;
 
     @Override
     public void addAPI(API api) throws GatewayException {
@@ -227,7 +215,8 @@ public class APIGatewayPublisherImpl implements APIGateway {
      * @throws GatewayException If there is a failure to publish to gateway
      */
     private void publishToPublisherTopic(GatewayEvent gatewayDTO) throws GatewayException {
-
+        APIMConfigurations apimConfigurations = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
+        String publisherTopic = apimConfigurations.getBrokerConfigurations().getPublisherTopic();
         BrokerUtil.publishToTopic(publisherTopic, gatewayDTO);
         if (log.isDebugEnabled()) {
             log.debug("Gateway event : " + gatewayDTO.getEventType() + " has been published to publisher topic : " +
@@ -242,6 +231,8 @@ public class APIGatewayPublisherImpl implements APIGateway {
      * @throws GatewayException If there is a failure to publish to gateway
      */
     private void publishToStoreTopic(GatewayEvent gatewayDTO) throws GatewayException {
+        APIMConfigurations apimConfigurations = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
+        String storeTopic = apimConfigurations.getBrokerConfigurations().getStoreTopic();
         BrokerUtil.publishToTopic(storeTopic, gatewayDTO);
         if (log.isDebugEnabled()) {
             log.debug("Gateway event : " + gatewayDTO.getEventType() + " has been published to store topic : " +
@@ -256,6 +247,9 @@ public class APIGatewayPublisherImpl implements APIGateway {
      * @throws GatewayException If there is a failure to publish to gateway
      */
     private void publishToThrottleTopic(GatewayEvent gatewayDTO) throws GatewayException {
+        APIMConfigurations apimConfigurations = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
+        String storeTopic = apimConfigurations.getBrokerConfigurations().getStoreTopic();
+        String throttleTopic = apimConfigurations.getBrokerConfigurations().getThrottleTopic();
         BrokerUtil.publishToTopic(throttleTopic, gatewayDTO);
         if (log.isDebugEnabled()) {
             log.debug("Gateway event : " + gatewayDTO.getEventType() + " has been published to store topic : " +
@@ -508,6 +502,8 @@ public class APIGatewayPublisherImpl implements APIGateway {
      * @throws GatewayException if failed to publish to the topic
      */
     private void publishToThreatProtectionTopic(GatewayEvent gatewayDTO) throws GatewayException {
+        APIMConfigurations apimConfigurations = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
+        String threatProtectionTopic = apimConfigurations.getBrokerConfigurations().getThreatProtectionTopic();
         BrokerUtil.publishToTopic(threatProtectionTopic, gatewayDTO);
         if (log.isDebugEnabled()) {
             log.debug("Gateway event : " + gatewayDTO.getEventType() +
