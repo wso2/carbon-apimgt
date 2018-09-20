@@ -20,6 +20,8 @@ package org.wso2.carbon.apimgt.tracing.zipkin;
 
 import brave.Tracing;
 import brave.opentracing.BraveTracer;
+import brave.propagation.B3Propagation;
+import brave.propagation.ExtraFieldPropagation;
 import io.opentracing.Tracer;
 import io.opentracing.contrib.reporter.Reporter;
 import io.opentracing.contrib.reporter.TracerR;
@@ -56,6 +58,7 @@ public class ZipkinTracerImpl extends OpenTracer {
         Tracer tracer = BraveTracer.create(Tracing.newBuilder()
                 .localServiceName(serviceName)
                 .spanReporter(AsyncReporter.builder(sender).build())
+                .propagationFactory(ExtraFieldPropagation.newFactory(B3Propagation.FACTORY, "request-id"))
                 .build());
 
 

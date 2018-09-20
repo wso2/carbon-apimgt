@@ -9,6 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 public class Util {
@@ -93,4 +94,27 @@ public class Util {
         return new TracingTracer(GlobalTracer.get());
     }
 
+    public static void baggageSet(TracingSpan span, String key, String value) {
+
+        Object sp = span.getSpan();
+        if(sp instanceof Span) {
+            ((Span) sp).setBaggageItem(key, value);
+        }
+    }
+
+    public static String baggageGet(TracingSpan span, String key) {
+
+        Object sp = span.getSpan();
+        if(sp instanceof Span) {
+            return ((Span) sp).getBaggageItem(key);
+        } else if (sp instanceof SpanContext) {
+            Iterable<Map.Entry<String, String>> entries = ((SpanContext) sp).baggageItems();
+            for (Map.Entry<String, String> entry: entries) {
+                if (entry.getKey().equals(key)) {
+                    return entry.getValue();
+                }
+            }
+        }
+        return null;
+    }
 }

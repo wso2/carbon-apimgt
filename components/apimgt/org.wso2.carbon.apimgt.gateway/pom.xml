@@ -282,6 +282,7 @@
                             !org.wso2.carbon.apimgt.gateway.stub.*,
                             org.wso2.carbon.apimgt.gateway.*;version="${carbon.apimgt.version}",
                             org.wso2.throttle.*
+                            <!--org.apache.commons.*-->
                         </Export-Package>
                         <Import-Package>
                             !javax.xml.soap,

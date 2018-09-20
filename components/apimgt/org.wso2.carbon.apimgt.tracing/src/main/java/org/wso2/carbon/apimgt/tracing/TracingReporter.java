@@ -19,179 +19,96 @@ import java.util.Map;
 public class TracingReporter implements Reporter {
 
     private final Log log;
-    private final JsonFactory f = new JsonFactory();
+    private final JsonFactory jsonFactory = new JsonFactory();
     private final boolean includeStackTraceInStructuredLog;
 
     public TracingReporter(Log log, boolean includeStackTraceInStructuredLog) {
-        LogFactory.getLog(this.getClass()).info("{reporter: 'init'}");
         this.log = log;
         this.includeStackTraceInStructuredLog = includeStackTraceInStructuredLog;
     }
 
-    public void start(Instant ts, SpanData span) {
-        if (this.log.isTraceEnabled()) {
-            this.log.trace(this.toStructuredMessage(ts, "start", span, (Map)null));
-        }
+    public void start(Instant timeStamp, SpanData span) {
 
     }
 
-    public void finish(Instant ts, SpanData span) {
+    public void finish(Instant timeStamp, SpanData span) {
         if (this.log.isTraceEnabled()) {
-            this.log.trace(this.toStructuredMessage(ts, "finish", span, (Map)null));
+            this.log.trace(this.toStructuredMessage(timeStamp, "finish", span));
         }
-
     }
 
-    public void log(Instant ts, SpanData span, Map<String, ?> fields) {
+    public void log(Instant timeStamp, SpanData span, Map<String, ?> fields) {
+
         LogLevel level = LogLevel.INFO;
-
         try {
             LogLevel level0 = (LogLevel)fields.get(LogLevel.FIELD_NAME);
             if (level0 != null) {
                 level = level0;
                 fields.remove(LogLevel.FIELD_NAME);
             }
-        } catch (Exception var6) {
-//            this.log.warn("fail to read value of field {}", LogLevel.FIELD_NAME, var6);
-            this.log.warn("fail to read value of field {}");
+        } catch (Exception e) {
+            this.log.warn("fail to read value of field {}", e);
         }
 
         switch(level) {
             case TRACE:
                 if (this.log.isTraceEnabled()) {
-                    this.log.trace(this.toStructuredMessage(ts, "log", span, fields));
+                    this.log.trace(this.toStructuredMessage(timeStamp, "log", span));
                 }
                 break;
             case DEBUG:
                 if (this.log.isDebugEnabled()) {
-                    this.log.debug(this.toStructuredMessage(ts, "log", span, fields));
+                    this.log.debug(this.toStructuredMessage(timeStamp, "log", span));
                 }
                 break;
             case WARN:
                 if (this.log.isWarnEnabled()) {
-                    this.log.warn(this.toStructuredMessage(ts, "log", span, fields));
+                    this.log.warn(this.toStructuredMessage(timeStamp, "log", span));
                 }
                 break;
             case ERROR:
                 if (this.log.isErrorEnabled()) {
-                    this.log.error(this.toStructuredMessage(ts, "log", span, fields));
+                    this.log.error(this.toStructuredMessage(timeStamp, "log", span));
                 }
                 break;
             default:
                 if (this.log.isInfoEnabled()) {
-                    this.log.info(this.toStructuredMessage(ts, "log", span, fields));
+                    this.log.info(this.toStructuredMessage(timeStamp, "log", span));
                 }
         }
 
     }
 
-    protected String toStructuredMessage(Instant ts, String action, SpanData span, Map<String, ?> fields) {
+    protected String toStructuredMessage(Instant timeStamp, String action, SpanData span) {
         try {
-            StringWriter w = new StringWriter();
-            JsonGenerator g = this.f.createGenerator(w);
-            g.writeStartObject();
-//            g.writeNumberField("ts", ts.toEpochMilli());
-//            g.writeNumberField("elapsed", Duration.between(span.startAt, ts).toMillis());
-            g.writeStringField("spanId", span.spanId);
-            g.writeStringField("operation", span.operationName);
-            g.writeStringField("action", action);
-//            g.writeStringField("operation", span.operationName);
-            g.writeObjectFieldStart("tags");
-            Iterator var7 = span.tags.entrySet().iterator();
+            StringWriter writer = new StringWriter();
+            JsonGenerator generator = this.jsonFactory.createGenerator(writer);
+            generator.writeStartObject();
+            generator.writeNumberField("Latency", Duration.between(span.startAt, timeStamp).toMillis());
+            generator.writeStringField("Operation", span.operationName);
+            generator.writeStringField("Action", action);
+            generator.writeObjectFieldStart("Tags");
+            Iterator itr = span.tags.entrySet().iterator();
 
-            Map.Entry kv;
-            Object v;
-            while(var7.hasNext()) {
-                kv = (Map.Entry)var7.next();
-                v = kv.getValue();
-                if (v instanceof String) {
-                    g.writeStringField((String)kv.getKey(), (String)v);
-                } else if (v instanceof Number) {
-                    g.writeNumberField((String)kv.getKey(), ((Number)v).doubleValue());
-                } else if (v instanceof Boolean) {
-                    g.writeBooleanField((String)kv.getKey(), (Boolean)v);
+            Map.Entry map;
+            Object value;
+            while(itr.hasNext()) {
+                map = (Map.Entry)itr.next();
+                value = map.getValue();
+                if (value instanceof String) {
+                    generator.writeStringField((String)map.getKey(), (String)value);
+                } else if (value instanceof Number) {
+                    generator.writeNumberField((String)map.getKey(), ((Number)value).doubleValue());
+                } else if (value instanceof Boolean) {
+                    generator.writeBooleanField((String)map.getKey(), (Boolean)value);
                 }
             }
-
-            g.writeEndObject();
-            if (fields != null && !fields.isEmpty()) {
-                g.writeObjectFieldStart("fields");
-                var7 = fields.entrySet().iterator();
-
-                while(var7.hasNext()) {
-                    kv = (Map.Entry)var7.next();
-                    v = kv.getValue();
-                    if (v instanceof String) {
-                        g.writeStringField((String)kv.getKey(), (String)v);
-                    } else if (v instanceof Number) {
-                        g.writeNumberField((String)kv.getKey(), ((Number)v).doubleValue());
-                    } else if (v instanceof Boolean) {
-                        g.writeBooleanField((String)kv.getKey(), (Boolean)v);
-                    } else if (v instanceof Throwable) {
-                        if (this.includeStackTraceInStructuredLog) {
-                            try {
-                                StringWriter w2 = new StringWriter();
-                                Throwable var11 = null;
-
-                                try {
-                                    ((Throwable)v).printStackTrace(new PrintWriter(w2));
-                                    g.writeStringField((String)kv.getKey(), w2.toString());
-                                } catch (Throwable var22) {
-                                    var11 = var22;
-                                    throw var22;
-                                } finally {
-                                    if (w2 != null) {
-                                        if (var11 != null) {
-                                            try {
-                                                w2.close();
-                                            } catch (Throwable var21) {
-                                                var11.addSuppressed(var21);
-                                            }
-                                        } else {
-                                            w2.close();
-                                        }
-                                    }
-
-                                }
-                            } catch (Exception var24) {
-                                g.writeStringField((String)kv.getKey(), String.valueOf(v));
-                            }
-                        } else {
-                            g.writeStringField((String)kv.getKey(), String.valueOf(v));
-                        }
-                    } else {
-                        g.writeStringField((String)kv.getKey(), String.valueOf(v));
-                    }
-                }
-
-                g.writeEndObject();
-            } else {
-                g.writeObjectFieldStart("baggage");
-                var7 = span.context().baggageItems().iterator();
-
-                while(var7.hasNext()) {
-                    kv = (Map.Entry)var7.next();
-                    g.writeStringField((String)kv.getKey(), (String)kv.getValue());
-                }
-
-                g.writeEndObject();
-                g.writeObjectFieldStart("references");
-                var7 = span.references.entrySet().iterator();
-
-                while(var7.hasNext()) {
-                    kv = (Map.Entry)var7.next();
-                    g.writeStringField((String)kv.getKey(), (String)kv.getValue());
-                }
-
-                g.writeEndObject();
-            }
-
-            g.writeEndObject();
-            g.close();
-            w.close();
-            return w.toString();
-        } catch (Exception var25) {
-            var25.printStackTrace();
+            generator.writeEndObject();
+            generator.close();
+            writer.close();
+            return writer.toString();
+        } catch (Exception e) {
+            log.error("Error in structured message");
             return "";
         }
     }

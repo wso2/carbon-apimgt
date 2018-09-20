@@ -107,8 +107,11 @@ public class APIKeyValidatorClient {
             TracingSpan keySpan = (TracingSpan) MessageContext.getCurrentMessageContext().getProperty(APIMgtGatewayConstants.KEY_VALIDATION_LATENCY_SPAN);
             TracingTracer tracer = Util.getGlobalTracer();
             Map<String, String> tracerSpecificCarrier = new HashMap<>();
-            TracingSpan tspan= Util.startSpan("API_Key_Validation_Info_dto", keySpan, tracer, null);
-            Util.inject(keySpan, tracer, tracerSpecificCarrier);
+            TracingSpan tspan = null;
+            if (keySpan != null) {
+                tspan = Util.startSpan("API_Key_Validation_Info_dto", keySpan, tracer, null);
+                Util.inject(keySpan, tracer, tracerSpecificCarrier);
+            }
             for (Map.Entry<String, String> entry: tracerSpecificCarrier.entrySet()) {
                 headerList.add(new Header(entry.getKey(), entry.getValue()));
             }
@@ -131,7 +134,9 @@ public class APIKeyValidatorClient {
                         + context + " with ID: " + MessageContext.getCurrentMessageContext().getMessageID() + " at "
                         + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
             }
-            Util.finishSpan(tspan);
+            if (tspan != null) {
+                Util.finishSpan(tspan);
+            }
 
             ServiceContext serviceContext = keyValidationServiceStub.
                     _getServiceClient().getLastOperationContext().getServiceContext();

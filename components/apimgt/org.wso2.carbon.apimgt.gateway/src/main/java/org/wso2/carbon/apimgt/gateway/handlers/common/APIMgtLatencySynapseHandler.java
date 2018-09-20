@@ -15,7 +15,7 @@ import java.util.UUID;
 public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 
     private static final Log log = LogFactory.getLog(APIMgtLatencySynapseHandler.class);
-    private TracingTracer tracer;
+    private static TracingTracer tracer;
     public APIMgtLatencySynapseHandler() {
         tracer = ServiceReferenceHolder.getInstance().getTracingService().buildTracer("Latency");
     }
@@ -38,6 +38,7 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
         TracingSpan parentSpan = (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY_SPAN);
         TracingSpan backendLatencySpan = Util.startSpan("BackendLatency", parentSpan, tracer, null);
         messageContext.setProperty(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN, backendLatencySpan);
+        Util.setTag(backendLatencySpan, APIMgtGatewayConstants.REQUEST_ID, (String) messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID));
         return true;
     }
     @Override
