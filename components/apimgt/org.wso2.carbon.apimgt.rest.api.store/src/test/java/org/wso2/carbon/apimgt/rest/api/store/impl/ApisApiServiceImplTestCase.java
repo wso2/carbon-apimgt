@@ -29,12 +29,13 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
-import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.api.UserNameMapper;
 import org.wso2.carbon.apimgt.core.exception.APICommentException;
-import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
-import org.wso2.carbon.apimgt.core.exception.APIRatingException;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtWSDLException;
+import org.wso2.carbon.apimgt.core.exception.APIRatingException;
 import org.wso2.carbon.apimgt.core.exception.ApiStoreSdkGenerationException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.impl.APIStoreImpl;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -52,20 +53,19 @@ import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.RatingDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.RatingMappingUtil;
-import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 import org.wso2.msf4j.Request;
+import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
-import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
+import javax.ws.rs.core.Response;
 
 import static junit.framework.TestCase.assertEquals;
 
@@ -86,6 +86,7 @@ public class ApisApiServiceImplTestCase {
     private static final String incorrectLanguage = "javaIncorrect";
     private static InputStream inputStreamCorrect, inputStreamIncorrect;
     private static String swaggerPetStoreCorrect, swaggerPetStoreIncorrect;
+    UserNameMapper userNameMapper = Mockito.mock(UserNameMapper.class);
 
     static {
         try {
@@ -178,7 +179,10 @@ public class ApisApiServiceImplTestCase {
         printTestMethodName();
         String apiId = UUID.randomUUID().toString();
         String commentId = UUID.randomUUID().toString();
-
+        APIManagerFactory instance = Mockito.mock(APIManagerFactory.class);
+        PowerMockito.mockStatic(APIManagerFactory.class);
+        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(instance);
+        PowerMockito.when(APIManagerFactory.getInstance().getUserNameMapper()).thenReturn(userNameMapper);
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
         APIStore apiStore = Mockito.mock(APIStoreImpl.class);
 
@@ -298,7 +302,10 @@ public class ApisApiServiceImplTestCase {
         printTestMethodName();
         String apiId = UUID.randomUUID().toString();
         String commentId = UUID.randomUUID().toString();
-
+        APIManagerFactory instance = Mockito.mock(APIManagerFactory.class);
+        PowerMockito.mockStatic(APIManagerFactory.class);
+        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(instance);
+        PowerMockito.when(APIManagerFactory.getInstance().getUserNameMapper()).thenReturn(userNameMapper);
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
         APIStore apiStore = Mockito.mock(APIStoreImpl.class);
 
@@ -549,7 +556,10 @@ public class ApisApiServiceImplTestCase {
     public void testApisApiIdGet() throws APIManagementException, NotFoundException {
         printTestMethodName();
         String apiId = UUID.randomUUID().toString();
-
+        APIManagerFactory instance = Mockito.mock(APIManagerFactory.class);
+        PowerMockito.mockStatic(APIManagerFactory.class);
+        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(instance);
+        PowerMockito.when(APIManagerFactory.getInstance().getUserNameMapper()).thenReturn(userNameMapper);
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
         APIStore apiStore = Mockito.mock(APIStoreImpl.class);
 

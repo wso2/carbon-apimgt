@@ -18,6 +18,7 @@ package org.wso2.carbon.apimgt.core.impl;
  */
 
 import feign.Response;
+import feign.gson.GsonDecoder;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +31,9 @@ import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+
+import java.io.IOException;
+import java.util.Map;
 
 /**
  * This class holds the key manager implementation for light weight key manager
@@ -54,9 +58,15 @@ public class WSO2ISKeyManagerImpl extends DefaultKeyManagerImpl {
 
     @Override
     public AccessTokenInfo getTokenMetaData(String accessToken) throws KeyManagementException {
+
         AccessTokenInfo accessTokenInfo = super.getTokenMetaData(accessToken);
         if (StringUtils.isNotEmpty(accessTokenInfo.getEndUserName())) {
             accessTokenInfo.setEndUserName(accessTokenInfo.getEndUserName().replace(SUPER_TENANT_SUFFIX, ""));
+        } else {
+            if (accessTokenInfo.isTokenValid() && StringUtils.isNotEmpty(accessTokenInfo.getScopes()) &&
+                    accessTokenInfo.getScopes().contains("openid")) {
+                accessTokenInfo.setEndUserName(getEndUsernameFromUserInfo(accessToken));
+            }
         }
         return accessTokenInfo;
     }
@@ -88,4 +98,23 @@ public class WSO2ISKeyManagerImpl extends DefaultKeyManagerImpl {
         }
     }
 
+    private String getEndUsernameFromUserInfo(String token) throws KeyManagementException {
+
+        try {
+            Response response = oAuth2ServiceStubs.getUserInfoServiceStub().getUserInfo(token);
+            if (response.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {
+                Map<String, String> userInfoMap = (Map<String, String>) new GsonDecoder().decode(response, Map.class);
+                return userInfoMap.get("sub");
+            } else {
+                throw new KeyManagementException("Error while Retrieving User Information", ExceptionCodes
+                        .ACCESS_TOKEN_INVALID);
+            }
+        } catch (APIManagementException e) {
+            log.error("Error while Getting UserInfo Service", e);
+            throw new KeyManagementException("Error while Getting UserInfo Service", ExceptionCodes.INTERNAL_ERROR);
+        } catch (IOException e) {
+            throw new KeyManagementException("Error while Getting UserInfo Service", ExceptionCodes.INTERNAL_ERROR);
+
+        }
+    }
 }

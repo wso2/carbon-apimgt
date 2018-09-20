@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
+import org.wso2.carbon.apimgt.core.api.UserNameMapper;
 import org.wso2.carbon.apimgt.core.api.WSDLProcessor;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
@@ -132,8 +133,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
     public APIPublisherImpl(String username, IdentityProvider idp, KeyManager keyManager, DAOFactory daoFactory,
                             APILifecycleManager apiLifecycleManager, GatewaySourceGenerator gatewaySourceGenerator,
-                            APIGateway apiGatewayPublisher) {
-        super(username, idp, keyManager, daoFactory, apiLifecycleManager, gatewaySourceGenerator, apiGatewayPublisher);
+                            APIGateway apiGatewayPublisher, UserNameMapper userNameMapper) {
+
+        super(username, idp, keyManager, daoFactory, apiLifecycleManager, gatewaySourceGenerator,
+                apiGatewayPublisher, userNameMapper);
     }
 
     /**
@@ -1488,7 +1491,12 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         searchAttribute = attribute.split(KEY_VALUE_DELIMITER)[0];
                         searchValue = attribute.split(KEY_VALUE_DELIMITER)[1];
                         log.debug(searchAttribute + KEY_VALUE_DELIMITER + searchValue);
-                        attributeMap.put(SearchType.fromString(searchAttribute), searchValue);
+                        if (SearchType.PROVIDER.equals(SearchType.fromString(searchAttribute))) {
+                            String pseudoName = getUserNameMapper().getLoggedInPseudoNameFromUserID(searchValue);
+                            attributeMap.put(SearchType.fromString(searchAttribute), pseudoName);
+                        } else {
+                            attributeMap.put(SearchType.fromString(searchAttribute), searchValue);
+                        }
                     }
                 }
 

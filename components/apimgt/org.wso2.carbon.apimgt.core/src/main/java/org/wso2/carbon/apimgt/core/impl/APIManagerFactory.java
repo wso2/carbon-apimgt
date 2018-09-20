@@ -120,8 +120,8 @@ public class APIManagerFactory {
     private APIPublisher newProvider(String username) throws APIManagementException {
         try {
             APIPublisherImpl apiPublisher = new APIPublisherImpl(username, getIdentityProvider(), getKeyManager(),
-                    new DAOFactory(), geApiLifecycleManager(),
-                    new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
+                    new DAOFactory(), geApiLifecycleManager(), new GatewaySourceGeneratorImpl(), new
+                    APIGatewayPublisherImpl(), new UserNameMapperImpl());
 
             // Register all the observers which need to observe 'Publisher' component
             apiPublisher.registerObserver(new EventLogger());
@@ -146,7 +146,8 @@ public class APIManagerFactory {
         // }
         try {
             APIStoreImpl userAwareAPIStore = new APIStoreImpl(username, getIdentityProvider(), getKeyManager(),
-                    new DAOFactory(), new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
+                    new DAOFactory(), new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl(), new
+                    UserNameMapperImpl());
 
             // Register all the observers which need to observe 'Store' component
             userAwareAPIStore.registerObserver(new EventLogger());

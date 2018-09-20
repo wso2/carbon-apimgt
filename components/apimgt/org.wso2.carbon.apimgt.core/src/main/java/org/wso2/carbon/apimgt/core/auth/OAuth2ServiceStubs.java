@@ -49,6 +49,7 @@ public class OAuth2ServiceStubs {
     private String tokenEndpoint;
     private String revokeEndpoint;
     private String introspectEndpoint;
+    private String userInfoEndpoint;
     private String kmCertAlias;
     private String username;
     private String password;
@@ -59,15 +60,17 @@ public class OAuth2ServiceStubs {
      * @param tokenEndpoint      Token endpoint URL
      * @param revokeEndpoint     Revoke endpoint URL
      * @param introspectEndpoint Token introspection endpoint
+     * @param userInfoEndpoint UserInfo endpoint URL
      * @param kmCertAlias        Key manager certificate alias
      * @param username           Username of Key Manager
      * @param password           Password of Key Manager
      */
-    public OAuth2ServiceStubs(String tokenEndpoint, String revokeEndpoint, String introspectEndpoint,
-                              String kmCertAlias, String username, String password) {
+    public OAuth2ServiceStubs(String tokenEndpoint, String revokeEndpoint, String introspectEndpoint, String
+            userInfoEndpoint, String kmCertAlias, String username, String password) {
         this.tokenEndpoint = tokenEndpoint;
         this.revokeEndpoint = revokeEndpoint;
         this.introspectEndpoint = introspectEndpoint;
+        this.userInfoEndpoint = userInfoEndpoint;
         this.kmCertAlias = kmCertAlias;
         this.username = username;
         this.password = password;
@@ -277,6 +280,17 @@ public class OAuth2ServiceStubs {
     }
 
     /**
+     * This interface is for /userinfo API stub
+     */
+    @Headers("Content-Type: application/x-www-form-urlencoded")
+    public interface UserInfoServiceStub {
+
+        @Headers("X-Auth-Token: {access_token}")
+        @RequestLine("GET /")
+        Response getUserInfo(@Param("access_token") String accessToken);
+    }
+
+    /**
      * Create and return OAuth2 Introspection service stubs
      *
      * @return OAuth2 introspection service stub
@@ -290,6 +304,20 @@ public class OAuth2ServiceStubs {
                 .client(new Client.Default(AMSSLSocketFactory.getSSLSocketFactory(kmCertAlias),
                         (hostname, sslSession) -> true))
                 .target(OAuth2ServiceStubs.IntrospectionServiceStub.class, introspectEndpoint);
+    }
+    /**
+     * Create and return OAuth2 UserInfo service stubs
+     *
+     * @return OAuth2 introspection service stub
+     * @throws APIManagementException if error occurs while crating OAuth2 introspection service stub
+     */
+    public OAuth2ServiceStubs.UserInfoServiceStub getUserInfoServiceStub() throws APIManagementException {
+        return Feign.builder()
+                .encoder(new FormEncoder())
+                .decoder(new GsonDecoder())
+                .client(new Client.Default(AMSSLSocketFactory.getSSLSocketFactory(kmCertAlias),
+                        (hostname, sslSession) -> true))
+                .target(OAuth2ServiceStubs.UserInfoServiceStub.class, userInfoEndpoint);
     }
 
     private static class FormEncoder implements Encoder {

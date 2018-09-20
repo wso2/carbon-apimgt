@@ -25,26 +25,37 @@ import org.testng.annotations.Test;
    Test cases for OAuth2ServiceStubs class
  */
 public class OAuth2ServiceStubsTest {
+
     String tokenEndpoint = "https://localhost:9443/oauth2/token";
     String revokeEndpoint = "https://localhost:9443/oauth2/revoke";
     String introspectEndpoint = "http://localhost:9763/oauth2/introspect";
+    String userInfoEndpoint = "https://localhost:9443/api/auth/oidc/v1.0/userinfo";
     String keyManagerCertAlias = "wso2carbon";
     OAuth2ServiceStubs oAuth2ServiceStubs = new OAuth2ServiceStubs(tokenEndpoint, revokeEndpoint, introspectEndpoint,
-            keyManagerCertAlias, "admin", "admin");
+            userInfoEndpoint, keyManagerCertAlias, "admin", "admin");
 
     @Test
     public void testGetTokenServiceStub() throws Exception {
+
         Assert.assertTrue(oAuth2ServiceStubs.getTokenServiceStub() instanceof OAuth2ServiceStubs.TokenServiceStub);
     }
 
     @Test
     public void testGetRevokeServiceStub() throws Exception {
+
         Assert.assertTrue(oAuth2ServiceStubs.getRevokeServiceStub() instanceof OAuth2ServiceStubs.RevokeServiceStub);
     }
 
     @Test
     public void testGetIntrospectionServiceStub() throws Exception {
+
         Assert.assertTrue(oAuth2ServiceStubs.getIntrospectionServiceStub() instanceof OAuth2ServiceStubs.
                 IntrospectionServiceStub);
+    }
+    @Test
+    public void testGetUserInfoServiceStub() throws Exception {
+
+        Assert.assertTrue(oAuth2ServiceStubs.getUserInfoServiceStub() instanceof OAuth2ServiceStubs.
+                UserInfoServiceStub);
     }
 }

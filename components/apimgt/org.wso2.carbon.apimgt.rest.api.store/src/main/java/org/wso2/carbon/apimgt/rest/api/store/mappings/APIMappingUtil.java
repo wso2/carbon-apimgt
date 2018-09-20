@@ -20,6 +20,10 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIInfoDTO;
@@ -31,6 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class APIMappingUtil {
+    private static final Logger log = LoggerFactory.getLogger(APIMappingUtil.class);
 
     /**
      * Converts {@code List<API>} to {@link APIListDTO} DTO.
@@ -54,18 +59,26 @@ public class APIMappingUtil {
      * @return List of APIInfoDTO
      */
     private static List<APIInfoDTO> toAPIInfo(List<API> apiSummaryList) {
-        List<APIInfoDTO> apiInfoList = new ArrayList<APIInfoDTO>();
+
+        List<APIInfoDTO> apiInfoList = new ArrayList<>();
         for (API apiSummary : apiSummaryList) {
-            APIInfoDTO apiInfo = new APIInfoDTO();
-            apiInfo.setId(apiSummary.getId());
-            apiInfo.setContext(apiSummary.getContext());
-            apiInfo.setDescription(apiSummary.getDescription());
-            apiInfo.setName(apiSummary.getName());
-            apiInfo.setProvider(apiSummary.getProvider());
-            apiInfo.setLifeCycleStatus(apiSummary.getLifeCycleStatus());
-            apiInfo.setVersion(apiSummary.getVersion());
-            apiInfo.setType(BaseAPIInfoDTO.TypeEnum.APIINFO);
-            apiInfoList.add(apiInfo);
+            try {
+                APIInfoDTO apiInfo = new APIInfoDTO();
+                apiInfo.setId(apiSummary.getId());
+                apiInfo.setContext(apiSummary.getContext());
+                apiInfo.setDescription(apiSummary.getDescription());
+                apiInfo.setName(apiSummary.getName());
+                String realName = APIManagerFactory.getInstance().getUserNameMapper().getLoggedInUserIDFromPseudoName
+                        (apiSummary.getProvider());
+                apiInfo.setProvider(realName);
+                apiInfo.setLifeCycleStatus(apiSummary.getLifeCycleStatus());
+                apiInfo.setVersion(apiSummary.getVersion());
+                apiInfo.setType(BaseAPIInfoDTO.TypeEnum.APIINFO);
+                apiInfoList.add(apiInfo);
+            } catch (APIManagementException ex) {
+                // This not to throw as this have api list
+                log.error("Error while Retrieving RealName from PseudoName", ex);
+            }
         }
         return apiInfoList;
     }
@@ -76,11 +89,14 @@ public class APIMappingUtil {
      * @param api API
      * @return API DTO
      */
-    public static APIDTO toAPIDTO(API api) {
+    public static APIDTO toAPIDTO(API api) throws APIManagementException {
+
         APIDTO apiDTO = new APIDTO();
         apiDTO.setId(api.getId());
         apiDTO.setName(api.getName());
-        apiDTO.setProvider(api.getProvider());
+        String realName = APIManagerFactory.getInstance().getUserNameMapper().getLoggedInUserIDFromPseudoName
+                (api.getProvider());
+        apiDTO.setProvider(realName);
         apiDTO.setLifeCycleStatus(api.getLifeCycleStatus());
         apiDTO.setVersion(api.getVersion());
         apiDTO.setContext(api.getContext());
