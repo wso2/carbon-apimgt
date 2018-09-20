@@ -4,7 +4,7 @@ import { List, ListItem, ListItemText, Divider } from '@material-ui/core/';
 import MenuList from '@material-ui/core/MenuList';
 import { Link } from 'react-router-dom';
 
-import MenuButton from '../../../Shared/MenuButton';
+import MenuButton from 'AppComponents/Shared/MenuButton';
 
 const APICreateMenu = (props) => {
     const createTypes = (

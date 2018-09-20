@@ -19,10 +19,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
-
+import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
+import API from 'AppData/api';
 import Policies from '../../Details/LifeCycle/Policies';
-import { ScopeValidation, resourceMethod, resourcePath } from '../../../../data/ScopeValidation';
-import API from '../../../../data/api';
 
 /**
  * @export @inheritDoc

@@ -1,8 +1,16 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import * as icons from '@material-ui/icons/';
+import InboxIcon from '@material-ui/icons/Inbox';
+import FaceIcon from '@material-ui/icons/Face';
+import PlaceIcon from '@material-ui/icons/Place';
+import MailIcon from '@material-ui/icons/Mail';
+
 import { Link } from 'react-router-dom';
+
+const icons = {
+    InboxIcon, FaceIcon, PlaceIcon, MailIcon,
+};
 
 const iconNames = Object.keys(icons);
 const styles = theme => ({

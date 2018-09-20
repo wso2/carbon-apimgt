@@ -2,10 +2,10 @@ import React, { Component } from 'react';
 import { Table } from 'antd';
 import PropTypes from 'prop-types';
 
-import API from '../../../../data/api';
-import { Progress } from '../../../Shared';
-import ApiPermissionValidation from '../../../../data/ApiPermissionValidation';
-import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
+import API from 'AppData/api';
+import { Progress } from 'AppComponents/Shared';
+import ApiPermissionValidation from 'AppData/ApiPermissionValidation';
+import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 
 class Subscriptions extends Component {
     constructor(props) {

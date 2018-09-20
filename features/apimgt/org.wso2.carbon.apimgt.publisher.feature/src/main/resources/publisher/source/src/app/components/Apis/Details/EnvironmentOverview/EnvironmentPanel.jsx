@@ -24,11 +24,12 @@ import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 
 import Grid from '@material-ui/core/Grid';
-import ApiThumb from '../../Listing/components/ApiThumb';
-import API from '../../../../data/api';
-import { Progress } from '../../../Shared';
-import AuthManager from '../../../../data/AuthManager';
-import Utils from '../../../../data/Utils';
+import ApiThumb from 'AppComponents/Apis/Listing/components/ApiThumb';
+import API from 'AppData/api';
+import { Progress } from 'AppComponents/Shared';
+import AuthManager from 'AppData/AuthManager';
+import Utils from 'AppData/Utils';
+
 import EnvironmentPanelMessage from './EnvironmentPanelMessage';
 
 const styles = theme => ({

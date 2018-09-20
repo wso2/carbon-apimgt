@@ -23,9 +23,9 @@ import { Button, Row, Col, message } from 'antd';
 import PropTypes from 'prop-types';
 
 import '../../../../../../../node_modules/react-quill/dist/quill.snow.css';
-import API from '../../../../data/api.js';
-import { Progress } from '../../../Shared';
-import ApiPermissionValidation from '../../../../data/ApiPermissionValidation';
+import API from 'AppData/api.js';
+import { Progress } from 'AppComponents/Shared';
+import ApiPermissionValidation from 'AppData/ApiPermissionValidation';
 
 class InlineEditor extends Component {
     constructor(props) {

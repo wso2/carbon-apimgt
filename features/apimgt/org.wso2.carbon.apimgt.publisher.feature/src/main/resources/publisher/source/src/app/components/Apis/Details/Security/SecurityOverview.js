@@ -19,8 +19,8 @@
 import React, {Component} from 'react'
 import {Link} from 'react-router-dom'
 
-import Api from '../../../../data/api'
-import Alert from '../../../Shared/Alert'
+import Api from 'AppData/api'
+import Alert from 'AppComponents/Shared/Alert'
 
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';

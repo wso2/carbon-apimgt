@@ -13,9 +13,10 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import green from '@material-ui/core/colors/green';
 import API from 'AppData/api.js';
 
+import Alert from 'AppComponents/Shared/Alert';
+import DeleteApiButton from 'AppComponents/Apis/Details/components/DeleteApiButton';
+
 import ImageGenerator from './ImageGenerator';
-import Alert from '../../../Shared/Alert';
-import DeleteApiButton from '../../Details/components/DeleteApiButton';
 
 const styles = theme => ({
     card: {

@@ -29,12 +29,14 @@ import {
     FormHelperText,
     FormControlLabel,
 } from '@material-ui/core';
-import { Done, ErrorOutline } from '@material-ui/icons/';
+import ErrorOutline from '@material-ui/icons/ErrorOutline';
+import Done from '@material-ui/icons/Done';
 import PropTypes from 'prop-types';
 import Progress from 'AppComponents/Shared/Progress';
+import Alert from 'AppComponents/Shared/Alert';
+import API from 'AppData/api';
+
 import FileUpload from './FileUpload';
-import Alert from '../../../../Shared/Alert';
-import API from '../../../../../data/api';
 
 const styles = () => ({
     radioGroup: {
@@ -148,8 +150,7 @@ class ProvideWSDL extends Component {
                 }
                 const response = error.response && error.response.obj;
                 const message =
-                    'Error while validating WSDL!! '
-                    + response && '[' + response.message + '] ' + response.description;
+                    'Error while validating WSDL!! ' + response && '[' + response.message + '] ' + response.description;
                 this.setState({ isValid: false, errorMessage: message, loading: false });
                 console.error(error);
                 Alert.error(message);

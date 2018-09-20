@@ -20,8 +20,8 @@ import 'react-tagsinput/react-tagsinput.css';
 import { message } from 'antd/lib/index';
 import PropTypes from 'prop-types';
 import React from 'react';
-import Api from '../../../../data/api';
-import { Progress } from '../../../Shared';
+import Api from 'AppData/api';
+import { Progress } from 'AppComponents/Shared';
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
 
 /**

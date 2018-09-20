@@ -29,7 +29,7 @@ import purple from '@material-ui/core/colors/purple';
 import green from '@material-ui/core/colors/green';
 import Button from '@material-ui/core/Button';
 import { FormattedMessage } from 'react-intl';
-import { Progress } from '../../../Shared';
+import { Progress } from 'AppComponents/Shared';
 import Grow from '@material-ui/core/Grow';
 import Slide from '@material-ui/core/Slide';
 

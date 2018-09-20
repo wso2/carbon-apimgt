@@ -3,5 +3,5 @@
     "env",
     "react"
   ],
-  "plugins": ["transform-class-properties","dynamic-import-webpack", "transform-object-rest-spread"]
+  "plugins": ["transform-class-properties","syntax-dynamic-import", "transform-object-rest-spread"]
 }

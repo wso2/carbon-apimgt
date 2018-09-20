@@ -4,9 +4,10 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import PropTypes from 'prop-types';
 
+import API from 'AppData/api';
+import { Progress } from 'AppComponents/Shared';
+
 import APIPropertyField from './APIPropertyField';
-import API from '../../../../data/api';
-import { Progress } from '../../../Shared';
 
 /**
  *
