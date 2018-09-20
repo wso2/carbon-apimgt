@@ -356,7 +356,11 @@ public class MappingUtil {
     private static List<APIInfoDTO> toAPI(List<API> apiSummaryList) {
         List<APIInfoDTO> apiInfoList = new ArrayList<>();
         for (API api : apiSummaryList) {
-            apiInfoList.add(toAPIDto(api));
+            try {
+                apiInfoList.add(toAPIDto(api));
+            } catch (APIManagementException e) {
+                // This not to throw as this have api list
+                log.error("Error while Retrieving RealName from PseudoName", e);            }
         }
         return apiInfoList;
     }
