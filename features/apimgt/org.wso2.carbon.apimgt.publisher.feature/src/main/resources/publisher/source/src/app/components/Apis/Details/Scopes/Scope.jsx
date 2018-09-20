@@ -22,9 +22,9 @@ import 'react-tagsinput/react-tagsinput.css';
 import TagsInput from 'react-tagsinput';
 import PropTypes from 'prop-types';
 import Log from 'log4javascript';
-import Alert from '../../../Shared/Alert';
+import Alert from 'AppComponents/Shared/Alert';
 
-import Api from '../../../../data/api';
+import Api from 'AppData/api';
 import Loading from '../../../Base/Loading/Loading';
 
 /**

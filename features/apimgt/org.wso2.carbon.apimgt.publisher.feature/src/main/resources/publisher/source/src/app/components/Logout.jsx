@@ -22,8 +22,8 @@ import qs from 'qs';
 import Alert from 'AppComponents/Shared/Alert';
 import PropTypes from 'prop-types';
 
-import ConfigManager from '../data/ConfigManager';
-import AuthManager from '../data/AuthManager';
+import ConfigManager from 'AppData/ConfigManager';
+import AuthManager from 'AppData/AuthManager';
 
 
 /**

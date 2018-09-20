@@ -9,7 +9,7 @@ import SearchOutlined from '@material-ui/icons/SearchOutlined';
 import { Link } from 'react-router-dom';
 import APIsIcon from '@material-ui/icons/SettingsApplicationsOutlined';
 
-import API from '../../../../data/api';
+import API from 'AppData/api';
 /* Utility methods defined here are described in
 * react-autosuggest documentation https://github.com/moroshko/react-autosuggest
 */

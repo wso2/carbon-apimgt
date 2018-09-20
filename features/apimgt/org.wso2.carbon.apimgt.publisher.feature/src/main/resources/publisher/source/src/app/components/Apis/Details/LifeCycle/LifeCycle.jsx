@@ -21,10 +21,10 @@ import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 
-import Api from '../../../../data/api';
-import ConfigManager from '../../../../data/ConfigManager';
+import Api from 'AppData/api';
+import ConfigManager from 'AppData/ConfigManager';
 import LifeCycleUpdate from './LifeCycleUpdate';
-import { Progress } from '../../../Shared';
+import { Progress } from 'AppComponents/Shared';
 import LifeCycleHistory from './LifeCycleHistory';
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
 

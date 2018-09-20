@@ -28,6 +28,15 @@ import ScopesIcon from '@material-ui/icons/VpnKey';
 import SecurityIcon from '@material-ui/icons/Security';
 import DocumentsIcon from '@material-ui/icons/LibraryBooks';
 import SubscriptionsIcon from '@material-ui/icons/Bookmarks';
+import PageContainer from 'AppComponents/Base/container/';
+import Utils from 'AppData/Utils';
+import ConfigManager from 'AppData/ConfigManager';
+import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
+import Api from 'AppData/api';
+import { Progress } from 'AppComponents/Shared';
+
+import APIDetailsTopMenu from './components/APIDetailsTopMenu';
+import APIDetailsRoutes from './components/APIDetailsRoutes';
 import Overview from './Overview/Overview';
 import LifeCycle from './LifeCycle/LifeCycle';
 import Documents from './Documents/Documents';
@@ -37,15 +46,7 @@ import Subscriptions from './Subscriptions/Subscriptions';
 import Scopes from './Scopes/Scopes';
 import Security from './Security';
 
-import PageContainer from '../../Base/container/';
 import APIDetailsNavBar from './components/APIDetailsNavBar';
-import Utils from '../../../data/Utils';
-import ConfigManager from '../../../data/ConfigManager';
-import APIDetailsTopMenu from './components/APIDetailsTopMenu';
-import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
-import Api from '../../../data/api';
-import APIDetailsRoutes from './components/APIDetailsRoutes';
-import { Progress } from '../../Shared';
 
 const apiDetailPages = [
     {

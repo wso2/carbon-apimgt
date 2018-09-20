@@ -21,6 +21,10 @@ import Utils from './Utils';
  * Abstract resource representation, Host for generic resource related methods
  */
 export default class Resource {
+    /**
+     *Creates an instance of Resource.
+     * @memberof Resource
+     */
     constructor() {
         this.client = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment().label).client;
     }

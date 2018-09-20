@@ -19,9 +19,9 @@
 import React, { Component } from 'react';
 import { Table, Popconfirm } from 'antd';
 import InlineEditor from './InlineEditor';
-import API from '../../../../data/api.js';
-import { Progress } from '../../../Shared';
-import ApiPermissionValidation from '../../../../data/ApiPermissionValidation';
+import API from 'AppData/api.js';
+import { Progress } from 'AppComponents/Shared';
+import ApiPermissionValidation from 'AppData/ApiPermissionValidation';
 
 class DocumentsTable extends Component {
     constructor(props) {

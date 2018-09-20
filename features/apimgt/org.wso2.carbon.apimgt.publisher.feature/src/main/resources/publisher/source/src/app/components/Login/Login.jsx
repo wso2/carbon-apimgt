@@ -17,27 +17,27 @@
  */
 
 import React, { Component } from 'react';
-import { Redirect, Switch } from 'react-router-dom';
 import qs from 'qs';
 import TextField from '@material-ui/core/TextField';
 import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-import Snackbar from '@material-ui/core/Snackbar';
-import Input, { InputLabel } from '@material-ui/core/Input';
+import Alert from 'AppComponents/Shared/Alert';
+import Input from '@material-ui/core/Input';
+import InputLabel from '@material-ui/core/InputLabel';
 import Select from '@material-ui/core/Select';
-import { FormControl } from '@material-ui/core/';
+import FormControl from '@material-ui/core/FormControl';
 import MenuItem from '@material-ui/core/MenuItem';
 import Grid from '@material-ui/core/Grid';
 import PropTypes from 'prop-types';
+import AuthManager from 'AppData/AuthManager';
+import Footer from 'AppComponents/Base/Footer/Footer';
+import User from 'AppData/User';
+import ConfigManager from 'AppData/ConfigManager';
+import Utils from 'AppData/Utils';
+import { Redirecting, Progress } from 'AppComponents/Shared';
 
 import './login.css';
-import AuthManager from '../../data/AuthManager';
-import Footer from '../Base/Footer/Footer';
-import User from '../../data/User';
-import ConfigManager from '../../data/ConfigManager';
-import Utils from '../../data/Utils';
-import { Redirecting, Progress } from '../Shared';
 
 /**
  * Login page React Component
@@ -56,12 +56,9 @@ class Login extends Component {
         this.authManager = new AuthManager();
         this.state = {
             isLogin: false,
-            referrer: '/',
             username: '',
             password: '',
             validate: false,
-            messageOpen: false,
-            message: '',
             environments: [],
             environmentId: 0,
             loginStatusEnvironments: [],
@@ -128,14 +125,17 @@ class Login extends Component {
             });
     }
 
+    /**
+     *
+     *
+     * @returns
+     * @memberof Login
+     */
     handleRedirectionFromIDP() {
-        let queryString = this.props.location.search;
-        queryString = queryString.replace(/^\?/, '');
+        const { search } = this.props.location;
+        const queryString = search.replace(/^\?/, '');
         /* With QS version up we can directly use {ignoreQueryPrefix: true} option */
         const params = qs.parse(queryString);
-        if (params.referrer) {
-            this.setState({ referrer: params.referrer });
-        }
         if (params.user_name) {
             const environmentName = Utils.getCurrentEnvironment().label;
             const validityPeriod = params.validity_period; // In seconds
@@ -147,6 +147,8 @@ class Login extends Component {
                 user.scopes = params.scopes.split(' ');
                 AuthManager.setUser(user);
                 this.setState({ isLogin: true });
+                this.props.updateUser(user);
+                this.props.history.push(params.referrer);
                 console.log(`Successfully login to : ${environmentName}`);
             } else {
                 this.setState({ isLogin: false });
@@ -189,10 +191,13 @@ class Login extends Component {
         this.setState({ validate: true });
         const { username, password } = this.state;
         const environment = this.state.environments[this.state.environmentId];
+        const { search } = this.props.location;
+        const queryString = search.replace(/^\?/, '');
+        /* With QS version up we can directly use {ignoreQueryPrefix: true} option */
+        const params = qs.parse(queryString);
 
         if (!username || !password) {
-            this.setState({ messageOpen: true });
-            this.setState({ message: 'Please fill both username and password fields' });
+            Alert.error('Please fill both username and password fields');
             return;
         }
 
@@ -200,15 +205,21 @@ class Login extends Component {
         loginPromise
             .then((response) => {
                 this.setState({ isLogin: AuthManager.getUser() });
+                this.props.updateUser(AuthManager.getUser());
                 this.authManager.handleAutoLoginEnvironments(
                     response.data.idToken,
                     this.state.environments,
                     this.state.authConfigs,
                 );
+                this.props.history.push(params.referrer);
             })
             .catch((error) => {
-                this.setState({ messageOpen: true });
-                this.setState({ message: error });
+                const { response } = error;
+                Alert.error('Error occurred while login to the Publisher!');
+                if (response) {
+                    const { data } = response;
+                    Alert.error(`Error [${data.code}]: ${data.description}`);
+                }
                 console.log(error);
             });
     };
@@ -231,10 +242,6 @@ class Login extends Component {
             Utils.setEnvironment(environment);
         }
         this.setState({ environmentId, isLogin });
-    };
-
-    handleRequestClose = () => {
-        this.setState({ messageOpen: false });
     };
 
     /**
@@ -262,15 +269,6 @@ class Login extends Component {
             // If not logged in, go to login page
             return (
                 <div className='login-flex-container'>
-                    <Snackbar
-                        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-                        open={this.state.messageOpen}
-                        onClose={this.handleRequestClose}
-                        ContentProps={{
-                            'aria-describedby': 'message-id',
-                        }}
-                        message={<span id='message-id'>{this.state.message}</span>}
-                    />
                     <Grid container justify='center' alignItems='center' spacing={0} style={{ height: '100vh' }}>
                         <Grid item lg={6} md={8} xs={10}>
                             <Grid container>
@@ -383,12 +381,7 @@ class Login extends Component {
                 </div>
             );
         } else {
-            // If logged in, redirect to /apis page
-            return (
-                <Switch>
-                    <Redirect to={this.state.referrer} />
-                </Switch>
-            );
+            return 'Redirecting ...';
         }
     }
 }
@@ -397,6 +390,10 @@ Login.propTypes = {
     location: PropTypes.shape({
         search: PropTypes.string,
     }).isRequired,
+    history: PropTypes.shape({
+        push: PropTypes.func,
+    }).isRequired,
+    updateUser: PropTypes.func.isRequired,
 };
 
 export default Login;

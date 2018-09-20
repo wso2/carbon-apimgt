@@ -33,10 +33,10 @@ import Divider from '@material-ui/core/Divider';
 import List, { ListItem, ListItemSecondaryAction } from '@material-ui/core/List';
 
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
-import Api from '../../../../data/api';
+import Api from 'AppData/api';
 import Resource from './Resource';
-import { Progress } from '../../../Shared';
-import ApiPermissionValidation from '../../../../data/ApiPermissionValidation';
+import { Progress } from 'AppComponents/Shared';
+import ApiPermissionValidation from 'AppData/ApiPermissionValidation';
 
 const styles = theme => ({
     root: {

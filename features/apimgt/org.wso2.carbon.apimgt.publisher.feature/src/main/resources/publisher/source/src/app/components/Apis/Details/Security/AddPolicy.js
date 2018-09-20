@@ -33,8 +33,8 @@ import Input, { InputLabel } from '@material-ui/core/Input';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 
-import API from '../../../../data/api'
-import Alert from '../../../Shared/Alert'
+import API from 'AppData/api'
+import Alert from 'AppComponents/Shared/Alert'
 
 class AddPolicy extends Component {
     state = {

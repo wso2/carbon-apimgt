@@ -16,7 +16,7 @@
 
 import React from 'react';
 import { Component } from 'react';
-import Api from '../../../../data/api';
+import Api from 'AppData/api';
 import { Grid, Paper, Typography, Divider } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import InputLabel from '@material-ui/core/InputLabel';
