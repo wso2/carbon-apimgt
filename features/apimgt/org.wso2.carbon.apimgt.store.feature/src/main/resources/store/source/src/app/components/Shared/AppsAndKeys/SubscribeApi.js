@@ -312,175 +312,39 @@ class Subscribe extends Component {
         const api = this.state.api;
 
         return (
-            this.state.api ?
-                <div className={classes.root}>
-                    <IconButton
-                        className={classnames(classes.expand, {
-                        [classes.expandOpen]: this.state.expanded,
-                        })}
-                        onClick={this.handleExpandClick}
-                        aria-expanded={this.state.expanded}
-                        aria-label="Show more"
-                    >
-                        <ExpandMoreIcon />
-                    </IconButton>
-                    <Collapse in={this.state.expanded} timeout="auto" unmountOnExit>
-                       asdfsdf
-                        </Collapse>
-
-
-                    {this.state.applications && this.state.applications.length > 0 ? 
-                    <div>
-                        <Typography variant="headline" className={classes.headline} >
-                            Test this API?
-                        </Typography>
-
-                        <Typography gutterBottom>
-                            {`
-                            Create an Application and subscribe this API to that Application.
-                            An application is a logical collection of APIs. 
-                            Applications allow you to use a single access token to invoke a collection 
-                            of APIs and to subscribe to one API multiple times with different SLA levels. 
-                            The DefaultApplication is pre-created and allows unlimited access by default.
-                            `}
-                        </Typography>
-
-                        <Button onClick={this.handleAppDialogOpen} color="primary" variant="raised"
-                                    className="form-buttons full-width"> Create New Application</Button> 
-                        </div> 
-                    : <div>
-                        <Typography variant="headline" className={classes.headline} >
-                            Subscriptions
-                        </Typography>
-                        
-                        {this.state.applicationsAvailable && this.state.applicationsAvailable.length > 0 ?
-                            <div>
-                                <FormControl 
-                                            className={classes.formControl}>
-                                    <InputLabel>Applications</InputLabel>
-                                    <Select
-                                        value={this.state.applicationId}
-                                        onChange={this.handleChange('applicationId')}
-                                    >
-                                        {this.state.applicationsAvailable.map((app) => <option value={app.value} key={app.value}>
-                                            {app.label}
-                                        </option>)}
-                                    </Select>
-                                </FormControl>
-                                {this.state.tiers &&
-                                    <FormControl
-                                            className={classes.formControl}>
-                                        <Select
-                                            value={this.state.policyName}
-                                            onChange={this.handleChange('policyName')}
-                                        >
-                                            {this.state.tiers.map((tier) => <option value={tier.value}>{tier.label}</option>)}
-                                        </Select>
-                                    </FormControl>
-                                }
-                                <Button onClick={this.createSubscription} color="primary" variant="raised"
-                                    className="form-buttons full-width"> Subscribed to this API</Button>   
-                            </div>
-                            
-                            : <div>
-                                <Typography gutterBottom>
-                                    {`
-                                    You have subscribed to all the available applications. You need to create a 
-                                    new application to subscribe again to this API.
-                                    `}
-                                </Typography>
-                                <Button onClick={this.handleAppDialogOpen} color="primary" variant="raised"
-                                    className="form-buttons full-width"> Create New Application</Button>    
-                            </div>
-                            }
-                            
-
-                            {this.state.subscribedApplications  && this.state.subscribedApplications .length > 0 &&  
-                                <div>
-                                    <Typography variant="caption" className={classes.subtitle}>
-                                        subscribed Applications
-                                        { (this.state.subscribedApplications && this.state.subscribedApplications.length > 2) && 
-                                            <span>
-                                                - showing 2 out of {this.state.subscribedApplications.length} -
-                                                <Link to="/applications" className={classes.viewAllLink}> View All</Link>
-                                            </span>
-                                        }
-                                    </Typography>
-                                        {this.state.subscribedApplications.slice(0).reverse().map( (app, index)  => 
-                                        index < 2 && 
-                                            <div className={classes.appListWrapper} key={index}>
-                                                <Link to={"/applications/" + app.value} key={app.value} className={classes.appLink}>
-                                                    <span className={classes.applicationName}>
-                                                        {app.label} 
-                                                    </span>
-                                                    <span className={classes.caption}>
-                                                        - ( {app.policy} ) 
-                                                    </span>
-                                                </Link>
-                                            </div>
-                                        )}
-                                   
-                                    
-                                </div>
-                            }
-
-
-                    </div> }
-
-                   
-
-
-
-
-                    {/* Application creation container */}
-                    <Dialog
-                    fullScreen
-                    open={this.state.createAppOpen}
-                    onClose={this.handleClose}
-                    transition={Transition}
-                    >
-                        <Grid container>
-                            <Grid item xs={1} className={classes.closeButton} >
-                                <IconButton color="inherit" onClick={this.handleAppDialogClose} aria-label="Close">
-                                    <CloseIcon />
-                                </IconButton>
-                            </Grid>
-                            <Grid item xs={11} className={classes.applicationCreateRoot} >
-                                <ApplicationCreate 
-                                    updateSubscriptionData={this.updateSubscriptionData} 
-                                    handleAppDialogClose={this.handleAppDialogClose}  />
-                            </Grid>
-                            
-                        </Grid>
-                    </Dialog>
-
-                    {/* Dialog to show once user have subscribed. */}
-                    <Dialog
-                        open={this.state.openSubsConfirm}
-                        onClose={this.handleCloseSubsConfirm}
-                        aria-labelledby="alert-dialog-title"
-                        aria-describedby="alert-dialog-description"
-                        >
-                        <DialogTitle id="alert-dialog-title">{"Use Google's location service?"}</DialogTitle>
-                        <DialogContent>
-                            <DialogContentText id="alert-dialog-description">
-                            successfully created application.
-                            </DialogContentText>
-                        </DialogContent>
-                        <DialogActions>
-                            <Link to={"/applications/" + this.state.applicationId}>
-                                <Button color="primary">
-                                Go to application page.
-                                </Button>
-                            </Link>
-                            <Button onClick={this.handleCloseSubsConfirm} color="primary" autoFocus>
-                            Stay on the API detials page.
-                            </Button>
-                        </DialogActions>
-                    </Dialog>
-                   
-                </div>
-                : <Loading/>
+            ( this.state.applicationsAvailable && this.state.applicationsAvailable.length > 0 ) &&
+            <Grid container spacing={24} className={classes.root}>
+                <Grid item xs={12} md={6}>
+                    <FormControl className={classes.FormControl}>
+                        <InputLabel shrink htmlFor="age-label-placeholder" className={classes.quotaHelp}>
+                            Application
+                        </InputLabel>
+                        <Select
+                            value={this.state.applicationId}
+                            onChange={this.handleChange('applicationId')}
+                            >
+                            {this.state.applicationsAvailable.map((app) => <option value={app.value} key={app.value}>
+                                {app.label}
+                            </option>)}
+                        </Select>
+                        <FormHelperText>Label + placeholder</FormHelperText>
+                    </FormControl>
+                    {this.state.tiers &&
+                        <FormControl className={classes.FormControlOdd}>
+                            <InputLabel shrink htmlFor="age-label-placeholder" className={classes.quotaHelp}>
+                                Throttling Tier
+                            </InputLabel>
+                            <Select
+                                    value={this.state.policyName}
+                                    onChange={this.handleChange('policyName')}
+                                >
+                                    {this.state.tiers.map((tier) => <option value={tier.value}>{tier.label}</option>)}
+                            </Select>
+                            <FormHelperText>Label + placeholder</FormHelperText>
+                        </FormControl>
+                    }
+                    </Grid>
+                </Grid>
         );
     }
 }
