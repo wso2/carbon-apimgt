@@ -26,6 +26,7 @@ import io.swagger.models.Response;
 import io.swagger.models.Swagger;
 import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.QueryParameter;
+import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.ObjectProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
@@ -100,7 +101,6 @@ public class SOAPOperationBindingUtils {
                 if (HTTPConstants.HTTP_METHOD_GET.equals(operation.getHttpVerb())) {
                     for (ModelImpl input : inputParameterModel) {
                         if (operation.getName().equals(input.getName())) {
-                            operation.setName(operation.getName().substring(3, operation.getName().length()));
                             Map<String, Property> properties = input.getProperties();
                             if (properties != null) {
                                 QueryParameter param = new QueryParameter();
@@ -152,8 +152,10 @@ public class SOAPOperationBindingUtils {
                     Map<String, Property> inputPropertyMap = new HashMap<>();
                     for (ModelImpl input : inputParameterModel) {
                         RefProperty inputRefProp = new RefProperty();
-                        inputRefProp.set$ref(SOAPToRESTConstants.Swagger.DEFINITIONS_ROOT + input.getName());
-                        inputPropertyMap.put(input.getName(), inputRefProp);
+                        if (input != null) {
+                            inputRefProp.set$ref(SOAPToRESTConstants.Swagger.DEFINITIONS_ROOT + input.getName());
+                            inputPropertyMap.put(input.getName(), inputRefProp);
+                        }
                     }
                     inputModel.setProperties(inputPropertyMap);
                     swaggerDoc
@@ -166,8 +168,10 @@ public class SOAPOperationBindingUtils {
                 Map<String, Property> outputPropertyMap = new HashMap<>();
                 for (ModelImpl output : outputParameterModel) {
                     RefProperty outputRefProp = new RefProperty();
-                    outputRefProp.set$ref(SOAPToRESTConstants.Swagger.DEFINITIONS_ROOT + output.getName());
-                    outputPropertyMap.put(output.getName(), outputRefProp);
+                    if (output != null) {
+                        outputRefProp.set$ref(SOAPToRESTConstants.Swagger.DEFINITIONS_ROOT + output.getName());
+                        outputPropertyMap.put(output.getName(), outputRefProp);
+                    }
                 }
                 outputModel.setProperties(outputPropertyMap);
                 swaggerDoc.addDefinition(operation.getName() + SOAPToRESTConstants.Swagger.OUTPUT_POSTFIX, outputModel);
@@ -180,11 +184,16 @@ public class SOAPOperationBindingUtils {
                 swaggerDoc.info(info);
             }
             if (paramModelMap != null) {
-                for (String s : paramModelMap.keySet()) {
-                    swaggerDoc.addDefinition(s, paramModelMap.get(s));
+                for (String propertyName : paramModelMap.keySet()) {
+                    swaggerDoc.addDefinition(propertyName, paramModelMap.get(propertyName));
                 }
             }
-            swaggerStr = Json.pretty(swaggerDoc);
+            try {
+                swaggerStr = Json.pretty(swaggerDoc);
+            } catch (Exception e) {
+                String msg = "Error occurred while deserialize swagger model.";
+                handleException(msg, e);
+            }
             if (log.isDebugEnabled()) {
                 log.debug(swaggerStr);
             }
@@ -260,6 +269,22 @@ public class SOAPOperationBindingUtils {
                 String operationName = operation.getName();
                 operation.setSoapBindingOpName(operationName);
                 operation.setHttpVerb(HTTPConstants.HTTP_METHOD_POST);
+                if (operationName.toLowerCase().startsWith("get") && operation.getInputParameterModel() != null
+                        && operation.getInputParameterModel().size() <= 1) {
+
+                    Map<String, Property> properties = operation.getInputParameterModel().get(0).getProperties();
+                    if (properties == null) {
+                        operation.setHttpVerb(HTTPConstants.HTTP_METHOD_GET);
+                    } else if (properties.size() <= 1) {
+                        for (String property : properties.keySet()) {
+                            String type = properties.get(property).getType();
+                            if (!(type.equals(ObjectProperty.TYPE) || type.equals(ArrayProperty.TYPE) || type
+                                    .equals(RefProperty.TYPE))) {
+                                operation.setHttpVerb(HTTPConstants.HTTP_METHOD_GET);
+                            }
+                        }
+                    }
+                }
                 resourcePath = operationName;
                 resourcePath =
                         resourcePath.substring(0, 1).toLowerCase() + resourcePath.substring(1, resourcePath.length());
@@ -272,7 +297,7 @@ public class SOAPOperationBindingUtils {
                 if (log.isDebugEnabled()) {
                     log.debug("SOAP operation: " + operationName + " has " + params.size() + " parameters");
                 }
-                if(params != null) {
+                if (params != null) {
                     for (WSDLOperationParam param : params) {
                         if (param.getDataType() != null) {
                             String dataTypeWithNS = param.getDataType();
@@ -283,8 +308,6 @@ public class SOAPOperationBindingUtils {
                             }
                         }
                     }
-                } else {
-                    log.info("No parameters found for SOAP operation: " + operationName);
                 }
             }
         } else {
