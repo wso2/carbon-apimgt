@@ -70,6 +70,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPToRESTConstants.COMPLEX_TYPE_NODE_NAME;
+import static org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPToRESTConstants.SIMPLE_TYPE_NODE_NAME;
+
 /**
  * Class that reads wsdl soap operations and maps with the types.
  */
@@ -93,6 +96,7 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
     private Map<String, ModelImpl> parameterModelMap = new HashMap<>();
 
     private static volatile APIMWSDLReader wsdlReader;
+    private Property currentProperty;
 
     public WSDL11SOAPOperationExtractor(APIMWSDLReader wsdlReader) {
         WSDL11SOAPOperationExtractor.wsdlReader = wsdlReader;
@@ -115,28 +119,32 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
                         Element schemaElement = schema.getElement();
                         NodeList schemaNodes = schemaElement.getChildNodes();
                         schemaNodeList.addAll(SOAPOperationBindingUtils.list(schemaNodes));
-                        if (schemaNodeList != null) {
-                            for (Node node : schemaNodeList) {
-                                WSDLParamDefinition wsdlParamDefinition = new WSDLParamDefinition();
-                                ModelImpl model = new ModelImpl();
-                                traverseTypeElement(node, null, wsdlParamDefinition, model, null);
-                                if (StringUtils.isNotBlank(model.getName())) {
-                                    parameterModelMap.put(model.getName(), model);
-                                }
-                                if (wsdlParamDefinition.getDefinitionName() != null) {
-                                    wsdlParamDefinitions.add(wsdlParamDefinition);
-                                }
-                            }
-                        } else {
-                            log.warn("No schemas found in the type element for target namespace:" + schema
-                                    .getDocumentBaseURI());
-                        }
                         if (log.isDebugEnabled()) {
                             Gson gson = new GsonBuilder().setExclusionStrategies(new SwaggerFieldsExcludeStrategy())
                                     .create();
                             log.debug("swagger definition model map from the wsdl: " + gson.toJson(parameterModelMap));
                         }
+                        if (schemaNodeList == null) {
+                            log.warn("No schemas found in the type element for target namespace:" + schema
+                                    .getDocumentBaseURI());
+                        }
                     }
+                }
+                if (schemaNodeList != null) {
+                    for (Node node : schemaNodeList) {
+                        WSDLParamDefinition wsdlParamDefinition = new WSDLParamDefinition();
+                        ModelImpl model = new ModelImpl();
+                        Property currentProperty = null;
+                        traverseTypeElement(node, null, model, currentProperty);
+                        if (StringUtils.isNotBlank(model.getName())) {
+                            parameterModelMap.put(model.getName(), model);
+                        }
+                        if (wsdlParamDefinition.getDefinitionName() != null) {
+                            wsdlParamDefinitions.add(wsdlParamDefinition);
+                        }
+                    }
+                } else {
+                    log.info("No schema is defined in the wsdl document");
                 }
             }
             if (log.isDebugEnabled()) {
@@ -150,8 +158,7 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
         return canProcess;
     }
 
-    private void traverseTypeElement(Node element, Node prevNode, WSDLParamDefinition wsdlParamDefinition,
-            ModelImpl model, String propertyName) {
+    private void traverseTypeElement(Node element, Node prevNode, ModelImpl model, Property currentProp) {
 
         if (log.isDebugEnabled()) {
             if (element.hasAttributes()
@@ -162,225 +169,282 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
                 log.debug(element.getNodeName() + " and " + prevNode);
             }
         }
-        String currentProperty = generateSwaggerModelForComplexType(element, prevNode, model, propertyName);
+        if (prevNode != null) {
+            currentProperty = generateSwaggerModelForComplexType(element, model, currentProp);
+            setNamespaceDetails(model, element);
+        } else {
+            currentProperty = generateSwaggerModelForComplexType(element, model, currentProp);
+            setNamespaceDetails(model, element);
+        }
         NodeList nodeList = element.getChildNodes();
         if (nodeList != null) {
             for (int i = 0; i < nodeList.getLength(); i++) {
                 Node currentNode = nodeList.item(i);
                 if (currentNode.getNodeType() == Node.ELEMENT_NODE) {
-                    traverseTypeElement(currentNode, prevNode, wsdlParamDefinition, model, currentProperty);
+                    traverseTypeElement(currentNode, prevNode, model, currentProperty);
                 }
                 prevNode = element;
             }
         }
     }
-    /**
-     * Generates swagger model for a given complex type
-     *
-     * @param current      current type element node
-     * @param previous     previous type element node
-     * @param model        swagger model element
-     * @param propertyName definition property name
-     * @return swagger string for the model
-     */
-    private String generateSwaggerModelForComplexType(Node current, Node previous, ModelImpl model,
-            String propertyName) {
 
-        if (WSDL_ELEMENT_NODE.equals(current.getLocalName()) || SOAPToRESTConstants.COMPLEX_TYPE_NODE_NAME
-                .equals(current.getLocalName()) || SOAPToRESTConstants.SIMPLE_TYPE_NODE_NAME
-                .equals(current.getLocalName())) {
-            if (current.hasAttributes()
-                    && current.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE) != null) {
-                //first type node
-                if (previous == null) {
-                    setNamespaceDetails(model, current);
-                    if (current.getAttributes().getNamedItem(SOAPToRESTConstants.MAX_OCCURS_ATTRIBUTE) != null
-                            && SOAPToRESTConstants.UNBOUNDED
-                            .equals(current.getAttributes().getNamedItem(SOAPToRESTConstants.MAX_OCCURS_ATTRIBUTE)
-                                    .getNodeValue())) {
-                        model.setType(ArrayProperty.TYPE);
-                    } else {
-                        model.setType(ObjectProperty.TYPE);
-                    }
-                    model.setName(
-                            current.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE).getNodeValue());
-                    return current.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE).getNodeValue();
-                } else if (SOAPToRESTConstants.COMPLEX_TYPE_NODE_NAME.equals(current.getLocalName())) {
-                    if (current.getAttributes().getNamedItem(SOAPToRESTConstants.MAX_OCCURS_ATTRIBUTE) != null
-                            && SOAPToRESTConstants.UNBOUNDED
-                            .equals(current.getAttributes().getNamedItem(SOAPToRESTConstants.MAX_OCCURS_ATTRIBUTE)
-                                    .getNodeValue())) {
-                        ArrayProperty prop = new ArrayProperty();
-                        setNamespaceDetails(prop, current);
-                        model.addProperty(
-                                current.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE).getNodeValue(),
-                                prop);
-                    } else {
-                        ObjectProperty prop = new ObjectProperty();
-                        setNamespaceDetails(prop, current);
-                        model.addProperty(
-                                current.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE).getNodeValue(),
-                                prop);
-                    }
-                    return current.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE).getNodeValue();
-                } else if (WSDL_ELEMENT_NODE.equals(current.getLocalName())) {
-                    if (StringUtils.isNotBlank(propertyName) && model.getProperties() != null && model.getProperties()
-                            .containsKey(propertyName)) {
-                        Property parentProperty = model.getProperties().get(propertyName);
-                        if (log.isDebugEnabled()) {
-                            log.debug("Property: " + propertyName + " in the model: " + model.getName() + "is logged.");
-                        }
-                        if (current.getAttributes().getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE) != null) {
-                            String dataType = current.getAttributes().getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE)
-                                    .getNodeValue().contains(":") ?
-                                    current.getAttributes().getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE)
-                                            .getNodeValue().split(":")[1] :
-                                    current.getAttributes().getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE)
-                                            .getNodeValue();
-                            Property property = getPropertyFromDataType(dataType);
-                            String childPropertyName =
-                                    current.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE) != null ?
-                                            current.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE)
-                                                    .getNodeValue() :
-                                            SOAPToRESTConstants.EMPTY_STRING;
-                            if (parentProperty instanceof ArrayProperty && !(property instanceof RefProperty)) {
-                                if (log.isDebugEnabled()) {
-                                    log.debug("Property: " + propertyName + " is array property and previous node: "
-                                            + previous + " in the model" + model.getName() + "is logged.");
-                                }
-                                if (previous.hasChildNodes() && previous.getChildNodes().getLength() > 1) {
-                                    if (((ArrayProperty) parentProperty).getItems() != null && StringUtils
-                                            .isNotBlank(childPropertyName)) {
-                                        ((ObjectProperty) ((ArrayProperty) parentProperty).getItems()).getProperties()
-                                                .put(childPropertyName, property);
-                                    } else if (((ArrayProperty) parentProperty).getItems() == null) {
-                                        ObjectProperty objProperty = new ObjectProperty();
-                                        Map<String, Property> localPropertyMap = new HashMap<>();
-                                        localPropertyMap.put(childPropertyName, property);
-                                        objProperty.setProperties(localPropertyMap);
-                                        ((ArrayProperty) parentProperty).setItems(objProperty);
-                                    }
-                                } else if (previous.hasChildNodes()) {
-                                    ((ArrayProperty) parentProperty).setItems(property);
-                                }
-                            } else if (parentProperty instanceof ObjectProperty && !(property instanceof RefProperty)) {
-                                if (log.isDebugEnabled()) {
-                                    log.debug("Property: " + propertyName + " is object property and previous node: "
-                                            + previous + " in the model" + model.getName() + "is logged.");
-                                }
-                                if (previous.hasChildNodes() && previous.getChildNodes().getLength() > 1) {
-                                    if (((ObjectProperty) parentProperty).getProperties() != null && StringUtils
-                                            .isNotBlank(childPropertyName)) {
-                                        ((ObjectProperty) parentProperty).getProperties()
-                                                .put(childPropertyName, property);
-                                    } else if (((ObjectProperty) parentProperty).getProperties() == null) {
-                                        Map<String, Property> localPropertyMap = new HashMap<>();
-                                        localPropertyMap.put(childPropertyName, property);
-                                        ((ObjectProperty) parentProperty).setProperties(localPropertyMap);
-                                    }
-                                } else if (previous.hasChildNodes()) {
-                                    Map<String, Property> localPropertyMap = new HashMap<>();
-                                    localPropertyMap.put(childPropertyName, property);
-                                    ((ObjectProperty) parentProperty).setProperties(localPropertyMap);
-                                }
-                            }
-                        }
-                    } else if (StringUtils.isNotBlank(propertyName) && propertyName.equals(model.getName())) {
-                        if (current.getAttributes().getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE) != null) {
-                            String dataType = current.getAttributes().getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE)
-                                    .getNodeValue().contains(":") ?
-                                    current.getAttributes().getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE)
-                                            .getNodeValue().split(":")[1] :
-                                    current.getAttributes().getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE)
-                                            .getNodeValue();
-                            addPropertyToSwaggerModel(dataType,
-                                    current.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE)
-                                            .getNodeValue(), current, model);
-                        } else if (current.getAttributes().getNamedItem(SOAPToRESTConstants.REF_ATTRIBUTE) != null) {
-                            String dataType = current.getAttributes().getNamedItem(SOAPToRESTConstants.REF_ATTRIBUTE)
-                                    .getNodeValue().contains(":") ?
-                                    current.getAttributes().getNamedItem(SOAPToRESTConstants.REF_ATTRIBUTE)
-                                            .getNodeValue().split(":")[1] :
-                                    current.getAttributes().getNamedItem(SOAPToRESTConstants.REF_ATTRIBUTE)
-                                            .getNodeValue();
-                            addPropertyToSwaggerModel(dataType, dataType, current, model);
-                        } else if (current.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE) != null) {
-                            if (!(current.hasChildNodes() && SOAPToRESTConstants.SIMPLE_TYPE_NODE_NAME
-                                    .equals(current.getFirstChild().getLocalName()))) {
-                                if (isArrayType(current)) {
-                                    ArrayProperty prop = new ArrayProperty();
-                                    model.addProperty(
-                                            current.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE)
-                                                    .getNodeValue(), prop);
-                                } else {
-                                    ObjectProperty prop = new ObjectProperty();
-                                    model.addProperty(
-                                            current.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE)
-                                                    .getNodeValue(), prop);
-                                }
-                            }
-                        }
-                    }
-                } else if (SOAPToRESTConstants.RESTRICTION_ATTR.equals(current.getLocalName())) {
-                    if (current.hasAttributes()
-                            && current.getAttributes().getNamedItem(SOAPToRESTConstants.BASE_ATTR) != null) {
-                        String dataType = current.getAttributes().getNamedItem(SOAPToRESTConstants.BASE_ATTR)
-                                .getNodeValue().contains(":") ?
-                                current.getAttributes().getNamedItem(SOAPToRESTConstants.BASE_ATTR).getNodeValue()
-                                        .split(":")[1] :
-                                current.getAttributes().getNamedItem(SOAPToRESTConstants.BASE_ATTR).getNodeValue();
-                        Property property = getPropertyFromDataType(dataType);
-                        model.addProperty(propertyName, property);
-                    }
+    /**
+     * Generates swagger property for a given wsdl document node
+     *
+     * @param current     current type element node
+     * @param model       swagger model element
+     * @param currentProp current wsdl type element
+     * @return swagger property for the wsdl element
+     */
+    private Property generateSwaggerModelForComplexType(Node current, ModelImpl model, Property currentProp) {
+        if (WSDL_ELEMENT_NODE.equals(current.getLocalName())) {
+            if (StringUtils.isNotBlank(getNodeName(current))) {
+                addModelDefinition(current, model, SOAPToRESTConstants.EMPTY_STRING);
+            } else if (StringUtils.isNotBlank(getRefNodeName(current))) {
+                if (current.getParentNode() != null) {
+                    addModelDefinition(current, model, SOAPToRESTConstants.EMPTY_STRING);
                 }
-            } else if (SOAPToRESTConstants.COMPLEX_TYPE_NODE_NAME.equals(current.getLocalName())) {
-                if (previous != null && previous.hasAttributes()
-                        && previous.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE) != null) {
-                    return previous.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE).getNodeValue();
+            }
+        } else if (COMPLEX_TYPE_NODE_NAME.equals(current.getLocalName())) {
+            if (StringUtils.isNotBlank(getNodeName(current))) {
+                if (current.getParentNode() != null) {
+                    addModelDefinition(current, model, SOAPToRESTConstants.EMPTY_STRING);
                 }
-            } else if (SOAPToRESTConstants.SIMPLE_TYPE_NODE_NAME.equals(current.getLocalName())) {
-                if (previous != null && previous.hasAttributes()
-                        && previous.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE) != null) {
-                    return previous.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE).getNodeValue();
+            }
+        } else if (SIMPLE_TYPE_NODE_NAME.equals(current.getLocalName())) {
+            if (StringUtils.isNotBlank(getNodeName(current))) {
+                if (current.getParentNode() != null) {
+                    addModelDefinition(current, model, SOAPToRESTConstants.SIMPLE_TYPE_NODE_NAME);
                 }
-            } else if (current.hasAttributes()
-                    && current.getAttributes().getNamedItem(SOAPToRESTConstants.REF_ATTRIBUTE) != null) {
-                String dataType = current.getAttributes().getNamedItem(SOAPToRESTConstants.REF_ATTRIBUTE).getNodeValue()
-                        .contains(":") ?
-                        current.getAttributes().getNamedItem(SOAPToRESTConstants.REF_ATTRIBUTE).getNodeValue()
-                                .split(":")[1] :
-                        current.getAttributes().getNamedItem(SOAPToRESTConstants.REF_ATTRIBUTE).getNodeValue();
-                addPropertyToSwaggerModel(dataType, dataType, current, model);
+            }
+        } else if (SOAPToRESTConstants.RESTRICTION_ATTR.equals(current.getLocalName())) {
+            if (current.getParentNode() != null) {
+                addModelDefinition(current, model, SOAPToRESTConstants.RESTRICTION_ATTR);
             }
         }
-        return propertyName;
+        return currentProp;
     }
 
-    private void addPropertyToSwaggerModel(String dataType, String propName, Node current, ModelImpl model) {
-
-        Property property = getPropertyFromDataType(dataType);
-        if (isArrayType(current)) {
-            ArrayProperty prop = new ArrayProperty();
-            if (property instanceof RefProperty) {
-                RefProperty refProperty = new RefProperty();
-                refProperty.set$ref(SOAPToRESTConstants.Swagger.DEFINITIONS_ROOT + dataType);
-                refProperty.getRefFormat();
-                prop.setItems(refProperty);
-            } else {
-                prop.setItems(property);
+    /**
+     * Adds swagger type definitions to swagger model
+     *
+     * @param current current wsdl node
+     * @param model   swagger model element
+     * @param type    wsdl node type{i.e: complexType, simpleType}
+     */
+    private void addModelDefinition(Node current, ModelImpl model, String type) {
+        if (current.getParentNode() != null) {
+            String xPath = getXpathFromNode(current);
+            if (log.isDebugEnabled()) {
+                log.debug("Processing current document node: " + getNodeName(current) + " with the xPath:" + xPath);
             }
-            setNamespaceDetails(prop, current);
-            model.addProperty(
-                    propName, prop);
-        } else {
-            if (property instanceof RefProperty) {
-                RefProperty refProperty = new RefProperty();
-                refProperty.set$ref(SOAPToRESTConstants.Swagger.DEFINITIONS_ROOT  + dataType);
-                model.addProperty(propName, refProperty);
-            } else {
-                model.addProperty(propName, property);
+            String[] elements = xPath.split("\\.");
+            if (getNodeName(current).equals(elements[elements.length - 1]) || getNodeName(current)
+                    .equals(elements[elements.length - 1].substring(elements[elements.length - 1].indexOf(":") + 1))
+                    || type.equals(SOAPToRESTConstants.RESTRICTION_ATTR)) {
+                if (StringUtils.isBlank(model.getName())) {
+                    model.setName(getNodeName(current));
+                    if (!SOAPToRESTConstants.SIMPLE_TYPE_NODE_NAME.equals(type)) {
+                        if (isArrayType(current)) {
+                            model.setType(ArrayProperty.TYPE);
+                        } else {
+                            model.setType(ObjectProperty.TYPE);
+                        }
+                    }
+                } else if (model.getProperties() == null) {
+                    if (SOAPToRESTConstants.RESTRICTION_ATTR.equals(type)) {
+                        Property restrictionProp = createPropertyFromNode(current);
+                        if (!(restrictionProp instanceof RefProperty || restrictionProp instanceof ObjectProperty
+                                || restrictionProp instanceof ArrayProperty)) {
+                            model.setType(restrictionProp.getType());
+                        } else {
+                            model.setType(StringProperty.TYPE);
+                        }
+                    } else {
+                        Map<String, Property> propertyMap = new HashMap<>();
+                        Property prop = createPropertyFromNode(current);
+                        propertyMap.put(getNodeName(current), prop);
+                        model.setProperties(propertyMap);
+                    }
+                } else {
+                    Property parentProp = null;
+                    int pos = 0;
+                    for (String element : elements) {
+                        if (model.getName().equals(element)) {
+                            //do nothing
+                        } else if (model.getProperties().containsKey(element)) {
+                            parentProp = model.getProperties().get(element);
+                            if (SOAPToRESTConstants.RESTRICTION_ATTR.equals(type) && pos == elements.length - 1) {
+                                model.getProperties().remove(element);
+                                parentProp = createPropertyFromNode(current);
+                                parentProp.setName(element);
+                                model.addProperty(element, parentProp);
+                            }
+                        } else {
+                            if (parentProp instanceof ArrayProperty) {
+                                if (((ArrayProperty) parentProp).getItems().getName() == null) {
+                                    Property currentProp = createPropertyFromNode(current);
+                                    if (currentProp instanceof ObjectProperty) {
+                                        ((ArrayProperty) parentProp).setItems(currentProp);
+                                    } else if (currentProp instanceof ArrayProperty) {
+                                        Map<String, Property> arrayPropMap = new HashMap();
+                                        arrayPropMap.put(getNodeName(current), currentProp);
+                                        ObjectProperty arrayObjProp = new ObjectProperty();
+                                        arrayObjProp.setProperties(arrayPropMap);
+                                        ((ArrayProperty) parentProp).setItems(arrayObjProp);
+                                    } else {
+                                        ((ArrayProperty) parentProp).setItems(currentProp);
+                                    }
+                                } else {
+                                    ((ArrayProperty) parentProp).setItems(createPropertyFromNode(current));
+                                }
+                                parentProp = ((ArrayProperty) parentProp).getItems();
+                            } else if (parentProp instanceof ObjectProperty) {
+                                if (SOAPToRESTConstants.RESTRICTION_ATTR.equals(type) && pos == elements.length - 1) {
+                                    parentProp = createPropertyFromNode(current);
+                                    parentProp.setName(element);
+                                } else {
+                                    if (((ObjectProperty) parentProp).getProperties() == null) {
+                                        Map<String, Property> propertyMap = new HashMap<>();
+                                        ((ObjectProperty) parentProp).setProperties(propertyMap);
+                                    }
+                                    Property childProp = createPropertyFromNode(current);
+                                    if (((ObjectProperty) parentProp).getProperties().get(element) == null) {
+                                        ((ObjectProperty) parentProp).getProperties()
+                                                .put(getNodeName(current), childProp);
+                                    }
+                                    if (childProp instanceof ObjectProperty) {
+                                        parentProp = ((ObjectProperty) parentProp).getProperties().get(element);
+                                    } else if (childProp instanceof ArrayProperty) {
+                                        parentProp = childProp;
+                                    }
+
+                                }
+                            } else if (parentProp == null) {
+                                if (StringUtils.isNotBlank(getNodeName(current))) {
+                                    model.addProperty(getNodeName(current), createPropertyFromNode(current));
+                                } else if (StringUtils.isNotBlank(getRefNodeName(current))) {
+                                    model.addProperty(getRefNodeName(current), createPropertyFromNode(current));
+                                }
+                            }
+                        }
+                        pos++;
+                    }
+
+                }
             }
         }
+    }
+
+    private String getXPath(Node node) {
+
+        if (node != null) {
+            Node parent = node.getParentNode();
+            if (parent == null && node.hasAttributes()
+                    && node.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE) != null) {
+                return "/" + node.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE).getNodeValue();
+            }
+            if (node.hasAttributes() && node.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE) != null) {
+                return getXPath(parent) + "/" + node.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE)
+                        .getNodeValue();
+            } else if (node.hasAttributes()
+                    && node.getAttributes().getNamedItem(SOAPToRESTConstants.REF_ATTRIBUTE) != null) {
+                return getXPath(parent) + "/" + node.getAttributes().getNamedItem(SOAPToRESTConstants.REF_ATTRIBUTE)
+                        .getNodeValue();
+            }
+            return getXPath(parent) + "/";
+        }
+        return SOAPToRESTConstants.EMPTY_STRING;
+    }
+
+    private String getXpathFromNode(Node node) {
+
+        if (node.getParentNode() != null) {
+            String xPath = getXPath(node);
+            xPath = xPath.replaceAll("/+", ".");
+            if (xPath.startsWith(".")) {
+                xPath = xPath.substring(1);
+                return xPath;
+            }
+        }
+        return null;
+    }
+
+    private String getNodeName(Node node) {
+
+        if (node.hasAttributes() && node.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE) != null) {
+            return node.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE).getNodeValue();
+        }
+        if (node.hasAttributes() && node.getAttributes().getNamedItem(SOAPToRESTConstants.REF_ATTRIBUTE) != null) {
+            return node.getAttributes().getNamedItem(SOAPToRESTConstants.REF_ATTRIBUTE).getNodeValue().contains(":") ?
+                    node.getAttributes().getNamedItem(SOAPToRESTConstants.REF_ATTRIBUTE).getNodeValue().split(":")[1] :
+                    node.getAttributes().getNamedItem(SOAPToRESTConstants.REF_ATTRIBUTE).getNodeValue();
+        }
+        return SOAPToRESTConstants.EMPTY_STRING;
+    }
+
+    private String getRefNodeName(Node node) {
+        if (node.hasAttributes() && node.getAttributes().getNamedItem(SOAPToRESTConstants.REF_ATTRIBUTE) != null) {
+            return node.getAttributes().getNamedItem(SOAPToRESTConstants.REF_ATTRIBUTE).getNodeValue().contains(":") ?
+                    node.getAttributes().getNamedItem(SOAPToRESTConstants.REF_ATTRIBUTE).getNodeValue().split(":")[1] :
+                    node.getAttributes().getNamedItem(SOAPToRESTConstants.REF_ATTRIBUTE).getNodeValue();
+        }
+        return SOAPToRESTConstants.EMPTY_STRING;
+    }
+
+    /**
+     * Creates a swagger property from given wsdl node.
+     *
+     * @param node wsdl node
+     * @return generated swagger property
+     */
+    private Property createPropertyFromNode(Node node) {
+
+        Property property = null;
+        if (node.hasAttributes()) {
+            if (node.getAttributes().getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE) != null) {
+                if (node.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE) != null) {
+                    String dataType = node.getAttributes().getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE)
+                            .getNodeValue().contains(":") ?
+                            node.getAttributes().getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE).getNodeValue()
+                                    .split(":")[1] :
+                            node.getAttributes().getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE).getNodeValue();
+                    property = getPropertyFromDataType(dataType);
+                    if (property instanceof RefProperty) {
+                        ((RefProperty) property).set$ref(SOAPToRESTConstants.Swagger.DEFINITIONS_ROOT + dataType);
+                    }
+                    property.setName(
+                            node.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE).getNodeValue());
+                }
+            } else if (node.getAttributes().getNamedItem(SOAPToRESTConstants.REF_ATTRIBUTE) != null) {
+                property = new RefProperty();
+                String dataType = node.getAttributes().getNamedItem(SOAPToRESTConstants.REF_ATTRIBUTE).getNodeValue()
+                        .contains(":") ?
+                        node.getAttributes().getNamedItem(SOAPToRESTConstants.REF_ATTRIBUTE).getNodeValue()
+                                .split(":")[1] :
+                        node.getAttributes().getNamedItem(SOAPToRESTConstants.REF_ATTRIBUTE).getNodeValue();
+                ((RefProperty) property).set$ref(SOAPToRESTConstants.Swagger.DEFINITIONS_ROOT + dataType);
+                property.setName(dataType);
+            } else if (node.getAttributes().getNamedItem("base") != null) {
+                String dataType = node.getAttributes().getNamedItem("base").getNodeValue().contains(":") ?
+                        node.getAttributes().getNamedItem("base").getNodeValue().split(":")[1] :
+                        node.getAttributes().getNamedItem("base").getNodeValue();
+                property = getPropertyFromDataType(dataType);
+                if (property instanceof RefProperty) {
+                    ((RefProperty) property).set$ref(SOAPToRESTConstants.Swagger.DEFINITIONS_ROOT + dataType);
+                }
+                property.setName(dataType);
+            } else if (node.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE) != null) {
+                property = new ObjectProperty();
+                property.setName(getNodeName(node));
+            }
+            if (isArrayType(node)) {
+                Property arrayProperty = new ArrayProperty();
+                ((ArrayProperty) arrayProperty).setItems(property);
+                return arrayProperty;
+            }
+        }
+        return property;
     }
 
     private Property getPropertyFromDataType(String dataType) {
@@ -391,6 +455,12 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
         case "boolean":
             return new BooleanProperty();
         case "int":
+            return new IntegerProperty();
+        case "nonNegativeInteger":
+            return new IntegerProperty();
+        case "integer":
+            return new IntegerProperty();
+        case "positiveInteger":
             return new IntegerProperty();
         case "double":
             return new DoubleProperty();
