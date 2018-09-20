@@ -229,6 +229,7 @@ public class AuthenticatorService {
         }
 
         log.debug("Received access token for {} application.", appName);
+        accessTokenInfo = getKeyManager().getTokenMetaData(accessTokenInfo.getAccessToken());
         return accessTokenInfo;
     }
 
@@ -254,9 +255,12 @@ public class AuthenticatorService {
      */
     public AuthResponseBean getResponseBeanFromTokenInfo(AccessTokenInfo accessTokenInfo)
             throws KeyManagementException {
+
         String authUser = null;
         if (accessTokenInfo.getIdToken() != null) {
             authUser = getUsernameFromJWT(accessTokenInfo.getIdToken());
+        } else if (accessTokenInfo.getEndUserName() != null) {
+            authUser = accessTokenInfo.getEndUserName();
         }
         if (authUser == null) {
             authUser = AuthenticatorConstants.ADMIN_USER;

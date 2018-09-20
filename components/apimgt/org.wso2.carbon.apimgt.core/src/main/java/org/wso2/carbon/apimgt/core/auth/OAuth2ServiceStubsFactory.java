@@ -32,11 +32,12 @@ public class OAuth2ServiceStubsFactory {
      * @return {@link OAuth2ServiceStubs} object
      */
     public static OAuth2ServiceStubs getOAuth2ServiceStubs() {
+
         KeyMgtConfigurations keyManagerConfigs = ServiceReferenceHolder.getInstance().getAPIMConfiguration()
                 .getKeyManagerConfigs();
         return new OAuth2ServiceStubs(keyManagerConfigs.getTokenEndpoint(), keyManagerConfigs.getRevokeEndpoint(),
-                keyManagerConfigs.getIntrospectEndpoint(), keyManagerConfigs.getKeyManagerCertAlias(),
-                keyManagerConfigs.getKeyManagerCredentials().getUsername(),
+                keyManagerConfigs.getIntrospectEndpoint(), keyManagerConfigs.getUserInfoEndpoint(), keyManagerConfigs
+                .getKeyManagerCertAlias(), keyManagerConfigs.getKeyManagerCredentials().getUsername(),
                 keyManagerConfigs.getKeyManagerCredentials().getPassword());
     }
 }

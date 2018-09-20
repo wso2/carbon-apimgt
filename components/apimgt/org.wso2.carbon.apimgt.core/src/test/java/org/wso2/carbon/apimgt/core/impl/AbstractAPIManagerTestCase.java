@@ -1,18 +1,18 @@
 /*
-* Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.wso2.carbon.apimgt.core.impl;
 
 import org.mockito.Mockito;
@@ -61,6 +61,7 @@ public class AbstractAPIManagerTestCase {
 
     @Test(description = "Search API by UUID")
     public void testSearchAPIByUUID() throws APIManagementException {
+
         ApiDAO apiDAO = mock(ApiDAO.class);
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -74,6 +75,7 @@ public class AbstractAPIManagerTestCase {
 
     @Test(description = "Retrieve an application by uuid")
     public void testGetApplicationByUuid() throws APIManagementException {
+
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
@@ -87,6 +89,7 @@ public class AbstractAPIManagerTestCase {
 
     @Test(description = "Retrieve documentation summary given the id")
     public void testGetDocumentationSummary() throws APIManagementException {
+
         ApiDAO apiDAO = mock(ApiDAO.class);
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -100,6 +103,7 @@ public class AbstractAPIManagerTestCase {
 
     @Test(description = "Retrieve list of documentations")
     public void testAllDocumentation() throws APIManagementException {
+
         ApiDAO apiDAO = mock(ApiDAO.class);
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -113,6 +117,7 @@ public class AbstractAPIManagerTestCase {
 
     @Test(description = "Getting last updated time of API")
     public void testGetLastUpdatedTimeOfAPI() throws APIManagementException {
+
         ApiDAO apiDAO = mock(ApiDAO.class);
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -124,6 +129,7 @@ public class AbstractAPIManagerTestCase {
 
     @Test(description = "Getting last updated time of Swagger Definition")
     public void testGetLastUpdatedTimeOfSwaggerDefinition() throws APIManagementException {
+
         ApiDAO apiDAO = mock(ApiDAO.class);
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -135,6 +141,7 @@ public class AbstractAPIManagerTestCase {
 
     @Test(description = "Check if context exist when context is null")
     public void testIsContextExistWhenContextNull() throws APIManagementException {
+
         ApiDAO apiDAO = mock(ApiDAO.class);
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -145,6 +152,7 @@ public class AbstractAPIManagerTestCase {
 
     @Test(description = "Get swagger definition for API")
     public void testGetSwagger20Definition() throws APIManagementException {
+
         ApiDAO apiDAO = mock(ApiDAO.class);
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -157,6 +165,7 @@ public class AbstractAPIManagerTestCase {
 
     @Test(description = "Get subscription by UUID")
     public void testGetSubscriptionByUUID() throws APIManagementException {
+
         APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
@@ -168,6 +177,7 @@ public class AbstractAPIManagerTestCase {
 
     @Test(description = "Getting last updated time of Document")
     public void testGetLastUpdatedTimeOfDocument() throws APIManagementException {
+
         ApiDAO apiDAO = mock(ApiDAO.class);
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -179,6 +189,7 @@ public class AbstractAPIManagerTestCase {
 
     @Test(description = "Getting last updated time of Document content")
     public void testGetLastUpdatedTimeOfDocumentContent() throws APIManagementException {
+
         ApiDAO apiDAO = mock(ApiDAO.class);
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -190,6 +201,7 @@ public class AbstractAPIManagerTestCase {
 
     @Test(description = "Getting last updated time of API Thumbnail Image")
     public void testGetLastUpdatedTimeOfAPIThumbnailImage() throws APIManagementException {
+
         ApiDAO apiDAO = mock(ApiDAO.class);
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -201,6 +213,7 @@ public class AbstractAPIManagerTestCase {
 
     @Test(description = "Getting last updated time of Application")
     public void testGetLastUpdatedTimeOfApplication() throws APIManagementException {
+
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
@@ -212,6 +225,7 @@ public class AbstractAPIManagerTestCase {
 
     @Test(description = "Getting last updated time of Subscription")
     public void testGetLastUpdatedTimeOfSubscription() throws APIManagementException {
+
         APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
@@ -223,6 +237,7 @@ public class AbstractAPIManagerTestCase {
 
     @Test(description = "Getting subscriptions by API")
     public void testGetSubscriptionsByAPI() throws APIManagementException {
+
         APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
@@ -234,6 +249,7 @@ public class AbstractAPIManagerTestCase {
 
     @Test(description = "Getting Documentation content when source type is FILE")
     public void testGetDocumentationContentFile() throws APIManagementException {
+
         ApiDAO apiDAO = mock(ApiDAO.class);
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -252,6 +268,7 @@ public class AbstractAPIManagerTestCase {
 
     @Test(description = "Getting Documentation content when source type is INLINE")
     public void testGetDocumentationContentInline() throws APIManagementException, IOException {
+
         ApiDAO apiDAO = mock(ApiDAO.class);
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -271,6 +288,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Exception when retrieving an application by uuid",
             expectedExceptions = APIManagementException.class)
     public void testGetApplicationByUuidException() throws APIManagementException {
+
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
@@ -283,6 +301,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Exception when retrieving documentation summary given the id",
             expectedExceptions = APIManagementException.class)
     public void testGetDocumentationSummaryException() throws APIManagementException {
+
         ApiDAO apiDAO = mock(ApiDAO.class);
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -295,6 +314,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Exception when retrieving list of documentations",
             expectedExceptions = APIManagementException.class)
     public void testAllDocumentationException() throws APIManagementException {
+
         ApiDAO apiDAO = mock(ApiDAO.class);
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -306,6 +326,7 @@ public class AbstractAPIManagerTestCase {
 
     @Test(description = "Exception when getting API by UUID", expectedExceptions = APIManagementException.class)
     public void testSearchAPIByUUIDException() throws APIManagementException {
+
         ApiDAO apiDAO = mock(ApiDAO.class);
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -319,6 +340,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Exception when getting last updated time of API",
             expectedExceptions = APIManagementException.class)
     public void testGetLastUpdatedTimeOfAPIException() throws APIManagementException {
+
         ApiDAO apiDAO = mock(ApiDAO.class);
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -333,6 +355,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Exception when getting last updated time of Swagger Definition",
             expectedExceptions = APIManagementException.class)
     public void testGetLastUpdatedTimeOfSwaggerDefinitionException() throws APIManagementException {
+
         ApiDAO apiDAO = mock(ApiDAO.class);
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -346,6 +369,7 @@ public class AbstractAPIManagerTestCase {
 
     @Test(description = "Exception when checking for context exist", expectedExceptions = APIManagementException.class)
     public void testIsContextExistException() throws APIManagementException {
+
         ApiDAO apiDAO = mock(ApiDAO.class);
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -359,6 +383,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Exception when checking for api name exists",
             expectedExceptions = APIManagementException.class)
     public void testIsApiNameExistException() throws APIManagementException {
+
         ApiDAO apiDAO = mock(ApiDAO.class);
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -372,6 +397,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Exception when getting swagger definition for API",
             expectedExceptions = APIManagementException.class)
     public void testGetSwagger20DefinitionException() throws APIManagementException {
+
         ApiDAO apiDAO = mock(ApiDAO.class);
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -386,6 +412,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Exception when getting subscription by UUID",
             expectedExceptions = APIManagementException.class)
     public void testGetSubscriptionByUUIDException() throws APIManagementException {
+
         APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
@@ -399,6 +426,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Exception when getting last updated time of Document",
             expectedExceptions = APIManagementException.class)
     public void testGetLastUpdatedTimeOfDocumentException() throws APIManagementException {
+
         ApiDAO apiDAO = mock(ApiDAO.class);
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -413,6 +441,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Exception when getting last updated time of Document Content",
             expectedExceptions = APIManagementException.class)
     public void testGetLastUpdatedTimeOfDocumentContentException() throws APIManagementException {
+
         ApiDAO apiDAO = mock(ApiDAO.class);
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -427,6 +456,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Exception when getting last updated time of API Thumbnail Image",
             expectedExceptions = APIManagementException.class)
     public void testGetLastUpdatedTimeOfAPIThumbnailImageException() throws APIManagementException {
+
         ApiDAO apiDAO = mock(ApiDAO.class);
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -441,6 +471,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Exception when getting last updated time of Application",
             expectedExceptions = APIManagementException.class)
     public void testGetLastUpdatedTimeOfApplicationException() throws APIManagementException {
+
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
@@ -455,6 +486,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Exception when getting last updated time of Subscription",
             expectedExceptions = APIManagementException.class)
     public void testGetLastUpdatedTimeOfSubscriptionException() throws APIManagementException {
+
         APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
@@ -469,6 +501,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Exception when getting subscriptions by API",
             expectedExceptions = APIManagementException.class)
     public void testGetSubscriptionsByAPIException() throws APIManagementException {
+
         APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
@@ -483,6 +516,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Getting Documentation content when source type is FILE and the input stream is null",
             expectedExceptions = APIManagementException.class)
     public void testGetDocumentationContentFileWithNullStream() throws APIManagementException {
+
         ApiDAO apiDAO = mock(ApiDAO.class);
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -500,6 +534,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Getting Documentation content when source type is INLINE and inline content is null",
             expectedExceptions = APIManagementException.class)
     public void testGetDocumentationContentInlineWithNullContent() throws APIManagementException {
+
         ApiDAO apiDAO = mock(ApiDAO.class);
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -514,6 +549,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Getting Documentation content when document cannot be found",
             expectedExceptions = APIManagementException.class)
     public void testGetDocumentationContentWhenDocumentNotFound() throws APIManagementException {
+
         ApiDAO apiDAO = mock(ApiDAO.class);
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -527,6 +563,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Exception when getting Documentation content due to error retrieving document content",
             expectedExceptions = APIManagementException.class)
     public void testGetDocumentationContentErrorOnRetrieval() throws APIManagementException {
+
         ApiDAO apiDAO = mock(ApiDAO.class);
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -541,6 +578,7 @@ public class AbstractAPIManagerTestCase {
 
     @Test(description = "Get Label by ID")
     public void testGetLabelByID() throws APIManagementException {
+
         LabelDAO labelDAO = mock(LabelDAO.class);
         Label label = SampleTestObjectCreator.createLabel(LABEL_NAME, SampleTestObjectCreator.LABEL_TYPE_STORE).build();
         DAOFactory daoFactory = mock(DAOFactory.class);
@@ -552,12 +590,14 @@ public class AbstractAPIManagerTestCase {
     }
 
     private APIStoreImpl getAPIStoreImpl(DAOFactory daoFactory) {
-        return new APIStoreImpl(USER_NAME, null, null, daoFactory, null, null);
+
+        return new APIStoreImpl(USER_NAME, null, null, daoFactory, null, null, null);
     }
-    
+
     private APIPublisherImpl getApiPublisherImpl(DAOFactory daoFactory) {
+
         return new APIPublisherImpl(USER_NAME, null, null, daoFactory, null, new GatewaySourceGeneratorImpl(),
-                new APIGatewayPublisherImpl());
+                new APIGatewayPublisherImpl(), null);
     }
 
 }

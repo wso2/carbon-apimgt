@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
 import org.wso2.carbon.apimgt.core.api.LabelExtractor;
+import org.wso2.carbon.apimgt.core.api.UserNameMapper;
 import org.wso2.carbon.apimgt.core.api.WSDLProcessor;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
@@ -143,8 +144,11 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
      * @param apiGateway             APIGateway object
      */
     public APIStoreImpl(String username, IdentityProvider idp, KeyManager keyManager, DAOFactory daoFactory,
-                        GatewaySourceGenerator gatewaySourceGenerator, APIGateway apiGateway) {
-        super(username, idp, keyManager, daoFactory, new APILifeCycleManagerImpl(), gatewaySourceGenerator, apiGateway);
+                        GatewaySourceGenerator gatewaySourceGenerator, APIGateway apiGateway, UserNameMapper
+                                userNameMapper) {
+
+        super(username, idp, keyManager, daoFactory, new APILifeCycleManagerImpl(), gatewaySourceGenerator,
+                apiGateway, userNameMapper);
     }
 
     /**
@@ -1441,7 +1445,12 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 } else {
                     searchAttribute = attributes[0].split(":")[0];
                     searchValue = attributes[0].split(":")[1];
-                    attributeMap.put(SearchType.fromString(searchAttribute), searchValue);
+                    if (SearchType.PROVIDER.equals(SearchType.fromString(searchAttribute))) {
+                        String pseudoName = getUserNameMapper().getLoggedInPseudoNameFromUserID(searchValue);
+                        attributeMap.put(SearchType.fromString(searchAttribute), pseudoName);
+                    } else {
+                        attributeMap.put(SearchType.fromString(searchAttribute), searchValue);
+                    }
                 }
 
                 if (isFullTextSearch) {
