@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.api;
 
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
+import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
@@ -911,7 +912,8 @@ public interface APIProvider extends APIManager {
      * @return a response code.
      * @throws APIManagementException API Management Exception.
      */
-    int addClientCertificate(String userName, APIIdentifier apiIdentifier, String certificate, String alias) throws APIManagementException;
+    int addClientCertificate(String userName, APIIdentifier apiIdentifier, String certificate, String alias,
+            String tierName) throws APIManagementException;
 
     /**
      * Method to remove the certificate which mapped to the given alias, endpoint from publisher and gateway nodes.
@@ -951,7 +953,8 @@ public interface APIProvider extends APIManager {
      */
     List<CertificateMetadataDTO> getCertificates(String userName) throws APIManagementException;
 
-    List<String> getClientCertificateAlias(String userName, APIIdentifier apiIdentifier) throws APIManagementException;
+    List<ClientCertificateDTO> getClientCertificates(String userName, APIIdentifier apiIdentifier) throws
+            APIManagementException;
 
     /**
      * Method to search the certificate metadata database for the provided alias and endpoints.

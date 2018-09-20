@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.api.UnsupportedPolicyTypeException;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
+import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -1804,7 +1805,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             authorizationHeader = APIUtil.getOAuthConfiguration(tenantId, APIConstants.AUTHORIZATION_HEADER);
         }
 
-        String gatewaySecurity = api.getGatewaySecurity();
+        String apiSecurity = api.getApiSecurity();
         String apiLevelPolicy = api.getApiLevelPolicy();
 
         if (!StringUtils.isBlank(authorizationHeader)) {
@@ -1859,7 +1860,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (!StringUtils.isBlank(authorizationHeader)) {
                 authProperties.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
             }
-            authProperties.put(APIConstants.GATEWAY_SECURITY, gatewaySecurity);
+            authProperties.put(APIConstants.API_Security, apiSecurity);
             authProperties.put(APIConstants.API_LEVEL_POLICY, apiLevelPolicy);
             //Get RemoveHeaderFromOutMessage from tenant registry or api-manager.xml
             String removeHeaderFromOutMessage = APIUtil
@@ -5190,8 +5191,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return responseCode.getResponseCode();
     }
 
-    public int addClientCertificate(String userName, APIIdentifier apiIdentifier, String certificate, String alias)
-            throws APIManagementException {
+    public int addClientCertificate(String userName, APIIdentifier apiIdentifier, String certificate, String alias,
+            String tierName) throws APIManagementException {
+
         ResponseCode responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
         String tenantDomain = MultitenantUtils.getTenantDomain(userName);
         CertificateManager certificateManager = CertificateManagerFactory.getCertificateManagerInstance();
@@ -5199,13 +5201,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
-            responseCode = certificateManager
-                    .addClientCertificateToParentNode(apiIdentifier, certificate, alias, tenantId);
-
-            if (responseCode == ResponseCode.SUCCESS) {
-                //Get the gateway manager and add the certificate to gateways.
-                GatewayCertificateManager.getInstance().addToGateways(certificate, alias);
-            }
+            responseCode = certificateManager.addClientCertificate(apiIdentifier, certificate, alias, tierName,
+                    tenantId);
         } catch (UserStoreException e) {
             handleException("Error while reading tenant information, client certificate addition failed for the API "
                     + apiIdentifier.toString(), e);
@@ -5251,15 +5248,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
             responseCode = certificateManager.deleteClientCertificateFromParentNode(apiIdentifier, alias, tenantId);
-
-            if (responseCode == ResponseCode.SUCCESS) {
-                //Get the gateway manager and remove the certificate from gateways.
-                GatewayCertificateManager gatewayCertificateManager = new GatewayCertificateManager();
-                gatewayCertificateManager.removeFromGateways(alias);
-            } else {
-                log.error("Removing the certificate from Publisher node is failed. No client certificate changes will "
-                        + "be affected for the API " + apiIdentifier.toString());
-            }
         } catch (UserStoreException e) {
             handleException(
                     "Error while reading tenant information while trying to delete client certificate with alias "
@@ -5289,7 +5277,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return certificateManager.getCertificates(tenantId);
     }
 
-    public List<String> getClientCertificateAlias(String userName, APIIdentifier apiIdentifier) throws APIManagementException {
+    public List<ClientCertificateDTO> getClientCertificates(String userName, APIIdentifier apiIdentifier) throws
+            APIManagementException {
         int tenantId = -1;
         try {
             tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
@@ -5299,7 +5288,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handleException("Error while reading tenant information", e);
         }
         return CertificateManagerFactory.getCertificateManagerInstance()
-                .getClientCertificateAlias(apiIdentifier, tenantId);
+                .getClientCertificates(apiIdentifier, tenantId);
     }
 
     @Override

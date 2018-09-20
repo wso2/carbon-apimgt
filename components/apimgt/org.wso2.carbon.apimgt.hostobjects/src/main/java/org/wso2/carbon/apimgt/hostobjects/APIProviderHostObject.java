@@ -58,6 +58,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
+import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -103,7 +104,6 @@ import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.PermissionUpdateUtil;
-import org.wso2.carbon.governance.lcm.util.CommonUtil;
 import org.wso2.carbon.identity.oauth.OAuthAdminService;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -148,6 +148,7 @@ public class APIProviderHostObject extends ScriptableObject {
     private static String ICON_PATH = "tmp/icon";
     private static final String ALIAS = "alias";
     private static final String END_POINT = "endpoint";
+    private static final String TIER = "tier";
 
     private APIProvider apiProvider;
 
@@ -431,7 +432,6 @@ public class APIProviderHostObject extends ScriptableObject {
         if (gatewaySecurityObject instanceof String || gatewaySecurityObject instanceof ConsString) {
             gatewaySecurity = String.valueOf(apiData.get("gatewaySecurity", apiData));
         }
-
         int cacheTimeOut = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
         if (APIConstants.ENABLED.equalsIgnoreCase(responseCache)) {
             responseCache = APIConstants.ENABLED;
@@ -518,7 +518,7 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         api.setAdditionalProperties(properties);
         api.setAuthorizationHeader(authorizationHeader);
-        api.setGatewaySecurity(gatewaySecurity);
+        api.setApiSecurity(gatewaySecurity);
 
         Set<Tier> availableTier = new HashSet<Tier>();
         String[] tierNames;
@@ -2878,8 +2878,8 @@ public class APIProviderHostObject extends ScriptableObject {
                     }
                     myn.put(57, myn, apiLabelsArray);
                 }
-                myn.put(58, myn, checkTransport("oauth2", api.getGatewaySecurity()));
-                myn.put(59, myn, checkTransport("mutualssl", api.getGatewaySecurity()));
+                myn.put(58, myn, checkTransport("oauth2", api.getApiSecurity()));
+                myn.put(59, myn, checkTransport("mutualssl", api.getApiSecurity()));
 
             } else {
                 handleException("Cannot find the requested API- " + apiName +
@@ -5208,7 +5208,7 @@ public class APIProviderHostObject extends ScriptableObject {
      */
     public static int jsFunction_uploadClientCertificate(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException {
-        if ((args == null) || (args.length != 6) || !isStringValues(args)) {
+        if ((args == null) || (args.length != 7) || !isStringValues(args)) {
             handleException(
                     "Invalid number of arguments. Expect User Name, api name, version, provider, Alias, Endpoint "
                             + "and Certificate String .");
@@ -5220,11 +5220,12 @@ public class APIProviderHostObject extends ScriptableObject {
         String provider = (String) args[3];
         String alias = (String) args[4];
         String certificate = (String) args[5];
+        String tierName = (String) args[6];
 
         APIProvider apiProvider = getAPIProvider(thisObj);
 
         APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), apiName, version);
-        return apiProvider.addClientCertificate(userName, apiIdentifier, certificate, alias);
+        return apiProvider.addClientCertificate(userName, apiIdentifier, certificate, alias, tierName);
     }
 
     /**
@@ -5321,9 +5322,10 @@ public class APIProviderHostObject extends ScriptableObject {
         return certificateMetaDataArray;
     }
 
-    public static NativeArray jsFunction_getClientCertificateAlias(Context cx, Scriptable thisObj, Object[] args, Function funObj)
+    public static NativeArray jsFunction_getClientCertificates(Context cx, Scriptable thisObj, Object[] args,
+            Function funObj)
             throws APIManagementException {
-        NativeArray certificateMetaDataArray = new NativeArray(0);
+        NativeArray clientCertificateMetaData = new NativeArray(0);
 
         NativeObject certificateMetaData = new NativeObject();
         CertificateManager certificateManager = new CertificateManagerImpl();
@@ -5339,18 +5341,21 @@ public class APIProviderHostObject extends ScriptableObject {
 
         APIProvider apiProvider = getAPIProvider(thisObj);
         APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), apiName, apiVersion);
-        List<String> aliases = apiProvider.getClientCertificateAlias(userName, apiIdentifier);
+        List<ClientCertificateDTO> clientCertificateDTOList = apiProvider.getClientCertificates(userName, apiIdentifier);
 
         String tenantDomain = MultitenantUtils.getTenantDomain(userName);
         int i = 0;
 
-        if (aliases != null) {
-            for (String alias : aliases) {
-                certificateMetaDataArray.put(i, certificateMetaDataArray, alias);
+        if (clientCertificateDTOList != null) {
+            for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOList) {
+                NativeObject obj = new NativeObject();
+                obj.put(ALIAS, obj, clientCertificateDTO.getAlias());
+                obj.put(TIER, obj, clientCertificateDTO.getTierName());
+                clientCertificateMetaData.put(i, clientCertificateMetaData, obj);
                 i++;
             }
         }
-        return certificateMetaDataArray;
+        return clientCertificateMetaData;
     }
 
 

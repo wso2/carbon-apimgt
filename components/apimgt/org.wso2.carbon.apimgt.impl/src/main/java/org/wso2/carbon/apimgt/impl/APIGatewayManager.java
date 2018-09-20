@@ -25,9 +25,12 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.gateway.dto.stub.APIData;
 import org.wso2.carbon.apimgt.gateway.dto.stub.ResourceData;
+import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
+import org.wso2.carbon.apimgt.impl.dao.CertificateMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
@@ -36,9 +39,13 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
+import org.wso2.carbon.user.api.TenantManager;
+import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.xml.namespace.QName;
@@ -119,6 +126,7 @@ public class APIGatewayManager {
                     }
 					setSecureVaultProperty(client, api, tenantDomain, environment);
 					undeployCustomSequences(client, api,tenantDomain, environment);
+					unDeployClientCertificates(client, api, tenantDomain);
 				} else {
 					if (debugEnabled) {
 						log.debug("API exists, updating existing API " + api.getId().getApiName() +
@@ -148,6 +156,7 @@ public class APIGatewayManager {
 
                     //Update the custom sequences of the API
 					updateCustomSequences(client, api, tenantDomain, environment);
+                    updateClientCertificates(client, api, tenantDomain);
 				}
 			} else {
 				// If the Gateway type is 'production' and a production url has
@@ -168,7 +177,7 @@ public class APIGatewayManager {
 					}
                     //Deploy the fault sequence first since it has to be available by the time the API is deployed.
                     deployAPIFaultSequence(client, api, tenantDomain, environment);
-
+                    deployClientCertificates(client, api, tenantDomain);
                     if(!APIConstants.APIType.WS.toString().equals(api.getType())) {
                         //Add the API
                         if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(api.getImplementation())) {
@@ -225,6 +234,7 @@ public class APIGatewayManager {
                 failedEnvironmentsMap.put(environmentName, ex.getMessage());
             }
         }
+        updateRemovedClientCertificates(api, tenantDomain);
         return failedEnvironmentsMap;
     }
 
@@ -248,6 +258,7 @@ public class APIGatewayManager {
                     }
 
                     APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
+                    unDeployClientCertificates(client, api, tenantDomain);
                     if(!APIConstants.APIType.WS.toString().equals(api.getType())) {
                         if (client.getApi(tenantDomain, api.getId()) != null) {
                             if (debugEnabled) {
@@ -281,6 +292,7 @@ public class APIGatewayManager {
                             client.deleteDefaultApi(tenantDomain, api.getId());
                         }
                     }
+
                 } catch (AxisFault axisFault) {
                     /*
                     didn't throw this exception to handle multiple gateway publishing
@@ -295,7 +307,7 @@ public class APIGatewayManager {
                     failedEnvironmentsMap.put(environmentName, ex.getMessage());
                 }
             }
-
+            updateRemovedClientCertificates(api, tenantDomain);
         }
         return failedEnvironmentsMap;
     }
@@ -533,6 +545,92 @@ public class APIGatewayManager {
         return APIConstants.APIEndpointSecurityConstants.BASIC_AUTH;
     }
 
+    private void deployClientCertificates(APIGatewayAdminClient client, API api, String tenantDomain) {
+        try {
+            List<ClientCertificateDTO> clientCertificateDTOList = CertificateMgtDAO.getInstance()
+                    .getClientCertificates(api.getId(), getTenantId(tenantDomain));
+            if (clientCertificateDTOList != null) {
+                for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOList) {
+                    client.addCertificate(clientCertificateDTO.getCertificate(), clientCertificateDTO.getAlias());
+                }
+            }
+        } catch (CertificateManagementException e) {
+            e.printStackTrace();
+        } catch (AxisFault axisFault) {
+            axisFault.printStackTrace();
+        }
+    }
+
+    private void updateClientCertificates(APIGatewayAdminClient client, API api, String tenantDomain) {
+        int tenantId = getTenantId(tenantDomain);
+        try {
+            List<ClientCertificateDTO> clientCertificateDTOList = CertificateMgtDAO.getInstance()
+                    .getRemovedClientCertificates(api.getId(), tenantId);
+            if (clientCertificateDTOList != null) {
+                for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOList) {
+                    client.deleteCertificate(clientCertificateDTO.getAlias());
+                }
+            }
+            clientCertificateDTOList = CertificateMgtDAO.getInstance()
+                    .getClientCertificates(api.getId(), tenantId);
+            if (clientCertificateDTOList != null) {
+                for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOList) {
+                    client.addCertificate(clientCertificateDTO.getCertificate(), clientCertificateDTO.getAlias());
+                }
+            }
+        } catch (CertificateManagementException e) {
+            e.printStackTrace();
+        } catch (AxisFault axisFault) {
+            axisFault.printStackTrace();
+        }
+    }
+
+    private void updateRemovedClientCertificates(API api, String tenantDomain) {
+        try {
+            CertificateMgtDAO.getInstance().updateRemovedCertificatesFromGateways(api.getId(),
+                    getTenantId(tenantDomain));
+        } catch (CertificateManagementException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private int getTenantId(String tenantDomain) {
+        int tenantId = MultitenantConstants.SUPER_TENANT_ID;
+        if (StringUtils.isNotEmpty(tenantDomain)) {
+            TenantManager tenantManager = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager();
+            try {
+                tenantId = tenantManager.getTenantId(tenantDomain);
+            } catch (UserStoreException e) {
+                e.printStackTrace();
+            }
+        }
+        return tenantId;
+    }
+
+    private void unDeployClientCertificates(APIGatewayAdminClient client, API api, String tenantDomain) {
+        try {
+            int tenantId = getTenantId(tenantDomain);
+            List<ClientCertificateDTO> clientCertificateDTOList = CertificateMgtDAO.getInstance()
+                    .getClientCertificates(api.getId(), tenantId);
+            if (clientCertificateDTOList != null) {
+                for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOList) {
+                    client.deleteCertificate(clientCertificateDTO.getAlias());
+                }
+            }
+            clientCertificateDTOList = CertificateMgtDAO.getInstance()
+                    .getRemovedClientCertificates(api.getId(), tenantId);
+            if (clientCertificateDTOList != null) {
+                for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOList) {
+                    client.deleteCertificate(clientCertificateDTO.getAlias());
+                }
+            }
+        } catch (CertificateManagementException e) {
+            e.printStackTrace();
+        } catch (AxisFault axisFault) {
+            axisFault.printStackTrace();
+        }
+    }
+
 	/**
 	 * Get the specified in/out sequences from api object
 	 * 
@@ -654,6 +752,7 @@ public class APIGatewayManager {
             }
         }
     }
+
 
     /**
 	 * Update the custom sequences in gateway

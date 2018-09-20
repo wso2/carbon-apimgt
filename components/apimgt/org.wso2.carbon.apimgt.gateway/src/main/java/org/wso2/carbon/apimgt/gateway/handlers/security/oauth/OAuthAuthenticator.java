@@ -57,11 +57,11 @@ public class OAuthAuthenticator implements Authenticator {
     private String consumerKeyHeaderSegment = "Bearer";
     private String oauthHeaderSplitter = ",";
     private String consumerKeySegmentDelimiter = " ";
-    private String securityContextHeader;
+    protected String securityContextHeader;
     private boolean removeOAuthHeadersFromOutMessage=true;
     private boolean removeDefaultAPIHeaderFromOutMessage=true;
     private String clientDomainHeader = "referer";
-    private String requestOrigin;
+    protected String requestOrigin;
 
     public OAuthAuthenticator() {
     }
@@ -124,7 +124,7 @@ public class OAuthAuthenticator implements Authenticator {
         Timer timer = getTimer(MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "GET_RESOURCE_AUTH"));
         Timer.Context context = timer.start();
-        String authenticationScheme = getAPIKeyValidator().getResourceAuthenticationScheme(synCtx);
+        String authenticationScheme = (String) synCtx.getProperty(APIConstants.RESOURCE_AUTHENTICATION_SCHEME);
         context.stop();
         APIKeyValidationInfoDTO info;
         if(APIConstants.AUTH_NO_AUTHENTICATION.equals(authenticationScheme)){

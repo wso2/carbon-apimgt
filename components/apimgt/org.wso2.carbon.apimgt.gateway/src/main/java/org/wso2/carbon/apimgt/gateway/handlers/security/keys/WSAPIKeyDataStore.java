@@ -18,10 +18,12 @@ package org.wso2.carbon.apimgt.gateway.handlers.security.keys;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.CertificateTierDTO;
 
 import java.util.ArrayList;
 
@@ -51,6 +53,31 @@ public class WSAPIKeyDataStore implements APIKeyDataStore {
             throw new APISecurityException(ex.getErrorCode(),
                     "Resource forbidden", ex);
        }catch (Exception e) {
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                    "Error while accessing backend services for API key validation", e);
+        } finally {
+            try {
+                if (client != null) {
+                    clientPool.release(client);
+                }
+            } catch (Exception exception) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Releasing client from client pool caused an exception = " + exception.getMessage());
+                }
+            }
+        }
+    }
+
+    @Override
+    public CertificateTierDTO getCertificateTierInformation(APIIdentifier apiIdentifier,
+            String certificateIdentifier) throws APISecurityException {
+        APIKeyValidatorClient client = null;
+        try {
+            client = clientPool.get();
+            return client.getCertificateTierInformation(apiIdentifier, certificateIdentifier);
+        } catch (APISecurityException ex) {
+            throw new APISecurityException(ex.getErrorCode(), "Resource forbidden", ex);
+        } catch (Exception e) {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     "Error while accessing backend services for API key validation", e);
         } finally {

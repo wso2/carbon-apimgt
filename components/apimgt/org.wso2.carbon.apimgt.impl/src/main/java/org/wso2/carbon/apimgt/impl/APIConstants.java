@@ -260,7 +260,7 @@ public final class APIConstants {
     public static final String API_OVERVIEW_OUTSEQUENCE = "overview_outSequence";
     public static final String API_OVERVIEW_FAULTSEQUENCE = "overview_faultSequence";
     public static final String API_OVERVIEW_AUTHORIZATION_HEADER = "overview_authorizationHeader";
-    public static final String API_OVERVIEW_GATEWAY_SECURITY = "overview_gatewaySecurity";
+    public static final String API_OVERVIEW_API_SECURITY = "overview_apiSecurity";
     public static final String AUTHORIZATION_HEADER_BASIC = "Basic";
     public static final String DEFAULT_GATEWAY_SECURITY_OAUTH2 = "oauth2";
     public static final String GATEWAY_SECURITY_MUTUAL_SSL = "mutualssl";
@@ -346,7 +346,7 @@ public final class APIConstants {
 
     public static final String OAUTH_CONFIGS = "OAuthConfigurations.";
     public static final String AUTHORIZATION_HEADER = "AuthorizationHeader";
-    public static final String GATEWAY_SECURITY = "GatewaySecurity";
+    public static final String API_Security = "APISecurity";
     public static final String API_LEVEL_POLICY = "APILevelPolicy";
     public static final String AUTHORIZATION_HEADER_DEFAULT = "Authorization";
     public static final String REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE = "RemoveOAuthHeadersFromOutMessage";
@@ -387,6 +387,7 @@ public final class APIConstants {
     public static final String RETIRED = "RETIRED";
     public static final String BLOCKED = "BLOCKED";
     public static final String VERB_INFO_DTO = "VERB_INFO";
+    public static final String RESOURCE_AUTHENTICATION_SCHEME = "ResourceAuthenticationScheme";
 
     //Overview constants for CORS configuration
     public static final String API_OVERVIEW_CORS_CONFIGURATION = "overview_corsConfiguration";

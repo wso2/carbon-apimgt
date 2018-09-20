@@ -35,6 +35,20 @@ struct APIKeyValidationInfoDTO {
     24: optional bool stopOnQuotaReach;
 }
 
+struct CertificateTierDTO {
+    1: optional string tier;
+    2: optional i32 spikeArrestLimit;
+    3: optional string spikeArrestUnit;
+    4: optional bool stopOnQuotaReach;
+}
+
+struct APIIdentifier {
+    1: optional string providerName;
+    2: optional string apiName;
+    3: optional string version;
+    4: optional string tier;
+    5: optional string applicationId;
+}
 
 struct ConditionDTO {
     1: optional string conditionType;
@@ -64,4 +78,5 @@ service APIKeyValidationService {
 APIKeyValidationInfoDTO validateKey(1:required string context, 2:required string version, 3:required string accessToken, 4:required string sessionId, 5:required string requiredAuthenticationLevel, 6:optional string clientDomain, 7:required string matchingResource, 8:required string httpVerb) throws (1:APIKeyMgtException apiKeyMgtException, 2:APIManagementException apiMgtException)
 list<URITemplate> getAllURITemplates(1:required string context, 2:required string apiVersion, 3:required string sessionId) throws (1:APIKeyMgtException apiKeyMgtException, 2:APIManagementException apiMgtException)
 APIKeyValidationInfoDTO validateKeyforHandshake(1:required string context, 2:required string version, 3:required string accessToken, 4:required string sessionId) throws (1:APIKeyMgtException apiKeyMgtException, 2:APIManagementException apiMgtException)
+CertificateTierDTO getCertificateTierInformation(1:required APIIdentifier apiIdentifier, 2: required string certificateIdentifier, 3: required string sessionId) throws(1:APIKeyMgtException apiKeyMgtException)
 }

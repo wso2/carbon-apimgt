@@ -176,7 +176,7 @@
             <name>Authorization Header</name>
      </field>
      <field type="text">
-             <name>Gateway Security</name>
+             <name>API Security</name>
       </field>
     </table>
     <table name="URITemplate" columns="4">

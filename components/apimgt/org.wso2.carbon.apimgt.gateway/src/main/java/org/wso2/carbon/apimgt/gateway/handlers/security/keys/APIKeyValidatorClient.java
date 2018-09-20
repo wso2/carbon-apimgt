@@ -30,6 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.dto.xsd.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.xsd.ConditionGroupDTO;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
@@ -37,6 +38,7 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.CertificateTierDTO;
 import org.wso2.carbon.apimgt.keymgt.stub.validator.APIKeyValidationServiceStub;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -123,6 +125,67 @@ public class APIKeyValidatorClient {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                                            "Error while accessing backend services for API key validation", e);
         }
+    }
+
+    public CertificateTierDTO getCertificateTierInformation(APIIdentifier apiIdentifier,
+            String certificateIdentifier) throws APISecurityException {
+        CarbonUtils.setBasicAccessSecurityHeaders(username, password, keyValidationServiceStub._getServiceClient());
+        if (cookie != null) {
+            keyValidationServiceStub._getServiceClient().getOptions().setProperty(HTTPConstants.COOKIE_STRING, cookie);
+        }
+        try {
+            List headerList = (List) keyValidationServiceStub._getServiceClient().getOptions()
+                    .getProperty(org.apache.axis2.transport.http.HTTPConstants.HTTP_HEADERS);
+            Map headers = (Map) MessageContext.getCurrentMessageContext()
+                    .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+            if (headers != null) {
+                headerList.add(new Header(APIConstants.ACTIVITY_ID, (String) headers.get(APIConstants.ACTIVITY_ID)));
+            }
+            keyValidationServiceStub._getServiceClient().getOptions()
+                    .setProperty(org.apache.axis2.transport.http.HTTPConstants.HTTP_HEADERS, headerList);
+
+            if (log.isDebugEnabled()) {
+                log.debug("Certificate tier information request from gateway to keymanager via web service call for:"
+                        + apiIdentifier.toString() + " with ID: " + MessageContext.getCurrentMessageContext()
+                        .getMessageID() + " at " + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]")
+                        .format(new Date()));
+            }
+            org.wso2.carbon.apimgt.impl.dto.xsd.CertificateTierDTO dto = keyValidationServiceStub
+                    .getCertificateTierInformation(toXSD(apiIdentifier), certificateIdentifier);
+            if (log.isDebugEnabled()) {
+                log.debug("Certificate tier  response received to gateway from keymanager via web service call for:"
+                        + apiIdentifier.toString() + " with ID: " + MessageContext.getCurrentMessageContext()
+                        .getMessageID() + " at " + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]")
+                        .format(new Date()));
+            }
+
+            ServiceContext serviceContext = keyValidationServiceStub.
+                    _getServiceClient().getLastOperationContext().getServiceContext();
+            cookie = (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
+            return toDTO(dto);
+        } catch (Exception e) {
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                    "Error while accessing backend services for API key validation", e);
+        }
+    }
+
+    private org.wso2.carbon.apimgt.api.model.xsd.APIIdentifier toXSD(APIIdentifier apiIdentifier) {
+        org.wso2.carbon.apimgt.api.model.xsd.APIIdentifier xsdAPIIdentifier =
+                new org.wso2.carbon.apimgt.api.model.xsd.APIIdentifier();
+        xsdAPIIdentifier.setApiName(apiIdentifier.getApiName());
+        xsdAPIIdentifier.setVersion(apiIdentifier.getVersion());
+        xsdAPIIdentifier.setProviderName(apiIdentifier.getProviderName());
+        return xsdAPIIdentifier;
+    }
+
+    private CertificateTierDTO toDTO(
+            org.wso2.carbon.apimgt.impl.dto.xsd.CertificateTierDTO generatedDto) {
+        CertificateTierDTO certificateTierDTO = new CertificateTierDTO();
+        certificateTierDTO.setTier(generatedDto.getTier());
+        certificateTierDTO.setStopOnQuotaReach(generatedDto.getStopOnQuotaReach());
+        certificateTierDTO.setSpikeArrestUnit(generatedDto.getSpikeArrestUnit());
+        certificateTierDTO.setSpikeArrestLimit(generatedDto.getSpikeArrestLimit());
+        return certificateTierDTO;
     }
 
     private APIKeyValidationInfoDTO toDTO(

@@ -150,6 +150,54 @@ $(document).ready(function(){
         }
     });
 
+    $('#save_api').click(function(e){
+        if(!$("#backend_tps_specify").is(":checked")) {
+            // Setting text field values to null if check box is not selected.
+            $('#productionTps').val(null);
+            $('#sandboxTps').val(null);
+        }
+        thisID=$(this).attr('id');
+        $('#apiSaved').show();
+        setTimeout("hideMsg()", 3000);
+    });
+
+
+    $('#responseCache').change(function(){
+        var cache = $('#responseCache').find(":selected").val();
+        if(cache == "enabled"){
+            $('#cacheTimeout').show();
+        }
+        else{
+            $('#cacheTimeout').hide();
+        }
+    });
+
+    var certificate_data = [];
+    if ($('#cert-data').val() != "") {
+        certificate_data = jQuery.parseJSON($('#cert-data').val());
+    }
+    $("#cert-config").certUi({
+        config: {"cert_data": certificate_data, "ep_data": "<%=api.name%>"}
+    });
+
+    // Manage certificates
+    $("#mutualssl").change(function() {
+        if(this.checked) {
+            $("#manage-certificates").removeAttr("hidden");
+        } else {
+            $("#manage-certificates").attr("hidden", "");
+        }
+    });
+
+    // Manage authorization header
+    $("#oauth2_checkbox").change(function() {
+        if(this.checked) {
+            $("#authConfigs").removeAttr("hidden");
+        } else {
+            $("#authConfigs").attr("hidden", "");
+        }
+    });
+
     $("#resource_adv_policy").click(function(){
 
         return false;

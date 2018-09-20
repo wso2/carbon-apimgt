@@ -25,10 +25,12 @@ import org.apache.thrift.transport.TSSLTransportFactory;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.CertificateTierDTO;
 import org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyValidationService;
 import org.wso2.carbon.apimgt.impl.generated.thrift.ConditionGroupDTO;
 
@@ -122,6 +124,53 @@ public class ThriftKeyValidatorClient {
         apiKeyValidationInfoDTO.setContentAware(thriftDTO.isIsContentAware());
         return apiKeyValidationInfoDTO;
     }
+
+    public CertificateTierDTO getCertificateTierInformation(APIIdentifier apiIdentifier,
+            String certificateIdentifier) throws APISecurityException {
+
+        CertificateTierDTO certificateTierDTO;
+        org.wso2.carbon.apimgt.impl.generated.thrift.CertificateTierDTO thriftDTO;
+
+        try {
+            thriftDTO = keyValClient.getCertificateTierInformation(getGeneratedIdentifier(apiIdentifier),
+                    certificateIdentifier, sessionId);
+
+        } catch (Exception e) {
+            try {
+
+                log.warn("Login failed.. Authenticating again..");
+                sessionId = thriftUtils.reLogin();
+                //we re-initialize the thrift client in case open sockets have been closed due to
+                //key manager restart.
+                reInitializeClient();
+                thriftDTO = keyValClient.getCertificateTierInformation(getGeneratedIdentifier(apiIdentifier),
+                        certificateIdentifier, sessionId);
+
+            } catch (Exception e1) {
+                throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e1.getMessage(), e1);
+            }
+        }
+        return toImplDTO(thriftDTO);
+    }
+
+    private CertificateTierDTO toImplDTO(org.wso2.carbon.apimgt.impl.generated.thrift.CertificateTierDTO thriftDTO) {
+        CertificateTierDTO certificateTierDTO = new CertificateTierDTO();
+        certificateTierDTO.setSpikeArrestLimit(thriftDTO.getSpikeArrestLimit());
+        certificateTierDTO.setSpikeArrestUnit(thriftDTO.getSpikeArrestUnit());
+        certificateTierDTO.setTier(thriftDTO.getTier());
+        certificateTierDTO.setStopOnQuotaReach(thriftDTO.isStopOnQuotaReach());
+        return certificateTierDTO;
+    }
+
+    private org.wso2.carbon.apimgt.impl.generated.thrift.APIIdentifier getGeneratedIdentifier(APIIdentifier apiIdentifier) {
+        org.wso2.carbon.apimgt.impl.generated.thrift.APIIdentifier generatedIdentifier =
+                new org.wso2.carbon.apimgt.impl.generated.thrift.APIIdentifier();
+        generatedIdentifier.setApiName(apiIdentifier.getApiName());
+        generatedIdentifier.setVersion(apiIdentifier.getVersion());
+        generatedIdentifier.setProviderName(apiIdentifier.getProviderName());
+        return generatedIdentifier;
+    }
+
     public ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion
     ) throws APISecurityException {
         ArrayList<URITemplate> templates=new ArrayList<URITemplate>();

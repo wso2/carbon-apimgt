@@ -144,7 +144,7 @@
                                     return;
                                 }
                                 certUi.config.certificates = certUi.config.certificates.filter(function (certificate) {
-                                    return certificate !== dataAlias;
+                                    return certificate.alias !== dataAlias;
                                 });
                                 jagg.message({
                                     content: getMessage(result.message),
@@ -171,6 +171,7 @@
             $("#messageModal div.modal-footer").html("");
             var alias = $('.certAlias').val();
             var name = $('#certificate_api_name').val();
+            var tierName = $('#tierName').find(":selected").attr("data-value");
             var version = $('#certificate_api_version').val();
             var provider = $('#certificate_api_provider').val();
             var existingCertificates = certUi.config.certificates;
@@ -197,8 +198,7 @@
                 return;
             }
 
-            var cert_payload = alias;
-
+            var cert_payload = {"alias": alias, "tier" : tierName};
             /**
              * Checks whether a certificate is already uploaded for the given alias and endpoint.
              * */
@@ -214,9 +214,7 @@
                     i18n.t("Alias exists in trust store")
                 });
                 return;
-            } else {
             }
-
             /**
              * Calls the api with payload to upload the certificate.
              * */
@@ -227,7 +225,8 @@
                     certificate: certString,
                     name : name,
                     version : version,
-                    provider : provider
+                    provider : provider,
+                    tierName : tierName
                 },
                 function (result) {
                     if (!result.error) {

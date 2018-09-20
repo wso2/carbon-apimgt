@@ -133,7 +133,7 @@ public class APIManagerComponent {
     public static final String API_RXT =  "api.rxt";
     public static final String AUTHORIZATION_HEADER =  "Authorization Header";
     public static final String LABELS =  "Labels";
-
+    public static final String API_SECURITY = "API Security";
 
     protected void activate(ComponentContext componentContext) throws Exception {
         if (log.isDebugEnabled()) {
@@ -377,6 +377,12 @@ public class APIManagerComponent {
                             // check whether the resource contains a section called 'Labels' and add it
                             if (!RegistryUtils.decodeBytes((byte[]) resource.getContent()).
                                     contains(LABELS)) {
+                                updateRegistryResourceContent(resource, systemRegistry, rxtDir, rxtPath, resourcePath);
+                            }
+
+                            // check whether the resource contains a section called 'API Security' and add it
+                            if (!RegistryUtils.decodeBytes((byte[]) resource.getContent()).
+                                    contains(API_SECURITY)) {
                                 updateRegistryResourceContent(resource, systemRegistry, rxtDir, rxtPath, resourcePath);
                             }
                         }

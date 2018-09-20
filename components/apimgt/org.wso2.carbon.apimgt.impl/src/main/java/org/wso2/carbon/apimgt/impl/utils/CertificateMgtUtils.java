@@ -21,6 +21,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
+import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerFactory;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
 
@@ -34,6 +35,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -137,6 +139,55 @@ public class CertificateMgtUtils {
             responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
         } finally {
             closeStreams(localTrustStoreStream, fileOutputStream, serverCert);
+        }
+        return responseCode;
+    }
+
+    public ResponseCode validateCertificate(String alias, String certificate) {
+        File trustStoreFile = new File(TRUST_STORE);
+        ResponseCode responseCode = ResponseCode.SUCCESS;
+        ByteArrayInputStream serverCert = null;
+
+        try {
+            localTrustStoreStream = new FileInputStream(trustStoreFile);
+            KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            trustStore.load(localTrustStoreStream, TRUST_STORE_PASSWORD);
+
+            if (trustStore.containsAlias(alias)) {
+                responseCode = ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE;
+            } else {
+                byte[] cert = (Base64.decodeBase64(certificate.getBytes(StandardCharsets.UTF_8)));
+                serverCert = new ByteArrayInputStream(cert);
+
+                if (serverCert.available() == 0) {
+                    responseCode = ResponseCode.CERTIFICATE_NOT_FOUND;
+                } else {
+                    CertificateFactory cf = CertificateFactory.getInstance(CERTIFICATE_TYPE);
+                    while (serverCert.available() > 0) {
+                        Certificate generatedCertificate = cf.generateCertificate(serverCert);
+                        X509Certificate x509Certificate = (X509Certificate) generatedCertificate;
+                        if (x509Certificate.getNotAfter().getTime() <= System.currentTimeMillis()) {
+                            responseCode = ResponseCode.CERTIFICATE_EXPIRED;
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            log.error("I/O Exception while trying to load trust store while trying to check whether alias " + alias + " exists", e);
+            responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
+        } catch (CertificateException e) {
+            log.error("Certificate Exception while trying to load trust store while trying to check whether alias " + alias + " exists", e);
+            responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
+        } catch (NoSuchAlgorithmException e) {
+            log.error("No Such Algorithm Exception while trying to load trust store while trying to check whether "
+                    + "alias " + alias + " exists", e);
+            responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
+        } catch (KeyStoreException e) {
+            log.error("KeyStore Exception while trying to load trust store while trying to check whether " + "alias "
+                    + alias + " exists", e);
+            responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
+        } finally {
+            closeStreams(serverCert);
         }
         return responseCode;
     }
@@ -339,5 +390,27 @@ public class CertificateMgtUtils {
         } catch (IOException e) {
             log.error("Error closing the stream.", e);
         }
+    }
+
+    public String getUniqueIdentifierOfCertificate(String certficate) {
+        byte[] cert = (Base64.decodeBase64(certficate.getBytes(StandardCharsets.UTF_8)));
+        ByteArrayInputStream serverCert = new ByteArrayInputStream(cert);
+        String uniqueIdentifier = null;
+
+        CertificateFactory cf = null;
+        try {
+            cf = CertificateFactory.getInstance("X.509");
+            while (serverCert.available() > 0) {
+                Certificate generatedCertificate = cf.generateCertificate(serverCert);
+                X509Certificate x509Certificate = (X509Certificate) generatedCertificate;
+                uniqueIdentifier = String.valueOf(x509Certificate.getSerialNumber() + "_" + x509Certificate.getIssuerDN());
+            }
+        } catch (CertificateException e) {
+            log.error("Error while getting serial number of the certificate.", e);
+        } finally {
+            closeStreams(serverCert);
+        }
+        return uniqueIdentifier;
+
     }
 }

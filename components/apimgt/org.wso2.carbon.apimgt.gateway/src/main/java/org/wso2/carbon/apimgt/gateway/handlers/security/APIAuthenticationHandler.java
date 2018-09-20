@@ -35,16 +35,19 @@ import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
+import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.bouncycastle.jce.PrincipalUtil;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.oauth.OAuthAuthenticator;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.dto.CertificateTierDTO;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.metrics.manager.MetricManager;
@@ -60,6 +63,8 @@ import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static org.wso2.carbon.apimgt.impl.APIConstants.AUTH_NO_AUTHENTICATION;
 
 /**
  * Authentication handler for REST APIs exposed in the API gateway. This handler will
@@ -83,7 +88,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     private SynapseEnvironment synapseEnvironment;
 
     private String authorizationHeader;
-    private String gatewaySecurity;
+    private String apiSecurity;
     private String apiLevelPolicy;
 
     public String getAPILevelPolicy() {
@@ -114,12 +119,12 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         this.authorizationHeader = authorizationHeader;
     }
 
-    public String getGatewaySecurity() {
-        return gatewaySecurity;
+    public String getAPISecurity() {
+        return apiSecurity;
     }
 
-    public void setGatewaySecurity(String gatewaySecurity) {
-        this.gatewaySecurity = gatewaySecurity;
+    public void setAPISecurity(String apiSecurity) {
+        this.apiSecurity = apiSecurity;
     }
 
     public boolean getRemoveOAuthHeadersFromOutMessage() {
@@ -183,8 +188,9 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 initializeAuthenticator();
             }
 
-            if ((!isMutualSSLProtected() || isMutalSSLAuthenticationSucceeded(messageContext)) && (!isOauthProtected()
-                    || isAuthenticate(messageContext))) {
+            if ((isResourceNotProtected(messageContext) && isAuthenticate(messageContext)) ||
+                    ((!isMutualSSLProtected() || isMutalSSLAuthenticationSucceeded(messageContext))
+                            && (!isOauthProtected() || isAuthenticate(messageContext)))) {
                 setAPIParametersToMessageContext(messageContext);
                 return true;
             }
@@ -233,10 +239,10 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     private boolean isOauthProtected() {
 
         boolean isOauthProtected = false;
-        if (StringUtils.isEmpty(gatewaySecurity)) {
-            gatewaySecurity = APIConstants.DEFAULT_GATEWAY_SECURITY_OAUTH2;
+        if (StringUtils.isEmpty(apiSecurity)) {
+            apiSecurity = APIConstants.DEFAULT_GATEWAY_SECURITY_OAUTH2;
             isOauthProtected = true;
-        } else if (gatewaySecurity.contains(APIConstants.DEFAULT_GATEWAY_SECURITY_OAUTH2)) {
+        } else if (apiSecurity.contains(APIConstants.DEFAULT_GATEWAY_SECURITY_OAUTH2)) {
             isOauthProtected = true;
         }
         return isOauthProtected;
@@ -250,12 +256,21 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     private boolean isMutualSSLProtected() {
 
         boolean isMutualSSLProtected = false;
-        if (gatewaySecurity != null && gatewaySecurity.contains(APIConstants.GATEWAY_SECURITY_MUTUAL_SSL)) {
+        if (apiSecurity != null && apiSecurity.contains(APIConstants.GATEWAY_SECURITY_MUTUAL_SSL)) {
             isMutualSSLProtected = true;
         }
         return isMutualSSLProtected;
     }
 
+    private boolean isResourceNotProtected(MessageContext messageContext) throws APISecurityException {
+
+        if (keyValidator == null) {
+            keyValidator = new APIKeyValidator(synapseEnvironment.getSynapseConfiguration().getAxisConfiguration());
+        }
+        String resourceAuthenticationScheme = keyValidator.getResourceAuthenticationScheme(messageContext);
+        messageContext.setProperty(APIConstants.RESOURCE_AUTHENTICATION_SCHEME, resourceAuthenticationScheme);
+        return resourceAuthenticationScheme.equalsIgnoreCase(AUTH_NO_AUTHENTICATION);
+    }
     /**
      * To check whether mutual SSL authentication succeeded for current API invocation.
      *
@@ -270,7 +285,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 .getAxis2MessageContext();
 
         // try to retrieve the certificate
-        Object sslCertObject = axis2MessageContext.getProperty("ssl.client.auth.cert.X509");
+        Object sslCertObject = axis2MessageContext.getProperty(NhttpConstants.SSL_CLIENT_AUTH_CERT_X509);
 
         /* If the certificate cannot be retrieved from the axis2Message context, then mutual SSL authentication has
          not happened in transport level.*/
@@ -282,13 +297,15 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             throw new APISecurityException(APISecurityConstants.MUTUAL_SSL_VALIDATION_FAILURE,
                     APISecurityConstants.MUTUAL_SSL_VALIDATION_FAILURE_MESSAGE);
         } else {
-            if (!gatewaySecurity.contains(APIConstants.DEFAULT_GATEWAY_SECURITY_OAUTH2)) {
+            if (!apiSecurity.contains(APIConstants.DEFAULT_GATEWAY_SECURITY_OAUTH2)) {
                 AuthenticationContext authContext = new AuthenticationContext();
                 authContext.setAuthenticated(true);
                 APISecurityUtils.setAuthenticationContext(messageContext, authContext, null);
                 X509Certificate[] certs = (X509Certificate[]) sslCertObject;
                 X509Certificate x509Certificate = certs[0];
                 String subjectDN = x509Certificate.getSubjectDN().getName();
+                String uniqueIdentifier = String
+                        .valueOf(x509Certificate.getSerialNumber() + "_" + x509Certificate.getIssuerDN());
                 authContext.setUsername(subjectDN);
                 try {
                     LdapName ldapDN = new LdapName(subjectDN);
@@ -301,20 +318,23 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                     log.warn("Cannot get the CN name from certificate:" + e.getMessage());
                     authContext.setUsername(subjectDN);
                 }
-                try {
-                    if (keyValidator == null) {
-                        keyValidator = new APIKeyValidator(
-                                synapseEnvironment.getSynapseConfiguration().getAxisConfiguration());
-
-                    }
-                    VerbInfoDTO verb = keyValidator.findMatchingVerb(messageContext);
-                    if (verb != null) {
-                        messageContext.setProperty(APIConstants.VERB_INFO_DTO, verb);
-                    }
-                } catch (ResourceNotFoundException e) {
-                    log.error("Could not find matching resource for the request", e);
-                }
                 authContext.setApiTier(apiLevelPolicy);
+                CertificateTierDTO certificateTierDTO =
+                        keyValidator.getCertificateTierInformation(getAPIIdentifier(messageContext),
+                        uniqueIdentifier);
+                authContext.setApiKey(uniqueIdentifier);
+                authContext.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
+                /* If the relevant certificate does not have any tier information, then the relevant certificate is
+                not added against this API, hence adding unauthenticated tier as subscription tier */
+                if (StringUtils.isEmpty(certificateTierDTO.getTier())) {
+                    authContext.setTier(APIConstants.UNAUTHENTICATED_TIER);
+                    authContext.setStopOnQuotaReach(true);
+                } else {
+                    authContext.setTier(certificateTierDTO.getTier());
+                    authContext.setStopOnQuotaReach(certificateTierDTO.isStopOnQuotaReach());
+                    authContext.setSpikeArrestLimit(certificateTierDTO.getSpikeArrestLimit());
+                    authContext.setSpikeArrestUnit(certificateTierDTO.getSpikeArrestUnit());
+                }
             }
         }
         return true;
@@ -541,6 +561,25 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             resource = matcher.group(1);
         }
         return resource;
+    }
+
+    private APIIdentifier getAPIIdentifier(MessageContext messageContext) {
+        String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
+
+        String apiPublisher = (String) messageContext.getProperty(APIMgtGatewayConstants.API_PUBLISHER);
+        //if publisher is null,extract the publisher from the api_version
+        if (apiPublisher == null) {
+            int ind = apiVersion.indexOf("--");
+            apiPublisher = apiVersion.substring(0, ind);
+        }
+        int index = apiVersion.indexOf("--");
+
+        if (index != -1) {
+            apiVersion = apiVersion.substring(index + 2);
+        }
+
+        String api = apiVersion.split(":")[0];
+        return new APIIdentifier(apiPublisher, api, apiVersion);
     }
 
 }

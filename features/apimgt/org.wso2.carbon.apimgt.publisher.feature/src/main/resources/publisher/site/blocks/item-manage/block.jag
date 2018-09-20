@@ -31,7 +31,7 @@ jagg.block("item-manage", {
     result = mod.isDataPublishingEnabled();
     isDataPublishingEnabled = result.isDataPublishingEnabled;
 
-    var certificates = mod.getClientCertificates(name, version, provider).aliasList;
+    var certificates = mod.getClientCertificates(name, version, provider).certificates;
         return {
             "api":api,
             "isPermitted":isPermitted,

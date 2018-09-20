@@ -959,13 +959,14 @@ if(jagg.isCSRFTokenValid())
             var name = request.getParameter('name');
             var version = request.getParameter('version');
             var provider = request.getParameter('provider');
+            var tierName = request.getParameter('tierName');
 
             var api = {};
             api.name = name;
             api.version = version;
             api.provider = provider;
 
-            result = mod.uploadClientCertificate(api, certificate, alias);
+            result = mod.uploadClientCertificate(api, certificate, alias, tierName);
 
             if (result.response == false) {
                 print({error: true, message: "Inserting certificate failed!"});

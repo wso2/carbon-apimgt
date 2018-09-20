@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl.certificatemgt;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
+import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 
 import java.io.ByteArrayInputStream;
@@ -58,7 +59,7 @@ public interface CertificateManager {
      * ALIAS_EXISTS_IN_TRUST_STORE : If the alias already present in the trust store,CERTIFICATE_EXPIRED : If the
      * certificate is expired.
      */
-    ResponseCode addClientCertificateToParentNode(APIIdentifier apiIdentifier, String certificate, String alias,
+    ResponseCode addClientCertificate(APIIdentifier apiIdentifier, String certificate, String alias, String tierName,
             int tenantId);
     /**
      * Method to delete certificate from publisher trust store.
@@ -127,7 +128,7 @@ public interface CertificateManager {
      * @param tenantId : The Id of the tenant that endpoint belongs to.
      * @return CertificateMetadataDTO object which contains the certificate meta data.
      */
-    List<String> getClientCertificateAlias(APIIdentifier apiIdentifier, int tenantId);
+    List<ClientCertificateDTO> getClientCertificates(APIIdentifier apiIdentifier, int tenantId);
 
     /**
      * This method is used to retrieve all the certificates which belong to the given tenant.

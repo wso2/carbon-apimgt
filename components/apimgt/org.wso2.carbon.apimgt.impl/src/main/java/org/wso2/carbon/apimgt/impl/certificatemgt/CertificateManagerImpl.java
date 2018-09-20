@@ -22,11 +22,13 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
+import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateAliasExistsException;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
 import org.wso2.carbon.apimgt.impl.dao.CertificateMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -86,30 +88,18 @@ public class CertificateManagerImpl implements CertificateManager {
     }
 
     @Override
-    public ResponseCode addClientCertificateToParentNode(APIIdentifier apiIdentifier, String certificate,
-            String alias, int tenantId) {
-        ResponseCode responseCode = certificateMgtUtils.addCertificateToTrustStore(certificate, alias);
-
-        if (responseCode.getResponseCode() == ResponseCode.SUCCESS.getResponseCode()) {
-            try {
-                certificateMgtDAO.addClientCertificate(apiIdentifier, alias, tenantId);
-            } catch (CertificateManagementException e) {
-                log.error("Error when adding client certificate with alias " + alias + " to database for the API "
-                        + apiIdentifier.toString(), e);
-                responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
+    public ResponseCode addClientCertificate(APIIdentifier apiIdentifier, String certificate, String alias,
+            String tierName, int tenantId) {
+        ResponseCode responseCode;
+        try {
+            responseCode = certificateMgtUtils.validateCertificate(alias, certificate);
+            if (responseCode == ResponseCode.SUCCESS && !certificateMgtDAO.checkWhetherAliasExist(alias)) {
+                certificateMgtDAO.addClientCertificate(certificate, apiIdentifier, alias, tierName, tenantId);
             }
-        } else if (responseCode.getResponseCode() == ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode()) {
-            log.error("Internal server error while adding client certificate with alias " + alias
-                    + " to database for the API " + apiIdentifier.toString());
-        } else if (responseCode.getResponseCode() == ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE
-                .getResponseCode()) {
-            log.error(
-                    "Could not add client certificate with alias " + alias + " for the API " + apiIdentifier.toString()
-                            + ", same alias exist already");
-        } else if (responseCode.getResponseCode() == ResponseCode.CERTIFICATE_EXPIRED.getResponseCode()) {
-            log.error(
-                    "Client certificate addition with alias " + alias + " for the API " + apiIdentifier.toString()
-                            + " failed, as the certificate provided is in expired state");
+        } catch (CertificateManagementException e) {
+            log.error("Error when adding client certificate with alias " + alias + " to database for the API "
+                    + apiIdentifier.toString(), e);
+            responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
         }
         return responseCode;
     }
@@ -149,20 +139,7 @@ public class CertificateManagerImpl implements CertificateManager {
         try {
             boolean removeFromDB = certificateMgtDAO.deleteClientCertificate(apiIdentifier, alias, tenantId);
             if (removeFromDB) {
-                ResponseCode responseCode = certificateMgtUtils.removeCertificateFromTrustStore(alias);
-                if (responseCode == ResponseCode.INTERNAL_SERVER_ERROR) {
-                    certificateMgtDAO.addClientCertificate(apiIdentifier, alias, tenantId);
-                    log.error(
-                            "Error removing the certificate alias " + alias + " for the API " + apiIdentifier.toString()
-                                    + " from the trust store. Hence Rolling back...");
-                } else if (responseCode.getResponseCode() == ResponseCode.CERTIFICATE_NOT_FOUND.getResponseCode()) {
-                    log.warn("The Certificate for Alias '" + alias + "' for API " + apiIdentifier.toString() + " has "
-                            + "been previously removed from trust store. Hence DB entry is removed.");
-                } else {
-                    log.info("Certificate is successfully removed from the Publisher Trust Store with Alias '" + alias
-                            + "' for the API " + apiIdentifier.toString());
-                }
-                return responseCode;
+                return ResponseCode.SUCCESS;
             } else {
                 log.error("Failed to remove certificate with alias " + alias + " from the data base for the API "
                         + apiIdentifier.toString() + "  No certificate changes will be affected.");
@@ -171,6 +148,7 @@ public class CertificateManagerImpl implements CertificateManager {
         } catch (CertificateManagementException e) {
             log.error("Error persisting/ deleting certificate metadata. ", e);
             return ResponseCode.INTERNAL_SERVER_ERROR;
+
         }
     }
 
@@ -236,14 +214,14 @@ public class CertificateManagerImpl implements CertificateManager {
         return certificateMetadataList;
     }
 
-    public List<String> getClientCertificateAlias(APIIdentifier apiIdentifier, int tenantId) {
-        List<String> clientCertificateAlias = null;
+    public List<ClientCertificateDTO> getClientCertificates(APIIdentifier apiIdentifier, int tenantId) {
+        List<ClientCertificateDTO> clientCertificateDTOList = null;
         try {
-            clientCertificateAlias = certificateMgtDAO.getClientCertificateAlias(apiIdentifier, tenantId);
+            clientCertificateDTOList = certificateMgtDAO.getClientCertificates(apiIdentifier, tenantId);
         } catch (CertificateManagementException e) {
             e.printStackTrace();
         }
-        return clientCertificateAlias;
+        return clientCertificateDTOList;
     }
 
     @Override
