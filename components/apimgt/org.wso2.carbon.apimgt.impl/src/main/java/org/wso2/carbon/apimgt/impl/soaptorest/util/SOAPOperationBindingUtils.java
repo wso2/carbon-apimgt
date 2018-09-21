@@ -272,7 +272,10 @@ public class SOAPOperationBindingUtils {
                 if (operationName.toLowerCase().startsWith("get") && operation.getInputParameterModel() != null
                         && operation.getInputParameterModel().size() <= 1) {
 
-                    Map<String, Property> properties = operation.getInputParameterModel().get(0).getProperties();
+                    Map<String, Property> properties = null;
+                    if (operation.getInputParameterModel().size() > 0) {
+                        properties = operation.getInputParameterModel().get(0).getProperties();
+                    }
                     if (properties == null) {
                         operation.setHttpVerb(HTTPConstants.HTTP_METHOD_GET);
                     } else if (properties.size() <= 1) {

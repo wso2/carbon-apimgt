@@ -681,4 +681,8 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
         }
         return false;
     }
+
+    public Map<String, ModelImpl> getParameterModelMap() {
+        return parameterModelMap;
+    }
 }
