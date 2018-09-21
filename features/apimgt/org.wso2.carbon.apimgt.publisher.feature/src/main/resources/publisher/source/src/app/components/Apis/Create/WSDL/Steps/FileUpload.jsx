@@ -22,6 +22,7 @@ import Dropzone from 'react-dropzone';
 import PropTypes from 'prop-types';
 
 import React from 'react';
+import { FormattedMessage } from 'react-intl';
 
 const FileUploader = (props) => {
     const { onDropHandler, currentFiles } = props;
@@ -33,12 +34,12 @@ const FileUploader = (props) => {
                 </Dropzone>
             </div>
             <aside>
-                <h2>Uploaded files</h2>
+                <h2><FormattedMessage id='uploaded.files' defaultMessage='Uploaded files' /></h2>
                 <ul>
                     {currentFiles &&
                         currentFiles.map(file => (
                             <li key={file.name}>
-                                {file.name} - {file.size} bytes
+                                {file.name} - {file.size} <FormattedMessage id='bytes' defaultMessage='bytes' />
                             </li>
                         ))}
                 </ul>

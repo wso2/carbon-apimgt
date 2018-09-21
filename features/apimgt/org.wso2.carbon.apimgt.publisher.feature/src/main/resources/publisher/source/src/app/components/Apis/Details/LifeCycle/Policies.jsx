@@ -23,6 +23,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Select from '@material-ui/core/Select';
+import { FormattedMessage } from 'react-intl';
 
 import API from '../../../../data/api';
 
@@ -87,7 +88,9 @@ export default class Policies extends Component {
         return (
             <div>
                 <FormControl className='policies-select'>
-                    <InputLabel htmlFor='name-multiple'> Business Plans </InputLabel>
+                    <InputLabel htmlFor='name-multiple'>
+                        <FormattedMessage id="business.plans" defaultMessage="Business Plans" />
+                    </InputLabel>
                     <Select
                         margin='none'
                         multiple
@@ -115,7 +118,10 @@ export default class Policies extends Component {
                             </MenuItem>
                         ))}
                     </Select>
-                    <FormHelperText> Select a plan for the API and enable API level throttling. </FormHelperText>
+                    <FormHelperText>
+                        <FormattedMessage id="select.a.plan.for.the.api.and.enable.api.level.throttling"
+                            defaultMessage="Select a plan for the API and enable API level throttling." />
+                    </FormHelperText>
                 </FormControl>
             </div>
         );

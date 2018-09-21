@@ -7,6 +7,7 @@ import BackIcon from '@material-ui/icons/KeyboardBackspace';
 import Grid from '@material-ui/core/Grid';
 import { withStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
+import { FormattedMessage } from 'react-intl';
 // import { FormattedMessage } from 'react-intl';
 
 const styles = theme => ({
@@ -33,7 +34,9 @@ const APICreateTopMenu = ({ classes }) => {
                 </Link>
             </Grid>
             <Grid item lg={8}>
-                <Typography variant='display1'>Create New API</Typography>
+                <Typography variant='display1'>
+                    <FormattedMessage id='create.new.api' defaultMessage='Create New API' />
+                </Typography>
             </Grid>
         </Grid>
     );

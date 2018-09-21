@@ -23,7 +23,7 @@ import TextField from '@material-ui/core/TextField';
 import Policies from '../../Details/LifeCycle/Policies';
 import { ScopeValidation, resourceMethod, resourcePath } from '../../../../data/ScopeValidation';
 import API from '../../../../data/api';
-
+import { FormattedMessage } from 'react-intl';
 /**
  * @export @inheritDoc
  * @class InputForm
@@ -70,7 +70,7 @@ export default class APIInputForm extends Component {
                 <TextField
                     fullWidth
                     id='name'
-                    label='Name'
+                    label={<FormattedMessage id="name" defaultMessage="Name"/>}
                     required
                     type='text'
                     name='name'
@@ -86,10 +86,10 @@ export default class APIInputForm extends Component {
                     // InputLabelProps={inputLabelClass}
                     // value={this.state.apiFields.apiVersion}
                     fullWidth
-                    label='Version'
+                    label={<FormattedMessage id="version" defaultMessage="Version"/>}
                     required
                     id='version'
-                    helperText='**Version input is not support in this release'
+                    helperText={<FormattedMessage id="version.helper.text" defaultMessage="**Version input is not support in this release"/>}
                     type='text'
                     name='version'
                     margin='normal'
@@ -99,7 +99,7 @@ export default class APIInputForm extends Component {
                     fullWidth
                     id='context'
                     required
-                    label='Context'
+                    label={ <FormattedMessage id="context" defaultMessage="Context"/>}
                     type='text'
                     name='context'
                     margin='normal'
@@ -109,7 +109,7 @@ export default class APIInputForm extends Component {
                 <TextField
                     fullWidth
                     id='endpoint'
-                    label='Endpoint'
+                    label={ <FormattedMessage id="endpoint" defaultMessage="Endpoint"/>}
                     type='text'
                     name='endpoint'
                     margin='normal'
