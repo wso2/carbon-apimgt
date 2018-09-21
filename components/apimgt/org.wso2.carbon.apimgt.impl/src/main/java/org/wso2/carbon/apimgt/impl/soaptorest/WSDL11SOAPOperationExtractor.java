@@ -609,18 +609,24 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
                     for (Object obj : map.entrySet()) {
                         Map.Entry entry = (Map.Entry) obj;
                         Part part = (Part) entry.getValue();
-                        if (soapStyle.equalsIgnoreCase(SOAPToRESTConstants.DOCUMENT_TYPE_WSDL)) {
-                            inputParameterModelList.add(parameterModelMap.get(part.getElementName().getLocalPart()));
-                        } else {
-                            if (parameterModelMap.containsKey(part.getTypeName().getLocalPart())) {
-                                inputParameterModelList.add(parameterModelMap.get(part.getTypeName().getLocalPart()));
+                        if (part != null) {
+                            if (part.getElementName() != null) {
+                                inputParameterModelList.add(parameterModelMap.get(part.getElementName()
+                                        .getLocalPart()));
                             } else {
-                                ModelImpl model = new ModelImpl();
-                                model.setType(ObjectProperty.TYPE);
-
-                                model.setName(message.getQName().getLocalPart());
-                                model.addProperty(part.getName(), getPropertyFromDataType(part.getTypeName().getLocalPart()));
-                                inputParameterModelList.add(model);
+                                if (part.getTypeName() != null && parameterModelMap
+                                        .containsKey(part.getTypeName().getLocalPart())) {
+                                    inputParameterModelList
+                                            .add(parameterModelMap.get(part.getTypeName().getLocalPart()));
+                                } else {
+                                    ModelImpl model = new ModelImpl();
+                                    model.setType(ObjectProperty.TYPE);
+                                    model.setName(message.getQName().getLocalPart());
+                                    model.addProperty(part.getName(),
+                                            getPropertyFromDataType(part.getTypeName().getLocalPart()));
+                                    parameterModelMap.put(model.getName(), model);
+                                    inputParameterModelList.add(model);
+                                }
                             }
                         }
                     }
@@ -650,18 +656,24 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
                     for (Object obj : map.entrySet()) {
                         Map.Entry entry = (Map.Entry) obj;
                         Part part = (Part) entry.getValue();
-                        if (soapStyle.equalsIgnoreCase(SOAPToRESTConstants.DOCUMENT_TYPE_WSDL)) {
-                            outputParameterModelList.add(parameterModelMap.get(part.getElementName().getLocalPart()));
-                        } else {
-                            if (parameterModelMap.containsKey(part.getTypeName().getLocalPart())) {
-                                outputParameterModelList.add(parameterModelMap.get(part.getTypeName().getLocalPart()));
+                        if (part != null) {
+                            if (part.getElementName() != null) {
+                                outputParameterModelList.add(parameterModelMap.get(part.getElementName()
+                                        .getLocalPart()));
                             } else {
-                                ModelImpl model = new ModelImpl();
-                                model.setType(ObjectProperty.TYPE);
-
-                                model.setName(message.getQName().getLocalPart());
-                                model.addProperty(part.getName(), getPropertyFromDataType(part.getTypeName().getLocalPart()));
-                                outputParameterModelList.add(model);
+                                if (part.getTypeName() != null && parameterModelMap
+                                        .containsKey(part.getTypeName().getLocalPart())) {
+                                    outputParameterModelList
+                                            .add(parameterModelMap.get(part.getTypeName().getLocalPart()));
+                                } else {
+                                    ModelImpl model = new ModelImpl();
+                                    model.setType(ObjectProperty.TYPE);
+                                    model.setName(message.getQName().getLocalPart());
+                                    model.addProperty(part.getName(),
+                                            getPropertyFromDataType(part.getTypeName().getLocalPart()));
+                                    parameterModelMap.put(model.getName(), model);
+                                    outputParameterModelList.add(model);
+                                }
                             }
                         }
                     }
