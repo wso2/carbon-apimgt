@@ -73,8 +73,6 @@ public class Util {
 
     public static void inject(TracingSpan span, TracingTracer tracer, Map<String, String> tracerSpecificCarrier) {
 
-//        Map<String, String> tracerSpecificCarrier = new HashMap<>();
-//        tracer.getTracingTracer().inject(span.getSpan().context(), Format.Builtin.HTTP_HEADERS, requestInjector);
         Object sp = span.getSpan();
         RequestInjector requestInjector = new RequestInjector(tracerSpecificCarrier);
         if(sp instanceof Span) {

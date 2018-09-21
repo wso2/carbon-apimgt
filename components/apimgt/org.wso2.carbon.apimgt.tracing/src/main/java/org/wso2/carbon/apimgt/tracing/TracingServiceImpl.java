@@ -29,6 +29,8 @@ import org.wso2.carbon.apimgt.tracing.zipkin.ZipkinTracerImpl;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.ServiceLoader;
 
 public class TracingServiceImpl implements TracingService {
 
@@ -55,19 +57,25 @@ public class TracingServiceImpl implements TracingService {
         String openTracerName = getConfiguration().getFirstProperty(TracingConstants.OPEN_TRACER_NAME);
         String enabled = getConfiguration().getFirstProperty(TracingConstants.OPEN_TRACER_ENABLED);
 
-        if (openTracerName.equalsIgnoreCase("JAEGER") && enabled.equalsIgnoreCase("TRUE")) {
+//        if (openTracerName.equalsIgnoreCase("JAEGER") && enabled.equalsIgnoreCase("TRUE")) {
+//
+//            tracer = new JaegerTracerImpl().getTracer(serviceName);
+//            return new TracingTracer(tracer);
+//        } else if (openTracerName.equalsIgnoreCase("ZIPKIN") && enabled.equalsIgnoreCase("TRUE")) {
+//
+//            tracer = new ZipkinTracerImpl().getTracer(serviceName);
+//            return new TracingTracer(tracer);
+//        } else {
+//            log.error("Invalid Configuration");
+//        }
 
-            tracer = new JaegerTracerImpl().getTracer(serviceName);
-            return new TracingTracer(tracer);
-        } else if (openTracerName.equalsIgnoreCase("ZIPKIN") && enabled.equalsIgnoreCase("TRUE")) {
+        ServiceLoader<OpenTracer> openTracers = ServiceLoader.load(OpenTracer.class);
+        HashMap<String, OpenTracer> tracerMap = new HashMap<>();
+        openTracers.forEach(t -> tracerMap.put(t.getName().toLowerCase(), t));
 
-            tracer = new ZipkinTracerImpl().getTracer(serviceName);
-            return new TracingTracer(tracer);
-        } else {
-            log.error("Invalid Configuration");
-        }
+        OpenTracer openTracer = tracerMap.get(openTracerName.toLowerCase());
 
-        return null;
+        return new TracingTracer(openTracer.getTracer(serviceName));
     }
 
     public APIManagerConfiguration getConfiguration() {

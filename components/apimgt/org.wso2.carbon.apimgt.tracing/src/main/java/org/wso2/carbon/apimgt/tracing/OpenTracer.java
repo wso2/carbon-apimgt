@@ -21,9 +21,9 @@ package org.wso2.carbon.apimgt.tracing;
 import io.opentracing.Tracer;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 
-public abstract class OpenTracer {
+public interface OpenTracer {
 
-    public abstract Tracer getTracer(String serviceName);
-    public abstract String getName();
+    Tracer getTracer(String serviceName);
+    String getName();
 
 }

@@ -36,7 +36,7 @@ import org.wso2.carbon.apimgt.tracing.TracingServiceImpl;
 import zipkin2.reporter.AsyncReporter;
 import zipkin2.reporter.okhttp3.OkHttpSender;
 
-public class ZipkinTracerImpl extends OpenTracer {
+public class ZipkinTracerImpl implements OpenTracer {
 
     private static final String NAME = "zipkin";
     APIManagerConfiguration configuration = new TracingServiceImpl().getConfiguration();

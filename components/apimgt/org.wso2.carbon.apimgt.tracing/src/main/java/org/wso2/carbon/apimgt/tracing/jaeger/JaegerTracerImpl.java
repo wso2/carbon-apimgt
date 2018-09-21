@@ -28,7 +28,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.tracing.OpenTracer;
 import org.wso2.carbon.apimgt.tracing.TracingServiceImpl;
 
-public class JaegerTracerImpl extends OpenTracer {
+public class JaegerTracerImpl implements OpenTracer {
 
     private static final String NAME = "jaeger";
     APIManagerConfiguration configuration = new TracingServiceImpl().getConfiguration();
