@@ -43,6 +43,7 @@ import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
 import java.io.StringWriter;
@@ -102,6 +103,7 @@ public class ThrottlePolicyTemplateBuilder {
                         "org.apache.velocity.runtime.log.Log4JLogChute");
                 velocityengine.setProperty("runtime.log.logsystem.log4j.logger", getVelocityLogger());
             }
+            velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
             velocityengine.init();
             Template template = velocityengine.getTemplate(getTemplatePathForAPI());
             StringWriter writer;
@@ -173,6 +175,7 @@ public class ThrottlePolicyTemplateBuilder {
                         "org.apache.velocity.runtime.log.Log4JLogChute");
                 velocityengine.setProperty("runtime.log.logsystem.log4j.logger", getVelocityLogger());
             }
+            velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
             velocityengine.init();
             Template template = velocityengine.getTemplate(getTemplatePathForAPIDefaultPolicy());
             StringWriter writer;
@@ -242,6 +245,7 @@ public class ThrottlePolicyTemplateBuilder {
                         "org.apache.velocity.runtime.log.Log4JLogChute");
                 velocityengine.setProperty("runtime.log.logsystem.log4j.logger", getVelocityLogger());
             }
+            velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
             velocityengine.init();
 
             Template template = velocityengine.getTemplate(getTemplatePathForGlobal());
@@ -292,6 +296,7 @@ public class ThrottlePolicyTemplateBuilder {
                         "org.apache.velocity.runtime.log.Log4JLogChute");
                 velocityengine.setProperty("runtime.log.logsystem.log4j.logger", getVelocityLogger());
             }
+            velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
             velocityengine.init();
             Template template = velocityengine.getTemplate(getTemplatePathForApplication());
 
@@ -336,6 +341,7 @@ public class ThrottlePolicyTemplateBuilder {
                         "org.apache.velocity.runtime.log.Log4JLogChute");
                 velocityengine.setProperty("runtime.log.logsystem.log4j.logger", getVelocityLogger());
             }
+            velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
             velocityengine.init();
             Template t = velocityengine.getTemplate(getTemplatePathForSubscription());
 
