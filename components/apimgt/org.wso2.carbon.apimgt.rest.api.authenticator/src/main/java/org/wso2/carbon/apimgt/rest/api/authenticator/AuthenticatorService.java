@@ -229,7 +229,8 @@ public class AuthenticatorService {
         }
 
         log.debug("Received access token for {} application.", appName);
-        accessTokenInfo = getKeyManager().getTokenMetaData(accessTokenInfo.getAccessToken());
+        AccessTokenInfo accessTokenInfoUser = getKeyManager().getTokenMetaData(accessTokenInfo.getAccessToken());
+        accessTokenInfo.setEndUserName(accessTokenInfoUser.getEndUserName());
         return accessTokenInfo;
     }
 

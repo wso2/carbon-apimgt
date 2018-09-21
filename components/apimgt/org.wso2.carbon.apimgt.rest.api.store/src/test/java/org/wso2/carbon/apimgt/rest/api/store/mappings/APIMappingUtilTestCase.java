@@ -21,8 +21,12 @@ package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
 import org.apache.commons.collections.map.HashedMap;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.wso2.carbon.apimgt.core.api.UserNameMapper;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
@@ -36,8 +40,8 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.BaseAPIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.BaseAPIInfoDTO;
 
+import java.lang.reflect.Field;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -47,8 +51,19 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-
 public class APIMappingUtilTestCase {
+
+    UserNameMapper userNameMapper;
+
+    @Before
+    public void setup() throws NoSuchFieldException, IllegalAccessException {
+
+        APIManagerFactory apiManagerFactory = APIManagerFactory.getInstance();
+        userNameMapper = Mockito.mock(UserNameMapper.class);
+        Field field = APIManagerFactory.class.getDeclaredField("userNameMapper");
+        field.setAccessible(true);
+        field.set(apiManagerFactory, userNameMapper);
+    }
 
     @Test
     public void testAPIListDTO() throws APIManagementException {
@@ -83,6 +98,7 @@ public class APIMappingUtilTestCase {
 
     @Test
     public void testToAPIDTO() throws APIManagementException {
+
         String api1Id = UUID.randomUUID().toString();
         Endpoint api1SandBoxEndpointId = new Endpoint.Builder().id(UUID.randomUUID().toString()).applicableLevel
                 (APIMgtConstants.API_SPECIFIC_ENDPOINT).name("abcd").build();
@@ -102,9 +118,9 @@ public class APIMappingUtilTestCase {
     private static API.APIBuilder createApi(String provider, String apiId, String name, String version, String
             description, Map<String, Endpoint> endpointTypeToIdMap)
             throws APIManagementException {
+
         Set<String> transport = new HashSet<>();
         transport.add("http");
-
 
         Set<Policy> policies = new HashSet<>();
         policies.add(new SubscriptionPolicy("Silver"));
@@ -149,7 +165,6 @@ public class APIMappingUtilTestCase {
                 createdBy("Adam Doe").
                 lastUpdatedTime(Instant.now()).
                 endpoint(endpointTypeToIdMap);
-
 
         apiBuilder.uriTemplates(Collections.emptyMap());
 
