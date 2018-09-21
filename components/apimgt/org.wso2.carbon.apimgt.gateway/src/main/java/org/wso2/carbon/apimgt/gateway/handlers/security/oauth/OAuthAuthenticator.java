@@ -132,7 +132,7 @@ public class OAuthAuthenticator implements Authenticator {
         Timer timer = getTimer(MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "GET_RESOURCE_AUTH"));
         Timer.Context context = timer.start();
-        TracingSpan authenticationSchemeSpan = Util.startSpan("get_Resource_Authentication_Scheme()", keySpan, tracer, null);
+        TracingSpan authenticationSchemeSpan = Util.startSpan("GET_RESOURCE_AUTH", keySpan, tracer, null);
         String authenticationScheme = getAPIKeyValidator().getResourceAuthenticationScheme(synCtx);
         synCtx.setProperty(APIMgtGatewayConstants.GET_RESOURCE_AUTHENTICATION_SCHEME_SPAN,authenticationSchemeSpan);
         Util.finishSpan(authenticationSchemeSpan);

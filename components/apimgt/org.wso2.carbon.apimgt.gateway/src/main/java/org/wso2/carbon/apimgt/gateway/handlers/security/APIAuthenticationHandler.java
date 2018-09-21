@@ -153,8 +153,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         Util.setTag(keySpan, APIMgtGatewayConstants.REQUEST_ID, (String) messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID));
         Util.baggageSet(keySpan, "request-id", (String) messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID ));
         messageContext.setProperty(APIMgtGatewayConstants.KEY_VALIDATION_LATENCY_SPAN, keySpan);
-        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
-                getAxis2MessageContext();
+        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         axis2MC.setProperty(APIMgtGatewayConstants.KEY_VALIDATION_LATENCY_SPAN, keySpan);
         Timer.Context context = startMetricTimer();
         long startTime = System.nanoTime();

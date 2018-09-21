@@ -62,11 +62,6 @@
 			<artifactId>jaeger-client</artifactId>
 			<version>0.30.4</version>
 		</dependency>
-		<!--<dependency>-->
-            <!--<groupId>org.wso2.carbon.apimgt</groupId>-->
-            <!--<artifactId>org.wso2.carbon.apimgt.keymgt</artifactId>-->
-            <!--<scope>test</scope>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-module-junit4</artifactId>
