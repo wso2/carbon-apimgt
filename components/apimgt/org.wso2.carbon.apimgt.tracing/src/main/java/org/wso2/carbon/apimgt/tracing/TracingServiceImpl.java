@@ -66,7 +66,7 @@ public class TracingServiceImpl implements TracingService {
             tracer = new ZipkinTracerImpl().getTracer(serviceName);
             return new TracingTracer(tracer);
         } else {
-            log.error("Invalid Configuration");
+            log.error("Invalid test Configuration");
         }
 
 //        ServiceLoader<OpenTracer> openTracers = ServiceLoader.load(OpenTracer.class);
