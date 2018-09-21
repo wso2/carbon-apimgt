@@ -43,6 +43,7 @@ import org.wso2.carbon.caching.impl.Util;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 
+import java.lang.reflect.Field;
 import java.util.TreeMap;
 
 /*
@@ -60,7 +61,7 @@ public class APIAuthenticationHandlerTestCase {
 
 
     @Before
-    public void setup(){
+    public void setup() {
         synapseEnvironment = Mockito.mock(SynapseEnvironment.class);
         messageContext = Mockito.mock(Axis2MessageContext.class);
         axis2MsgCntxt = Mockito.mock(org.apache.axis2.context.MessageContext.class);
@@ -81,12 +82,11 @@ public class APIAuthenticationHandlerTestCase {
     * This method will test handleRequest method for it's happy path
     * */
     @Test
-    public void testHandleRequest() {
+    public void testHandleRequest() throws NoSuchFieldException, IllegalAccessException, APISecurityException {
 
         APIAuthenticationHandler apiAuthenticationHandler = createAPIAuthenticationHandler();
-        apiAuthenticationHandler.init(synapseEnvironment);
+        mockAPIKeyValidator(apiAuthenticationHandler);
         Assert.assertEquals(apiAuthenticationHandler.startMetricTimer(), null);
-
         Options options = Mockito.mock(Options.class);
         Mockito.when(options.getMessageId()).thenReturn("1");
         Mockito.when(axis2MsgCntxt.getOptions()).thenReturn(options);
@@ -101,6 +101,17 @@ public class APIAuthenticationHandlerTestCase {
         Assert.assertTrue(apiAuthenticationHandler.handleRequest(messageContext));
     }
 
+    private void mockAPIKeyValidator(APIAuthenticationHandler apiAuthenticationHandler)
+            throws NoSuchFieldException, IllegalAccessException, APISecurityException {
+        APIKeyValidator apiKeyValidator = Mockito.mock(APIKeyValidator.class);
+        Field keyValidatorField = APIAuthenticationHandler.class.getDeclaredField("keyValidator");
+        keyValidatorField.setAccessible(true);
+        keyValidatorField.set(apiAuthenticationHandler, apiKeyValidator);
+        keyValidatorField.setAccessible(false);
+        apiAuthenticationHandler.init(synapseEnvironment);
+        Mockito.doReturn(APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN).when(apiKeyValidator).getResourceAuthenticationScheme(Mockito.any(MessageContext.class));
+
+    }
     /*
     *  This method will test Response method
     * */
@@ -115,14 +126,15 @@ public class APIAuthenticationHandlerTestCase {
     * This method will test handleRequest method when APISecurityException is thrown
     * */
     @Test
-    public void testHandleRequestSecurityException() {
+    public void testHandleRequestSecurityException()
+            throws NoSuchFieldException, IllegalAccessException, APISecurityException {
         SynapseEnvironment synapseEnvironment = Mockito.mock(SynapseEnvironment.class);
         MessageContext messageContext = Mockito.mock(Axis2MessageContext.class);
         org.apache.axis2.context.MessageContext axis2MsgCntxt = Mockito.mock(org.apache.axis2.context.MessageContext.class);
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
         APIAuthenticationHandler apiAuthenticationHandler = createAPIAuthenticationHandlerForExceptionTest();
         apiAuthenticationHandler.init(synapseEnvironment);
-
+        mockAPIKeyValidator(apiAuthenticationHandler);
         Options options = Mockito.mock(Options.class);
         Mockito.when(options.getMessageId()).thenReturn("1");
         Mockito.when(axis2MsgCntxt.getOptions()).thenReturn(options);

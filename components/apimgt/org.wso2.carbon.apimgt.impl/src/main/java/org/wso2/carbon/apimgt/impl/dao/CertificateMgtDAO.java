@@ -637,14 +637,14 @@ public class CertificateMgtDAO {
             preparedStatement.setString(2, certificateIdentifier);
             resultSet = preparedStatement.executeQuery();
 
-            if (resultSet.next()) {
+            boolean isResultExist = resultSet.next();
+            if (isResultExist) {
                 certificateTierDTO.setTier(resultSet.getString("TIER_NAME"));
-            }
-
-            if (APIUtil.isAdvanceThrottlingEnabled()) {
-                certificateTierDTO.setSpikeArrestLimit(resultSet.getInt("RATE_LIMIT_COUNT"));
-                certificateTierDTO.setSpikeArrestUnit(resultSet.getString("RATE_LIMIT_TIME_UNIT"));
-                certificateTierDTO.setStopOnQuotaReach(resultSet.getBoolean("STOP_ON_QUOTA_REACH"));
+                if (APIUtil.isAdvanceThrottlingEnabled()) {
+                    certificateTierDTO.setSpikeArrestLimit(resultSet.getInt("RATE_LIMIT_COUNT"));
+                    certificateTierDTO.setSpikeArrestUnit(resultSet.getString("RATE_LIMIT_TIME_UNIT"));
+                    certificateTierDTO.setStopOnQuotaReach(resultSet.getBoolean("STOP_ON_QUOTA_REACH"));
+                }
             }
         } catch (SQLException e) {
             handleException("Error while getting certificate level tier details for " + apiIdentifier.toString(), e);

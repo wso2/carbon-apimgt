@@ -2904,7 +2904,7 @@ public class SQLConstants {
         public static final String PRE_DELETE_CERTIFICATES = "DELETE FROM AM_API_CLIENT_CERTIFICATE_METADATA "
                 + "WHERE TENANT_ID=? and API_ID=? and REMOVED=? and ALIAS=?";
 
-        public static final String DELETE_CERTIFICATES = "UPDATE AM_API_CLIENT_CERTIFICATE_METADATA SET REMOVED = ?"
+        public static final String DELETE_CERTIFICATES = "UPDATE AM_API_CLIENT_CERTIFICATE_METADATA SET REMOVED = ? "
                 + "WHERE TENANT_ID=? AND ALIAS=? AND API_ID=?";
 
         public static final String SELECT_CERTIFICATE_TIER = "SELECT TIER_NAME FROM "

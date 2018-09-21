@@ -564,22 +564,24 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     }
 
     private APIIdentifier getAPIIdentifier(MessageContext messageContext) {
-        String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
+        String apiWithversion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
 
         String apiPublisher = (String) messageContext.getProperty(APIMgtGatewayConstants.API_PUBLISHER);
         //if publisher is null,extract the publisher from the api_version
         if (apiPublisher == null) {
-            int ind = apiVersion.indexOf("--");
-            apiPublisher = apiVersion.substring(0, ind);
+            int ind = apiWithversion.indexOf("--");
+            apiPublisher = apiWithversion.substring(0, ind);
         }
-        int index = apiVersion.indexOf("--");
+        int index = apiWithversion.indexOf("--");
 
         if (index != -1) {
-            apiVersion = apiVersion.substring(index + 2);
+            apiWithversion = apiWithversion.substring(index + 2);
         }
 
-        String api = apiVersion.split(":")[0];
-        return new APIIdentifier(apiPublisher, api, apiVersion);
+        String[] splitParts = apiWithversion.split(":");
+        String api = splitParts[0];
+        apiWithversion = splitParts[1].substring(1, splitParts[1].length());
+        return new APIIdentifier(apiPublisher, api, apiWithversion);
     }
 
 }
