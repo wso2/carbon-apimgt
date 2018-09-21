@@ -494,7 +494,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                     return Util.marshall(new LogoutRequestBuilder().
                             buildLogoutRequest((String) args[0], sessionIndexId,
                                     SSOConstants.LOGOUT_USER,
-                                    relyingPartyObject.getSSOProperty(idpLogoutURL), nameIdFormat));
+                                    relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID), nameIdFormat));
                 } else {
                     return Util.marshall(new LogoutRequestBuilder().
                             buildSignedLogoutRequest((String) args[0], sessionIndexId,
@@ -502,7 +502,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                                     relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID),
                                     MultitenantConstants.SUPER_TENANT_ID,
                                     MultitenantConstants.SUPER_TENANT_DOMAIN_NAME,
-                                    relyingPartyObject.getSSOProperty(idpLogoutURL), nameIdFormat));
+                                    idpLogoutURL, nameIdFormat));
                 }
             } else {
                 if (!Boolean.parseBoolean(relyingPartyObject.getSSOProperty(SSOConstants.SIGN_REQUESTS))) {
@@ -515,7 +515,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                                     relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID),
                                     MultitenantConstants.SUPER_TENANT_ID,
                                     MultitenantConstants.SUPER_TENANT_DOMAIN_NAME,
-                                    relyingPartyObject.getSSOProperty(SSOConstants.IDP_URL), nameIdFormat));
+                                    idpLogoutURL, nameIdFormat));
                 }
             }
         }
