@@ -26,12 +26,13 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import { withStyles } from '@material-ui/core/styles';
 import green from '@material-ui/core/colors/green';
 import { Divider, Card, CardContent, CardActions } from '@material-ui/core/';
-import { Create, GetApp } from '@material-ui/icons';
+import Create from '@material-ui/icons/Create';
+import GetApp from '@material-ui/icons/GetApp';
 import { PropTypes } from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
-import API from '../../../../data/api';
-import Alert from '../../../Shared/Alert';
+import API from 'AppData/api';
+import Alert from 'AppComponents/Shared/Alert';
 import APICreateMenu from '../components/APICreateMenu';
 
 const styles = {

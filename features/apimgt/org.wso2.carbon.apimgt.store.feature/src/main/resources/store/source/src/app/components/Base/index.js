@@ -135,6 +135,7 @@ const styles = theme => ({
         backgroundColor: theme.palette.grey['A100'],
         padding: theme.spacing.unit * 3,
         height: 50,
+        display: 'none',
       },
       toolbar: { 
         minHeight: 56, 
@@ -154,6 +155,7 @@ const styles = theme => ({
       },
       mainContent: {
         display: 'flex',
+        height: '100vh',
       },
       userLink: {
         color: theme.palette.getContrastText(theme.palette.background.appBar),

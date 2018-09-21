@@ -23,9 +23,12 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.utils;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
@@ -62,8 +65,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.DedicatedGatewayDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPointDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPoint_endpointSecurityDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPoint_endpointConfigDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPoint_endpointSecurityDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ScopeDTO;
@@ -89,14 +92,14 @@ import java.util.UUID;
  * Utility class for mapping rest api Models to Core
  */
 public class MappingUtil {
-
+    private static final Logger log = LoggerFactory.getLogger(MappingUtil.class);
     /**
      * This method converts the API Object from models into APIDTO object.
      *
      * @param api API object
      * @return APIDTO object with provided API object
      */
-    public static APIDTO toAPIDto(API api)  {
+    public static APIDTO toAPIDto(API api) throws APIManagementException {
         APIDTO apidto = new APIDTO();
         apidto.setId(api.getId());
         apidto.setName(api.getName());
@@ -108,7 +111,9 @@ public class MappingUtil {
         apidto.setResponseCaching(Boolean.toString(api.isResponseCachingEnabled()));
         apidto.setCacheTimeout(api.getCacheTimeout());
         apidto.setVisibleRoles(new ArrayList<>(api.getVisibleRoles()));
-        apidto.setProvider(api.getProvider());
+        String realName = APIManagerFactory.getInstance().getUserNameMapper().getLoggedInUserIDFromPseudoName(api
+                .getProvider());
+        apidto.setProvider(realName);
         apidto.setPermission(api.getApiPermission());
         apidto.setLifeCycleStatus(api.getLifeCycleStatus());
         apidto.setWorkflowStatus(api.getWorkflowStatus());
@@ -198,7 +203,7 @@ public class MappingUtil {
      * @param apidto APIDTO object with API data
      * @return APIBuilder object
      */
-    public static API.APIBuilder toAPI(APIDTO apidto) {
+    public static API.APIBuilder toAPI(APIDTO apidto) throws APIManagementException {
         BusinessInformation businessInformation = new BusinessInformation();
         API_businessInformationDTO apiBusinessInformationDTO = apidto.getBusinessInformation();
         if (apiBusinessInformationDTO != null) {
@@ -239,6 +244,11 @@ public class MappingUtil {
         }
         Set<Policy> subscriptionPolicies = new HashSet<>();
         apidto.getPolicies().forEach(v -> subscriptionPolicies.add(new SubscriptionPolicy(v)));
+        if (StringUtils.isNotEmpty(apidto.getProvider())) {
+            String pseudoName = APIManagerFactory.getInstance().getUserNameMapper().getLoggedInPseudoNameFromUserID
+                    (apidto.getProvider());
+            apidto.setProvider(pseudoName);
+        }
         API.APIBuilder apiBuilder = new API.APIBuilder(apidto.getProvider(), apidto.getName(), apidto.getVersion()).
                 id(apidto.getId()).
                 context(apidto.getContext()).
@@ -312,19 +322,45 @@ public class MappingUtil {
      * @return
      */
     private static List<APIInfoDTO> toAPIInfo(List<API> apiSummaryList) {
-        List<APIInfoDTO> apiInfoList = new ArrayList<APIInfoDTO>();
+
+        List<APIInfoDTO> apiInfoList = new ArrayList<>();
         for (API apiSummary : apiSummaryList) {
-            APIInfoDTO apiInfo = new APIInfoDTO();
-            apiInfo.setId(apiSummary.getId());
-            apiInfo.setContext(apiSummary.getContext());
-            apiInfo.setDescription(apiSummary.getDescription());
-            apiInfo.setName(apiSummary.getName());
-            apiInfo.setProvider(apiSummary.getProvider());
-            apiInfo.setLifeCycleStatus(apiSummary.getLifeCycleStatus());
-            apiInfo.setVersion(apiSummary.getVersion());
-            apiInfo.setWorkflowStatus(apiSummary.getWorkflowStatus());
-            apiInfo.setSecurityScheme(mapSecuritySchemeIntToList(apiSummary.getSecurityScheme()));
-            apiInfoList.add(apiInfo);
+            try {
+                APIInfoDTO apiInfo = new APIInfoDTO();
+                apiInfo.setId(apiSummary.getId());
+                apiInfo.setContext(apiSummary.getContext());
+                apiInfo.setDescription(apiSummary.getDescription());
+                apiInfo.setName(apiSummary.getName());
+                String realName = APIManagerFactory.getInstance().getUserNameMapper().getLoggedInUserIDFromPseudoName
+                        (apiSummary.getProvider());
+                apiInfo.setProvider(realName);
+                apiInfo.setLifeCycleStatus(apiSummary.getLifeCycleStatus());
+                apiInfo.setVersion(apiSummary.getVersion());
+                apiInfo.setWorkflowStatus(apiSummary.getWorkflowStatus());
+                apiInfo.setSecurityScheme(mapSecuritySchemeIntToList(apiSummary.getSecurityScheme()));
+                apiInfoList.add(apiInfo);
+            } catch (APIManagementException e) {
+                // This not to throw as this have api list
+                log.error("Error while Retrieving RealName from PseudoName", e);
+            }
+        }
+        return apiInfoList;
+    }
+
+    /**
+     * Converts {@link API} List to an {@link APIDTO} List.
+     *
+     * @param apiSummaryList
+     * @return
+     */
+    private static List<APIInfoDTO> toAPI(List<API> apiSummaryList) {
+        List<APIInfoDTO> apiInfoList = new ArrayList<>();
+        for (API api : apiSummaryList) {
+            try {
+                apiInfoList.add(toAPIDto(api));
+            } catch (APIManagementException e) {
+                // This not to throw as this have api list
+                log.error("Error while Retrieving RealName from PseudoName", e);            }
         }
         return apiInfoList;
     }
@@ -333,14 +369,19 @@ public class MappingUtil {
      * Converts API list to APIListDTO list.
      *
      * @param apisResult List of APIs
+     * @param expand Specify whether to get detail API or summary API
      * @return APIListDTO object
      */
-    public static APIListDTO toAPIListDTO(List<API> apisResult) {
+    public static APIListDTO toAPIListDTO(List<API> apisResult, boolean expand) {
         APIListDTO apiListDTO = new APIListDTO();
         apiListDTO.setCount(apisResult.size());
         // apiListDTO.setNext(next);
         // apiListDTO.setPrevious(previous);
-        apiListDTO.setList(toAPIInfo(apisResult));
+        if (expand) {
+            apiListDTO.setList(toAPI(apisResult));
+        } else {
+            apiListDTO.setList(toAPIInfo(apisResult));
+        }
         return apiListDTO;
     }
 
@@ -406,12 +447,14 @@ public class MappingUtil {
      * @param application Contains application data
      * @return DTO containing application data
      */
-    public static ApplicationDTO toApplicationDto(Application application) {
+    public static ApplicationDTO toApplicationDto(Application application) throws APIManagementException {
         ApplicationDTO applicationDTO = new ApplicationDTO();
         applicationDTO.setApplicationId(application.getId());
         applicationDTO.setDescription(application.getDescription());
         applicationDTO.setName(application.getName());
-        applicationDTO.setSubscriber(application.getCreatedUser());
+        String realName = APIManagerFactory.getInstance().getUserNameMapper().getLoggedInUserIDFromPseudoName
+                    (application.getCreatedUser());
+        applicationDTO.setSubscriber(realName);
         if (application.getPolicy() != null) {
             applicationDTO.setThrottlingTier(application.getPolicy().getPolicyName());
         }
@@ -430,7 +473,12 @@ public class MappingUtil {
                                                                 Integer offset) {
         SubscriptionListDTO subscriptionListDTO = new SubscriptionListDTO();
         for (Subscription subscription : subscriptionList) {
-            subscriptionListDTO.addListItem(fromSubscription(subscription));
+            try {
+                subscriptionListDTO.addListItem(fromSubscription(subscription));
+            } catch (APIManagementException e) {
+                // Need to list other non affected Subscriptions
+                log.error(e.getMessage(), e);
+            }
         }
         //TODO need to change when pagination implementation goes on
         subscriptionListDTO.count(subscriptionList.size());
@@ -443,7 +491,7 @@ public class MappingUtil {
      * @param subscription subscription model containg subscription details
      * @return SubscriptionDTO containing subscription list
      */
-    public static SubscriptionDTO fromSubscription(Subscription subscription) {
+    public static SubscriptionDTO fromSubscription(Subscription subscription) throws APIManagementException {
         SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
         subscriptionDTO.setSubscriptionId(subscription.getId());
         subscriptionDTO.setSubscriptionStatus(

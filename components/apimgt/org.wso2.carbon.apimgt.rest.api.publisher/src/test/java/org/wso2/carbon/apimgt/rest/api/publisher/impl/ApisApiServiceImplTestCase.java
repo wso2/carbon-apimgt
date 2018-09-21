@@ -1265,8 +1265,8 @@ public class ApisApiServiceImplTestCase {
         PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
                 thenReturn(apiPublisher);
         Mockito.doReturn(apis).doThrow(new IllegalArgumentException())
-                .when(apiPublisher).searchAPIs(10, 0, "");
-        Response response = apisApiService.apisGet(10, 0, "", null, getRequest());
+                .when(apiPublisher).searchAPIs(10, 0, "", false);
+        Response response = apisApiService.apisGet(10, 0, "", null, false, getRequest());
         assertEquals(response.getStatus(), 200);
         assertTrue(response.getEntity().toString().contains("newAPI1"));
         assertTrue(response.getEntity().toString().contains("newAPI2"));
@@ -1282,8 +1282,8 @@ public class ApisApiServiceImplTestCase {
         PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
                 thenReturn(apiPublisher);
         Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.API_TYPE_INVALID))
-                .when(apiPublisher).searchAPIs(10, 0, "");
-        Response response = apisApiService.apisGet(10, 0, "", null, getRequest());
+                .when(apiPublisher).searchAPIs(10, 0, "", false);
+        Response response = apisApiService.apisGet(10, 0, "", null, false, getRequest());
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("API Type specified is invalid"));
     }

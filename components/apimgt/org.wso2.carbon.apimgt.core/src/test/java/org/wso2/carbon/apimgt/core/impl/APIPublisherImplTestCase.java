@@ -105,6 +105,7 @@ import static org.wso2.carbon.apimgt.core.dao.impl.PolicyDAOImpl.GOLD_TIER;
 import static org.wso2.carbon.apimgt.core.dao.impl.PolicyDAOImpl.SILVER_TIER;
 
 public class APIPublisherImplTestCase {
+
     private static final String USER = "admin";
     private static final String ALTERNATIVE_USER = "alternativeUser";
     private static final String USER_ID = "d54de56r-4151-448e-5423-85b4f1f8b069";
@@ -124,6 +125,7 @@ public class APIPublisherImplTestCase {
 
     @BeforeClass
     void init() {
+
         File temp = Files.createTempDir();
         temp.deleteOnExit();
         System.setProperty("gwHome", temp.getAbsolutePath());
@@ -134,16 +136,19 @@ public class APIPublisherImplTestCase {
 
             @Override
             public <T> T getConfigurationObject(Class<T> configClass) throws ConfigurationException {
+
                 T workflowConfig = (T) new WorkflowConfig();
                 return workflowConfig;
             }
 
             @Override
             public Object getConfigurationObject(String s) throws ConfigurationException {
+
                 return null;
             }
 
             public <T> T getConfigurationObject(String s, Class<T> aClass) throws ConfigurationException {
+
                 return null;
             }
 
@@ -221,6 +226,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Test add api with sandbox endpoint")
     public void testAddApiSandboxEndpoint() throws APIManagementException, LifecycleException {
+
         Map<String, Endpoint> endpointMap = new HashMap<>();
         Map<String, Endpoint> resourceEndpointMap = new HashMap<>();
         Map<String, UriTemplate> uriTemplateMap = new HashMap();
@@ -269,6 +275,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Test add api when uri templates are empty")
     public void testAddApiWithEmptyUriTemplate() throws APIManagementException, LifecycleException {
+
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().uriTemplates(new HashMap<>());
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
@@ -302,6 +309,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Test add api with empty templateId and api definition")
     public void testAddApiWithEmptyTemplateIdAndApiDefinition() throws APIManagementException, LifecycleException {
+
         Map<String, UriTemplate> uriTemplateMap = new HashMap();
         UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder();
         uriTemplateBuilder.endpoint(Collections.emptyMap());
@@ -345,6 +353,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Updating API Gateway Config")
     public void testUpdateApiGatewayConfig() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
@@ -376,6 +385,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Exception updating Gateway Config for API", expectedExceptions = APIManagementException.class)
     public void testUpdateApiGatewayConfigException() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
@@ -422,6 +432,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Test add api with duplicate name", expectedExceptions = APIManagementException.class)
     public void testAddApiWithDuplicateName() throws APIManagementException, LifecycleException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         LabelDAO labelDao = Mockito.mock(LabelDAO.class);
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI();
@@ -443,6 +454,7 @@ public class APIPublisherImplTestCase {
     @Test(description = "Test add api with API Lifecycle failed",
             expectedExceptions = {LifecycleException.class, APIManagementException.class})
     public void testAddAPILifecycleFailure() throws LifecycleException, APIManagementException {
+
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI();
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         LabelDAO labelDao = Mockito.mock(LabelDAO.class);
@@ -461,6 +473,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Test add api with restricted visibility")
     public void testAddApiWithRestrictedVisibility() throws APIManagementException, LifecycleException {
+
         Set<String> visibleRoles = new HashSet<>();
         visibleRoles.add(ADMIN_ROLE);
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI()
@@ -501,6 +514,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Get API with valid APIID")
     public void testGetApi() throws APIManagementException, LifecycleException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
@@ -523,6 +537,7 @@ public class APIPublisherImplTestCase {
     @Test(description = "Delete API when the logged in user has no delete permission for the API")
     public void testDeleteApiWhenUserHasNoDeletePermission()
             throws APIManagementException, LifecycleException, SQLException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
         APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
@@ -555,6 +570,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Delete API with zero Subscriptions")
     public void testDeleteApiWithZeroSubscriptions() throws APIManagementException, LifecycleException, SQLException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         List<String> roleIdsOfUser = new ArrayList<>();
         roleIdsOfUser.add(ADMIN_ROLE_ID);
@@ -592,6 +608,7 @@ public class APIPublisherImplTestCase {
     @Test(description = "Delete API with zero Subscriptions and pending wf state change")
     public void testDeleteApiWithZeroSubscriptionsAndPendingStateChange()
             throws APIManagementException, LifecycleException, SQLException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
         APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
@@ -631,6 +648,7 @@ public class APIPublisherImplTestCase {
     @Test(description = "Exception when getting api subscription count by API",
             expectedExceptions = APIManagementException.class)
     public void testGetAPISubscriptionCountByAPI() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
@@ -648,6 +666,7 @@ public class APIPublisherImplTestCase {
     @Test(description = "Error occurred while deleting API with zero subscriptions")
     public void testDeleteApiWithZeroSubscriptionsException()
             throws APIManagementException, LifecycleException, SQLException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
@@ -699,6 +718,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Search APIs")
     public void testSearchAPIs() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         List<String> roleIdsOfUser = new ArrayList<>();
         roleIdsOfUser.add(ADMIN_ROLE_ID);
@@ -713,7 +733,7 @@ public class APIPublisherImplTestCase {
                 thenReturn(apimResultsFromDAO);
         Mockito.when(identityProvider.getIdOfUser(ALTERNATIVE_USER)).thenReturn(USER_ID);
         Mockito.when(identityProvider.getRoleIdsOfUser(USER_ID)).thenReturn(roleIdsOfUser);
-        List<API> apis = apiPublisher.searchAPIs(2, 1, api1.getName());
+        List<API> apis = apiPublisher.searchAPIs(2, 1, api1.getName(), false);
         Assert.assertNotNull(apis);
         Mockito.verify(apiDAO, Mockito.atLeastOnce())
                 .searchAPIs(new HashSet<>(roleIdsOfUser), ALTERNATIVE_USER, api1.getName(), 1, 2);
@@ -721,18 +741,20 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Search APIs with null query string")
     public void testSearchAPIsWithNullQuery() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(daoFactory);
         List<API> apimResultsFromDAO = new ArrayList<>();
         Mockito.when(apiDAO.searchAPIs(new HashSet<>(), USER, null, 1, 2)).thenReturn(apimResultsFromDAO);
-        apiPublisher.searchAPIs(2, 1, null);
+        apiPublisher.searchAPIs(2, 1, null, false);
         Mockito.verify(apiDAO, Mockito.times(1)).getAPIs(new HashSet<String>(), USER);
     }
 
     @Test(description = "Exception when searching APIs")
     public void testSearchAPIsException() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
@@ -744,7 +766,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiDAO.searchAPIs(new HashSet<>(), ALTERNATIVE_USER, QUERY_STRING, 1, 2))
                 .thenThrow(APIMgtDAOException.class);
         try {
-            apiPublisher.searchAPIs(2, 1, QUERY_STRING);
+            apiPublisher.searchAPIs(2, 1, QUERY_STRING, false);
         } catch (APIManagementException e) {
             Assert.assertEquals(e.getMessage(), "Error occurred while Searching the API with query " + QUERY_STRING);
         }
@@ -753,7 +775,7 @@ public class APIPublisherImplTestCase {
         //IdentityProviderException
         Mockito.when(identityProvider.getIdOfUser(ALTERNATIVE_USER)).thenThrow(IdentityProviderException.class);
         try {
-            apiPublisher.searchAPIs(2, 1, QUERY_STRING);
+            apiPublisher.searchAPIs(2, 1, QUERY_STRING, false);
         } catch (APIManagementException e) {
             Assert.assertEquals(e.getMessage(),
                     "Error occurred while calling SCIM endpoint to retrieve user " + ALTERNATIVE_USER
@@ -763,6 +785,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Get subscriptions for a provider's APIs")
     public void testGetSubscribersOfProvider() throws APIManagementException {
+
         APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
         Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
@@ -776,6 +799,7 @@ public class APIPublisherImplTestCase {
     @Test(description = "Exception when getting subscriptions for a provider's APIs",
             expectedExceptions = APIManagementException.class)
     public void testGetSubscribersOfProviderException() throws APIManagementException {
+
         APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
         Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
@@ -789,6 +813,7 @@ public class APIPublisherImplTestCase {
             expectedExceptions = APIManagementException.class)
     public void testDeleteApiWithZeroSubscriptionsLifeCycleException()
             throws APIManagementException, LifecycleException, SQLException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
@@ -813,6 +838,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Delete API with Subscriptions", expectedExceptions = ApiDeleteFailureException.class)
     public void testDeleteApiWithSubscriptions() throws LifecycleException, APIManagementException, SQLException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
@@ -830,6 +856,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Test UpdateAPI with Status unchanged")
     public void testUpdateAPIWithStatusUnchanged() throws APIManagementException, LifecycleException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
@@ -870,6 +897,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Test UpdateAPI with Status changed", expectedExceptions = APIManagementException.class)
     public void testUpdateAPIWithStatusChanged() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
@@ -890,6 +918,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Test UpdateAPI with context changed")
     public void testUpdateAPIWithContextChange() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
@@ -924,6 +953,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Test UpdateAPI with api name changed", expectedExceptions = APIManagementException.class)
     public void testUpdateAPIWithNameChange() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
@@ -943,6 +973,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Test UpdateAPI with version changed", expectedExceptions = APIManagementException.class)
     public void testUpdateAPIWithVersionChange() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
@@ -962,6 +993,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Test UpdateAPI with provider changed", expectedExceptions = APIManagementException.class)
     public void testUpdateAPIWithProviderChange() throws APIManagementException {
+
         String newProvider = "testProvider";
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
@@ -983,6 +1015,7 @@ public class APIPublisherImplTestCase {
     @Test(description = "Test UpdateAPI with both context and version changed",
             expectedExceptions = APIManagementException.class)
     public void testUpdateAPIWithContextAndVersionChange() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
@@ -1002,6 +1035,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Exception when updating API")
     public void testUpdateAPIException() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
@@ -1071,6 +1105,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "IdentityProviderException when updating API when getting permissions of logged in user")
     public void testUpdateAPIIdentityProviderException() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
@@ -1093,6 +1128,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Test UpdateAPI with Status unchanged but different context")
     public void testUpdateAPIWithStatusUnchangedButDifferentContext() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
@@ -1130,6 +1166,7 @@ public class APIPublisherImplTestCase {
     @Test(description = "Test UpdateAPI with Status unchanged but context exist",
             expectedExceptions = APIManagementException.class)
     public void testUpdateAPIWithStatusUnchangedWhenContextExists() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
@@ -1158,6 +1195,7 @@ public class APIPublisherImplTestCase {
     @Test(description = "Test UpdateAPI with null api returned by uuid",
             expectedExceptions = APIManagementException.class)
     public void testUpdateNullAPI() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         API.APIBuilder api = SampleTestObjectCreator.createDefaultAPI();
@@ -1172,6 +1210,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Test UpdateAPI with restricted visibility")
     public void testUpdateAPIWithRestrictedVisibility() throws APIManagementException, LifecycleException {
+
         Set<String> visibleRoles = new HashSet<>();
         visibleRoles.add(ADMIN_ROLE);
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
@@ -1215,6 +1254,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Test UpdateAPI with restricted visibility but different context")
     public void testUpdateAPIWithRestrictedVisibilityButDifferentContext() throws APIManagementException {
+
         Set<String> visibleRoles = new HashSet<>();
         visibleRoles.add(ADMIN_ROLE);
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
@@ -1254,6 +1294,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Update api status")
     public void testUpdateAPIStatus() throws APIManagementException, LifecycleException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
@@ -1286,6 +1327,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Update api status", expectedExceptions = {APIManagementException.class})
     public void testUpdateAPIStatusWhileAPINotAvailable() throws APIManagementException, LifecycleException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
@@ -1307,6 +1349,7 @@ public class APIPublisherImplTestCase {
     @Test(description = "Update api status",
             expectedExceptions = {APIMgtDAOException.class, APIManagementException.class})
     public void testUpdateAPIStatusWhileGettingDBFailure() throws APIManagementException, LifecycleException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
@@ -1326,6 +1369,7 @@ public class APIPublisherImplTestCase {
     @Test(description = "Update api status with deprecating previous versions and not require re-subscriptions")
     public void testUpdateAPIStatusDeprecatePreviousVersionsAndNotRequireReSubscription()
             throws APIManagementException, LifecycleException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
         APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
@@ -1392,6 +1436,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Update api status with re-subscriptions")
     public void testUpdateAPIStatusRequireReSubscription() throws APIManagementException, LifecycleException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
         APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
@@ -1432,6 +1477,7 @@ public class APIPublisherImplTestCase {
     @Test(description = "Update API Status when its workflow status is pending",
             expectedExceptions = APIManagementException.class)
     public void testUpdateAPIWorkflowStatus() throws APIManagementException, LifecycleException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
@@ -1464,6 +1510,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Update checklist item")
     public void testUpdateCheckListItem() throws APIManagementException, LifecycleException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
@@ -1484,6 +1531,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Update API when there is a list of invalid roles specified for permission")
     public void testReplaceGroupNamesWithIdWithInvalidRoles() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
@@ -1515,6 +1563,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Remove api pending lc status change request")
     public void testRemovePendingLifecycleWorkflowTaskForAPI() throws APIManagementException, LifecycleException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
@@ -1543,6 +1592,7 @@ public class APIPublisherImplTestCase {
             expectedExceptions = APIManagementException.class)
     public void testRemovePendingLifecycleWorkflowTaskForAPIForAPIWithoutPendingLCState()
             throws APIManagementException, LifecycleException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
@@ -1564,6 +1614,7 @@ public class APIPublisherImplTestCase {
             expectedExceptions = APIManagementException.class)
     public void testTemovePendingLifecycleWorkflowTaskForAPIForAPIWithoutPendingLCState()
             throws APIManagementException, LifecycleException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
@@ -1592,6 +1643,7 @@ public class APIPublisherImplTestCase {
             expectedExceptions = APIManagementException.class)
     public void testRemovePendingLifecycleWorkflowTaskForInvalidAPI()
             throws APIManagementException, LifecycleException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
@@ -1609,6 +1661,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Create new  API version with valid APIID")
     public void testCreateNewAPIVersion() throws APIManagementException, LifecycleException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
@@ -1631,6 +1684,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Create new  API version when API definition is empty")
     public void testCreateNewAPIVersionWithEmptyAPIDefinition() throws APIManagementException, LifecycleException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         API api = SampleTestObjectCreator.createDefaultAPI().apiDefinition("").build();
@@ -1653,6 +1707,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Create new  API version with invalid APIID")
     public void testCreateNewAPIVersionWithInvalidUUID() throws APIManagementException, LifecycleException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
@@ -1670,6 +1725,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Create new  API version with empty APIID")
     void testCreateNewAPIVersionWithEmptyUUID() throws APIManagementException, LifecycleException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
@@ -1685,6 +1741,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Create new  API version with invalid API version")
     void testCreateNewAPIVersionWithEmptyVersion() throws APIManagementException, LifecycleException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
@@ -1702,6 +1759,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Create new  API version with previous API version")
     void testCreateNewAPIVersionWithPreviousVersion() throws APIManagementException, LifecycleException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
@@ -1724,6 +1782,7 @@ public class APIPublisherImplTestCase {
             expectedExceptions = {LifecycleException.class, APIManagementException.class})
     public void testCreateNewAPIVersionAndCheckNewApiLifecycleAddFailure()
             throws APIManagementException, LifecycleException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
@@ -1742,6 +1801,7 @@ public class APIPublisherImplTestCase {
     @Test(description = "Create new  API version with APIID and new API lifecycle add get failed",
             expectedExceptions = {APIMgtDAOException.class, APIManagementException.class})
     public void testCreateNewAPIVersionAndGetAPIByUuidFailure() throws APIManagementException, LifecycleException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
@@ -1754,6 +1814,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Check if api exist with valid uuid")
     public void testCheckIfAPIExistForValidUuid() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -1764,6 +1825,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Check if api exist with invalid uuid")
     public void testCheckIfAPIExistForInValidUuid() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -1775,6 +1837,7 @@ public class APIPublisherImplTestCase {
     @Test(description = "Check if api exist with invalid uuid",
             expectedExceptions = {APIMgtDAOException.class, APIManagementException.class})
     public void testCheckIfAPIExistWhileGettingJDBCConnectionFailure() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -1785,6 +1848,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Add Documentation Info")
     public void testAddDocumentationInfo() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DocumentInfo documentInfo = new DocumentInfo.Builder().fileName("sample_doc.pdf").name("howto_guide").id(DOC_ID)
                 .permission("[{\"groupId\": \"testGroup\",\"permission\":[\"READ\",\"UPDATE\",\"DELETE\"]}]").build();
@@ -1798,6 +1862,7 @@ public class APIPublisherImplTestCase {
     @Test(description = "Document already exists error when adding Documentation Info",
             expectedExceptions = APIManagementException.class)
     public void testAddDocumentationInfoDocAlreadyExists() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo();
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
@@ -1809,6 +1874,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Unable to add documentation info", expectedExceptions = APIManagementException.class)
     public void testUnableToAddDocumentationException() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo();
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
@@ -1822,6 +1888,7 @@ public class APIPublisherImplTestCase {
     @Test(description = "Parse exception when adding documentation info",
             expectedExceptions = APIManagementException.class)
     public void testAddDocumentationInfoJsonParseException() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DocumentInfo documentInfo = new DocumentInfo.Builder().fileName("sample_doc.pdf").name("howto_guide").id("")
                 .permission("data").build();
@@ -1833,6 +1900,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Remove Documentation Info")
     public void testRemoveDocumentationInfo() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -1843,6 +1911,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Exception when removing Documentation Info", expectedExceptions = APIManagementException.class)
     public void testRemoveDocumentationInfoException() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -1854,6 +1923,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Upload Documentation File")
     public void testUploadDocumentationFile() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -1865,6 +1935,7 @@ public class APIPublisherImplTestCase {
     @Test(description = "Exception when uploading Documentation File",
             expectedExceptions = APIManagementException.class)
     public void testUploadDocumentationFileException() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -1876,6 +1947,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Add documentation inline content")
     public void testAddDocumentationContent() throws APIManagementException, IOException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         String inlineContent = SampleTestObjectCreator.createDefaultInlineDocumentationContent();
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
@@ -1887,6 +1959,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Update Documentation Info")
     public void testUpdateDocumentation() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DocumentInfo documentInfo = new DocumentInfo.Builder().fileName("sample_doc.pdf").name("howto_guide").id(DOC_ID)
                 .permission("[{\"groupId\": \"testGroup\",\"permission\":[\"READ\",\"UPDATE\",\"DELETE\"]}]").build();
@@ -1901,6 +1974,7 @@ public class APIPublisherImplTestCase {
     @Test(description = "Documentation does not exists error when updating Documentation Info",
             expectedExceptions = APIManagementException.class)
     public void testUpdateDocumentationDocNotExists() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo();
         Mockito.when(apiDAO.isDocumentExist(API_ID, documentInfo)).thenReturn(false);
@@ -1912,6 +1986,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Unable to update documentation info")
     public void testUnableToUpdateDocumentationException() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo();
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
@@ -1929,6 +2004,7 @@ public class APIPublisherImplTestCase {
     @Test(description = "Parse exception when updating documentation info",
             expectedExceptions = APIManagementException.class)
     public void testUpdateDocumentationInfoJsonParseException() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DocumentInfo documentInfo = new DocumentInfo.Builder().fileName("sample_doc.pdf").name("howto_guide").id("")
                 .permission("data").build();
@@ -1940,6 +2016,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Exception when updating api status", expectedExceptions = APIManagementException.class)
     public void testUpdateAPIStatusException() throws APIManagementException, LifecycleException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
@@ -1968,6 +2045,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Exception when updating checklist item", expectedExceptions = APIManagementException.class)
     public void testUpdateCheckListItemException() throws APIManagementException, LifecycleException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
@@ -1988,6 +2066,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Get lifecycle events list of an API")
     public void testGetLifeCycleEvents() throws APIManagementException, LifecycleException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
@@ -2012,6 +2091,7 @@ public class APIPublisherImplTestCase {
             expectedExceptions = APIManagementException.class)
     public void testGetLifeCycleEventsExceptionFindingApiSummaryResource()
             throws APIManagementException, LifecycleException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         Mockito.when(apiDAO.getAPISummary(API_ID))
                 .thenThrow(new APIMgtDAOException("Couldn't find APISummary Resource for ID " + API_ID));
@@ -2025,6 +2105,7 @@ public class APIPublisherImplTestCase {
             expectedExceptions = APIManagementException.class)
     public void testGetLifeCycleEventsExceptionFindingAPILifeCycleHistory()
             throws APIManagementException, LifecycleException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
@@ -2042,6 +2123,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Get api lifecycle data")
     public void testGetAPILifeCycleData() throws APIManagementException, LifecycleException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
@@ -2062,6 +2144,7 @@ public class APIPublisherImplTestCase {
     @Test(description = "Get api lifecycle data for a null api",
             expectedExceptions = APIManagementException.class)
     public void testGetAPILifeCycleDataForNullAPI() throws APIManagementException, LifecycleException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -2075,6 +2158,7 @@ public class APIPublisherImplTestCase {
             expectedExceptions = APIManagementException.class)
     public void testGetAPILifeCycleDataExceptionWhenRetrievingAPISummary()
             throws APIManagementException, LifecycleException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -2088,6 +2172,7 @@ public class APIPublisherImplTestCase {
             expectedExceptions = APIManagementException.class)
     public void testGetAPILifeCycleDataExceptionWhenRetrievingAPILifeCycle()
             throws APIManagementException, LifecycleException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
@@ -2106,6 +2191,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Save thumbnail image for API")
     public void testSaveThumbnailImage() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -2118,6 +2204,7 @@ public class APIPublisherImplTestCase {
     @Test(description = "Exception when saving thumbnail image for API",
             expectedExceptions = APIManagementException.class)
     public void testSaveThumbnailImageException() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -2129,6 +2216,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Get thumbnail image for API")
     public void testGetThumbnailImage() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -2143,6 +2231,7 @@ public class APIPublisherImplTestCase {
     @Test(description = "Exception when getting thumbnail image for API",
             expectedExceptions = APIManagementException.class)
     public void testGetThumbnailImageException() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -2154,6 +2243,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Retrieving all labels")
     public void testGetAllLabels() throws APIManagementException {
+
         LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
         Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDAO);
@@ -2165,6 +2255,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Exception when retrieving all labels", expectedExceptions = Exception.class)
     public void testGetAllLabelsException() throws Exception {
+
         LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
         Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDAO);
@@ -2173,9 +2264,9 @@ public class APIPublisherImplTestCase {
         apiPublisher.getAllLabels();
     }
 
-
     @Test(description = "get  labels by STORE type")
     public void getLabelsByType() throws Exception {
+
         LabelDAO labelDao = Mockito.mock(LabelDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
         Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDao);
@@ -2185,9 +2276,9 @@ public class APIPublisherImplTestCase {
         Mockito.verify(labelDao, Mockito.times(1)).getLabelsByType("GATEWAY");
     }
 
-
     @Test(description = "get labels by type Exception", expectedExceptions = Exception.class)
     public void getLabelsByTypeException() throws Exception {
+
         LabelDAO labelDao = Mockito.mock(LabelDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
         Mockito.when(daoFactory.getLabelDAO()).thenReturn(labelDao);
@@ -2199,6 +2290,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Update subscription status")
     public void testUpdateSubscriptionStatus() throws APIManagementException {
+
         APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
         APIGateway apiGatewayPublisher = Mockito.mock(APIGateway.class);
         Application application = SampleTestObjectCreator.createDefaultApplication();
@@ -2216,6 +2308,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Error when updating subscription status", expectedExceptions = APIManagementException.class)
     public void testUpdateSubscriptionStatusException() throws APIManagementException {
+
         APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
         Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
@@ -2227,6 +2320,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Update subscription policy")
     public void testUpdateSubscriptionPolicy() throws APIManagementException {
+
         APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
         Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
@@ -2237,6 +2331,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Error when updating subscription policy", expectedExceptions = APIManagementException.class)
     public void testUpdateSubscriptionPolicyException() throws APIManagementException {
+
         APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
         Mockito.when(daoFactory.getAPISubscriptionDAO()).thenReturn(apiSubscriptionDAO);
@@ -2248,6 +2343,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Get last updated time of endpoint")
     public void testGetLastUpdatedTimeOfEndpoint() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -2260,6 +2356,7 @@ public class APIPublisherImplTestCase {
     @Test(description = "Exception when getting last updated time of endpoint",
             expectedExceptions = APIManagementException.class)
     public void testGetLastUpdatedTimeOfEndpointException() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -2271,6 +2368,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Get last updated time of Throttling Policy")
     public void testGetLastUpdatedTimeOfThrottlingPolicy() throws APIManagementException {
+
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
         Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
@@ -2285,6 +2383,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Get last updated time of Gateway Config")
     public void testGetLastUpdatedTimeOfGatewayConfig() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -2297,6 +2396,7 @@ public class APIPublisherImplTestCase {
     @Test(description = "Exception when getting last updated time of Gateway Config",
             expectedExceptions = APIManagementException.class)
     public void testGetLastUpdatedTimeOfGatewayConfigException() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -2310,6 +2410,7 @@ public class APIPublisherImplTestCase {
     @Test(description = "Exception when getting last updated time of Throttling Policy",
             expectedExceptions = APIManagementException.class)
     public void testGetLastUpdatedTimeOfThrottlingPolicyException() throws APIManagementException {
+
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
         Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
@@ -2323,6 +2424,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Get all policies by level")
     public void testGetAllPoliciesByLevel() throws APIManagementException {
+
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
         List<Policy> policies = new ArrayList<>();
         Policy policy = Mockito.mock(Policy.class);
@@ -2348,6 +2450,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Get all policy by name")
     public void testGetPolicyByName() throws APIManagementException {
+
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
         Policy policy = Mockito.mock(Policy.class);
         policy.setPolicyName(POLICY_NAME);
@@ -2376,6 +2479,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Test if endpoint exists")
     public void testIsEndpointExist() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -2394,6 +2498,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Test adding an API from WSDL file")
     public void testAddUpdateAPIFromWSDLFile() throws APIManagementException, LifecycleException, IOException {
+
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI()
                 .endpoint(SampleTestObjectCreator.getMockEndpointMap());
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
@@ -2428,6 +2533,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Test adding an API from WSDL archive")
     public void testAddUpdateAPIFromWSDLArchive() throws APIManagementException, LifecycleException, IOException {
+
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI()
                 .endpoint(SampleTestObjectCreator.getMockEndpointMap());
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
@@ -2459,6 +2565,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Retrieve a WSDL of an API")
     public void testGetAPIWSDL() throws APIManagementException, IOException {
+
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
@@ -2474,6 +2581,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Retrieve a WSDL archive of an API")
     public void testGetAPIWSDLArchive() throws APIManagementException, IOException {
+
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
@@ -2487,6 +2595,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Save swagger definition for API")
     public void testSaveSwagger20Definition() throws APIManagementException, IOException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
@@ -2518,6 +2627,7 @@ public class APIPublisherImplTestCase {
     @Test(description = "Exception when saving swagger definition for API",
             expectedExceptions = APIManagementException.class)
     public void testSaveSwagger20DefinitionException() throws APIManagementException, IOException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
@@ -2546,6 +2656,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Test getting all endpoints")
     public void testGetAllEndpoints() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         List<Endpoint> endpointList = new ArrayList<>();
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
@@ -2566,6 +2677,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Test getting endpoint")
     public void testGetEndpoint() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         Endpoint endpoint = SampleTestObjectCreator.createMockEndpoint();
         String endpointId = endpoint.getId();
@@ -2587,6 +2699,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Test getting endpoint by name")
     public void testGetEndpointByName() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         Endpoint endpoint = SampleTestObjectCreator.createMockEndpoint();
         String endpointName = endpoint.getName();
@@ -2645,6 +2758,7 @@ public class APIPublisherImplTestCase {
     @Test(description = "Add api from definition using httpUrlConnection")
     public void testAddApiFromDefinitionFromUrlConnection()
             throws APIManagementException, LifecycleException, IOException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         LabelDAO labelDao = Mockito.mock(LabelDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
@@ -2674,6 +2788,7 @@ public class APIPublisherImplTestCase {
     @Test(description = "Couldn't retrieve swagger definition for api when getting api gateway config",
             expectedExceptions = APIManagementException.class)
     public void testGetApiGatewayConfigException() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -2687,6 +2802,7 @@ public class APIPublisherImplTestCase {
             expectedExceptions = APIManagementException.class)
     public void testAddApiDefinitionErrorGettingSwaggerResource()
             throws APIManagementException, LifecycleException, IOException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         HttpURLConnection httpURLConnection = Mockito.mock(HttpURLConnection.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
@@ -2705,6 +2821,7 @@ public class APIPublisherImplTestCase {
             expectedExceptions = APIManagementException.class)
     public void testAddApiDefinitionErrorProtocolException()
             throws APIManagementException, LifecycleException, IOException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         HttpURLConnection httpURLConnection = Mockito.mock(HttpURLConnection.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
@@ -2722,6 +2839,7 @@ public class APIPublisherImplTestCase {
     @Test(description = "Test IO exception when adding api definition from swagger resource",
             expectedExceptions = APIManagementException.class)
     public void testAddApiDefinitionErrorIOException() throws APIManagementException, LifecycleException, IOException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         HttpURLConnection httpURLConnection = Mockito.mock(HttpURLConnection.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
@@ -2738,6 +2856,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "SwaggerDefinition get for api")
     public void testGetApiDefinition() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         String uuid = UUID.randomUUID().toString();
         Mockito.when(apiDAO.getApiSwaggerDefinition(uuid)).thenReturn(SampleTestObjectCreator.apiDefinition);
@@ -2749,6 +2868,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Endpoint add")
     public void testAddEndpoint() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
@@ -2763,6 +2883,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Add endpoint when endpoint name is null")
     public void testAddEndpointWhenNameNull() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
@@ -2779,6 +2900,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Add endpoint when endpoint name is empty")
     public void testAddEndpointWhenNameEmpty() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
@@ -2795,6 +2917,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Add endpoint when endpoint name already exist")
     public void testAddEndpointWhenEndpointExist() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
@@ -2813,6 +2936,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Exception when adding endpoint")
     public void testAddEndpointException() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
@@ -2831,6 +2955,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Update endpoint")
     public void testUpdateEndpoint() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
@@ -2854,6 +2979,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Delete endpoint")
     public void testDeleteEndpoint() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
@@ -2996,7 +3122,6 @@ public class APIPublisherImplTestCase {
         Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
         Mockito.verify(apiDAO, Mockito.times(1)).getEndpointByName(apiEndpoint.getName());
     }
-
 
     @Test(description = "Test add api with Api Specific Endpoint")
     public void testAddResourceLevelEndpoint() throws APIManagementException, LifecycleException {
@@ -3577,6 +3702,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Save swagger definition for API")
     public void testUpdateSwagger20DefinitionWithDifferentSwagger() throws APIManagementException, IOException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
@@ -3604,6 +3730,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Save swagger definition for API")
     public void testUpdateSwagger20DefinitionWithDifferentSwagger2() throws APIManagementException, IOException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
@@ -3631,6 +3758,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Save swagger definition for API")
     public void testGetScopesFromApi() throws APIManagementException, IOException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
@@ -3647,6 +3775,7 @@ public class APIPublisherImplTestCase {
 
     @Test
     public void testGetScopeInformationFromApi() throws APIManagementException, IOException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         KeyManager keyManager = Mockito.mock(KeyManager.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
@@ -3664,6 +3793,7 @@ public class APIPublisherImplTestCase {
 
     @Test
     public void testGetScopeInformationForNonExistingScope() throws APIManagementException, IOException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         KeyManager keyManager = Mockito.mock(KeyManager.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
@@ -3684,9 +3814,9 @@ public class APIPublisherImplTestCase {
         }
     }
 
-
     @Test(description = "Add Scope to API")
     public void testAddScopeToApi() throws APIManagementException, IOException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
@@ -3713,6 +3843,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Add existing Scope to API")
     public void testAddExistingScopeToApi() throws APIManagementException, IOException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
@@ -3740,6 +3871,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Add existing Scope to API")
     public void testAddExistingScopeToApi2() throws APIManagementException, IOException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
@@ -3768,6 +3900,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "update existing Scope to API")
     public void testUpdateScopeToApi() throws APIManagementException, IOException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
@@ -3793,6 +3926,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "update existing Scope to API")
     public void testUpdateScopeOfNonExistingScope() throws APIManagementException, IOException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
@@ -3820,6 +3954,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Delete existing Scope of API")
     public void testDeleteScopeToApi() throws APIManagementException, IOException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
@@ -3843,6 +3978,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "delete existing Scope to API")
     public void testDeleteScopeOfNonExistingScope() throws APIManagementException, IOException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
@@ -3870,6 +4006,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Get dedicated gateway")
     public void testGetDedicatedGateway() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DedicatedGateway dedicatedGateway = new DedicatedGateway();
         dedicatedGateway.setEnabled(true);
@@ -3885,6 +4022,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Get dedicated gateway exception scenario", expectedExceptions = APIManagementException.class)
     public void testGetDedicatedGatewayForException() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DedicatedGateway dedicatedGateway = new DedicatedGateway();
         dedicatedGateway.setEnabled(true);
@@ -3899,6 +4037,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Update dedicated gateway")
     public void testUpdateDedicatedGateway() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
@@ -3928,6 +4067,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Update dedicated gateway when label is not null and present in the system")
     public void testUpdateDedicatedGatewayWhenLabelIsNotNull() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
@@ -3959,6 +4099,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Update dedicated gateway when dedicated gateway is disabled")
     public void testUpdateDedicatedGatewayWhenDedicatedGatewayIsDisabled() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
@@ -3989,6 +4130,7 @@ public class APIPublisherImplTestCase {
     @Test(description = "Update dedicated gateway when dedicated gateway is disabled and api has own gateway")
     public void testUpdateDedicatedGatewayWhenDedicatedGatewayIsDisabledAndAPIHasOwnGateway() throws
             APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
@@ -4014,6 +4156,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Update dedicated gateway for exception", expectedExceptions = APIManagementException.class)
     public void testUpdateDedicatedGatewayForException() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
@@ -4045,6 +4188,7 @@ public class APIPublisherImplTestCase {
     @Test(description = "Update dedicated gateway when API is in Published state", expectedExceptions
             = APIManagementException.class)
     public void testUpdateDedicatedGatewayWhenAPIIsInPublishedState() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
@@ -4070,6 +4214,7 @@ public class APIPublisherImplTestCase {
     @Test(description = "Update dedicated gateway when API is in Deprecated state", expectedExceptions
             = APIManagementException.class)
     public void testUpdateDedicatedGatewayWhenAPIIsInDeprecatedState() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
@@ -4095,6 +4240,7 @@ public class APIPublisherImplTestCase {
     @Test(description = "Update dedicated gateway when API is in Retired state", expectedExceptions
             = APIManagementException.class)
     public void testUpdateDedicatedGatewayWhenAPIIsInRetiredState() throws APIManagementException {
+
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
@@ -4118,10 +4264,12 @@ public class APIPublisherImplTestCase {
     }
 
     private APIPublisherImpl getApiPublisherImpl(DAOFactory daoFactory, KeyManager keyManager) {
-        return new APIPublisherImpl(USER, null, keyManager, daoFactory, null, null, null);
+
+        return new APIPublisherImpl(USER, null, keyManager, daoFactory, null, null, null, null);
     }
 
     private PolicyDAO getDefaultMockedPolicyDAO() throws APIManagementException {
+
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
         Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api,
                 APIMgtConstants.DEFAULT_API_POLICY)).thenReturn(new APIPolicy(APIMgtConstants.DEFAULT_API_POLICY));
@@ -4138,6 +4286,7 @@ public class APIPublisherImplTestCase {
     }
 
     private APILifecycleManager getDefaultMockedAPILifecycleManager() throws LifecycleException {
+
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, USER))
                 .thenReturn(new LifecycleState());
@@ -4145,81 +4294,95 @@ public class APIPublisherImplTestCase {
     }
 
     private APIPublisherImpl getApiPublisherImpl() {
+
         return new APIPublisherImpl(USER, null, null, null, null, new GatewaySourceGeneratorImpl(),
-                new APIGatewayPublisherImpl());
+                new APIGatewayPublisherImpl(), null);
     }
 
     private APIPublisherImpl getApiPublisherImpl(DAOFactory daoFactory, APILifecycleManager apiLifecycleManager,
                                                  APIGateway apiGatewayPublisher) {
+
         return new APIPublisherImpl(USER, null, null, daoFactory, apiLifecycleManager, new GatewaySourceGeneratorImpl()
-                , apiGatewayPublisher);
+                , apiGatewayPublisher, null);
     }
 
     private APIPublisherImpl getApiPublisherImpl(IdentityProvider identityProvider, DAOFactory daoFactory,
                                                  APILifecycleManager apiLifecycleManager, APIGateway
                                                          apiGatewayPublisher) {
+
         return new APIPublisherImpl(USER, identityProvider, null, daoFactory, apiLifecycleManager,
-                new GatewaySourceGeneratorImpl(), apiGatewayPublisher);
+                new GatewaySourceGeneratorImpl(), apiGatewayPublisher, null);
     }
 
     private APIPublisherImpl getApiPublisherImpl(String user, IdentityProvider identityProvider,
                                                  DAOFactory daoFactory) {
+
         return new APIPublisherImpl(user, identityProvider, null, daoFactory, null, new GatewaySourceGeneratorImpl(),
-                new APIGatewayPublisherImpl());
+                new APIGatewayPublisherImpl(), null);
     }
 
     private APIPublisherImpl getApiPublisherImpl(DAOFactory daoFactory, APILifecycleManager apiLifecycleManager) {
+
         return new APIPublisherImpl(USER, null, null, daoFactory, apiLifecycleManager, new GatewaySourceGeneratorImpl()
-                , new APIGatewayPublisherImpl());
+                , new APIGatewayPublisherImpl(), null);
     }
 
     private APIPublisherImpl getApiPublisherImpl(IdentityProvider identityProvider, DAOFactory daoFactory,
                                                  APILifecycleManager apiLifecycleManager) {
+
         return new APIPublisherImpl(USER, identityProvider, null, daoFactory, apiLifecycleManager,
-                new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
+                new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl(), null);
     }
 
     private APIPublisherImpl getApiPublisherImpl(String username, IdentityProvider idp, KeyManager keyManager,
                                                  DAOFactory daoFactory, APILifecycleManager apiLifecycleManager,
                                                  GatewaySourceGenerator gatewaySourceGenerator, APIGateway
                                                          apiGatewayPublisher) {
+
         return new APIPublisherImpl(username, idp, keyManager, daoFactory, apiLifecycleManager, gatewaySourceGenerator,
-                apiGatewayPublisher);
+                apiGatewayPublisher, null);
     }
 
     private APIPublisherImpl getApiPublisherImpl(DAOFactory daoFactory) {
+
         return new APIPublisherImpl(USER, null, null, daoFactory, null, new GatewaySourceGeneratorImpl(),
-                new APIGatewayPublisherImpl());
+                new APIGatewayPublisherImpl(), null);
     }
 
     private APIPublisherImpl getApiPublisherImpl(DAOFactory daoFactory, APIGateway gatewayPublisher) {
+
         return new APIPublisherImpl(USER, null, null, daoFactory, null, new GatewaySourceGeneratorImpl(),
-                gatewayPublisher);
+                gatewayPublisher, null);
     }
 
     private APIPublisherImpl getApiPublisherImpl(DAOFactory daoFactory, APILifecycleManager apiLifecycleManager,
                                                  GatewaySourceGenerator gatewaySourceGenerator,
                                                  APIGateway gatewayPublisher) {
+
         return new APIPublisherImpl(USER, null, null, daoFactory, apiLifecycleManager, gatewaySourceGenerator
-                , gatewayPublisher);
+                , gatewayPublisher, null);
     }
 
     private APIPublisherImpl getApiPublisherImpl(DAOFactory daoFactory, GatewaySourceGenerator gatewaySourceGenerator,
                                                  APIGateway apiGatewayPublisher) {
-        return new APIPublisherImpl(USER, null, null, daoFactory, null, gatewaySourceGenerator, apiGatewayPublisher);
+
+        return new APIPublisherImpl(USER, null, null, daoFactory, null, gatewaySourceGenerator, apiGatewayPublisher,
+                null);
     }
 
     private APIPublisherImpl getApiPublisherImpl(IdentityProvider identityProvider, DAOFactory daoFactory,
                                                  GatewaySourceGenerator gatewaySourceGenerator) {
-        return new APIPublisherImpl(USER, identityProvider, null, daoFactory, null, gatewaySourceGenerator, null);
+
+        return new APIPublisherImpl(USER, identityProvider, null, daoFactory, null, gatewaySourceGenerator, null, null);
     }
 
     private APIPublisherImpl getApiPublisherImpl(IdentityProvider identityProvider, KeyManager keyManager,
                                                  DAOFactory daoFactory, APILifecycleManager apiLifecycleManager,
                                                  GatewaySourceGenerator gatewaySourceGenerator,
                                                  APIGateway apiGatewayPublisher) {
+
         return new APIPublisherImpl(USER, identityProvider, keyManager, daoFactory, apiLifecycleManager,
-                gatewaySourceGenerator, apiGatewayPublisher);
+                gatewaySourceGenerator, apiGatewayPublisher, null);
     }
 
 }

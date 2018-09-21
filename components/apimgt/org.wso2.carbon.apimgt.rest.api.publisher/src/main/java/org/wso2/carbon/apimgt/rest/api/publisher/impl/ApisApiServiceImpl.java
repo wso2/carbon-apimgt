@@ -1451,13 +1451,15 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response apisGet(Integer limit, Integer offset, String query, String ifNoneMatch, Request request)
+    public Response apisGet(Integer limit, Integer offset, String query, String ifNoneMatch, Boolean expand,
+            Request request)
             throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         APIListDTO apiListDTO = null;
         try {
             apiListDTO = MappingUtil
-                    .toAPIListDTO(RestAPIPublisherUtil.getApiPublisher(username).searchAPIs(limit, offset, query));
+                    .toAPIListDTO(RestAPIPublisherUtil.getApiPublisher(username).searchAPIs(limit, offset, query,
+                            expand), expand);
             return Response.ok().entity(apiListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving APIs";

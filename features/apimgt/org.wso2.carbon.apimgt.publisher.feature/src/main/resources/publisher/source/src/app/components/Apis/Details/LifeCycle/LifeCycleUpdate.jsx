@@ -26,10 +26,10 @@ import Checkbox from '@material-ui/core/Checkbox';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 
-import API from '../../../../data/api';
-import { ScopeValidation, resourceMethod, resourcePath } from '../../../../data/ScopeValidation';
-import ApiPermissionValidation from '../../../../data/ApiPermissionValidation';
-import Alert from '../../../Shared/Alert';
+import API from 'AppData/api';
+import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
+import ApiPermissionValidation from 'AppData/ApiPermissionValidation';
+import Alert from 'AppComponents/Shared/Alert';
 import LifeCycleImage from './LifeCycleImage';
 
 

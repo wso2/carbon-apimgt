@@ -19,14 +19,14 @@
  */
 package org.wso2.carbon.apimgt.rest.api.common.impl;
 
-import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.common.api.RESTAPIAuthenticator;
-import org.wso2.carbon.apimgt.rest.api.common.exception.APIMgtSecurityException;
+import org.wso2.carbon.auth.rest.api.authenticators.api.RESTAPIAuthenticator;
+import org.wso2.carbon.auth.rest.api.authenticators.exceptions.ExceptionCodes;
+import org.wso2.carbon.auth.rest.api.authenticators.exceptions.RestAPIAuthSecurityException;
 import org.wso2.msf4j.Request;
 import org.wso2.msf4j.Response;
-import org.wso2.msf4j.ServiceMethodInfo;
 
+import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.Base64;
 
@@ -35,21 +35,20 @@ import java.util.Base64;
  */
 public class BasicAuthAuthenticator implements RESTAPIAuthenticator {
 
-    /*
-    * basic auth authentication logic is executed here
-    * @pqram Request
-    * @param Response
-    * @param ServiceMethodInfo
-    * @return authentication status. true if authentication is successful; else false
-    * */
+    private boolean authenticate(String username, String password) {
+        //todo improve
+        return username.equals(password);
+
+    }
+
     @Override
-    public boolean authenticate(Request request, Response responder, ServiceMethodInfo serviceMethodInfo)
-            throws APIMgtSecurityException {
+    public boolean authenticate(Request request, Response responder, Method method) throws
+            RestAPIAuthSecurityException {
+
         String authHeader = request.getHeader(RestApiConstants.AUTHORIZATION_HTTP_HEADER);
         if (authHeader != null) {
             String authType = authHeader.substring(0, RestApiConstants.AUTH_TYPE_BASIC_LENGTH);
             String authEncoded = authHeader.substring(RestApiConstants.AUTH_TYPE_BASIC_LENGTH).trim();
-
 
             //If Basic auth header is not found returning true to check the other interceptors(for other auth types)
             if (RestApiConstants.AUTH_TYPE_BASIC.equalsIgnoreCase(authType) && !authEncoded.isEmpty()) {
@@ -63,21 +62,15 @@ public class BasicAuthAuthenticator implements RESTAPIAuthenticator {
                     return true;
                 }
             } else {
-                throw new APIMgtSecurityException("Missing 'Authorization : Basic' header in the request.`",
+                throw new RestAPIAuthSecurityException("Missing 'Authorization : Basic' header in the request.`",
                         ExceptionCodes.MALFORMED_AUTHORIZATION_HEADER_BASIC);
             }
 
         } else {
-            throw new APIMgtSecurityException("Missing Authorization header in the request.`",
+            throw new RestAPIAuthSecurityException("Missing Authorization header in the request.`",
                     ExceptionCodes.MALFORMED_AUTHORIZATION_HEADER_BASIC);
 
         }
         return false;
-    }
-
-    private boolean authenticate(String username, String password) {
-        //todo improve
-        return username.equals(password);
-
     }
 }

@@ -205,6 +205,7 @@ public class AuthenticatorServiceTestCase {
 
         //// Actual response - When authorization code is not null
         Mockito.when(keyManager.getNewAccessToken(Mockito.any())).thenReturn(tokenInfo);
+        Mockito.when(keyManager.getTokenMetaData(tokenInfo.getAccessToken())).thenReturn(tokenInfo);
         String scopes = authenticatorService.getApplicationScopes("store");
         AccessTokenInfo tokenInfoResponseForValidAuthCode = authenticatorService.getTokens("store",
                 "authorization_code", null, null, null, 0,

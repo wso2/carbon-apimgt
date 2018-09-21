@@ -17,6 +17,7 @@
  */
 
 import React, {Component} from 'react'
+import classnames from 'classnames';
 import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import Api from '../../../data/api'
@@ -39,6 +40,9 @@ import CloseIcon from '@material-ui/icons/Close';
 import ApplicationCreate from '../../Applications/Create/ApplicationCreate'
 import Grid from '@material-ui/core/Grid'
 import PropTypes from 'prop-types';
+import Collapse from '@material-ui/core/Collapse';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+
 
 
 const styles = theme => ({
@@ -101,7 +105,20 @@ const styles = theme => ({
     },
     viewAllLink: {
         color: theme.palette.text.secondary,
-    }
+    },
+    expand: {
+        transform: 'rotate(0deg)',
+        transition: theme.transitions.create('transform', {
+          duration: theme.transitions.duration.shortest,
+        }),
+        marginLeft: 'auto',
+        [theme.breakpoints.up('sm')]: {
+          marginRight: -8,
+        },
+      },
+      expandOpen: {
+        transform: 'rotate(180deg)',
+      },
 });
 function Transition(props) {
     return <Slide direction="up" {...props} />;
@@ -128,6 +145,7 @@ class Subscribe extends Component {
             anchorEl: null,
             createAppOpen: false,
             openSubsConfirm: false,
+            expaned: false,
         };
         this.api_uuid = this.props.api_uuid;
         this.logChange = this.logChange.bind(this);
@@ -219,7 +237,9 @@ class Subscribe extends Component {
             level: 'success'
         });
     };
-
+    handleExpandClick = () => {
+        this.setState(state => ({ expanded: !state.expanded }));
+      };
     createSubscription = (e) => {
         e.preventDefault();
         let apiId = this.api_uuid;
@@ -294,6 +314,21 @@ class Subscribe extends Component {
         return (
             this.state.api ?
                 <div className={classes.root}>
+                    <IconButton
+                        className={classnames(classes.expand, {
+                        [classes.expandOpen]: this.state.expanded,
+                        })}
+                        onClick={this.handleExpandClick}
+                        aria-expanded={this.state.expanded}
+                        aria-label="Show more"
+                    >
+                        <ExpandMoreIcon />
+                    </IconButton>
+                    <Collapse in={this.state.expanded} timeout="auto" unmountOnExit>
+                       asdfsdf
+                        </Collapse>
+
+
                     {this.state.applications && this.state.applications.length > 0 ? 
                     <div>
                         <Typography variant="headline" className={classes.headline} >

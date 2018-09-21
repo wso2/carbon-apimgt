@@ -19,32 +19,40 @@
  */
 package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
-import java.text.DecimalFormat;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.rest.api.store.dto.RatingDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.RatingListDTO;
+
+import java.text.DecimalFormat;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Mapping class for Rating Objects
  *
  */
 public class RatingMappingUtil {
+    private static final Logger log = LoggerFactory.getLogger(RatingMappingUtil.class);
 
     /** Converts an Rating object into corresponding REST API RatingDTO object
      *
      * @param rating Comment object
      * @return a new RatingDTO object corresponding to given Rating object
      */
-    public static RatingDTO fromRatingToDTO(Rating rating) {
+    public static RatingDTO fromRatingToDTO(Rating rating) throws APIManagementException {
 
         RatingDTO ratingDTO = new RatingDTO();
         ratingDTO.setRatingId(rating.getUuid());
         ratingDTO.setRating(rating.getRating());
-        ratingDTO.setUsername(rating.getUsername());
+        String realName = APIManagerFactory.getInstance().getUserNameMapper().getLoggedInUserIDFromPseudoName(rating
+                .getUsername());
+        ratingDTO.setUsername(realName);
 
         return ratingDTO;
     }
@@ -89,11 +97,18 @@ public class RatingMappingUtil {
      * @return a new list object of ratingDTO objects
      */
     public static List<RatingDTO> fromRatingListToDTOList(List<Rating> userRatingList) {
+
         List<RatingDTO> ratingDTOList = new ArrayList<>();
-        for(Rating rating : userRatingList) {
-            ratingDTOList.add(fromRatingToDTO(rating));
+        for (Rating rating : userRatingList) {
+            try {
+                ratingDTOList.add(fromRatingToDTO(rating));
+            } catch (APIManagementException e) {
+                // This not to throw as this have Rating list
+                log.error("Error while Retrieving RealName from PseudoName", e);
+
+            }
         }
-        return  ratingDTOList;
+        return ratingDTOList;
     }
 
     /**

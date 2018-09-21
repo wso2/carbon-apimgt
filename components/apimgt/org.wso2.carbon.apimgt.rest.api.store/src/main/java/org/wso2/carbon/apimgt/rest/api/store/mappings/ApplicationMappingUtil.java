@@ -16,6 +16,10 @@
 package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
@@ -31,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 public class ApplicationMappingUtil {
+    private static final Logger log = LoggerFactory.getLogger(ApplicationMappingUtil.class);
 
     /** Converts an Application[] array into a corresponding ApplicationListDTO
      *
@@ -52,13 +57,19 @@ public class ApplicationMappingUtil {
         int end = offset + limit - 1 <= applications.size() - 1 ? offset + limit - 1 : applications.size() - 1;
 
         for (int i = start; i <= end; i++) {
-            applicationInfoDTOs.add(fromApplicationToInfoDTO(applications.get(i)));
+            try {
+                applicationInfoDTOs.add(fromApplicationToInfoDTO(applications.get(i)));
+            } catch (APIManagementException e) {
+                // This not to throw as this have application list
+                log.error("Error while Retrieving RealName from PseudoName", e);
+            }
         }
         applicationListDTO.setCount(applicationInfoDTOs.size());
         return applicationListDTO;
     }
 
-    public static ApplicationDTO fromApplicationToDTO(Application application) {
+    public static ApplicationDTO fromApplicationToDTO(Application application) throws APIManagementException {
+
         ApplicationDTO applicationDTO = new ApplicationDTO();
         applicationDTO.setApplicationId(application.getId());
         applicationDTO.setThrottlingTier(application.getPolicy().getPolicyName());
@@ -66,9 +77,11 @@ public class ApplicationMappingUtil {
         applicationDTO.setName(application.getName());
         applicationDTO.setLifeCycleStatus(application.getStatus());
         applicationDTO.setPermission(application.getPermissionString());
-        applicationDTO.setSubscriber(application.getCreatedUser());
+        String realName = APIManagerFactory.getInstance().getUserNameMapper().getLoggedInUserIDFromPseudoName
+                (application.getCreatedUser());
+        applicationDTO.setSubscriber(realName);
         List<ApplicationKeysDTO> applicationKeyDTOs = new ArrayList<>();
-        for(OAuthApplicationInfo applicationKeys : application.getApplicationKeys()) {
+        for (OAuthApplicationInfo applicationKeys : application.getApplicationKeys()) {
             ApplicationKeysDTO applicationKeysDTO = ApplicationKeyMappingUtil.fromApplicationKeysToDTO(applicationKeys);
             applicationKeyDTOs.add(applicationKeysDTO);
         }
@@ -107,14 +120,16 @@ public class ApplicationMappingUtil {
         applicationListDTO.setPrevious(paginatedPrevious);
     }
 
-    public static ApplicationInfoDTO fromApplicationToInfoDTO (Application application) {
+    public static ApplicationInfoDTO fromApplicationToInfoDTO (Application application) throws APIManagementException {
         ApplicationInfoDTO applicationInfoDTO = new ApplicationInfoDTO();
         applicationInfoDTO.setApplicationId(application.getId());
         applicationInfoDTO.setThrottlingTier(application.getPolicy().getPolicyName());
         applicationInfoDTO.setDescription(application.getDescription());
         applicationInfoDTO.setLifeCycleStatus(application.getStatus());
         applicationInfoDTO.setName(application.getName());
-        applicationInfoDTO.setSubscriber(application.getCreatedUser());
+        String realName = APIManagerFactory.getInstance().getUserNameMapper().getLoggedInUserIDFromPseudoName
+                (application.getCreatedUser());
+        applicationInfoDTO.setSubscriber(realName);
         return applicationInfoDTO;
     }
 

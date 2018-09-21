@@ -3,7 +3,7 @@
 	<parent>
 		<artifactId>apimgt-feature</artifactId>
 		<groupId>org.wso2.carbon.apimgt</groupId>
-		<version>7.0.192-SNAPSHOT</version>
+		<version>7.0.196-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
@@ -55,6 +55,10 @@
 								<feature>
 									<id>org.wso2.carbon.apimgt.core.feature</id>
 									<version>${carbon.apimgt.version}</version>
+								</feature>
+								<feature>
+									<id>org.wso2.carbon.auth.rest.api.authenticators.feature</id>
+									<version>${carbon.auth.version}</version>
 								</feature>
 							</importFeatures>
 						</configuration>

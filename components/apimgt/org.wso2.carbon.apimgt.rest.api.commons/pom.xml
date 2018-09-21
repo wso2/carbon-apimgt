@@ -4,7 +4,7 @@
     <parent>
         <artifactId>apimgt</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>7.0.192-SNAPSHOT</version>
+        <version>7.0.196-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -131,6 +131,10 @@
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.auth</groupId>
+            <artifactId>org.wso2.carbon.auth.rest.api.authenticators</artifactId>
+        </dependency>
     </dependencies>
     <properties>
         <import.package>
@@ -148,14 +152,12 @@
             com.google.gson.*,
             io.swagger.parser.*,
             io.swagger.models.*;version="${io.swagger.import.version.range}",
-            io.swagger.util.*;version="${io.swagger.import.version.range}"
+            io.swagger.util.*;version="${io.swagger.import.version.range}",
+            org.wso2.carbon.auth.rest.api.authenticators.*;version="${carbon.auth.version}"
         </import.package>
         <export.package>
             org.wso2.carbon.apimgt.rest.api.common.*; version="${carbon.apimgt.version}",
         </export.package>
-        <carbon.component>
-            osgi.service;objectClass="org.wso2.msf4j.Interceptor" ; serviceCount="1"
-        </carbon.component>
     </properties>
 
 </project>

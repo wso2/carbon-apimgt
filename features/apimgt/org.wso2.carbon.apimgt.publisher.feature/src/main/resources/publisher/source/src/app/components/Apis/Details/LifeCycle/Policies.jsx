@@ -25,7 +25,7 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 import Select from '@material-ui/core/Select';
 import { FormattedMessage } from 'react-intl';
 
-import API from '../../../../data/api';
+import API from 'AppData/api';
 
 const Option = Select.Option;
 

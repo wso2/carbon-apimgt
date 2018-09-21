@@ -127,7 +127,7 @@ public class APIImportExportTestCase {
                 ("api1_thumbnail.png"));
         List<API> apis = new ArrayList<>();
         apis.add(api1);
-        Mockito.when(apiPublisher.searchAPIs(Integer.MAX_VALUE, 0, "*")).thenReturn(apis);
+        Mockito.when(apiPublisher.searchAPIs(Integer.MAX_VALUE, 0, "*", false)).thenReturn(apis);
 
         ApiImportExportManager importExportManager = new ApiImportExportManager(apiPublisher);
         Set<APIDetails> apiDetailsSet = importExportManager.getAPIDetails(Integer.MAX_VALUE, 0, "*");
@@ -214,7 +214,7 @@ public class APIImportExportTestCase {
         List<API> apis = new ArrayList<>();
         apis.add(api4);
         apis.add(api5);
-        Mockito.when(apiPublisher.searchAPIs(Integer.MAX_VALUE, 0, "*")).thenReturn(apis);
+        Mockito.when(apiPublisher.searchAPIs(Integer.MAX_VALUE, 0, "*", false)).thenReturn(apis);
 
         ApiImportExportManager importExportManager = new ApiImportExportManager(apiPublisher);
         Set<APIDetails> apiDetailsSet = importExportManager.getAPIDetails(Integer.MAX_VALUE, 0, "*");
@@ -300,7 +300,7 @@ public class APIImportExportTestCase {
         List<API> apis = new ArrayList<>();
         apis.add(api6);
         apis.add(api7);
-        Mockito.when(apiPublisher.searchAPIs(Integer.MAX_VALUE, 0, "*")).thenReturn(apis);
+        Mockito.when(apiPublisher.searchAPIs(Integer.MAX_VALUE, 0, "*", false)).thenReturn(apis);
 
         ApiImportExportManager importExportManager = new ApiImportExportManager(apiPublisher);
         Set<APIDetails> apiDetailsSet = importExportManager.getAPIDetails(Integer.MAX_VALUE, 0, "*");

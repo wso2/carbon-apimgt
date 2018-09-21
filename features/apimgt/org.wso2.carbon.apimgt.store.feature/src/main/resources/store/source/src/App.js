@@ -29,18 +29,17 @@ import ApplicationEdit from './app/components/Applications/Edit/ApplicationEdit'
 import Utils from "./app/data/Utils";
 import ConfigManager from "./app/data/ConfigManager";
 import {MuiThemeProvider, createMuiTheme} from '@material-ui/core/styles';
-import DarkTheme from './app/components/Shared/DarkTheme'
-import LightTheme from './app/components/Shared/LightTheme'
 import AnonymousView from "./app/components/AnonymousView/AnonymousView";
 import SignUp from "./app/components/AnonymousView/SignUp";
 import PrivacyPolicy from "./app/components/Policy/PrivacyPolicy";
 import CookiePolicy from "./app/components/Policy/CookiePolicy";
 import {addLocaleData, defineMessages, IntlProvider} from 'react-intl';
+import Configurations from "Config";
 
 const themes = [];
 
-themes.push(createMuiTheme(LightTheme));
-themes.push(createMuiTheme(DarkTheme));
+themes.push(createMuiTheme(Configurations.themes.light));
+themes.push(createMuiTheme(Configurations.themes.dark));
 
 /**
  * Language.
@@ -69,6 +68,7 @@ class Protected extends Component {
         this.environments = [];
         this.loadLocale = this.loadLocale.bind(this);
         /* TODO: need to fix the header to avoid conflicting with messages ~tmkb*/
+
     }
 
     /**

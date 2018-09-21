@@ -538,12 +538,12 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
-     * @see ApiDAO#attributeSearchAPIs(Set, String, Map, int, int)
+     * @see ApiDAO#attributeSearchAPIs(Set, String, Map, int, int, boolean)
      */
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     public List<API> attributeSearchAPIs(Set<String> roles, String user, Map<SearchType, String> attributeMap,
-                                         int offset, int limit) throws APIMgtDAOException {
+                                         int offset, int limit, boolean expand) throws APIMgtDAOException {
         final String query = sqlStatements.getPermissionBasedApiAttributeSearchQuery(attributeMap, roles.size());
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -567,6 +567,9 @@ public class ApiDAOImpl implements ApiDAO {
             sqlStatements.setPermissionBasedApiAttributeSearchStatement(statement, roles, user, attributeMap,
                     ApiType.STANDARD, offset, limit);
 
+            if (expand) {
+                return constructDetailAPIList(connection, statement);
+            }
             return constructAPISummaryList(connection, statement);
 
         } catch (SQLException e) {
@@ -2204,6 +2207,30 @@ public class ApiDAOImpl implements ApiDAO {
             }
         }
 
+        return apiList;
+    }
+
+    private List<API> constructDetailAPIList(Connection connection, PreparedStatement statement)
+            throws SQLException, APIMgtDAOException {
+        List<API> apiList = new ArrayList<>();
+        try (ResultSet rs = statement.executeQuery()) {
+            while (rs.next()) {
+                String apiPrimaryKey = rs.getString("UUID");
+                final String query = API_SELECT + " WHERE UUID = ? AND API_TYPE_ID = "
+                        + "(SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)";
+
+                try (PreparedStatement statement1 = connection.prepareStatement(query)) {
+                    statement1.setString(1, apiPrimaryKey);
+                    statement1.setString(2, ApiType.STANDARD.toString());
+
+                    API api = constructAPIFromResultSet(connection, statement1);
+                    apiList.add(api);
+                } catch (SQLException | IOException e) {
+                    //skip throwing error to make sure next api is fetched even one api fetching is failed.
+                    log.error(DAOUtil.DAO_ERROR_PREFIX + "getting API with id: " + apiPrimaryKey, e);
+                }
+            }
+        }
         return apiList;
     }
 

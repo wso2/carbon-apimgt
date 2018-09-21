@@ -74,7 +74,7 @@ public class ApiImportExportManager {
 
         Set<APIDetails> apiDetailSet = new HashSet<>();
         // search for APIs
-        List<API> apis = apiPublisher.searchAPIs(limit, offset, query);
+        List<API> apis = apiPublisher.searchAPIs(limit, offset, query, false);
         if (apis == null || apis.isEmpty()) {
             // no APIs found, return
             return apiDetailSet;
