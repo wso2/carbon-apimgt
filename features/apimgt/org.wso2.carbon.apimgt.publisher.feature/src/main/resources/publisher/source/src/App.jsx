@@ -76,12 +76,12 @@ class Publisher extends React.Component {
     /**
      *
      *
-     * @returns
+     * @returns {React.Component} Render complete app component
      * @memberof Publisher
      */
     render() {
-        const { pathname } = window.location;
         const { user } = this.state;
+        const { pathname } = window.location;
         const params = qs.stringify({
             referrer: pathname.split('/').reduce((acc, cv, ci) => (ci <= 1 ? '' : acc + '/' + cv)),
         });

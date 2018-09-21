@@ -205,7 +205,7 @@ class AuthManager {
             .then(() => {
                 Utils.deleteCookie(User.CONST.WSO2_AM_TOKEN_1, Utils.CONST.CONTEXT_PATH, environmentName);
                 AuthManager.dismissUser(environmentName);
-                APIClientFactory.getInstance().destroyAPIClient(environmentName);
+                new APIClientFactory().destroyAPIClient(environmentName);
                 // Single client should be re initialize after log out
                 console.log(`Successfully logout from environment: ${environmentName}`);
             })
@@ -326,6 +326,9 @@ class AuthManager {
                 const user = AuthManager.loginUserMapper(response, environment.label);
                 AuthManager.setUser(user, environment.label);
                 this.setupAutoRefresh(environment.label);
+                // remove the swaggerjs api client which could contain old access token if
+                // user login back without page reload
+                new APIClientFactory().destroyAPIClient(environment.label);
                 console.log(`Authentication Success in '${environment.label}' environment.`);
             })
             .catch((error) => {

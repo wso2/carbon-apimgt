@@ -14,6 +14,8 @@ import {
 import AccountCircle from '@material-ui/icons/Person';
 import NightMode from '@material-ui/icons/Brightness2';
 import { withStyles } from '@material-ui/core/styles';
+import { Link } from 'react-router-dom';
+import qs from 'qs';
 
 const styles = theme => ({
     profileCircle: {
@@ -70,6 +72,10 @@ class Avatar extends Component {
      */
     render() {
         const { classes } = this.props;
+        const { pathname } = window.location;
+        const params = qs.stringify({
+            referrer: pathname.split('/').reduce((acc, cv, ci) => (ci <= 1 ? '' : acc + '/' + cv)),
+        });
         const { openMenu, profileIcon } = this.state;
         return (
             <div>
@@ -89,7 +95,10 @@ class Avatar extends Component {
                                     <MenuList>
                                         <MenuItem onClick={this.toggleMenu}>Profile</MenuItem>
                                         <MenuItem onClick={this.toggleMenu}>My account</MenuItem>
-                                        <MenuItem onClick={this.toggleMenu}>Logout</MenuItem>
+                                        <Link to={{ pathname: '/logout', search: params }}>
+                                            <MenuItem onClick={this.toggleMenu}>Logout</MenuItem>
+                                        </Link>
+
                                         <Divider />
                                         <MenuItem className={classes.menuItem} onClick={this.props.toggleTheme}>
                                             <ListItemText primary='Night Mode' />

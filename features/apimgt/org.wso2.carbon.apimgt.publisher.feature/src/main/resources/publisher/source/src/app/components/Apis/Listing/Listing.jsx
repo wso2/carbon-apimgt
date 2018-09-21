@@ -56,8 +56,7 @@ class Listing extends React.Component {
      * @memberof Listing
      */
     componentDidMount() {
-        const promisedApis = API.all();
-        promisedApis
+        API.all()
             .then((response) => {
                 this.setState({ apis: response.obj });
             })
