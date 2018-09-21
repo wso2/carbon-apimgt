@@ -25,6 +25,7 @@ public class SOAPToRESTConstants {
     public static final String SOAP_TO_REST_RESOURCE = "soap_to_rest";
 
     public static final String COMPLEX_TYPE_NODE_NAME = "complexType";
+    public static final String DOCUMENT_TYPE_WSDL = "document";
     public static final String SIMPLE_TYPE_NODE_NAME = "simpleType";
     public static final String RESTRICTION_ATTR = "restriction";
     public static final String BASE_ATTR = "base";
