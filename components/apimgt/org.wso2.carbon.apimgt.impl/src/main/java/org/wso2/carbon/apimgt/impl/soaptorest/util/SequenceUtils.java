@@ -211,8 +211,8 @@ public class SequenceUtils {
                     Resource resource = registry.get(path);
                     String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
                     String resourceName = ((ResourceImpl) resource).getName();
-                    resourceName = resourceName
-                            .replaceAll(SOAPToRESTConstants.SequenceGen.XML_FILE_RESOURCE_PREFIX, SOAPToRESTConstants.EMPTY_STRING);
+                    resourceName = resourceName.replaceAll(SOAPToRESTConstants.SequenceGen.XML_FILE_RESOURCE_PREFIX,
+                            SOAPToRESTConstants.EMPTY_STRING);
                     String httpMethod = resource.getProperty(SOAPToRESTConstants.METHOD);
                     Map<String, String> resourceMap = new HashMap<>();
                     resourceMap.put(SOAPToRESTConstants.METHOD, httpMethod);
@@ -261,10 +261,11 @@ public class SequenceUtils {
                     Resource resource = registry.get(path);
                     String method = resource.getProperty(SOAPToRESTConstants.METHOD);
                     String resourceName = ((ResourceImpl) resource).getName();
+                    resourceName = resourceName.replaceAll(SOAPToRESTConstants.SequenceGen.XML_FILE_RESOURCE_PREFIX,
+                            SOAPToRESTConstants.EMPTY_STRING);
                     resourceName = resourceName
-                            .replaceAll(SOAPToRESTConstants.SequenceGen.XML_FILE_RESOURCE_PREFIX, SOAPToRESTConstants.EMPTY_STRING);
-                    resourceName = resourceName
-                            .replaceAll(SOAPToRESTConstants.SequenceGen.RESOURCE_METHOD_SEPERATOR + method, SOAPToRESTConstants.EMPTY_STRING);
+                            .replaceAll(SOAPToRESTConstants.SequenceGen.RESOURCE_METHOD_SEPERATOR + method,
+                                    SOAPToRESTConstants.EMPTY_STRING);
                     resourceName = SOAPToRESTConstants.SequenceGen.PATH_SEPARATOR + resourceName;
                     String content = RegistryUtils.decodeBytes((byte[]) resource.getContent());
                     JSONObject contentObj = new JSONObject();
@@ -297,7 +298,8 @@ public class SequenceUtils {
             if (inputType.equals(SOAPToRESTConstants.Swagger.BODY)) {
                 JSONObject schema = (JSONObject) ((JSONObject) param).get(SOAPToRESTConstants.Swagger.SCHEMA);
                 String definitionPath = String.valueOf(schema.get(SOAPToRESTConstants.Swagger.REF));
-                String definition = definitionPath.replaceAll(SOAPToRESTConstants.Swagger.DEFINITIONS_ROOT, SOAPToRESTConstants.EMPTY_STRING);
+                String definition = definitionPath
+                        .replaceAll(SOAPToRESTConstants.Swagger.DEFINITIONS_ROOT, SOAPToRESTConstants.EMPTY_STRING);
                 JSONObject definitions = (JSONObject) ((JSONObject) swaggerObj
                         .get(SOAPToRESTConstants.Swagger.DEFINITIONS)).get(definition);
                 JSONObject properties = (JSONObject) definitions.get(SOAPToRESTConstants.Swagger.PROPERTIES);
@@ -309,7 +311,8 @@ public class SequenceUtils {
                     JSONArray propArray = new JSONArray();
                     if (value.get(SOAPToRESTConstants.Swagger.REF) != null) {
                         String propDefinitionRef = String.valueOf(value.get(SOAPToRESTConstants.Swagger.REF))
-                                .replaceAll(SOAPToRESTConstants.Swagger.DEFINITIONS_ROOT, SOAPToRESTConstants.EMPTY_STRING);
+                                .replaceAll(SOAPToRESTConstants.Swagger.DEFINITIONS_ROOT,
+                                        SOAPToRESTConstants.EMPTY_STRING);
                         getNestedDefinitionsFromSwagger(
                                 (JSONObject) swaggerObj.get(SOAPToRESTConstants.Swagger.DEFINITIONS), propDefinitionRef,
                                 propDefinitionRef, propArray);
