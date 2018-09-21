@@ -166,12 +166,18 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
             String tier = "";
             AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(mc);
             if (authContext != null) {
-                consumerKey = handleValue(authContext.getConsumerKey());
-                username = handleValue(authContext.getUsername());
-                applicationName = handleValue(authContext.getApplicationName());
-                applicationId = handleValue(authContext.getApplicationId());
+                consumerKey = authContext.getConsumerKey();
+                username = authContext.getUsername();
+                applicationName = authContext.getApplicationName();
+                if (applicationName == null || "".equals(applicationName)) {
+                    applicationName = "None";
+                }
+                applicationId = authContext.getApplicationId();
                 tier = authContext.getTier();
-                applicationOwner = handleValue(authContext.getSubscriber());
+                applicationOwner = authContext.getSubscriber();
+                if (applicationOwner == null || "".equals(applicationOwner)) {
+                    applicationOwner = "None";
+                }
             }
 
             RequestResponseStreamDTO stream = new RequestResponseStreamDTO();
@@ -185,9 +191,12 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
             stream.setApiResourceTemplate((String) mc.getProperty(APIConstants.API_ELECTED_RESOURCE));
             stream.setApiTier(tier);
             stream.setApiVersion(apiVersion);
-            stream.setApplicationConsumerKey((String) mc.getProperty(APIMgtGatewayConstants.CONSUMER_KEY));
-            stream.setApplicationId(applicationId);
+            consumerKey = (String) mc.getProperty(APIMgtGatewayConstants.CONSUMER_KEY);
+            if (consumerKey == null || "".equals(consumerKey)) {
+                consumerKey = "None";
+            }
             stream.setApplicationConsumerKey(consumerKey);
+            stream.setApplicationId(applicationId);
             stream.setApplicationName(applicationName);
             stream.setApplicationOwner(applicationOwner);
             stream.setBackendTime(backendTime);
@@ -237,6 +246,5 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
     public boolean isContentAware() {
         return false;
     }
-
 }
 
