@@ -986,7 +986,7 @@ public class APIProviderHostObject extends ScriptableObject {
         if (apiData.containsKey(APIConstants.WSDL_FILE)) {
             wsdlFile = (FileHostObject) apiData.get(APIConstants.WSDL_FILE, apiData);
             if (wsdlFile != null) {
-                if (wsdlFile.getName().endsWith(APIConstants.ZIP_FILE_EXTENSION)) {
+                if (wsdlFile.getName() != null && wsdlFile.getName().endsWith(APIConstants.ZIP_FILE_EXTENSION)) {
                     WSDLArchiveInfo archiveInfo = APIUtil.extractAndValidateWSDLArchive(wsdlFile.getInputStream());
                     if (archiveInfo != null) {
                         api.setWsdlArchivePath(archiveInfo.getAbsoluteFilePath());
@@ -998,8 +998,12 @@ public class APIProviderHostObject extends ScriptableObject {
                                 wsdlFile.getJavaScriptFile().getContentType());
                         api.setWsdlArchive(wsdlResource);
                         APIFileUtil.deleteDirectory(archiveInfo.getLocation());
+                    } else {
+                        throw new APIManagementException(
+                                "WSDL archive validation failed. Hence wsdl archive will not be uploaded.");
                     }
-                } else if (wsdlFile.getName().endsWith(APIConstants.WSDL_FILE_EXTENSION)) {
+                } else if (wsdlFile.getName() != null && wsdlFile.getName()
+                        .endsWith(APIConstants.WSDL_FILE_EXTENSION)) {
                     String path = System.getProperty(APIConstants.JAVA_IO_TMPDIR) + File.separator
                             + APIConstants.WSDL_ARCHIVES_TEMP_FOLDER + File.separator + UUID.randomUUID().toString();
                     String wsdlFilePath = path + File.separator + APIConstants.WSDL_FILE
@@ -1007,11 +1011,13 @@ public class APIProviderHostObject extends ScriptableObject {
                     APIFileUtil.extractSingleWSDLFile(wsdlFile.getInputStream(), path, wsdlFilePath);
                     api.setWsdlUrl(APIConstants.FILE_URI_PREFIX + wsdlFilePath);
                 } else {
-                    throw new APIManagementException("Invalid file archive file extension: Use .zip format");
+                    throw new APIManagementException(
+                            "Could not extract the archived file. The file must be a ZIP compressed file");
                 }
+            } else {
+                log.warn("provided wsdl archive/file is null");
             }
         }
-
 
         if (apiData.get("swagger", apiData) != null) {
             // Read URI Templates from swagger resource and set it to api object

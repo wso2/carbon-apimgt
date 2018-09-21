@@ -1338,12 +1338,9 @@ public final class APIUtil {
      * @return wsdl archive path
      */
     public static String getWsdlArchivePath(APIIdentifier identifier) {
-        String wsdlArchiveResourcePath =
-                APIConstants.API_WSDL_RESOURCE_LOCATION + APIConstants.API_WSDL_ARCHIVE_LOCATION + identifier
-                        .getProviderName() +
-                        APIConstants.WSDL_PROVIDER_SEPERATOR + identifier.getApiName() + identifier.getVersion()
-                        + APIConstants.ZIP_FILE_EXTENSION;
-        return wsdlArchiveResourcePath;
+        return APIConstants.API_WSDL_RESOURCE_LOCATION + APIConstants.API_WSDL_ARCHIVE_LOCATION +
+                identifier.getProviderName() + APIConstants.WSDL_PROVIDER_SEPERATOR + identifier.getApiName() +
+                identifier.getVersion() + APIConstants.ZIP_FILE_EXTENSION;
     }
 
     /**
@@ -1677,9 +1674,8 @@ public final class APIUtil {
     public static String saveWSDLArchive(Registry registry, API api) throws RegistryException, APIManagementException {
         String wsdlArchiveResourcePath =
                 APIConstants.API_WSDL_RESOURCE_LOCATION + APIConstants.API_WSDL_ARCHIVE_LOCATION + api.getId()
-                        .getProviderName() +
-                        APIConstants.WSDL_PROVIDER_SEPERATOR + api.getId().getApiName() + api.getId().getVersion()
-                        + APIConstants.ZIP_FILE_EXTENSION;
+                        .getProviderName() + APIConstants.WSDL_PROVIDER_SEPERATOR + api.getId().getApiName() +
+                        api.getId().getVersion() + APIConstants.ZIP_FILE_EXTENSION;
         String absoluteWSDLResourcePath = RegistryUtils
                 .getAbsolutePath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
                 + wsdlArchiveResourcePath;
@@ -1720,8 +1716,7 @@ public final class APIUtil {
         }
         WSDLSOAPOperationExtractor processor = SOAPOperationBindingUtils.getWSDLProcessor(extractedLocation);
         if (!processor.canProcess()) {
-            throw new APIManagementException(
-                    "Unable to process WSDL by the processor " + processor.getClass().getName());
+            throw new APIManagementException(processor.getClass().getName() + " was unable to process the WSDL");
         }
         return new WSDLArchiveInfo(path, APIConstants.WSDL_ARCHIVE_ZIP_FILE);
     }

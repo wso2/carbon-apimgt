@@ -153,7 +153,8 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
                 log.debug("Successfully processed all WSDL files in path " + path);
             }
         } catch (WSDLException e) {
-            throw new APIMgtWSDLException("Cannot process the WSDL by " + this.getClass().getName(), e);
+            throw new APIMgtWSDLException(
+                    this.getClass().getName() + " was unable to process the WSDL Files for the path: " + path, e);
         }
         return canProcess;
     }

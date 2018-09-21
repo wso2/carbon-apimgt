@@ -77,7 +77,7 @@ public class APIFileUtil {
         try {
             Files.createDirectories(Paths.get(path));
         } catch (IOException e) {
-            String msg = "Error in creating directory at: " + path;
+            String msg = "Error in creating directory.";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
@@ -111,14 +111,14 @@ public class APIFileUtil {
         try (FileOutputStream outFileStream = new FileOutputStream(new File(archivePath))) {
             IOUtils.copy(inputStream, outFileStream);
         } catch (IOException e) {
-            String errorMsg = "Error in Creating archive from data.";
+            String errorMsg = "Error occurred while archiving the data.";
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e);
         }
     }
 
     /**
-     * Extracts a a given zip archive
+     * Extracts a given zip archive
      *
      * @param archiveFilePath path of the zip archive
      * @param destination     extract location
@@ -159,7 +159,7 @@ public class APIFileUtil {
 
                 // create the parent directory structure
                 if (destinationParent.mkdirs()) {
-                    log.debug("Creation of folder is successful. Directory Name : " + destinationParent.getName());
+                    log.debug("Successfully created folder with directory Name : " + destinationParent.getName());
                 }
 
                 if (!entry.isDirectory()) {

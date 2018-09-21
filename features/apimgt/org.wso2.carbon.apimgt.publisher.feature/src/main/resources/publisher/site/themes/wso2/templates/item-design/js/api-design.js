@@ -1512,7 +1512,6 @@ $(document).ready(function(){
         if(wsdlInputVal.endsWith(".zip")) {
             $("#fileUploadSection").show();
             $("#wsdlurlInputSection").hide();
-
         } else {
             $("#fileUploadSection").hide();
         }

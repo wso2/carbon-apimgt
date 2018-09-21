@@ -3999,7 +3999,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         wsdlContent = folderToImport + APIConstants.UPDATED_WSDL_ZIP;
                     }
                 } else {
-                    ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
+                    arrayOutputStream = new ByteArrayOutputStream();
                     IOUtils.copy((InputStream) docResourceMap.get("Data"), arrayOutputStream);
                     byte[] updatedWSDLContent = this.getUpdatedWSDLByEnvironment(resourceUrl,
                             arrayOutputStream.toByteArray(), environmentName, environmentType, apiName, apiVersion);
@@ -4046,7 +4046,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             zos.closeEntry();
             zos.close();
         } catch (IOException e) {
-            handleException("Error occurred while copying file content into zip file: " + zipFile, e);
+            handleException("Error occurred while creating the ZIP file: " + zipFile, e);
         }
     }
 

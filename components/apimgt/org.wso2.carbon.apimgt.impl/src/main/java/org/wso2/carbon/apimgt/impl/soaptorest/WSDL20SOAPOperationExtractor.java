@@ -101,7 +101,7 @@ public class WSDL20SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
             }
         } catch (WSDLException | ParserConfigurationException | SAXException | IOException e) {
             //This implementation class cannot process the WSDL.
-            log.debug("Cannot process the WSDL by " + this.getClass().getName(), e);
+            log.debug(this.getClass().getName() + " was unable to process the WSDL.", e);
             canProcess = false;
         }
         return canProcess;
@@ -134,7 +134,8 @@ public class WSDL20SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
             }
         } catch (WSDLException e) {
             //This implementation class cannot process the WSDL.
-            throw new APIMgtWSDLException("Cannot process the WSDL by " + this.getClass().getName(), e);
+            throw new APIMgtWSDLException(
+                    this.getClass().getName() + " was unable to process the WSDL Files for the path: " + path, e);
         }
         return canProcess;
     }

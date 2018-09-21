@@ -226,10 +226,10 @@ public class SOAPOperationBindingUtils {
                 return wsdl20Processor;
             }
         } catch (APIMgtWSDLException e) {
-            handleException("Error while instantiating wsdl processor class.", e);
+            handleException("Error while initializing wsdl processor class.", e);
         }
         //no processors found if this line reaches
-        throw new APIManagementException("No WSDL processor found to process WSDL content.");
+        throw new APIManagementException("No WSDL processor found.");
     }
 
     /**
