@@ -580,8 +580,8 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
                 wsdlOperation.setTargetNamespace(targetNamespace);
                 wsdlOperation.setStyle(soapOperation.getStyle());
 
-                wsdlOperation.setInputParameterModel(getSoapInputParameterModel(bindingOperation));
-                wsdlOperation.setOutputParameterModel(getSoapOutputParameterModel(bindingOperation));
+                wsdlOperation.setInputParameterModel(getSoapInputParameterModel(bindingOperation, soapOperation.getStyle()));
+                wsdlOperation.setOutputParameterModel(getSoapOutputParameterModel(bindingOperation, soapOperation.getStyle()));
             }
         }
         return wsdlOperation;
@@ -594,7 +594,7 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
      * @return list of swagger models for the parameters
      * @throws APIMgtWSDLException
      */
-    private List<ModelImpl> getSoapInputParameterModel(BindingOperation bindingOperation) throws APIMgtWSDLException {
+    private List<ModelImpl> getSoapInputParameterModel(BindingOperation bindingOperation, String soapStyle) throws APIMgtWSDLException {
 
         List<ModelImpl> inputParameterModelList = new ArrayList<>();
         Operation operation = bindingOperation.getOperation();
@@ -609,10 +609,19 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
                     for (Object obj : map.entrySet()) {
                         Map.Entry entry = (Map.Entry) obj;
                         Part part = (Part) entry.getValue();
-                        if (part.getElementName() != null) {
+                        if (soapStyle.equalsIgnoreCase(SOAPToRESTConstants.DOCUMENT_TYPE_WSDL)) {
                             inputParameterModelList.add(parameterModelMap.get(part.getElementName().getLocalPart()));
                         } else {
-                            inputParameterModelList.add(parameterModelMap.get(part.getName()));
+                            if (parameterModelMap.containsKey(part.getTypeName().getLocalPart())) {
+                                inputParameterModelList.add(parameterModelMap.get(part.getTypeName().getLocalPart()));
+                            } else {
+                                ModelImpl model = new ModelImpl();
+                                model.setType(ObjectProperty.TYPE);
+
+                                model.setName(message.getQName().getLocalPart());
+                                model.addProperty(part.getName(), getPropertyFromDataType(part.getTypeName().getLocalPart()));
+                                inputParameterModelList.add(model);
+                            }
                         }
                     }
                 }
@@ -628,7 +637,7 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
      * @return list of swagger models for the parameters
      * @throws APIMgtWSDLException
      */
-    private List<ModelImpl> getSoapOutputParameterModel(BindingOperation bindingOperation) throws APIMgtWSDLException {
+    private List<ModelImpl> getSoapOutputParameterModel(BindingOperation bindingOperation, String soapStyle) throws APIMgtWSDLException {
         List<ModelImpl> outputParameterModelList = new ArrayList<>();
         Operation operation = bindingOperation.getOperation();
         if (operation != null) {
@@ -641,10 +650,19 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
                     for (Object obj : map.entrySet()) {
                         Map.Entry entry = (Map.Entry) obj;
                         Part part = (Part) entry.getValue();
-                        if (part.getElementName() != null) {
+                        if (soapStyle.equalsIgnoreCase(SOAPToRESTConstants.DOCUMENT_TYPE_WSDL)) {
                             outputParameterModelList.add(parameterModelMap.get(part.getElementName().getLocalPart()));
                         } else {
-                            outputParameterModelList.add(parameterModelMap.get(part.getName()));
+                            if (parameterModelMap.containsKey(part.getTypeName().getLocalPart())) {
+                                outputParameterModelList.add(parameterModelMap.get(part.getTypeName().getLocalPart()));
+                            } else {
+                                ModelImpl model = new ModelImpl();
+                                model.setType(ObjectProperty.TYPE);
+
+                                model.setName(message.getQName().getLocalPart());
+                                model.addProperty(part.getName(), getPropertyFromDataType(part.getTypeName().getLocalPart()));
+                                outputParameterModelList.add(model);
+                            }
                         }
                     }
                 }
