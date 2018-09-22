@@ -36,14 +36,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ThrottlingPolicyTemplateBuilderTest {
-    
-    private final String POLICY_LOCATION = "src" + File.separator + "test" + File.separator + "resources"
-            + File.separator + "repository" + File.separator + "resources" + File.separator + "policy_templates"
-            + File.separator + "";
+
+    private final String POLICY_LOCATION =
+            "repository" + File.separator + "resources" + File.separator + "policy_templates" + File.separator + "";
     private ThrottlePolicyTemplateBuilder templateBuilder;
 
     @Before
     public void setUp() throws Exception {
+        System.setProperty("carbon.home", ThrottlingPolicyTemplateBuilderTest.class.getResource("/").getFile());
         templateBuilder = new ThrottlePolicyTemplateBuilder();
         //set the policy file location manually for testting
         templateBuilder.setPolicyTemplateLocation(POLICY_LOCATION);

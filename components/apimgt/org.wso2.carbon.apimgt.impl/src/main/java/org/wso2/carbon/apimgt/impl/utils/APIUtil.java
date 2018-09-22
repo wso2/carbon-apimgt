@@ -3640,8 +3640,8 @@ public final class APIUtil {
 
         InputStream inSeqStream = null;
         String seqFolderLocation =
-                APIConstants.API_CUSTOM_SEQUENCES_FOLDER_LOCATION + File.separator +
-                        customSequenceType;
+                CarbonUtils.getCarbonHome() + File.separator + APIConstants.API_CUSTOM_SEQUENCES_FOLDER_LOCATION
+                        + File.separator + customSequenceType;
 
         try {
             File inSequenceDir = new File(seqFolderLocation);

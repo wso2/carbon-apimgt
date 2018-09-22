@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.xml.stream.XMLStreamException;
@@ -122,6 +123,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
                                             "org.apache.velocity.runtime.log.Log4JLogChute" );
                 velocityengine.setProperty( "runtime.log.logsystem.log4j.logger", getVelocityLogger());
             }
+            velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
             velocityengine.init();
 
             Template t = velocityengine.getTemplate(this.getTemplatePath());
@@ -169,6 +171,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
                                             "org.apache.velocity.runtime.log.Log4JLogChute" );
                 velocityengine.setProperty( "runtime.log.logsystem.log4j.logger", getVelocityLogger());
             }
+            velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
             velocityengine.init();
 
             Template t = velocityengine.getTemplate(this.getPrototypeTemplatePath());
@@ -193,6 +196,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
                                             "org.apache.velocity.runtime.log.Log4JLogChute" );
                 velocityengine.setProperty( "runtime.log.logsystem.log4j.logger", getVelocityLogger());
             }
+            velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
             velocityengine.init();
 
             ConfigContext configcontext = new APIConfigContext(this.api);
@@ -256,6 +260,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
                         "org.apache.velocity.runtime.log.Log4JLogChute" );
                 velocityengine.setProperty( "runtime.log.logsystem.log4j.logger", getVelocityLogger());
             }
+            velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
             velocityengine.init();
 
             context.put("type", endpointType);
