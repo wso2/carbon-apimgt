@@ -124,7 +124,6 @@ class Wizard extends React.Component {
       if(promised_create) {
         promised_create.then(response => {
           let appCreated = JSON.parse(response.data);
-          console.info('JSON.parse(response.data)', JSON.parse(response.data));
           that.newApp = {value: appCreated.applicationId, label: appCreated.name}
           //Once application loading fixed this need to pass application ID and load app
           that.setState({

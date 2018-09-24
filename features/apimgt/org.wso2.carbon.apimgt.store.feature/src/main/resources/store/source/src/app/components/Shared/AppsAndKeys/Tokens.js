@@ -73,8 +73,6 @@ class Tokens extends React.Component {
         this.setState({ [name]: event.target.value });
     };
     generateToken() {
-        console.info("*****", this.state.application);
-        console.info("&&&&&", this.key_type);
 
         if (!this.state.application) {
             console.warn("No Application found!");
