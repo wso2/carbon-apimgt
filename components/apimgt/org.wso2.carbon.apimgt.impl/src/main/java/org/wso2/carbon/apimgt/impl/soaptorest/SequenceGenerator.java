@@ -33,6 +33,7 @@ import io.swagger.models.parameters.QueryParameter;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.util.Json;
 import io.swagger.util.Yaml;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.simple.parser.JSONParser;
@@ -116,38 +117,15 @@ public class SequenceGenerator {
                 Map<String, Object> vendorExtensions = operation.getVendorExtensions();
                 Object vendorExtensionObj = vendorExtensions.get("x-wso2-soap");
 
-                //todo handle if the extensions are not available
-                String soapAction = (String) ((LinkedHashMap) vendorExtensionObj).get("soap-action");
-                String namespace = (String) ((LinkedHashMap) vendorExtensionObj).get("namespace");
-
-                List<Parameter> parameters = operation.getParameters();
-                for (Parameter parameter : parameters) {
-                    String name = parameter.getName();
-                    if (parameter instanceof BodyParameter) {
-                        Model schema = ((BodyParameter) parameter).getSchema();
-                        if (schema instanceof RefModel) {
-                            String $ref = ((RefModel) schema).get$ref();
-                            if (StringUtils.isNotBlank($ref)) {
-                                String defName = $ref.substring("#/definitions/".length());
-                                Model model = definitions.get(defName);
-                                Example example = ExampleBuilder
-                                        .fromModel(defName, model, definitions, new HashSet<String>());
-
-                                String jsonExample = Json.pretty(example);
-                                try {
-                                    org.json.JSONObject json = new org.json.JSONObject(jsonExample);
-                                    SequenceUtils.listJson(json, parameterJsonPathMapping);
-                                } catch (JSONException e) {
-                                    log.error("Error occurred while generating json mapping for the definition", e);
-                                }
-                            }
-                        }
-                    }
-                    if (parameter instanceof QueryParameter) {
-                        String type = ((QueryParameter) parameter).getType();
-                        queryParameters.put(name, type);
-                    }
+                String soapAction = SOAPToRESTConstants.EMPTY_STRING;
+                String namespace = SOAPToRESTConstants.EMPTY_STRING;
+                if (vendorExtensionObj != null) {
+                    soapAction = (String) ((LinkedHashMap) vendorExtensionObj).get("soap-action");
+                    namespace = (String) ((LinkedHashMap) vendorExtensionObj).get("namespace");
                 }
+                //populates body parameter json paths and query parameters to generate api sequence parameters
+                populateParametersFromOperation(operation, definitions, parameterJsonPathMapping, queryParameters);
+
                 Map<String, String> payloadSequence = createPayloadFacXMLForOperation(parameterJsonPathMapping, queryParameters,
                         namespace, SOAPToRESTConstants.EMPTY_STRING, operationId);
                 try {
@@ -172,8 +150,40 @@ public class SequenceGenerator {
                     saveApiSequences(apiDataStr, inSequence, outSequence, httpMethod.toString().toLowerCase(),
                             pathName);
                 } catch (APIManagementException e) {
-                    handleException("Error when generating sequence property elements", e);
+                    handleException("Error when generating sequence property and arg elements for soap operation: " + operationId, e);
                 }
+            }
+        }
+    }
+
+    private static void populateParametersFromOperation(Operation operation, Map<String, Model> definitions,
+            Map<String, String> parameterJsonPathMapping, Map<String, String> queryParameters) {
+
+        List<Parameter> parameters = operation.getParameters();
+        for (Parameter parameter : parameters) {
+            String name = parameter.getName();
+            if (parameter instanceof BodyParameter) {
+                Model schema = ((BodyParameter) parameter).getSchema();
+                if (schema instanceof RefModel) {
+                    String $ref = ((RefModel) schema).get$ref();
+                    if (StringUtils.isNotBlank($ref)) {
+                        String defName = $ref.substring("#/definitions/".length());
+                        Model model = definitions.get(defName);
+                        Example example = ExampleBuilder.fromModel(defName, model, definitions, new HashSet<String>());
+
+                        String jsonExample = Json.pretty(example);
+                        try {
+                            org.json.JSONObject json = new org.json.JSONObject(jsonExample);
+                            SequenceUtils.listJson(json, parameterJsonPathMapping);
+                        } catch (JSONException e) {
+                            log.error("Error occurred while generating json mapping for the definition: " + defName, e);
+                        }
+                    }
+                }
+            }
+            if (parameter instanceof QueryParameter) {
+                String type = ((QueryParameter) parameter).getType();
+                queryParameters.put(name, type);
             }
         }
     }
@@ -341,7 +351,7 @@ public class SequenceGenerator {
             argStr += params[1] + SOAPToRESTConstants.SequenceGen.NEW_LINE_CHAR;
         }
 
-        if (parameterJsonPathMapping.size() == 0) {
+        if (MapUtils.isEmpty(parameterJsonPathMapping)) {
             for (String queryParam : queryPathParamMapping.keySet()) {
                 String paramElements = SequenceGenerator
                         .createParameterElements(queryParam, SOAPToRESTConstants.ParamTypes.QUERY);
