@@ -165,19 +165,17 @@ public class APIThrottleHandler extends AbstractHandler {
         Timer.Context context = timer.start();
         long executionStartTime = System.nanoTime();
 
-        TracingSpan responseLatencySpan = (TracingSpan) messageContext.getProperty("ResponseLatency");
+        TracingSpan responseLatencySpan = (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
         TracingTracer tracer = Util.getGlobalTracer();
-        TracingSpan throttlingLatencySpan = Util.startSpan("Throttling_Latency-APIThrottleHandler", responseLatencySpan, tracer, null);
-        Util.setTag(throttlingLatencySpan, "RequestID", String.valueOf(messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID)));
-        messageContext.setProperty("ThrottlingLatencySpan-APIThrottleHandler", throttlingLatencySpan);
+        TracingSpan throttlingLatencySpan = Util.startSpan(APIMgtGatewayConstants.THROTTLE_LATENCY, responseLatencySpan, tracer);
+        Util.setTag(throttlingLatencySpan, APIMgtGatewayConstants.REQUEST_ID, String.valueOf(messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID)));
         try {
             return doThrottle(messageContext);
         } finally {
             messageContext.setProperty(APIMgtGatewayConstants.THROTTLING_LATENCY,
                     TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - executionStartTime));
             context.stop();
-            TracingSpan span = (TracingSpan) messageContext.getProperty("ThrottlingLatencySpan-APIThrottleHandler");
-            Util.finishSpan(span);
+            Util.finishSpan(throttlingLatencySpan);
         }
     }
 

@@ -30,6 +30,7 @@ import org.apache.synapse.rest.RESTUtils;
 import org.apache.synapse.rest.Resource;
 import org.apache.synapse.rest.dispatch.RESTDispatcher;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyDataStore;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.WSAPIKeyDataStore;
 import org.wso2.carbon.apimgt.gateway.handlers.security.thrift.ThriftAPIDataStore;
@@ -357,7 +358,11 @@ public class APIKeyValidator {
 
         VerbInfoDTO verb = null;
         try {
+            TracingSpan keySpan = (TracingSpan) synCtx.getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
+            TracingTracer tracer = Util.getGlobalTracer();
+            TracingSpan span = Util.startSpan(APIMgtGatewayConstants.FIND_MATCHING_VERB, keySpan ,tracer);
             verb = findMatchingVerb(synCtx);
+            Util.finishSpan(span);
             if (verb != null) {
                 synCtx.setProperty(APIConstants.VERB_INFO_DTO, verb);
             }
@@ -573,8 +578,8 @@ public class APIKeyValidator {
             if (log.isDebugEnabled()) {
                 log.debug("Could not find API object in cache for key: " + apiCacheKey);
             }
-            TracingSpan span = (TracingSpan) synCtx.getProperty("KeySpan");
-            TracingSpan apiInfoDTOSpan = Util.startSpan("API_INFO_DTO", span, Util.getGlobalTracer(), null);
+            TracingSpan keySpan = (TracingSpan) synCtx.getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
+            TracingSpan apiInfoDTOSpan = Util.startSpan(APIMgtGatewayConstants.DO_GET_API_INFO_DTO, keySpan, Util.getGlobalTracer());
             apiInfoDTO = doGetAPIInfo(apiContext, apiVersion);
             Util.finishSpan(apiInfoDTOSpan);
 

@@ -20,18 +20,20 @@ package org.wso2.carbon.apimgt.tracing.jaeger;
 
 import io.jaegertracing.Configuration;
 import io.opentracing.Tracer;
+import io.opentracing.contrib.reporter.Reporter;
 import io.opentracing.contrib.reporter.TracerR;
-import io.opentracing.contrib.reporter.slf4j.Slf4jReporter;
+import io.opentracing.util.GlobalTracer;
 import io.opentracing.util.ThreadLocalScopeManager;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.tracing.OpenTracer;
+import org.wso2.carbon.apimgt.tracing.TracingReporter;
 import org.wso2.carbon.apimgt.tracing.TracingServiceImpl;
 
 public class JaegerTracerImpl implements OpenTracer {
 
     private static final String NAME = "jaeger";
-    APIManagerConfiguration configuration = new TracingServiceImpl().getConfiguration();
+    private APIManagerConfiguration configuration = new TracingServiceImpl().getConfiguration();
 
     @Override
     public Tracer getTracer(String serviceName) {
@@ -46,13 +48,16 @@ public class JaegerTracerImpl implements OpenTracer {
                 configuration.getFirstProperty(Constants.CONFIG_SAMPLER_TYPE) : Constants.DEFAULT_SAMPLER_TYPE;
 
         float samplerParam = configuration.getFirstProperty(Constants.CONFIG_SAMPLER_PARAM) != null ?
-                Float.parseFloat(configuration.getFirstProperty(Constants.CONFIG_SAMPLER_PARAM)) : Constants.DEFAULT_SAMPLER_PARAM;
+                Float.parseFloat(configuration.getFirstProperty(Constants.CONFIG_SAMPLER_PARAM))
+                : Constants.DEFAULT_SAMPLER_PARAM;
 
         int reporterFlushInterval = configuration.getFirstProperty(Constants.CONFIG_REPORTER_FLUSH_INTERVAL) != null ?
-                Integer.parseInt(configuration.getFirstProperty(Constants.CONFIG_REPORTER_FLUSH_INTERVAL)) : Constants.DEFAULT_REPORTER_FLUSH_INTERVAL;
+                Integer.parseInt(configuration.getFirstProperty(Constants.CONFIG_REPORTER_FLUSH_INTERVAL))
+                : Constants.DEFAULT_REPORTER_FLUSH_INTERVAL;
 
         int reporterBufferSize = configuration.getFirstProperty(Constants.CONFIG_REPORTER_BUFFER_SIZE) != null ?
-                Integer.parseInt(configuration.getFirstProperty(Constants.CONFIG_REPORTER_BUFFER_SIZE)) : Constants.DEFAULT_REPORTER_BUFFER_SIZE;
+                Integer.parseInt(configuration.getFirstProperty(Constants.CONFIG_REPORTER_BUFFER_SIZE))
+                : Constants.DEFAULT_REPORTER_BUFFER_SIZE;
 
         Configuration.SamplerConfiguration samplerConfig = new Configuration.SamplerConfiguration()
                 .withType(samplerType)
@@ -67,11 +72,11 @@ public class JaegerTracerImpl implements OpenTracer {
                 .withSender(senderConfig);
 
         Tracer tracer = new Configuration(serviceName).withSampler(samplerConfig).withReporter(reporterConfig).getTracer();
+        Reporter reporter = new TracingReporter(LogFactory.getLog("tracer"), true);
+        Tracer tracerR = new TracerR(tracer, reporter, new ThreadLocalScopeManager());
+        GlobalTracer.register(tracerR);
 
-        io.opentracing.contrib.reporter.Reporter reporter = new Slf4jReporter(LoggerFactory.getLogger("tracer"), true);
-        Tracer tracer1 = new TracerR(tracer, reporter, new ThreadLocalScopeManager());
-
-        return tracer1;
+        return tracerR;
     }
 
     @Override

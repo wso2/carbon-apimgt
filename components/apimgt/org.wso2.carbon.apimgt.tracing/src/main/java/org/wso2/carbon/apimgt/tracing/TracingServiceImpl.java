@@ -41,7 +41,6 @@ public class TracingServiceImpl implements TracingService {
     public static TracingServiceImpl getInstance() {
         return instance;
     }
-    private Tracer tracer;
 
     @Override
     public TracingTracer buildTracer(String serviceName) {
@@ -57,6 +56,7 @@ public class TracingServiceImpl implements TracingService {
         String openTracerName = getConfiguration().getFirstProperty(TracingConstants.OPEN_TRACER_NAME);
         String enabled = getConfiguration().getFirstProperty(TracingConstants.OPEN_TRACER_ENABLED);
 
+        Tracer tracer;
         if (openTracerName.equalsIgnoreCase("JAEGER") && enabled.equalsIgnoreCase("TRUE")) {
 
             tracer = new JaegerTracerImpl().getTracer(serviceName);

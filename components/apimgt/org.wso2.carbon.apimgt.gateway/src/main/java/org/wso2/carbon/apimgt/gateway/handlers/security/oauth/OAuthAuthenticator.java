@@ -119,9 +119,9 @@ public class OAuthAuthenticator implements Authenticator {
         String httpMethod = (String)((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(Constants.Configuration.HTTP_METHOD);
 
-        TracingSpan keySpan = (TracingSpan) synCtx.getProperty(APIMgtGatewayConstants.KEY_VALIDATION_LATENCY_SPAN);
+        TracingSpan keySpan = (TracingSpan) synCtx.getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
         TracingTracer tracer = Util.getGlobalTracer();
-        TracingSpan getClientDomainSpan = Util.startSpan("Get_Client_Domain()", keySpan, tracer, null);
+        TracingSpan getClientDomainSpan = Util.startSpan(APIMgtGatewayConstants.GET_CLIENT_DOMAIN, keySpan, tracer);
         String clientDomain = getClientDomain(synCtx);
         Util.finishSpan(getClientDomainSpan);
 
@@ -132,9 +132,8 @@ public class OAuthAuthenticator implements Authenticator {
         Timer timer = getTimer(MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "GET_RESOURCE_AUTH"));
         Timer.Context context = timer.start();
-        TracingSpan authenticationSchemeSpan = Util.startSpan("GET_RESOURCE_AUTH", keySpan, tracer, null);
+        TracingSpan authenticationSchemeSpan = Util.startSpan(APIMgtGatewayConstants.GET_RESOURCE_AUTHENTICATION_SCHEME, keySpan, tracer);
         String authenticationScheme = getAPIKeyValidator().getResourceAuthenticationScheme(synCtx);
-        synCtx.setProperty(APIMgtGatewayConstants.GET_RESOURCE_AUTHENTICATION_SCHEME_SPAN,authenticationSchemeSpan);
         Util.finishSpan(authenticationSchemeSpan);
         context.stop();
         APIKeyValidationInfoDTO info;
@@ -214,7 +213,7 @@ public class OAuthAuthenticator implements Authenticator {
                     APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "GET_KEY_VALIDATION_INFO"));
             context = timer.start();
 
-            TracingSpan keyInfo = Util.startSpan("get_Key_Validation_Info()", keySpan, tracer, null);
+            TracingSpan keyInfo = Util.startSpan(APIMgtGatewayConstants.GET_KEY_VALIDATION_INFO, keySpan, tracer);
             info = getAPIKeyValidator().getKeyValidationInfo(apiContext, apiKey, apiVersion, authenticationScheme, clientDomain,
                     matchingResource, httpMethod, defaultVersionInvoked);
             Util.finishSpan(keyInfo);
@@ -226,7 +225,6 @@ public class OAuthAuthenticator implements Authenticator {
         }
 
         if (info.isAuthorized()) {
-            TracingSpan isAuthorizedSpan = Util.startSpan("is_Authorized()", keySpan, tracer, null);
             AuthenticationContext authContext = new AuthenticationContext();
             authContext.setAuthenticated(true);
             authContext.setTier(info.getTier());
@@ -256,7 +254,6 @@ public class OAuthAuthenticator implements Authenticator {
             //String tenantDomain = MultitenantUtils.getTenantDomain(info.getApiPublisher());
             synCtx.setProperty("api.ut.apiPublisher", info.getApiPublisher());
             synCtx.setProperty("API_NAME", info.getApiName());
-            Util.finishSpan(isAuthorizedSpan);
 
             if(log.isDebugEnabled()){
                 log.debug("User is authorized to access the Resource");

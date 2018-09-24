@@ -118,9 +118,9 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 
         Timer.Context context = startMetricTimer();
 
-        TracingSpan responseLatencySpan = (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY_SPAN);
+        TracingSpan responseLatencySpan = (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
         TracingTracer tracer = Util.getGlobalTracer();
-        TracingSpan CORSRequestHandlerSpan = Util.startSpan("CORS_Request_Handler", responseLatencySpan, tracer, null);
+        TracingSpan CORSRequestHandlerSpan = Util.startSpan(APIMgtGatewayConstants.CORS_REQUEST_HANDLER, responseLatencySpan, tracer);
         Util.setTag(CORSRequestHandlerSpan, APIMgtGatewayConstants.REQUEST_ID, (String) messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID));
         try {
             if (!initializeHeaderValues) {

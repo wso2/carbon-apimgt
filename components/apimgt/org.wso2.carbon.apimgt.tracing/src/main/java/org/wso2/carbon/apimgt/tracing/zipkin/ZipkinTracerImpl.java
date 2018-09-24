@@ -39,8 +39,7 @@ import zipkin2.reporter.okhttp3.OkHttpSender;
 public class ZipkinTracerImpl implements OpenTracer {
 
     private static final String NAME = "zipkin";
-    APIManagerConfiguration configuration = new TracingServiceImpl().getConfiguration();
-    private static final Log log = LogFactory.getLog(ZipkinTracerImpl.class);
+    private APIManagerConfiguration configuration = new TracingServiceImpl().getConfiguration();
 
     @Override
     public Tracer getTracer(String serviceName) {
@@ -64,10 +63,9 @@ public class ZipkinTracerImpl implements OpenTracer {
 
         Reporter reporter = new TracingReporter(LogFactory.getLog("tracer"), true);
         Tracer tracerR = new TracerR(tracer, reporter, new ThreadLocalScopeManager());
-
         GlobalTracer.register(tracerR);
 
-        return  GlobalTracer.get();
+        return  tracerR;
     }
 
     @Override

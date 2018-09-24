@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableMap;
 import io.opentracing.Span;
 import io.opentracing.SpanContext;
 import io.opentracing.propagation.Format;
+import io.opentracing.propagation.TextMapExtractAdapter;
+import io.opentracing.propagation.TextMapInjectAdapter;
 import io.opentracing.util.GlobalTracer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -16,7 +18,7 @@ public class Util {
 
     private static final Log log = LogFactory.getLog(Util.class);
 
-    public static TracingSpan startSpan(String spanName, TracingSpan parentSpan, TracingTracer tracer, String tags) {
+    public static TracingSpan startSpan(String spanName, TracingSpan parentSpan, TracingTracer tracer) {
 
         if (parentSpan == null) {
             Span span = tracer.getTracingTracer().buildSpan(spanName).start();
@@ -26,14 +28,11 @@ public class Util {
             Object sp = parentSpan.getSpan();
             Span childSpan;
             if (sp instanceof Span) {
-                childSpan = tags == null ? tracer.getTracingTracer().buildSpan(spanName).asChildOf((Span) sp).start() :
-                        tracer.getTracingTracer()
-                                .buildSpan(spanName).asChildOf((Span) sp).withTag("span.kind", tags).start() ;
+                childSpan = tracer.getTracingTracer().buildSpan(spanName).asChildOf((Span) sp).start();
+
             } else {
-                childSpan = tags == null ? tracer.getTracingTracer().buildSpan(spanName)
-                        .asChildOf((SpanContext) sp).start() :
-                        tracer.getTracingTracer().buildSpan(spanName)
-                                .asChildOf((SpanContext) sp).withTag("span.kind", tags).start() ;
+                childSpan = tracer.getTracingTracer().buildSpan(spanName).asChildOf((SpanContext) sp).start();
+
             }
             return new TracingSpan(childSpan);
         }
@@ -74,21 +73,23 @@ public class Util {
     public static void inject(TracingSpan span, TracingTracer tracer, Map<String, String> tracerSpecificCarrier) {
 
         Object sp = span.getSpan();
-        RequestInjector requestInjector = new RequestInjector(tracerSpecificCarrier);
         if(sp instanceof Span) {
-            tracer.getTracingTracer().inject(((Span) sp).context(), Format.Builtin.HTTP_HEADERS, requestInjector);
+            tracer.getTracingTracer().inject(((Span) sp).context(), Format.Builtin.HTTP_HEADERS,
+                    new TextMapInjectAdapter(tracerSpecificCarrier));
         }else {
-            tracer.getTracingTracer().inject((SpanContext) sp, Format.Builtin.HTTP_HEADERS, requestInjector);
+            tracer.getTracingTracer().inject((SpanContext) sp, Format.Builtin.HTTP_HEADERS,
+                    new TextMapInjectAdapter(tracerSpecificCarrier));
         }
     }
 
-    public static TracingSpan extract(TracingTracer tracer, Map<String, String> contextString) {
+    public static TracingSpan extract(TracingTracer tracer, Map<String, String> headerMap) {
 
         return new TracingSpan(tracer.getTracingTracer().extract(Format.Builtin.HTTP_HEADERS,
-                new RequestExtractor(contextString)));
+                new TextMapExtractAdapter(headerMap)));
     }
 
     public static TracingTracer getGlobalTracer() {
+
         return new TracingTracer(GlobalTracer.get());
     }
 

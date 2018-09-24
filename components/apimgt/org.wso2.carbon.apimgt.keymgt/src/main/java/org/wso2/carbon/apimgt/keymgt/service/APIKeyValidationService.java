@@ -112,6 +112,15 @@ public class APIKeyValidationService extends AbstractAdmin {
         Timer.Context timerContext = timer.start();
 
         MessageContext axis2MessageContext = MessageContext.getCurrentMessageContext();
+        if (axis2MessageContext != null) {
+            Map map = (Map) axis2MessageContext.getProperty(MessageContext.TRANSPORT_HEADERS);
+            spanContext = Util.extract(tracer, map);
+            validateMainspan = Util.startSpan(TracingConstants.VALIDATE_MAIN, spanContext, tracer);
+            String key = Util.baggageGet(spanContext, TracingConstants.REQUEST_ID);
+            Util.setTag(validateMainspan, TracingConstants.REQUEST_ID, key);
+            Util.setTag(validateMainspan, "span.kind", "client");
+        }
+
         Map headersMap = null;
         String activityID = null;
         try {
@@ -124,7 +133,7 @@ public class APIKeyValidationService extends AbstractAdmin {
                     if (headers != null && headers instanceof Map) {
                         headersMap = (Map) headers;
                         activityID = (String) headersMap.get("activityID");
-                        spanContext = Util.extract(tracer, headersMap);
+//                        spanContext = Util.extract(tracer, headersMap);
                     }
                     if(headersMap != null) {
                         headersList.add(new Header("activityID", (String) headersMap.get("activityID")));
@@ -132,18 +141,18 @@ public class APIKeyValidationService extends AbstractAdmin {
 
                     responseMessageContext.setProperty(HTTPConstants.HTTP_HEADERS, headersList);
                 }
+                spanContext = Util.extract(tracer, headersMap);
             }
         } catch (AxisFault axisFault) {
             throw new APIKeyMgtException("Error while building response messageContext: " + axisFault.getLocalizedMessage());
         }
 
-        validateMainspan = Util.startSpan("Validate_Main", spanContext, tracer, null);
-        if(spanContext != null) {
-            String key = Util.baggageGet(spanContext, "request-id");
-            Util.setTag(validateMainspan, "RequestID", key);
-        }
-//        Util.setTag(validateMainspan, "span.kind", "server");
-        Util.setTag(validateMainspan, "span.kind", "client");
+//        validateMainspan = Util.startSpan(TracingConstants.VALIDATE_MAIN, spanContext, tracer);
+//        if(spanContext != null) {
+//            String key = Util.baggageGet(spanContext, TracingConstants.REQUEST_ID);
+//            Util.setTag(validateMainspan, TracingConstants.REQUEST_ID, key);
+//        }
+//        Util.setTag(validateMainspan, "span.kind", "client");
 
         if (log.isDebugEnabled()) {
             String logMsg = "KeyValidation request from gateway: requestTime= "
@@ -165,16 +174,14 @@ public class APIKeyValidationService extends AbstractAdmin {
         validationContext.setValidationInfoDTO(new APIKeyValidationInfoDTO());
         validationContext.setVersion(version);
 
-        TracingSpan span = Util.startSpan("Get_Access_Token_Cache_Key", validateMainspan,tracer, null);
-//        Util.setTag(span,"RequestID", key);
+        TracingSpan span = Util.startSpan(TracingConstants.GET_ACCESS_TOKEN_CACHE_KEY, validateMainspan,tracer);
         String cacheKey = APIUtil.getAccessTokenCacheKey(accessToken,
                                                          context, version, matchingResource, httpVerb, requiredAuthenticationLevel);
 
         validationContext.setCacheKey(cacheKey);
         Util.finishSpan(span);
 
-        TracingSpan keyValDTO = Util.startSpan("Fetching_API_Key_Validation_DTO", validateMainspan, tracer, null);
-//        Util.setTag(keyValDTO,"RequestID", key);
+        TracingSpan keyValDTO = Util.startSpan(TracingConstants.FETCHING_API_KEY_VAL_INFO_DTO_FROM_CACHE, validateMainspan, tracer);
         APIKeyValidationInfoDTO infoDTO = APIKeyMgtUtil.getFromKeyManagerCache(cacheKey);
         Util.finishSpan(keyValDTO);
 
@@ -189,8 +196,7 @@ public class APIKeyValidationService extends AbstractAdmin {
         Timer timer2 = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "VALIDATE_TOKEN"));
         Timer.Context timerContext2 = timer2.start();
-        TracingSpan validateTokenSpan = Util.startSpan("Validate_Token", validateMainspan, tracer, null);
-//        Util.setTag(validateTokenSpan,"RequestID", key);
+        TracingSpan validateTokenSpan = Util.startSpan(TracingConstants.VALIDATE_TOKEN, validateMainspan, tracer);
         boolean state = keyValidationHandler.validateToken(validationContext);
         timerContext2.stop();
         Util.finishSpan(validateTokenSpan);
@@ -200,8 +206,7 @@ public class APIKeyValidationService extends AbstractAdmin {
             Timer timer3 = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                     APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "VALIDATE_SUBSCRIPTION"));
             Timer.Context timerContext3 = timer3.start();
-            TracingSpan validateSubscriptionSpan = Util.startSpan("Validate_Subscription", validateMainspan, tracer, null);
-//            Util.setTag(validateSubscriptionSpan,"RequestID", key);
+            TracingSpan validateSubscriptionSpan = Util.startSpan(TracingConstants.VALIDATE_SUBSCRIPTION, validateMainspan, tracer);
             state = keyValidationHandler.validateSubscription(validationContext);
             timerContext3.stop();
             Util.finishSpan(validateSubscriptionSpan);
@@ -213,8 +218,7 @@ public class APIKeyValidationService extends AbstractAdmin {
             Timer timer4 = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                     APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "VALIDATE_SCOPES"));
             Timer.Context timerContext4 = timer4.start();
-            TracingSpan validateScopeSpan = Util.startSpan("Validate_Scopes", validateMainspan, tracer, null);
-//            Util.setTag(validateScopeSpan,"RequestID", key);
+            TracingSpan validateScopeSpan = Util.startSpan(TracingConstants.VALIDATE_SCOPES, validateMainspan, tracer);
             state = keyValidationHandler.validateScopes(validationContext);
             timerContext4.stop();
             Util.finishSpan(validateScopeSpan);
@@ -227,8 +231,7 @@ public class APIKeyValidationService extends AbstractAdmin {
             Timer timer5 = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                     APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "GENERATE_JWT"));
             Timer.Context timerContext5 = timer5.start();
-            TracingSpan generateJWTSpan = Util.startSpan("Generate_JWT", validateMainspan, tracer, null);
-//            Util.setTag(generateJWTSpan,"RequestID", key);
+            TracingSpan generateJWTSpan = Util.startSpan(TracingConstants.GENERATE_JWT, validateMainspan, tracer);
             keyValidationHandler.generateConsumerToken(validationContext);
             timerContext5.stop();
             Util.finishSpan(generateJWTSpan);
@@ -236,15 +239,13 @@ public class APIKeyValidationService extends AbstractAdmin {
         log.debug("State after calling generateConsumerToken... " + state);
 
         if (!validationContext.isCacheHit()) {
-            TracingSpan keyCache = Util.startSpan("Write_to_key_manager_cache", validateMainspan, tracer, null);
-//            Util.setTag(keyCache,"RequestID", key);
+            TracingSpan keyCache = Util.startSpan(TracingConstants.WRITE_TO_KEY_MANAGER_CACHE, validateMainspan, tracer);
             APIKeyMgtUtil.writeToKeyManagerCache(cacheKey, validationContext.getValidationInfoDTO());
             Util.finishSpan(keyCache);
         }
 
-        TracingSpan span1 = Util.startSpan("publishing_from KM _to_gateway", validateMainspan, tracer, null);
-//        Util.setTag(span1,"RequestID", key);
-        if (log.isDebugEnabled() && axis2MessageContext != null) {
+        TracingSpan keyValResponseSpan = Util.startSpan(TracingConstants.PUBLISHING_KEY_VALIDATION_RESPONSE, validateMainspan, tracer);
+            if (log.isDebugEnabled() && axis2MessageContext != null) {
             logMessageDetails(axis2MessageContext, validationContext.getValidationInfoDTO());
         }
 
@@ -253,9 +254,11 @@ public class APIKeyValidationService extends AbstractAdmin {
             log.debug("KeyValidation response from keymanager to gateway for access token:" + accessToken + " at "
                     + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
         }
-        Util.finishSpan(span1);
+        Util.finishSpan(keyValResponseSpan);
         timerContext.stop();
-        Util.finishSpan(validateMainspan);
+        if(validateMainspan != null) {
+            Util.finishSpan(validateMainspan);
+        }
         return validationContext.getValidationInfoDTO();
     }
 

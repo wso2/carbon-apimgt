@@ -100,11 +100,22 @@ public class APIMgtGatewayConstants {
     public static final String CLIENT_USER_AGENT = "clientUserAgent";
     public static final String CLIENT_IP = "clientIp";
 
-    public static final String REQUEST_ID = "RequestID";
-    public static final String RESPONSE_LATENCY_SPAN = "ResponseLatency";
-    public static final String BACKEND_LATENCY_SPAN = "BackendLatency";
-    public static final String KEY_VALIDATION_LATENCY_SPAN = "KeySpan";
-    public static final String GET_RESOURCE_AUTHENTICATION_SCHEME_SPAN = "GetResourceAuthenticationScheme";
-    
+    public static final String SERVICE_NAME = "API:Latency";
+    public static final String REQUEST_ID = "request-id";
+    public static final String RESPONSE_LATENCY = "API:Response_Latency";
+    public static final String BACKEND_LATENCY_SPAN = "API:Backend_Latency";
+    public static final String KEY_VALIDATION = "API:Key_Validation_Latency";
+    public static final String REQUEST_MEDIATION = "API:Request_Mediation_Latency";
+    public static final String RESPONSE_MEDIATION = "API:Response_Mediation_Latency";
+    public static final String GET_RESOURCE_AUTHENTICATION_SCHEME = "API:Get_Resource_Authentication_Scheme()";
+    public static final String KEY_VALIDATION_FROM_GATEWAY_NODE = "API:Key_Validation_From_Gateway_Node";
+    public static final String GET_CLIENT_DOMAIN = "API:Get_Client_Domain()";
+    public static final String GET_KEY_VALIDATION_INFO = "API:Get_Key_Validation_Info()";
+    public static final String FIND_MATCHING_VERB = "API:Find_matching_verb()";
+    public static final String CORS_REQUEST_HANDLER = "API:CORS_Request_Handler";
+    public static final String THROTTLE_LATENCY = "API:Throttle_Latency";
+    public static final String DO_GET_API_INFO_DTO = "API:Do_Get_API_Info_dto()";
+    public static final String SET_API_PARAMETERS_TO_MESSAGE_CONTEXT = "API:SET_API_PARAMETERS_TO_MESSAGE_CONTEXT";
+
 }
 

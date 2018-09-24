@@ -494,11 +494,10 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         Timer timer3 = getTimer(MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), THROTTLE_MAIN));
         Timer.Context context3 = timer3.start();
-        TracingSpan responseLatencySpan = (TracingSpan) messageContext.getProperty("ResponseLatency");
+        TracingSpan responseLatencySpan = (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
         TracingTracer tracer = Util.getGlobalTracer();
-        TracingSpan throttlingLatencySpan = Util.startSpan("Throttling_Latency-ThrottleHandler", responseLatencySpan, tracer, null);
-        Util.setTag(throttlingLatencySpan,"RequestID", String.valueOf(messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID)));
-        messageContext.setProperty("ThrottlingLatencySpan-ThrottleHandler", throttlingLatencySpan);
+        TracingSpan throttleLatencySpan = Util.startSpan(APIMgtGatewayConstants.THROTTLE_LATENCY, responseLatencySpan, tracer);
+        Util.setTag(throttleLatencySpan, APIMgtGatewayConstants.REQUEST_ID, String.valueOf(messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID)));
         long executionStartTime = System.currentTimeMillis();
         try {
             return doThrottle(messageContext);
@@ -506,8 +505,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
             messageContext.setProperty(APIMgtGatewayConstants.THROTTLING_LATENCY,
                     System.currentTimeMillis() - executionStartTime);
             context3.stop();
-            TracingSpan span = (TracingSpan) messageContext.getProperty("ThrottlingLatencySpan-ThrottleHandler");
-            Util.finishSpan(span);
+            Util.finishSpan(throttleLatencySpan);
         }
     }
 

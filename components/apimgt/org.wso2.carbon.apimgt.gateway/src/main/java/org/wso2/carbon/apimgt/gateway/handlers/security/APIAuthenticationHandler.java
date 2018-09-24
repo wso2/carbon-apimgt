@@ -147,14 +147,14 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "EXS_EXCEPTION_SOFTENING_RETURN_FALSE",
             justification = "Error is sent through payload")
     public boolean handleRequest(MessageContext messageContext) {
-        TracingSpan responseLatencySpan = (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY_SPAN);
+        TracingSpan responseLatencySpan = (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
         TracingTracer tracer = Util.getGlobalTracer();
-        TracingSpan keySpan = Util.startSpan("Key_Validation_Latency", responseLatencySpan, tracer, null);
+        TracingSpan keySpan = Util.startSpan(APIMgtGatewayConstants.KEY_VALIDATION, responseLatencySpan, tracer);
         Util.setTag(keySpan, APIMgtGatewayConstants.REQUEST_ID, (String) messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID));
-        Util.baggageSet(keySpan, "request-id", (String) messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID ));
-        messageContext.setProperty(APIMgtGatewayConstants.KEY_VALIDATION_LATENCY_SPAN, keySpan);
+        Util.baggageSet(keySpan, APIMgtGatewayConstants.REQUEST_ID, (String) messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID ));
+        messageContext.setProperty(APIMgtGatewayConstants.KEY_VALIDATION, keySpan);
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-        axis2MC.setProperty(APIMgtGatewayConstants.KEY_VALIDATION_LATENCY_SPAN, keySpan);
+        axis2MC.setProperty(APIMgtGatewayConstants.KEY_VALIDATION, keySpan);
         Timer.Context context = startMetricTimer();
         long startTime = System.nanoTime();
         long endTime;
@@ -169,7 +169,9 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 initializeAuthenticator();
             }
             if (isAuthenticate(messageContext)) {
+                TracingSpan span = Util.startSpan(APIMgtGatewayConstants.SET_API_PARAMETERS_TO_MESSAGE_CONTEXT, keySpan, tracer);
                 setAPIParametersToMessageContext(messageContext);
+                Util.finishSpan(span);
                 return true;
             }
         } catch (APISecurityException e) {

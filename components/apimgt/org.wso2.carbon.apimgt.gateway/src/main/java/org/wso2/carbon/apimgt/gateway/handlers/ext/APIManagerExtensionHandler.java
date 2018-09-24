@@ -75,15 +75,14 @@ public class APIManagerExtensionHandler extends AbstractHandler {
     public boolean handleRequest(MessageContext messageContext) {
         Timer.Context context = startMetricTimer(DIRECTION_IN);
         long executionStartTime = System.nanoTime();
-        TracingSpan responseLatencySpan = (TracingSpan) messageContext.getProperty("ResponseLatency");
+        TracingSpan responseLatencySpan = (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
         TracingTracer tracer = Util.getGlobalTracer();
-        TracingSpan requestMediationLatencySpan = Util.startSpan("Request_Mediation_Latency", responseLatencySpan, tracer, null);
-        Util.setTag(requestMediationLatencySpan, "RequestID", String.valueOf(messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID)));
-        messageContext.setProperty("Request_Mediation_Latency", requestMediationLatencySpan);
+        TracingSpan requestMediationSpan = Util.startSpan(APIMgtGatewayConstants.REQUEST_MEDIATION, responseLatencySpan, tracer);
+        Util.setTag(requestMediationSpan, APIMgtGatewayConstants.REQUEST_ID, String.valueOf(messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID)));
         try {
             return mediate(messageContext, DIRECTION_IN);
         } finally {
-            Util.finishSpan(requestMediationLatencySpan);
+            Util.finishSpan(requestMediationSpan);
             messageContext.setProperty(APIMgtGatewayConstants.REQUEST_MEDIATION_LATENCY,
                     TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - executionStartTime));
             stopMetricTimer(context);
@@ -93,15 +92,14 @@ public class APIManagerExtensionHandler extends AbstractHandler {
     public boolean handleResponse(MessageContext messageContext) {
         Timer.Context context = startMetricTimer(DIRECTION_OUT);
         long executionStartTime = System.nanoTime();
-        TracingSpan responseLatencySpan = (TracingSpan) messageContext.getProperty("ResponseLatency");
+        TracingSpan responseLatencySpan = (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
         TracingTracer tracer = Util.getGlobalTracer();
-        TracingSpan responseMediationLatencySpan = Util.startSpan("Response_Mediation_Latency", responseLatencySpan, tracer, null);
-        Util.setTag(responseMediationLatencySpan, "RequestID", String.valueOf(messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID)));
-        messageContext.setProperty("ResponseMediationLatencySpan", responseMediationLatencySpan);
+        TracingSpan responseMediationSpan = Util.startSpan(APIMgtGatewayConstants.RESPONSE_MEDIATION, responseLatencySpan, tracer);
+        Util.setTag(responseMediationSpan, APIMgtGatewayConstants.REQUEST_ID, String.valueOf(messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID)));
         try {
             return mediate(messageContext, DIRECTION_OUT);
         } finally {
-            Util.finishSpan(responseMediationLatencySpan);
+            Util.finishSpan(responseMediationSpan);
             messageContext.setProperty(APIMgtGatewayConstants.RESPONSE_MEDIATION_LATENCY,
                     TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - executionStartTime));
             stopMetricTimer(context);
