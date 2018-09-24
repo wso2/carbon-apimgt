@@ -137,7 +137,7 @@ import javax.wsdl.Definition;
  * class which is visible to them. These extensions may add additional features like
  * security to this class.
  */
-class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
+public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     private static final Log log = LogFactory.getLog(APIConsumerImpl.class);
     public static final char COLON_CHAR = ':';

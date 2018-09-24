@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.gateway;
+package org.wso2.carbon.apimgt.keymgt;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -36,17 +36,45 @@ public class MethodTimeLogger
     private static final Log log = LogFactory.getLog("timing");
 
     /**
-     * This is an AspectJ pointcut defined to apply to all methods within the packages,
-     * org.wso2.carbon.apimgt.keymgt.service and org.wso2.carbon.apimgt.keymgt.token.
-     * Also, the pointcut looks for the configuration to enable/ disable timing logs
+     * This is an AspectJ pointcut defined to apply to all methods within the package,
+     * org.wso2.carbon.apimgt.impl and consist of the annotation, @MethodStats.
      *
-     * @return true if the configuration value is given as true
+     * Note:
+     *   1. The annotation can be given to a class too, to enable logging for all methods of the class
+     *   2. Here, the org.wso2.carbon.apimgt.keymgt.service method is explicitly given because annotations cannot be
+     *      added to the service classes
      */
-    @Pointcut("(execution(* org.wso2.carbon.apimgt.keymgt.service..*(..)) ||" +
-            " execution(* org.wso2.carbon.apimgt.keymgt.token..*(..))) && if()")
-    public static boolean pointCut() {
+    @Pointcut("execution(* org.wso2.carbon.apimgt.keymgt.service..*(..)) || (execution(* *(..)) &&" +
+            " (@annotation(MethodStats) || @target(MethodStats)))")
+    public static void pointCut() {
+    }
+
+    /**
+     * This is an AspectJ pointcut defined to apply to all methods within the package,
+     * org.wso2.carbon.apimgt.keymgt. Also, the pointcut looks for the system property to enable
+     * method time logging for all methods in this package
+     *
+     * @return true if the property value matches this package name
+     */
+    @Pointcut("execution(* *(..)) && if()")
+    public static boolean pointCutAll() {
         boolean enabled = false;
-        String config = CarbonUtils.getServerConfiguration().getFirstProperty("EnableTimingLogs");
+        String config = System.getProperty("logAllMethods");
+        if (config != null && !config.equals("")) {
+            enabled = config.contains("keymgt");
+        }
+        return enabled;
+    }
+
+    /**
+     * This pointcut looks for the system property to enable/ disable timing logs
+     *
+     * @return true if the property value is given as true
+     */
+    @Pointcut("if()")
+    public static boolean isConfigEnabled() {
+        boolean enabled = false;
+        String config = System.getProperty("enableCorrelationLogs");
         if (config != null && !config.equals("")) {
             enabled = Boolean.parseBoolean(config);
         }
@@ -54,21 +82,36 @@ public class MethodTimeLogger
     }
 
     /**
-     * If the pointcut returns true, this method is invoked every time a method satisfies the
+     * If the pointcuts results true, this method is invoked every time a method satisfies the
      * criteria given in the pointcut.
      *
      * @param point The JoinPoint before method execution
      * @return result of method execution
      * @throws Throwable
      */
-    @Around("pointCut()")
+    @Around("isConfigEnabled() && (pointCut() || pointCutAll())")
     public Object log(ProceedingJoinPoint point) throws Throwable
     {
         long start = System.currentTimeMillis();
+        MethodSignature signature = (MethodSignature) point.getSignature();
         Object result = point.proceed();
-        log.info("className="+MethodSignature.class.cast(point.getSignature()).getDeclaringTypeName()+
-                ", methodName="+MethodSignature.class.cast(point.getSignature()).getMethod().getName()+
-                ",threadId="+Thread.currentThread().getId() + ", timeMs="+ (System.currentTimeMillis() - start) );
+        String[] args = signature.getParameterNames();
+
+        String argString;
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("[");
+        if (args != null && args.length != 0) {
+            String delimiter = "";
+            for (String arg : args) {
+                stringBuilder.append(delimiter);
+                delimiter = ", ";
+                stringBuilder.append(arg);
+            }
+        }
+        stringBuilder.append("]");
+        argString = stringBuilder.toString();
+        log.info((System.currentTimeMillis() - start) + "|METHOD|" + MethodSignature.class.cast(point.getSignature()).getDeclaringTypeName() +
+                "|" + MethodSignature.class.cast(point.getSignature()).getMethod().getName()+ "|" + argString);
         return result;
     }
 }

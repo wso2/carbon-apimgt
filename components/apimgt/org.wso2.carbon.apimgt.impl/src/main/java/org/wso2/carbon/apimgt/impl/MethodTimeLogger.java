@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.gateway;
+package org.wso2.carbon.apimgt.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,18 +37,17 @@ public class MethodTimeLogger
 
     /**
      * This is an AspectJ pointcut defined to apply to all methods within the package,
-     * org.wso2.carbon.apimgt.gateway.handlers and consist of the annotation, @MethodStats.
+     * org.wso2.carbon.apimgt.impl and consist of the annotation, @MethodStats.
      *
      * Note: The annotation can be given to a class too, to enable logging for all methods of the class
      */
-    @Pointcut("execution(* org.wso2.carbon.apimgt.gateway.handlers..*(..)) " +
-            "&& (@annotation(MethodStats) || @target(MethodStats))")
+    @Pointcut("execution(* *(..)) && (@annotation(MethodStats) || @target(MethodStats))")
     public static void pointCut() {
     }
 
     /**
      * This is an AspectJ pointcut defined to apply to all methods within the package,
-     * org.wso2.carbon.apimgt.gateway. Also, the pointcut looks for the  system property to enable
+     * org.wso2.carbon.apimgt.impl. Also, the pointcut looks for the system property to enable
      * method time logging for all methods in this package
      *
      * @return true if the property value matches this package name
@@ -58,7 +57,7 @@ public class MethodTimeLogger
         boolean enabled = false;
         String config = System.getProperty("logAllMethods");
         if (config != null && !config.equals("")) {
-            enabled = config.contains("gateway");
+            enabled = config.contains("impl");
         }
         return enabled;
     }
