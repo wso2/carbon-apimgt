@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.dao.SearchType;
+import org.wso2.carbon.apimgt.core.dao.SecondarySearchType;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 import java.sql.PreparedStatement;
@@ -99,10 +100,11 @@ public class H2SQLStatements implements ApiDAOVendorSpecificStatements {
     }
 
     /**
-     * @see ApiDAOVendorSpecificStatements#getPermissionBasedApiAttributeSearchQuery(Map, int)
+     * @see ApiDAOVendorSpecificStatements#getPermissionBasedApiAttributeSearchQuery(Map, Map, int)
      */
     @Override
-    public String getPermissionBasedApiAttributeSearchQuery(Map<SearchType, String> attributeMap, int roleCount) {
+    public String getPermissionBasedApiAttributeSearchQuery(Map<SearchType, String> attributeMap,
+            Map<SecondarySearchType, String> secondaryAttributeMap, int roleCount) {
         StringBuilder searchQuery = new StringBuilder();
         Iterator<Map.Entry<SearchType, String>> entries = attributeMap.entrySet().iterator();
         while (entries.hasNext()) {
@@ -110,13 +112,13 @@ public class H2SQLStatements implements ApiDAOVendorSpecificStatements {
             searchQuery.append("LOWER(");
             searchQuery.append(entry.getKey());
             searchQuery.append(") LIKE ?");
-            if (entries.hasNext()) {
-                searchQuery.append(" AND ");
-            }
+            searchQuery.append(" AND ");
+
         }
 
-        String query = API_SUMMARY_SELECT + " WHERE " + searchQuery.toString()
-                + " AND API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)";
+        String query = API_SUMMARY_SELECT + getSecondaryAttributesSearchQuery(secondaryAttributeMap) + ((
+                secondaryAttributeMap.size() > 0) ? " AND " : " WHERE ") + searchQuery.toString()
+                + "  API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)";
 
         if (roleCount > 0) {
             query += " AND (((GROUP_ID IN (" + DAOUtil.getParameterString(roleCount)
@@ -131,17 +133,18 @@ public class H2SQLStatements implements ApiDAOVendorSpecificStatements {
 
     /**
      * @see ApiDAOVendorSpecificStatements#setPermissionBasedApiAttributeSearchStatement(PreparedStatement, Set,
-     * String ,Map, ApiType,int, int)
+     * String ,Map, Map, ApiType,int, int)
      */
     @Override
     @SuppressFBWarnings({"SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
             "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE"})
     public void setPermissionBasedApiAttributeSearchStatement(PreparedStatement statement, Set<String> roles,
-                                                              String user, Map<SearchType, String> attributeMap,
-                                                              ApiType apiType, int offset, int limit)
-                                                                throws SQLException {
+            String user, Map<SearchType, String> attributeMap, Map<SecondarySearchType, String> secondaryAttributeMap,
+            ApiType apiType, int offset, int limit) throws SQLException {
         int index = 0;
-
+        if (secondaryAttributeMap != null && secondaryAttributeMap.size() > 0) {
+            index = setSecondaryAttributeBasedSearchStatement(statement, secondaryAttributeMap);
+        }
         for (Map.Entry<SearchType, String> entry : attributeMap.entrySet()) {
             entry.setValue('%' + entry.getValue().toLowerCase(Locale.ENGLISH) + '%');
             statement.setString(++index, entry.getValue());

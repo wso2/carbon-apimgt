@@ -45,6 +45,7 @@ import org.wso2.carbon.apimgt.core.configuration.models.NotificationConfiguratio
 import org.wso2.carbon.apimgt.core.configuration.models.ServiceDiscoveryConfigurations;
 import org.wso2.carbon.apimgt.core.configuration.models.ServiceDiscoveryImplConfig;
 import org.wso2.carbon.apimgt.core.dao.SearchType;
+import org.wso2.carbon.apimgt.core.dao.SecondarySearchType;
 import org.wso2.carbon.apimgt.core.dao.ThreatProtectionDAO;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
@@ -1480,11 +1481,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
                 String[] attributes = query.split(ATTRIBUTE_DELIMITER);
                 Map<SearchType, String> attributeMap = new EnumMap<>(SearchType.class);
+                Map<SecondarySearchType, String> secondaryAttributeMap = new EnumMap<>(SecondarySearchType.class);
 
-                boolean isFullTextSearch = false;
                 String searchAttribute, searchValue;
                 if (!query.contains(KEY_VALUE_DELIMITER)) {
-                    isFullTextSearch = true;
+                    apiResults = getApiDAO().searchAPIs(roles, user, query, offset, limit);
                 } else {
                     log.debug("Search query: " + query);
                     for (String attribute : attributes) {
@@ -1495,16 +1496,17 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                             String pseudoName = getUserNameMapper().getLoggedInPseudoNameFromUserID(searchValue);
                             attributeMap.put(SearchType.fromString(searchAttribute), pseudoName);
                         } else {
-                            attributeMap.put(SearchType.fromString(searchAttribute), searchValue);
+                            if (SecondarySearchType.fromString(searchAttribute) != null) {
+                                secondaryAttributeMap.put(SecondarySearchType.fromString(searchAttribute), searchValue);
+                            } else {
+                                attributeMap.put(SearchType.fromString(searchAttribute), searchValue);
+                            }
                         }
                     }
-                }
-
-                if (isFullTextSearch) {
-                    apiResults = getApiDAO().searchAPIs(roles, user, query, offset, limit);
-                } else {
                     log.debug("Attributes:", attributeMap.toString());
-                    apiResults = getApiDAO().attributeSearchAPIs(roles, user, attributeMap, offset, limit, expand);
+                    apiResults = getApiDAO()
+                            .attributeSearchAPIs(roles, user, attributeMap, secondaryAttributeMap, offset, limit,
+                                    expand);
                 }
 
             } else {
