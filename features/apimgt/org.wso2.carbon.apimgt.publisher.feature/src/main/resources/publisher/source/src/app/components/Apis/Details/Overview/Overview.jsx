@@ -381,23 +381,28 @@ class Overview extends Component {
                     <Typography variant='headline'> Additional Properties</Typography>
                     <Divider />
                 </Grid>
-                 <Grid item lg={5}>
-                    <TextField style={{justifyContent:'space-between', marginRight: 25}}
-                          id='api-property'
-                          label={isEditable}
-                          placeholder='My Property'
-                          margin='normal'
-                     />
-
-                     <TextField style={{justifyContent:'space-between', marginLeft: 25}}
-                           id='api-property-value'
-                           label={isEditable}
-                           placeholder='Property Value'
-                           margin='normal'
-                      />
-
-                    </Grid>
-
+                <Grid item lg={5}>
+                    <TextField
+                        style={{
+                            justifyContent: 'space-between',
+                            marginRight: 25,
+                        }}
+                        id='api-property'
+                        label={isEditable}
+                        placeholder='My Property'
+                        margin='normal'
+                    />
+                    <TextField
+                        style={{
+                            justifyContent: 'space-between',
+                            marginLeft: 25,
+                        }}
+                        id='api-property-value'
+                        label={isEditable}
+                        placeholder='Property Value'
+                        margin='normal'
+                    />
+                </Grid>
             </Grid>
         );
     }
