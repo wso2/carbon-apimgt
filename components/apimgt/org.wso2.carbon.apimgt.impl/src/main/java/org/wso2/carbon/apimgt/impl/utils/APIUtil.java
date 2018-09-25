@@ -4207,6 +4207,7 @@ public final class APIUtil {
             }
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             log.error("Error when getting the list of roles", e);
+            return false;
         }
         return true;
     }
