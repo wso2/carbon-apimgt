@@ -29,6 +29,7 @@ import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
 import InputForm from 'AppComponents/Apis/Create/Endpoint/APIInputForm';
 import Progress from 'AppComponents/Shared/Progress';
+import { FormattedMessage } from 'react-intl';
 
 import ProvideWSDL from './Steps/ProvideWSDL';
 import BindingInfo from './BindingInfo';
@@ -253,9 +254,11 @@ class ApiCreateWSDL extends Component {
                 <Grid item md={10}>
                     <Paper className={classes.paper}>
                         <Typography type='display1' className={classes.textWelcome}>
-                            Design a new REST API using WSDL
+                            <FormattedMessage
+                                id='design.a.new.rest.api.using.wsdl'
+                                defaultMessage='Design a new REST API using WSDL'
+                            />
                         </Typography>
-
                         <Stepper activeStep={currentStep} orientation='vertical'>
                             <Step key='provideWSDL'>
                                 <StepLabel>
@@ -265,16 +268,16 @@ class ApiCreateWSDL extends Component {
                                         className={classes.stepLabel}
                                         component='span'
                                     >
-                                        Select WSDL
+                                        <FormattedMessage id='select.wsdl' defaultMessage='Select WSDL' />
                                     </Typography>
                                 </StepLabel>
                                 <StepContent>
                                     <ProvideWSDL {...provideWSDLProps} />
                                     <div className={classes.optionAction}>
                                         <Button color='primary' onClick={this.nextStep}>
-                                            Next
+                                            <FormattedMessage id='next' defaultMessage='Next' />
                                         </Button>
-                                        <Button>Cancel</Button>
+                                        <Button><FormattedMessage id='cancel' defaultMessage='Cancel' /></Button>
                                     </div>
                                 </StepContent>
                             </Step>
@@ -285,13 +288,17 @@ class ApiCreateWSDL extends Component {
                                         gutterBottom
                                         className={classes.stepLabel}
                                         component='span'
-                                    >
-                                        Create API
+                                    ><FormattedMessage id='create.api' defaultMessage='Create API' />
+
                                     </Typography>
                                 </StepLabel>
                                 <StepContent>
                                     <Typography type='caption' gutterBottom align='left'>
-                                        You can configure the advanced configurations later
+                                        <FormattedMessage
+                                            id='fill.the.mandatory.fields'
+                                            defaultMessage={'Fill the mandatory fields (Name, Version, Context) and' +
+                                            'create the API. Configure advanced configurations later.'}
+                                        />
                                     </Typography>
                                     <InputForm api={api} handleInputChange={this.updateApiInputs} />
                                     <Grid item xs={10}>
@@ -305,10 +312,10 @@ class ApiCreateWSDL extends Component {
                                     <div className={classes.optionAction}>
                                         <Button disabled={loading} color='primary' onClick={this.createWSDLAPI}>
                                             {loading && <Progress />}
-                                            Create
+                                            <FormattedMessage id='create' defaultMessage='Create' />
                                         </Button>
                                         <Button color='primary' onClick={this.stepBack}>
-                                            Back
+                                            <FormattedMessage id='back' defaultMessage='Back' />
                                         </Button>
                                     </div>
                                 </StepContent>
