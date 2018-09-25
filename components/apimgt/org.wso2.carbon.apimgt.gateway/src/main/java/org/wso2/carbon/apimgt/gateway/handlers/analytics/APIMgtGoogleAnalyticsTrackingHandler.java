@@ -39,10 +39,14 @@ import org.apache.synapse.config.Entry;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
+import org.wso2.carbon.apimgt.tracing.TracingSpan;
+import org.wso2.carbon.apimgt.tracing.TracingTracer;
+import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsagePublisherConstants;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsConstants;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsData;
@@ -67,6 +71,10 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
 
 	@Override
 	public boolean handleRequest(MessageContext msgCtx) {
+
+        TracingSpan responseLatencySpan = (TracingSpan) msgCtx.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+        TracingTracer tracer = Util.getGlobalTracer();
+        TracingSpan span = Util.startSpan(APIMgtGatewayConstants.GOOGLE_ANALYTICS_HANDLER, responseLatencySpan, tracer);
 		if (configKey == null) {
             throw new SynapseException("Google Analytics configuration unspecified for the API");
         }
@@ -103,6 +111,7 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
             log.warn("Unable to create Google Analytics configuration using key: " + configKey);
             return true;
         }
+        Util.finishSpan(span);
 
         if (!config.isEnabled()) {
             return true;

@@ -132,7 +132,11 @@ public class OAuthAuthenticator implements Authenticator {
         Timer timer = getTimer(MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "GET_RESOURCE_AUTH"));
         Timer.Context context = timer.start();
-        TracingSpan authenticationSchemeSpan = Util.startSpan(APIMgtGatewayConstants.GET_RESOURCE_AUTHENTICATION_SCHEME, keySpan, tracer);
+        org.apache.axis2.context.MessageContext axis2MessageCtx = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
+        org.apache.axis2.context.MessageContext.setCurrentMessageContext(axis2MessageCtx);
+
+        TracingSpan authenticationSchemeSpan =
+                Util.startSpan(APIMgtGatewayConstants.GET_RESOURCE_AUTHENTICATION_SCHEME, keySpan, tracer);
         String authenticationScheme = getAPIKeyValidator().getResourceAuthenticationScheme(synCtx);
         Util.finishSpan(authenticationSchemeSpan);
         context.stop();
@@ -206,8 +210,8 @@ public class OAuthAuthenticator implements Authenticator {
             if(log.isDebugEnabled()){
                 log.debug("Matching resource is: ".concat(matchingResource));
             }
-            org.apache.axis2.context.MessageContext axis2MessageCtx = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
-            org.apache.axis2.context.MessageContext.setCurrentMessageContext(axis2MessageCtx);
+//            org.apache.axis2.context.MessageContext axis2MessageCtx = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
+//            org.apache.axis2.context.MessageContext.setCurrentMessageContext(axis2MessageCtx);
 
             timer = getTimer(MetricManager.name(
                     APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "GET_KEY_VALIDATION_INFO"));

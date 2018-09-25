@@ -20,7 +20,7 @@ public class Util {
 
     public static TracingSpan startSpan(String spanName, TracingSpan parentSpan, TracingTracer tracer) {
 
-        if (parentSpan == null) {
+        if(parentSpan == null) {
             Span span = tracer.getTracingTracer().buildSpan(spanName).start();
             return new TracingSpan(span);
 
@@ -42,7 +42,7 @@ public class Util {
 
         Object sp = span.getSpan();
         if(sp instanceof Span) {
-            ((Span) sp).setTag(key,value);
+            ((Span) sp).setTag(key, value);
         }
     }
 
@@ -76,7 +76,8 @@ public class Util {
         if(sp instanceof Span) {
             tracer.getTracingTracer().inject(((Span) sp).context(), Format.Builtin.HTTP_HEADERS,
                     new TextMapInjectAdapter(tracerSpecificCarrier));
-        }else {
+
+        } else if(sp instanceof SpanContext) {
             tracer.getTracingTracer().inject((SpanContext) sp, Format.Builtin.HTTP_HEADERS,
                     new TextMapInjectAdapter(tracerSpecificCarrier));
         }
@@ -106,9 +107,10 @@ public class Util {
         Object sp = span.getSpan();
         if(sp instanceof Span) {
             return ((Span) sp).getBaggageItem(key);
+
         } else if (sp instanceof SpanContext) {
             Iterable<Map.Entry<String, String>> entries = ((SpanContext) sp).baggageItems();
-            for (Map.Entry<String, String> entry: entries) {
+            for (Map.Entry<String, String> entry : entries) {
                 if (entry.getKey().equals(key)) {
                     return entry.getValue();
                 }

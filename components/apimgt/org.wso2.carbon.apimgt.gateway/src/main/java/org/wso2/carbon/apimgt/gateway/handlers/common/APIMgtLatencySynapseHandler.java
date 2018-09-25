@@ -1,3 +1,21 @@
+/*
+ *  Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.apimgt.gateway.handlers.common;
 
 import org.apache.commons.logging.Log;
@@ -16,8 +34,7 @@ import java.util.UUID;
 
 public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 
-    private static final Log log = LogFactory.getLog(APIMgtLatencySynapseHandler.class);
-    private static TracingTracer tracer;
+    private TracingTracer tracer;
 
     public APIMgtLatencySynapseHandler() {
 
@@ -29,16 +46,9 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 
         org.apache.axis2.context.MessageContext axis2MessageContext =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-//        Map headersMap;
         Map headersMap = (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         TracingSpan spanContext = Util.extract(tracer, headersMap);
-//        if (axis2MessageContext != null) {
-//            Object headers = axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-//            if (headers instanceof Map) {
-//                headersMap = (Map) headers;
-//                spanContext = Util.extract(tracer, headersMap);
-//            }
-//        }
+
         String requestId = UUID.randomUUID().toString();
         messageContext.setProperty(APIMgtGatewayConstants.REQUEST_ID, requestId);
         TracingSpan responseLatencySpan = Util.startSpan(APIMgtGatewayConstants.RESPONSE_LATENCY, spanContext, tracer);
@@ -53,8 +63,6 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
         TracingSpan parentSpan = (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
         TracingSpan backendLatencySpan = Util.startSpan(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN, parentSpan, tracer);
         messageContext.setProperty(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN, backendLatencySpan);
-        Util.setTag(backendLatencySpan, APIMgtGatewayConstants.REQUEST_ID,
-                (String) messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID));
         return true;
     }
 

@@ -57,29 +57,23 @@ public class TracingServiceImpl implements TracingService {
         String enabled = getConfiguration().getFirstProperty(TracingConstants.OPEN_TRACER_ENABLED);
 
         Tracer tracer;
-        if (openTracerName.equalsIgnoreCase("JAEGER") && enabled.equalsIgnoreCase("TRUE")) {
-
+        if (openTracerName.equalsIgnoreCase(TracingConstants.JAEGER) && enabled.equalsIgnoreCase("TRUE")) {
             tracer = new JaegerTracerImpl().getTracer(serviceName);
             return new TracingTracer(tracer);
-        } else if (openTracerName.equalsIgnoreCase("ZIPKIN") && enabled.equalsIgnoreCase("TRUE")) {
 
+        } else if(openTracerName.equalsIgnoreCase(TracingConstants.ZIPKIN) && enabled.equalsIgnoreCase("TRUE")) {
             tracer = new ZipkinTracerImpl().getTracer(serviceName);
             return new TracingTracer(tracer);
+
         } else {
             log.error("Invalid test Configuration");
         }
 
-//        ServiceLoader<OpenTracer> openTracers = ServiceLoader.load(OpenTracer.class);
-//        HashMap<String, OpenTracer> tracerMap = new HashMap<>();
-//        openTracers.forEach(t -> tracerMap.put(t.getName().toLowerCase(), t));
-//
-//        OpenTracer openTracer = tracerMap.get(openTracerName.toLowerCase()) ;
-//
-//        return new TracingTracer(openTracer.getTracer(serviceName));
         return null;
     }
 
     public APIManagerConfiguration getConfiguration() {
+
         return configuration;
     }
 

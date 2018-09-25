@@ -24,6 +24,9 @@ import org.apache.synapse.rest.AbstractHandler;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
+import org.wso2.carbon.apimgt.tracing.TracingSpan;
+import org.wso2.carbon.apimgt.tracing.TracingTracer;
+import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageDataPublisher;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 
@@ -39,7 +42,12 @@ public class APIMgtUsageHandler extends AbstractHandler {
 
     public boolean handleRequest(MessageContext mc) {
 
+        TracingSpan responseLatencySpan = (TracingSpan) mc.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+        TracingTracer tracer = Util.getGlobalTracer();
+        TracingSpan span = Util.startSpan(APIMgtGatewayConstants.API_MGT_USAGE_HANDLER, responseLatencySpan, tracer);
         boolean enabled = getApiManagerAnalyticsConfiguration().isAnalyticsEnabled();
+        Util.finishSpan(span);
+
         if (!enabled) {
             return true;
         }

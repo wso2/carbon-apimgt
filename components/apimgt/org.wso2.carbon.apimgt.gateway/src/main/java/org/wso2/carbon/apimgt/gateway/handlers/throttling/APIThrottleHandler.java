@@ -164,11 +164,9 @@ public class APIThrottleHandler extends AbstractHandler {
         Timer timer = getTimer();
         Timer.Context context = timer.start();
         long executionStartTime = System.nanoTime();
-
         TracingSpan responseLatencySpan = (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
         TracingTracer tracer = Util.getGlobalTracer();
         TracingSpan throttlingLatencySpan = Util.startSpan(APIMgtGatewayConstants.THROTTLE_LATENCY, responseLatencySpan, tracer);
-        Util.setTag(throttlingLatencySpan, APIMgtGatewayConstants.REQUEST_ID, String.valueOf(messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID)));
         try {
             return doThrottle(messageContext);
         } finally {

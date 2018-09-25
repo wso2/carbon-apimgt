@@ -104,7 +104,8 @@ public class APIKeyValidatorClient {
             Map headers = (Map) MessageContext.getCurrentMessageContext().getProperty(
                     org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
 
-            TracingSpan keySpan = (TracingSpan) MessageContext.getCurrentMessageContext().getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
+            TracingSpan keySpan = (TracingSpan) MessageContext.getCurrentMessageContext()
+                    .getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
             TracingTracer tracer = Util.getGlobalTracer();
             Map<String, String> tracerSpecificCarrier = new HashMap<>();
             TracingSpan span = null;
@@ -182,19 +183,15 @@ public class APIKeyValidatorClient {
     public ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion
     ) throws APISecurityException {
 
-
         CarbonUtils.setBasicAccessSecurityHeaders(username, password, keyValidationServiceStub._getServiceClient());
         if (cookie != null) {
             keyValidationServiceStub._getServiceClient().getOptions().setProperty(HTTPConstants.COOKIE_STRING, cookie);
         }
-
-//        MessageContext axis2MessageContext = MessageContext.getCurrentMessageContext();
-//        TracingSpan keySpan = (TracingSpan) axis2MessageContext.getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
-//        TracingSpan keySpan = (TracingSpan) axis2MessageContext.getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
-//        TracingTracer tracer = Util.getGlobalTracer();
-//        TracingSpan span = Util.startSpan("GET_URI_TEMPLATES", keySpan, tracer);
-
         try {
+            TracingSpan keySpan = (TracingSpan) MessageContext.getCurrentMessageContext()
+                    .getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
+            TracingTracer tracer = Util.getGlobalTracer();
+            TracingSpan span = Util.startSpan(APIMgtGatewayConstants.GET_ALL_URI_TEMPLATES, keySpan, tracer);
             if (log.isDebugEnabled()) {
                 log.debug("Get all URI templates request from gateway to keymanager via web service call for:"
                         + context + " at "
@@ -207,7 +204,7 @@ public class APIKeyValidatorClient {
                         + " call for:" + context + " at "
                         + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
             }
-//            Util.finishSpan(span);
+            Util.finishSpan(span);
             ServiceContext serviceContext = keyValidationServiceStub.
                     _getServiceClient().getLastOperationContext().getServiceContext();
             cookie = (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);

@@ -41,6 +41,7 @@ public class TracingSpan {
     }
 
     public Object getSpan() {
+
         return span == null ? spanContext : span;
     }
 }
