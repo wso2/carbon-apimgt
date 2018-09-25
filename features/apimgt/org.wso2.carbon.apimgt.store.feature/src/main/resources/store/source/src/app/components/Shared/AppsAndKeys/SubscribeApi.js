@@ -37,7 +37,6 @@ import Slide from "@material-ui/core/Slide";
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
-import ApplicationCreate from '../../Applications/Create/ApplicationCreate'
 import Grid from '@material-ui/core/Grid'
 import PropTypes from 'prop-types';
 import Collapse from '@material-ui/core/Collapse';

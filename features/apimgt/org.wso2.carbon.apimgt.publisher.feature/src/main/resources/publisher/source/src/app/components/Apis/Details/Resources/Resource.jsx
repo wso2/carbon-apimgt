@@ -16,26 +16,29 @@
  * under the License.
  */
 
-import React from 'react'
+import React from 'react';
 import { Input, Icon, Form } from 'antd';
 import Select from '@material-ui/core/Select';
-import {MenuItem} from '@material-ui/core/Menu';
-const FormItem = Form.Item;
+import MenuItem from '@material-ui/core/MenuItem';
 import Chip from '@material-ui/core/Chip';
-import List, {
-    ListItem,
-    ListItemText,
-    ListItemSecondaryAction
-} from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import { withStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import PropTypes from 'prop-types';
-import Table, { TableBody, TableCell, TableHead, TableRow } from '@material-ui/core/Table';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableHead from '@material-ui/core/TableHead';
+import TableRow from '@material-ui/core/TableRow';
 import Delete from '@material-ui/icons/Delete';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
-import { FormGroup, FormControlLabel } from '@material-ui/core/';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
+
+const FormItem = Form.Item;
 
 const styles = theme => ({
     root: {
@@ -52,14 +55,14 @@ const styles = theme => ({
         width: 400,
     },
     mainTitle: {
-        paddingLeft: 20
+        paddingLeft: 20,
     },
     scopes: {
-        width: 400
+        width: 400,
     },
     divider: {
         marginTop: 20,
-        marginBottom: 20
+        marginBottom: 20,
     },
     chip: {
         margin: theme.spacing.unit,
@@ -73,20 +76,23 @@ const styles = theme => ({
         minWidth: 100,
     },
     paper: {
-        padding:20
+        padding:20,
     },
     link: {
-        cursor: 'pointer'
-    }
+        cursor: 'pointer',
+    },
 });
 
 function hasErrors(fieldsError) {
     return Object.keys(fieldsError).some(field => fieldsError[field]);
 }
-/*
- Property add form
+/**
+ * API Listing table view header of the table
+ *
+ * @export
+ * @class PropertyAddForm
+ * @extends {React.Component}
  */
-
 class PropertyAddForm extends React.Component {
     componentDidMount() {
         // To disabled submit button at the beginning.

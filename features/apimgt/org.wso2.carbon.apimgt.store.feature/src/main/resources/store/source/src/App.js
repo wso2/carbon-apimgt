@@ -161,7 +161,13 @@ class Protected extends Component {
             );
         } else {
             return (
-                <Route path={"/"} component={AnonymousView}/>
+                <IntlProvider locale={language} messages={this.state.messages}>
+                    <MuiThemeProvider theme={themes[this.state.themeIndex % 2]}>
+                        <Base setTheme={() => this.setTheme()}>
+                            <Route path={"/"} component={AnonymousView}/>
+                        </Base>
+                    </MuiThemeProvider>
+                </IntlProvider>
             );
         }
 

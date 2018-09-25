@@ -13,27 +13,18 @@ const styles = theme => ({
         color: theme.palette.secondary.main,
     },
     rightMenu: {
-        backgroundColor: theme.palette.background.leftMenu,
-        textAlign: 'center',
-        height: '100vh',
-        backgroundColor: theme.palette.background.paper,
+        width: window.innerWidth - theme.palette.custom.contentAreaWidth - theme.palette.custom.leftMenuWidth - 50,
         borderLeft: 'solid 1px ' + theme.palette.secondary.main,
+        textAlign: 'center',
+        fontFamily: theme.typography.fontFamily,
         position: 'absolute',
+        bottom: 0,
         right: 0,
-    },
-    leftLInk: {
-        paddingTop: 10,
-        paddingBottom: 10,  
-        fontSize: 11,
-        cursor: 'pointer'
-    },
-    leftLInkMain: {
-        borderBottom: 'solid 1px ' + theme.palette.grey['A200'],
-        paddingBottom: 5,
-        paddingTop: 5,
-        height: 70,
-        fontSize: 12,
-        cursor: 'pointer',
+        top: 0,
+        overflowY: 'auto',
+        backgroundColor: theme.palette.background.paper,
+        padding: 10,
+        fontSize: theme.typography.fontSize,
     },
     rightMenuToggle: {
         backgroundColor: theme.palette.secondary.main,
@@ -43,15 +34,11 @@ const styles = theme => ({
         borderTopLeftRadius: 5,
         borderBottomLeftRadius: 5,
         cursor: 'pointer',
-        position: 'absolute',
-        marginLeft: -32,
+        position: 'fixed',
+        marginLeft: -53,
+        marginTop: '-10px',
     },
-    rightPanelContent: {
-        width: window.innerWidth - theme.palette.custom.contentAreaWidth - theme.palette.custom.leftMenuWidth,
-        padding: 10,
-        overflowY: 'auto',
-        height: '100vh',
-    }
+
 
 });
 
@@ -62,9 +49,30 @@ class RightPanel extends React.Component {
     }
   state = {
     open: true,
+    toggleButtonTop: 0,
   };
 
-  componentDidMount() { // We are hidding the panel by default if the screen widht is greater than 1600
+  handleScroll = () => {
+    let scrollTop = window.scrollY
+
+    if( scrollTop === 0 ){
+        this.setState({toggleButtonTop: 10});
+    } else if ( scrollTop > 0 && scrollTop < 72){
+        this.setState({toggleButtonTop: scrollTop});
+    } else {
+        this.setState({toggleButtonTop: 72});
+    } 
+}
+
+  componentWillUnmount() {
+    window.removeEventListener('scroll', this.handleScroll);
+  }
+
+  
+  componentDidMount() { // We are hidding the panel by default if the screen widht is less than 1600
+    this.handleScroll();
+    window.addEventListener('scroll', this.handleScroll);
+
     let hideByDefault = false;
     if(window.innerWidth > 1600){
         hideByDefault = true;
@@ -82,23 +90,17 @@ class RightPanel extends React.Component {
     
     return (
         <div className={classes.rightMenu}>
-            <div onClick={this.toggleRightPanel} className={classes.rightMenuToggle}>?</div> 
-            
-                <Slide direction="left"  mountOnEnter unmountOnExit in={this.state.open} >
-                    <div className={classes.rightPanelContent}>
-                        <Typography>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut dolor dui, fermentum in ipsum a, pharetra feugiat orci. Suspendisse at sem nunc. Integer in eros eget orci sollicitudin ultricies. Mauris vehicula mollis vulputate. Morbi sed velit vulputate nisl ullamcorper blandit. Quisque diam orci, ultrices at risus vel, auctor vulputate odio. Etiam vel iaculis massa, vel sollicitudin velit. Aenean facilisis vitae elit vitae iaculis. Nam vel tincidunt arcu.
-
-Nulla pharetra dolor ut elementum aliquam. Vivamus iaculis convallis nunc vel accumsan. Vestibulum sed consequat velit, eget rhoncus tellus. Ut vel arcu lobortis, condimentum magna quis, ultricies turpis. Nunc et dolor metus. Donec fringilla quam ut metus pellentesque, a aliquet purus rutrum. Aenean molestie, dui eu euismod feugiat, tellus felis suscipit leo, non lacinia metus nisl quis nulla. In condimentum congue turpis, efficitur finibus felis interdum id. Suspendisse et cursus tortor, vitae gravida nunc.
-
-Nulla urna metus, consequat vel iaculis et, rhoncus nec nibh. Curabitur efficitur felis nec pellentesque aliquam. Duis luctus turpis velit. Aenean eu arcu vel odio accumsan consectetur et sit amet lectus. Donec eget ipsum imperdiet, mollis enim vel, ullamcorper massa. Sed condimentum quam ut faucibus tincidunt. Nunc efficitur auctor lacus, non pharetra ligula ultricies ac. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Morbi volutpat ultrices nisi. Mauris massa risus, venenatis ac mollis eu, elementum eget mi.
-
-Aliquam tempor, odio in hendrerit porta, arcu neque tincidunt odio, at pulvinar enim arcu non nibh. Ut lacinia lorem eu ligula rhoncus vehicula. Praesent condimentum purus vel urna maximus condimentum. Praesent quis tortor et purus mollis fringilla. Nunc pharetra neque in ipsum volutpat pulvinar. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis maximus euismod dolor, ac efficitur massa porttitor at. Duis a enim vitae metus imperdiet consectetur. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Donec ut egestas arcu. Vestibulum suscipit elit augue, quis pharetra ex pharetra eu. Aliquam mattis metus eget efficitur pulvinar.
-
-In hac habitasse platea dictumst. Nulla sed sollicitudin tortor. Sed non faucibus ipsum. Cras blandit auctor sapien, eget fringilla mi vulputate non. Maecenas quis fermentum sapien. Vestibulum sit amet nulla dui. Donec pellentesque libero non diam varius lacinia.
-                        </Typography>
-                    </div>
-                </Slide>
+        <div onClick={this.toggleRightPanel} className={classes.rightMenuToggle} style={{marginTop: '-' + this.state.toggleButtonTop + 'px'}}>?</div> 
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut dolor dui, fermentum in ipsum a, pharetra feugiat orci. Suspendisse at sem nunc. Integer in eros eget orci sollicitudin ultricies. Mauris vehicula mollis vulputate. Morbi sed velit vulputate nisl ullamcorper blandit. Quisque diam orci, ultrices at risus vel, auctor vulputate odio. Etiam vel iaculis massa, vel sollicitudin velit. Aenean facilisis vitae elit vitae iaculis. Nam vel tincidunt arcu.
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut dolor dui, fermentum in ipsum a, pharetra feugiat orci. Suspendisse at sem nunc. Integer in eros eget orci sollicitudin ultricies. Mauris vehicula mollis vulputate. Morbi sed velit vulputate nisl ullamcorper blandit. Quisque diam orci, ultrices at risus vel, auctor vulputate odio. Etiam vel iaculis massa, vel sollicitudin velit. Aenean facilisis vitae elit vitae iaculis. Nam vel tincidunt arcu.
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut dolor dui, fermentum in ipsum a, pharetra feugiat orci. Suspendisse at sem nunc. Integer in eros eget orci sollicitudin ultricies. Mauris vehicula mollis vulputate. Morbi sed velit vulputate nisl ullamcorper blandit. Quisque diam orci, ultrices at risus vel, auctor vulputate odio. Etiam vel iaculis massa, vel sollicitudin velit. Aenean facilisis vitae elit vitae iaculis. Nam vel tincidunt arcu.
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut dolor dui, fermentum in ipsum a, pharetra feugiat orci. Suspendisse at sem nunc. Integer in eros eget orci sollicitudin ultricies. Mauris vehicula mollis vulputate. Morbi sed velit vulputate nisl ullamcorper blandit. Quisque diam orci, ultrices at risus vel, auctor vulputate odio. Etiam vel iaculis massa, vel sollicitudin velit. Aenean facilisis vitae elit vitae iaculis. Nam vel tincidunt arcu.
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut dolor dui, fermentum in ipsum a, pharetra feugiat orci. Suspendisse at sem nunc. Integer in eros eget orci sollicitudin ultricies. Mauris vehicula mollis vulputate. Morbi sed velit vulputate nisl ullamcorper blandit. Quisque diam orci, ultrices at risus vel, auctor vulputate odio. Etiam vel iaculis massa, vel sollicitudin velit. Aenean facilisis vitae elit vitae iaculis. Nam vel tincidunt arcu.
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut dolor dui, fermentum in ipsum a, pharetra feugiat orci. Suspendisse at sem nunc. Integer in eros eget orci sollicitudin ultricies. Mauris vehicula mollis vulputate. Morbi sed velit vulputate nisl ullamcorper blandit. Quisque diam orci, ultrices at risus vel, auctor vulputate odio. Etiam vel iaculis massa, vel sollicitudin velit. Aenean facilisis vitae elit vitae iaculis. Nam vel tincidunt arcu.
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut dolor dui, fermentum in ipsum a, pharetra feugiat orci. Suspendisse at sem nunc. Integer in eros eget orci sollicitudin ultricies. Mauris vehicula mollis vulputate. Morbi sed velit vulputate nisl ullamcorper blandit. Quisque diam orci, ultrices at risus vel, auctor vulputate odio. Etiam vel iaculis massa, vel sollicitudin velit. Aenean facilisis vitae elit vitae iaculis. Nam vel tincidunt arcu.
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut dolor dui, fermentum in ipsum a, pharetra feugiat orci. Suspendisse at sem nunc. Integer in eros eget orci sollicitudin ultricies. Mauris vehicula mollis vulputate. Morbi sed velit vulputate nisl ullamcorper blandit. Quisque diam orci, ultrices at risus vel, auctor vulputate odio. Etiam vel iaculis massa, vel sollicitudin velit. Aenean facilisis vitae elit vitae iaculis. Nam vel tincidunt arcu.
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut dolor dui, fermentum in ipsum a, pharetra feugiat orci. Suspendisse at sem nunc. Integer in eros eget orci sollicitudin ultricies. Mauris vehicula mollis vulputate. Morbi sed velit vulputate nisl ullamcorper blandit. Quisque diam orci, ultrices at risus vel, auctor vulputate odio. Etiam vel iaculis massa, vel sollicitudin velit. Aenean facilisis vitae elit vitae iaculis. Nam vel tincidunt arcu.
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut dolor dui, fermentum in ipsum a, pharetra feugiat orci. Suspendisse at sem nunc. Integer in eros eget orci sollicitudin ultricies. Mauris vehicula mollis vulputate. Morbi sed velit vulputate nisl ullamcorper blandit. Quisque diam orci, ultrices at risus vel, auctor vulputate odio. Etiam vel iaculis massa, vel sollicitudin velit. Aenean facilisis vitae elit vitae iaculis. Nam vel tincidunt arcu.
         </div>
         
     );

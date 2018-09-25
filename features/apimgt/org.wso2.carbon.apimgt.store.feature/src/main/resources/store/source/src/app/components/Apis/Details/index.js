@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
 import CustomIcon from '../../Shared/CustomIcon';
-import {Route, Switch, Redirect} from 'react-router-dom'
+import {Route, Switch, Redirect, Link} from 'react-router-dom'
 
 import Overview from './Overview'
 import ApiConsole from './ApiConsole/ApiConsole'
@@ -15,22 +15,23 @@ import InfoBar from './InfoBar';
 import RightPanel from './RightPanel';
 import { ApiContext } from './ApiContext';
 import Credentials from './Credentials/Credentials';
-import Api from '../../../data/api'
+import Api from '../../../data/api';
+import Comments from './Comments/Comments';
 
 
 const styles = theme => ({
     linkColor: {
         color: theme.palette.getContrastText(theme.palette.background.leftMenu),
     },
-    linkColorMain: {
-        color: theme.palette.secondary.main,
-    },
     LeftMenu: {
         backgroundColor: theme.palette.background.leftMenu,
         width: 90,
         textAlign: 'center',
-        height: 'auto',
         fontFamily: theme.typography.fontFamily,
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        top: 0,
     },
     leftLInk: {
         paddingTop: 10,
@@ -41,36 +42,51 @@ const styles = theme => ({
         cursor: 'pointer'
     },
     leftLInkMain: {
-        borderBottom: 'solid 1px ' + theme.palette.grey['A200'],
+        borderRight: 'solid 1px ' + theme.palette.background.leftMenu,
         paddingBottom: 5,
         paddingTop: 5,
-        height: 70,
+        height: 60,
         fontSize: 12,
         cursor: 'pointer',
-    }
-
+        backgroundColor: theme.palette.background.leftMenuActive,
+        color: theme.palette.getContrastText(theme.palette.background.leftMenuActive),
+        textDecoration: 'none',
+    },
+    detailsContent: {
+        display: 'flex',
+        flex: 1,
+    },
+      content: {
+        display: 'flex',
+        flex: 1,
+        flexDirection: 'column',
+        marginLeft: 90,
+        paddingBottom: 20,
+      }
 });
 
 class Details extends React.Component {
     constructor(props){
         super(props);
-        this.handleMenuSelect = (menuLink) => {
-            this.setState({active:menuLink});
-            this.props.history.push({pathname: "/apis/" + this.props.match.params.api_uuid + "/" + menuLink});
-        }
+        
         this.state = {
             active: 'overview',
+            overviewHiden: false,
             handleMenuSelect: this.handleMenuSelect,
             api: null,
             applications: null,
             subscribedApplications: [],
             applicationsAvailable: [],
+            item: 1,
         };
         this.setDetailsAPI = this.setDetailsAPI.bind(this);
         this.api_uuid = this.props.match.params.api_uuid;
     }
-    
-
+    handleMenuSelect = (menuLink) => {
+        this.props.history.push({pathname: "/apis/" + this.props.match.params.api_uuid + "/" + menuLink});
+        (menuLink === "overview") ? this.infoBar.toggleOverview(true) : this.infoBar.toggleOverview(false) ;
+        this.setState({active: menuLink});
+    }
     setDetailsAPI(api){
         this.setState({api: api});
     }
@@ -143,11 +159,15 @@ class Details extends React.Component {
         )
     }
     componentDidMount() {
+     
+        var body = document.body,
+        html = document.documentElement;
+  
         let currentLink = this.props.location.pathname.match(/[^\/]+(?=\/$|$)/g);
         if( currentLink && currentLink.length > 0){
             this.setState({ active: currentLink[0] });
         }
-
+        console.info(this.state.active);
         this.updateSubscriptionData();
     }
     
@@ -155,15 +175,15 @@ class Details extends React.Component {
   render() {
     const { classes, theme } = this.props;
     const strokeColor = theme.palette.getContrastText(theme.palette.background.leftMenu);
-    const strokeColorMain = theme.palette.secondary.main;
     let redirect_url = "/apis/" + this.props.match.params.api_uuid + "/overview";
     return (
         <ApiContext.Provider value={this.state}>
-            <div className={classes.LeftMenu}>
-                <div className={classes.leftLInkMain}>
-                    <CustomIcon strokeColor={strokeColorMain} width={32} height={32} icon="api" />
-                    <div className={classes.linkColorMain}>APIs</div>
-                </div>
+             <div className={classes.LeftMenu}>
+                <Link to={"/apis"}>
+                    <div className={classes.leftLInkMain}>
+                        <CustomIcon width={52} height={52} icon="api" />
+                    </div>
+                </Link>
                 <div className={classes.leftLInk} 
                     onClick={( () => this.handleMenuSelect('overview') ) }
                     style={{backgroundColor: this.state.active === "overview" ? theme.palette.background.appBar : ''}}
@@ -207,21 +227,21 @@ class Details extends React.Component {
                     <div className={classes.linkColor}>SDK</div>
                 </div>
             </div>
-            <div style={{width:'100%'}}>
-                <InfoBar api_uuid={this.props.match.params.api_uuid} />
+              <div className={classes.content}>
+              <InfoBar api_uuid={this.props.match.params.api_uuid} innerRef={node => this.infoBar = node}/>
                 <Switch>
                     <Redirect exact from="/apis/:api_uuid" to={redirect_url}/>
-                    <Route path="/apis/:api_uuid/overview" render={props => <Overview  api_uuid={this.props.match.params.api_uuid }  />}/>
+                    <Route path="/apis/:api_uuid/overview" component={Overview}/>
                     <Route path="/apis/:api_uuid/credentials" component={Credentials} />
-                    <Route path="/apis/:api_uuid/comments" render={props => <div>comments</div>} />
+                    <Route path="/apis/:api_uuid/comments" component={Comments} />
                     <Route path="/apis/:api_uuid/test" component={ApiConsole}/>
                     <Route path="/apis/:api_uuid/docs" component={Documentation}/>
                     <Route path="/apis/:api_uuid/forum" component={Forum}/>
                     <Route path="/apis/:api_uuid/sdk" component={Sdk}/>
                     <Route component={PageNotFound}/>
                 </Switch>
-            </div>
-            <RightPanel />
+              </div>
+              <RightPanel />
         </ApiContext.Provider>
     );
   }

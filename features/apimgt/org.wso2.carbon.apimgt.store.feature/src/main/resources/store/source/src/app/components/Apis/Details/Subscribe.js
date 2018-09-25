@@ -446,9 +446,7 @@ class Subscribe extends Component {
                                 </IconButton>
                             </Grid>
                             <Grid item xs={11} className={classes.applicationCreateRoot} >
-                                <ApplicationCreate 
-                                    updateSubscriptionData={this.updateSubscriptionData} 
-                                    handleAppDialogClose={this.handleAppDialogClose}  />
+                               
                             </Grid>
                             
                         </Grid>

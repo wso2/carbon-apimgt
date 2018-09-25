@@ -66,6 +66,7 @@ const styles = theme => ({
   },
   expansion: {
     background: 'transparent',
+    boxShadow: 'none',
     
   },
   summary: {
@@ -118,15 +119,26 @@ class Credentials extends React.Component {
 
           </div>
           <Collapse in={this.state.expanded} timeout="auto" unmountOnExit>
-            {(applicationsAvailable.length === 0 && subscribedApplications.length === 0) ? 
-              <InlineMessage handleMenuSelect={this.startStopWizard} type="info" />
+            {(applicationsAvailable.length === 0 && subscribedApplications.length === 0 ) ? 
+                !this.state.wizardOn && <InlineMessage handleMenuSelect={this.startStopWizard} 
+                  type="info">
+                  <Typography variant="headline" component="h3">
+                      Generate Credentials
+                  </Typography>
+                  <Typography component="p">
+                      You need to generate credentials to access this API
+                  </Typography>
+                    <Button variant="contained" color="primary" className={classes.button} onClick={this.startStopWizard}>
+                        GENERATE
+                    </Button>
+                </InlineMessage>
             : 
               <React.Fragment>
                 <ExpansionPanel defaultExpanded={true} className={classes.expansion}>
                     <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                     
                       <Typography variant="headline">{api.name} is subscribed to the following applications.</Typography>
-                      <Typography variant="caption">( {subscribedApplications.length} subscriptions )</Typography>
+                      <Typography variant="caption">( {subscribedApplications.length} {subscribedApplications.length === 1 ? 'subscription' : 'subscriptions' } )</Typography>
                     </ExpansionPanelSummary>
                     <ExpansionPanelDetails>
                       <table className={classes.tableMain}>
