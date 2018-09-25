@@ -29,6 +29,7 @@ import Popper from "@material-ui/core/Popper";
 import Grow from "@material-ui/core/Grow";
 import Paper from "@material-ui/core/Paper";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
+import HowToReg from '@material-ui/icons/HowToReg';
 
 const styles = theme => ({
   // New styles ..........
@@ -188,6 +189,8 @@ class Layout extends React.Component {
                 <EnvironmentMenu environments={this.state.environments}
                                          environmentLabel={Utils.getEnvironment().label}
                                          handleEnvironmentChange={this.handleEnvironmentChange}/>
+                {user ? 
+                <React.Fragment>
                 <Button
                     buttonRef={node => {
                     this.anchorEl = node;
@@ -253,6 +256,26 @@ class Layout extends React.Component {
                     </Grow>
                     )}
                 </Popper>
+                </React.Fragment>
+                : 
+                  <React.Fragment>
+                     <Link to={"/sign-up"}>
+                      <Button
+                          className={classes.userLink}
+                      >
+                        <HowToReg  /> sign-up
+                      </Button>
+                    </Link>
+                    <Link to={"/login"}>
+                      <Button
+                          className={classes.userLink}
+                      >
+                        <Person  /> Sign-in
+                      </Button>
+                    </Link>
+                   
+                  </React.Fragment>
+                }
               </Toolbar>
             </AppBar>
           <GlobalNavBar

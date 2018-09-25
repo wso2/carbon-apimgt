@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
-import { KeyboardArrowLeft, StarRate, FileCopy, KeyboardArrowUp, KeyboardArrowDown } from "@material-ui/icons";
+import { KeyboardArrowLeft, StarRate, FileCopy, ArrowDropDownOutlined, ArrowDropUpOutlined } from "@material-ui/icons";
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
 import HighlightOff from "@material-ui/icons/HighlightOff";
@@ -14,6 +14,8 @@ import Api from "../../../data/api";
 import ImageGenerator from "../Listing/ImageGenerator";
 import CopyToClipboard from "react-copy-to-clipboard";
 import Tooltip from "@material-ui/core/Tooltip";
+import Collapse from '@material-ui/core/Collapse';
+
 
 const styles = theme => ({
   root: {
@@ -406,9 +408,14 @@ class InfoBar extends React.Component {
     };
     setTimeout(caller, 4000);
   };
-  toggleOverview = () => {
-    this.setState({ showOverview: !this.state.showOverview });
+  toggleOverview = (todo) => {
+    if(typeof(todo) === "boolean"){
+      this.setState({ showOverview: todo });
+    } else{
+      this.setState({ showOverview: !this.state.showOverview });
+    }
   };
+  
 
   render() {
     const { classes, theme } = this.props;
@@ -418,13 +425,6 @@ class InfoBar extends React.Component {
     }
     if (!api) {
       return <Loading />;
-    }
-
-    let currentLink = this.props.pathname.match(/[^\/]+(?=\/$|$)/g);
-    if (currentLink && currentLink.length > 0) {
-      currentLink = currentLink[0];
-    } else {
-      currentLink = null;
     }
     return (
       <div className={classes.infoBarMain}>
@@ -449,6 +449,7 @@ class InfoBar extends React.Component {
         </div>
 
         {this.state.showOverview && 
+        <Collapse in={this.state.showOverview} timeout="auto" unmountOnExit>
           <div className={classes.infoContent}>
             <div className={classes.contentWrapper}>
               <div className={classes.topBar}>
@@ -553,12 +554,13 @@ class InfoBar extends React.Component {
               </Typography>
             </div>
           </div>
+          </Collapse>
         }
         <div className={classes.infoContentBottom}>
           <div className={classes.contentWrapper} onClick={this.toggleOverview}>
             <div className={classes.buttonView}>
-            {this.state.showOverview ? <Typography className={classes.buttonOverviewText}>HIDE</Typography>: <Typography>SHOW</Typography>}
-              {this.state.showOverview ? <KeyboardArrowUp /> : <KeyboardArrowDown /> }
+            {this.state.showOverview ? <Typography className={classes.buttonOverviewText}>HIDE</Typography>: <Typography className={classes.buttonOverviewText}>SHOW</Typography>}
+              {this.state.showOverview ? <ArrowDropUpOutlined /> : <ArrowDropDownOutlined /> }
               </div>
           </div>
         </div>

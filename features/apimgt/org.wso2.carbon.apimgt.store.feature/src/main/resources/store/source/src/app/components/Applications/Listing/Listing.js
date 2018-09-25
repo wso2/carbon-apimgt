@@ -39,6 +39,11 @@ import CardContent from '@material-ui/core/CardContent';
 import Divider from '@material-ui/core/Divider';
 import qs from 'qs';
 import TablePagination from '@material-ui/core/TablePagination';
+import CustomIcon from '../../Shared/CustomIcon';
+import InlineMessage from '../../Shared/InlineMessage';
+import IconButton from '@material-ui/core/IconButton';
+import NewApp from '../Create/NewApp';
+
 
 const styles = theme => ({
         card: {
@@ -68,6 +73,34 @@ const styles = theme => ({
         },
         titleWrapper: {
             display: 'flex',
+        },
+        // New styles
+        ////////////////////////
+        content: {
+            flexGrow: 1,
+        },
+        root: {
+            height: 70,
+            background: theme.palette.background.paper,
+            borderBottom: 'solid 1px ' + theme.palette.grey['A200'],
+            display: 'flex',
+            alignItems: 'center',
+        },
+        mainIconWrapper: {
+            paddingTop: 13,
+            paddingLeft: 35,
+            paddingRight: 20,
+        },
+        mainTitle:{
+            paddingTop: 10,
+        },
+        createLinkWrapper: {
+            paddingLeft: theme.spacing.unit*2,
+        },
+        appContent: {
+            paddingLeft: theme.spacing.unit*4,
+            paddingTop: theme.spacing.unit,
+            width: theme.palette.custom.contentAreaWidth,
         }
 });
 
@@ -196,29 +229,39 @@ class Listing extends Component {
         if (!data) {
             return <Loading/>;
         }
-        const { classes } = this.props;
+        const { classes, theme } = this.props;
         const bull = <span className={classes.bullet}>•</span>;
+        const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
         return (
-            <div>
-                {alertMessage && <Alert message={alertMessage}/>}
-                <Grid container justify="center" alignItems="center">
-                    <Grid item xs={12} sm={12} md={12} lg={11} xl={10}>
-                        <div className={classes.titleWrapper}>
-                            <Typography variant="display1" gutterBottom >
+            <main className={classes.content}>
+                <div className={classes.root}>
+                    <div className={classes.mainIconWrapper}>
+                        <CustomIcon strokeColor={strokeColorMain} width={42} height={42} icon="applications" />
+                    </div>
+                    <div className={classes.mainTitleWrapper}>
+                        <Typography variant="display1" className={classes.mainTitle} >
                             Applications
-                            </Typography>
-                            { data.size > 0 &&
-                            <Link to={"/application/create"} className={classes.createButton}>
-                                <Button variant="raised" color="secondary" className={classes.button}>
-                                Add New Application
-                                </Button>
-                            </Link>
+                        </Typography>
+                        { this.state.data &&
+                        <Typography variant="caption" gutterBottom align="left">
+                            {this.state.data.count === 0 ?
+                                <React.Fragment>No Applications created</React.Fragment>
+                                :
+                                <React.Fragment>Displaying {this.state.data.count} {this.state.data.count === 1 ? 'Application' : 'Applications'}</React.Fragment> 
                             }
-                        </div>
-                        <Divider className={classes.divider} />
-
-                            {data.size > 0 ? (
-                                <div>
+                        </Typography>
+                        }
+                    </div>
+                    { ( data.size !==0 ) &&
+                    <div className={classes.createLinkWrapper}>
+                        <NewApp />
+                    </div> }
+                </div>
+                {alertMessage && <Alert message={alertMessage}/>}
+                <Grid container spacing={0} justify="center">
+                    <Grid item xs={12}>
+                            {data.size > 0 ? 
+                                <div className={classes.appContent}>
                                     <Typography variant="caption" gutterBottom align="left">
                                     An application is a logical collection of APIs. Applications allow you to use a single
                             access token to invoke a collection of APIs and to subscribe to one API multiple times with different
@@ -247,35 +290,33 @@ class Listing extends Component {
                                         onChangeRowsPerPage={this.handleChangeRowsPerPage}
                                     />
                                 </div>
-                            ) : (
-                                <Grid item xs={12} sm={12} md={6} lg={4} xl={4} >
-                                    <Card className={classes.card}>
-                                        <CardContent>
-                                        <Typography className={classes.title}>
-                                        An application is a logical collection of APIs. Applications allow you to use a single
-                            access token to invoke a collection of APIs and to subscribe to one API multiple times with different
-                            SLA levels. The DefaultApplication is pre-created and allows unlimited access by default.
+                             : 
+                                <div className={classes.appContent}>
+                                    <InlineMessage  type="info" 
+                                                    style={{width: 1000, padding: theme.spacing.unit*2 }}>
+                                        <Typography variant="headline" component="h3">
+                                            Create New Application
                                         </Typography>
-                                        </CardContent>
-                                        <CardActions>
-                                            <Link to={"/application/create"} className={classes.createAppWrapper}>
-                                                <Button  variant="raised" color="primary">
-                                                    Add New Application
-                                                </Button>
-                                            </Link>
-                                        </CardActions>
-                                    </Card>
-                                </Grid>
-                            )}
+                                        <Typography component="p">
+                                        An application is a logical collection of APIs. Applications allow you to use a single
+                                access token to invoke a collection of APIs and to subscribe to one API multiple times with different
+                                SLA levels. The DefaultApplication is pre-created and allows unlimited access by default.
+                                        </Typography>
+                                        <NewApp />
+                                    </InlineMessage>
+                                </div>
+                            }
 
                     </Grid>
                 </Grid>
-            </div>
+            </main>
         );
     }
 }
 Listing.propTypes = {
     classes: PropTypes.object.isRequired,
+    theme: PropTypes.object.isRequired,
+
 };
   
-export default withStyles(styles)(Listing);
+export default withStyles(styles, { withTheme: true })(Listing);

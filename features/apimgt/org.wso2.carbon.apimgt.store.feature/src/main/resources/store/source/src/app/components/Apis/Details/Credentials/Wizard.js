@@ -298,17 +298,7 @@ class Wizard extends React.Component {
     );
   }
 }
-class Child extends React.Component {
-  getAlert() {
-    alert('clicked');
-  }
 
-  render() {
-    return (
-      <h1>Hello</h1>
-    );
-  }
-}
 Wizard.propTypes = {
   classes: PropTypes.object.isRequired
 };

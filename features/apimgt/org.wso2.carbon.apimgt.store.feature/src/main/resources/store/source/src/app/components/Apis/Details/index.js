@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
 import CustomIcon from '../../Shared/CustomIcon';
-import {Route, Switch, Redirect} from 'react-router-dom'
+import {Route, Switch, Redirect, Link} from 'react-router-dom'
 
 import Overview from './Overview'
 import ApiConsole from './ApiConsole/ApiConsole'
@@ -22,9 +22,6 @@ import Comments from './Comments/Comments';
 const styles = theme => ({
     linkColor: {
         color: theme.palette.getContrastText(theme.palette.background.leftMenu),
-    },
-    linkColorMain: {
-        color: theme.palette.secondary.main,
     },
     LeftMenu: {
         backgroundColor: theme.palette.background.leftMenu,
@@ -45,12 +42,15 @@ const styles = theme => ({
         cursor: 'pointer'
     },
     leftLInkMain: {
-        borderBottom: 'solid 1px ' + theme.palette.grey['A200'],
+        borderRight: 'solid 1px ' + theme.palette.background.leftMenu,
         paddingBottom: 5,
         paddingTop: 5,
-        height: 70,
+        height: 60,
         fontSize: 12,
         cursor: 'pointer',
+        backgroundColor: theme.palette.background.leftMenuActive,
+        color: theme.palette.getContrastText(theme.palette.background.leftMenuActive),
+        textDecoration: 'none',
     },
     detailsContent: {
         display: 'flex',
@@ -68,11 +68,7 @@ const styles = theme => ({
 class Details extends React.Component {
     constructor(props){
         super(props);
-        this.handleMenuSelect = (menuLink) => {
-            let overviewHiden = menuLink === "overview" ? true : false;
-            this.setState({active:menuLink, overviewHiden});
-            this.props.history.push({pathname: "/apis/" + this.props.match.params.api_uuid + "/" + menuLink});
-        }
+        
         this.state = {
             active: 'overview',
             overviewHiden: false,
@@ -86,8 +82,11 @@ class Details extends React.Component {
         this.setDetailsAPI = this.setDetailsAPI.bind(this);
         this.api_uuid = this.props.match.params.api_uuid;
     }
-    
-
+    handleMenuSelect = (menuLink) => {
+        this.props.history.push({pathname: "/apis/" + this.props.match.params.api_uuid + "/" + menuLink});
+        (menuLink === "overview") ? this.infoBar.toggleOverview(true) : this.infoBar.toggleOverview(false) ;
+        this.setState({active: menuLink});
+    }
     setDetailsAPI(api){
         this.setState({api: api});
     }
@@ -163,17 +162,12 @@ class Details extends React.Component {
      
         var body = document.body,
         html = document.documentElement;
-    
-    var height = Math.max( body.scrollHeight, body.offsetHeight, 
-                           html.clientHeight, html.scrollHeight, html.offsetHeight );
-
-
-
+  
         let currentLink = this.props.location.pathname.match(/[^\/]+(?=\/$|$)/g);
         if( currentLink && currentLink.length > 0){
             this.setState({ active: currentLink[0] });
         }
-
+        console.info(this.state.active);
         this.updateSubscriptionData();
     }
     
@@ -181,15 +175,15 @@ class Details extends React.Component {
   render() {
     const { classes, theme } = this.props;
     const strokeColor = theme.palette.getContrastText(theme.palette.background.leftMenu);
-    const strokeColorMain = theme.palette.secondary.main;
     let redirect_url = "/apis/" + this.props.match.params.api_uuid + "/overview";
     return (
         <ApiContext.Provider value={this.state}>
              <div className={classes.LeftMenu}>
-                <div className={classes.leftLInkMain}>
-                    <CustomIcon strokeColor={strokeColorMain} width={32} height={32} icon="api" />
-                    <div className={classes.linkColorMain}>APIs</div>
-                </div>
+                <Link to={"/apis"}>
+                    <div className={classes.leftLInkMain}>
+                        <CustomIcon width={52} height={52} icon="api" />
+                    </div>
+                </Link>
                 <div className={classes.leftLInk} 
                     onClick={( () => this.handleMenuSelect('overview') ) }
                     style={{backgroundColor: this.state.active === "overview" ? theme.palette.background.appBar : ''}}
@@ -234,7 +228,7 @@ class Details extends React.Component {
                 </div>
             </div>
               <div className={classes.content}>
-              <InfoBar api_uuid={this.props.match.params.api_uuid} pathname={this.state.active} overviewHiden={this.state.overviewHiden} />
+              <InfoBar api_uuid={this.props.match.params.api_uuid} innerRef={node => this.infoBar = node}/>
                 <Switch>
                     <Redirect exact from="/apis/:api_uuid" to={redirect_url}/>
                     <Route path="/apis/:api_uuid/overview" component={Overview}/>

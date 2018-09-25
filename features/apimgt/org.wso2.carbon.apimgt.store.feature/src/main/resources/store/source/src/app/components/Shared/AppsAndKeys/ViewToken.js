@@ -87,7 +87,15 @@ class ViewToken extends React.Component {
     const { classes, token } = this.props;
         return (
             <div className={classes.root}>
-                <InlineMessage type="warn"/>
+                <InlineMessage type="warn">
+                    <Typography variant="headline" component="h3">
+                        Please Copy the Access Token
+                    </Typography>
+                    <Typography component="p">
+                    Please copy this generated token value as it will be displayed only for the current browser session.
+    ( After a page refresh, the token is not visible in the UI )
+                    </Typography>
+                </InlineMessage>
                 <div className={classes.epWrapper}>
                     <Typography className={classes.prodLabel}>
                         Access Token
