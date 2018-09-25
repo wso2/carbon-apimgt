@@ -502,7 +502,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                                     relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID),
                                     MultitenantConstants.SUPER_TENANT_ID,
                                     MultitenantConstants.SUPER_TENANT_DOMAIN_NAME,
-                                    relyingPartyObject.getSSOProperty(idpLogoutURL), nameIdFormat));
+                                    idpLogoutURL, nameIdFormat));
                 }
             } else {
                 if (!Boolean.parseBoolean(relyingPartyObject.getSSOProperty(SSOConstants.SIGN_REQUESTS))) {
@@ -515,7 +515,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                                     relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID),
                                     MultitenantConstants.SUPER_TENANT_ID,
                                     MultitenantConstants.SUPER_TENANT_DOMAIN_NAME,
-                                    relyingPartyObject.getSSOProperty(SSOConstants.IDP_URL), nameIdFormat));
+                                    idpLogoutURL, nameIdFormat));
                 }
             }
         }
