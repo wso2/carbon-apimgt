@@ -172,16 +172,21 @@ class ApiCreateSwagger extends React.Component {
                 <Grid item md={10}>
                     <Paper className={classes.paper}>
                         <Typography className='page-title' type='display2' gutterBottom>
-                            <FormattedMessage id='create.new.api.swagger' defaultMessage='Create New API - '/>
+                            <FormattedMessage id='create.new.api.swagger' defaultMessage='Create New API - ' />
                             {this.state.uploadMethod === 'file' ? (
-                                <span><FormattedMessage id='swagger.file.upload' defaultMessage='Swagger file upload'/></span>
+                                <span>
+                                    <FormattedMessage id='swagger.file.upload' defaultMessage='Swagger file upload' />
+                                </span>
                             ) : (
-                                <span><FormattedMessage id='by.swagger.url' defaultMessage='By swagger url'/></span>
+                                <span><FormattedMessage id='by.swagger.url' defaultMessage='By swagger url' /></span>
                             )}
                         </Typography>
                         <Typography type='caption' gutterBottom align='left' className='page-title-help'>
-                            <FormattedMessage id='fill.the.mandatory.fields' defaultMessage='Fill the mandatory fields (Name, Version, Context) and create the API. Configure advanced
-                                configurations later.'/>
+                            <FormattedMessage
+                                id='fill.the.mandatory.fields'
+                                defaultMessage={'Fill the mandatory fields (Name, Version, Context) '
+                                + 'and create the API. Configure advanced configurations later.'}
+                            />
                         </Typography>
 
                         <form onSubmit={this.handleSubmit} className='login-form'>
@@ -193,8 +198,16 @@ class ApiCreateSwagger extends React.Component {
                                     onChange={this.handleUploadMethodChange}
                                     className='horizontal'
                                 >
-                                    <FormControlLabel value='file' control={<Radio />} label={<FormattedMessage id="file" defaultMessage="File"/>} />
-                                    <FormControlLabel value='url' control={<Radio />} label={<FormattedMessage id="url" defaultMessage="URL"/>} />
+                                    <FormControlLabel
+                                        value='file'
+                                        control={<Radio />}
+                                        label={<FormattedMessage id='file' defaultMessage='File' />}
+                                    />
+                                    <FormControlLabel
+                                        value='url'
+                                        control={<Radio />}
+                                        label={<FormattedMessage id='url' defaultMessage='URL' />}
+                                    />
                                 </RadioGroup>
                             </Grid>
                             <Grid item>
@@ -202,12 +215,17 @@ class ApiCreateSwagger extends React.Component {
                                     <FormControl className='horizontal dropzone-wrapper'>
                                         <div className='dropzone'>
                                             <Dropzone onDrop={this.onDrop} multiple={false}>
-                                                <p><FormattedMessage id='try.dropping.some.files.here.or.click.to.select.files.to.upload'
-                                                     defaultMessage='Try dropping some files here, or click to select files to upload.'/></p>
+                                                <p><FormattedMessage
+                                                    id='try.dropping.some.files.here.or.click.to.select.files.to.upload'
+                                                    defaultMessage={'Try dropping some files here, or click to select' +
+                                                    'files to upload.'}
+                                                />
+                                                </p>
                                             </Dropzone>
                                         </div>
                                         <aside>
-                                            <h2><FormattedMessage id='uploaded.files' defaultMessage='Uploaded files'/></h2>
+                                            <h2><FormattedMessage id='uploaded.files' defaultMessage='Uploaded files' />
+                                            </h2>
                                             <ul>
                                                 {files.map(f => (
                                                     <li key={f.name}>
@@ -249,7 +267,7 @@ class ApiCreateSwagger extends React.Component {
                                                     color='primary'
                                                     type='submit'
                                                 >
-                                                    Create
+                                                    <FormattedMessage id='create.btn' defaultMessage='Create' />
                                                 </Button>
                                                 {loading && (
                                                     <CircularProgress size={24} className={classes.buttonProgress} />
@@ -259,7 +277,7 @@ class ApiCreateSwagger extends React.Component {
 
                                         <Grid item>
                                             <Button raised onClick={() => this.props.history.push('/apis')}>
-                                                Cancel
+                                                <FormattedMessage id='cancel.btn' defaultMessage='Cancel' />
                                             </Button>
                                         </Grid>
                                     </Grid>

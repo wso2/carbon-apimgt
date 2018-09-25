@@ -48,7 +48,7 @@
   "fail.over.endpints": "Fail over endpints",
   "add.another.load.balanced.endpoint": "Add another load balanced endpoint",
   "add.another.fail.over.endpoint": "Add another fail over endpoint",
-  "endpoint.advance.configuration": "Endpoint Advance Configuration",
+  "endpoint.advanced.configuration": "Endpoint Advanced Configuration",
   "endpoint.url": "Endpoint URL",
   "you.can.define.endpoint.inline.or.pick.from.a.list.of.global.endpoints": "You can define endpoint inline or pick from a list of global endpoints",
   "global.endpoints.can.be.only.edited.from.global.endpoint.page": "Global endpoints can be only edited from Global Endpoint Page",
@@ -59,12 +59,11 @@
   "suspend.factor": "Suspend Factor",
   "create.an.endpoint": "Create An Endpoint",
   "global.endpoints": "Global Endpoints",
-  "create": "CREATE",
-  "cancel": "CANCEL",
+  "create.btn": "CREATE",
+  "cancel.btn": "CANCEL",
   "next": "Next",
   "bytes": "bytes",
   "create.api": "Create API",
-  "you.can.configure.the.advance.configurations.later": "You can configure the advance configurations later",
   "create": "Create",
   "back": "Back"
 

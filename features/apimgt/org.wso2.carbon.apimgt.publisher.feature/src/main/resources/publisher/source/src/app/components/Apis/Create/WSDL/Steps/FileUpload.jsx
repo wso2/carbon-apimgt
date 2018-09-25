@@ -30,7 +30,11 @@ const FileUploader = (props) => {
         <FormControl className='horizontal dropzone-wrapper'>
             <div className='dropzone'>
                 <Dropzone onDrop={onDropHandler} multiple={false}>
-                    <p>Try dropping some files here, or click to select files to upload.</p>
+                    <p><FormattedMessage
+                        id='try.dropping.some.files.here.or.click.to.select.files.to.upload'
+                        defaultMessage='Try dropping some files here, or click to select files to upload.'
+                    />
+                    </p>
                 </Dropzone>
             </div>
             <aside>

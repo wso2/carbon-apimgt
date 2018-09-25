@@ -254,7 +254,10 @@ class ApiCreateWSDL extends Component {
                 <Grid item md={10}>
                     <Paper className={classes.paper}>
                         <Typography type='display1' className={classes.textWelcome}>
-                            <FormattedMessage id="design.a.new.rest.api.using.wsdl" defaultMessage="Design a new REST API using WSDL" />
+                            <FormattedMessage
+                                id='design.a.new.rest.api.using.wsdl'
+                                defaultMessage='Design a new REST API using WSDL'
+                            />
                         </Typography>
                         <Stepper activeStep={currentStep} orientation='vertical'>
                             <Step key='provideWSDL'>
@@ -263,17 +266,18 @@ class ApiCreateWSDL extends Component {
                                         type='headline'
                                         gutterBottom
                                         className={classes.stepLabel}
-                                        component='span'>
-                                        <FormattedMessage id="select.wsdl" defaultMessage="Select WSDL" />
+                                        component='span'
+                                    >
+                                        <FormattedMessage id='select.wsdl' defaultMessage='Select WSDL' />
                                     </Typography>
                                 </StepLabel>
                                 <StepContent>
                                     <ProvideWSDL {...provideWSDLProps} />
                                     <div className={classes.optionAction}>
                                         <Button color='primary' onClick={this.nextStep}>
-                                            <FormattedMessage id="next" defaultMessage="Next" />
+                                            <FormattedMessage id='next' defaultMessage='Next' />
                                         </Button>
-                                        <Button><FormattedMessage id="cancel" defaultMessage="Cancel" /></Button>
+                                        <Button><FormattedMessage id='cancel' defaultMessage='Cancel' /></Button>
                                     </div>
                                 </StepContent>
                             </Step>
@@ -284,15 +288,17 @@ class ApiCreateWSDL extends Component {
                                         gutterBottom
                                         className={classes.stepLabel}
                                         component='span'
-                                    ><FormattedMessage id="create.api" defaultMessage="Create API" />
+                                    ><FormattedMessage id='create.api' defaultMessage='Create API' />
 
                                     </Typography>
                                 </StepLabel>
                                 <StepContent>
                                     <Typography type='caption' gutterBottom align='left'>
-                                        <FormattedMessage id="fill.the.mandatory.fields"
-                                            defaultMessage="Fill the mandatory fields (Name, Version, Context) and create the API. Configure advanced
-                                            configurations later." />
+                                        <FormattedMessage
+                                            id='fill.the.mandatory.fields'
+                                            defaultMessage={'Fill the mandatory fields (Name, Version, Context) and' +
+                                            'create the API. Configure advanced configurations later.'}
+                                        />
                                     </Typography>
                                     <InputForm api={api} handleInputChange={this.updateApiInputs} />
                                     <Grid item xs={10}>
@@ -306,10 +312,10 @@ class ApiCreateWSDL extends Component {
                                     <div className={classes.optionAction}>
                                         <Button disabled={loading} color='primary' onClick={this.createWSDLAPI}>
                                             {loading && <Progress />}
-                                            <FormattedMessage id="create" defaultMessage="Create" />
+                                            <FormattedMessage id='create' defaultMessage='Create' />
                                         </Button>
                                         <Button color='primary' onClick={this.stepBack}>
-                                            <FormattedMessage id="back" defaultMessage="Back" />
+                                            <FormattedMessage id='back' defaultMessage='Back' />
                                         </Button>
                                     </div>
                                 </StepContent>

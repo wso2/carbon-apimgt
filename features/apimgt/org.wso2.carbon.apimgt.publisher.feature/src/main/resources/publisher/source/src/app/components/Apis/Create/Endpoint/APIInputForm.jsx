@@ -20,9 +20,10 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
 import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
+import { FormattedMessage } from 'react-intl';
 import API from 'AppData/api';
 import Policies from '../../Details/LifeCycle/Policies';
-import { FormattedMessage } from 'react-intl';
+
 /**
  * @export @inheritDoc
  * @class InputForm
@@ -69,7 +70,7 @@ export default class APIInputForm extends Component {
                 <TextField
                     fullWidth
                     id='name'
-                    label={<FormattedMessage id="name" defaultMessage="Name"/>}
+                    label={<FormattedMessage id='name' defaultMessage='Name' />}
                     required
                     type='text'
                     name='name'
@@ -85,10 +86,13 @@ export default class APIInputForm extends Component {
                     // InputLabelProps={inputLabelClass}
                     // value={this.state.apiFields.apiVersion}
                     fullWidth
-                    label={<FormattedMessage id="version" defaultMessage="Version"/>}
+                    label={<FormattedMessage id='version' defaultMessage='Version' />}
                     required
                     id='version'
-                    helperText={<FormattedMessage id="version.helper.text" defaultMessage="**Version input is not support in this release"/>}
+                    helperText={<FormattedMessage
+                        id='version.helper.text'
+                        defaultMessage='**Version input is not support in this release'
+                    />}
                     type='text'
                     name='version'
                     margin='normal'
@@ -98,7 +102,7 @@ export default class APIInputForm extends Component {
                     fullWidth
                     id='context'
                     required
-                    label={ <FormattedMessage id="context" defaultMessage="Context"/>}
+                    label={<FormattedMessage id='context' defaultMessage='Context' />}
                     type='text'
                     name='context'
                     margin='normal'
@@ -108,7 +112,7 @@ export default class APIInputForm extends Component {
                 <TextField
                     fullWidth
                     id='endpoint'
-                    label={ <FormattedMessage id="endpoint" defaultMessage="Endpoint"/>}
+                    label={<FormattedMessage id='endpoint' defaultMessage='Endpoint' />}
                     type='text'
                     name='endpoint'
                     margin='normal'

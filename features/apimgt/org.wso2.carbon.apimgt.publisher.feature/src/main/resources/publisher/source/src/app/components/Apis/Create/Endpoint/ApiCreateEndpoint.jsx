@@ -27,9 +27,10 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import PropTypes from 'prop-types';
 import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api.js';
+import { FormattedMessage } from 'react-intl';
 import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
 import APIInputForm from './APIInputForm';
-import { FormattedMessage } from 'react-intl';
+
 
 const styles = theme => ({
     root: {
@@ -164,11 +165,14 @@ class ApiCreateEndpoint extends Component {
                 <Grid item md={10}>
                     <Paper className={classes.paper}>
                         <Typography type='title' gutterBottom>
-                            <FormattedMessage id='create.new.rest.api' defaultMessage='Create New REST API'/>
+                            <FormattedMessage id='create.new.rest.api' defaultMessage='Create New REST API' />
                         </Typography>
                         <Typography type='subheading' gutterBottom align='left'>
-                           <FormattedMessage id='fill.the.mandatory.fields' defaultMessage='Fill the mandatory fields (Name, Version, Context) and create the API. Configure advanced
-                            configurations later.'/>
+                            <FormattedMessage
+                                id='fill.the.mandatory.fields'
+                                defaultMessage={'Fill the mandatory fields (Name, Version, Context) '
+                                    + 'and create the API. Configure advanced configurations later.'}
+                            />
                         </Typography>
                         <form onSubmit={this.handleSubmit}>
                             <APIInputForm api={api} handleInputChange={this.inputChange} />
@@ -180,7 +184,7 @@ class ApiCreateEndpoint extends Component {
                                     >
                                         <div>
                                             <Button type='submit' variant='outlined' disabled={loading} color='primary'>
-                                                <FormattedMessage id='create' defaultMessage='Create'/>
+                                                <FormattedMessage id='create' defaultMessage='Create' />
                                             </Button>
                                             {loading && (
                                                 <CircularProgress size={24} className={classes.buttonProgress} />
@@ -190,7 +194,7 @@ class ApiCreateEndpoint extends Component {
                                 </Grid>
                                 <Grid item>
                                     <Button onClick={() => this.props.history.push('/apis')}>
-                                        <FormattedMessage id='cancel' defaultMessage='Cancel'/>
+                                        <FormattedMessage id='cancel' defaultMessage='Cancel' />
                                     </Button>
                                 </Grid>
                             </Grid>
