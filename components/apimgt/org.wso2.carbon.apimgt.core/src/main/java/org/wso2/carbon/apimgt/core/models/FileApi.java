@@ -21,7 +21,6 @@ package org.wso2.carbon.apimgt.core.models;
 
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
-
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -73,6 +72,7 @@ public class FileApi {
     private List<String> userSpecificApiPermissions;
     private int securityScheme;
     private Set<String> threatProtectionPolicies;
+    private List<AdditionalProperties> additionalProperties;
 
     public String getId() {
         return id;
@@ -210,6 +210,14 @@ public class FileApi {
         this.threatProtectionPolicies = threatProtectionPolicies;
     }
 
+    public List<AdditionalProperties> getAdditionalProperties() {
+        return additionalProperties;
+    }
+
+    public void setAdditionalProperties(List<AdditionalProperties> additionalProperties) {
+        this.additionalProperties = additionalProperties;
+    }
+
     public FileApi(API api) {
         id = api.getId();
         provider = api.getProvider();
@@ -261,6 +269,7 @@ public class FileApi {
             this.apiPolicy = api.getApiPolicy().getPolicyName();
         }
         this.threatProtectionPolicies = api.getThreatProtectionPolicies();
+        additionalProperties = api.getAdditionalProperties();
     }
 
     public List<String> getGatewayLabels() {

@@ -3988,6 +3988,16 @@ definitions:
               technicalOwnerEmail:
                 type: string
                 example: technicalowner@wso2.com
+          additionalProperties:
+            type: array
+            items:
+              properties:
+                name:
+                  type: string
+                  example: "Suspension time"
+                value:
+                  type: string
+                  example: "2s"
           corsConfiguration:
             description: |
               CORS configuration for the API

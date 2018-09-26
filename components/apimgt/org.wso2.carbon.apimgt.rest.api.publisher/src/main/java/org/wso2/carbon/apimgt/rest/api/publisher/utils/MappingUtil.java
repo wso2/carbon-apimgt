@@ -29,54 +29,14 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.Application;
-import org.wso2.carbon.apimgt.core.models.BusinessInformation;
-import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
-import org.wso2.carbon.apimgt.core.models.DedicatedGateway;
-import org.wso2.carbon.apimgt.core.models.DocumentInfo;
-import org.wso2.carbon.apimgt.core.models.Endpoint;
-import org.wso2.carbon.apimgt.core.models.Label;
-import org.wso2.carbon.apimgt.core.models.Scope;
-import org.wso2.carbon.apimgt.core.models.Subscription;
-import org.wso2.carbon.apimgt.core.models.UriTemplate;
-import org.wso2.carbon.apimgt.core.models.WSDLInfo;
+import org.wso2.carbon.apimgt.core.models.*;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.ThreatProtectionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDefinitionValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDefinitionValidationResponse_wsdlInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDefinitionValidationResponse_wsdlInfo_bindingInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDefinitionValidationResponse_wsdlInfo_endpointsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_businessInformationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_corsConfigurationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_endpointDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_operationsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_threatProtectionPoliciesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_threatProtectionPolicies_listDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.DedicatedGatewayDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPointDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPoint_endpointConfigDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPoint_endpointSecurityDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.ScopeDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.ScopeListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.ScopeList_listDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.Scope_bindingsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThreatProtectionPolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.WorkflowResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.WorkflowResponseDTO.WorkflowStatusEnum;
 
 import java.util.ArrayList;
@@ -154,6 +114,14 @@ public class MappingUtil {
             apiOperationsDTO.setPolicy(uriTemplate.getPolicy().getPolicyName());
             apiOperationsDTO.setScopes(uriTemplate.getScopes());
             apidto.addOperationsItem(apiOperationsDTO);
+        }
+
+        if (api.getAdditionalProperties() != null) {
+            List<API_additionalPropertiesDTO> additionalPropertiesDTOList = new ArrayList<>();
+            for (AdditionalProperties propertiesDTO : api.getAdditionalProperties()){
+                additionalPropertiesDTOList.add(new API_additionalPropertiesDTO(propertiesDTO.getPropertyName(),propertiesDTO.getPropertyValue()));
+            }
+            apidto.setAdditionalProperties(additionalPropertiesDTOList);
         }
         if (api.getApiPolicy() != null) {
             apidto.setApiPolicy(api.getApiPolicy().getPolicyName());
@@ -270,6 +238,14 @@ public class MappingUtil {
                 scopes(apidto.getScopes()).
                 securityScheme(mapSecuritySchemeListToInt(apidto.getSecurityScheme()));
 
+
+        if (apidto.getAdditionalProperties() != null) {
+            List<AdditionalProperties> additionalProperties = new ArrayList<>();
+            for (API_additionalPropertiesDTO propertiesDTO : apidto.getAdditionalProperties()){
+                additionalProperties.add(new AdditionalProperties(propertiesDTO.getName(),propertiesDTO.getValue()));
+            }
+            apiBuilder.additionalProperties(additionalProperties);
+        }
         if (apidto.getIsDefaultVersion() != null) {
             apiBuilder.isDefaultVersion(apidto.getIsDefaultVersion());
         }

@@ -34,19 +34,7 @@ import org.wso2.carbon.apimgt.core.dao.SearchType;
 import org.wso2.carbon.apimgt.core.dao.SecondarySearchType;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
-import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APIStatus;
-import org.wso2.carbon.apimgt.core.models.BusinessInformation;
-import org.wso2.carbon.apimgt.core.models.Comment;
-import org.wso2.carbon.apimgt.core.models.CompositeAPI;
-import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
-import org.wso2.carbon.apimgt.core.models.DedicatedGateway;
-import org.wso2.carbon.apimgt.core.models.DocumentInfo;
-import org.wso2.carbon.apimgt.core.models.Endpoint;
-import org.wso2.carbon.apimgt.core.models.Rating;
-import org.wso2.carbon.apimgt.core.models.ResourceCategory;
-import org.wso2.carbon.apimgt.core.models.Subscription;
-import org.wso2.carbon.apimgt.core.models.UriTemplate;
+import org.wso2.carbon.apimgt.core.models.*;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
@@ -756,6 +744,10 @@ public class ApiDAOImpl implements ApiDAO {
         addAPIDefinition(connection, apiPrimaryKey, api.getApiDefinition(), api.getCreatedBy());
         addAPIPermission(connection, api.getPermissionMap(), apiPrimaryKey);
 
+        if (api.getAdditionalProperties() != null) {
+            addAdditionalProperties(connection, api.getAdditionalProperties(), apiPrimaryKey);
+        }
+
         if (api.getThreatProtectionPolicies() != null) {
             addThreatProtectionPolicies(connection, apiPrimaryKey, api.getThreatProtectionPolicies());
         }
@@ -763,6 +755,8 @@ public class ApiDAOImpl implements ApiDAO {
         if (api.getApiPolicy() != null) {
             addApiPolicy(connection, api.getApiPolicy().getUuid(), apiPrimaryKey);
         }
+
+
     }
 
     /**
@@ -2183,7 +2177,8 @@ public class ApiDAOImpl implements ApiDAO {
                         workflowStatus(rs.getString("LC_WORKFLOW_STATUS")).
                         securityScheme(rs.getInt("SECURITY_SCHEME")).
                         apiPolicy(getApiPolicyByAPIId(connection, apiPrimaryKey)).
-                        threatProtectionPolicies(getThreatProtectionPolicies(connection, apiPrimaryKey)).build();
+                        threatProtectionPolicies(getThreatProtectionPolicies(connection, apiPrimaryKey)).
+                        additionalProperties(getAdditionalProperties(connection, apiPrimaryKey)).build();
             }
         }
 
@@ -2751,6 +2746,38 @@ public class ApiDAOImpl implements ApiDAO {
         }
 
         return policies;
+    }
+
+    private void addAdditionalProperties(Connection connection, List<AdditionalProperties> additionalProperty, String apiID)
+            throws SQLException {
+        final String query =
+                "INSERT INTO AM_API_ADDITIONAL_PROPERTIES(UUID, PROPERTY_NAME, PROPERTY_VALUE) VALUES (?, ?, ?)";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+
+            for (int i = 0; i < additionalProperty.size(); i++) {
+                statement.setString(1, apiID);
+                statement.setString(2, (additionalProperty.get(i)).getPropertyName());
+                statement.setString(3, (additionalProperty.get(i)).getPropertyValue());
+                statement.execute();
+            }
+
+        }
+    }
+
+    private List<AdditionalProperties> getAdditionalProperties(Connection connection, String apiID) throws SQLException {
+
+        final String query = "SELECT PROPERTY_NAME,PROPERTY_VALUE  FROM AM_API_ADDITIONAL_PROPERTIES WHERE UUID = ?";
+        List<AdditionalProperties> additionalProperties = new ArrayList<>();
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, apiID);
+            statement.execute();
+            try (ResultSet rs = statement.getResultSet()) {
+                while (rs.next()) {
+                    additionalProperties.add(new AdditionalProperties(rs.getString("PROPERTY_NAME"), rs.getString("PROPERTY_VALUE")));
+                }
+            }
+        }
+        return  additionalProperties;
     }
 
     private boolean checkTableColumnExists(DatabaseMetaData databaseMetaData, String tableName, String columnName)
