@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.dao.SearchType;
+import org.wso2.carbon.apimgt.core.dao.SecondarySearchType;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -538,13 +539,16 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
-     * @see ApiDAO#attributeSearchAPIs(Set, String, Map, int, int, boolean)
+     * @see ApiDAO#attributeSearchAPIs(Set, String, Map, Map, int, int, boolean)
      */
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public List<API> attributeSearchAPIs(Set<String> roles, String user, Map<SearchType, String> attributeMap,
-                                         int offset, int limit, boolean expand) throws APIMgtDAOException {
-        final String query = sqlStatements.getPermissionBasedApiAttributeSearchQuery(attributeMap, roles.size());
+    public List<API> attributeSearchAPIs(
+            Set<String> roles, String user, Map<SearchType, String> attributeMap,
+            Map<SecondarySearchType, String> secondaryAttributeMap, int offset, int limit, boolean expand)
+            throws APIMgtDAOException {
+        final String query = sqlStatements
+                .getPermissionBasedApiAttributeSearchQuery(attributeMap, secondaryAttributeMap, roles.size());
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
 
@@ -563,9 +567,8 @@ public class ApiDAOImpl implements ApiDAO {
                             ExceptionCodes.API_ATTRIBUTE_NOT_FOUND);
                 }
             }
-
             sqlStatements.setPermissionBasedApiAttributeSearchStatement(statement, roles, user, attributeMap,
-                    ApiType.STANDARD, offset, limit);
+                    secondaryAttributeMap, ApiType.STANDARD, offset, limit);
 
             if (expand) {
                 return constructDetailAPIList(connection, statement);

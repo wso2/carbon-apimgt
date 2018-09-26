@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.SearchType;
+import org.wso2.carbon.apimgt.core.dao.SecondarySearchType;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -689,11 +690,12 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     /**
-     * @see ApiDAO#attributeSearchAPIs(Set, String, Map, int, int, boolean)
+     * @see ApiDAO#attributeSearchAPIs(Set, String, Map, Map, int, int, boolean)
      */
     @Override
     public List<API> attributeSearchAPIs(Set<String> roles, String user, Map<SearchType, String> attributeMap,
-                                         int offset, int limit, boolean expand) throws APIMgtDAOException {
+            Map<SecondarySearchType, String> secondaryAttributeMap, int offset, int limit, boolean expand)
+            throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 

@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 
 import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.dao.SearchType;
+import org.wso2.carbon.apimgt.core.dao.SecondarySearchType;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 import java.sql.PreparedStatement;
@@ -48,10 +49,12 @@ public interface ApiDAOVendorSpecificStatements {
      * Returns the query string to be used for the attribute search query. This is required to construct the
      * PreparedStatement which will be created externally
      * @param attributeMap Search attributes to be queried
+     * @param secondaryAttributeMap Search attributes that are not present in AM_API table
      * @param roleCount Number of roles to be passed to query
      * @return String
      */
-    String getPermissionBasedApiAttributeSearchQuery(Map<SearchType, String> attributeMap, int roleCount);
+    String getPermissionBasedApiAttributeSearchQuery(Map<SearchType, String> attributeMap,
+            Map<SecondarySearchType, String> secondaryAttributeMap, int roleCount);
 
     /**
      * Format supplied search string to DB compatible value
@@ -74,14 +77,15 @@ public interface ApiDAOVendorSpecificStatements {
      * @param roles roles assigned to the user doing the search
      * @param user user doing the search
      * @param attributeMap Search attributes to be queried
+     * @param secondaryAttributeMap Secondary set of attributes wich are not stored in AM_API table
      * @param apiType API type to be considered for the search
      * @param offset result pagination offset
      * @param limit result pagination limit
      * @throws SQLException if DB error occurs
      */
     void setPermissionBasedApiAttributeSearchStatement(PreparedStatement statement, Set<String> roles, String user,
-                                                       Map<SearchType, String> attributeMap, ApiType apiType,
-                                                       int offset, int limit) throws SQLException;
+            Map<SearchType, String> attributeMap, Map<SecondarySearchType, String> secondaryAttributeMap,
+            ApiType apiType, int offset, int limit) throws SQLException;
 
     /**
      * Returns the query string to be used for the visibility based full text search query. This is required
@@ -175,6 +179,40 @@ public interface ApiDAOVendorSpecificStatements {
         }
 
         return metaData;
+    }
+
+    default String getSecondaryAttributesSearchQuery(Map<SecondarySearchType, String> secondaryAttributeMap) {
+        String extendedQuery = "";
+        if (secondaryAttributeMap.containsKey(SecondarySearchType.GATEWAYLABEL)) {
+            extendedQuery = SecondaryAttributeSearch.getLabelAttributeQuery(APIMgtConstants.LABEL_TYPE_GATEWAY);
+        } else if (secondaryAttributeMap.containsKey(SecondarySearchType.STORELABEL)) {
+            extendedQuery = SecondaryAttributeSearch.getLabelAttributeQuery(APIMgtConstants.LABEL_TYPE_STORE);
+        }
+        return extendedQuery;
+    }
+
+    default int setSecondaryAttributeBasedSearchStatement(PreparedStatement statement,
+            Map<SecondarySearchType, String> attributeMap) throws SQLException {
+        int index = 0;
+
+        for (Map.Entry<SecondarySearchType, String> entry : attributeMap.entrySet()) {
+            entry.setValue('%' + entry.getValue().toLowerCase(Locale.ENGLISH) + '%');
+            statement.setString(++index, entry.getValue());
+        }
+        return index;
+    }
+
+    /**
+     *  Class to perform secondary level attribute search. This class will return common set of queries irrespective
+     *  of the database type.
+     */
+    class SecondaryAttributeSearch {
+
+        private static String getLabelAttributeQuery(String labelType) {
+            return " LEFT JOIN AM_API_LABEL_MAPPING LM  ON UUID=LM.API_ID LEFT JOIN"
+                    + "  AM_LABELS AL ON LM.LABEL_ID = AL.LABEL_ID WHERE AL.TYPE_NAME = '" + labelType
+                    + "' AND LOWER (AL" + ".NAME) LIKE ?";
+        }
     }
 
 }

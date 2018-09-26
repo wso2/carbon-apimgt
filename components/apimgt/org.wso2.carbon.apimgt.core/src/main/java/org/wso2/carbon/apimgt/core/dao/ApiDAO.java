@@ -223,6 +223,7 @@ public interface ApiDAO {
      * @param roles     List of the roles of the user.
      * @param user      Current user.
      * @param attributeMap Map containing the attributes and search queries for those attributes
+     * @param secondaryAttributeMap Map containing the attributes those are not in AM_API table
      * @param offset  The starting point of the formatApiSearch results.
      * @param limit   Number of formatApiSearch results that will be returned.
      * @param expand specify whether to return detailed API instead of summary of API
@@ -230,8 +231,9 @@ public interface ApiDAO {
      * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    List<API> attributeSearchAPIs(Set<String> roles, String user, Map<SearchType, String> attributeMap, int offset,
-            int limit, boolean expand) throws APIMgtDAOException;
+    List<API> attributeSearchAPIs(Set<String> roles, String user, Map<SearchType, String> attributeMap,
+            Map<SecondarySearchType, String> secondaryAttributeMap, int offset, int limit, boolean expand)
+            throws APIMgtDAOException;
 
     /**
      * Retrieves summary of paginated data of APIs based on visibility (in store), that match the
