@@ -25,7 +25,6 @@ import PropTypes from 'prop-types';
 import ConfigManager from 'AppData/ConfigManager';
 import AuthManager from 'AppData/AuthManager';
 
-
 /**
  *
  * Handle Logout action from APP
@@ -33,15 +32,22 @@ import AuthManager from 'AppData/AuthManager';
  * @extends {Component}
  */
 class Logout extends Component {
+    /**
+     *Creates an instance of Logout.
+     * @param {Object} props React component props
+     * @memberof Logout
+     */
     constructor(props) {
         super(props);
-        this.authManager = new AuthManager();
+        const { search } = window.location;
+        const queryString = search.replace(/^\?/, '');
+        /* With QS version up we can directly use {ignoreQueryPrefix: true} option */
+        const queryParams = qs.parse(queryString);
+        this.referrer = qs.stringify({ referrer: queryParams.referrer || '/' });
         this.state = {
             logoutSuccess: false,
-            referrer: '/login',
         };
     }
-
 
     /**
      *
@@ -49,27 +55,16 @@ class Logout extends Component {
      * @memberof Logout
      */
     componentDidMount() {
+        const authManager = new AuthManager();
         ConfigManager.getConfigs()
             .environments.then((response) => {
                 const { environments } = response.data;
-                const promisedLogout = this.authManager.logoutFromEnvironments(environments);
-                promisedLogout
-                    .then(() => {
-                        const newState = { logoutSuccess: true };
-                        let queryString = this.props.location.search;
-                        queryString = queryString.replace(/^\?/, '');
-                        /* With QS version up we can directly use {ignoreQueryPrefix: true} option */
-                        const params = qs.parse(queryString);
-                        if (params.referrer) {
-                            newState.referrer = params.referrer;
-                        }
-                        this.setState(newState);
-                    })
-                    .catch((error) => {
-                        const message = 'Error while logging out';
-                        Alert.error(message);
-                        console.log(error);
-                    });
+                const promisedLogout = authManager.logoutFromEnvironments(environments);
+                promisedLogout.then(() => this.setState({ logoutSuccess: true })).catch((error) => {
+                    const message = 'Error while logging out';
+                    Alert.error(message);
+                    console.log(error);
+                });
             })
             .catch((error) => {
                 console.error(error);
@@ -77,8 +72,15 @@ class Logout extends Component {
             });
     }
 
+    /**
+     *
+     *
+     * @returns {React.Component} Render Logout
+     * @memberof Logout
+     */
     render() {
-        return this.state.logoutSuccess && <Redirect to={this.state.referrer} />;
+        const { logoutSuccess } = this.state;
+        return logoutSuccess && <Redirect to={{ pathname: '/login', search: this.referrer }} />;
     }
 }
 

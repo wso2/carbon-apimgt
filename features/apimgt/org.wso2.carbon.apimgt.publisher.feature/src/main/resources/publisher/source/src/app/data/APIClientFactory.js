@@ -44,6 +44,13 @@ class APIClientFactory {
      * @returns {APIClient} APIClient object for the environment
      */
     getAPIClient(environment) {
+        const {
+            label,
+        } = environment;
+        if (label === undefined) {
+            throw new Error('Environment label is undefined, Please provide' +
+                'a valid environment object with keys (host,label & loginTokenPath)');
+        }
         let apiClient = this._APIClientMap.get(environment.label);
 
         if (apiClient) {
@@ -57,18 +64,10 @@ class APIClientFactory {
 
     /**
      * Remove an APIClient object from the environment
-     * @param {String} environmentLabel
+     * @param {String} environmentLabel name of the environment
      */
     destroyAPIClient(environmentLabel) {
         this._APIClientMap.delete(environmentLabel);
-    }
-
-    /**
-     * Get an instance of APIClientFactory
-     * @returns {APIClientFactory} An instance of APIClientFactory
-     */
-    static getInstance() {
-        return new APIClientFactory();
     }
 }
 

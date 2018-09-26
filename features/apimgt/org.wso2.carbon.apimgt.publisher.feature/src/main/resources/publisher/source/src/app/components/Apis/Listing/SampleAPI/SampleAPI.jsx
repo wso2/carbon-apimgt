@@ -75,20 +75,21 @@ class SampleAPI extends Component {
     handleDeploySample() {
         this.setState({ deploying: true });
         const promisedSampleAPI = this.createSampleAPI();
-        promisedSampleAPI.then((sampleAPI) => {
-            sampleAPI
-                .publish()
-                .then(() => {
-                    const message = 'Pet-Store API Published successfully';
-                    this.setState({ published: true, api: sampleAPI });
-                    Alert.info(message);
-                })
-                .catch((error) => {
-                    console.error(error);
-                    this.setState({ deploying: false });
-                    Alert.error(error);
-                });
-        });
+        promisedSampleAPI
+            .then((sampleAPI) => {
+                sampleAPI
+                    .publish()
+                    .then(() => {
+                        const message = 'Pet-Store API Published successfully';
+                        this.setState({ published: true, api: sampleAPI });
+                        Alert.info(message);
+                    })
+                    .catch((error) => {
+                        console.error(error);
+                        this.setState({ deploying: false });
+                        Alert.error(error);
+                    });
+            });
     }
 
     /**
@@ -143,11 +144,13 @@ class SampleAPI extends Component {
         return sampleAPI.save().catch((error) => {
             console.error(error);
             this.setState({ deploying: false });
-            Alert.error(error);
-            const errorData = JSON.parse(error.data);
-            const messageTxt =
-                'Error[' + errorData.code + ']: ' + errorData.description + ' | ' + errorData.message + '.';
-            Alert.info(messageTxt);
+            const { response } = error;
+            if (response) {
+                const { code, description, message } = response.body;
+                Alert.error(`ERROR[${code}] : ${description} | ${message}`);
+            } else {
+                Alert.error(error);
+            }
         });
     }
 
