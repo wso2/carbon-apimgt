@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.common;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.AbstractSynapseHandler;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;

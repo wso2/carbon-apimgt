@@ -23,6 +23,7 @@ import io.opentracing.Tracer;
 public interface OpenTracer {
 
     Tracer getTracer(String serviceName);
+
     String getName();
 
 }

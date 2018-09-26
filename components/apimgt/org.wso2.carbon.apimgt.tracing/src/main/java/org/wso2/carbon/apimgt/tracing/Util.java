@@ -7,16 +7,10 @@ import io.opentracing.propagation.Format;
 import io.opentracing.propagation.TextMapExtractAdapter;
 import io.opentracing.propagation.TextMapInjectAdapter;
 import io.opentracing.util.GlobalTracer;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 public class Util {
-
-    private static final Log log = LogFactory.getLog(Util.class);
 
     public static TracingSpan startSpan(String spanName, TracingSpan parentSpan, TracingTracer tracer) {
 
@@ -27,7 +21,7 @@ public class Util {
         } else {
             Object sp = parentSpan.getSpan();
             Span childSpan;
-            if (sp instanceof Span) {
+            if(sp instanceof Span) {
                 childSpan = tracer.getTracingTracer().buildSpan(spanName).asChildOf((Span) sp).start();
 
             } else {
@@ -105,7 +99,7 @@ public class Util {
     public static String baggageGet(TracingSpan span, String key) {
 
         Object sp = span.getSpan();
-        if(sp instanceof Span) {
+        if (sp instanceof Span) {
             return ((Span) sp).getBaggageItem(key);
 
         } else if (sp instanceof SpanContext) {

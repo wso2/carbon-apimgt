@@ -20,14 +20,10 @@ package org.wso2.carbon.apimgt.tracing;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
-import io.opentracing.contrib.reporter.LogLevel;
 import io.opentracing.contrib.reporter.Reporter;
 import io.opentracing.contrib.reporter.SpanData;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
-
-import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.Duration;
 import java.time.Instant;
@@ -53,7 +49,7 @@ public class TracingReporter implements Reporter {
 
     public void log(Instant timeStamp, SpanData span, Map<String, ?> fields) {}
 
-    protected String toStructuredMessage(Instant timeStamp, SpanData span) {
+    private String toStructuredMessage(Instant timeStamp, SpanData span) {
         try {
             StringWriter writer = new StringWriter();
             JsonGenerator generator = this.jsonFactory.createGenerator(writer);

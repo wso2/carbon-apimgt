@@ -210,8 +210,6 @@ public class OAuthAuthenticator implements Authenticator {
             if(log.isDebugEnabled()){
                 log.debug("Matching resource is: ".concat(matchingResource));
             }
-//            org.apache.axis2.context.MessageContext axis2MessageCtx = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
-//            org.apache.axis2.context.MessageContext.setCurrentMessageContext(axis2MessageCtx);
 
             timer = getTimer(MetricManager.name(
                     APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "GET_KEY_VALIDATION_INFO"));
