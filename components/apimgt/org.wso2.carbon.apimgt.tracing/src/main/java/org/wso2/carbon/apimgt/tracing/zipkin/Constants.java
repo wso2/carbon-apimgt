@@ -28,6 +28,7 @@ public class Constants {
     static final String CONFIG_HOST = "OpenTracer.Hostname";
     static final String CONFIG_API_CONTEXT = "OpenTracer.APIContext";
     static final String REQUEST_ID = "request-id";
+    static final String TRACER = "tracer";
 
     static final int DEFAULT_PORT = 9411;
     static final String DEFAULT_HOST = "localhost";

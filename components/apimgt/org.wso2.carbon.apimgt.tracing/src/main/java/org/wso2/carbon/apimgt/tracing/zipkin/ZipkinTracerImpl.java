@@ -60,7 +60,7 @@ public class ZipkinTracerImpl implements OpenTracer {
                 .propagationFactory(ExtraFieldPropagation.newFactory(B3Propagation.FACTORY, Constants.REQUEST_ID))
                 .build());
 
-        Reporter reporter = new TracingReporter(LogFactory.getLog("tracer"));
+        Reporter reporter = new TracingReporter(LogFactory.getLog(Constants.TRACER));
         Tracer tracerR = new TracerR(tracer, reporter, new ThreadLocalScopeManager());
         GlobalTracer.register(tracerR);
 

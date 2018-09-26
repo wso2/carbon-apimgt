@@ -27,5 +27,6 @@ class TracingConstants {
     static final String TAGS = "Tags";
     static final String JAEGER = "JAEGER";
     static final String ZIPKIN = "ZIPKIN";
+    static final String TRACER = "tracer";
 
 }

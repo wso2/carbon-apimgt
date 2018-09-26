@@ -72,7 +72,7 @@ public class JaegerTracerImpl implements OpenTracer {
                 .withSender(senderConfig);
 
         Tracer tracer = new Configuration(serviceName).withSampler(samplerConfig).withReporter(reporterConfig).getTracer();
-        Reporter reporter = new TracingReporter(LogFactory.getLog("tracer"));
+        Reporter reporter = new TracingReporter(LogFactory.getLog(Constants.TRACER));
         Tracer tracerR = new TracerR(tracer, reporter, new ThreadLocalScopeManager());
         GlobalTracer.register(tracerR);
 

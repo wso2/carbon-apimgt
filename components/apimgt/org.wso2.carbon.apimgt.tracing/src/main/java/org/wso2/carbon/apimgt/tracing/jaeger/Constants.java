@@ -30,6 +30,7 @@ public class Constants {
     static final String CONFIG_SAMPLER_TYPE = "OpenTracer.SamplerType";
     static final String CONFIG_REPORTER_FLUSH_INTERVAL = "OpenTracer.ReporterFlushInterval";
     static final String CONFIG_REPORTER_BUFFER_SIZE = "OpenTracer.ReporterBufferSize";
+    static final String TRACER = "tracer";
 
     static final int DEFAULT_PORT = 5775;
     static final String DEFAULT_HOST = "localhost";
