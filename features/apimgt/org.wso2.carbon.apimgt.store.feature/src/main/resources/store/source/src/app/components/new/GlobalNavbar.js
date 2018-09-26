@@ -11,7 +11,7 @@ import {
 } from "@material-ui/core";
 import APIsIcon from "@material-ui/icons/Power";
 import EndpointsIcon from "@material-ui/icons/ZoomOutMapOutlined";
-import HomeIcon from "@material-ui/icons/Home";
+import CustomIcon from '../Shared/CustomIcon';
 
 const styles = theme => ({
   list: {
@@ -38,6 +38,7 @@ class GlobalNavBar extends Component {
         top: 64
       }
     };
+    let strokeColor = theme.palette.getContrastText(theme.palette.background.leftMenu);
     return (
       <div>
         <Drawer
@@ -60,7 +61,7 @@ class GlobalNavBar extends Component {
                 <Link to="/apis">
                   <ListItem button>
                     <ListItemIcon>
-                      <APIsIcon className={classes.listText} />
+                      <CustomIcon width={32} height={32} icon="api" className={classes.listText} strokeColor={strokeColor} />
                     </ListItemIcon>
                     <ListItemText
                       classes={{ primary: classes.listText }}
@@ -71,7 +72,7 @@ class GlobalNavBar extends Component {
                 <Link to="/applications">
                   <ListItem button>
                     <ListItemIcon>
-                      <EndpointsIcon className={classes.listText} />
+                      <CustomIcon width={32} height={32} icon="applications" className={classes.listText} strokeColor={strokeColor} />
                     </ListItemIcon>
                     <ListItemText
                       classes={{ primary: classes.listText }}

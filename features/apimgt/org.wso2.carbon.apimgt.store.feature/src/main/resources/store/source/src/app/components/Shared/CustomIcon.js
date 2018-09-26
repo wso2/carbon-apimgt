@@ -178,6 +178,39 @@ export default class CustomIcon extends React.Component{
                     </g>
                 </g>
             </svg>
+        } else if ( icon === 'keys'){
+            return <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height}
+            viewBox="0 0 9.8881274 7.2221771" id="svg8">
+                <g id="layer25" transform="translate(36.575 -55.028)">
+                    <g transform="translate(-43.821 -15.122) scale(.93173)" id="g10309">
+                        <g id="g10305" transform="matrix(.59773 0 0 .59773 8.88 46.917)" strokeLinecap="round">
+                            <circle r="1.497" cy="57.583" cx="8.138" id="circle10299" fill={strokeColor}
+                            strokeWidth="0.529" strokeLinejoin="round" />
+                            <path id="path10301" d="m 6.6416492,53.373914 c 2.7091648,-0.363432 5.5994938,2.122181 5.7062048,5.612659"
+                            fill="none" stroke={strokeColor} strokeWidth="1.323" />
+                            <path d="m 6.7351935,50.47404 c 5.1370835,-0.52388 7.9751195,3.245055 8.5125345,8.512533"
+                            id="path10303" fill="none" stroke={strokeColor} strokeWidth="1.323" />
+                        </g>
+                        <path d="m 13.270424,82.869816 c 0.202009,-0.123999 0.264813,-0.386454 0.140817,-0.588463 l -2.15606,-3.512502 a 1.9966529,1.9966529 0 0 0 0.291837,-2.455259 1.9966529,1.9966529 0 0 0 -2.746164,-0.657136 1.9966529,1.9966529 0 0 0 -0.657136,2.746165 1.9966529,1.9966529 0 0 0 2.32141,0.851187 l 0.720727,1.174159 c -0.01053,0.0054 -0.02102,0.01091 -0.03127,0.0172 l -1.640879,1.007211 c -0.20201,0.123999 -0.273132,0.372901 -0.159465,0.558078 0.113665,0.185175 0.3678,0.234429 0.569812,0.110425 l 1.640878,-1.00721 c 0.01024,-0.0063 0.02,-0.01304 0.0296,-0.01993 l 1.026666,1.672574 c 0.123999,0.202009 0.386454,0.264813 0.588463,0.140817 z m -2.450446,-4.792127 c -0.13624,-0.143956 -0.357939,-0.17773 -0.533882,-0.06973 l -0.06077,0.03731 c -0.175941,0.107998 -0.246189,0.320971 -0.179518,0.507607 a 1.2122535,1.2122535 0 0 1 -1.233611,-0.560605 1.2122535,1.2122535 0 0 1 0.398974,-1.667314 1.2122535,1.2122535 0 0 1 1.667315,0.398975 1.2122535,1.2122535 0 0 1 -0.05853,1.353753 z"
+                        id="path10307" fill={strokeColor} stroke={strokeColor} strokeWidth="0.143" strokeLinejoin="round"
+                        />
+                    </g>
+                </g>
+            </svg>
+        } else if ( icon === 'keys'){
+            return <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height}
+            viewBox="0 0 6.5989004 6.5674281" id="svg8">
+                <g id="layer25" transform="translate(35.929 -86.734)">
+                    <g transform="matrix(.66392 0 0 .66392 -39.893 53.694)" id="g10459" strokeLinecap="round">
+                        <circle id="circle10453" cx="8.138" cy="57.583" r="1.497" fill={strokeColor}
+                        strokeWidth="0.529" strokeLinejoin="round" />
+                        <path d="m 6.6416492,53.373914 c 2.7091648,-0.363432 5.5994938,2.122181 5.7062048,5.612659"
+                        id="path10455" fill="none" stroke={strokeColor} strokeWidth="1.323" />
+                        <path id="path10457" d="m 6.7351935,50.47404 c 5.1370835,-0.52388 7.9751195,3.245055 8.5125345,8.512533"
+                        fill="none" stroke={strokeColor} strokeWidth="1.323" />
+                    </g>
+                </g>
+            </svg>
         }
         
     }
