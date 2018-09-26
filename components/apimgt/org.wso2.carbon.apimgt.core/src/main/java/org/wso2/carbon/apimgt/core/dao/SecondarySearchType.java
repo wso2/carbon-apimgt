@@ -27,7 +27,8 @@ import javax.annotation.CheckForNull;
  * Supported API meta data related search types
  */
 public enum SecondarySearchType {
-    GATEWAYLABEL;
+    GATEWAYLABEL,
+    STORELABEL;
 
     private static final Map<String, SecondarySearchType> stringToEnum = new HashMap<>();
 

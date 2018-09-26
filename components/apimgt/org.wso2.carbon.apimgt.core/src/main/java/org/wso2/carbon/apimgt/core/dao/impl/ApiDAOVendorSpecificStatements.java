@@ -184,7 +184,9 @@ public interface ApiDAOVendorSpecificStatements {
     default String getSecondaryAttributesSearchQuery(Map<SecondarySearchType, String> secondaryAttributeMap) {
         String extendedQuery = "";
         if (secondaryAttributeMap.containsKey(SecondarySearchType.GATEWAYLABEL)) {
-            extendedQuery = SecondaryAttributeSearch.getLabelAttributeQuery();
+            extendedQuery = SecondaryAttributeSearch.getLabelAttributeQuery(APIMgtConstants.LABEL_TYPE_GATEWAY);
+        } else if (secondaryAttributeMap.containsKey(SecondarySearchType.STORELABEL)) {
+            extendedQuery = SecondaryAttributeSearch.getLabelAttributeQuery(APIMgtConstants.LABEL_TYPE_STORE);
         }
         return extendedQuery;
     }
@@ -206,10 +208,10 @@ public interface ApiDAOVendorSpecificStatements {
      */
     class SecondaryAttributeSearch {
 
-        private static String getLabelAttributeQuery() {
+        private static String getLabelAttributeQuery(String labelType) {
             return " LEFT JOIN AM_API_LABEL_MAPPING LM  ON UUID=LM.API_ID LEFT JOIN"
-                    + "  AM_LABELS AL ON LM.LABEL_ID = AL.LABEL_ID WHERE AL.TYPE_NAME = 'GATEWAY' AND LOWER(AL.NAME) "
-                    + "LIKE ?";
+                    + "  AM_LABELS AL ON LM.LABEL_ID = AL.LABEL_ID WHERE AL.TYPE_NAME = '" + labelType
+                    + "' AND LOWER (AL" + ".NAME) LIKE ?";
         }
     }
 
