@@ -381,32 +381,45 @@ class Overview extends Component {
                     <Typography variant='headline'> Additional Properties</Typography>
                     <Divider />
                 </Grid>
-                <Grid item lg={5}>
-                    <TextField
-                        style={{
-                            justifyContent: 'space-between',
-                            marginRight: 25,
-                        }}
-                        id='api-property'
-                        label={isEditable}
-                        placeholder='My Property'
-                        margin='normal'
-                    />
-                    <TextField
-                        style={{
-                            justifyContent: 'space-between',
-                            marginLeft: 25,
-                        }}
-                        id='api-property-value'
-                        label={isEditable}
-                        placeholder='Property Value'
-                        margin='normal'
-                    />
-                </Grid>
+                {api.additionalProperties
+                    .map(property => <AdditionalProperty property={property} isEditable={isEditable}/>)}
             </Grid>
         );
     }
 }
+
+const AdditionalProperty = ({property,isEditable}) => (
+    <Grid item lg={5}>
+        <TextField
+            style={{
+                justifyContent: 'space-between',
+                marginRight: 25,
+            }}
+            id='api-property'
+            label={isEditable && 'name'}
+            defaultValue={property.name}
+            placeholder='My Property'
+            margin='normal'
+            InputProps={{
+                readOnly: !isEditable,
+            }}
+        />
+        <TextField
+            style={{
+                justifyContent: 'space-between',
+                marginLeft: 25,
+            }}
+            id='api-property-value'
+            label={isEditable && 'value'}
+            defaultValue={property.value}
+            placeholder='Property Value'
+            margin='normal'
+            InputProps={{
+                readOnly: !isEditable,
+            }}
+        />
+    </Grid>
+);
 
 Overview.defaultProps = {
     isEditable: false,
