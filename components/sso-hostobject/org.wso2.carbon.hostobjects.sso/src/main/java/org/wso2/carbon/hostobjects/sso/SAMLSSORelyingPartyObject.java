@@ -494,7 +494,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                     return Util.marshall(new LogoutRequestBuilder().
                             buildLogoutRequest((String) args[0], sessionIndexId,
                                     SSOConstants.LOGOUT_USER,
-                                    relyingPartyObject.getSSOProperty(idpLogoutURL), nameIdFormat));
+                                    relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID), nameIdFormat));
                 } else {
                     return Util.marshall(new LogoutRequestBuilder().
                             buildSignedLogoutRequest((String) args[0], sessionIndexId,
