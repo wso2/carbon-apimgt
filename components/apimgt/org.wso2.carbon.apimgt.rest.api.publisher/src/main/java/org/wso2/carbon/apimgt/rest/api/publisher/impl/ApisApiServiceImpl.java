@@ -111,10 +111,12 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param query       search condition
      * @param accept      Accept header value
      * @param ifNoneMatch If-None-Match header value
+     * @param tenantDomain tenant domain of APIs to be returned
      * @return matched APIs for the given search condition
      */
     @Override
-    public Response apisGet(Integer limit, Integer offset, String query, String accept, String ifNoneMatch, Boolean expand) {
+    public Response apisGet(Integer limit, Integer offset, String query, String accept, String ifNoneMatch, Boolean expand,
+                            String tenantDomain) {
         List<API> allMatchedApis = new ArrayList<>();
         APIListDTO apiListDTO;
 
@@ -131,7 +133,11 @@ public class ApisApiServiceImpl extends ApisApiService {
             //We should send null as the provider, Otherwise searchAPIs will return all APIs of the provider
             // instead of looking at type and query
             String username = RestApiUtil.getLoggedInUsername();
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
+
+            if (tenantDomain == null) {
+                tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
+            }
+            RestApiUtil.handleMigrationSpecificPermissionViolations(tenantDomain, username);
             Map<String, Object> result = apiProvider.searchPaginatedAPIs(newSearchQuery, tenantDomain,
                                         offset, limit, false);
             Set<API> apis = (Set<API>) result.get("apis");
