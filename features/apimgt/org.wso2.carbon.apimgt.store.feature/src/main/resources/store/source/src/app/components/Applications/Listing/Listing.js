@@ -168,8 +168,10 @@ class Listing extends Component {
         };
         this.handleAppDelete = this.handleAppDelete.bind(this);
     }
-
     componentDidMount() {
+        this.updateApps();
+    }
+    updateApps = () => {
         let promised_applications = Application.all();
         promised_applications.then((applications) => {
             let apps = new Map(); // Applications list put into map, to make it efficient when deleting apps (referring back to an App)
@@ -254,7 +256,7 @@ class Listing extends Component {
                     </div>
                     { ( data.size !==0 ) &&
                     <div className={classes.createLinkWrapper}>
-                        <NewApp />
+                        <NewApp updateApps={this.updateApps} />
                     </div> }
                 </div>
                 {alertMessage && <Alert message={alertMessage}/>}
@@ -302,7 +304,7 @@ class Listing extends Component {
                                 access token to invoke a collection of APIs and to subscribe to one API multiple times with different
                                 SLA levels. The DefaultApplication is pre-created and allows unlimited access by default.
                                         </Typography>
-                                        <NewApp />
+                                        <NewApp  updateApps={this.updateApps} />
                                     </InlineMessage>
                                 </div>
                             }
