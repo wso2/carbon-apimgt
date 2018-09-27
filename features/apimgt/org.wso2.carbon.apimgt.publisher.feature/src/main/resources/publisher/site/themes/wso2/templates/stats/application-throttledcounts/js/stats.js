@@ -20,21 +20,25 @@ $( document ).ready(function() {
 
                     //day picker
                     $('#today-btn').on('click', function () {
+                        currentDay = getDate();
                         getDateTime(currentDay, currentDay - 86400000);
                     });
 
                     //hour picker
                     $('#hour-btn').on('click', function () {
+                        currentDay = getDate();
                         getDateTime(currentDay, currentDay - 3600000);
                     });
 
                     //week picker
                     $('#week-btn').on('click', function () {
+                        currentDay = getDate();
                         getDateTime(currentDay, currentDay - 604800000);
                     });
 
                     //month picker
                     $('#month-btn').on('click', function () {
+                        currentDay = getDate();
                         getDateTime(currentDay, currentDay - (604800000 * 4));
                     });
 
@@ -138,7 +142,8 @@ var drawThrottledTimeGraph = function (fromDate, toDate) {
     if(appName == ""){
         return;
     }
-
+    fromDate = convertTimeStringUTC(fromDate);
+    toDate = convertTimeStringUTC(toDate);
     jagg.post("/site/blocks/stats/application-throttledcounts/ajax/stats.jag", { action: "getThrottleDataOfApplication", currentLocation : currentLocation, appName : appName, fromDate: fromDate, toDate: toDate, apiFilter: apiFilter },
 
         function (json) {
