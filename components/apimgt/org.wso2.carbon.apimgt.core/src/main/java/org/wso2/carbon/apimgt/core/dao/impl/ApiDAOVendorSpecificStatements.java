@@ -183,9 +183,9 @@ public interface ApiDAOVendorSpecificStatements {
 
     default String getSecondaryAttributesSearchQuery(Map<SecondarySearchType, String> secondaryAttributeMap) {
         String extendedQuery = "";
-        if (secondaryAttributeMap.containsKey(SecondarySearchType.GATEWAYLABEL)) {
+        if (secondaryAttributeMap != null && secondaryAttributeMap.containsKey(SecondarySearchType.GATEWAYLABEL)) {
             extendedQuery = SecondaryAttributeSearch.getLabelAttributeQuery(APIMgtConstants.LABEL_TYPE_GATEWAY);
-        } else if (secondaryAttributeMap.containsKey(SecondarySearchType.STORELABEL)) {
+        } else if (secondaryAttributeMap != null && secondaryAttributeMap.containsKey(SecondarySearchType.STORELABEL)) {
             extendedQuery = SecondaryAttributeSearch.getLabelAttributeQuery(APIMgtConstants.LABEL_TYPE_STORE);
         }
         return extendedQuery;
