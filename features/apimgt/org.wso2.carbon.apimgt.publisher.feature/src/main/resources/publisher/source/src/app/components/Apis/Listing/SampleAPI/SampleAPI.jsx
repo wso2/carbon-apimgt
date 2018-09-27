@@ -35,13 +35,13 @@ import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
 import APICreateMenu from '../components/APICreateMenu';
 
-const styles = {
+const styles = theme => ({
     buttonProgress: {
         color: green[500],
         position: 'relative',
     },
-    headline: { paddingTop: '5px', paddingLeft: '10px' },
-};
+    headline: { paddingTop: theme.spacing.unit * 1.25, paddingLeft: theme.spacing.unit * 2.5 },
+});
 
 /**
  * Show Initial Welcome card if no APIs are available to list
