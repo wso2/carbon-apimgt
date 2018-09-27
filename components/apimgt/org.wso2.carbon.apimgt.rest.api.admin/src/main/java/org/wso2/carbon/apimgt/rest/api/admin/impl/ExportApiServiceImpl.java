@@ -67,19 +67,16 @@ public class ExportApiServiceImpl extends ExportApiService {
             consumer = RestApiUtil.getConsumer(username);
             FileBasedApplicationImportExportManager importExportManager = new FileBasedApplicationImportExportManager
                     (consumer, pathToExportDir);
+            String appTenant = MultitenantUtils.getTenantDomain(applicationDetails.getSubscriber().getName());
             if (importExportManager.isOwnerAvailable(appOwner)) {
                 applicationDetails = importExportManager.getApplicationDetails(appName, appOwner);
             }
             if (applicationDetails == null) {
-                // 404
                 String errorMsg = "No application found with name " + appName + " owned by " + appOwner;
                 log.error(errorMsg);
                 return Response.status(Response.Status.NOT_FOUND).entity(errorMsg).build();
-            } else if (!MultitenantUtils.getTenantDomain(applicationDetails.getSubscriber().getName()).equals
-                    (MultitenantUtils.getTenantDomain(username))) {
-                String errorMsg = "Cross Tenant Exports are not allowed";
-                log.error(errorMsg);
-                return Response.status(Response.Status.FORBIDDEN).entity(errorMsg).build();
+            } else {
+                RestApiUtil.handleMigrationSpecificPermissionViolations(appTenant, username);
             }
             exportedFilePath = importExportManager.exportApplication(applicationDetails,
                     DEFAULT_APPLICATION_EXPORT_DIR);

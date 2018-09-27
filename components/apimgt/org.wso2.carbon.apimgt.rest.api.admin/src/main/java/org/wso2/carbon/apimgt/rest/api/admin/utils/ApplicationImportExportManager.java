@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -62,7 +63,12 @@ public class ApplicationImportExportManager {
         Application application;
         int appId = APIUtil.getApplicationId(appName, username);
         String groupId = apiConsumer.getGroupId(appId);
-        application = apiConsumer.getApplicationById(appId);
+
+        if (Boolean.getBoolean(RestApiConstants.MIGRATION_ENABLED)) {
+            application = apiConsumer.getApplicationsByName(username, appName, groupId);
+        } else {
+            application = apiConsumer.getApplicationById(appId);
+        }
         if (application != null) {
             application.setGroupId(groupId);
             application.setOwner(application.getSubscriber().getName());
