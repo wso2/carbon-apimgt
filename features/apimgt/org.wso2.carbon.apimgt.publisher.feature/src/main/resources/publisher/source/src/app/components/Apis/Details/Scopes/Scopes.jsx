@@ -30,14 +30,14 @@ import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import Divider from '@material-ui/core/Divider';
 import Button from '@material-ui/core/Button';
-import { withStyles } from '@material-ui/core/styles';
+import withStyles from '@material-ui/core/styles/withStyles';
 
 const styles = theme => ({
     buttonProgress: {
         position: 'relative',
         margin: theme.spacing.unit,
     },
-    headline: { paddingTop: '5px', paddingLeft: '10px' },
+    headline: { paddingTop: theme.spacing.unit * 1.25, paddingLeft: theme.spacing.unit * 2.5 },
 });
 /**
  * Generate the scopes UI in API details page.
@@ -172,7 +172,7 @@ class Scopes extends React.Component {
                 <Grid container justify='center'>
                     <Grid item sm={5}>
                         <Card className={classes.card}>
-                            <Typography align='justify' className={classes.headline} gutterBottom variant='headline' component='h2'>
+                            <Typography className={classes.headline} gutterBottom variant='headline' component='h2'>
                                 <FormattedMessage
                                     id='create.scopes'
                                     defaultMessage='Create Scopes..'
@@ -187,8 +187,10 @@ class Scopes extends React.Component {
                                 </Typography>
                             </CardContent>
                             <CardActions>
-                                <Button variant="contained" color="primary" className={classes.button}>
-                                    Crearte scopes
+                                <Button variant='contained' color='primary' className={classes.button}>
+                                    <FormattedMessage
+                                        id='create.scope.button'
+                                    />
                                 </Button>
                             </CardActions>
                         </Card>
