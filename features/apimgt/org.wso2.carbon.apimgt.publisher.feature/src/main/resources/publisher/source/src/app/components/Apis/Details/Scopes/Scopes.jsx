@@ -183,7 +183,8 @@ class Scopes extends React.Component {
                                 <Typography align='justify' component='p'>
                                     <FormattedMessage
                                         id='create.scope.description'
-                                        defaultMessage='Scopes enable fine-grained access control to API resources based on user roles.'
+                                        defaultMessage={'Scopes enable fine-grained access control to API resources'
+                                        + ' based on user roles.'}
                                     />
                                 </Typography>
                             </CardContent>
