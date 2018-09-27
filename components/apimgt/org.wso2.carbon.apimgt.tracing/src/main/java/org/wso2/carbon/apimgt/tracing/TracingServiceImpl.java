@@ -19,23 +19,18 @@
 package org.wso2.carbon.apimgt.tracing;
 
 import io.opentracing.Tracer;
-import io.opentracing.util.GlobalTracer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.tracing.jaeger.JaegerTracerImpl;
-import org.wso2.carbon.apimgt.tracing.zipkin.ZipkinTracerImpl;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.ServiceLoader;
 
 public class TracingServiceImpl implements TracingService {
 
     private static final Log log = LogFactory.getLog(TracingServiceImpl.class);
-    private APIManagerConfiguration configuration = new APIManagerConfiguration();
+    private static APIManagerConfiguration configuration = new APIManagerConfiguration();
     private static TracingServiceImpl instance = new TracingServiceImpl();
 
     public static TracingServiceImpl getInstance() {
@@ -44,7 +39,6 @@ public class TracingServiceImpl implements TracingService {
 
     @Override
     public TracingTracer buildTracer(String serviceName) {
-
         try {
             String filePath = CarbonUtils.getCarbonConfigDirPath() + File.separator + "api-manager.xml";
             configuration.load(filePath);
@@ -53,27 +47,30 @@ public class TracingServiceImpl implements TracingService {
             log.error("Error in reading configuration file", e);
         }
 
-        String openTracerName = getConfiguration().getFirstProperty(TracingConstants.OPEN_TRACER_NAME);
-        String enabled = getConfiguration().getFirstProperty(TracingConstants.OPEN_TRACER_ENABLED);
+        String openTracerName = getConfiguration().getFirstProperty(TracingConstants.OPEN_TRACER_NAME) != null ?
+                configuration.getFirstProperty(TracingConstants.OPEN_TRACER_NAME)
+                : TracingConstants.DEFAULT_OPEN_TRACER_NAME;
+        String enabled = getConfiguration().getFirstProperty(TracingConstants.OPEN_TRACER_ENABLED) != null ?
+                configuration.getFirstProperty(TracingConstants.OPEN_TRACER_ENABLED)
+                : TracingConstants.DEFAULT_OPEN_TRACER_ENABLED;
 
         Tracer tracer;
         if (openTracerName.equalsIgnoreCase(TracingConstants.JAEGER) && enabled.equalsIgnoreCase("TRUE")) {
-            tracer = new JaegerTracerImpl().getTracer(serviceName);
+            tracer = new JaegerTracer().getTracer(serviceName);
             return new TracingTracer(tracer);
 
-        } else if(openTracerName.equalsIgnoreCase(TracingConstants.ZIPKIN) && enabled.equalsIgnoreCase("TRUE")) {
-            tracer = new ZipkinTracerImpl().getTracer(serviceName);
+        } else if (openTracerName.equalsIgnoreCase(TracingConstants.ZIPKIN) &&
+                enabled.equalsIgnoreCase("TRUE")) {
+            tracer = new ZipkinTracer().getTracer(serviceName);
             return new TracingTracer(tracer);
 
         } else {
             log.error("Invalid test Configuration");
         }
-
         return null;
     }
 
     public APIManagerConfiguration getConfiguration() {
-
         return configuration;
     }
 

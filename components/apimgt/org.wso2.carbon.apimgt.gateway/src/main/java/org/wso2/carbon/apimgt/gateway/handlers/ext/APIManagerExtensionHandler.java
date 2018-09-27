@@ -75,7 +75,8 @@ public class APIManagerExtensionHandler extends AbstractHandler {
     public boolean handleRequest(MessageContext messageContext) {
         Timer.Context context = startMetricTimer(DIRECTION_IN);
         long executionStartTime = System.nanoTime();
-        TracingSpan responseLatencySpan = (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+        TracingSpan responseLatencySpan =
+                (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
         TracingTracer tracer = Util.getGlobalTracer();
         TracingSpan requestMediationSpan =
                 Util.startSpan(APIMgtGatewayConstants.REQUEST_MEDIATION, responseLatencySpan, tracer);
@@ -92,7 +93,8 @@ public class APIManagerExtensionHandler extends AbstractHandler {
     public boolean handleResponse(MessageContext messageContext) {
         Timer.Context context = startMetricTimer(DIRECTION_OUT);
         long executionStartTime = System.nanoTime();
-        TracingSpan responseLatencySpan = (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+        TracingSpan responseLatencySpan =
+                (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
         TracingTracer tracer = Util.getGlobalTracer();
         TracingSpan responseMediationSpan =
                 Util.startSpan(APIMgtGatewayConstants.RESPONSE_MEDIATION, responseLatencySpan, tracer);

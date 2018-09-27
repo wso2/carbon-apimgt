@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.tracing.zipkin;
+package org.wso2.carbon.apimgt.tracing;
 
 import brave.Tracing;
 import brave.opentracing.BraveTracer;
@@ -27,49 +27,59 @@ import io.opentracing.contrib.reporter.Reporter;
 import io.opentracing.contrib.reporter.TracerR;
 import io.opentracing.util.GlobalTracer;
 import io.opentracing.util.ThreadLocalScopeManager;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.tracing.OpenTracer;
+import org.wso2.carbon.apimgt.tracing.TracingConstants;
 import org.wso2.carbon.apimgt.tracing.TracingReporter;
 import org.wso2.carbon.apimgt.tracing.TracingServiceImpl;
 import zipkin2.reporter.AsyncReporter;
 import zipkin2.reporter.okhttp3.OkHttpSender;
 
-public class ZipkinTracerImpl implements OpenTracer {
+public class ZipkinTracer implements OpenTracer {
 
     private static final String NAME = "zipkin";
-    private APIManagerConfiguration configuration = new TracingServiceImpl().getConfiguration();
+    private static APIManagerConfiguration configuration = new TracingServiceImpl().getConfiguration();
 
     @Override
     public Tracer getTracer(String serviceName) {
+        String hostname = configuration.getFirstProperty(TracingConstants.ZIPKIN_CONFIG_HOST) != null ?
+                configuration.getFirstProperty(TracingConstants.ZIPKIN_CONFIG_HOST)
+                : TracingConstants.ZIPKIN_DEFAULT_HOST;
 
-        String hostname = configuration.getFirstProperty(Constants.CONFIG_HOST) != null ?
-                configuration.getFirstProperty(Constants.CONFIG_HOST) : Constants.DEFAULT_HOST;
+        int port = configuration.getFirstProperty(TracingConstants.ZIPKIN_CONFIG_PORT) != null ?
+                Integer.parseInt(configuration.getFirstProperty(TracingConstants.ZIPKIN_CONFIG_PORT))
+                : TracingConstants.ZIPKIN_DEFAULT_PORT;
 
-        int port = configuration.getFirstProperty(Constants.CONFIG_PORT) != null ?
-                Integer.parseInt(configuration.getFirstProperty(Constants.CONFIG_PORT)) : Constants.DEFAULT_PORT;
+        String apiContext = configuration.getFirstProperty(TracingConstants.CONFIG_API_CONTEXT) != null ?
+                configuration.getFirstProperty(TracingConstants.CONFIG_API_CONTEXT)
+                : TracingConstants.DEFAULT_API_CONTEXT;
 
-        String apiContext = configuration.getFirstProperty(Constants.CONFIG_API_CONTEXT) != null ?
-                configuration.getFirstProperty(Constants.CONFIG_API_CONTEXT) : Constants.DEFAULT_API_CONTEXT;
+        String tracerLogEnabled = configuration.getFirstProperty(TracingConstants.CONFIG_TRACER_LOG_ENABLED) != null ?
+                configuration.getFirstProperty(TracingConstants.CONFIG_TRACER_LOG_ENABLED)
+                : TracingConstants.DEFAULT_TRACER_LOG_ENABLED;
 
         OkHttpSender sender = OkHttpSender.create("http://" + hostname + ":" + port + apiContext);
         Tracer tracer = BraveTracer.create(Tracing.newBuilder()
                 .localServiceName(serviceName)
                 .spanReporter(AsyncReporter.builder(sender).build())
-                .propagationFactory(ExtraFieldPropagation.newFactory(B3Propagation.FACTORY, Constants.REQUEST_ID))
+                .propagationFactory(ExtraFieldPropagation.newFactory(B3Propagation.FACTORY, TracingConstants.REQUEST_ID))
                 .build());
 
-        Reporter reporter = new TracingReporter(LogFactory.getLog(Constants.TRACER));
-        Tracer tracerR = new TracerR(tracer, reporter, new ThreadLocalScopeManager());
-        GlobalTracer.register(tracerR);
+        if (tracerLogEnabled.equals("true")) {
+            Reporter reporter = new TracingReporter(LogFactory.getLog(TracingConstants.TRACER));
+            Tracer tracerR = new TracerR(tracer, reporter, new ThreadLocalScopeManager());
+            GlobalTracer.register(tracerR);
+            return tracerR;
 
-        return  tracerR;
+        } else {
+            GlobalTracer.register(tracer);
+            return tracer;
+        }
     }
 
     @Override
     public String getName() {
-
         return NAME;
     }
 }

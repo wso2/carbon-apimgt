@@ -39,15 +39,17 @@ public class TracingReporter implements Reporter {
         this.log = log;
     }
 
-    public void start(Instant timeStamp, SpanData span) {}
+    public void start(Instant timeStamp, SpanData span) {
+    }
 
     public void finish(Instant timeStamp, SpanData span) {
-        if(this.log.isTraceEnabled()) {
+        if (this.log.isTraceEnabled()) {
             this.log.trace(this.toStructuredMessage(timeStamp, span));
         }
     }
 
-    public void log(Instant timeStamp, SpanData span, Map<String, ?> fields) {}
+    public void log(Instant timeStamp, SpanData span, Map<String, ?> fields) {
+    }
 
     private String toStructuredMessage(Instant timeStamp, SpanData span) {
         try {
@@ -61,22 +63,22 @@ public class TracingReporter implements Reporter {
 
             Map.Entry map;
             Object value;
-            while(itr.hasNext()) {
-                map = (Map.Entry)itr.next();
+            while (itr.hasNext()) {
+                map = (Map.Entry) itr.next();
                 value = map.getValue();
-                if(value instanceof String) {
-                    generator.writeStringField((String)map.getKey(), (String)value);
-                } else if(value instanceof Number) {
-                    generator.writeNumberField((String)map.getKey(), ((Number)value).doubleValue());
-                } else if(value instanceof Boolean) {
-                    generator.writeBooleanField((String)map.getKey(), (Boolean)value);
+                if (value instanceof String) {
+                    generator.writeStringField((String) map.getKey(), (String) value);
+                } else if (value instanceof Number) {
+                    generator.writeNumberField((String) map.getKey(), ((Number) value).doubleValue());
+                } else if (value instanceof Boolean) {
+                    generator.writeBooleanField((String) map.getKey(), (Boolean) value);
                 }
             }
             generator.writeEndObject();
             generator.close();
             writer.close();
             return writer.toString();
-        } catch(Exception e) {
+        } catch (Exception e) {
             log.error("Error in structured message");
             return null;
         }

@@ -147,7 +147,6 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "EXS_EXCEPTION_SOFTENING_RETURN_FALSE",
             justification = "Error is sent through payload")
     public boolean handleRequest(MessageContext messageContext) {
-
         TracingSpan responseLatencySpan =
                 (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
         TracingTracer tracer = Util.getGlobalTracer();
@@ -157,7 +156,8 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         Util.baggageSet(keySpan, APIMgtGatewayConstants.REQUEST_ID,
                 (String) messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID ));
         messageContext.setProperty(APIMgtGatewayConstants.KEY_VALIDATION, keySpan);
-        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        org.apache.axis2.context.MessageContext axis2MC =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         axis2MC.setProperty(APIMgtGatewayConstants.KEY_VALIDATION, keySpan);
 
         Timer.Context context = startMetricTimer();

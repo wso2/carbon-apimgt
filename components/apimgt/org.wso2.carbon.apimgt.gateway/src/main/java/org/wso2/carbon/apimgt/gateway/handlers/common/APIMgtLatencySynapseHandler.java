@@ -35,16 +35,16 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
     private TracingTracer tracer;
 
     public APIMgtLatencySynapseHandler() {
-
-        tracer = ServiceReferenceHolder.getInstance().getTracingService().buildTracer(APIMgtGatewayConstants.SERVICE_NAME);
+        tracer = ServiceReferenceHolder.getInstance().getTracingService()
+                .buildTracer(APIMgtGatewayConstants.SERVICE_NAME);
     }
 
     @Override
     public boolean handleRequestInFlow(MessageContext messageContext) {
-
         org.apache.axis2.context.MessageContext axis2MessageContext =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-        Map headersMap = (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        Map headersMap =
+                (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         TracingSpan spanContext = Util.extract(tracer, headersMap);
 
         String requestId = UUID.randomUUID().toString();
@@ -57,7 +57,6 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 
     @Override
     public boolean handleRequestOutFlow(MessageContext messageContext) {
-
         TracingSpan parentSpan = (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
         TracingSpan backendLatencySpan = Util.startSpan(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN, parentSpan, tracer);
         messageContext.setProperty(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN, backendLatencySpan);
@@ -66,7 +65,6 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 
     @Override
     public boolean handleResponseInFlow(MessageContext messageContext) {
-
         TracingSpan backendLatencySpan =
                 (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN);
         Util.finishSpan(backendLatencySpan);
@@ -75,7 +73,6 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 
     @Override
     public boolean handleResponseOutFlow(MessageContext messageContext) {
-
         TracingSpan responseLatencySpan =
                 (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
         Util.finishSpan(responseLatencySpan);

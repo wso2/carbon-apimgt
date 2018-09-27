@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.tracing.internal;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.apimgt.tracing.TracingService;
 import org.wso2.carbon.apimgt.tracing.TracingServiceImpl;
@@ -32,13 +33,13 @@ import org.wso2.carbon.apimgt.tracing.TracingServiceImpl;
 public class TracingServiceComponent {
 
     private static final Log log = LogFactory.getLog(TracingServiceComponent.class);
+    private ServiceRegistration registration;
 
     protected void activate(ComponentContext componentContext) {
-
         try {
             log.debug("Tracing Component activated");
             BundleContext bundleContext = componentContext.getBundleContext();
-            bundleContext.registerService(TracingService.class, new TracingServiceImpl(), null);
+            registration = bundleContext.registerService(TracingService.class, new TracingServiceImpl(), null);
 
         } catch (Throwable t) {
             log.error("Error occured in tracing component activation", t);
@@ -46,8 +47,8 @@ public class TracingServiceComponent {
     }
 
     protected void deactivate(ComponentContext componentContext) {
-
         log.debug("Tracing Component deactivated");
+        registration.unregister();
     }
 
 }

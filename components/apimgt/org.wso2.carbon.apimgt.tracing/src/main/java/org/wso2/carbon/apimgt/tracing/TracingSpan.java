@@ -31,17 +31,14 @@ public class TracingSpan {
     private SpanContext spanContext;
 
     public TracingSpan(Span span) {
-
         this.span = span;
     }
 
     public TracingSpan(SpanContext spanContext) {
-
         this.spanContext = spanContext;
     }
 
     public Object getSpan() {
-
         return span == null ? spanContext : span;
     }
 }
