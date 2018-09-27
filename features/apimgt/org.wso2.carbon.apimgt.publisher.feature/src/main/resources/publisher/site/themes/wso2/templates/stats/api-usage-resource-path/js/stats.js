@@ -28,6 +28,7 @@ jagg.post("/site/blocks/stats/api-usage-resource-path/ajax/stats.jag", { action:
 
                     //day picker
                     $('#today-btn').on('click',function(){
+                        currentDay = getDate();
                         getDateTime(currentDay,currentDay-86400000);
                         isToday=true;
                         isWeek,isMonth,isDefault,isHour=false;
@@ -36,6 +37,7 @@ jagg.post("/site/blocks/stats/api-usage-resource-path/ajax/stats.jag", { action:
 
                     //hour picker
                     $('#hour-btn').on('click',function(){
+                        currentDay = getDate();
                         getDateTime(currentDay,currentDay-3600000);
                         isHour=true;
                         isWeek,isMonth,isDefault,isToday=false;
@@ -43,6 +45,7 @@ jagg.post("/site/blocks/stats/api-usage-resource-path/ajax/stats.jag", { action:
 
                     //week picker
                     $('#week-btn').on('click',function(){
+                        currentDay = getDate();
                         getDateTime(currentDay,currentDay-604800000);
                         isWeek=true;
                         isToday,isMonth,isDefault,isHour=false;
@@ -50,6 +53,7 @@ jagg.post("/site/blocks/stats/api-usage-resource-path/ajax/stats.jag", { action:
 
                     //month picker
                     $('#month-btn').on('click',function(){
+                        currentDay = getDate();
                         getDateTime(currentDay,currentDay-(604800000*4));
                         isMonth=true;
                         isWeek,isToday,isDefault,isHour=false;
@@ -119,8 +123,8 @@ jagg.post("/site/blocks/stats/api-usage-resource-path/ajax/stats.jag", { action:
 
 
 var drawAPIUsageByResourcePath = function (from, to, apiFilter) {
-    var fromDate = from;
-    var toDate = to;
+    var fromDate = convertTimeStringUTC(from);
+    var toDate = convertTimeStringUTC(to);
     jagg.post("/site/blocks/stats/api-usage-resource-path/ajax/stats.jag", { action: "getAPIUsageByResourcePath", currentLocation: currentLocation, fromDate: fromDate, toDate: toDate, apiFilter: apiFilter},
         function (json) {
             $('#spinner').hide();

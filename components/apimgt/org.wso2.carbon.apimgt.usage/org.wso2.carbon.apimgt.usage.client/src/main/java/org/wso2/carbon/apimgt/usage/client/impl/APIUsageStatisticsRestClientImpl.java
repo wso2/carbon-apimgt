@@ -29,6 +29,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDateTime;
 import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
@@ -94,6 +95,7 @@ import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -104,6 +106,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 
@@ -462,7 +465,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
                 if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
                     granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
-                } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
+                } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0
+                        || durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_WEEKS) > 0) {
                     granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
                 } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
                     granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;
@@ -1193,19 +1197,23 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                         if (apiVersionUsageDTO.getVersion().equals(fault.getApiVersion())) {
                             long requestCount = apiVersionUsageDTO.getCount();
                             double faultPercentage =
-                                    ((double) requestCount - fault.getFaultCount()) / requestCount * 100;
+                                    ((double) fault.getFaultCount()) / (requestCount + fault.getFaultCount()) * 100;
                             DecimalFormat twoDForm = new DecimalFormat("#.##");
                             NumberFormat numberFormat = NumberFormat.getInstance(Locale.getDefault());
                             try {
-                                faultPercentage =
-                                        100 - numberFormat.parse(twoDForm.format(faultPercentage)).doubleValue();
+                                faultPercentage = numberFormat.parse(twoDForm.format(faultPercentage)).doubleValue();
                             } catch (ParseException e) {
                                 handleException("Parse exception while formatting time");
                             }
                             faultyDTO.setFaultPercentage(faultPercentage);
-                            faultyDTO.setTotalRequestCount(requestCount);
+                            faultyDTO.setTotalRequestCount(requestCount + fault.getFaultCount());
                             break;
                         }
+                    }
+                    //if no success request within that period, fault percentage is 100%
+                    if (apiVersionUsageList.isEmpty()) {
+                        faultyDTO.setFaultPercentage(100);
+                        faultyDTO.setTotalRequestCount(fault.getFaultCount());
                     }
                     faultyCount.add(faultyDTO);
                 }
@@ -1358,16 +1366,16 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             throws APIMgtUsageQueryServiceClientException {
         List<APIResponseFaultCount> faultUsage = new ArrayList<APIResponseFaultCount>();
         try {
-            String granularity = APIUsageStatisticsClientConstants.MINUTES_GRANULARITY;//default granularity
+            String granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;//default granularity
 
             Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
 
             if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
-                granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
+                granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
             } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
-                granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
+                granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
             } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
-                granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;
+                granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
             }
             String query =
                     "from " + tableName + " within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate) + "L per '"
@@ -1379,7 +1387,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                             + APIUsageStatisticsClientConstants.API_NAME + ", "
                             + APIUsageStatisticsClientConstants.API_VERSION + ", "
                             + APIUsageStatisticsClientConstants.API_CREATOR + ", "
-                            + APIUsageStatisticsClientConstants.API_CONTEXT + ";";
+                            + APIUsageStatisticsClientConstants.API_CONTEXT + "  order by " 
+                            + APIUsageStatisticsClientConstants.API_NAME + " ASC ;";
             JSONObject jsonObj = APIUtil
                     .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_FAULT_SUMMARY_SIDDHI_APP,
                             query);
@@ -1964,7 +1973,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
             if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
                 granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
-            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
+            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0
+                    || durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_WEEKS) > 0) {
                 granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
             } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
                 granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;
@@ -1999,7 +2009,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                     JSONArray recordArray = (JSONArray) record;
                     if (recordArray.size() == 3) {
                         timeStamp = (Long) recordArray.get(0);
-                        time = new DateTime(timeStamp).toString(formatter);
+                        time = new DateTime(timeStamp).withZone(DateTimeZone.UTC).toString(formatter);
                         successRequestCount = (Long) recordArray.get(1);
                         throttledOutCount = (Long) recordArray.get(2);
                         throttlingData.add(new APIThrottlingOverTimeDTO(apiName, provider, (int) successRequestCount,
@@ -2038,7 +2048,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
             if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
                 granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
-            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
+            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0
+                    || durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_WEEKS) > 0) {
                 granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
             } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
                 granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;
@@ -2226,7 +2237,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
                 if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
                     granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
-                } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
+                } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0
+                        || durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_WEEKS) > 0) {
                     granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
                 } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
                     granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;
@@ -2267,7 +2279,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                         executionTimeOfAPIValues.setApiPublisher((String) recordArray.get(2));
                         executionTimeOfAPIValues.setVersion((String) recordArray.get(3));
                         timeStamp = (Long) recordArray.get(4);
-                        DateTime time = new DateTime(timeStamp);
+                        DateTime time = new DateTime(timeStamp).withZone(DateTimeZone.UTC);
                         executionTimeOfAPIValues.setYear(time.getYear());
                         executionTimeOfAPIValues.setMonth(time.getMonthOfYear());
                         executionTimeOfAPIValues.setDay(time.getDayOfMonth());
@@ -2488,16 +2500,25 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         durationBreakdown.put(APIUsageStatisticsClientConstants.DURATION_YEARS, numOfYears);
         durationBreakdown.put(APIUsageStatisticsClientConstants.DURATION_MONTHS, numOfMonths);
         durationBreakdown.put(APIUsageStatisticsClientConstants.DURATION_DAYS, numOfDays);
+        durationBreakdown.put(APIUsageStatisticsClientConstants.DURATION_WEEKS, numOfWeeks);
         durationBreakdown.put(APIUsageStatisticsClientConstants.DURATION_HOURS, numOfHours);
         durationBreakdown.put(APIUsageStatisticsClientConstants.DURATION_MINUTES, numOfMinutes);
         durationBreakdown.put(APIUsageStatisticsClientConstants.DURATION_SECONDS, numOfSeconds);
         return durationBreakdown;
     }
 
-    private long getTimestamp(String date) {
-        DateTimeFormatter formatter = DateTimeFormat
-                .forPattern(APIUsageStatisticsClientConstants.TIMESTAMP_PATTERN);
-        DateTime dateTime = formatter.parseDateTime(date);
-        return dateTime.getMillis();
+    private long getTimestamp(String date) throws APIMgtUsageQueryServiceClientException {
+       
+        SimpleDateFormat formatter = new SimpleDateFormat(APIUsageStatisticsClientConstants.TIMESTAMP_PATTERN);
+        formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+        long time = 0;
+        Date parsedDate = null;
+        try {
+            parsedDate = formatter.parse(date);
+            time = parsedDate.getTime();
+        } catch (ParseException e) {
+            handleException("Error while parsing the date ", e);
+        }
+        return time;
     }
 }

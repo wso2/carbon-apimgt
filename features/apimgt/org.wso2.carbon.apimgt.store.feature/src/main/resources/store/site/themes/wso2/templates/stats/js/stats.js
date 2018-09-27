@@ -17,3 +17,13 @@ function showNoDataAnalyticsMsg() {
             "</div>";
     $('.stat-page').append($(msg));
 }
+function getDate() {
+    var date = new Date();
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes(),date.getSeconds());
+}
+
+var convertTimeStringUTC = function(date){
+    var d = new Date(date);
+    var formattedDate = d.getUTCFullYear() + "-" + formatTimeChunk((d.getUTCMonth()+1)) + "-" + formatTimeChunk(d.getUTCDate())+" "+formatTimeChunk(d.getUTCHours())+":"+formatTimeChunk(d.getUTCMinutes());
+    return formattedDate;
+};
