@@ -366,5 +366,6 @@
     "API Gateways" : "API Gateways",
     "Micro Gateways" : "Micro Gateways",
     "Gateways" : "Gateways",
-    "DEFAULT" : "OAuth"
+    "DEFAULT" : "OAuth",
+    "Resource Hit Count": "Resource Hit Count",
 }

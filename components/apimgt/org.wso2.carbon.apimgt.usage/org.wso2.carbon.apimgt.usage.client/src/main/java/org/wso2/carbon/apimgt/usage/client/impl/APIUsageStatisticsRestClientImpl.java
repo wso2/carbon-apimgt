@@ -593,7 +593,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                                 + APIUsageStatisticsClientConstants.API_CREATOR + ", "
                                 + APIUsageStatisticsClientConstants.API_METHOD + ", "
                                 + APIUsageStatisticsClientConstants.APPLICATION_ID + ", "
-                                + APIUsageStatisticsClientConstants.API_RESOURCE_TEMPLATE + " group by "
+                                + APIUsageStatisticsClientConstants.API_RESOURCE_TEMPLATE + ", "
+                                + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + " group by "
                                 + APIUsageStatisticsClientConstants.APPLICATION_ID + ", "
                                 + APIUsageStatisticsClientConstants.API_NAME + ", "
                                 + APIUsageStatisticsClientConstants.API_CREATOR + ", "
@@ -612,7 +613,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                     JSONArray jArray = (JSONArray) jsonObj.get(APIUsageStatisticsClientConstants.RECORDS_DELIMITER);
                     for (Object record : jArray) {
                         JSONArray recordArray = (JSONArray) record;
-                        if (recordArray.size() == 5) {
+                        if (recordArray.size() == 6) {
                             apiName = (String) recordArray.get(0);
                             apiCreator = (String) recordArray.get(1);
                             apiName = apiName + " (" + apiCreator + ")";
@@ -621,11 +622,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                             apiResourceTemplate = (String) recordArray.get(4);
                             List<String> callTypeList = new ArrayList<String>();
                             callTypeList.add(apiResourceTemplate + " (" + callType + ")");
+                            List<Integer> hitCountList = new ArrayList<Integer>();
+                            long hitCount = (Long) recordArray.get(5);
+                            hitCountList.add((int) hitCount);
                             String appName = subscriberAppsMap.get(applicationId);
                             boolean found = false;
                             for (AppCallTypeDTO dto : appApiCallTypeList) {
                                 if (dto.getAppName().equals(appName)) {
-                                    dto.addToApiCallTypeArray(apiName, callTypeList);
+                                    dto.addToApiCallTypeArray(apiName, callTypeList, hitCountList);
                                     found = true;
                                     break;
                                 }
@@ -633,7 +637,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                             if (!found) {
                                 appCallTypeDTO = new AppCallTypeDTO();
                                 appCallTypeDTO.setAppName(appName);
-                                appCallTypeDTO.addToApiCallTypeArray(apiName, callTypeList);
+                                appCallTypeDTO.addToApiCallTypeArray(apiName, callTypeList, hitCountList);
                                 appApiCallTypeList.add(appCallTypeDTO);
                             }
                         }
