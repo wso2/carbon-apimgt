@@ -175,7 +175,7 @@ class Scopes extends React.Component {
                             <Typography className={classes.headline} gutterBottom variant='headline' component='h2'>
                                 <FormattedMessage
                                     id='create.scopes'
-                                    defaultMessage='Create Scopes..'
+                                    defaultMessage='Create Scopes'
                                 />
                             </Typography>
                             <Divider />
@@ -183,13 +183,15 @@ class Scopes extends React.Component {
                                 <Typography align='justify' component='p'>
                                     <FormattedMessage
                                         id='create.scope.description'
+                                        defaultMessage='Scopes enable fine-grained access control to API resources based on user roles.'
                                     />
                                 </Typography>
                             </CardContent>
                             <CardActions>
                                 <Button variant='contained' color='primary' className={classes.button}>
                                     <FormattedMessage
-                                        id='create.scope.button'
+                                        id='create.scopes'
+                                        defaultMessage='Create Scopes'
                                     />
                                 </Button>
                             </CardActions>
