@@ -88,11 +88,6 @@
 			<artifactId>span-reporter</artifactId>
 			<version>0.1.0</version>
 		</dependency>
-		<!--<dependency>-->
-			<!--<groupId>org.slf4j</groupId>-->
-			<!--<artifactId>slf4j-simple</artifactId>-->
-			<!--<version>1.7.25</version>-->
-		<!--</dependency>-->
 		<dependency>
 			<groupId>io.opentracing.contrib</groupId>
 			<artifactId>span-reporter-slf4j</artifactId>
