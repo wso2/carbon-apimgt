@@ -42,8 +42,8 @@ const styles = theme => ({
     buttonProgress: {
         color: green[500],
         position: 'relative',
-        marginTop: -20,
-        marginLeft: -50,
+        marginTop: theme.spacing.unit * 5,
+        marginLeft: theme.spacing.unit * 6.25,
     },
 });
 
@@ -165,7 +165,6 @@ class ApiCreateEndpoint extends Component {
                 <Grid item md={10}>
                     <Paper className={classes.paper}>
                         <Typography type='title' gutterBottom>
-
                             <FormattedMessage
                                 id={type === 'ws' ? 'create.new.websocket.api' : 'create.new.rest.api'}
                                 defaultMessage='Create New REST API'
