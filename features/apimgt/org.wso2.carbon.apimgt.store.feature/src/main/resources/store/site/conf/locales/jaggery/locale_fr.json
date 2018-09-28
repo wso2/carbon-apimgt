@@ -215,7 +215,7 @@
 	"The selected application does not have an access token for the selected environment. Go to the application page and generate keys.": "L'application sélectionnée n'a pas de jeton d'accès pour l'environnement sélectionné. Aller à la page de l'application et générer des clés.",
 	"September": "Septembre",
 	"Share": "Partager",
-	"Show Keys": "Montrer les clefs",
+	"Show keys": "Montrer les clefs",
 	"Sign In": "Se connecter",
 	"Sign Out": "Se déconnecter",
 	"Sign Up": "Créer son compte",

@@ -4989,8 +4989,7 @@ public class ApiMgtDAO {
             prepStmt = connection.prepareStatement(query);
             prepStmt.setString(1, workflowDTO.getStatus().toString());
             prepStmt.setString(2, workflowDTO.getWorkflowDescription());
-            prepStmt.setTimestamp(3, updatedTimeStamp);
-            prepStmt.setString(4, workflowDTO.getExternalWorkflowReference());
+            prepStmt.setString(3, workflowDTO.getExternalWorkflowReference());
 
             prepStmt.execute();
 

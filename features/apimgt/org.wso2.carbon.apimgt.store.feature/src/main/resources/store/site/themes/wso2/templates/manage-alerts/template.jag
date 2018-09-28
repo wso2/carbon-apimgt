@@ -5,18 +5,26 @@
             <h2><%=i18n.localize("Manage Alert Types")%></h2>
         </div>
         <div class="white-wrapper add-padding-4x">
-           <%
-            var error = outputs.alertTypesInformations.error;
-            if(error == false){
-                var allAlertType = outputs.alertTypesInformations.allAlertTypeJson;
-                var savedAlertTypes = outputs.alertTypesInformations.savedAlertTypeJson;
-                %>
+            <%
+                var error = outputs.alertTypesInformations.error;
+                if(error == false){
+                    var allAlertType = outputs.alertTypesInformations.allAlertTypeJson;
+                    var savedAlertTypes = outputs.alertTypesInformations.savedAlertTypeJson;
+                    var configs = outputs.reqCountConfigs;
+            %>
                     <div class="form-horizontal">
                 <%
                 for (var key in allAlertType) {
                     if (allAlertType.hasOwnProperty(key)) {
                         var isChecked;
+                        var isDisabled = "";
                         var alertType = allAlertType[key];
+
+                        // if configurable alert type is not configured, We disabled it until it is configured
+                        if ("AbnormalRequestsPerMin" == alertType) {
+                            isDisabled = configs.length > 0 ? "" : "disabled";
+                        }
+
                         for (var savedAlertTypesKey in savedAlertTypes) {
                             if (savedAlertTypes.hasOwnProperty(savedAlertTypesKey)) {
                                 if(savedAlertTypes[savedAlertTypesKey] == key) {
@@ -33,7 +41,8 @@
                                     <div class="row">
                                         <div class="col-xs-10 col-sm-10 col-lg-11">
                                             <label class="checkbox">
-                                                <input type="checkbox" title="alertTypes" id="<%=allAlertType[key]%>" value="<%=encode.forHtml(key)%>" <%=encode.forHtml(isChecked) %>>
+                                                <input type="checkbox" title="alertTypes" id="<%=allAlertType[key]%>" value="<%=encode.forHtml(key)%>" <%=encode.forHtml(isChecked)%> <%=isDisabled%>>
+
                                                 <span class="helper"><strong><%= i18n.localize(encode.forHtml(allAlertType[key])) %></strong></span>
                                                 <p><%= i18n.localize(encode.forHtml(allAlertType[key]) + "_Desc") %></p>
                                             </label>
