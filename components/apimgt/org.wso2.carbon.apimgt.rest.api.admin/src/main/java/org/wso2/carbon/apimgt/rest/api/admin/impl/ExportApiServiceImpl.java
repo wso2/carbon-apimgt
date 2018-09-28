@@ -67,7 +67,6 @@ public class ExportApiServiceImpl extends ExportApiService {
             consumer = RestApiUtil.getConsumer(username);
             FileBasedApplicationImportExportManager importExportManager = new FileBasedApplicationImportExportManager
                     (consumer, pathToExportDir);
-            String appTenant = MultitenantUtils.getTenantDomain(applicationDetails.getSubscriber().getName());
             if (importExportManager.isOwnerAvailable(appOwner)) {
                 applicationDetails = importExportManager.getApplicationDetails(appName, appOwner);
             }
@@ -76,6 +75,7 @@ public class ExportApiServiceImpl extends ExportApiService {
                 log.error(errorMsg);
                 return Response.status(Response.Status.NOT_FOUND).entity(errorMsg).build();
             } else {
+                String appTenant = MultitenantUtils.getTenantDomain(applicationDetails.getSubscriber().getName());
                 RestApiUtil.handleMigrationSpecificPermissionViolations(appTenant, username);
             }
             exportedFilePath = importExportManager.exportApplication(applicationDetails,

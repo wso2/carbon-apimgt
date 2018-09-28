@@ -32,9 +32,12 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.ExportApiService;
+import org.wso2.carbon.apimgt.rest.api.util.exception.ForbiddenException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
+
+import static org.powermock.api.mockito.PowerMockito.doThrow;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({RestApiUtil.class, APIUtil.class})
@@ -71,7 +74,7 @@ public class ExportApiServiceImplTestCase {
      *
      * @throws Exception Exception.
      */
-    @Test
+    @Test (expected = ForbiddenException.class)
     public void testExportApplicationsGetCrossTenantError() throws Exception {
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
@@ -82,8 +85,10 @@ public class ExportApiServiceImplTestCase {
         Mockito.when(apiConsumer.getSubscriber("admin@hr.lk")).thenReturn(subscriber);
         Mockito.when(APIUtil.getApplicationId("sampleApp", "admin@hr.lk")).thenReturn(1);
         Mockito.when(apiConsumer.getApplicationById(1)).thenReturn(testApp);
-        Response response = exportApiService.exportApplicationsGet("sampleApp", "admin@hr.lk");
-        Assert.assertEquals(response.getStatus(), 403);
+
+        PowerMockito.doThrow(new ForbiddenException()).when(RestApiUtil.class);
+        RestApiUtil.handleMigrationSpecificPermissionViolations("hr.lk","admin");//this do define the mocking method
+        exportApiService.exportApplicationsGet("sampleApp", "admin@hr.lk");
     }
 
     /**
