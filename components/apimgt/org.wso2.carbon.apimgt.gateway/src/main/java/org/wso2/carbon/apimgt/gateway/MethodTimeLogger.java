@@ -33,7 +33,7 @@ import org.wso2.carbon.utils.CarbonUtils;
 @Aspect
 public class MethodTimeLogger
 {
-    private static final Log log = LogFactory.getLog("timing");
+    private static final Log log = LogFactory.getLog("correlation");
 
     /**
      * This is an AspectJ pointcut defined to apply to all methods within the package,

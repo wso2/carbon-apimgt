@@ -37,7 +37,7 @@ import java.util.Set;
 import javax.xml.stream.XMLStreamException;
 
 public class LogsHandler extends AbstractSynapseHandler {
-    private static final Log log = LogFactory.getLog("timing");
+    private static final Log log = LogFactory.getLog("correlation");
     private String apiName = null;
     private String apiCTX = null;
     private String apiMethod = null;
