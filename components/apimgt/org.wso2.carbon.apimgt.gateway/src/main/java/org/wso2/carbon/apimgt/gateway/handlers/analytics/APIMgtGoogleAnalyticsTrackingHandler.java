@@ -71,8 +71,7 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
 
 	@Override
 	public boolean handleRequest(MessageContext msgCtx) {
-
-        TracingSpan responseLatencySpan = (TracingSpan) msgCtx.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+	    TracingSpan responseLatencySpan = (TracingSpan) msgCtx.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
         TracingTracer tracer = Util.getGlobalTracer();
         TracingSpan span = Util.startSpan(APIMgtGatewayConstants.GOOGLE_ANALYTICS_HANDLER, responseLatencySpan, tracer);
 		if (configKey == null) {

@@ -360,7 +360,7 @@ public class APIKeyValidator {
         try {
             TracingSpan keySpan = (TracingSpan) synCtx.getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
             TracingTracer tracer = Util.getGlobalTracer();
-            TracingSpan span = Util.startSpan(APIMgtGatewayConstants.FIND_MATCHING_VERB, keySpan ,tracer);
+            TracingSpan span = Util.startSpan(APIMgtGatewayConstants.FIND_MATCHING_VERB, keySpan, tracer);
             verb = findMatchingVerb(synCtx);
             Util.finishSpan(span);
             if (verb != null) {
@@ -579,7 +579,8 @@ public class APIKeyValidator {
                 log.debug("Could not find API object in cache for key: " + apiCacheKey);
             }
             TracingSpan keySpan = (TracingSpan) synCtx.getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
-            TracingSpan apiInfoDTOSpan = Util.startSpan(APIMgtGatewayConstants.DO_GET_API_INFO_DTO, keySpan, Util.getGlobalTracer());
+            TracingSpan apiInfoDTOSpan =
+                    Util.startSpan(APIMgtGatewayConstants.DO_GET_API_INFO_DTO, keySpan, Util.getGlobalTracer());
             apiInfoDTO = doGetAPIInfo(apiContext, apiVersion);
             Util.finishSpan(apiInfoDTOSpan);
 

@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.tracing;
 
-public class TracingConstants {
+class TracingConstants {
 
     /**
      * OpenTracer Constants
@@ -30,38 +30,38 @@ public class TracingConstants {
     static final String LATENCY = "Latency";
     static final String OPERATION_NAME = "Operation";
     static final String TAGS = "Tags";
-    public static final String TRACER = "tracer";
-    public static final String CONFIG_TRACER_LOG_ENABLED = "OpenTracer.TracerLogEnabled";
-    public static final String DEFAULT_TRACER_LOG_ENABLED = "false";
+    static final String TRACER = "tracer";
+    static final String CONFIG_TRACER_LOG_ENABLED = "OpenTracer.TracerLogEnabled";
+    static final String DEFAULT_TRACER_LOG_ENABLED = "false";
 
     /**
      * Jaeger Tracer Constants
      * */
-    public static final String JAEGER = "JAEGER";
-    public static final String JAEGER_CONFIG_PORT = "OpenTracer.Port";
-    public static final String JAEGER_CONFIG_HOST = "OpenTracer.Hostname";
-    public static final String CONFIG_SAMPLER_PARAM = "OpenTracer.SamplerParam";
-    public static final String CONFIG_SAMPLER_TYPE = "OpenTracer.SamplerType";
-    public static final String CONFIG_REPORTER_FLUSH_INTERVAL = "OpenTracer.ReporterFlushInterval";
-    public static final String CONFIG_REPORTER_BUFFER_SIZE = "OpenTracer.ReporterBufferSize";
+    static final String JAEGER = "JAEGER";
+    static final String JAEGER_CONFIG_PORT = "OpenTracer.Port";
+    static final String JAEGER_CONFIG_HOST = "OpenTracer.Hostname";
+    static final String CONFIG_SAMPLER_PARAM = "OpenTracer.SamplerParam";
+    static final String CONFIG_SAMPLER_TYPE = "OpenTracer.SamplerType";
+    static final String CONFIG_REPORTER_FLUSH_INTERVAL = "OpenTracer.ReporterFlushInterval";
+    static final String CONFIG_REPORTER_BUFFER_SIZE = "OpenTracer.ReporterBufferSize";
 
-    public static final int JAEGER_DEFAULT_PORT = 5775;
-    public static final String JAEGER_DEFAULT_HOST = "localhost";
-    public static final int DEFAULT_SAMPLER_PARAM = 1;
-    public static final String DEFAULT_SAMPLER_TYPE = "const";
-    public static final int DEFAULT_REPORTER_FLUSH_INTERVAL = 1000;
-    public static final int DEFAULT_REPORTER_BUFFER_SIZE = 1000;
+    static final int JAEGER_DEFAULT_PORT = 5775;
+    static final String JAEGER_DEFAULT_HOST = "localhost";
+    static final int DEFAULT_SAMPLER_PARAM = 1;
+    static final String DEFAULT_SAMPLER_TYPE = "const";
+    static final int DEFAULT_REPORTER_FLUSH_INTERVAL = 1000;
+    static final int DEFAULT_REPORTER_BUFFER_SIZE = 1000;
 
     /**
      * Zipkin Constants
      * */
-    public static final String ZIPKIN = "ZIPKIN";
-    public static final String ZIPKIN_CONFIG_PORT = "OpenTracer.Port";
-    public static final String ZIPKIN_CONFIG_HOST = "OpenTracer.Hostname";
-    public static final String CONFIG_API_CONTEXT = "OpenTracer.APIContext";
-    public static final String REQUEST_ID = "request-id";
+    static final String ZIPKIN = "ZIPKIN";
+    static final String ZIPKIN_CONFIG_PORT = "OpenTracer.Port";
+    static final String ZIPKIN_CONFIG_HOST = "OpenTracer.Hostname";
+    static final String CONFIG_API_CONTEXT = "OpenTracer.APIContext";
+    static final String REQUEST_ID = "request-id";
 
-    public static final int ZIPKIN_DEFAULT_PORT = 9411;
-    public static final String ZIPKIN_DEFAULT_HOST = "localhost";
-    public static final String DEFAULT_API_CONTEXT = "/api/v2/spans";
+    static final int ZIPKIN_DEFAULT_PORT = 9411;
+    static final String ZIPKIN_DEFAULT_HOST = "localhost";
+    static final String DEFAULT_API_CONTEXT = "/api/v2/spans";
 }

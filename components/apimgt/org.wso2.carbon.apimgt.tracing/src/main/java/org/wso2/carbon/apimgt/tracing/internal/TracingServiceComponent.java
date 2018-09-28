@@ -40,7 +40,6 @@ public class TracingServiceComponent {
             log.debug("Tracing Component activated");
             BundleContext bundleContext = componentContext.getBundleContext();
             registration = bundleContext.registerService(TracingService.class, new TracingServiceImpl(), null);
-
         } catch (Throwable t) {
             log.error("Error occured in tracing component activation", t);
         }
@@ -50,5 +49,4 @@ public class TracingServiceComponent {
         log.debug("Tracing Component deactivated");
         registration.unregister();
     }
-
 }

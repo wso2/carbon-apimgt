@@ -29,13 +29,12 @@ import io.opentracing.util.GlobalTracer;
 import io.opentracing.util.ThreadLocalScopeManager;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.tracing.OpenTracer;
-import org.wso2.carbon.apimgt.tracing.TracingConstants;
-import org.wso2.carbon.apimgt.tracing.TracingReporter;
-import org.wso2.carbon.apimgt.tracing.TracingServiceImpl;
 import zipkin2.reporter.AsyncReporter;
 import zipkin2.reporter.okhttp3.OkHttpSender;
 
+/**
+ * Class for getting Zipkin tracer from reading configuration file
+ * */
 public class ZipkinTracer implements OpenTracer {
 
     private static final String NAME = "zipkin";
@@ -71,7 +70,6 @@ public class ZipkinTracer implements OpenTracer {
             Tracer tracerR = new TracerR(tracer, reporter, new ThreadLocalScopeManager());
             GlobalTracer.register(tracerR);
             return tracerR;
-
         } else {
             GlobalTracer.register(tracer);
             return tracer;

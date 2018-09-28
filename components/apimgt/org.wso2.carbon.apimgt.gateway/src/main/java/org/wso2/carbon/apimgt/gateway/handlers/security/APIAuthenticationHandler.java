@@ -44,8 +44,6 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.tracing.OpenTracer;
-import org.wso2.carbon.apimgt.tracing.TracingService;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
@@ -154,7 +152,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         Util.setTag(keySpan, APIMgtGatewayConstants.REQUEST_ID,
                 (String) messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID));
         Util.baggageSet(keySpan, APIMgtGatewayConstants.REQUEST_ID,
-                (String) messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID ));
+                (String) messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID));
         messageContext.setProperty(APIMgtGatewayConstants.KEY_VALIDATION, keySpan);
         org.apache.axis2.context.MessageContext axis2MC =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();

@@ -70,8 +70,5 @@ public class TracingServiceImpl implements TracingService {
         return null;
     }
 
-    public APIManagerConfiguration getConfiguration() {
-        return configuration;
-    }
-
+    public APIManagerConfiguration getConfiguration() { return configuration; }
 }

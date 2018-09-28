@@ -68,6 +68,7 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
             this.initializeDataPublisher();
             Util.finishSpan(span);
         }
+
         try {
             if (!enabled) {
                 return true;

@@ -23,7 +23,6 @@ import io.opentracing.Tracer;
 /**
  * A Wrapper class for io.opentracing Tracer
  */
-
 public class TracingTracer {
 
     private Tracer tracer;
@@ -32,7 +31,7 @@ public class TracingTracer {
         this.tracer = tracer;
     }
 
-    public Tracer getTracingTracer() {
+    Tracer getTracingTracer() {
         return this.tracer;
     }
 }

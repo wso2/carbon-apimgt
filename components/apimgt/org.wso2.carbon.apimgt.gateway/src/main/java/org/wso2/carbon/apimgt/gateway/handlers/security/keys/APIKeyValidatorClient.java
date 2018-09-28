@@ -28,12 +28,10 @@ import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.wso2.carbon.apimgt.api.dto.xsd.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.xsd.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.gateway.handlers.common.APIMgtLatencySynapseHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -41,7 +39,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.keymgt.stub.validator.APIKeyValidationServiceStub;
-import org.wso2.carbon.apimgt.tracing.TracingServiceImpl;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
@@ -103,7 +100,6 @@ public class APIKeyValidatorClient {
             List headerList = (List) keyValidationServiceStub._getServiceClient().getOptions().getProperty(org.apache.axis2.transport.http.HTTPConstants.HTTP_HEADERS);
             Map headers = (Map) MessageContext.getCurrentMessageContext().getProperty(
                     org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-
             TracingSpan keySpan = (TracingSpan) MessageContext.getCurrentMessageContext()
                     .getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
             TracingTracer tracer = Util.getGlobalTracer();
@@ -113,7 +109,7 @@ public class APIKeyValidatorClient {
                 span = Util.startSpan(APIMgtGatewayConstants.KEY_VALIDATION_FROM_GATEWAY_NODE, keySpan, tracer);
                 Util.inject(keySpan, tracer, tracerSpecificCarrier);
             }
-            for (Map.Entry<String, String> entry: tracerSpecificCarrier.entrySet()) {
+            for (Map.Entry<String, String> entry : tracerSpecificCarrier.entrySet()) {
                 headerList.add(new Header(entry.getKey(), entry.getValue()));
             }
             if (headers != null) {

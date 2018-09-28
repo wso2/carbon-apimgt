@@ -73,6 +73,7 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 
     @Override
     public boolean handleResponseOutFlow(MessageContext messageContext) {
+
         TracingSpan responseLatencySpan =
                 (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
         Util.finishSpan(responseLatencySpan);

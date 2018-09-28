@@ -26,11 +26,10 @@ import io.opentracing.util.GlobalTracer;
 import io.opentracing.util.ThreadLocalScopeManager;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.tracing.OpenTracer;
-import org.wso2.carbon.apimgt.tracing.TracingConstants;
-import org.wso2.carbon.apimgt.tracing.TracingReporter;
-import org.wso2.carbon.apimgt.tracing.TracingServiceImpl;
 
+/**
+ * Class for getting Jaeger tracer from reading configuration file
+ * */
 public class JaegerTracer implements OpenTracer {
 
     private static final String NAME = "jaeger";
@@ -54,7 +53,8 @@ public class JaegerTracer implements OpenTracer {
                 Float.parseFloat(configuration.getFirstProperty(TracingConstants.CONFIG_SAMPLER_PARAM))
                 : TracingConstants.DEFAULT_SAMPLER_PARAM;
 
-        int reporterFlushInterval = configuration.getFirstProperty(TracingConstants.CONFIG_REPORTER_FLUSH_INTERVAL) != null ?
+        int reporterFlushInterval =
+                configuration.getFirstProperty(TracingConstants.CONFIG_REPORTER_FLUSH_INTERVAL) != null ?
                 Integer.parseInt(configuration.getFirstProperty(TracingConstants.CONFIG_REPORTER_FLUSH_INTERVAL))
                 : TracingConstants.DEFAULT_REPORTER_FLUSH_INTERVAL;
 
@@ -80,12 +80,12 @@ public class JaegerTracer implements OpenTracer {
 
         Tracer tracer = new Configuration(serviceName).withSampler(samplerConfig)
                 .withReporter(reporterConfig).getTracer();
+
         if (tracerLogEnabled.equals("true")) {
             Reporter reporter = new TracingReporter(LogFactory.getLog(TracingConstants.TRACER));
             Tracer tracerR = new TracerR(tracer, reporter, new ThreadLocalScopeManager());
             GlobalTracer.register(tracerR);
             return tracerR;
-
         } else {
             GlobalTracer.register(tracer);
             return tracer;
@@ -94,7 +94,6 @@ public class JaegerTracer implements OpenTracer {
 
     @Override
     public String getName() {
-
         return NAME;
     }
 }

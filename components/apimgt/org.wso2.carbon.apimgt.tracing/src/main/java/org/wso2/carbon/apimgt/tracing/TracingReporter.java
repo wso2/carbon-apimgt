@@ -50,7 +50,7 @@ public class TracingReporter implements Reporter {
 
     public void log(Instant timeStamp, SpanData span, Map<String, ?> fields) {
     }
-
+    //method for stucturing the tracer log format
     private String toStructuredMessage(Instant timeStamp, SpanData span) {
         try {
             StringWriter writer = new StringWriter();

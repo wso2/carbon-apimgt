@@ -64,8 +64,6 @@ import java.util.*;
 public class APIKeyValidationService extends AbstractAdmin {
     private static final Log log = LogFactory.getLog(APIKeyValidationService.class);
     private static KeyValidationHandler keyValidationHandler;
-    private  TracingSpan validateMainSpan;
-    private  TracingTracer tracer = Util.getGlobalTracer();
 
     public APIKeyValidationService() {
         try {
@@ -105,6 +103,9 @@ public class APIKeyValidationService extends AbstractAdmin {
                                                String matchingResource, String httpVerb)
             throws APIKeyMgtException, APIManagementException {
 
+        TracingSpan validateMainSpan = null;
+        TracingTracer tracer = Util.getGlobalTracer();
+
         Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "VALIDATE_MAIN"));
         Timer.Context timerContext = timer.start();
@@ -140,6 +141,7 @@ public class APIKeyValidationService extends AbstractAdmin {
         } catch (AxisFault axisFault) {
             throw new APIKeyMgtException("Error while building response messageContext: " + axisFault.getLocalizedMessage());
         }
+
         if (log.isDebugEnabled()) {
             String logMsg = "KeyValidation request from gateway: requestTime= "
                     + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()) + " , for:"
@@ -160,7 +162,8 @@ public class APIKeyValidationService extends AbstractAdmin {
         validationContext.setValidationInfoDTO(new APIKeyValidationInfoDTO());
         validationContext.setVersion(version);
 
-        TracingSpan getAccessTokenCacheSpan = Util.startSpan(TracingConstants.GET_ACCESS_TOKEN_CACHE_KEY, validateMainSpan,tracer);
+        TracingSpan getAccessTokenCacheSpan =
+                Util.startSpan(TracingConstants.GET_ACCESS_TOKEN_CACHE_KEY, validateMainSpan, tracer);
         String cacheKey = APIUtil.getAccessTokenCacheKey(accessToken,
                                                          context, version, matchingResource, httpVerb, requiredAuthenticationLevel);
 
@@ -193,7 +196,8 @@ public class APIKeyValidationService extends AbstractAdmin {
             Timer timer3 = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                     APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "VALIDATE_SUBSCRIPTION"));
             Timer.Context timerContext3 = timer3.start();
-            TracingSpan validateSubscriptionSpan = Util.startSpan(TracingConstants.VALIDATE_SUBSCRIPTION, validateMainSpan, tracer);
+            TracingSpan validateSubscriptionSpan =
+                    Util.startSpan(TracingConstants.VALIDATE_SUBSCRIPTION, validateMainSpan, tracer);
             state = keyValidationHandler.validateSubscription(validationContext);
             timerContext3.stop();
             Util.finishSpan(validateSubscriptionSpan);
@@ -233,7 +237,7 @@ public class APIKeyValidationService extends AbstractAdmin {
 
         TracingSpan keyValResponseSpan =
                 Util.startSpan(TracingConstants.PUBLISHING_KEY_VALIDATION_RESPONSE, validateMainSpan, tracer);
-            if (log.isDebugEnabled() && axis2MessageContext != null) {
+        if (log.isDebugEnabled() && axis2MessageContext != null) {
             logMessageDetails(axis2MessageContext, validationContext.getValidationInfoDTO());
         }
 
@@ -242,7 +246,6 @@ public class APIKeyValidationService extends AbstractAdmin {
             log.debug("KeyValidation response from keymanager to gateway for access token:" + accessToken + " at "
                     + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
         }
-
         Util.finishSpan(keyValResponseSpan);
         timerContext.stop();
         if(validateMainSpan != null) {
