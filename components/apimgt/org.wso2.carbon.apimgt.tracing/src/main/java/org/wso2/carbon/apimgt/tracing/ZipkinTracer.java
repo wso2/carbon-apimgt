@@ -1,12 +1,12 @@
 /*
- *  Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
- *  WSO2 Inc. licenses this file to you under the Apache License,
- *  Version 2.0 (the "License"); you may not use this file except
- *  in compliance with the License.
- *  You may obtain a copy of the License at
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -54,9 +54,10 @@ public class ZipkinTracer implements OpenTracer {
                 configuration.getFirstProperty(TracingConstants.CONFIG_API_CONTEXT)
                 : TracingConstants.DEFAULT_API_CONTEXT;
 
-        String tracerLogEnabled = configuration.getFirstProperty(TracingConstants.CONFIG_TRACER_LOG_ENABLED) != null ?
+        boolean tracerLogEnabled =
+                Boolean.parseBoolean(configuration.getFirstProperty(TracingConstants.CONFIG_TRACER_LOG_ENABLED) != null ?
                 configuration.getFirstProperty(TracingConstants.CONFIG_TRACER_LOG_ENABLED)
-                : TracingConstants.DEFAULT_TRACER_LOG_ENABLED;
+                : TracingConstants.DEFAULT_TRACER_LOG_ENABLED);
 
         OkHttpSender sender = OkHttpSender.create("http://" + hostname + ":" + port + apiContext);
         Tracer tracer = BraveTracer.create(Tracing.newBuilder()
@@ -65,7 +66,7 @@ public class ZipkinTracer implements OpenTracer {
                 .propagationFactory(ExtraFieldPropagation.newFactory(B3Propagation.FACTORY, TracingConstants.REQUEST_ID))
                 .build());
 
-        if (tracerLogEnabled.equals("true")) {
+        if (tracerLogEnabled) {
             Reporter reporter = new TracingReporter(LogFactory.getLog(TracingConstants.TRACER));
             Tracer tracerR = new TracerR(tracer, reporter, new ThreadLocalScopeManager());
             GlobalTracer.register(tracerR);

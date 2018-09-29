@@ -41,42 +41,49 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 
     @Override
     public boolean handleRequestInFlow(MessageContext messageContext) {
-        org.apache.axis2.context.MessageContext axis2MessageContext =
-                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-        Map headersMap =
-                (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-        TracingSpan spanContext = Util.extract(tracer, headersMap);
+        if (tracer != null) {
+            org.apache.axis2.context.MessageContext axis2MessageContext =
+                    ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+            Map headersMap =
+                    (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+            TracingSpan spanContext = Util.extract(tracer, headersMap);
 
-        String requestId = UUID.randomUUID().toString();
-        messageContext.setProperty(APIMgtGatewayConstants.REQUEST_ID, requestId);
-        TracingSpan responseLatencySpan = Util.startSpan(APIMgtGatewayConstants.RESPONSE_LATENCY, spanContext, tracer);
-        Util.setTag(responseLatencySpan, APIMgtGatewayConstants.REQUEST_ID, requestId);
-        messageContext.setProperty(APIMgtGatewayConstants.RESPONSE_LATENCY, responseLatencySpan);
+            String requestId = UUID.randomUUID().toString();
+            messageContext.setProperty(APIMgtGatewayConstants.REQUEST_ID, requestId);
+            TracingSpan responseLatencySpan = Util.startSpan(APIMgtGatewayConstants.RESPONSE_LATENCY, spanContext, tracer);
+            Util.setTag(responseLatencySpan, APIMgtGatewayConstants.REQUEST_ID, requestId);
+            messageContext.setProperty(APIMgtGatewayConstants.RESPONSE_LATENCY, responseLatencySpan);
+        }
         return true;
     }
 
     @Override
     public boolean handleRequestOutFlow(MessageContext messageContext) {
-        TracingSpan parentSpan = (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
-        TracingSpan backendLatencySpan = Util.startSpan(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN, parentSpan, tracer);
-        messageContext.setProperty(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN, backendLatencySpan);
+        if (tracer != null) {
+            TracingSpan parentSpan = (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+            TracingSpan backendLatencySpan = Util.startSpan(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN, parentSpan, tracer);
+            messageContext.setProperty(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN, backendLatencySpan);
+        }
         return true;
     }
 
     @Override
     public boolean handleResponseInFlow(MessageContext messageContext) {
-        TracingSpan backendLatencySpan =
-                (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN);
-        Util.finishSpan(backendLatencySpan);
+        if (tracer != null) {
+            TracingSpan backendLatencySpan =
+                    (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN);
+            Util.finishSpan(backendLatencySpan);
+        }
         return true;
     }
 
     @Override
     public boolean handleResponseOutFlow(MessageContext messageContext) {
-
-        TracingSpan responseLatencySpan =
-                (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
-        Util.finishSpan(responseLatencySpan);
+        if (tracer != null) {
+            TracingSpan responseLatencySpan =
+                    (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+            Util.finishSpan(responseLatencySpan);
+        }
         return true;
     }
 

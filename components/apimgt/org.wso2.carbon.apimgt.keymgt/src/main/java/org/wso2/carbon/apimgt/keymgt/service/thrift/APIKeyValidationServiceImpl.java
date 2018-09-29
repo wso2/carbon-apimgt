@@ -17,7 +17,6 @@
 */
 package org.wso2.carbon.apimgt.keymgt.service.thrift;
 
-import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
@@ -28,9 +27,6 @@ import org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyValidationService;
 import org.wso2.carbon.apimgt.impl.generated.thrift.APIManagementException;
 import org.wso2.carbon.apimgt.impl.generated.thrift.URITemplate;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
-import org.wso2.carbon.apimgt.tracing.TracingSpan;
-import org.wso2.carbon.apimgt.tracing.TracingTracer;
-import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.identity.thrift.authentication.ThriftAuthenticatorService;

@@ -59,15 +59,14 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
     }
 
     public boolean mediate(MessageContext mc) {
-
+        TracingSpan responseLatencySpan = (TracingSpan) mc.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+        TracingTracer tracer = Util.getGlobalTracer();
+        TracingSpan span =
+                Util.startSpan(APIMgtGatewayConstants.API_MGT_RESPONSE_HANDLER, responseLatencySpan, tracer);
         if (publisher == null) {
-            TracingSpan responseLatencySpan = (TracingSpan) mc.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
-            TracingTracer tracer = Util.getGlobalTracer();
-            TracingSpan span =
-                    Util.startSpan(APIMgtGatewayConstants.API_MGT_RESPONSE_HANDLER, responseLatencySpan, tracer);
             this.initializeDataPublisher();
-            Util.finishSpan(span);
         }
+        Util.finishSpan(span);
 
         try {
             if (!enabled) {
