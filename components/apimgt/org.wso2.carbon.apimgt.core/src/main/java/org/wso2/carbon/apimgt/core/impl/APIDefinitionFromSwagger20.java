@@ -129,7 +129,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         }
 
         if (nameSpace != null && localConfigMap.containsKey(nameSpace) && localConfigMap.get(nameSpace).isEmpty()) {
-            populateConfigMapForScopes(resourceConfigsJSON, nameSpace);
+            populateConfigMapForScope(resourceConfigsJSON, nameSpace);
         }
 
         String resourceConfig = verb + "_" + apiPrefix + pathTemplate;
@@ -139,43 +139,6 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         return null;
     }
 
-    /*
-     * This method populates resource to scope mappings into localConfigMap
-     *
-     * @param swagger swagger oc of the apis
-     * @param String namespacee unigue identifier of the api
-     *
-     * */
-    private void populateConfigMapForScopes(Swagger swagger, String namespace) {
-
-        Map<String, String> configMap = ServiceReferenceHolder.getInstance().getRestAPIConfigurationMap(namespace);
-        //update local cache with configs defined in configuration file(dep.yaml)
-        if (!localConfigMap.containsKey(namespace)) {
-            localConfigMap.put(namespace, new ConcurrentHashMap<>());
-        }
-        if (configMap != null) {
-            localConfigMap.get(namespace).putAll(configMap);
-        }
-        //update local cache with the resource to scope mapping read from swagger
-        if (swagger != null) {
-            for (Map.Entry<String, Path> entry : swagger.getPaths().entrySet()) {
-                Path resource = entry.getValue();
-                Map<HttpMethod, Operation> operationsMap = resource.getOperationMap();
-                for (Map.Entry<HttpMethod, Operation> httpverbEntry : operationsMap.entrySet()) {
-                    if (httpverbEntry.getValue().getVendorExtensions().size() > 0 && httpverbEntry.getValue()
-                            .getVendorExtensions().get(APIMgtConstants.SWAGGER_X_SCOPE) != null) {
-                        String path = httpverbEntry.getKey() + "_" + entry.getKey();
-                        if (!localConfigMap.get(namespace).containsKey(path)) {
-                            localConfigMap.get(namespace).put(path,
-                                    httpverbEntry.getValue().getVendorExtensions().get(APIMgtConstants.SWAGGER_X_SCOPE)
-                                            .toString());
-                        }
-                    }
-
-                }
-            }
-        }
-    }
 
     /**
      * This method populates resource to scope mappings into localConfigMap
@@ -604,7 +567,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
                 }
             } else {
                 // rest api resource to scope mapping configurations have not been loaded.hence, populating
-                populateConfigMapForScopes(swagger, nameSpace);
+                populateConfigMapForScope(swagger, nameSpace);
             }
             if (securityHeaderScopes == null || StringUtils.isEmpty(securityHeaderScopes)) {
                 //security header is not found in deployment.yaml.hence, reading from swagger
