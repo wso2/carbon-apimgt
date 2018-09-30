@@ -86,6 +86,9 @@ public class OAuthAuthenticator implements Authenticator {
     public boolean authenticate(MessageContext synCtx) throws APISecurityException {
         String apiKey = null;
         boolean defaultVersionInvoked = false;
+        TracingSpan getClientDomainSpan = null;
+        TracingSpan authenticationSchemeSpan = null;
+        TracingSpan keyInfo = null;
         Map headers = (Map) ((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
 
@@ -119,12 +122,17 @@ public class OAuthAuthenticator implements Authenticator {
         String httpMethod = (String)((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(Constants.Configuration.HTTP_METHOD);
 
+        Boolean tracingEnabled = Boolean.valueOf(ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
+                .getFirstProperty(APIMgtGatewayConstants.TRACING_ENABLED));
         TracingSpan keySpan = (TracingSpan) synCtx.getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
         TracingTracer tracer = Util.getGlobalTracer();
-        TracingSpan getClientDomainSpan = Util.startSpan(APIMgtGatewayConstants.GET_CLIENT_DOMAIN, keySpan, tracer);
+        if (tracingEnabled) {
+            getClientDomainSpan = Util.startSpan(APIMgtGatewayConstants.GET_CLIENT_DOMAIN, keySpan, tracer);
+        }
         String clientDomain = getClientDomain(synCtx);
-        Util.finishSpan(getClientDomainSpan);
-
+        if (tracingEnabled) {
+            Util.finishSpan(getClientDomainSpan);
+        }
         if(log.isDebugEnabled() && null != clientDomain) {
             log.debug("Received Client Domain ".concat(clientDomain));
         }
@@ -135,10 +143,14 @@ public class OAuthAuthenticator implements Authenticator {
         org.apache.axis2.context.MessageContext axis2MessageCtx = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
         org.apache.axis2.context.MessageContext.setCurrentMessageContext(axis2MessageCtx);
 
-        TracingSpan authenticationSchemeSpan =
-                Util.startSpan(APIMgtGatewayConstants.GET_RESOURCE_AUTHENTICATION_SCHEME, keySpan, tracer);
+        if (tracingEnabled) {
+            authenticationSchemeSpan =
+                    Util.startSpan(APIMgtGatewayConstants.GET_RESOURCE_AUTHENTICATION_SCHEME, keySpan, tracer);
+        }
         String authenticationScheme = getAPIKeyValidator().getResourceAuthenticationScheme(synCtx);
-        Util.finishSpan(authenticationSchemeSpan);
+        if (tracingEnabled) {
+            Util.finishSpan(authenticationSchemeSpan);
+        }
         context.stop();
         APIKeyValidationInfoDTO info;
         if(APIConstants.AUTH_NO_AUTHENTICATION.equals(authenticationScheme)){
@@ -215,10 +227,14 @@ public class OAuthAuthenticator implements Authenticator {
                     APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "GET_KEY_VALIDATION_INFO"));
             context = timer.start();
 
-            TracingSpan keyInfo = Util.startSpan(APIMgtGatewayConstants.GET_KEY_VALIDATION_INFO, keySpan, tracer);
+            if (tracingEnabled) {
+                keyInfo = Util.startSpan(APIMgtGatewayConstants.GET_KEY_VALIDATION_INFO, keySpan, tracer);
+            }
             info = getAPIKeyValidator().getKeyValidationInfo(apiContext, apiKey, apiVersion, authenticationScheme, clientDomain,
                     matchingResource, httpMethod, defaultVersionInvoked);
-            Util.finishSpan(keyInfo);
+            if (tracingEnabled) {
+                Util.finishSpan(keyInfo);
+            }
             context.stop();
             synCtx.setProperty(APIMgtGatewayConstants.APPLICATION_NAME, info.getApplicationName());
             synCtx.setProperty(APIMgtGatewayConstants.END_USER_NAME, info.getEndUserName());

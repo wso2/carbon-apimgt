@@ -118,11 +118,11 @@ public class APIMgtGatewayConstants {
     public static final String CORS_REQUEST_HANDLER = "API:CORS_Request_Handler";
     public static final String THROTTLE_LATENCY = "API:Throttle_Latency";
     public static final String DO_GET_API_INFO_DTO = "API:Do_Get_API_Info_dto()";
-    public static final String SET_API_PARAMETERS_TO_MESSAGE_CONTEXT = "API:Set_API_Parameters_To_Message_Context()";
     public static final String API_MGT_RESPONSE_HANDLER = "API:API_MGT_Response_Handler";
     public static final String GOOGLE_ANALYTICS_HANDLER = "API:Google_Analytics_Handler";
     public static final String API_MGT_USAGE_HANDLER = "API:API_Mgt_Usage_Handler";
     public static final String GET_ALL_URI_TEMPLATES = "API:GET_ALL_URI_TEMPLATES()";
+    public static final String TRACING_ENABLED = "OpenTracer.Enabled";
 
 }
 

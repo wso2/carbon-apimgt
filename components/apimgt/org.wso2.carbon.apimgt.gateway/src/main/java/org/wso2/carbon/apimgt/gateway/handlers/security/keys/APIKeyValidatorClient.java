@@ -100,17 +100,21 @@ public class APIKeyValidatorClient {
             List headerList = (List) keyValidationServiceStub._getServiceClient().getOptions().getProperty(org.apache.axis2.transport.http.HTTPConstants.HTTP_HEADERS);
             Map headers = (Map) MessageContext.getCurrentMessageContext().getProperty(
                     org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-            TracingSpan keySpan = (TracingSpan) MessageContext.getCurrentMessageContext()
-                    .getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
-            TracingTracer tracer = Util.getGlobalTracer();
-            Map<String, String> tracerSpecificCarrier = new HashMap<>();
             TracingSpan span = null;
-            if (keySpan != null) {
-                span = Util.startSpan(APIMgtGatewayConstants.KEY_VALIDATION_FROM_GATEWAY_NODE, keySpan, tracer);
-                Util.inject(keySpan, tracer, tracerSpecificCarrier);
-            }
-            for (Map.Entry<String, String> entry : tracerSpecificCarrier.entrySet()) {
-                headerList.add(new Header(entry.getKey(), entry.getValue()));
+            Boolean tracingEnabled = Boolean.valueOf(ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
+                    .getFirstProperty(APIMgtGatewayConstants.TRACING_ENABLED));
+            if (tracingEnabled) {
+                TracingSpan keySpan = (TracingSpan) MessageContext.getCurrentMessageContext()
+                        .getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
+                TracingTracer tracer = Util.getGlobalTracer();
+                Map<String, String> tracerSpecificCarrier = new HashMap<>();
+                if (keySpan != null) {
+                    span = Util.startSpan(APIMgtGatewayConstants.KEY_VALIDATION_FROM_GATEWAY_NODE, keySpan, tracer);
+                    Util.inject(keySpan, tracer, tracerSpecificCarrier);
+                }
+                for (Map.Entry<String, String> entry : tracerSpecificCarrier.entrySet()) {
+                    headerList.add(new Header(entry.getKey(), entry.getValue()));
+                }
             }
             if (headers != null) {
                 headerList.add(new Header(APIConstants.ACTIVITY_ID, (String) headers.get(APIConstants.ACTIVITY_ID)));
@@ -131,7 +135,7 @@ public class APIKeyValidatorClient {
                         + context + " with ID: " + MessageContext.getCurrentMessageContext().getMessageID() + " at "
                         + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
             }
-            if (span != null) {
+            if (tracingEnabled && span != null) {
                 Util.finishSpan(span);
             }
 
@@ -184,10 +188,15 @@ public class APIKeyValidatorClient {
             keyValidationServiceStub._getServiceClient().getOptions().setProperty(HTTPConstants.COOKIE_STRING, cookie);
         }
         try {
-            TracingSpan keySpan = (TracingSpan) MessageContext.getCurrentMessageContext()
-                    .getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
-            TracingTracer tracer = Util.getGlobalTracer();
-            TracingSpan span = Util.startSpan(APIMgtGatewayConstants.GET_ALL_URI_TEMPLATES, keySpan, tracer);
+            TracingSpan span = null;
+            Boolean tracingEnabled = Boolean.valueOf(ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
+                    .getFirstProperty(APIMgtGatewayConstants.TRACING_ENABLED));
+            if (tracingEnabled) {
+                TracingSpan keySpan = (TracingSpan) MessageContext.getCurrentMessageContext()
+                        .getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
+                TracingTracer tracer = Util.getGlobalTracer();
+                span = Util.startSpan(APIMgtGatewayConstants.GET_ALL_URI_TEMPLATES, keySpan, tracer);
+            }
             if (log.isDebugEnabled()) {
                 log.debug("Get all URI templates request from gateway to keymanager via web service call for:"
                         + context + " at "
@@ -200,7 +209,9 @@ public class APIKeyValidatorClient {
                         + " call for:" + context + " at "
                         + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
             }
-            Util.finishSpan(span);
+            if (tracingEnabled) {
+                Util.finishSpan(span);
+            }
             ServiceContext serviceContext = keyValidationServiceStub.
                     _getServiceClient().getLastOperationContext().getServiceContext();
             cookie = (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);

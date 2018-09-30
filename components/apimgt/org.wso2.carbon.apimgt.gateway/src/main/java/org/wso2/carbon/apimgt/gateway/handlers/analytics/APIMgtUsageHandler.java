@@ -22,6 +22,7 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
@@ -42,12 +43,18 @@ public class APIMgtUsageHandler extends AbstractHandler {
 
     public boolean handleRequest(MessageContext mc) {
 
-        TracingSpan responseLatencySpan = (TracingSpan) mc.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
-        TracingTracer tracer = Util.getGlobalTracer();
-        TracingSpan span = Util.startSpan(APIMgtGatewayConstants.API_MGT_USAGE_HANDLER, responseLatencySpan, tracer);
+        TracingSpan span = null;
+        Boolean tracingEnabled = Boolean.valueOf(ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
+                .getFirstProperty(APIMgtGatewayConstants.TRACING_ENABLED));
+        if (tracingEnabled) {
+            TracingSpan responseLatencySpan = (TracingSpan) mc.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+            TracingTracer tracer = Util.getGlobalTracer();
+            span = Util.startSpan(APIMgtGatewayConstants.API_MGT_USAGE_HANDLER, responseLatencySpan, tracer);
+        }
         boolean enabled = getApiManagerAnalyticsConfiguration().isAnalyticsEnabled();
-        Util.finishSpan(span);
-
+        if (tracingEnabled) {
+            Util.finishSpan(span);
+        }
         if (!enabled) {
             return true;
         }

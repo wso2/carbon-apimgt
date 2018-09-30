@@ -172,10 +172,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 initializeAuthenticator();
             }
             if (isAuthenticate(messageContext)) {
-                TracingSpan span =
-                        Util.startSpan(APIMgtGatewayConstants.SET_API_PARAMETERS_TO_MESSAGE_CONTEXT, keySpan, tracer);
                 setAPIParametersToMessageContext(messageContext);
-                Util.finishSpan(span);
                 return true;
             }
         } catch (APISecurityException e) {

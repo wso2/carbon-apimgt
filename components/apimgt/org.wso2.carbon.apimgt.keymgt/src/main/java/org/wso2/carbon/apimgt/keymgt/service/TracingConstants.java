@@ -30,4 +30,5 @@ public class TracingConstants {
     public static final String GENERATE_JWT = "API:Generate_JWT";
     public static final String WRITE_TO_KEY_MANAGER_CACHE = "API:Write_To_Key_Manager_Cache()";
     public static final String PUBLISHING_KEY_VALIDATION_RESPONSE = "API:Publishing_Key_Validation_Response";
+    public static final String TRACING_ENABLED = "OpenTracer.Enabled";
 }

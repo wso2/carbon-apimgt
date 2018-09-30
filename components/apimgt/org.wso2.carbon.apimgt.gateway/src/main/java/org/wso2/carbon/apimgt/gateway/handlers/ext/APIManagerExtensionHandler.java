@@ -24,6 +24,7 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
@@ -74,15 +75,21 @@ public class APIManagerExtensionHandler extends AbstractHandler {
     public boolean handleRequest(MessageContext messageContext) {
         Timer.Context context = startMetricTimer(DIRECTION_IN);
         long executionStartTime = System.nanoTime();
-        TracingSpan responseLatencySpan =
-                (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
-        TracingTracer tracer = Util.getGlobalTracer();
-        TracingSpan requestMediationSpan =
-                Util.startSpan(APIMgtGatewayConstants.REQUEST_MEDIATION, responseLatencySpan, tracer);
+        TracingSpan requestMediationSpan = null;
+        Boolean tracingEnabled = Boolean.valueOf(ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
+                .getFirstProperty(APIMgtGatewayConstants.TRACING_ENABLED));
+        if (tracingEnabled) {
+            TracingSpan responseLatencySpan =
+                    (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+            TracingTracer tracer = Util.getGlobalTracer();
+            requestMediationSpan = Util.startSpan(APIMgtGatewayConstants.REQUEST_MEDIATION, responseLatencySpan, tracer);
+        }
         try {
             return mediate(messageContext, DIRECTION_IN);
         } finally {
-            Util.finishSpan(requestMediationSpan);
+            if (tracingEnabled) {
+                Util.finishSpan(requestMediationSpan);
+            }
             messageContext.setProperty(APIMgtGatewayConstants.REQUEST_MEDIATION_LATENCY,
                     TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - executionStartTime));
             stopMetricTimer(context);
@@ -92,15 +99,22 @@ public class APIManagerExtensionHandler extends AbstractHandler {
     public boolean handleResponse(MessageContext messageContext) {
         Timer.Context context = startMetricTimer(DIRECTION_OUT);
         long executionStartTime = System.nanoTime();
-        TracingSpan responseLatencySpan =
-                (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
-        TracingTracer tracer = Util.getGlobalTracer();
-        TracingSpan responseMediationSpan =
-                Util.startSpan(APIMgtGatewayConstants.RESPONSE_MEDIATION, responseLatencySpan, tracer);
+        TracingSpan responseMediationSpan = null;
+        Boolean tracingEnabled = Boolean.valueOf(ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
+                .getFirstProperty(APIMgtGatewayConstants.TRACING_ENABLED));
+        if (tracingEnabled) {
+            TracingSpan responseLatencySpan =
+                    (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+            TracingTracer tracer = Util.getGlobalTracer();
+            responseMediationSpan =
+                    Util.startSpan(APIMgtGatewayConstants.RESPONSE_MEDIATION, responseLatencySpan, tracer);
+        }
         try {
             return mediate(messageContext, DIRECTION_OUT);
         } finally {
-            Util.finishSpan(responseMediationSpan);
+            if (tracingEnabled) {
+                Util.finishSpan(responseMediationSpan);
+            }
             messageContext.setProperty(APIMgtGatewayConstants.RESPONSE_MEDIATION_LATENCY,
                     TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - executionStartTime));
             stopMetricTimer(context);

@@ -39,9 +39,12 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
                 .buildTracer(APIMgtGatewayConstants.SERVICE_NAME);
     }
 
+    private Boolean tracingEnabled = Boolean.valueOf(ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
+            .getFirstProperty(APIMgtGatewayConstants.TRACING_ENABLED));
+
     @Override
     public boolean handleRequestInFlow(MessageContext messageContext) {
-        if (tracer != null) {
+        if (tracingEnabled) {
             org.apache.axis2.context.MessageContext axis2MessageContext =
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext();
             Map headersMap =
@@ -50,7 +53,8 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 
             String requestId = UUID.randomUUID().toString();
             messageContext.setProperty(APIMgtGatewayConstants.REQUEST_ID, requestId);
-            TracingSpan responseLatencySpan = Util.startSpan(APIMgtGatewayConstants.RESPONSE_LATENCY, spanContext, tracer);
+            TracingSpan responseLatencySpan =
+                    Util.startSpan(APIMgtGatewayConstants.RESPONSE_LATENCY, spanContext, tracer);
             Util.setTag(responseLatencySpan, APIMgtGatewayConstants.REQUEST_ID, requestId);
             messageContext.setProperty(APIMgtGatewayConstants.RESPONSE_LATENCY, responseLatencySpan);
         }
@@ -59,9 +63,10 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 
     @Override
     public boolean handleRequestOutFlow(MessageContext messageContext) {
-        if (tracer != null) {
+        if (tracingEnabled) {
             TracingSpan parentSpan = (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
-            TracingSpan backendLatencySpan = Util.startSpan(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN, parentSpan, tracer);
+            TracingSpan backendLatencySpan =
+                    Util.startSpan(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN, parentSpan, tracer);
             messageContext.setProperty(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN, backendLatencySpan);
         }
         return true;
@@ -69,7 +74,7 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 
     @Override
     public boolean handleResponseInFlow(MessageContext messageContext) {
-        if (tracer != null) {
+        if (tracingEnabled) {
             TracingSpan backendLatencySpan =
                     (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN);
             Util.finishSpan(backendLatencySpan);
@@ -79,7 +84,7 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 
     @Override
     public boolean handleResponseOutFlow(MessageContext messageContext) {
-        if (tracer != null) {
+        if (tracingEnabled) {
             TracingSpan responseLatencySpan =
                     (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
             Util.finishSpan(responseLatencySpan);

@@ -357,12 +357,19 @@ public class APIKeyValidator {
     public String getResourceAuthenticationScheme(MessageContext synCtx) throws APISecurityException {
 
         VerbInfoDTO verb = null;
+        TracingSpan span = null;
+        Boolean tracingEnabled = Boolean.valueOf(ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
+                .getFirstProperty(APIMgtGatewayConstants.TRACING_ENABLED));
         try {
-            TracingSpan keySpan = (TracingSpan) synCtx.getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
-            TracingTracer tracer = Util.getGlobalTracer();
-            TracingSpan span = Util.startSpan(APIMgtGatewayConstants.FIND_MATCHING_VERB, keySpan, tracer);
+            if (tracingEnabled) {
+                TracingSpan keySpan = (TracingSpan) synCtx.getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
+                TracingTracer tracer = Util.getGlobalTracer();
+                span = Util.startSpan(APIMgtGatewayConstants.FIND_MATCHING_VERB, keySpan, tracer);
+            }
             verb = findMatchingVerb(synCtx);
-            Util.finishSpan(span);
+            if (tracingEnabled) {
+                Util.finishSpan(span);
+            }
             if (verb != null) {
                 synCtx.setProperty(APIConstants.VERB_INFO_DTO, verb);
             }
@@ -578,11 +585,18 @@ public class APIKeyValidator {
             if (log.isDebugEnabled()) {
                 log.debug("Could not find API object in cache for key: " + apiCacheKey);
             }
-            TracingSpan keySpan = (TracingSpan) synCtx.getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
-            TracingSpan apiInfoDTOSpan =
-                    Util.startSpan(APIMgtGatewayConstants.DO_GET_API_INFO_DTO, keySpan, Util.getGlobalTracer());
+            TracingSpan apiInfoDTOSpan = null;
+            Boolean tracingEnabled = Boolean.valueOf(ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
+                    .getFirstProperty(APIMgtGatewayConstants.TRACING_ENABLED));
+            if (tracingEnabled) {
+                TracingSpan keySpan = (TracingSpan) synCtx.getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
+                apiInfoDTOSpan =
+                        Util.startSpan(APIMgtGatewayConstants.DO_GET_API_INFO_DTO, keySpan, Util.getGlobalTracer());
+            }
             apiInfoDTO = doGetAPIInfo(apiContext, apiVersion);
-            Util.finishSpan(apiInfoDTOSpan);
+            if (tracingEnabled) {
+                Util.finishSpan(apiInfoDTOSpan);
+            }
 
             if (isGatewayAPIResourceValidationEnabled) {
                 getResourceCache().put(apiCacheKey, apiInfoDTO);
