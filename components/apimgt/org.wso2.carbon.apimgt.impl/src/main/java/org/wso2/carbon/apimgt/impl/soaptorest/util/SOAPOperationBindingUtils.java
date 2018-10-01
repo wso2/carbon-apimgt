@@ -143,6 +143,11 @@ public class SOAPOperationBindingUtils {
                 extensions.put(SOAPToRESTConstants.Swagger.SOAP_ACTION, operation.getSoapAction());
                 extensions.put(SOAPToRESTConstants.Swagger.SOAP_OPERATION, operation.getSoapBindingOpName());
                 extensions.put(SOAPToRESTConstants.Swagger.NAMESPACE, operation.getTargetNamespace());
+                if (processor.getWsdlInfo().isHasSoap12BindingOperations()) {
+                    extensions.put(SOAPToRESTConstants.Swagger.SOAP_VERSION, SOAPToRESTConstants.SOAP_VERSION_12);
+                } else if (processor.getWsdlInfo().hasSoapBindingOperations()) {
+                    extensions.put(SOAPToRESTConstants.Swagger.SOAP_VERSION, SOAPToRESTConstants.SOAP_VERSION_11);
+                }
                 op.setVendorExtension(SOAPToRESTConstants.Swagger.WSO2_SOAP, extensions);
 
                 if (!HTTPConstants.HTTP_METHOD_GET.equals(operation.getHttpVerb())) {
@@ -240,6 +245,9 @@ public class SOAPOperationBindingUtils {
                 String resourcePath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
                         provider + RegistryConstants.PATH_SEPARATOR + name + RegistryConstants.PATH_SEPARATOR + version
                         + RegistryConstants.PATH_SEPARATOR + SOAPToRESTConstants.SOAP_TO_REST_RESOURCE;
+                if (log.isDebugEnabled()) {
+                    log.debug("Resource path to the soap to rest converted sequence: " + resourcePath);
+                }
                 return registry.resourceExists(resourcePath);
             } catch (RegistryException e) {
                 handleException("Error when create registry instance", e);

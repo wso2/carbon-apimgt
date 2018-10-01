@@ -512,6 +512,7 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
                 wsdlInfo.setHasSoapBindingOperations(false);
             }
             wsdlInfo.setHasSoapBindingOperations(hasSoapBindingOperations());
+            wsdlInfo.setHasSoap12BindingOperations(hasSoap12BindingOperations());
             if (parameterModelMap.size() > 0) {
                 wsdlInfo.setParameterModelMap(parameterModelMap);
             }
@@ -684,26 +685,41 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
     }
 
     /**
-     * Returns if any of the WSDLs (initialized) contains SOAP binding operations
-     *
-     * @return whether the WSDLs (initialized) contains SOAP binding operations
-     */
-    private boolean hasSoapBindingOperations() {
-        return wsdlDefinition != null && hasSoapBindingOperations(wsdlDefinition);
-    }
-
-    /**
      * Returns if the provided WSDL definition contains SOAP binding operations
      *
-     * @param definition WSDL definition
      * @return whether the provided WSDL definition contains SOAP binding operations
      */
-    private boolean hasSoapBindingOperations(Definition definition) {
-        for (Object bindingObj : definition.getAllBindings().values()) {
+    private boolean hasSoapBindingOperations() {
+        if (wsdlDefinition == null) {
+            return false;
+        }
+        for (Object bindingObj : wsdlDefinition.getAllBindings().values()) {
             if (bindingObj instanceof Binding) {
                 Binding binding = (Binding) bindingObj;
                 for (Object ex : binding.getExtensibilityElements()) {
-                    if (ex instanceof SOAPBinding || ex instanceof SOAP12Binding) {
+                    if (ex instanceof SOAPBinding) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns if the provided WSDL definition contains SOAP 1.2 binding operations
+     *
+     * @return whether the provided WSDL definition contains SOAP 1.2 binding operations
+     */
+    private boolean hasSoap12BindingOperations() {
+        if (wsdlDefinition == null) {
+            return false;
+        }
+        for (Object bindingObj : wsdlDefinition.getAllBindings().values()) {
+            if (bindingObj instanceof Binding) {
+                Binding binding = (Binding) bindingObj;
+                for (Object ex : binding.getExtensibilityElements()) {
+                    if (ex instanceof SOAP12Binding) {
                         return true;
                     }
                 }

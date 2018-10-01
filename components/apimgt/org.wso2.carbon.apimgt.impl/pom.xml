@@ -271,7 +271,7 @@
             <artifactId>swagger-models</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.swagger</groupId>
+            <groupId>org.wso2.orbit.io.swagger</groupId>
             <artifactId>swagger-inflector</artifactId>
         </dependency>
         <dependency>

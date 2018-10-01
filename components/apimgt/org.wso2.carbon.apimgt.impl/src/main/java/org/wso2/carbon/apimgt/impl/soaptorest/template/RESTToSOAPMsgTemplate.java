@@ -49,16 +49,18 @@ public class RESTToSOAPMsgTemplate {
     /**
      * gets in sequence for the soap operation
      *
-     * @param mapping    soap to rest mapping json
-     * @param method     http method for the resource
-     * @param soapAction soap action for the operation
-     * @param namespace  soap namespace for the sequence
+     * @param mapping       soap to rest mapping json
+     * @param method        http method for the resource
+     * @param soapAction    soap action for the operation
+     * @param namespace     soap namespace for the operation
+     * @param soapNamespace soap namespace for the soap version
      * @return in sequence string
      */
     public String getMappingInSequence(Map<String, String> mapping, String method, String soapAction, String namespace,
-            JSONArray array) {
+            String soapNamespace, JSONArray array) {
 
-        ConfigContext configcontext = new SOAPToRESTConfigContext(mapping, method, soapAction, namespace, array);
+        ConfigContext configcontext = new SOAPToRESTConfigContext(mapping, method, soapAction, namespace, soapNamespace,
+                array);
         StringWriter writer = new StringWriter();
         try {
             VelocityContext context = configcontext.getContext();

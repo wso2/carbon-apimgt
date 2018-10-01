@@ -119,10 +119,16 @@ public class SequenceGenerator {
 
                 String soapAction = SOAPToRESTConstants.EMPTY_STRING;
                 String namespace = SOAPToRESTConstants.EMPTY_STRING;
-
+                String soapVersion = SOAPToRESTConstants.EMPTY_STRING;
                 if (vendorExtensionObj != null) {
                     soapAction = (String) ((LinkedHashMap) vendorExtensionObj).get("soap-action");
                     namespace = (String) ((LinkedHashMap) vendorExtensionObj).get("namespace");
+                    soapVersion = (String) ((LinkedHashMap) vendorExtensionObj)
+                            .get(SOAPToRESTConstants.Swagger.SOAP_VERSION);
+                }
+                String soapNamespace = SOAPToRESTConstants.SOAP12_NAMSPACE;
+                if (StringUtils.isNotBlank(soapVersion) && SOAPToRESTConstants.SOAP_VERSION_11.equals(soapVersion)) {
+                    soapNamespace = SOAPToRESTConstants.SOAP11_NAMESPACE;
                 }
 
                 List<Parameter> parameters = operation.getParameters();
@@ -174,8 +180,8 @@ public class SequenceGenerator {
                     sequenceMap.put("properties", propAndArgElements[1]);
                     sequenceMap.put("sequence", payloadSequence.get(operationId));
                     RESTToSOAPMsgTemplate template = new RESTToSOAPMsgTemplate();
-                    String inSequence = template.getMappingInSequence(sequenceMap, operationId, soapAction, namespace,
-                            arraySequenceElements);
+                    String inSequence = template.getMappingInSequence(sequenceMap, operationId, soapAction,
+                            namespace, soapNamespace, arraySequenceElements);
                     String outSequence = template.getMappingOutSequence();
                     saveApiSequences(apiDataStr, inSequence, outSequence, httpMethod.toString().toLowerCase(),
                             pathName);
