@@ -82,13 +82,21 @@ public class APIMgtThrottleUsageHandler extends APIMgtCommonExecutionPublisher {
                         APIMgtGatewayConstants.CONTEXT));
                 throttlePublisherDTO.setApiCreator((String) messageContext.getProperty(
                         APIMgtGatewayConstants.API_PUBLISHER));
-                throttlePublisherDTO.setApplicationName((String) messageContext.getProperty(
-                        APIMgtGatewayConstants.APPLICATION_NAME));
-                throttlePublisherDTO.setApplicationId((String) messageContext.getProperty(
-                        APIMgtGatewayConstants.APPLICATION_ID));
+                String applicationName = (String) messageContext.getProperty(APIMgtGatewayConstants.APPLICATION_NAME);
+                String applicationId = (String) messageContext.getProperty(APIMgtGatewayConstants.APPLICATION_ID);
+                if (applicationName == null || "".equals(applicationName)) {
+                    applicationName = "None";
+                    applicationId = "0";
+                }
+                throttlePublisherDTO.setApplicationName(applicationName);
+                throttlePublisherDTO.setApplicationId(applicationId);
                 throttlePublisherDTO.setThrottledTime(currentTime);
                 throttlePublisherDTO.setThrottledOutReason(throttleOutReason);
-                throttlePublisherDTO.setSubscriber(authContext.getSubscriber());
+                String subscriber = authContext.getSubscriber();
+                if (subscriber == null || "".equals(subscriber)) {
+                    subscriber = "None";
+                }
+                throttlePublisherDTO.setSubscriber(subscriber);
                 throttlePublisherDTO.setKeyType(keyType);
                 throttlePublisherDTO.setCorrelationID(correlationID);
                 throttlePublisherDTO.setGatewayType(APIMgtGatewayConstants.GATEWAY_TYPE);

@@ -168,8 +168,8 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
                 applicationName = authContext.getApplicationName();
                 if (applicationName == null || "".equals(applicationName)) {
                     applicationName = "None";
+                    applicationId = "0";
                 }
-                applicationId = authContext.getApplicationId();
                 tier = authContext.getTier();
                 applicationOwner = authContext.getSubscriber();
                 if (applicationOwner == null || "".equals(applicationOwner)) {
