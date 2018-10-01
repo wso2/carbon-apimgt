@@ -125,7 +125,8 @@ public class OracleSQLStatements implements ApiDAOVendorSpecificStatements {
 
         String query =
                 PAGINATION_PREFIX + API_SUMMARY_SELECT + getSecondaryAttributesSearchQuery(secondaryAttributeMap) + ((
-                        secondaryAttributeMap.size() > 0) ? " AND " : " WHERE ") + searchQuery.toString()
+                        secondaryAttributeMap != null && secondaryAttributeMap.size() > 0) ? " AND " : " WHERE ")
+                        + searchQuery.toString()
                         + "  API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)";
 
         if (roleCount > 0) {
