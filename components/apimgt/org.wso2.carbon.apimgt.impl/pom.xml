@@ -370,13 +370,15 @@
                 <artifactId>aspectj-maven-plugin</artifactId>
                 <version>1.8</version>
                 <configuration>
-                    <showWeaveInfo>true</showWeaveInfo>
+                    <!--Uncomment the following in order to debug the aspectJ weaving-->
+                    <!--<showWeaveInfo>true</showWeaveInfo>-->
                     <source>1.7</source>
                     <target>1.7</target>
                     <complianceLevel>1.7</complianceLevel>
                     <excludes>
-                        <!--This class have been excluded from aspectj weaving, to avoid build failures-->
+                        <!--The following class have been excluded from aspectj weaving, to avoid build failures-->
                         <exclude>**/utils/APIUtil.java</exclude>
+                        <exclude>**/thrift/*Service.java</exclude>
                     </excludes>
                 </configuration>
                 <executions>

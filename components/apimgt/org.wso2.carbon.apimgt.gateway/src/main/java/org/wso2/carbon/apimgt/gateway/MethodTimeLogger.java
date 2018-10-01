@@ -58,7 +58,7 @@ public class MethodTimeLogger
         boolean enabled = false;
         String config = System.getProperty("logAllMethods");
         if (config != null && !config.equals("")) {
-            enabled = config.contains("gateway");
+            enabled = config.contains("org.wso2.carbon.apimgt.gateway");
         }
         return enabled;
     }

@@ -61,7 +61,7 @@ public class MethodTimeLogger
         boolean enabled = false;
         String config = System.getProperty("logAllMethods");
         if (config != null && !config.equals("")) {
-            enabled = config.contains("keymgt");
+            enabled = config.contains("org.wso2.carbon.apimgt.keymgt");
         }
         return enabled;
     }

@@ -57,7 +57,7 @@ public class MethodTimeLogger
         boolean enabled = false;
         String config = System.getProperty("logAllMethods");
         if (config != null && !config.equals("")) {
-            enabled = config.contains("impl");
+            enabled = config.contains("org.wso2.carbon.apimgt.impl");
         }
         return enabled;
     }
