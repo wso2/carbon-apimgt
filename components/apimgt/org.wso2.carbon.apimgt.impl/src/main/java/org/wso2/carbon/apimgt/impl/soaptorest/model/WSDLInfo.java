@@ -32,6 +32,7 @@ public class WSDLInfo {
     private String version;
     private Map<String, String> endpoints;
     private boolean hasSoapBindingOperations;
+    private boolean hasSoap12BindingOperations;
     private boolean hasHttpBindingOperations;
     private Set<WSDLOperation> httpBindingOperations;
     private Set<WSDLSOAPOperation> soapBindingOperations;
@@ -75,6 +76,14 @@ public class WSDLInfo {
 
     public boolean hasSoapBindingOperations() {
         return hasSoapBindingOperations;
+    }
+
+    public boolean isHasSoap12BindingOperations() {
+        return hasSoap12BindingOperations;
+    }
+
+    public void setHasSoap12BindingOperations(boolean hasSoap12BindingOperations) {
+        this.hasSoap12BindingOperations = hasSoap12BindingOperations;
     }
 
     public void setHttpBindingOperations(Set<WSDLOperation> operations) {

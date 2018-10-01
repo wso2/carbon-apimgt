@@ -37,6 +37,10 @@ public class SOAPToRESTConstants {
     public static final String PARAM_TYPE = "type";
     public static final String CONTENT = "content";
     public static final String EMPTY_STRING = "";
+    public static final String SOAP_VERSION_11 = "1.1";
+    public static final String SOAP_VERSION_12 = "1.2";
+    public static final String SOAP11_NAMESPACE = "http://schemas.xmlsoap.org/soap/envelope/";
+    public static final String SOAP12_NAMSPACE = "http://www.w3.org/2003/05/soap-envelope";
 
     public final class Swagger {
         public static final String DEFINITIONS = "definitions";
@@ -60,6 +64,7 @@ public class SOAPToRESTConstants {
         public static final String SOAP_OPERATION = "soap-operation";
         public static final String NAMESPACE = "namespace";
         public static final String WSO2_SOAP = "x-wso2-soap";
+        public static final String SOAP_VERSION= "x-soap-version";
 
     }
 
@@ -107,6 +112,7 @@ public class SOAPToRESTConstants {
     public final class Template {
         public static final String HTTP_METHOD = "method";
         public static final String SOAP_ACTION = "soapAction";
+        public static final String SOAP_NAMESPACE = "soapNamespace";
         public static final String NAMESPACE = "namespace";
         public static final String RESOURCE_PATH = "resourcePath";
         public static final String MAPPING = "mapping";
