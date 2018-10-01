@@ -15,6 +15,7 @@ import ImageGenerator from "../Listing/ImageGenerator";
 import CopyToClipboard from "react-copy-to-clipboard";
 import Tooltip from "@material-ui/core/Tooltip";
 import Collapse from '@material-ui/core/Collapse';
+import VerticalDivider from '../../Shared/VerticalDivider';
 
 
 const styles = theme => ({
@@ -42,7 +43,7 @@ const styles = theme => ({
   },
   starRate: {
     fontSize: 70,
-    color: theme.palette.custom.starColor
+    color: theme.custom.starColor
   },
   starRateMy: {
     fontSize: 70,
@@ -108,7 +109,7 @@ const styles = theme => ({
     width: 100
   },
   contentWrapper: {
-    width: theme.palette.custom.contentAreaWidth - theme.palette.custom.leftMenuWidth,
+    width: theme.custom.contentAreaWidth - theme.custom.leftMenuWidth,
     alignItems: 'center',
   },
   ratingBoxWrapper: {
@@ -267,12 +268,12 @@ class StarRatingBar extends React.Component {
             style={{ color: theme.palette.grey["A200"] }}
           />
         )}
-        <div className="vertical-divider-midway" />
+        <VerticalDivider height={32} />
         <div className={classes.ratingBoxWrapper}>
           {this.state.showRateNow && (
             <div className={classes.ratingBox}>
               <HighlightOff />
-              <div className="vertical-divider" />
+              <VerticalDivider height={32} />
               {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => (
                 <StarRate
                   color={
@@ -436,7 +437,7 @@ class InfoBar extends React.Component {
               LISTING
             </div>
           </Link>
-          <div className="vertical-divider-70" />
+          <VerticalDivider height={70} />
           <ImageGenerator apiName={api.name} width="70" height="50" />
           <div style={{ marginLeft: theme.spacing.unit }}>
             <Typography variant="display1">{api.name}</Typography>
@@ -444,7 +445,7 @@ class InfoBar extends React.Component {
               {api.provider} | 21-May 2018
             </Typography>
           </div>
-          <div className="vertical-divider-70" />
+          <VerticalDivider height={70} />
           <StarRatingBar apiIdProp={api.id} />
         </div>
 

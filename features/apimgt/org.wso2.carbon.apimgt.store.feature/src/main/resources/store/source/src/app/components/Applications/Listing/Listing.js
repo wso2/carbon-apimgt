@@ -100,7 +100,7 @@ const styles = theme => ({
         appContent: {
             paddingLeft: theme.spacing.unit*4,
             paddingTop: theme.spacing.unit,
-            width: theme.palette.custom.contentAreaWidth,
+            width: theme.custom.contentAreaWidth,
         }
 });
 

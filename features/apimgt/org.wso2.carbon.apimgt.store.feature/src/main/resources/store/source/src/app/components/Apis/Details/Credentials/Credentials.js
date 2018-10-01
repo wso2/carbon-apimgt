@@ -26,7 +26,7 @@ const styles = theme => ({
     paddingBottom: 8,
   },
   contentWrapper: {
-      maxWidth: theme.palette.custom.contentAreaWidth,
+      maxWidth: theme.custom.contentAreaWidth,
       paddingLeft: theme.spacing.unit*2,
       paddingTop: theme.spacing.unig,
   },

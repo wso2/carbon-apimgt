@@ -6,9 +6,10 @@ export default class CustomIcon extends React.Component{
         const width = this.props.width !== undefined ? this.props.width : 32;
         const height = this.props.height !== undefined ? this.props.height : 32;
         const icon = this.props.icon !== undefined ? this.props.icon : 'api';
+        const className = this.props.className !== undefined ? this.props.className : '';
         if( icon === 'overview' ){
             return <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height}
-            viewBox="0 0 8.5272856 8.5114363" id="svg8">
+            viewBox="0 0 8.5272856 8.5114363" id="svg8" className={className}>
                 <g id="layer2" transform="translate(79.857 -62.367)">
                     <g id="g5726" transform="matrix(.9999 0 0 1.00321 -86.091 38.578)" fill="none"
                     stroke={strokeColor} strokeLinejoin="round">
@@ -25,7 +26,7 @@ export default class CustomIcon extends React.Component{
             </svg>
         } else if ( icon === 'api') {
             return <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 8.4666662 8.466666"
-            id="svg8">
+            id="svg8" className={className}>
                 <g id="layer2" transform="translate(82.262 -41.963)">
                     <g id="g5764" transform="matrix(.83117 0 0 .83117 193.242 4.456)" fill={strokeColor}
                     fillOpacity="0.933">
@@ -40,7 +41,7 @@ export default class CustomIcon extends React.Component{
             </svg>
         } else if( icon === 'credentials') {
             return <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} 
-                viewBox="0 0 8.4568129 8.4735926" id="svg8">
+                viewBox="0 0 8.4568129 8.4735926" id="svg8" className={className}>
                     <g id="layer2" transform="translate(84.561 -80.202)">
                         <g id="g5840" transform="matrix(.97554 0 0 1.03848 285.272 10.057)" stroke={strokeColor}
                         strokeLinejoin="round">
@@ -59,7 +60,7 @@ export default class CustomIcon extends React.Component{
             </svg>
         }   else if( icon === 'comments') {
             return <svg xmlns='http://www.w3.org/2000/svg' width={width} height={height}
-            viewBox='0 0 8.7174778 8.7393768' id='svg8'>
+            viewBox='0 0 8.7174778 8.7393768' id='svg8' className={className}>
                 <g id='layer2' transform='translate(80.796 -108.97)'>
                     <g id='g13332' transform='matrix(.48727 0 0 .51349 -107.832 57.032)' strokeWidth='1.058'
                     stroke={strokeColor}>
@@ -73,7 +74,7 @@ export default class CustomIcon extends React.Component{
             </svg>
         } else if ( icon === 'test'){
             return <svg xmlns="http://www.w3.org/2000/svg"  width={width} height={height}
-            viewBox="0 0 8.4809208 8.4427107" id="svg8">
+            viewBox="0 0 8.4809208 8.4427107" id="svg8" className={className}>
                 <g id="layer2" transform="translate(79.833 -138.905)">
                     <g id="g5708" transform="matrix(1.19734 0 0 1.0548 -89.665 113.54)" fill="none"
                     stroke={strokeColor} strokeWidth="0.529">
@@ -85,7 +86,7 @@ export default class CustomIcon extends React.Component{
             </svg>
         } else if ( icon === 'docs') {
             return <svg xmlns="http://www.w3.org/2000/svg"  width={width} height={height}
-            viewBox="0 0 8.7235365 8.6012734" id="svg8">
+            viewBox="0 0 8.7235365 8.6012734" id="svg8" className={className}>
                 <g id="layer2" transform="translate(96.939 -160.005)">
                     <g transform="translate(-105.895 83.252)" id="g13502">
                         <path id="path13492" d="m 10.313394,76.75522 c -0.7481907,0 -1.3505042,0.649337 -1.3505042,1.455945 v 4.182632 c 0,0.678745 -0.1020124,1.244445 0.4789962,1.407278 C 9.413435,83.683074 9.396752,83.559883 9.396752,83.432019 v -4.182631 c 0,-0.806608 1.131481,-1.985112 1.879671,-1.985112 h 4.521713 c 0.118615,0 0.23288,0.01799 0.342341,0.04866 -0.151051,-0.626389 -0.675771,-0.557722 -1.30537,-0.557722 z"
@@ -103,7 +104,7 @@ export default class CustomIcon extends React.Component{
             </svg>
         } else if (icon === 'sdk'){
             return <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 8.3962813 8.4666231"
-            id="svg8">
+            id="svg8" className={className}>
                 <g id="layer2" transform="translate(99.686 -182.41)">
                     <g id="g4078" transform="translate(-107.97 77.96)" fill="none" stroke={strokeColor}
                     strokeWidth="0.417">
@@ -117,7 +118,7 @@ export default class CustomIcon extends React.Component{
             </svg>
         } else if ( icon === 'subscriptions'){
             return <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} 
-            viewBox="0 0 8.428752 8.6233671" id="svg8">
+            viewBox="0 0 8.428752 8.6233671" id="svg8" className={className}>
                 <g id="layer2" transform="translate(105.022 -106.571)">
                     <g transform="matrix(.84802 0 0 .87176 -110.085 63.188)" id="g5876" strokeLinecap="round">
                         <circle id="circle5869" cx="8.138" cy="57.583" r="1.497" fill={strokeColor}
@@ -131,7 +132,7 @@ export default class CustomIcon extends React.Component{
             </svg>
         } else if ( icon === 'applications' ){
             return <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} 
-            viewBox="0 0 8.4505663 8.3507221" id="svg8">
+            viewBox="0 0 8.4505663 8.3507221" id="svg8" className={className}>
                 <g id="layer2" transform="translate(123.263 -67.386)">
                     <g id="g5908" transform="matrix(1.00352 0 0 .99166 -122.928 40.99)" fill={strokeColor}>
                         <circle r="3.946" cy="30.828" cx="3.877" id="circle5894" fill="none" stroke={strokeColor}
@@ -158,7 +159,7 @@ export default class CustomIcon extends React.Component{
             </svg>
         } else if ( icon === 'forum'){
             return <svg xmlns='http://www.w3.org/2000/svg' width={width} height={height} 
-            viewBox='0 0 8.3807926 8.5141972' id='svg8'>
+            viewBox='0 0 8.3807926 8.5141972' id='svg8' className={className}>
                 <g id='layer2' transform='translate(99.1 -122.406)'>
                     <g id='g5232' transform='matrix(.64374 0 0 .84004 -35.293 20.962)' stroke={strokeColor}>
                         <path id='path5713' d='m -91.233427,124.2468 h 2.860358' fill={strokeColor}
@@ -178,9 +179,9 @@ export default class CustomIcon extends React.Component{
                     </g>
                 </g>
             </svg>
-        } else if ( icon === 'keys'){
+        } else if ( icon === 'productionkeys' || icon === 'sandBoxkeys'){
             return <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height}
-            viewBox="0 0 9.8881274 7.2221771" id="svg8">
+            viewBox="0 0 9.8881274 7.2221771" id="svg8" className={className}>
                 <g id="layer25" transform="translate(36.575 -55.028)">
                     <g transform="translate(-43.821 -15.122) scale(.93173)" id="g10309">
                         <g id="g10305" transform="matrix(.59773 0 0 .59773 8.88 46.917)" strokeLinecap="round">
@@ -197,9 +198,9 @@ export default class CustomIcon extends React.Component{
                     </g>
                 </g>
             </svg>
-        } else if ( icon === 'keys'){
+        } else if ( icon === 'subscriptions'){
             return <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height}
-            viewBox="0 0 6.5989004 6.5674281" id="svg8">
+            viewBox="0 0 6.5989004 6.5674281" id="svg8" className={className}>
                 <g id="layer25" transform="translate(35.929 -86.734)">
                     <g transform="matrix(.66392 0 0 .66392 -39.893 53.694)" id="g10459" strokeLinecap="round">
                         <circle id="circle10453" cx="8.138" cy="57.583" r="1.497" fill={strokeColor}
@@ -208,6 +209,21 @@ export default class CustomIcon extends React.Component{
                         id="path10455" fill="none" stroke={strokeColor} strokeWidth="1.323" />
                         <path id="path10457" d="m 6.7351935,50.47404 c 5.1370835,-0.52388 7.9751195,3.245055 8.5125345,8.512533"
                         fill="none" stroke={strokeColor} strokeWidth="1.323" />
+                    </g>
+                </g>
+            </svg>
+        } else {
+            return <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 8.4666662 8.466666"
+            id="svg8" className={className}>
+                <g id="layer2" transform="translate(82.262 -41.963)">
+                    <g id="g5764" transform="matrix(.83117 0 0 .83117 193.242 4.456)" fill={strokeColor}
+                    fillOpacity="0.933">
+                        <path id="path5728" d="m -326.92369,45.126027 c -0.0789,0 -0.14264,0.06373 -0.14264,0.142626 v 1.111562 a 3.9026041,3.9026041 0 0 0 -1.52651,0.635619 l -0.78859,-0.788582 c -0.0558,-0.05579 -0.14576,-0.05579 -0.20154,0 l -0.78084,0.78083 c -0.0558,0.05579 -0.0558,0.145751 0,0.201538 l 0.786,0.785998 a 3.9026041,3.9026041 0 0 0 -0.63098,1.529107 h -1.1136 c -0.0789,0 -0.14264,0.06373 -0.14264,0.142626 v 1.10381 c 0,0.07889 0.0637,0.142626 0.14264,0.142626 h 1.11154 a 3.9026041,3.9026041 0 0 0 0.63564,1.526522 l -0.7886,0.788582 c -0.0558,0.05579 -0.0558,0.145751 0,0.201539 l 0.78084,0.78083 c 0.0558,0.05579 0.14576,0.05579 0.20154,0 l 0.78599,-0.785998 a 3.9026041,3.9026041 0 0 0 1.52911,0.630968 v 1.113629 c 0,0.07889 0.0637,0.142626 0.14264,0.142626 h 1.10379 c 0.0789,0 0.14263,-0.06373 0.14263,-0.142626 v -1.11156 a 3.9026041,3.9026041 0 0 0 1.52652,-0.635622 l 0.78859,0.788583 c 0.0558,0.05579 0.14576,0.05579 0.20153,0 l 0.78084,-0.78083 c 0.0558,-0.05579 0.0558,-0.145751 0,-0.201539 l -0.786,-0.785997 a 3.9026041,3.9026041 0 0 0 0.63098,-1.529107 h 1.1136 c 0.0789,0 0.14264,-0.06373 0.14264,-0.142626 v -1.10381 c 0,-0.07889 -0.0637,-0.142626 -0.14264,-0.142626 h -1.11154 a 3.9026041,3.9026041 0 0 0 -0.63563,-1.526522 l 0.78859,-0.788583 c 0.0558,-0.05579 0.0558,-0.145751 0,-0.201538 l -0.78084,-0.78083 c -0.0558,-0.05579 -0.14576,-0.05579 -0.20153,0 l -0.786,0.785997 a 3.9026041,3.9026041 0 0 0 -1.52911,-0.630967 v -1.113629 c 0,-0.07889 -0.0637,-0.142626 -0.14263,-0.142626 z m 0.55189,2.081527 a 3.0119976,3.0119976 0 0 1 3.01223,3.011702 3.0119976,3.0119976 0 0 1 -3.01223,3.01222 3.0119976,3.0119976 0 0 1 -3.01223,-3.01222 3.0119976,3.0119976 0 0 1 3.01223,-3.011702 z"
+                        strokeWidth="0.937" strokeLinejoin="round" />
+                        <g transform="matrix(.01024 0 0 .01024 -328.341 48.178)" id="g5762">
+                            <path d="m 364.427,259.214 c -14.051,-14.052 -32.733,-21.79 -52.605,-21.79 -10.619,0 -20.888,2.23 -30.302,6.431 -1.076,-1.701 -2.341,-3.298 -3.799,-4.756 l -54.188,-54.188 95.825,-95.825 c 2.645,2.529 5.363,3.085 7.197,3.085 4.06,0 6.8,-2.535 7.308,-3.042 L 356.06,66.932 c 3.771,-3.771 5.563,-7.434 5.477,-11.197 -0.135,-5.897 -4.599,-9.968 -9.767,-14.683 -1.53,-1.395 -3.111,-2.838 -4.7,-4.426 -1.588,-1.588 -3.03,-3.169 -4.426,-4.699 -4.782,-5.243 -8.912,-9.771 -14.939,-9.771 -3.676,0 -7.255,1.793 -10.941,5.48 l -22.281,22.281 c -2.746,2.746 -5.103,9.066 0.122,14.426 l -95.821,95.821 -56.131,-56.131 c 4.012,-9.232 6.137,-19.269 6.137,-29.638 0,-19.872 -7.739,-38.555 -21.791,-52.607 C 112.95,7.737 94.27,0 74.4,0 67.768,0 61.168,0.881 54.785,2.62 c -2.513,0.684 -4.569,2.752 -5.238,5.268 -0.683,2.565 0.096,5.206 2.121,7.232 0.266,0.267 26.668,26.873 35.46,35.665 1.31,1.31 1.193,4.015 1.058,4.81 l -0.069,0.489 c -1.005,10.964 -3.034,24.215 -4.565,27.493 -3.303,1.581 -16.767,3.637 -27.911,4.633 l -0.149,-0.013 -0.302,0.072 c -0.082,0.009 -0.26,0.024 -0.508,0.024 -1.253,0 -3.096,-0.349 -4.758,-2.011 C 40.773,77.13 15.387,51.932 15.145,51.692 13.085,49.632 10.998,49.2 9.609,49.2 6.384,49.2 3.497,51.549 2.587,54.913 -4.357,80.592 3,108.214 21.786,127 c 14.051,14.051 32.733,21.79 52.606,21.79 10.369,0 20.407,-2.126 29.639,-6.137 l 56.131,56.131 -22.013,22.013 c -3.536,-1.853 -7.497,-2.839 -11.618,-2.839 -6.693,0 -12.972,2.592 -17.678,7.298 l -12.282,12.283 c -1.175,-0.166 -2.369,-0.254 -3.578,-0.254 -6.692,0 -12.971,2.592 -17.677,7.298 l -64.351,64.35 c -4.707,4.706 -7.299,10.984 -7.299,17.678 0,6.693 2.592,12.971 7.299,17.678 l 28.44,28.44 c 4.706,4.706 10.984,7.298 17.678,7.298 6.692,0 12.971,-2.592 17.677,-7.298 l 64.35,-64.35 c 4.707,-4.706 7.299,-10.984 7.299,-17.678 0,-1.209 -0.087,-2.404 -0.254,-3.579 l 12.282,-12.282 c 4.707,-4.707 7.299,-10.984 7.299,-17.678 0,-4.121 -0.986,-8.082 -2.839,-11.618 l 22.013,-22.013 54.188,54.188 c 1.458,1.457 3.055,2.723 4.755,3.798 -4.201,9.414 -6.431,19.684 -6.431,30.302 0,19.873 7.739,38.555 21.791,52.607 14.048,14.048 32.729,21.785 52.6,21.786 0.001,0 0.001,0 0.003,0 6.63,0 13.23,-0.882 19.614,-2.62 2.513,-0.684 4.568,-2.752 5.236,-5.268 0.682,-2.565 -0.097,-5.206 -2.122,-7.23 -0.266,-0.267 -26.667,-26.874 -35.459,-35.666 -1.31,-1.31 -1.193,-4.015 -1.058,-4.811 l 0.069,-0.489 c 1.005,-10.964 3.034,-24.214 4.565,-27.493 3.303,-1.581 16.767,-3.637 27.911,-4.633 l 0.149,0.013 0.301,-0.072 c 0.083,-0.009 0.261,-0.024 0.508,-0.024 1.253,0 3.097,0.349 4.76,2.012 9.15,9.151 34.536,34.349 34.778,34.589 2.06,2.06 4.147,2.493 5.536,2.493 3.225,0 6.112,-2.349 7.023,-5.713 6.945,-25.677 -0.413,-53.299 -19.2,-72.086 z m -278.221,70.499 -7.226,7.226 c -7.778,7.778 -20.506,7.778 -28.284,0 l -3.94,-3.941 c -7.778,-7.778 -7.778,-20.506 0,-28.284 l 7.226,-7.226 c 7.778,-7.778 20.506,-7.778 28.284,0 l 3.941,3.941 c 7.777,7.778 7.777,20.506 -10e-4,28.284 z m 159.465,-84.042 c -1.465,1.464 -3.385,2.197 -5.304,2.197 -1.92,0 -3.839,-0.732 -5.304,-2.197 l -88.414,-88.414 c -2.929,-2.929 -2.929,-7.678 0,-10.607 2.931,-2.93 7.679,-2.929 10.607,0 l 27.519,27.519 v 0 l 24.749,24.749 v 0 l 36.146,36.147 c 2.93,2.929 2.93,7.678 0.001,10.606 z"
+                            id="path5730" />
+                        </g>
                     </g>
                 </g>
             </svg>

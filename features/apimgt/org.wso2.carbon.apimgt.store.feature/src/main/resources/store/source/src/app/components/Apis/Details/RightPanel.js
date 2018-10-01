@@ -13,7 +13,7 @@ const styles = theme => ({
         color: theme.palette.secondary.main,
     },
     rightMenu: {
-        width: window.innerWidth - theme.palette.custom.contentAreaWidth - theme.palette.custom.leftMenuWidth - 50,
+        width: window.innerWidth - theme.custom.contentAreaWidth - theme.custom.leftMenuWidth - 50,
         borderLeft: 'solid 1px ' + theme.palette.secondary.main,
         textAlign: 'center',
         fontFamily: theme.typography.fontFamily,

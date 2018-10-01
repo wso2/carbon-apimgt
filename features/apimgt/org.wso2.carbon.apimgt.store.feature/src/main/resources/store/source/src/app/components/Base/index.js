@@ -30,6 +30,7 @@ import Grow from "@material-ui/core/Grow";
 import Paper from "@material-ui/core/Paper";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import HowToReg from '@material-ui/icons/HowToReg';
+import VerticalDivider from '../Shared/VerticalDivider';
 
 const styles = theme => ({
   // New styles ..........
@@ -55,7 +56,8 @@ const styles = theme => ({
   },
   wrapper: {
     minHeight: "100%",
-    marginBottom: -50
+    marginBottom: -50,
+    background: 'transparent url('+ theme.custom.backgroundImage +') repeat left top',
   },
   contentWrapper: {
     display: 'flex',
@@ -168,6 +170,16 @@ class Layout extends React.Component {
     this.setState({ openUserMenu: false });
   };
 
+  componentWillMount(){
+      document.body.style.height = "100%";
+      document.body.style.margin = "0";
+
+  }
+  
+  componentWillUnmount(){
+      document.body.style.height = null;
+      document.body.style.margin = null;
+  }
   render() {
     const { classes, theme } = this.props;
     let user = AuthManager.getUser();
@@ -181,10 +193,10 @@ class Layout extends React.Component {
               <IconButton onClick={this.toggleGlobalNavBar} color="inherit">
                   <MenuIcon className={classes.menuIcon} />
                 </IconButton>
-                <Link to="/"><div className="main-logo"></div></Link>
-                <div className="vertical-divider"></div>
+                <Link to="/"><img src={theme.custom.logo} /></Link>
+                <VerticalDivider height={32} />
                 <GenericSearch  />
-                <div className="vertical-divider"></div>
+                <VerticalDivider height={72} />
                 {/* Environment menu */}
                 <EnvironmentMenu environments={this.state.environments}
                                          environmentLabel={Utils.getEnvironment().label}

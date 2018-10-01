@@ -33,6 +33,7 @@ import CopyToClipboard from "react-copy-to-clipboard";
 import Tooltip from "@material-ui/core/Tooltip";
 import Collapse from '@material-ui/core/Collapse';
 import CheckCircle from '@material-ui/icons/CheckCircle'
+import VerticalDivider from '../../Shared/VerticalDivider';
 
 
 const styles = theme => ({
@@ -60,7 +61,7 @@ const styles = theme => ({
   },
   starRate: {
     fontSize: 70,
-    color: theme.palette.custom.starColor
+    color: theme.custom.starColor
   },
   starRateMy: {
     fontSize: 70,
@@ -126,7 +127,7 @@ const styles = theme => ({
     width: 100
   },
   contentWrapper: {
-    width: theme.palette.custom.contentAreaWidth - theme.palette.custom.leftMenuWidth,
+    width: theme.custom.contentAreaWidth - theme.custom.leftMenuWidth,
     alignItems: 'center',
   },
   ratingBoxWrapper: {
@@ -255,7 +256,7 @@ class InfoBar extends React.Component {
               LISTING
             </div>
           </Link>
-          <div className="vertical-divider-70" />
+          <VerticalDivider height={70} />
           <div style={{ marginLeft: theme.spacing.unit }}>
             <Typography variant="display1">{application.name}</Typography>
             <Typography variant="caption" gutterBottom align="left">
