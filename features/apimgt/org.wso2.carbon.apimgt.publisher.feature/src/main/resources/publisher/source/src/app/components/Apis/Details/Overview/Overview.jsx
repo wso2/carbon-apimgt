@@ -27,6 +27,8 @@ import ChipInput from 'material-ui-chip-input';
 import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
 import moment from 'moment';
+import IconButton from '@material-ui/core/IconButton';
+import AddIcon from '@material-ui/icons/Add';
 
 import { Progress } from 'AppComponents/Shared';
 import Api from 'AppData/api';
@@ -97,12 +99,14 @@ class Overview extends Component {
         this.state = {
             api: null,
             editableDescriptionText: null,
+            additionalProperties: [],
         };
         this.downloadWSDL = this.downloadWSDL.bind(this);
         this.handleTagChange = this.handleTagChange.bind(this);
         this.handleTransportChange = this.handleTransportChange.bind(this);
         this.editDescription = this.editDescription.bind(this);
         this.handleInput = this.handleInput.bind(this);
+        this.handleAddAdditionalProperties = this.handleAddAdditionalProperties.bind(this);
     }
 
     downloadWSDL() {
@@ -191,6 +195,13 @@ class Overview extends Component {
                 Alert.error('Error occurred while retrieving API');
                 this.setState({ api: currentAPI });
             });
+    }
+
+    handleAddAdditionalProperties = () =>{
+        const temp = this.state.additionalProperties
+        temp.push([<AdditionalProperty property={{name :"", value:""}} isEditable={true}/>])
+        this.setState(temp)
+        console.log(this.state.additionalProperties)
     }
 
     /**
@@ -382,13 +393,17 @@ class Overview extends Component {
                     <Divider />
                 </Grid>
                 {api.additionalProperties
-                    .map(property => <AdditionalProperty property={property} isEditable={isEditable}/>)}
+                    .map((property,i) => <AdditionalProperty key={i} property={property} isEditable={isEditable}
+                                                             handler = {this.handleAddAdditionalProperties()}/>)}
+                {this.state.additionalProperties.map(i => i)}
+
+
             </Grid>
         );
     }
 }
 
-const AdditionalProperty = ({property,isEditable}) => (
+const AdditionalProperty = ({property,isEditable, handler}) => (
     <Grid item lg={5}>
         <TextField
             style={{
@@ -418,6 +433,14 @@ const AdditionalProperty = ({property,isEditable}) => (
                 readOnly: !isEditable,
             }}
         />
+        <IconButton
+            id={name}
+            aria-label='Add'
+            onClick={handler}
+        >
+            <AddIcon id='1' />
+        </IconButton>
+
     </Grid>
 );
 
