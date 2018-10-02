@@ -354,7 +354,7 @@ if(jagg.isCSRFTokenValid())
                     mappingJson = session.get("mappingJson");
                     if (mappingJson) {
                         var sequenceGenerator = Packages.org.wso2.carbon.apimgt.impl.soaptorest.SequenceGenerator;
-                        sequenceGenerator.generateSequencesFromSeagger(apiData.swagger,stringify(apiData));
+                        sequenceGenerator.generateSequencesFromSwagger(apiData.swagger,stringify(apiData));
                     }
                 }
             }
