@@ -975,6 +975,29 @@ class API extends Resource {
         return promised_getDedicatedGateway;
     }
 
+    /**
+     * Add new thumbnail image to an API
+     *
+     * @param {String} api_id id of the API
+     * @param {File} imageFile thumbnail image to be uploaded
+     */
+    addAPIThumbnail(api_id, imageFile) {
+        const promised_addAPIThumbnail = this.client.then((client) => {
+            const payload = {
+                apiId: api_id,
+                file: imageFile,
+                'Content-Type': imageFile.type,
+            };
+            return client.apis['API (Individual)'].post_apis__apiId__thumbnail(
+                payload,
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data'
+                }),
+            );
+        });
+
+        return promised_addAPIThumbnail;
+    }
 
     /**
      *
