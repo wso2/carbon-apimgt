@@ -26,7 +26,6 @@ import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
@@ -64,7 +63,7 @@ public class ApplicationImportExportManager {
         int appId = APIUtil.getApplicationId(appName, username);
         String groupId = apiConsumer.getGroupId(appId);
 
-        if (Boolean.getBoolean(RestApiConstants.MIGRATION_ENABLED)) {
+        if (Boolean.getBoolean(RestApiConstants.MIGRATION_MODE)) {
             application = apiConsumer.getApplicationsByName(username, appName, groupId);
         } else {
             application = apiConsumer.getApplicationById(appId);
