@@ -12,8 +12,8 @@ import Chip from '@material-ui/core/Chip';
 import { Link } from 'react-router-dom';
 // import { FormattedMessage } from 'react-intl';
 
-import ImageGenerator from '../../Listing/components/ImageGenerator';
 import DeleteApiButton from './DeleteApiButton';
+import ThumbnailView from '../../Listing/components/ThumbnailView';
 
 const styles = theme => ({
     root: {
@@ -40,7 +40,7 @@ const DetailsTopMenu = ({ classes, api }) => {
                 </Link>
             </Grid>
             <Grid item>
-                <ImageGenerator width={80} height={80} api={api} />
+                <ThumbnailView api={api} />
             </Grid>
             <Grid
                 item
