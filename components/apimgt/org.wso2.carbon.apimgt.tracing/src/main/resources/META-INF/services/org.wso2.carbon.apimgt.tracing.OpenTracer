@@ -1,0 +1,2 @@
+org.wso2.carbon.apimgt.tracing.JaegerTracer
+org.wso2.carbon.apimgt.tracing.ZipkinTracer

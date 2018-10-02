@@ -123,6 +123,8 @@ public class APIMgtGatewayConstants {
     public static final String API_MGT_USAGE_HANDLER = "API:API_Mgt_Usage_Handler";
     public static final String GET_ALL_URI_TEMPLATES = "API:GET_ALL_URI_TEMPLATES()";
     public static final String TRACING_ENABLED = "OpenTracer.Enabled";
+    public static final String SPAN_KIND = "span.kind";
+    public static final String SERVER = "server";
 
 }
 

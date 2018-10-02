@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.tracing;
 
-import io.opentracing.Tracer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -26,6 +25,8 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.ServiceLoader;
 
 public class TracingServiceImpl implements TracingService {
 
@@ -51,20 +52,16 @@ public class TracingServiceImpl implements TracingService {
                     configuration.getFirstProperty(TracingConstants.OPEN_TRACER_ENABLED)
                     : TracingConstants.DEFAULT_OPEN_TRACER_ENABLED);
 
-            Tracer tracer;
-            if (openTracerName.equalsIgnoreCase(TracingConstants.JAEGER) && enabled) {
-                tracer = new JaegerTracer().getTracer(serviceName);
-                return new TracingTracer(tracer);
+            if (enabled) {
+                ServiceLoader<OpenTracer> openTracers = ServiceLoader.load(OpenTracer.class,
+                        OpenTracer.class.getClassLoader());
+                HashMap<String, OpenTracer> tracerMap = new HashMap<>();
+                openTracers.forEach(t -> tracerMap.put(t.getName().toLowerCase(), t));
 
-            } else if (openTracerName.equalsIgnoreCase(TracingConstants.ZIPKIN) && enabled) {
-                tracer = new ZipkinTracer().getTracer(serviceName);
-                return new TracingTracer(tracer);
+                OpenTracer openTracer = tracerMap.get(openTracerName.toLowerCase());
 
-            } else {
-                log.error("Invalid test Configuration");
+                return new TracingTracer(openTracer.getTracer(serviceName));
             }
-            return null;
-
         } catch (APIManagementException e) {
             log.error("Error in reading configuration file", e);
         }

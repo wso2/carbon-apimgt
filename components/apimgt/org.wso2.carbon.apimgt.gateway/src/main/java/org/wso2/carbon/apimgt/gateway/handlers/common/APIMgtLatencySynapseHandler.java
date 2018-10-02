@@ -56,6 +56,7 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
             TracingSpan responseLatencySpan =
                     Util.startSpan(APIMgtGatewayConstants.RESPONSE_LATENCY, spanContext, tracer);
             Util.setTag(responseLatencySpan, APIMgtGatewayConstants.REQUEST_ID, requestId);
+            Util.setTag(responseLatencySpan, APIMgtGatewayConstants.SPAN_KIND, APIMgtGatewayConstants.SERVER);
             messageContext.setProperty(APIMgtGatewayConstants.RESPONSE_LATENCY, responseLatencySpan);
         }
         return true;

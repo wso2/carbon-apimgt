@@ -36,10 +36,12 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.oauth.OAuthAuthenticator;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.caching.impl.Util;
 import org.wso2.carbon.metrics.manager.MetricManager;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.metrics.manager.Timer;
 
 import java.util.TreeMap;
@@ -48,7 +50,8 @@ import java.util.TreeMap;
 * Test class for APIAuthenticationhandler
 * */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Util.class, MetricManager.class, Timer.Context.class, APIUtil.class})
+@PrepareForTest({Util.class, MetricManager.class, Timer.Context.class, APIUtil.class, ServiceReferenceHolder.class,
+        APIManagerConfigurationService.class, APIManagerConfiguration.class})
 public class APIAuthenticationHandlerTestCase {
     private Timer.Context context;
     private SynapseEnvironment synapseEnvironment;
@@ -67,6 +70,14 @@ public class APIAuthenticationHandlerTestCase {
 
         PowerMockito.mockStatic(Timer.Context.class);
         context = Mockito.mock(Timer.Context.class);
+
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(APIManagerConfiguration.class);
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        APIManagerConfiguration amConfig = Mockito.mock(APIManagerConfiguration.class);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        PowerMockito.when(serviceReferenceHolder.getAPIManagerConfiguration()).thenReturn(amConfig);
+        PowerMockito.when(amConfig.getFirstProperty(APIMgtGatewayConstants.TRACING_ENABLED)).thenReturn("true");
     }
 
     /*

@@ -145,18 +145,25 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "EXS_EXCEPTION_SOFTENING_RETURN_FALSE",
             justification = "Error is sent through payload")
     public boolean handleRequest(MessageContext messageContext) {
-        TracingSpan responseLatencySpan =
-                (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
-        TracingTracer tracer = Util.getGlobalTracer();
-        TracingSpan keySpan = Util.startSpan(APIMgtGatewayConstants.KEY_VALIDATION, responseLatencySpan, tracer);
-        Util.setTag(keySpan, APIMgtGatewayConstants.REQUEST_ID,
-                (String) messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID));
-        Util.baggageSet(keySpan, APIMgtGatewayConstants.REQUEST_ID,
-                (String) messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID));
-        messageContext.setProperty(APIMgtGatewayConstants.KEY_VALIDATION, keySpan);
-        org.apache.axis2.context.MessageContext axis2MC =
-                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-        axis2MC.setProperty(APIMgtGatewayConstants.KEY_VALIDATION, keySpan);
+        TracingSpan keySpan = null;
+        Boolean tracingEnabled = Boolean.valueOf(ServiceReferenceHolder
+                .getInstance()
+                .getAPIManagerConfiguration()
+                .getFirstProperty(APIMgtGatewayConstants.TRACING_ENABLED));
+        if (tracingEnabled) {
+            TracingSpan responseLatencySpan =
+                    (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+            TracingTracer tracer = Util.getGlobalTracer();
+            keySpan = Util.startSpan(APIMgtGatewayConstants.KEY_VALIDATION, responseLatencySpan, tracer);
+            Util.setTag(keySpan, APIMgtGatewayConstants.REQUEST_ID,
+                    (String) messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID));
+            Util.baggageSet(keySpan, APIMgtGatewayConstants.REQUEST_ID,
+                    (String) messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID));
+            messageContext.setProperty(APIMgtGatewayConstants.KEY_VALIDATION, keySpan);
+            org.apache.axis2.context.MessageContext axis2MC =
+                    ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+            axis2MC.setProperty(APIMgtGatewayConstants.KEY_VALIDATION, keySpan);
+        }
 
         Timer.Context context = startMetricTimer();
         long startTime = System.nanoTime();
@@ -203,7 +210,9 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
             handleAuthFailure(messageContext, e);
         } finally {
-            Util.finishSpan(keySpan);
+            if (tracingEnabled) {
+                Util.finishSpan(keySpan);
+            }
             messageContext.setProperty(APIMgtGatewayConstants.SECURITY_LATENCY,
                     TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime));
             stopMetricTimer(context);
