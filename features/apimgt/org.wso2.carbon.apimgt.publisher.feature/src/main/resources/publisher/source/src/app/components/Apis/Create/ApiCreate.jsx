@@ -19,7 +19,7 @@ import React from 'react';
 
 import { Route, Switch } from 'react-router-dom';
 import ApiCreateEndpoint from './Endpoint/ApiCreateEndpoint';
-import ApiCreateWebsocket from './Websocket/ApiCreateWebsocket';
+import ApiCreateWebsocket from './WebSocket/ApiCreateWebsocket';
 import ApiCreateSwagger from './Swagger/ApiCreateSwagger';
 import ApiCreateWSDL from './WSDL/ApiCreateWSDL';
 
