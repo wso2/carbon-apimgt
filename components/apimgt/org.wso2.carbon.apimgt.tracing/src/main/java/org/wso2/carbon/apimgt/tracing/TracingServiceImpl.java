@@ -20,55 +20,52 @@ package org.wso2.carbon.apimgt.tracing;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.apimgt.tracing.internal.ServiceReferenceHolder;
 
-import java.io.File;
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.ServiceLoader;
 
 public class TracingServiceImpl implements TracingService {
 
     private static final Log log = LogFactory.getLog(TracingServiceImpl.class);
-    private static APIManagerConfiguration configuration = new APIManagerConfiguration();
+    private static APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
+            .getAPIManagerConfiguration();
     private static TracingServiceImpl instance = new TracingServiceImpl();
+    private OpenTracer tracer = null;
 
     public static TracingServiceImpl getInstance() {
         return instance;
     }
 
-    @Override
-    public TracingTracer buildTracer(String serviceName) {
+    private TracingServiceImpl() {
         try {
-            String filePath = CarbonUtils.getCarbonConfigDirPath() + File.separator + "api-manager.xml";
-            configuration.load(filePath);
-
-            String openTracerName = getConfiguration().getFirstProperty(TracingConstants.OPEN_TRACER_NAME) != null ?
+            String openTracerName = configuration.getFirstProperty(TracingConstants.OPEN_TRACER_NAME) != null ?
                     configuration.getFirstProperty(TracingConstants.OPEN_TRACER_NAME)
                     : TracingConstants.DEFAULT_OPEN_TRACER_NAME;
-            boolean enabled = Boolean.parseBoolean(getConfiguration()
-                    .getFirstProperty(TracingConstants.OPEN_TRACER_ENABLED) != null ?
+            Boolean enabled =
+                    Boolean.valueOf(configuration.getFirstProperty(TracingConstants.OPEN_TRACER_ENABLED) != null ?
                     configuration.getFirstProperty(TracingConstants.OPEN_TRACER_ENABLED)
                     : TracingConstants.DEFAULT_OPEN_TRACER_ENABLED);
 
             if (enabled) {
                 ServiceLoader<OpenTracer> openTracers = ServiceLoader.load(OpenTracer.class,
                         OpenTracer.class.getClassLoader());
-                HashMap<String, OpenTracer> tracerMap = new HashMap<>();
-                openTracers.forEach(t -> tracerMap.put(t.getName().toLowerCase(), t));
-
-                OpenTracer openTracer = tracerMap.get(openTracerName.toLowerCase());
-
-                return new TracingTracer(openTracer.getTracer(serviceName));
+                Iterator iterator = openTracers.iterator();
+                while (iterator.hasNext()) {
+                    OpenTracer openTracer = (OpenTracer) iterator.next();
+                    if (openTracer.getName().equals(openTracerName)) {
+                        this.tracer = openTracer;
+                    }
+                }
             }
-        } catch (APIManagementException e) {
+        } catch (Exception e) {
             log.error("Error in reading configuration file", e);
         }
-        return null;
     }
 
-    public APIManagerConfiguration getConfiguration() {
-        return configuration;
+    @Override
+    public TracingTracer buildTracer(String serviceName) {
+        return new TracingTracer(tracer.getTracer(serviceName));
     }
 }

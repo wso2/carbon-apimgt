@@ -57,7 +57,6 @@ import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
-import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
@@ -165,9 +164,7 @@ public class APIThrottleHandler extends AbstractHandler {
         Timer.Context context = timer.start();
         long executionStartTime = System.nanoTime();
         TracingSpan throttlingLatencySpan = null;
-        Boolean tracingEnabled = Boolean.valueOf(ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
-                .getFirstProperty(APIMgtGatewayConstants.TRACING_ENABLED));
-        if (tracingEnabled) {
+        if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
                     (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
             TracingTracer tracer = Util.getGlobalTracer();
@@ -179,7 +176,7 @@ public class APIThrottleHandler extends AbstractHandler {
             messageContext.setProperty(APIMgtGatewayConstants.THROTTLING_LATENCY,
                     TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - executionStartTime));
             context.stop();
-            if (tracingEnabled) {
+            if (Util.tracingEnabled()) {
                 Util.finishSpan(throttlingLatencySpan);
             }
         }

@@ -146,11 +146,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             justification = "Error is sent through payload")
     public boolean handleRequest(MessageContext messageContext) {
         TracingSpan keySpan = null;
-        Boolean tracingEnabled = Boolean.valueOf(ServiceReferenceHolder
-                .getInstance()
-                .getAPIManagerConfiguration()
-                .getFirstProperty(APIMgtGatewayConstants.TRACING_ENABLED));
-        if (tracingEnabled) {
+        if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
                     (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
             TracingTracer tracer = Util.getGlobalTracer();
@@ -184,6 +180,9 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             }
         } catch (APISecurityException e) {
 
+            if (Util.tracingEnabled() && keySpan != null) {
+                Util.setTag(keySpan, APIMgtGatewayConstants.ERROR, APIMgtGatewayConstants.KEY_SPAN_ERROR);
+            }
             if (log.isDebugEnabled()) {
                 // We do the calculations only if the debug logs are enabled. Otherwise this would be an overhead
                 // to all the gateway calls that is happening.
@@ -210,7 +209,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
             handleAuthFailure(messageContext, e);
         } finally {
-            if (tracingEnabled) {
+            if (Util.tracingEnabled()) {
                 Util.finishSpan(keySpan);
             }
             messageContext.setProperty(APIMgtGatewayConstants.SECURITY_LATENCY,

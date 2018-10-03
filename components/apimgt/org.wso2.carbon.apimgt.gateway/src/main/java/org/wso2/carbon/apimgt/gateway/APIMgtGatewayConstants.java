@@ -125,6 +125,8 @@ public class APIMgtGatewayConstants {
     public static final String TRACING_ENABLED = "OpenTracer.Enabled";
     public static final String SPAN_KIND = "span.kind";
     public static final String SERVER = "server";
+    public static final String ERROR = "error";
+    public static final String KEY_SPAN_ERROR = "API Authentication Failure";
 
 }
 

@@ -101,9 +101,7 @@ public class APIKeyValidatorClient {
             Map headers = (Map) MessageContext.getCurrentMessageContext().getProperty(
                     org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
             TracingSpan span = null;
-            Boolean tracingEnabled = Boolean.valueOf(ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
-                    .getFirstProperty(APIMgtGatewayConstants.TRACING_ENABLED));
-            if (tracingEnabled) {
+            if (Util.tracingEnabled()) {
                 TracingSpan keySpan = (TracingSpan) MessageContext.getCurrentMessageContext()
                         .getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
                 TracingTracer tracer = Util.getGlobalTracer();
@@ -135,7 +133,7 @@ public class APIKeyValidatorClient {
                         + context + " with ID: " + MessageContext.getCurrentMessageContext().getMessageID() + " at "
                         + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
             }
-            if (tracingEnabled && span != null) {
+            if (Util.tracingEnabled() && span != null) {
                 Util.finishSpan(span);
             }
 
@@ -189,9 +187,7 @@ public class APIKeyValidatorClient {
         }
         try {
             TracingSpan span = null;
-            Boolean tracingEnabled = Boolean.valueOf(ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
-                    .getFirstProperty(APIMgtGatewayConstants.TRACING_ENABLED));
-            if (tracingEnabled) {
+            if (Util.tracingEnabled()) {
                 TracingSpan keySpan = (TracingSpan) MessageContext.getCurrentMessageContext()
                         .getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
                 TracingTracer tracer = Util.getGlobalTracer();
@@ -209,7 +205,7 @@ public class APIKeyValidatorClient {
                         + " call for:" + context + " at "
                         + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
             }
-            if (tracingEnabled) {
+            if (Util.tracingEnabled()) {
                 Util.finishSpan(span);
             }
             ServiceContext serviceContext = keyValidationServiceStub.

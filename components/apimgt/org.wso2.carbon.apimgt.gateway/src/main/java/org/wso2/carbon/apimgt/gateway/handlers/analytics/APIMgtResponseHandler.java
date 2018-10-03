@@ -27,7 +27,6 @@ import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
-import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
@@ -61,9 +60,7 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
 
     public boolean mediate(MessageContext mc) {
         TracingSpan span = null;
-        Boolean tracingEnabled = Boolean.valueOf(ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
-                .getFirstProperty(APIMgtGatewayConstants.TRACING_ENABLED));
-        if (tracingEnabled) {
+        if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan = (TracingSpan) mc.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
             TracingTracer tracer = Util.getGlobalTracer();
             span = Util.startSpan(APIMgtGatewayConstants.API_MGT_RESPONSE_HANDLER, responseLatencySpan, tracer);
@@ -71,7 +68,7 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
         if (publisher == null) {
             this.initializeDataPublisher();
         }
-        if (tracingEnabled) {
+        if (Util.tracingEnabled()) {
             Util.finishSpan(span);
         }
         try {

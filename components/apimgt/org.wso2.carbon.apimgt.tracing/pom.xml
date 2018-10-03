@@ -86,6 +86,11 @@
 			<groupId>io.opentracing.contrib</groupId>
 			<artifactId>span-reporter</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>io.opentracing</groupId>
+			<artifactId>opentracing-mock</artifactId>
+			<scope>compile</scope>
+		</dependency>
 	</dependencies>
 
 	<build>

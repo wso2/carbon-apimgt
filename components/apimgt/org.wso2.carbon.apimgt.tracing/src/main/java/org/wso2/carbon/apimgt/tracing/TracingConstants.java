@@ -26,7 +26,7 @@ class TracingConstants {
     static final String OPEN_TRACER_NAME = "OpenTracer.Name";
     static final String DEFAULT_OPEN_TRACER_NAME = "zipkin";
     static final String OPEN_TRACER_ENABLED = "OpenTracer.Enabled";
-    static final String DEFAULT_OPEN_TRACER_ENABLED = "true";
+    static final String DEFAULT_OPEN_TRACER_ENABLED = "false";
     static final String LATENCY = "Latency";
     static final String OPERATION_NAME = "Operation";
     static final String TAGS = "Tags";

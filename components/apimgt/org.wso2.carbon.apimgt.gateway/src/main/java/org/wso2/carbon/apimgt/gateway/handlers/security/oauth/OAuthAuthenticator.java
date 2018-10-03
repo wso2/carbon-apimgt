@@ -122,15 +122,13 @@ public class OAuthAuthenticator implements Authenticator {
         String httpMethod = (String)((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(Constants.Configuration.HTTP_METHOD);
 
-        Boolean tracingEnabled = Boolean.valueOf(ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
-                .getFirstProperty(APIMgtGatewayConstants.TRACING_ENABLED));
+        if (Util.tracingEnabled()) {
         TracingSpan keySpan = (TracingSpan) synCtx.getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
         TracingTracer tracer = Util.getGlobalTracer();
-        if (tracingEnabled) {
             getClientDomainSpan = Util.startSpan(APIMgtGatewayConstants.GET_CLIENT_DOMAIN, keySpan, tracer);
         }
         String clientDomain = getClientDomain(synCtx);
-        if (tracingEnabled) {
+        if (Util.tracingEnabled()) {
             Util.finishSpan(getClientDomainSpan);
         }
         if(log.isDebugEnabled() && null != clientDomain) {
@@ -143,12 +141,14 @@ public class OAuthAuthenticator implements Authenticator {
         org.apache.axis2.context.MessageContext axis2MessageCtx = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
         org.apache.axis2.context.MessageContext.setCurrentMessageContext(axis2MessageCtx);
 
-        if (tracingEnabled) {
+        if (Util.tracingEnabled()) {
+            TracingSpan keySpan = (TracingSpan) synCtx.getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
+            TracingTracer tracer = Util.getGlobalTracer();
             authenticationSchemeSpan =
                     Util.startSpan(APIMgtGatewayConstants.GET_RESOURCE_AUTHENTICATION_SCHEME, keySpan, tracer);
         }
         String authenticationScheme = getAPIKeyValidator().getResourceAuthenticationScheme(synCtx);
-        if (tracingEnabled) {
+        if (Util.tracingEnabled()) {
             Util.finishSpan(authenticationSchemeSpan);
         }
         context.stop();
@@ -227,12 +227,14 @@ public class OAuthAuthenticator implements Authenticator {
                     APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "GET_KEY_VALIDATION_INFO"));
             context = timer.start();
 
-            if (tracingEnabled) {
+            if (Util.tracingEnabled()) {
+                TracingSpan keySpan = (TracingSpan) synCtx.getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
+                TracingTracer tracer = Util.getGlobalTracer();
                 keyInfo = Util.startSpan(APIMgtGatewayConstants.GET_KEY_VALIDATION_INFO, keySpan, tracer);
             }
             info = getAPIKeyValidator().getKeyValidationInfo(apiContext, apiKey, apiVersion, authenticationScheme, clientDomain,
                     matchingResource, httpMethod, defaultVersionInvoked);
-            if (tracingEnabled) {
+            if (Util.tracingEnabled()) {
                 Util.finishSpan(keyInfo);
             }
             context.stop();

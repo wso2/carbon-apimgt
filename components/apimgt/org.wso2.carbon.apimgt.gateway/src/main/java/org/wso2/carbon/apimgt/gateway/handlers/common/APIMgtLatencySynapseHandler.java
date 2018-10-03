@@ -39,12 +39,10 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
                 .buildTracer(APIMgtGatewayConstants.SERVICE_NAME);
     }
 
-    private Boolean tracingEnabled = Boolean.valueOf(ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
-            .getFirstProperty(APIMgtGatewayConstants.TRACING_ENABLED));
 
     @Override
     public boolean handleRequestInFlow(MessageContext messageContext) {
-        if (tracingEnabled) {
+        if (Util.tracingEnabled()) {
             org.apache.axis2.context.MessageContext axis2MessageContext =
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext();
             Map headersMap =
@@ -64,7 +62,7 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 
     @Override
     public boolean handleRequestOutFlow(MessageContext messageContext) {
-        if (tracingEnabled) {
+        if (Util.tracingEnabled()) {
             TracingSpan parentSpan = (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
             TracingSpan backendLatencySpan =
                     Util.startSpan(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN, parentSpan, tracer);
@@ -75,7 +73,7 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 
     @Override
     public boolean handleResponseInFlow(MessageContext messageContext) {
-        if (tracingEnabled) {
+        if (Util.tracingEnabled()) {
             TracingSpan backendLatencySpan =
                     (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN);
             Util.finishSpan(backendLatencySpan);
@@ -85,7 +83,7 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 
     @Override
     public boolean handleResponseOutFlow(MessageContext messageContext) {
-        if (tracingEnabled) {
+        if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
                     (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
             Util.finishSpan(responseLatencySpan);

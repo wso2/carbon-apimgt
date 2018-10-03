@@ -76,9 +76,7 @@ public class APIManagerExtensionHandler extends AbstractHandler {
         Timer.Context context = startMetricTimer(DIRECTION_IN);
         long executionStartTime = System.nanoTime();
         TracingSpan requestMediationSpan = null;
-        Boolean tracingEnabled = Boolean.valueOf(ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
-                .getFirstProperty(APIMgtGatewayConstants.TRACING_ENABLED));
-        if (tracingEnabled) {
+        if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
                     (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
             TracingTracer tracer = Util.getGlobalTracer();
@@ -87,7 +85,7 @@ public class APIManagerExtensionHandler extends AbstractHandler {
         try {
             return mediate(messageContext, DIRECTION_IN);
         } finally {
-            if (tracingEnabled) {
+            if (Util.tracingEnabled()) {
                 Util.finishSpan(requestMediationSpan);
             }
             messageContext.setProperty(APIMgtGatewayConstants.REQUEST_MEDIATION_LATENCY,
@@ -112,7 +110,7 @@ public class APIManagerExtensionHandler extends AbstractHandler {
         try {
             return mediate(messageContext, DIRECTION_OUT);
         } finally {
-            if (tracingEnabled) {
+            if (Util.tracingEnabled()) {
                 Util.finishSpan(responseMediationSpan);
             }
             messageContext.setProperty(APIMgtGatewayConstants.RESPONSE_MEDIATION_LATENCY,

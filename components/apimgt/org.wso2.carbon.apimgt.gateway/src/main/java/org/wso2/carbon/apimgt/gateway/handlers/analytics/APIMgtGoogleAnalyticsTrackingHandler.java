@@ -43,7 +43,6 @@ import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
-import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
@@ -73,9 +72,7 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
 	@Override
 	public boolean handleRequest(MessageContext msgCtx) {
         TracingSpan span = null;
-        Boolean tracingEnabled = Boolean.valueOf(ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
-                .getFirstProperty(APIMgtGatewayConstants.TRACING_ENABLED));
-        if (tracingEnabled) {
+        if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan = (TracingSpan) msgCtx.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
             TracingTracer tracer = Util.getGlobalTracer();
             span = Util.startSpan(APIMgtGatewayConstants.GOOGLE_ANALYTICS_HANDLER, responseLatencySpan, tracer);
@@ -116,7 +113,7 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
             log.warn("Unable to create Google Analytics configuration using key: " + configKey);
             return true;
         }
-        if (tracingEnabled) {
+        if (Util.tracingEnabled()) {
             Util.finishSpan(span);
         }
         if (!config.isEnabled()) {

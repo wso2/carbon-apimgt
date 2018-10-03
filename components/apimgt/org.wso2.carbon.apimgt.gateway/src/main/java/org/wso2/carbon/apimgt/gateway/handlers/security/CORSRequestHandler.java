@@ -118,9 +118,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 
         Timer.Context context = startMetricTimer();
         TracingSpan CORSRequestHandlerSpan = null;
-        Boolean tracingEnabled = Boolean.valueOf(ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
-                .getFirstProperty(APIMgtGatewayConstants.TRACING_ENABLED));
-        if (tracingEnabled) {
+        if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
                     (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
             TracingTracer tracer = Util.getGlobalTracer();
@@ -225,7 +223,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             return true;
         } finally {
             stopMetricTimer(context);
-            if (tracingEnabled) {
+            if (Util.tracingEnabled()) {
                 Util.finishSpan(CORSRequestHandlerSpan);
             }
         }

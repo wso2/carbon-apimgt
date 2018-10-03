@@ -494,9 +494,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), THROTTLE_MAIN));
         Timer.Context context3 = timer3.start();
         TracingSpan throttleLatencySpan = null;
-        Boolean tracingEnabled = Boolean.valueOf(ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
-                .getFirstProperty(APIMgtGatewayConstants.TRACING_ENABLED));
-        if (tracingEnabled) {
+        if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
                     (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
             TracingTracer tracer = Util.getGlobalTracer();
@@ -509,7 +507,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
             messageContext.setProperty(APIMgtGatewayConstants.THROTTLING_LATENCY,
                     System.currentTimeMillis() - executionStartTime);
             context3.stop();
-            if (tracingEnabled) {
+            if (Util.tracingEnabled()) {
                 Util.finishSpan(throttleLatencySpan);
             }
         }

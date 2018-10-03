@@ -29,6 +29,7 @@ import io.opentracing.util.GlobalTracer;
 import io.opentracing.util.ThreadLocalScopeManager;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.tracing.internal.ServiceReferenceHolder;
 import zipkin2.reporter.AsyncReporter;
 import zipkin2.reporter.okhttp3.OkHttpSender;
 
@@ -38,7 +39,8 @@ import zipkin2.reporter.okhttp3.OkHttpSender;
 public class ZipkinTracer implements OpenTracer {
 
     private static final String NAME = "zipkin";
-    private static APIManagerConfiguration configuration = new TracingServiceImpl().getConfiguration();
+    private static APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
+            .getAPIManagerConfiguration();
 
     @Override
     public Tracer getTracer(String serviceName) {

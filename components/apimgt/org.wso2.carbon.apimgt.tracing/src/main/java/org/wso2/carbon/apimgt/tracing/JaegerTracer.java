@@ -26,6 +26,7 @@ import io.opentracing.util.GlobalTracer;
 import io.opentracing.util.ThreadLocalScopeManager;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.tracing.internal.ServiceReferenceHolder;
 
 /**
  * Class for getting Jaeger tracer from reading configuration file
@@ -33,7 +34,8 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 public class JaegerTracer implements OpenTracer {
 
     private static final String NAME = "jaeger";
-    private APIManagerConfiguration configuration = new TracingServiceImpl().getConfiguration();
+    private static APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
+            .getAPIManagerConfiguration();
 
     @Override
     public Tracer getTracer(String serviceName) {

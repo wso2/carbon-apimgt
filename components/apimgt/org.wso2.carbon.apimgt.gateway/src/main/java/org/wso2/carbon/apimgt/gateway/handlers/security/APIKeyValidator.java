@@ -358,16 +358,14 @@ public class APIKeyValidator {
 
         VerbInfoDTO verb = null;
         TracingSpan span = null;
-        Boolean tracingEnabled = Boolean.valueOf(ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
-                .getFirstProperty(APIMgtGatewayConstants.TRACING_ENABLED));
         try {
-            if (tracingEnabled) {
+            if (Util.tracingEnabled()) {
                 TracingSpan keySpan = (TracingSpan) synCtx.getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
                 TracingTracer tracer = Util.getGlobalTracer();
                 span = Util.startSpan(APIMgtGatewayConstants.FIND_MATCHING_VERB, keySpan, tracer);
             }
             verb = findMatchingVerb(synCtx);
-            if (tracingEnabled) {
+            if (Util.tracingEnabled()) {
                 Util.finishSpan(span);
             }
             if (verb != null) {
@@ -586,15 +584,13 @@ public class APIKeyValidator {
                 log.debug("Could not find API object in cache for key: " + apiCacheKey);
             }
             TracingSpan apiInfoDTOSpan = null;
-            Boolean tracingEnabled = Boolean.valueOf(ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
-                    .getFirstProperty(APIMgtGatewayConstants.TRACING_ENABLED));
-            if (tracingEnabled) {
+            if (Util.tracingEnabled()) {
                 TracingSpan keySpan = (TracingSpan) synCtx.getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
                 apiInfoDTOSpan =
                         Util.startSpan(APIMgtGatewayConstants.DO_GET_API_INFO_DTO, keySpan, Util.getGlobalTracer());
             }
             apiInfoDTO = doGetAPIInfo(apiContext, apiVersion);
-            if (tracingEnabled) {
+            if (Util.tracingEnabled()) {
                 Util.finishSpan(apiInfoDTOSpan);
             }
 

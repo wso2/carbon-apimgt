@@ -32,6 +32,7 @@ import java.util.Map;
  * Span utility class
  * */
 public class Util {
+    private static boolean isTraceEnabled = false;
 
     public static TracingSpan startSpan(String spanName, TracingSpan parentSpan, TracingTracer tracer) {
         if (parentSpan == null) {
@@ -117,5 +118,13 @@ public class Util {
             }
         }
         return null;
+    }
+
+    public static void setTracingEnabled(boolean isTraceEnabled){
+        Util.isTraceEnabled = isTraceEnabled;
+    }
+
+    public static boolean tracingEnabled() {
+        return isTraceEnabled;
     }
 }

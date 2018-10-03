@@ -23,11 +23,15 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.tracing.TracingService;
 import org.wso2.carbon.apimgt.tracing.TracingServiceImpl;
 
 /**
  * @scr.component name="org.wso2.carbon.apimgt.tracing.internal.TracingServiceComponent" immediate="true"
+ * @scr.reference name="api.manager.config.service"
+ * interface="org.wso2.carbon.apimgt.impl.APIManagerConfigurationService" cardinality="1..1"
+ * policy="dynamic" bind="setAPIManagerConfigurationService" unbind="unsetAPIManagerConfigurationService"
  */
 
 public class TracingServiceComponent {
@@ -39,7 +43,7 @@ public class TracingServiceComponent {
         try {
             log.debug("Tracing Component activated");
             BundleContext bundleContext = componentContext.getBundleContext();
-            registration = bundleContext.registerService(TracingService.class, new TracingServiceImpl(), null);
+            registration = bundleContext.registerService(TracingService.class, TracingServiceImpl.getInstance(), null);
         } catch (Throwable t) {
             log.error("Error occured in tracing component activation", t);
         }
@@ -49,4 +53,13 @@ public class TracingServiceComponent {
         log.debug("Tracing Component deactivated");
         registration.unregister();
     }
+
+    protected void setAPIManagerConfigurationService(APIManagerConfigurationService amcService) {
+        ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(amcService);
+    }
+
+    protected void unsetAPIManagerConfigurationService(APIManagerConfigurationService amcService) {
+        ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(null);
+    }
+
 }

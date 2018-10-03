@@ -1430,6 +1430,12 @@
                 <artifactId>span-reporter</artifactId>
                 <version>${span.reporter.version}</version>
             </dependency>
+            <dependency>
+                <groupId>io.opentracing</groupId>
+                <artifactId>opentracing-mock</artifactId>
+                <version>${opentracing.mock.version}</version>
+                <scope>compile</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -1634,6 +1640,7 @@
         <brave.opentracing.version>0.32.0</brave.opentracing.version>
         <opentracing.api.version>0.31.0</opentracing.api.version>
         <span.reporter.version>0.1.0</span.reporter.version>
+        <opentracing.mock.version>0.31.0</opentracing.mock.version>
     </properties>
 </project>
 
