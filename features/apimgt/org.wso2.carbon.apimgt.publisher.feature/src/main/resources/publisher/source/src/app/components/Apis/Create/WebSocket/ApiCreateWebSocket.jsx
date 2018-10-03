@@ -16,7 +16,7 @@
 import React from 'react';
 import Commons from 'AppComponents/Apis/Create/Components/Commons';
 
-const ApiCreateWebsocket = (props) => {
+const ApiCreateWebSocket = (props) => {
     return (<Commons {...props} type='ws' />);
 };
-export default ApiCreateWebsocket;
+export default ApiCreateWebSocket;
