@@ -116,12 +116,6 @@ class SampleAPI extends Component {
                 technicalOwner: 'WSO2 APIM Team',
                 technicalOwnerEmail: 'dev@wso2.org',
             },
-            additionalProperties: [
-                {
-                    name : "hello",
-                    value : "test"
-                }
-            ],
             tags: ['Pet', 'Store', 'Cat', 'Hippopotamus'],
             transport: ['http', 'https'],
             visibility: 'PUBLIC',

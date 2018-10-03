@@ -36,6 +36,7 @@ import Alert from 'AppComponents/Shared/Alert';
 
 import APIPropertyField from './APIPropertyField';
 import BusinessPlans from './BusinessPlans';
+import AdditionalProperty from './AdditionalProperty';
 
 const styles = () => ({
     imageSideContent: {
@@ -99,7 +100,7 @@ class Overview extends Component {
         this.state = {
             api: null,
             editableDescriptionText: null,
-            additionalProperties: [],
+            additionalProperties: props.api.additionalProperties,
         };
         this.downloadWSDL = this.downloadWSDL.bind(this);
         this.handleTagChange = this.handleTagChange.bind(this);
@@ -107,6 +108,7 @@ class Overview extends Component {
         this.editDescription = this.editDescription.bind(this);
         this.handleInput = this.handleInput.bind(this);
         this.handleAddAdditionalProperties = this.handleAddAdditionalProperties.bind(this);
+        this.handleDelete = this.handleDelete.bind(this);
     }
 
     downloadWSDL() {
@@ -197,10 +199,20 @@ class Overview extends Component {
             });
     }
 
-    handleAddAdditionalProperties = () => {
-        const temp = this.state.additionalProperties;
-        temp.push([<AdditionalProperty property={{ name: '', value: '' }} isEditable />]);
-        this.setState(temp);
+    handleAddAdditionalProperties() {
+        this.setState({
+            additionalProperties : [...this.state.additionalProperties, {
+                'name': '',
+                'value': '',
+            }],
+        });
+    }
+
+    handleDelete(name) {
+        const { additionalProperties } = this.state;
+        this.setState({
+            additionalProperties : additionalProperties.filter(property => property.name !== name),
+        });
     }
 
     /**
@@ -245,6 +257,8 @@ class Overview extends Component {
     /** @inheritDoc */
     render() {
         const { api, isEditable } = this.props;
+        const { additionalProperties } = this.state;
+
         if (!api) {
             return <Progress />;
         }
@@ -391,74 +405,24 @@ class Overview extends Component {
                     <Typography variant='headline'> Additional Properties</Typography>
                     <Divider />
                 </Grid>
-                { api.additionalProperties
+                { additionalProperties
                     .map(property => (<AdditionalProperty
                         property={property}
                         isEditable={isEditable}
-                        handler={this.handleAddAdditionalProperties}
+                        onDelete={this.handleDelete}
                     />))
                 }
-                {this.state.additionalProperties.map(i => i)}
-            </Grid>
-        );
-    }
-}
-
-
-class AdditionalProperty extends React {
-    render() {
-        return (
-            <Grid item lg={5}>
-                <TextField
-                    style={{
-                        justifyContent: 'space-between',
-                        marginRight: 25,
-                    }}
-                    id='api-property'
-                    label={this.isEditable && 'name'}
-                    defaultValue={this.property.name}
-                    placeholder='My Property'
-                    margin='normal'
-                    InputProps={{
-                        readOnly: !this.isEditable,
-                    }}
-                />
-                <TextField
-                    style={{
-                        justifyContent: 'space-between',
-                        marginLeft: 25,
-                    }}
-                    id='api-property-value'
-                    label={this.isEditable && 'value'}
-                    defaultValue={this.property.value}
-                    placeholder='Property Value'
-                    margin='normal'
-                    InputProps={{
-                        readOnly: !this.isEditable,
-                    }}
-                />
                 <IconButton
                     id='add'
                     aria-label='Add'
-                    onClick={this.handler}
+                    onClick={this.handleAddAdditionalProperties}
                 >
                     <AddIcon id='1' />
                 </IconButton>
-
             </Grid>
         );
     }
 }
-
-
-AdditionalProperty.defaultprops = {
-    property: PropTypes.shape({
-        name: PropTypes.string,
-        value: PropTypes.string,
-    }).isRequired,
-    isEditable: PropTypes.bool,
-    handler: PropTypes.func(),
-};
 
 
 Overview.defaultProps = {
