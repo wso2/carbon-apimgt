@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 import React from 'react';
-import Commons from 'AppComponents/Apis/Create/Components/Commons';
+import APICreateForm from 'AppComponents/Apis/Create/Components/APICreateForm';
 
 const ApiCreateWebSocket = (props) => {
-    return (<Commons {...props} type='ws' />);
+    return (<APICreateForm {...props} type='ws' />);
 };
 export default ApiCreateWebSocket;

@@ -49,14 +49,14 @@ const styles = theme => ({
 
 /**
  * Create API with inline Endpoint
- * @class Commons
+ * @class APICreateForm
  * @extends {Component}
  */
-class Commons extends Component {
+class APICreateForm extends Component {
     /**
      * Creates an instance of Commons.
      * @param {any} props @inheritDoc
-     * @memberof Commons
+     * @memberof APICreateForm
      */
     constructor(props) {
         super(props);
@@ -155,7 +155,7 @@ class Commons extends Component {
     /**
      * @inheritDoc
      * @returns {React.Component} Render API Create with endpoint UI
-     * @memberof Commons
+     * @memberof APICreateForm
      */
     render() {
         const { classes, type } = this.props;
@@ -209,7 +209,7 @@ class Commons extends Component {
     }
 }
 
-Commons.propTypes = {
+APICreateForm.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     history: PropTypes.shape({
         push: PropTypes.func.isRequired,
@@ -217,4 +217,4 @@ Commons.propTypes = {
     type: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles)(Commons);
+export default withStyles(styles)(APICreateForm);
