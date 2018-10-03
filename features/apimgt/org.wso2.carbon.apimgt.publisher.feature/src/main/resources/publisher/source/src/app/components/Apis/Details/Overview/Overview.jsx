@@ -197,11 +197,10 @@ class Overview extends Component {
             });
     }
 
-    handleAddAdditionalProperties = () =>{
-        const temp = this.state.additionalProperties
-        temp.push([<AdditionalProperty property={{name :"", value:""}} isEditable={true}/>])
-        this.setState(temp)
-        console.log(this.state.additionalProperties)
+    handleAddAdditionalProperties = () => {
+        const temp = this.state.additionalProperties;
+        temp.push([<AdditionalProperty property={{ name: '', value: '' }} isEditable />]);
+        this.setState(temp);
     }
 
     /**
@@ -392,57 +391,75 @@ class Overview extends Component {
                     <Typography variant='headline'> Additional Properties</Typography>
                     <Divider />
                 </Grid>
-                {api.additionalProperties
-                    .map((property,i) => <AdditionalProperty key={i} property={property} isEditable={isEditable}
-                                                             handler = {this.handleAddAdditionalProperties()}/>)}
+                { api.additionalProperties
+                    .map(property => (<AdditionalProperty
+                        property={property}
+                        isEditable={isEditable}
+                        handler={this.handleAddAdditionalProperties}
+                    />))
+                }
                 {this.state.additionalProperties.map(i => i)}
+            </Grid>
+        );
+    }
+}
 
+
+class AdditionalProperty extends React {
+    render() {
+        return (
+            <Grid item lg={5}>
+                <TextField
+                    style={{
+                        justifyContent: 'space-between',
+                        marginRight: 25,
+                    }}
+                    id='api-property'
+                    label={this.isEditable && 'name'}
+                    defaultValue={this.property.name}
+                    placeholder='My Property'
+                    margin='normal'
+                    InputProps={{
+                        readOnly: !this.isEditable,
+                    }}
+                />
+                <TextField
+                    style={{
+                        justifyContent: 'space-between',
+                        marginLeft: 25,
+                    }}
+                    id='api-property-value'
+                    label={this.isEditable && 'value'}
+                    defaultValue={this.property.value}
+                    placeholder='Property Value'
+                    margin='normal'
+                    InputProps={{
+                        readOnly: !this.isEditable,
+                    }}
+                />
+                <IconButton
+                    id='add'
+                    aria-label='Add'
+                    onClick={this.handler}
+                >
+                    <AddIcon id='1' />
+                </IconButton>
 
             </Grid>
         );
     }
 }
 
-const AdditionalProperty = ({property,isEditable, handler}) => (
-    <Grid item lg={5}>
-        <TextField
-            style={{
-                justifyContent: 'space-between',
-                marginRight: 25,
-            }}
-            id='api-property'
-            label={isEditable && 'name'}
-            defaultValue={property.name}
-            placeholder='My Property'
-            margin='normal'
-            InputProps={{
-                readOnly: !isEditable,
-            }}
-        />
-        <TextField
-            style={{
-                justifyContent: 'space-between',
-                marginLeft: 25,
-            }}
-            id='api-property-value'
-            label={isEditable && 'value'}
-            defaultValue={property.value}
-            placeholder='Property Value'
-            margin='normal'
-            InputProps={{
-                readOnly: !isEditable,
-            }}
-        />
-        <IconButton
-            id={name}
-            aria-label='Add'
-            onClick={handler}
-        >
-            <AddIcon id='1' />
-        </IconButton>
 
-    </Grid>
-);
+AdditionalProperty.defaultprops = {
+    property: PropTypes.shape({
+        name: PropTypes.string,
+        value: PropTypes.string,
+    }).isRequired,
+    isEditable: PropTypes.bool,
+    handler: PropTypes.func(),
+};
+
 
 Overview.defaultProps = {
     isEditable: false,
