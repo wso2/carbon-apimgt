@@ -54,7 +54,7 @@ const styles = theme => ({
  */
 class APICreateForm extends Component {
     /**
-     * Creates an instance of Commons.
+     * Creates an instance of APICreateForm.
      * @param {any} props @inheritDoc
      * @memberof APICreateForm
      */
@@ -71,7 +71,7 @@ class APICreateForm extends Component {
     /**
      * Change input
      * @param {any} e Synthetic React Event
-     * @memberof Commons
+     * @memberof APICreateForm
      */
     inputChange({ target }) {
         const { type } = this.props;
