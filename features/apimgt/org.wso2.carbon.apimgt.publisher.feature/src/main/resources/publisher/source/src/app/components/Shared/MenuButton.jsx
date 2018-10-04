@@ -14,6 +14,9 @@ const styles = theme => ({
     paper: {
         marginRight: theme.spacing.unit * 2,
     },
+    possition: {
+        zIndex: 1,
+    },
 });
 
 /**
@@ -81,7 +84,14 @@ class MenuButton extends React.Component {
                 >
                     {children}  ▼
                 </Button>
-                <Popper open={open} placement='bottom-start' anchorEl={this.anchorEl} transition disablePortal>
+                <Popper
+                    open={open}
+                    placement='bottom-start'
+                    anchorEl={this.anchorEl}
+                    transition
+                    disablePortal
+                    className={this.props.classes.possition}
+                >
                     {({ TransitionProps, placement }) => (
                         <Grow
                             {...TransitionProps}

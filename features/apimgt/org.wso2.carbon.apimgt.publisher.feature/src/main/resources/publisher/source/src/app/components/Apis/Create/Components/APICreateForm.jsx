@@ -49,14 +49,14 @@ const styles = theme => ({
 
 /**
  * Create API with inline Endpoint
- * @class ApiCreateEndpoint
+ * @class APICreateForm
  * @extends {Component}
  */
-class ApiCreateEndpoint extends Component {
+class APICreateForm extends Component {
     /**
-     * Creates an instance of ApiCreateEndpoint.
+     * Creates an instance of APICreateForm.
      * @param {any} props @inheritDoc
-     * @memberof ApiCreateEndpoint
+     * @memberof APICreateForm
      */
     constructor(props) {
         super(props);
@@ -71,7 +71,7 @@ class ApiCreateEndpoint extends Component {
     /**
      * Change input
      * @param {any} e Synthetic React Event
-     * @memberof ApiCreateEndpoint
+     * @memberof APICreateForm
      */
     inputChange({ target }) {
         const { type } = this.props;
@@ -155,7 +155,7 @@ class ApiCreateEndpoint extends Component {
     /**
      * @inheritDoc
      * @returns {React.Component} Render API Create with endpoint UI
-     * @memberof ApiCreateEndpoint
+     * @memberof APICreateForm
      */
     render() {
         const { classes, type } = this.props;
@@ -209,7 +209,7 @@ class ApiCreateEndpoint extends Component {
     }
 }
 
-ApiCreateEndpoint.propTypes = {
+APICreateForm.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     history: PropTypes.shape({
         push: PropTypes.func.isRequired,
@@ -217,4 +217,4 @@ ApiCreateEndpoint.propTypes = {
     type: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles)(ApiCreateEndpoint);
+export default withStyles(styles)(APICreateForm);
