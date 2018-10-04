@@ -128,6 +128,15 @@ class ThumbnailView extends Component {
     }
 
     /**
+     * Clean up resource
+     */
+    componentWillUnmount() {
+        if (this.state.thumbnail) {
+            windowURL.revokeObjectURL(this.state.thumbnail);
+        }
+    }
+
+    /**
      * Event listener for file drop on the dropzone
      *
      * @param {File} acceptedFile dropped file
@@ -180,10 +189,6 @@ class ThumbnailView extends Component {
         if (this.state.file) {
             windowURL.revokeObjectURL(this.state.file.preview);
         }
-        if (this.state.thumbnail) {
-            windowURL.revokeObjectURL(this.state.thumbnail);
-        }
-
         this.setState({ open: false, file: null });
     }
 

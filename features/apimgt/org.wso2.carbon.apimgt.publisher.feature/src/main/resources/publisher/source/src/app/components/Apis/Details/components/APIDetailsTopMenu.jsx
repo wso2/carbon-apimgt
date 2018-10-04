@@ -10,10 +10,9 @@ import Grid from '@material-ui/core/Grid';
 import { withStyles } from '@material-ui/core/styles';
 import Chip from '@material-ui/core/Chip';
 import { Link } from 'react-router-dom';
-// import { FormattedMessage } from 'react-intl';
+import ThumbnailView from 'AppComponents/Apis/Listing/components/ThumbnailView';
 
 import DeleteApiButton from './DeleteApiButton';
-import ThumbnailView from '../../Listing/components/ThumbnailView';
 
 const styles = theme => ({
     root: {
