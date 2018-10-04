@@ -5,7 +5,7 @@ import Card from '@material-ui/core/Card';
 import Button from '@material-ui/core/Button';
 import PropTypes from 'prop-types';
 import {withStyles} from '@material-ui/core/styles';
-import {FormattedMessage} from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 
 const styles = theme => ({
     grid:{
@@ -15,8 +15,7 @@ const styles = theme => ({
         margin:theme.spacing.unit*2
     },
     typography:{
-        margin:theme.spacing.unit*2,
-        //height:theme.spacing.unit*4
+        margin:theme.spacing.unit*2
     }
 
 });
@@ -35,13 +34,16 @@ class EmptyPage extends Component{
                     <Grid item sm={4} >
                         <Card>
                             <Typography gutterBottom variant='headline' component='h4' className={classes.typography}>
-                                Add New Document from Inline
+                                <FormattedMessage id='create.doc.inline.title'
+                                    DefaultMessage='Create New Document from Inline'/>
                             </Typography>
                             <Typography className={classes.typography}>
-                                <FormattedMessage id='Create a new Document from Inline by clicking the create button below'/>
+                                <FormattedMessage id='create.document.inline'
+                                   DefaultMessage='Documenting your API makes your consumers experience even better. Create a new document from Inline'/>
                             </Typography>
                             <Button className={classes.button} variant="contained">
-                                Create
+                                <FormattedMessage id='create.btn'
+                                   DefaultMessage='Create'/>
                             </Button>   
                         </Card>
                     </Grid>
@@ -49,13 +51,16 @@ class EmptyPage extends Component{
                     <Grid item sm={4}>
                         <Card>
                             <Typography gutterBottom variant='headline' component='h4' className={classes.typography}>
-                                Create New Document from File or URL
+                                <FormattedMessage id='create.doc.fileurl.title'
+                                   DefaultMessage='Create New Document from File or URL'/>
                             </Typography>
                             <Typography className={classes.typography}>
-                                <FormattedMessage id='Create a new Document from File or URL by clicking the create button below'/>
+                                <FormattedMessage id='create.document.fileUrl'
+                                 DefaultMeassage="Documenting your API makes your consumers experience even better. Create a new document by File or URL"/>
                             </Typography>
                             <Button className={classes.button} variant="contained">
-                                Create
+                                <FormattedMessage id='create.btn'
+                                DefaultMessage='Create'/>
                             </Button>    
                         </Card>
                     </Grid>
