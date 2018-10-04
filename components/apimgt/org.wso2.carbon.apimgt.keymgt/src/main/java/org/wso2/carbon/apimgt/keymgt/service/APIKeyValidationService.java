@@ -123,8 +123,6 @@ public class APIKeyValidationService extends AbstractAdmin {
             Map map = (Map) axis2MessageContext.getProperty(MessageContext.TRANSPORT_HEADERS);
             TracingSpan spanContext = Util.extract(tracer, map);
             validateMainSpan = Util.startSpan(TracingConstants.VALIDATE_MAIN, spanContext, tracer);
-            String key = Util.baggageGet(spanContext, TracingConstants.REQUEST_ID);
-            Util.setTag(validateMainSpan, TracingConstants.REQUEST_ID, key);
         }
         Map headersMap = null;
         String activityID = null;

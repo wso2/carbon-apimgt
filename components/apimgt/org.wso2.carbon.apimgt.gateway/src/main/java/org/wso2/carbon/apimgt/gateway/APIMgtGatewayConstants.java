@@ -104,7 +104,6 @@ public class APIMgtGatewayConstants {
      * Constants for Open Tracing
      * */
     public static final String SERVICE_NAME = "API:Latency";
-    public static final String REQUEST_ID = "request-id";
     public static final String RESPONSE_LATENCY = "API:Response_Latency";
     public static final String BACKEND_LATENCY_SPAN = "API:Backend_Latency";
     public static final String KEY_VALIDATION = "API:Key_Validation_Latency";
@@ -127,6 +126,13 @@ public class APIMgtGatewayConstants {
     public static final String SERVER = "server";
     public static final String ERROR = "error";
     public static final String KEY_SPAN_ERROR = "API Authentication Failure";
+    public static final String RESPONSE_MEDIATION_ERROR = "Error in Response Mediation";
+    public static final String REQUEST_MEDIATION_ERROR = "Error in Request Mediation";
+    public static final String RESOURCE_AUTH_ERROR = "Error in Resource Authentication";
+    public static final String THROTTLE_HANDLER_ERROR = "Error in Throttle Handler";
+    public static final String API_THROTTLE_HANDLER_ERROR = "Error in API Throttle Handler";
+    public static final String CORS_REQUEST_HANDLER_ERROR = "Error in CORS_Request Handler";
+    public static final String API_KEY_VALIDATOR_ERROR = "Error while accessing backend services for API key validation";
 
 }
 

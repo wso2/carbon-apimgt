@@ -365,15 +365,20 @@ public class APIKeyValidator {
                 span = Util.startSpan(APIMgtGatewayConstants.FIND_MATCHING_VERB, keySpan, tracer);
             }
             verb = findMatchingVerb(synCtx);
-            if (Util.tracingEnabled()) {
-                Util.finishSpan(span);
-            }
             if (verb != null) {
                 synCtx.setProperty(APIConstants.VERB_INFO_DTO, verb);
             }
         } catch (ResourceNotFoundException e) {
+            if (Util.tracingEnabled() && span != null) {
+                Util.setTag(span, APIMgtGatewayConstants.ERROR,
+                        APIMgtGatewayConstants.RESOURCE_AUTH_ERROR);
+            }
             log.error("Could not find matching resource for request", e);
             return APIConstants.NO_MATCHING_AUTH_SCHEME;
+        } finally {
+            if (Util.tracingEnabled()) {
+                Util.finishSpan(span);
+            }
         }
 
         if (verb != null) {

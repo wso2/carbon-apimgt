@@ -172,6 +172,12 @@ public class APIThrottleHandler extends AbstractHandler {
         }
         try {
             return doThrottle(messageContext);
+        } catch (SynapseException e) {
+            if (Util.tracingEnabled()) {
+                Util.setTag(throttlingLatencySpan, APIMgtGatewayConstants.ERROR,
+                        APIMgtGatewayConstants.API_THROTTLE_HANDLER_ERROR);
+            }
+            throw e;
         } finally {
             messageContext.setProperty(APIMgtGatewayConstants.THROTTLING_LATENCY,
                     TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - executionStartTime));

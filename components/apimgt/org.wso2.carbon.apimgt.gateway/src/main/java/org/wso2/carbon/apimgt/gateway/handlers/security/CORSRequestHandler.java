@@ -221,6 +221,12 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             }
             setCORSHeaders(messageContext, selectedResource);
             return true;
+        } catch (Exception e) {
+            if (Util.tracingEnabled() && CORSRequestHandlerSpan != null) {
+                Util.setTag(CORSRequestHandlerSpan, APIMgtGatewayConstants.ERROR,
+                        APIMgtGatewayConstants.CORS_REQUEST_HANDLER_ERROR);
+            }
+            throw e;
         } finally {
             stopMetricTimer(context);
             if (Util.tracingEnabled()) {

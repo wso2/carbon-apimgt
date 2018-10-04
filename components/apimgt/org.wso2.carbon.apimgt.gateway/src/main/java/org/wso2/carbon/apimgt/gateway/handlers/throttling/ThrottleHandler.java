@@ -503,6 +503,12 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         long executionStartTime = System.currentTimeMillis();
         try {
             return doThrottle(messageContext);
+        } catch (Exception e) {
+            if (Util.tracingEnabled() && throttleLatencySpan != null) {
+                Util.setTag(throttleLatencySpan, APIMgtGatewayConstants.ERROR,
+                        APIMgtGatewayConstants.THROTTLE_HANDLER_ERROR);
+            }
+            throw e;
         } finally {
             messageContext.setProperty(APIMgtGatewayConstants.THROTTLING_LATENCY,
                     System.currentTimeMillis() - executionStartTime);

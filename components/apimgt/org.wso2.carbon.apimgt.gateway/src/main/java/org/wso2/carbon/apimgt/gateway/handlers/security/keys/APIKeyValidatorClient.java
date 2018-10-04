@@ -61,6 +61,7 @@ public class APIKeyValidatorClient {
     private String username;
     private String password;
     private String cookie;
+    Map<String, String> tracerSpecificCarrier = new HashMap<>();
 
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "PRMC_POSSIBLY_REDUNDANT_METHOD_CALLS",
                                                       justification = "It is required to set two options on the Options object")
@@ -96,20 +97,21 @@ public class APIKeyValidatorClient {
         if (cookie != null) {
             keyValidationServiceStub._getServiceClient().getOptions().setProperty(HTTPConstants.COOKIE_STRING, cookie);
         }
+        TracingSpan span = null;
+        if (Util.tracingEnabled()) {
+            TracingSpan keySpan = (TracingSpan) MessageContext.getCurrentMessageContext()
+                    .getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
+            TracingTracer tracer = Util.getGlobalTracer();
+            if (keySpan != null) {
+                span = Util.startSpan(APIMgtGatewayConstants.KEY_VALIDATION_FROM_GATEWAY_NODE, keySpan, tracer);
+                Util.inject(keySpan, tracer, tracerSpecificCarrier);
+            }
+        }
         try {
             List headerList = (List) keyValidationServiceStub._getServiceClient().getOptions().getProperty(org.apache.axis2.transport.http.HTTPConstants.HTTP_HEADERS);
             Map headers = (Map) MessageContext.getCurrentMessageContext().getProperty(
                     org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-            TracingSpan span = null;
             if (Util.tracingEnabled()) {
-                TracingSpan keySpan = (TracingSpan) MessageContext.getCurrentMessageContext()
-                        .getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
-                TracingTracer tracer = Util.getGlobalTracer();
-                Map<String, String> tracerSpecificCarrier = new HashMap<>();
-                if (keySpan != null) {
-                    span = Util.startSpan(APIMgtGatewayConstants.KEY_VALIDATION_FROM_GATEWAY_NODE, keySpan, tracer);
-                    Util.inject(keySpan, tracer, tracerSpecificCarrier);
-                }
                 for (Map.Entry<String, String> entry : tracerSpecificCarrier.entrySet()) {
                     headerList.add(new Header(entry.getKey(), entry.getValue()));
                 }
@@ -133,17 +135,21 @@ public class APIKeyValidatorClient {
                         + context + " with ID: " + MessageContext.getCurrentMessageContext().getMessageID() + " at "
                         + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
             }
-            if (Util.tracingEnabled() && span != null) {
-                Util.finishSpan(span);
-            }
 
             ServiceContext serviceContext = keyValidationServiceStub.
                     _getServiceClient().getLastOperationContext().getServiceContext();
             cookie = (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
             return toDTO(dto);
         } catch (Exception e) {
+            if (Util.tracingEnabled()) {
+                Util.setTag(span, APIMgtGatewayConstants.ERROR, APIMgtGatewayConstants.API_KEY_VALIDATOR_ERROR);
+            }
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                                            "Error while accessing backend services for API key validation", e);
+        } finally {
+            if (Util.tracingEnabled() && span != null) {
+                Util.finishSpan(span);
+            }
         }
     }
 

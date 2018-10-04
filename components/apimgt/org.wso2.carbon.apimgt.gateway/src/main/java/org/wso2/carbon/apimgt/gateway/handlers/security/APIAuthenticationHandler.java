@@ -151,10 +151,6 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                     (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
             TracingTracer tracer = Util.getGlobalTracer();
             keySpan = Util.startSpan(APIMgtGatewayConstants.KEY_VALIDATION, responseLatencySpan, tracer);
-            Util.setTag(keySpan, APIMgtGatewayConstants.REQUEST_ID,
-                    (String) messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID));
-            Util.baggageSet(keySpan, APIMgtGatewayConstants.REQUEST_ID,
-                    (String) messageContext.getProperty(APIMgtGatewayConstants.REQUEST_ID));
             messageContext.setProperty(APIMgtGatewayConstants.KEY_VALIDATION, keySpan);
             org.apache.axis2.context.MessageContext axis2MC =
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext();

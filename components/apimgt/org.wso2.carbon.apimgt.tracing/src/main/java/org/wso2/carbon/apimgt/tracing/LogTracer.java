@@ -36,7 +36,6 @@ public class LogTracer implements OpenTracer{
         Reporter reporter = new TracingReporter(LogFactory.getLog(TracingConstants.TRACER));
         Tracer tracerR = new TracerR(tracer, reporter, new ThreadLocalScopeManager());
         GlobalTracer.register(tracerR);
-
         return tracerR;
     }
 

@@ -24,7 +24,6 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
@@ -84,6 +83,12 @@ public class APIManagerExtensionHandler extends AbstractHandler {
         }
         try {
             return mediate(messageContext, DIRECTION_IN);
+        } catch (Exception e) {
+            if (Util.tracingEnabled() && requestMediationSpan != null) {
+                Util.setTag(requestMediationSpan, APIMgtGatewayConstants.ERROR,
+                        APIMgtGatewayConstants.REQUEST_MEDIATION_ERROR);
+            }
+            throw e;
         } finally {
             if (Util.tracingEnabled()) {
                 Util.finishSpan(requestMediationSpan);
@@ -98,9 +103,7 @@ public class APIManagerExtensionHandler extends AbstractHandler {
         Timer.Context context = startMetricTimer(DIRECTION_OUT);
         long executionStartTime = System.nanoTime();
         TracingSpan responseMediationSpan = null;
-        Boolean tracingEnabled = Boolean.valueOf(ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
-                .getFirstProperty(APIMgtGatewayConstants.TRACING_ENABLED));
-        if (tracingEnabled) {
+        if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
                     (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
             TracingTracer tracer = Util.getGlobalTracer();
@@ -109,6 +112,12 @@ public class APIManagerExtensionHandler extends AbstractHandler {
         }
         try {
             return mediate(messageContext, DIRECTION_OUT);
+        } catch (Exception e) {
+            if (Util.tracingEnabled() && responseMediationSpan != null) {
+                Util.setTag(responseMediationSpan, APIMgtGatewayConstants.ERROR,
+                        APIMgtGatewayConstants.RESPONSE_MEDIATION_ERROR);
+            }
+            throw e;
         } finally {
             if (Util.tracingEnabled()) {
                 Util.finishSpan(responseMediationSpan);

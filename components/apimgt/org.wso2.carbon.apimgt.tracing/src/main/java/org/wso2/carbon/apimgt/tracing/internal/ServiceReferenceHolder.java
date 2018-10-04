@@ -38,9 +38,7 @@ public class ServiceReferenceHolder {
         try {
             String filePath = getFilePath();
             configuration.load(filePath);
-
             Util.setTracingEnabled(Boolean.parseBoolean(configuration.getFirstProperty(OPEN_TRACER_ENABLED)));
-
         } catch (Exception e) {
             log.error("Error in loading configurations", e);
         }
