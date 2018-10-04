@@ -448,12 +448,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     getApiDAO().addAPI(createdAPI);
                 } else if (API.Visibility.RESTRICTED == createdAPI.getVisibility()) {
                     //get all the roles in the system
-                    Set<String> allAvailableRoles = APIUtils.getAllAvailableRoles();
                     //get the roles needed to be associated with the API
                     apiRoleList = createdAPI.getVisibleRoles();
-                    if (APIUtils.checkAllowedRoles(allAvailableRoles, apiRoleList)) {
-                        getApiDAO().addAPI(createdAPI);
-                    }
+                    isRolesExist(apiRoleList);
+                    getApiDAO().addAPI(createdAPI);
                 }
 
                 APIUtils.logDebug("API " + createdAPI.getName() + "-" + createdAPI.getVersion() + " was created " +
@@ -495,6 +493,22 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             throw new APIManagementException(message, ExceptionCodes.GATEWAY_EXCEPTION);
         }
         return apiBuilder.getId();
+    }
+
+    private void isRolesExist(Set<String> apiRoleList) throws APIManagementException {
+
+        if (apiRoleList.isEmpty()) {
+            String errorMsg = "Roles not added";
+            log.error(errorMsg);
+            throw new APIManagementException(errorMsg, ExceptionCodes.ROLES_CANNOT_BE_EMPTY);
+        }
+        for (String role : apiRoleList) {
+            if (!getIdentityProvider().isValidRole(role)) {
+                String errorMsg = "Invalid role(s) found.";
+                log.error(errorMsg);
+                throw new APIManagementException(errorMsg, ExceptionCodes.UNSUPPORTED_ROLE);
+            }
+        }
     }
 
     private void validateEndpoints(Map<String, Endpoint> endpointMap, boolean apiUpdate) throws
@@ -646,14 +660,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                             if (API.Visibility.PUBLIC == api.getVisibility()) {
                                 getApiDAO().updateAPI(api.getId(), api);
                             } else if (API.Visibility.RESTRICTED == api.getVisibility()) {
-                                //get all the roles in the system
-                                Set<String> availableRoles = APIUtils.getAllAvailableRoles();
-                                //get the roles needed to be associated with the API
                                 Set<String> apiRoleList = api.getVisibleRoles();
-                                //if the API has role based visibility, update the API with role checking
-                                if (APIUtils.checkAllowedRoles(availableRoles, apiRoleList)) {
-                                    getApiDAO().updateAPI(api.getId(), api);
-                                }
+                                isRolesExist(apiRoleList);
+                                getApiDAO().updateAPI(api.getId(), api);
                             }
                             getApiDAO().updateApiDefinition(api.getId(), updatedSwagger, api.getUpdatedBy());
                             getApiDAO().updateGatewayConfig(api.getId(), updatedGatewayConfig, api.getUpdatedBy());
@@ -666,14 +675,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         if (API.Visibility.PUBLIC == api.getVisibility()) {
                             getApiDAO().updateAPI(api.getId(), api);
                         } else if (API.Visibility.RESTRICTED == api.getVisibility()) {
-                            //get all the roles in the system
-                            Set<String> allAvailableRoles = APIUtils.getAllAvailableRoles();
-                            //get the roles needed to be associated with the API
                             Set<String> apiRoleList = api.getVisibleRoles();
+                            isRolesExist(apiRoleList);
                             //if the API has role based visibility, update the API with role checking
-                            if (APIUtils.checkAllowedRoles(allAvailableRoles, apiRoleList)) {
-                                getApiDAO().updateAPI(api.getId(), api);
-                            }
+                            getApiDAO().updateAPI(api.getId(), api);
                         }
                         getApiDAO().updateApiDefinition(api.getId(), updatedSwagger, api.getUpdatedBy());
                         getApiDAO().updateGatewayConfig(api.getId(), updatedGatewayConfig, api.getUpdatedBy());

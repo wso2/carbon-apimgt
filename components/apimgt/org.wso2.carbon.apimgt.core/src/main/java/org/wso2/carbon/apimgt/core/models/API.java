@@ -319,7 +319,7 @@ public final class API {
      * Visibility options
      */
     public enum Visibility {
-        PUBLIC, PRIVATE, RESTRICTED,
+        PUBLIC, RESTRICTED,
     }
 
     private final String id;

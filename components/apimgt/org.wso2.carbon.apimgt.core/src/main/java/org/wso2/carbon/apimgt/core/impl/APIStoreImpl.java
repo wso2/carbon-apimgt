@@ -187,6 +187,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
     @Override
     public API getAPIbyUUID(String uuid) throws APIManagementException {
+
         API api = super.getAPIbyUUID(uuid);
         if (api != null && (APIStatus.CREATED.getStatus().equals(api.getLifeCycleStatus()) || APIStatus.MAINTENANCE
                 .getStatus()
@@ -195,6 +196,24 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             throw new APIManagementException(
                     "Attempt to access an API which is in a restricted state: " + api.getLifeCycleStatus()
                             + ", API uuid : " + uuid, ExceptionCodes.API_NOT_FOUND);
+        }
+        if (api != null && API.Visibility.RESTRICTED.equals(api.getVisibility())) {
+            String userId = getIdentityProvider().getIdOfUser(getUsername());
+            Set<String> roles = new HashSet<>();
+            if (userId != null) {
+                roles = new HashSet<>(getIdentityProvider().getRoleNamesOfUser(userId));
+            }
+            boolean found = false;
+            for (String role : api.getVisibleRoles()) {
+                if (roles.contains(role)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                throw new APIManagementException("Attempt to access an API which is in a restricted visibility: " +
+                        api.getVisibility() + ", API uuid : " + uuid, ExceptionCodes.API_NOT_FOUND);
+            }
         }
         return api;
     }
@@ -1428,16 +1447,14 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 String labelId = getLabelDAO().getLabelIdByNameAndType(label, APIMgtConstants.LABEL_TYPE_STORE);
                 labelIds.add(labelId);
             }
-
-            // TODO: Need to validate users roles against results returned
-            //this should be current logged in user
-            String user = "admin";
-            //role list of current user
-            Set<String> roles = APIUtils.getAllRolesOfUser(user);
+            String userId = getIdentityProvider().getIdOfUser(getUsername());
+            Set<String> roles = new HashSet<>();
+            if (userId != null) {
+                roles = new HashSet<>(getIdentityProvider().getRoleNamesOfUser(userId));
+            }
             if (query != null && !query.isEmpty()) {
                 String[] attributes = query.split(",");
                 Map<SearchType, String> attributeMap = new EnumMap<>(SearchType.class);
-                // TODO get the logged in user and user roles from key manager.
                 boolean isFullTextSearch = false;
                 String searchAttribute, searchValue;
                 if (!query.contains(":")) {
@@ -1454,7 +1471,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 }
 
                 if (isFullTextSearch) {
-                    apiResults = getApiDAO().searchAPIsByStoreLabel(roles, user, query, offset, limit, labelIds);
+                    apiResults = getApiDAO().searchAPIsByStoreLabel(roles, getUsername(), query, offset, limit,
+                            labelIds);
                 } else {
                     apiResults = getApiDAO().searchAPIsByAttributeInStore(roles, labelIds,
                             attributeMap,
@@ -1642,7 +1660,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         ApplicationCreationResponse applicationResponse = null;
 
         try {
-            if (getApplicationDAO().isApplicationNameExists(application.getName())) {
+            if (getApplicationDAO().isApplicationNameExists(application.getName(), getUsername())) {
                 String message = "An application already exists with a duplicate name - " + application.getName();
                 log.error(message);
                 throw new APIMgtResourceAlreadyExistsException(message, ExceptionCodes.APPLICATION_ALREADY_EXISTS);

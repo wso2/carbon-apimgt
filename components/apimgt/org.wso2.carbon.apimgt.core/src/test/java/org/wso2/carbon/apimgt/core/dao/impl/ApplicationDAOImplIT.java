@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
 
@@ -91,11 +92,11 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
 
         ApplicationDAO applicationDAO = new DAOFactory().getApplicationDAO();
         //check for a non-existing application
-        Assert.assertFalse(applicationDAO.isApplicationNameExists("ExistingApp"));
+        Assert.assertFalse(applicationDAO.isApplicationNameExists("ExistingApp", UUID.randomUUID().toString()));
         //add new app
         Application app = TestUtil.addTestApplication();
         //check for the existing application
-        Assert.assertTrue(applicationDAO.isApplicationNameExists(app.getName()));
+        Assert.assertTrue(applicationDAO.isApplicationNameExists(app.getName(), app.getCreatedUser()));
     }
 
     @Test
