@@ -71,6 +71,9 @@
   "create": "Create",
   "back": "Back",
   "create.scopes": "Create Scopes",
-  "create.scope.description": "Scopes enable fine-grained access control to API resources based on user roles. You define scopes to an API's resources. When a user invokes the API, his/her OAuth 2 bearer token cannot grant access to any API resource beyond its associated scopes."
-
+  "create.scope.description": "Scopes enable fine-grained access control to API resources based on user roles. You define scopes to an API's resources. When a user invokes the API, his/her OAuth 2 bearer token cannot grant access to any API resource beyond its associated scopes.",
+  "create.document.inline": "Documenting your API makes your consumers experience even better. Create a new document by Inline",
+  "create.document.fileUrl": "Documenting your API makes your consumers experience even better. Create a new document by File or URL",
+  "create.doc.inline.title": "Create New Document from Inline",
+  "create.doc.fileurl.title": "Create New Document from File or URL"
 }
