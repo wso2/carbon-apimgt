@@ -17,33 +17,73 @@
  */
 
 import React, {Component} from 'react'
-import BasicTabs from './NavTab'
-import Overview from './Overview'
+import PropTypes from 'prop-types';
 import ProductionKey from './ProductionKey'
 import SandboxKey from './SandboxKey'
 import Subscriptions from './Subscriptions'
-import {Route, Switch, Redirect} from 'react-router-dom'
+import {Route, Switch, Redirect, Link} from 'react-router-dom'
 import API from '../../../data/api'
 import {PageNotFound} from '../../Base/Errors/index'
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
-import ComputerIcon from '@material-ui/icons/Computer';
-import SubscriptionsIcon  from '@material-ui/icons/Subscriptions';
-import KeysIcon  from '@material-ui/icons/VpnKey';
 import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
-import Paper from '@material-ui/core/Paper';
+import { withStyles } from '@material-ui/core/styles';
+import CustomIcon from '../../Shared/CustomIcon';
+import InfoBar from './InfoBar';
 
 
-export default class Details extends Component {
+
+const styles = theme => ({
+    linkColor: {
+        color: theme.palette.getContrastText(theme.palette.background.leftMenu),
+    },
+    LeftMenu: {
+        backgroundColor: theme.palette.background.leftMenu,
+        width: 90,
+        textAlign: 'center',
+        fontFamily: theme.typography.fontFamily,
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        top: 0,
+    },
+    leftLInk: {
+        paddingTop: 10,
+        paddingBottom: 10,  
+        paddingLeft: 5,
+        paddingRight: 5,
+        fontSize: 11,
+        cursor: 'pointer'
+    },
+    leftLInkMain: {
+        borderRight: 'solid 1px ' + theme.palette.background.leftMenu,
+        paddingBottom: 5,
+        paddingTop: 5,
+        height: 60,
+        fontSize: 12,
+        cursor: 'pointer',
+        backgroundColor: theme.palette.background.leftMenuActive,
+        color: theme.palette.getContrastText(theme.palette.background.leftMenuActive),
+        textDecoration: 'none',
+    },
+    detailsContent: {
+        display: 'flex',
+        flex: 1,
+    },
+      content: {
+        display: 'flex',
+        flex: 1,
+        flexDirection: 'column',
+        marginLeft: 90,
+        paddingBottom: 20,
+      }
+});
+class Details extends Component {
 
     constructor(props) {
         super(props);
         this.state = {
             application: null,
-            value: 'overview',
+            active: 'overview',
         };
     }
 
@@ -71,9 +111,16 @@ export default class Details extends Component {
         this.setState({value});
         this.props.history.push({pathname: "/applications/" + this.props.match.params.application_uuid + "/" + value});
     };
-
+    handleMenuSelect = (menuLink) => {
+        this.props.history.push({pathname: "/applications/" + this.props.match.params.application_uuid + "/" + menuLink});
+        //(menuLink === "overview") ? this.infoBar.toggleOverview(true) : this.infoBar.toggleOverview(false) ;
+        this.setState({active: menuLink});
+    }
     render() {
-        let redirect_url = "/applications/" + this.props.match.params.application_uuid + "/overview";
+        let redirect_url = "/applications/" + this.props.match.params.application_uuid + "/productionkeys";
+
+        const  { classes, theme } = this.props;
+        const strokeColor = theme.palette.getContrastText(theme.palette.background.leftMenu);
 
         if (this.state.notFound) {
             return <ResourceNotFound />
@@ -82,36 +129,55 @@ export default class Details extends Component {
         }
 
         return (
-            <Grid container spacing={0} justify="center">
-                <Grid item xs={12} sm={6} md={8} lg={8} xl={10} >
-                    <Typography type="title" gutterBottom className="page-title">
-                        {this.state.application.name}
-                    </Typography>
-                    <Paper>
-                        <Tabs
-                            value={this.state.value}
-                            onChange={this.handleChange}
-                            fullWidth
-                            indicatorColor="primary"
-                            textColor="primary"
+            <React.Fragment>
+                <div className={classes.LeftMenu}>
+                    <Link to={"/apis"}>
+                        <div className={classes.leftLInkMain}>
+                            <CustomIcon width={52} height={52} icon="applications" />
+                        </div>
+                    </Link>
+                    <div className={classes.leftLInk} 
+                        onClick={( () => this.handleMenuSelect('productionkeys') ) }
+                        style={{backgroundColor: this.state.active === "productionkeys" ? theme.palette.background.appBar : ''}}
                         >
-                            <Tab value="overview" icon={<ComputerIcon />} label="Overview"/>
-                            <Tab value="productionkeys" icon={<KeysIcon />} label="Production Keys"/>
-                            <Tab value="sandBoxkeys" icon={<KeysIcon />} label="SandBox Keys"/>
-                            <Tab value="subscriptions" icon={<SubscriptionsIcon />} label="Subscriptions"/>
-                        </Tabs>
-                    </Paper>    
-                    <Switch>
-                        <Redirect exact from="/applications/:applicationId" to={redirect_url}/>
-                        <Route path="/applications/:applicationId/overview" component={Overview}/>
-                        <Route path="/applications/:applicationId/productionkeys" component={ProductionKey}/>
-                        <Route path="/applications/:applicationId/sandBoxkeys" component={SandboxKey}/>
-                        <Route path="/applications/:applicationId/subscriptions" component={Subscriptions}/>
-                        <Route component={PageNotFound}/>
-                    </Switch>
-                </Grid>
-        </Grid>
+                        <CustomIcon strokeColor={strokeColor}  width={32} height={32} icon="keys" />
+                        <div className={classes.linkColor}>Production Keys</div>
+                    </div>
+                    <div className={classes.leftLInk} 
+                        onClick={( () => this.handleMenuSelect('sandBoxkeys') ) }
+                        style={{backgroundColor: this.state.active === "sandBoxkeys" ? theme.palette.background.appBar : ''}}
+                        >
+                        <CustomIcon strokeColor={strokeColor}  width={32} height={32} icon="keys" />
+                        <div className={classes.linkColor}>Sandbox Keys</div>
+                    </div>
+                    <div className={classes.leftLInk} 
+                        onClick={( () => this.handleMenuSelect('subscriptions') ) }
+                        style={{backgroundColor: this.state.active === "subscriptions" ? theme.palette.background.appBar : ''}}
+                        >
+                        <CustomIcon strokeColor={strokeColor}  width={32} height={32} icon="keys" />
+                        <div className={classes.linkColor}>Subscriptions</div>
+                    </div>
+                </div>
+            <div className={classes.content}>
+              <InfoBar applicationId={this.props.match.params.application_uuid} innerRef={node => this.infoBar = node}/>
+                <Switch>
+                    <Redirect exact from="/applications/:applicationId" to={redirect_url}/>
+                    <Route path="/applications/:applicationId/productionkeys" component={ProductionKey}/>
+                    <Route path="/applications/:applicationId/sandBoxkeys" component={SandboxKey}/>
+                    <Route path="/applications/:applicationId/subscriptions" component={Subscriptions}/>
+                    <Route component={PageNotFound}/>
+                </Switch>
+              </div>
+            </React.Fragment>
+            
         );
     }
 
 }
+
+Details.propTypes = {
+    classes: PropTypes.object.isRequired,
+    theme: PropTypes.object.isRequired,
+  };
+  
+  export default withStyles(styles, { withTheme: true })(Details);

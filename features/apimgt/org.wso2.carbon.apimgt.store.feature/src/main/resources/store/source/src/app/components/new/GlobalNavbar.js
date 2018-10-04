@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { Link } from "react-router-dom";
 import {
   ListItemIcon,
   Drawer,
@@ -10,57 +11,39 @@ import {
 } from "@material-ui/core";
 import APIsIcon from "@material-ui/icons/Power";
 import EndpointsIcon from "@material-ui/icons/ZoomOutMapOutlined";
-import HomeIcon from "@material-ui/icons/Home";
+import CustomIcon from '../Shared/CustomIcon';
 
 const styles = theme => ({
   list: {
-    width: 250
+    width: theme.palette.custom.drawerWidth
   },
   drawerStyles: {
     top: theme.mixins.toolbar["@media (min-width:600px)"].minHeight
+  },
+  listText: {
+    color: theme.palette.getContrastText(theme.palette.background.drawer)
   }
 });
 
-const homeIcon = (
-  <div>
-    <ListItem button>
-      <ListItemIcon>
-        <HomeIcon />
-      </ListItemIcon>
-      <ListItemText primary="Home" />
-    </ListItem>
-  </div>
-);
-
-const globalPages = (
-  <div>
-    <ListItem button>
-      <ListItemIcon>
-        <APIsIcon />
-      </ListItemIcon>
-      <ListItemText primary="APIs" />
-    </ListItem>
-    <ListItem button>
-      <ListItemIcon>
-        <EndpointsIcon />
-      </ListItemIcon>
-      <ListItemText primary="Endpoints" />
-    </ListItem>
-  </div>
-);
-
 class GlobalNavBar extends Component {
   render() {
-    const { open, toggleGlobalNavBar, classes } = this.props;
+    const { open, toggleGlobalNavBar, classes, theme } = this.props;
     // TODO: Refer to fix: https://github.com/mui-org/material-ui/issues/10076#issuecomment-361232810 ~tmkb
     const commonStyle = {
       style: { top: 64 }
     };
+    const paperStyles = {
+      style: {
+        backgroundColor: theme.palette.background.drawer,
+        top: 64
+      }
+    };
+    let strokeColor = theme.palette.getContrastText(theme.palette.background.leftMenu);
     return (
       <div>
         <Drawer
           className={classes.drawerStyles}
-          PaperProps={commonStyle}
+          PaperProps={paperStyles}
           SlideProps={commonStyle}
           ModalProps={commonStyle}
           BackdropProps={commonStyle}
@@ -74,9 +57,30 @@ class GlobalNavBar extends Component {
             onKeyDown={toggleGlobalNavBar}
           >
             <div className={classes.list}>
-              <List>{homeIcon}</List>
-              <Divider />
-              <List>{globalPages}</List>
+              <List>
+                <Link to="/apis">
+                  <ListItem button>
+                    <ListItemIcon>
+                      <CustomIcon width={32} height={32} icon="api" className={classes.listText} strokeColor={strokeColor} />
+                    </ListItemIcon>
+                    <ListItemText
+                      classes={{ primary: classes.listText }}
+                      primary="APIs"
+                    />
+                  </ListItem>
+                </Link>
+                <Link to="/applications">
+                  <ListItem button>
+                    <ListItemIcon>
+                      <CustomIcon width={32} height={32} icon="applications" className={classes.listText} strokeColor={strokeColor} />
+                    </ListItemIcon>
+                    <ListItemText
+                      classes={{ primary: classes.listText }}
+                      primary="Applications"
+                    />
+                  </ListItem>
+                </Link>
+              </List>
             </div>
           </div>
         </Drawer>
@@ -85,4 +89,4 @@ class GlobalNavBar extends Component {
   }
 }
 
-export default withStyles(styles)(GlobalNavBar);
+export default withStyles(styles, { withTheme: true })(GlobalNavBar);

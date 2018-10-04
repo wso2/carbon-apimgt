@@ -26,21 +26,22 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import { withStyles } from '@material-ui/core/styles';
 import green from '@material-ui/core/colors/green';
 import { Divider, Card, CardContent, CardActions } from '@material-ui/core/';
-import { Create, GetApp } from '@material-ui/icons';
+import Create from '@material-ui/icons/Create';
+import GetApp from '@material-ui/icons/GetApp';
 import { PropTypes } from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
-import API from '../../../../data/api';
-import Alert from '../../../Shared/Alert';
+import API from 'AppData/api';
+import Alert from 'AppComponents/Shared/Alert';
 import APICreateMenu from '../components/APICreateMenu';
 
-const styles = {
+const styles = theme => ({
     buttonProgress: {
         color: green[500],
         position: 'relative',
     },
-    headline: { paddingTop: '5px', paddingLeft: '10px' },
-};
+    headline: { paddingTop: theme.spacing.unit * 1.25, paddingLeft: theme.spacing.unit * 2.5 },
+});
 
 /**
  * Show Initial Welcome card if no APIs are available to list
@@ -74,20 +75,21 @@ class SampleAPI extends Component {
     handleDeploySample() {
         this.setState({ deploying: true });
         const promisedSampleAPI = this.createSampleAPI();
-        promisedSampleAPI.then((sampleAPI) => {
-            sampleAPI
-                .publish()
-                .then(() => {
-                    const message = 'Pet-Store API Published successfully';
-                    this.setState({ published: true, api: sampleAPI });
-                    Alert.info(message);
-                })
-                .catch((error) => {
-                    console.error(error);
-                    this.setState({ deploying: false });
-                    Alert.error(error);
-                });
-        });
+        promisedSampleAPI
+            .then((sampleAPI) => {
+                sampleAPI
+                    .publish()
+                    .then(() => {
+                        const message = 'Pet-Store API Published successfully';
+                        this.setState({ published: true, api: sampleAPI });
+                        Alert.info(message);
+                    })
+                    .catch((error) => {
+                        console.error(error);
+                        this.setState({ deploying: false });
+                        Alert.error(error);
+                    });
+            });
     }
 
     /**
@@ -142,11 +144,13 @@ class SampleAPI extends Component {
         return sampleAPI.save().catch((error) => {
             console.error(error);
             this.setState({ deploying: false });
-            Alert.error(error);
-            const errorData = JSON.parse(error.data);
-            const messageTxt =
-                'Error[' + errorData.code + ']: ' + errorData.description + ' | ' + errorData.message + '.';
-            Alert.info(messageTxt);
+            const { response } = error;
+            if (response) {
+                const { code, description, message } = response.body;
+                Alert.error(`ERROR[${code}] : ${description} | ${message}`);
+            } else {
+                Alert.error(error);
+            }
         });
     }
 

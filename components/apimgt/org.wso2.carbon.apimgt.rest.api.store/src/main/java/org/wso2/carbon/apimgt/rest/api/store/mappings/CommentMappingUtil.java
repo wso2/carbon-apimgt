@@ -18,6 +18,10 @@
  */
 package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.rest.api.store.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.CommentListDTO;
@@ -31,17 +35,21 @@ import java.util.List;
  */
 public class CommentMappingUtil {
 
+    private static final Logger log = LoggerFactory.getLogger(CommentMappingUtil.class);
+
     /**
      * Converts a Comment object into corresponding REST API CommentDTO object
      *
      * @param comment comment object
      * @return CommentDTO
      */
-    public static CommentDTO fromCommentToDTO(Comment comment) {
+    public static CommentDTO fromCommentToDTO(Comment comment) throws APIManagementException {
 
         CommentDTO commentDTO = new CommentDTO();
         commentDTO.setCommentId(comment.getUuid());
-        commentDTO.setUsername(comment.getCommentedUser());
+        String realName = APIManagerFactory.getInstance().getUserNameMapper().getLoggedInUserIDFromPseudoName(comment
+                .getCommentedUser());
+        commentDTO.setUsername(realName);
         commentDTO.setCommentText(comment.getCommentText());
         commentDTO.setCreatedBy(comment.getCreatedUser());
         commentDTO.setLastUpdatedBy(comment.getUpdatedUser());
@@ -87,7 +95,12 @@ public class CommentMappingUtil {
         int end = offset + limit - 1 <= commentList.size() - 1 ? offset + limit - 1 : commentList.size() - 1;
 
         for (int i = start; i <= end; i++) {
-            listOfCommentDTOs.add(fromCommentToDTO(commentList.get(i)));
+            try {
+                listOfCommentDTOs.add(fromCommentToDTO(commentList.get(i)));
+            } catch (APIManagementException e) {
+                // This not to throw as this have comment list
+                log.error("Error while Retrieving RealName from PseudoName", e);
+            }
         }
         commentListDTO.setList(listOfCommentDTOs);
         return commentListDTO;

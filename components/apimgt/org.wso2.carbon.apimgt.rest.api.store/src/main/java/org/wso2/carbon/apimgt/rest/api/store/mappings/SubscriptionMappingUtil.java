@@ -15,6 +15,8 @@
 */
 package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionListDTO;
@@ -23,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SubscriptionMappingUtil {
+    private static final Logger log = LoggerFactory.getLogger(RatingMappingUtil.class);
 
     /** Converts a List object of SubscribedAPIs into a DTO
      *

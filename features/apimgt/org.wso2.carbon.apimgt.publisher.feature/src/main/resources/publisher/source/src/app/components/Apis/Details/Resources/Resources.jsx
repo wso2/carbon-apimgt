@@ -18,25 +18,30 @@
 
 import React from 'react';
 import Button from '@material-ui/core/Button';
-import Card, { CardContent } from '@material-ui/core/Card';
+import Card from '@material-ui/core/Card';
+import CardContent  from '@material-ui/core/Card';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
-import { InputLabel } from '@material-ui/core/Input';
+import InputLabel from '@material-ui/core/InputLabel';
 import TextField from '@material-ui/core/TextField';
-import { FormGroup, FormControlLabel, FormControl } from '@material-ui/core/';
+import FormGroup from '@material-ui/core/FormGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormControl from '@material-ui/core/FormControl';
 import Checkbox from '@material-ui/core/Checkbox';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import Divider from '@material-ui/core/Divider';
-import List, { ListItem, ListItemSecondaryAction } from '@material-ui/core/List';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
 
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
-import Api from '../../../../data/api';
+import Api from 'AppData/api';
 import Resource from './Resource';
-import { Progress } from '../../../Shared';
-import ApiPermissionValidation from '../../../../data/ApiPermissionValidation';
+import { Progress } from 'AppComponents/Shared';
+import ApiPermissionValidation from 'AppData/ApiPermissionValidation';
 
 const styles = theme => ({
     root: {
@@ -78,7 +83,7 @@ class Resources extends React.Component {
             notFound: false,
         };
         this.api = new Api();
-        this.api_uuid = props.match.params.api_uuid;
+        this.api_uuid = props.api.id;
         this.addResources = this.addResources.bind(this);
         this.onChange = this.onChange.bind(this);
         this.onChangeInput = this.onChangeInput.bind(this);
@@ -448,14 +453,14 @@ class Resources extends React.Component {
 
         return (
             <div className={classes.root}>
-                <Typography type='display1' align='left' className={classes.mainTitle}>
+                <Typography variant='display1' align='left' className={classes.mainTitle}>
                     Resources
                 </Typography>
                 <Grid container spacing={8}>
                     <Grid item md={12} lg={12}>
                         <Card>
                             <CardContent>
-                                <Typography type='headline' component='h2'>
+                                <Typography variant='headline' component='h2'>
                                     Add New Resource
                                 </Typography>
                                 <TextField
@@ -482,7 +487,7 @@ class Resources extends React.Component {
                                         </FormGroup>
                                     ))}
                                 </div>
-                                <Button raised className={classes.button} onClick={this.addResources}>
+                                <Button  className={classes.button} onClick={this.addResources}>
                                     Add Resources to Path
                                 </Button>
 
@@ -494,7 +499,6 @@ class Resources extends React.Component {
                                                 Assign Global Scopes for API
                                             </InputLabel>
                                             <Select
-                                                margin='none'
                                                 multiple
                                                 value={this.state.scopes}
                                                 onChange={this.handleScopeChange}
@@ -539,7 +543,6 @@ class Resources extends React.Component {
                                         <ListItemSecondaryAction>
                                             <Button
                                                 className={classes.button}
-                                                raised
                                                 color='secondary'
                                                 onClick={this.deleteSelected}
                                             >
@@ -568,7 +571,7 @@ class Resources extends React.Component {
                             })}
                         </List>
                         <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
-                            <Button raised color='primary' onClick={this.updateResources} className={classes.button}>
+                            <Button  color='primary' onClick={this.updateResources} className={classes.button}>
                                 Save
                             </Button>
                         </ApiPermissionValidation>

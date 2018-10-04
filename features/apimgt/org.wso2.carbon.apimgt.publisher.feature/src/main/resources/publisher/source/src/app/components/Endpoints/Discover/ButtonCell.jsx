@@ -4,7 +4,7 @@ import AddIcon from '@material-ui/icons/Add';
 import UpdateIcon from '@material-ui/icons/Update';
 import PropTypes from 'prop-types';
 
-import API from '../../../data/api';
+import API from 'AppData/api';
 
 export default class ButtonCell extends Component {
     constructor(props) {

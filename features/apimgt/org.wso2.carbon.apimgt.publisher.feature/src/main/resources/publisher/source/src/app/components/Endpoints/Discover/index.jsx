@@ -39,9 +39,10 @@ import { FormControl } from '@material-ui/core/';
 import TextField from '@material-ui/core/TextField';
 import Select from '@material-ui/core/Select';
 
-import API from '../../../data/api';
-import { ScopeValidation, resourceMethod, resourcePath } from '../../../data/ScopeValidation';
-import Alert from '../../Shared/Alert';
+import API from 'AppData/api';
+import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
+import Alert from 'AppComponents/Shared/Alert';
+
 import ButtonCell from './ButtonCell';
 
 const styles = theme => ({

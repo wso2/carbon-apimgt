@@ -534,6 +534,7 @@ public class APIMgtConstants {
      */
     public static class LabelConstants {
         public static final String DEFAULT = "Default";
+        public static final String GATEWAY_LABEL_QUERY = "gatewayLabel";
     }
 
     /**

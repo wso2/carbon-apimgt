@@ -20,10 +20,25 @@ import 'react-tagsinput/react-tagsinput.css';
 import { message } from 'antd/lib/index';
 import PropTypes from 'prop-types';
 import React from 'react';
-import Api from '../../../../data/api';
-import { Progress } from '../../../Shared';
-import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
+import Api from 'AppData/api';
+import { Progress } from 'AppComponents/Shared';
+import Grid from '@material-ui/core/Grid';
+import Card from '@material-ui/core/Card';
+import Typography from '@material-ui/core/Typography';
+import { FormattedMessage } from 'react-intl';
+import CardActions from '@material-ui/core/CardActions';
+import CardContent from '@material-ui/core/CardContent';
+import Divider from '@material-ui/core/Divider';
+import Button from '@material-ui/core/Button';
+import withStyles from '@material-ui/core/styles/withStyles';
 
+const styles = theme => ({
+    buttonProgress: {
+        position: 'relative',
+        margin: theme.spacing.unit,
+    },
+    headline: { paddingTop: theme.spacing.unit * 1.25, paddingLeft: theme.spacing.unit * 2.5 },
+});
 /**
  * Generate the scopes UI in API details page.
  * @class Scopes
@@ -43,7 +58,6 @@ class Scopes extends React.Component {
             apiScopes: null,
             apiScope: {},
             roles: [],
-            notFound: false,
         };
         this.deleteScope = this.deleteScope.bind(this);
         this.updateScope = this.updateScope.bind(this);
@@ -51,31 +65,6 @@ class Scopes extends React.Component {
         this.addScope = this.addScope.bind(this);
     }
 
-    /**
-     * Fetch API resource when component get mounted
-     * @memberof Scopes
-     */
-    componentDidMount() {
-        const api = new Api();
-        const promisedScopesObject = api.getScopes(this.api_uuid);
-        promisedScopesObject
-            .then((response) => {
-                this.setState({
-                    apiScopes: response.obj.list,
-                });
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-                const { status } = error;
-                if (status === 404) {
-                    this.setState({
-                        notFound: true,
-                    });
-                }
-            });
-    }
     /**
      * Delete scope
      * @param {any} scopeName Name of the scope need to be deleted
@@ -170,14 +159,47 @@ class Scopes extends React.Component {
      * @memberof Scopes
      */
     render() {
-        const { apiScopes } = this.state;
+        const { api } = this.props;
+        const { scopes } = api;
+        const { classes } = this.props;
 
-        if (this.state.notFound) {
-            return <ResourceNotFound message={this.props.resourceNotFountMessage} />;
+        if (!scopes) {
+            return <Progress />;
         }
 
-        if (!apiScopes) {
-            return <Progress />;
+        if (scopes.length === 0) {
+            return (
+                <Grid container justify='center'>
+                    <Grid item sm={5}>
+                        <Card className={classes.card}>
+                            <Typography className={classes.headline} gutterBottom variant='headline' component='h2'>
+                                <FormattedMessage
+                                    id='create.scopes'
+                                    defaultMessage='Create Scopes'
+                                />
+                            </Typography>
+                            <Divider />
+                            <CardContent>
+                                <Typography align='justify' component='p'>
+                                    <FormattedMessage
+                                        id='create.scope.description'
+                                        defaultMessage={'Scopes enable fine-grained access control to API resources'
+                                        + ' based on user roles.'}
+                                    />
+                                </Typography>
+                            </CardContent>
+                            <CardActions>
+                                <Button variant='contained' color='primary' className={classes.button}>
+                                    <FormattedMessage
+                                        id='create.scopes'
+                                        defaultMessage='Create Scopes'
+                                    />
+                                </Button>
+                            </CardActions>
+                        </Card>
+                    </Grid>
+                </Grid>
+            );
         }
 
         return (
@@ -247,11 +269,12 @@ Scopes.propTypes = {
     match: PropTypes.shape({
         params: PropTypes.object,
     }),
-    resourceNotFountMessage: PropTypes.string.isRequired,
+    api: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({}).isRequired,
 };
 
 Scopes.defaultProps = {
     match: { params: {} },
 };
 
-export default Scopes;
+export default withStyles(styles)(Scopes);

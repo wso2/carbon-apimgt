@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
+import org.wso2.carbon.apimgt.core.api.UserNameMapper;
 import org.wso2.carbon.apimgt.core.api.WSDLProcessor;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
@@ -44,6 +45,7 @@ import org.wso2.carbon.apimgt.core.configuration.models.NotificationConfiguratio
 import org.wso2.carbon.apimgt.core.configuration.models.ServiceDiscoveryConfigurations;
 import org.wso2.carbon.apimgt.core.configuration.models.ServiceDiscoveryImplConfig;
 import org.wso2.carbon.apimgt.core.dao.SearchType;
+import org.wso2.carbon.apimgt.core.dao.SecondarySearchType;
 import org.wso2.carbon.apimgt.core.dao.ThreatProtectionDAO;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
@@ -132,8 +134,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
     public APIPublisherImpl(String username, IdentityProvider idp, KeyManager keyManager, DAOFactory daoFactory,
                             APILifecycleManager apiLifecycleManager, GatewaySourceGenerator gatewaySourceGenerator,
-                            APIGateway apiGatewayPublisher) {
-        super(username, idp, keyManager, daoFactory, apiLifecycleManager, gatewaySourceGenerator, apiGatewayPublisher);
+                            APIGateway apiGatewayPublisher, UserNameMapper userNameMapper) {
+
+        super(username, idp, keyManager, daoFactory, apiLifecycleManager, gatewaySourceGenerator,
+                apiGatewayPublisher, userNameMapper);
     }
 
     /**
@@ -1477,26 +1481,32 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
                 String[] attributes = query.split(ATTRIBUTE_DELIMITER);
                 Map<SearchType, String> attributeMap = new EnumMap<>(SearchType.class);
+                Map<SecondarySearchType, String> secondaryAttributeMap = new EnumMap<>(SecondarySearchType.class);
 
-                boolean isFullTextSearch = false;
                 String searchAttribute, searchValue;
                 if (!query.contains(KEY_VALUE_DELIMITER)) {
-                    isFullTextSearch = true;
+                    apiResults = getApiDAO().searchAPIs(roles, user, query, offset, limit);
                 } else {
                     log.debug("Search query: " + query);
                     for (String attribute : attributes) {
                         searchAttribute = attribute.split(KEY_VALUE_DELIMITER)[0];
                         searchValue = attribute.split(KEY_VALUE_DELIMITER)[1];
                         log.debug(searchAttribute + KEY_VALUE_DELIMITER + searchValue);
-                        attributeMap.put(SearchType.fromString(searchAttribute), searchValue);
+                        if (SearchType.PROVIDER.equals(SearchType.fromString(searchAttribute))) {
+                            String pseudoName = getUserNameMapper().getLoggedInPseudoNameFromUserID(searchValue);
+                            attributeMap.put(SearchType.fromString(searchAttribute), pseudoName);
+                        } else {
+                            if (SecondarySearchType.fromString(searchAttribute) != null) {
+                                secondaryAttributeMap.put(SecondarySearchType.fromString(searchAttribute), searchValue);
+                            } else {
+                                attributeMap.put(SearchType.fromString(searchAttribute), searchValue);
+                            }
+                        }
                     }
-                }
-
-                if (isFullTextSearch) {
-                    apiResults = getApiDAO().searchAPIs(roles, user, query, offset, limit);
-                } else {
                     log.debug("Attributes:", attributeMap.toString());
-                    apiResults = getApiDAO().attributeSearchAPIs(roles, user, attributeMap, offset, limit, expand);
+                    apiResults = getApiDAO()
+                            .attributeSearchAPIs(roles, user, attributeMap, secondaryAttributeMap, offset, limit,
+                                    expand);
                 }
 
             } else {

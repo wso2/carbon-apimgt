@@ -39,6 +39,8 @@ public class KeyMgtConfigurations {
     private String introspectEndpoint = "https://localhost:9443/api/identity/oauth2/introspect/v1.0/introspect";
     @Element(description = "Scope Registration Endpoint URL")
     private String scopeRegistrationEndpoint = "https://localhost:9443/api/auth/scope-registration/v1.0/scopes";
+    @Element(description = "UserInfo Endpoint URL")
+    private String userInfoEndpoint = "https://localhost:9443/api/auth/oidc/v1.0/userinfo";
     @Element(description = "Key manager Credentials")
     private CredentialConfigurations keyManagerCredentials = new CredentialConfigurations();
     @Element(description = "Alias of Key Manager Certificate in Client Trust Store")
@@ -142,5 +144,15 @@ public class KeyMgtConfigurations {
 
     public void setProductRestApiScopesKeyWord(String productRestApiScopesKeyWord) {
         this.productRestApiScopesKeyWord = productRestApiScopesKeyWord;
+    }
+
+    public String getUserInfoEndpoint() {
+
+        return userInfoEndpoint;
+    }
+
+    public void setUserInfoEndpoint(String userInfoEndpoint) {
+
+        this.userInfoEndpoint = userInfoEndpoint;
     }
 }

@@ -20,10 +20,10 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
+import Endpoint from 'AppData/Endpoint';
+import Progress from 'AppComponents/Shared/Progress';
 
 import EndpointForm from '../Create/EndpointForm';
-import Endpoint from '../../../data/Endpoint';
-import Progress from '../../Shared/Progress';
 
 /**
  * Render global endpoint details.

@@ -19,15 +19,19 @@
  */
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
+import org.mockito.Mockito;
 import org.testng.Assert;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
+import org.wso2.carbon.apimgt.core.api.UserNameMapper;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Label;
-import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
@@ -48,23 +52,32 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.MappingUtil;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.Assert.assertTrue;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotEquals;
 import static org.testng.AssertJUnit.assertNull;
 
 
 public class TestMappingUtilTestCase {
+    UserNameMapper userNameMapper;
 
+    @BeforeTest
+    public void setup() throws NoSuchFieldException, IllegalAccessException {
+        APIManagerFactory apiManagerFactory = APIManagerFactory.getInstance();
+        userNameMapper = Mockito.mock(UserNameMapper.class);
+        Field field = APIManagerFactory.class.getDeclaredField("userNameMapper");
+        field.setAccessible(true);
+        field.set(apiManagerFactory, userNameMapper);
+    }
     @Test(description = "APIDTO mapping test case")
-    void testAPItoAPIDTOMappingAndAPIDTOtoAPIMapping() throws IOException {
+    void testAPItoAPIDTOMappingAndAPIDTOtoAPIMapping() throws APIManagementException {
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI();
         API api = apiBuilder.build();
 
@@ -85,7 +98,7 @@ public class TestMappingUtilTestCase {
         assertEquals(api.isResponseCachingEnabled(), Boolean.parseBoolean(apidto.getResponseCaching()));
         assertEquals((Integer)api.getCacheTimeout(), apidto.getCacheTimeout());
         assertEquals(api.getVisibleRoles().size(), apidto.getVisibleRoles().size());
-        assertEquals(api.getProvider(), apidto.getProvider());
+        assertNotEquals(api.getProvider(), apidto.getProvider());
         assertEquals(api.getApiPermission(), apidto.getPermission());
         assertEquals(api.getLifeCycleStatus(), apidto.getLifeCycleStatus());
         assertEquals(api.getWorkflowStatus(), apidto.getWorkflowStatus());
@@ -213,7 +226,7 @@ public class TestMappingUtilTestCase {
         assertEquals(api1.getName(), apiListDTO.getList().get(0).getName());
         assertEquals(api1.getContext(), apiListDTO.getList().get(0).getContext());
         assertEquals(api1.getDescription(), apiListDTO.getList().get(0).getDescription());
-        assertEquals(api1.getProvider(), apiListDTO.getList().get(0).getProvider());
+        assertNotEquals(api1.getProvider(), apiListDTO.getList().get(0).getProvider());
         assertEquals(api1.getLifeCycleStatus(), apiListDTO.getList().get(0).getLifeCycleStatus());
         assertEquals(api1.getVersion(), apiListDTO.getList().get(0).getVersion());
         assertEquals(api1.getWorkflowStatus(), apiListDTO.getList().get(0).getWorkflowStatus());
@@ -222,7 +235,7 @@ public class TestMappingUtilTestCase {
         assertEquals(api2.getName(), apiListDTO.getList().get(1).getName());
         assertEquals(api2.getContext(), apiListDTO.getList().get(1).getContext());
         assertEquals(api2.getDescription(), apiListDTO.getList().get(1).getDescription());
-        assertEquals(api2.getProvider(), apiListDTO.getList().get(1).getProvider());
+        assertNotEquals(api2.getProvider(), apiListDTO.getList().get(1).getProvider());
         assertEquals(api2.getLifeCycleStatus(), apiListDTO.getList().get(1).getLifeCycleStatus());
         assertEquals(api2.getVersion(), apiListDTO.getList().get(1).getVersion());
         assertEquals(api2.getWorkflowStatus(), apiListDTO.getList().get(1).getWorkflowStatus());
@@ -291,18 +304,18 @@ public class TestMappingUtilTestCase {
     }
 
     @Test(description = "Application to Application DTO mapping")
-    void testApplicationToApplicationDTOMapping() {
+    void testApplicationToApplicationDTOMapping() throws APIManagementException {
         Application application = SampleTestObjectCreator.createDefaultApplication();
         ApplicationDTO applicationDTO = MappingUtil.toApplicationDto(application);
         assertEquals(application.getId(), applicationDTO.getApplicationId());
         assertEquals(application.getDescription(), applicationDTO.getDescription());
         assertEquals(application.getName(), applicationDTO.getName());
-        assertEquals(application.getCreatedUser(), applicationDTO.getSubscriber());
+        assertNotEquals(application.getCreatedUser(), applicationDTO.getSubscriber());
         assertEquals(application.getPolicy().getPolicyName(), applicationDTO.getThrottlingTier());
     }
 
     @Test(description = "Subscription to Subscription DTO mapping")
-    void testSubscriptionToSubscriptionDTOMapping() {
+    void testSubscriptionToSubscriptionDTOMapping() throws APIManagementException {
         Policy subscriptionPolicy = SampleTestObjectCreator.goldSubscriptionPolicy;
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Application application = SampleTestObjectCreator.createDefaultApplication();

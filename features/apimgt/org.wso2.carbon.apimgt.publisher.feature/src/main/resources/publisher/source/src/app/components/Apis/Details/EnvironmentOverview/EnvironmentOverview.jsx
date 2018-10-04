@@ -22,11 +22,12 @@ import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
 
-import Api from '../../../../data/api';
-import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
-import { Progress } from '../../../Shared';
+import Api from 'AppData/api';
+import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
+import { Progress } from 'AppComponents/Shared';
+import ConfigManager from 'AppData/ConfigManager';
+
 import EnvironmentPanel from './EnvironmentPanel';
-import ConfigManager from '../../../../data/ConfigManager';
 
 class EnvironmentOverview extends Component {
     constructor(props) {

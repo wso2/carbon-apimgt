@@ -20,18 +20,33 @@
 package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.wso2.carbon.apimgt.core.api.UserNameMapper;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 public class ApplicationMappingUtilTestCase {
 
+    @Before
+    public void setup() throws NoSuchFieldException, IllegalAccessException {
+
+        APIManagerFactory apiManagerFactory = APIManagerFactory.getInstance();
+        UserNameMapper userNameMapper = Mockito.mock(UserNameMapper.class);
+        Field field = APIManagerFactory.class.getDeclaredField("userNameMapper");
+        field.setAccessible(true);
+        field.set(apiManagerFactory, userNameMapper);
+    }
 
     @Test
     public void testFromApplicationsToDTO() {
@@ -67,7 +82,7 @@ public class ApplicationMappingUtilTestCase {
     }
 
     @Test
-    public void testFromApplicationToDTO() {
+    public void testFromApplicationToDTO() throws APIManagementException {
 
         String applicationID = UUID.randomUUID().toString();
 

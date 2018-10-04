@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
+import org.wso2.carbon.apimgt.core.api.UserNameMapper;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
@@ -78,10 +79,11 @@ public abstract class AbstractAPIManager implements APIManager {
     protected APIDefinition apiDefinitionFromSwagger20 = new APIDefinitionFromSwagger20();
     protected APIMConfigurations config;
     private DAOFactory daoFactory;
+    private UserNameMapper userNameMapper;
 
     public AbstractAPIManager(String username, IdentityProvider idp, KeyManager keyManager, DAOFactory daoFactory,
                               APILifecycleManager apiLifecycleManager, GatewaySourceGenerator gatewaySourceGenerator,
-                              APIGateway apiGatewayPublisher) {
+                              APIGateway apiGatewayPublisher, UserNameMapper userNameMapper) {
 
         this.daoFactory = daoFactory;
         this.username = username;
@@ -91,13 +93,14 @@ public abstract class AbstractAPIManager implements APIManager {
         this.apiGatewayPublisher = apiGatewayPublisher;
         this.apiLifecycleManager = apiLifecycleManager;
         this.config = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
+        this.userNameMapper = userNameMapper;
     }
 
     public AbstractAPIManager(String username, IdentityProvider idp, KeyManager keyManager, DAOFactory daoFactory,
                               APILifecycleManager apiLifecycleManager) {
 
-        this(username, idp, keyManager, daoFactory, apiLifecycleManager, new GatewaySourceGeneratorImpl()
-                , new APIGatewayPublisherImpl());
+        this(username, idp, keyManager, daoFactory, apiLifecycleManager, new GatewaySourceGeneratorImpl(), new
+                APIGatewayPublisherImpl(), new UserNameMapperImpl());
     }
 
     /**
@@ -685,5 +688,10 @@ public abstract class AbstractAPIManager implements APIManager {
 
     public ThreatProtectionDAO getThreatProtectionDAO() {
         return daoFactory.getThreatProtectionDAO();
+    }
+
+    public UserNameMapper getUserNameMapper() {
+
+        return userNameMapper;
     }
 }

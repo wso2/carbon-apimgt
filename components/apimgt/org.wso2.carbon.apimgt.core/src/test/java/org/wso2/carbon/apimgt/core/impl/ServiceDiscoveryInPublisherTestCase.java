@@ -76,6 +76,7 @@ public class ServiceDiscoveryInPublisherTestCase {
 
     @Test
     public void testDiscoverServiceEndpointsWhenDisabled() throws Exception {
+
         ServiceDiscoveryConfigurations sdConfig = new ServiceDiscoveryConfigurations();
         sdConfig.setEnabled(false);
 
@@ -88,6 +89,7 @@ public class ServiceDiscoveryInPublisherTestCase {
     }
 
     private APIPublisherImpl getApiPublisherImpl() {
-        return new APIPublisherImpl("admin", null, null, null, null, null, null);
+
+        return new APIPublisherImpl("admin", null, null, null, null, null, null, null);
     }
 }

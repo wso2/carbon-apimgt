@@ -72,32 +72,7 @@ class AnonymousView extends React.Component{
     render(){
         const { classes } = this.props;
         return(
-            <Grid>
-                <AppBar
-                    position="absolute"
-                    className={classNames(classes.appBar, classes.appBarShift)}
-                >
-                    <ToolBar>
-                        <Typography variant="title"  noWrap className={classes.brand}>
-                            <img className={classes.siteLogo} src="/store/public/app/images/logo.png"
-                                 alt="wso2-logo"/> <span>API STORE</span>
-                        </Typography>
-                        <div className={classes.buttonsWrapper}>
-                            <Link to={"/sign-up"} className={classes.linkDisplay}>
-                        <Button variant="raised" color="secondary">
-                            Sign-up
-                        </Button>
-                            </Link>
-                        <Link to={"/login"} className={classes.linkDisplay}>
-                            <Button variant="raised" color="secondary" className={classes.buttonAlignment}>
-                                Sign-in
-                            </Button>
-                        </Link>
-                        </div>
-                </ToolBar>
-                </AppBar>
-                <Footer/>
-            </Grid>
+            <div></div>
         );
     }
 }

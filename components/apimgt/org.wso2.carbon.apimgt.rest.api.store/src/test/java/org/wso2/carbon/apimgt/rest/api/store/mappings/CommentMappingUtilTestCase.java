@@ -20,22 +20,37 @@
 package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.wso2.carbon.apimgt.core.api.UserNameMapper;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.rest.api.store.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.CommentListDTO;
 
+import java.lang.reflect.Field;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 public class CommentMappingUtilTestCase {
+    UserNameMapper userNameMapper;
+
+    @Before
+    public void setup() throws NoSuchFieldException, IllegalAccessException {
+        APIManagerFactory apiManagerFactory = APIManagerFactory.getInstance();
+        userNameMapper = Mockito.mock(UserNameMapper.class);
+        Field field = APIManagerFactory.class.getDeclaredField("userNameMapper");
+        field.setAccessible(true);
+        field.set(apiManagerFactory, userNameMapper);
+    }
 
     @Test
-    public void testFromCommentToDTO() {
+    public void testFromCommentToDTO() throws APIManagementException {
 
         String commentUUID = UUID.randomUUID().toString();
         Instant time = APIUtils.getCurrentUTCTime();
@@ -73,8 +88,8 @@ public class CommentMappingUtilTestCase {
     }
 
     @Test
-    public void testFromCommentListToDTO() {
-
+    public void testFromCommentListToDTO() throws APIManagementException {
+        Mockito.when(userNameMapper.getLoggedInUserIDFromPseudoName(Mockito.anyString())).thenReturn(Mockito.anyString());
         Instant time = APIUtils.getCurrentUTCTime();
         Comment comment1 = new Comment();
         comment1.setUuid(UUID.randomUUID().toString());
@@ -102,7 +117,7 @@ public class CommentMappingUtilTestCase {
         CommentListDTO commentListDTO =
                 CommentMappingUtil.fromCommentListToDTO(commentList, 10, 0);
 
-        Assert.assertEquals(commentListDTO.getList().get(0).getUsername().toString(), "commentedUser1");
+        Assert.assertNotEquals(commentListDTO.getList().get(0).getUsername().toString(), "commentedUser1");
 
     }
 }

@@ -10,10 +10,11 @@ import Paper from '@material-ui/core/Paper';
 import Checkbox from '@material-ui/core/Checkbox';
 import { Link } from 'react-router-dom';
 
+import API from 'AppData/api';
+import Alert from 'AppComponents/Shared/Alert';
+
 import APITableHeader from './APITableHeader';
 import APITableToolBar from './APITableToolBar';
-import API from '../../../../data/api';
-import Alert from '../../../Shared/Alert';
 
 const styles = theme => ({
     root: {

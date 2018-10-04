@@ -54,6 +54,7 @@ import java.util.Map;
  * This is the default key manager supported by API Manager
  */
 public class DefaultKeyManagerImpl implements KeyManager {
+
     private static final Logger log = LoggerFactory.getLogger(DefaultKeyManagerImpl.class);
 
     protected DCRMServiceStub dcrmServiceStub;
@@ -82,6 +83,7 @@ public class DefaultKeyManagerImpl implements KeyManager {
     public DefaultKeyManagerImpl(DCRMServiceStub dcrmServiceStub, OAuth2ServiceStubs oAuth2ServiceStubs,
                                  ScopeRegistration scopeRegistration)
             throws APIManagementException {
+
         this.dcrmServiceStub = dcrmServiceStub;
         this.oAuth2ServiceStubs = oAuth2ServiceStubs;
         this.scopeRegistration = scopeRegistration;
@@ -89,6 +91,7 @@ public class DefaultKeyManagerImpl implements KeyManager {
 
     @Override
     public OAuthApplicationInfo createApplication(OAuthAppRequest oauthAppRequest) throws KeyManagementException {
+
         log.debug("Creating OAuth2 application:{}", oauthAppRequest.toString());
 
         String applicationName = oauthAppRequest.getClientName();
@@ -140,6 +143,7 @@ public class DefaultKeyManagerImpl implements KeyManager {
     @Override
     public OAuthApplicationInfo updateApplication(OAuthApplicationInfo oAuthApplicationInfo)
             throws KeyManagementException {
+
         if (log.isDebugEnabled()) {
             log.debug("Updating OAuth2 application with : " + oAuthApplicationInfo.toString());
         }
@@ -194,6 +198,7 @@ public class DefaultKeyManagerImpl implements KeyManager {
 
     @Override
     public void deleteApplication(String consumerKey) throws KeyManagementException {
+
         if (log.isDebugEnabled()) {
             log.debug("Deleting OAuth application for consumer key: " + consumerKey);
         }
@@ -219,6 +224,7 @@ public class DefaultKeyManagerImpl implements KeyManager {
 
     @Override
     public OAuthApplicationInfo retrieveApplication(String consumerKey) throws KeyManagementException {
+
         if (log.isDebugEnabled()) {
             log.debug("Retrieving OAuth application for consumer key: " + consumerKey);
         }
@@ -253,6 +259,7 @@ public class DefaultKeyManagerImpl implements KeyManager {
 
     @Override
     public AccessTokenInfo getNewAccessToken(AccessTokenRequest tokenRequest) throws KeyManagementException {
+
         if (tokenRequest == null) {
             throw new KeyManagementException("No information available to generate Token. AccessTokenRequest is null",
                     ExceptionCodes.INVALID_TOKEN_REQUEST);
@@ -326,6 +333,7 @@ public class DefaultKeyManagerImpl implements KeyManager {
 
     @Override
     public AccessTokenInfo getTokenMetaData(String accessToken) throws KeyManagementException {
+
         log.debug("Token introspection request is being sent.");
         Response response;
         try {
@@ -354,6 +362,12 @@ public class DefaultKeyManagerImpl implements KeyManager {
                     tokenInfo.setExpiryTime(introspectResponse.getExp());
                     if (StringUtils.isNotEmpty(introspectResponse.getUsername())) {
                         tokenInfo.setEndUserName(introspectResponse.getUsername());
+                    } else {
+                        if (StringUtils.isNotEmpty(introspectResponse.getScope()) && introspectResponse.getScope()
+                                .contains("openid")) {
+                            tokenInfo.setEndUserName(getEndUsernameFromUserInfo(accessToken));
+                        }
+
                     }
                     long validityPeriod = introspectResponse.getExp() - introspectResponse.getIat();
                     tokenInfo.setValidityPeriod(validityPeriod);
@@ -404,6 +418,7 @@ public class DefaultKeyManagerImpl implements KeyManager {
 
     @Override
     public KeyManagerConfiguration getKeyManagerConfiguration() throws KeyManagementException {
+
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
@@ -414,16 +429,19 @@ public class DefaultKeyManagerImpl implements KeyManager {
 
     @Override
     public boolean registerNewResource(API api, Map resourceAttributes) throws KeyManagementException {
+
         return true;
     }
 
     @Override
     public Map getResourceByApiId(String apiId) throws KeyManagementException {
+
         return null;
     }
 
     @Override
     public boolean updateRegisteredResource(API api, Map resourceAttributes) throws KeyManagementException {
+
         return false;
     }
 
@@ -439,6 +457,7 @@ public class DefaultKeyManagerImpl implements KeyManager {
 
     @Override
     public boolean registerScope(Scope scope) throws KeyManagementException {
+
         boolean status = scopeRegistration.isScopeExist(scope.getName());
         if (!status) {
             return scopeRegistration.registerScope(scope);
@@ -448,20 +467,24 @@ public class DefaultKeyManagerImpl implements KeyManager {
 
     @Override
     public Scope retrieveScope(String name) throws KeyManagementException {
+
         return scopeRegistration.getScopeByName(name);
     }
 
     @Override
     public boolean updateScope(Scope scope) throws KeyManagementException {
+
         return scopeRegistration.updateScope(scope);
     }
 
     @Override
     public boolean deleteScope(String name) throws KeyManagementException {
+
         return scopeRegistration.deleteScope(name);
     }
 
     private OAuthApplicationInfo getOAuthApplicationInfo(Response response) throws IOException {
+
         OAuthApplicationInfo oAuthApplicationInfoResponse = new OAuthApplicationInfo();
         DCRClientInfo dcrClientInfoResponse = (DCRClientInfo) new GsonDecoder().decode(response, DCRClientInfo.class);
         oAuthApplicationInfoResponse.setClientName(dcrClientInfoResponse.getClientName());
@@ -470,5 +493,25 @@ public class DefaultKeyManagerImpl implements KeyManager {
         oAuthApplicationInfoResponse.setGrantTypes(dcrClientInfoResponse.getGrantTypes());
         oAuthApplicationInfoResponse.setCallBackURL(dcrClientInfoResponse.getRedirectURIs().get(0));
         return oAuthApplicationInfoResponse;
+    }
+
+    private String getEndUsernameFromUserInfo(String token) throws KeyManagementException {
+
+        try {
+            Response response = oAuth2ServiceStubs.getUserInfoServiceStub().getUserInfo(token);
+            if (response.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {
+                Map<String, String> userInfoMap = (Map<String, String>) new GsonDecoder().decode(response, Map.class);
+                return userInfoMap.get("sub");
+            } else {
+                throw new KeyManagementException("Error while Retrieving User Information", ExceptionCodes
+                        .ACCESS_TOKEN_INVALID);
+            }
+        } catch (APIManagementException e) {
+            log.error("Error while Getting UserInfo Service", e);
+            throw new KeyManagementException("Error while Getting UserInfo Service", ExceptionCodes.INTERNAL_ERROR);
+        } catch (IOException e) {
+            throw new KeyManagementException("Error while Getting UserInfo Service", ExceptionCodes.INTERNAL_ERROR);
+
+        }
     }
 }

@@ -1,42 +1,75 @@
 var Configurations = {
-    /* Blue themed palette */
-    palette: {
-        primary: {
-            main: '#3F51B5'
+    themes: {
+      light: {
+        palette: {
+          primary: {
+            // light: will be calculated from palette.primary.main,
+            main: "#15b8cf"
+            // dark: will be calculated from palette.primary.main,
+            // contrastText: will be calculated to contrast with palette.primary.main
+          },
+          secondary: {
+            light: "#0066ff",
+            main: "#a2ecf5",
+            // dark: will be calculated from palette.secondary.main,
+            contrastText: "#ffcc00"
+          },
+          background: {
+            default: "#f6f6f6",
+            paper: "#ffffff",
+            appBar: "#1d344f",
+            leftMenu: "#1a1f2f",
+            leftMenuActive: "#000000",
+            drawer: '#1a1f2f',
+          },
+          custom: {
+            leftMenuText: "#8b8e95",
+            starColor: "#f2c73a",
+            leftMenuWidth: 90,
+            contentAreaWidth: 1240,
+            drawerWidth: 200,
+          }
         },
-        secondary: {
-            main: '#1565C0'
+        typography: {
+          fontFamily: '"Open Sans", "Helvetica", "Arial", sans-serif',
+          fontSize: 12
+        }
+      },
+      dark: {
+        palette: {
+          primary: {
+            // light: will be calculated from palette.primary.main,
+            main: "#15b8cf"
+            // dark: will be calculated from palette.primary.main,
+            // contrastText: will be calculated to contrast with palette.primary.main
+          },
+          secondary: {
+            light: "#0066ff",
+            main: "#a2ecf5",
+            // dark: will be calculated from palette.secondary.main,
+            contrastText: "#ffcc00"
+          },
+          background: {
+            default: "#f6f6f6",
+            paper: "#ffffff",
+            appBar: "#1d344f",
+            leftMenu: "#1a1f2f",
+            leftMenuActive: "#000000",
+            drawer: '#1a1f2f',
+          },
+          custom: {
+            leftMenuText: "#8b8e95",
+            starColor: "#f2c73a",
+            leftMenuWidth: 90,
+            contentAreaWidth: 1240,
+            drawerWidth: 200,
+          }
         },
-        /*text: { // TODO: till we migrate to MUI version(v1.0.0-beta.30 or above) with this fix https://github.com/mui-org/material-ui/issues/9750 ~tmkasun
-            primary: '#31375a'
-        },*/
-        background : {
-            appBar: '#31375a'
+        typography: {
+          fontFamily: '"Open Sans", "Helvetica", "Arial", sans-serif',
+          fontSize: 12
         }
-    },
-    typography: {
-        title: {
-            fontWeight: 400
-        }
+      }
     }
-    /* Orange themed palette */
-    // palette: {
-    //     primary: {
-    //         main: '#ff5000'
-    //     },
-    //     secondary: {
-    //         main: '#37474F'
-    //     },
-    //     text: {
-    //         primary: '#2c3e50'
-    //     },
-    //     background : {
-    //         appBar: '#2c3e50'
-    //     }
-    // },
-    // typography: {
-    //     title: {
-    //         fontWeight: 400
-    //     }
-    // }
-};
+  };
+  

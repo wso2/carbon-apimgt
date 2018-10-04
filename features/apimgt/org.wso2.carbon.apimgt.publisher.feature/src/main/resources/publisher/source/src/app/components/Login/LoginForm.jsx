@@ -21,7 +21,7 @@ import { Switch, Redirect } from 'react-router-dom';
 import qs from 'qs';
 import PropTypes from 'prop-types';
 
-import AuthManager from '../../data/AuthManager';
+import AuthManager from 'AppData/AuthManager';
 
 export default class LoginForm extends Component {
     constructor(props) {

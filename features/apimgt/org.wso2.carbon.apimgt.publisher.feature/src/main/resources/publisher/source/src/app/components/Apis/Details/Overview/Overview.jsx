@@ -28,9 +28,10 @@ import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
 import moment from 'moment';
 
-import { Progress } from '../../../Shared';
-import Api from '../../../../data/api';
-import Alert from '../../../Shared/Alert';
+import { Progress } from 'AppComponents/Shared';
+import Api from 'AppData/api';
+import Alert from 'AppComponents/Shared/Alert';
+
 import APIPropertyField from './APIPropertyField';
 import BusinessPlans from './BusinessPlans';
 

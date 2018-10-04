@@ -1,16 +1,16 @@
 import React from 'react';
 import { IconButton, Toolbar, AppBar, Typography } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
-import { Menu as MenuIcon } from '@material-ui/icons';
+import MenuIcon from '@material-ui/icons/Menu';
 import SearchIcon from '@material-ui/icons/SearchOutlined';
 import Hidden from '@material-ui/core/Hidden';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
+import User from 'AppData/User';
 
 import Avatar from './avatar/Avatar';
 import HeaderSearch from './headersearch/HeaderSearch';
 import GlobalNavBar from './navbar/GlobalNavBar';
-import User from '../../../data/User';
 
 const styles = theme => ({
     appBar: {
