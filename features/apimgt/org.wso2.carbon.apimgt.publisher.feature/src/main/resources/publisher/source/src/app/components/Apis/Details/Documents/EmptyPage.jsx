@@ -38,7 +38,7 @@ class EmptyPage extends Component{
                                 Add New Document from Inline
                             </Typography>
                             <Typography className={classes.typography}>
-                                <FormattedMessage id='You can create a new Document from Inline by clicking the create button below'/>
+                                <FormattedMessage id='Create a new Document from Inline by clicking the create button below'/>
                             </Typography>
                             <Button className={classes.button} variant="contained">
                                 Create
@@ -52,7 +52,7 @@ class EmptyPage extends Component{
                                 Create New Document from File or URL
                             </Typography>
                             <Typography className={classes.typography}>
-                                <FormattedMessage id='You can create a new Document from File or URL by clicking the create button below'/>
+                                <FormattedMessage id='Create a new Document from File or URL by clicking the create button below'/>
                             </Typography>
                             <Button className={classes.button} variant="contained">
                                 Create
