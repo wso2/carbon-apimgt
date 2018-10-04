@@ -19,7 +19,7 @@ import React from 'react';
 
 import { Route, Switch } from 'react-router-dom';
 import ApiCreateEndpoint from './Endpoint/ApiCreateEndpoint';
-import ApiCreateWebsocket from './WebSocket/ApiCreateWebsocket';
+import ApiCreateWebSocket from './WebSocket/ApiCreateWebSocket';
 import ApiCreateSwagger from './Swagger/ApiCreateSwagger';
 import ApiCreateWSDL from './WSDL/ApiCreateWSDL';
 
@@ -32,7 +32,7 @@ const ApiCreate = () => {
         <PageContainer pageNav={<APICreateNavBar />} pageTopMenu={<APICreateTopMenu />}>
             <Switch>
                 <Route path='/apis/create/rest' component={ApiCreateEndpoint} />
-                <Route path='/apis/create/websocket' component={ApiCreateWebsocket} />
+                <Route path='/apis/create/websocket' component={ApiCreateWebSocket} />
                 <Route path='/apis/create/swagger' component={ApiCreateSwagger} />
                 <Route path='/apis/create/wsdl' component={ApiCreateWSDL} />
             </Switch>
