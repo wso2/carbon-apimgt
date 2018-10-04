@@ -108,7 +108,7 @@ class Overview extends Component {
         this.editDescription = this.editDescription.bind(this);
         this.handleInput = this.handleInput.bind(this);
         this.handleAddAdditionalProperties = this.handleAddAdditionalProperties.bind(this);
-        this.handleDelete = this.handleDelete.bind(this);
+        this.handleDeleteAdditionalProperties = this.handleDeleteAdditionalProperties.bind(this);
     }
 
     downloadWSDL() {
@@ -199,19 +199,27 @@ class Overview extends Component {
             });
     }
 
+    /**
+     * Handle adding Additional properties
+     */
     handleAddAdditionalProperties() {
         this.setState({
-            additionalProperties : [...this.state.additionalProperties, {
-                'name': '',
-                'value': '',
+            additionalProperties: [...this.state.additionalProperties, {
+                name: '',
+                value: '',
             }],
         });
     }
 
-    handleDelete(name) {
+    /**
+     * Handle delete Additional properties
+     *
+     * @param {AdditionalProperty} name AdditionalProperty
+     */
+    handleDeleteAdditionalProperties(name) {
         const { additionalProperties } = this.state;
         this.setState({
-            additionalProperties : additionalProperties.filter(property => property.name !== name),
+            additionalProperties: additionalProperties.filter(property => property.name !== name),
         });
     }
 
@@ -409,7 +417,7 @@ class Overview extends Component {
                     .map(property => (<AdditionalProperty
                         property={property}
                         isEditable={isEditable}
-                        onDelete={this.handleDelete}
+                        onDelete={this.handleDeleteAdditionalProperties}
                     />))
                 }
                 <IconButton
@@ -433,6 +441,10 @@ Overview.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     api: PropTypes.shape({
         id: PropTypes.string,
+        additionalProperties: PropTypes.shape({
+            name: PropTypes.string,
+            value: PropTypes.string,
+        }).isRequired,
     }).isRequired,
     isEditable: PropTypes.bool,
 };
