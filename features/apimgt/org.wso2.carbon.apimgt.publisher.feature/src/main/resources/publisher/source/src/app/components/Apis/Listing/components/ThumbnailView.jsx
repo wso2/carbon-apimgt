@@ -1,4 +1,5 @@
 import { withStyles } from '@material-ui/core/styles';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 import green from '@material-ui/core/colors/green';
 import red from '@material-ui/core/colors/red';
@@ -154,20 +155,21 @@ class ThumbnailView extends Component {
      * @param {File} file new thumbnail image file
      */
     uploadThumbnail(apiId, file) {
+        const { intl } = this.props;
         if (!apiId || !file) {
-            Alert.error('Invalid file or API information is not set correctly.');
+            Alert.error(intl.formatMessage({ id: 'thumbnail.validation.error' }));
             return;
         }
         const api = new Api();
         const thumbnailPromise = api.addAPIThumbnail(apiId, file);
         thumbnailPromise.then(() => {
-            Alert.info('Thumbnail uploaded successfully');
+            Alert.info(intl.formatMessage({ id: 'thumbnail.upload.success' }));
             this.setState({ open: false, thumbnail: file.preview });
         }).catch((error) => {
             if (process.env.NODE_ENV !== 'production') {
                 console.log(error);
             }
-            Alert.error('Error occured while uploading new thumbnail. Please try again.');
+            Alert.error(intl.formatMessage({ id: 'thumbnail.upload.error' }));
         });
     }
 
@@ -255,7 +257,10 @@ class ThumbnailView extends Component {
                                         variant='title'
                                         color='inherit'
                                     >
-                                        Drop your image or click the box to upload image
+                                        <FormattedMessage
+                                            id='drop.image.message'
+                                            defaultMessage='Drop your image or click the box to '
+                                        />
                                     </Typography>
                                 </Dropzone>
                             </Grid>
@@ -279,13 +284,19 @@ class ThumbnailView extends Component {
                         </Grid>
                     </DialogContent>
                     <DialogActions>
-                        <Button variant='outlined' color='primary' onClick={this.handleClick} id='btnUploadAPIThumb' >
+                        <Button color='primary' onClick={this.handleClick} id='btnUploadAPIThumb' >
                             <UploadIcon />
-                            Upload
+                            <FormattedMessage
+                                id='upload.btn'
+                                defaultMessage='UPLOAD'
+                            />
                         </Button>
-                        <Button variant='outlined' onClick={this.handleClose} color='secondary'>
+                        <Button onClick={this.handleClose} color='secondary'>
                             <CancelIcon />
-                            Cancel
+                            <FormattedMessage
+                                id='cancel.btn'
+                                defaultMessage='CANCEL'
+                            />
                         </Button>
                     </DialogActions>
                 </Dialog>
@@ -306,6 +317,7 @@ ThumbnailView.propTypes = {
     height: PropTypes.number,
     width: PropTypes.number,
     isEditable: PropTypes.bool,
+    intl: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles)(ThumbnailView);
+export default injectIntl(withStyles(styles)(ThumbnailView));

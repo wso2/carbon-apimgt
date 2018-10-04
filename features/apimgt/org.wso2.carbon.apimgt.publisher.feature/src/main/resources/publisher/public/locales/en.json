@@ -65,12 +65,17 @@
   "global.endpoints": "Global Endpoints",
   "create.btn": "CREATE",
   "cancel.btn": "CANCEL",
+  "upload.btn": "UPLOAD",
   "next": "Next",
   "bytes": "bytes",
   "create.api": "Create API",
   "create": "Create",
   "back": "Back",
   "create.scopes": "Create Scopes",
-  "create.scope.description": "Scopes enable fine-grained access control to API resources based on user roles. You define scopes to an API's resources. When a user invokes the API, his/her OAuth 2 bearer token cannot grant access to any API resource beyond its associated scopes."
+  "create.scope.description": "Scopes enable fine-grained access control to API resources based on user roles. You define scopes to an API's resources. When a user invokes the API, his/her OAuth 2 bearer token cannot grant access to any API resource beyond its associated scopes.",
+  "drop.image.message": "Drop your image or click the box to upload image",
+  "thumbnail.validation.error": "Invalid file or API information is not set correctly.",
+  "thumbnail.upload.success": "Thumbnail uploaded successfully",
+  "thumbnail.upload.error": "Error occured while uploading new thumbnail. Please try again."
 
 }
