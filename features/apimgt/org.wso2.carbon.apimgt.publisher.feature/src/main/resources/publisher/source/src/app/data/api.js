@@ -976,6 +976,23 @@ class API extends Resource {
     }
 
     /**
+     * Get the thumnail of an API
+     *
+     * @param id {string} UUID of the api
+     */
+    getAPIThumbnail(id) {
+        const promised_getAPIThumbnail = this.client.then((client) => {
+            return client.apis['API (Individual)'].get_apis__apiId__thumbnail({
+                    apiId: id
+                },
+                this._requestMetaData(),
+            );
+        });
+
+        return promised_getAPIThumbnail;
+    }
+
+    /**
      * Add new thumbnail image to an API
      *
      * @param {String} api_id id of the API

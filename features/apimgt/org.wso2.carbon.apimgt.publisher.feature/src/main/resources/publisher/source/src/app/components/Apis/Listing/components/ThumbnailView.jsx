@@ -1,26 +1,33 @@
-import React, { Component } from 'react';
-import { ButtonBase, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography, Slide } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
-import Alert from 'AppComponents/Shared/Alert';
-import Api from 'AppData/api';
-import CancelIcon from '@material-ui/icons/Cancel';
-import Card from '@material-ui/core/Card';
-import CardMedia from '@material-ui/core/CardMedia';
-import Dropzone from 'react-dropzone';
-import EditIcon from '@material-ui/icons/Edit';
-import PropTypes from 'prop-types';
-import UploadIcon from '@material-ui/icons/Send';
 import green from '@material-ui/core/colors/green';
 import red from '@material-ui/core/colors/red';
+import React, { Component } from 'react';
+import Button from '@material-ui/core/Button';
+import ButtonBase from '@material-ui/core/ButtonBase';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import Grid from '@material-ui/core/Grid';
+import GridList from '@material-ui/core/GridList';
+import GridListTile from '@material-ui/core/GridListTile';
+import GridListTileBar from '@material-ui/core/GridListTileBar';
+import Slide from '@material-ui/core/Slide';
+import Typography from '@material-ui/core/Typography';
+import EditIcon from '@material-ui/icons/Edit';
+import CancelIcon from '@material-ui/icons/Cancel';
+import UploadIcon from '@material-ui/icons/Send';
+import PropTypes from 'prop-types';
+import Dropzone from 'react-dropzone';
+import Api from 'AppData/api';
+import Alert from 'AppComponents/Shared/Alert';
 
 import ImageGenerator from './ImageGenerator';
 
+const windowURL = window.URL || window.webkitURL;
 const styles = theme => ({
     acceptDrop: {
         backgroundColor: green[50],
-    },
-    card: {
-        maxWidth: 80,
     },
     dropzone: {
         border: '2px dashed rgb(102, 102, 102)',
@@ -31,6 +38,13 @@ const styles = theme => ({
         position: 'relative',
         textAlign: 'center',
         width: '100%',
+    },
+    media: {
+        // ⚠️ object-fit is not supported by IE11.
+        objectFit: 'cover',
+    },
+    preview: {
+        height: theme.spacing.unit * 25,
     },
     rejectDrop: {
         backgroundColor: red[50],
@@ -63,23 +77,6 @@ const styles = theme => ({
         justifyContent: 'center',
         color: theme.palette.common.white,
     },
-    media: {
-        // ⚠️ object-fit is not supported by IE11.
-        objectFit: 'cover',
-    },
-    paper: {
-        position: 'absolute',
-        width: theme.spacing.unit * 100,
-        backgroundColor: theme.palette.background.paper,
-        boxShadow: theme.shadows[5],
-        padding: theme.spacing.unit * 4,
-        top: '25%',
-        left: `calc(50% - ${(theme.spacing.unit * 100) / 2}px)`,
-    },
-    preview: {
-        height: theme.spacing.unit * 20,
-        width: theme.spacing.unit * 20,
-    },
 });
 
 /**
@@ -102,10 +99,26 @@ class ThumbnailView extends Component {
      */
     constructor(props) {
         super(props);
-        this.state = { open: false, file: null };
+        this.state = { open: false, file: null, thumbnail: null };
         this.handleClick = this.handleClick.bind(this);
         this.handleClose = this.handleClose.bind(this);
     }
+
+    /**
+     * Load required data for showing the thubnail view
+     */
+    componentDidMount() {
+        const thumbApi = new Api();
+        const { api } = this.props;
+        thumbApi.getAPIThumbnail(api.id)
+            .then((response) => {
+                if (response && response.data) {
+                    const url = windowURL.createObjectURL(response.data);
+                    this.setState({ thumbnail: url });
+                }
+            });
+    }
+
     /**
      * Event listener for file drop on the dropzone
      * @param {File} acceptedFile dropeed file
@@ -137,8 +150,9 @@ class ThumbnailView extends Component {
         }
         const api = new Api();
         const thumbnailPromise = api.addAPIThumbnail(apiId, file);
-        thumbnailPromise.then((response) => {
+        thumbnailPromise.then(() => {
             Alert.info('Thumbnail uploaded successfully');
+            this.setState({ open: false, thumbnail: file.preview });
         }).catch((error) => {
             if (process.env.NODE_ENV !== 'production') {
                 console.log(error);
@@ -151,7 +165,10 @@ class ThumbnailView extends Component {
      */
     handleClose() {
         if (this.state.file) {
-            window.URL.revokeObjectURL(this.state.file.preview);
+            windowURL.revokeObjectURL(this.state.file.preview);
+        }
+        if (this.state.thumbnail) {
+            windowURL.revokeObjectURL(this.state.thumbnail);
         }
 
         this.setState({ open: false, file: null });
@@ -160,24 +177,16 @@ class ThumbnailView extends Component {
      * @inheritdoc
      */
     render() {
-        const { api, classes } = this.props;
-        const { file } = this.state;
+        const {
+            api, classes, width, height,
+        } = this.props;
+        const { file, thumbnail } = this.state;
         let view;
 
-        if (api.thumb) {
-            view = (
-                <Card className={classes.card}>
-                    <CardMedia
-                        component='img'
-                        className={classes.media}
-                        height={80}
-                        image={api.thumb}
-                        title='API Thumbnail'
-                    />
-                </Card>
-            );
+        if (thumbnail) {
+            view = <img height={height} width={width} src={thumbnail} alt='API Thumbnail' className={classes.media} />;
         } else {
-            view = <ImageGenerator width={80} height={80} api={api} />;
+            view = <ImageGenerator width={width} height={height} api={api} />;
         }
 
         return (
@@ -212,29 +221,43 @@ class ThumbnailView extends Component {
                 >
                     <DialogTitle id='thumb-dialog-title'>Upload Thumbnail</DialogTitle>
                     <DialogContent>
-                        <Dropzone
-                            multiple={false}
-                            accept='image/*'
-                            className={classes.dropzone}
-                            activeClassName={classes.acceptDrop}
-                            rejectClassName={classes.rejectDrop}
-                            onDrop={(dropFile) => { this.onDrop(dropFile); }}
-                        >
-                            <Typography
-                                component='span'
-                                variant='title'
-                                color='inherit'
-                            >
-                                Drop your image or click the box to upload image
-                            </Typography>
-                        </Dropzone>
-                        {file && file.length > 0 &&
-                            <Card>
-                                <CardMedia className={classes.media}>
-                                    <img className={classes.preview} src={file[0].preview} alt='Thumbnail Preview' />
-                                </CardMedia>
-                            </Card>
-                        }
+                        <Grid container spacing={16}>
+                            <Grid item xs={9}>
+                                <Dropzone
+                                    multiple={false}
+                                    accept='image/*'
+                                    className={classes.dropzone}
+                                    activeClassName={classes.acceptDrop}
+                                    rejectClassName={classes.rejectDrop}
+                                    onDrop={(dropFile) => { this.onDrop(dropFile); }}
+                                >
+                                    <Typography
+                                        component='span'
+                                        variant='title'
+                                        color='inherit'
+                                    >
+                                        Drop your image or click the box to upload image
+                                    </Typography>
+                                </Dropzone>
+                            </Grid>
+                            <Grid item xs={3}>
+                                <GridList cellHeight='auto' className={classes.gridList} cols='1'>
+                                    <GridListTile key='tileImage' cols='1'>
+                                        <img
+                                            className={classes.preview}
+                                            src={file && file.length > 0 ?
+                                                file[0].preview :
+                                                '/publisher/public/app/images/api/api-default.png'
+                                            }
+                                            alt='Thumbnail Preview'
+                                        />
+                                        <GridListTileBar
+                                            title='Preview'
+                                        />
+                                    </GridListTile>
+                                </GridList>
+                            </Grid>
+                        </Grid>
                     </DialogContent>
                     <DialogActions>
                         <Button variant='outlined' color='primary' onClick={this.handleClick} id='btnUploadAPIThumb' >
@@ -252,9 +275,16 @@ class ThumbnailView extends Component {
     }
 }
 
+ThumbnailView.defaultProps = {
+    height: 190,
+    width: 250,
+};
+
 ThumbnailView.propTypes = {
     api: PropTypes.shape({}).isRequired,
     classes: PropTypes.shape({}).isRequired,
+    height: PropTypes.number,
+    width: PropTypes.number,
 };
 
 export default withStyles(styles)(ThumbnailView);
