@@ -1,4 +1,5 @@
 import { withStyles } from '@material-ui/core/styles';
+import { Link } from 'react-router-dom';
 import green from '@material-ui/core/colors/green';
 import red from '@material-ui/core/colors/red';
 import React, { Component } from 'react';
@@ -49,6 +50,10 @@ const styles = theme => ({
     rejectDrop: {
         backgroundColor: red[50],
     },
+    suppressLinkStyles: {
+        textDecoration: 'none',
+        color: theme.palette.text.disabled,
+    },
     thumb: {
         '&:hover': {
             zIndex: 1,
@@ -81,6 +86,7 @@ const styles = theme => ({
 
 /**
  * Slide up transition for modal
+ *
  * @param {any} props Properties
  * @returns {Slide} Slide up transition
  */
@@ -95,6 +101,7 @@ function Transition(props) {
 class ThumbnailView extends Component {
     /**
      * Initializes the ThumbnailView Component
+     *
      * @param {any} props Component properties
      */
     constructor(props) {
@@ -112,7 +119,7 @@ class ThumbnailView extends Component {
         const { api } = this.props;
         thumbApi.getAPIThumbnail(api.id)
             .then((response) => {
-                if (response && response.data) {
+                if (response && response.data && response.data.size > 0) {
                     const url = windowURL.createObjectURL(response.data);
                     this.setState({ thumbnail: url });
                 }
@@ -121,11 +128,13 @@ class ThumbnailView extends Component {
 
     /**
      * Event listener for file drop on the dropzone
-     * @param {File} acceptedFile dropeed file
+     *
+     * @param {File} acceptedFile dropped file
      */
     onDrop(acceptedFile) {
         this.setState({ file: acceptedFile });
     }
+
     /**
      * @param {SyntheticEvent} e React event object
      */
@@ -137,6 +146,7 @@ class ThumbnailView extends Component {
             this.uploadThumbnail(api.id, this.state.file[0]);
         }
     }
+
     /**
      * Add new thumbnail image to an API
      *
@@ -160,6 +170,7 @@ class ThumbnailView extends Component {
             Alert.error('Error occured while uploading new thumbnail. Please try again.');
         });
     }
+
     /**
      * Handle modal close event
      */
@@ -173,14 +184,16 @@ class ThumbnailView extends Component {
 
         this.setState({ open: false, file: null });
     }
+
     /**
      * @inheritdoc
      */
     render() {
         const {
-            api, classes, width, height,
+            api, classes, width, height, isEditable,
         } = this.props;
         const { file, thumbnail } = this.state;
+        const overviewPath = `/apis/${api.id}/overview`;
         let view;
 
         if (thumbnail) {
@@ -191,24 +204,30 @@ class ThumbnailView extends Component {
 
         return (
             <div>
-                <ButtonBase
-                    focusRipple
-                    className={classes.thumb}
-                    onClick={this.handleClick}
-                    id='btnEditAPIThumb'
-                >
-                    {view}
-                    <span className={classes.thumbBackdrop} />
-                    <span className={classes.thumbButton}>
-                        <Typography
-                            component='span'
-                            variant='subheading'
-                            color='inherit'
-                        >
-                            <EditIcon />
-                        </Typography>
-                    </span>
-                </ButtonBase>
+                {isEditable ?
+                    <ButtonBase
+                        focusRipple
+                        className={classes.thumb}
+                        onClick={this.handleClick}
+                        id='btnEditAPIThumb'
+                    >
+                        { view }
+                        <span className={classes.thumbBackdrop} />
+                        <span className={classes.thumbButton}>
+                            <Typography
+                                component='span'
+                                variant='subheading'
+                                color='inherit'
+                            >
+                                <EditIcon />
+                            </Typography>
+                        </span>
+                    </ButtonBase>
+                    :
+                    <Link className={classes.suppressLinkStyles} to={overviewPath}>
+                        { view }
+                    </Link>
+                }
 
                 <Dialog
                     TransitionComponent={Transition}
@@ -278,6 +297,7 @@ class ThumbnailView extends Component {
 ThumbnailView.defaultProps = {
     height: 190,
     width: 250,
+    isEditable: false,
 };
 
 ThumbnailView.propTypes = {
@@ -285,6 +305,7 @@ ThumbnailView.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     height: PropTypes.number,
     width: PropTypes.number,
+    isEditable: PropTypes.bool,
 };
 
 export default withStyles(styles)(ThumbnailView);

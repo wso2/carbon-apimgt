@@ -40,7 +40,7 @@ const DetailsTopMenu = ({ classes, api }) => {
                 </Link>
             </Grid>
             <Grid item>
-                <ThumbnailView api={api} width={80} height={80} />
+                <ThumbnailView api={api} width={80} height={80} isEditable />
             </Grid>
             <Grid
                 item
