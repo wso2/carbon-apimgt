@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import React, { Component } from 'react';
-import { Paper, Divider } from '@material-ui/core';
+import { Divider } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import IconButton from '@material-ui/core/IconButton';
 import SaveIcon from '@material-ui/icons/Save';
@@ -75,26 +75,20 @@ class Endpoint extends Component {
      * @memberof Endpoint
      */
     componentDidMount() {
-        const { apiUUID } = this.props.match.params;
-        // Populate Defined endpoints dropdowns
-        const api = new Api();
+        const { api } = this.props;
         const promisedEndpoints = EndpointDAO.all();
 
-        // Populate endpoint details
-        const promisedAPI = api.get(apiUUID);
-        const setSelectedEp = Promise.all([promisedEndpoints, promisedAPI]);
-        setSelectedEp
-            .then((responses) => {
+        promisedEndpoints
+            .then((response) => {
                 const epMap = new Map();
-                for (const endpoint of responses[0]) {
+                for (const endpoint of response) {
                     epMap.set(endpoint.id, endpoint);
                 }
 
-                // this.setState({ endpointsMap: epMap });
                 let inline = false;
                 let currentProdEP = null;
                 let currentSandboxEP = null;
-                const endpointInAPI = responses[1].body.endpoint;
+                const endpointInAPI = api.endpoint;
                 for (const i in endpointInAPI) {
                     if (endpointInAPI[i].inline !== undefined) {
                         inline = true;
@@ -120,7 +114,7 @@ class Endpoint extends Component {
                 }
 
                 this.setState({
-                    api: responses[1].data,
+                    api: api,
                     productionEndpoint: currentProdEP,
                     sandboxEndpoint: currentSandboxEP,
                     isInline: inline,
@@ -268,7 +262,7 @@ class Endpoint extends Component {
             return <Progress />;
         }
         return (
-            <Paper>
+            <React.Fragment>
                 {this.state.readOnly && (
                     <IconButton
                         className={classes.button}
@@ -314,7 +308,7 @@ class Endpoint extends Component {
                     />
                 )}
                 <Divider />
-            </Paper>
+            </React.Fragment>
         );
     }
 }

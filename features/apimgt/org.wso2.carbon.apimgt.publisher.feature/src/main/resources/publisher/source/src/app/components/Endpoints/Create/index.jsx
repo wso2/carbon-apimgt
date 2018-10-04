@@ -44,7 +44,7 @@ const styles = theme => ({
     filterWrapper: {
         display: 'flex',
     },
-    formControl: {
+    widthControl: {
         marginTop: 21,
     },
     textField: {
