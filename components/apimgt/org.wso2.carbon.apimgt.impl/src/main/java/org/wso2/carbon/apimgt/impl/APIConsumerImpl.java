@@ -2348,7 +2348,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             String subscriptionStatus = null;
             String subscriptionUUID = "";
 
-            if (workflowResponse != null) {
+            if (workflowResponse != null && workflowResponse.getJSONPayload() != null
+                    && !workflowResponse.getJSONPayload().isEmpty()) {
                 try {
                     JSONObject wfResponseJson = (JSONObject) new JSONParser().parse(workflowResponse.getJSONPayload());
                     if (APIConstants.SubscriptionStatus.REJECTED.equals(wfResponseJson.get("Status"))) {
