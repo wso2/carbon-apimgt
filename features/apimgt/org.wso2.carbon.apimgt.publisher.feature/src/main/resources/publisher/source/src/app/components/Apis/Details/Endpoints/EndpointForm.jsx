@@ -17,21 +17,11 @@
 import React from 'react';
 import { Component } from 'react';
 import { Grid, Paper, Typography, Divider } from '@material-ui/core';
-import EndpointsSelector from './EndpointsSelector';
 import PropTypes from 'prop-types';
-import Input from '@material-ui/core/Input';
-import InputLabel from '@material-ui/core/InputLabel';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import FormControl from '@material-ui/core/FormControl';
-import { withStyles, MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
-import purple from '@material-ui/core/colors/purple';
-import green from '@material-ui/core/colors/green';
-import Button from '@material-ui/core/Button';
 import { FormattedMessage } from 'react-intl';
 import { Progress } from 'AppComponents/Shared';
-import Grow from '@material-ui/core/Grow';
-import Slide from '@material-ui/core/Slide';
 
 const styles = theme => ({
     root: {
@@ -56,6 +46,16 @@ const styles = theme => ({
     },
     button: {
         margin: theme.spacing.unit,
+    },
+    grid: {
+        paddingLeft: '10px',
+        paddingRight: '10px',
+        minWidth: '50%',
+    },
+    suspendGrid: {
+        paddingLeft: '10px',
+        paddingRight: '10px',
+        minWidth: '33%',
     },
 });
 
@@ -154,20 +154,16 @@ class EndpointForm extends Component {
         const suspendFactor = this.props.selectedEndpointConfig.attributes
             ? this.props.selectedEndpointConfig.attributes.find(item => item.name === 'suspendFactor')
             : '';
-        if (!this.state.serviceUrl) {
-            return <Progress />;
-        }
+
         return (
-            <Grid container>
-                <Grow in={this.props.showConfig}>
+            <React.Fragment>
                     <Grid item xs={12}>
                         <Paper className={classes.paper}>
                             <form className={classes.container} noValidate autoComplete='off'>
-                                <Grid item xs={5}>
+                                <Grid item xs={5} className={classes.grid}>
                                     <TextField
                                         id='url'
                                         label={<FormattedMessage id='service.url' defaultMessage='Service URL' />}
-                                        className={classes.textField}
                                         value={this.props.selectedEndpointConfig.url}
                                         fullWidth
                                         margin='normal'
@@ -175,11 +171,10 @@ class EndpointForm extends Component {
                                         disabled={this.props.readOnly || (!this.props.readOnly && !this.props.isInline)}
                                     />
                                 </Grid>
-                                <Grid item xs={5}>
+                                <Grid item xs={5} className={classes.grid}>
                                     <TextField
                                         id='timeout'
                                         label={<FormattedMessage id='timeout' defaultMessage='Timeout' />}
-                                        className={classes.textField}
                                         value={this.props.selectedEndpointConfig.timeout}
                                         fullWidth
                                         margin='normal'
@@ -194,7 +189,7 @@ class EndpointForm extends Component {
                                 <FormattedMessage id='endpoint.suspend.state' defaultMessage='Endpoint Suspend State' />
                             </Typography>
                             <form className={classes.container} noValidate autoComplete='off'>
-                                <Grid item xs={4}>
+                                <Grid item xs={4} className={classes.suspendGrid}>
                                     <TextField
                                         id='suspendInitialDuration'
                                         label={
@@ -203,14 +198,14 @@ class EndpointForm extends Component {
                                                 defaultMessage='Initial Duration(ms)'
                                             />
                                         }
-                                        className={classes.textField}
                                         value={suspendInitialDuration ? suspendInitialDuration.value : ''}
                                         margin='normal'
+                                        fullWidth
                                         onChange={this.handleEndpointAttributeChange}
                                         disabled={this.props.readOnly || (!this.props.readOnly && !this.props.isInline)}
                                     />
                                 </Grid>
-                                <Grid item xs={4}>
+                                <Grid item xs={4} className={classes.suspendGrid}>
                                     <TextField
                                         id='suspendMaximumDuration'
                                         label={
@@ -219,20 +214,20 @@ class EndpointForm extends Component {
                                                 defaultMessage='Maximium Duration(ms)'
                                             />
                                         }
-                                        className={classes.textField}
                                         value={suspendMaixumumlDuration ? suspendMaixumumlDuration.value : ''}
                                         margin='normal'
+                                        fullWidth
                                         onChange={this.handleEndpointAttributeChange}
                                         disabled={this.props.readOnly || (!this.props.readOnly && !this.props.isInline)}
                                     />
                                 </Grid>
-                                <Grid item xs={3}>
+                                <Grid item xs={3} className={classes.suspendGrid}>
                                     <TextField
                                         id='suspendFactor'
                                         label={<FormattedMessage id='suspend.factor' defaultMessage='Suspend Factor' />}
-                                        className={classes.textField}
                                         value={suspendFactor ? suspendFactor.value : ''}
                                         margin='normal'
+                                        fullWidth
                                         onChange={this.handleEndpointAttributeChange}
                                         disabled={this.props.readOnly || (!this.props.readOnly && !this.props.isInline)}
                                     />
@@ -241,91 +236,7 @@ class EndpointForm extends Component {
                         </Paper>
                         <Divider />
                     </Grid>
-                </Grow>
-                <Slide direction='up' in={this.props.showEpConfigSlide} mountOnEnter unmountOnExit>
-                    <Grid item xs={12}>
-                        <Paper className={classes.paper}>
-                            <form className={classes.container} noValidate autoComplete='off'>
-                                <Grid item xs={5}>
-                                    <TextField
-                                        id='url'
-                                        label={<FormattedMessage id='service.url' defaultMessage='Service URL' />}
-                                        className={classes.textField}
-                                        value={this.props.selectedEndpointConfig.url}
-                                        fullWidth
-                                        margin='normal'
-                                        onChange={this.handleEndpointConfigTextFieldChange}
-                                        disabled={this.props.readOnly || (!this.props.readOnly && !this.props.isInline)}
-                                    />
-                                </Grid>
-                                <Grid item xs={5}>
-                                    <TextField
-                                        id='timeout'
-                                        label={<FormattedMessage id='timeout' defaultMessage='Timeout' />}
-                                        className={classes.textField}
-                                        value={this.props.selectedEndpointConfig.timeout}
-                                        fullWidth
-                                        margin='normal'
-                                        onChange={this.handleEndpointConfigTextFieldChange}
-                                        disabled={this.props.readOnly || (!this.props.readOnly && !this.props.isInline)}
-                                    />
-                                </Grid>
-                            </form>
-                        </Paper>
-                        <Paper className={classes.paper}>
-                            <Typography variant='subheading' gutterBottom>
-                                <FormattedMessage id='endpoint.suspend.state' defaultMessage='Endpoint Suspend State' />
-                            </Typography>
-                            <form className={classes.container} noValidate autoComplete='off'>
-                                <Grid item xs={4}>
-                                    <TextField
-                                        id='suspendInitialDuration'
-                                        label={
-                                            <FormattedMessage
-                                                id='initial.duration.ms'
-                                                defaultMessage='Initial Duration(ms)'
-                                            />
-                                        }
-                                        className={classes.textField}
-                                        value={suspendInitialDuration ? suspendInitialDuration.value : ''}
-                                        margin='normal'
-                                        onChange={this.handleEndpointAttributeChange}
-                                        disabled={this.props.readOnly || (!this.props.readOnly && !this.props.isInline)}
-                                    />
-                                </Grid>
-                                <Grid item xs={4}>
-                                    <TextField
-                                        id='suspendMaximumDuration'
-                                        label={
-                                            <FormattedMessage
-                                                id='maximum.duration.ms'
-                                                defaultMessage='Maximium Duration(ms)'
-                                            />
-                                        }
-                                        className={classes.textField}
-                                        value={suspendMaixumumlDuration ? suspendMaixumumlDuration.value : ''}
-                                        margin='normal'
-                                        onChange={this.handleEndpointAttributeChange}
-                                        disabled={this.props.readOnly || (!this.props.readOnly && !this.props.isInline)}
-                                    />
-                                </Grid>
-                                <Grid item xs={3}>
-                                    <TextField
-                                        id='suspendFactor'
-                                        label={<FormattedMessage id='suspend.factor' defaultMessage='Suspend Factor' />}
-                                        className={classes.textField}
-                                        value={suspendFactor ? suspendFactor.value : ''}
-                                        margin='normal'
-                                        onChange={this.handleEndpointAttributeChange}
-                                        disabled={this.props.readOnly || (!this.props.readOnly && !this.props.isInline)}
-                                    />
-                                </Grid>
-                            </form>
-                        </Paper>
-                        <Divider />
-                    </Grid>
-                </Slide>
-            </Grid>
+            </React.Fragment>
         );
     }
 }
