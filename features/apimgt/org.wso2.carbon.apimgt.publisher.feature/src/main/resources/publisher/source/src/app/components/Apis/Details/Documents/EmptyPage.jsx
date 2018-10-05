@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React from 'react';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Card from '@material-ui/core/Card';
@@ -20,14 +20,9 @@ const styles = theme => ({
 
 });
 
-class EmptyPage extends Component{
-    
-    constructor(props){
-        super(props);
-    }
-    
-    render(){
-        const { classes } = this.props;
+function EmptyPage(props) {
+
+        const { classes } = props;
         return(
             <div>
                 <Grid container justify="center" spacing={24} className={classes.grid}>
@@ -44,10 +39,10 @@ class EmptyPage extends Component{
                             <Button className={classes.button} variant="contained">
                                 <FormattedMessage id='create.btn'
                                    DefaultMessage='Create'/>
-                            </Button>   
+                            </Button>
                         </Card>
                     </Grid>
-                
+
                     <Grid item sm={4}>
                         <Card>
                             <Typography gutterBottom variant='headline' component='h4' className={classes.typography}>
@@ -61,14 +56,12 @@ class EmptyPage extends Component{
                             <Button className={classes.button} variant="contained">
                                 <FormattedMessage id='create.btn'
                                 DefaultMessage='Create'/>
-                            </Button>    
+                            </Button>
                         </Card>
                     </Grid>
-                </Grid>   
-                
+                </Grid>
             </div>
-        );   
-    }
+        );
 }
 EmptyPage.propTypes = {
     classes: PropTypes.object.isRequired,
