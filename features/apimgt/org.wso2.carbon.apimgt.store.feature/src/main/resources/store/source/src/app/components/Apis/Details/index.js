@@ -1,16 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
 import CustomIcon from '../../Shared/CustomIcon';
-import {Route, Switch, Redirect, Link} from 'react-router-dom'
-
-import Overview from './Overview'
-import ApiConsole from './ApiConsole/ApiConsole'
-import Documentation from './Documents/Documentation'
-import Forum from './Forum'
-import Sdk from './Sdk'
-import {PageNotFound} from '../../Base/Errors/index'
+import LeftMenuItem from '../../Shared/LeftMenuItem';
+import {Route, Switch, Redirect, Link} from 'react-router-dom';
+import Overview from './Overview';
+import ApiConsole from './ApiConsole/ApiConsole';
+import Documentation from './Documents/Documentation';
+import Forum from './Forum';
+import Sdk from './Sdk';
+import {PageNotFound} from '../../Base/Errors/index';
 import InfoBar from './InfoBar';
 import RightPanel from './RightPanel';
 import { ApiContext } from './ApiContext';
@@ -20,12 +19,9 @@ import Comments from './Comments/Comments';
 
 
 const styles = theme => ({
-    linkColor: {
-        color: theme.palette.getContrastText(theme.palette.background.leftMenu),
-    },
     LeftMenu: {
         backgroundColor: theme.palette.background.leftMenu,
-        width: 90,
+        width: theme.custom.leftMenuWidth,
         textAlign: 'center',
         fontFamily: theme.typography.fontFamily,
         position: 'absolute',
@@ -33,20 +29,10 @@ const styles = theme => ({
         left: 0,
         top: 0,
     },
-    leftLInk: {
-        paddingTop: 10,
-        paddingBottom: 10,  
-        paddingLeft: 5,
-        paddingRight: 5,
-        fontSize: 11,
-        cursor: 'pointer'
-    },
     leftLInkMain: {
         borderRight: 'solid 1px ' + theme.palette.background.leftMenu,
-        paddingBottom: 5,
-        paddingTop: 5,
-        height: 60,
-        fontSize: 12,
+        paddingBottom: theme.spacing.unit,  
+        paddingTop: theme.spacing.unit,  
         cursor: 'pointer',
         backgroundColor: theme.palette.background.leftMenuActive,
         color: theme.palette.getContrastText(theme.palette.background.leftMenuActive),
@@ -60,11 +46,10 @@ const styles = theme => ({
         display: 'flex',
         flex: 1,
         flexDirection: 'column',
-        marginLeft: 90,
-        paddingBottom: 20,
+        marginLeft: theme.custom.leftMenuWidth,
+        paddingBottom:  theme.spacing.unit*3,  
       }
 });
-
 class Details extends React.Component {
     constructor(props){
         super(props);
@@ -174,58 +159,24 @@ class Details extends React.Component {
 
   render() {
     const { classes, theme } = this.props;
-    const strokeColor = theme.palette.getContrastText(theme.palette.background.leftMenu);
     let redirect_url = "/apis/" + this.props.match.params.api_uuid + "/overview";
+    const leftMenuIconMainSize = theme.custom.leftMenuIconMainSize;
+
     return (
         <ApiContext.Provider value={this.state}>
              <div className={classes.LeftMenu}>
                 <Link to={"/apis"}>
                     <div className={classes.leftLInkMain}>
-                        <CustomIcon width={52} height={52} icon="api" />
+                        <CustomIcon width={leftMenuIconMainSize} height={leftMenuIconMainSize} icon="api" />
                     </div>
                 </Link>
-                <div className={classes.leftLInk} 
-                    onClick={( () => this.handleMenuSelect('overview') ) }
-                    style={{backgroundColor: this.state.active === "overview" ? theme.palette.background.appBar : ''}}
-                    >
-                    <CustomIcon strokeColor={strokeColor}  width={32} height={32} icon="overview" />
-                    <div className={classes.linkColor}>OVERVIEW</div>
-                </div>
-                <div className={classes.leftLInk} 
-                    onClick={( () => this.handleMenuSelect('credentials') ) }
-                    style={{backgroundColor: this.state.active === "credentials" ? theme.palette.background.appBar : ''}}
-                    >
-                    <CustomIcon strokeColor={strokeColor}  width={32} height={32} icon="credentials" />
-                    <div className={classes.linkColor}>CREDENTIALS</div>
-                </div>
-                <div className={classes.leftLInk}
-                    onClick={( () => this.handleMenuSelect('comments') ) }
-                    style={{backgroundColor: this.state.active === "comments" ? theme.palette.background.appBar : ''}}
-                    >
-                    <CustomIcon strokeColor={strokeColor}  width={32} height={32} icon="comments" />
-                    <div className={classes.linkColor}>COMMENTS</div>
-                </div>
-                <div className={classes.leftLInk}
-                    onClick={( () => this.handleMenuSelect('test') ) }
-                    style={{backgroundColor: this.state.active === "test" ? theme.palette.background.appBar : ''}}
-                    >
-                    <CustomIcon strokeColor={strokeColor}  width={32} height={32} icon="test" />
-                    <div className={classes.linkColor}>TEST</div>
-                </div>
-                <div className={classes.leftLInk}
-                    onClick={( () => this.handleMenuSelect('docs') ) }
-                    style={{backgroundColor: this.state.active === "docs" ? theme.palette.background.appBar : ''}}
-                    >
-                    <CustomIcon strokeColor={strokeColor}  width={32} height={32} icon="docs" />
-                    <div className={classes.linkColor}>DOCS</div>
-                </div>
-                <div className={classes.leftLInk}
-                    onClick={( () => this.handleMenuSelect('sdk') ) }
-                    style={{backgroundColor: this.state.active === "sdk" ? theme.palette.background.appBar : ''}}
-                    >
-                    <CustomIcon strokeColor={strokeColor}  width={32} height={32} icon="sdk" />
-                    <div className={classes.linkColor}>SDK</div>
-                </div>
+                <LeftMenuItem text="overview" handleMenuSelect={this.handleMenuSelect} active={this.state.active} />
+                <LeftMenuItem text="credentials" handleMenuSelect={this.handleMenuSelect} active={this.state.active} />
+                <LeftMenuItem text="comments" handleMenuSelect={this.handleMenuSelect} active={this.state.active} />
+                <LeftMenuItem text="test" handleMenuSelect={this.handleMenuSelect} active={this.state.active} />
+                <LeftMenuItem text="docs" handleMenuSelect={this.handleMenuSelect} active={this.state.active} />
+                <LeftMenuItem text="sdk" handleMenuSelect={this.handleMenuSelect} active={this.state.active} />
+               
             </div>
               <div className={classes.content}>
               <InfoBar api_uuid={this.props.match.params.api_uuid} innerRef={node => this.infoBar = node}/>
@@ -241,7 +192,7 @@ class Details extends React.Component {
                     <Route component={PageNotFound}/>
                 </Switch>
               </div>
-              <RightPanel />
+            {theme.custom.showApiHelp && <RightPanel /> }
         </ApiContext.Provider>
     );
   }

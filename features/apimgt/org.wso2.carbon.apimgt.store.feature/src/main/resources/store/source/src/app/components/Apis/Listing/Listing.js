@@ -51,33 +51,9 @@ const styles = theme => ({
         margin: theme.spacing.unit,
         marginBottom: 0
     },
-    titleBar: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        borderBottomWidth: '1px',
-        borderBottomStyle: 'solid',
-        borderColor: theme.palette.text.secondary,
-        marginBottom: 20,
-    },
-    buttonLeft: {
-        alignSelf: 'flex-start',
-        display: 'flex',
-    },
     buttonRight: {
         alignSelf: 'flex-end',
         display: 'flex',
-    },
-    title: {
-        display: 'inline-block',
-        marginRight: 50
-    },
-    addButton: {
-        display: 'inline-block',
-        marginBottom: 20,
-        zIndex: 1,
-    },
-    popperClose: {
-        pointerEvents: 'none',
     },
     ListingWrapper: {
         paddingTop: 10,
@@ -88,32 +64,6 @@ const styles = theme => ({
         background: theme.palette.background.paper,
         borderBottom: 'solid 1px ' + theme.palette.grey['A200'],
         display: 'flex',
-    },
-    backIcon: {
-        color: theme.palette.primary.main,
-        fontSize: 56,
-        cursor: 'pointer',
-    },
-    backText: {
-        color: theme.palette.primary.main,
-        paddingTop: 10,
-        cursor: 'pointer',
-    },
-    apiIcon: {
-        height: 45,
-        marginTop: 10,
-        marginRight: 10,
-    },
-    starRate: {
-        fontSize: 70,
-        color: theme.palette.custom.starColor,
-    },
-    ratingSummery: {
-        marginTop: 15,
-    },
-    rateLink: {
-        cursor: 'pointer',
-        lineHeight: '70px',
     },
     mainIconWrapper: {
         paddingTop: 13,
@@ -187,12 +137,12 @@ class Listing extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            listType: 'grid',
             apis: null,
             value: 1,
             order: 'asc',
             orderBy: 'name'
         };
+        this.state.listType = this.props.theme.custom.defaultApiView;
     }
 
     setListType = (value) => {

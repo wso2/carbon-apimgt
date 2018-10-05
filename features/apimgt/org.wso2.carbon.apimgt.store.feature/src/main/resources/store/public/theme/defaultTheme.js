@@ -22,18 +22,26 @@ var Configurations = {
             leftMenuActive: "#000000",
             drawer: '#1a1f2f',
           },
-          custom: {
-            leftMenuText: "#8b8e95",
-            starColor: "#f2c73a",
-            leftMenuWidth: 90,
-            contentAreaWidth: 1240,
-            drawerWidth: 200,
-          }
         },
         typography: {
           fontFamily: '"Open Sans", "Helvetica", "Arial", sans-serif',
           fontSize: 12
-        }
+        },
+        custom: {
+          starColor: "#f2c73a",
+          leftMenuWidth: 120,
+          contentAreaWidth: 1240,
+          drawerWidth: 200,
+          logo: '/store/public/app/images/logo.png',
+          backgroundImage: '/store/public/app/images/back-light.png',
+          title: 'WSO2 Developer Portal',
+          defaultApiView: 'grid', // Sets the default view for the api listing page ( Other values available = 'list' )
+          showApiHelp: false, // API detials page has a right hand side panel showing it's related help. Set this to false if you want to hide it.
+          leftMenu: 'icon top', //  other values ('icon top', 'icon left', 'no icon', 'no text')
+          leftMenuIconSize: 32,
+          leftMenuIconMainSize: 52,
+          leftMenuTextStyle: 'uppercase',
+        },
       },
       dark: {
         palette: {
@@ -57,19 +65,27 @@ var Configurations = {
             leftMenuActive: "#000000",
             drawer: '#1a1f2f',
           },
-          custom: {
-            leftMenuText: "#8b8e95",
-            starColor: "#f2c73a",
-            leftMenuWidth: 90,
-            contentAreaWidth: 1240,
-            drawerWidth: 200,
-          }
         },
         typography: {
           fontFamily: '"Open Sans", "Helvetica", "Arial", sans-serif',
           fontSize: 12
-        }
-      }
-    }
+        },
+        custom: {
+          starColor: "#f2c73a",
+          leftMenuWidth: 120,
+          contentAreaWidth: 1240,
+          drawerWidth: 200,
+          logo: '/store/public/app/images/logo.png',
+          backgroundImage: '/store/public/app/images/back-light.png',
+          title: 'WSO2 Developer Portal',
+          defaultApiView: 'grid', // Sets the default view for the api listing page ( Other values available = 'list' )
+          showApiHelp: false, // API detials page has a right hand side panel showing it's related help. Set this to false if you want to hide it.
+          leftMenu: 'icon top', //  other values ('icon top', 'icon left', 'no icon', 'no text')
+          leftMenuIconSize: 32,
+          leftMenuIconMainSize: 52,
+          leftMenuTextStyle: 'uppercase',
+        },
+      },
+    },
   };
   
