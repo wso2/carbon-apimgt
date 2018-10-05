@@ -35,10 +35,27 @@ public interface WSDLSOAPOperationExtractor {
     boolean init(byte[] wsdlContent) throws APIMgtWSDLException;
 
     /**
+     * Initialize the processor based on a provided file path which contains WSDL files.
+     *
+     * @param path File path with WSDL files
+     * @return true if initialization successful
+     * @throws APIMgtWSDLException Unexpected error while initialization
+     */
+    boolean initPath(String path) throws APIMgtWSDLException;
+
+    /**
      * Populates the wsdl info object by reading the wsdl
      *
      * @return {@link WSDLInfo} object
      * @throws APIMgtWSDLException
      */
     WSDLInfo getWsdlInfo() throws APIMgtWSDLException;
+
+    /**
+     * Returns whether this WSDL processor can process the provided WSDL content bytes or WSDL file path .
+     * To be called after calling {@link #init(byte[])} or  {@link #initPath(String)}.
+     *
+     * @return true if WSDL can be processed by this processor
+     */
+    boolean canProcess();
 }

@@ -76,6 +76,7 @@ if(jagg.isCSRFTokenValid())
             var type = request.getParameter("type");
             var swagger = null;
             var wsdl = null;
+            var wsdlFile = null;
             var apiDefinitionVersion = request.getParameter("apiDefinitionVersion");
 
             if(type == "rest"){
@@ -204,11 +205,14 @@ if(jagg.isCSRFTokenValid())
             }
             else if(type == "soap"){
                 var url = request.getParameter("wsdl-url");
-                var file = request.getFile("wsdl-file");
+                wsdlFile = request.getFile("wsdl-file");
                 var import_type = request.getParameter("import-definition");
                 var passThrough = request.getParameter("soap-options-pass-thru");
                 var rest = request.getParameter("soap-options-rest");
                 wsdl = "soap";
+                if (wsdlFile) {
+                    wsdl = wsdlFile.getName();
+                }
                 if(url){
                     wsdl = url.trim();
                 }
@@ -416,24 +420,32 @@ if(jagg.isCSRFTokenValid())
                 } catch (e) {
                     log.error(e);
                 }
-            }else if(type=="ws"){
-                session.put("wsdl",null);
-                session.put("swagger",null);
-                session.put("ws","ws");
-            }else if(type == "new"){
-                session.put("ws",null);
-                session.put("wsdl",null);
-                session.put("swagger",null);
-                session.put("apiDefinitionVersion",apiDefinitionVersion);
+            } else if (type == "ws") {
+                session.put("wsdl", null);
+                session.put("swagger", null);
+                session.put("ws", "ws");
+            } else if (type == "new") {
+                session.put("ws", null);
+                session.put("wsdl", null);
+                session.put("swagger", null);
+                session.put("apiDefinitionVersion", apiDefinitionVersion);
             }
-            if(swagger){
-                session.put("ws",null);
-                session.put("wsdl",null);
+            if (swagger) {
+                session.put("ws", null);
+                session.put("wsdl", null);
                 session.put("swagger", swagger);
-            }if(wsdl){
-                session.put("ws",null);
-                session.put("swagger",swagger);
+            }
+            if (wsdl) {
+                session.put("ws", null);
+                session.put("swagger", swagger);
                 session.put("wsdl", wsdl);
+            }
+            if (wsdlFile) {
+                session.put("ws", null);
+                session.put("swagger", swagger);
+                session.put("wsdl-file", wsdlFile);
+            } else {
+                session.remove("wsdl-file");
             }
 
             print({
@@ -471,9 +483,14 @@ if(jagg.isCSRFTokenValid())
                 return;
             }
 
+            var wsdlFile = request.getFile("wsdl-file");
+            if (wsdlFile == null) {
+                wsdlFile = session.get("wsdl-file");
+            }
+
             //try to read the wsdl content from the url
             var wsdlUrl = request.getParameter("wsdl");
-            if (wsdlUrl != null) {
+            if (wsdlFile == null && wsdlUrl != null) {
                 if (!wsdlUrl.match(org.wso2.carbon.apimgt.impl.APIConstants.API_WSDL_RESOURCE_LOCATION)) {
                     try {
                         org.wso2.carbon.apimgt.impl.utils.APIUtil.isWSDL2Document(wsdlUrl);
@@ -520,6 +537,7 @@ if(jagg.isCSRFTokenValid())
             apiData.visibility = request.getParameter("visibility");
             apiData.visibleRoles = request.getParameter("roles","UTF-8");
             apiData.wsdl = request.getParameter("wsdl");
+            apiData.wsdlFile = wsdlFile;
             apiData.accessControl = request.getParameter("accessControl");
             apiData.accessControlRoles = request.getParameter("accessControlRoles", "UTF-8");
             apiData.additionalProperties = request.getParameter("additionalProperties", "UTF-8");

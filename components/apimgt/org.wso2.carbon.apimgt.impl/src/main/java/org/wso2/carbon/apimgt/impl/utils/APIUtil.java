@@ -90,6 +90,7 @@ import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
@@ -115,6 +116,8 @@ import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.soaptorest.WSDLSOAPOperationExtractor;
+import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPOperationBindingUtils;
 import org.wso2.carbon.apimgt.impl.reportgen.ReportGenerator;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
@@ -220,6 +223,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
@@ -1328,6 +1332,18 @@ public final class APIUtil {
     }
 
     /**
+     * Utility method for get registry path for wsdl archive.
+     *
+     * @param identifier APIIdentifier
+     * @return wsdl archive path
+     */
+    public static String getWsdlArchivePath(APIIdentifier identifier) {
+        return APIConstants.API_WSDL_RESOURCE_LOCATION + APIConstants.API_WSDL_ARCHIVE_LOCATION +
+                identifier.getProviderName() + APIConstants.WSDL_PROVIDER_SEPERATOR + identifier.getApiName() +
+                identifier.getVersion() + APIConstants.ZIP_FILE_EXTENSION;
+    }
+
+    /**
      * Utility method to generate the path for a file.
      *
      * @param identifier APIIdentifier
@@ -1653,6 +1669,56 @@ public final class APIUtil {
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
+    }
+
+    public static String saveWSDLArchive(Registry registry, API api) throws RegistryException, APIManagementException {
+        String wsdlArchiveResourcePath =
+                APIConstants.API_WSDL_RESOURCE_LOCATION + APIConstants.API_WSDL_ARCHIVE_LOCATION + api.getId()
+                        .getProviderName() + APIConstants.WSDL_PROVIDER_SEPERATOR + api.getId().getApiName() +
+                        api.getId().getVersion() + APIConstants.ZIP_FILE_EXTENSION;
+        String absoluteWSDLResourcePath = RegistryUtils
+                .getAbsolutePath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
+                + wsdlArchiveResourcePath;
+        try {
+            if (api.getWsdlArchive() != null) {
+                Resource wsdlResource = registry.newResource();
+                wsdlResource.setContentStream(api.getWsdlArchive().getContent());
+                wsdlResource.setMediaType(api.getWsdlArchive().getContentType());
+                registry.put(wsdlArchiveResourcePath, wsdlResource);
+                String[] visibleRoles = null;
+                if (api.getVisibleRoles() != null) {
+                    visibleRoles = api.getVisibleRoles().split(",");
+                }
+                setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
+                        wsdlArchiveResourcePath);
+                api.setWsdlUrl(getRegistryResourceHTTPPermlink(absoluteWSDLResourcePath));
+            }
+        } catch (RegistryException e) {
+            String msg = "Failed to add WSDL Archive " + api.getWsdlUrl() + " to the registry";
+            log.error(msg, e);
+            throw new RegistryException(msg, e);
+        } catch (APIManagementException e) {
+            String msg = "Failed to process the WSDL Archive: " + api.getWsdlUrl();
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+        return wsdlArchiveResourcePath;
+    }
+
+    public static WSDLArchiveInfo extractAndValidateWSDLArchive(InputStream inputStream) throws APIManagementException {
+        String path = System.getProperty(APIConstants.JAVA_IO_TMPDIR) + File.separator
+                + APIConstants.WSDL_ARCHIVES_TEMP_FOLDER + File.separator + UUID.randomUUID().toString();
+        String archivePath = path + File.separator + APIConstants.WSDL_ARCHIVE_ZIP_FILE;
+        String extractedLocation = APIFileUtil
+                .extractUploadedArchive(inputStream, APIConstants.API_WSDL_EXTRACTED_DIRECTORY, archivePath, path);
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully extracted WSDL archive. Location: " + extractedLocation);
+        }
+        WSDLSOAPOperationExtractor processor = SOAPOperationBindingUtils.getWSDLProcessor(extractedLocation);
+        if (!processor.canProcess()) {
+            throw new APIManagementException(processor.getClass().getName() + " was unable to process the WSDL");
+        }
+        return new WSDLArchiveInfo(path, APIConstants.WSDL_ARCHIVE_ZIP_FILE);
     }
 
     /**
@@ -5252,7 +5318,7 @@ public final class APIUtil {
     public static boolean isValidWSDLURL(String wsdlURL, boolean required) {
         if (wsdlURL != null && !"".equals(wsdlURL)) {
             if (wsdlURL.startsWith("http:") || wsdlURL.startsWith("https:") ||
-                    wsdlURL.startsWith("file:") || wsdlURL.startsWith("/registry")) {
+                    wsdlURL.startsWith("file:") || (wsdlURL.startsWith("/registry") && !wsdlURL.endsWith(".zip"))) {
                 return true;
             }
         } else if (!required) {

@@ -43,11 +43,13 @@ public class API implements Serializable {
     private String url;
     private String sandboxUrl;
     private String wsdlUrl;
+    private String wsdlArchivePath;
     private String wadlUrl;
     private String type;
     private String context;
     private String contextTemplate;
     private String thumbnailUrl;
+    private ResourceFile wsdlArchive;
     private Set<String> tags = new LinkedHashSet<String>();
     private Set<Documentation> documents = new LinkedHashSet<Documentation>();
     private String httpVerb;
@@ -788,5 +790,18 @@ public class API implements Serializable {
 
     public void setAuthorizationHeader(String authorizationHeader) {
         this.authorizationHeader = authorizationHeader;
+    }
+
+    public String getWsdlArchivePath() {
+        return wsdlArchivePath;
+    }
+    public void setWsdlArchivePath(String wsdlArchivePath) {
+        this.wsdlArchivePath = wsdlArchivePath;
+    }
+    public ResourceFile getWsdlArchive() {
+        return wsdlArchive;
+    }
+    public void setWsdlArchive(ResourceFile wsdlArchive) {
+        this.wsdlArchive = wsdlArchive;
     }
 }
