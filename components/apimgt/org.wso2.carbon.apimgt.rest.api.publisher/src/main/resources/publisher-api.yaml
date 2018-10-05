@@ -3992,12 +3992,12 @@ definitions:
             type: array
             items:
               properties:
-                name:
+                key:
                   type: string
-                  example: "Suspension time"
+                  example: "environment"
                 value:
                   type: string
-                  example: "2s"
+                  example: "preprod"
           corsConfiguration:
             description: |
               CORS configuration for the API

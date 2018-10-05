@@ -126,7 +126,7 @@ class Overview extends Component {
             } else {
                 // assumes a single WSDL in text format
                 anchor.download =
-                    this.state.api.provider + '-' + this.state.api.name + '-' + this.state.api.version + '.wsdl';
+                    this.state.api.provider + '-' + this.state.api.key + '-' + this.state.api.version + '.wsdl';
             }
             anchor.click();
             windowUrl.revokeObjectURL(url);
@@ -205,7 +205,7 @@ class Overview extends Component {
     handleAddAdditionalProperties() {
         this.setState({
             additionalProperties: [...this.state.additionalProperties, {
-                name: '',
+                key: '',
                 value: '',
             }],
         });
@@ -214,12 +214,12 @@ class Overview extends Component {
     /**
      * Handle delete Additional properties
      *
-     * @param {AdditionalProperty} name AdditionalProperty
+     * @param {AdditionalProperty} key AdditionalProperty
      */
-    handleDeleteAdditionalProperties(name) {
+    handleDeleteAdditionalProperties(key) {
         const { additionalProperties } = this.state;
         this.setState({
-            additionalProperties: additionalProperties.filter(property => property.name !== name),
+            additionalProperties: additionalProperties.filter(property => property.key !== key),
         });
     }
 
@@ -442,7 +442,7 @@ Overview.propTypes = {
     api: PropTypes.shape({
         id: PropTypes.string,
         additionalProperties: PropTypes.shape({
-            name: PropTypes.string,
+            key: PropTypes.string,
             value: PropTypes.string,
         }).isRequired,
     }).isRequired,

@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_additionalPropertiesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndpointConfig_attributesDTO;
 import java.util.Objects;
 
 /**
@@ -23,7 +23,7 @@ public class EndpointConfigDTO   {
   private Boolean isPrimary = null;
 
   @SerializedName("attributes")
-  private List<API_additionalPropertiesDTO> attributes = new ArrayList<API_additionalPropertiesDTO>();
+  private List<EndpointConfig_attributesDTO> attributes = new ArrayList<EndpointConfig_attributesDTO>();
 
   public EndpointConfigDTO url(String url) {
     this.url = url;
@@ -79,12 +79,12 @@ public class EndpointConfigDTO   {
     this.isPrimary = isPrimary;
   }
 
-  public EndpointConfigDTO attributes(List<API_additionalPropertiesDTO> attributes) {
+  public EndpointConfigDTO attributes(List<EndpointConfig_attributesDTO> attributes) {
     this.attributes = attributes;
     return this;
   }
 
-  public EndpointConfigDTO addAttributesItem(API_additionalPropertiesDTO attributesItem) {
+  public EndpointConfigDTO addAttributesItem(EndpointConfig_attributesDTO attributesItem) {
     this.attributes.add(attributesItem);
     return this;
   }
@@ -94,11 +94,11 @@ public class EndpointConfigDTO   {
    * @return attributes
   **/
   @ApiModelProperty(value = "")
-  public List<API_additionalPropertiesDTO> getAttributes() {
+  public List<EndpointConfig_attributesDTO> getAttributes() {
     return attributes;
   }
 
-  public void setAttributes(List<API_additionalPropertiesDTO> attributes) {
+  public void setAttributes(List<EndpointConfig_attributesDTO> attributes) {
     this.attributes = attributes;
   }
 

@@ -10,33 +10,33 @@ import java.util.Objects;
  * API_additionalPropertiesDTO
  */
 public class API_additionalPropertiesDTO   {
-  @SerializedName("name")
-  private String name = null;
+  @SerializedName("key")
+  private String key = null;
 
   @SerializedName("value")
   private String value = null;
 
-  public API_additionalPropertiesDTO(String name, String value) {
-    this.name = name;
-    this.value = value;
-  }
+    public API_additionalPropertiesDTO(String key, String value) {
+        this.key = key;
+        this.value = value;
+    }
 
-  public API_additionalPropertiesDTO name(String name) {
-    this.name = name;
+  public API_additionalPropertiesDTO key(String key) {
+    this.key = key;
     return this;
   }
 
    /**
-   * Get name
-   * @return name
+   * Get key
+   * @return key
   **/
-  @ApiModelProperty(example = "Suspension time", value = "")
-  public String getName() {
-    return name;
+  @ApiModelProperty(example = "environment", value = "")
+  public String getKey() {
+    return key;
   }
 
-  public void setName(String name) {
-    this.name = name;
+  public void setKey(String key) {
+    this.key = key;
   }
 
   public API_additionalPropertiesDTO value(String value) {
@@ -48,7 +48,7 @@ public class API_additionalPropertiesDTO   {
    * Get value
    * @return value
   **/
-  @ApiModelProperty(example = "2s", value = "")
+  @ApiModelProperty(example = "preprod", value = "")
   public String getValue() {
     return value;
   }
@@ -67,21 +67,21 @@ public class API_additionalPropertiesDTO   {
       return false;
     }
     API_additionalPropertiesDTO apIAdditionalProperties = (API_additionalPropertiesDTO) o;
-    return Objects.equals(this.name, apIAdditionalProperties.name) &&
+    return Objects.equals(this.key, apIAdditionalProperties.key) &&
         Objects.equals(this.value, apIAdditionalProperties.value);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, value);
+    return Objects.hash(key, value);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class API_additionalPropertiesDTO {\n");
-    
-    sb.append("    name: ").append(toIndentedString(name)).append("\n");
+
+    sb.append("    key: ").append(toIndentedString(key)).append("\n");
     sb.append("    value: ").append(toIndentedString(value)).append("\n");
     sb.append("}");
     return sb.toString();

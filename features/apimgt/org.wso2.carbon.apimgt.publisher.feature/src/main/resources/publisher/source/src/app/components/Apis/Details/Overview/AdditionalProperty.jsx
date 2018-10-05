@@ -34,9 +34,9 @@ const AdditionalProperty = ({ isEditable, property, onDelete }) => {
                     justifyContent: 'space-between',
                     marginRight: 25,
                 }}
-                id='api-property-name'
-                label={isEditable && 'name'}
-                defaultValue={property.name}
+                id='api-property-key'
+                label={isEditable && 'key'}
+                defaultValue={property.key}
                 placeholder='My Property'
                 margin='normal'
                 InputProps={{
@@ -60,7 +60,7 @@ const AdditionalProperty = ({ isEditable, property, onDelete }) => {
             <IconButton
                 id='delete'
                 aria-label='Remove'
-                onClick={() => { onDelete(property.name); }}
+                onClick={() => { onDelete(property.key); }}
             >
                 <DeleteIcon />
             </IconButton>
@@ -73,7 +73,7 @@ const AdditionalProperty = ({ isEditable, property, onDelete }) => {
  */
 AdditionalProperty.propTypes = {
     property: PropTypes.shape({
-        name: PropTypes.string,
+        key: PropTypes.string,
         value: PropTypes.string,
     }).isRequired,
     isEditable: PropTypes.bool.isRequired,

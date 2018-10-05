@@ -26,20 +26,20 @@ package org.wso2.carbon.apimgt.core.models;
 
 public class AdditionalProperties {
 
-    private  String propertyName;
+    private  String propertyKey;
     private  String propertyValue;
 
-    public AdditionalProperties(String propertyName, String propertyValue) {
-        this.propertyName = propertyName;
+    public AdditionalProperties(String propertyKey, String propertyValue) {
+        this.propertyKey = propertyKey;
         this.propertyValue = propertyValue;
     }
 
-    public String getPropertyName() {
-        return propertyName;
+    public String getPropertyKey() {
+        return propertyKey;
     }
 
     public void setPropertyName(String propertyName) {
-        this.propertyName = propertyName;
+        this.propertyKey = propertyName;
     }
 
     public String getPropertyValue() {

@@ -374,8 +374,6 @@ public final class API {
         this.additionalProperties = additionalProperties;
     }
 
-
-
     public String getWorkflowStatus() {
         return workflowStatus;
     }
@@ -510,7 +508,7 @@ public final class API {
         public Set<String> getTags() {
             return tags;
         }
-        
+
         public List<String> getGatewayLabels() {
             return gatewayLabels;
         }

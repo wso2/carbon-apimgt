@@ -119,7 +119,7 @@ public class MappingUtil {
         if (api.getAdditionalProperties() != null) {
             List<API_additionalPropertiesDTO> additionalPropertiesDTOList = new ArrayList<>();
             for (AdditionalProperties propertiesDTO : api.getAdditionalProperties()){
-                additionalPropertiesDTOList.add(new API_additionalPropertiesDTO(propertiesDTO.getPropertyName(),propertiesDTO.getPropertyValue()));
+                additionalPropertiesDTOList.add(new API_additionalPropertiesDTO(propertiesDTO.getPropertyKey(),propertiesDTO.getPropertyValue()));
             }
             apidto.setAdditionalProperties(additionalPropertiesDTOList);
         }
@@ -243,7 +243,7 @@ public class MappingUtil {
             List<AdditionalProperties> additionalProperties = new ArrayList<>();
             //get additional properties for each list element in API_additionalPropertiesDTO
             for (API_additionalPropertiesDTO propertiesDTO : apidto.getAdditionalProperties()){
-                additionalProperties.add(new AdditionalProperties(propertiesDTO.getName(),propertiesDTO.getValue()));
+                additionalProperties.add(new AdditionalProperties(propertiesDTO.getKey(),propertiesDTO.getValue()));
             }
             apiBuilder.additionalProperties(additionalProperties);
         }

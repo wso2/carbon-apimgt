@@ -769,7 +769,6 @@ public class ApiDAOImpl implements ApiDAO {
             addApiPolicy(connection, api.getApiPolicy().getUuid(), apiPrimaryKey);
         }
 
-
     }
 
     /**
@@ -2772,12 +2771,12 @@ public class ApiDAOImpl implements ApiDAO {
     private void addAdditionalProperties(Connection connection, List<AdditionalProperties> additionalProperty,
                                          String apiID) throws SQLException {
         final String query =
-                "INSERT INTO AM_API_ADDITIONAL_PROPERTIES(UUID, PROPERTY_NAME, PROPERTY_VALUE) VALUES (?, ?, ?)";
+                "INSERT INTO AM_API_ADDITIONAL_PROPERTIES(UUID, PROPERTY_KEY, PROPERTY_VALUE) VALUES (?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
 
             for (AdditionalProperties property : additionalProperty) {
                 statement.setString(1, apiID);
-                statement.setString(2, property.getPropertyName());
+                statement.setString(2, property.getPropertyKey());
                 statement.setString(3, property.getPropertyValue());
                 statement.execute();
             }
@@ -2795,7 +2794,7 @@ public class ApiDAOImpl implements ApiDAO {
     private List<AdditionalProperties> getAdditionalProperties(Connection connection, String apiID)
             throws SQLException {
 
-        final String query = "SELECT PROPERTY_NAME,PROPERTY_VALUE  FROM AM_API_ADDITIONAL_PROPERTIES" +
+        final String query = "SELECT PROPERTY_KEY,PROPERTY_VALUE  FROM AM_API_ADDITIONAL_PROPERTIES" +
                              " WHERE UUID = ?";
         List<AdditionalProperties> additionalProperties = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -2805,7 +2804,7 @@ public class ApiDAOImpl implements ApiDAO {
                 while (rs.next()) {
                     additionalProperties.add(
                             new AdditionalProperties(
-                                    rs.getString("PROPERTY_NAME"),
+                                    rs.getString("PROPERTY_KEY"),
                                     rs.getString("PROPERTY_VALUE")
                             )
                     );
