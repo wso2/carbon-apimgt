@@ -38,8 +38,8 @@ public class AdditionalProperties {
         return propertyKey;
     }
 
-    public void setPropertyName(String propertyName) {
-        this.propertyKey = propertyName;
+    public void setPropertyKey(String propertyKey) {
+        this.propertyKey = propertyKey;
     }
 
     public String getPropertyValue() {
