@@ -24,10 +24,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import React from 'react';
 
 /**
- *
- *
  * @class AdditionalProperty
- * @extends {Component}
  */
 const AdditionalProperty = ({ isEditable, property, onDelete }) => {
     return (
@@ -67,12 +64,13 @@ const AdditionalProperty = ({ isEditable, property, onDelete }) => {
             >
                 <DeleteIcon />
             </IconButton>
-
         </Grid>
     );
 };
 
-
+/**
+ * @class Prop types of Additional properties.
+ */
 AdditionalProperty.propTypes = {
     property: PropTypes.shape({
         name: PropTypes.string,

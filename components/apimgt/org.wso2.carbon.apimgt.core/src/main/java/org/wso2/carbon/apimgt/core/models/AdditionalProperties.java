@@ -34,8 +34,6 @@ public class AdditionalProperties {
         this.propertyValue = propertyValue;
     }
 
-
-
     public String getPropertyName() {
         return propertyName;
     }

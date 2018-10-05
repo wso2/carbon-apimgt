@@ -238,9 +238,10 @@ public class MappingUtil {
                 scopes(apidto.getScopes()).
                 securityScheme(mapSecuritySchemeListToInt(apidto.getSecurityScheme()));
 
-
+        //additional properties
         if (apidto.getAdditionalProperties() != null) {
             List<AdditionalProperties> additionalProperties = new ArrayList<>();
+            //get additional properties for each list element in API_additionalPropertiesDTO
             for (API_additionalPropertiesDTO propertiesDTO : apidto.getAdditionalProperties()){
                 additionalProperties.add(new AdditionalProperties(propertiesDTO.getName(),propertiesDTO.getValue()));
             }

@@ -2761,22 +2761,37 @@ public class ApiDAOImpl implements ApiDAO {
         return policies;
     }
 
+    /**
+     * Add additional properties to the database
+     *
+     * @param connection SQL Connection
+     * @param apiID      ApiId of the API
+     * @param additionalProperty      List<AdditionalProperties>
+     * @throws SQLException If failed to add additional properties
+     */
     private void addAdditionalProperties(Connection connection, List<AdditionalProperties> additionalProperty,
                                          String apiID) throws SQLException {
         final String query =
                 "INSERT INTO AM_API_ADDITIONAL_PROPERTIES(UUID, PROPERTY_NAME, PROPERTY_VALUE) VALUES (?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
 
-            for (int i = 0; i < additionalProperty.size(); i++) {
+            for (AdditionalProperties property : additionalProperty) {
                 statement.setString(1, apiID);
-                statement.setString(2, (additionalProperty.get(i)).getPropertyName());
-                statement.setString(3, (additionalProperty.get(i)).getPropertyValue());
+                statement.setString(2, property.getPropertyName());
+                statement.setString(3, property.getPropertyValue());
                 statement.execute();
             }
 
         }
     }
 
+    /**
+     * Get additional properties from the database
+     *
+     * @param connection SQL Connection
+     * @param apiID      ApiId of the API
+     * @throws SQLException If failed to get additional properties
+     */
     private List<AdditionalProperties> getAdditionalProperties(Connection connection, String apiID)
             throws SQLException {
 
@@ -2788,8 +2803,12 @@ public class ApiDAOImpl implements ApiDAO {
             statement.execute();
             try (ResultSet rs = statement.getResultSet()) {
                 while (rs.next()) {
-                    additionalProperties.add(new AdditionalProperties(rs.getString("PROPERTY_NAME"),
-                            rs.getString("PROPERTY_VALUE")));
+                    additionalProperties.add(
+                            new AdditionalProperties(
+                                    rs.getString("PROPERTY_NAME"),
+                                    rs.getString("PROPERTY_VALUE")
+                            )
+                    );
                 }
             }
         }
