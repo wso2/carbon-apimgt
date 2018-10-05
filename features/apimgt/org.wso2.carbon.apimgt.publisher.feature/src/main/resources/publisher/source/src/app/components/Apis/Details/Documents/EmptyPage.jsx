@@ -17,11 +17,9 @@ const styles = theme => ({
     typography:{
         margin:theme.spacing.unit*2
     }
-
 });
 
 function EmptyPage(props) {
-
         const { classes } = props;
         return(
             <div>
