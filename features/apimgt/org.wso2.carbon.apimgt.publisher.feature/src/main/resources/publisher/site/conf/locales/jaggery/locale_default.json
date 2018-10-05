@@ -644,6 +644,8 @@
     "Error while updating API swagger definition" : "Error while updating API swagger definition",
     "Delete Task" : "Delete Task",
     "Authorization Header": "Authorization Header",
-    "Here a custom authorization header can be defined as a replacement to the default <strong>Authorization</strong> header used to send a request. If a value is specified here, that will be used as the header field to send the access token in a request to consume the API": "A custom authorization header can be defined here as a replacement to the default <strong>Authorization</strong> header used to send a request. If a value is specified here, it will be used as the header field to send the access token in a request to consume the API",
+    "Here a custom authorization header can be defined as a replacement to the default <strong>Authorization</strong> header used to send a request. If a value is specified here, that will be used as the header field to send the access token in a request to consume the API": "Here a custom authorization header can be defined as a replacement to the default <strong>Authorization</strong> header used to send a request. If a value is specified here, that will be used as the header field to send the access token in a request to consume the API",
+    "Deprecate old versions after publish the API": "Deprecate old versions after publish the API",
+    "Requires re-subscription when publish the API": "Requires re-subscription when publish the API",
     "You have selected Microgateways for this API. The mediation policies selected here will not be applied in Microgateway environments.":"You have selected Microgateways for this API. The mediation policies selected here will not be applied in Microgateway environments."
 }
