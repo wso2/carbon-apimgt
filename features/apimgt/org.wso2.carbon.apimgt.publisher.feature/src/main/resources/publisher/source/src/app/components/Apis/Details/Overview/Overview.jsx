@@ -126,7 +126,7 @@ class Overview extends Component {
             } else {
                 // assumes a single WSDL in text format
                 anchor.download =
-                    this.state.api.provider + '-' + this.state.api.key + '-' + this.state.api.version + '.wsdl';
+                    this.state.api.provider + '-' + this.state.api.name + '-' + this.state.api.version + '.wsdl';
             }
             anchor.click();
             windowUrl.revokeObjectURL(url);
