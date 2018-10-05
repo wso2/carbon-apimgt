@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.tracing;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
+import io.opentracing.contrib.reporter.LogLevel;
 import io.opentracing.contrib.reporter.Reporter;
 import io.opentracing.contrib.reporter.SpanData;
 import org.apache.commons.logging.Log;
@@ -49,6 +50,42 @@ public class TracingReporter implements Reporter {
     }
 
     public void log(Instant timeStamp, SpanData span, Map<String, ?> fields) {
+        LogLevel level = LogLevel.INFO;
+        try {
+            LogLevel level0 = (LogLevel) fields.get(LogLevel.FIELD_NAME);
+            if (level0 != null) {
+                level = level0;
+                fields.remove(LogLevel.FIELD_NAME);
+            }
+        } catch (Exception exc) {
+            log.warn("fail to read value of field {}");
+        }
+        switch (level) {
+            case TRACE:
+                if (log.isTraceEnabled()) {
+                    log.trace(toStructuredMessage(timeStamp, span));
+                }
+                break;
+            case DEBUG:
+                if (log.isDebugEnabled()) {
+                    log.debug(toStructuredMessage(timeStamp, span));
+                }
+                break;
+            case WARN:
+                if (log.isWarnEnabled()) {
+                    log.warn(toStructuredMessage(timeStamp, span));
+                }
+                break;
+            case ERROR:
+                if (log.isErrorEnabled()) {
+                    log.error(toStructuredMessage(timeStamp, span));
+                }
+                break;
+            default:
+                if (log.isInfoEnabled()) {
+                    log.info(toStructuredMessage(timeStamp, span));
+                }
+        }
     }
     //method for stucturing the tracer log format
     private String toStructuredMessage(Instant timeStamp, SpanData span) {

@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.tracing;
 import io.opentracing.Tracer;
 import io.opentracing.contrib.reporter.Reporter;
 import io.opentracing.contrib.reporter.TracerR;
-import io.opentracing.mock.MockTracer;
+import io.opentracing.noop.NoopTracerFactory;
 import io.opentracing.util.GlobalTracer;
 import io.opentracing.util.ThreadLocalScopeManager;
 import org.apache.commons.logging.LogFactory;
@@ -32,7 +32,7 @@ public class LogTracer implements OpenTracer{
 
     @Override
     public Tracer getTracer(String serviceName) {
-        Tracer tracer = new MockTracer();
+        Tracer tracer = NoopTracerFactory.create();
         Reporter reporter = new TracingReporter(LogFactory.getLog(TracingConstants.TRACER));
         Tracer tracerR = new TracerR(tracer, reporter, new ThreadLocalScopeManager());
         GlobalTracer.register(tracerR);
