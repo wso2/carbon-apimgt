@@ -40,6 +40,7 @@ function triggerSubscribe() {
                 $('#messageModal a.btn-primary').click(function() {
                     window.location.reload();
                 });
+                $('#messageModal').modal();
             } else {
                 var jsonPayload = result.status.workflowResponse.jsonPayload;
                 if(jsonPayload != null && jsonPayload != ""){
