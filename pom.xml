@@ -1015,6 +1015,6 @@
         <joda.time.version>2.9.9</joda.time.version>
         <broker.version>0.1.44</broker.version>
         <broker.package.import.version.range>[0.1.44,1.0.0)</broker.package.import.version.range>
-        <carbon.auth.version>1.0.50</carbon.auth.version>
+        <carbon.auth.version>1.0.51</carbon.auth.version>
     </properties>
 </project>

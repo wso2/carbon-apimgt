@@ -473,7 +473,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Test add api with restricted visibility")
     public void testAddApiWithRestrictedVisibility() throws APIManagementException, LifecycleException {
-
+        IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
         Set<String> visibleRoles = new HashSet<>();
         visibleRoles.add(ADMIN_ROLE);
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI()
@@ -502,7 +502,8 @@ public class APIPublisherImplTestCase {
         Mockito.when(
                 policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription, BRONZE_TIER))
                 .thenReturn(new SubscriptionPolicy(BRONZE_TIER));
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(null, null, daoFactory, apiLifecycleManager,
+        Mockito.when(identityProvider.isValidRole(Mockito.anyString())).thenReturn(true);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, null, daoFactory, apiLifecycleManager,
                 gatewaySourceGenerator, gateway);
         String endpointId = apiBuilder.getEndpoint().get("production").getId();
         Endpoint endpoint = new Endpoint.Builder().id(endpointId).name("testEndpoint").build();
@@ -1245,6 +1246,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(identityProvider.getRoleId(ADMIN_ROLE)).thenReturn(ADMIN_ROLE_ID);
         Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
         Mockito.when(identityProvider.getRoleId(DEVELOPER_ROLE)).thenReturn(DEVELOPER_ROLE_ID);
+        Mockito.when(identityProvider.isValidRole(Mockito.anyString())).thenReturn(true);
         apiPublisher.updateAPI(api.lifeCycleStatus(APIStatus.CREATED.getStatus()).id(uuid));
         Mockito.verify(apiDAO, Mockito.times(1)).getAPI(uuid);
         Mockito.verify(apiDAO, Mockito.times(0)).isAPIContextExists(api.getContext());
@@ -1286,6 +1288,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
         Mockito.when(identityProvider.getRoleId(ADMIN_ROLE)).thenReturn(ADMIN_ROLE_ID);
         Mockito.when(identityProvider.getRoleId(DEVELOPER_ROLE)).thenReturn(DEVELOPER_ROLE_ID);
+        Mockito.when(identityProvider.isValidRole(ADMIN_ROLE)).thenReturn(true);
         apiPublisher.updateAPI(api.context("testContext"));
         Mockito.verify(apiDAO, Mockito.times(1)).getAPI(uuid);
         Mockito.verify(apiDAO, Mockito.times(1)).isAPIContextExists(api.getContext());

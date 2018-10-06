@@ -114,10 +114,11 @@ public interface ApplicationDAO {
      * Check whether given application name is already available in the system
      *
      * @param appName application name
+     * @param username
      * @return true if application name is already available
      * @throws APIMgtDAOException if failed to get applications for given subscriber
      */
-    boolean isApplicationNameExists(String appName) throws APIMgtDAOException;
+    boolean isApplicationNameExists(String appName, String username) throws APIMgtDAOException;
 
     /**
      * Add application key related information

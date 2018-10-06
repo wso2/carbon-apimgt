@@ -102,7 +102,7 @@ public class RestApiUtil {
         String user =
                 request.getProperty(LOGGED_IN_USER) != null ? request.getProperty(LOGGED_IN_USER).toString() : null;
         //Then get relevant pseudo name from local mapping.
-        if (user != null) {
+        if (!(user == null || RestApiConstants.ANONYMOUS_USER.equals(user))) {
             try {
                 return APIManagerFactory.getInstance().getUserNameMapper().getLoggedInPseudoNameFromUserID(user);
             } catch (APIManagementException e) {
