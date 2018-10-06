@@ -198,10 +198,12 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                             + ", API uuid : " + uuid, ExceptionCodes.API_NOT_FOUND);
         }
         if (api != null && API.Visibility.RESTRICTED.equals(api.getVisibility())) {
-            String userId = getIdentityProvider().getIdOfUser(getUsername());
             Set<String> roles = new HashSet<>();
-            if (userId != null) {
-                roles = new HashSet<>(getIdentityProvider().getRoleNamesOfUser(userId));
+            if (!APIMgtConstants.ANONYMOUS_USER.equals(getUsername())) {
+                String userId = getIdentityProvider().getIdOfUser(getUsername());
+                if (userId != null) {
+                    roles = new HashSet<>(getIdentityProvider().getRoleNamesOfUser(userId));
+                }
             }
             boolean found = false;
             for (String role : api.getVisibleRoles()) {
@@ -1447,10 +1449,12 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 String labelId = getLabelDAO().getLabelIdByNameAndType(label, APIMgtConstants.LABEL_TYPE_STORE);
                 labelIds.add(labelId);
             }
-            String userId = getIdentityProvider().getIdOfUser(getUsername());
             Set<String> roles = new HashSet<>();
-            if (userId != null) {
-                roles = new HashSet<>(getIdentityProvider().getRoleNamesOfUser(userId));
+            if (!APIMgtConstants.ANONYMOUS_USER.equals(getUsername())) {
+                String userId = getIdentityProvider().getIdOfUser(getUsername());
+                if (userId != null) {
+                    roles = new HashSet<>(getIdentityProvider().getRoleNamesOfUser(userId));
+                }
             }
             if (query != null && !query.isEmpty()) {
                 String[] attributes = query.split(",");

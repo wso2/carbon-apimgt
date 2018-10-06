@@ -68,6 +68,7 @@ public class APIMgtConstants {
     public static final String PRODUCTION_ENDPOINT = "production";
     public static final String OAUTH2SECURITY = "OAuth2Security";
     public static final String SCOPES = "scopes";
+    public static final String ANONYMOUS_USER = "__wso2.am.anon__";
 
     public static final String DEFAULT_LABEL_NAME = "Default";
     public static final String DEFAULT_LABEL_ACCESS_URL = "https://localhost:9092";
