@@ -54,7 +54,7 @@ public class TracingServiceImpl implements TracingService {
                 Iterator iterator = openTracers.iterator();
                 while (iterator.hasNext()) {
                     OpenTracer openTracer = (OpenTracer) iterator.next();
-                    if (openTracer.getName().equals(openTracerName)) {
+                    if (openTracer.getName().equalsIgnoreCase(openTracerName)) {
                         this.tracer = openTracer;
                     }
                 }

@@ -31,19 +31,19 @@ class TracingConstants {
     static final String OPERATION_NAME = "Operation";
     static final String TAGS = "Tags";
     static final String TRACER = "tracer";
-    static final String CONFIG_TRACER_LOG_ENABLED = "OpenTracer.TracerLogEnabled";
+    static final String CONFIG_TRACER_LOG_ENABLED = "OpenTracer.ZipkinTracer.TracerLogEnabled";
     static final String DEFAULT_TRACER_LOG_ENABLED = "false";
 
     /**
      * Jaeger Tracer Constants
      * */
     static final String JAEGER = "JAEGER";
-    static final String JAEGER_CONFIG_PORT = "OpenTracer.Port";
-    static final String JAEGER_CONFIG_HOST = "OpenTracer.Hostname";
-    static final String CONFIG_SAMPLER_PARAM = "OpenTracer.SamplerParam";
-    static final String CONFIG_SAMPLER_TYPE = "OpenTracer.SamplerType";
+    static final String JAEGER_CONFIG_PORT = "OpenTracer.JaegerTracer.Port";
+    static final String JAEGER_CONFIG_HOST = "OpenTracer.JaegerTracer.Hostname";
+    static final String CONFIG_SAMPLER_PARAM = "OpenTracer.JaegerTracer.SamplerParam";
+    static final String CONFIG_SAMPLER_TYPE = "OpenTracer.JaegerTracer.SamplerType";
     static final String CONFIG_REPORTER_FLUSH_INTERVAL = "OpenTracer.ReporterFlushInterval";
-    static final String CONFIG_REPORTER_BUFFER_SIZE = "OpenTracer.ReporterBufferSize";
+    static final String CONFIG_REPORTER_BUFFER_SIZE = "OpenTracer.JaegerTracer.ReporterBufferSize";
 
     static final int JAEGER_DEFAULT_PORT = 5775;
     static final String JAEGER_DEFAULT_HOST = "localhost";
@@ -56,9 +56,9 @@ class TracingConstants {
      * Zipkin Constants
      * */
     static final String ZIPKIN = "ZIPKIN";
-    static final String ZIPKIN_CONFIG_PORT = "OpenTracer.Port";
-    static final String ZIPKIN_CONFIG_HOST = "OpenTracer.Hostname";
-    static final String CONFIG_API_CONTEXT = "OpenTracer.APIContext";
+    static final String ZIPKIN_CONFIG_PORT = "OpenTracer.ZipkinTracer.Port";
+    static final String ZIPKIN_CONFIG_HOST = "OpenTracer.ZipkinTracer.Hostname";
+    static final String CONFIG_API_CONTEXT = "OpenTracer.ZipkinTracer.APIContext";
     static final String REQUEST_ID = "request-id";
 
     static final int ZIPKIN_DEFAULT_PORT = 9411;

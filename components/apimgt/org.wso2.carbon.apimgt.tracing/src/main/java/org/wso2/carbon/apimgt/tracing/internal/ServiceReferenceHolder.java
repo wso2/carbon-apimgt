@@ -32,7 +32,7 @@ public class ServiceReferenceHolder {
     private static final ServiceReferenceHolder instance = new ServiceReferenceHolder();
     private APIManagerConfiguration configuration = new APIManagerConfiguration();
     private APIManagerConfigurationService amConfigService;
-    private static final String OPEN_TRACER_ENABLED = "OpenTracer.TracerLogEnabled";
+    private static final String OPEN_TRACER_ENABLED = "OpenTracer.Enabled";
 
     private ServiceReferenceHolder() {
         try {
