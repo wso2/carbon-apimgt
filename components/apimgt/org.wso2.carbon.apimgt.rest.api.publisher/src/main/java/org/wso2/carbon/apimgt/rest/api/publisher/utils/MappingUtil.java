@@ -286,10 +286,15 @@ public class MappingUtil {
             List<AdditionalProperties> additionalProperties = new ArrayList<>();
             //get additional properties for each list element in API_additionalPropertiesDTO
             for (API_additionalPropertiesDTO propertiesDTO : apidto.getAdditionalProperties()) {
-                additionalProperties.add(new AdditionalProperties(propertiesDTO.getKey(), propertiesDTO.getValue()));
+                if (StringUtils.isEmpty(propertiesDTO.getId())) {
+                    propertiesDTO.setId(UUID.randomUUID().toString());
+                }
+                additionalProperties.add(new AdditionalProperties(propertiesDTO.getKey(), propertiesDTO.getValue(),
+                        propertiesDTO.getId()));
             }
             apiBuilder.additionalProperties(additionalProperties);
         }
+
         if (apidto.getIsDefaultVersion() != null) {
             apiBuilder.isDefaultVersion(apidto.getIsDefaultVersion());
         }

@@ -16,6 +16,18 @@ public class API_additionalPropertiesDTO   {
   @SerializedName("value")
   private String value = null;
 
+  private String id = null;
+
+  public String getId() {
+    return id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
+  }
+
+
+
     public API_additionalPropertiesDTO(String key, String value) {
         this.key = key;
         this.value = value;

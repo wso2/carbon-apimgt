@@ -26,10 +26,17 @@ public class AdditionalProperties {
 
     private  String propertyKey;
     private  String propertyValue;
+    private  String propertyId;
 
-    public AdditionalProperties(String propertyKey, String propertyValue) {
+    public AdditionalProperties(String propertyKey, String propertyValue ) {
         this.propertyKey = propertyKey;
         this.propertyValue = propertyValue;
+    }
+
+    public AdditionalProperties(String propertyKey, String propertyValue, String propertyId ) {
+        this.propertyKey = propertyKey;
+        this.propertyValue = propertyValue;
+        this.propertyId = propertyId;
     }
 
     public String getPropertyKey() {
@@ -46,5 +53,13 @@ public class AdditionalProperties {
 
     public void setPropertyValue(String propertyValue) {
         this.propertyValue = propertyValue;
+    }
+
+    public String getPropertyId() {
+        return propertyId;
+    }
+
+    public void setPropertyId(String propertyId) {
+        this.propertyId = propertyId;
     }
 }

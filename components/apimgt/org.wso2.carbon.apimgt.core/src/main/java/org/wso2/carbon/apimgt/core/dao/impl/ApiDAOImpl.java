@@ -2771,13 +2771,14 @@ public class ApiDAOImpl implements ApiDAO {
     private void addAdditionalProperties(Connection connection, List<AdditionalProperties> additionalProperties,
                                          String apiID) throws SQLException {
         final String query =
-                "INSERT INTO AM_API_ADDITIONAL_PROPERTIES(UUID, PROPERTY_KEY, PROPERTY_VALUE) VALUES (?, ?, ?)";
+                "INSERT INTO AM_API_ADDITIONAL_PROPERTIES(UUID, API_ID, PROPERTY_KEY, PROPERTY_VALUE) VALUES (?, ?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
 
             for (AdditionalProperties property : additionalProperties) {
-                statement.setString(1, apiID);
-                statement.setString(2, property.getPropertyKey());
-                statement.setString(3, property.getPropertyValue());
+                statement.setString(1, property.getPropertyId());
+                statement.setString(2, apiID);
+                statement.setString(3, property.getPropertyKey());
+                statement.setString(4, property.getPropertyValue());
                 statement.execute();
             }
 
@@ -2795,7 +2796,7 @@ public class ApiDAOImpl implements ApiDAO {
             throws SQLException {
 
         final String query = "SELECT PROPERTY_KEY,PROPERTY_VALUE  FROM AM_API_ADDITIONAL_PROPERTIES" +
-                             " WHERE UUID = ?";
+                             " WHERE API_ID = ?";
         List<AdditionalProperties> additionalProperties = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, apiID);
