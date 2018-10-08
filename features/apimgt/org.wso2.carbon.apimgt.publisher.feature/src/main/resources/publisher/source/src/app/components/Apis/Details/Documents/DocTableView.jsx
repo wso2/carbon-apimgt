@@ -162,9 +162,9 @@ class DocTableView extends React.Component {
 
     /**
      *
-     * Helper method to check is the given API UUID is in the selected APIs array
-     * @param {String} id UUID of the API which needs to be checked for selected
-     * @returns {Boolean} is the given API uuid in selected list
+     * Helper method to check is the given Doc UUID is in the selected Docs array
+     * @param {String} id UUID of the Doc which needs to be checked for selected
+     * @returns {Boolean} is the given Doc uuid in selected list
      * @memberof DocTableView
      */
     isSelected(id) {
@@ -194,10 +194,6 @@ class DocTableView extends React.Component {
                         numSelected={selected.length}
                         totalDocCount={docs.length}
                     />
-                    {/*
-                todo: totalAPIsCount verify /apis GET all .count returns the total number of APIs,
-                If so use that property ~tmkb
-                */}
                     <div className={classes.tableWrapper}>
                         <Table className={classes.table} aria-labelledby='tableTitle'>
                             <DocTableHeader
