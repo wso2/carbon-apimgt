@@ -73,6 +73,11 @@
   "create.scopes": "Create Scopes",
   "create.scope.description": "Scopes enable fine-grained access control to API resources based on user roles. You define scopes to an API's resources. When a user invokes the API, his/her OAuth 2 bearer token cannot grant access to any API resource beyond its associated scopes.",
   "security": "Security",
-  "define.global.endpoint": "Define Global Endpoint"
-
+  "define.global.endpoint": "Define Global Endpoint",
+  "documents": "Documents",
+  "docs": "Docs",
+  "create.an.inline.document": "Create an inline document",
+  "create.a.new.inline.document.for.api": "Create a new inline document for this api.",
+  "create.a.document.from.file.or.url": "Create a document from file or URL.",
+  "create.a.document.from.file.or.url.decription": "Create a new document using a file or URL for this api."
 }
