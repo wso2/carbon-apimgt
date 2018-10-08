@@ -96,7 +96,8 @@ export default class APIInputForm extends Component {
                     type='text'
                     name='version'
                     margin='normal'
-                    disabled
+                    value={api.version}
+                    onChange={handleInputChange}
                 />
                 <TextField
                     fullWidth

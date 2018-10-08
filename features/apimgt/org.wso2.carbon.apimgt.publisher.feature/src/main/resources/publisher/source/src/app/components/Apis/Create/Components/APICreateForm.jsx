@@ -135,7 +135,6 @@ class APICreateForm extends Component {
     handleSubmit(e) {
         e.preventDefault();
         const { api } = this.state;
-        api.version = 'v1.0.0';
         api.save()
             .then((newAPI) => {
                 const redirectURL = '/apis/' + newAPI.id + '/overview';
