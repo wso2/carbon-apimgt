@@ -52,16 +52,12 @@ public class ZipkinTracer implements OpenTracer {
                 Integer.parseInt(configuration.getFirstProperty(TracingConstants.ZIPKIN_CONFIG_PORT))
                 : TracingConstants.ZIPKIN_DEFAULT_PORT;
 
-        String apiContext = configuration.getFirstProperty(TracingConstants.CONFIG_API_CONTEXT) != null ?
-                configuration.getFirstProperty(TracingConstants.CONFIG_API_CONTEXT)
-                : TracingConstants.DEFAULT_API_CONTEXT;
-
         boolean tracerLogEnabled =
                 Boolean.parseBoolean(configuration.getFirstProperty(TracingConstants.CONFIG_TRACER_LOG_ENABLED) != null ?
                 configuration.getFirstProperty(TracingConstants.CONFIG_TRACER_LOG_ENABLED)
                 : TracingConstants.DEFAULT_TRACER_LOG_ENABLED);
 
-        OkHttpSender sender = OkHttpSender.create("http://" + hostname + ":" + port + apiContext);
+        OkHttpSender sender = OkHttpSender.create("http://" + hostname + ":" + port + TracingConstants.ZIPKIN_API_CONTEXT);
         Tracer tracer = BraveTracer.create(Tracing.newBuilder()
                 .localServiceName(serviceName)
                 .spanReporter(AsyncReporter.builder(sender).build())

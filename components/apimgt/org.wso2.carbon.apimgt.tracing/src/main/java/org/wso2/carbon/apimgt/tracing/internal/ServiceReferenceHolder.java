@@ -32,13 +32,18 @@ public class ServiceReferenceHolder {
     private static final ServiceReferenceHolder instance = new ServiceReferenceHolder();
     private APIManagerConfiguration configuration = new APIManagerConfiguration();
     private APIManagerConfigurationService amConfigService;
-    private static final String OPEN_TRACER_ENABLED = "OpenTracer.Enabled";
+    private static final String REMOTE_TRACER_ENABLED = "OpenTracer.RemoteTracer.Enabled";
+    private static final String LOG_TRACER_ENABLED = "OpenTracer.LogTracer.Enabled";
 
     private ServiceReferenceHolder() {
         try {
             String filePath = getFilePath();
             configuration.load(filePath);
-            Util.setTracingEnabled(Boolean.parseBoolean(configuration.getFirstProperty(OPEN_TRACER_ENABLED)));
+            boolean remoteTracerEnabled = Boolean.parseBoolean(configuration.getFirstProperty(REMOTE_TRACER_ENABLED));
+            boolean logTracerEnabled = Boolean.parseBoolean(configuration.getFirstProperty(LOG_TRACER_ENABLED));
+            if (remoteTracerEnabled || logTracerEnabled) {
+                Util.setTracingEnabled(true);
+            }
         } catch (Exception e) {
             log.error("Error in loading configurations", e);
         }

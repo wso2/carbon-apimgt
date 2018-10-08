@@ -23,27 +23,27 @@ class TracingConstants {
     /**
      * OpenTracer Constants
      * */
-    static final String OPEN_TRACER_NAME = "OpenTracer.Name";
+    static final String OPEN_TRACER_NAME = "OpenTracer.RemoteTracer.Name";
     static final String DEFAULT_OPEN_TRACER_NAME = "zipkin";
-    static final String OPEN_TRACER_ENABLED = "OpenTracer.Enabled";
+    static final String OPEN_TRACER_ENABLED = "OpenTracer.RemoteTracer.Enabled";
     static final String DEFAULT_OPEN_TRACER_ENABLED = "false";
     static final String LATENCY = "Latency";
     static final String OPERATION_NAME = "Operation";
     static final String TAGS = "Tags";
     static final String TRACER = "tracer";
-    static final String CONFIG_TRACER_LOG_ENABLED = "OpenTracer.ZipkinTracer.TracerLogEnabled";
+    static final String CONFIG_TRACER_LOG_ENABLED = "OpenTracer.LogTracer.Enabled";
     static final String DEFAULT_TRACER_LOG_ENABLED = "false";
 
     /**
      * Jaeger Tracer Constants
      * */
     static final String JAEGER = "JAEGER";
-    static final String JAEGER_CONFIG_PORT = "OpenTracer.JaegerTracer.Port";
-    static final String JAEGER_CONFIG_HOST = "OpenTracer.JaegerTracer.Hostname";
-    static final String CONFIG_SAMPLER_PARAM = "OpenTracer.JaegerTracer.SamplerParam";
-    static final String CONFIG_SAMPLER_TYPE = "OpenTracer.JaegerTracer.SamplerType";
-    static final String CONFIG_REPORTER_FLUSH_INTERVAL = "OpenTracer.ReporterFlushInterval";
-    static final String CONFIG_REPORTER_BUFFER_SIZE = "OpenTracer.JaegerTracer.ReporterBufferSize";
+    static final String JAEGER_CONFIG_PORT = "OpenTracer.RemoteTracer.Properties.Port";
+    static final String JAEGER_CONFIG_HOST = "OpenTracer.RemoteTracer.Properties.Hostname";
+    static final String CONFIG_SAMPLER_PARAM = "OpenTracer.RemoteTracer.Properties.SamplerParam";
+    static final String CONFIG_SAMPLER_TYPE = "OpenTracer.RemoteTracer.Properties.SamplerType";
+    static final String CONFIG_REPORTER_FLUSH_INTERVAL = "OpenTracer.RemoteTracer.Properties.ReporterFlushInterval";
+    static final String CONFIG_REPORTER_BUFFER_SIZE = "OpenTracer.RemoteTracer.Properties.ReporterBufferSize";
 
     static final int JAEGER_DEFAULT_PORT = 5775;
     static final String JAEGER_DEFAULT_HOST = "localhost";
@@ -56,12 +56,17 @@ class TracingConstants {
      * Zipkin Constants
      * */
     static final String ZIPKIN = "ZIPKIN";
-    static final String ZIPKIN_CONFIG_PORT = "OpenTracer.ZipkinTracer.Port";
-    static final String ZIPKIN_CONFIG_HOST = "OpenTracer.ZipkinTracer.Hostname";
-    static final String CONFIG_API_CONTEXT = "OpenTracer.ZipkinTracer.APIContext";
+    static final String ZIPKIN_CONFIG_PORT = "OpenTracer.RemoteTracer.Properties.Port";
+    static final String ZIPKIN_CONFIG_HOST = "OpenTracer.RemoteTracer.Properties.HostName";
     static final String REQUEST_ID = "request-id";
 
     static final int ZIPKIN_DEFAULT_PORT = 9411;
     static final String ZIPKIN_DEFAULT_HOST = "localhost";
-    static final String DEFAULT_API_CONTEXT = "/api/v2/spans";
+    static final String ZIPKIN_API_CONTEXT = "/api/v2/spans";
+
+    /**
+     * Log Constants
+     * */
+    static final String LOG_ENABLED = "OpenTracer.LogTracer.Enabled";
+    static final String LOG = "log";
 }

@@ -43,24 +43,25 @@ public class TracingServiceImpl implements TracingService {
             String openTracerName = configuration.getFirstProperty(TracingConstants.OPEN_TRACER_NAME) != null ?
                     configuration.getFirstProperty(TracingConstants.OPEN_TRACER_NAME)
                     : TracingConstants.DEFAULT_OPEN_TRACER_NAME;
-            Boolean enabled =
+
+            Boolean remoteTracerEnabled =
                     Boolean.valueOf(configuration.getFirstProperty(TracingConstants.OPEN_TRACER_ENABLED) != null ?
                     configuration.getFirstProperty(TracingConstants.OPEN_TRACER_ENABLED)
                     : TracingConstants.DEFAULT_OPEN_TRACER_ENABLED);
 
-            if (enabled) {
-                ServiceLoader<OpenTracer> openTracers = ServiceLoader.load(OpenTracer.class,
-                        OpenTracer.class.getClassLoader());
-                Iterator iterator = openTracers.iterator();
-                while (iterator.hasNext()) {
-                    OpenTracer openTracer = (OpenTracer) iterator.next();
-                    if (openTracer.getName().equalsIgnoreCase(openTracerName)) {
-                        this.tracer = openTracer;
-                    }
+            String tracerName = (openTracerName != null && remoteTracerEnabled) ? openTracerName : TracingConstants.LOG;
+
+            ServiceLoader<OpenTracer> openTracers = ServiceLoader.load(OpenTracer.class,
+                    OpenTracer.class.getClassLoader());
+            Iterator iterator = openTracers.iterator();
+            while (iterator.hasNext()) {
+                OpenTracer openTracer = (OpenTracer) iterator.next();
+                if (openTracer.getName().equalsIgnoreCase(tracerName)) {
+                    this.tracer = openTracer;
                 }
             }
         } catch (Exception e) {
-            log.error("Error in reading configuration file", e);
+            log.error("Error in reading openTracerName", e);
         }
     }
 

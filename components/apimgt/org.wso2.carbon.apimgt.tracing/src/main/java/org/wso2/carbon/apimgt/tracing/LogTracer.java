@@ -25,18 +25,26 @@ import io.opentracing.noop.NoopTracerFactory;
 import io.opentracing.util.GlobalTracer;
 import io.opentracing.util.ThreadLocalScopeManager;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.tracing.internal.ServiceReferenceHolder;
 
 public class LogTracer implements OpenTracer{
 
     private static final String NAME = "log";
+    private static APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
+            .getAPIManagerConfiguration();
 
     @Override
     public Tracer getTracer(String serviceName) {
-        Tracer tracer = NoopTracerFactory.create();
-        Reporter reporter = new TracingReporter(LogFactory.getLog(TracingConstants.TRACER));
-        Tracer tracerR = new TracerR(tracer, reporter, new ThreadLocalScopeManager());
-        GlobalTracer.register(tracerR);
-        return tracerR;
+        boolean LogEnabled = Boolean.valueOf(configuration.getFirstProperty(TracingConstants.LOG_ENABLED));
+        if (LogEnabled) {
+            Tracer tracer = NoopTracerFactory.create();
+            Reporter reporter = new TracingReporter(LogFactory.getLog(TracingConstants.TRACER));
+            Tracer tracerR = new TracerR(tracer, reporter, new ThreadLocalScopeManager());
+            GlobalTracer.register(tracerR);
+            return tracerR;
+        }
+        return null;
     }
 
     @Override
