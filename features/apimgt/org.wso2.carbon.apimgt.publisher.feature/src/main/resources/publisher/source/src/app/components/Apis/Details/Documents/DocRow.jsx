@@ -3,7 +3,11 @@ import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
 import Checkbox from '@material-ui/core/Checkbox';
 
-
+/**
+ * Row of the API Document in Doucment listing
+ * @class DocRow @inheritdoc
+ * @extends {React.Component} @inheritdoc
+ */
 export default class DocRow extends React.Component {
 
     render() {
