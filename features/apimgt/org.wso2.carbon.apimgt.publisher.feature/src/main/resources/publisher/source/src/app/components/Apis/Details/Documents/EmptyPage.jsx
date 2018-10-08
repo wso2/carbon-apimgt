@@ -22,7 +22,7 @@ const styles = theme => ({
 function EmptyPage(props) {
         const { classes } = props;
         return(
-            <div>
+            <Fragment>
                 <Grid container justify="center" spacing={24} className={classes.grid}>
                     <Grid item sm={4} >
                         <Card>
@@ -58,7 +58,7 @@ function EmptyPage(props) {
                         </Card>
                     </Grid>
                 </Grid>
-            </div>
+            </Fragment>
         );
 }
 EmptyPage.propTypes = {
