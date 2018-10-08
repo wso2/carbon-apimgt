@@ -347,15 +347,17 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      * Check whether given application name is already available in the system
      *
      * @param appName application name
+     * @param username
      * @return true if application name is already available
      * @throws APIMgtDAOException if failed to get applications for given subscriber
      */
     @Override
-    public boolean isApplicationNameExists(String appName) throws APIMgtDAOException {
-        final String query = "SELECT 1 FROM AM_APPLICATION WHERE NAME = ?";
+    public boolean isApplicationNameExists(String appName, String username) throws APIMgtDAOException {
+        final String query = "SELECT 1 FROM AM_APPLICATION WHERE NAME = ? AND CREATED_BY = ?";
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, appName);
+            statement.setString(2, username);
             statement.execute();
             try (ResultSet rs = statement.getResultSet()) {
                 if (rs.next()) {

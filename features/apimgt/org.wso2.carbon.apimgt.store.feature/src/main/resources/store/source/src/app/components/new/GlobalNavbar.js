@@ -15,7 +15,7 @@ import CustomIcon from '../Shared/CustomIcon';
 
 const styles = theme => ({
   list: {
-    width: theme.palette.custom.drawerWidth
+    width: theme.custom.drawerWidth
   },
   drawerStyles: {
     top: theme.mixins.toolbar["@media (min-width:600px)"].minHeight

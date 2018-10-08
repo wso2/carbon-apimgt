@@ -28,7 +28,7 @@
     <groupId>org.wso2.carbon.apimgt</groupId>
     <artifactId>carbon-apimgt</artifactId>
     <packaging>pom</packaging>
-    <version>7.0.206-SNAPSHOT</version>
+    <version>7.0.209-SNAPSHOT</version>
 
     <name>WSO2 Carbon - API Management Aggregator POM</name>
 
@@ -42,7 +42,7 @@
     <modules>
         <module>components/apimgt</module>
         <module>features/apimgt</module>
-        <module>gateway-modules</module>
+        <!--<module>gateway-modules</module>-->
         <module>analyzer-modules</module>
     </modules>
 
@@ -870,7 +870,7 @@
         <!-- Dependencies -->
         <carbon.kernel.version>5.2.6</carbon.kernel.version>
         <carbon.kernel.package.import.version.range>[5.2.0, 6.0.0)</carbon.kernel.package.import.version.range>
-        <carbon.apimgt.version>7.0.206-SNAPSHOT</carbon.apimgt.version>
+        <carbon.apimgt.version>7.0.209-SNAPSHOT</carbon.apimgt.version>
 
         <carbon.datasources.version>1.1.4</carbon.datasources.version>
 
@@ -1015,6 +1015,6 @@
         <joda.time.version>2.9.9</joda.time.version>
         <broker.version>0.1.44</broker.version>
         <broker.package.import.version.range>[0.1.44,1.0.0)</broker.package.import.version.range>
-        <carbon.auth.version>1.0.50</carbon.auth.version>
+        <carbon.auth.version>1.0.52</carbon.auth.version>
     </properties>
 </project>

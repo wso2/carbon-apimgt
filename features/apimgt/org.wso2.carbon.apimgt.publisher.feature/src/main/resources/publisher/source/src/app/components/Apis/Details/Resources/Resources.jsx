@@ -38,10 +38,10 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
-import Api from 'AppData/api';
+import Api from '../../../../data/api';
 import Resource from './Resource';
-import { Progress } from 'AppComponents/Shared';
-import ApiPermissionValidation from 'AppData/ApiPermissionValidation';
+import { Progress } from '../../../Shared';
+import ApiPermissionValidation from '../../../../data/ApiPermissionValidation';
 
 const styles = theme => ({
     root: {
@@ -494,7 +494,7 @@ class Resources extends React.Component {
                                 {this.state.apiScopes ? (
                                     <div>
                                         <Divider className={classes.divider} />
-                                        <FormControl className={classes.formControl}>
+                                        <FormControl className={classes.widthControl}>
                                             <InputLabel htmlFor='select-multiple'>
                                                 Assign Global Scopes for API
                                             </InputLabel>
