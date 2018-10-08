@@ -35,7 +35,7 @@ const styles = theme => ({
 });
 
 /**
- * Table view of the API listing
+ * Table view of the Document listing
  * @class DocTableView @inheritdoc
  * @extends {React.Component} @inheritdoc
  */
@@ -74,7 +74,7 @@ class DocTableView extends React.Component {
     };
 
     /**
-     * Handle select all api checkbox in header
+     * Handle select all doc checkbox in header
      *
      * @param {React.SyntheticEvent} event ignored
      * @param {Boolean} checked is the select all checkbox is selected
@@ -90,7 +90,7 @@ class DocTableView extends React.Component {
 
     /**
      *
-     * Handle onClick event of checkbox for single API (One row in the APIs listing table view)
+     * Handle onClick event of checkbox for single Doc (One row in the Doc listing table view)
      * @param {React.SyntheticEvent} event onClick event
      * @memberof DocTableView
      */
@@ -128,7 +128,7 @@ class DocTableView extends React.Component {
     /**
      *
      * Provide implementation for Material UI standard TablePagination callback prop
-     * Change the number of rows(APIs) shown in single page
+     * Change the number of rows(Docs) shown in single page
      * @param {React.SyntheticEvent} event Synthetic event for number of rows dropdown menu
      * @memberof DocTableView
      */
@@ -138,7 +138,7 @@ class DocTableView extends React.Component {
 
     /**
      *
-     * Delete API in `selected` list
+     * Delete Doc in `selected` list
      * @memberof DocTableView
      */
     handleDeleteDocs() {
@@ -190,7 +190,7 @@ class DocTableView extends React.Component {
                 <Paper>
                     <DocTableToolBar
                         loading={isDeleting}
-                        handleDeleteAPIs={this.handleDeleteDocs}
+                        handleDeleteDocs={this.handleDeleteDocs}
                         numSelected={selected.length}
                         totalDocCount={docs.length}
                     />
