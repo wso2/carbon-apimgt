@@ -210,7 +210,6 @@ class DocTableView extends React.Component {
                             />
                             <TableBody>
                                 {docs
-                                    // .sort(getSorting(order, orderBy))
                                     .slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage)
                                     .map((doc) => {
                                         const { documentId } = doc;
