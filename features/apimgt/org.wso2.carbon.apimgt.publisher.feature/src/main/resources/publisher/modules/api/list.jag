@@ -72,8 +72,8 @@ var getAPI = function (api) {
             additionalProperties:result[55],
             authorizationHeader:result[56],
             gatewayLabels:result[57],
-            gatewaysecurity_oauth2:result[58],
-            gatewaysecurity_mutualssl:result[59]
+            apisecurity_oauth2:result[58],
+            apisecurity_mutualssl:result[59]
         };
         return {
             error:false,

@@ -73,7 +73,10 @@ import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
-import org.wso2.carbon.apimgt.impl.certificatemgt.*;
+import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
+import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
+import org.wso2.carbon.apimgt.impl.certificatemgt.GatewayCertificateManager;
+import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.clients.RegistryCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -92,12 +95,7 @@ import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilderImpl;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
-import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
-import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
-import org.wso2.carbon.apimgt.impl.utils.APIStoreNameComparator;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
-import org.wso2.carbon.apimgt.impl.utils.StatUpdateClusterMessage;
+import org.wso2.carbon.apimgt.impl.utils.*;
 import org.wso2.carbon.apimgt.impl.workflow.APIStateWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
@@ -188,10 +186,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private static final Log log = LogFactory.getLog(APIProviderImpl.class);
 
     private final String userNameWithoutChange;
+    private CertificateManager certificateManager;
 
     public APIProviderImpl(String username) throws APIManagementException {
         super(username);
         this.userNameWithoutChange = username;
+        certificateManager = CertificateManagerImpl.getInstance();
     }
 
     protected String getUserNameWithoutChange() {
@@ -1106,6 +1106,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         //Validate Transports
         validateAndSetTransports(api);
+        validateAndSetAPISecurity(api);
         boolean transactionCommitted = false;
         try {
             registry.beginTransaction();
@@ -1742,6 +1743,42 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    /**
+     * To validate the API Security options and set it.
+     *
+     * @param api Relevant API that need to be validated.
+     */
+    private void validateAndSetAPISecurity(API api) {
+        String apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
+        if (api.getApiSecurity() != null) {
+            apiSecurity = api.getApiSecurity();
+            String[] apiSecurityLevels = apiSecurity.split(",");
+            boolean isOauth2 = false;
+            boolean isMutualSSL = false;
+            for (String apiSecurityLevel : apiSecurityLevels) {
+                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+                    isOauth2 = true;
+                }
+                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL)) {
+                    isMutualSSL = true;
+                }
+            }
+            apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
+            if (isOauth2 && isMutualSSL) {
+                apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2 + "," + APIConstants.API_SECURITY_MUTUAL_SSL;
+            } else if (isMutualSSL) {
+                apiSecurity = APIConstants.API_SECURITY_MUTUAL_SSL;
+            }
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("API " + api.getId() + " has following enabled protocols : " + apiSecurity);
+        }
+        api.setApiSecurity(apiSecurity);
+        if (!apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+            api.removeAllTiers();
+        }
+    }
+
     private void checkIfValidTransport(String transport) throws APIManagementException {
         if (!Constants.TRANSPORT_HTTP.equalsIgnoreCase(transport) && !Constants.TRANSPORT_HTTPS.equalsIgnoreCase(transport)) {
             handleException("Unsupported Transport [" + transport + ']');
@@ -1804,10 +1841,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             // in tenant registry
             authorizationHeader = APIUtil.getOAuthConfiguration(tenantId, APIConstants.AUTHORIZATION_HEADER);
         }
-
-        String apiSecurity = api.getApiSecurity();
-        String apiLevelPolicy = api.getApiLevelPolicy();
-
         if (!StringUtils.isBlank(authorizationHeader)) {
             corsProperties.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
         }
@@ -1856,12 +1889,32 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         if(!APIConstants.PROTOTYPED.equals(api.getStatus())) {
 
+            List<ClientCertificateDTO> clientCertificateDTOS = null;
+            if (certificateManager.isClientCertificateBasedAuthenticationConfigured()) {
+                clientCertificateDTOS = certificateManager.searchClientCertificates(tenantId, null, api.getId());
+            }
+            Map<String, String> clientCertificateObject = null;
+            CertificateMgtUtils certificateMgtUtils = CertificateMgtUtils.getInstance();
+            if (clientCertificateDTOS != null) {
+                clientCertificateObject = new HashMap<>();
+                for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOS) {
+                    clientCertificateObject.put(certificateMgtUtils
+                                    .getUniqueIdentifierOfCertificate(clientCertificateDTO.getCertificate()),
+                            clientCertificateDTO.getTierName());
+                }
+            }
+
             Map<String, String> authProperties = new HashMap<String, String>();
             if (!StringUtils.isBlank(authorizationHeader)) {
                 authProperties.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
             }
-            authProperties.put(APIConstants.API_Security, apiSecurity);
+            String apiSecurity = api.getApiSecurity();
+            String apiLevelPolicy = api.getApiLevelPolicy();
+            authProperties.put(APIConstants.API_SECURITY, apiSecurity);
             authProperties.put(APIConstants.API_LEVEL_POLICY, apiLevelPolicy);
+            if (clientCertificateObject != null) {
+                authProperties.put(APIConstants.CERTIFICATE_INFORMATION, clientCertificateObject.toString());
+            }
             //Get RemoveHeaderFromOutMessage from tenant registry or api-manager.xml
             String removeHeaderFromOutMessage = APIUtil
                     .getOAuthConfiguration(tenantId, APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE);
@@ -2591,6 +2644,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         //Validate Transports
         validateAndSetTransports(api);
+        validateAndSetAPISecurity(api);
         boolean transactionCommitted = false;
         try {
             registry.beginTransaction();
@@ -2638,7 +2692,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
             String publisherAccessControlRoles = api.getAccessControlRoles();
-
             APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
                     artifactPath, registry);
 
@@ -2932,7 +2985,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             cleanUpPendingAPIStateChangeTask(apiId);
             //Run cleanup task for workflow
             /*
-            WorkflowExecutor apiStateChangeWFExecutor = WorkflowExecutorFactory.getCertificateManagerInstance().
+            WorkflowExecutor apiStateChangeWFExecutor = WorkflowExecutorFactory.getInstance().
                     getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_STATE);
   
             WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
@@ -5168,7 +5221,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throws APIManagementException {
 
         ResponseCode responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
-        CertificateManager certificateManager = new CertificateManagerImpl();
         String tenantDomain = MultitenantUtils.getTenantDomain(userName);
 
         try {
@@ -5179,7 +5231,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             if (responseCode == ResponseCode.SUCCESS) {
                 //Get the gateway manager and add the certificate to gateways.
-                GatewayCertificateManager gatewayCertificateManager = new GatewayCertificateManager();
+                GatewayCertificateManager gatewayCertificateManager = GatewayCertificateManager.getInstance();
                 gatewayCertificateManager.addToGateways(certificate, alias);
             } else {
                 log.error("Adding certificate to the Publisher node is failed. No certificate changes will be " +
@@ -5191,18 +5243,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return responseCode.getResponseCode();
     }
 
+    @Override
     public int addClientCertificate(String userName, APIIdentifier apiIdentifier, String certificate, String alias,
             String tierName) throws APIManagementException {
 
         ResponseCode responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
         String tenantDomain = MultitenantUtils.getTenantDomain(userName);
-        CertificateManager certificateManager = CertificateManagerFactory.getCertificateManagerInstance();
 
         try {
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
-            responseCode = certificateManager.addClientCertificate(apiIdentifier, certificate, alias, tierName,
-                    tenantId);
+            responseCode = certificateManager
+                    .addClientCertificate(apiIdentifier, certificate, alias, tierName, tenantId);
         } catch (UserStoreException e) {
             handleException("Error while reading tenant information, client certificate addition failed for the API "
                     + apiIdentifier.toString(), e);
@@ -5214,7 +5266,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public int deleteCertificate(String userName, String alias, String endpoint) throws APIManagementException {
 
         ResponseCode responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
-        CertificateManager certificateManager = new CertificateManagerImpl();
         String tenantDomain = MultitenantUtils.getTenantDomain(userName);
 
         try {
@@ -5224,7 +5275,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             if (responseCode == ResponseCode.SUCCESS) {
                 //Get the gateway manager and remove the certificate from gateways.
-                GatewayCertificateManager gatewayCertificateManager = new GatewayCertificateManager();
+                GatewayCertificateManager gatewayCertificateManager = GatewayCertificateManager.getInstance();
                 gatewayCertificateManager.removeFromGateways(alias);
             } else {
                 log.error("Removing the certificate from Publisher node is failed. No certificate changes will "
@@ -5241,7 +5292,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throws APIManagementException {
 
         ResponseCode responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
-        CertificateManager certificateManager = CertificateManagerFactory.getCertificateManagerInstance();
         String tenantDomain = MultitenantUtils.getTenantDomain(userName);
 
         try {
@@ -5258,15 +5308,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public boolean isConfigured() {
-
-        CertificateManager certificateManager = new CertificateManagerImpl();
         return certificateManager.isConfigured();
     }
 
     @Override
-    public List<CertificateMetadataDTO> getCertificates(String userName) throws APIManagementException {
+    public boolean isClientCertificateBasedAuthenticationConfigured() {
+        return certificateManager.isClientCertificateBasedAuthenticationConfigured();
+    }
 
-        CertificateManager certificateManager = new CertificateManagerImpl();
+    @Override
+    public List<CertificateMetadataDTO> getCertificates(String userName) throws APIManagementException {
         int tenantId = 0;
         try {
             tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
@@ -5277,50 +5328,44 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return certificateManager.getCertificates(tenantId);
     }
 
-    public List<ClientCertificateDTO> getClientCertificates(String userName, APIIdentifier apiIdentifier) throws
-            APIManagementException {
-        int tenantId = -1;
-        try {
-            tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(tenantDomain);
-
-        } catch (UserStoreException e) {
-            handleException("Error while reading tenant information", e);
-        }
-        return CertificateManagerFactory.getCertificateManagerInstance()
-                .getClientCertificates(apiIdentifier, tenantId);
-    }
-
     @Override
     public List<CertificateMetadataDTO> searchCertificates(int tenantId, String alias, String endpoint) throws
             APIManagementException {
-
-        CertificateManager certificateManager = new CertificateManagerImpl();
         return certificateManager.getCertificates(tenantId, alias, endpoint);
+    }
+
+    public List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, APIIdentifier apiIdentifier)
+            throws APIManagementException {
+        return certificateManager.searchClientCertificates(tenantId, alias, apiIdentifier);
     }
 
     @Override
     public boolean isCertificatePresent(int tenantId, String alias) throws APIManagementException {
-
-        CertificateManager certificateManager = new CertificateManagerImpl();
         return certificateManager.isCertificatePresent(tenantId, alias);
     }
 
     @Override
-    public CertificateInformationDTO getCertificateStatus(String alias) throws APIManagementException {
+    public ClientCertificateDTO getClientCertificate(int tenantId, String alias) throws APIManagementException {
+        List<ClientCertificateDTO> clientCertificateDTOS = certificateManager.searchClientCertificates(tenantId, alias,
+                null);
+        if (clientCertificateDTOS != null && clientCertificateDTOS.size() > 0){
+            return clientCertificateDTOS.get(0);
+        }
+        return null;
+    }
 
-        CertificateManager certificateManager = new CertificateManagerImpl();
+    @Override
+    public CertificateInformationDTO getCertificateStatus(String alias) throws APIManagementException {
         return certificateManager.getCertificateInformation(alias);
     }
 
     @Override
     public int updateCertificate(String certificateString, String alias) throws APIManagementException {
 
-        CertificateManager certificateManager = new CertificateManagerImpl();
         ResponseCode responseCode = certificateManager.updateCertificate(certificateString, alias);
 
         if (ResponseCode.SUCCESS == responseCode) {
-            GatewayCertificateManager gatewayCertificateManager = new GatewayCertificateManager();
+            GatewayCertificateManager gatewayCertificateManager = GatewayCertificateManager.getInstance();
             gatewayCertificateManager.removeFromGateways(alias);
             gatewayCertificateManager.addToGateways(certificateString, alias);
         }
@@ -5328,16 +5373,30 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode();
     }
 
+
+    @Override
+    public int updateClientCertificate(String certificate, String alias, APIIdentifier apiIdentifier,
+            String tier, int tenantId) throws APIManagementException {
+        ResponseCode responseCode = certificateManager
+                .updateClientCertificate(certificate, alias, tier, tenantId);
+        return responseCode != null ?
+                responseCode.getResponseCode() :
+                ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode();
+    }
+
     @Override
     public int getCertificateCountPerTenant(int tenantId) throws APIManagementException {
+        return certificateManager.getCertificateCount(tenantId);
+    }
 
-        return new CertificateManagerImpl().getCertificateCount(tenantId);
+    @Override
+    public int getClientCertificateCount(int tenantId) throws APIManagementException {
+        return certificateManager.getClientCertificateCount(tenantId);
     }
 
     @Override
     public ByteArrayInputStream getCertificateContent(String alias) throws APIManagementException {
-
-        return new CertificateManagerImpl().getCertificateContent(alias);
+        return certificateManager.getCertificateContent(alias);
     }
 
     /**

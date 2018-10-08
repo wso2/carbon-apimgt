@@ -262,8 +262,8 @@ public final class APIConstants {
     public static final String API_OVERVIEW_AUTHORIZATION_HEADER = "overview_authorizationHeader";
     public static final String API_OVERVIEW_API_SECURITY = "overview_apiSecurity";
     public static final String AUTHORIZATION_HEADER_BASIC = "Basic";
-    public static final String DEFAULT_GATEWAY_SECURITY_OAUTH2 = "oauth2";
-    public static final String GATEWAY_SECURITY_MUTUAL_SSL = "mutualssl";
+    public static final String DEFAULT_API_SECURITY_OAUTH2 = "oauth2";
+    public static final String API_SECURITY_MUTUAL_SSL = "mutualssl";
     public static final String CERTIFICATE_COMMON_NAME = "CN";
 
     public static final String API_OVERVIEW_RESPONSE_CACHING = "overview_responseCaching";
@@ -346,8 +346,9 @@ public final class APIConstants {
 
     public static final String OAUTH_CONFIGS = "OAuthConfigurations.";
     public static final String AUTHORIZATION_HEADER = "AuthorizationHeader";
-    public static final String API_Security = "APISecurity";
+    public static final String API_SECURITY = "APISecurity";
     public static final String API_LEVEL_POLICY = "APILevelPolicy";
+    public static final String CERTIFICATE_INFORMATION = "CertificateInformation";
     public static final String AUTHORIZATION_HEADER_DEFAULT = "Authorization";
     public static final String REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE = "RemoveOAuthHeadersFromOutMessage";
     public static final String REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE_DEFAULT = "true";
@@ -622,6 +623,7 @@ public final class APIConstants {
     public static final String AUTH_MANAGER_URL = AUTH_MANAGER + "ServerURL";
     public static final String AUTH_MANAGER_USERNAME = AUTH_MANAGER + "Username";
     public static final String AUTH_MANAGER_PASSWORD = AUTH_MANAGER + "Password";
+    public static final String ENABLE_MTLS_FOR_APIS = "EnableMTLSForAPIs";
 
     public static final String SELF_SIGN_UP = "SelfSignUp.";
     public static final String SELF_SIGN_UP_ENABLED = SELF_SIGN_UP + "Enabled";
@@ -815,6 +817,7 @@ public final class APIConstants {
     public static final String RESOURCE_CACHE_NAME = "resourceCache";
     public static final String POLICY_CACHE_CONTEXT = "POLICY:";
     public static final String GATEWAY_KEY_CACHE_NAME = "gatewayKeyCache";
+    public static final String GATEWAY_CERTIFICATE_CACHE_NAME = "gatewayCertificateCache";
     public static final String GATEWAY_TOKEN_CACHE_NAME = "GATEWAY_TOKEN_CACHE";
     public static final String GATEWAY_INVALID_TOKEN_CACHE_NAME = "GATEWAY_INVALID_TOKEN_CACHE";
     public static final String KEY_CACHE_NAME = "keyCache";

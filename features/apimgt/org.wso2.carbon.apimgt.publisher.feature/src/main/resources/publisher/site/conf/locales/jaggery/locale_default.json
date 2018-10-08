@@ -380,6 +380,7 @@
     "Password": "Password",
     "Please select at least one subscription tier.": "Please select at least one subscription tier.",
     "Please select at least one transport.": "Please select at least one transport.",
+    "Please select at least one API Security.": "Please select at least one API Security.",
     "Please specify a production or sandbox endpoint.": "Please specify a production or sandbox endpoint.",
     "Please use a valid WSDL endpoint": "Please use a valid WSDL endpoint",
     "Please use a valid swagger file": "Please use a valid swagger file",
@@ -658,5 +659,6 @@
     "You have selected Microgateways for this API. The mediation policies selected here will not be applied in Microgateway environments.":"You have selected Microgateways for this API. The mediation policies selected here will not be applied in Microgateway environments.",
     "This option determines the type of security that will be used to secure this API. An API can be secured with either one of them or it can be secured by both of them. If OAuth2 option is selected, relevant API will require a valid OAuth2 token for successful invocation. If Mutual SSL option is selected, a trusted client certificate should be presented to access the API":"This option determines the type of security that will be used to secure this API. An API can be secured with either one of them or it can be secured by both of them. If OAuth2 option is selected, relevant API will require a valid OAuth2 token for successful invocation. If Mutual SSL option is selected, a trusted client certificate should be presented to access the API",
     "OAuth2" : "OAuth2",
-    "Mutual SSL" : "Mutual SSL"
+    "Mutual SSL" : "Mutual SSL",
+    "Subscription tiers are not applicable for this API, as it is only protected with mutual SSL." : "Subscription are not applicable for this API, as it is only protected with mutual SSL."
 }

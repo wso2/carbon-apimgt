@@ -35,7 +35,6 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.gateway.dto.stub.APIData;
 import org.wso2.carbon.apimgt.gateway.dto.stub.ResourceData;
 import org.wso2.carbon.apimgt.impl.dao.CertificateMgtDAO;
-import org.wso2.carbon.apimgt.impl.dto.CertificateTierDTO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
@@ -93,7 +92,8 @@ public class APIGatewayManagerTest {
             + "      \"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/\",\n" + "      \"config\":null\n"
             + "   }\n" + "}";
 
-    @Before public void init() throws Exception {
+    @Before
+    public void init() throws Exception {
         System.setProperty("carbon.home", "");
         config = Mockito.mock(APIManagerConfiguration.class);
         carbonContext = Mockito.mock(PrivilegedCarbonContext.class);
@@ -145,6 +145,7 @@ public class APIGatewayManagerTest {
         environments.put(sandBoxEnvironmentName, sandboxEnvironment);
         Mockito.when(config.getApiGatewayEnvironments()).thenReturn(environments);
         apiIdentifier = new APIIdentifier(provider, apiName, version);
+        TestUtils.initConfigurationContextService(false);
         gatewayManager = APIGatewayManager.getInstance();
     }
 
@@ -636,6 +637,7 @@ public class APIGatewayManagerTest {
                 .when(apiGatewayAdminClient).setSecureVaultProperty(api, tenantDomain);
         api.setEndpointSecured(true);
         Mockito.when(config.getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE)).thenReturn("true");
+        Mockito.when(config.getFirstProperty(APIConstants.ENABLE_MTLS_FOR_APIS)).thenReturn("true");
         Map<String, String> failedEnvironmentsMap2 = gatewayManager
                 .publishToGateway(api, apiTemplateBuilder, tenantDomain);
         Assert.assertEquals(failedEnvironmentsMap2.size(), 1);

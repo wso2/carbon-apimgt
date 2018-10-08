@@ -13,6 +13,7 @@
     var default_tier = resourceTiers[resourceTiers.length -1].tierName;
     var isWSAPI = api.type.toUpperCase() == "WS";
     var certificates = JSON.stringify(outputs.certificates);
+    var isClientCertificateBasedAuthenticationEnabled = outputs.isClientCertificateBasedAuthenticationEnabled;
 
     var hasCustomSequences = false;
     if((api.inSequence && (!"none".equals(api.inSequence))) || (api.outSequence && (!"none".equals(api.outSequence)))
@@ -276,84 +277,76 @@
 
                                                     <% } %>
                                         <!--Response Caching End -->
-                                                      <!--Gateway Security Start-->
-                                                           <div id="gatewaySecurity form-control">
-                                                                <div class="form-group">
-                                                                    <label class="control-label col-sm-3"
-                                                                    for="gatewaySecurity"><%=i18n.localize("API Security")%>:
-                                                                       <a class="help_popup"
-                                                                        help_data="gatewaysecurity_header_help"
-                                                                        title="gatewaysecurity_header_help" data-trigger="hover" data-placement="bottom">
-                                                                            <span class="icon fw-stack fw-lg" style="font-size:6px">
-                                                                                <i class="fw fw-circle fw-stack-2x"></i>
-                                                                                <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
-                                                                            </span>
-                                                                        </a>
-                                                                    <p id="gatewaysecurity_header_help"
-                                                                    class="hide"><%=i18n.localize("This option determines the type of security that will be used to secure this API. An API can be secured with either one of them or it can be secured by both of them. If OAuth2 option is selected, relevant API will require a valid OAuth2 token for successful invocation. If Mutual SSL option is selected, a trusted client certificate should be presented to access the API")%></p>
-                                                                    </label>
-                                                                     <div class="controls col-sm-8
-                                                                     gatewaySecuritySelect">
+                  <!--API Security Start-->
+                       <% if (isClientCertificateBasedAuthenticationEnabled) { %>
+                           <div id="gatewaySecurity form-control">
+                                <div class="form-group">
+                                    <label class="control-label col-sm-3"
+                                    for="gatewaySecurity"><%=i18n.localize("API Security")%>:
+                                    <span class="requiredAstrix">*</span>
+                                       <a class="help_popup"
+                                        help_data="gatewaysecurity_header_help"
+                                        title="gatewaysecurity_header_help" data-trigger="hover" data-placement="bottom">
+                                            <span class="icon fw-stack fw-lg" style="font-size:6px">
+                                                <i class="fw fw-circle fw-stack-2x"></i>
+                                                <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+                                            </span>
+                                        </a>
+                                    <p id="gatewaysecurity_header_help" class="hide"><%=i18n.localize("This option determines the type of security that will be used to secure this API. An API can be secured with either one of them or it can be secured by both of them. If OAuth2 option is selected, relevant API will require a valid OAuth2 token for successful invocation. If Mutual SSL option is selected, a trusted client certificate should be presented to access the API")%></p>
+                                    </label>
+                                    <div class="controls col-sm-8 gatewaySecuritySelect">
+                                        <label id="oauth2" class="gatewaysecurity_checkbox_label checkbox add-padding-bottom-1x">
+                                            <input id="oauth2_checkbox" type="checkbox" class="gatewaysecurity_check"
+                                            name="apisecurity_oauth2" value="oauth2" <%if(api.apisecurity_oauth2 =="checked"){%>checked<%}%>>
+                                            <span class="helper"><%=i18n.localize("OAuth2")%></span>
+                                        </label>
+                                        <label class="gatewaysecurity_checkbox_label checkbox add-padding-bottom-1x">
+                                            <input id="mutualssl" type="checkbox" class="gatewaysecurity_check"
+                                            name="apisecurity_mutualssl" value="mutualssl" <%if(api.apisecurity_mutualssl =="checked")
+                                            {%>checked<%}%>>
+                                            <span class="helper"><%=i18n.localize("Mutual SSL")%></span>
+                                        </label>
+                                        <label id="gatewaysecurity_error" class="error hide" style="display: block;"><%=i18n.localize("Please select at least one API Security.")%></label>
+                                    </div>
+                                </div>
+                            </div>
+                               <!--Manage Certificates - main-->
+                            <div class="form-group" id="manage-certificates"
+                            <%if(api.apisecurity_mutualssl !="checked") { %> hidden <% } %>>
+                                <div class="control-label col-sm-3"></div>
+                                    <div class="col-sm-4">
+                                            <a href="#" class="manage-certs but"
+                                            ref="manage-endpoint-certs" title="Manage Certificates"><%=i18n.localize("Manage Certificates")%></a>
+                                    </div>
+                                    <div id="manage-endpoint-certs" style="display: none">
+                                        <div id="cert-config"></div>
+                                    </div>
+                            </div>
 
-            <label id="oauth2" class="gatewaysecurity_checkbox_label checkbox add-padding-bottom-1x">
-                                                                <input id="oauth2_checkbox" type="checkbox"
-                                                                class="gatewaysecurity_check"
-        name="gatewaysecurity_oauth2" value="oauth2" <%if(api.gatewaysecurity_oauth2 =="checked"){%>checked<%}%>>
-                                                                <span class="helper"><%=i18n.localize("OAuth2")%></span>
-                                                        </label>
-                                                         <label class="gatewaysecurity_checkbox_label
-                                                         checkbox add-padding-bottom-1x">
-                                                                <input id="mutualssl" type="checkbox"
-                                                                class="gatewaysecurity_check"
-        name="gatewaysecurity_mutualssl" value="mutualssl" <%if(api.gatewaysecurity_mutualssl =="checked")
-        {%>checked<%}%>>
-                                                                <span class="helper"><%=i18n.localize("Mutual SSL")%></span>
-                                                        </label>
+                      <% } %>
+                  <!--Custom Authorization Header Start-->
+                       <div id="authConfigs" <%if
+(isClientCertificateBasedAuthenticationEnabled && api.apisecurity_oauth2 !="checked"){%>hidden<%}%>>
+                            <div class="form-group">
+                                <label class="control-label col-sm-3" for="authConfiguration"><%=i18n.localize("Authorization Header")%>:
+                                    <a class="help_popup" help_data="authorization_header_help" title="authorization_header_help" data-trigger="hover" data-placement="bottom">
+                                        <span class="icon fw-stack fw-lg" style="font-size:6px">
+                                            <i class="fw fw-circle fw-stack-2x"></i>
+                                            <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+                                        </span>
+                                    </a>
+                                <p id="authorization_header_help" class="hide"><%=i18n.localize("Here a custom authorization header can be defined as a replacement to the default <strong>Authorization</strong> header used to send a request. If a value is specified here, that will be used as the header field to send the access token in a request to consume the API")%></p>
+                                </label>
+                                <div class="controls col-sm-4">
+                                     <input type="text" class="form-control" id="authorizationHeader" name="authorizationHeader"
+                                       placeholder="Authorization"  value="<%=encode.forHtml(api.authorizationHeader)%>">
+                                </div>
+                            </div>
+                       </div>
+    <!--Custom Authorization Header End-->
+    <!--Gateway Security End-->
 
-        %>
-       <label id="gatewaysecurity_error" class="error hide" style="display: block;"><%=i18n.localize("Please select at least one subscription tier.")%></label>
-
-                                                </div>
-                                            </div>
-                                       </div>
-
-                                           <!--Manage Certificates - main-->
-                                        <div class="form-group" id="manage-certificates" <%if(api
-            .gatewaysecurity_mutualssl !="checked") { %> hidden <% } %>>
-                                            <div class="control-label col-sm-3"></div>
-                                                <div class="col-sm-4">
-                                                        <a href="#" class="manage-certs but"
-                                                        ref="manage-endpoint-certs" title="Manage Certificates"><%=i18n.localize("Manage Certificates")%></a>
-                                                </div>
-                                                <div id="manage-endpoint-certs" style="display: none">
-                                                    <div id="cert-config"></div>
-                                                </div>
-                                        </div>
-
-
-                                                      <!--Custom Authorization Header Start-->
-                                                           <div id="authConfigs" <%if(api
-            .gatewaysecurity_oauth2 !="checked"){%>hidden<%}%>>
-                                                                <div class="form-group">
-                                                                    <label class="control-label col-sm-3" for="authConfiguration"><%=i18n.localize("Authorization Header")%>:
-                                                                        <a class="help_popup" help_data="authorization_header_help" title="authorization_header_help" data-trigger="hover" data-placement="bottom">
-                                                                            <span class="icon fw-stack fw-lg" style="font-size:6px">
-                                                                                <i class="fw fw-circle fw-stack-2x"></i>
-                                                                                <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
-                                                                            </span>
-                                                                        </a>
-                                                                    <p id="authorization_header_help" class="hide"><%=i18n.localize("Here a custom authorization header can be defined as a replacement to the default <strong>Authorization</strong> header used to send a request. If a value is specified here, that will be used as the header field to send the access token in a request to consume the API")%></p>
-                                                                    </label>
-                                                                    <div class="controls col-sm-4">
-                                                                         <input type="text" class="form-control" id="authorizationHeader" name="authorizationHeader"
-                                                                           placeholder="Authorization"  value="<%=encode.forHtml(api.authorizationHeader)%>">
-                                                                    </div>
-                                                                </div>
-                                                           </div>
-                                        <!--Custom Authorization Header End-->
-                                        <!--Gateway Security End-->
-
-                                                        <input hidden id="cert-data" value="<%=encode.forHtmlAttribute(certificates)%>"/>
+                    <input hidden id="cert-data" value="<%=encode.forHtmlAttribute(certificates)%>"/>
 
 
                     <script id="certificate-ui-template" type="text/x-handlebars-template">
@@ -492,6 +485,9 @@
                                 </a>
                             </label>
                             <div class="col-sm-6">
+                            <label id="tier_warning" class="alert-warning hide" style="display:
+                                                   block;
+                                                   "><%=i18n.localize("Subscription tiers are not applicable for this API, as it is only protected with mutual SSL.")%></label>
                                 <select type="text" class="form-control" id="tierName" required>
                                     <% for (var i = 0; i < tiers.length; i++) { %>
                                     <option data-value ="<%= tiers[i].tierName%>">
@@ -1460,6 +1456,14 @@
     var enjoyhint_instance_onMessage = null;
 
     $(document).ready(function(){
+          if (document.getElementById("oauth2_checkbox")) {
+            var checkedOAuth2Security = $("#oauth2_checkbox").is(":checked");
+
+             if (!checkedOAuth2Security) {
+                   $('#subscription-tiers input').attr('checked', false).attr('disbaled', true);
+                   $("#tier_warning").removeClass("hide");
+            }
+        }
         $.ajaxSetup({
             contentType: "application/x-www-form-urlencoded; charset=utf-8"
         });
@@ -1491,7 +1495,7 @@
                 success: function(responseText){
                     $("body").unbind('api_saved');
                     if (!responseText.error) {
-                        var jsonObj = JSON.stringify(responseText);                        
+                        var jsonObj = JSON.stringify(responseText);
                         var jsonPayload = responseText.status.workflowResponse.jsonPayload;
                         if (responseText.status.stateChangeStatus == 'REJECTED') {
                                 showWorkflowRejectedMessage();
@@ -1580,6 +1584,9 @@
                 return false;
             }
             if(!validate_Transports()){
+                return false;
+            }
+            if (!validate_APISecurity()){
                 return false;
             }
             var designer = APIDesigner();

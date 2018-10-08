@@ -253,6 +253,13 @@ public class RestAPIStoreUtils {
 
         APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
         API api = apiConsumer.getAPI(apiIdentifier);
+
+        String apiSecurity = api.getApiSecurity();
+        if (apiSecurity != null && !apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+            String msg = "Subscription is not allowed for API " + apiIdentifier.toString() + ". To access the API, "
+                    + "please use the client certificate";
+            throw new APIMgtAuthorizationFailedException(msg);
+        }
         Set<Tier> tiers = api.getAvailableTiers();
 
         //Tenant based validation for subscription

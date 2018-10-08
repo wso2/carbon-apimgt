@@ -94,7 +94,7 @@ public class WebsocketUtilTestCase {
 //        PowerMockito.mockStatic(ServiceReferenceHolder.class);
 //        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
 //        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
-//        PowerMockito.when(ServiceReferenceHolder.getCertificateManagerInstance()).thenReturn(serviceReferenceHolder);
+//        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
 //        Mockito.when(serviceReferenceHolder.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
 //        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL))
 //                .thenReturn(apiKeyValidationURL);

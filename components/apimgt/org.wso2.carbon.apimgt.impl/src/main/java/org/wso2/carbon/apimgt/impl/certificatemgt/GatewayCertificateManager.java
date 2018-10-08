@@ -43,6 +43,11 @@ public class GatewayCertificateManager {
     private List<Environment> successGateways = new ArrayList<Environment>();
     private Map<String, List<Environment>> envList = new HashMap<String, List<Environment>>();
 
+    /**
+     * To get the instance of GatewayCertificate Manager.
+     *
+     * @return instance of gateway certificate manager.
+     */
     public static GatewayCertificateManager getInstance() {
         if (instance == null) {
             synchronized (GatewayCertificateManager.class) {
@@ -54,7 +59,7 @@ public class GatewayCertificateManager {
         return instance;
     }
 
-    public GatewayCertificateManager() {
+    private GatewayCertificateManager() {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
         environmentMap = config.getApiGatewayEnvironments();

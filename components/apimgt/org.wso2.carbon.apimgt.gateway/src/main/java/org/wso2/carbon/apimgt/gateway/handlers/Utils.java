@@ -242,17 +242,4 @@ public class Utils {
         axis2MC.removeProperty(Constants.Configuration.CONTENT_TYPE);
         Axis2Sender.sendBack(messageContext);
     }
-
-    /**
-     * This method is used to handle the null and empty values.
-     *
-     * @param value Relevant value.
-     * @return the modified value.
-     */
-    public static String handleValue(String value) {
-        if (StringUtils.isEmpty(value)) {
-            value = " ";
-        }
-        return value;
-    }
 }

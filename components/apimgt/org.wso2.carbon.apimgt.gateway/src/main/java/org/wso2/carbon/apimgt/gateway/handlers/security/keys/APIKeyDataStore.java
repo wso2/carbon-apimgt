@@ -16,11 +16,9 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security.keys;
 
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.CertificateTierDTO;
 
 import java.util.ArrayList;
 
@@ -57,8 +55,6 @@ public interface APIKeyDataStore {
                                                  String requiredAuthenticationLevel, String clientDomain,
                                                  String matchingResource, String httpVerb) throws APISecurityException;
 
-    CertificateTierDTO getCertificateTierInformation(APIIdentifier apiIdentifier, String certificateIdentifier)
-            throws APISecurityException;
     /**
      * Get API Resource URI Templates
      *

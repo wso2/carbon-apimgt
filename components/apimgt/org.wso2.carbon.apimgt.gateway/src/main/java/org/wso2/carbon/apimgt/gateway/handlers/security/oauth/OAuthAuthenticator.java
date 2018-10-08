@@ -57,11 +57,11 @@ public class OAuthAuthenticator implements Authenticator {
     private String consumerKeyHeaderSegment = "Bearer";
     private String oauthHeaderSplitter = ",";
     private String consumerKeySegmentDelimiter = " ";
-    protected String securityContextHeader;
+    private String securityContextHeader;
     private boolean removeOAuthHeadersFromOutMessage=true;
     private boolean removeDefaultAPIHeaderFromOutMessage=true;
     private String clientDomainHeader = "referer";
-    protected String requestOrigin;
+    private String requestOrigin;
 
     public OAuthAuthenticator() {
     }
@@ -77,7 +77,9 @@ public class OAuthAuthenticator implements Authenticator {
     }
 
     public void destroy() {
-        this.keyValidator.cleanup();
+        if (keyValidator != null) {
+            this.keyValidator.cleanup();
+        }
     }
 
     public boolean authenticate(MessageContext synCtx) throws APISecurityException {
@@ -124,7 +126,7 @@ public class OAuthAuthenticator implements Authenticator {
         Timer timer = getTimer(MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "GET_RESOURCE_AUTH"));
         Timer.Context context = timer.start();
-        String authenticationScheme = (String) synCtx.getProperty(APIConstants.RESOURCE_AUTHENTICATION_SCHEME);
+        String authenticationScheme = getAPIKeyValidator().getResourceAuthenticationScheme(synCtx);
         context.stop();
         APIKeyValidationInfoDTO info;
         if(APIConstants.AUTH_NO_AUTHENTICATION.equals(authenticationScheme)){

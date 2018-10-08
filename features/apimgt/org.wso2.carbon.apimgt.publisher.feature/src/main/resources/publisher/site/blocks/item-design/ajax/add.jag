@@ -699,16 +699,16 @@ if(jagg.isCSRFTokenValid())
             apiData.additionalProperties = request.getParameter("additionalProperties", "UTF-8");
             apiData.authorizationHeader = request.getParameter("authorizationHeader");
 
-            var mutualSSLGatewaySecurity = request.getParameter("gatewaysecurity_mutualssl");
-            var oauth2GatewaySecurity =  request.getParameter("gatewaysecurity_oauth2");
+            var mutualSSLAPISecurity = request.getParameter("apisecurity_mutualssl");
+            var oauth2APISecurity =  request.getParameter("apisecurity_oauth2");
 
-            if (mutualSSLGatewaySecurity != null && oauth2GatewaySecurity != null) {
-                apiData.gatewaySecurity = oauth2GatewaySecurity + "," + mutualSSLGatewaySecurity;
+            if (mutualSSLAPISecurity != null && oauth2APISecurity != null) {
+                apiData.apiSecurity = oauth2APISecurity + "," + mutualSSLAPISecurity;
             } else {
-                if (mutualSSLGatewaySecurity != null) {
-                    apiData.gatewaySecurity = mutualSSLGatewaySecurity;
-                } else if (oauth2GatewaySecurity != null) {
-                    apiData.gatewaySecurity = oauth2GatewaySecurity;
+                if (mutualSSLAPISecurity != null) {
+                    apiData.apiSecurity = mutualSSLAPISecurity;
+                } else if (oauth2APISecurity != null) {
+                    apiData.apiSecurity = oauth2APISecurity;
                 }
             }
             apiData.gatewayLabels = request.getParameter("gatewayLabels", "UTF-8");

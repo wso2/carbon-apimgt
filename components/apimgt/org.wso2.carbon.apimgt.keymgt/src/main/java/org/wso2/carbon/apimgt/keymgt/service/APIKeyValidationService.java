@@ -31,12 +31,9 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.dao.CertificateMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.CertificateTierDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
@@ -336,20 +333,6 @@ public class APIKeyValidationService extends AbstractAdmin {
         info.setConsumerKey(validationContext.getTokenInfo().getConsumerKey());
         info.setEndUserName(validationContext.getTokenInfo().getEndUserName());
         return info;
-    }
-
-    public CertificateTierDTO getCertificateTierInformation(APIIdentifier apiIdentifier, String certificateIdentifier)
-            throws APIKeyMgtException {
-        try {
-            return CertificateMgtDAO.getInstance()
-                    .getCertificateSubscriptionTierInformation(apiIdentifier, certificateIdentifier);
-        } catch (CertificateManagementException e) {
-            String errorMessage =
-                    "Certificate management exception while trying to tier information for a certificate for the API "
-                            + apiIdentifier.toString();
-            log.error(errorMessage, e);
-            throw new APIKeyMgtException(errorMessage, e);
-        }
     }
 
     /**

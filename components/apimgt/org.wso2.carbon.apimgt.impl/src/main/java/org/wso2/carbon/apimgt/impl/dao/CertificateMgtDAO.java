@@ -17,7 +17,6 @@
  */
 package org.wso2.carbon.apimgt.impl.dao;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,14 +27,19 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateAliasExistsException;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
-import org.wso2.carbon.apimgt.impl.dto.CertificateTierDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.sql.*;
+import java.sql.Blob;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,7 +64,7 @@ public class CertificateMgtDAO {
      * Private constructor
      */
     private CertificateMgtDAO() {
-        certificateMgtUtils = new CertificateMgtUtils();
+        certificateMgtUtils = CertificateMgtUtils.getInstance();
     }
 
     /**
@@ -109,16 +113,15 @@ public class CertificateMgtDAO {
     /**
      * Method to add a new client certificate to the database.
      *
-     * @param certificate : Client certificate that need to be added.
+     * @param certificate   : Client certificate that need to be added.
      * @param apiIdentifier : API which the client certificate is uploaded against.
-     * @param alias    : Alias for the new certificate.
-     * @param tenantId : The Id of the tenant who uploaded the certificate.
+     * @param alias         : Alias for the new certificate.
+     * @param tenantId      : The Id of the tenant who uploaded the certificate.
      * @return : True if the information is added successfully, false otherwise.
      * @throws CertificateManagementException if existing entry is found for the given endpoint or alias.
      */
-    public boolean addClientCertificate(String certificate, APIIdentifier apiIdentifier, String alias,
-            String tierName, int tenantId) throws CertificateManagementException {
-
+    public boolean addClientCertificate(String certificate, APIIdentifier apiIdentifier, String alias, String tierName,
+            int tenantId) throws CertificateManagementException {
         boolean result = false;
         Connection connection = null;
         PreparedStatement preparedStatement = null;
@@ -129,16 +132,13 @@ public class CertificateMgtDAO {
             initialAutoCommit = connection.getAutoCommit();
             connection.setAutoCommit(false);
             int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier, connection);
-
             preparedStatement = connection.prepareStatement(addCertQuery);
             preparedStatement.setBlob(1, getInputStream(certificate));
             preparedStatement.setInt(2, tenantId);
             preparedStatement.setString(3, alias);
             preparedStatement.setInt(4, apiId);
-            preparedStatement.setString(5, certificateMgtUtils
-                    .getUniqueIdentifierOfCertificate(certificate));
-            preparedStatement.setString(6, tierName);
-            result = preparedStatement.executeUpdate() == 1;
+            preparedStatement.setString(5, tierName);
+            result = preparedStatement.executeUpdate() >= 1;
             connection.commit();
         } catch (SQLException e) {
             handleConnectionRollBack(connection);
@@ -148,6 +148,7 @@ public class CertificateMgtDAO {
             }
             handleException("Error while persisting client certificate for the API " + apiIdentifier.toString(), e);
         } catch (APIManagementException e) {
+            handleConnectionRollBack(connection);
             handleException("Error getting API details of the API " + apiIdentifier.toString() + " when storing "
                     + "client certificate", e);
         } finally {
@@ -157,6 +158,55 @@ public class CertificateMgtDAO {
         return result;
     }
 
+    /**
+     * To update an already existing client certificate.
+     *
+     * @param certificate Specific certificate.
+     * @param alias       Alias of the certificate.
+     * @param tier        Name of tier related with the certificate.
+     * @param tenantId    ID of the tenant.
+     * @return true if the update succeeds, unless false.
+     * @throws CertificateManagementException Certificate Management Exception.
+     */
+    public boolean updateClientCertificate(String certificate, String alias, String tier, int tenantId)
+            throws CertificateManagementException {
+        boolean result = false;
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        String updateCertQuery = SQLConstants.ClientCertificateConstants.UPDATE_CERTIFICATE;
+        int index = 1;
+        if (StringUtils.isNotEmpty(certificate) && StringUtils.isNotEmpty(tier)) {
+            updateCertQuery = SQLConstants.ClientCertificateConstants.UPDATE_CERTIFICATE_AND_TIER;
+        } else if (StringUtils.isNotEmpty(tier)) {
+            updateCertQuery = SQLConstants.ClientCertificateConstants.UPDATE_TIER;
+        }
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            initialAutoCommit = connection.getAutoCommit();
+            connection.setAutoCommit(false);
+            preparedStatement = connection.prepareStatement(updateCertQuery);
+            if (StringUtils.isNotEmpty(certificate)) {
+                preparedStatement.setBlob(index, getInputStream(certificate));
+                index++;
+            }
+            if (StringUtils.isNotEmpty(tier)) {
+                preparedStatement.setString(index, tier);
+                index++;
+            }
+            preparedStatement.setInt(index, tenantId);
+            index++;
+            preparedStatement.setString(index, alias);
+            result = preparedStatement.executeUpdate() >= 1;
+            connection.commit();
+        } catch (SQLException e) {
+            handleConnectionRollBack(connection);
+            handleException("Error while updating client certificate for the API for the alias " + alias, e);
+        } finally {
+            APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, null);
+        }
+        return result;
+    }
 
     /**
      * To get the input stream from string.
@@ -240,8 +290,6 @@ public class CertificateMgtDAO {
         return result;
     }
 
-
-
     /**
      * Method to retrieve certificate metadata from db for specific alias or endpoint.
      * From alias and endpoint, only one parameter is required. This will be used to query all the certificates
@@ -284,6 +332,80 @@ public class CertificateMgtDAO {
             APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
         }
         return certificateMetadataDTO;
+    }
+
+    /**
+     * Method to retrieve certificate metadata from db for specific tenant which matches alias or api identifier.
+     * Both alias and api identifier are optional
+     *
+     * @param tenantId      : The id of the tenant which the certificate belongs to.
+     * @param alias         : Alias for the certificate. (Optional)
+     * @param apiIdentifier : The endpoint/ server url which the certificate is mapped to. (Optional)
+     * @return : A CertificateMetadataDTO object if the certificate is retrieved successfully, null otherwise.
+     */
+    public List<ClientCertificateDTO> getClientCertificates(int tenantId, String alias,
+            APIIdentifier apiIdentifier) throws CertificateManagementException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        List<ClientCertificateDTO> clientCertificateDTOS = new ArrayList<>();
+        int apiId = 0;
+        int index = 1;
+        String selectQuery = SQLConstants.ClientCertificateConstants.SELECT_CERTIFICATE_FOR_TENANT;
+        if (StringUtils.isNotEmpty(alias) && apiIdentifier != null) {
+            selectQuery = SQLConstants.ClientCertificateConstants.SELECT_CERTIFICATE_FOR_TENANT_ALIAS_APIID;
+        } else if (StringUtils.isNotEmpty(alias)) {
+            selectQuery = SQLConstants.ClientCertificateConstants.SELECT_CERTIFICATE_FOR_TENANT_ALIAS;
+        } else if (apiIdentifier != null) {
+            selectQuery = SQLConstants.ClientCertificateConstants.SELECT_CERTIFICATE_FOR_TENANT_APIID;
+        }
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            initialAutoCommit = connection.getAutoCommit();
+            connection.setAutoCommit(false);
+            if (apiIdentifier != null) {
+                apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier, connection);
+            }
+            preparedStatement = connection.prepareStatement(selectQuery);
+            preparedStatement.setBoolean(index, false);
+            index++;
+            preparedStatement.setInt(index, tenantId);
+            index++;
+            if (alias != null) {
+                preparedStatement.setString(index, alias);
+                index++;
+            }
+            if (apiIdentifier != null) {
+                preparedStatement.setInt(index, apiId);
+            }
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                Blob blob = resultSet.getBlob("CERTIFICATE");
+                alias = resultSet.getString("ALIAS");
+                ClientCertificateDTO clientCertificateDTO = new ClientCertificateDTO();
+                clientCertificateDTO.setTierName(resultSet.getString("TIER_NAME"));
+                clientCertificateDTO.setAlias(alias);
+                clientCertificateDTO.setCertificate(new String(blob.getBytes(1L, (int) blob.length())));
+                if (apiIdentifier == null) {
+                    apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(resultSet.getString("API_PROVIDER")),
+                            resultSet.getString("API_NAME"), resultSet.getString("API_VERSION"));
+                }
+                clientCertificateDTO.setApiIdentifier(apiIdentifier);
+                clientCertificateDTOS.add(clientCertificateDTO);
+            }
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while searching client certificate details for the tenant " + tenantId, e);
+        } catch (APIManagementException e) {
+            handleException(
+                    "API Management Exception while searching client certificate details for the tenant " + tenantId,
+                    e);
+        } finally {
+            APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
+        }
+        return clientCertificateDTOS;
     }
 
     /**
@@ -348,44 +470,18 @@ public class CertificateMgtDAO {
         return certificateMetadataList;
     }
 
-
-    public List<String> getClientCertificateAlias(APIIdentifier apiIdentifier, int tenantId)
-            throws CertificateManagementException {
-
-        Connection connection = null;
-        String getCertQuery = SQLConstants.ClientCertificateConstants.GET_CERTIFICATES_FOR_API;
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-        List<String> aliasList = new ArrayList<>();
-
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier, connection);
-            preparedStatement = connection.prepareStatement(getCertQuery);
-            preparedStatement.setInt(1, tenantId);
-            preparedStatement.setInt(2, apiId);
-            preparedStatement.setBoolean(3, false);
-            resultSet = preparedStatement.executeQuery();
-
-            while (resultSet.next()) {
-                aliasList.add(resultSet.getString("ALIAS"));
-            }
-        } catch (SQLException e) {
-            handleException("Error while retrieving certificate metadata.", e);
-        } catch (APIManagementException e) {
-            e.printStackTrace();
-        } finally {
-            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
-        }
-        return aliasList;
-    }
-
+    /**
+     * To remove the entries of updated certificates from gateway.
+     *
+     * @param apiIdentifier Identifier of the API.
+     * @param tenantId      ID of the tenant.
+     * @throws CertificateManagementException Certificate Management Exception.
+     */
     public void updateRemovedCertificatesFromGateways(APIIdentifier apiIdentifier, int tenantId)
             throws CertificateManagementException {
         Connection connection = null;
         String getCertQuery = SQLConstants.ClientCertificateConstants.DELETE_CERTIFICATES_FOR_API;
         PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
 
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -400,16 +496,28 @@ public class CertificateMgtDAO {
             connection.commit();
         } catch (SQLException e) {
             handleConnectionRollBack(connection);
-            handleException("Error while retrieving certificate metadata.", e);
+            handleException(
+                    "SQL exception while updating removed certificates from gateway for the api " + apiIdentifier
+                            .toString(), e);
         } catch (APIManagementException e) {
-            e.printStackTrace();
+            handleConnectionRollBack(connection);
+            handleException("API management exception while updating removed certificates from gateway for the api "
+                    + apiIdentifier.toString(), e);
         } finally {
             APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
-            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, null);
         }
     }
 
-    public List<ClientCertificateDTO> getRemovedClientCertificates(APIIdentifier apiIdentifier, int tenantId)
+    /**
+     * To get the set of client certificates tht are removed from publisher, but not removed from the gateway
+     *
+     * @param apiIdentifier Identifier of the API.
+     * @param tenantId      ID of the tenant.
+     * @return set of client certificates.
+     * @throws CertificateManagementException Certificate Management Exception.
+     */
+    public List<ClientCertificateDTO> getDeletedClientCertificates(APIIdentifier apiIdentifier, int tenantId)
             throws CertificateManagementException {
 
         Connection connection = null;
@@ -435,99 +543,18 @@ public class CertificateMgtDAO {
                 clientCertificateDTOList.add(clientCertificateDTO);
             }
         } catch (SQLException e) {
-            handleException("Error while retrieving certificate metadata.", e);
+            handleException(
+                    "SQL exception while retrieving deleted client certificate details for the API " + apiIdentifier
+                            .toString(), e);
         } catch (APIManagementException e) {
-            e.printStackTrace();
+            handleException(
+                    "API Management exception while retrieving deleted client certificate details " + "for the API "
+                            + apiIdentifier.toString(), e);
         } finally {
             APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
         }
         return clientCertificateDTOList;
     }
-
-    public List<ClientCertificateDTO> getClientCertificates(APIIdentifier apiIdentifier, int tenantId)
-            throws CertificateManagementException {
-
-        Connection connection = null;
-        String getCertQuery = SQLConstants.ClientCertificateConstants.GET_CERTIFICATES_FOR_API;
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-        List<ClientCertificateDTO> clientCertificateDTOList = new ArrayList<>();
-
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier, connection);
-            preparedStatement = connection.prepareStatement(getCertQuery);
-            preparedStatement.setInt(1, tenantId);
-            preparedStatement.setInt(2, apiId);
-            preparedStatement.setBoolean(3, false);
-            resultSet = preparedStatement.executeQuery();
-
-            while (resultSet.next()) {
-                Blob blob = resultSet.getBlob("CERTIFICATE");
-                ClientCertificateDTO clientCertificateDTO = new ClientCertificateDTO();
-                clientCertificateDTO.setAlias(resultSet.getString("ALIAS"));
-                clientCertificateDTO.setCertificate(new String(blob.getBytes(1L, (int) blob.length())));
-                clientCertificateDTO.setUniqueIdentifier(resultSet.getString("UNIQUE_IDENTIFIER"));
-                clientCertificateDTO.setTierName(resultSet.getString("TIER_NAME"));
-                clientCertificateDTOList.add(clientCertificateDTO);
-            }
-        } catch (SQLException e) {
-            handleException("Error while retrieving certificate metadata.", e);
-        } catch (APIManagementException e) {
-            e.printStackTrace();
-        } finally {
-            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
-        }
-        return clientCertificateDTOList;
-    }
-
-    /**
-     * Serialize an object and set into a prepared statement as a blob.
-     *
-     * @param prepStmt Prepared statement.
-     * @param value    Object to be saved.
-     * @param index    Index of the prepared statement.
-     * @throws SQLException
-     * @throws IOException
-     */
-    private void setBlobObject(PreparedStatement prepStmt, Object value, int index) throws SQLException, IOException {
-        if (value != null) {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ObjectOutputStream oos = new ObjectOutputStream(baos);
-            oos.writeObject(value);
-            oos.flush();
-            oos.close();
-            InputStream inputStream = new ByteArrayInputStream(baos.toByteArray());
-            prepStmt.setBinaryStream(index, inputStream, inputStream.available());
-        } else {
-            prepStmt.setBinaryStream(index, null, 0);
-        }
-    }
-
-
-    /**
-     * Retun java object from input stream. Used to retrieve blob objects from database.
-     *
-     * @param is Input stream.
-     * @return Java object constructed from the input stream.
-     * @throws IOException
-     * @throws ClassNotFoundException
-     */
-    private Object getBlobObject(InputStream is) throws IOException, ClassNotFoundException {
-        if (is != null) {
-            ObjectInput ois = null;
-            try {
-                ois = new ObjectInputStream(is);
-                return ois.readObject();
-            } finally {
-                if (ois != null) {
-                    ois.close();
-                }
-            }
-        }
-        return null;
-    }
-
 
     /**
      * Method to delete a certificate from the database.
@@ -575,7 +602,6 @@ public class CertificateMgtDAO {
      */
     public boolean deleteClientCertificate(APIIdentifier apiIdentifier, String alias, int tenantId)
             throws CertificateManagementException {
-
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         boolean result = false;
@@ -586,8 +612,10 @@ public class CertificateMgtDAO {
             initialAutoCommit = connection.getAutoCommit();
             connection.setAutoCommit(false);
             int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier, connection);
+            /* If an entry exists already with "Removed" true, remove that particular entry and update the current
+             entry with removed true */
             preparedStatement = connection.prepareStatement(deleteCertQuery);
-            preparedStatement.setInt(1, tenantId);;
+            preparedStatement.setInt(1, tenantId);
             preparedStatement.setInt(2, apiId);
             preparedStatement.setBoolean(3, true);
             preparedStatement.setString(4, alias);
@@ -596,10 +624,10 @@ public class CertificateMgtDAO {
             deleteCertQuery = SQLConstants.ClientCertificateConstants.DELETE_CERTIFICATES;
             preparedStatement = connection.prepareStatement(deleteCertQuery);
             preparedStatement.setBoolean(1, true);
-            preparedStatement.setInt(2, tenantId);;
+            preparedStatement.setInt(2, tenantId);
             preparedStatement.setString(3, alias);
             preparedStatement.setInt(4, apiId);
-            result = preparedStatement.executeUpdate() == 1;
+            result = preparedStatement.executeUpdate() >= 1;
             connection.commit();
         } catch (SQLException e) {
             handleConnectionRollBack(connection);
@@ -615,45 +643,6 @@ public class CertificateMgtDAO {
             APIMgtDBUtil.closeAllConnections(preparedStatement, connection, null);
         }
         return result;
-    }
-
-    public CertificateTierDTO getCertificateSubscriptionTierInformation(APIIdentifier apiIdentifier,
-            String certificateIdentifier) throws CertificateManagementException {
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-        String deleteCertQuery = SQLConstants.ClientCertificateConstants.SELECT_CERTIFICATE_TIER;
-
-        if (APIUtil.isAdvanceThrottlingEnabled()) {
-            deleteCertQuery = SQLConstants.ClientCertificateConstants.SELECT_CERTIFICATE_TIER_ADVANCED;
-        }
-        CertificateTierDTO certificateTierDTO = new CertificateTierDTO();
-
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier, connection);
-            preparedStatement = connection.prepareStatement(deleteCertQuery);
-            preparedStatement.setInt(1, apiId);
-            preparedStatement.setString(2, certificateIdentifier);
-            resultSet = preparedStatement.executeQuery();
-
-            boolean isResultExist = resultSet.next();
-            if (isResultExist) {
-                certificateTierDTO.setTier(resultSet.getString("TIER_NAME"));
-                if (APIUtil.isAdvanceThrottlingEnabled()) {
-                    certificateTierDTO.setSpikeArrestLimit(resultSet.getInt("RATE_LIMIT_COUNT"));
-                    certificateTierDTO.setSpikeArrestUnit(resultSet.getString("RATE_LIMIT_TIME_UNIT"));
-                    certificateTierDTO.setStopOnQuotaReach(resultSet.getBoolean("STOP_ON_QUOTA_REACH"));
-                }
-            }
-        } catch (SQLException e) {
-            handleException("Error while getting certificate level tier details for " + apiIdentifier.toString(), e);
-        } catch (APIManagementException e) {
-            handleException("API Management exception while getting certificate level tier details for " + apiIdentifier
-                    .toString(), e);
-            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
-        }
-        return certificateTierDTO;
     }
 
     /**
@@ -693,8 +682,46 @@ public class CertificateMgtDAO {
         return count;
     }
 
-    public boolean checkWhetherAliasExist(String alias) throws CertificateManagementException {
 
+    /**
+     * Retrieve the number of total client certificates which a tenant has uploaded.
+     *
+     * @param tenantId : The id of the tenant.
+     * @return : The total certificate count of the tenant.
+     * @throws CertificateManagementException :
+     */
+    public int getClientCertificateCount(int tenantId) throws CertificateManagementException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        String clientCertificateCountQuery = SQLConstants.ClientCertificateConstants.CERTIFICATE_COUNT_QUERY;
+        int count = 0;
+        ResultSet resultSet = null;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            preparedStatement = connection.prepareStatement(clientCertificateCountQuery);
+            preparedStatement.setInt(1, tenantId);
+            preparedStatement.setBoolean(2, false);
+            resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                count = resultSet.getInt(1);
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving the client certificate count for tenantId " + tenantId + ".", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
+        }
+        return count;
+    }
+
+    /**
+     * To check whether alias with the given value exist already.
+     *
+     * @param alias Relevant alias.
+     * @return true if the alias exist, false if not.
+     * @throws CertificateManagementException Certificate Management Exception.
+     */
+    public boolean checkWhetherAliasExist(String alias, int tenantId) throws CertificateManagementException {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         String selectCertificateForAlias = SQLConstants.ClientCertificateConstants.SELECT_CERTIFICATE_FOR_ALIAS;
@@ -706,25 +733,30 @@ public class CertificateMgtDAO {
             preparedStatement = connection.prepareStatement(selectCertificateForAlias);
             preparedStatement.setString(1, alias);
             preparedStatement.setBoolean(2, false);
+            preparedStatement.setInt(3, tenantId);
             resultSet = preparedStatement.executeQuery();
-
             if (resultSet.next()) {
                 isExist = true;
+                if (log.isDebugEnabled()) {
+                    log.debug("Alias " + alias + " exist already and uploaded as a client certificate");
+                }
             }
-
             if (!isExist) {
                 selectCertificateForAlias = SQLConstants.CertificateConstants.SELECT_CERTIFICATE_FOR_ALIAS;
+                preparedStatement = connection.prepareStatement(selectCertificateForAlias);
                 preparedStatement.setString(1, alias);
+                preparedStatement.setInt(2, tenantId);
                 resultSet = preparedStatement.executeQuery();
-
                 if (resultSet.next()) {
                     isExist = true;
+                    if (log.isDebugEnabled()) {
+                        log.debug("Alias " + alias + " exist already and uploaded as a certificate for the backend");
+                    }
                 }
             }
         } catch (SQLException e) {
             handleException("Error while retrieving the certificates for alias " + alias + ".", e);
         } finally {
-            APIMgtDBUtil.closeStatement(preparedStatement);
             APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
         }
         return isExist;

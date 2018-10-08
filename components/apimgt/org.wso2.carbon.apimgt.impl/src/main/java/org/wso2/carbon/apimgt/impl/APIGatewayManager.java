@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.gateway.dto.stub.APIData;
 import org.wso2.carbon.apimgt.gateway.dto.stub.ResourceData;
+import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
 import org.wso2.carbon.apimgt.impl.dao.CertificateMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
@@ -42,7 +43,6 @@ import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.user.api.TenantManager;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -232,6 +232,9 @@ public class APIGatewayManager {
             } catch (EndpointAdminException ex) {
                 log.error("Error occurred when endpoint add/update operation" + environmentName, ex);
                 failedEnvironmentsMap.put(environmentName, ex.getMessage());
+            } catch (CertificateManagementException ex) {
+                log.error("Error occurred while adding/updating client certificate in " + environmentName, ex);
+                failedEnvironmentsMap.put(environmentName, ex.getMessage());
             }
         }
         updateRemovedClientCertificates(api, tenantDomain);
@@ -304,6 +307,9 @@ public class APIGatewayManager {
                     failedEnvironmentsMap.put(environmentName, axisFault.getMessage());
                 } catch (EndpointAdminException ex) {
                     log.error("Error occurred when deleting endpoint from gateway" + environmentName, ex);
+                    failedEnvironmentsMap.put(environmentName, ex.getMessage());
+                } catch (CertificateManagementException ex) {
+                    log.error("Error occurred when deleting certificate from gateway" + environmentName, ex);
                     failedEnvironmentsMap.put(environmentName, ex.getMessage());
                 }
             }
@@ -545,89 +551,109 @@ public class APIGatewayManager {
         return APIConstants.APIEndpointSecurityConstants.BASIC_AUTH;
     }
 
-    private void deployClientCertificates(APIGatewayAdminClient client, API api, String tenantDomain) {
-        try {
-            List<ClientCertificateDTO> clientCertificateDTOList = CertificateMgtDAO.getInstance()
-                    .getClientCertificates(api.getId(), getTenantId(tenantDomain));
-            if (clientCertificateDTOList != null) {
-                for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOList) {
-                    client.addCertificate(clientCertificateDTO.getCertificate(), clientCertificateDTO.getAlias());
-                }
+    /**
+     * To deploy client certificate in given API environment.
+     *
+     * @param client       API GatewayAdminClient .
+     * @param api          Relevant API.
+     * @param tenantDomain Tenant domain.
+     * @throws CertificateManagementException Certificate Management Exception.
+     * @throws AxisFault                      AxisFault.
+     */
+    private void deployClientCertificates(APIGatewayAdminClient client, API api, String tenantDomain)
+            throws CertificateManagementException, AxisFault {
+        if (!CertificateManagerImpl.getInstance().isClientCertificateBasedAuthenticationConfigured()) {
+            return;
+        }
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        List<ClientCertificateDTO> clientCertificateDTOList = CertificateMgtDAO.getInstance()
+                .getClientCertificates(tenantId, null, api.getId());
+        if (clientCertificateDTOList != null) {
+            for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOList) {
+                client.addClientCertificate(clientCertificateDTO.getCertificate(),
+                        clientCertificateDTO.getAlias() + "_" + tenantId);
             }
-        } catch (CertificateManagementException e) {
-            e.printStackTrace();
-        } catch (AxisFault axisFault) {
-            axisFault.printStackTrace();
         }
     }
 
-    private void updateClientCertificates(APIGatewayAdminClient client, API api, String tenantDomain) {
-        int tenantId = getTenantId(tenantDomain);
-        try {
-            List<ClientCertificateDTO> clientCertificateDTOList = CertificateMgtDAO.getInstance()
-                    .getRemovedClientCertificates(api.getId(), tenantId);
-            if (clientCertificateDTOList != null) {
-                for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOList) {
-                    client.deleteCertificate(clientCertificateDTO.getAlias());
-                }
+    /**
+     * To update client certificate in relevant API gateway environment.
+     *
+     * @param client       API Gateway admi client.
+     * @param api          Relevant API.
+     * @param tenantDomain Tenant domain.
+     */
+    private void updateClientCertificates(APIGatewayAdminClient client, API api, String tenantDomain)
+            throws CertificateManagementException, AxisFault {
+        if (!CertificateManagerImpl.getInstance().isClientCertificateBasedAuthenticationConfigured()) {
+            return;
+        }
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        List<ClientCertificateDTO> clientCertificateDTOList = CertificateMgtDAO.getInstance()
+                .getDeletedClientCertificates(api.getId(), tenantId);
+        if (clientCertificateDTOList != null) {
+            for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOList) {
+                client.deleteClientCertificate(clientCertificateDTO.getAlias() + "_" + tenantId);
             }
-            clientCertificateDTOList = CertificateMgtDAO.getInstance()
-                    .getClientCertificates(api.getId(), tenantId);
-            if (clientCertificateDTOList != null) {
-                for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOList) {
-                    client.addCertificate(clientCertificateDTO.getCertificate(), clientCertificateDTO.getAlias());
-                }
+        }
+        clientCertificateDTOList = CertificateMgtDAO.getInstance().getClientCertificates(tenantId, null, api.getId());
+        if (clientCertificateDTOList != null) {
+            for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOList) {
+                client.addClientCertificate(clientCertificateDTO.getCertificate(),
+                        clientCertificateDTO.getAlias() + "_" + tenantId);
             }
-        } catch (CertificateManagementException e) {
-            e.printStackTrace();
-        } catch (AxisFault axisFault) {
-            axisFault.printStackTrace();
         }
     }
 
+    /**
+     * To update the database instance with the successfully removed client certificates from teh gateway.
+     *
+     * @param api          Relevant API related with teh removed certificate.
+     * @param tenantDomain Tenant domain of the API.
+     */
     private void updateRemovedClientCertificates(API api, String tenantDomain) {
+        if (!CertificateManagerImpl.getInstance().isClientCertificateBasedAuthenticationConfigured()) {
+            return;
+        }
         try {
             CertificateMgtDAO.getInstance().updateRemovedCertificatesFromGateways(api.getId(),
-                    getTenantId(tenantDomain));
+                    APIUtil.getTenantIdFromTenantDomain(tenantDomain));
+            /* The flow does not need to be blocked, as this failure do not related with updating client certificates
+             in gateway, rather updating in database. There is no harm in database having outdated certificate
+             information.*/
         } catch (CertificateManagementException e) {
-            e.printStackTrace();
+            log.error("Certificate Management Exception while trying to update the remove certificate from gateways "
+                    + "for the api " + api.getId() + " for the tenant domain " + tenantDomain, e);
         }
     }
 
-    private int getTenantId(String tenantDomain) {
-        int tenantId = MultitenantConstants.SUPER_TENANT_ID;
-        if (StringUtils.isNotEmpty(tenantDomain)) {
-            TenantManager tenantManager = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager();
-            try {
-                tenantId = tenantManager.getTenantId(tenantDomain);
-            } catch (UserStoreException e) {
-                e.printStackTrace();
+    /**
+     * To undeploy the client certificates from the gateway environment.
+     *
+     * @param client       APIGatewayAdmin Client.
+     * @param api          Relevant API particular certificate is related with.
+     * @param tenantDomain Tenant domain of the API.
+     * @throws CertificateManagementException Certificate Management Exception.
+     * @throws AxisFault                      AxisFault.
+     */
+    private void unDeployClientCertificates(APIGatewayAdminClient client, API api, String tenantDomain)
+            throws CertificateManagementException, AxisFault {
+        if (!CertificateManagerImpl.getInstance().isClientCertificateBasedAuthenticationConfigured()) {
+            return;
+        }
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        List<ClientCertificateDTO> clientCertificateDTOList = CertificateMgtDAO.getInstance()
+                .getClientCertificates(tenantId, null, api.getId());
+        if (clientCertificateDTOList != null) {
+            for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOList) {
+                client.deleteClientCertificate(clientCertificateDTO.getAlias() + "_" + tenantId);
             }
         }
-        return tenantId;
-    }
-
-    private void unDeployClientCertificates(APIGatewayAdminClient client, API api, String tenantDomain) {
-        try {
-            int tenantId = getTenantId(tenantDomain);
-            List<ClientCertificateDTO> clientCertificateDTOList = CertificateMgtDAO.getInstance()
-                    .getClientCertificates(api.getId(), tenantId);
-            if (clientCertificateDTOList != null) {
-                for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOList) {
-                    client.deleteCertificate(clientCertificateDTO.getAlias());
-                }
+        clientCertificateDTOList = CertificateMgtDAO.getInstance().getDeletedClientCertificates(api.getId(), tenantId);
+        if (clientCertificateDTOList != null) {
+            for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOList) {
+                client.deleteClientCertificate(clientCertificateDTO.getAlias() + "_" + tenantId);
             }
-            clientCertificateDTOList = CertificateMgtDAO.getInstance()
-                    .getRemovedClientCertificates(api.getId(), tenantId);
-            if (clientCertificateDTOList != null) {
-                for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOList) {
-                    client.deleteCertificate(clientCertificateDTO.getAlias());
-                }
-            }
-        } catch (CertificateManagementException e) {
-            e.printStackTrace();
-        } catch (AxisFault axisFault) {
-            axisFault.printStackTrace();
         }
     }
 
@@ -752,7 +778,6 @@ public class APIGatewayManager {
             }
         }
     }
-
 
     /**
 	 * Update the custom sequences in gateway

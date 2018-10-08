@@ -29,7 +29,6 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.rest.RESTUtils;
 import org.apache.synapse.rest.Resource;
 import org.apache.synapse.rest.dispatch.RESTDispatcher;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyDataStore;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.WSAPIKeyDataStore;
@@ -37,7 +36,10 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.thrift.ThriftAPIDataStor
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.dto.*;
+import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.ResourceInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -320,11 +322,6 @@ public class APIKeyValidator {
 
         return dataStore.getAPIKeyData(context, apiVersion, apiKey, authenticationScheme, clientDomain,
                 matchingResource, httpVerb);
-    }
-
-    protected CertificateTierDTO getCertificateTierInformation(APIIdentifier apiIdentifier,
-            String certificateIdentifier) throws APISecurityException {
-        return dataStore.getCertificateTierInformation(apiIdentifier, certificateIdentifier);
     }
 
     public void cleanup() {

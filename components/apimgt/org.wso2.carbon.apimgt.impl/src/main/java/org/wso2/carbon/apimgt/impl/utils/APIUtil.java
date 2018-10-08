@@ -259,7 +259,6 @@ public final class APIUtil {
     public static final String HOST_NAME_VERIFIER = "httpclient.hostnameVerifier";
     public static String multiGrpAppSharing = null;
 
-
     //Need tenantIdleTime to check whether the tenant is in idle state in loadTenantConfig method
     static {
         tenantIdleTimeMillis =
@@ -1078,6 +1077,10 @@ public final class APIUtil {
             //attaching micro-gateway labels to the API
             attachLabelsToAPIArtifact(artifact, api, tenantDomain);
 
+            String apiSecurity = artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY);
+            if (apiSecurity != null && !apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+                artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, "");
+            }
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + api.getId().getApiName();
             log.error(msg, e);
@@ -4345,7 +4348,7 @@ public final class APIUtil {
     public static int getTenantIdFromTenantDomain(String tenantDomain) {
         RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
 
-        if (realmService == null) {
+        if (realmService == null || tenantDomain == null) {
             return MultitenantConstants.SUPER_TENANT_ID;
         }
 

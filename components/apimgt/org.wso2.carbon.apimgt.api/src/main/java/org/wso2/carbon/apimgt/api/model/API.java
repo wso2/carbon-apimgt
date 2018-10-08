@@ -127,6 +127,7 @@ public class API implements Serializable {
     // Used for endpoint environments configured with non empty URLs
     private Set<String> environmentList;
 
+    // API security at the gateway level.
     private String apiSecurity = "oauth2";
 
     public void setEnvironmentList(Set<String> environmentList) {

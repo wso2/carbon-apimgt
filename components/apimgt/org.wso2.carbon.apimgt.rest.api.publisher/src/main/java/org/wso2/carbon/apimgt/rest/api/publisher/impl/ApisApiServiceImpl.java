@@ -212,7 +212,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             if (body.getContext().endsWith("/")) {
                 RestApiUtil.handleBadRequest("Context cannot end with '/' character", log);
             }
-
             if (apiProvider.isApiNameWithDifferentCaseExist(body.getName())) {
                 RestApiUtil.handleBadRequest("Error occurred while adding API. API with name " + body.getName()
                         + " already exists.", log);

@@ -243,6 +243,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                     apiLevelThrottledTriggered = true;
                 }
 
+
                 //If verbInfo is present then only we will do resource level throttling
                 if (APIConstants.UNLIMITED_TIER.equalsIgnoreCase(verbInfoDTO.getThrottling()) && !apiLevelThrottledTriggered) {
                     //If unlimited tier throttling will not apply at resource level and pass it

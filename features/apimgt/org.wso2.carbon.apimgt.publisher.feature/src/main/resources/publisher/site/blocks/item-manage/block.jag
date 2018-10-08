@@ -31,7 +31,13 @@ jagg.block("item-manage", {
     result = mod.isDataPublishingEnabled();
     isDataPublishingEnabled = result.isDataPublishingEnabled;
 
-    var certificates = mod.getClientCertificates(name, version, provider).certificates;
+    var isClientCertificateBasedAuthenticationEnabled = mod.isClientCertificateBasedAuthenticationConfigured().isConfigured;
+    var certificates = [];
+
+    if (isClientCertificateBasedAuthenticationEnabled) {
+        certificates = mod.getClientCertificates(name, version, provider).certificates;
+    }
+
         return {
             "api":api,
             "isPermitted":isPermitted,
@@ -41,7 +47,8 @@ jagg.block("item-manage", {
             "isDataPublishingEnabled":isDataPublishingEnabled,
             "lcStatus":lcStatus,
             "wfStatus":apiWFstatus,
-            "certificates" : certificates
+            "certificates" : certificates,
+            "isClientCertificateBasedAuthenticationEnabled" : isClientCertificateBasedAuthenticationEnabled
         }
     }
 

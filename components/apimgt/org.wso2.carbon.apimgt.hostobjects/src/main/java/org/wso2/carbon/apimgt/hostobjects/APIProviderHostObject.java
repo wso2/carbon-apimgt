@@ -51,7 +51,13 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.mozilla.javascript.*;
+import org.mozilla.javascript.ConsString;
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.Function;
+import org.mozilla.javascript.NativeArray;
+import org.mozilla.javascript.NativeObject;
+import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.ScriptableObject;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -86,8 +92,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.UserAwareAPIProvider;
-import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
-import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
@@ -426,11 +430,11 @@ public class APIProviderHostObject extends ScriptableObject {
             properties = (JSONObject) parser.parse(additionalProperties);
         }
         String authorizationHeader = (String) apiData.get("authorizationHeader", apiData);
-        String gatewaySecurity = APIConstants.DEFAULT_GATEWAY_SECURITY_OAUTH2;
-        Object gatewaySecurityObject = apiData.get("gatewaySecurity", apiData);
+        String apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
+        Object apiSecurityObject = apiData.get("apiSecurity", apiData);
 
-        if (gatewaySecurityObject instanceof String || gatewaySecurityObject instanceof ConsString) {
-            gatewaySecurity = String.valueOf(apiData.get("gatewaySecurity", apiData));
+        if (apiSecurityObject instanceof String || apiSecurityObject instanceof ConsString) {
+            apiSecurity = String.valueOf(apiSecurityObject);
         }
         int cacheTimeOut = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
         if (APIConstants.ENABLED.equalsIgnoreCase(responseCache)) {
@@ -518,7 +522,7 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         api.setAdditionalProperties(properties);
         api.setAuthorizationHeader(authorizationHeader);
-        api.setApiSecurity(gatewaySecurity);
+        api.setApiSecurity(apiSecurity);
 
         Set<Tier> availableTier = new HashSet<Tier>();
         String[] tierNames;
@@ -2772,8 +2776,8 @@ public class APIProviderHostObject extends ScriptableObject {
                 myn.put(24, myn, checkValue(api.getEndpointUTPassword()));
                 myn.put(25, myn, checkValue(Boolean.toString(api.isEndpointSecured())));
                 myn.put(26, myn, APIUtil.replaceEmailDomainBack(checkValue(api.getId().getProviderName())));
-                myn.put(27, myn, checkTransport("http", api.getTransports()));
-                myn.put(28, myn, checkTransport("https", api.getTransports()));
+                myn.put(27, myn, checkValue("http", api.getTransports()));
+                myn.put(28, myn, checkValue("https", api.getTransports()));
                 Set<APIStore> storesSet = apiProvider.getExternalAPIStores(api.getId());
                 if (storesSet != null && storesSet.size() != 0) {
                     NativeArray apiStoresArray = new NativeArray(0);
@@ -2878,9 +2882,8 @@ public class APIProviderHostObject extends ScriptableObject {
                     }
                     myn.put(57, myn, apiLabelsArray);
                 }
-                myn.put(58, myn, checkTransport("oauth2", api.getApiSecurity()));
-                myn.put(59, myn, checkTransport("mutualssl", api.getApiSecurity()));
-
+                myn.put(58, myn, checkValue("oauth2", api.getApiSecurity()));
+                myn.put(59, myn, checkValue("mutualssl", api.getApiSecurity()));
             } else {
                 handleException("Cannot find the requested API- " + apiName +
                         "-" + version);
@@ -3071,10 +3074,10 @@ public class APIProviderHostObject extends ScriptableObject {
         }
     }
 
-    private static String checkTransport(String compare, String transport) throws APIManagementException {
-        if (transport != null) {
+    private static String checkValue(String compare, String value) throws APIManagementException {
+        if (value != null) {
             List<String> transportList = new ArrayList<String>();
-            transportList.addAll(Arrays.asList(transport.split(",")));
+            transportList.addAll(Arrays.asList(value.split(",")));
             if (transportList.contains(compare)) {
                 return "checked";
             } else {
@@ -5209,11 +5212,9 @@ public class APIProviderHostObject extends ScriptableObject {
     public static int jsFunction_uploadClientCertificate(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException {
         if ((args == null) || (args.length != 7) || !isStringValues(args)) {
-            handleException(
-                    "Invalid number of arguments. Expect User Name, api name, version, provider, Alias, Endpoint "
-                            + "and Certificate String .");
+            handleException("Invalid number of arguments. Expect user Name, api name, version, provider, alias "
+                    + "certificate string and tier name.");
         }
-
         String userName = (String) args[0];
         String apiName = (String) args[1];
         String version = (String) args[2];
@@ -5221,9 +5222,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String alias = (String) args[4];
         String certificate = (String) args[5];
         String tierName = (String) args[6];
-
         APIProvider apiProvider = getAPIProvider(thisObj);
-
         APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), apiName, version);
         return apiProvider.addClientCertificate(userName, apiIdentifier, certificate, alias, tierName);
     }
@@ -5240,7 +5239,6 @@ public class APIProviderHostObject extends ScriptableObject {
     public static int jsFunction_deleteCertificate(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException {
         ResponseCode responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
-        CertificateManager certificateManager = new CertificateManagerImpl();
         if ((args == null) || (args.length != 3) || !isStringValues(args)) {
             handleException("Invalid number of arguments. Expect User Name, Alias and Endpoint.");
         }
@@ -5262,20 +5260,18 @@ public class APIProviderHostObject extends ScriptableObject {
      * @param funObj  Function object
      * @return : True if deleting certificate is successful. False otherwise.
      */
-    public static int jsFunction_deleteClientCertificate(Context cx, Scriptable thisObj, Object[] args,
-            Function funObj) throws APIManagementException {
+    public static int jsFunction_deleteClientCertificate(Context cx, Scriptable thisObj, Object[] args, Function funObj)
+            throws APIManagementException {
         ResponseCode responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
-        CertificateManager certificateManager = new CertificateManagerImpl();
         if ((args == null) || (args.length != 5) || !isStringValues(args)) {
-            handleException("Invalid number of arguments. Expect User Name, Alias and Endpoint.");
+            handleException("Invalid number of arguments. Expected arguments username, alias, apiname, version and "
+                    + "provider.");
         }
-
         String userName = (String) args[0];
         String alias = (String) args[1];
         String apiName = (String) args[2];
         String apiVersion = (String) args[3];
         String providerName = (String) args[4];
-
         APIProvider apiProvider = getAPIProvider(thisObj);
         return apiProvider
                 .deleteClientCertificate(userName, new APIIdentifier(providerName, apiName, apiVersion), alias);
@@ -5295,7 +5291,6 @@ public class APIProviderHostObject extends ScriptableObject {
         NativeArray certificateMetaDataArray = new NativeArray(0);
 
         NativeObject certificateMetaData = new NativeObject();
-        CertificateManager certificateManager = new CertificateManagerImpl();
         if ((args == null) || (args.length != 2) || !isStringValues(args)) {
             log.error("Invalid arguments. Expect User Name and Endpoint");
             return null;
@@ -5322,37 +5317,41 @@ public class APIProviderHostObject extends ScriptableObject {
         return certificateMetaDataArray;
     }
 
+    /**
+     * To get the client certificates related with an API.
+     *
+     * @param cx      Context.
+     * @param thisObj Scriptable object
+     * @param args    Arguments.
+     * @param funObj  Function object.
+     * @return Array of certificates uploaded against API.
+     * @throws APIManagementException API Management Exception.
+     */
     public static NativeArray jsFunction_getClientCertificates(Context cx, Scriptable thisObj, Object[] args,
-            Function funObj)
-            throws APIManagementException {
-        NativeArray clientCertificateMetaData = new NativeArray(0);
-
-        NativeObject certificateMetaData = new NativeObject();
-        CertificateManager certificateManager = new CertificateManagerImpl();
+            Function funObj) throws APIManagementException {
         if ((args == null) || (args.length != 4) || !isStringValues(args)) {
             log.error("Invalid arguments. Expect User Name and Endpoint");
             return null;
         }
-
         String userName = (String) args[0];
         String apiName = (String) args[1];
         String provider = (String) args[2];
-        String apiVersion = (String)args[3];
-
+        String apiVersion = (String) args[3];
+        NativeArray clientCertificateMetaData = new NativeArray(0);
+        NativeObject certificateMetaData = new NativeObject();
         APIProvider apiProvider = getAPIProvider(thisObj);
         APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), apiName, apiVersion);
-        List<ClientCertificateDTO> clientCertificateDTOList = apiProvider.getClientCertificates(userName, apiIdentifier);
-
         String tenantDomain = MultitenantUtils.getTenantDomain(userName);
-        int i = 0;
-
+        List<ClientCertificateDTO> clientCertificateDTOList = apiProvider
+                .searchClientCertificates(APIUtil.getTenantIdFromTenantDomain(tenantDomain), null, apiIdentifier);
+        int index = 0;
         if (clientCertificateDTOList != null) {
             for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOList) {
                 NativeObject obj = new NativeObject();
                 obj.put(ALIAS, obj, clientCertificateDTO.getAlias());
                 obj.put(TIER, obj, clientCertificateDTO.getTierName());
-                clientCertificateMetaData.put(i, clientCertificateMetaData, obj);
-                i++;
+                clientCertificateMetaData.put(index, clientCertificateMetaData, obj);
+                index++;
             }
         }
         return clientCertificateMetaData;
@@ -5367,6 +5366,21 @@ public class APIProviderHostObject extends ScriptableObject {
     public static boolean jsFunction_isConfigured(Context cx, Scriptable thisObj, Object[] args, Function funObj) {
         APIProvider apiProvider = getAPIProvider(thisObj);
         return apiProvider.isConfigured();
+    }
+
+    /**
+     * This method check the whether the client certificate based authentication is enabled in AM level.
+     *
+     * @param cx      Context.
+     * @param thisObj Scriptable object.
+     * @param args    Arguments.
+     * @param funObj  Function Object.
+     * @return true if the client certificate based authentication is enabled in AM level.
+     */
+    public static boolean jsFunction_isClientCertificateBasedAuthenticationConfigured(Context cx, Scriptable thisObj,
+            Object[] args, Function funObj) {
+        APIProvider apiProvider = getAPIProvider(thisObj);
+        return apiProvider.isClientCertificateBasedAuthenticationConfigured();
     }
 
     /**

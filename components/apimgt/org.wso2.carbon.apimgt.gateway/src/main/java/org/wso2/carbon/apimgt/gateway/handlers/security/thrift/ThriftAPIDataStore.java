@@ -19,14 +19,12 @@ package org.wso2.carbon.apimgt.gateway.handlers.security.thrift;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyDataStore;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.CertificateTierDTO;
 
 import java.util.ArrayList;
 
@@ -68,30 +66,6 @@ public class ThriftAPIDataStore implements APIKeyDataStore{
             }
         }
     }
-
-    public CertificateTierDTO getCertificateTierInformation(APIIdentifier apiIdentifier, String certificateIdentifier)
-            throws APISecurityException {
-        ThriftKeyValidatorClient client = null;
-        try {
-            client = clientPool.get();
-            return client.getCertificateTierInformation(apiIdentifier, certificateIdentifier);
-        } catch (Exception e) {
-            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
-                    "Error while accessing backend services for API key validation", e);
-        } finally {
-            try {
-                if (client != null) {
-                    clientPool.release(client);
-                }
-            } catch (Exception exception) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Releasing client from client pool caused an exception = " + exception.getMessage());
-                }
-            }
-        }
-    }
-
-
     public ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion)
             throws APISecurityException {
         ThriftKeyValidatorClient client = null;

@@ -52,7 +52,7 @@ public class SubscriptionsApi  {
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Get all Subscriptions", notes = "This operation can be used to retrieve a list of subscriptions of the user associated with the provided access token. This operation is capable of\n\n1. Retrieving all subscriptions for the user's APIs.\n`GET https://localhost:9443/api/am/publisher/v0.13/subscriptions`\n\n2. Retrieving subscriptions for a specific API.\n`GET https://localhost:9443/api/am/publisher/v0.13/subscriptions?apiId=c43a325c-260b-4302-81cb-768eafaa3aed`\n", response = SubscriptionListDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "Get all Subscriptions", notes = "This operation can be used to retrieve a list of subscriptions of the user associated with the provided access token. This operation is capable of\n\n1. Retrieving all subscriptions for the user's APIs.\n`GET https://localhost:9443/api/am/publisher/v0.14/subscriptions`\n\n2. Retrieving subscriptions for a specific API.\n`GET https://localhost:9443/api/am/publisher/v0.14/subscriptions?apiId=c43a325c-260b-4302-81cb-768eafaa3aed`\n", response = SubscriptionListDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nSubscription list returned.\n"),
         

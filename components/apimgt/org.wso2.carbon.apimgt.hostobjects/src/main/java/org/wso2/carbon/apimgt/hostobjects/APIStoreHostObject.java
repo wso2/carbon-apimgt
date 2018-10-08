@@ -146,7 +146,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
     // The zero-argument constructor used for create instances for runtime
     public APIStoreHostObject() throws APIManagementException {
-        //apiConsumer = APIManagerFactory.getCertificateManagerInstance().getAPIConsumer();
+        //apiConsumer = APIManagerFactory.getInstance().getAPIConsumer();
     }
 
     public APIStoreHostObject(String loggedUser) throws APIManagementException {
@@ -2051,6 +2051,7 @@ public class APIStoreHostObject extends ScriptableObject {
                         row.put("type", row, api.getType());
                         row.put("additionalProperties", row, api.getAdditionalProperties().toJSONString());
                         row.put("authorizationHeader", row, api.getAuthorizationHeader());
+                        row.put("apiSecurity", row, api.getApiSecurity());
 
                         //put the labels to the native array which represents the API
                         List<Label> labelList = api.getGatewayLabels();
