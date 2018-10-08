@@ -46,7 +46,7 @@ export default class DocTableHeader extends React.Component {
      *
      * @inheritdoc
      * @returns {React.Component} @inheritdoc
-     * @memberof APITableHeader
+     * @memberof DocTableHeader
      */
     render() {
         const {
