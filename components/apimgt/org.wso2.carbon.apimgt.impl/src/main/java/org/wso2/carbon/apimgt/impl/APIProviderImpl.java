@@ -3515,6 +3515,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_INSEQUENCE_LOCATION);
                 if (inSeqCollection != null) {
                     String[] inSeqChildPaths = inSeqCollection.getChildren();
+                    Arrays.sort(inSeqChildPaths);
                     for (String inSeqChildPath : inSeqChildPaths) {
                         Resource inSequence = registry.get(inSeqChildPath);
                         try {
@@ -3534,6 +3535,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         (org.wso2.carbon.registry.api.Collection) registry.get(customInSeqFileLocation);
                 if (inSeqCollection != null) {
                     String[] inSeqChildPaths = inSeqCollection.getChildren();
+                    Arrays.sort(inSeqChildPaths);
                     for (String inSeqChildPath : inSeqChildPaths) {
                         Resource inSequence = registry.get(inSeqChildPath);
                         try {
@@ -3586,6 +3588,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION);
                 if (outSeqCollection != null) {
                     String[] outSeqChildPaths = outSeqCollection.getChildren();
+                    Arrays.sort(outSeqChildPaths);
                     for (String childPath : outSeqChildPaths) {
                         Resource outSequence = registry.get(childPath);
                         try {
@@ -3605,6 +3608,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         (org.wso2.carbon.registry.api.Collection) registry.get(customOutSeqFileLocation);
                 if (outSeqCollection != null) {
                     String[] outSeqChildPaths = outSeqCollection.getChildren();
+                    Arrays.sort(outSeqChildPaths);
                     for (String outSeqChildPath : outSeqChildPaths) {
                         Resource outSequence = registry.get(outSeqChildPath);
                         try {
@@ -3643,6 +3647,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_INSEQUENCE_LOCATION);
                 if (inSeqCollection != null) {
                     String[] inSeqChildPaths = inSeqCollection.getChildren();
+                    Arrays.sort(inSeqChildPaths);
                     for (String inSeqChildPath : inSeqChildPaths) {
                         Resource inSequence = registry.get(inSeqChildPath);
                         try {
@@ -3688,6 +3693,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION);
                 if (outSeqCollection != null) {
                     String[] outSeqChildPaths = outSeqCollection.getChildren();
+                    Arrays.sort(outSeqChildPaths);
                     for (String outSeqChildPath : outSeqChildPaths) {
                         Resource outSequence = registry.get(outSeqChildPath);
                         try {
@@ -3733,6 +3739,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_FAULTSEQUENCE_LOCATION);
                 if (faultSeqCollection != null) {
                     String[] faultSeqChildPaths = faultSeqCollection.getChildren();
+                    Arrays.sort(faultSeqChildPaths);
                     for (String faultSeqChildPath : faultSeqChildPaths) {
                         Resource outSequence = registry.get(faultSeqChildPath);
                         try {
@@ -3792,6 +3799,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 APIConstants.API_CUSTOM_FAULTSEQUENCE_LOCATION);
                 if (faultSeqCollection != null) {
                     String[] faultSeqChildPaths = faultSeqCollection.getChildren();
+                    Arrays.sort(faultSeqChildPaths);
                     for (String faultSeqChildPath : faultSeqChildPaths) {
                         Resource outSequence = registry.get(faultSeqChildPath);
                         try {
@@ -3814,6 +3822,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         (org.wso2.carbon.registry.api.Collection) registry.get(customOutSeqFileLocation);
                 if (faultSeqCollection != null) {
                     String[] faultSeqChildPaths = faultSeqCollection.getChildren();
+                    Arrays.sort(faultSeqChildPaths);
                     for (String faultSeqChildPath : faultSeqChildPaths) {
                         Resource faultSequence = registry.get(faultSeqChildPath);
                         try {
@@ -3881,6 +3890,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         .get(customInSeqFileLocation);
                 if (inSeqCollection != null) {
                     String[] inSeqChildPaths = inSeqCollection.getChildren();
+                    Arrays.sort(inSeqChildPaths);
                     for (String inSeqChildPath : inSeqChildPaths) {
                         Resource outSequence = registry.get(inSeqChildPath);
                         try {
@@ -3946,6 +3956,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         (org.wso2.carbon.registry.api.Collection) registry.get(customOutSeqFileLocation);
                 if (outSeqCollection != null) {
                     String[] outSeqChildPaths = outSeqCollection.getChildren();
+                    Arrays.sort(outSeqChildPaths);
                     for (String outSeqChildPath : outSeqChildPaths) {
                         Resource outSequence = registry.get(outSeqChildPath);
                         try {
@@ -4010,6 +4021,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         .get(customOutSeqFileLocation);
                 if (faultSeqCollection != null) {
                     String[] faultSeqChildPaths = faultSeqCollection.getChildren();
+                    Arrays.sort(faultSeqChildPaths);
                     for (String faultSeqChildPath : faultSeqChildPaths) {
                         Resource faultSequence = registry.get(faultSeqChildPath);
                         try {

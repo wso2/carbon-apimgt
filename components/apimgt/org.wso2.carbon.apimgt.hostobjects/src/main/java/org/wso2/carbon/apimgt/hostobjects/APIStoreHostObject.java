@@ -139,6 +139,7 @@ public class APIStoreHostObject extends ScriptableObject {
     private static final String httpsPort = "mgt.transport.https.port";
     private static final String hostName = "carbon.local.ip";
     private static final String DEFAULT_TOKEN_TYPE = "DEFAULT";
+    private static final String adminAppName = "AdminApp";
 
     private APIConsumer apiConsumer;
 
@@ -599,6 +600,12 @@ public class APIStoreHostObject extends ScriptableObject {
 
         String username = (String) args[0];
         String password = (String) args[1];
+        String appContext = "";
+
+        if (args.length == 3) {
+            appContext = (String) args[2];
+        }
+
         ConfigurationContext configurationContext = ServiceReferenceHolder.getInstance().getAxis2ConfigurationContext();
         APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
         String url = config.getFirstProperty(APIConstants.AUTH_MANAGER_URL);
@@ -648,8 +655,11 @@ public class APIStoreHostObject extends ScriptableObject {
             } else {
                 usernameWithDomain = usernameWithDomain + APIConstants.EMAIL_DOMAIN_SEPARATOR + tenantDomain;
             }
-            boolean authorized =
-                    APIUtil.checkPermissionQuietly(usernameWithDomain, APIConstants.Permissions.API_SUBSCRIBE);
+
+            boolean authorized = true;
+            if (!adminAppName.equals(appContext)) {
+                authorized = APIUtil.checkPermissionQuietly(usernameWithDomain, APIConstants.Permissions.API_SUBSCRIBE);
+            }
             boolean displayPublishUrlFromStore = false;
             if (config != null) {
                 displayPublishUrlFromStore = Boolean.parseBoolean(config.getFirstProperty(APIConstants.SHOW_API_PUBLISHER_URL_FROM_STORE));
@@ -3124,8 +3134,14 @@ public class APIStoreHostObject extends ScriptableObject {
             apiObj.put("hasMultipleEndpoints", apiObj, String.valueOf(api.getSandboxUrl() != null));
             apisArray.put(apisArray.getIds().length, apisArray, apiObj);
         } catch (APIManagementException e) {
-            // we didn't throw this exception if registry corruption occured as mentioned in https://wso2.org/jira/browse/APIMANAGER-2046
-            log.error("Error while obtaining application metadata", e);
+            if (APIUtil.isDueToAuthorizationFailure(e)) {
+                String message =
+                        "Failed to access the API " + subscribedAPI.getApiId() + " due to an authorization failure";
+                log.info(message);
+            } else {
+                // we didn't throw this exception if registry corruption occured as mentioned in https://wso2.org/jira/browse/APIMANAGER-2046
+                log.error("Error while retrieving API " + subscribedAPI.getApiId(), e);
+            }
         }
     }
 
@@ -3459,7 +3475,24 @@ public class APIStoreHostObject extends ScriptableObject {
 
                 int i = 0;
                 for (SubscribedAPI subscribedAPI : subscribedAPIs) {
-                    API api = apiConsumer.getLightweightAPI(subscribedAPI.getApiId());
+                    API api = null;
+                    try {
+                        api = apiConsumer.getLightweightAPI(subscribedAPI.getApiId());
+                    } catch (APIManagementException e) {
+                        if (APIUtil.isDueToAuthorizationFailure(e)) {
+                            String message =
+                                    "user " + username + " failed to access the API " + subscribedAPI.getApiId()
+                                            + " due to an authorization failure";
+                            log.info(message);
+                            continue;
+                        } else {
+                            //This is an unexpected failure
+                            String message =
+                                    "Failed to retrieve the API " + subscribedAPI.getApiId() + " to check user "
+                                            + username + " has access to the API";
+                            throw new APIManagementException(message, e);
+                        }
+                    }
                     NativeObject row = new NativeObject();
                     row.put("apiName", row, subscribedAPI.getApiId().getApiName());
                     row.put("apiVersion", row, subscribedAPI.getApiId().getVersion());

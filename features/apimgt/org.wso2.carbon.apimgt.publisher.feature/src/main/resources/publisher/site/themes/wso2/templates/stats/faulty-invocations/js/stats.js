@@ -17,21 +17,25 @@ currentLocation=window.location.pathname;
 
                     //day picker
                     $('#today-btn').on('click',function(){
+                        currentDay = getDate();
                         getDateTime(currentDay,currentDay-86400000);
                     });
 
                     //hour picker
                     $('#hour-btn').on('click',function(){
+                        currentDay = getDate();
                         getDateTime(currentDay,currentDay-3600000);
                     })
 
                     //week picker
                     $('#week-btn').on('click',function(){
+                        currentDay = getDate();
                         getDateTime(currentDay,currentDay-604800000);
                     })
 
                     //month picker
                     $('#month-btn').on('click',function(){
+                        currentDay = getDate();
                         getDateTime(currentDay,currentDay-(604800000*4));
                     });
 
@@ -150,8 +154,8 @@ var drawAPIResponseFaultCountTable = function(from,to){
 }
 
 var drawAPIResponseFaultCountChart = function(from,to){
-    var fromDate = from;
-    var toDate = to;
+    var fromDate = convertTimeStringUTC(from);
+    var toDate = convertTimeStringUTC(to);
     jagg.post("/site/blocks/stats/faulty-invocations/ajax/stats.jag", { action:"getAPIResponseFaultCount",currentLocation:currentLocation,fromDate:fromDate,toDate:toDate,apiFilter:apiFilter },
         function (json) {
             $('#spinner').hide();

@@ -60,18 +60,21 @@ $( document ).ready(function() {
       renderGraph(from,to);        
     });
     $('#today-btn').on('click', function () {
+      currentDay = getDate();
       from = currentDay - 86400000;
       to = currentDay;
       renderGraph(from,to);
       btnActiveToggle(this);
     });
        $('#week-btn').on('click', function () {
+        currentDay = getDate();
         from = currentDay - 604800000;
         to = currentDay;
         renderGraph(from,to);         
        btnActiveToggle(this);
       });
        $('#month-btn').on('click', function () {
+        currentDay = getDate();
         from = currentDay - (604800000 * 4);
         to = currentDay;
         renderGraph(from,to);        
@@ -148,8 +151,8 @@ var populateVersionList = function(apiName,compare){
 
 function renderGraph(fromDate,toDate){
   if (statsEnabled) {
-   var toDateString = convertTimeString(toDate);
-    var fromDateString = convertTimeString(fromDate);
+   var toDateString = convertTimeStringUTC(toDate);
+    var fromDateString = convertTimeStringUTC(fromDate);
     getDateTime(toDate,fromDate);
     var data = [];
            jagg.post("/site/blocks/stats/api-user-agent-usage/ajax/stats.jag", { action : "getUserAgentUsageByAPI" , apiName : apiName , apiVersion : version , fromDate : fromDateString , toDate : toDateString,drilldown:drilldown},

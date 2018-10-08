@@ -45,24 +45,28 @@ $(document).ready(function () {
 
                     //day picker
                     $('#today-btn').on('click', function () {
+                        currentDay = getDate();
                         getDateTime(currentDay, currentDay - 86400000);
                         reloadDataTable();
                     });
 
                     //hour picker
                     $('#hour-btn').on('click',function(){
+                        currentDay = getDate();
                         getDateTime(currentDay, currentDay - 3600000);
                         reloadDataTable();
                     })
 
                     //week picker
                     $('#week-btn').on('click', function () {
+                        currentDay = getDate();
                         getDateTime(currentDay, currentDay - 604800000);
                         reloadDataTable();
                     });
 
                     //month picker
                     $('#month-btn').on('click', function () {
+                        currentDay = getDate();
                         getDateTime(currentDay, currentDay - (604800000 * 4));
                         reloadDataTable();
                     });
@@ -135,8 +139,8 @@ var drawTopAPIUsersTable = function () {
                 d.currentLocation = currentLocation;
                 d.apiName = apiName;
                 d.version = version;
-                d.fromDate = from;
-                d.toDate = to;
+                d.fromDate = convertTimeStringUTC(from);
+                d.toDate = convertTimeStringUTC(to);
             }
         },
         "columns": [

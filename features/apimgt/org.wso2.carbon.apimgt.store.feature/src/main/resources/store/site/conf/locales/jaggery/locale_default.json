@@ -386,10 +386,12 @@
     "Micro Gateways" : "Micro Gateways",
     "Gateways" : "Gateways",
     "DEFAULT" : "OAuth",
+    "Resource Hit Count": "Resource Hit Count",
     "OAuth2" : "OAuth2",
     "Mutual SSL" : "Mutual SSL",
     "Enabled API Security Protocols" : "Enabled API Security Protocols",
     "This API is protected only with Mutual SSL, use the client certificate to access the API." : "This API is protected only with Mutual SSL, use the client certificate to access the API.",
     "Application subscription is not permitted for this API, as it is only protected with Mutual SSL." : "Application subscription is not permitted for this API, as it is only protected with Mutual SSL."
+
 
 }

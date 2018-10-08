@@ -24,10 +24,11 @@ public class AppCallTypeDTO {
         return apiCallTypeArray;
     }
 
-    public void addToApiCallTypeArray(String apiName, List<String> callType) {
+    public void addToApiCallTypeArray(String apiName, List<String> callType, List<Integer> hitCount) {
         ApiCallTypeArray apiCallTypeArray = new ApiCallTypeArray();
         apiCallTypeArray.setApiName(apiName);
         apiCallTypeArray.setCallType(callType);
+        apiCallTypeArray.setHitCount(hitCount);
         this.apiCallTypeArray.add(apiCallTypeArray);
     }
 }
@@ -35,6 +36,7 @@ public class AppCallTypeDTO {
 class ApiCallTypeArray {
     String apiName;
     List<String> callType;
+    List<Integer> hitCount;
 
     public String getApiName() {
         return apiName;
@@ -50,5 +52,13 @@ class ApiCallTypeArray {
 
     public void setCallType(List<String> callType) {
         this.callType = callType;
+    }
+
+    public List<Integer> getHitCount() {
+        return hitCount;
+    }
+
+    public void setHitCount(List<Integer> hitCount) {
+        this.hitCount = hitCount;
     }
 }

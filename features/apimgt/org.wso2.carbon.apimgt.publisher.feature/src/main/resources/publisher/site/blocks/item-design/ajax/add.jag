@@ -490,7 +490,16 @@ if(jagg.isCSRFTokenValid())
 
             //If API not exist create
             result = mod.checkIfResourceExists(apiData);
-            if(!result){
+            if (!result) {
+                // Check logged in user try to create api with different user name.
+                if (jagg.getUser().username != apiData.provider) {
+                    obj = {
+                        error:true,
+                        message:"Not allowed to add APIs with different provider name other than logged in user."
+                    };
+                    print(obj);
+                    return;
+                }
                 result = mod.createAPI(apiData);
                 if (result.error==true) {
                     obj = {

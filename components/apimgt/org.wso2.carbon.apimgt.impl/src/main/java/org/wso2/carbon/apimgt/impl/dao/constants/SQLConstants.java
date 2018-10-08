@@ -123,8 +123,7 @@ public class SQLConstants {
                     "   AM_SUBSCRIBER SB, " +
                     "   AM_APPLICATION APP " +
                     " WHERE " +
-                    "   SB.USER_ID = ? " +
-                    "   AND SB.TENANT_ID = ? " +
+                    "   SB.TENANT_ID = ? " +
                     "   AND SB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
                     "   AND APP.APPLICATION_ID=SP.APPLICATION_ID " +
                     "   AND API.API_ID = SP.API_ID" +
@@ -144,8 +143,7 @@ public class SQLConstants {
                     "   AM_SUBSCRIBER SB, " +
                     "   AM_APPLICATION APP " +
                     " WHERE " +
-                    "   LOWER(SB.USER_ID) = LOWER(?) " +
-                    "   AND SB.TENANT_ID = ? " +
+                    "   SB.TENANT_ID = ? " +
                     "   AND SB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
                     "   AND APP.APPLICATION_ID=SP.APPLICATION_ID " +
                     "   AND API.API_ID = SP.API_ID" +
