@@ -45,18 +45,9 @@ const styles = theme => ({
 const PageNav = (props) => {
     const { classes, section, navItems } = props;
     return (
-        <div className={classes.root}>
-            <Drawer
-                variant='permanent'
-                classes={{
-                    paper: classes.drawerPaper,
-                }}
-            >
-                <div className={classes.toolbar} />
-                <List className={classes.section}>{section}</List>
-                <List>{navItems}</List>
-            </Drawer>
-        </div>
+        <React.Fragment>
+            {navItems}
+        </React.Fragment>
     );
 };
 

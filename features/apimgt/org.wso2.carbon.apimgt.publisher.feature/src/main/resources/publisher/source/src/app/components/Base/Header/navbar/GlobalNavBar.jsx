@@ -2,15 +2,15 @@ import React from 'react';
 import { ListItemIcon, Drawer, List, Divider, withStyles, ListItem, ListItemText } from '@material-ui/core';
 import APIsIcon from '@material-ui/icons/Power';
 import EndpointsIcon from '@material-ui/icons/ZoomOutMapOutlined';
-import HomeIcon from '@material-ui/icons/Home';
 import withWidth, { isWidthDown } from '@material-ui/core/withWidth';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
+import CustomIcon from 'AppComponents/Shared/CustomIcon';
 
 const styles = theme => ({
     list: {
-        width: 250,
-    },
+        width: theme.custom.drawerWidth
+      },
     drawerStyles: {
         top: 56, // Based on https://github.com/mui-org/material-ui/issues/10076#issuecomment-361232810
         [`${theme.breakpoints.up('xs')} and (orientation: landscape)`]: {
@@ -20,58 +20,34 @@ const styles = theme => ({
             top: 64,
         },
     },
+    leftLink_Icon: {
+        color: theme.palette.getContrastText(theme.palette.background.leftMenu),
+        fontSize: theme.custom.leftMenuIconSize + 'px',
+    },
+    listText: {
+        color: theme.palette.getContrastText(theme.palette.background.drawer)
+    },
 });
 
-const homeIcon = (
-    <Link to='/'>
-        <ListItem button>
-            <ListItemIcon>
-                <HomeIcon />
-            </ListItemIcon>
-            <ListItemText primary='Home' />
-        </ListItem>
-    </Link>
-);
-
-const globalPages = (
-    <React.Fragment>
-        <Link to='/apis'>
-            <ListItem button>
-                <ListItemIcon>
-                    <APIsIcon />
-                </ListItemIcon>
-                <ListItemText primary='APIs' />
-            </ListItem>
-        </Link>
-        <Link to='/endpoints'>
-            <ListItem button>
-                <ListItemIcon>
-                    <EndpointsIcon />
-                </ListItemIcon>
-                <ListItemText primary='Endpoints' />
-            </ListItem>
-        </Link>
-    </React.Fragment>
-);
 
 const GlobalNavBar = (props) => {
-    const {
-        open, toggleGlobalNavBar, classes, width,
-    } = props;
+    const { open, toggleGlobalNavBar, classes, theme,} = props;
 
-    let top = 64;
-    if (isWidthDown('sm', width)) {
-        top = 56;
-    } else if (isWidthDown('xs', width)) {
-        top = 48;
-    }
-    // TODO: Refer to fix: https://github.com/mui-org/material-ui/issues/10076#issuecomment-361232810 ~tmkb
-    const commonStyle = { style: { top } };
+    const commonStyle = {
+        style: { top: 64 }
+      };
+    const paperStyles = {
+        style: {
+            backgroundColor: theme.palette.background.drawer,
+            top: 64
+        }
+    };
+    let strokeColor = theme.palette.getContrastText(theme.palette.background.leftMenu);
     return (
         <div>
             <Drawer
                 className={classes.drawerStyles}
-                PaperProps={commonStyle}
+                PaperProps={paperStyles}
                 SlideProps={commonStyle}
                 ModalProps={commonStyle}
                 BackdropProps={commonStyle}
@@ -80,9 +56,24 @@ const GlobalNavBar = (props) => {
             >
                 <div tabIndex={0} role='button' onClick={toggleGlobalNavBar} onKeyDown={toggleGlobalNavBar}>
                     <div className={classes.list}>
-                        <List>{homeIcon}</List>
-                        <Divider />
-                        <List>{globalPages}</List>
+                        <List>
+                            <Link to='/apis'>
+                                <ListItem button>
+                                    <ListItemIcon>
+                                    <CustomIcon width={32} height={32} icon="api" className={classes.listText} strokeColor={strokeColor} />
+                                    </ListItemIcon>
+                                    <ListItemText classes={{ primary: classes.listText }} primary='APIs' />
+                                </ListItem>
+                            </Link>
+                            <Link to='/endpoints'>
+                                <ListItem button>
+                                    <ListItemIcon>
+                                        <EndpointsIcon className={classes.leftLink_Icon} />
+                                    </ListItemIcon>
+                                    <ListItemText classes={{ primary: classes.listText }} primary='Endpoints' />
+                                </ListItem>
+                            </Link>
+                        </List>
                     </div>
                 </div>
             </Drawer>
@@ -94,7 +85,7 @@ GlobalNavBar.propTypes = {
     open: PropTypes.bool.isRequired,
     toggleGlobalNavBar: PropTypes.func.isRequired,
     classes: PropTypes.shape({}).isRequired,
-    width: PropTypes.string.isRequired,
+    theme: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(withWidth()(GlobalNavBar));
+export default withStyles(styles, {withTheme: true})(GlobalNavBar);
