@@ -108,7 +108,7 @@
                             </div>
                             </div>
                             <div class="col-md-12 col-lg-3" style="position:relative">
-                                 <a title="<%=i18n.localize("Download WSDL")%>" class="btn btn-default" style="color:#1a78d8; top:50%; position:absolute" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/api/documentation/download.jag?tenant=" + tenantDomain + "&apiName=" + api.name + "&apiVersion=" + api.version + "&environmentName=" + environmentName + "&environmentType=" + environmentType + "&resourceUrl=" + api.wsdl))%>" target="_blank"><i class="fw fw-download"></i>&nbsp;&nbsp;<%=i18n.localize("Download WSDL")%></a>
+                                 <a title="<%=i18n.localize("Download WSDL")%>" class="btn btn-default" style="color:#1a78d8; top:50%; position:absolute" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/api/documentation/download.jag?tenant=" + tenantDomain + "&apiName=" + api.name + "&apiVersion=" + api.version + "&apiProvider=" + api.provider + "&environmentName=" + environmentName + "&environmentType=" + environmentType + "&resourceUrl=" + api.wsdl))%>" target="_blank"><i class="fw fw-download"></i>&nbsp;&nbsp;<%=i18n.localize("Download WSDL")%></a>
                             </div>
                         </div>
                         <% }
