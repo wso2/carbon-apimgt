@@ -23,7 +23,10 @@ import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 
 import java.util.Map;
 
-public class LogUtils {
+/**
+ * Provides util methods for the LogsHandler
+ */
+class LogUtils {
 
     protected static String getAuthorizationHeader(Map headers) {
         return (String) headers.get("Authorization");

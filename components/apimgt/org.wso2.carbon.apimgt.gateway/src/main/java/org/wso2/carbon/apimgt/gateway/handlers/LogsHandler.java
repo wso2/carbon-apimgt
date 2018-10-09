@@ -28,7 +28,6 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -36,6 +35,9 @@ import java.util.Map;
 import java.util.Set;
 import javax.xml.stream.XMLStreamException;
 
+/**
+ * This Handler can be used to log all external calls done by the api manager via synapse
+ */
 public class LogsHandler extends AbstractSynapseHandler {
     private static final Log log = LogFactory.getLog("correlation");
     private String apiName = null;
@@ -127,21 +129,6 @@ public class LogsHandler extends AbstractSynapseHandler {
                     String SrcIdHeader = (String) messageContext.getProperty("SRC_ID_HEADER");
                     String applIdHeader = (String) messageContext.getProperty("APP_ID_HEADER");
                     String uuIdHeader = (String) messageContext.getProperty("UUID_HEADER");
-                    /*
-                     * 1. Back-end Latency in milliseconds
-                     * 2. API Name
-                     * 3. API URI (HTTP method, Context+version+resource path)
-                     * 4. API resource path
-                     * 5. Authorization
-                     * 6. Org-Id
-                     * 7. Source-Id
-                     * 8. Application-Id
-                     * 9. UUID
-                     * 10. Request Size in bytes
-                     * 11. Response Size in bytes
-                     * 12. Response Time in milliseconds
-                     * 13. HTTP Response Status Code
-                     */
                     log.info(beTotalLatency + "|HTTP|" + apiName + "|" + apiMethod + "|" + apiCTX + apiElectedRsrc + "|"
                             + apiTo + "|" + authHeader + "|" + orgIdHeader + "|" + SrcIdHeader
                             + "|" + applIdHeader + "|" + uuIdHeader + "|" + requestSize
@@ -248,31 +235,6 @@ public class LogsHandler extends AbstractSynapseHandler {
         }
         return responseTime;
     }
-
-    /*
-     * private long calculateMessageSize(org.apache.synapse.MessageContext
-     * messageContext) { long requestSize = 0;
-     * org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext)
-     * messageContext) .getAxis2MessageContext(); try {
-     * RelayUtils.buildMessage(axis2MC); } catch (IOException ex) { // In case of an
-     * exception, it won't be propagated up,and set response size to 0
-     * log.error("Error occurred while building the message to" +
-     * " calculate the request body size", ex); } catch (XMLStreamException ex) {
-     * log.
-     * error("Error occurred while building the message to calculate the request" +
-     * " body size", ex); }
-     * if(axis2MC.getProperty(Constants.Configuration.CONTENT_TYPE).equals(
-     * "application/json")){ InputStream jsonPaylodStream = (InputStream)
-     * ((Axis2MessageContext) messageContext) .getAxis2MessageContext().getProperty(
-     * "org.apache.synapse.commons.json.JsonInputStream") }else{ // retrive payload
-     * from SoapPayload then do the calulation SOAPEnvelope env =
-     * messageContext.getEnvelope(); if (env != null) { SOAPBody soapbody =
-     * env.getBody(); if (soapbody != null) { byte[] size =
-     * soapbody.toString().getBytes(Charset.defaultCharset()); requestSize =
-     * size.length; } } return requestSize;
-     *
-     * }
-     */
 
     private long buildRequestMessage(org.apache.synapse.MessageContext messageContext) {
         long requestSize = 0;
