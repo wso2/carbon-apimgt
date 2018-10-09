@@ -283,6 +283,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisApiIdCommentsCommentIdPut(String commentId, String apiId, CommentDTO body,
                                                   String ifMatch, String ifUnmodifiedSince, Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
+
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
             String existingFingerprint = apisApiIdCommentsCommentIdPutFingerprint(commentId, apiId, body, ifMatch,

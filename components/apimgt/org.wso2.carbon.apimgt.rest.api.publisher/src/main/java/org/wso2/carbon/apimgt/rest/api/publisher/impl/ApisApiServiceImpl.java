@@ -321,7 +321,6 @@ public class ApisApiServiceImpl extends ApisApiService {
         }
     }
 
-
     /**
      * Retrive Dedicated Gateway of an API
      *

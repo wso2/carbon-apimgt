@@ -1365,13 +1365,27 @@ public class ApiDAOImpl implements ApiDAO {
     @Override
     public void deleteComment(String commentId, String apiId) throws APIMgtDAOException {
         final String deleteCommentQuery = "DELETE FROM AM_API_COMMENTS WHERE UUID = ? AND API_ID = ?";
+        final String getChildCommentsQuery = "SELECT UUID FROM AM_API_COMMENTS WHERE PARENT_COMMENT_ID = ?";
         try (Connection connection = DAOUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(deleteCommentQuery)) {
+             PreparedStatement statement1 = connection.prepareStatement(deleteCommentQuery)) {
             try {
                 connection.setAutoCommit(false);
-                statement.setString(1, commentId);
-                statement.setString(2, apiId);
-                statement.execute();
+                statement1.setString(1, commentId);
+                statement1.setString(2, apiId);
+                statement1.execute();
+                try (PreparedStatement statement2 = connection.prepareStatement(getChildCommentsQuery)) {
+                    statement2.setString(1, commentId);
+                    statement2.execute();
+                    try (ResultSet rs = statement2.getResultSet()) {
+                        while (rs.next()) {
+                            String deleteCommentReplyQuery = "DELETE FROM AM_API_COMMENTS WHERE UUID = ?";
+                            try (PreparedStatement statement3 = connection.prepareStatement(deleteCommentReplyQuery)) {
+                                statement3.setString(1, rs.getString("UUID"));
+                                statement3.execute();
+                            }
+                        }
+                    }
+                }
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -1386,7 +1400,6 @@ public class ApiDAOImpl implements ApiDAO {
             throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + errorMessage, e);
         }
     }
-
 
     @Override
     public void updateComment(Comment comment, String commentId, String apiId) throws APIMgtDAOException {

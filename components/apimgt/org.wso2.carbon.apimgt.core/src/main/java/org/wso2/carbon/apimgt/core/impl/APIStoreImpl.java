@@ -854,7 +854,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                   and with a different end point*/
                 if (!(comment.getCommentedUser().equals(username) &&
                         comment.getEntryPoint().equals(ENTRY_POINT_STORE))) {
-                    checkIfUserIsCommentModerator(username);
+                    checkIfUserIsAdmin(username);
                 }
                 apiDAO.deleteComment(commentId, apiId);
             } else {
@@ -883,7 +883,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                         oldComment.getEntryPoint().equals(ENTRY_POINT_STORE))) {
                     String errorMsg = "The user " + username + " does not have permission to update this comment";
                     log.error(errorMsg);
-                    throw new APICommentException(errorMsg, ExceptionCodes.NO_UPDATE_PERMISSIONS);
+                    throw new APICommentException(errorMsg, ExceptionCodes.COULD_NOT_UPDATE_COMMENT);
                 }
                 getApiDAO().updateComment(comment, commentId, apiId);
             } else {
@@ -905,7 +905,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
      * @param username username of the user
      * @throws APICommentException if user does not have comment moderator role
      */
-    private void checkIfUserIsCommentModerator(String username) throws APICommentException {
+    /*private void checkIfUserIsCommentModerator(String username) throws APICommentException {
         Set<String> roles = APIUtils.getAllRolesOfUser(username);
         if (roles.contains(getConfig().getCommentModeratorRole())) {
             return;
@@ -913,6 +913,22 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         String errorMsg = "comment moderator permission needed";
         log.error(errorMsg);
         throw new APICommentException(errorMsg, ExceptionCodes.NEED_COMMENT_MODERATOR_PERMISSION);
+    }*/
+
+    /**
+     * Check whether current user is an admin
+     *
+     * @param username username of the user
+     * @throws APICommentException if user does not have admin role
+     */
+    private void checkIfUserIsAdmin(String username) throws APICommentException {
+        Set<String> roles = APIUtils.getAllRolesOfUser(username);
+        if (roles.contains("admin")) {
+            return;
+        }
+        String errorMsg = "admin permission needed";
+        log.error(errorMsg);
+        throw new APICommentException(errorMsg, ExceptionCodes.NEED_ADMIN_PERMISSION);
     }
 
     /**

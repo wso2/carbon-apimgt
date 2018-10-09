@@ -116,34 +116,20 @@ public class ApisApiServiceImplTestCase {
         Mockito.doNothing().doThrow(new IllegalArgumentException()).when(apiStore)
                 .deleteComment(commentId, apiId, USER);
 
-        javax.ws.rs.core.Response response =
+        javax.ws.rs.core.Response response1 =
                 apisApiService.apisApiIdCommentsCommentIdDelete
                         (null, apiId, null, null, request);
 
-        Assert.assertEquals(200, response.getStatus());
-    }
+        Assert.assertEquals(200, response1.getStatus());
 
-    @Test
-    public void testApisApiIdCommentsCommentIdDeleteNotFound() throws APIManagementException, NotFoundException {
-        printTestMethodName();
-        String apiId = UUID.randomUUID().toString();
-        String commentId = UUID.randomUUID().toString();
-
-        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
-        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
-
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        Request request = getRequest();
-        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
-
+        // Error Case when comment_id is not found
         Mockito.doThrow(new APICommentException("Error occurred", ExceptionCodes.COMMENT_NOT_FOUND))
                 .when(apiStore).deleteComment(commentId, apiId, USER);
 
-        Response response = apisApiService.apisApiIdCommentsCommentIdDelete
+        Response response2 = apisApiService.apisApiIdCommentsCommentIdDelete
                 (commentId, apiId, IF_MATCH, IF_UNMODIFIED_SINCE, request);
 
-        assertEquals(response.getStatus(), 404);
+        assertEquals(response2.getStatus(), 404);
     }
 
     @Test
@@ -219,63 +205,21 @@ public class ApisApiServiceImplTestCase {
         PowerMockito.when(CommentMappingUtil.fromDTOToComment(commentDTO,USER)).thenReturn(comment);
         PowerMockito.when(CommentMappingUtil.fromCommentToDTO(comment)).thenReturn(commentDTO);
 
-        Response response = apisApiService.apisApiIdCommentsPost
+        Response response1 = apisApiService.apisApiIdCommentsPost
                 (apiId,commentDTO,request);
 
-        Assert.assertEquals(201, response.getStatus());
-    }
+        Assert.assertEquals(201, response1.getStatus());
 
-    @Test
-    public void apisApiIdCommentsPostErrorCase() throws Exception {
-        printTestMethodName();
-        String apiId = UUID.randomUUID().toString();
-        String commentId = UUID.randomUUID().toString();
-        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
-        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
-
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        Request request = getRequest();
-        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
-
-        CommentDTO commentDTO = new CommentDTO();
-        commentDTO.setApiId(apiId);
-        commentDTO.setCommentId(commentId);
-        commentDTO.setCommentText("comment text");
-        commentDTO.setCategory("testCategory");
-        commentDTO.setParentCommentId("");
-        commentDTO.setEntryPoint("APIStore");
-        commentDTO.setCreatedBy("creater");
-        commentDTO.setLastUpdatedBy("updater");
-
-        Instant time = APIUtils.getCurrentUTCTime();
-        Comment comment = new Comment();
-        comment.setUuid(commentId);
-        comment.setApiId(apiId);
-        comment.setCommentedUser("commentedUser");
-        comment.setCommentText("this is a comment");
-        comment.setCategory("testCategory");
-        comment.setParentCommentId("");
-        comment.setEntryPoint("APIStore");
-        comment.setCreatedUser("createdUser");
-        comment.setUpdatedUser("updatedUser");
-        comment.setCreatedTime(time);
-        comment.setUpdatedTime(time);
-
+        // Error Case
         Mockito.doThrow(new APICommentException("Error occurred", ExceptionCodes.INTERNAL_ERROR))
                 .when(apiStore).addComment(comment,apiId);
         Mockito.doThrow(new APICommentException("Error occurred", ExceptionCodes.INTERNAL_ERROR))
                 .when(apiStore).getCommentByUUID(commentId, apiId);
 
-        PowerMockito.mockStatic(CommentMappingUtil.class);
-        PowerMockito.when(CommentMappingUtil.fromDTOToComment(commentDTO,USER)).thenReturn(comment);
-        PowerMockito.when(CommentMappingUtil.fromCommentToDTO(comment)).thenReturn(commentDTO);
-
-        Response response = apisApiService.apisApiIdCommentsPost
+        Response response2 = apisApiService.apisApiIdCommentsPost
                 (apiId, commentDTO, request);
 
-        Assert.assertEquals(ExceptionCodes.INTERNAL_ERROR.getHttpStatusCode(), response.getStatus());
-
+        Assert.assertEquals(ExceptionCodes.INTERNAL_ERROR.getHttpStatusCode(), response2.getStatus());
     }
 
     @Test
@@ -311,33 +255,19 @@ public class ApisApiServiceImplTestCase {
 
         Mockito.when(apiStore.getCommentByUUID(commentId, apiId)).thenReturn(comment);
 
-        Response response = apisApiService.apisApiIdCommentsCommentIdGet
+        Response response1 = apisApiService.apisApiIdCommentsCommentIdGet
                 (commentId, apiId, null, null, request);
 
-        Assert.assertEquals(200, response.getStatus());
-    }
+        Assert.assertEquals(200, response1.getStatus());
 
-    @Test
-    public void testApisApiIdCommentsCommentIdGetNotFound() throws APIManagementException, NotFoundException {
-        printTestMethodName();
-        String apiId = UUID.randomUUID().toString();
-        String commentId = UUID.randomUUID().toString();
-
-        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
-        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
-
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        Request request = getRequest();
-        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
-
+        // Error Case when commentId is not found
         Mockito.doThrow(new APICommentException("Error occurred", ExceptionCodes.COMMENT_NOT_FOUND))
                 .when(apiStore).getCommentByUUID(commentId, apiId);
 
-        Response response = apisApiService.apisApiIdCommentsCommentIdGet
+        Response response2 = apisApiService.apisApiIdCommentsCommentIdGet
                 (commentId, apiId, null, null, request);
 
-        Assert.assertEquals(404, response.getStatus());
+        Assert.assertEquals(404, response2.getStatus());
     }
 
     @Test
@@ -384,30 +314,17 @@ public class ApisApiServiceImplTestCase {
         commentList.add(comment2);
 
         Mockito.when(apiStore.getCommentsForApi(apiId)).thenReturn(commentList);
-        Response response = apisApiService.apisApiIdCommentsGet(apiId, 3, 0, request);
+        Response response1 = apisApiService.apisApiIdCommentsGet(apiId, 3, 0, request);
 
-        Assert.assertEquals(200, response.getStatus());
-    }
+        Assert.assertEquals(200, response1.getStatus());
 
-    @Test
-    public void testApisApiIdCommentsGetNotFound() throws APIManagementException, NotFoundException {
-        printTestMethodName();
-        String apiId = UUID.randomUUID().toString();
-
-        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
-        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
-
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        Request request = getRequest();
-        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
-
+        // Error Case when commentId is not found
         Mockito.doThrow(new APICommentException("Error occurred", ExceptionCodes.COMMENT_NOT_FOUND))
                 .when(apiStore).getCommentsForApi(apiId);
 
-        Response response = apisApiService.apisApiIdCommentsGet(apiId, 3, 0, request);
+        Response response2 = apisApiService.apisApiIdCommentsGet(apiId, 3, 0, request);
 
-        Assert.assertEquals(404, response.getStatus());
+        Assert.assertEquals(404, response2.getStatus());
     }
 
     @Test
@@ -452,57 +369,22 @@ public class ApisApiServiceImplTestCase {
                 .updateComment(comment, commentId, apiId, USER);
         Mockito.when(apiStore.getCommentByUUID(commentId, apiId)).thenReturn(comment);
 
-        Response response = apisApiService.apisApiIdCommentsCommentIdPut
+        Response response1 = apisApiService.apisApiIdCommentsCommentIdPut
                 (commentId, apiId, commentDTO, null, null, request);
 
-        Assert.assertEquals(200, response.getStatus());
-    }
+        Assert.assertEquals(200, response1.getStatus());
 
-    @Test
-    public void testApisApiIdCommentsCommentIdPutErrorCase() throws APIManagementException, NotFoundException {
-        printTestMethodName();
-        String apiId = UUID.randomUUID().toString();
-        String commentId = UUID.randomUUID().toString();
-
-        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
-        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
-
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        Request request = getRequest();
-        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
-
-        CommentDTO commentDTO = new CommentDTO();
-        commentDTO.setApiId(apiId);
-        commentDTO.setCommentText("comment text");
-        commentDTO.setCategory("testCategory");
-        commentDTO.setParentCommentId("");
-        commentDTO.setEntryPoint("APIStore");
-        commentDTO.setCreatedBy("creater");
-        commentDTO.setLastUpdatedBy("updater");
-
-        Instant time = APIUtils.getCurrentUTCTime();
-        Comment comment = new Comment();
-        comment.setCommentedUser("commentedUser");
-        comment.setCommentText("this is a comment");
-        comment.setCategory("testCategory");
-        comment.setParentCommentId("");
-        comment.setEntryPoint("APIStore");
-        comment.setCreatedUser("createdUser");
-        comment.setUpdatedUser("updatedUser");
-        comment.setCreatedTime(time);
-        comment.setUpdatedTime(time);
-
+        // Error Case
         Mockito.doThrow(new APICommentException("Error occurred", ExceptionCodes.INTERNAL_ERROR))
                 .when(apiStore).updateComment(comment, commentId, apiId, USER);
         Mockito.doThrow(new APICommentException("Error occurred", ExceptionCodes.INTERNAL_ERROR))
                 .when(apiStore).getCommentByUUID(commentId, apiId);
 
 
-        Response response = apisApiService.apisApiIdCommentsCommentIdPut
+        Response response2 = apisApiService.apisApiIdCommentsCommentIdPut
                 (commentId, apiId, commentDTO, IF_MATCH, IF_UNMODIFIED_SINCE, request);
 
-        Assert.assertEquals(ExceptionCodes.INTERNAL_ERROR.getHttpStatusCode(), response.getStatus());
+        Assert.assertEquals(ExceptionCodes.INTERNAL_ERROR.getHttpStatusCode(), response2.getStatus());
     }
 
     @Test

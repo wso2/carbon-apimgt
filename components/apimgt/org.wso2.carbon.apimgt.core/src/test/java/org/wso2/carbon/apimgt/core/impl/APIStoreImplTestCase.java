@@ -1021,7 +1021,7 @@ public class APIStoreImplTestCase {
         APIStore apiStore = getApiStoreImpl(daoFactory);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
-        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
+        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId(), "APIStore");
         apiStore.addComment(comment, api.getId());
         Mockito.verify(apiDAO, Mockito.times(1)).isAPIExists(api.getId());
         Mockito.verify(apiDAO, Mockito.times(1)).addComment(comment, api.getId());
@@ -1036,7 +1036,7 @@ public class APIStoreImplTestCase {
         APIStore apiStore = getApiStoreImpl(daoFactory);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
-        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
+        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId(), "APIStore");
         Mockito.when(apiDAO.getCommentByUUID(comment.getUuid(), api.getId())).thenReturn(comment);
         apiStore.getCommentByUUID(comment.getUuid(), api.getId());
         Mockito.verify(apiDAO, Mockito.times(1)).isAPIExists(api.getId());
@@ -1053,8 +1053,8 @@ public class APIStoreImplTestCase {
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
         List<Comment> commentList = new ArrayList<>();
-        Comment comment1 = SampleTestObjectCreator.createDefaultComment(api.getId());
-        Comment comment2 = SampleTestObjectCreator.createDefaultComment(api.getId());
+        Comment comment1 = SampleTestObjectCreator.createDefaultComment(api.getId(), "APIStore");
+        Comment comment2 = SampleTestObjectCreator.createDefaultComment(api.getId(), "APIStore");
         commentList.add(comment1);
         commentList.add(comment2);
         Mockito.when(apiDAO.getCommentsForApi(api.getId())).thenReturn(commentList);
@@ -1074,7 +1074,7 @@ public class APIStoreImplTestCase {
         APIStore apiStore = getApiStoreImpl(daoFactory);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
-        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
+        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId(), "APIStore");
         Mockito.when(apiDAO.getCommentByUUID(comment.getUuid(), api.getId())).thenReturn(comment);
         apiStore.deleteComment(comment.getUuid(), api.getId(), "admin");
         Mockito.verify(apiDAO, Mockito.times(1)).isAPIExists(api.getId());
@@ -1090,7 +1090,7 @@ public class APIStoreImplTestCase {
         APIStore apiStore = getApiStoreImpl(daoFactory);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
-        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
+        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId(), "APIStore");
         Mockito.when(apiDAO.getCommentByUUID(UUID, api.getId())).thenReturn(comment);
         apiStore.updateComment(comment, UUID, api.getId(), "admin");
         Mockito.verify(apiDAO, Mockito.times(1)).isAPIExists(api.getId());
@@ -1253,7 +1253,7 @@ public class APIStoreImplTestCase {
         APIStore apiStore = getApiStoreImpl(daoFactory);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
-        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
+        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId(), "APIStore");
         Mockito.doThrow(new APIMgtDAOException("Error occurred while adding comment for api id " + api.getId(),
                 new SQLException()))
                 .when(apiDAO).addComment(comment, api.getId());
@@ -1270,7 +1270,7 @@ public class APIStoreImplTestCase {
         APIStore apiStore = getApiStoreImpl(daoFactory);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
-        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
+        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId(), "APIStore");
         Mockito.when(apiDAO.getCommentByUUID(comment.getUuid(), api.getId())).thenReturn(comment);
         Mockito.doThrow(new APIMgtDAOException("Error occurred while deleting comment " + comment.getUuid(),
                 new SQLException()))
@@ -1288,7 +1288,7 @@ public class APIStoreImplTestCase {
         APIStore apiStore = getApiStoreImpl(daoFactory);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
-        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
+        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId(), "APIStore");
         Mockito.when(apiDAO.getCommentByUUID(comment.getUuid(), api.getId())).thenReturn(comment);
         apiStore.deleteComment(comment.getUuid(), api.getId(), "john");
     }
@@ -1318,7 +1318,7 @@ public class APIStoreImplTestCase {
         APIStore apiStore = getApiStoreImpl(daoFactory);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
-        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
+        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId(), "APIStore");
         Mockito.when(apiDAO.getCommentByUUID(comment.getUuid(), api.getId())).thenReturn(comment);
         Mockito.doThrow(new APIMgtDAOException("Error occurred while updating comment " + comment.getUuid(),
                 new SQLException()))
@@ -1336,7 +1336,7 @@ public class APIStoreImplTestCase {
         APIStore apiStore = getApiStoreImpl(daoFactory);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
-        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
+        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId(), "APIStore");
         Mockito.when(apiDAO.getCommentByUUID(comment.getUuid(), api.getId())).thenReturn(null);
         apiStore.updateComment(comment, comment.getUuid(), api.getId(), "admin");
     }
@@ -1383,7 +1383,7 @@ public class APIStoreImplTestCase {
         APIStore apiStore = getApiStoreImpl(daoFactory);
         String randomUUIDForApi = java.util.UUID.randomUUID().toString();
         Mockito.when(apiDAO.getAPI(randomUUIDForApi)).thenReturn(null);
-        Comment comment = SampleTestObjectCreator.createDefaultComment(randomUUIDForApi);
+        Comment comment = SampleTestObjectCreator.createDefaultComment(randomUUIDForApi, "APIStore");
         apiStore.addComment(comment, randomUUIDForApi);
     }
 
@@ -1413,7 +1413,7 @@ public class APIStoreImplTestCase {
         APIStore apiStore = getApiStoreImpl(daoFactory);
         String randomUUIDForApi = java.util.UUID.randomUUID().toString();
         Mockito.when(apiDAO.getAPI(randomUUIDForApi)).thenReturn(null);
-        Comment comment = SampleTestObjectCreator.createDefaultComment(randomUUIDForApi);
+        Comment comment = SampleTestObjectCreator.createDefaultComment(randomUUIDForApi, "APIStore");
         apiStore.updateComment(comment, comment.getUuid(), randomUUIDForApi, "admin");
     }
 
