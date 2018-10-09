@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
-import Grid from '@material-ui/core/Grid';
 import List from '@material-ui/icons/List';
 import GridOn from '@material-ui/icons/GridOn';
 import { withStyles } from '@material-ui/core/styles';
@@ -13,11 +12,11 @@ import APICreateMenu from '../components/APICreateMenu';
 
 const styles = theme => ({
     rightIcon: {
-        marginLeft: theme.spacing.unit
+        marginLeft: theme.spacing.unit,
     },
     button: {
         margin: theme.spacing.unit,
-        marginBottom: 0
+        marginBottom: 0,
     },
     buttonRight: {
         alignSelf: 'flex-end',
@@ -30,7 +29,7 @@ const styles = theme => ({
     root: {
         height: 70,
         background: theme.palette.background.paper,
-        borderBottom: 'solid 1px ' + theme.palette.grey['A200'],
+        borderBottom: 'solid 1px ' + theme.palette.grey.A200,
         display: 'flex',
     },
     mainIconWrapper: {
@@ -38,11 +37,10 @@ const styles = theme => ({
         paddingLeft: 35,
         paddingRight: 20,
     },
-    mainTitle:{
+    mainTitle: {
         paddingTop: 10,
     },
-    mainTitleWrapper: {
-    },
+    mainTitleWrapper: {},
     APICreateMenu: {
         flexGrow: 1,
         display: 'flex',
@@ -56,56 +54,56 @@ class TopMenu extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            apis: null,
-            value: 1,
-            order: 'asc',
-            orderBy: 'name'
+            listType: this.props.theme.custom.defaultApiView,
         };
-        this.state.listType = this.props.theme.custom.defaultApiView;
     }
     render() {
-        let { classes, apis, setListType, theme } = this.props;
-        let { listType } = this.state;
+        const {
+            classes, apis, setListType, theme,
+        } = this.props;
+        const { listType } = this.state;
         const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
-         return(
+        return (
             <div className={classes.root}>
                 <div className={classes.mainIconWrapper}>
-                    <CustomIcon strokeColor={strokeColorMain} width={42} height={42} icon="api" />
+                    <CustomIcon strokeColor={strokeColorMain} width={42} height={42} icon='api' />
                 </div>
                 <div className={classes.mainTitleWrapper}>
-                    <Typography variant="display1" className={classes.mainTitle} >
+                    <Typography variant='display1' className={classes.mainTitle}>
                         APIs
                     </Typography>
-                    { apis &&
-                    <Typography variant="caption" gutterBottom align="left">
-                        Displaying {apis.count} API
-                    </Typography>
-                    }
+                    {apis && (
+                        <Typography variant='caption' gutterBottom align='left'>
+                            Displaying {apis.count} API
+                        </Typography>
+                    )}
                 </div>
                 <VerticalDivider height={70} />
                 <div className={classes.APICreateMenu}>
-                    <APICreateMenu buttonProps={{variant:"contained", color:"primary", className:classes.button}}>
-                            <FormattedMessage id='create.an.api' defaultMessage='Create API' />
+                    <APICreateMenu buttonProps={{ variant: 'contained', color: 'primary', className: classes.button }}>
+                        <FormattedMessage id='create.an.api' defaultMessage='Create API' />
                     </APICreateMenu>
                 </div>
                 <div className={classes.buttonRight}>
-                    <IconButton className={classes.button} onClick={() => setListType('list')} >
-                        <List color={listType === "list" ? "primary" : "default" } />
+                    <IconButton className={classes.button} onClick={() => setListType('list')}>
+                        <List color={listType === 'list' ? 'primary' : 'default'} />
                     </IconButton>
                     <IconButton className={classes.button} onClick={() => setListType('grid')}>
-                        <GridOn color={listType === "grid" ? "primary" : "default" } />
+                        <GridOn color={listType === 'grid' ? 'primary' : 'default'} />
                     </IconButton>
                 </div>
             </div>
-        )
+        );
     }
 }
 
 TopMenu.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     setListType: PropTypes.func.isRequired,
-    apis: PropTypes.object.isRequired,
-    theme: PropTypes.object.isRequired,
+    apis: PropTypes.shape({}).isRequired,
+    theme: PropTypes.shape({
+        custom: PropTypes.string,
+    }).isRequired,
 };
 
-export default withStyles(styles, {withTheme: true})(TopMenu);
+export default withStyles(styles, { withTheme: true })(TopMenu);

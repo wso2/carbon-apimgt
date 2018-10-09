@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React from 'react'
+import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import Typography from '@material-ui/core/Typography';
@@ -42,11 +42,11 @@ const styles = theme => ({
     },
     leftLInk: {
         paddingTop: theme.spacing.unit,
-        paddingBottom: theme.spacing.unit,  
+        paddingBottom: theme.spacing.unit,
         paddingLeft: theme.spacing.unit,
         paddingRight: theme.spacing.unit,
         fontSize: theme.typography.caption.fontSize,
-        cursor: 'pointer'
+        cursor: 'pointer',
     },
     leftLink_Icon: {
         color: theme.palette.getContrastText(theme.palette.background.leftMenu),
@@ -63,47 +63,76 @@ const styles = theme => ({
         diplay: 'none',
     },
 });
-class LeftMenuItem extends React.Component {
-    constructor(props){
-        super(props);
-    }
-    render(){
-        const {classes, theme, Icon } = this.props;
-        const leftMenu = theme.custom.leftMenu;
-        const strokeColor = theme.palette.getContrastText(theme.palette.background.leftMenu);
-        const iconSize = theme.custom.leftMenuIconSize;
-  
-        return(
-            <div className={classNames(classes.leftLInk, {
-                    [classes.leftLink_IconLeft]: leftMenu === 'icon left'}, "leftLInk")} 
-                    onClick={( () => this.props.handleMenuSelect(this.props.text) ) }
-                    style={{backgroundColor: this.props.active === this.props.text ? theme.palette.background.appBar : ''}}
-                >
+function LeftMenuItem(props) {
+    const { classes, theme, Icon } = props;
+    const { leftMenu } = theme.custom;
+    const strokeColor = theme.palette.getContrastText(theme.palette.background.leftMenu);
+    const iconSize = theme.custom.leftMenuIconSize;
+
+    return (
+        <div
+            className={classNames(
+                classes.leftLInk,
                 {
-                    // If the icon pro ( which is comming from the React Material library ) is coming we add css class and render. 
-                    // If leftMenu='no icon' at the theme object we hide the icon. Also we add static classes to allow customers theme
-                    // the product without compiling.
-                    Icon ? React.cloneElement(Icon, { className: classNames(classes.leftLink_Icon, {
-                        [classes.noIcon]: leftMenu === 'no icon',
-                            }, "leftLink_Icon")}) : 
-                    // We can also add custom icons
-                    <CustomIcon strokeColor={strokeColor}  width={iconSize} height={iconSize} icon={this.props.text} 
-                        className={classNames(classes.leftLInk, {
-                            [classes.noIcon]: leftMenu === 'no icon',
-                                }, "leftLink_Icon")} 
+                    [classes.leftLink_IconLeft]: leftMenu === 'icon left',
+                },
+                'leftLInk',
+            )}
+            onClick={() => props.handleMenuSelect(props.text)}
+            onKeyDown={() => props.handleMenuSelect(props.text)}
+            style={{ backgroundColor: props.active === props.text ? theme.palette.background.appBar : '' }}
+        >
+            {// If the icon pro ( which is comming from the React Material library ) is coming we add css class and render.
+            // If leftMenu='no icon' at the theme object we hide the icon. Also we add static classes to allow customers theme
+            // the product without compiling.
+                Icon ? (
+                    React.cloneElement(Icon, {
+                        className: classNames(
+                            classes.leftLink_Icon,
+                            {
+                                [classes.noIcon]: leftMenu === 'no icon',
+                            },
+                            'leftLink_Icon',
+                        ),
+                    })
+                ) : (
+                // We can also add custom icons
+                    <CustomIcon
+                        strokeColor={strokeColor}
+                        width={iconSize}
+                        height={iconSize}
+                        icon={props.text}
+                        className={classNames(
+                            classes.leftLInk,
+                            {
+                                [classes.noIcon]: leftMenu === 'no icon',
+                            },
+                            'leftLink_Icon',
+                        )}
                     />
-                }
-                <Typography className={classNames(classes.leftLInkText, {
+                )}
+            <Typography
+                className={classNames(
+                    classes.leftLInkText,
+                    {
                         [classes.leftLInkText_IconLeft]: leftMenu === 'icon left',
                         [classes.leftLInkText_NoText]: leftMenu === 'no text',
-                    }, "leftLInkText")}  style={{textTransform:'uppercase'}}>{this.props.text}
-                </Typography>
-            </div>
-        )
-    }
+                    },
+                    'leftLInkText',
+                )}
+                style={{ textTransform: 'uppercase' }}
+            >
+                {props.text}
+            </Typography>
+        </div>
+    );
 }
 LeftMenuItem.propTypes = {
-    classes: PropTypes.object.isRequired,
-    theme: PropTypes.object.isRequired,
+    classes: PropTypes.shape({}).isRequired,
+    theme: PropTypes.shape({}).isRequired,
+    Icon: PropTypes.element.isRequired,
+    text: PropTypes.string.isRequired,
+    handleMenuSelect: PropTypes.func.isRequired,
+    active: PropTypes.string.isRequired,
 };
 export default withStyles(styles, { withTheme: true })(LeftMenuItem);

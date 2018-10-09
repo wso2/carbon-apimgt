@@ -29,7 +29,7 @@ const styles = theme => ({
     },
     accountIcon: {
         marginRight: 10,
-    }
+    },
 });
 
 /**
@@ -88,7 +88,7 @@ class Avatar extends Component {
                     onClick={this.toggleMenu}
                     className={classes.userLink}
                 >
-                    <AccountCircle className={classes.accountIcon}  /> {user.name}
+                    <AccountCircle className={classes.accountIcon} /> {user.name}
                 </IconButton>
                 <Popper className={classes.profileMenu} open={openMenu} anchorEl={profileIcon} transition>
                     {({ TransitionProps }) => (

@@ -1,8 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import Drawer from '@material-ui/core/Drawer';
-import List from '@material-ui/core/List';
 
 const styles = theme => ({
     root: {
@@ -43,7 +41,7 @@ const styles = theme => ({
  * @returns {React.Component} @inheritdoc
  */
 const PageNav = (props) => {
-    const { classes, section, navItems } = props;
+    const { navItems } = props;
     return (
         <React.Fragment>
             {navItems}
@@ -56,7 +54,6 @@ PageNav.defaultProps = {
 };
 PageNav.propTypes = {
     classes: PropTypes.shape({}).isRequired,
-    section: PropTypes.element.isRequired,
     navItems: PropTypes.arrayOf(PropTypes.element),
 };
 

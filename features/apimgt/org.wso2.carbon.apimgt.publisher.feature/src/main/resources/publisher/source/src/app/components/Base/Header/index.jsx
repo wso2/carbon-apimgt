@@ -1,22 +1,21 @@
 import React from 'react';
-import { IconButton, Toolbar, AppBar, Typography } from '@material-ui/core';
+import { IconButton, Toolbar, AppBar } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 import MenuIcon from '@material-ui/icons/Menu';
 import SearchIcon from '@material-ui/icons/SearchOutlined';
 import Hidden from '@material-ui/core/Hidden';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-import User from 'AppData/User';
+import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 
 import Avatar from './avatar/Avatar';
 import HeaderSearch from './headersearch/HeaderSearch';
 import GlobalNavBar from './navbar/GlobalNavBar';
-import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 
 const styles = theme => ({
     appBar: {
         zIndex: theme.zIndex.modal + 1,
-        position: "relative",
+        position: 'relative',
         background: theme.palette.background.appBar,
     },
     typoRoot: {
@@ -29,12 +28,12 @@ const styles = theme => ({
     },
     toolbar: {
         minHeight: 56,
-        [`${theme.breakpoints.up("xs")} and (orientation: landscape)`]: {
-          minHeight: 48
+        [`${theme.breakpoints.up('xs')} and (orientation: landscape)`]: {
+            minHeight: 48,
         },
-        [theme.breakpoints.up("sm")]: {
-          minHeight: 64
-        }
+        [theme.breakpoints.up('sm')]: {
+            minHeight: 64,
+        },
     },
     menuIcon: {
         color: theme.palette.getContrastText(theme.palette.background.appBar),
@@ -92,10 +91,12 @@ class Header extends React.Component {
             <React.Fragment>
                 <AppBar className={classes.appBar} position='fixed'>
                     <Toolbar className={classes.toolbar}>
-                        <IconButton onClick={this.toggleGlobalNavBar} >
+                        <IconButton onClick={this.toggleGlobalNavBar}>
                             <MenuIcon className={classes.menuIcon} />
                         </IconButton>
-                        <Link to="/"><img src={theme.custom.logo} /></Link>
+                        <Link to='/'>
+                            <img src={theme.custom.logo} alt={theme.custom.title} />
+                        </Link>
                         <VerticalDivider height={32} />
                         <Hidden smDown>
                             <HeaderSearch />
@@ -121,8 +122,7 @@ Header.defaultProps = {
 Header.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     avatar: PropTypes.element,
-    user: PropTypes.instanceOf(User).isRequired,
-    theme: PropTypes.object.isRequired,
+    theme: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles, {withTheme: true})(Header);
+export default withStyles(styles, { withTheme: true })(Header);

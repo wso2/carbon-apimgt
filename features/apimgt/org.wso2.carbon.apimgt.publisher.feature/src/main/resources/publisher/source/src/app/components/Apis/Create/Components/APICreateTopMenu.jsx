@@ -11,11 +11,11 @@ import CustomIcon from 'AppComponents/Shared/CustomIcon';
 
 const styles = theme => ({
     rightIcon: {
-        marginLeft: theme.spacing.unit
+        marginLeft: theme.spacing.unit,
     },
     button: {
         margin: theme.spacing.unit,
-        marginBottom: 0
+        marginBottom: 0,
     },
     buttonRight: {
         alignSelf: 'flex-end',
@@ -28,15 +28,14 @@ const styles = theme => ({
     root: {
         height: 70,
         background: theme.palette.background.paper,
-        borderBottom: "solid 1px " + theme.palette.grey["A200"],
-        display: "flex",
-        alignItems: "center"
+        borderBottom: 'solid 1px ' + theme.palette.grey.A200,
+        display: 'flex',
+        alignItems: 'center',
     },
-    mainTitle:{
+    mainTitle: {
         paddingTop: 10,
     },
-    mainTitleWrapper: {
-    },
+    mainTitleWrapper: {},
     APICreateMenu: {
         flexGrow: 1,
         display: 'flex',
@@ -47,35 +46,33 @@ const styles = theme => ({
     },
     backText: {
         color: theme.palette.primary.main,
-        cursor: "pointer",
-        fontFamily: theme.typography.fontFamily
+        cursor: 'pointer',
+        fontFamily: theme.typography.fontFamily,
     },
     backLink: {
-        alignItems: "center",
-        textDecoration: "none",
-        display: "flex",
-        paddingLeft: theme.spacing.unit*3,
+        alignItems: 'center',
+        textDecoration: 'none',
+        display: 'flex',
+        paddingLeft: theme.spacing.unit * 3,
     },
     backIcon: {
         color: theme.palette.primary.main,
         fontSize: 56,
-        cursor: "pointer"
-      },
-      mainIconWrapper: {
+        cursor: 'pointer',
+    },
+    mainIconWrapper: {
         paddingTop: 13,
         paddingLeft: 0,
         paddingRight: 20,
     },
-  });
-  
+});
 
 const APIDetailsTopMenu = ({ classes, theme }) => {
     const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
     return (
-
         <main className={classes.content}>
             <div className={classes.root}>
-                <Link to="/apis" className={classes.backLink}>
+                <Link to='/apis' className={classes.backLink}>
                     <KeyboardArrowLeft className={classes.backIcon} />
                     <div className={classes.backText}>
                         BACK TO <br />
@@ -84,11 +81,11 @@ const APIDetailsTopMenu = ({ classes, theme }) => {
                 </Link>
                 <VerticalDivider height={70} />
                 <div className={classes.mainIconWrapper}>
-                    <CustomIcon strokeColor={strokeColorMain} width={42} height={42} icon="api" />
+                    <CustomIcon strokeColor={strokeColorMain} width={42} height={42} icon='api' />
                 </div>
                 <div className={classes.mainTitleWrapper}>
-                    <Typography variant="display1">APIs - Create New API</Typography>
-                    <Typography variant="caption" gutterBottom align="left">
+                    <Typography variant='display1'>APIs - Create New API</Typography>
+                    <Typography variant='caption' gutterBottom align='left'>
                         Create an API with one click. You will be able to design and implement it later.
                     </Typography>
                 </div>
@@ -99,7 +96,7 @@ const APIDetailsTopMenu = ({ classes, theme }) => {
 
 APIDetailsTopMenu.propTypes = {
     classes: PropTypes.shape({}).isRequired,
-    theme: PropTypes.object.isRequired,
+    theme: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles, {withTheme: true})(APIDetailsTopMenu);
+export default withStyles(styles, { withTheme: true })(APIDetailsTopMenu);

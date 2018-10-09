@@ -16,7 +16,7 @@ import Base from 'AppComponents/Base';
 import AuthManager from 'AppData/AuthManager';
 import Header from 'AppComponents/Base/Header';
 import Avatar from 'AppComponents/Base/Header/avatar/Avatar';
-import Configurations from "Config";
+import Configurations from 'Config';
 
 const themes = [];
 
@@ -100,9 +100,8 @@ export default class Protected extends Component {
      * Change the theme index incrementally
      */
     toggleTheme() {
-        this.setState({theme: themes[this.state.themeIndex % 3]});
         this.state.themeIndex++;
-        localStorage.setItem("themeIndex", this.state.themeIndex);
+        localStorage.setItem('themeIndex', this.state.themeIndex);
     }
 
     /**

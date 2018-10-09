@@ -23,55 +23,55 @@ import { withStyles } from '@material-ui/core/styles';
 
 const styles = theme => ({
     appBar: {
-        position: "relative",
-        background: theme.palette.background.appBar
-      },
-      icon: {
-        marginRight: theme.spacing.unit * 2
-      },
-      menuIcon: {
+        position: 'relative',
+        background: theme.palette.background.appBar,
+    },
+    icon: {
+        marginRight: theme.spacing.unit * 2,
+    },
+    menuIcon: {
         color: theme.palette.getContrastText(theme.palette.background.appBar),
-        fontSize: 35
-      },
-      userLink: {
-        color: theme.palette.getContrastText(theme.palette.background.appBar)
-      },
+        fontSize: 35,
+    },
+    userLink: {
+        color: theme.palette.getContrastText(theme.palette.background.appBar),
+    },
     // Page layout styles
-      drawer: {
-        top: 64
-      },
-      wrapper: {
-        minHeight: "100%",
+    drawer: {
+        top: 64,
+    },
+    wrapper: {
+        minHeight: '100%',
         marginBottom: -50,
-        background: 'transparent url('+ theme.custom.backgroundImage +') repeat left top',
-      },
-      contentWrapper: {
+        background: 'transparent url(" + theme.custom.backgroundImage + ") repeat left top',
+    },
+    contentWrapper: {
         display: 'flex',
         flexDirection: 'row',
         overflow: 'auto',
         position: 'relative',
         minHeight: 'calc(100vh - 114px)',
-      },
-      push: {
-        height: 50
-      },
-      footer: {
-        backgroundColor: theme.palette.grey["A100"],
+    },
+    push: {
+        height: 50,
+    },
+    footer: {
+        backgroundColor: theme.palette.grey.A100,
         paddingLeft: theme.spacing.unit * 3,
         height: 50,
         alignItems: 'center',
         display: 'flex',
-      },
-      toolbar: {
+    },
+    toolbar: {
         minHeight: 56,
-        [`${theme.breakpoints.up("xs")} and (orientation: landscape)`]: {
-          minHeight: 48
+        [`${theme.breakpoints.up('xs')} and (orientation: landscape)`]: {
+            minHeight: 48,
         },
-        [theme.breakpoints.up("sm")]: {
-          minHeight: 64
-        }
-      },
-  });
+        [theme.breakpoints.up('sm')]: {
+            minHeight: 64,
+        },
+    },
+});
 
 /**
  * Base Component for the publisher app
@@ -86,14 +86,12 @@ const Base = ({ classes, children, header }) => {
         <Fragment>
             <div className={classes.wrapper}>
                 {header}
-                <div className={classes.contentWrapper}>
-                    {children}
-                </div>
-           
+                <div className={classes.contentWrapper}>{children}</div>
+
                 <div className={classes.push} />
             </div>
             <footer className={classes.footer}>
-                <Typography noWrap>{'WSO2 APIM v3.0.0 | © 2018 WSO2 Inc'}</Typography>
+                <Typography noWrap>WSO2 APIM v3.0.0 | © 2018 WSO2 Inc</Typography>
             </footer>
         </Fragment>
     );

@@ -1,11 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ListItem, ListItemIcon, ListItemText, withStyles } from '@material-ui/core/';
+import { withStyles } from '@material-ui/core/';
 import Typography from '@material-ui/core/Typography';
 import { Link } from 'react-router-dom';
 import classNames from 'classnames';
 import CustomIcon from '../../../Shared/CustomIcon';
-
 
 const styles = theme => ({
     leftLInkText: {
@@ -26,11 +25,11 @@ const styles = theme => ({
     },
     leftLInk: {
         paddingTop: theme.spacing.unit,
-        paddingBottom: theme.spacing.unit,  
+        paddingBottom: theme.spacing.unit,
         paddingLeft: theme.spacing.unit,
         paddingRight: theme.spacing.unit,
         fontSize: theme.typography.caption.fontSize,
-        cursor: 'pointer'
+        cursor: 'pointer',
     },
     leftLink_IconLeft: {
         display: 'flex',
@@ -47,8 +46,8 @@ const styles = theme => ({
     },
     leftLInkMain: {
         borderRight: 'solid 1px ' + theme.palette.background.leftMenu,
-        paddingBottom: theme.spacing.unit,  
-        paddingTop: theme.spacing.unit,  
+        paddingBottom: theme.spacing.unit,
+        paddingTop: theme.spacing.unit,
         cursor: 'pointer',
         backgroundColor: theme.palette.background.leftMenuActive,
         color: theme.palette.getContrastText(theme.palette.background.leftMenuActive),
@@ -61,32 +60,42 @@ const NavItem = (props) => {
         listItemProps, listItemTextProps, iconProps, classes, theme, ...other
     } = props;
     const {
-        selected, name, onClick, linkTo, NavIcon,
+        selected, name, linkTo, NavIcon,
     } = other;
-    const leftMenu = theme.custom.leftMenu;
-    const strokeColor = theme.palette.getContrastText(theme.palette.background.leftMenu);
-    const iconSize = theme.custom.leftMenuIconSize;
-    const leftMenuIconMainSize = theme.custom.leftMenuIconMainSize;
-
+    const { leftMenu, leftMenuIconMainSize } = theme.custom;
 
     return linkTo ? (
-        <div className={classNames(classes.leftLInk, {
-            [classes.leftLink_IconLeft]: leftMenu === 'icon left',
-                }, "leftLInk")} 
-            style={{backgroundColor: selected ? theme.palette.background.appBar : ''}}
-            >
-            <Link to={linkTo} className={classNames(classes.leftLinkAnchor, "leftLinkAnchor") }>
+        <div
+            className={classNames(
+                classes.leftLInk,
+                {
+                    [classes.leftLink_IconLeft]: leftMenu === 'icon left',
+                },
+                'leftLInk',
+            )}
+            style={{ backgroundColor: selected ? theme.palette.background.appBar : '' }}
+        >
+            <Link to={linkTo} className={classNames(classes.leftLinkAnchor, 'leftLinkAnchor')}>
                 {NavIcon}
-                <Typography className={classNames(classes.leftLInkText, {
-                [classes.leftLInkText_IconLeft]: leftMenu === 'icon left',
-                [classes.leftLInkText_NoText]: leftMenu === 'no text',
-                    }, "leftLInkText")}  style={{textTransform:'uppercase'}}>{name}</Typography>
+                <Typography
+                    className={classNames(
+                        classes.leftLInkText,
+                        {
+                            [classes.leftLInkText_IconLeft]: leftMenu === 'icon left',
+                            [classes.leftLInkText_NoText]: leftMenu === 'no text',
+                        },
+                        'leftLInkText',
+                    )}
+                    style={{ textTransform: 'uppercase' }}
+                >
+                    {name}
+                </Typography>
             </Link>
         </div>
     ) : (
-        <Link to={"/apis"}>
+        <Link to='/apis'>
             <div className={classes.leftLInkMain}>
-                <CustomIcon width={leftMenuIconMainSize} height={leftMenuIconMainSize} icon="api" />
+                <CustomIcon width={leftMenuIconMainSize} height={leftMenuIconMainSize} icon='api' />
             </div>
         </Link>
     );
@@ -110,6 +119,7 @@ NavItem.propTypes = {
     linkTo: PropTypes.string,
     classes: PropTypes.shape({}).isRequired,
     selected: PropTypes.bool,
+    theme: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles, {withTheme: true})(NavItem);
+export default withStyles(styles, { withTheme: true })(NavItem);

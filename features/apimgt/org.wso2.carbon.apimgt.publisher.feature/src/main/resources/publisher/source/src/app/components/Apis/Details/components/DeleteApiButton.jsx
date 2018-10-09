@@ -16,45 +16,44 @@ const styles = theme => ({
     root: {
         height: 70,
         background: theme.palette.background.paper,
-        borderBottom: "solid 1px " + theme.palette.grey["A200"],
-        display: "flex",
-        alignItems: "center"
+        borderBottom: 'solid 1px ' + theme.palette.grey.A200,
+        display: 'flex',
+        alignItems: 'center',
     },
     backLink: {
-        alignItems: "center",
-        textDecoration: "none",
-        display: "flex"
+        alignItems: 'center',
+        textDecoration: 'none',
+        display: 'flex',
     },
     backIcon: {
-      color: theme.palette.primary.main,
-      fontSize: 56,
-      cursor: "pointer"
+        color: theme.palette.primary.main,
+        fontSize: 56,
+        cursor: 'pointer',
     },
     backText: {
-      color: theme.palette.primary.main,
-      cursor: "pointer",
-      fontFamily: theme.typography.fontFamily
+        color: theme.palette.primary.main,
+        cursor: 'pointer',
+        fontFamily: theme.typography.fontFamily,
     },
     deleteWrapper: {
         flex: 1,
         display: 'flex',
         justifyContent: 'flex-end',
-        paddingRight: theme.spacing.unit*2,
+        paddingRight: theme.spacing.unit * 2,
     },
     delete: {
-        display: "flex",
+        display: 'flex',
         flexDirection: 'column',
-        color: theme.palette.getContrastText(theme.palette.background.paper),
         textAlign: 'center',
-        color: '#ed4242',
+        color: theme.custom.deleteButtonColor,
         justifyContent: 'center',
         cursor: 'pointer',
     },
     linkText: {
         fontSize: theme.typography.fontSize,
     },
-  });
-  
+});
+
 /**
  * Handle Delete an API from API Overview/Details page
  *
@@ -120,26 +119,24 @@ class DeleteApiButton extends React.Component {
      * @memberof DeleteApiButton
      */
     render() {
-        const { api, buttonClass, onClick, classes } = this.props;
+        const {
+            api, onClick, classes,
+        } = this.props;
         const deleteHandler = onClick || this.handleApiDelete;
         return (
             <React.Fragment>
                 {/* allowing delete based on scopes */}
                 <ScopeValidation resourceMethod={resourceMethod.DELETE} resourcePath={resourcePath.SINGLE_API}>
-                    <ApiPermissionValidation
-                        checkingPermissionType={ApiPermissionValidation.permissionType.DELETE}
-                        userPermissions={api.userPermissionsForApi}
-                    >
-                    <div className={classes.deleteWrapper}>
-                        <VerticalDivider height={70} />
-                        <a
-                            onClick={this.handleRequestOpen}
-                            className={classes.delete}
-                        >
-                            <div><DeleteIcon /></div>
-                            <div className={classes.linkText}>Delete</div>
-                        </a>
-                    </div>
+                    <ApiPermissionValidation checkingPermissionType={ApiPermissionValidation.permissionType.DELETE} userPermissions={api.userPermissionsForApi}>
+                        <div className={classes.deleteWrapper}>
+                            <VerticalDivider height={70} />
+                            <a onClick={this.handleRequestOpen} onKeyDown={this.handleRequestOpen} className={classes.delete}>
+                                <div>
+                                    <DeleteIcon />
+                                </div>
+                                <div className={classes.linkText}>Delete</div>
+                            </a>
+                        </div>
                     </ApiPermissionValidation>
                 </ScopeValidation>
                 <Dialog open={this.state.openMenu} transition={Slide}>
@@ -165,7 +162,6 @@ class DeleteApiButton extends React.Component {
 }
 
 DeleteApiButton.defaultProps = {
-    buttonClass: '',
     onClick: false,
 };
 
@@ -174,9 +170,8 @@ DeleteApiButton.propTypes = {
         delete: PropTypes.func,
     }).isRequired,
     history: PropTypes.shape({ push: PropTypes.func }).isRequired,
-    buttonClass: PropTypes.string,
     onClick: PropTypes.func,
-    classes: PropTypes.object.isRequired,
+    classes: PropTypes.shape({}).isRequired,
 };
 
-export default withRouter(withStyles(styles, {withTheme: true})(DeleteApiButton));
+export default withRouter(withStyles(styles, { withTheme: true })(DeleteApiButton));

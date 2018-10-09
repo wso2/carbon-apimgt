@@ -1,5 +1,4 @@
 import React, { Fragment } from 'react';
-import { Grid } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 
@@ -19,7 +18,7 @@ const styles = theme => ({
         flex: 1,
         flexDirection: 'column',
         marginLeft: theme.custom.leftMenuWidth,
-        paddingBottom:  theme.spacing.unit*3,  
+        paddingBottom: theme.spacing.unit * 3,
     },
 });
 
@@ -38,17 +37,11 @@ const Container = (props) => {
     } = props;
     return (
         <Fragment>
-            <div className={classes.LeftMenu}>
-                {pageNav}  
-            </div>
-              <div className={classes.content}>
-                {pageTopMenu && (
-                    <Fragment>
-                        {pageTopMenu}
-                    </Fragment>
-                )}
+            <div className={classes.LeftMenu}>{pageNav}</div>
+            <div className={classes.content}>
+                {pageTopMenu && <Fragment>{pageTopMenu}</Fragment>}
                 {children}
-              </div>
+            </div>
         </Fragment>
     );
 };
