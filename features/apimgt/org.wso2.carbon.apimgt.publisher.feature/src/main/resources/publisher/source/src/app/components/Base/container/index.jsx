@@ -1,21 +1,24 @@
 import React, { Fragment } from 'react';
-import { Grid } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 
 const styles = theme => ({
-    pageNav: {},
-    pageContent: {
-        padding: theme.spacing.unit * 3,
+    LeftMenu: {
+        backgroundColor: theme.palette.background.leftMenu,
+        width: theme.custom.leftMenuWidth,
+        textAlign: 'center',
+        fontFamily: theme.typography.fontFamily,
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        top: 0,
     },
-    pageContainer: {
-        background: theme.palette.background.container,
-    },
-    pageTopMenu: {
-        boxSizing: 'border-box',
-        height: '100px',
-        borderBottom: '1px solid',
-        padding: '10px 10px 0px 10px',
+    content: {
+        display: 'flex',
+        flex: 1,
+        flexDirection: 'column',
+        marginLeft: theme.custom.leftMenuWidth,
+        paddingBottom: theme.spacing.unit * 3,
     },
 });
 
@@ -34,21 +37,11 @@ const Container = (props) => {
     } = props;
     return (
         <Fragment>
-            <Grid item xs={2} sm={1} md={2} lg={2}>
-                {pageNav}
-            </Grid>
-            <Grid item className={classes.pageContainer} xs={10} sm={11} md={10} lg={10}>
-                <Grid className={classes.pageContainer} container>
-                    {pageTopMenu && (
-                        <Grid className={classes.pageTopMenu} item container xs={12} sm={12} md={12} lg={12}>
-                            {pageTopMenu}
-                        </Grid>
-                    )}
-                    <Grid className={classes.pageContent} item xs={12} sm={12} md={12} lg={12}>
-                        {children}
-                    </Grid>
-                </Grid>
-            </Grid>
+            <div className={classes.LeftMenu}>{pageNav}</div>
+            <div className={classes.content}>
+                {pageTopMenu && <Fragment>{pageTopMenu}</Fragment>}
+                {children}
+            </div>
         </Fragment>
     );
 };

@@ -1,8 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import Drawer from '@material-ui/core/Drawer';
-import List from '@material-ui/core/List';
 
 const styles = theme => ({
     root: {
@@ -43,20 +41,11 @@ const styles = theme => ({
  * @returns {React.Component} @inheritdoc
  */
 const PageNav = (props) => {
-    const { classes, section, navItems } = props;
+    const { navItems } = props;
     return (
-        <div className={classes.root}>
-            <Drawer
-                variant='permanent'
-                classes={{
-                    paper: classes.drawerPaper,
-                }}
-            >
-                <div className={classes.toolbar} />
-                <List className={classes.section}>{section}</List>
-                <List>{navItems}</List>
-            </Drawer>
-        </div>
+        <React.Fragment>
+            {navItems}
+        </React.Fragment>
     );
 };
 
@@ -65,7 +54,6 @@ PageNav.defaultProps = {
 };
 PageNav.propTypes = {
     classes: PropTypes.shape({}).isRequired,
-    section: PropTypes.element.isRequired,
     navItems: PropTypes.arrayOf(PropTypes.element),
 };
 

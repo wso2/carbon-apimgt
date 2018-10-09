@@ -1,12 +1,12 @@
 import React from 'react';
-import { IconButton, Toolbar, AppBar, Typography } from '@material-ui/core';
+import { IconButton, Toolbar, AppBar } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 import MenuIcon from '@material-ui/icons/Menu';
 import SearchIcon from '@material-ui/icons/SearchOutlined';
 import Hidden from '@material-ui/core/Hidden';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-import User from 'AppData/User';
+import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 
 import Avatar from './avatar/Avatar';
 import HeaderSearch from './headersearch/HeaderSearch';
@@ -15,6 +15,8 @@ import GlobalNavBar from './navbar/GlobalNavBar';
 const styles = theme => ({
     appBar: {
         zIndex: theme.zIndex.modal + 1,
+        position: 'relative',
+        background: theme.palette.background.appBar,
     },
     typoRoot: {
         marginLeft: theme.spacing.unit * 3,
@@ -23,6 +25,19 @@ const styles = theme => ({
     },
     brandLink: {
         color: theme.palette.primary.contrastText,
+    },
+    toolbar: {
+        minHeight: 56,
+        [`${theme.breakpoints.up('xs')} and (orientation: landscape)`]: {
+            minHeight: 48,
+        },
+        [theme.breakpoints.up('sm')]: {
+            minHeight: 64,
+        },
+    },
+    menuIcon: {
+        color: theme.palette.getContrastText(theme.palette.background.appBar),
+        fontSize: 35,
     },
 });
 
@@ -71,35 +86,32 @@ class Header extends React.Component {
      */
     render() {
         const { openNavBar, smScreen } = this.state;
-        const { classes, avatar, user } = this.props;
+        const { classes, avatar, theme } = this.props;
         return (
-            <div>
+            <React.Fragment>
                 <AppBar className={classes.appBar} position='fixed'>
-                    <Toolbar>
-                        <IconButton onClick={this.toggleGlobalNavBar} color='inherit'>
-                            <MenuIcon style={{ fontSize: 35 }} />
+                    <Toolbar className={classes.toolbar}>
+                        <IconButton onClick={this.toggleGlobalNavBar}>
+                            <MenuIcon className={classes.menuIcon} />
                         </IconButton>
-                        <Typography style={{ flexGrow: '1' }} color='inherit' variant='title'>
-                            <Link className={classes.brandLink} to='/'>
-                                WSO2 API Publisher
-                            </Link>
-                        </Typography>
-
+                        <Link to='/'>
+                            <img src={theme.custom.logo} alt={theme.custom.title} />
+                        </Link>
+                        <VerticalDivider height={32} />
                         <Hidden smDown>
                             <HeaderSearch />
                         </Hidden>
                         <Hidden mdUp>
                             <IconButton onClick={this.toggleSmSearch} color='inherit'>
-                                <SearchIcon style={{ fontSize: 35 }} />
+                                <SearchIcon className={classes.menuIcon} />
                             </IconButton>
                             {smScreen && <HeaderSearch toggleSmSearch={this.toggleSmSearch} smSearch={smScreen} />}
                         </Hidden>
-                        <div className={classes.typoRoot}>{user.name}</div>
                         {avatar}
                     </Toolbar>
                 </AppBar>
                 <GlobalNavBar toggleGlobalNavBar={this.toggleGlobalNavBar} open={openNavBar} />
-            </div>
+            </React.Fragment>
         );
     }
 }
@@ -110,7 +122,7 @@ Header.defaultProps = {
 Header.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     avatar: PropTypes.element,
-    user: PropTypes.instanceOf(User).isRequired,
+    theme: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles)(Header);
+export default withStyles(styles, { withTheme: true })(Header);

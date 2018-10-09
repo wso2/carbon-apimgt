@@ -18,18 +18,57 @@
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { Grid } from '@material-ui/core';
+import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
 
 const styles = theme => ({
-    baseContainer: {
-        height: '100vh',
-        paddingTop: 56,
+    appBar: {
+        position: 'relative',
+        background: theme.palette.background.appBar,
+    },
+    icon: {
+        marginRight: theme.spacing.unit * 2,
+    },
+    menuIcon: {
+        color: theme.palette.getContrastText(theme.palette.background.appBar),
+        fontSize: 35,
+    },
+    userLink: {
+        color: theme.palette.getContrastText(theme.palette.background.appBar),
+    },
+    // Page layout styles
+    drawer: {
+        top: 64,
+    },
+    wrapper: {
+        minHeight: '100%',
+        marginBottom: -50,
+        background: 'transparent url(" + theme.custom.backgroundImage + ") repeat left top',
+    },
+    contentWrapper: {
+        display: 'flex',
+        flexDirection: 'row',
+        overflow: 'auto',
+        position: 'relative',
+        minHeight: 'calc(100vh - 114px)',
+    },
+    push: {
+        height: 50,
+    },
+    footer: {
+        backgroundColor: theme.palette.grey.A100,
+        paddingLeft: theme.spacing.unit * 3,
+        height: 50,
+        alignItems: 'center',
+        display: 'flex',
+    },
+    toolbar: {
+        minHeight: 56,
         [`${theme.breakpoints.up('xs')} and (orientation: landscape)`]: {
-            paddingTop: 48,
+            minHeight: 48,
         },
         [theme.breakpoints.up('sm')]: {
-            paddingTop: 64,
+            minHeight: 64,
         },
     },
 });
@@ -45,10 +84,15 @@ const styles = theme => ({
 const Base = ({ classes, children, header }) => {
     return (
         <Fragment>
-            {header}
-            <Grid classes={{ container: classes.baseContainer }} container>
-                {children}
-            </Grid>
+            <div className={classes.wrapper}>
+                {header}
+                <div className={classes.contentWrapper}>{children}</div>
+
+                <div className={classes.push} />
+            </div>
+            <footer className={classes.footer}>
+                <Typography noWrap>WSO2 APIM v3.0.0 | © 2018 WSO2 Inc</Typography>
+            </footer>
         </Fragment>
     );
 };

@@ -18,26 +18,36 @@
 import React from 'react';
 
 import { Route, Switch } from 'react-router-dom';
+import { withStyles } from '@material-ui/core/styles';
+import PropTypes from 'prop-types';
+
 import ApiCreateEndpoint from './Endpoint/ApiCreateEndpoint';
-import ApiCreateWebSocket from './WebSocket/ApiCreateWebSocket';
 import ApiCreateSwagger from './Swagger/ApiCreateSwagger';
 import ApiCreateWSDL from './WSDL/ApiCreateWSDL';
-
-import APICreateNavBar from './Components/APICreateNavBar';
 import APICreateTopMenu from './Components/APICreateTopMenu';
-import PageContainer from '../../Base/container/';
 
-const ApiCreate = () => {
+const styles = {
+    content: {
+        flexGrow: 1,
+    },
+};
+
+function ApiCreate(props) {
+    const { classes } = props;
     return (
-        <PageContainer pageNav={<APICreateNavBar />} pageTopMenu={<APICreateTopMenu />}>
+        <main className={classes.content}>
+            <APICreateTopMenu />
             <Switch>
                 <Route path='/apis/create/rest' component={ApiCreateEndpoint} />
-                <Route path='/apis/create/websocket' component={ApiCreateWebSocket} />
                 <Route path='/apis/create/swagger' component={ApiCreateSwagger} />
                 <Route path='/apis/create/wsdl' component={ApiCreateWSDL} />
             </Switch>
-        </PageContainer>
+        </main>
     );
+}
+
+ApiCreate.propTypes = {
+    classes: PropTypes.shape({}).isRequired,
 };
 
-export default ApiCreate;
+export default withStyles(styles)(ApiCreate);

@@ -11,22 +11,24 @@ import {
     ListItemText,
     Divider,
 } from '@material-ui/core';
-import AccountCircle from '@material-ui/icons/Person';
+import AccountCircle from '@material-ui/icons/AccountCircle';
 import NightMode from '@material-ui/icons/Brightness2';
 import { withStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
 import qs from 'qs';
 
 const styles = theme => ({
-    profileCircle: {
-        width: '50px',
-        'border-radius': '50%',
-        'vertical-align': 'middle',
-        border: '1px solid #eee',
-    },
     profileMenu: {
         zIndex: theme.zIndex.modal + 1,
         paddingTop: '5px',
+    },
+    userLink: {
+        color: theme.palette.getContrastText(theme.palette.background.appBar),
+        fontSize: theme.typography.fontSize,
+        textTransform: 'uppercase',
+    },
+    accountIcon: {
+        marginRight: 10,
     },
 });
 
@@ -71,21 +73,22 @@ class Avatar extends Component {
      * @memberof Avatar
      */
     render() {
-        const { classes } = this.props;
+        const { classes, user } = this.props;
         const { pathname } = window.location;
         const params = qs.stringify({
             referrer: pathname.split('/').reduce((acc, cv, ci) => (ci <= 1 ? '' : acc + '/' + cv)),
         });
         const { openMenu, profileIcon } = this.state;
         return (
-            <div>
+            <React.Fragment>
                 <IconButton
                     aria-owns='profile-menu-appbar'
                     aria-haspopup='true'
                     color='inherit'
                     onClick={this.toggleMenu}
+                    className={classes.userLink}
                 >
-                    <AccountCircle className={classes.profileCircle} style={{ fontSize: '45' }} />
+                    <AccountCircle className={classes.accountIcon} /> {user.name}
                 </IconButton>
                 <Popper className={classes.profileMenu} open={openMenu} anchorEl={profileIcon} transition>
                     {({ TransitionProps }) => (
@@ -112,7 +115,7 @@ class Avatar extends Component {
                         </Fade>
                     )}
                 </Popper>
-            </div>
+            </React.Fragment>
         );
     }
 }
