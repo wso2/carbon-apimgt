@@ -128,6 +128,7 @@ import java.util.UUID;
  */
 public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMObservable {
 
+    private static final String ENTRY_POINT_STORE = "APIStore";
     // Map to store observers, which observe APIStore events
     private Map<String, EventObserver> eventObservers = new HashMap<>();
 
@@ -829,6 +830,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         validateCommentMaxCharacterLength(comment.getCommentText());
         String generatedUuid = UUID.randomUUID().toString();
         comment.setUuid(generatedUuid);
+        comment.setEntryPoint(ENTRY_POINT_STORE);
         try {
             failIfApiNotExists(apiId);
             getApiDAO().addComment(comment, apiId);
@@ -848,8 +850,10 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             failIfApiNotExists(apiId);
             Comment comment = apiDAO.getCommentByUUID(commentId, apiId);
             if (comment != null) {
-                // if the delete operation is done by a user who isn't the owner of the comment
-                if (!comment.getCommentedUser().equals(username)) {
+                  /*if the delete operation is done by a user who isn't the owner of the comment
+                  and with a different end point*/
+                if (!(comment.getCommentedUser().equals(username) &&
+                        comment.getEntryPoint().equals(ENTRY_POINT_STORE))) {
                     checkIfUserIsCommentModerator(username);
                 }
                 apiDAO.deleteComment(commentId, apiId);
@@ -873,9 +877,13 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             failIfApiNotExists(apiId);
             Comment oldComment = getApiDAO().getCommentByUUID(commentId, apiId);
             if (oldComment != null) {
-                // if the update operation is done by a user who isn't the owner of the comment
-                if (!oldComment.getCommentedUser().equals(username)) {
-                    checkIfUserIsCommentModerator(username);
+               /*if the update operation is done by a user who isn't the owner of the comment
+                  and with a different end point*/
+                if (!(oldComment.getCommentedUser().equals(username) &&
+                        oldComment.getEntryPoint().equals(ENTRY_POINT_STORE))) {
+                    String errorMsg = "The user " + username + " does not have permission to update this comment";
+                    log.error(errorMsg);
+                    throw new APICommentException(errorMsg, ExceptionCodes.NO_UPDATE_PERMISSIONS);
                 }
                 getApiDAO().updateComment(comment, commentId, apiId);
             } else {

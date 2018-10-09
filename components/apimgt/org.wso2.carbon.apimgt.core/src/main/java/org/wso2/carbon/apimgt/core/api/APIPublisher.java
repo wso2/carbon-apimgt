@@ -20,11 +20,14 @@
 
 package org.wso2.carbon.apimgt.core.api;
 
+import org.wso2.carbon.apimgt.core.exception.APICommentException;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtWSDLException;
 import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Label;
@@ -632,7 +635,7 @@ public interface APIPublisher extends APIManager {
      * @return Scope object which contains relevant details.
      * @throws APIManagementException If an error occured while retrieving scope information
      */
-    Scope getScopeInformationOfApi(String apiId, String scopeName) throws APIManagementException;
+        Scope getScopeInformationOfApi(String apiId, String scopeName) throws APIManagementException;
 
     /**
      * Create Scope for API
@@ -660,4 +663,62 @@ public interface APIPublisher extends APIManager {
      * @throws APIManagementException If an error occurred while deleting scope
      */
     void deleteScopeFromApi(String apiId, String scopeName) throws APIManagementException;
+
+    /**
+     * Add comment for an API
+     *
+     * @param comment the comment text
+     * @param apiId   UUID of the API
+     * @return String UUID of the created comment
+     * @throws APICommentException if failed to add a comment
+     * @throws APIMgtResourceNotFoundException if api not found
+     */
+    String addComment(Comment comment, String apiId) throws APICommentException, APIMgtResourceNotFoundException;
+
+    /**
+     * Delete a comment from an API given the commentId and apiId
+     *
+     * @param commentId UUID of the comment to be deleted
+     * @param apiId     UUID of the api
+     * @param username  username of the consumer
+     * @throws APICommentException             if failed to delete a comment
+     * @throws APIMgtResourceNotFoundException if api or comment not found
+     */
+     void deleteComment(String commentId, String apiId, String username) throws APICommentException,
+            APIMgtResourceNotFoundException;
+
+    /**
+     * Update a comment
+     *
+     * @param comment   new Comment object
+     * @param commentId the id of the comment which needs to be updated
+     * @param apiId     UUID of the api the comment belongs to
+     * @param username  username of the consumer
+     * @throws APICommentException if failed to update a comment
+     * @throws APIMgtResourceNotFoundException if api or comment not found
+     */
+    void updateComment(Comment comment, String commentId, String apiId, String username) throws APICommentException,
+            APIMgtResourceNotFoundException;
+
+    /**
+     * Retrieve list of comments for a given apiId
+     *
+     * @param apiId UUID of the api
+     * @return a list of comments for the api
+     * @throws APICommentException if failed to retrieve all comments for an api
+     * @throws APIMgtResourceNotFoundException if api not found
+     */
+    List<Comment> getCommentsForApi(String apiId) throws APICommentException, APIMgtResourceNotFoundException;
+
+    /**
+     * Retrieve Individual Comment based on Comment ID
+     *
+     * @param commentId UUID od the comment
+     * @param apiId     UUID of the API
+     * @return Comment Object.
+     * @throws APICommentException if failed to retrieve comment from data layer
+     * @throws APIMgtResourceNotFoundException if api or comment was not found
+     */
+    Comment getCommentByUUID(String commentId, String apiId) throws APICommentException,
+            APIMgtResourceNotFoundException;
 }

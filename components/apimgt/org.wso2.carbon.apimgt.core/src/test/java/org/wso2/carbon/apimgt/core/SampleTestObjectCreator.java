@@ -1128,6 +1128,8 @@ public class SampleTestObjectCreator {
         comment.setUuid(UUID.randomUUID().toString());
         comment.setApiId(apiId);
         comment.setCommentText("this is a sample comment");
+        comment.setCategory("sample category");
+        comment.setParentCommentId(UUID.randomUUID().toString());
         comment.setCommentedUser("admin");
         comment.setUpdatedUser("admin");
         comment.setCreatedTime(time);
@@ -1141,6 +1143,8 @@ public class SampleTestObjectCreator {
         comment.setUuid(UUID.randomUUID().toString());
         comment.setApiId(apiId);
         comment.setCommentText("this is a sample comment - alternative");
+        comment.setCategory("sample alternative category");
+        comment.setParentCommentId(UUID.randomUUID().toString());
         comment.setCommentedUser("admin");
         comment.setUpdatedUser("admin");
         comment.setCreatedTime(time);

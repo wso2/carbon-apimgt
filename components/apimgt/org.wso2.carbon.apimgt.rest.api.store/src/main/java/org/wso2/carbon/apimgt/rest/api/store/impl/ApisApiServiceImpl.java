@@ -223,7 +223,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
 
     /**
-     * Update a comment
+     * Add a new comment
      *
      * @param apiId   API ID
      * @param body    comment body
@@ -268,6 +268,8 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     /**
+     * Update a comment
+     *
      * @param commentId         Comment ID
      * @param apiId             API ID
      * @param body              comment body

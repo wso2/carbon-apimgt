@@ -17,19 +17,20 @@
  *  under the License.
  *
  */
-package org.wso2.carbon.apimgt.rest.api.store.mappings;
+package org.wso2.carbon.apimgt.rest.api.publisher.mappings;
 
-import org.junit.Assert;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.testng.Assert;
 import org.wso2.carbon.apimgt.core.api.UserNameMapper;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
-import org.wso2.carbon.apimgt.rest.api.store.dto.CommentDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.CommentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.CommentDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.CommentListDTO;
 
 import java.lang.reflect.Field;
 import java.time.Instant;
@@ -61,7 +62,7 @@ public class CommentMappingUtilTestCase {
         comment.setCommentText("this is a comment");
         comment.setCategory("testingCategory");
         comment.setParentCommentId("");
-        comment.setEntryPoint("APIStore");
+        comment.setEntryPoint("APIPublisher");
         comment.setCreatedUser("createdUser");
         comment.setUpdatedUser("updatedUser");
         comment.setCreatedTime(time);
@@ -83,7 +84,7 @@ public class CommentMappingUtilTestCase {
         commentDTO.setCommentText("comment text");
         commentDTO.setCategory("testingCategory");
         commentDTO.setParentCommentId("");
-        commentDTO.setEntryPoint("APIStore");
+        commentDTO.setEntryPoint("APIPublisher");
         commentDTO.setCreatedBy("creater");
         commentDTO.setLastUpdatedBy("updater");
 
@@ -103,7 +104,7 @@ public class CommentMappingUtilTestCase {
         comment1.setCommentText("this is a comment 1");
         comment1.setCategory("testingCategory1");
         comment1.setParentCommentId("");
-        comment1.setEntryPoint("APIStore");
+        comment1.setEntryPoint("APIPublisher");
         comment1.setCreatedUser("createdUser1");
         comment1.setUpdatedUser("updatedUser1");
         comment1.setCreatedTime(time);
@@ -116,7 +117,7 @@ public class CommentMappingUtilTestCase {
         comment2.setCommentText("this is a comment 2");
         comment2.setCategory("testingCategory1");
         comment2.setParentCommentId("");
-        comment2.setEntryPoint("APIStore");
+        comment2.setEntryPoint("APIPublisher");
         comment2.setCreatedUser("createdUser2");
         comment2.setUpdatedUser("updatedUser2");
         comment2.setCreatedTime(time);

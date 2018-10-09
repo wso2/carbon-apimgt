@@ -16,15 +16,16 @@
  *  under the License.
  *
  */
-package org.wso2.carbon.apimgt.rest.api.store.mappings;
+package org.wso2.carbon.apimgt.rest.api.publisher.mappings;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.Comment;
-import org.wso2.carbon.apimgt.rest.api.store.dto.CommentDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.CommentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.CommentDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.CommentListDTO;
+
 
 import java.util.ArrayList;
 import java.util.List;

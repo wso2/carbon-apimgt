@@ -52,6 +52,7 @@ import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.RatingDTO;
+import org.wso2.carbon.apimgt.rest.api.store.mappings.CommentMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.RatingMappingUtil;
 import org.wso2.msf4j.Request;
 import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
@@ -70,7 +71,7 @@ import javax.ws.rs.core.Response;
 import static junit.framework.TestCase.assertEquals;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({RestApiUtil.class, APIManagerFactory.class})
+@PrepareForTest({RestApiUtil.class, CommentMappingUtil.class, APIManagerFactory.class})
 public class ApisApiServiceImplTestCase {
 
     private final static Logger logger = LoggerFactory.getLogger(ApisApiServiceImplTestCase.class);
@@ -175,6 +176,109 @@ public class ApisApiServiceImplTestCase {
     }
 
     @Test
+    public void apisApiIdCommentsPost() throws Exception {
+        printTestMethodName();
+        String apiId = UUID.randomUUID().toString();
+        String commentId = UUID.randomUUID().toString();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
+
+        CommentDTO commentDTO = new CommentDTO();
+        commentDTO.setApiId(apiId);
+        commentDTO.setCommentId(commentId);
+        commentDTO.setCommentText("comment text");
+        commentDTO.setCategory("testCategory");
+        commentDTO.setParentCommentId("");
+        commentDTO.setEntryPoint("APIStore");
+        commentDTO.setCreatedBy("creater");
+        commentDTO.setLastUpdatedBy("updater");
+
+        Instant time = APIUtils.getCurrentUTCTime();
+        Comment comment = new Comment();
+        comment.setUuid(commentId);
+        comment.setApiId(apiId);
+        comment.setCommentedUser("commentedUser");
+        comment.setCommentText("this is a comment");
+        comment.setCategory("testCategory");
+        comment.setParentCommentId("");
+        comment.setEntryPoint("APIStore");
+        comment.setCreatedUser("createdUser");
+        comment.setUpdatedUser("updatedUser");
+        comment.setCreatedTime(time);
+        comment.setUpdatedTime(time);
+
+        Mockito.when(apiStore.addComment(comment,apiId)).thenReturn(commentId);
+        Mockito.when(apiStore.getCommentByUUID(commentId, apiId)).thenReturn(comment);
+
+        PowerMockito.mockStatic(CommentMappingUtil.class);
+        PowerMockito.when(CommentMappingUtil.fromDTOToComment(commentDTO,USER)).thenReturn(comment);
+        PowerMockito.when(CommentMappingUtil.fromCommentToDTO(comment)).thenReturn(commentDTO);
+
+        Response response = apisApiService.apisApiIdCommentsPost
+                (apiId,commentDTO,request);
+
+        Assert.assertEquals(201, response.getStatus());
+    }
+
+    @Test
+    public void apisApiIdCommentsPostErrorCase() throws Exception {
+        printTestMethodName();
+        String apiId = UUID.randomUUID().toString();
+        String commentId = UUID.randomUUID().toString();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
+
+        CommentDTO commentDTO = new CommentDTO();
+        commentDTO.setApiId(apiId);
+        commentDTO.setCommentId(commentId);
+        commentDTO.setCommentText("comment text");
+        commentDTO.setCategory("testCategory");
+        commentDTO.setParentCommentId("");
+        commentDTO.setEntryPoint("APIStore");
+        commentDTO.setCreatedBy("creater");
+        commentDTO.setLastUpdatedBy("updater");
+
+        Instant time = APIUtils.getCurrentUTCTime();
+        Comment comment = new Comment();
+        comment.setUuid(commentId);
+        comment.setApiId(apiId);
+        comment.setCommentedUser("commentedUser");
+        comment.setCommentText("this is a comment");
+        comment.setCategory("testCategory");
+        comment.setParentCommentId("");
+        comment.setEntryPoint("APIStore");
+        comment.setCreatedUser("createdUser");
+        comment.setUpdatedUser("updatedUser");
+        comment.setCreatedTime(time);
+        comment.setUpdatedTime(time);
+
+        Mockito.doThrow(new APICommentException("Error occurred", ExceptionCodes.INTERNAL_ERROR))
+                .when(apiStore).addComment(comment,apiId);
+        Mockito.doThrow(new APICommentException("Error occurred", ExceptionCodes.INTERNAL_ERROR))
+                .when(apiStore).getCommentByUUID(commentId, apiId);
+
+        PowerMockito.mockStatic(CommentMappingUtil.class);
+        PowerMockito.when(CommentMappingUtil.fromDTOToComment(commentDTO,USER)).thenReturn(comment);
+        PowerMockito.when(CommentMappingUtil.fromCommentToDTO(comment)).thenReturn(commentDTO);
+
+        Response response = apisApiService.apisApiIdCommentsPost
+                (apiId, commentDTO, request);
+
+        Assert.assertEquals(ExceptionCodes.INTERNAL_ERROR.getHttpStatusCode(), response.getStatus());
+
+    }
+
+    @Test
     public void testApisApiIdCommentsCommentIdGet() throws APIManagementException, NotFoundException {
         printTestMethodName();
         String apiId = UUID.randomUUID().toString();
@@ -197,6 +301,9 @@ public class ApisApiServiceImplTestCase {
         comment.setApiId(apiId);
         comment.setCommentedUser("commentedUser");
         comment.setCommentText("this is a comment");
+        comment.setCategory("testCategory");
+        comment.setParentCommentId("");
+        comment.setEntryPoint("APIStore");
         comment.setCreatedUser("createdUser");
         comment.setUpdatedUser("updatedUser");
         comment.setCreatedTime(time);
@@ -251,6 +358,9 @@ public class ApisApiServiceImplTestCase {
         comment1.setUuid(UUID.randomUUID().toString());
         comment1.setCommentedUser("commentedUser1");
         comment1.setCommentText("this is a comment 1");
+        comment1.setCategory("testCategory1");
+        comment1.setParentCommentId("");
+        comment1.setEntryPoint("APIStore");
         comment1.setCreatedUser("createdUser1");
         comment1.setUpdatedUser("updatedUser1");
         comment1.setCreatedTime(time);
@@ -261,6 +371,9 @@ public class ApisApiServiceImplTestCase {
         comment2.setUuid(UUID.randomUUID().toString());
         comment2.setCommentedUser("commentedUser2");
         comment2.setCommentText("this is a comment 2");
+        comment2.setCategory("testCategory2");
+        comment2.setParentCommentId("");
+        comment2.setEntryPoint("APIStore");
         comment2.setCreatedUser("createdUser2");
         comment2.setUpdatedUser("updatedUser2");
         comment2.setCreatedTime(time);
@@ -317,6 +430,9 @@ public class ApisApiServiceImplTestCase {
         CommentDTO commentDTO = new CommentDTO();
         commentDTO.setApiId(apiId);
         commentDTO.setCommentText("comment text");
+        commentDTO.setCategory("testCategory");
+        commentDTO.setParentCommentId("");
+        commentDTO.setEntryPoint("APIStore");
         commentDTO.setCreatedBy("creater");
         commentDTO.setLastUpdatedBy("updater");
 
@@ -324,6 +440,9 @@ public class ApisApiServiceImplTestCase {
         Comment comment = new Comment();
         comment.setCommentedUser("commentedUser");
         comment.setCommentText("this is a comment");
+        comment.setCategory("testCategory");
+        comment.setParentCommentId("");
+        comment.setEntryPoint("APIStore");
         comment.setCreatedUser("createdUser");
         comment.setUpdatedUser("updatedUser");
         comment.setCreatedTime(time);
@@ -356,6 +475,9 @@ public class ApisApiServiceImplTestCase {
         CommentDTO commentDTO = new CommentDTO();
         commentDTO.setApiId(apiId);
         commentDTO.setCommentText("comment text");
+        commentDTO.setCategory("testCategory");
+        commentDTO.setParentCommentId("");
+        commentDTO.setEntryPoint("APIStore");
         commentDTO.setCreatedBy("creater");
         commentDTO.setLastUpdatedBy("updater");
 
@@ -363,6 +485,9 @@ public class ApisApiServiceImplTestCase {
         Comment comment = new Comment();
         comment.setCommentedUser("commentedUser");
         comment.setCommentText("this is a comment");
+        comment.setCategory("testCategory");
+        comment.setParentCommentId("");
+        comment.setEntryPoint("APIStore");
         comment.setCreatedUser("createdUser");
         comment.setUpdatedUser("updatedUser");
         comment.setCreatedTime(time);
