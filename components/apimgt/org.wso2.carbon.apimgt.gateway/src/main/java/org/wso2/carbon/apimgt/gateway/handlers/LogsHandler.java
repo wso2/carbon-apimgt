@@ -40,6 +40,8 @@ import javax.xml.stream.XMLStreamException;
  */
 public class LogsHandler extends AbstractSynapseHandler {
     private static final Log log = LogFactory.getLog("correlation");
+    private static boolean isEnabled = false;
+    private static boolean isSet = false;
     private String apiName = null;
     private String apiCTX = null;
     private String apiMethod = null;
@@ -54,12 +56,14 @@ public class LogsHandler extends AbstractSynapseHandler {
     private String apiConsumerKey = null;
 
     private boolean isEnabled() {
-        boolean enabled = false;
-        String config = System.getProperty("enableCorrelationLogs");
-        if (config != null && !config.equals("")) {
-            enabled = Boolean.parseBoolean(config);
+        if(!isSet) {
+            String config = System.getProperty("enableCorrelationLogs");
+            if (config != null && !config.equals("")) {
+                isEnabled = Boolean.parseBoolean(config);
+                isSet = true;
+            }
         }
-        return enabled;
+        return isEnabled;
     }
 
     public boolean handleRequestInFlow(MessageContext messageContext) {

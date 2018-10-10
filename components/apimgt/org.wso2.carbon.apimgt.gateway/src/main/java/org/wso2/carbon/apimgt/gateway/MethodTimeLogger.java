@@ -34,6 +34,10 @@ import org.wso2.carbon.utils.CarbonUtils;
 public class MethodTimeLogger
 {
     private static final Log log = LogFactory.getLog("correlation");
+    private static boolean isEnabled = false;
+    private static boolean logAllMethods = false;
+    private static boolean isSet = false;
+    private static boolean isLogAllSet = false;
 
     /**
      * This is an AspectJ pointcut defined to apply to all methods within the package,
@@ -55,12 +59,14 @@ public class MethodTimeLogger
      */
     @Pointcut("execution(* *(..)) && if()")
     public static boolean pointCutAll() {
-        boolean enabled = false;
-        String config = System.getProperty("logAllMethods");
-        if (config != null && !config.equals("")) {
-            enabled = config.contains("org.wso2.carbon.apimgt.gateway");
+        if (!isLogAllSet) {
+            String config = System.getProperty("logAllMethods");
+            if (config != null && !config.equals("")) {
+                logAllMethods = config.contains("org.wso2.carbon.apimgt.gateway");
+                isLogAllSet = true;
+            }
         }
-        return enabled;
+        return logAllMethods;
     }
 
     /**
@@ -70,12 +76,14 @@ public class MethodTimeLogger
      */
     @Pointcut("if()")
     public static boolean isConfigEnabled() {
-        boolean enabled = false;
-        String config = System.getProperty("enableCorrelationLogs");
-        if (config != null && !config.equals("")) {
-            enabled = Boolean.parseBoolean(config);
+        if (!isSet) {
+            String config = System.getProperty("enableCorrelationLogs");
+            if (config != null && !config.equals("")) {
+                isEnabled = Boolean.parseBoolean(config);
+                isSet = true;
+            }
         }
-        return enabled;
+        return isEnabled;
     }
 
     /**
