@@ -18,7 +18,7 @@
 
 import { Button, message } from 'antd';
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import API from 'AppData/api.js';
 import ApiPermissionValidation from 'AppData/ApiPermissionValidation';
 import { ScopeValidation, resourcePath, resourceMethod } from 'AppData/ScopeValidation';
@@ -51,7 +51,7 @@ class Documents extends Component {
     constructor(props) {
         super(props);
         this.client = new API();
-        this.apiUUID = this.props.match.params.apiUUID;
+        this.apiUUID = this.props.api.id;
         // New or editing documents' information are maintained in state
         // (docName, documentId, docSourceType, docSourceURL, docFilePath, docSummary, docFile)
         this.state = {
@@ -101,19 +101,15 @@ class Documents extends Component {
     render() {
         const { api } = this.props;
 
-        if (this.state.notFound) {
-            return <ResourceNotFound message={this.props.resourceNotFountMessage} />;
-        }
-        if (!api) {
+        if (!this.state.documentsList) {
             return <Progress />;
         }
 
         return (
-            <div>
-                <hr color='#f2f2f2' />
+            <Fragment>
                 {this.state.documentsList && this.state.documentsList.length > 0 ? (
                     <div>
-                        <DocMenu />
+                        <DocMenu api= {api}/>
                         <DocTableView docs={this.state.documentsList}/>
                     </div>
                 ) : (
@@ -121,7 +117,7 @@ class Documents extends Component {
                         <p>No documents added into the API</p>
                     </div>
                 )}
-            </div>
+            </Fragment>
         );
     }
 }
