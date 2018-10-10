@@ -91,7 +91,6 @@ public class ClientCertificatesApiServiceImpl extends ClientCertificatesApiServi
             int responseCode = apiProvider
                     .deleteClientCertificate(RestApiUtil.getLoggedInUsername(), clientCertificateDTO.getApiIdentifier(),
                             alias);
-
             if (responseCode == ResponseCode.SUCCESS.getResponseCode()) {
                 API api = apiProvider.getAPI(clientCertificateDTO.getApiIdentifier());
                 apiProvider.updateAPI(api);
@@ -146,21 +145,19 @@ public class ClientCertificatesApiServiceImpl extends ClientCertificatesApiServi
             Attachment certificateDetail, String tier) {
         try {
             ContentDisposition contentDisposition;
-            String fileName = null;
-            if (certificateDetail != null) {
-                contentDisposition = certificateDetail.getContentDisposition();
-                fileName = contentDisposition.getParameter(RestApiConstants.CONTENT_DISPOSITION_FILENAME);
-            }
+            String fileName;
             String base64EncodedCert = null;
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
             int tenantId = APIUtil.getTenantId(userName);
-            ClientCertificateDTO clientCertificateDTO  = preValidateClientCertificate(alias);
-
-            if (StringUtils.isNotBlank(fileName)) {
-                base64EncodedCert = CertificateRestApiUtils.generateEncodedCertificate(certificateInputStream);
+            ClientCertificateDTO clientCertificateDTO = preValidateClientCertificate(alias);
+            if (certificateDetail != null) {
+                contentDisposition = certificateDetail.getContentDisposition();
+                fileName = contentDisposition.getParameter(RestApiConstants.CONTENT_DISPOSITION_FILENAME);
+                if (StringUtils.isNotBlank(fileName)) {
+                    base64EncodedCert = CertificateRestApiUtils.generateEncodedCertificate(certificateInputStream);
+                }
             }
-
             if (StringUtils.isEmpty(base64EncodedCert) && StringUtils.isEmpty(tier)) {
                 return Response.ok().entity("Client Certificate is not updated for alias " + alias).build();
             }
@@ -185,8 +182,9 @@ public class ClientCertificatesApiServiceImpl extends ClientCertificatesApiServi
             } else if (ResponseCode.CERTIFICATE_NOT_FOUND.getResponseCode() == responseCode) {
                 RestApiUtil.handleResourceNotFoundError("", log);
             } else if (ResponseCode.CERTIFICATE_EXPIRED.getResponseCode() == responseCode) {
-                RestApiUtil.handleBadRequest("Error while updating the client certificate for the alias " + alias +
-                        " Certificate Expired.", log);
+                RestApiUtil.handleBadRequest(
+                        "Error while updating the client certificate for the alias " + alias + " Certificate Expired.",
+                        log);
             }
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError(
@@ -210,7 +208,6 @@ public class ClientCertificatesApiServiceImpl extends ClientCertificatesApiServi
     public Response clientCertificatesGet(Integer limit,Integer offset,String alias, String apiId){
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-
         List<ClientCertificateDTO> certificates = new ArrayList<>();
         String userName = RestApiUtil.getLoggedInUsername();
         int tenantId = APIUtil.getTenantId(userName);
@@ -218,13 +215,11 @@ public class ClientCertificatesApiServiceImpl extends ClientCertificatesApiServi
 
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-
             if (!apiProvider.isClientCertificateBasedAuthenticationConfigured()) {
                 RestApiUtil.handleBadRequest(
                         "The client certificate based authentication is not configured for this " + "server", log);
             }
             int totalCount = apiProvider.getClientCertificateCount(tenantId);
-
             if (totalCount > 0) {
                 APIIdentifier apiIdentifier = null;
                 if (StringUtils.isNotEmpty(apiId)) {
@@ -252,18 +247,16 @@ public class ClientCertificatesApiServiceImpl extends ClientCertificatesApiServi
     public Response clientCertificatesPost(InputStream certificateInputStream,Attachment certificateDetail,
             String alias,String apiId,String tier){
         try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            ContentDisposition contentDisposition = certificateDetail.getContentDisposition();
+            String fileName = contentDisposition.getParameter(RestApiConstants.CONTENT_DISPOSITION_FILENAME);
             if (StringUtils.isEmpty(alias) || StringUtils.isEmpty(apiId)) {
                 RestApiUtil.handleBadRequest("The alias and/ or apiId should not be empty", log);
             }
-
-            ContentDisposition contentDisposition = certificateDetail.getContentDisposition();
-            String fileName = contentDisposition.getParameter(RestApiConstants.CONTENT_DISPOSITION_FILENAME);
-
             if (StringUtils.isBlank(fileName)) {
                 RestApiUtil.handleBadRequest("Certificate addition failed. Proper Certificate file should be provided",
                         log);
             }
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             if (!apiProvider.isClientCertificateBasedAuthenticationConfigured()) {
                 RestApiUtil.handleBadRequest(
                         "The client certificate based authentication is not configured for this " + "server", log);
@@ -272,11 +265,9 @@ public class ClientCertificatesApiServiceImpl extends ClientCertificatesApiServi
             String userName = RestApiUtil.getLoggedInUsername();
             String base64EncodedCert = CertificateRestApiUtils.generateEncodedCertificate(certificateInputStream);
             int responseCode = apiProvider.addClientCertificate(userName, api.getId(), base64EncodedCert, alias, tier);
-
             if (log.isDebugEnabled()) {
                 log.debug(String.format("Add certificate operation response code : %d", responseCode));
             }
-
             if (ResponseCode.SUCCESS.getResponseCode() == responseCode) {
                 apiProvider.updateAPI(api);
                 ClientCertMetadataDTO certificateDTO = new ClientCertMetadataDTO();
@@ -322,7 +313,6 @@ public class ClientCertificatesApiServiceImpl extends ClientCertificatesApiServi
     private ClientCertificateDTO preValidateClientCertificate(String alias) throws APIManagementException {
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-
         if (StringUtils.isEmpty(alias)) {
             RestApiUtil.handleBadRequest("The alias cannot be empty", log);
         }

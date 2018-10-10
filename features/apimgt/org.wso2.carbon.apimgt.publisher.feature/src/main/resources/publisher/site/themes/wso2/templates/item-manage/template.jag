@@ -38,11 +38,11 @@
 
     var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
     var tenantDomain = MultitenantUtils.getTenantDomain(jagg.getUser().username);
-    %>
-    <script language="javascript">
-        var VERBS = [ 'GET' , 'POST' , 'PUT' , 'DELETE', 'PATCH', 'OPTIONS'];
-        var AUTH_TYPES = [
-          { "value": "None", "text":"<%=i18n.localize("None")%>"} ,
+%>
+<script language="javascript">
+    var VERBS = [ 'GET' , 'POST' , 'PUT' , 'DELETE', 'PATCH', 'OPTIONS'];
+    var AUTH_TYPES = [
+      { "value": "None", "text":"<%=i18n.localize("None")%>"} ,
       { "value": "Application", "text":"<%=i18n.localize("Application")%>"},
       { "value": "Application User", "text":"<%=i18n.localize("Application User")%>"},
       { "value": "Application & Application User", "text":"<%=i18n.localize("Application & Application User")%>"}
@@ -51,7 +51,7 @@
         <% for (var i = 0; i < resourceTiers.length; i++) {
         %>{ "value": "<%= encode.forJavaScript(String(resourceTiers[i].tierName)) %>", "text": "<%= encode.forJavaScript(String(resourceTiers[i].tierDisplayName)) %>"
         }<% if(
-            (i+1) != resourceTiers.length){%>,<%}%>
+        (i+1) != resourceTiers.length){%>,<%}%>
         <% } %>
     ];
 
@@ -73,9 +73,9 @@
     var design_w_link = jagg.url('/design?'+apiUrlId);
     var implement_w_link = jagg.url('/implement?'+apiUrlId);
     var manage_w_link = jagg.url('/manage?'+apiUrlId);
-    %>
-    <!-- <center>
-    <%if(createPermitted){%>
+%>
+<!-- <center>
+<%if(createPermitted){%>
 <ul class="new-sub-menu-wizard" style="margin:0 auto">
     <li>
         <a href="<%= design_w_link %>" class="wizard-done" title="<%=i18n.localize("Design")%>">
@@ -234,9 +234,9 @@
 
 
                                             <% mod = jagg.module("api");
-        result = mod.isMultipleTenantsAvailable();
-        var isMultipleTenantsAvailable = result.status;
-        if(api.visibility == "public" && isMultipleTenantsAvailable == true){%>
+                                                result = mod.isMultipleTenantsAvailable();
+                                                var isMultipleTenantsAvailable = result.status;
+                                                if(api.visibility == "public" && isMultipleTenantsAvailable == true){%>
                                                     <div class="form-group">
                                                         <label class="control-label col-sm-3" for="subscriptions"><%=i18n.localize("Subscriptions")%>:
                                                             <a class="help_popup" help_data="subscriptions_help" title="subscriptions_help" data-trigger="hover" data-placement="bottom">
@@ -546,9 +546,9 @@
 
 
                     <% mod = jagg.module("api");
-        result = mod.isMultipleTenantsAvailable();
-        var isMultipleTenantsAvailable = result.status;
-        if(api.visibility == "public" && isMultipleTenantsAvailable == true){%>
+                    result = mod.isMultipleTenantsAvailable();
+                    var isMultipleTenantsAvailable = result.status;
+                    if(api.visibility == "public" && isMultipleTenantsAvailable == true){%>
                     <div class="form-group">
                         <label class="control-label col-sm-3" for="subscriptions"><%=i18n.localize("Subscriptions")%>:
                             <a class="help_popup" help_data="subscriptions_help" title="subscriptions_help" data-trigger="hover" data-placement="bottom">
@@ -656,17 +656,17 @@
                                                 </label>
                                                 <div class="controls col-sm-4 tierSelect">
                                         			<%
-    for (var i = 0; i < tiers.length; i++) {
-        var isSelected = api.availableTiers.indexOf(tiers[i].tierName) > -1;
-        %>
-        <label id="<%=tiers[i].tierName%>" class="tier_checkbox_label checkbox add-padding-bottom-1x">
+                                                        for (var i = 0; i < tiers.length; i++) {
+                                                            var isSelected = api.availableTiers.indexOf(tiers[i].tierName) > -1;
+                                                        %>
+                                                        <label id="<%=tiers[i].tierName%>" class="tier_checkbox_label checkbox add-padding-bottom-1x">
                                                                 <input type="checkbox" class="tier_check" name="tier" value="<%= encode.forHtmlAttribute(String(tiers[i].tierName))%>" <%if(isSelected){%>checked<%}%>>
                                                                 <span class="helper"><strong><%= encode.forHtml(String(tiers[i].tierDisplayName)) %></strong> : <%= encode.forHtml(String(tiers[i].tierDescription)) %></span>
                                                         </label>
                                                         <%
-    }
-    %>
-   <label id="tier_error" class="error hide" style="display: block;"><%=i18n.localize("Please select at least one subscription tier.")%></label>
+                                                        }
+                                                    %>
+                                                   <label id="tier_error" class="error hide" style="display: block;"><%=i18n.localize("Please select at least one subscription tier.")%></label>
                                                 </div>
                                         	</div>
 
@@ -725,21 +725,21 @@
                                                          <%}%>
                                                     <select id="apiTier" name="apiTier"  class="form-control selected required">
                                                     <%
-        for (var i = 0; i < resourceTiers.length; i++) {
-            var isSelectedAPITier = api.availableTiers.indexOf(resourceTiers[i].tierName) > -1;
-            var isSelected = false;
-            if(resourceTiers[i].tierName == api.apiLevelPolicy){
-                isSelected = true;
-            }
-            %><option value="<%= encode.forHtmlAttribute(String(resourceTiers[i].tierName))%>"
+                                                    for (var i = 0; i < resourceTiers.length; i++) {
+                                                        var isSelectedAPITier = api.availableTiers.indexOf(resourceTiers[i].tierName) > -1;
+                                                        var isSelected = false;
+                                                        if(resourceTiers[i].tierName == api.apiLevelPolicy){
+                                                            isSelected = true;
+                                                        }
+                                                        %><option value="<%= encode.forHtmlAttribute(String(resourceTiers[i].tierName))%>"
                                                         <%if
-            (isSelected){%>selected="selected"<%}%>><%= encode.forHtml(String(resourceTiers[i].tierDisplayName)) %></option>
+                                                        (isSelected){%>selected="selected"<%}%>><%= encode.forHtml(String(resourceTiers[i].tierDisplayName)) %></option>
                                                         <%
-        }
-        %>
-        </select>
-    </div>
-             <%if(!isWSAPI){%>
+                                                    }
+                                                    %>
+                                                    </select>
+                                                </div>
+                                                         <%if(!isWSAPI){%>
                                                 <div id="resource-policy-select" class="col-sm-4 <%if(api.apiLevelPolicy != null && api.apiLevelPolicy != ""){%>hide<%}%>"  >
                                                     <script id="resource-policy-ui-template" language="text/x-handlebars-template">
                                                         <a class="select_adv_policy_for_resource btn btn-secondary"><%=i18n.localize("Select Policy per Resource")%></a>
@@ -906,15 +906,15 @@
                          <tbody>
 
                          <%
-    var environmentsJson=api.environments;
-    if(environmentsJson=="none"){
-        for(i=0 ;i<environmentsList.length;i++){
-            %>
-               <tr data-type="selectable">
-                   <td>
-                       <div class="environments_checkbox">
-                           <label class="checkbox">
-                               <input type="checkbox" value="<%=environmentsList[i].name%>" class="env" name="gateways">
+                         var environmentsJson=api.environments;
+                         if(environmentsJson=="none"){
+                                for(i=0 ;i<environmentsList.length;i++){
+                         %>
+                            <tr data-type="selectable">
+                                <td>
+                                    <div class="environments_checkbox">
+                                        <label class="checkbox">
+                                            <input type="checkbox" value="<%=environmentsList[i].name%>" class="env" name="gateways">
                                             <span class="helper"></span>
                                         </label>
                                     </div>
@@ -924,9 +924,9 @@
                                 <td><div class="environments_data"><%=encode.forHtml(environmentsList[i].description)%></div></td>
                             </tr>
                          <%}}
-    else{
-        for(i=0 ;i<environmentsList.length;i++){
-            if(environmentsJson.split(",").indexOf(environmentsList[i].name)>=0){%>
+                         else{
+                             for(i=0 ;i<environmentsList.length;i++){
+                                    if(environmentsJson.split(",").indexOf(environmentsList[i].name)>=0){%>
                                         <tr data-type="selectable">
                                              <td>
                                                 <div class="environments_checkbox">
@@ -974,18 +974,18 @@
                                     </thead>
                                     <tbody>
                                         <%  var currentLabels = "";
-        for (var i in labels) {
-            var isLabelAttached = false;
-            if (attachedLabels != null) {
-                var attachedLabelObj = parse(stringify(attachedLabels));
-                for (var j=0; j< attachedLabelObj.length; j++){
-                    if (labels[i].name == attachedLabelObj[j].labelName){
-                        currentLabels += labels[i].name + ",";
-                        isLabelAttached = true;
-                        break;
-                    }
-                }
-            }%>
+                                            for (var i in labels) {
+                                                var isLabelAttached = false;
+                                                if (attachedLabels != null) {
+                                                    var attachedLabelObj = parse(stringify(attachedLabels));
+                                                    for (var j=0; j< attachedLabelObj.length; j++){
+                                                        if (labels[i].name == attachedLabelObj[j].labelName){
+                                                            currentLabels += labels[i].name + ",";
+                                                            isLabelAttached = true;
+                                                            break;
+                                                        }
+                                                    }
+                                                }%>
                                                 <tr data-type="selectable">
                                                     <td>
                                                         <div class="label_checkbox">
@@ -1006,8 +1006,8 @@
                                    <p><%=i18n.localize("You have selected Microgateways for this API. The mediation policies selected here will not be applied in Microgateway environments.")%></p>
                                </div>
                                 <% if (currentLabels.length > 1) {
-            currentLabels = currentLabels.substring(0, currentLabels.length-1);
-        }%>
+                                    currentLabels = currentLabels.substring(0, currentLabels.length-1);
+                                }%>
                                 <input type="hidden" id="gatewayLabels" name="gatewayLabels" value="<%=encode.forHtml("" + currentLabels)%>"/>
                                     <script type="text/javascript">
                                     function appendLabels() {
@@ -1158,13 +1158,13 @@
 
                                 <button class="btn btn-secondary has-spinner" id="save_api"><%=i18n.localize("Save")%></button>
                                 <% if(outputs.isPermitted) {
-        var status=outputs.lcStatus;
-        var wfStatus = "";
-        if(outputs.wfStatus != null && outputs.wfStatus.status != null){
-            wfStatus = outputs.wfStatus.status;
-        }
-        %>
-             <% if(status=="BLOCKED" || status=="DEPRECATED" || status=="RETIRED" || wfStatus=="CREATED"){ %>
+                                   var status=outputs.lcStatus;
+                                   var wfStatus = "";
+                                   if(outputs.wfStatus != null && outputs.wfStatus.status != null){
+                                     wfStatus = outputs.wfStatus.status;
+                                   }
+                                %>
+                                     <% if(status=="BLOCKED" || status=="DEPRECATED" || status=="RETIRED" || wfStatus=="CREATED"){ %>
                                      <a class="btn btn-primary" id="publish_api_disabled" disabled title="<%=i18n.localize("Save & Publish")%>"><%=i18n.localize("Save & Publish")%></a>
                                      <%} else{%>
                                      <a class="btn btn-primary has-spinner" id="publish_api" title="<%=i18n.localize("Save & Publish")%>"><%=i18n.localize("Save & Publish")%></a>
@@ -1174,7 +1174,7 @@
                                 <input type="reset" class="btn btn-secondary" value="<%=i18n.localize("Cancel")%>" onclick="javascript:window.location.href='./'" />
                                 <label id="gateway_error" class="bg-warning hide" style="display: block;padding:
                                 10px; border-radius: 5px;margin-top:10px;"><%=i18n
-        .localize("Some of the gateway environments are not selected.")%></label>
+                                .localize("Some of the gateway environments are not selected.")%></label>
                             </div>
                     </div>
                 </div>
@@ -1460,7 +1460,7 @@
             var checkedOAuth2Security = $("#oauth2_checkbox").is(":checked");
 
              if (!checkedOAuth2Security) {
-                   $('#subscription-tiers input').attr('checked', false).attr('disbaled', true);
+                   $('#subscription-tiers input').attr('checked', false).attr('disabled', true);
                    $("#tier_warning").removeClass("hide");
             }
         }

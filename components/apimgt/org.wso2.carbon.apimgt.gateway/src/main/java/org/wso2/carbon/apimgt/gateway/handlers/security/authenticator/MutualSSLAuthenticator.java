@@ -138,7 +138,6 @@ public class MutualSSLAuthenticator implements Authenticator {
         }
         AuthenticationContext authContext = new AuthenticationContext();
         authContext.setAuthenticated(true);
-        APISecurityUtils.setAuthenticationContext(messageContext, authContext, null);
         authContext.setUsername(subjectDN);
         try {
             LdapName ldapDN = new LdapName(subjectDN);
@@ -166,6 +165,7 @@ public class MutualSSLAuthenticator implements Authenticator {
             log.debug("Auth context for the API " + getAPIIdentifier(messageContext) + ": Username[" + authContext
                     .getUsername() + "APIKey[(" + authContext.getApiKey() + "] Tier[" + authContext.getTier() + "]");
         }
+        APISecurityUtils.setAuthenticationContext(messageContext, authContext, null);
     }
 
     /**

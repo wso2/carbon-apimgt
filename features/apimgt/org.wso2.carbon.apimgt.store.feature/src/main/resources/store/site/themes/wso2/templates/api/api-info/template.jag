@@ -7,18 +7,16 @@ var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUt
 var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
 var urlPrefix = jagg.getTenantURLPrefix("&");
 var isOAuthProtected = false;
-var apiSecurity = api.apiSecurity.split(",");
-
-for (var index = 0; index < apiSecurity.length; index++) {
-    if (apiSecurity[index] == "oauth2") {
-        isOAuthProtected = true;
-        index = apiSecurity.length;
-    }
-}
-
 %>
 <%if(api!=null){
-    
+    var apiSecurity = api.apiSecurity.split(",");
+
+    for (var index = 0; index < apiSecurity.length; index++) {
+        if (apiSecurity[index] == "oauth2") {
+            isOAuthProtected = true;
+            index = apiSecurity.length;
+        }
+    }
     var displayOwner = api.provider;
     if(api.isAdvertiseOnly && api.apiOwner != null) {
     	displayOwner = api.apiOwner;

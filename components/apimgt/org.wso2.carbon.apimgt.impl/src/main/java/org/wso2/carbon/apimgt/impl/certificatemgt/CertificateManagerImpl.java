@@ -101,6 +101,13 @@ public class CertificateManagerImpl implements CertificateManager {
                 }
             }
         }
+        if (log.isDebugEnabled()) {
+            if (isMTLSConfigured) {
+                log.debug("Mutual SSL based authentication is supported for this server.");
+            } else {
+                log.debug("Mutual SSL based authentication is not supported for this server.");
+            }
+        }
     }
 
     @Override
@@ -403,15 +410,15 @@ public class CertificateManagerImpl implements CertificateManager {
     }
 
     @Override
-    public ResponseCode updateClientCertificate(String certificate, String alias, String tier, int tenantId) throws APIManagementException {
+    public ResponseCode updateClientCertificate(String certificate, String alias, String tier, int tenantId)
+            throws APIManagementException {
         ResponseCode responseCode = ResponseCode.SUCCESS;
         if (StringUtils.isNotEmpty(certificate)) {
-            responseCode = certificateMgtUtils.validateCertificate(null, tenantId , certificate);
+            responseCode = certificateMgtUtils.validateCertificate(null, tenantId, certificate);
         }
         try {
             if (responseCode.getResponseCode() == ResponseCode.SUCCESS.getResponseCode()) {
-                boolean isSuccess = certificateMgtDAO
-                        .updateClientCertificate(certificate, alias, tier, tenantId);
+                boolean isSuccess = certificateMgtDAO.updateClientCertificate(certificate, alias, tier, tenantId);
                 if (isSuccess) {
                     responseCode = ResponseCode.SUCCESS;
                 } else {
@@ -518,6 +525,4 @@ public class CertificateManagerImpl implements CertificateManager {
         }
         return success;
     }
-
-
 }

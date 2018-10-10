@@ -2058,7 +2058,11 @@
         },
         "authorizationHeader": {
           "type": "string",
-          "description": "Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified\nin tenant or system level will be used. \n"
+          "description": "Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified\nin tenant or system level will be used.\n"
+        },
+        "apiSecurity": {
+          "type": "string",
+          "description": "Supported API security for the API ( mutualssl and/or oauth2)\n"
         },
         "tags": {
           "type": "array",

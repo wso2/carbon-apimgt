@@ -1245,6 +1245,12 @@ public class APIProviderHostObject extends ScriptableObject {
         if (publisherAccessControl != null && publisherAccessControl.equals(APIConstants.API_RESTRICTED_VISIBILITY)) {
             publisherAccessControlRoles = (String) apiData.get(APIConstants.ACCESS_CONTROL_ROLES_PARAMETER, apiData);
         }
+        String apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
+        Object apiSecurityObject = apiData.get("apiSecurity", apiData);
+
+        if (apiSecurityObject instanceof String || apiSecurityObject instanceof ConsString) {
+            apiSecurity = String.valueOf(apiSecurityObject);
+        }
 
         if (sandboxUrl != null && sandboxUrl.trim().length() == 0) {
             sandboxUrl = null;
@@ -1589,6 +1595,7 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setAccessControl(publisherAccessControl);
         api.setAccessControlRoles(publisherAccessControlRoles);
         api.setAdditionalProperties(properties);
+        api.setApiSecurity(apiSecurity);
         api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments));
         CORSConfiguration corsConfiguration = APIUtil.getCorsConfigurationDtoFromJson(corsConfiguraion);
         if (corsConfiguration != null) {
@@ -1798,6 +1805,12 @@ public class APIProviderHostObject extends ScriptableObject {
         String visibleRoles = "";
         String additionalProperties = (String) apiData.get("additionalProperties", apiData);
         JSONObject properties = null;
+        String apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
+        Object apiSecurityObject = apiData.get("apiSecurity", apiData);
+
+        if (apiSecurityObject instanceof String || apiSecurityObject instanceof ConsString) {
+            apiSecurity = String.valueOf(apiSecurityObject);
+        }
         if (!StringUtils.isEmpty(additionalProperties)) {
             JSONParser parser = new JSONParser();
             properties = (JSONObject) parser.parse(additionalProperties);
@@ -2065,6 +2078,7 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setVisibleTenants(visibleTenants != null ? visibleTenants.trim() : null);
         api.setAccessControl(publisherAccessControl);
         api.setAccessControlRoles(publisherAccessControlRoles);
+        api.setApiSecurity(apiSecurity);
         api.setAdditionalProperties(properties);
         Set<Tier> availableTier = new HashSet<Tier>();
         if (tier != null) {

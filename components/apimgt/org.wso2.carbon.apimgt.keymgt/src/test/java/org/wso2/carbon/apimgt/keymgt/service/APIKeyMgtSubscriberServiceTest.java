@@ -366,7 +366,6 @@ public class APIKeyMgtSubscriberServiceTest {
         String validityTime = "3600";
 
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
-        PowerMockito.mockStatic(APIUtil.class);
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
         APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
         APIManagerConfigurationService apiManagerConfigurationService = Mockito
@@ -530,7 +529,6 @@ public class APIKeyMgtSubscriberServiceTest {
     @Test
     public void testRevokeTokensOfUserByApp() throws Exception {
         PowerMockito.mockStatic(ApiMgtDAO.class);
-        PowerMockito.mockStatic(APIUtil.class);
         ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
         Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
 

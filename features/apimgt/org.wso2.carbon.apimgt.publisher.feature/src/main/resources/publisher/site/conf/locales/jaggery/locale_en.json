@@ -115,6 +115,8 @@
     "Certificate exists for Alias : Endpoint combination": "Certificate exists for Alias : Endpoint combination",
     "Certificate for the endpoint": "Certificate for the endpoint",
     "The certificate was added successfully. Please note that it will be available to all users.": "The certificate was added successfully. Please note that it will be available to all users.",
+    "The certificate was added successfully." : "The certificate was added successfully.",
+    "The certificate was deleted successfully.":"The certificate was deleted successfully.",
     "The certificate was deleted successfully. Note that it will not be accessible to any user hereafter.": "The certificate was deleted successfully. Note that it will not be accessible to any user hereafter.",
     "Change": "Change",
     "Change Icon": "Change Icon",

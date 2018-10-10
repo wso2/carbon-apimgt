@@ -95,7 +95,13 @@ import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilderImpl;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
-import org.wso2.carbon.apimgt.impl.utils.*;
+import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
+import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
+import org.wso2.carbon.apimgt.impl.utils.APIStoreNameComparator;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
+import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
+import org.wso2.carbon.apimgt.impl.utils.StatUpdateClusterMessage;
 import org.wso2.carbon.apimgt.impl.workflow.APIStateWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
@@ -1775,6 +1781,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         api.setApiSecurity(apiSecurity);
         if (!apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+            if (log.isDebugEnabled()) {
+                log.info("API " + api.getId() + " does not supports oauth2 security, hence removing all the "
+                        + "subscription tiers associated with it");
+            }
             api.removeAllTiers();
         }
     }
@@ -1890,7 +1900,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if(!APIConstants.PROTOTYPED.equals(api.getStatus())) {
 
             List<ClientCertificateDTO> clientCertificateDTOS = null;
-            if (certificateManager.isClientCertificateBasedAuthenticationConfigured()) {
+            if (isClientCertificateBasedAuthenticationConfigured()) {
                 clientCertificateDTOS = certificateManager.searchClientCertificates(tenantId, null, api.getId());
             }
             Map<String, String> clientCertificateObject = null;
@@ -5346,6 +5356,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return certificateManager.getCertificates(tenantId, alias, endpoint);
     }
 
+    @Override
     public List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, APIIdentifier apiIdentifier)
             throws APIManagementException {
         return certificateManager.searchClientCertificates(tenantId, alias, apiIdentifier);
@@ -5358,9 +5369,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public ClientCertificateDTO getClientCertificate(int tenantId, String alias) throws APIManagementException {
-        List<ClientCertificateDTO> clientCertificateDTOS = certificateManager.searchClientCertificates(tenantId, alias,
-                null);
-        if (clientCertificateDTOS != null && clientCertificateDTOS.size() > 0){
+        List<ClientCertificateDTO> clientCertificateDTOS = certificateManager
+                .searchClientCertificates(tenantId, alias, null);
+        if (clientCertificateDTOS != null && clientCertificateDTOS.size() > 0) {
             return clientCertificateDTOS.get(0);
         }
         return null;
@@ -5389,8 +5400,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public int updateClientCertificate(String certificate, String alias, APIIdentifier apiIdentifier,
             String tier, int tenantId) throws APIManagementException {
-        ResponseCode responseCode = certificateManager
-                .updateClientCertificate(certificate, alias, tier, tenantId);
+        ResponseCode responseCode = certificateManager.updateClientCertificate(certificate, alias, tier, tenantId);
         return responseCode != null ?
                 responseCode.getResponseCode() :
                 ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode();

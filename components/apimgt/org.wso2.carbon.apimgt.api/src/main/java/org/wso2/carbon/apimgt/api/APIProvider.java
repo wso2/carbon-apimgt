@@ -970,7 +970,7 @@ public interface APIProvider extends APIManager {
             APIManagementException;
 
     /**
-     * Method to search the client certificates for the provided tenant id, alias and
+     * Method to search the client certificates for the provided tenant id, alias and api identifier.
      *
      * @param tenantId      ID of the tenant.
      * @param alias         Alias of the certificate.
@@ -1010,8 +1010,9 @@ public interface APIProvider extends APIManager {
     /**
      * Method to check whether an client certificate for the given alis is present in trust store and whether it can
      * be modified by current user.
+     *
      * @param tenantId Id of the tenant.
-     * @param alias Relevant alias.
+     * @param alias    Relevant alias.
      * @return true if the client certificate is present and modifiable by current user.
      * @throws APIManagementException API Management Exception.
      */
