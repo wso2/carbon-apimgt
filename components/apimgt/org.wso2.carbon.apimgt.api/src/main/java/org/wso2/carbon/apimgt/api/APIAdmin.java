@@ -59,5 +59,5 @@ public interface APIAdmin  {
      */
     Label updateLabel(Label label) throws APIManagementException;
 
-    Application[] getAllApplicationsOfTenant(String appTenantDomain) throws APIManagementException;
+    Application[] getAllApplicationsOfTenantForMigration(String appTenantDomain) throws APIManagementException;
 }

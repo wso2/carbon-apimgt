@@ -72,6 +72,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.DocumentationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.MediationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.util.exception.ForbiddenException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.api.Resource;
@@ -96,6 +98,8 @@ import javax.ws.rs.core.Response;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
+import static org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil.getErrorDTO;
+
 /**
  * This is the service implementation class for Publisher API related operations
  */
@@ -111,12 +115,12 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param query       search condition
      * @param accept      Accept header value
      * @param ifNoneMatch If-None-Match header value
-     * @param tenantDomain tenant domain of APIs to be returned
+     * @param targetTenantDomain tenant domain of APIs to be returned
      * @return matched APIs for the given search condition
      */
     @Override
     public Response apisGet(Integer limit, Integer offset, String query, String accept, String ifNoneMatch, Boolean expand,
-                            String tenantDomain) {
+                            String targetTenantDomain) {
         List<API> allMatchedApis = new ArrayList<>();
         APIListDTO apiListDTO;
 
@@ -133,11 +137,16 @@ public class ApisApiServiceImpl extends ApisApiService {
             //We should send null as the provider, Otherwise searchAPIs will return all APIs of the provider
             // instead of looking at type and query
             String username = RestApiUtil.getLoggedInUsername();
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
+            boolean migrationMode = Boolean.getBoolean(RestApiConstants.MIGRATION_MODE);
 
-            if (tenantDomain == null) {
-                tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
+            if (migrationMode) { // migration flow
+                if (!StringUtils.isEmpty(targetTenantDomain)) {
+                    tenantDomain = targetTenantDomain;
+                }
+                RestApiUtil.handleMigrationSpecificPermissionViolations(tenantDomain, username);
             }
-            RestApiUtil.handleMigrationSpecificPermissionViolations(tenantDomain, username);
+
             Map<String, Object> result = apiProvider.searchPaginatedAPIs(newSearchQuery, tenantDomain,
                                         offset, limit, false);
             Set<API> apis = (Set<API>) result.get("apis");

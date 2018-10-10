@@ -47,9 +47,11 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
+import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.SelfSignUpUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorListItemDTO;
@@ -63,6 +65,10 @@ import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.registry.core.exceptions.ResourceNotFoundException;
 import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.UserRealm;
+import org.wso2.carbon.user.core.UserStoreManager;
+import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
+import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.uri.template.URITemplateException;
@@ -1299,16 +1305,14 @@ public class RestApiUtil {
      * started with the system property 'migrationMode=true' if a migration related exports are to be done.
      *
      * @param targetTenantDomain Tenant domain of which resources are requested
-     * @param username           Resource requester/logged in user name
+     * @param username           Logged in user name
      * @throws ForbiddenException
      */
     public static void handleMigrationSpecificPermissionViolations(String targetTenantDomain, String username) throws ForbiddenException {
-        boolean isCrossTenantAccess = !targetTenantDomain.equals
-                (MultitenantUtils.getTenantDomain(username));
+        boolean isCrossTenantAccess = !targetTenantDomain.equals(MultitenantUtils.getTenantDomain(username));
         if (!isCrossTenantAccess) {
             return;
         }
-        boolean migrationMode = Boolean.getBoolean(RestApiConstants.MIGRATION_MODE);
         String superAdminRole = null;
         try {
             superAdminRole = ServiceReferenceHolder.getInstance().getRealmService().
@@ -1325,25 +1329,49 @@ public class RestApiUtil {
             RestApiUtil.handleInternalServerError("Error in getting the super tenant domain", e, log);
         }
         boolean isSuperTenantUser = RestApiUtil.getLoggedInUserTenantDomain().equals(superTenantDomain);
+        if (!isSuperTenantUser) {
+            String errorMsg = "Cross Tenant resource access is not allowed for this request. User " + username +
+                    " is not allowed to access resources in " + targetTenantDomain + " as the requester is not a super tenant user";
+            log.error(errorMsg);
+            ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_FORBIDDEN_MESSAGE_DEFAULT, 403l, errorMsg);
+            throw new ForbiddenException(errorDTO);
+        }
 
         //check whether the user has super tenant admin role
         boolean isSuperAdminRoleNameExist = false;
         try {
-            isSuperAdminRoleNameExist = APIUtil.isRoleNameExist(username, superAdminRole);
-        } catch (APIManagementException e) {
+            isSuperAdminRoleNameExist = isUserInRole(username, superAdminRole);
+        } catch (UserStoreException | APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error in checking whether the user has admin role", e, log);
         }
 
-        boolean isSuperTenantAdmin = isSuperTenantUser && isSuperAdminRoleNameExist;
-        boolean hasMigrationSpecificPermissions = migrationMode && isSuperTenantAdmin;
-
-        if (!hasMigrationSpecificPermissions) {
+        if (!isSuperAdminRoleNameExist) {
             String errorMsg = "Cross Tenant resource access is not allowed for this request. User " + username +
-                    " is not allowed to access resources in " + targetTenantDomain + ".Both the facts; setting " +
-                    "'migrationMode=true' system property set at APIM Server startup and the requester being a super " +
-                    "tenant admin, should be satisfied for this to be allowed";
+                    " is not allowed to access resources in " + targetTenantDomain + " as the requester is not a " +
+                    "super tenant admin";
+            log.error(errorMsg);
             ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_FORBIDDEN_MESSAGE_DEFAULT, 403l, errorMsg);
             throw new ForbiddenException(errorDTO);
         }
+    }
+
+    /**
+     * Check whether the user has the given role
+     *
+     * @throws UserStoreException
+     * @throws APIManagementException
+     */
+    public static boolean isUserInRole(String user, String role) throws UserStoreException, APIManagementException {
+        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(user));
+        UserRegistrationConfigDTO signupConfig = SelfSignUpUtil.getSignupConfiguration(tenantDomain);
+        user = SelfSignUpUtil.getDomainSpecificUserName(user, signupConfig);
+        String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(user);
+        RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+        int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                .getTenantId(tenantDomain);
+        UserRealm realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
+        UserStoreManager manager = realm.getUserStoreManager();
+        AbstractUserStoreManager abstractManager = (AbstractUserStoreManager) manager;
+        return abstractManager.isUserInRole(tenantAwareUserName, role);
     }
 }

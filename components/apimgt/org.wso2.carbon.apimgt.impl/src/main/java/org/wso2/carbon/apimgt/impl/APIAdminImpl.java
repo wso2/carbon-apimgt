@@ -75,7 +75,7 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
-    public Application[] getAllApplicationsOfTenant(String appTenantDomain) throws APIManagementException{
-        return apiMgtDAO.getLightWeightApplicationsOfTenant(appTenantDomain);
+    public Application[] getAllApplicationsOfTenantForMigration(String appTenantDomain) throws APIManagementException{
+        return apiMgtDAO.getAllApplicationsOfTenantForMigration(appTenantDomain);
     }
 }

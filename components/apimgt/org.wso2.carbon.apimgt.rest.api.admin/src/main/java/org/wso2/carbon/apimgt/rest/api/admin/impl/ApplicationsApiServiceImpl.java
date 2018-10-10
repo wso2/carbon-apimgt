@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.admin.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIAdmin;
@@ -50,25 +51,29 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             user = RestApiUtil.getLoggedInUsername();
         }
 
-        //if appTenantDomain is not passed as a query param, set it as the application creator user name's tenant domain
-        if (appTenantDomain == null || appTenantDomain.isEmpty()) {
-            appTenantDomain = MultitenantUtils.getTenantDomain(user);
-        }
-        RestApiUtil.handleMigrationSpecificPermissionViolations(appTenantDomain, user);
-        String userTenantDomain = MultitenantUtils.getTenantDomain(user);
-
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
         ApplicationListDTO applicationListDTO;
         try {
             Application[] allMatchedApps;
-            if (userTenantDomain.equals(appTenantDomain)) {
+            boolean migrationMode = Boolean.getBoolean(RestApiConstants.MIGRATION_MODE);
+            if (!migrationMode) { // normal non-migration flow
+                if (!MultitenantUtils.getTenantDomain(user).equals(RestApiUtil.getLoggedInUserTenantDomain())) {
+                    String errorMsg = "User " + user + " is not available for the current tenant domain";
+                    log.error(errorMsg);
+                    return Response.status(Response.Status.FORBIDDEN).entity(errorMsg).build();
+                }
                 APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(user);
                 allMatchedApps = apiConsumer.getApplicationsByOwner(user);
-            } else {
+
+            } else { // flow at migration process
+                if (StringUtils.isEmpty(appTenantDomain)) {
+                    appTenantDomain = MultitenantUtils.getTenantDomain(user);
+                }
+                RestApiUtil.handleMigrationSpecificPermissionViolations(appTenantDomain, RestApiUtil.getLoggedInUsername());
                 APIAdmin apiAdmin = new APIAdminImpl();
-                allMatchedApps = apiAdmin.getAllApplicationsOfTenant(appTenantDomain);
+                allMatchedApps = apiAdmin.getAllApplicationsOfTenantForMigration(appTenantDomain);
             }
             //allMatchedApps are already sorted to application name
             applicationListDTO = ApplicationMappingUtil.fromApplicationsToDTO(allMatchedApps, limit, offset);
