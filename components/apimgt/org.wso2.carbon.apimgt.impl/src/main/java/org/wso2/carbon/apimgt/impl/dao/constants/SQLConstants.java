@@ -1765,6 +1765,10 @@ public class SQLConstants {
             "   AND API_NAME = ? " +
             "   AND" + " API_VERSION = ? ";
 
+    public static final String FIX_NULL_THROTTLING_TIERS =
+            "UPDATE AM_API_URL_MAPPING SET THROTTLING_TIER = 'Unlimited' WHERE " +
+                     " THROTTLING_TIER IS NULL";
+
     public static final String REMOVE_APPLICATION_MAPPINGS_BY_CONSUMER_KEY_SQL =
             "DELETE FROM AM_APPLICATION_KEY_MAPPING WHERE CONSUMER_KEY = ?";
 

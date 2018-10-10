@@ -26,6 +26,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
@@ -46,7 +47,7 @@ import java.io.FileNotFoundException;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ APIUtil.class, APIManagerComponent.class, ServiceReferenceHolder.class, AuthorizationUtils.class,
                         RegistryUtils.class, APIMgtDBUtil.class, KeyManagerHolder.class,
-                        SQLConstantManagerFactory.class })
+                        SQLConstantManagerFactory.class, ApiMgtDAO.class })
 public class APIManagerComponentTest {
 
     @Before
@@ -102,6 +103,10 @@ public class APIManagerComponentTest {
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
         PowerMockito.when(RegistryUtils.getAbsolutePath(null, null)).thenReturn("");
         PowerMockito.whenNew(APIManagerConfiguration.class).withAnyArguments().thenReturn(configuration);
+
+        PowerMockito.mockStatic(ApiMgtDAO.class);
+        ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
+        PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
 
         APIManagerComponent apiManagerComponent = new APIManagerComponentWrapper(registry);
         try {
