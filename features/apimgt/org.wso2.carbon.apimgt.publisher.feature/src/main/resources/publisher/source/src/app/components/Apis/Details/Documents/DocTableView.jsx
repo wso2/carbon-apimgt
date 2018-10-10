@@ -34,6 +34,20 @@ const styles = theme => ({
     },
 });
 
+function desc(a, b, orderBy) {
+    if (b[orderBy] < a[orderBy]) {
+        return -1;
+    }
+    if (b[orderBy] > a[orderBy]) {
+        return 1;
+    }
+    return 0;
+}
+
+function getSorting(order, orderBy) {
+    return order === 'desc' ? (a, b) => desc(a, b, orderBy) : (a, b) => -desc(a, b, orderBy);
+}
+
 /**
  * Table view of the Document listing
  * @class DocTableView @inheritdoc
@@ -60,6 +74,7 @@ class DocTableView extends React.Component {
         this.handleSelectAllClick = this.handleSelectAllClick.bind(this);
         this.handleChangePage = this.handleChangePage.bind(this);
         this.handleChangeRowsPerPage = this.handleChangeRowsPerPage.bind(this);
+        this.handleRequestSort = this.handleRequestSort.bind(this);
     }
 
     handleRequestSort = (event, property) => {
@@ -206,6 +221,7 @@ class DocTableView extends React.Component {
                             />
                             <TableBody>
                                 {docs
+                                    .sort(getSorting(order, orderBy))
                                     .slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage)
                                     .map((doc) => {
                                         const { documentId } = doc;

@@ -81,6 +81,7 @@ const styles = theme => ({
     },
     contentInside: {
         paddingLeft: theme.spacing.unit * 3,
+        paddingTop: theme.spacing.unit * 2,
     },
 });
 
