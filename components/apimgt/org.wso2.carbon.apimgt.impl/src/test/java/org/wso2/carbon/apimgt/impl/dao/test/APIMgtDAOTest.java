@@ -119,8 +119,6 @@ public class APIMgtDAOTest {
 
     @Before
     public void setUp() throws Exception {
-//        System.setProperty("APIManagerDBConfigurationPath","/home/fazlann/repos/support/carbon-apimgt-1/components/apimgt/org.wso2.carbon.apimgt.impl/src/test/resources/amConfig.xml");
-//        System.setProperty("IdentityConfigurationPath","/home/fazlann/repos/support/carbon-apimgt-1/components/apimgt/org.wso2.carbon.apimgt.impl/src/test/resources/identity.xml");
         String dbConfigPath = System.getProperty("APIManagerDBConfigurationPath");
         APIManagerConfiguration config = new APIManagerConfiguration();
         initializeDatabase(dbConfigPath);
