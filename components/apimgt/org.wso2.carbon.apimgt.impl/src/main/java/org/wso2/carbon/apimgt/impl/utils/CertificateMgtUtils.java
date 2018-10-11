@@ -69,7 +69,9 @@ public class CertificateMgtUtils {
     public static CertificateMgtUtils getInstance() {
         if (instance == null) {
             synchronized (CertificateMgtUtils.class) {
-                instance = new CertificateMgtUtils();
+                if (instance == null) {
+                    instance = new CertificateMgtUtils();
+                }
             }
         }
         return instance;
@@ -472,7 +474,7 @@ public class CertificateMgtUtils {
                 X509Certificate x509Certificate = (X509Certificate) generatedCertificate;
                 uniqueIdentifier = String
                         .valueOf(x509Certificate.getSerialNumber() + "_" + x509Certificate.getIssuerDN());
-                uniqueIdentifier = uniqueIdentifier.replaceAll(",", "#");
+                uniqueIdentifier = uniqueIdentifier.replaceAll(",", "#").replaceAll("\"", "'");
             }
         } catch (CertificateException e) {
             log.error("Error while getting serial number of the certificate.", e);

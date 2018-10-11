@@ -40,8 +40,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
-import org.wso2.carbon.user.api.TenantManager;
-import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.HashMap;
@@ -589,14 +587,13 @@ public class APIGatewayManager {
             return;
         }
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-        List<ClientCertificateDTO> clientCertificateDTOList = CertificateMgtDAO.getInstance()
-                .getDeletedClientCertificates(api.getId(), tenantId);
-        if (clientCertificateDTOList != null) {
-            for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOList) {
-                client.deleteClientCertificate(clientCertificateDTO.getAlias() + "_" + tenantId);
-            }
+        List<String> aliasList = CertificateMgtDAO.getInstance()
+                .getDeletedClientCertificateAlias(api.getId(), tenantId);
+        for (String alias : aliasList) {
+            client.deleteClientCertificate(alias + "_" + tenantId);
         }
-        clientCertificateDTOList = CertificateMgtDAO.getInstance().getClientCertificates(tenantId, null, api.getId());
+        List<ClientCertificateDTO> clientCertificateDTOList = CertificateMgtDAO.getInstance()
+                .getClientCertificates(tenantId, null, api.getId());
         if (clientCertificateDTOList != null) {
             for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOList) {
                 client.addClientCertificate(clientCertificateDTO.getCertificate(),
@@ -649,11 +646,10 @@ public class APIGatewayManager {
                 client.deleteClientCertificate(clientCertificateDTO.getAlias() + "_" + tenantId);
             }
         }
-        clientCertificateDTOList = CertificateMgtDAO.getInstance().getDeletedClientCertificates(api.getId(), tenantId);
-        if (clientCertificateDTOList != null) {
-            for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOList) {
-                client.deleteClientCertificate(clientCertificateDTO.getAlias() + "_" + tenantId);
-            }
+        List<String> aliasList = CertificateMgtDAO.getInstance()
+                .getDeletedClientCertificateAlias(api.getId(), tenantId);
+        for (String alias : aliasList) {
+            client.deleteClientCertificate(alias + "_" + tenantId);
         }
     }
 

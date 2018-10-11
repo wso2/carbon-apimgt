@@ -57,7 +57,7 @@ public class CertificateManagerImpl implements CertificateManager {
     private static CertificateMgtDAO certificateMgtDAO = CertificateMgtDAO.getInstance();
     private CertificateMgtUtils certificateMgtUtils = CertificateMgtUtils.getInstance();
     private static boolean isMTLSConfigured = false;
-    private static CertificateManager instance = new CertificateManagerImpl();
+    private static CertificateManager instance;
 
     /**
      * To get the instance of certificate manager.
@@ -67,7 +67,9 @@ public class CertificateManagerImpl implements CertificateManager {
     public static CertificateManager getInstance() {
         if (instance == null) {
             synchronized (CertificateManagerImpl.class) {
-                instance = new CertificateManagerImpl();
+                if (instance == null) {
+                    instance = new CertificateManagerImpl();
+                }
             }
         }
         return instance;
@@ -151,12 +153,12 @@ public class CertificateManagerImpl implements CertificateManager {
         ResponseCode responseCode;
         try {
             responseCode = certificateMgtUtils.validateCertificate(alias, tenantId, certificate);
-            if (responseCode == ResponseCode.SUCCESS && certificateMgtDAO
-                    .checkWhetherAliasExist(alias, tenantId)) {
-                responseCode = ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE;
-            }
             if (responseCode == ResponseCode.SUCCESS) {
-                certificateMgtDAO.addClientCertificate(certificate, apiIdentifier, alias, tierName, tenantId);
+                if (certificateMgtDAO.checkWhetherAliasExist(alias, tenantId)) {
+                    responseCode = ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE;
+                } else {
+                    certificateMgtDAO.addClientCertificate(certificate, apiIdentifier, alias, tierName, tenantId, null);
+                }
             }
         } catch (CertificateManagementException e) {
             log.error("Error when adding client certificate with alias " + alias + " to database for the API "
@@ -200,7 +202,7 @@ public class CertificateManagerImpl implements CertificateManager {
     public ResponseCode deleteClientCertificateFromParentNode(APIIdentifier apiIdentifier, String alias, int tenantId) {
         try {
             boolean removeFromDB = certificateMgtDAO
-                    .deleteClientCertificate(apiIdentifier, alias, tenantId);
+                    .deleteClientCertificate(apiIdentifier, alias, tenantId, null);
             if (removeFromDB) {
                 return ResponseCode.SUCCESS;
             } else {

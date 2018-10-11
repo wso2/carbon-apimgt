@@ -485,10 +485,7 @@
                                 </a>
                             </label>
                             <div class="col-sm-6">
-                            <label id="tier_warning" class="alert-warning hide" style="display:
-                                                   block;
-                                                   "><%=i18n.localize("Subscription tiers are not applicable for this API, as it is only protected with mutual SSL.")%></label>
-                                <select type="text" class="form-control" id="tierName" required>
+                                 <select type="text" class="form-control" id="tierName" required>
                                     <% for (var i = 0; i < tiers.length; i++) { %>
                                     <option data-value ="<%= tiers[i].tierName%>">
                                     <%= encode.forHtml(String(tiers[i] .tierDisplayName)) %></strong> : <%= encode.forHtml(String(tiers[i].tierDescription)) %></option>
@@ -655,6 +652,10 @@
                                             	    <p id="tier_help" class="hide"><%=i18n.localize("The tiers selected here determine which tiers are available to a subscriber when subscribing to this API. Each tier indicates the number of requests the subscriber is granted within a unit time.")%></p>
                                                 </label>
                                                 <div class="controls col-sm-4 tierSelect">
+                                                 <label id="tier_warning" class="alert-warning hide" style="display:
+                                                   block;
+                                                   "><%=i18n.localize("Subscription tiers are not applicable for this API, as it is only protected with mutual SSL.")%></label>
+
                                         			<%
                                                         for (var i = 0; i < tiers.length; i++) {
                                                             var isSelected = api.availableTiers.indexOf(tiers[i].tierName) > -1;

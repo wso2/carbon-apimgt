@@ -2885,16 +2885,7 @@ public class SQLConstants {
         public static final String INSERT_CERTIFICATE = "INSERT INTO AM_API_CLIENT_CERTIFICATE " +
                 "(CERTIFICATE, TENANT_ID, ALIAS, API_ID, TIER_NAME) VALUES(?, ?, ?, ?, ?)";
 
-        public static final String UPDATE_CERTIFICATE = "UPDATE AM_API_CLIENT_CERTIFICATE SET CERTIFICATE = ? "
-                + "WHERE TENANT_ID=? AND ALIAS=?";
-
-        public static final String UPDATE_CERTIFICATE_AND_TIER =
-                "UPDATE AM_API_CLIENT_CERTIFICATE SET CERTIFICATE = ?, TIER_NAME = ? WHERE TENANT_ID=? AND ALIAS=?";
-
-        public static final String UPDATE_TIER =
-                "UPDATE AM_API_CLIENT_CERTIFICATE SET TIER_NAME = ? WHERE TENANT_ID=? AND ALIAS=?";
-
-        public static final String GET_CERTIFICATES_FOR_API = "SELECT * FROM AM_API_CLIENT_CERTIFICATE WHERE "
+        public static final String GET_CERTIFICATES_FOR_API = "SELECT ALIAS FROM AM_API_CLIENT_CERTIFICATE WHERE "
                 + "TENANT_ID=? and API_ID=? and REMOVED=?";
 
         public static final String DELETE_CERTIFICATES_FOR_API = "DELETE FROM AM_API_CLIENT_CERTIFICATE "
@@ -2922,10 +2913,16 @@ public class SQLConstants {
                         + "WHERE AC.REMOVED=? AND AC.TENANT_ID=? AND AC.API_ID=?";
 
         public static final String PRE_DELETE_CERTIFICATES = "DELETE FROM AM_API_CLIENT_CERTIFICATE "
-                + "WHERE TENANT_ID=? and API_ID=? and REMOVED=? and ALIAS=?";
+                + "WHERE TENANT_ID=? AND REMOVED=? ANd ALIAS=? AND API_ID=?";
+
+        public static final String PRE_DELETE_CERTIFICATES_WITHOUT_APIID = "DELETE FROM AM_API_CLIENT_CERTIFICATE "
+                + "WHERE TENANT_ID=? AND REMOVED=? and ALIAS=?";
 
         public static final String DELETE_CERTIFICATES = "UPDATE AM_API_CLIENT_CERTIFICATE SET REMOVED = ? "
                 + "WHERE TENANT_ID=? AND ALIAS=? AND API_ID=?";
+
+        public static final String DELETE_CERTIFICATES_WITHOUT_APIID = "UPDATE AM_API_CLIENT_CERTIFICATE SET REMOVED=? "
+                + "WHERE TENANT_ID=? AND ALIAS=?";
 
         public static final String CERTIFICATE_COUNT_QUERY = "SELECT COUNT(*) AS count FROM AM_API_CLIENT_CERTIFICATE " +
                 "WHERE TENANT_ID=? AND REMOVED=?";

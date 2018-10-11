@@ -67,7 +67,7 @@ public class MutualSSLAuthenticator implements Authenticator {
             for (String certificatePart : certificateParts) {
                 int tierDivisionIndex = certificatePart.lastIndexOf("=");
                 if (tierDivisionIndex > 0) {
-                    String uniqueIdentifier = certificatePart.substring(0, tierDivisionIndex);
+                    String uniqueIdentifier = certificatePart.substring(0, tierDivisionIndex).trim();
                     String tier = certificatePart.substring(tierDivisionIndex + 1);
                     certificates.put(uniqueIdentifier, tier);
                 }
@@ -126,7 +126,8 @@ public class MutualSSLAuthenticator implements Authenticator {
         X509Certificate x509Certificate = certs[0];
         String subjectDN = x509Certificate.getSubjectDN().getName();
         String uniqueIdentifier = String
-                .valueOf(x509Certificate.getSerialNumber() + "_" + x509Certificate.getIssuerDN()).replaceAll(",", "#");
+                .valueOf(x509Certificate.getSerialNumber() + "_" + x509Certificate.getIssuerDN()).replaceAll(",",
+                        "#").replaceAll("\"", "'").trim();
         String tier = certificates.get(uniqueIdentifier);
         if (StringUtils.isEmpty(tier)) {
             if (log.isDebugEnabled()) {

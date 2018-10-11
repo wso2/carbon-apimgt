@@ -301,22 +301,21 @@ public class CertificateMgtDaoTest {
     }
 
     /**
-     * To test the behaviour of the getDeletedClientCertificates method.
+     * To test the behaviour of the getDeletedClientCertificateAlias method.
      *
      * @throws CertificateManagementException Certificate Management Exception.
      */
     @Test
     public void testGetDeletedClientCertificates() throws CertificateManagementException {
         certificateMgtDAO.updateRemovedCertificatesFromGateways(apiIdentifier, TENANT_ID);
-        List<ClientCertificateDTO> clientCertificateDTOS = certificateMgtDAO
-                .getDeletedClientCertificates(apiIdentifier, TENANT_ID);
-        Assert.assertEquals("The number of deleted certificates retrieved was wrong", 0, clientCertificateDTOS.size());
+        List<String> aliasList = certificateMgtDAO.getDeletedClientCertificateAlias(apiIdentifier, TENANT_ID);
+        Assert.assertEquals("The number of deleted certificates retrieved was wrong", 0, aliasList.size());
         addClientCertificate();
-        clientCertificateDTOS = certificateMgtDAO.getDeletedClientCertificates(apiIdentifier, TENANT_ID);
-        Assert.assertEquals("The number of deleted certificates retrieved was wrong", 0, clientCertificateDTOS.size());
+        aliasList = certificateMgtDAO.getDeletedClientCertificateAlias(apiIdentifier, TENANT_ID);
+        Assert.assertEquals("The number of deleted certificates retrieved was wrong", 0, aliasList.size());
         deleteClientCertificate();
-        clientCertificateDTOS = certificateMgtDAO.getDeletedClientCertificates(apiIdentifier, TENANT_ID);
-        Assert.assertEquals("The number of deleted certificates retrieved was wrong", 1, clientCertificateDTOS.size());
+        aliasList = certificateMgtDAO.getDeletedClientCertificateAlias(apiIdentifier, TENANT_ID);
+        Assert.assertEquals("The number of deleted certificates retrieved was wrong", 1, aliasList.size());
     }
 
     /**
@@ -326,7 +325,7 @@ public class CertificateMgtDaoTest {
      * @throws CertificateManagementException Certificate Management Exception.
      */
     private boolean addClientCertificate() throws CertificateManagementException {
-        return certificateMgtDAO.addClientCertificate(certificate, apiIdentifier, "test", "Gold", TENANT_ID);
+        return certificateMgtDAO.addClientCertificate(certificate, apiIdentifier, "test", "Gold", TENANT_ID, null);
     }
 
     /**
@@ -336,7 +335,7 @@ public class CertificateMgtDaoTest {
      * @throws CertificateManagementException Certificate Management Exception.
      */
     private boolean deleteClientCertificate() throws CertificateManagementException {
-        return certificateMgtDAO.deleteClientCertificate(apiIdentifier, "test", TENANT_ID);
+        return certificateMgtDAO.deleteClientCertificate(apiIdentifier, "test", TENANT_ID, null);
     }
 
 }

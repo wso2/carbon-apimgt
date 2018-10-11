@@ -321,7 +321,7 @@ function checkOnKeyPress(e) {
 </script>
 <div id="authorizations" class="col-md-12 col-lg-12">
 
-<% if(subscriptions != null && subscriptions.length > 0) { %>
+<% if(isOauthProtected && subscriptions != null && subscriptions.length > 0) { %>
 <form class="form-horizontal">
       <div class="form-group oauth-apps">
           <label for="" class="col-sm-3 control-label">Try</label>

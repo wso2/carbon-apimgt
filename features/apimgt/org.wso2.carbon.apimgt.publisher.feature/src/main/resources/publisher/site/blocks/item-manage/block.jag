@@ -35,7 +35,10 @@ jagg.block("item-manage", {
     var certificates = [];
 
     if (isClientCertificateBasedAuthenticationEnabled) {
-        certificates = mod.getClientCertificates(name, version, provider).certificates;
+        var results = mod.getClientCertificates(name, version, provider);
+        if (results.certificates) {
+            certificates = results.certificates;
+        }
     }
 
         return {
