@@ -5215,12 +5215,12 @@ public class ApiMgtDAO {
                 prepStmt.setString(4, uriTemplate.getUriTemplate());
                 //If API policy is available then set it for all the resources.
                 if (StringUtils.isEmpty(api.getApiLevelPolicy())) {
-                    prepStmt.setString(5, (uriTemplate.getThrottlingTier() == null) ?
+                    prepStmt.setString(5, (StringUtils.isEmpty(uriTemplate.getThrottlingTier())) ?
                             APIConstants.UNLIMITED_TIER :
                             uriTemplate.getThrottlingTier());
                 } else {
                     prepStmt.setString(5,
-                            (api.getApiLevelPolicy() == null) ? APIConstants.UNLIMITED_TIER : api.getApiLevelPolicy());
+                            (StringUtils.isEmpty(api.getApiLevelPolicy())) ? APIConstants.UNLIMITED_TIER : api.getApiLevelPolicy());
                 }
                 InputStream is;
                 if (uriTemplate.getMediationScript() != null) {
