@@ -16,16 +16,32 @@
  * under the License.
  */
 import React from 'react';
+
 import { Route, Switch } from 'react-router-dom';
-import CreateScopes from './CreateScopes';
+import PropTypes from 'prop-types';
+import CreateScope from './CreateScope';
+import Scopes from './Scopes';
+import { PageNotFound } from '../../../Base/Errors';
 
 
-const ScopeCreate = () => {
+const Scope = ({ api }) => {
     return (
         <Switch>
-            <Route path='/apis/create/scope' component={CreateScopes} />
+            <Route exact path='/apis/:api_uuid/scopes/' component={() => <Scopes api={api} />} />
+            <Route exact path='/apis/:api_uuid/scopes/create' component={() => <CreateScope api={api} />} />
+            <Route component={PageNotFound} />
         </Switch>
     );
 };
 
-export default ScopeCreate;
+Scope.propTypes = {
+    api: PropTypes.shape({
+        id: PropTypes.string,
+        additionalProperties: PropTypes.shape({
+            key: PropTypes.string,
+            value: PropTypes.string,
+        }).isRequired,
+    }).isRequired,
+};
+
+export default Scope;

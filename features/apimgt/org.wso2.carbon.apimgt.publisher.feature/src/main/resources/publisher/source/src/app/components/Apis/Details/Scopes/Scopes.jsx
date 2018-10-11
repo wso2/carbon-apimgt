@@ -31,7 +31,6 @@ import CardContent from '@material-ui/core/CardContent';
 import Divider from '@material-ui/core/Divider';
 import Button from '@material-ui/core/Button';
 import withStyles from '@material-ui/core/styles/withStyles';
-import CreateScopes from './CreateScopes';
 import { Link } from 'react-router-dom';
 
 
@@ -163,6 +162,7 @@ class Scopes extends React.Component {
      */
     render() {
         const { api } = this.props;
+        console.log(api);
         const { scopes } = api;
         const { classes } = this.props;
 
@@ -192,7 +192,7 @@ class Scopes extends React.Component {
                                 </Typography>
                             </CardContent>
                             <CardActions>
-                                <Link to='/apis/create/scope'>
+                                <Link to={'/apis/' + api.id + '/scopes/create'}>
                                     <Button variant='contained' color='primary' className={classes.button}>
                                         <FormattedMessage
                                             id='create.scopes'
