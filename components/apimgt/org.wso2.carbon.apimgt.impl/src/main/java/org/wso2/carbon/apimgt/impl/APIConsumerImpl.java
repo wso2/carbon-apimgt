@@ -3995,8 +3995,9 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                             wsdlFiles.add(updatedWSDLFile);
                         }
                         wsdlFiles.addAll(xsdFiles);
-                        getZipFileFromFileList(folderToImport + APIConstants.UPDATED_WSDL_ZIP, wsdlFiles);
-                        wsdlContent = folderToImport + APIConstants.UPDATED_WSDL_ZIP;
+                        getZipFileFromFileList(folderToImport.getCanonicalPath() + APIConstants.UPDATED_WSDL_ZIP,
+                                wsdlFiles);
+                        wsdlContent = folderToImport.getCanonicalPath() + APIConstants.UPDATED_WSDL_ZIP;
                     }
                 } else {
                     arrayOutputStream = new ByteArrayOutputStream();
@@ -4033,7 +4034,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             for (File file : fileList) {
                 String path = file.getAbsolutePath().substring(
                         file.getAbsolutePath().indexOf(APIConstants.API_WSDL_EXTRACTED_DIRECTORY)
-                                + APIConstants.API_WSDL_EXTRACTED_DIRECTORY.length());
+                                + APIConstants.API_WSDL_EXTRACTED_DIRECTORY.length() + 1);
                 ZipEntry ze = new ZipEntry(path);
                 zos.putNextEntry(ze);
                 try (FileInputStream in = new FileInputStream(file)) {
