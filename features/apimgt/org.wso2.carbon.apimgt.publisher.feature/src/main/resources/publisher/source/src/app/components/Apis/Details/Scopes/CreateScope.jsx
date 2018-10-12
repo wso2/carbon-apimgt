@@ -1,8 +1,23 @@
-
+/*
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import React from 'react';
-import Card from '@material-ui/core/Card';
 import APIPropertyField from 'AppComponents/Apis/Details/Overview/APIPropertyField';
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage } from 'react-intl';
@@ -12,8 +27,31 @@ import Button from '@material-ui/core/Button';
 import PropTypes from 'prop-types';
 import { message } from 'antd/lib/index';
 import { withRouter } from 'react-router';
+import { Link } from 'react-router-dom';
+import { withStyles } from '@material-ui/core/styles';
 
-// import Scope from './Scope';
+const styles = theme => ({
+    buttonSave: {
+        marginTop: theme.spacing.unit * 10,
+    },
+    buttonCancel: {
+        marginTop: theme.spacing.unit * 10,
+        marginLeft: theme.spacing.unit * 5,
+    },
+    topics: {
+        marginTop: theme.spacing.unit * 10,
+    },
+    headline: {
+        paddingTop: theme.spacing.unit * 1.5,
+        paddingLeft: theme.spacing.unit * 2.5,
+    },
+});
+
+/**
+ * Create new scoped for an API
+ * @class CreateScope
+ * @extends {Component}
+ */
 
 class CreateScope extends React.Component {
     constructor(props) {
@@ -44,7 +82,6 @@ class CreateScope extends React.Component {
         const promisedScopeAdd = api.addScope(this.props.match.params.api_uuid, scope);
         promisedScopeAdd.then((response) => {
             if (response.status !== 201) {
-                console.log(response);
                 message.error('Something went wrong while updating the ' + scope.name + ' Scope!');
                 hideMessage();
                 return;
@@ -81,80 +118,78 @@ class CreateScope extends React.Component {
     }
 
     render() {
-        const { api } = this.props;
+        const { classes } = this.props;
         return (
-            <Grid container justify='center'>
-                <Grid item lg={5}>
-                    <Card
-                        title='Add Scope'
-                        style={{
-                            width: '100%',
-                            marginBottom: 20,
-                        }}
+            <Grid container>
+                <Typography
+                    className={classes.headline}
+                    gutterBottom
+                    variant='headline'
+                    component='h2'
+                >
+                    <FormattedMessage
+                        id='create.new.scopes'
+                        defaultMessage='Create New Scope'
+                    />
+                </Typography>
+                <Grid item lg={5} className={classes.topics}>
+                    <APIPropertyField name='Name'>
+                        <TextField
+                            fullWidth
+                            id='name'
+                            type='text'
+                            name='name'
+                            margin='normal'
+                            value={this.state.apiScope.name || ''}
+                            onChange={this.handleInputs}
+                        />
+                    </APIPropertyField>
+                    <APIPropertyField name='Description'>
+                        <TextField
+                            style={{
+                                width: '100%',
+                            }}
+                            id='description'
+                            name='description'
+                            helperText='Short description about the scope'
+                            margin='normal'
+                            type='text'
+                            onChange={this.handleInputs}
+                            value={this.state.apiScope.description || ''}
+                        />
+                    </APIPropertyField>
+                    <APIPropertyField name='Roles'>
+                        <TagsInput
+                            value={this.state.roles}
+                            onChange={this.handleInputs}
+                            onlyUnique
+                        />
+                    </APIPropertyField>
+                    <Button
+                        variant='contained'
+                        color='primary'
+                        onClick={this.addScope}
+                        className={classes.buttonSave}
                     >
-                        <Typography className='create-scope' gutterBottom variant='headline' component='h2'>
-                            <FormattedMessage
-                                id='create.new.scopes'
-                                defaultMessage='Create New Scope'
-                            />
-                        </Typography>
-                        <APIPropertyField name='Name'>
-                            <TextField
-                                id='name'
-                                type='text'
-                                name='name'
-                                margin='normal'
-                                value={this.state.apiScope.name || ''}
-                                onChange={this.handleInputs}
-                            />
-                        </APIPropertyField>
-                        <APIPropertyField name='Description'>
-                            <TextField
-                                style={{
-                                    width: '100%',
-                                }}
-                                id='description'
-                                name='description'
-                                helperText='Short description about the scope'
-                                margin='normal'
-                                type='text'
-                                onChange={this.handleInputs}
-                                value={this.state.apiScope.description || ''}
-                            />
-                        </APIPropertyField>
-                        <APIPropertyField name='Roles'>
-                            <TagsInput
-                                value={this.state.roles}
-                                onChange={this.handleInputs}
-                                onlyUnique
-                            />
-                        </APIPropertyField>
-                    </Card>
-                    <Button variant='contained' color='primary' onClick={this.addScope}>
                         <FormattedMessage
                             id='save'
                             defaultMessage='Save'
                         />
                     </Button>
-                    <Button variant='contained' color='primary' >
-                        <FormattedMessage
-                            id='cancel'
-                            defaultMessage='Cancel'
-                        />
-                    </Button>
+                    <Link to={'/apis/' + this.props.api.id + '/scopes'}>
+                        <Button
+                            variant='contained'
+                            color='primary'
+                            className={classes.buttonCancel}
+                        >
+                            <FormattedMessage
+                                id='cancel'
+                                defaultMessage='Cancel'
+                            />
+                        </Button>
+                    </Link>
                 </Grid>
             </Grid>
-            // Object.keys(this.apiScopes).map((key) => {
-            //     const scope = this.apiScopes[key];
-            //     return (
-            //         <Scope
-            //             name={scope.name}
-            //             description={scope.description}
-            //             api_uuid={this.api_uuid}
-            //             key={key}
-            //         />
-            //     );
-            // })
         );
     }
 }
@@ -163,7 +198,9 @@ CreateScope.propTypes = {
     match: PropTypes.shape({
         params: PropTypes.object,
     }),
-    api: PropTypes.shape({}).isRequired,
+    api: PropTypes.shape({
+        id: PropTypes.string,
+    }).isRequired,
     classes: PropTypes.shape({}).isRequired,
 };
 
@@ -171,4 +208,4 @@ CreateScope.defaultProps = {
     match: { params: {} },
 };
 
-export default withRouter(CreateScope);
+export default withRouter(withStyles(styles)(CreateScope));
