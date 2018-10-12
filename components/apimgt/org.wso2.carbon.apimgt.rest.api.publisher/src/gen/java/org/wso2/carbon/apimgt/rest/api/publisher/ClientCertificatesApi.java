@@ -37,7 +37,7 @@ public class ClientCertificatesApi  {
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\n"),
         
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nInvalid request or validation error.\n*\n"),
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nAlias not provided or server is not configured to support mutual SSL authentication.\n"),
         
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Certificate for the Alias not found.\n"),
         
@@ -55,7 +55,7 @@ public class ClientCertificatesApi  {
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nThe Certificate deleted successfully.\n"),
         
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\n\nInvalid request or validation error.\n"),
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nAlias not found or server is not configured to support mutual SSL authentication.\n"),
         
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. |\nFailed to delete the certificate. Certificate could not found for\nthe given alias\n"),
         
@@ -73,7 +73,7 @@ public class ClientCertificatesApi  {
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\n"),
         
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nInvalid request or validation error.\n"),
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nAlias not found or server is not configured to support mutual SSL authentication.\n"),
         
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nAlias not found\n"),
         
@@ -91,9 +91,9 @@ public class ClientCertificatesApi  {
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nThe Certificate updated successfully.\n"),
         
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nInvalid request or validation error.\n"),
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nFailure due to not providing alias.\n"),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\n * Updating certificat failed. Alias not found\n"),
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nUpdating certificate failed. Alias not found or server is not configured to support mutual SSL\nauthentication.\n"),
         
         @io.swagger.annotations.ApiResponse(code = 500, message = "Internal Server Error\n") })
 
@@ -112,9 +112,7 @@ public class ClientCertificatesApi  {
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Successful response with the list of matching certificate information in the body.\n"),
         
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nInvalid request or validation error.\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\n"),
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nFailure due to not providing alias or server is not configured to support mutual SSL authentication.\n"),
         
         @io.swagger.annotations.ApiResponse(code = 500, message = "Internal Server Error\n") })
 
@@ -129,13 +127,13 @@ public class ClientCertificatesApi  {
     
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Upload a new Certificate.", notes = "This operation can be used to upload a new certificate for an endpoint.\n", response = ClientCertMetadataDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "Upload a new certificate.", notes = "This operation can be used to upload a new certificate for an endpoint.\n", response = ClientCertMetadataDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nThe Certificate added successfully.\n"),
         
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nInvalid request or validation error.\n* Failures due to existing alias or expired certificate.\n"),
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nFailures due to existing alias or expired certificate.\n"),
         
-        @io.swagger.annotations.ApiResponse(code = 500, message = "Internal Server Error\n* Failed to add the Certificate due to an Internal Server Error\n") })
+        @io.swagger.annotations.ApiResponse(code = 500, message = "Internal Server Error\nFailed to add the Certificate due to an Internal Server Error\n") })
 
     public Response clientCertificatesPost(@ApiParam(value = "The certificate that needs to be uploaded.") @Multipart(value = "certificate") InputStream certificateInputStream,
     @ApiParam(value = "The certificate that needs to be uploaded. : details") @Multipart(value = "certificate" ) Attachment certificateDetail,

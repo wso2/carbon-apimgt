@@ -134,7 +134,7 @@ public class ClientCertificatesApiServiceImpl extends ClientCertificatesApiServi
             }
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError(
-                    "Error while deleting the client certificate with alias " + alias + " for the tenant "
+                    "Error while retrieving the client certificate with alias " + alias + " for the tenant "
                             + tenantDomain, e, log);
         }
         return null;
@@ -319,7 +319,7 @@ public class ClientCertificatesApiServiceImpl extends ClientCertificatesApiServi
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
         if (!apiProvider.isClientCertificateBasedAuthenticationConfigured()) {
             RestApiUtil.handleBadRequest(
-                    "The client certificate based authentication is not configured for this " + "server", log);
+                    "The client certificate based authentication is not configured for this server", log);
         }
         ClientCertificateDTO clientCertificate = apiProvider.getClientCertificate(tenantId, alias);
         if (clientCertificate == null) {

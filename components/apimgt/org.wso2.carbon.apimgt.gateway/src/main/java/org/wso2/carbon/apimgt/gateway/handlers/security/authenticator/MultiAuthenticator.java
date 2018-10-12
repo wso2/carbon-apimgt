@@ -166,7 +166,7 @@ public class MultiAuthenticator implements Authenticator {
                 challengeString.append(authenticator.getChallengeString()).append(" ");
             }
         }
-        return challengeString.toString();
+        return challengeString.toString().trim();
     }
 
     @Override

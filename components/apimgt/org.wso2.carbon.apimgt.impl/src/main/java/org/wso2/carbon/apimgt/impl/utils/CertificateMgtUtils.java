@@ -392,7 +392,8 @@ public class CertificateMgtUtils {
             byte[] cert = (Base64.decodeBase64(base64EncodedCertificate.getBytes(StandardCharsets.UTF_8)));
             InputStream serverCert = new ByteArrayInputStream(cert);
             if (serverCert.available() == 0) {
-                log.error("Provided certificate is empty for getting certificate information");
+                log.error("Provided certificate is empty for getting certificate information. Hence please provide a "
+                        + "non-empty certificate to overcome this issue.");
             }
             CertificateFactory cf = CertificateFactory.getInstance(CERTIFICATE_TYPE);
             while (serverCert.available() > 0) {

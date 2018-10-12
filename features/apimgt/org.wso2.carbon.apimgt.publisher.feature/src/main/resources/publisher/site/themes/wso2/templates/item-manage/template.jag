@@ -306,7 +306,8 @@
                                             {%>checked<%}%>>
                                             <span class="helper"><%=i18n.localize("Mutual SSL")%></span>
                                         </label>
-                                        <label id="gatewaysecurity_error" class="error hide" style="display: block;"><%=i18n.localize("Please select at least one API Security.")%></label>
+                                        <label id="gatewaysecurity_error" class="error hide" style="display: block;
+                                        "><%=i18n.localize("Please select at least one API security method.")%></label>
                                     </div>
                                 </div>
                             </div>
@@ -385,7 +386,7 @@
 
                             {{else}}
                             <div class="message message-info">
-                                <h4><i class="icon fw fw-info"></i><%=i18n.localize("No uploaded client certificates for the API")%></h4>
+                                <h4><i class="icon fw fw-info"></i><%=i18n.localize("No client certificate found for this API. Please upload a certificate")%></h4>
                                     <p><%=i18n.localize("Click the button below to add certificates.")%></p>
                             </div>
                             {{/if}}
@@ -401,7 +402,7 @@
                                     <div class="modal-header">
                                         <button type="button" class="close modal-close" aria-hidden="true"><i class="fw fw-cancel"></i>
                                         </button>
-                                        <h3 class="modal-title"><%=i18n.localize("Upload client certificates")%></h3>
+                                        <h3 class="modal-title"><%=i18n.localize("Upload client certificate")%></h3>
                                     </div>
                                     <div class="modal-body">
                                         <div class="cert-upload-form"></div>

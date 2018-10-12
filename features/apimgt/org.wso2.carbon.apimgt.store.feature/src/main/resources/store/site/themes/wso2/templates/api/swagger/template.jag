@@ -432,12 +432,12 @@ function checkOnKeyPress(e) {
     <% } else if (isOauthProtected && isMutualSSLProtected) { %>
         <div class="message message-info remove-margin-top">
             <h4><i class="icon fw fw-info"></i>Notice</h4>
-            <p><%=i18n.localize("You can either use client certificate or access token to access this API.")%> &nbsp; <%=i18n.localize("If you already have an access token, please provide it below.")%></p>
+            <p><%=i18n.localize("You can use either the client certificate or the access token to access this API.")%> &nbsp; <%=i18n.localize("If you already have an access token, please provide it below.")%></p>
         </div>
     <% } else { %>
          <div class="message message-info remove-margin-top">
             <h4><i class="icon fw fw-info"></i>Notice </h4>
-            <p><%=i18n.localize("This API is protected only with Mutual SSL, use the client certificate to access the API.")%></p>
+            <p><%=i18n.localize("This API is protected only with Mutual SSL. Use the client certificate to access the API.")%></p>
         </div>
     <% } %>
 

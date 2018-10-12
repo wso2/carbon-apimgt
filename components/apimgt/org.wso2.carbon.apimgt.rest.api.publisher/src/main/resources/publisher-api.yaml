@@ -2651,12 +2651,7 @@ paths:
         '400':
           description: |
             Bad Request.
-            Invalid request or validation error.
-          schema:
-            $ref: '#/definitions/Error'
-        '404':
-          description: |
-            Not Found.
+            Failure due to not providing alias or server is not configured to support mutual SSL authentication.
           schema:
             $ref: '#/definitions/Error'
         '500':
@@ -2739,14 +2734,13 @@ paths:
         '400':
           description: |
             Bad Request.
-            Invalid request or validation error.
-            * Failures due to existing alias or expired certificate.
+            Failures due to existing alias or expired certificate.
           schema:
             $ref: '#/definitions/Error'
         '500':
           description: |
             Internal Server Error
-            * Failed to add the Certificate due to an Internal Server Error
+            Failed to add the Certificate due to an Internal Server Error
           schema:
             $ref: '#/definitions/Error'
 
@@ -2807,13 +2801,14 @@ paths:
         '400':
           description: |
             Bad Request.
-            Invalid request or validation error.
+            Failure due to not providing alias.
           schema:
             $ref: '#/definitions/Error'
         '404':
           description: |
             Not Found.
-             * Updating certificat failed. Alias not found
+            Updating certificate failed. Alias not found or server is not configured to support mutual SSL
+            authentication.
           schema:
             $ref: '#/definitions/Error'
         '500':
@@ -2859,8 +2854,7 @@ paths:
         '400':
           description: |
             Bad Request.
-
-            Invalid request or validation error.
+            Alias not found or server is not configured to support mutual SSL authentication.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -2920,7 +2914,7 @@ paths:
         '400':
           description: |
             Bad Request.
-            Invalid request or validation error.
+            Alias not found or server is not configured to support mutual SSL authentication.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -2973,8 +2967,7 @@ paths:
         '400':
           description: |
             Bad Request.
-            Invalid request or validation error.
-            *
+            Alias not provided or server is not configured to support mutual SSL authentication.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -3169,7 +3162,7 @@ paths:
         '404':
           description: |
             Not Found.
-             * Updating certificat failed. Alias not found
+            Updating certificate failed. Alias not found
           schema:
             $ref: '#/definitions/Error'
         '500':

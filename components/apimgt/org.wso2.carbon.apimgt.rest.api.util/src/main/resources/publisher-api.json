@@ -2682,13 +2682,7 @@
                         }
                     },
                     "400": {
-                        "description": "Bad Request.\nInvalid request or validation error.\n",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found.\n",
+                        "description": "Bad Request.\nFailure due to not providing alias or server is not configured to support mutual SSL authentication.\n",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }
@@ -2762,13 +2756,13 @@
                         }
                     },
                     "400": {
-                        "description": "Bad Request.\nInvalid request or validation error.\n* Failures due to existing alias or expired certificate.\n",
+                        "description": "Bad Request.\nFailures due to existing alias or expired certificate.\n",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error\n* Failed to add the Certificate due to an Internal Server Error\n",
+                        "description": "Internal Server Error\nFailed to add the Certificate due to an Internal Server Error\n",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }
@@ -2784,7 +2778,7 @@
                 ],
                 "x-wso2-curl": "curl -X PUT https://localhost:9443/api/am/publisher/v0.14/clientCertificates/newtest1 -H 'authorization: Bearer f80b8c34-01bc-3ac2-99b6-4873e45c861c' -F tier=Bronze",
                 "x-wso2-request": "PUT https://localhost:9443/api/am/publisher/v0.14/clientCertificates/newtest1 -H 'authorization: Bearer f80b8c34-01bc-3ac2-99b6-4873e45c861c' -F tier=Bronze",
-                "x-wso2-response": "HTTP/1.1 200 OK\r\n {\r\n\"alias\":\"newtest1\"\r\n,\"apiId\":\"fea749dd-d548-4a8b-b308-34903b39a34b\"\r\n, \"tier\":\"Gold\"\r\n}\r\n",
+                "x-wso2-response": "HTTP/1.1 200 OK\r\n {\r\n\"alias\":\"newtest1\",\r\n\"apiId\":\"fea749dd-d548-4a8b-b308-34903b39a34b\",\r\n \"tier\":\"Gold\"\r\n}\r\n",
                 "summary": "Update a certificate.",
                 "description": "This operation can be used to update an uploaded certificate.\n",
                 "parameters": [
@@ -2831,13 +2825,13 @@
                         }
                     },
                     "400": {
-                        "description": "Bad Request.\nInvalid request or validation error.\n",
+                        "description": "Bad Request.\nFailure due to not providing alias.\n",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }
                     },
                     "404": {
-                        "description": "Not Found.\n * Updating certificat failed. Alias not found\n",
+                        "description": "Not Found.\nUpdating certificate failed. Alias not found or server is not configured to support mutual SSL\nauthentication.\n",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }
@@ -2880,7 +2874,7 @@
                         }
                     },
                     "400": {
-                        "description": "Bad Request.\n\nInvalid request or validation error.\n",
+                        "description": "Bad Request.\nAlias not found or server is not configured to support mutual SSL authentication.\n",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }
@@ -2934,7 +2928,7 @@
                         }
                     },
                     "400": {
-                        "description": "Bad Request.\nInvalid request or validation error.\n",
+                        "description": "Bad Request.\nAlias not found or server is not configured to support mutual SSL authentication.\n",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }
@@ -2984,7 +2978,7 @@
                         }
                     },
                     "400": {
-                        "description": "Bad Request.\nInvalid request or validation error.\n*\n",
+                        "description": "Bad Request.\nAlias not provided or server is not configured to support mutual SSL authentication.\n",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }
@@ -3195,7 +3189,7 @@
                         }
                     },
                     "404": {
-                        "description": "Not Found.\n * Updating certificat failed. Alias not found\n",
+                        "description": "Not Found.\nUpdating certificate failed. Alias not found\n",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }

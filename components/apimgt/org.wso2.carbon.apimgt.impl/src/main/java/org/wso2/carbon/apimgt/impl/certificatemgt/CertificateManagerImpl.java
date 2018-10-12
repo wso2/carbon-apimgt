@@ -518,7 +518,8 @@ public class CertificateManagerImpl implements CertificateManager {
                     log.info("The Transport listener will be re-initialized in few minutes.");
                 } else {
                     if (log.isDebugEnabled()) {
-                        log.debug("Error when modifyig listener profile config file");
+                        log.debug(
+                                "Error when modifying listener profile config file in path " + listenerProfileFilePath);
                     }
                     log.error("Could not modify the file listener profile config file");
                 }

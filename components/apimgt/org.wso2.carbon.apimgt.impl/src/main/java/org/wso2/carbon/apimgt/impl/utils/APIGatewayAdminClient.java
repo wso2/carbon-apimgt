@@ -533,7 +533,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
         try {
             return apiGatewayAdminStub.addClientCertificate(certificate, alias);
         } catch (RemoteException e) {
-            throw new AxisFault("Error adding client certificate file with alias " + alias, e);
+            throw new AxisFault("Error while adding client certificate file with alias " + alias, e);
         }
     }
 

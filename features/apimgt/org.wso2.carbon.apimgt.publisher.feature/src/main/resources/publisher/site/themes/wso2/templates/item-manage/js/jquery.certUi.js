@@ -1,7 +1,7 @@
 (function ($, window, document, undefined) {
     var deleteConfirmation = i18n.t("Do you really want to delete the certificate with alias");
     var aliasEPValidationMessage = i18n.t("Alias should not be empty");
-    var certFileError = i18n.t("You must upload a Certificate file");
+    var certFileError = i18n.t("You must upload a certificate file");
     var certSource = $("#certificate-ui-template").html();
     var certFormSource = $(".cert-upload-form-content").html();
     var certTemplate;
@@ -121,9 +121,9 @@
 
             jagg.message({
                 content: deleteConfirmation + " " + dataAlias + "? <br/> <strong>" +
-                i18n.t("This action cannot be undone") + ".</strong>",
+                i18n.t("This action cannot be reversed") + ".</strong>",
                 type: "confirm",
-                title: i18n.t("Delete Certificate with alias") + " " + dataAlias,
+                title: i18n.t("Delete certificate with alias") + " " + dataAlias,
                 okCallback: function () {
                     jagg.post("/site/blocks/item-design/ajax/add.jag",
                         {
@@ -211,7 +211,7 @@
                 jagg.message({
                     type: "error",
                     content: i18n.t("Could not add certificate for alias") + ", '" + alias + "'. " +
-                    i18n.t("Alias exists in trust store")
+                        i18n.t("Alias exists in trust store") + ". " + i18n.t("Please provide a different alias name.")
                 });
                 return;
             }
@@ -281,24 +281,21 @@
             }
             case (2) : {
                 if (msgObject.action === "add") {
-                    return i18n.t("Failed to add Certificate due to an Internal Server Error.");
+                    return i18n.t("Failed to add certificate due to an Internal Server Error.");
                 } else {
-                    return i18n.t("Failed to delete Certificate due to an Internal Server Error.");
+                    return i18n.t("Failed to delete certificate due to an Internal Server Error");
                 }
             }
             case (3) : {
-                return i18n.t("Failed to add Certificate in to Publisher Trust Store. Certificate exists for" +
-                    " the Alias");
+                return i18n.t("Failed to add certificate in to the publisher trust store. Certificate exists for the " +
+                    "alias");
             }
             case (4) : {
-                return i18n.t("Failed to delete the certificate. Certificate could not found for the given alias." +
-                    " Hence the entry is removed from the data base.");
+                return i18n.t("Failed to delete the certificate. Certificate could not be found for the given alias." +
+                    " Hence the entry is removed from the database.");
             }
             case (6) : {
-                return i18n.t("Failed to add Certificate. Certificate Expired");
-            }
-            case (7) : {
-                return i18n.t("Failed to add Certificate. Certificate for Endpoint exists.");
+                return i18n.t("Failed to add certificate. Certificate expired");
             }
         }
     };

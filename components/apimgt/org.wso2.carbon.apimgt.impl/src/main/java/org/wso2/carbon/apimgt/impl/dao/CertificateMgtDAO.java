@@ -773,7 +773,7 @@ public class CertificateMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Error while retrieving the certificates for alias " + alias + ".", e);
+            handleException("Database error while checking whether alias " + alias + " exist in the database.", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
         }
