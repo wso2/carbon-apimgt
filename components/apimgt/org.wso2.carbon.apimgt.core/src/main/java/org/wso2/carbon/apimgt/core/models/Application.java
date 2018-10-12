@@ -46,6 +46,7 @@ public final class Application {
     private ApplicationToken applicationToken;
     private String permissionString;
     private HashMap permissionMap;
+    private String tokenType;
 
 
     public Application(String name, String createdUser) {
@@ -168,6 +169,7 @@ public final class Application {
                 Objects.equals(description, that.description) &&
                 Objects.equals(status, that.status) &&
                 Objects.equals(permissionString, that.permissionString) &&
+                Objects.equals(tokenType, that.tokenType) &&
                 Objects.equals(createdUser, that.createdUser);
     }
 
@@ -190,6 +192,16 @@ public final class Application {
 
     public void setPermissionMap(HashMap permissionMap) {
         this.permissionMap = permissionMap;
+    }
+
+    public String getTokenType() {
+
+        return tokenType;
+    }
+
+    public void setTokenType(String tokenType) {
+
+        this.tokenType = tokenType;
     }
 
     @Override

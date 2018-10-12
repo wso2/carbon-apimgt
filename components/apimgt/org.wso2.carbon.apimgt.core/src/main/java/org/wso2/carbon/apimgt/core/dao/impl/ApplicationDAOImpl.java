@@ -52,7 +52,8 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             ".NAME AS APPLICATION_POLICY_NAME, APPLICATION.DESCRIPTION AS DESCRIPTION," +
             "APPLICATION.APPLICATION_STATUS AS APPLICATION_STATUS,APPLICATION.CREATED_BY AS " +
             "CREATED_BY,APPLICATION.CREATED_TIME AS CREATED_TIME , APPLICATION.UPDATED_BY AS UPDATED_BY, APPLICATION" +
-            ".LAST_UPDATED_TIME AS LAST_UPDATED_TIME, APPLICATION.UUID AS UUID FROM AM_APPLICATION APPLICATION," +
+            ".LAST_UPDATED_TIME AS LAST_UPDATED_TIME, APPLICATION.UUID AS UUID, APPLICATION.TOKEN_TYPE AS TOKEN_TYPE " +
+            "FROM AM_APPLICATION APPLICATION," +
             "AM_APPLICATION_POLICY APPLICATION_POLICY " +
             "WHERE APPLICATION.APPLICATION_POLICY_ID = APPLICATION_POLICY.UUID ";
     private static final String AM_APPLICATION_TABLE_NAME = "AM_APPLICATION";
@@ -180,7 +181,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
     public void addApplication(Application application) throws APIMgtDAOException {
         final String addAppQuery = "INSERT INTO AM_APPLICATION (UUID, NAME, APPLICATION_POLICY_ID, " +
                 "DESCRIPTION, APPLICATION_STATUS, CREATED_BY, CREATED_TIME, UPDATED_BY, " +
-                "LAST_UPDATED_TIME) VALUES (?, ?,?,?,?,?,?,?,?)";
+                "LAST_UPDATED_TIME,TOKEN_TYPE) VALUES (?, ?,?,?,?,?,?,?,?,?)";
         try (Connection conn = DAOUtil.getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement ps = conn.prepareStatement(addAppQuery)) {
@@ -199,6 +200,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 ps.setTimestamp(7, Timestamp.from(application.getCreatedTime()));
                 ps.setString(8, application.getCreatedUser());
                 ps.setTimestamp(9, Timestamp.from(application.getCreatedTime()));
+                ps.setString(10, application.getTokenType());
                 ps.executeUpdate();
                 addApplicationPermission(conn, application.getPermissionMap(), application.getId());
                 conn.commit();
@@ -291,7 +293,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
     public void updateApplication(String appID, Application updatedApp)
             throws APIMgtDAOException {
         final String updateAppQuery = "UPDATE AM_APPLICATION SET NAME=?, APPLICATION_POLICY_ID=" +
-                "?, DESCRIPTION=?, APPLICATION_STATUS=?, UPDATED_BY=?, LAST_UPDATED_TIME=? WHERE UUID=?";
+                "?, DESCRIPTION=?, APPLICATION_STATUS=?, UPDATED_BY=?, LAST_UPDATED_TIME=?, TOKEN_TYPE=? WHERE UUID=?";
         try (Connection conn = DAOUtil.getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement ps = conn.prepareStatement(updateAppQuery)) {
@@ -301,7 +303,8 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 ps.setString(4, updatedApp.getStatus());
                 ps.setString(5, updatedApp.getUpdatedUser());
                 ps.setTimestamp(6, Timestamp.from(updatedApp.getUpdatedTime()));
-                ps.setString(7, appID);
+                ps.setString(7, updatedApp.getTokenType());
+                ps.setString(8, appID);
                 ps.executeUpdate();
                 updateApplicationPermission(conn, updatedApp.getPermissionMap(), updatedApp.getId());
                 conn.commit();
@@ -491,6 +494,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             application.setCreatedTime(rs.getTimestamp("CREATED_TIME").toInstant());
             application.setUpdatedUser(rs.getString("UPDATED_BY"));
             application.setUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME").toInstant());
+            application.setTokenType(rs.getString("TOKEN_TYPE"));
             application.setPolicy(new ApplicationPolicy(rs.getString("APPLICATION_POLICY_NAME")));
         }
         return application;

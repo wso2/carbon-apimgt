@@ -2,12 +2,10 @@ package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 
 import com.google.gson.annotations.SerializedName;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeysDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationTokenDTO;
 import java.util.Objects;
 
 /**
@@ -22,6 +20,39 @@ public class ApplicationDTO   {
 
   @SerializedName("subscriber")
   private String subscriber = null;
+
+  /**
+   * Type of the access token generated for this application.  **OAUTH:** A UUID based access token which is issued by default. **JWT:** A self-contained, signed JWT based access token. **Note:** This can be only used in Microgateway environments. 
+   */
+  public enum TokenTypeEnum {
+    @SerializedName("OAUTH")
+    OAUTH("OAUTH"),
+    
+    @SerializedName("JWT")
+    JWT("JWT");
+
+    private String value;
+
+    TokenTypeEnum(String value) {
+      this.value = value;
+    }
+
+    @Override
+    public String toString() {
+      return String.valueOf(value);
+    }
+    public static TokenTypeEnum fromValue(String text) {
+      for (TokenTypeEnum b : TokenTypeEnum.values()) {
+        if (String.valueOf(b.value).equals(text)) {
+          return b;
+        }
+      }
+      return null;
+    }
+  }
+
+  @SerializedName("tokenType")
+  private TokenTypeEnum tokenType = TokenTypeEnum.OAUTH;
 
   @SerializedName("throttlingTier")
   private String throttlingTier = null;
@@ -93,6 +124,24 @@ public class ApplicationDTO   {
 
   public void setSubscriber(String subscriber) {
     this.subscriber = subscriber;
+  }
+
+  public ApplicationDTO tokenType(TokenTypeEnum tokenType) {
+    this.tokenType = tokenType;
+    return this;
+  }
+
+   /**
+   * Type of the access token generated for this application.  **OAUTH:** A UUID based access token which is issued by default. **JWT:** A self-contained, signed JWT based access token. **Note:** This can be only used in Microgateway environments. 
+   * @return tokenType
+  **/
+  @ApiModelProperty(example = "OAUTH", value = "Type of the access token generated for this application.  **OAUTH:** A UUID based access token which is issued by default. **JWT:** A self-contained, signed JWT based access token. **Note:** This can be only used in Microgateway environments. ")
+  public TokenTypeEnum getTokenType() {
+    return tokenType;
+  }
+
+  public void setTokenType(TokenTypeEnum tokenType) {
+    this.tokenType = tokenType;
   }
 
   public ApplicationDTO throttlingTier(String throttlingTier) {
@@ -221,6 +270,7 @@ public class ApplicationDTO   {
     return Objects.equals(this.applicationId, application.applicationId) &&
         Objects.equals(this.name, application.name) &&
         Objects.equals(this.subscriber, application.subscriber) &&
+        Objects.equals(this.tokenType, application.tokenType) &&
         Objects.equals(this.throttlingTier, application.throttlingTier) &&
         Objects.equals(this.permission, application.permission) &&
         Objects.equals(this.description, application.description) &&
@@ -231,7 +281,7 @@ public class ApplicationDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(applicationId, name, subscriber, throttlingTier, permission, description, lifeCycleStatus, token, keys);
+    return Objects.hash(applicationId, name, subscriber, tokenType, throttlingTier, permission, description, lifeCycleStatus, token, keys);
   }
 
   @Override
@@ -242,6 +292,7 @@ public class ApplicationDTO   {
     sb.append("    applicationId: ").append(toIndentedString(applicationId)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    subscriber: ").append(toIndentedString(subscriber)).append("\n");
+    sb.append("    tokenType: ").append(toIndentedString(tokenType)).append("\n");
     sb.append("    throttlingTier: ").append(toIndentedString(throttlingTier)).append("\n");
     sb.append("    permission: ").append(toIndentedString(permission)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
