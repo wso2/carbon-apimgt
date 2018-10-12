@@ -359,9 +359,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         APIGateway gateway = getApiGateway();
 
         apiBuilder.provider(getUsername());
-        if (StringUtils.isEmpty(apiBuilder.getId())) {
-            apiBuilder.id(UUID.randomUUID().toString());
-        }
+        apiBuilder.id(UUID.randomUUID().toString());
 
         Instant dateTime = Instant.now();
         apiBuilder.createdTime(dateTime);
