@@ -569,7 +569,8 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         if (alias.endsWith("_" + tenantId) || tenantId == MultitenantConstants.SUPER_TENANT_ID) {
             return certificateManager.addClientCertificateToGateway(certificate, alias);
         } else {
-            log.warn("Attempt to add the alias " + alias + " by tenant " + tenantId + " has been rejected");
+            log.warn("Attempt to add an alias " + alias + " by tenant " + tenantId + " has been rejected. Please "
+                    + "make sure to provide a alias name that ends with '_" + tenantId + "' .");
             return false;
         }
     }
@@ -599,7 +600,9 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
             CertificateManager certificateManager = CertificateManagerImpl.getInstance();
             return certificateManager.deleteClientCertificateFromGateway(alias);
         } else {
-            log.warn("Attempt to delete the alias " + alias + " by tenant " + tenantId + " has been rejected");
+            log.warn("Attempt to delete the alias " + alias + " by tenant " + tenantId + " has been rejected. Only "
+                    + "the client certificates that belongs to " + tenantId + " can be deleted. All the client "
+                    + "certificates belongs to " + tenantId + " have '_" + tenantId + "' suffix in alias");
             return false;
         }
     }

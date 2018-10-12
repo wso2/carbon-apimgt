@@ -22,7 +22,6 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
@@ -40,7 +39,7 @@ import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
-import org.wso2.carbon.apimgt.gateway.handlers.security.authenticator.MutualSSLAndOAuthAuthenticator;
+import org.wso2.carbon.apimgt.gateway.handlers.security.authenticator.MultiAuthenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.authenticator.MutualSSLAuthenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.oauth.OAuthAuthenticator;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -51,6 +50,7 @@ import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
@@ -200,8 +200,13 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 }
             }
             if (isOAuthProtected && isMutualSSLProtected) {
-                authenticator = new MutualSSLAndOAuthAuthenticator(authorizationHeader,
-                        removeOAuthHeadersFromOutMessage, apiLevelPolicy, certificateInformation);
+                Map<String, Object> parametersForAuthenticator = new HashMap<>();
+                parametersForAuthenticator.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
+                parametersForAuthenticator.put(APIConstants.REMOVE_OAUTH_HEADERS_FROM_MESSAGE, removeOAuthHeadersFromOutMessage);
+                parametersForAuthenticator.put(APIConstants.API_LEVEL_POLICY, apiLevelPolicy);
+                parametersForAuthenticator.put(APIConstants.CERTIFICATE_INFORMATION, certificateInformation);
+                parametersForAuthenticator.put(APIConstants.API_SECURITY, apiSecurity);
+                authenticator = new MultiAuthenticator(parametersForAuthenticator);
             } else if (isOAuthProtected) {
                 authenticator = new OAuthAuthenticator(authorizationHeader, removeOAuthHeadersFromOutMessage);
             } else {

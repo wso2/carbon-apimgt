@@ -905,11 +905,14 @@ public interface APIProvider extends APIManager {
     /**
      * Method to add client certificate to gateway nodes to support mutual SSL based authentication.
      *
-     * @param userName      User name of the logged in user.
-     * @param apiIdentifier Relevant API identifier which the certificate is added against.
-     * @param certificate   Relevant public certificate.
-     * @param alias         Alias of the certificate.
-     * @return Response code on whether add client certificate is succeeded.
+     * @param userName      : User name of the logged in user.
+     * @param apiIdentifier : Relevant API identifier which the certificate is added against.
+     * @param certificate   : Relevant public certificate.
+     * @param alias         : Alias of the certificate.
+     * @return SUCCESS : If operation succeeded,
+     * INTERNAL_SERVER_ERROR : If any internal error occurred,
+     * ALIAS_EXISTS_IN_TRUST_STORE : If alias is already present in the trust store,
+     * CERTIFICATE_EXPIRED : If the certificate is expired.
      * @throws APIManagementException API Management Exception.
      */
     int addClientCertificate(String userName, APIIdentifier apiIdentifier, String certificate, String alias,
@@ -931,7 +934,9 @@ public interface APIProvider extends APIManager {
      * @param userName      : Name of the logged in user.
      * @param apiIdentifier : Identifier of API for which the certificate need to be deleted.
      * @param alias         : Alias of the certificate which needs to be deleted.
-     * @return Status that indicate whether delete client certificate succeeds.
+     * @return 1: If delete succeeded,
+     * 2: If delete failed, due to an un-expected error.
+     * 4 : If certificate is not found in the trust store.
      * @throws APIManagementException API Management Exception.
      */
     int deleteClientCertificate(String userName, APIIdentifier apiIdentifier, String alias)
@@ -972,9 +977,9 @@ public interface APIProvider extends APIManager {
     /**
      * Method to search the client certificates for the provided tenant id, alias and api identifier.
      *
-     * @param tenantId      ID of the tenant.
-     * @param alias         Alias of the certificate.
-     * @param apiIdentifier Identifier of the API.
+     * @param tenantId      : ID of the tenant.
+     * @param alias         : Alias of the certificate.
+     * @param apiIdentifier : Identifier of the API.
      * @return list of client certificates that match search criteria.
      * @throws APIManagementException API Management Exception.
      */
@@ -992,7 +997,7 @@ public interface APIProvider extends APIManager {
     /**
      * Retrieve the total number client certificates which the specified tenant has.
      *
-     * @param tenantId ID of the tenant.
+     * @param tenantId : ID of the tenant.
      * @return count of client certificates that exists for a particular tenant.
      * @throws APIManagementException API Management Exception.
      */
@@ -1008,12 +1013,13 @@ public interface APIProvider extends APIManager {
     boolean isCertificatePresent(int tenantId, String alias) throws APIManagementException;
 
     /**
-     * Method to check whether an client certificate for the given alis is present in trust store and whether it can
+     * Method to check whether a client certificate for the given alias is present in trust store and whether it can
      * be modified by current user.
      *
-     * @param tenantId Id of the tenant.
-     * @param alias    Relevant alias.
-     * @return true if the client certificate is present and modifiable by current user.
+     * @param tenantId : Id of the tenant.
+     * @param alias    : Relevant alias.
+     * @return Instance of {@link ClientCertificateDTO} if the client certificate is present and
+     * modifiable by current user.
      * @throws APIManagementException API Management Exception.
      */
     ClientCertificateDTO getClientCertificate(int tenantId, String alias) throws APIManagementException;
@@ -1043,10 +1049,13 @@ public interface APIProvider extends APIManager {
      *
      * @param certificate   : Relevant certificate that need to be updated.
      * @param alias         : Alias of the certificate.
-     * @param APIIdentifier API Identifier of the certificate.
-     * @param tier          : tier name
+     * @param APIIdentifier : API Identifier of the certificate.
+     * @param tier          : tier name.
      * @param tenantId      : Id of tenant.
-     * @return : Integer value which represents the client certificate update status.
+     * @return : 1 : If client certificate update is successful,
+     * 2 : If update failed due to internal error,
+     * 4 : If provided certificate is empty,
+     * 6 : If provided certificate is expired
      * @throws APIManagementException API Management Exception.
      */
     int updateClientCertificate(String certificate, String alias, APIIdentifier APIIdentifier, String tier,

@@ -166,10 +166,10 @@ public class CertificateMgtDAO {
     /**
      * To update an already existing client certificate.
      *
-     * @param certificate Specific certificate.
-     * @param alias       Alias of the certificate.
-     * @param tier        Name of tier related with the certificate.
-     * @param tenantId    ID of the tenant.
+     * @param certificate : Specific certificate.
+     * @param alias       : Alias of the certificate.
+     * @param tier        : Name of tier related with the certificate.
+     * @param tenantId    : ID of the tenant.
      * @return true if the update succeeds, unless false.
      * @throws CertificateManagementException Certificate Management Exception.
      */
@@ -218,7 +218,7 @@ public class CertificateMgtDAO {
     /**
      * To get the input stream from string.
      *
-     * @param value Relevant string that need to be converted to input stream.
+     * @param value : Relevant string that need to be converted to input stream.
      * @return input stream.
      */
     private InputStream getInputStream(String value) {
@@ -347,11 +347,11 @@ public class CertificateMgtDAO {
      *
      * @param tenantId      : The id of the tenant which the certificate belongs to.
      * @param alias         : Alias for the certificate. (Optional)
-     * @param apiIdentifier : The endpoint/ server url which the certificate is mapped to. (Optional)
+     * @param apiIdentifier : The API which the certificate is mapped to. (Optional)
      * @return : A CertificateMetadataDTO object if the certificate is retrieved successfully, null otherwise.
      */
-    public List<ClientCertificateDTO> getClientCertificates(int tenantId, String alias,
-            APIIdentifier apiIdentifier) throws CertificateManagementException {
+    public List<ClientCertificateDTO> getClientCertificates(int tenantId, String alias, APIIdentifier apiIdentifier)
+            throws CertificateManagementException {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
@@ -390,7 +390,8 @@ public class CertificateMgtDAO {
                 ClientCertificateDTO clientCertificateDTO = new ClientCertificateDTO();
                 clientCertificateDTO.setTierName(resultSet.getString("TIER_NAME"));
                 clientCertificateDTO.setAlias(alias);
-                clientCertificateDTO.setCertificate(APIMgtDBUtil.getStringFromInputStream(resultSet.getBinaryStream("CERTIFICATE")));
+                clientCertificateDTO.setCertificate(
+                        APIMgtDBUtil.getStringFromInputStream(resultSet.getBinaryStream("CERTIFICATE")));
                 if (apiIdentifier == null) {
                     apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(resultSet.getString("API_PROVIDER")),
                             resultSet.getString("API_NAME"), resultSet.getString("API_VERSION"));
@@ -475,8 +476,8 @@ public class CertificateMgtDAO {
     /**
      * To remove the entries of updated certificates from gateway.
      *
-     * @param apiIdentifier Identifier of the API.
-     * @param tenantId      ID of the tenant.
+     * @param apiIdentifier : Identifier of the API.
+     * @param tenantId      : ID of the tenant.
      * @throws CertificateManagementException Certificate Management Exception.
      */
     public void updateRemovedCertificatesFromGateways(APIIdentifier apiIdentifier, int tenantId)
@@ -512,11 +513,11 @@ public class CertificateMgtDAO {
     }
 
     /**
-     * To get the set of alias of client certificates tht are removed from publisher, but not removed from the gateway.
+     * To get the set of alias of client certificates that are removed from publisher, but not removed from the gateway.
      *
-     * @param apiIdentifier Identifier of the API.
-     * @param tenantId      ID of the tenant.
-     * @return list of alias of client certificates that need to be removed.
+     * @param apiIdentifier : Identifier of the API.
+     * @param tenantId      : ID of the tenant.
+     * @return list of alias of client certificates that need to be removed from the gateway.
      * @throws CertificateManagementException Certificate Management Exception.
      */
     public List<String> getDeletedClientCertificateAlias(APIIdentifier apiIdentifier, int tenantId)
@@ -609,10 +610,10 @@ public class CertificateMgtDAO {
 
         try {
             if (connection == null) {
+                isConnectionNew = true;
                 connection = APIMgtDBUtil.getConnection();
                 initialAutoCommit = connection.getAutoCommit();
                 connection.setAutoCommit(false);
-                isConnectionNew = true;
             }
             int apiId = 0;
             if (apiIdentifier != null) {

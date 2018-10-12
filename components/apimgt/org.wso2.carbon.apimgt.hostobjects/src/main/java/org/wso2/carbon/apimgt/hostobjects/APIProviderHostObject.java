@@ -5226,8 +5226,9 @@ public class APIProviderHostObject extends ScriptableObject {
     public static int jsFunction_uploadClientCertificate(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException {
         if ((args == null) || (args.length != 7) || !isStringValues(args)) {
-            handleException("Invalid number of arguments. Expect user Name, api name, version, provider, alias "
-                    + "certificate string and tier name.");
+            handleException(
+                    "Invalid number of arguments. The method expects user name, api name, version. provider, alias, "
+                            + "certificate string and tier name");
         }
         String userName = (String) args[0];
         String apiName = (String) args[1];
@@ -5278,7 +5279,7 @@ public class APIProviderHostObject extends ScriptableObject {
             throws APIManagementException {
         ResponseCode responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
         if ((args == null) || (args.length != 5) || !isStringValues(args)) {
-            handleException("Invalid number of arguments. Expected arguments username, alias, apiname, version and "
+            handleException("Invalid number of arguments. The method expects user name, alias, api name, version and "
                     + "provider.");
         }
         String userName = (String) args[0];
@@ -5344,8 +5345,8 @@ public class APIProviderHostObject extends ScriptableObject {
     public static NativeArray jsFunction_getClientCertificates(Context cx, Scriptable thisObj, Object[] args,
             Function funObj) throws APIManagementException {
         if ((args == null) || (args.length != 4) || !isStringValues(args)) {
-            log.error("Invalid arguments. Expect User Name and Endpoint");
-            return null;
+            handleException(
+                    "Invalid number of arguments. The method expects user name, api name, provider and version.");
         }
         String userName = (String) args[0];
         String apiName = (String) args[1];

@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.security.Authenticator;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 
@@ -49,9 +50,15 @@ public class MutualSSLAuthenticator implements Authenticator {
     private static final Log log = LogFactory.getLog(APIAuthenticationHandler.class);
     private String apiLevelPolicy;
     private String requestOrigin;
+    private static String challengeString;
 
     // <UniqueIdentifierName,Tier> -Format
     private HashMap<String, String> certificates;
+
+    static {
+        challengeString = "Mutual SSL realm=\"" + ServiceReferenceHolder.getInstance().getServerConfigurationService()
+                .getFirstProperty("Name") + "\"";
+    }
 
     /**
      * Initialized the mutual SSL authenticator.
@@ -103,7 +110,7 @@ public class MutualSSLAuthenticator implements Authenticator {
         if (sslCertObject == null) {
             if (log.isDebugEnabled()) {
                 log.debug("Mutual SSL authentication has not happened in the transport level for the API "
-                        + getAPIIdentifier(messageContext).toString() + "hence API invocation is not allowed");
+                        + getAPIIdentifier(messageContext).toString() + ", hence API invocation is not allowed");
             }
             throw new APISecurityException(APISecurityConstants.MUTUAL_SSL_VALIDATION_FAILURE,
                     APISecurityConstants.MUTUAL_SSL_VALIDATION_FAILURE_MESSAGE);
@@ -131,8 +138,8 @@ public class MutualSSLAuthenticator implements Authenticator {
         String tier = certificates.get(uniqueIdentifier);
         if (StringUtils.isEmpty(tier)) {
             if (log.isDebugEnabled()) {
-                log.debug("The relevant certificate is available in gateway, however it was not added against the "
-                        + "API " + getAPIIdentifier(messageContext));
+                log.debug("The client certificate presented is available in gateway, however it was not added against "
+                        + "the API " + getAPIIdentifier(messageContext));
             }
             throw new APISecurityException(APISecurityConstants.MUTUAL_SSL_VALIDATION_FAILURE,
                     APISecurityConstants.MUTUAL_SSL_VALIDATION_FAILURE_MESSAGE);
@@ -148,7 +155,8 @@ public class MutualSSLAuthenticator implements Authenticator {
                 }
             }
         } catch (InvalidNameException e) {
-            log.warn("Cannot get the CN name from certificate:" + e.getMessage());
+            log.warn("Cannot get the CN name from certificate:" + e.getMessage() + ". Please make sure the "
+                    + "certificate to include a proper common name that follows naming convention.");
             authContext.setUsername(subjectDN);
         }
         authContext.setApiTier(apiLevelPolicy);
@@ -199,7 +207,7 @@ public class MutualSSLAuthenticator implements Authenticator {
 
     @Override
     public String getChallengeString() {
-        return "Mutual SSL realm=\"WSO2 API Manager\"";
+        return challengeString;
     }
 
     @Override

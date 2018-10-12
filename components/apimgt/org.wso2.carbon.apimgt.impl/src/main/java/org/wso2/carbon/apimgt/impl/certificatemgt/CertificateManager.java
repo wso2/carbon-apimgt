@@ -209,9 +209,9 @@ public interface CertificateManager {
     /**
      * This method is used to search client certificates based on different parameters.
      *
-     * @param tenantId      ID of the tenant.
-     * @param alias         Alias of the certificate.
-     * @param apiIdentifier Identifier of the API.
+     * @param tenantId      : ID of the tenant.
+     * @param alias         : Alias of the certificate.
+     * @param apiIdentifier : Identifier of the API.
      * @return List of certificates that match the criteria.
      * @throws APIManagementException API Management Exception.
      */
@@ -233,7 +233,7 @@ public interface CertificateManager {
     /**
      * To get the count of the client certificates updated for the particular tenant.
      *
-     * @param tenantId ID of the tenant.
+     * @param tenantId : ID of the tenant.
      * @return count of client certificates.
      * @throws APIManagementException API Management Exception.
      */

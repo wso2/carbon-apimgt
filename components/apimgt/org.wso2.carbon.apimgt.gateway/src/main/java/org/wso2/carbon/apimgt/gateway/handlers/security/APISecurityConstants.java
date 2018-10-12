@@ -62,7 +62,12 @@ public class APISecurityConstants {
     public static final String INVALID_SCOPE_MESSAGE = "The access token does not allow you to access the requested resource";
 
     public static final int MUTUAL_SSL_VALIDATION_FAILURE = 900911;
-    public static final String MUTUAL_SSL_VALIDATION_FAILURE_MESSAGE = "The mutual SSL authentication has failed";
+    public static final String MUTUAL_SSL_VALIDATION_FAILURE_MESSAGE = "The mutual SSL authentication has failed due "
+            + "to invalid/missing client certificate";
+
+    public static final int MULTI_AUTHENTICATION_FAILURE = 900912;
+    public static final String MULTI_AUTHENTICATION_FAILURE_MESSAGE = "Authentication has failed after trying with "
+            + "multiple authenticators";
 
     // We have added this because we need to add an additional description to the original one and we need to
     // separate the 2 messages
@@ -112,10 +117,13 @@ public class APISecurityConstants {
             case MUTUAL_SSL_VALIDATION_FAILURE:
                 errorMessage = MUTUAL_SSL_VALIDATION_FAILURE_MESSAGE;
                 break;
+            case MULTI_AUTHENTICATION_FAILURE:
+                errorMessage = MULTI_AUTHENTICATION_FAILURE_MESSAGE;
+                break;
             default:
                 errorMessage = API_AUTH_GENERAL_ERROR_MESSAGE;
                 break;
-        }
+            }
         return errorMessage;
     }
 

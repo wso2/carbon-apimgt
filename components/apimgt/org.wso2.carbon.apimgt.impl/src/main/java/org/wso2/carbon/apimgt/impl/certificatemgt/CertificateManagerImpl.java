@@ -201,17 +201,18 @@ public class CertificateManagerImpl implements CertificateManager {
     @Override
     public ResponseCode deleteClientCertificateFromParentNode(APIIdentifier apiIdentifier, String alias, int tenantId) {
         try {
-            boolean removeFromDB = certificateMgtDAO
-                    .deleteClientCertificate(apiIdentifier, alias, tenantId, null);
+            boolean removeFromDB = certificateMgtDAO.deleteClientCertificate(apiIdentifier, alias, tenantId, null);
             if (removeFromDB) {
                 return ResponseCode.SUCCESS;
             } else {
-                log.error("Failed to remove certificate with alias " + alias + " from the data base for the API "
+                log.error("Failed to remove certificate with alias " + alias + " from the database for the API "
                         + apiIdentifier + "  No certificate changes will be affected.");
                 return ResponseCode.INTERNAL_SERVER_ERROR;
             }
         } catch (CertificateManagementException e) {
-            log.error("Error persisting/ deleting certificate metadata. ", e);
+            log.error(
+                    "Error while deleting certificate metadata of the alias " + alias + " of the API " + apiIdentifier,
+                    e);
             return ResponseCode.INTERNAL_SERVER_ERROR;
         }
     }
@@ -429,7 +430,7 @@ public class CertificateManagerImpl implements CertificateManager {
             }
         } catch (CertificateManagementException e) {
             throw new APIManagementException(
-                    "Certificate management exception while trying to update the certificate" + " of alias " + alias
+                    "Certificate management exception while trying to update the certificate of alias " + alias
                             + " of tenant " + tenantId, e);
         }
         return responseCode;
@@ -455,8 +456,8 @@ public class CertificateManagerImpl implements CertificateManager {
             return certificateMgtDAO.getClientCertificateCount(tenantId);
         } catch (CertificateManagementException e) {
             throw new APIManagementException(
-                    "Certificate management exception while getting count of client " + "certificates for the tenant "
-                            + tenantId);
+                    "Certificate management exception while getting count of client certificates of the tenant "
+                            + tenantId, e);
         }
     }
 
@@ -523,7 +524,8 @@ public class CertificateManagerImpl implements CertificateManager {
                 }
             }
         } else {
-            log.warn("Mutual SSL file path is configured in axis2.xml");
+            log.warn("Mutual SSL file path for listener is not configured correctly in axis2.xml. Please recheck the "
+                    + "relevant configuration under transport listener.");
         }
         return success;
     }
