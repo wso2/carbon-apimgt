@@ -62,7 +62,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
-import javax.net.ssl.HttpsURLConnection;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -1573,11 +1572,10 @@ public class ApisApiServiceImpl extends ApisApiService {
                     uuid = apiPublisher.addApiFromDefinition(fileInputStream);
                 } else {
                     URL swaggerUrl = new URL(url);
-                    HttpsURLConnection urlConn = (HttpsURLConnection) swaggerUrl.openConnection();
+                    HttpURLConnection urlConn = (HttpURLConnection) swaggerUrl.openConnection();
                     uuid = apiPublisher.addApiFromDefinition(urlConn);
                 }
             } else { // WSDL type
-
 
                 if (log.isDebugEnabled()) {
                     log.debug("Adding an API by importing a WSDL.");
