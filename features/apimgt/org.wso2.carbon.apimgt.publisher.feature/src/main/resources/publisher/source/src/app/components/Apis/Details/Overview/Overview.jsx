@@ -27,6 +27,8 @@ import ChipInput from 'material-ui-chip-input';
 import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
 import moment from 'moment';
+import IconButton from '@material-ui/core/IconButton';
+import AddIcon from '@material-ui/icons/Add';
 
 import { Progress } from 'AppComponents/Shared';
 import Api from 'AppData/api';
@@ -34,6 +36,7 @@ import Alert from 'AppComponents/Shared/Alert';
 
 import APIPropertyField from './APIPropertyField';
 import BusinessPlans from './BusinessPlans';
+import AdditionalProperty from './AdditionalProperty';
 
 const styles = () => ({
     imageSideContent: {
@@ -97,12 +100,15 @@ class Overview extends Component {
         this.state = {
             api: null,
             editableDescriptionText: null,
+            additionalProperties: props.api.additionalProperties,
         };
         this.downloadWSDL = this.downloadWSDL.bind(this);
         this.handleTagChange = this.handleTagChange.bind(this);
         this.handleTransportChange = this.handleTransportChange.bind(this);
         this.editDescription = this.editDescription.bind(this);
         this.handleInput = this.handleInput.bind(this);
+        this.handleAddAdditionalProperties = this.handleAddAdditionalProperties.bind(this);
+        this.handleDeleteAdditionalProperties = this.handleDeleteAdditionalProperties.bind(this);
     }
 
     downloadWSDL() {
@@ -194,6 +200,30 @@ class Overview extends Component {
     }
 
     /**
+     * Handle adding Additional properties
+     */
+    handleAddAdditionalProperties() {
+        this.setState({
+            additionalProperties: [...this.state.additionalProperties, {
+                key: '',
+                value: '',
+            }],
+        });
+    }
+
+    /**
+     * Handle delete Additional properties
+     *
+     * @param {AdditionalProperty} key AdditionalProperty
+     */
+    handleDeleteAdditionalProperties(key) {
+        const { additionalProperties } = this.state;
+        this.setState({
+            additionalProperties: additionalProperties.filter(property => property.key !== key),
+        });
+    }
+
+    /**
      * Edit description
      *
      * @param {SyntheticEvent} sEvent Synthetic Event
@@ -235,6 +265,8 @@ class Overview extends Component {
     /** @inheritDoc */
     render() {
         const { api, isEditable } = this.props;
+        const { additionalProperties } = this.state;
+
         if (!api) {
             return <Progress />;
         }
@@ -377,14 +409,29 @@ class Overview extends Component {
                         }}
                     />
                 </APIPropertyField>
-                <Grid item>
-                    <Typography variant='headline'> Additional Fields</Typography>
+                <Grid item >
+                    <Typography variant='headline'> Additional Properties</Typography>
                     <Divider />
                 </Grid>
+                { additionalProperties
+                    .map(property => (<AdditionalProperty
+                        property={property}
+                        isEditable={isEditable}
+                        onDelete={this.handleDeleteAdditionalProperties}
+                    />))
+                }
+                <IconButton
+                    id='add'
+                    aria-label='Add'
+                    onClick={this.handleAddAdditionalProperties}
+                >
+                    <AddIcon id='1' />
+                </IconButton>
             </Grid>
         );
     }
 }
+
 
 Overview.defaultProps = {
     isEditable: false,
@@ -394,6 +441,10 @@ Overview.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     api: PropTypes.shape({
         id: PropTypes.string,
+        additionalProperties: PropTypes.shape({
+            key: PropTypes.string,
+            value: PropTypes.string,
+        }).isRequired,
     }).isRequired,
     isEditable: PropTypes.bool,
 };
