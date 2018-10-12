@@ -96,7 +96,7 @@ export default class APIInputForm extends Component {
                     type='text'
                     name='version'
                     margin='normal'
-                    value={api.version}
+                    value={api.version || ''}
                     onChange={handleInputChange}
                 />
                 <TextField
