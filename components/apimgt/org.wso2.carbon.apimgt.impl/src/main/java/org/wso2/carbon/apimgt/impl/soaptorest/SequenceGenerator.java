@@ -17,26 +17,34 @@
  */
 package org.wso2.carbon.apimgt.impl.soaptorest;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.TypeFactory;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import io.swagger.inflector.examples.ExampleBuilder;
+import io.swagger.inflector.examples.models.Example;
+import io.swagger.inflector.processors.JsonNodeExampleSerializer;
+import io.swagger.models.HttpMethod;
+import io.swagger.models.Model;
+import io.swagger.models.Operation;
+import io.swagger.models.Path;
+import io.swagger.models.RefModel;
+import io.swagger.models.Swagger;
+import io.swagger.models.parameters.BodyParameter;
+import io.swagger.models.parameters.Parameter;
+import io.swagger.models.parameters.QueryParameter;
+import io.swagger.parser.SwaggerParser;
+import io.swagger.util.Json;
+import io.swagger.util.Yaml;
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.json.JSONException;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.soaptorest.model.WSDLSOAPOperation;
 import org.wso2.carbon.apimgt.impl.soaptorest.template.RESTToSOAPMsgTemplate;
 import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPToRESTConstants;
 import org.wso2.carbon.apimgt.impl.soaptorest.util.SequenceUtils;
@@ -60,12 +68,12 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.IOException;
 import java.io.StringWriter;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
@@ -75,22 +83,127 @@ import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 public class SequenceGenerator {
     private static final Logger log = LoggerFactory.getLogger(SequenceGenerator.class);
 
-    private static APIDefinition definitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
-
     /**
-     * generates api in/out sequences from the swagger to soap definitions
-     * <p>
-     * Note: this method is directly invoked from the jaggery layer
+     * Generates in/out sequences from the swagger given
      *
-     * @param apiDataStr           api object as a string
-     * @param soapOperationMapping soap operation mapping from the wsdl
-     * @throws APIManagementException throws if error occurred in registry access/ parsing definitions
+     * @param swaggerStr swagger string
+     * @param apiDataStr api data as json string
+     * @throws APIManagementException
      */
-    public static void generateSequences(String apiDataStr, String soapOperationMapping) throws APIManagementException {
+    public static void generateSequencesFromSwagger(String swaggerStr, String apiDataStr)
+            throws APIManagementException {
+
+        Swagger swagger = new SwaggerParser().parse(swaggerStr);
+        Map<String, Model> definitions = swagger.getDefinitions();
+
+        // Configure serializers
+        SimpleModule simpleModule = new SimpleModule().addSerializer(new JsonNodeExampleSerializer());
+        Json.mapper().registerModule(simpleModule);
+        Yaml.mapper().registerModule(simpleModule);
+
+        Map<String, Path> paths = swagger.getPaths();
+
+        for (String pathName : paths.keySet()) {
+            Path path = paths.get(pathName);
+
+            Map<HttpMethod, Operation> operationMap = path.getOperationMap();
+            for (HttpMethod httpMethod : operationMap.keySet()) {
+                Map<String, String> parameterJsonPathMapping = new HashMap<>();
+                Map<String, String> queryParameters = new HashMap<>();
+                Operation operation = operationMap.get(httpMethod);
+                String operationId = operation.getOperationId();
+
+                //get vendor extensions
+                Map<String, Object> vendorExtensions = operation.getVendorExtensions();
+                Object vendorExtensionObj = vendorExtensions.get("x-wso2-soap");
+
+                String soapAction = SOAPToRESTConstants.EMPTY_STRING;
+                String namespace = SOAPToRESTConstants.EMPTY_STRING;
+                String soapVersion = SOAPToRESTConstants.EMPTY_STRING;
+                if (vendorExtensionObj != null) {
+                    soapAction = (String) ((LinkedHashMap) vendorExtensionObj).get("soap-action");
+                    namespace = (String) ((LinkedHashMap) vendorExtensionObj).get("namespace");
+                    soapVersion = (String) ((LinkedHashMap) vendorExtensionObj)
+                            .get(SOAPToRESTConstants.Swagger.SOAP_VERSION);
+                }
+                String soapNamespace = SOAPToRESTConstants.SOAP12_NAMSPACE;
+                if (StringUtils.isNotBlank(soapVersion) && SOAPToRESTConstants.SOAP_VERSION_11.equals(soapVersion)) {
+                    soapNamespace = SOAPToRESTConstants.SOAP11_NAMESPACE;
+                }
+                //populates body parameter json paths and query parameters to generate api sequence parameters
+                populateParametersFromOperation(operation, definitions, parameterJsonPathMapping, queryParameters);
+
+                Map<String, String> payloadSequence = createPayloadFacXMLForOperation(parameterJsonPathMapping, queryParameters,
+                        namespace, SOAPToRESTConstants.EMPTY_STRING, operationId);
+                try {
+                    String[] propAndArgElements = getPropertyAndArgElementsForSequence(parameterJsonPathMapping,
+                            queryParameters);
+                    if (log.isDebugEnabled()) {
+                        log.debug("properties string for the generated sequence: " + propAndArgElements[0]);
+                        log.debug("arguments string for the generated sequence: " + propAndArgElements[1]);
+                    }
+                    org.json.simple.JSONArray arraySequenceElements = new org.json.simple.JSONArray();
+
+                    //gets array elements for the sequence to be used
+                    getArraySequenceElements(arraySequenceElements, parameterJsonPathMapping);
+                    Map<String, String> sequenceMap = new HashMap<>();
+                    sequenceMap.put("args", propAndArgElements[0]);
+                    sequenceMap.put("properties", propAndArgElements[1]);
+                    sequenceMap.put("sequence", payloadSequence.get(operationId));
+                    RESTToSOAPMsgTemplate template = new RESTToSOAPMsgTemplate();
+                    String inSequence = template.getMappingInSequence(sequenceMap, operationId, soapAction,
+                            namespace, soapNamespace, arraySequenceElements);
+                    String outSequence = template.getMappingOutSequence();
+                    saveApiSequences(apiDataStr, inSequence, outSequence, httpMethod.toString().toLowerCase(),
+                            pathName);
+                } catch (APIManagementException e) {
+                    handleException("Error when generating sequence property and arg elements for soap operation: " + operationId, e);
+                }
+            }
+        }
+    }
+
+    private static void populateParametersFromOperation(Operation operation, Map<String, Model> definitions,
+            Map<String, String> parameterJsonPathMapping, Map<String, String> queryParameters) {
+
+        List<Parameter> parameters = operation.getParameters();
+        for (Parameter parameter : parameters) {
+            String name = parameter.getName();
+            if (parameter instanceof BodyParameter) {
+                Model schema = ((BodyParameter) parameter).getSchema();
+                if (schema instanceof RefModel) {
+                    String $ref = ((RefModel) schema).get$ref();
+                    if (StringUtils.isNotBlank($ref)) {
+                        String defName = $ref.substring("#/definitions/".length());
+                        Model model = definitions.get(defName);
+                        Example example = ExampleBuilder.fromModel(defName, model, definitions, new HashSet<String>());
+
+                        String jsonExample = Json.pretty(example);
+                        try {
+                            org.json.JSONObject json = new org.json.JSONObject(jsonExample);
+                            SequenceUtils.listJson(json, parameterJsonPathMapping);
+                        } catch (JSONException e) {
+                            log.error("Error occurred while generating json mapping for the definition: " + defName, e);
+                        }
+                    }
+                }
+            }
+            if (parameter instanceof QueryParameter) {
+                String type = ((QueryParameter) parameter).getType();
+                queryParameters.put(name, type);
+            }
+        }
+    }
+
+    private static void saveApiSequences(String apiDataStr, String inSequence, String outSequence, String method,
+            String resourcePath) throws APIManagementException {
+
         JSONParser parser = new JSONParser();
         boolean isTenantFlowStarted = false;
+
+        org.json.simple.JSONObject apiData;
         try {
-            JSONObject apiData = (JSONObject) parser.parse(apiDataStr);
+            apiData = (org.json.simple.JSONObject) parser.parse(apiDataStr);
             String provider = (String) apiData.get("provider");
             String name = (String) apiData.get("name");
             String version = (String) apiData.get("version");
@@ -102,9 +215,6 @@ public class SequenceGenerator {
             provider = (provider != null ? provider.trim() : null);
             name = (name != null ? name.trim() : null);
             version = (version != null ? version.trim() : null);
-            APIIdentifier apiId = new APIIdentifier(provider, name, version);
-
-            JSONObject apiJSON;
 
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -115,69 +225,37 @@ public class SequenceGenerator {
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
             int tenantId;
             UserRegistry registry;
+
             try {
                 tenantId = ServiceReferenceHolder.getInstance().getRealmService().
                         getTenantManager().getTenantId(tenantDomain);
                 APIUtil.loadTenantRegistry(tenantId);
                 registry = registryService.getGovernanceSystemRegistry(tenantId);
 
-                apiJSON = (JSONObject) parser.parse(definitionFromOpenAPISpec.getAPIDefinition(apiId, registry));
+                String resourceInPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                        provider + RegistryConstants.PATH_SEPARATOR + name + RegistryConstants.PATH_SEPARATOR + version
+                        + RegistryConstants.PATH_SEPARATOR + SOAPToRESTConstants.SequenceGen.SOAP_TO_REST_IN_RESOURCE
+                        + resourcePath + SOAPToRESTConstants.SequenceGen.RESOURCE_METHOD_SEPERATOR + method
+                        + SOAPToRESTConstants.SequenceGen.XML_FILE_EXTENSION;
+                String resourceOutPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                        provider + RegistryConstants.PATH_SEPARATOR + name + RegistryConstants.PATH_SEPARATOR + version
+                        + RegistryConstants.PATH_SEPARATOR + SOAPToRESTConstants.SequenceGen.SOAP_TO_REST_OUT_RESOURCE
+                        + resourcePath + SOAPToRESTConstants.SequenceGen.RESOURCE_METHOD_SEPERATOR + method
+                        + SOAPToRESTConstants.SequenceGen.XML_FILE_EXTENSION;
 
-                ObjectMapper mapper = new ObjectMapper()
-                        .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-                mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                TypeFactory typeFactory = mapper.getTypeFactory();
-                List<WSDLSOAPOperation> soapOperations = mapper.readValue(soapOperationMapping,
-                        typeFactory.constructCollectionType(List.class, WSDLSOAPOperation.class));
-
-                if (apiJSON != null) {
-                    Map pathMap = (HashMap) apiJSON.get(SOAPToRESTConstants.Swagger.PATHS);
-                    for (Object resourceObj : pathMap.entrySet()) {
-                        Map.Entry entry = (Map.Entry) resourceObj;
-                        String resourcePath = (String) entry.getKey();
-                        JSONObject resource = (JSONObject) entry.getValue();
-
-                        Set methods = resource.keySet();
-                        for (Object key1 : methods) {
-                            String method = (String) key1;
-
-                            List<JSONObject> mappingList = SequenceUtils
-                                    .getResourceParametersFromSwagger(apiJSON, resource, method);
-                            String inSequence = generateApiInSequence(mappingList, soapOperations, resourcePath);
-                            String outSequence = generateApiOutSequence();
-                            if (log.isDebugEnabled()) {
-                                log.debug("Generated api in sequence for " + resource + " is: " + inSequence);
-                                log.debug("Generated api out sequence for " + resource + " is: " + outSequence);
-                            }
-                            String resourceInPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                                    provider + RegistryConstants.PATH_SEPARATOR + name
-                                    + RegistryConstants.PATH_SEPARATOR + version + RegistryConstants.PATH_SEPARATOR
-                                    + SOAPToRESTConstants.SequenceGen.SOAP_TO_REST_IN_RESOURCE + resourcePath
-                                    + SOAPToRESTConstants.SequenceGen.RESOURCE_METHOD_SEPERATOR + method
-                                    + SOAPToRESTConstants.SequenceGen.XML_FILE_EXTENSION;
-                            String resourceOutPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                                    provider + RegistryConstants.PATH_SEPARATOR + name
-                                    + RegistryConstants.PATH_SEPARATOR + version + RegistryConstants.PATH_SEPARATOR
-                                    + SOAPToRESTConstants.SequenceGen.SOAP_TO_REST_OUT_RESOURCE + resourcePath
-                                    + SOAPToRESTConstants.SequenceGen.RESOURCE_METHOD_SEPERATOR + method
-                                    + SOAPToRESTConstants.SequenceGen.XML_FILE_EXTENSION;
-                            SequenceUtils.saveRestToSoapConvertedSequence(registry, inSequence, method, resourceInPath);
-                            SequenceUtils
-                                    .saveRestToSoapConvertedSequence(registry, outSequence, method, resourceOutPath);
-                        }
-                    }
-                }
-            } catch (RegistryException e) {
-                handleException("Error when create registry instance", e);
+                SequenceUtils.saveRestToSoapConvertedSequence(registry, inSequence, method, resourceInPath);
+                SequenceUtils.saveRestToSoapConvertedSequence(registry, outSequence, method, resourceOutPath);
             } catch (UserStoreException e) {
                 handleException("Error while reading tenant information", e);
-            } catch (ParseException e) {
-                handleException("Error while parsing soap operations json content", e);
-            } catch (IOException e) {
-                handleException("Error occurred when parsing soap operations json string", e);
+            } catch (RegistryException e) {
+                handleException("Error while creating registry resource", e);
+            } catch (APIManagementException e) {
+                handleException(
+                        "Error while saving the soap to rest converted sequence for resource path: " + resourcePath, e);
             }
+
         } catch (ParseException e) {
-            handleException("Error occurred when parsing api json string", e);
+            handleException("Error occurred while parsing the sequence json", e);
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
@@ -185,152 +263,63 @@ public class SequenceGenerator {
         }
     }
 
-    /**
-     * Generates api in sequence for api resource that needs to added to synapse api configs
-     *
-     * @param mappingList    swagger resource mapping
-     * @param soapOperations soap operations taken from the wsdl
-     * @param resourcePath   resource path of the http method
-     * @param method         resource method
-     * @return generated api in sequence
-     * @throws APIManagementException
-     */
-    private static String generateApiInSequence(List<JSONObject> mappingList, List<WSDLSOAPOperation> soapOperations,
-            String resourcePath) throws APIManagementException {
-        RESTToSOAPMsgTemplate template = new RESTToSOAPMsgTemplate();
-
-        String soapAction = "";
-        String namespace = "";
-        String opName = "";
-        for (WSDLSOAPOperation operationParam : soapOperations) {
-            if (operationParam.getName().equals(resourcePath.substring(1))) {
-                opName = operationParam.getSoapBindingOpName();
-                soapAction = operationParam.getSoapAction();
-                namespace = operationParam.getTargetNamespace();
-                if (log.isDebugEnabled()) {
-                    log.debug("Soap operation name: " + opName + ", soap action: " + soapAction + ", namespace: "
-                            + namespace);
-                }
-                break;
-            }
-        }
-        JSONArray array = new JSONArray();
-        Map<String, String> sequenceMap = createXMLFromMapping(mappingList, opName, namespace, array);
-        return template.getMappingInSequence(sequenceMap, opName, soapAction, namespace, array);
-    }
-
-    /**
-     * Generates api out sequence for api resource that needs to added to synapse api configs
-     *
-     * @return generated api out sequence
-     */
-    private static String generateApiOutSequence() {
-        RESTToSOAPMsgTemplate template = new RESTToSOAPMsgTemplate();
-        return template.getMappingOutSequence();
-    }
-
-    /**
-     * Creates xml string needed to inject into the velocity templates.
-     *
-     * @param mappingList swagger definition mapping with the soap operations
-     * @param opName      soap operation name
-     * @param namespace   soap namespace of the operation
-     * @param array       parameter array used to generate sequence for array type
-     * @return xml string that needs to injected to the api sequence
-     * @throws APIManagementException throws in xml to string transformation
-     */
-    private static Map<String, String> createXMLFromMapping(List<JSONObject> mappingList, String opName,
-            String namespace, JSONArray array) throws APIManagementException {
+    private static Map<String, String> createPayloadFacXMLForOperation(Map<String, String> parameterJsonPathMapping,
+            Map<String, String> queryPathParamMapping, String namespace, String prefix, String operationId)
+            throws APIManagementException {
 
         DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
         DocumentBuilder docBuilder;
         StringWriter stringWriter = new StringWriter();
-        TransformerFactory transformerFactory = TransformerFactory.newInstance();
-        Map<String, String> map = new HashMap<>();
-        String argStr = "";
-        String propertyStr = "";
+
         try {
+            Transformer transformer = transformerFactory.newTransformer();
             docBuilder = docFactory.newDocumentBuilder();
             Document doc = docBuilder.newDocument();
-            doc.createElementNS(namespace, SOAPToRESTConstants.SequenceGen.NAMESPACE_PREFIX
-                    + SOAPToRESTConstants.SequenceGen.NAMESPACE_SEPARATOR + opName);
-            Transformer transformer = transformerFactory.newTransformer();
             Element rootElement = doc.createElementNS(namespace, SOAPToRESTConstants.SequenceGen.NAMESPACE_PREFIX
-                    + SOAPToRESTConstants.SequenceGen.NAMESPACE_SEPARATOR + opName);
+                    + SOAPToRESTConstants.SequenceGen.NAMESPACE_SEPARATOR + operationId);
             doc.appendChild(rootElement);
             int count = 1;
-            for (JSONObject jsonObject : mappingList) {
-                for (Object obj : jsonObject.keySet()) {
-                    if (jsonObject.get(obj) instanceof JSONArray) {
-                        JSONArray paramArr = (JSONArray) jsonObject.get(obj);
-                        if (log.isDebugEnabled()) {
-                            log.debug("Swagger parameter definition: " + paramArr.toJSONString());
-                        }
-                        for (Object paramObj : paramArr) {
-                            JSONObject param = (JSONObject) paramObj;
-                            String paramName = (String) param.keySet().iterator().next();
-                            String xPath;
-                            String paramElements = createParameterElements(paramName, SOAPToRESTConstants.Swagger.BODY);
-                            String[] params = paramElements.split(SOAPToRESTConstants.SequenceGen.COMMA);
-                            argStr += params[1] + SOAPToRESTConstants.SequenceGen.NEW_LINE_CHAR;
-                            if (SOAPToRESTConstants.ParamTypes.ARRAY
-                                    .equals(param.get(SOAPToRESTConstants.Swagger.TYPE))) {
-                                xPath = (String) param.get(SOAPToRESTConstants.SequenceGen.XPATH);
-                                JSONObject arrayObj = new JSONObject();
-                                arrayObj.put(SOAPToRESTConstants.SequenceGen.PROPERTY_NAME, paramName);
-                                arrayObj.put(SOAPToRESTConstants.SequenceGen.PARAMETER_NAME,
-                                        param.get(SOAPToRESTConstants.SequenceGen.PARAMETER_NAME));
-                                array.add(arrayObj);
-                            } else {
-                                propertyStr += params[0] + SOAPToRESTConstants.SequenceGen.NEW_LINE_CHAR;
-                                JSONObject entry = (JSONObject) ((JSONObject) paramObj).get(paramName);
-                                xPath = (String) entry.get(SOAPToRESTConstants.SequenceGen.XPATH);
-                            }
-                            if (xPath == null) {
-                                throw new APIManagementException("Cannot map parameters without x-path property.");
-                            }
-                            String[] xPathElements = xPath.split(SOAPToRESTConstants.SequenceGen.PATH_SEPARATOR);
-                            Element prevElement = rootElement;
-                            int elemPos = 0;
-                            for (String xPathElement : xPathElements) {
-                                Element element = doc.createElementNS(namespace,
-                                        SOAPToRESTConstants.SequenceGen.NAMESPACE_PREFIX
-                                                + SOAPToRESTConstants.SequenceGen.NAMESPACE_SEPARATOR + xPathElement);
-                                if (doc.getElementsByTagName(element.getTagName()).getLength() > 0) {
-                                    prevElement = (Element) doc.getElementsByTagName(element.getTagName()).item(0);
-                                } else {
-                                    if (elemPos == xPathElements.length - 1) {
-                                        element.setTextContent(SOAPToRESTConstants.SequenceGen.PROPERTY_ACCESSOR +
-                                                count);
-                                        count++;
-                                    }
-                                    prevElement.appendChild(element);
-                                    prevElement = element;
-                                }
-                                elemPos++;
-                                if (log.isDebugEnabled()) {
-                                    log.debug("Current x path element  " + element.getNodeValue() + " at position: "
-                                            + elemPos);
-                                }
-                            }
-                        }
-                    } else if (jsonObject.get(obj) instanceof JSONObject) {
-                        JSONObject param = (JSONObject) jsonObject.get(obj);
+            for (String parameter : parameterJsonPathMapping.keySet()) {
+                String parameterType = parameterJsonPathMapping.get(parameter);
+                String[] parameterTreeNodes = parameter.split("\\.");
+
+                Element prevElement = rootElement;
+                int elemPos = 0;
+                int length = parameterType.equals(SOAPToRESTConstants.ParamTypes.ARRAY) ?
+                        parameterTreeNodes.length - 1 :
+                        parameterTreeNodes.length;
+                for (int i = 0; i < length; i++) {
+                    String parameterTreeNode = parameterTreeNodes[i];
+                    if (StringUtils.isNotBlank(parameterTreeNode)) {
                         Element element = doc.createElementNS(namespace,
                                 SOAPToRESTConstants.SequenceGen.NAMESPACE_PREFIX
-                                        + SOAPToRESTConstants.SequenceGen.NAMESPACE_SEPARATOR + param
-                                        .get(SOAPToRESTConstants.Swagger.NAME).toString());
-                        element.setTextContent(SOAPToRESTConstants.SequenceGen.PROPERTY_ACCESSOR + count);
-                        rootElement.appendChild(element);
-                        String paramElements = createParameterElements(
-                                param.get(SOAPToRESTConstants.Swagger.NAME).toString(),
-                                SOAPToRESTConstants.ParamTypes.QUERY);
-                        String[] params = paramElements.split(SOAPToRESTConstants.SequenceGen.COMMA);
-                        argStr += params[1] + SOAPToRESTConstants.SequenceGen.NEW_LINE_CHAR;
-                        propertyStr += params[0] + SOAPToRESTConstants.SequenceGen.NEW_LINE_CHAR;
-                        count++;
+                                        + SOAPToRESTConstants.SequenceGen.NAMESPACE_SEPARATOR + parameterTreeNode);
+                        if (doc.getElementsByTagName(element.getTagName()).getLength() > 0) {
+                            prevElement = (Element) doc.getElementsByTagName(element.getTagName()).item(0);
+                        } else {
+                            if (elemPos == length - 1) {
+                                element.setTextContent(SOAPToRESTConstants.SequenceGen.PROPERTY_ACCESSOR + count);
+                                count++;
+                            }
+                            prevElement.appendChild(element);
+                            prevElement = element;
+                        }
+                        elemPos++;
                     }
                 }
+            }
+            count = 1;
+            if (parameterJsonPathMapping.size() == 0) {
+                for (String queryParam : queryPathParamMapping.keySet()) {
+                    Element element = doc.createElementNS(namespace, SOAPToRESTConstants.SequenceGen.NAMESPACE_PREFIX
+                            + SOAPToRESTConstants.SequenceGen.NAMESPACE_SEPARATOR + queryParam);
+                    element.setTextContent(SOAPToRESTConstants.SequenceGen.PROPERTY_ACCESSOR + count);
+                    count++;
+                    rootElement.appendChild(element);
+                }
+            } else if (parameterJsonPathMapping.size() > 0 && queryPathParamMapping.size() > 0) {
+                log.warn("Query parameters along with the body parameter is not allowed");
             }
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.setOutputProperty(SOAPToRESTConstants.SequenceGen.INDENT_PROPERTY,
@@ -344,10 +333,61 @@ public class SequenceGenerator {
         } catch (TransformerException e) {
             handleException("Error occurred when transforming in sequence xml", e);
         }
-        map.put("properties", propertyStr);
-        map.put("args", argStr);
-        map.put("sequence", stringWriter.toString());
-        return map;
+        if (log.isDebugEnabled()) {
+            log.debug("parameter mapping for used in payload factory for soap operation:" + operationId + " is "
+                    + stringWriter.toString());
+        }
+        Map<String, String> paramMap = new HashMap<>();
+        paramMap.put(operationId, stringWriter.toString());
+        return paramMap;
+    }
+
+    private static String[] getPropertyAndArgElementsForSequence(Map<String, String> parameterJsonPathMapping,
+            Map<String, String> queryPathParamMapping) throws APIManagementException {
+
+        String argStr = SOAPToRESTConstants.EMPTY_STRING;
+        String propertyStr = SOAPToRESTConstants.EMPTY_STRING;
+        for (String parameter : parameterJsonPathMapping.keySet()) {
+            String parameterType = parameterJsonPathMapping.get(parameter);
+            String paramElements = SequenceGenerator
+                    .createParameterElements(parameter, SOAPToRESTConstants.Swagger.BODY);
+            String[] params = paramElements.split(SOAPToRESTConstants.SequenceGen.COMMA);
+            if (!SOAPToRESTConstants.ParamTypes.ARRAY.equals(parameterType)) {
+                propertyStr += params[0] + SOAPToRESTConstants.SequenceGen.NEW_LINE_CHAR;
+            }
+            argStr += params[1] + SOAPToRESTConstants.SequenceGen.NEW_LINE_CHAR;
+        }
+
+        if (MapUtils.isEmpty(parameterJsonPathMapping)) {
+            for (String queryParam : queryPathParamMapping.keySet()) {
+                String paramElements = SequenceGenerator
+                        .createParameterElements(queryParam, SOAPToRESTConstants.ParamTypes.QUERY);
+                String[] params = paramElements.split(SOAPToRESTConstants.SequenceGen.COMMA);
+                argStr += params[1] + SOAPToRESTConstants.SequenceGen.NEW_LINE_CHAR;
+                propertyStr += params[0] + SOAPToRESTConstants.SequenceGen.NEW_LINE_CHAR;
+            }
+        } else if (parameterJsonPathMapping.size() > 0 && queryPathParamMapping.size() > 0) {
+            log.warn("Query parameters along with the body parameter is not allowed");
+        }
+
+        return new String[] { argStr, propertyStr };
+    }
+
+    private static void getArraySequenceElements(org.json.simple.JSONArray array,
+            Map<String, String> parameterJsonPathMapping) {
+
+        for (String parameter : parameterJsonPathMapping.keySet()) {
+            String parameterType = parameterJsonPathMapping.get(parameter);
+            String[] parameterTreeNodes = parameter.split("\\.");
+
+            if (SOAPToRESTConstants.ParamTypes.ARRAY.equals(parameterType)) {
+                org.json.simple.JSONObject arrayObj = new org.json.simple.JSONObject();
+                arrayObj.put(SOAPToRESTConstants.SequenceGen.PROPERTY_NAME, parameter);
+                arrayObj.put(SOAPToRESTConstants.SequenceGen.PARAMETER_NAME,
+                        parameterTreeNodes[parameterTreeNodes.length - 1]);
+                array.add(arrayObj);
+            }
+        }
     }
 
     /**
@@ -359,12 +399,13 @@ public class SequenceGenerator {
      * @throws APIManagementException throws in xml to string transformation
      */
     private static String createParameterElements(String jsonPathElement, String type) throws APIManagementException {
+
         DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder docBuilder;
         StringWriter stringWriter = new StringWriter();
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
-        String property = "";
-        String argument = "";
+        String property = SOAPToRESTConstants.EMPTY_STRING;
+        String argument = SOAPToRESTConstants.EMPTY_STRING;
         try {
             Transformer transformer = transformerFactory.newTransformer();
             docBuilder = docFactory.newDocumentBuilder();

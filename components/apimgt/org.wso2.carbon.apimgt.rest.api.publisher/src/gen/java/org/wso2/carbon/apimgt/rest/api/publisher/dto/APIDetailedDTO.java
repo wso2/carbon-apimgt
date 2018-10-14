@@ -44,7 +44,7 @@ public class APIDetailedDTO extends APIInfoDTO {
   private Boolean isDefaultVersion = null;
   
   public enum TypeEnum {
-     HTTP,  WS, 
+     HTTP,  WS,  SOAPTOREST, 
   };
   
   private TypeEnum type = TypeEnum.HTTP;
@@ -197,9 +197,9 @@ public class APIDetailedDTO extends APIInfoDTO {
 
   
   /**
-   * The transport to be set. Accepted values are HTTP, WS
+   * The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST
    **/
-  @ApiModelProperty(value = "The transport to be set. Accepted values are HTTP, WS")
+  @ApiModelProperty(value = "The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST")
   @JsonProperty("type")
   public TypeEnum getType() {
     return type;

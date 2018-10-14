@@ -3304,10 +3304,11 @@ definitions:
             example: false
           type:
             type: string
-            description: The transport to be set. Accepted values are HTTP, WS
+            description: The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST
             enum:
               - HTTP
               - WS
+              - SOAPTOREST
             example: HTTP
             default: HTTP
           transport:
