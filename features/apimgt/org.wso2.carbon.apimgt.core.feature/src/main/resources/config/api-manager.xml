@@ -11,7 +11,7 @@
     By default secure vault is disabled.-->
     <EnableSecureVault>false</EnableSecureVault>
 
-    <!-- This parameter is used to enabe mutual tls based authentication support for APIs, when this is disabled,
+    <!-- This parameter is used to enable mutual tls based authentication support for APIs, when this is disabled,
     APIs will be protected with OAuth2 security-->
     <EnableMTLSForAPIs>false</EnableMTLSForAPIs>
 
