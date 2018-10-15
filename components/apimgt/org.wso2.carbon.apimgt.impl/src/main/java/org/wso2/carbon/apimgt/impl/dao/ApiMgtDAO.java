@@ -5213,11 +5213,14 @@ public class ApiMgtDAO {
                 prepStmt.setString(2, uriTemplate.getHTTPVerb());
                 prepStmt.setString(3, uriTemplate.getAuthType());
                 prepStmt.setString(4, uriTemplate.getUriTemplate());
-                //If API policy is available then set it for all the resources
+                //If API policy is available then set it for all the resources.
                 if (StringUtils.isEmpty(api.getApiLevelPolicy())) {
-                    prepStmt.setString(5, uriTemplate.getThrottlingTier());
+                    prepStmt.setString(5, (StringUtils.isEmpty(uriTemplate.getThrottlingTier())) ?
+                            APIConstants.UNLIMITED_TIER :
+                            uriTemplate.getThrottlingTier());
                 } else {
-                    prepStmt.setString(5, api.getApiLevelPolicy());
+                    prepStmt.setString(5,
+                            (StringUtils.isEmpty(api.getApiLevelPolicy())) ? APIConstants.UNLIMITED_TIER : api.getApiLevelPolicy());
                 }
                 InputStream is;
                 if (uriTemplate.getMediationScript() != null) {
@@ -11829,6 +11832,32 @@ public class ApiMgtDAO {
             handleException("Failed to add Application", sqlException);
         } finally {
             APIMgtDBUtil.closeAllConnections(null, connection, null);
+        }
+    }
+
+    /**
+     * Converts all null values for THROTTLING_TIER in AM_API_URL_MAPPING table, to Unlimited.
+     * This will be executed only during startup of the server.
+     *
+     * @throws APIManagementException
+     */
+    public void convertNullThrottlingTiers() throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+
+        String query = SQLConstants.FIX_NULL_THROTTLING_TIERS;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.execute();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException(
+                    "Error occurred while converting NULL throttling tiers to Unlimited in AM_API_URL_MAPPING table",
+                    e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
         }
     }
 }

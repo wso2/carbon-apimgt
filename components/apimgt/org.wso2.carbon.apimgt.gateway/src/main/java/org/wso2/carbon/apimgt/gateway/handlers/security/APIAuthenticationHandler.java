@@ -373,6 +373,14 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         OMElement errorDetail = fac.createOMElement("description", ns);
         errorDetail.setText(APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(), e.getMessage()));
 
+        // if custom auth header is configured, the error message should specify its name instead of default value
+        if (e.getErrorCode() == APISecurityConstants.API_AUTH_MISSING_CREDENTIALS) {
+            String errorDescription =
+                    APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(), e.getMessage()) + "'"
+                            + authorizationHeader + " : Bearer ACCESS_TOKEN" + "'";
+            errorDetail.setText(errorDescription);
+        }
+
         payload.addChild(errorCode);
         payload.addChild(errorMessage);
         payload.addChild(errorDetail);
