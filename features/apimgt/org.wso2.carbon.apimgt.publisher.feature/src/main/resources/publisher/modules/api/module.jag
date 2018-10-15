@@ -177,8 +177,14 @@ jagg.module("api", {
     uploadCertificate:function () {
         return jagg.require(jagg.getModulesDir() + "api/add.jag").uploadCertificate.apply(this, arguments);
     },
+    uploadClientCertificate:function () {
+        return jagg.require(jagg.getModulesDir() + "api/add.jag").uploadClientCertificate.apply(this, arguments);
+    },
     deleteCertificate:function () {
         return jagg.require(jagg.getModulesDir() + "api/add.jag").deleteCertificate.apply(this, arguments);
+    },
+    deleteClientCertificate:function () {
+        return jagg.require(jagg.getModulesDir() + "api/add.jag").deleteClientCertificate.apply(this, arguments);
     },
     getCertificate:function () {
         return jagg.require(jagg.getModulesDir() + "api/add.jag").getCertificate.apply(this, arguments);
@@ -186,8 +192,14 @@ jagg.module("api", {
     getCertificates:function () {
         return jagg.require(jagg.getModulesDir() + "api/add.jag").getCertificates.apply(this, arguments);
     },
+    getClientCertificates:function () {
+        return jagg.require(jagg.getModulesDir() + "api/add.jag").getClientCertificates.apply(this, arguments);
+    },
     isConfigured:function () {
         return jagg.require(jagg.getModulesDir() + "api/add.jag").isConfigured.apply(this, arguments);
+    },
+    isClientCertificateBasedAuthenticationConfigured:function() {
+        return jagg.require(jagg.getModulesDir() + "api/add.jag").isClientCertificateBasedAuthenticationConfigured.apply(this, arguments);
     },
     getSequenceFileContent:function() {
         return jagg.require(jagg.getModulesDir() + "api/add.jag").getSequenceFileContent.apply(this, arguments);

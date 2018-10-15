@@ -707,6 +707,19 @@ if(jagg.isCSRFTokenValid())
             apiData.corsConfiguration=request.getParameter("corsConfiguration","UTF-8");
             apiData.additionalProperties = request.getParameter("additionalProperties", "UTF-8");
             apiData.authorizationHeader = request.getParameter("authorizationHeader");
+
+            var mutualSSLAPISecurity = request.getParameter("apisecurity_mutualssl");
+            var oauth2APISecurity =  request.getParameter("apisecurity_oauth2");
+
+            if (mutualSSLAPISecurity != null && oauth2APISecurity != null) {
+                apiData.apiSecurity = oauth2APISecurity + "," + mutualSSLAPISecurity;
+            } else {
+                if (mutualSSLAPISecurity != null) {
+                    apiData.apiSecurity = mutualSSLAPISecurity;
+                } else if (oauth2APISecurity != null) {
+                    apiData.apiSecurity = oauth2APISecurity;
+                }
+            }
             apiData.gatewayLabels = request.getParameter("gatewayLabels", "UTF-8");
             var errorMsg = null;
             if(apiData.productionTps != null && apiData.productionTps != ""  && !isPositiveInteger(apiData.productionTps)){
@@ -911,6 +924,30 @@ if(jagg.isCSRFTokenValid())
                     message: {"action": "delete", "code": result.response}
                 })
             }
+        } else if (request.getMethod() == 'POST' && action === 'deleteClientCert') {
+            mod = jagg.module('api');
+            var alias = request.getParameter('alias');
+            var name = request.getParameter('name');
+            var version = request.getParameter('version');
+            var provider = request.getParameter('provider');
+
+            var api = {};
+            api.name = name;
+            api.version = version;
+            api.provider = provider;
+
+            result = mod.deleteClientCertificate(alias, api);
+            if (result.response == false) {
+                print({
+                    error: true,
+                    message: "Deleting certificate failed."
+                })
+            } else {
+                print({
+                    error: false,
+                    message: {"action": "delete", "code": result.response}
+                })
+            }
         } else if (request.getMethod() == 'POST' && action === 'addCertificate') {
             mod = jagg.module('api');
             var alias = request.getParameter('alias');
@@ -918,6 +955,27 @@ if(jagg.isCSRFTokenValid())
             var certificate = request.getParameter('certificate');
 
             result = mod.uploadCertificate(certificate, alias, ep);
+
+            if (result.response == false) {
+                print({error: true, message: "Inserting certificate failed!"});
+            } else {
+                print({error: false, message: {"action": "add", "code": result.response}});
+            }
+        } else if (request.getMethod() == 'POST' && action === 'addClientCertificate') {
+            mod = jagg.module('api');
+            var alias = request.getParameter('alias');
+            var certificate = request.getParameter('certificate');
+            var name = request.getParameter('name');
+            var version = request.getParameter('version');
+            var provider = request.getParameter('provider');
+            var tierName = request.getParameter('tierName');
+
+            var api = {};
+            api.name = name;
+            api.version = version;
+            api.provider = provider;
+
+            result = mod.uploadClientCertificate(api, certificate, alias, tierName);
 
             if (result.response == false) {
                 print({error: true, message: "Inserting certificate failed!"});

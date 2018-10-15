@@ -39,6 +39,8 @@ import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.handlers.security.authenticator.MultiAuthenticator;
+import org.wso2.carbon.apimgt.gateway.handlers.security.authenticator.MutualSSLAuthenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.oauth.OAuthAuthenticator;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -48,6 +50,7 @@ import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
@@ -71,10 +74,49 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     private static final Log log = LogFactory.getLog(APIAuthenticationHandler.class);
 
     private volatile Authenticator authenticator;
-
     private SynapseEnvironment synapseEnvironment;
 
     private String authorizationHeader;
+    private String apiSecurity;
+    private String apiLevelPolicy;
+    private String certificateInformation;
+
+    /**
+     * To get the certificates uploaded against particular API.
+     *
+     * @return the certificates uploaded against particular API.
+     */
+    public String getCertificateInformation() {
+        return certificateInformation;
+    }
+
+    /**
+     * To set the certificates uploaded against particular API.
+     *
+     * @param certificateInformation the certificates uplaoded against the API.
+     */
+    public void setCertificateInformation(String certificateInformation) {
+        this.certificateInformation = certificateInformation;
+    }
+
+    /**
+     * To get the API level tier policy.
+     *
+     * @return Relevant tier policy related with API level policy.
+     */
+    public String getAPILevelPolicy() {
+        return apiLevelPolicy;
+    }
+
+    /**
+     * To set the API level tier policy.
+     *
+     * @param apiLevelPolicy Relevant API level tier policy related with this API.
+     */
+    public void setAPILevelPolicy(String apiLevelPolicy) {
+        this.apiLevelPolicy = apiLevelPolicy;
+    }
+
     private boolean removeOAuthHeadersFromOutMessage = true;
 
     public void init(SynapseEnvironment synapseEnvironment) {
@@ -93,6 +135,24 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
     public void setAuthorizationHeader(String authorizationHeader) {
         this.authorizationHeader = authorizationHeader;
+    }
+
+    /**
+     * To get the API level security expected for the current API in gateway level.
+     *
+     * @return API level security related with the current API.
+     */
+    public String getAPISecurity() {
+        return apiSecurity;
+    }
+
+    /**
+     * To set the API level security of current API.
+     *
+     * @param apiSecurity Relevant API level security.
+     */
+    public void setAPISecurity(String apiSecurity) {
+        this.apiSecurity = apiSecurity;
     }
 
     public boolean getRemoveOAuthHeadersFromOutMessage() {
@@ -122,20 +182,37 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
     protected Authenticator getAuthenticator() {
         if (authenticator == null) {
-            if (authorizationHeader == null) {
-                try {
-                    authorizationHeader = APIUtil.getOAuthConfigurationFromAPIMConfig(APIConstants.AUTHORIZATION_HEADER);
-                    if (authorizationHeader == null) {
-                        authorizationHeader = HttpHeaders.AUTHORIZATION;
+            boolean isOAuthProtected =
+                    apiSecurity == null || apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2);
+            boolean isMutualSSLProtected =
+                    apiSecurity != null && apiSecurity.contains(APIConstants.API_SECURITY_MUTUAL_SSL);
+            if (isOAuthProtected) {
+                if (authorizationHeader == null) {
+                    try {
+                        authorizationHeader = APIUtil
+                                .getOAuthConfigurationFromAPIMConfig(APIConstants.AUTHORIZATION_HEADER);
+                        if (authorizationHeader == null) {
+                            authorizationHeader = HttpHeaders.AUTHORIZATION;
+                        }
+                    } catch (APIManagementException e) {
+                        log.error("Error while reading authorization header from APIM configurations", e);
                     }
-                } catch (APIManagementException e) {
-                    log.error("Error while reading authorization header from APIM configurations", e);
                 }
             }
-
-            authenticator = new OAuthAuthenticator(authorizationHeader, removeOAuthHeadersFromOutMessage);
+            if (isOAuthProtected && isMutualSSLProtected) {
+                Map<String, Object> parametersForAuthenticator = new HashMap<>();
+                parametersForAuthenticator.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
+                parametersForAuthenticator.put(APIConstants.REMOVE_OAUTH_HEADERS_FROM_MESSAGE, removeOAuthHeadersFromOutMessage);
+                parametersForAuthenticator.put(APIConstants.API_LEVEL_POLICY, apiLevelPolicy);
+                parametersForAuthenticator.put(APIConstants.CERTIFICATE_INFORMATION, certificateInformation);
+                parametersForAuthenticator.put(APIConstants.API_SECURITY, apiSecurity);
+                authenticator = new MultiAuthenticator(parametersForAuthenticator);
+            } else if (isOAuthProtected) {
+                authenticator = new OAuthAuthenticator(authorizationHeader, removeOAuthHeadersFromOutMessage);
+            } else {
+                authenticator = new MutualSSLAuthenticator(apiLevelPolicy, certificateInformation);
+            }
         }
-
         return authenticator;
     }
 

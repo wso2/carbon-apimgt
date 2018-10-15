@@ -2182,7 +2182,11 @@ definitions:
         type: string
         description: |
           Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified
-          in tenant or system level will be used. 
+          in tenant or system level will be used.
+      apiSecurity :
+         type: string
+         description: |
+           Supported API security for the API ( mutualssl and/or oauth2)
       tags:
         type: array
         description: Search keywords related to the API
@@ -2332,7 +2336,7 @@ definitions:
           - JWT
         description: |
           Type of the access token generated for this application.
-          
+
           **OAUTH:** A UUID based access token which is issued by default.
           **JWT:** A self-contained, signed JWT based access token. **Note:** This can be only used in Microgateway environments.
         default: OAUTH

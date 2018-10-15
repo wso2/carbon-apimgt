@@ -127,6 +127,9 @@ public class API implements Serializable {
     // Used for endpoint environments configured with non empty URLs
     private Set<String> environmentList;
 
+    // API security at the gateway level.
+    private String apiSecurity = "oauth2";
+
     public void setEnvironmentList(Set<String> environmentList) {
         this.environmentList = environmentList;
     }
@@ -788,5 +791,25 @@ public class API implements Serializable {
 
     public void setAuthorizationHeader(String authorizationHeader) {
         this.authorizationHeader = authorizationHeader;
+    }
+
+    /**
+     * To set the gateway security for the relevant API.
+     *
+     * @param apiSecurity Relevant type of gateway security for the API.
+     */
+    public void setApiSecurity(String apiSecurity) {
+        if (apiSecurity != null) {
+            this.apiSecurity = apiSecurity;
+        }
+    }
+
+    /**
+     * To get the gateway level security specific to the relevant API.
+     *
+     * @return Relevant type of gateway security.
+     */
+    public String getApiSecurity() {
+        return apiSecurity;
     }
 }

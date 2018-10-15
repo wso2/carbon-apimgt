@@ -35,6 +35,7 @@ import java.util.Map;
  */
 public class GatewayCertificateManager {
 
+    private static GatewayCertificateManager instance = null;
     private static Log log = LogFactory.getLog(GatewayCertificateManager.class);
     private static APIGatewayAdminClient apiGatewayAdminClient = null;
     private static Map<String, Environment> environmentMap = null;
@@ -42,7 +43,23 @@ public class GatewayCertificateManager {
     private List<Environment> successGateways = new ArrayList<Environment>();
     private Map<String, List<Environment>> envList = new HashMap<String, List<Environment>>();
 
-    public GatewayCertificateManager() {
+    /**
+     * To get the instance of GatewayCertificate Manager.
+     *
+     * @return instance of gateway certificate manager.
+     */
+    public static GatewayCertificateManager getInstance() {
+        if (instance == null) {
+            synchronized (GatewayCertificateManager.class) {
+                if (instance == null) {
+                    instance = new GatewayCertificateManager();
+                }
+            }
+        }
+        return instance;
+    }
+
+    private GatewayCertificateManager() {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
         environmentMap = config.getApiGatewayEnvironments();

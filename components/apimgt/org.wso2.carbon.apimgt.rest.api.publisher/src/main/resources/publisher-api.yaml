@@ -24,7 +24,7 @@ info:
 
 # The schemes supported by the API
 schemes:
-  - https
+- https
 
 # The domain of the API.
 # This is configured by the customer during deployment.
@@ -40,7 +40,7 @@ basePath: /api/am/publisher/v0.14
 # The default is json, i.e. the Content-Type header is not needed to
 # be set, but supporting it serves extensibility.
 consumes:
-  - application/json
+- application/json
 
 # The following media types may be passed as output in message bodies of the API.
 # The media type(s) consumable by the requestor is specified in the Accept header field
@@ -50,48 +50,48 @@ consumes:
 # The default of the Accept header is json, i.e. there is not needed to
 # set the value, but supporting it serves extensibility.
 produces:
-  - application/json
+- application/json
 
 
 x-wso2-security:
   apim:
     x-wso2-scopes:
-      - description: ""
-        roles: admin
-        name: apim:api_view
-        key: apim:api_view
-      - description: ""
-        roles: admin
-        name: apim:api_create
-        key: apim:api_create
-      - description: ""
-        roles: admin
-        name: apim:api_publish
-        key: apim:api_publish
-      - description: ""
-        roles: admin
-        name: apim:tier_view
-        key: apim:tier_view
-      - description: ""
-        roles: admin
-        name: apim:tier_manage
-        key: apim:tier_manage
-      - description: ""
-        roles: admin
-        name: apim:subscription_view
-        key: apim:subscription_view
-      - description: ""
-        roles: admin
-        name: apim:subscription_block
-        key: apim:subscription_block
-      - description: ""
-        roles: admin
-        name: apim:mediation_policy_view
-        key: apim:mediation_policy_view
-      - description: ""
-        roles: admin
-        name: apim:api_workflow
-        key: apim:api_workflow
+    - description: ""
+      roles: admin
+      name: apim:api_view
+      key: apim:api_view
+    - description: ""
+      roles: admin
+      name: apim:api_create
+      key: apim:api_create
+    - description: ""
+      roles: admin
+      name: apim:api_publish
+      key: apim:api_publish
+    - description: ""
+      roles: admin
+      name: apim:tier_view
+      key: apim:tier_view
+    - description: ""
+      roles: admin
+      name: apim:tier_manage
+      key: apim:tier_manage
+    - description: ""
+      roles: admin
+      name: apim:subscription_view
+      key: apim:subscription_view
+    - description: ""
+      roles: admin
+      name: apim:subscription_block
+      key: apim:subscription_block
+    - description: ""
+      roles: admin
+      name: apim:mediation_policy_view
+      key: apim:mediation_policy_view
+    - description: ""
+      roles: admin
+      name: apim:api_workflow
+      key: apim:api_workflow
 
 
 ######################################################
@@ -100,14 +100,14 @@ x-wso2-security:
 paths:
   /apis:
 
-#-----------------------------------------------------
-# Retrieving the list of all APIs qualifying under a given search condition
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Retrieving the list of all APIs qualifying under a given search condition
+    #-----------------------------------------------------
     get:
       x-scope: apim:api_view
       produces:
-        - application/json
-        - application/gzip
+      - application/json
+      - application/gzip
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/publisher/v0.14/apis"
       x-wso2-request: |
         GET https://localhost:9443/api/am/publisher/v0.14/apis
@@ -120,37 +120,37 @@ paths:
 
         Each retrieved API is represented with a minimal amount of attributes. If you want to get complete details of an API, you need to use **Get details of an API** operation.
       parameters:
-        - $ref : '#/parameters/limit'
-        - $ref : '#/parameters/offset'
-        - name : query
-          in: query
-          description: |
-            **Search condition**.
+      - $ref : '#/parameters/limit'
+      - $ref : '#/parameters/offset'
+      - name : query
+        in: query
+        description: |
+          **Search condition**.
 
-            You can search in attributes by using an **"<attribute>:"** modifier.
+          You can search in attributes by using an **"<attribute>:"** modifier.
 
-            Eg.
-            "provider:wso2" will match an API if the provider of the API is exactly "wso2".
-            "status:PUBLISHED" will match an API if the API is in PUBLISHED state.
-            "label:external" will match an API if it contains a Microgateway label called "external".
+          Eg.
+          "provider:wso2" will match an API if the provider of the API is exactly "wso2".
+          "status:PUBLISHED" will match an API if the API is in PUBLISHED state.
+          "label:external" will match an API if it contains a Microgateway label called "external".
 
-            Additionally you can use wildcards.
+          Additionally you can use wildcards.
 
-            Eg.
-            "provider:wso2*" will match an API if the provider of the API starts with "wso2".
+          Eg.
+          "provider:wso2*" will match an API if the provider of the API starts with "wso2".
 
-            Supported attribute modifiers are [**version, context, status,
-            description, subcontext, doc, provider, label**]
+          Supported attribute modifiers are [**version, context, status,
+          description, subcontext, doc, provider, label**]
 
-            If no advanced attribute modifier has been specified,  the API names containing
-            the search term will be returned as a result.
+          If no advanced attribute modifier has been specified,  the API names containing
+          the search term will be returned as a result.
 
-          type: string
-        - $ref : "#/parameters/Accept"
-        - $ref : "#/parameters/If-None-Match"
-        - $ref : "#/parameters/expand"
+        type: string
+      - $ref : "#/parameters/Accept"
+      - $ref : "#/parameters/If-None-Match"
+      - $ref : "#/parameters/expand"
       tags:
-        - API (Collection)
+      - API (Collection)
       responses:
         200:
           description: |
@@ -177,9 +177,9 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-#-----------------------------------------------------
-# Create a new API -API (Individual)
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Create a new API -API (Individual)
+    #-----------------------------------------------------
     post:
       x-scope: apim:api_create
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json https://localhost:9443/api/am/publisher/v0.14/apis"
@@ -191,16 +191,16 @@ paths:
 
         There is a special capability for a user who has `APIM Admin` permission such that he can create APIs on behalf of other users. For that he can to specify `"provider" : "some_other_user"` in the payload so that the API's creator will be shown as `some_other_user` in the UI.
       parameters:
-        - in: body
-          name: body
-          description: |
-            API object that needs to be added
-          required: true
-          schema:
-            $ref: '#/definitions/APIDetailed'
-        - $ref: '#/parameters/Content-Type'
+      - in: body
+        name: body
+        description: |
+          API object that needs to be added
+        required: true
+        schema:
+          $ref: '#/definitions/APIDetailed'
+      - $ref: '#/parameters/Content-Type'
       tags:
-        - API (Individual)
+      - API (Individual)
       responses:
         201:
           description: |
@@ -239,14 +239,14 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-######################################################
-# The "Individual API" resource APIs
-######################################################
+  ######################################################
+  # The "Individual API" resource APIs
+  ######################################################
   /apis/{apiId}:
 
-#-----------------------------------------------------
-# Retrieve the details of an API definition
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Retrieve the details of an API definition
+    #-----------------------------------------------------
     get:
       x-scope: apim:api_view
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/publisher/v0.14/apis/7a2298c4-c905-403f-8fac-38c73301631f"
@@ -258,12 +258,12 @@ paths:
       description: |
         Using this operation, you can retrieve complete details of a single API. You need to provide the Id of the API to retrive it.
       parameters:
-        - $ref: '#/parameters/apiId'
-        - $ref: '#/parameters/Accept'
-        - $ref: '#/parameters/If-None-Match'
-        - $ref: '#/parameters/If-Modified-Since'
+      - $ref: '#/parameters/apiId'
+      - $ref: '#/parameters/Accept'
+      - $ref: '#/parameters/If-None-Match'
+      - $ref: '#/parameters/If-Modified-Since'
       tags:
-        - API (Individual)
+      - API (Individual)
       responses:
         200:
           description: |
@@ -302,9 +302,9 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-#-----------------------------------------------------
-# Update the definition of an API
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Update the definition of an API
+    #-----------------------------------------------------
     put:
       x-scope: apim:api_create
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X PUT -d @data.json https://localhost:9443/api/am/publisher/v0.14/apis/7a2298c4-c905-403f-8fac-38c73301631f"
@@ -315,19 +315,19 @@ paths:
         This operation can be used to update an existing API.
         But the properties `name`, `version`, `context`, `provider`, `state` will not be changed by this operation.
       parameters:
-        - $ref: '#/parameters/apiId'
-        - in: body
-          name: body
-          description: |
-            API object that needs to be added
-          required: true
-          schema:
-            $ref: '#/definitions/APIDetailed'
-        - $ref: '#/parameters/Content-Type'
-        - $ref: '#/parameters/If-Match'
-        - $ref: '#/parameters/If-Unmodified-Since'
+      - $ref: '#/parameters/apiId'
+      - in: body
+        name: body
+        description: |
+          API object that needs to be added
+        required: true
+        schema:
+          $ref: '#/definitions/APIDetailed'
+      - $ref: '#/parameters/Content-Type'
+      - $ref: '#/parameters/If-Match'
+      - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - API (Individual)
+      - API (Individual)
       responses:
         200:
           description: |
@@ -378,9 +378,9 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-#-----------------------------------------------------
-# Delete the definition of an API
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Delete the definition of an API
+    #-----------------------------------------------------
     delete:
       x-scope: apim:api_create
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X DELETE https://localhost:9443/api/am/publisher/v0.14/apis/6fb74674-4ab8-4b52-9886-f9a376985060"
@@ -392,11 +392,11 @@ paths:
       description: |
         This operation can be used to delete an existing API proving the Id of the API.
       parameters:
-        - $ref: '#/parameters/apiId'
-        - $ref: '#/parameters/If-Match'
-        - $ref: '#/parameters/If-Unmodified-Since'
+      - $ref: '#/parameters/apiId'
+      - $ref: '#/parameters/If-Match'
+      - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - API (Individual)
+      - API (Individual)
       responses:
         200:
           description: |
@@ -421,14 +421,14 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-################################################################
-# The swagger resource of "Individual API" resource APIs
-################################################################
+  ################################################################
+  # The swagger resource of "Individual API" resource APIs
+  ################################################################
 
   /apis/{apiId}/swagger:
-#-----------------------------------------------------
-# Retrieve the API swagger definition
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Retrieve the API swagger definition
+    #-----------------------------------------------------
     get:
       x-scope: apim:api_view
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/publisher/v0.14/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/swagger"
@@ -440,12 +440,12 @@ paths:
       description: |
         This operation can be used to retrieve the swagger definition of an API.
       parameters:
-        - $ref: '#/parameters/apiId'
-        - $ref: '#/parameters/Accept'
-        - $ref: '#/parameters/If-None-Match'
-        - $ref: '#/parameters/If-Modified-Since'
+      - $ref: '#/parameters/apiId'
+      - $ref: '#/parameters/Accept'
+      - $ref: '#/parameters/If-None-Match'
+      - $ref: '#/parameters/If-Modified-Since'
       tags:
-        - API (Individual)
+      - API (Individual)
       responses:
         200:
           description: |
@@ -482,41 +482,41 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-#-----------------------------------------------------
-# Update the API swagger definition
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Update the API swagger definition
+    #-----------------------------------------------------
     put:
       consumes:
-        - multipart/form-data
+      - multipart/form-data
       x-scope: apim:api_create
       x-wso2-curl: "curl -k -H \"Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013\" -F apiDefinition=\"{\\\"paths\\\":{\\\"\\/*\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application\\\",\\\"x-throttling-tier\\\":\\\"Unlimited\\\",\\\"responses\\\":{\\\"200\\\":{\\\"description\\\":\\\"OK\\\"}}}}},\\\"x-wso2-security\\\":{\\\"apim\\\":{\\\"x-wso2-scopes\\\":[]}},\\\"swagger\\\":\\\"2.0\\\",\\\"info\\\":{\\\"title\\\":\\\"PhoneVerification\\\",\\\"description\\\":\\\"Verify a phone number\\\",\\\"contact\\\":{\\\"email\\\":\\\"xx@ee.com\\\",\\\"name\\\":\\\"xx\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\" -X PUT \"https://localhost:9443/api/am/publisher/v0.14/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/swagger\""
       x-wso2-request: |
-       PUT https://localhost:9443/api/am/publisher/v0.14/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/swagger
-       Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013
-       Content-Length: 477
-       Content-Type: multipart/form-data; boundary=------------------------4f51e636c0003d99
+        PUT https://localhost:9443/api/am/publisher/v0.14/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/swagger
+        Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013
+        Content-Length: 477
+        Content-Type: multipart/form-data; boundary=------------------------4f51e636c0003d99
 
-       --------------------------4f51e636c0003d99
-       Content-Disposition: form-data; name="apiDefinition"
+        --------------------------4f51e636c0003d99
+        Content-Disposition: form-data; name="apiDefinition"
 
-       {"paths":{"\/*":{"get":{"x-auth-type":"Application","x-throttling-tier":"Unlimited","responses":{"200":{"description":"OK"}}}}},"x-wso2-security":{"apim":{"x-wso2-scopes":[]}},"swagger":"2.0","info":{"title":"PhoneVerification","description":"Verify a phone number","contact":{"email":"xx@ee.com","name":"xx"},"version":"1.0.0"}}
-       --------------------------4f51e636c0003d99--
+        {"paths":{"\/*":{"get":{"x-auth-type":"Application","x-throttling-tier":"Unlimited","responses":{"200":{"description":"OK"}}}}},"x-wso2-security":{"apim":{"x-wso2-scopes":[]}},"swagger":"2.0","info":{"title":"PhoneVerification","description":"Verify a phone number","contact":{"email":"xx@ee.com","name":"xx"},"version":"1.0.0"}}
+        --------------------------4f51e636c0003d99--
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-tier\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"x-wso2-security\": {\"apim\": {\"x-wso2-scopes\": []}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}"
       summary: Update swagger definition
       description: |
         This operation can be used to update the swagger definition of an existing API. Swagger definition to be updated is passed as a form data parameter `apiDefinition`.
       parameters:
-        - $ref: '#/parameters/apiId'
-        - in: formData
-          name: apiDefinition
-          description: Swagger definition of the API
-          type: string
-          required: true
-        - $ref: '#/parameters/Content-Type'
-        - $ref: '#/parameters/If-Match'
-        - $ref: '#/parameters/If-Unmodified-Since'
+      - $ref: '#/parameters/apiId'
+      - in: formData
+        name: apiDefinition
+        description: Swagger definition of the API
+        type: string
+        required: true
+      - $ref: '#/parameters/Content-Type'
+      - $ref: '#/parameters/If-Match'
+      - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - API (Individual)
+      - API (Individual)
       responses:
         200:
           description: |
@@ -565,14 +565,14 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-################################################################
-# The thumbnail resource of "Individual API" resource APIs
-################################################################
+  ################################################################
+  # The thumbnail resource of "Individual API" resource APIs
+  ################################################################
 
   /apis/{apiId}/thumbnail:
-#-------------------------------------------------------------------------------------------------
-# Downloads a thumbnail image of an API
-#-------------------------------------------------------------------------------------------------
+    #-------------------------------------------------------------------------------------------------
+    # Downloads a thumbnail image of an API
+    #-------------------------------------------------------------------------------------------------
     get:
       x-scope: apim:api_view
       x-wso2-curl: "curl -k -H \"Authorization: Bearer d34baf74-3f02-3929-814e-88b27f750ba9\" https://localhost:9443/api/am/publisher/v0.14/apis/29c9ec3d-f590-467e-83e6-96d43517080f/thumbnail > image.jpg"
@@ -584,12 +584,12 @@ paths:
       description: |
         This operation can be used to download a thumbnail image of an API.
       parameters:
-        - $ref: '#/parameters/apiId'
-        - $ref: '#/parameters/Accept'
-        - $ref: '#/parameters/If-None-Match'
-        - $ref: '#/parameters/If-Modified-Since'
+      - $ref: '#/parameters/apiId'
+      - $ref: '#/parameters/Accept'
+      - $ref: '#/parameters/If-None-Match'
+      - $ref: '#/parameters/If-Modified-Since'
       tags:
-        - API (Individual)
+      - API (Individual)
       responses:
         200:
           description: |
@@ -627,12 +627,12 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-#----------------------------------------------------------------------------
-# Upload a thumbnail image to a certain API
-#----------------------------------------------------------------------------
+    #----------------------------------------------------------------------------
+    # Upload a thumbnail image to a certain API
+    #----------------------------------------------------------------------------
     post:
       consumes:
-        - multipart/form-data
+      - multipart/form-data
       x-scope: apim:api_create
       x-wso2-curl: "curl -X POST -H \"Authorization: Bearer d34baf74-3f02-3929-814e-88b27f750ba9\" https://localhost:9443/api/am/publisher/v0.14/apis/29c9ec3d-f590-467e-83e6-96d43517080f/thumbnail -F file=@image.jpg"
       x-wso2-request: |
@@ -653,17 +653,17 @@ paths:
       description: |
         This operation can be used to upload a thumbnail image of an API. The thumbnail to be uploaded should be given as a form data parameter `file`.
       parameters:
-        - $ref: '#/parameters/apiId'
-        - in: formData
-          name: file
-          description: Image to upload
-          type: file
-          required: true
-        - $ref: '#/parameters/Content-Type'
-        - $ref: '#/parameters/If-Match'
-        - $ref: '#/parameters/If-Unmodified-Since'
+      - $ref: '#/parameters/apiId'
+      - in: formData
+        name: file
+        description: Image to upload
+        type: file
+        required: true
+      - $ref: '#/parameters/Content-Type'
+      - $ref: '#/parameters/If-Match'
+      - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - API (Individual)
+      - API (Individual)
       responses:
         200:
           description: |
@@ -709,14 +709,14 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-######################################################
-# The "Copy API" Processing Function resource API
-######################################################
+  ######################################################
+  # The "Copy API" Processing Function resource API
+  ######################################################
   /apis/copy-api:
 
-#-----------------------------------------------------
-# Create a new API based on an already existing one
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Create a new API based on an already existing one
+    #-----------------------------------------------------
     post:
       x-scope: apim:api_create
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X POST \"https://localhost:9443/api/am/publisher/v0.14/apis/copy-api?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&newVersion=2.0.0\""
@@ -728,14 +728,14 @@ paths:
       description: |
         This operation can be used to create a new version of an existing API. The new version is specified as `newVersion` query parameter. New API will be in `CREATED` state.
       parameters:
-        - name: newVersion
-          description: Version of the new API.
-          type: string
-          in: query
-          required: true
-        - $ref: '#/parameters/apiId-Q'
+      - name: newVersion
+        description: Version of the new API.
+        type: string
+        in: query
+        required: true
+      - $ref: '#/parameters/apiId-Q'
       tags:
-        - API (Individual)
+      - API (Individual)
       responses:
         201:
           description: |
@@ -762,14 +762,14 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-######################################################
-# The "Change Lifecycle" Processing Function resource API
-######################################################
+  ######################################################
+  # The "Change Lifecycle" Processing Function resource API
+  ######################################################
   /apis/change-lifecycle:
 
-#-----------------------------------------------------
-# Change the lifecycle of an API
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Change the lifecycle of an API
+    #-----------------------------------------------------
     post:
       x-scope: apim:api_publish
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X POST \"https://localhost:9443/api/am/publisher/v0.14/apis/change-lifecycle?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish\""
@@ -785,44 +785,44 @@ paths:
 
         Some actions supports providing additional paramters which should be provided as `lifecycleChecklist` parameter. Please see parameters table for more information.
       parameters:
-        - name: action
-          description: |
-            The action to demote or promote the state of the API.
+      - name: action
+        description: |
+          The action to demote or promote the state of the API.
 
-            Supported actions are [ **Publish, Deploy as a Prototype, Demote to Created, Demote to Prototyped, Block, Deprecate, Re-Publish, Retire **]
+          Supported actions are [ **Publish, Deploy as a Prototype, Demote to Created, Demote to Prototyped, Block, Deprecate, Re-Publish, Retire **]
 
-          in: query
-          type: string
-          required: true
-          enum:
-            - Publish
-            - Deploy as a Prototype
-            - Demote to Created
-            - Demote to Prototyped
-            - Block
-            - Deprecate
-            - Re-Publish
-            - Retire
-        - name: lifecycleChecklist
-          description: |
+        in: query
+        type: string
+        required: true
+        enum:
+        - Publish
+        - Deploy as a Prototype
+        - Demote to Created
+        - Demote to Prototyped
+        - Block
+        - Deprecate
+        - Re-Publish
+        - Retire
+      - name: lifecycleChecklist
+        description: |
 
-            Supported checklist items are as follows.
-            1. **Deprecate Old Versions**: Setting this to true will deprecate older versions of a particular API when it is promoted to Published state from Created state.
-            2. **Require Re-Subscription**: If you set this to true, users need to re subscribe to the API although they may have subscribed to an older version.
+          Supported checklist items are as follows.
+          1. **Deprecate Old Versions**: Setting this to true will deprecate older versions of a particular API when it is promoted to Published state from Created state.
+          2. **Require Re-Subscription**: If you set this to true, users need to re subscribe to the API although they may have subscribed to an older version.
 
-            You can specify additional checklist items by using an **"attribute:"** modifier.
+          You can specify additional checklist items by using an **"attribute:"** modifier.
 
-            Eg: "Deprecate Old Versions:true" will deprecate older versions of a particular API when it is promoted to Published state from Created state. Multiple checklist items can be given in "attribute1:true, attribute2:false" format.
+          Eg: "Deprecate Old Versions:true" will deprecate older versions of a particular API when it is promoted to Published state from Created state. Multiple checklist items can be given in "attribute1:true, attribute2:false" format.
 
-            **Sample CURL :**  curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -X POST "https://localhost:9443/api/am/publisher/v0.14/apis/change-lifecycle?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish&lifecycleChecklist=Deprecate Old Versions:true,Require Re-Subscription:true"
+          **Sample CURL :**  curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -X POST "https://localhost:9443/api/am/publisher/v0.14/apis/change-lifecycle?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish&lifecycleChecklist=Deprecate Old Versions:true,Require Re-Subscription:true"
 
-          type: string
-          in: query
-        - $ref: '#/parameters/apiId-Q'
-        - $ref: '#/parameters/If-Match'
-        - $ref: '#/parameters/If-Unmodified-Since'
+        type: string
+        in: query
+      - $ref: '#/parameters/apiId-Q'
+      - $ref: '#/parameters/If-Match'
+      - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - API (Individual)
+      - API (Individual)
       responses:
         200:
           description: |
@@ -857,14 +857,14 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-######################################################
-# The "Document Collection" resource APIs
-######################################################
+  ######################################################
+  # The "Document Collection" resource APIs
+  ######################################################
   /apis/{apiId}/documents:
 
-#-----------------------------------------------------
-# Retrieve the documents associated with an API that qualify under a search condition
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Retrieve the documents associated with an API that qualify under a search condition
+    #-----------------------------------------------------
     get:
       x-scope: apim:api_view
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/publisher/v0.14/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents\""
@@ -876,13 +876,13 @@ paths:
       description: |
         This operation can be used to retrive a list of documents belonging to an API by providing the id of the API.
       parameters:
-        - $ref: '#/parameters/apiId'
-        - $ref: '#/parameters/limit'
-        - $ref: '#/parameters/offset'
-        - $ref: '#/parameters/Accept'
-        - $ref: '#/parameters/If-None-Match'
+      - $ref: '#/parameters/apiId'
+      - $ref: '#/parameters/limit'
+      - $ref: '#/parameters/offset'
+      - $ref: '#/parameters/Accept'
+      - $ref: '#/parameters/If-None-Match'
       tags:
-        - Document (Collection)
+      - Document (Collection)
       responses:
         200:
           description: |
@@ -916,9 +916,9 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-#-----------------------------------------------------
-# Add a document to a certain API
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Add a document to a certain API
+    #-----------------------------------------------------
     post:
       x-scope: apim:api_create
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://localhost:9443/api/am/publisher/v0.14/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents\""
@@ -928,17 +928,17 @@ paths:
       description: |
         This operation can be used to add a new documentation to an API. This operation only adds the metadata of a document. To add the actual content we need to use **Upload the content of an API document ** API once we obtain a document Id by this operation.
       parameters:
-        - $ref: '#/parameters/apiId'
-        - in: body
-          name: body
-          description: |
-            Document object that needs to be added
-          required: true
-          schema:
-            $ref: '#/definitions/Document'
-        - $ref: '#/parameters/Content-Type'
+      - $ref: '#/parameters/apiId'
+      - in: body
+        name: body
+        description: |
+          Document object that needs to be added
+        required: true
+        schema:
+          $ref: '#/definitions/Document'
+      - $ref: '#/parameters/Content-Type'
       tags:
-        - Document (Collection)
+      - Document (Collection)
       responses:
         201:
           description: |
@@ -972,14 +972,14 @@ paths:
             Unsupported media type.
             The entity of the request was in a not supported format.
 
-######################################################
-# The "Individual Document" resource APIs
-######################################################
+          ######################################################
+  # The "Individual Document" resource APIs
+  ######################################################
   '/apis/{apiId}/documents/{documentId}':
 
-#-----------------------------------------------------
-# Retrieve a particular document of a certain API
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Retrieve a particular document of a certain API
+    #-----------------------------------------------------
     get:
       x-scope: apim:api_view
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/publisher/v0.14/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\""
@@ -991,13 +991,13 @@ paths:
       description: |
         This operation can be used to retrieve a particular document's metadata associated with an API.
       parameters:
-        - $ref: '#/parameters/apiId'
-        - $ref: '#/parameters/documentId'
-        - $ref: '#/parameters/Accept'
-        - $ref: '#/parameters/If-None-Match'
-        - $ref: '#/parameters/If-Modified-Since'
+      - $ref: '#/parameters/apiId'
+      - $ref: '#/parameters/documentId'
+      - $ref: '#/parameters/Accept'
+      - $ref: '#/parameters/If-None-Match'
+      - $ref: '#/parameters/If-Modified-Since'
       tags:
-        - Document (Individual)
+      - Document (Individual)
       responses:
         200:
           description: |
@@ -1037,9 +1037,9 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-#-----------------------------------------------------
-# Update a particular document of a certain API
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Update a particular document of a certain API
+    #-----------------------------------------------------
     put:
       x-scope: apim:api_create
       x-wso2-curl: "curl -k -H \"Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" -H \"Content-Type: application/json\" -X PUT -d data.json \"https://localhost:9443/api/am/publisher/v0.14/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\""
@@ -1049,20 +1049,20 @@ paths:
       description: |
         This operation can be used to update metadata of an API's document.
       parameters:
-        - $ref: '#/parameters/apiId'
-        - $ref: '#/parameters/documentId'
-        - in: body
-          name: body
-          description: |
-            Document object that needs to be added
-          required: true
-          schema:
-            $ref: '#/definitions/Document'
-        - $ref: '#/parameters/Content-Type'
-        - $ref: '#/parameters/If-Match'
-        - $ref: '#/parameters/If-Unmodified-Since'
+      - $ref: '#/parameters/apiId'
+      - $ref: '#/parameters/documentId'
+      - in: body
+        name: body
+        description: |
+          Document object that needs to be added
+        required: true
+        schema:
+          $ref: '#/definitions/Document'
+      - $ref: '#/parameters/Content-Type'
+      - $ref: '#/parameters/If-Match'
+      - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - Document (Individual)
+      - Document (Individual)
       responses:
         200:
           description: |
@@ -1108,9 +1108,9 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-#-----------------------------------------------------
-# Delete a particular document of a certain API
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Delete a particular document of a certain API
+    #-----------------------------------------------------
     delete:
       x-scope: apim:api_create
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X DELETE https://localhost:9443/api/am/publisher/v0.14/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058"
@@ -1122,12 +1122,12 @@ paths:
       description: |
         This operation can be used to delete a document associated with an API.
       parameters:
-        - $ref: '#/parameters/apiId'
-        - $ref: '#/parameters/documentId'
-        - $ref: '#/parameters/If-Match'
-        - $ref: '#/parameters/If-Unmodified-Since'
+      - $ref: '#/parameters/apiId'
+      - $ref: '#/parameters/documentId'
+      - $ref: '#/parameters/If-Match'
+      - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - Document (Individual)
+      - Document (Individual)
       responses:
         200:
           description: |
@@ -1146,497 +1146,497 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-################################################################
-# The content resource of "Individual Document" resource APIs
-################################################################
+  ################################################################
+  # The content resource of "Individual Document" resource APIs
+  ################################################################
 
   '/apis/{apiId}/documents/{documentId}/content':
 
-  #-------------------------------------------------------------------------------------------------
-  # Downloads a FILE type document/get the inline content or source url of a certain document
-  #-------------------------------------------------------------------------------------------------
-      get:
-        x-scope: apim:api_view
-        x-wso2-curl: "curl -k -H \"Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" \"https://localhost:9443/api/am/publisher/v0.14/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content\" > sample.pdf"
-        x-wso2-request: |
-          GET https://localhost:9443/api/am/publisher/v0.14/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content
-          Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a
-        x-wso2-response: "HTTP/1.1 200 OK\nContent-Disposition: attachment; filename=\"sample.pdf\"\nContent-Type: application/octet-stream\nContent-Length: 7802\n\n%PDF-1.4\n%äüöß\n2 0 obj\n<</Length 3 0 R/Filter/FlateDecode>>\nstream\n..\n>>\nstartxref\n7279\n%%EOF"
-        summary: Get the content of an API document
-        description: |
-          This operation can be used to retrive the content of an API's document.
+    #-------------------------------------------------------------------------------------------------
+    # Downloads a FILE type document/get the inline content or source url of a certain document
+    #-------------------------------------------------------------------------------------------------
+    get:
+      x-scope: apim:api_view
+      x-wso2-curl: "curl -k -H \"Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" \"https://localhost:9443/api/am/publisher/v0.14/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content\" > sample.pdf"
+      x-wso2-request: |
+        GET https://localhost:9443/api/am/publisher/v0.14/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content
+        Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Disposition: attachment; filename=\"sample.pdf\"\nContent-Type: application/octet-stream\nContent-Length: 7802\n\n%PDF-1.4\n%äüöß\n2 0 obj\n<</Length 3 0 R/Filter/FlateDecode>>\nstream\n..\n>>\nstartxref\n7279\n%%EOF"
+      summary: Get the content of an API document
+      description: |
+        This operation can be used to retrive the content of an API's document.
 
-          The document can be of 3 types. In each cases responses are different.
+        The document can be of 3 types. In each cases responses are different.
 
-          1. **Inline type**:
-             The content of the document will be retrieved in `text/plain` content type
+        1. **Inline type**:
+           The content of the document will be retrieved in `text/plain` content type
 
-             _Sample cURL_ : `curl -k -H "Authorization:Bearer 579f0af4-37be-35c7-81a4-f1f1e9ee7c51" -F inlineContent=@"docs.txt" -X POST "https://localhost:9443/api/am/publisher/v0.14/apis/995a4972-3178-4b17-a374-756e0e19127c/documents/43c2bcce-60e7-405f-bc36-e39c0c5e189e/content`
-          2. **FILE type**:
-             The file will be downloaded with the related content type (eg. `application/pdf`)
-          3. **URL type**:
-              The client will recieve the URL of the document as the Location header with the response with - `303 See Other`
-        parameters:
-          - $ref: '#/parameters/apiId'
-          - $ref: '#/parameters/documentId'
-          - $ref: '#/parameters/Accept'
-          - $ref: '#/parameters/If-None-Match'
-          - $ref: '#/parameters/If-Modified-Since'
-        tags:
-          - Document (Individual)
-        responses:
-          200:
-            description: |
-              OK.
-              File or inline content returned.
-            headers:
-              Content-Type:
-                description: |
-                  The content type of the body.
-                type: string
-              ETag:
-                description: |
-                  Entity Tag of the response resource.
-                  Used by caches, or in conditional requests (Will be supported in future).
-                type: string
-              Last-Modified:
-                description: |
-                  Date and time the resource has been modifed the last time.
-                  Used by caches, or in conditional requests (Will be supported in future).
-                type: string
-          303:
-            description: |
-              See Other.
-              Source can be retrived from the URL specified at the Location header.
-            headers:
-              Location:
-                description: |
-                  The Source URL of the document.
-                type: string
-          304:
-            description: |
-              Not Modified.
-              Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-          404:
-            description: |
-              Not Found.
-              Requested Document does not exist.
-            schema:
-              $ref: '#/definitions/Error'
-          406:
-            description: |
-              Not Acceptable.
-              The requested media type is not supported
-            schema:
-              $ref: '#/definitions/Error'
+           _Sample cURL_ : `curl -k -H "Authorization:Bearer 579f0af4-37be-35c7-81a4-f1f1e9ee7c51" -F inlineContent=@"docs.txt" -X POST "https://localhost:9443/api/am/publisher/v0.14/apis/995a4972-3178-4b17-a374-756e0e19127c/documents/43c2bcce-60e7-405f-bc36-e39c0c5e189e/content`
+        2. **FILE type**:
+           The file will be downloaded with the related content type (eg. `application/pdf`)
+        3. **URL type**:
+            The client will recieve the URL of the document as the Location header with the response with - `303 See Other`
+      parameters:
+      - $ref: '#/parameters/apiId'
+      - $ref: '#/parameters/documentId'
+      - $ref: '#/parameters/Accept'
+      - $ref: '#/parameters/If-None-Match'
+      - $ref: '#/parameters/If-Modified-Since'
+      tags:
+      - Document (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            File or inline content returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        303:
+          description: |
+            See Other.
+            Source can be retrived from the URL specified at the Location header.
+          headers:
+            Location:
+              description: |
+                The Source URL of the document.
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+        404:
+          description: |
+            Not Found.
+            Requested Document does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
 
-  #----------------------------------------------------------------------------
-  # Upload a file or add inline content to a document of a certain API
-  #----------------------------------------------------------------------------
-      post:
-        consumes:
-          - multipart/form-data
-        x-scope: apim:api_create
-        x-wso2-curl: "curl -k -H \"Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -F file=@\"sample.pdf\" -X POST \"https://localhost:9443/api/am/publisher/v0.14/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content\""
-        x-wso2-request: |
-          POST https://localhost:9443/api/am/publisher/v0.14/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/documents/b3a79270-02bb-4e39-9ac1-90ce8f6c84af/content
-          Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-          Content-Length: 8004
-          Content-Type: multipart/form-data; boundary=------------------------7b9a53f1ffa452b9
+    #----------------------------------------------------------------------------
+    # Upload a file or add inline content to a document of a certain API
+    #----------------------------------------------------------------------------
+    post:
+      consumes:
+      - multipart/form-data
+      x-scope: apim:api_create
+      x-wso2-curl: "curl -k -H \"Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -F file=@\"sample.pdf\" -X POST \"https://localhost:9443/api/am/publisher/v0.14/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content\""
+      x-wso2-request: |
+        POST https://localhost:9443/api/am/publisher/v0.14/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/documents/b3a79270-02bb-4e39-9ac1-90ce8f6c84af/content
+        Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+        Content-Length: 8004
+        Content-Type: multipart/form-data; boundary=------------------------7b9a53f1ffa452b9
 
-          --------------------------7b9a53f1ffa452b9
-          Content-Disposition: form-data; name="file"; filename="sample.pdf"
-          Content-Type: application/octet-stream
+        --------------------------7b9a53f1ffa452b9
+        Content-Disposition: form-data; name="file"; filename="sample.pdf"
+        Content-Type: application/octet-stream
 
-          [file content]
+        [file content]
 
-          --------------------------7b9a53f1ffa452b9--
-        x-wso2-response: "HTTP/1.1 201 Created\nLocation: https://localhost:9443/api/am/publisher/v0.14/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/documents/b3a79270-02bb-4e39-9ac1-90ce8f6c84af/content\nContent-Type: application/json\n\n{\n    \"visibility\":\"API_LEVEL\",\n    \"sourceType\":\"FILE\",\n    \"sourceUrl\":null,\n    \"otherTypeName\":null,\n    \"documentId\":\"daf732d3-bda2-46da-b381-2c39d901ea61\",\n    \"summary\":\"This is a sample documentation pdf\",\n    \"name\":\"Introduction to PhoneVerification API PDF\",\n    \"type\":\"HOWTO\"\n}"
-        summary: Upload the content of an API document
-        description: |
-          Thid operation can be used to upload a file or add inline content to an API document.
+        --------------------------7b9a53f1ffa452b9--
+      x-wso2-response: "HTTP/1.1 201 Created\nLocation: https://localhost:9443/api/am/publisher/v0.14/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/documents/b3a79270-02bb-4e39-9ac1-90ce8f6c84af/content\nContent-Type: application/json\n\n{\n    \"visibility\":\"API_LEVEL\",\n    \"sourceType\":\"FILE\",\n    \"sourceUrl\":null,\n    \"otherTypeName\":null,\n    \"documentId\":\"daf732d3-bda2-46da-b381-2c39d901ea61\",\n    \"summary\":\"This is a sample documentation pdf\",\n    \"name\":\"Introduction to PhoneVerification API PDF\",\n    \"type\":\"HOWTO\"\n}"
+      summary: Upload the content of an API document
+      description: |
+        Thid operation can be used to upload a file or add inline content to an API document.
 
-          **IMPORTANT:**
-          * Either **file** or **inlineContent** form data parameters should be specified at one time.
-          * Document's source type should be **FILE** in order to upload a file to the document using **file** parameter.
-          * Document's source type should be **INLINE** in order to add inline content to the document using **inlineContent** parameter.
-        parameters:
-          - $ref: '#/parameters/apiId'
-          - $ref: '#/parameters/documentId'
-          - in: formData
-            name: file
-            description: Document to upload
-            type: file
-            required: false
-          - in: formData
-            name: inlineContent
-            description: Inline content of the document
-            type: string
-            required: false
-          - $ref: '#/parameters/Content-Type'
-          - $ref: '#/parameters/If-Match'
-          - $ref: '#/parameters/If-Unmodified-Since'
-        tags:
-          - Document (Individual)
-        responses:
-          200:
-            description: |
-              OK.
-              Document updated
-            schema:
-              $ref: '#/definitions/Document'
-            headers:
-              Location:
-                description: |
-                  The URL of the updated content of the document.
-                type: string
-              Content-Type:
-                description: |
-                  The content type of the body.
-                type: string
-              ETag:
-                description: |
-                  Entity Tag of the response resource.
-                  Used by caches, or in conditional requests (Will be supported in future).
-                type: string
-              Last-Modified:
-                description: |
-                  Date and time the resource has been modifed the last time.
-                  Used by caches, or in conditional requests (Will be supported in future).
-                type: string
-          400:
-            description: |
-              Bad Request.
-              Invalid request or validation error.
-            schema:
-              $ref: '#/definitions/Error'
-          404:
-            description: |
-              Not Found.
-              The resource to be updated does not exist.
-            schema:
-              $ref: '#/definitions/Error'
-          412:
-            description: |
-              Precondition Failed.
-              The request has not been performed because one of the preconditions is not met.
-            schema:
-              $ref: '#/definitions/Error'
+        **IMPORTANT:**
+        * Either **file** or **inlineContent** form data parameters should be specified at one time.
+        * Document's source type should be **FILE** in order to upload a file to the document using **file** parameter.
+        * Document's source type should be **INLINE** in order to add inline content to the document using **inlineContent** parameter.
+      parameters:
+      - $ref: '#/parameters/apiId'
+      - $ref: '#/parameters/documentId'
+      - in: formData
+        name: file
+        description: Document to upload
+        type: file
+        required: false
+      - in: formData
+        name: inlineContent
+        description: Inline content of the document
+        type: string
+        required: false
+      - $ref: '#/parameters/Content-Type'
+      - $ref: '#/parameters/If-Match'
+      - $ref: '#/parameters/If-Unmodified-Since'
+      tags:
+      - Document (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Document updated
+          schema:
+            $ref: '#/definitions/Document'
+          headers:
+            Location:
+              description: |
+                The URL of the updated content of the document.
+              type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            The resource to be updated does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
 
-              ##pp
-######################################################
-# The "specific mediation policy" resource APIs
-######################################################
+            ##pp
+  ######################################################
+  # The "specific mediation policy" resource APIs
+  ######################################################
   '/apis/{apiId}/policies/mediation':
 
-  #-----------------------------------------------------------------------------------------
-  # Retrieving the list of all API specific mediation sequences under a given search condition
-  #-----------------------------------------------------------------------------------------
-      get:
-        x-scope: apim:api_view
-        x-wso2-curl: "curl -k -H \"Authorization: Bearer fb2a0784-f60c-3276-8fde-5b0f70e61ecc\" https://localhost:9443/api/am/publisher/v0.14/apis/40082986-6488-4b86-801a-b0b069d4588c/policies/mediation"
-        x-wso2-request: "GET https://localhost:9443/api/am/publisher/v0.14/apis/40082986-6488-4b86-801a-b0b069d4588c/policies/mediation\r\nAuthorization: Bearer fb2a0784-f60c-3276-8fde-5b0f70e61ecc"
-        x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n   \"count\": 1,\r\n   \"next\": null,\r\n   \"previous\": null,\r\n   \"list\": [   {\r\n      \"name\": \"add_custom_header_fault\",\r\n      \"id\": \"6460d7e6-4272-4e3a-9879-437228d83123\",\r\n      \"type\": \"fault\"\r\n   }]\r\n}"
-        summary: |
-          Get all mediation policies of an API
-        description: |
-          This operation provides you a list of available mediation policies of an API.
-        parameters:
-          - $ref: '#/parameters/apiId'
-          - $ref : '#/parameters/limit'
-          - $ref : '#/parameters/offset'
-          - name : query
-            in: query
-            description: "-Not supported yet-"
-            type: string
-          - $ref : "#/parameters/Accept"
-          - $ref : "#/parameters/If-None-Match"
-        tags:
-          - Mediation Policy (Collection)
-        responses:
-          200:
-            description: |
-              OK.
-              List of qualifying APIs is returned.
-            schema:
-              $ref: '#/definitions/mediationList'
-            headers:
-              Content-Type:
-                description: The content type of the body.
-                type: string
-              ETag:
-                description: |
-                  Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
-                type: string
-          304:
-            description: |
-              Not Modified.
-              Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-          406:
-            description: |
-              Not Acceptable.
-              The requested media type is not supported
-            schema:
-              $ref: '#/definitions/Error'
+    #-----------------------------------------------------------------------------------------
+    # Retrieving the list of all API specific mediation sequences under a given search condition
+    #-----------------------------------------------------------------------------------------
+    get:
+      x-scope: apim:api_view
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer fb2a0784-f60c-3276-8fde-5b0f70e61ecc\" https://localhost:9443/api/am/publisher/v0.14/apis/40082986-6488-4b86-801a-b0b069d4588c/policies/mediation"
+      x-wso2-request: "GET https://localhost:9443/api/am/publisher/v0.14/apis/40082986-6488-4b86-801a-b0b069d4588c/policies/mediation\r\nAuthorization: Bearer fb2a0784-f60c-3276-8fde-5b0f70e61ecc"
+      x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n   \"count\": 1,\r\n   \"next\": null,\r\n   \"previous\": null,\r\n   \"list\": [   {\r\n      \"name\": \"add_custom_header_fault\",\r\n      \"id\": \"6460d7e6-4272-4e3a-9879-437228d83123\",\r\n      \"type\": \"fault\"\r\n   }]\r\n}"
+      summary: |
+        Get all mediation policies of an API
+      description: |
+        This operation provides you a list of available mediation policies of an API.
+      parameters:
+      - $ref: '#/parameters/apiId'
+      - $ref : '#/parameters/limit'
+      - $ref : '#/parameters/offset'
+      - name : query
+        in: query
+        description: "-Not supported yet-"
+        type: string
+      - $ref : "#/parameters/Accept"
+      - $ref : "#/parameters/If-None-Match"
+      tags:
+      - Mediation Policy (Collection)
+      responses:
+        200:
+          description: |
+            OK.
+            List of qualifying APIs is returned.
+          schema:
+            $ref: '#/definitions/mediationList'
+          headers:
+            Content-Type:
+              description: The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
 
-#----------------------------------------------------------------------------
-# Upload an API specific mediation policy
-#----------------------------------------------------------------------------
-      post:
-        x-scope: apim:api_create
-        x-wso2-curl: "curl -k -H \"Authorization: Bearer 6cea3696-0151-3282-bf79-a0c4db6f308a\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://localhost:9443/api/am/publisher/v0.14/apis/40082986-6488-4b86-801a-b0b069d4588c/policies/mediation\""
-        x-wso2-request: "POST https://localhost:9443/api/am/publisher/v0.14/apis/40082986-6488-4b86-801a-b0b069d4588c/policies/mediation\r\nContent-Type: application/json\r\nAuthorization: Bearer 6cea3696-0151-3282-bf79-a0c4db6f308a\r\n\r\n{\r\n   \"name\": \"add_custom_header_fault\",\r\n   \"type\": \"fault\",\r\n   \"config\": \"<sequence xmlns=\\\"http://ws.apache.org/ns/synapse\\\" name=\\\"add_custom_header_fault\\\">\\n    <property name=\\\"CustomHeader\\\" scope=\\\"transport\\\" value=\\\"example\\\"/>\\n<\\/sequence>\\n\"\r\n}"
-        x-wso2-response: "HTTP/1.1 201 Created\r\nLocation: https://localhost:9443/api/am/publisher/v0.14/registry/resource/_system/governance/apimgt/applicationdata/provider/admin/hello/1.0.0/fault/add_custom_header_fault.xml\r\nContent-Type: application/json\r\n\r\n{  \r\n   \"id\":\"624b9f7d-bfaf-484b-94cc-e84491f5d725\",\r\n   \"name\":\"add_custom_header_fault\",\r\n   \"type\":\"fault\",\r\n   \"config\":\"<sequence xmlns=\\\"http://ws.apache.org/ns/synapse\\\" name=\\\"add_custom_header_fault\\\">\\n    <property name=\\\"CustomHeader\\\" scope=\\\"transport\\\" value=\\\"example\\\"/>\\n</sequence>\\n\"\r\n}"
-        summary: Add an API specific mediation policy
-        description: |
-          This operation can be used to add an API specifc mediation policy.
-        parameters:
-          - in: body
-            name: body
-            description: mediation policy to upload
-            required: true
-            schema:
-               $ref: '#/definitions/Mediation'
-          - $ref: '#/parameters/apiId'
-          - $ref: '#/parameters/Content-Type'
-          - $ref: '#/parameters/If-Match'
-          - $ref: '#/parameters/If-Unmodified-Since'
-        tags:
-          - Mediation Policy (Collection)
-        responses:
-          200:
-            description: |
-              OK.
-              mediation policy uploaded
-            schema:
-              $ref : '#/definitions/Mediation'
-            headers:
-              Location:
-                description: |
-                  The URL of the uploaded thumbnail image of the API.
-                type: string
-              Content-Type:
-                description: |
-                  The content type of the body.
-                type: string
-              ETag:
-                description: |
-                  Entity Tag of the response resource.
-                  Used by caches, or in conditional requests (Will be supported in future).
-                type: string
-              Last-Modified:
-                description: |
-                  Date and time the resource has been modifed the last time.
-                  Used by caches, or in conditional requests (Will be supported in future).
-                type: string
-          400:
-            description: |
-              Bad Request.
-              Invalid request or validation error.
-            schema:
-              $ref: '#/definitions/Error'
-          404:
-            description: |
-              Not Found.
-              The resource to be updated does not exist.
-            schema:
-              $ref: '#/definitions/Error'
-          412:
-            description: |
-              Precondition Failed.
-              The request has not been performed because one of the preconditions is not met.
-            schema:
-              $ref: '#/definitions/Error'
+    #----------------------------------------------------------------------------
+    # Upload an API specific mediation policy
+    #----------------------------------------------------------------------------
+    post:
+      x-scope: apim:api_create
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer 6cea3696-0151-3282-bf79-a0c4db6f308a\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://localhost:9443/api/am/publisher/v0.14/apis/40082986-6488-4b86-801a-b0b069d4588c/policies/mediation\""
+      x-wso2-request: "POST https://localhost:9443/api/am/publisher/v0.14/apis/40082986-6488-4b86-801a-b0b069d4588c/policies/mediation\r\nContent-Type: application/json\r\nAuthorization: Bearer 6cea3696-0151-3282-bf79-a0c4db6f308a\r\n\r\n{\r\n   \"name\": \"add_custom_header_fault\",\r\n   \"type\": \"fault\",\r\n   \"config\": \"<sequence xmlns=\\\"http://ws.apache.org/ns/synapse\\\" name=\\\"add_custom_header_fault\\\">\\n    <property name=\\\"CustomHeader\\\" scope=\\\"transport\\\" value=\\\"example\\\"/>\\n<\\/sequence>\\n\"\r\n}"
+      x-wso2-response: "HTTP/1.1 201 Created\r\nLocation: https://localhost:9443/api/am/publisher/v0.14/registry/resource/_system/governance/apimgt/applicationdata/provider/admin/hello/1.0.0/fault/add_custom_header_fault.xml\r\nContent-Type: application/json\r\n\r\n{  \r\n   \"id\":\"624b9f7d-bfaf-484b-94cc-e84491f5d725\",\r\n   \"name\":\"add_custom_header_fault\",\r\n   \"type\":\"fault\",\r\n   \"config\":\"<sequence xmlns=\\\"http://ws.apache.org/ns/synapse\\\" name=\\\"add_custom_header_fault\\\">\\n    <property name=\\\"CustomHeader\\\" scope=\\\"transport\\\" value=\\\"example\\\"/>\\n</sequence>\\n\"\r\n}"
+      summary: Add an API specific mediation policy
+      description: |
+        This operation can be used to add an API specifc mediation policy.
+      parameters:
+      - in: body
+        name: body
+        description: mediation policy to upload
+        required: true
+        schema:
+          $ref: '#/definitions/Mediation'
+      - $ref: '#/parameters/apiId'
+      - $ref: '#/parameters/Content-Type'
+      - $ref: '#/parameters/If-Match'
+      - $ref: '#/parameters/If-Unmodified-Since'
+      tags:
+      - Mediation Policy (Collection)
+      responses:
+        200:
+          description: |
+            OK.
+            mediation policy uploaded
+          schema:
+            $ref : '#/definitions/Mediation'
+          headers:
+            Location:
+              description: |
+                The URL of the uploaded thumbnail image of the API.
+              type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            The resource to be updated does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
 
-######################################################
-# The "Individual API specific mediation sequence" resource
-######################################################
+  ######################################################
+  # The "Individual API specific mediation sequence" resource
+  ######################################################
   /apis/{apiId}/policies/mediation/{mediationPolicyId}:
 
-#-----------------------------------------------------
-# Retrieve a particular API specific mediation squence
-#-----------------------------------------------------
-      get:
-        x-scope: apim:api_view
-        x-wso2-curl: "curl -k -H \"Authorization: Bearer 5aa0acc0-0ce3-3a0b-8cc8-db5ef696ee23\" https://localhost:9443/api/am/publisher/v0.14/apis/40082986-6488-4b86-801a-b0b069d4588c/policies/mediation/624b9f7d-bfaf-484b-94cc-e84491f5d725"
-        x-wso2-request: "GET https://localhost:9443/api/am/publisher/v0.14/apis/40082986-6488-4b86-801a-b0b069d4588c/policies/mediation/624b9f7d-bfaf-484b-94cc-e84491f5d725\r\nAuthorization: Bearer 5aa0acc0-0ce3-3a0b-8cc8-db5ef696ee23"
-        x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n   \"id\": \"624b9f7d-bfaf-484b-94cc-e84491f5d725\",\r\n   \"name\": \"add_custom_header_fault\",\r\n   \"type\": \"fault\",\r\n   \"config\": \"<sequence xmlns=\\\"http://ws.apache.org/ns/synapse\\\" name=\\\"add_custom_header_fault\\\">\\n    <property name=\\\"CustomHeader\\\" scope=\\\"transport\\\" value=\\\"example\\\"/>\\n<\\/sequence>\\n\"\r\n}"
-        summary: Get an API specific mediation policy
-        description: |
-          This operation can be used to retrieve a particular API specific mediation policy.
-        parameters:
-          - $ref: '#/parameters/apiId'
-          - $ref: '#/parameters/mediationPolicyId'
-          - $ref: '#/parameters/Accept'
-          - $ref: '#/parameters/If-None-Match'
-          - $ref: '#/parameters/If-Modified-Since'
-        tags:
-          - Mediation Policy (Individual)
-        responses:
-          200:
-            description: |
-              OK.
-              Mediation policy returned.
-            schema:
-              $ref: '#/definitions/Mediation'
-            headers:
-              Content-Type:
-                description: |
-                  The content type of the body.
-                type: string
-              ETag:
-                description: |
-                  Entity Tag of the response resource.
-                  Used by caches, or in conditional requests (Will be supported in future).
-                type: string
-              Last-Modified:
-                description: |
-                  Date and time the resource has been modifed the last time.
-                  Used by caches, or in conditional requests (Will be supported in future).
-                type: string
-          304:
-            description: |
-              Not Modified.
-              Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-          404:
-            description: |
-              Not Found.
-              Requested Document does not exist.
-            schema:
-              $ref: '#/definitions/Error'
-          406:
-            description: |
-              Not Acceptable.
-              The requested media type is not supported
-            schema:
-              $ref: '#/definitions/Error'
+    #-----------------------------------------------------
+    # Retrieve a particular API specific mediation squence
+    #-----------------------------------------------------
+    get:
+      x-scope: apim:api_view
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer 5aa0acc0-0ce3-3a0b-8cc8-db5ef696ee23\" https://localhost:9443/api/am/publisher/v0.14/apis/40082986-6488-4b86-801a-b0b069d4588c/policies/mediation/624b9f7d-bfaf-484b-94cc-e84491f5d725"
+      x-wso2-request: "GET https://localhost:9443/api/am/publisher/v0.14/apis/40082986-6488-4b86-801a-b0b069d4588c/policies/mediation/624b9f7d-bfaf-484b-94cc-e84491f5d725\r\nAuthorization: Bearer 5aa0acc0-0ce3-3a0b-8cc8-db5ef696ee23"
+      x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n   \"id\": \"624b9f7d-bfaf-484b-94cc-e84491f5d725\",\r\n   \"name\": \"add_custom_header_fault\",\r\n   \"type\": \"fault\",\r\n   \"config\": \"<sequence xmlns=\\\"http://ws.apache.org/ns/synapse\\\" name=\\\"add_custom_header_fault\\\">\\n    <property name=\\\"CustomHeader\\\" scope=\\\"transport\\\" value=\\\"example\\\"/>\\n<\\/sequence>\\n\"\r\n}"
+      summary: Get an API specific mediation policy
+      description: |
+        This operation can be used to retrieve a particular API specific mediation policy.
+      parameters:
+      - $ref: '#/parameters/apiId'
+      - $ref: '#/parameters/mediationPolicyId'
+      - $ref: '#/parameters/Accept'
+      - $ref: '#/parameters/If-None-Match'
+      - $ref: '#/parameters/If-Modified-Since'
+      tags:
+      - Mediation Policy (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Mediation policy returned.
+          schema:
+            $ref: '#/definitions/Mediation'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+        404:
+          description: |
+            Not Found.
+            Requested Document does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
 
-#-----------------------------------------------------
-# Delete the mediation policy
-#-----------------------------------------------------
-      delete:
-        x-scope: apim:api_create
-        x-wso2-curl: "curl -k -H \"Authorization: Bearer fb2a0784-f60c-3276-8fde-5b0f70e61ecc\" -X DELETE https://localhost:9443/api/am/publisher/v0.14/apis/40082986-6488-4b86-801a-b0b069d4588c/policies/mediation/60f5146d-1774-405d-86b3-9b040ac266d5"
-        x-wso2-request: "DELETE https://localhost:9443/api/am/publisher/v0.14/apis/40082986-6488-4b86-801a-b0b069d4588c/policies/mediation/60f5146d-1774-405d-86b3-9b040ac266d5\r\nAuthorization: Bearer fb2a0784-f60c-3276-8fde-5b0f70e61ecc"
-        x-wso2-response: "HTTP/1.1 200 OK"
-        summary: Delete an API specific mediation policy
-        description: |
-          This operation can be used to delete an existing API specific mediation policy providing the Id of the API and the Id of the mediation policy.
-        parameters:
-          - $ref: '#/parameters/apiId'
-          - $ref: '#/parameters/mediationPolicyId'
-          - $ref: '#/parameters/If-Match'
-          - $ref: '#/parameters/If-Unmodified-Since'
-        tags:
-          - Mediation Policy (Individual)
-        responses:
-          200:
-            description: |
-              OK.
-              Resource successfully deleted.
-          403:
-            description: |
-              Forbidden.
-              The request must be conditional but no condition has been specified.
-            schema:
-              $ref: '#/definitions/Error'
-          404:
-            description: |
-              Not Found.
-              Resource to be deleted does not exist.
-            schema:
-              $ref: '#/definitions/Error'
-          412:
-            description: |
-              Precondition Failed.
-              The request has not been performed because one of the preconditions is not met.
-            schema:
-              $ref: '#/definitions/Error'
+    #-----------------------------------------------------
+    # Delete the mediation policy
+    #-----------------------------------------------------
+    delete:
+      x-scope: apim:api_create
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer fb2a0784-f60c-3276-8fde-5b0f70e61ecc\" -X DELETE https://localhost:9443/api/am/publisher/v0.14/apis/40082986-6488-4b86-801a-b0b069d4588c/policies/mediation/60f5146d-1774-405d-86b3-9b040ac266d5"
+      x-wso2-request: "DELETE https://localhost:9443/api/am/publisher/v0.14/apis/40082986-6488-4b86-801a-b0b069d4588c/policies/mediation/60f5146d-1774-405d-86b3-9b040ac266d5\r\nAuthorization: Bearer fb2a0784-f60c-3276-8fde-5b0f70e61ecc"
+      x-wso2-response: "HTTP/1.1 200 OK"
+      summary: Delete an API specific mediation policy
+      description: |
+        This operation can be used to delete an existing API specific mediation policy providing the Id of the API and the Id of the mediation policy.
+      parameters:
+      - $ref: '#/parameters/apiId'
+      - $ref: '#/parameters/mediationPolicyId'
+      - $ref: '#/parameters/If-Match'
+      - $ref: '#/parameters/If-Unmodified-Since'
+      tags:
+      - Mediation Policy (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Resource successfully deleted.
+        403:
+          description: |
+            Forbidden.
+            The request must be conditional but no condition has been specified.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Resource to be deleted does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
 
-#-----------------------------------------------------
-# Update the a mediation policy
-#-----------------------------------------------------
-      put:
-        x-scope: apim:api_create
-        x-wso2-curl: "curl -k -H \"Authorization: Bearer 9e41fae2-3ada-3dd1-8f12-2077202f4285\" -H \"Content-Type: application/json\" -X PUT -d @data.json https://localhost:9443/api/am/publisher/v0.14/apis/40082986-6488-4b86-801a-b0b069d4588c/policies/mediation/820fdcf7-7258-42b5-809e-674b893644d1"
-        x-wso2-request: "PUT https://localhost:9443/api/am/publisher/v0.14/apis/40082986-6488-4b86-801a-b0b069d4588c/policies/mediation/820fdcf7-7258-42b5-809e-674b893644d1\r\nContent-Type: application/json\r\nAuthorization: Bearer 9e41fae2-3ada-3dd1-8f12-2077202f4285\r\n\r\n{\r\n   \"name\": \"add_custom_header_fault\",\r\n   \"type\": \"fault\",\r\n   \"config\": \"<sequence xmlns=\\\"http://ws.apache.org/ns/synapse\\\" name=\\\"add_custom_header_fault\\\">\\n    <property name=\\\"CustomHeader\\\" scope=\\\"transport\\\" value=\\\"example\\\"/>\\n<\\/sequence>\\n\"\r\n}"
-        x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n   \"id\": \"a7365481-5b3f-463c-a646-a498895ac210\",\r\n   \"name\": \"add_custom_header_fault\",\r\n   \"type\": \"fault\",\r\n   \"config\": \"<sequence xmlns=\\\"http://ws.apache.org/ns/synapse\\\" name=\\\"add_custom_header_fault\\\">\\n    <property name=\\\"CustomHeader\\\" scope=\\\"transport\\\" value=\\\"example\\\"/>\\n<\\/sequence>\\n\"\r\n}"
-        summary: Update an API specific mediation policy
+    #-----------------------------------------------------
+    # Update the a mediation policy
+    #-----------------------------------------------------
+    put:
+      x-scope: apim:api_create
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer 9e41fae2-3ada-3dd1-8f12-2077202f4285\" -H \"Content-Type: application/json\" -X PUT -d @data.json https://localhost:9443/api/am/publisher/v0.14/apis/40082986-6488-4b86-801a-b0b069d4588c/policies/mediation/820fdcf7-7258-42b5-809e-674b893644d1"
+      x-wso2-request: "PUT https://localhost:9443/api/am/publisher/v0.14/apis/40082986-6488-4b86-801a-b0b069d4588c/policies/mediation/820fdcf7-7258-42b5-809e-674b893644d1\r\nContent-Type: application/json\r\nAuthorization: Bearer 9e41fae2-3ada-3dd1-8f12-2077202f4285\r\n\r\n{\r\n   \"name\": \"add_custom_header_fault\",\r\n   \"type\": \"fault\",\r\n   \"config\": \"<sequence xmlns=\\\"http://ws.apache.org/ns/synapse\\\" name=\\\"add_custom_header_fault\\\">\\n    <property name=\\\"CustomHeader\\\" scope=\\\"transport\\\" value=\\\"example\\\"/>\\n<\\/sequence>\\n\"\r\n}"
+      x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n   \"id\": \"a7365481-5b3f-463c-a646-a498895ac210\",\r\n   \"name\": \"add_custom_header_fault\",\r\n   \"type\": \"fault\",\r\n   \"config\": \"<sequence xmlns=\\\"http://ws.apache.org/ns/synapse\\\" name=\\\"add_custom_header_fault\\\">\\n    <property name=\\\"CustomHeader\\\" scope=\\\"transport\\\" value=\\\"example\\\"/>\\n<\\/sequence>\\n\"\r\n}"
+      summary: Update an API specific mediation policy
+      description: |
+        This operation can be used to update an existing mediation policy of an API.
+      parameters:
+      - $ref: '#/parameters/apiId'
+      - $ref: '#/parameters/mediationPolicyId'
+      - in: body
+        name: body
         description: |
-          This operation can be used to update an existing mediation policy of an API.
-        parameters:
-          - $ref: '#/parameters/apiId'
-          - $ref: '#/parameters/mediationPolicyId'
-          - in: body
-            name: body
-            description: |
-              Mediation policy object that needs to be updated
-            required: true
-            schema:
-              $ref: '#/definitions/Mediation'
-          - $ref: '#/parameters/Content-Type'
-          - $ref: '#/parameters/If-Match'
-          - $ref: '#/parameters/If-Unmodified-Since'
-        tags:
-          - Mediation Policy (Individual)
-        responses:
-          200:
-            description: |
-              OK.
-              Successful response with updated API object
-            schema:
-              $ref: '#/definitions/Mediation'
-            headers:
-              Location:
-                description: |
-                  The URL of the newly created resource.
-                type: string
-              Content-Type:
-                description: |
-                  The content type of the body.
-                type: string
-              ETag:
-                description: |
-                  Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
-                type: string
-              Last-Modified:
-                description: |
-                  Date and time the resource has been modifed the last time.
-                  Used by caches, or in conditional requests (Will be supported in future).
-                type: string
-          400:
-            description: |
-              Bad Request.
-              Invalid request or validation error
-            schema:
-              $ref: '#/definitions/Error'
-          403:
-            description: |
-              Forbidden.
-              The request must be conditional but no condition has been specified.
-            schema:
-              $ref: '#/definitions/Error'
-          404:
-            description: |
-              Not Found.
-              The resource to be updated does not exist.
-            schema:
-              $ref: '#/definitions/Error'
-          412:
-            description: |
-              Precondition Failed.
-              The request has not been performed because one of the preconditions is not met.
-            schema:
-              $ref: '#/definitions/Error'
+          Mediation policy object that needs to be updated
+        required: true
+        schema:
+          $ref: '#/definitions/Mediation'
+      - $ref: '#/parameters/Content-Type'
+      - $ref: '#/parameters/If-Match'
+      - $ref: '#/parameters/If-Unmodified-Since'
+      tags:
+      - Mediation Policy (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with updated API object
+          schema:
+            $ref: '#/definitions/Mediation'
+          headers:
+            Location:
+              description: |
+                The URL of the newly created resource.
+              type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        403:
+          description: |
+            Forbidden.
+            The request must be conditional but no condition has been specified.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            The resource to be updated does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
 
-######################################################
-# The wsdl Resource
-######################################################
+  ######################################################
+  # The wsdl Resource
+  ######################################################
   /apis/{apiId}/wsdl:
 
-#-----------------------------------------------------
-# Retrieve the details about a certain wsdl
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Retrieve the details about a certain wsdl
+    #-----------------------------------------------------
     get:
       x-scope: apim:api_view
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/publisher/v0.14/apis/7f82f6b0-2667-441e-af23-c0fc44cf3a17/wsdl\""
@@ -1648,12 +1648,12 @@ paths:
       description: |
         This operation can be used to retrieve the WSDL definition of an API.
       parameters:
-        - $ref: '#/parameters/apiId'
-        - $ref: '#/parameters/Accept'
-        - $ref: '#/parameters/If-None-Match'
-        - $ref: '#/parameters/If-Modified-Since'
+      - $ref: '#/parameters/apiId'
+      - $ref: '#/parameters/Accept'
+      - $ref: '#/parameters/If-None-Match'
+      - $ref: '#/parameters/If-Modified-Since'
       tags:
-        - Wsdl (Individual)
+      - Wsdl (Individual)
       responses:
         200:
           description: |
@@ -1692,9 +1692,9 @@ paths:
             The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
-#-----------------------------------------------------
-# Add a wsdl to the registry
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Add a wsdl to the registry
+    #-----------------------------------------------------
     post:
       x-scope: apim:api_create
       x-wso2-curl: "curl -k -H \"Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://localhost:9443/api/am/publisher/v0.14/apis/af3f96da-9ccf-463f-8cee-13ec8530a9cd/wsdl\""
@@ -1704,19 +1704,19 @@ paths:
       description: |
         This operation can be used to add a WSDL definition to an existing API.
       parameters:
-        - $ref: '#/parameters/apiId'
-        - in: body
-          name: body
-          description: |
-            JSON payload including WSDL definition that needs to be added
-          required: true
-          schema:
-            $ref: '#/definitions/Wsdl'
-        - $ref: '#/parameters/Content-Type'
-        - $ref: '#/parameters/If-Match'
-        - $ref: '#/parameters/If-Unmodified-Since'
+      - $ref: '#/parameters/apiId'
+      - in: body
+        name: body
+        description: |
+          JSON payload including WSDL definition that needs to be added
+        required: true
+        schema:
+          $ref: '#/definitions/Wsdl'
+      - $ref: '#/parameters/Content-Type'
+      - $ref: '#/parameters/If-Match'
+      - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - Wsdl (Individual)
+      - Wsdl (Individual)
       responses:
         200:
           description: |
@@ -1766,14 +1766,14 @@ paths:
             $ref: '#/definitions/Error'
 
 
-######################################################
-# The "Individual Application" resource APIs
-######################################################
+  ######################################################
+  # The "Individual Application" resource APIs
+  ######################################################
   '/applications/{applicationId}':
 
-#-----------------------------------------------------
-# Retrieve the details about a certain application
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Retrieve the details about a certain application
+    #-----------------------------------------------------
     get:
       x-scope: apim:api_create
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/publisher/v0.14/applications/896658a0-b4ee-4535-bbfa-806c894a4015"
@@ -1785,12 +1785,12 @@ paths:
       description: |
         This operation can be used to retrieve details of an individual application specifying the application id in the URI.
       parameters:
-        - $ref: '#/parameters/applicationId'
-        - $ref: '#/parameters/Accept'
-        - $ref: '#/parameters/If-None-Match'
-        - $ref: '#/parameters/If-Modified-Since'
+      - $ref: '#/parameters/applicationId'
+      - $ref: '#/parameters/Accept'
+      - $ref: '#/parameters/If-None-Match'
+      - $ref: '#/parameters/If-Modified-Since'
       tags:
-        - Application (Individual)
+      - Application (Individual)
       responses:
         200:
           description: |
@@ -1829,14 +1829,14 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-######################################################
-# The "Subscription Collection" resource APIs
-######################################################
+  ######################################################
+  # The "Subscription Collection" resource APIs
+  ######################################################
   /subscriptions:
 
-#-----------------------------------------------------
-# Retrieve all subscriptions of a certain API
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Retrieve all subscriptions of a certain API
+    #-----------------------------------------------------
     get:
       x-scope: apim:subscription_view
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/publisher/v0.14/subscriptions?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b\""
@@ -1854,13 +1854,13 @@ paths:
         2. Retrieving subscriptions for a specific API.
         `GET https://localhost:9443/api/am/publisher/v0.14/subscriptions?apiId=c43a325c-260b-4302-81cb-768eafaa3aed`
       parameters:
-        - $ref: '#/parameters/apiId-Q'
-        - $ref: '#/parameters/limit'
-        - $ref: '#/parameters/offset'
-        - $ref: '#/parameters/Accept'
-        - $ref: '#/parameters/If-None-Match'
+      - $ref: '#/parameters/apiId-Q'
+      - $ref: '#/parameters/limit'
+      - $ref: '#/parameters/offset'
+      - $ref: '#/parameters/Accept'
+      - $ref: '#/parameters/If-None-Match'
       tags:
-        - Subscription (Collection)
+      - Subscription (Collection)
       responses:
         200:
           description: |
@@ -1888,14 +1888,14 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-######################################################
-# The "Individual Subscription" resource APIs
-######################################################
+  ######################################################
+  # The "Individual Subscription" resource APIs
+  ######################################################
   '/subscriptions/{subscriptionId}':
 
-#-----------------------------------------------------
-# Retrieve a certain subscription
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Retrieve a certain subscription
+    #-----------------------------------------------------
     get:
       x-scope: apim:subscription_view
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/publisher/v0.14/subscriptions/64eca60b-2e55-4c38-8603-e9e6bad7d809"
@@ -1907,12 +1907,12 @@ paths:
       description: |
         This operation can be used to get details of a single subscription.
       parameters:
-        - $ref: '#/parameters/subscriptionId'
-        - $ref: '#/parameters/Accept'
-        - $ref: '#/parameters/If-None-Match'
-        - $ref: '#/parameters/If-Modified-Since'
+      - $ref: '#/parameters/subscriptionId'
+      - $ref: '#/parameters/Accept'
+      - $ref: '#/parameters/If-None-Match'
+      - $ref: '#/parameters/If-Modified-Since'
       tags:
-        - Subscription (Individual)
+      - Subscription (Individual)
       responses:
         200:
           description: |
@@ -1941,14 +1941,14 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-######################################################
-# The "Block Subscription" Processing Function resource API
-######################################################
+  ######################################################
+  # The "Block Subscription" Processing Function resource API
+  ######################################################
   /subscriptions/block-subscription:
 
-#-----------------------------------------------------
-# Block a certain subscription
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Block a certain subscription
+    #-----------------------------------------------------
     post:
       x-scope: apim:subscription_block
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X POST \"https://localhost:9443/api/am/publisher/v0.14/subscriptions/block-subscription?subscriptionId=64eca60b-2e55-4c38-8603-e9e6bad7d809&blockState=PROD_ONLY_BLOCKED\""
@@ -1963,20 +1963,20 @@ paths:
         1. `BLOCKED` : Subscription is completely blocked for both Production and Sandbox environments.
         2. `PROD_ONLY_BLOCKED` : Subscription is blocked for Production environment only.
       parameters:
-        - $ref: '#/parameters/subscriptionId-Q'
-        - name: blockState
-          in: query
-          description: |
-            Subscription block state.
-          type: string
-          required: true
-          enum:
-            - BLOCKED
-            - PROD_ONLY_BLOCKED
-        - $ref: '#/parameters/If-Match'
-        - $ref: '#/parameters/If-Unmodified-Since'
+      - $ref: '#/parameters/subscriptionId-Q'
+      - name: blockState
+        in: query
+        description: |
+          Subscription block state.
+        type: string
+        required: true
+        enum:
+        - BLOCKED
+        - PROD_ONLY_BLOCKED
+      - $ref: '#/parameters/If-Match'
+      - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - Subscription (Individual)
+      - Subscription (Individual)
       responses:
         200:
           description: |
@@ -2012,14 +2012,14 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-######################################################
-# The "Unblock Subscription" Processing Function resource API
-######################################################
+  ######################################################
+  # The "Unblock Subscription" Processing Function resource API
+  ######################################################
   /subscriptions/unblock-subscription:
 
-#-----------------------------------------------------
-# Unblock a certain subscription
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Unblock a certain subscription
+    #-----------------------------------------------------
     post:
       x-scope: apim:subscription_block
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X POST \"https://localhost:9443/api/am/publisher/v0.14/subscriptions/unblock-subscription?subscriptionId=64eca60b-2e55-4c38-8603-e9e6bad7d809\""
@@ -2029,13 +2029,13 @@ paths:
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"subscriptionId\": \"64eca60b-2e55-4c38-8603-e9e6bad7d809\",\n   \"tier\": \"Gold\",\n   \"apiIdentifier\": \"admin-PhoneVerification-1.0.0\",\n   \"applicationId\": \"896658a0-b4ee-4535-bbfa-806c894a4015\",\n   \"status\": \"UNBLOCKED\"\n} "
       summary: Unblock a Subscription
       parameters:
-        - $ref: '#/parameters/subscriptionId-Q'
-        - $ref: '#/parameters/If-Match'
-        - $ref: '#/parameters/If-Unmodified-Since'
+      - $ref: '#/parameters/subscriptionId-Q'
+      - $ref: '#/parameters/If-Match'
+      - $ref: '#/parameters/If-Unmodified-Since'
       description: |
         This operation can be used to unblock a subscription specifying the subscription Id. The subscription will be fully unblocked after performing this operation.
       tags:
-        - Subscription (Individual)
+      - Subscription (Individual)
       responses:
         200:
           description: |
@@ -2071,14 +2071,14 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-######################################################
-# The "Tier Collection" resource APIs
-######################################################
+  ######################################################
+  # The "Tier Collection" resource APIs
+  ######################################################
   '/tiers/{tierLevel}':
 
-#-----------------------------------------------------
-# Retrieve the list of all available tiers
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Retrieve the list of all available tiers
+    #-----------------------------------------------------
     get:
       x-scope: apim:tier_view
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/publisher/v0.14/tiers/api"
@@ -2090,13 +2090,13 @@ paths:
       description: |
         This operation can be used to list the available tiers for a given tier level. Tier level should be specified as a path parameter and should be one of `api`, `application` and `resource`.
       parameters:
-        - $ref: '#/parameters/limit'
-        - $ref: '#/parameters/offset'
-        - $ref: '#/parameters/tierLevel'
-        - $ref: '#/parameters/Accept'
-        - $ref: '#/parameters/If-None-Match'
+      - $ref: '#/parameters/limit'
+      - $ref: '#/parameters/offset'
+      - $ref: '#/parameters/tierLevel'
+      - $ref: '#/parameters/Accept'
+      - $ref: '#/parameters/If-None-Match'
       tags:
-        - Throttling Tier (Collection)
+      - Throttling Tier (Collection)
       responses:
         200:
           description: |
@@ -2124,9 +2124,9 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-#-----------------------------------------------------
-# Create a new tier
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Create a new tier
+    #-----------------------------------------------------
     post:
       x-scope: apim:tier_manage
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://localhost:9443/api/am/publisher/v0.14/tiers/api\""
@@ -2140,17 +2140,17 @@ paths:
         **IMPORTANT:**
         * This is only effective when Advanced Throttling is disabled in the Server. If enabled, we need to use Admin REST API for throttling tiers modification related operations.
       parameters:
-        - in: body
-          name: body
-          description: |
-            Tier object that should to be added
-          required: true
-          schema:
-            $ref: '#/definitions/Tier'
-        - $ref: '#/parameters/tierLevel-A'
-        - $ref: '#/parameters/Content-Type'
+      - in: body
+        name: body
+        description: |
+          Tier object that should to be added
+        required: true
+        schema:
+          $ref: '#/definitions/Tier'
+      - $ref: '#/parameters/tierLevel-A'
+      - $ref: '#/parameters/Content-Type'
       tags:
-        - Throttling Tier (Collection)
+      - Throttling Tier (Collection)
       responses:
         201:
           description: |
@@ -2184,14 +2184,14 @@ paths:
             Unsupported media type.
             The entity of the request was in a not supported format.
 
-######################################################
-# The "Individual Tier" resource APIs
-######################################################
+          ######################################################
+  # The "Individual Tier" resource APIs
+  ######################################################
   '/tiers/{tierLevel}/{tierName}':
 
-#-----------------------------------------------------
-# Retrieve a certain tier
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Retrieve a certain tier
+    #-----------------------------------------------------
     get:
       x-scope: apim:tier_view
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/publisher/v0.14/tiers/api/Bronze"
@@ -2205,13 +2205,13 @@ paths:
         Note that the scope of the API is mandatory while retreiving the access token with the following cURL command : `curl -k -d \"grant_type=password&username=username&password=password&scope=apim:tier_view\" -H \"Authorization: Basic <token>\" https://localhost:8243/token`.
         You will receive the access token as the response, for example `"access_token":"8644c013-7ff1-3217-b150-d7b92cae6be7"`.
       parameters:
-        - $ref: '#/parameters/tierName'
-        - $ref: '#/parameters/tierLevel'
-        - $ref: '#/parameters/Accept'
-        - $ref: '#/parameters/If-None-Match'
-        - $ref: '#/parameters/If-Modified-Since'
+      - $ref: '#/parameters/tierName'
+      - $ref: '#/parameters/tierLevel'
+      - $ref: '#/parameters/Accept'
+      - $ref: '#/parameters/If-None-Match'
+      - $ref: '#/parameters/If-Modified-Since'
       tags:
-        - Throttling Tier (Individual)
+      - Throttling Tier (Individual)
       responses:
         200:
           description: |
@@ -2251,9 +2251,9 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-#-----------------------------------------------------
-# Update a certain tier
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Update a certain tier
+    #-----------------------------------------------------
     put:
       x-scope: apim:tier_manage
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X PUT -d @data.json \"https://localhost:9443/api/am/publisher/v0.14/tiers/api/Low\""
@@ -2267,20 +2267,20 @@ paths:
         **IMPORTANT:**
         * This is only effective when Advanced Throttling is disabled in the Server. If enabled, we need to use Admin REST API for throttling tiers modification related operations.
       parameters:
-        - $ref: '#/parameters/tierName'
-        - in: body
-          name: body
-          description: |
-            Tier object that needs to be modified
-          required: true
-          schema:
-            $ref: '#/definitions/Tier'
-        - $ref: '#/parameters/tierLevel-A'
-        - $ref: '#/parameters/Content-Type'
-        - $ref: '#/parameters/If-Match'
-        - $ref: '#/parameters/If-Unmodified-Since'
+      - $ref: '#/parameters/tierName'
+      - in: body
+        name: body
+        description: |
+          Tier object that needs to be modified
+        required: true
+        schema:
+          $ref: '#/definitions/Tier'
+      - $ref: '#/parameters/tierLevel-A'
+      - $ref: '#/parameters/Content-Type'
+      - $ref: '#/parameters/If-Match'
+      - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - Throttling Tier (Individual)
+      - Throttling Tier (Individual)
       responses:
         200:
           description: |
@@ -2326,9 +2326,9 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-#-----------------------------------------------------
-# Delete a certain tier
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Delete a certain tier
+    #-----------------------------------------------------
     delete:
       x-scope: apim:tier_manage
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X DELETE \"https://localhost:9443/api/am/publisher/v0.14/tiers/api/Low\""
@@ -2344,12 +2344,12 @@ paths:
         **IMPORTANT:**
         * This is only effective when Advanced Throttling is disabled in the Server. If enabled, we need to use Admin REST API for throttling tiers modification related operations.
       parameters:
-        - $ref: '#/parameters/tierName'
-        - $ref: '#/parameters/tierLevel-A'
-        - $ref: '#/parameters/If-Match'
-        - $ref: '#/parameters/If-Unmodified-Since'
+      - $ref: '#/parameters/tierName'
+      - $ref: '#/parameters/tierLevel-A'
+      - $ref: '#/parameters/If-Match'
+      - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - Throttling Tier (Individual)
+      - Throttling Tier (Individual)
       responses:
         200:
           description: |
@@ -2368,14 +2368,14 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-######################################################
-# The "Update Permission" Processing Function resource API
-######################################################
+  ######################################################
+  # The "Update Permission" Processing Function resource API
+  ######################################################
   '/tiers/update-permission':
 
-#-----------------------------------------------------
-# Update the permission of a certain tier
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Update the permission of a certain tier
+    #-----------------------------------------------------
     post:
       x-scope: apim:tier_manage
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://localhost:9443/api/am/publisher/v0.14/tiers/update-permission?tierName=Bronze&tierLevel=api\""
@@ -2385,16 +2385,16 @@ paths:
       description: |
         This operation can be used to update tier permissions which controls access for the particular tier based on the subscribers' roles.
       parameters:
-        - $ref: '#/parameters/tierName-Q'
-        - $ref: '#/parameters/tierLevel-Q'
-        - $ref: '#/parameters/If-Match'
-        - $ref: '#/parameters/If-Unmodified-Since'
-        - in: body
-          name: permissions
-          schema:
-            $ref: '#/definitions/TierPermission'
+      - $ref: '#/parameters/tierName-Q'
+      - $ref: '#/parameters/tierLevel-Q'
+      - $ref: '#/parameters/If-Match'
+      - $ref: '#/parameters/If-Unmodified-Since'
+      - in: body
+        name: permissions
+        schema:
+          $ref: '#/definitions/TierPermission'
       tags:
-        - Throttling Tier (Individual)
+      - Throttling Tier (Individual)
       responses:
         200:
           description: |
@@ -2441,14 +2441,14 @@ paths:
             $ref: '#/definitions/Error'
 
 
-######################################################
-# The "Environment Collection" resource API
-######################################################
+  ######################################################
+  # The "Environment Collection" resource API
+  ######################################################
   /environments:
 
-#-----------------------------------------------------
-# Retrieve the list of environments configured for a certain API
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Retrieve the list of environments configured for a certain API
+    #-----------------------------------------------------
     get:
       x-scope: apim:api_view
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/publisher/v0.14/environments\""
@@ -2460,9 +2460,9 @@ paths:
       description: |
         This operation can be used to retrieve the list of gateway environments available.
       parameters:
-        - $ref: '#/parameters/apiId-Q'
+      - $ref: '#/parameters/apiId-Q'
       tags:
-        - Environment (Collection)
+      - Environment (Collection)
       responses:
         200:
           description: |
@@ -2492,9 +2492,9 @@ paths:
             $ref: '#/definitions/Error'
   /policies/mediation:
 
-#-----------------------------------------------------------------------------------------
-# Retrieving the list of all global mediation sequences under a given search condition
-#-----------------------------------------------------------------------------------------
+    #-----------------------------------------------------------------------------------------
+    # Retrieving the list of all global mediation sequences under a given search condition
+    #-----------------------------------------------------------------------------------------
     get:
       x-scope: apim:mediation_policy_view
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/publisher/v0.14/policies/mediation"
@@ -2507,16 +2507,16 @@ paths:
       description: |
         This operation provides you a list of available all global level mediation policies.
       parameters:
-        - $ref : '#/parameters/limit'
-        - $ref : '#/parameters/offset'
-        - name : query
-          in: query
-          description: "-Not supported yet-"
-          type: string
-        - $ref : "#/parameters/Accept"
-        - $ref : "#/parameters/If-None-Match"
+      - $ref : '#/parameters/limit'
+      - $ref : '#/parameters/offset'
+      - name : query
+        in: query
+        description: "-Not supported yet-"
+        type: string
+      - $ref : "#/parameters/Accept"
+      - $ref : "#/parameters/If-None-Match"
       tags:
-        - Mediation Policy (Collection)
+      - Mediation Policy (Collection)
       responses:
         200:
           description: |
@@ -2545,14 +2545,14 @@ paths:
 
 
 
-######################################################
-# The "Workflow approval" resource API
-######################################################
+  ######################################################
+  # The "Workflow approval" resource API
+  ######################################################
   /workflows/update-workflow-status:
 
-#-------------------------------------------------------------------
-# Resume the workflow by approving or rejecting the workflow request
-#-------------------------------------------------------------------
+    #-------------------------------------------------------------------
+    # Resume the workflow by approving or rejecting the workflow request
+    #-------------------------------------------------------------------
     post:
       x-scope: apim:api_workflow
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://localhost:9443/api/am/publisher/v0.14/workflows/update-workflow-status?workflowReferenceId=56e3a170-a7a7-45f8-b051-7e43a58a67e1\""
@@ -2562,16 +2562,16 @@ paths:
       description: |
         This operation can be used to approve or reject a workflow task.
       parameters:
-       - $ref: '#/parameters/workflowReferenceId-Q'
-       - in: body
-         name: body
-         description: |
-            Workflow event that need to be updated
-         required: true
-         schema:
-           $ref: '#/definitions/Workflow'
+      - $ref: '#/parameters/workflowReferenceId-Q'
+      - in: body
+        name: body
+        description: |
+          Workflow event that need to be updated
+        required: true
+        schema:
+          $ref: '#/definitions/Workflow'
       tags:
-        - Workflows (Individual)
+      - Workflows (Individual)
       responses:
         200:
           description: |
@@ -2596,39 +2596,424 @@ paths:
             Workflow for the given reference in not found.
           schema:
             $ref: '#/definitions/Error'
-######################################################
-# The "Certificate Management" resource APIs
-######################################################
+
+  ######################################################
+  # The "Certificate Management" resource APIs
+  ######################################################
+
+  /clientCertificates:
+    #-------------------------------------------------------------------
+    # Retrieve/ Search the uploaded certificates.
+    #-------------------------------------------------------------------
+    get:
+      x-scope: 'apim:api_view'
+      produces:
+      - application/json
+      x-wso2-curl: "curl -X GET \
+                      https://localhost:9443/api/am/publisher/v0.14/clientCertificates \
+                      -H 'authorization: Bearer f80b8c34-01bc-3ac2-99b6-4873e45c861c'"
+      x-wso2-request: "GET https://localhost:9443/api/am/publisher/v0.14/clientCertificates \ -H 'authorization:
+      Bearer f80b8c34-01bc-3ac2-99b6-4873e45c861c'"
+      x-wso2-response: "HTTP/1.1 200 OK \
+                        {\"count\":1,\"next\":\"\",\"previous\":\"\",\"certificates\":[{\"alias\":\"newtest1\",
+                         \"apiId\":\"admin-mesting12da1-1.0.0\",\"tier\":\"Bronze\"}],\"pagination\":{\"total\":1,
+                         \"offset\":0,\"limit\":25}}"
+      summary: Retrieve/ Search uploaded Client Certificates.
+      description: |
+        This operation can be used to retrieve and search the uploaded client certificates.
+      tags:
+      - ClientCertificates (Collection)
+      parameters:
+      - $ref: '#/parameters/limit'
+      - $ref: '#/parameters/offset'
+      - in: query
+        name: alias
+        required: false
+        type: string
+        description: Alias for the client certificate
+      - in: query
+        name: apiId
+        required: false
+        type: string
+        description: UUID of the API
+      responses:
+        '200':
+          description: >
+            OK. Successful response with the list of matching certificate
+            information in the body.
+          schema:
+            $ref: '#/definitions/ClientCertificates'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        '400':
+          description: |
+            Bad Request.
+            Failure due to not providing alias or server is not configured to support mutual SSL authentication.
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: |
+            Internal Server Error
+          schema:
+            $ref: '#/definitions/Error'
+
+    #-------------------------------------------------------------------
+    # Upload client certificate resource api.
+    #-------------------------------------------------------------------
+    post:
+      x-scope: 'apim:api_create'
+      consumes:
+      - multipart/form-data
+      x-wso2-curl: "curl -X POST \
+                      https://localhost:9443/api/am/publisher/v0.14/clientCertificates \
+                      -H 'authorization: Bearer f2f562bd-f6d9-3fad-b48d-72ab5702c98a' \
+                      -H 'content-type: multipart/form-data' \
+                      -F certificate=@test.crt \
+                      -F alias=alias \
+                      -F apiId=fea749dd-d548-4a8b-b308-34903b39a34b \
+                      -F tier=Gold"
+      x-wso2-request: "POST https://localhost:9443/api/am/publisher/v0.14/clientCertificates \
+                                                  -H 'authorization: Bearer f2f562bd-f6d9-3fad-b48d-72ab5702c98a' \
+                                                  -H 'content-type: multipart/form-data' \
+                                                  -F certificate=@test.crt \
+                                                  -F alias=alias \
+                                                  -F apiId=fea749dd-d548-4a8b-b308-34903b39a34b \
+                                                  -F tier=Gold"
+      x-wso2-response: "HTTP/1.1 201 Created \
+                        Location: https://localhost:9443/api/am/publisher/v0.14/clientCertificates?alias=newtest1 \
+                        Date: Tue, 09 Oct 2018 16:18:10 GMT \
+                        Content-Type: application/json \
+                        Transfer-Encoding: chunked \
+                        Server: WSO2 Carbon Server \
+                        {\"alias\":\"alias\",\"apiId\":\"fea749dd-d548-4a8b-b308-34903b39a34b\",\"tier\":\"Gold\"}"
+      summary: Upload a new certificate.
+      description: |
+        This operation can be used to upload a new certificate for an endpoint.
+      parameters:
+      - in: formData
+        name: certificate
+        description: The certificate that needs to be uploaded.
+        required: true
+        type: file
+      - in: formData
+        name: alias
+        description: Alias for the certificate
+        required: true
+        type: string
+      - in: formData
+        name: apiId
+        description: apiId to which the certificate should be applied.
+        required: true
+        type: string
+      - in: formData
+        name: tier
+        description: apiId to which the certificate should be applied.
+        required: true
+        type: string
+      tags:
+      - ClientCertificates (Individual)
+      responses:
+        '200':
+          description: |
+            OK.
+            The Certificate added successfully.
+          headers:
+            Location:
+              description: |
+                The URL of the newly created resource.
+              type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            $ref: '#/definitions/ClientCertMetadata'
+        '400':
+          description: |
+            Bad Request.
+            Failures due to existing alias or expired certificate.
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: |
+            Internal Server Error
+            Failed to add the Certificate due to an Internal Server Error
+          schema:
+            $ref: '#/definitions/Error'
+
+  #-------------------------------------------------------------------
+  # Update certificate resource.
+  #-------------------------------------------------------------------
+  /clientCertificates/{alias}:
+    put:
+      x-scope: 'apim:api_create'
+      consumes:
+      - multipart/form-data
+      x-wso2-curl: "curl -X PUT \
+                      https://localhost:9443/api/am/publisher/v0.14/clientCertificates/newtest1 \
+                      -H 'authorization: Bearer f80b8c34-01bc-3ac2-99b6-4873e45c861c' \
+                      -F tier=Bronze"
+      x-wso2-request: "PUT https://localhost:9443/api/am/publisher/v0.14/clientCertificates/newtest1 \
+                                      -H 'authorization: Bearer f80b8c34-01bc-3ac2-99b6-4873e45c861c'\ -F tier=Bronze"
+      x-wso2-response: "HTTP/1.1 200 OK\r\n
+                        {\r\n\"alias\":\"newtest1\",\r\n\"apiId\":\"fea749dd-d548-4a8b-b308-34903b39a34b\",\r\n
+                         \"tier\":\"Gold\"\r\n}\r\n"
+      summary: Update a certificate.
+      description: |
+        This operation can be used to update an uploaded certificate.
+      parameters:
+      - in: formData
+        name: certificate
+        description: The certificate that needs to be uploaded.
+        required: false
+        type: file
+      - in: path
+        name: alias
+        description: Alias for the certificate
+        required: true
+        type: string
+      - in: formData
+        name : tier
+        description: The tier of the certificate
+        required: false
+        type: string
+      tags:
+      - ClientCertificates (Individual)
+      responses:
+        '200':
+          description: |
+            OK.
+            The Certificate updated successfully.
+          schema:
+            $ref: '#/definitions/ClientCertMetadata'
+          headers:
+            Location:
+              description: |
+                The URL of the newly created resource.
+              type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        '400':
+          description: |
+            Bad Request.
+            Failure due to not providing alias.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: |
+            Not Found.
+            Updating certificate failed. Alias not found or server is not configured to support mutual SSL
+            authentication.
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: |
+            Internal Server Error
+          schema:
+            $ref: '#/definitions/Error'
+
+    #-------------------------------------------------------------------
+    # Delete Certificate resource
+    #-------------------------------------------------------------------
+    delete:
+      x-scope: 'apim:api_create'
+      x-wso2-curl:
+        "curl -X DELETE \
+           https://localhost:9443/api/am/publisher/v0.14/clientCertificates/newtest1 \
+           -H 'authorization: Bearer f80b8c34-01bc-3ac2-99b6-4873e45c861c' "
+      x-wso2-request: "DELETE https://localhost:9443/api/am/publisher/v0.14/clientCertificates/newtest1 \
+                                         -H 'authorization: Bearer f80b8c34-01bc-3ac2-99b6-4873e45c861c'"
+      x-wso2-response: "HTTP/1.1 200 OK"
+      summary: Delete a certificate.
+      description: |
+        This operation can be used to delete an uploaded certificate.
+      parameters:
+      - in: path
+        name: alias
+        description: |
+          The alias of the certificate that should be deleted.
+        required: true
+        type: string
+      tags:
+      - ClientCertificates (Individual)
+      responses:
+        '200':
+          description: |
+            OK.
+            The Certificate deleted successfully.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        '400':
+          description: |
+            Bad Request.
+            Alias not found or server is not configured to support mutual SSL authentication.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: |
+            Not Found. |
+            Failed to delete the certificate. Certificate could not found for
+            the given alias
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: |
+            Internal Server Error
+          schema:
+            $ref: '#/definitions/Error'
+
+    #-------------------------------------------------------------------
+    # Get certificate information resource.
+    #-------------------------------------------------------------------
+    get:
+      x-scope: 'apim:api_view'
+      produces:
+      - application/json
+      x-wso2-curl: "curl -X GET \
+                      https://localhost:9443/api/am/publisher/v0.14/clientCertificates/newtest1 \
+                      -H 'authorization: Bearer f80b8c34-01bc-3ac2-99b6-4873e45c861c'"
+      x-wso2-request: "GET https://apis.wso2.com/api/am/publisher/v0.14/clientCertificates/newtest1 Authorization:
+      Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+      x-wso2-response: "HTTP/1.1 200 OK
+                        Date: Tue, 09 Oct 2018 16:25:43 GMT
+                        Content-Type: application/json
+                        Transfer-Encoding: chunked
+                        Server: WSO2 Carbon Server
+                        {\"status\":\"Active\",\"validity\":{\"from\":\"Fri Sep 14 15:46:22 IST 2018\",\"to\":\"Sat Sep
+                         14 15:46:22 IST 2019\"},\"version\":\"3\",\"subject\":\"EMAILADDRESS=wso2@wso2.com,
+                         CN=WSO2, OU=test, O=WSO2, L=colombo, ST=Some-State, C=CA\"}"
+      summary: Get the certificate information.
+      description: |
+        This operation can be used to get the information about a certificate.
+      parameters:
+      - in: path
+        name: alias
+        type: string
+        required: true
+      tags:
+      - ClientCertificates (Individual)
+      responses:
+        '200':
+          description: |
+            OK.
+          schema:
+            $ref: '#/definitions/CertificateInfo'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        '400':
+          description: |
+            Bad Request.
+            Alias not found or server is not configured to support mutual SSL authentication.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: |
+            Not Found.
+            Alias not found
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: |
+            Internal Server Error
+          schema:
+            $ref: '#/definitions/Error'
+
+  #-------------------------------------------------------------------
+  # Download the certificate which matches the alias.
+  #-------------------------------------------------------------------
+  /clientCertificates/{alias}/content:
+    get:
+      x-scope: 'apim:api_view'
+      x-wso2-curl: "curl -X GET \
+                      https://localhost:9443/api/am/publisher/v0.14/clientCertificates/newtest1/content \
+                      -H 'authorization: Bearer f80b8c34-01bc-3ac2-99b6-4873e45c861c'"
+      x-wso2-request: "GET https://apis.wso2.com/api/am/publisher/v0.14/certificates/wso2carbon/content Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+      x-wso2-response: "HTTP/1.1 200 OK \
+                        Content-Disposition: attachment; filename=\"newtest1.crt\" \
+                         Date: Tue, 09 Oct 2018 16:21:25 GMT
+                         Content-Type: application/octet-stream
+                         Content-Length: 997
+                         Server: WSO2 Carbon Server"
+      summary: Download a certificate.
+      description: |
+        This operation can be used to download a certificate which matches the given alias.
+      parameters:
+      - in: path
+        name: alias
+        type: string
+        required: true
+      tags:
+      - ClientCertificates (Individual)
+      responses:
+        '200':
+          description: |
+            OK.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        '400':
+          description: |
+            Bad Request.
+            Alias not provided or server is not configured to support mutual SSL authentication.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: |
+            Not Found. Certificate for the Alias not found.
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: |
+            Internal Server Error
+          schema:
+            $ref: '#/definitions/Error'
+
+  ######################################################
+  # The "Certificate Management" resource APIs
+  ######################################################
 
   /certificates:
-  #-------------------------------------------------------------------
-  # Retrieve/ Search the uploaded certificates.
-  #-------------------------------------------------------------------
+    #-------------------------------------------------------------------
+    # Retrieve/ Search the uploaded certificates.
+    #-------------------------------------------------------------------
     get:
       x-scope: 'apim:api_create'
       produces:
-        - application/json
+      - application/json
       x-wso2-curl: "curl -X GET -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" \"https://localhost:9443/api/am/publisher/v0.14/certificates\""
       x-wso2-request: "GET https://localhost:9443/api/am/publisher/v0.14/certificates?alias=wso2carbon&endpoint=https://www.abc.com"
       x-wso2-response: "HTTP/1.1 200 OK \n\n{\n  \"count\":1,\n  \"next\":\"\",\n  \"previous\":\"\",\n\"certificates\":[\n   {\n    \"alias\":\"wso2carbon\",\n    \"endpoint\":\"https://www.abc.com\"\n   }\n],\n  \"pagination\":{\n	  \"total\":1,\n          \"offset\":0,\n          \"limit\":25\n   } \n}"
-      summary: Retrieve/ Search uploaded Certificates.
+      summary: Retrieve/Search uploaded certificates.
       description: |
         This operation can be used to retrieve and search the uploaded certificates.
       tags:
-        - Certificates (Collection)
+      - Certificates (Collection)
       parameters:
-        - $ref: '#/parameters/limit'
-        - $ref: '#/parameters/offset'
-        - in: query
-          name: alias
-          required: false
-          type: string
-          description: Alias for the certificate
-        - in: query
-          name: endpoint
-          required: false
-          type: string
-          description: Endpoint of which the certificate is uploaded
+      - $ref: '#/parameters/limit'
+      - $ref: '#/parameters/offset'
+      - in: query
+        name: alias
+        required: false
+        type: string
+        description: Alias for the certificate
+      - in: query
+        name: endpoint
+        required: false
+        type: string
+        description: Endpoint of which the certificate is uploaded
       responses:
         '200':
           description: >
@@ -2658,37 +3043,43 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-  #-------------------------------------------------------------------
-  # Upload certificate resource api.
-  #-------------------------------------------------------------------
+    #-------------------------------------------------------------------
+    # Upload certificate resource api.
+    #-------------------------------------------------------------------
     post:
       x-scope: 'apim:api_create'
       consumes:
-        - multipart/form-data
+      - multipart/form-data
       x-wso2-curl: "curl -X POST -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: multipart/form-data\"  -F \"certificate=@/home/user/wso2carbon.cert\" -F \"alias=wso2carbon\" -F \"endpoint=https://www.abc.com\" \"https://localhost:9443/api/am/publisher/v0.14/certificates/certificate\""
       x-wso2-request: "POST https://localhost:9443/api/am/publisher/v0.14/certificates/certificate \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -F \"certificate=/home/user/wso2carbon.cert\" -F \"alias=wso2carbon\" -F \"endpoint=https://www.abc.com\""
-      x-wso2-response: "HTTP/1.1 201 Created.\r\nLocation: certificates?alias=wso2carbon\r\n{\"alias\":wso2carbon, \"endpoint\":\"https://www.abc.com\"}"
+      x-wso2-response: "HTTP/1.1 201 Created
+                        Location: https://localhost:9443/api/am/publisher/v0.14/clientCertificates?alias=newtest1
+                        Date: Fri, 05 Oct 2018 09:50:48 GMT
+                        Content-Type: application/json
+                        Transfer-Encoding: chunked
+                        Server: WSO2 Carbon Server
+                        {\"alias\": \"newtest1\",\"apiId\": \"4624bdfb-6acd-465a-8454-bac9c4c94d88\",\"tier\": \"Gold\"}"
       summary: Upload a new Certificate.
       description: |
         This operation can be used to upload a new certificate for an endpoint.
       parameters:
-        - in: formData
-          name: certificate
-          description: The certificate that needs to be uploaded.
-          required: true
-          type: file
-        - in: formData
-          name: alias
-          description: Alias for the certificate
-          required: true
-          type: string
-        - in: formData
-          name: endpoint
-          description: Endpoint to which the certificate should be applied.
-          required: true
-          type: string
+      - in: formData
+        name: certificate
+        description: The certificate that needs to be uploaded.
+        required: true
+        type: file
+      - in: formData
+        name: alias
+        description: Alias for the certificate
+        required: true
+        type: string
+      - in: formData
+        name: endpoint
+        description: Endpoint to which the certificate should be applied.
+        required: true
+        type: string
       tags:
-        - Certificates (Individual)
+      - Certificates (Individual)
       responses:
         '200':
           description: |
@@ -2726,7 +3117,7 @@ paths:
     put:
       x-scope: 'apim:api_create'
       consumes:
-        - multipart/form-data
+      - multipart/form-data
       x-wso2-curl: "curl -X PUT -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type:multipart/form-data\" -F \"certificate=@/home/user/wso2carbon.cert\" \"https://localhost:9443/api/am/publisher/v0.14/certificates/wso2carbon\""
       x-wso2-request: "PUT https://localhost:9443/api/am/publisher/v0.14/certificates/wso2carbon Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8 -F  \"certificate=@/home/user/wso2carbon.cert\""
       x-wso2-response: "HTTP/1.1 200 OK\r\n {\"alias\":wso2carbon,\"endpoint\":\"https://www.abc.com\"}"
@@ -2734,18 +3125,18 @@ paths:
       description: |
         This operation can be used to update an uploaded certificate.
       parameters:
-        - in: formData
-          name: certificate
-          description: The certificate that needs to be uploaded.
-          required: true
-          type: file
-        - in: path
-          name: alias
-          description: Alias for the certificate
-          required: true
-          type: string
+      - in: formData
+        name: certificate
+        description: The certificate that needs to be uploaded.
+        required: true
+        type: file
+      - in: path
+        name: alias
+        description: Alias for the certificate
+        required: true
+        type: string
       tags:
-        - Certificates (Individual)
+      - Certificates (Individual)
       responses:
         '200':
           description: |
@@ -2771,7 +3162,7 @@ paths:
         '404':
           description: |
             Not Found.
-             * Updating certificat failed. Alias not found
+            Updating certificate failed. Alias not found
           schema:
             $ref: '#/definitions/Error'
         '500':
@@ -2780,9 +3171,9 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-  #-------------------------------------------------------------------
-  # Delete Certificate resource
-  #-------------------------------------------------------------------
+    #-------------------------------------------------------------------
+    # Delete Certificate resource
+    #-------------------------------------------------------------------
     delete:
       x-scope: 'apim:api_create'
       x-wso2-curl:
@@ -2793,14 +3184,14 @@ paths:
       description: |
         This operation can be used to delete an uploaded certificate.
       parameters:
-        - in: path
-          name: alias
-          description: |
-            The alias of the certificate that should be deleted.
-          required: true
-          type: string
+      - in: path
+        name: alias
+        description: |
+          The alias of the certificate that should be deleted.
+        required: true
+        type: string
       tags:
-        - Certificates (Individual)
+      - Certificates (Individual)
       responses:
         '200':
           description: |
@@ -2831,13 +3222,13 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-  #-------------------------------------------------------------------
-  # Get certificate information resource.
-  #-------------------------------------------------------------------
+    #-------------------------------------------------------------------
+    # Get certificate information resource.
+    #-------------------------------------------------------------------
     get:
       x-scope: 'apim:api_create'
       produces:
-        - application/json
+      - application/json
       x-wso2-curl: "curl -X GET \"https://apis.wso2.com/api/am/publisher/v0.14/certificates/wso2carbon\" -H  \"accept: application/json\""
       x-wso2-request: "GET https://apis.wso2.com/api/am/publisher/v0.14/certificates/wso2carbon Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
       x-wso2-response: "HTTP/1.1 200 OK \nContent-Type: application/json\r\n {\n  \"status\":\"Active\",\n  \"validity\":{\n    \"from\":\"Fri May 04 19:01:01 IST 2018\",\n    \"to\":\"Thu Aug 02 19:01:01 IST 2018\"\n  }\n,  \"version\":\"3\",\n  \"subject\":\"CN=wso2.com, OU=wso2, O=wso2, L=Colombo, ST=Western, C=LK\"\n}"
@@ -2845,12 +3236,12 @@ paths:
       description: |
         This operation can be used to get the information about a certificate.
       parameters:
-        - in: path
-          name: alias
-          type: string
-          required: true
+      - in: path
+        name: alias
+        type: string
+        required: true
       tags:
-        - Certificates (Individual)
+      - Certificates (Individual)
       responses:
         '200':
           description: |
@@ -2893,12 +3284,12 @@ paths:
       description: |
         This operation can be used to download a certificate which matches the given alias.
       parameters:
-        - in: path
-          name: alias
-          type: string
-          required: true
+      - in: path
+        name: alias
+        type: string
+        required: true
       tags:
-        - Certificates (Individual)
+      - Certificates (Individual)
       responses:
         '200':
           description: |
@@ -2932,8 +3323,8 @@ paths:
 ######################################################
 parameters:
 
-# API Identifier
-# Specified as part of the path expression
+  # API Identifier
+  # Specified as part of the path expression
   apiId:
     name: apiId
     in: path
@@ -2945,8 +3336,8 @@ parameters:
     type: string
     x-encoded: true
 
-# API Identifier
-# Specified as part of the query string
+  # API Identifier
+  # Specified as part of the query string
   apiId-Q:
     name: apiId
     in: query
@@ -2959,8 +3350,8 @@ parameters:
     x-encoded: true
 
 
-# Document Identifier
-# Specified as part of the path expression
+  # Document Identifier
+  # Specified as part of the path expression
   documentId:
     name: documentId
     in: path
@@ -2969,8 +3360,8 @@ parameters:
     required: true
     type: string
 
-# Application Identifier
-# Specified as part of the path expression
+  # Application Identifier
+  # Specified as part of the path expression
   applicationId:
     name: applicationId
     in: path
@@ -2979,8 +3370,8 @@ parameters:
     required: true
     type: string
 
-# Subscription Identifier
-# Specified as part of the path expression
+  # Subscription Identifier
+  # Specified as part of the path expression
   subscriptionId:
     name: subscriptionId
     in: path
@@ -2989,8 +3380,8 @@ parameters:
     required: true
     type: string
 
-# Mediation policy identifier
-# Specified as part of the path expression
+  # Mediation policy identifier
+  # Specified as part of the path expression
   mediationPolicyId:
     name: mediationPolicyId
     in: path
@@ -3001,8 +3392,8 @@ parameters:
 
 
 
-# Subscription Identifier
-# Specified as part of the query string
+  # Subscription Identifier
+  # Specified as part of the query string
   subscriptionId-Q:
     name: subscriptionId
     in: query
@@ -3011,8 +3402,8 @@ parameters:
     required: true
     type: string
 
-# Tier Name
-# Specified as part of the path expression
+  # Tier Name
+  # Specified as part of the path expression
   tierName:
     name: tierName
     in: path
@@ -3021,8 +3412,8 @@ parameters:
     required: true
     type: string
 
-# Tier Name
-# Specified as part of the query string
+  # Tier Name
+  # Specified as part of the query string
   tierName-Q:
     name: tierName
     in: query
@@ -3031,8 +3422,8 @@ parameters:
     required: true
     type: string
 
-# Tier Type
-# Specified as part of the path expression
+  # Tier Type
+  # Specified as part of the path expression
   tierLevel:
     name: tierLevel
     in: path
@@ -3040,13 +3431,13 @@ parameters:
       List API or Application or Resource type tiers.
     type: string
     enum:
-      - api
-      - application
-      - resource
+    - api
+    - application
+    - resource
     required: true
 
-# Tier Type
-# Specified as part of the path expression
+  # Tier Type
+  # Specified as part of the path expression
   tierLevel-A:
     name: tierLevel
     in: path
@@ -3054,11 +3445,11 @@ parameters:
       List API or Application or Resource type tiers.
     type: string
     enum:
-      - api
+    - api
     required: true
 
-# Tier Type
-# Specified as part of the query string
+  # Tier Type
+  # Specified as part of the query string
   tierLevel-Q:
     name: tierLevel
     in: query
@@ -3066,13 +3457,13 @@ parameters:
       List API or Application or Resource type tiers.
     type: string
     enum:
-      - api
-      - application
-      - resource
+    - api
+    - application
+    - resource
     required: true
 
-# Used for pagination:
-# The maximum number of resoures to be returned by a GET
+  # Used for pagination:
+  # The maximum number of resoures to be returned by a GET
   limit:
     name: limit
     in: query
@@ -3081,9 +3472,9 @@ parameters:
     default: 25
     type: integer
 
-# Used for pagination:
-# The order number of an instance in a qualified set of resoures
-# at which to start to return the next batch of qualified resources
+  # Used for pagination:
+  # The order number of an instance in a qualified set of resoures
+  # at which to start to return the next batch of qualified resources
   offset:
     name: offset
     in: query
@@ -3092,7 +3483,7 @@ parameters:
     default: 0
     type: integer
 
-# The HTTP Accept header
+  # The HTTP Accept header
   Accept:
     name: Accept
     in: header
@@ -3101,7 +3492,7 @@ parameters:
     default: application/json
     type: string
 
-# The HTTP Content-Type header
+  # The HTTP Content-Type header
   Content-Type:
     name: Content-Type
     in: header
@@ -3111,7 +3502,7 @@ parameters:
     required: true
     type : string
 
-# The HTTP Authorization header
+  # The HTTP Authorization header
   Authorization:
     name: Authorization
     in: header
@@ -3120,8 +3511,8 @@ parameters:
     required: true
     type : string
 
-# The HTTP If-None-Match header
-# Used to avoid retrieving data that are already cached
+  # The HTTP If-None-Match header
+  # Used to avoid retrieving data that are already cached
   If-None-Match:
     name: If-None-Match
     in: header
@@ -3130,8 +3521,8 @@ parameters:
       variant of the resource (Will be supported in future).
     type : string
 
-# The HTTP If-Modified-Since header
-# Used to avoid retrieving data that are already cached
+  # The HTTP If-Modified-Since header
+  # Used to avoid retrieving data that are already cached
   If-Modified-Since:
     name: If-Modified-Since
     in: header
@@ -3140,8 +3531,8 @@ parameters:
       formerly retrieved variant of the resource (Will be supported in future).
     type: string
 
-# The HTTP If-Match header
-# Used to avoid concurrent updates
+  # The HTTP If-Match header
+  # Used to avoid concurrent updates
   If-Match:
     name: If-Match
     in: header
@@ -3149,8 +3540,8 @@ parameters:
       Validator for conditional requests; based on ETag (Will be supported in future).
     type: string
 
-# The HTTP If-Unmodified-Since header
-# Used to avoid concurrent updates
+  # The HTTP If-Unmodified-Since header
+  # Used to avoid concurrent updates
   If-Unmodified-Since:
     name: If-Unmodified-Since
     in: header
@@ -3159,8 +3550,8 @@ parameters:
     type: string
 
 
-# Workflow reference ID
-# Specified as part of the path expression
+  # Workflow reference ID
+  # Specified as part of the path expression
   workflowReferenceId-Q:
     name: workflowReferenceId
     in: query
@@ -3169,7 +3560,7 @@ parameters:
     required: true
     type: string
 
-# Specifies whether full details of APIs should be returned on apisGet call
+  # Specifies whether full details of APIs should be returned on apisGet call
   expand:
     name: expand
     in: query
@@ -3182,9 +3573,9 @@ parameters:
 ######################################################
 definitions:
 
-#-----------------------------------------------------
-# The API List resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The API List resource
+  #-----------------------------------------------------
   APIList:
     title: API List
     properties:
@@ -3221,9 +3612,9 @@ definitions:
             type: integer
             example: 1290
 
-#-----------------------------------------------------
-# The API Info resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The API Info resource
+  #-----------------------------------------------------
   APIInfo:
     title: API Info object with basic API details.
     properties:
@@ -3261,177 +3652,182 @@ definitions:
         type: string
         example: /apis/01234567-0123-0123-0123-012345678901/thumbnail
 
-#-----------------------------------------------------
-# The Detailed API resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Detailed API resource
+  #-----------------------------------------------------
   APIDetailed:
     title: API object
     required:
-      - name
-      - context
-      - version
-      - tiers
-      - isDefaultVersion
-      - transport
-      - endpointConfig
-      - visibility
-      - type
-      - apiDefinition
+    - name
+    - context
+    - version
+    - tiers
+    - isDefaultVersion
+    - transport
+    - endpointConfig
+    - visibility
+    - type
+    - apiDefinition
     allOf:
-      - $ref: '#/definitions/APIInfo'
-      - properties:
-          apiDefinition:
-            description: |
-              Swagger definition of the API which contains details about URI templates and scopes
+    - $ref: '#/definitions/APIInfo'
+    - properties:
+        apiDefinition:
+          description: |
+            Swagger definition of the API which contains details about URI templates and scopes
+          type: string
+          example: "{\"paths\":{\"/substract\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\",\"parameters\":[{\"name\":\"x\",\"required\":true,\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}},\"/add\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\",\"parameters\":[{\"name\":\"x\",\"required\":true,\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}}},\"swagger\":\"2.0\",\"info\":{\"title\":\"CalculatorAPI\",\"version\":\"1.0.0\"}}"
+        wsdlUri:
+          description: |
+            WSDL URL if the API is based on a WSDL endpoint
+          type: string
+          example: "http://www.webservicex.com/globalweather.asmx?wsdl"
+        responseCaching:
+          type: string
+          example: Disabled
+        cacheTimeout:
+          type: integer
+          example: 300
+        destinationStatsEnabled:
+          type: string
+          example: Disabled
+        isDefaultVersion:
+          type: boolean
+          example: false
+        type:
+          type: string
+          description: The transport to be set. Accepted values are HTTP, WS
+          enum:
+          - HTTP
+          - WS
+          example: HTTP
+          default: HTTP
+        transport:
+          description: |
+            Supported transports for the API (http and/or https).
+          type: array
+          items:
             type: string
-            example: "{\"paths\":{\"/substract\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\",\"parameters\":[{\"name\":\"x\",\"required\":true,\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}},\"/add\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\",\"parameters\":[{\"name\":\"x\",\"required\":true,\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}}},\"swagger\":\"2.0\",\"info\":{\"title\":\"CalculatorAPI\",\"version\":\"1.0.0\"}}"
-          wsdlUri:
-            description: |
-              WSDL URL if the API is based on a WSDL endpoint
+          example: ["http","https"]
+        tags:
+          type: array
+          description: Search keywords related to the API
+          items:
             type: string
-            example: "http://www.webservicex.com/globalweather.asmx?wsdl"
-          responseCaching:
+          example: ["substract","add"]
+        tiers:
+          type: array
+          description: The subscription tiers selected for the particular API
+          items:
             type: string
-            example: Disabled
-          cacheTimeout:
-            type: integer
-            example: 300
-          destinationStatsEnabled:
+          example: ["Unlimited"]
+        apiLevelPolicy:
+          description: The policy selected for the particular API
+          type: string
+          example: "Unlimited"
+        authorizationHeader:
+          type: string
+          description: |
+            Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified
+            in tenant or system level will be used.
+        apiSecurity:
+          type: string
+          description: |
+            Type of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If
+            it is not set OAuth2 will be set as the security for the current API.
+        maxTps:
+          $ref: '#/definitions/APIMaxTps'
+        visibility:
+          type: string
+          description: The visibility level of the API. Accepts one of the following. PUBLIC, PRIVATE, RESTRICTED OR CONTROLLED.
+          enum:
+          - PUBLIC
+          - PRIVATE
+          - RESTRICTED
+          - CONTROLLED
+          example: PUBLIC
+        visibleRoles:
+          type: array
+          description: The user roles that are able to access the API
+          items:
             type: string
-            example: Disabled
-          isDefaultVersion:
-            type: boolean
-            example: false
-          type:
+          example: []
+        visibleTenants:
+          type: array
+          items:
             type: string
-            description: The transport to be set. Accepted values are HTTP, WS
-            enum:
-              - HTTP
-              - WS
-            example: HTTP
-            default: HTTP
-          transport:
-            description: |
-              Supported transports for the API (http and/or https).
-            type: array
-            items:
-              type: string
-            example: ["http","https"]
-          tags:
-            type: array
-            description: Search keywords related to the API
-            items:
-              type: string
-            example: ["substract","add"]
-          tiers:
-            type: array
-            description: The subscription tiers selected for the particular API
-            items:
-              type: string
-            example: ["Unlimited"]
-          apiLevelPolicy:
-            description: The policy selected for the particular API
-            type: string
-            example: "Unlimited"
-          authorizationHeader:
-            type: string
-            description: |
-              Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified
-              in tenant or system level will be used. 
-          maxTps:
-            $ref: '#/definitions/APIMaxTps'
-          visibility:
-            type: string
-            description: The visibility level of the API. Accepts one of the following. PUBLIC, PRIVATE, RESTRICTED OR CONTROLLED.
-            enum:
-              - PUBLIC
-              - PRIVATE
-              - RESTRICTED
-              - CONTROLLED
-            example: PUBLIC
-          visibleRoles:
-            type: array
-            description: The user roles that are able to access the API
-            items:
-              type: string
-            example: []
-          visibleTenants:
-            type: array
-            items:
-              type: string
-          endpointConfig:
-            type: string
-            example: "{\"production_endpoints\":{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/\",\"config\":{\"suspendErrorCode\":\"101000\",\"suspendDuration\":\"2000\",\"suspendMaxDuration\":\"3\",\"factor\":\"2\",\"retryErroCode\":\"101000\",\"retryTimeOut\":\"4\",\"retryDelay\":\"1000\",\"actionSelect\":\"fault\",\"actionDuration\":\"3000\"}},\"sandbox_endpoints\":{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/\",\"config\":null},\"endpoint_type\":\"http\"}"
-          endpointSecurity:
-            $ref: '#/definitions/APIEndpointSecurity'
-          gatewayEnvironments:
-            description: |
-              Comma separated list of gateway environments.
-            type: string
-            example: Production and Sandbox
-          labels:
-            description: |
-              Labels of micro-gateway environments attached to the API.
-            type: array
-            items:
-              $ref: '#/definitions/Label'
-          sequences:
-            type: array
-            items:
-              $ref: '#/definitions/Sequence'
-            example: "\"sequences\":
+        endpointConfig:
+          type: string
+          example: "{\"production_endpoints\":{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/\",\"config\":{\"suspendErrorCode\":\"101000\",\"suspendDuration\":\"2000\",\"suspendMaxDuration\":\"3\",\"factor\":\"2\",\"retryErroCode\":\"101000\",\"retryTimeOut\":\"4\",\"retryDelay\":\"1000\",\"actionSelect\":\"fault\",\"actionDuration\":\"3000\"}},\"sandbox_endpoints\":{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/\",\"config\":null},\"endpoint_type\":\"http\"}"
+        endpointSecurity:
+          $ref: '#/definitions/APIEndpointSecurity'
+        gatewayEnvironments:
+          description: |
+            Comma separated list of gateway environments.
+          type: string
+          example: Production and Sandbox
+        labels:
+          description: |
+            Labels of micro-gateway environments attached to the API.
+          type: array
+          items:
+            $ref: '#/definitions/Label'
+        sequences:
+          type: array
+          items:
+            $ref: '#/definitions/Sequence'
+          example: "\"sequences\":
             [
               {\"name\": \"json_to_xml_in_message\",\"config\": null,\"type\": \"in\"},
               {\"name\": \"xml_to_json_out_message\",\"config\": null,\"type\": \"out\"},
               {\"name\": \"json_fault\",\"config\": null,\"type\": \"fault\"}
             ],"
-          subscriptionAvailability:
+        subscriptionAvailability:
+          type: string
+          description: The subscription availability. Accepts one of the following. current_tenant, all_tenants or specific_tenants.
+          enum:
+          - current_tenant
+          - all_tenants
+          - specific_tenants
+          example: current_tenant
+        subscriptionAvailableTenants:
+          type: array
+          items:
             type: string
-            description: The subscription availability. Accepts one of the following. current_tenant, all_tenants or specific_tenants.
-            enum:
-              - current_tenant
-              - all_tenants
-              - specific_tenants
-            example: current_tenant
-          subscriptionAvailableTenants:
-            type: array
-            items:
-              type: string
-            example: ["tenant1", "tenant2"]
+          example: ["tenant1", "tenant2"]
+        additionalProperties:
+          type: object
           additionalProperties:
-            type: object
-            additionalProperties:
-                type: string
-            description : Map of custom properties of API
-          accessControl:
             type: string
-            description: |
-              Is the API is restricted to certain set of publishers or creators or is it visible to all the
-              publishers and creators. If the accessControl restriction is none, this API can be modified by all the
-              publishers and creators, if not it can only be viewable/modifiable by certain set of publishers and creators,
-               based on the restriction.
-            enum:
-              - NONE
-              - RESTRICTED
-          accessControlRoles:
-                type: array
-                description: The user roles that are able to view/modify as API publisher or creator.
-                items:
-                  type: string
-                example: [admin]
-          businessInformation:
-            $ref: '#/definitions/APIBusinessInformation'
-          corsConfiguration:
-            $ref: '#/definitions/APICorsConfiguration'
+          description : Map of custom properties of API
+        accessControl:
+          type: string
+          description: |
+            Is the API is restricted to certain set of publishers or creators or is it visible to all the
+            publishers and creators. If the accessControl restriction is none, this API can be modified by all the
+            publishers and creators, if not it can only be viewable/modifiable by certain set of publishers and creators,
+             based on the restriction.
+          enum:
+          - NONE
+          - RESTRICTED
+        accessControlRoles:
+          type: array
+          description: The user roles that are able to view/modify as API publisher or creator.
+          items:
+            type: string
+          example: [admin]
+        businessInformation:
+          $ref: '#/definitions/APIBusinessInformation'
+        corsConfiguration:
+          $ref: '#/definitions/APICorsConfiguration'
 
-#-----------------------------------------------------
-# The Application resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Application resource
+  #-----------------------------------------------------
   Application:
     title: Application
     required:
-      - name
-      - throttlingTier
+    - name
+    - throttlingTier
     properties:
       applicationId:
         type: string
@@ -3452,9 +3848,9 @@ definitions:
         type: string
         example: ""
 
-#-----------------------------------------------------
-# The Document List resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Document List resource
+  #-----------------------------------------------------
   DocumentList:
     title: Document List
     properties:
@@ -3480,16 +3876,16 @@ definitions:
         items:
           $ref: '#/definitions/Document'
 
-#-----------------------------------------------------
-# The Document resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Document resource
+  #-----------------------------------------------------
   Document:
     title: Document
     required:
-      - name
-      - type
-      - sourceType
-      - visibility
+    - name
+    - type
+    - sourceType
+    - visibility
     properties:
       documentId:
         type: string
@@ -3500,13 +3896,13 @@ definitions:
       type:
         type: string
         enum:
-          - HOWTO
-          - SAMPLES
-          - PUBLIC_FORUM
-          - SUPPORT_FORUM
-          - API_MESSAGE_FORMAT
-          - SWAGGER_DOC
-          - OTHER
+        - HOWTO
+        - SAMPLES
+        - PUBLIC_FORUM
+        - SUPPORT_FORUM
+        - API_MESSAGE_FORMAT
+        - SWAGGER_DOC
+        - OTHER
         example: HOWTO
       summary:
         type: string
@@ -3514,9 +3910,9 @@ definitions:
       sourceType:
         type: string
         enum:
-          - INLINE
-          - URL
-          - FILE
+        - INLINE
+        - URL
+        - FILE
         example: INLINE
       sourceUrl:
         type: string
@@ -3527,14 +3923,14 @@ definitions:
       visibility:
         type: string
         enum:
-          - OWNER_ONLY
-          - PRIVATE
-          - API_LEVEL
+        - OWNER_ONLY
+        - PRIVATE
+        - API_LEVEL
         example: API_LEVEL
 
-#-----------------------------------------------------
-# The Mediation List resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Mediation List resource
+  #-----------------------------------------------------
   mediationList:
     title: Mediation List
     properties:
@@ -3560,15 +3956,15 @@ definitions:
         items:
           $ref: '#/definitions/MediationInfo'
 
-#-----------------------------------------------------
-# The MediationInfo resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The MediationInfo resource
+  #-----------------------------------------------------
   MediationInfo:
     title: MediationInfo
     required:
-      - name
-      - type
-      - id
+    - name
+    - type
+    - id
     properties:
       name:
         type: string
@@ -3579,19 +3975,19 @@ definitions:
       type:
         type: string
         enum:
-          - in
-          - out
-          - fault
+        - in
+        - out
+        - fault
         example: in
-#-----------------------------------------------------
-# The Mediation resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Mediation resource
+  #-----------------------------------------------------
   Mediation:
     title: Mediation
     required:
-      - name
-      - type
-      - config
+    - name
+    - type
+    - config
     properties:
       id:
         type: string
@@ -3602,9 +3998,9 @@ definitions:
       type:
         type: string
         enum:
-          - in
-          - out
-          - fault
+        - in
+        - out
+        - fault
         example: in
       config:
         type: string
@@ -3614,23 +4010,23 @@ definitions:
                       </log>
                   </sequence>'
 
-#-----------------------------------------------------
-# The MediationInfo resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The MediationInfo resource
+  #-----------------------------------------------------
   Wsdl:
-      title: Wsdl
-      required:
-        - name
-      properties:
-        name:
-          type: string
-          example: admin--calculatorAPI2.0.wsdl
-        wsdlDefinition:
-          type: string
+    title: Wsdl
+    required:
+    - name
+    properties:
+      name:
+        type: string
+        example: admin--calculatorAPI2.0.wsdl
+      wsdlDefinition:
+        type: string
 
 
-# The Tier List resource
-#-----------------------------------------------------
+  # The Tier List resource
+  #-----------------------------------------------------
   TierList:
     title: Tier List
     properties:
@@ -3656,17 +4052,17 @@ definitions:
         items:
           $ref: '#/definitions/Tier'
 
-#-----------------------------------------------------
-# The Tier resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Tier resource
+  #-----------------------------------------------------
   Tier:
     title: Tier
     required:
-      - name
-      - tierPlan
-      - requestCount
-      - unitTime
-      - stopOnQuotaReach
+    - name
+    - tierPlan
+    - requestCount
+    - unitTime
+    - stopOnQuotaReach
     properties:
       name:
         type: string
@@ -3677,9 +4073,9 @@ definitions:
       tierLevel:
         type: string
         enum:
-          - api
-          - application
-          - resource
+        - api
+        - application
+        - resource
         example: api
       attributes:
         description: |
@@ -3706,8 +4102,8 @@ definitions:
           This attribute declares whether this tier is available under commercial or free
         type: string
         enum:
-          - FREE
-          - COMMERCIAL
+        - FREE
+        - COMMERCIAL
         example: FREE
       stopOnQuotaReach:
         description: |
@@ -3716,20 +4112,20 @@ definitions:
         type: boolean
         example: true
 
-#-----------------------------------------------------
-# The Tier Permission resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Tier Permission resource
+  #-----------------------------------------------------
   TierPermission:
     title: tierPermission
     required:
-      - permissionType
-      - roles
+    - permissionType
+    - roles
     properties:
       permissionType:
         type: string
         enum:
-          - allow
-          - deny
+        - allow
+        - deny
         example: deny
       roles:
         type: array
@@ -3737,9 +4133,9 @@ definitions:
           type: string
         example: ["Internal/everyone"]
 
-#-----------------------------------------------------
-# The Subscription List resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Subscription List resource
+  #-----------------------------------------------------
   SubscriptionList:
     title: Subscription List
     properties:
@@ -3765,15 +4161,15 @@ definitions:
         items:
           $ref: '#/definitions/Subscription'
 
-#-----------------------------------------------------
-# The Subscription resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Subscription resource
+  #-----------------------------------------------------
   Subscription:
     title: Subscription
     required:
-      - applicationId
-      - apiIdentifier
-      - tier
+    - applicationId
+    - apiIdentifier
+    - tier
     properties:
       subscriptionId:
         type: string
@@ -3790,34 +4186,34 @@ definitions:
       status:
         type: string
         enum:
-          - BLOCKED
-          - PROD_ONLY_BLOCKED
-          - UNBLOCKED
-          - ON_HOLD
-          - REJECTED
+        - BLOCKED
+        - PROD_ONLY_BLOCKED
+        - UNBLOCKED
+        - ON_HOLD
+        - REJECTED
         example: UNBLOCKED
 
-#-----------------------------------------------------
-# The Extended Subscription resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Extended Subscription resource
+  #-----------------------------------------------------
   ExtendedSubscription:
     title: Subscription with Ext. Workflow Reference
     required:
-      - workflowId
+    - workflowId
     allOf:
-      - $ref: '#/definitions/Subscription'
-      - properties:
-          workflowId:
-            type: string
-            example: 01234567-0123-0123-0123-012345678901
+    - $ref: '#/definitions/Subscription'
+    - properties:
+        workflowId:
+          type: string
+          example: 01234567-0123-0123-0123-012345678901
 
-#-----------------------------------------------------
-# The Sequence resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Sequence resource
+  #-----------------------------------------------------
   Sequence:
     title: Sequence
     required:
-      - name
+    - name
     properties:
       name:
         type: string
@@ -3832,13 +4228,13 @@ definitions:
         type: boolean
         example: true
 
-#-----------------------------------------------------
-# The Label resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Label resource
+  #-----------------------------------------------------
   Label:
     title: Label
     required:
-      - name
+    - name
     properties:
       name:
         type: string
@@ -3847,14 +4243,14 @@ definitions:
         type: string
         example: Explanation about the micro gateway.
 
-#-----------------------------------------------------
-# The Error resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Error resource
+  #-----------------------------------------------------
   Error:
     title: Error object returned with 4XX HTTP status
     required:
-      - code
-      - message
+    - code
+    - message
     properties:
       code:
         type: integer
@@ -3878,14 +4274,14 @@ definitions:
         items:
           $ref: '#/definitions/ErrorListItem'
 
-#-----------------------------------------------------
-# The Error List Item resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Error List Item resource
+  #-----------------------------------------------------
   ErrorListItem:
     title: Description of individual errors that may have occurred during a request.
     required:
-      - code
-      - message
+    - code
+    - message
     properties:
       code:
         type: string
@@ -3894,17 +4290,17 @@ definitions:
         description: |
           Description about individual errors occurred
 
-#-----------------------------------------------------
-# The Environment resource
-#-----------------------------------------------------
+        #-----------------------------------------------------
+  # The Environment resource
+  #-----------------------------------------------------
   Environment:
     title: Environment
     required:
-      - name
-      - type
-      - serverUrl
-      - endpoints
-      - showInApiConsole
+    - name
+    - type
+    - serverUrl
+    - endpoints
+    - showInApiConsole
     properties:
       name:
         type: string
@@ -3921,9 +4317,9 @@ definitions:
       endpoints:
         $ref: '#/definitions/EnvironmentEndpoints'
 
-#-----------------------------------------------------
-# The Environment List resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Environment List resource
+  #-----------------------------------------------------
   EnvironmentList:
     title: Environment List
     properties:
@@ -3938,9 +4334,9 @@ definitions:
           $ref: '#/definitions/Environment'
 
 
-#-----------------------------------------------------
-# The Environment Endpoint resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Environment Endpoint resource
+  #-----------------------------------------------------
   EnvironmentEndpoints :
     title: Environment Endpoints
     properties:
@@ -3953,9 +4349,9 @@ definitions:
         description: HTTPS environment URL
         example: "https://localhost:8243"
 
-#-----------------------------------------------------
-# The File Information resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The File Information resource
+  #-----------------------------------------------------
   FileInfo :
     title: File Information including meta data
     properties:
@@ -3969,21 +4365,21 @@ definitions:
         example: "image/jpeg"
 
 
-#-----------------------------------------------------
-# The workflow response resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The workflow response resource
+  #-----------------------------------------------------
   Workflow:
     title: workflow
     required:
-      - status
+    - status
     properties:
       status:
         description: |
           This attribute declares whether this workflow task is approved or rejected.
         type: string
         enum:
-          - APPROVED
-          - REJECTED
+        - APPROVED
+        - REJECTED
         example: APPROVED
       attributes:
         description: |
@@ -3996,9 +4392,9 @@ definitions:
         type: string
         example: "Approve workflow request."
 
-#-----------------------------------------------------
-# API maxTPs resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # API maxTPs resource
+  #-----------------------------------------------------
   APIMaxTps:
     properties:
       production:
@@ -4010,9 +4406,9 @@ definitions:
         format: int64
         example: 1000
 
-#-----------------------------------------------------
-# API Endpoint Security resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # API Endpoint Security resource
+  #-----------------------------------------------------
   APIEndpointSecurity:
     properties:
       type:
@@ -4020,8 +4416,8 @@ definitions:
         example: basic
         description: Accepts one of the following, basic or digest.
         enum:
-          - basic
-          - digest
+        - basic
+        - digest
       username:
         type: string
         example: admin
@@ -4029,9 +4425,9 @@ definitions:
         type: string
         example: password
 
-#-----------------------------------------------------
-# API Business Information resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # API Business Information resource
+  #-----------------------------------------------------
   APIBusinessInformation:
     properties:
       businessOwner:
@@ -4047,9 +4443,9 @@ definitions:
         type: string
         example: technicalowner@wso2.com
 
-#-----------------------------------------------------
-# API CORS configuration resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # API CORS configuration resource
+  #-----------------------------------------------------
   APICorsConfiguration:
     description: |
       CORS configuration for the API
@@ -4060,7 +4456,7 @@ definitions:
       accessControlAllowOrigins:
         type: array
         items:
-           type: string
+          type: string
       accessControlAllowCredentials:
         type: boolean
         default: false
@@ -4073,9 +4469,9 @@ definitions:
         items:
           type: string
 
-#-----------------------------------------------------
-# Certificates list resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # Certificates list resource
+  #-----------------------------------------------------
   Certificates:
     title: Certificates
     description: Representation of a list of certificates
@@ -4105,9 +4501,9 @@ definitions:
             type: integer
             example: 1290
 
-#-----------------------------------------------------
-# Certificate metadata resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # Certificate metadata resource
+  #-----------------------------------------------------
   CertMetadata:
     title: Certificate
     description: Representation of the details of a certificate
@@ -4119,9 +4515,9 @@ definitions:
         type: string
         example: www.abc.com
 
-#-----------------------------------------------------
-# Certificates information resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # Certificates information resource
+  #-----------------------------------------------------
   CertificateInfo:
     title: Certificate information
     properties:
@@ -4129,7 +4525,7 @@ definitions:
         type: string
         example: Active
       validity:
-              $ref: '#/definitions/CertificateValidity'
+        $ref: '#/definitions/CertificateValidity'
       version:
         type: string
         example: V3
@@ -4137,9 +4533,9 @@ definitions:
         type: string
         example: CN=wso2.com, OU=wso2, O=wso2, L=Colombo, ST=Western, C=LK
 
-#-----------------------------------------------------
-# Certificate validity period resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # Certificate validity period resource
+  #-----------------------------------------------------
   CertificateValidity:
     title: Certificate Valid period
     properties:
@@ -4149,3 +4545,52 @@ definitions:
       to:
         type: string
         example: 01-01-2019
+
+  #-----------------------------------------------------
+  # Client Certificates list resource
+  #-----------------------------------------------------
+  ClientCertificates:
+    title: Client Certificates
+    description: Representation of a list of client certificates
+    properties:
+      count:
+        type: integer
+        example: 1
+      next:
+        type: string
+        example: '/certificates?limit=1&offset=2'
+      previous:
+        type: string
+        example: '/certificates?limit=1&offset=0'
+      certificates:
+        type: array
+        items:
+          $ref: '#/definitions/ClientCertMetadata'
+      pagination:
+        properties:
+          offset:
+            type: integer
+            example: 12
+          limit:
+            type: integer
+            example: 25
+          total:
+            type: integer
+            example: 1290
+
+  #-----------------------------------------------------
+  # Certificate metadata resource
+  #-----------------------------------------------------
+  ClientCertMetadata:
+    title: Client certificate meta data
+    description: Meta data of certificate
+    properties:
+      alias:
+        type: string
+        example: wso2carbon
+      apiId:
+        type: string
+        example: 64eca60b-2e55-4c38-8603-e9e6bad7d809
+      tier:
+        type: string
+        example: Gold

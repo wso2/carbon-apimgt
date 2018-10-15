@@ -136,6 +136,7 @@
     "INACTIVE": "INACTIVE (Waiting for approval)",
     "If you already have an OAuth application registered with the IdP, you can use those keys without generating one.": "If you already have an OAuth application registered with the IdP, you can use those keys without generating one.",
     "If you already have an access token, please provide it below.": "If you already have an access token, please provide it below.",
+    "You can use either the client certificate or the access token to access this API." : "You can use either the client certificate or the access token to access this API.",
     "In a similar manner, you can generate an access token using the Client Credentials grant type with the following cURL command.": "In a similar manner, you can generate an access token using the Client Credentials grant type with the following cURL command.",
     "Info": "Info",
     "Inline Documentation": "Inline Documentation",
@@ -385,6 +386,12 @@
     "Micro Gateways" : "Micro Gateways",
     "Gateways" : "Gateways",
     "DEFAULT" : "OAuth",
-    "Resource Hit Count": "Resource Hit Count"
+    "Resource Hit Count": "Resource Hit Count",
+    "OAuth2" : "OAuth2",
+    "Mutual SSL" : "Mutual SSL",
+    "Enabled API Security Protocols" : "Enabled API Security Protocols",
+    "This API is protected only with Mutual SSL. Use the client certificate to access the API." : "This API is protected only with Mutual SSL. Use the client certificate to access the API.",
+    "Application subscription is not permitted for this API, as it is only protected with Mutual SSL." : "Application subscription is not permitted for this API, as it is only protected with Mutual SSL."
+
 
 }

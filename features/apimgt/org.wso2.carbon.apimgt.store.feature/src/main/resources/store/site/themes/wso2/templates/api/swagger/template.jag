@@ -16,6 +16,16 @@ if(subscriptions) {
     subscriptions = subscriptions_without_jwt;
 }
 
+var isOauthProtected = false;
+var isMutualSSLProtected = false;
+var apiSecurity = outputs.api.apiSecurity.split(",");
+for (var index = 0; index < apiSecurity.length; index++) {
+    if (apiSecurity[index] == "oauth2") {
+        isOauthProtected = true;
+    } else if (apiSecurity[index] == "mutualssl") {
+        isMutualSSLProtected = true;
+    }
+}
 var protocol = "http";
 
 function getLocation(href) {
@@ -156,6 +166,7 @@ var api = outputs.api;%>
               SwaggerUIBundle.presets.apis
           ],
           requestInterceptor: function(request) {
+            if (<%= isOauthProtected%>) {
               //Intercept the request and inject Bearer token
               var authorizationHeader = <%=stringify(outputs.authorizationHeader)%>;
               var key = $("#access_token").val();
@@ -164,7 +175,8 @@ var api = outputs.api;%>
               } else {
                   request.headers[authorizationHeader] = "Bearer ";
               }
-              return request;
+            }
+            return request;
           },
           onComplete: function(){
               runEnjoyHintScript_swaggerUi();
@@ -309,7 +321,7 @@ function checkOnKeyPress(e) {
 </script>
 <div id="authorizations" class="col-md-12 col-lg-12">
 
-<% if(subscriptions != null && subscriptions.length > 0) { %>
+<% if(isOauthProtected && subscriptions != null && subscriptions.length > 0) { %>
 <form class="form-horizontal">
       <div class="form-group oauth-apps">
           <label for="" class="col-sm-3 control-label">Try</label>
@@ -407,15 +419,25 @@ function checkOnKeyPress(e) {
     </div>
 
     -->
-    <% }else if(jagg.getUser() != null){ %>
+    <% }else if(jagg.getUser() != null && isOauthProtected && !isMutualSSLProtected){ %>
         <div class="message message-info remove-margin-top">
             <h4><i class="icon fw fw-info"></i>Notice </h4>
             <p><%=i18n.localize("Please subscribe to the API to generate an access token.")%>&nbsp;<%=i18n.localize("If you already have an access token, please provide it below.")%></p>
         </div>
-    <% }else{ %>
+    <% }else if (isOauthProtected && !isMutualSSLProtected) { %>
         <div class="message message-info remove-margin-top">
             <h4><i class="icon fw fw-info"></i>Notice</h4>
             <p><%=i18n.localize("You require an access token to try the API. Please login and subscribe to the API to generate an access token.")%> &nbsp; <%=i18n.localize("If you already have an access token, please provide it below.")%></p>
+        </div>
+    <% } else if (isOauthProtected && isMutualSSLProtected) { %>
+        <div class="message message-info remove-margin-top">
+            <h4><i class="icon fw fw-info"></i>Notice</h4>
+            <p><%=i18n.localize("You can use either the client certificate or the access token to access this API.")%> &nbsp; <%=i18n.localize("If you already have an access token, please provide it below.")%></p>
+        </div>
+    <% } else { %>
+         <div class="message message-info remove-margin-top">
+            <h4><i class="icon fw fw-info"></i>Notice </h4>
+            <p><%=i18n.localize("This API is protected only with Mutual SSL. Use the client certificate to access the API.")%></p>
         </div>
     <% } %>
 
@@ -430,15 +452,17 @@ function checkOnKeyPress(e) {
                     </div>
                 </div>
            </div>
-          <div class="form-group">
-            <label class="col-sm-3 control-label">Set Request Header</label>
-            <div class=" col-sm-9">
-            <div class="input-group">
-              <span class="input-group-addon" id="sizing-addon1"><%=authorizationHeader%> : Bearer</span>
-              <input type="text" id="access_token" name="access_token" title="access_token" placeholder="Access Token" class="form-control" onkeypress="return checkOnKeyPress(event)">
-            </div>
-            </div>
-          </div>
+          <% if (isOauthProtected)  { %>
+              <div class="form-group">
+                <label class="col-sm-3 control-label">Set Request Header</label>
+                <div class=" col-sm-9">
+                <div class="input-group">
+                  <span class="input-group-addon" id="sizing-addon1"><%=authorizationHeader%> : Bearer</span>
+                  <input type="text" id="access_token" name="access_token" title="access_token" placeholder="Access Token" class="form-control" onkeypress="return checkOnKeyPress(event)">
+                </div>
+                </div>
+              </div>
+          <% } %>
         </form>
     </div>
 

@@ -6,10 +6,17 @@ var tenant=request_tenant;
 var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
 var urlPrefix = jagg.getTenantURLPrefix("&");
-
+var isOAuthProtected = false;
 %>
 <%if(api!=null){
-    
+    var apiSecurity = api.apiSecurity.split(",");
+
+    for (var index = 0; index < apiSecurity.length; index++) {
+        if (apiSecurity[index] == "oauth2") {
+            isOAuthProtected = true;
+            index = apiSecurity.length;
+        }
+    }
     var displayOwner = api.provider;
     if(api.isAdvertiseOnly && api.apiOwner != null) {
     	displayOwner = api.apiOwner;
@@ -184,7 +191,13 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
 
 
                     <div class="col-xs-12 col-sm-12 col-md-8 col-lg-5 col-md-height col-md-top">
-                    <%if(subsPermitted && api.status =="PUBLISHED"){%>
+                     <% if (subsPermitted && !isOAuthProtected) { %>
+                        <div class="message message-warning remove-margin-top">
+                        <h4><i class="icon fw fw-info"></i>Notice</h4>
+                        <p><%=i18n.localize("Application subscription is not permitted for this API, as it is only protected with Mutual SSL.")%></p>
+                        </div>
+                    <% }  %>
+                    <%if(isOAuthProtected && subsPermitted && api.status =="PUBLISHED"){%>
                             <form class="form-api-subscription add-padding-4x">
                                 <!-- Load Application -->
                                 <% if(user && apps) {
@@ -405,7 +418,9 @@ $(window).load(function(){
         }
     }
     else {
-        startAPIStoreInteractiveTutorial();
+        if (<%=isOAuthProtected%>) {
+            startAPIStoreInteractiveTutorial();
+        }
     }
 
 function startAPIStoreInteractiveTutorial() {

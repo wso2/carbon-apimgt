@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.impl.utils;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
@@ -34,6 +35,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -55,6 +57,25 @@ public class CertificateMgtUtils {
     private static InputStream localTrustStoreStream = null;
     private static OutputStream fileOutputStream = null;
     private static ResponseCode responseCode;
+    private static CertificateMgtUtils instance;
+
+    private CertificateMgtUtils(){}
+
+    /**
+     * To get the instance of CertificateMgtUtils class.
+     *
+     * @return instance of {@link CertificateMgtUtils}
+     */
+    public static CertificateMgtUtils getInstance() {
+        if (instance == null) {
+            synchronized (CertificateMgtUtils.class) {
+                if (instance == null) {
+                    instance = new CertificateMgtUtils();
+                }
+            }
+        }
+        return instance;
+    }
 
     /**
      * This method generates a certificate from a base64 encoded certificate string and add to the configured trust
@@ -137,6 +158,64 @@ public class CertificateMgtUtils {
             responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
         } finally {
             closeStreams(localTrustStoreStream, fileOutputStream, serverCert);
+        }
+        return responseCode;
+    }
+
+    /**
+     * To validate the current certificate and alias.
+     *
+     * @param alias       Alias of the certificate.
+     * @param certificate Bas64 endcoded certificated.
+     * @return response code based on the validation
+     */
+    public ResponseCode validateCertificate(String alias, int tenantId, String certificate) {
+        File trustStoreFile = new File(TRUST_STORE);
+        ResponseCode responseCode = ResponseCode.SUCCESS;
+        ByteArrayInputStream serverCert = null;
+
+        try {
+            localTrustStoreStream = new FileInputStream(trustStoreFile);
+            KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            trustStore.load(localTrustStoreStream, TRUST_STORE_PASSWORD);
+            if (StringUtils.isNotEmpty(alias) && trustStore.containsAlias(alias + "_" + tenantId)) {
+                responseCode = ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE;
+            }
+            if (responseCode != ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE) {
+                byte[] cert = (Base64.decodeBase64(certificate.getBytes(StandardCharsets.UTF_8)));
+                serverCert = new ByteArrayInputStream(cert);
+
+                if (serverCert.available() == 0) {
+                    responseCode = ResponseCode.CERTIFICATE_NOT_FOUND;
+                } else {
+                    CertificateFactory cf = CertificateFactory.getInstance(CERTIFICATE_TYPE);
+                    while (serverCert.available() > 0) {
+                        Certificate generatedCertificate = cf.generateCertificate(serverCert);
+                        X509Certificate x509Certificate = (X509Certificate) generatedCertificate;
+                        if (x509Certificate.getNotAfter().getTime() <= System.currentTimeMillis()) {
+                            responseCode = ResponseCode.CERTIFICATE_EXPIRED;
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            log.error("I/O Exception while trying to load trust store while trying to check whether alias " + alias
+                    + " exists", e);
+            responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
+        } catch (CertificateException e) {
+            log.error("Certificate Exception while trying to load trust store while trying to check whether alias "
+                    + alias + " exists", e);
+            responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
+        } catch (NoSuchAlgorithmException e) {
+            log.error("No Such Algorithm Exception while trying to load trust store while trying to check whether "
+                    + "alias " + alias + " exists", e);
+            responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
+        } catch (KeyStoreException e) {
+            log.error("KeyStore Exception while trying to load trust store while trying to check whether alias " + alias
+                    + " exists", e);
+            responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
+        } finally {
+            closeStreams(serverCert);
         }
         return responseCode;
     }
@@ -268,12 +347,7 @@ public class CertificateMgtUtils {
 
             if (trustStore.containsAlias(alias)) {
                 X509Certificate certificate = (X509Certificate) trustStore.getCertificate(alias);
-                certificateInformation.setStatus(certificate.getNotAfter().getTime() > System.currentTimeMillis() ?
-                        "Active" : "Expired");
-                certificateInformation.setFrom(certificate.getNotBefore().toString());
-                certificateInformation.setTo(certificate.getNotAfter().toString());
-                certificateInformation.setSubject(certificate.getSubjectDN().toString());
-                certificateInformation.setVersion(String.valueOf(certificate.getVersion()));
+                certificateInformation = getCertificateMetaData(certificate);
             }
         } catch (IOException e) {
             throw new CertificateManagementException("Error wile loading the keystore.", e);
@@ -287,6 +361,49 @@ public class CertificateMgtUtils {
             closeStreams(localTrustStoreStream);
         }
         return certificateInformation;
+    }
+
+    /**
+     * To get the certificate meta data information such as version expiry data
+     *
+     * @param certificate Relevant certificate to get certificate meta data information.
+     * @return Certificate meta data information.
+     */
+    private CertificateInformationDTO getCertificateMetaData(X509Certificate certificate) {
+        CertificateInformationDTO certificateInformation = new CertificateInformationDTO();
+        certificateInformation
+                .setStatus(certificate.getNotAfter().getTime() > System.currentTimeMillis() ? "Active" : "Expired");
+        certificateInformation.setFrom(certificate.getNotBefore().toString());
+        certificateInformation.setTo(certificate.getNotAfter().toString());
+        certificateInformation.setSubject(certificate.getSubjectDN().toString());
+        certificateInformation.setVersion(String.valueOf(certificate.getVersion()));
+        return certificateInformation;
+    }
+
+    /**
+     * To get the certificate information from base64 encoded certificate.
+     *
+     * @param base64EncodedCertificate Base 64 encoded certificate.
+     * @return Certificate information.
+     */
+    public CertificateInformationDTO getCertificateInfo(String base64EncodedCertificate) {
+        CertificateInformationDTO certificateInformationDTO = null;
+        try {
+            byte[] cert = (Base64.decodeBase64(base64EncodedCertificate.getBytes(StandardCharsets.UTF_8)));
+            InputStream serverCert = new ByteArrayInputStream(cert);
+            if (serverCert.available() == 0) {
+                log.error("Provided certificate is empty for getting certificate information. Hence please provide a "
+                        + "non-empty certificate to overcome this issue.");
+            }
+            CertificateFactory cf = CertificateFactory.getInstance(CERTIFICATE_TYPE);
+            while (serverCert.available() > 0) {
+                Certificate certificate = cf.generateCertificate(serverCert);
+                certificateInformationDTO = getCertificateMetaData((X509Certificate) certificate);
+            }
+        } catch (IOException | CertificateException e) {
+            log.error("Error while getting the certificate information from the certificate", e);
+        }
+        return certificateInformationDTO;
     }
 
     /**
@@ -339,5 +456,32 @@ public class CertificateMgtUtils {
         } catch (IOException e) {
             log.error("Error closing the stream.", e);
         }
+    }
+
+    /**
+     * To get the unique identifier(serialnumber_issuerdn) of the certificate.
+     *
+     * @param certificate Base64 encoded certificate.
+     * @return unique identifier of the certification.
+     */
+    public String getUniqueIdentifierOfCertificate(String certificate) {
+        byte[] cert = (Base64.decodeBase64(certificate.getBytes(StandardCharsets.UTF_8)));
+        ByteArrayInputStream serverCert = new ByteArrayInputStream(cert);
+        String uniqueIdentifier = null;
+        try {
+            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            while (serverCert.available() > 0) {
+                Certificate generatedCertificate = cf.generateCertificate(serverCert);
+                X509Certificate x509Certificate = (X509Certificate) generatedCertificate;
+                uniqueIdentifier = String
+                        .valueOf(x509Certificate.getSerialNumber() + "_" + x509Certificate.getIssuerDN());
+                uniqueIdentifier = uniqueIdentifier.replaceAll(",", "#").replaceAll("\"", "'");
+            }
+        } catch (CertificateException e) {
+            log.error("Error while getting serial number of the certificate.", e);
+        } finally {
+            closeStreams(serverCert);
+        }
+        return uniqueIdentifier;
     }
 }

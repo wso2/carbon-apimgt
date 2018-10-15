@@ -195,6 +195,11 @@ public class ApisApiServiceImpl extends ApisApiService {
                 }
             }
 
+            String apiSecurity = body.getApiSecurity();
+            if (!apiProvider.isClientCertificateBasedAuthenticationConfigured() && apiSecurity != null && apiSecurity
+                    .contains(APIConstants.API_SECURITY_MUTUAL_SSL)) {
+                RestApiUtil.handleBadRequest("Mutual SSL Based authentication is not supported in this server", log);
+            }
             if (body.getAccessControlRoles() != null) {
                 String errorMessage = RestApiPublisherUtils.validateUserRoles(body.getAccessControlRoles());
 
@@ -212,7 +217,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             if (body.getContext().endsWith("/")) {
                 RestApiUtil.handleBadRequest("Context cannot end with '/' character", log);
             }
-
             if (apiProvider.isApiNameWithDifferentCaseExist(body.getName())) {
                 RestApiUtil.handleBadRequest("Error occurred while adding API. API with name " + body.getName()
                         + " already exists.", log);
@@ -817,6 +821,12 @@ public class ApisApiServiceImpl extends ApisApiService {
                 body.setThumbnailUri(apiInfo.getThumbnailUrl());
             }
 
+            // Validate API Security
+            String apiSecurity = body.getApiSecurity();
+            if (!apiProvider.isClientCertificateBasedAuthenticationConfigured() && apiSecurity != null && apiSecurity
+                    .contains(APIConstants.API_SECURITY_MUTUAL_SSL)) {
+                RestApiUtil.handleBadRequest("Mutual SSL based authentication is not supported in this server.", log);
+            }
             //validation for tiers
             List<String> tiersFromDTO = body.getTiers();
             if (tiersFromDTO == null || tiersFromDTO.isEmpty()) {

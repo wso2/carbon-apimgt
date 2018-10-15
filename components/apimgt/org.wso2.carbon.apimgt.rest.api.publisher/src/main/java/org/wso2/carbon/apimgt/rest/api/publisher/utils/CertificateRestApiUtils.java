@@ -23,14 +23,24 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
+import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.CertMetadataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.CertificatesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ClientCertMetadataDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ClientCertificatesDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +64,29 @@ public class CertificateRestApiUtils {
         byte[] certificateBytes = IOUtils.toByteArray(certificateInputStream);
         byte[] encodedCert = Base64.encodeBase64(certificateBytes);
         return new String(encodedCert, StandardCharset.UTF_8);
+    }
+
+    /**
+     * To get the decoded certificate input stream.
+     *
+     * @param certificate Relevant encoded certificate
+     * @return Input stream of the certificate.
+     * @throws APIManagementException API Management Exception.
+     */
+    public static ByteArrayInputStream getDecodedCertificate(String certificate) throws APIManagementException {
+        byte[] cert = (Base64.decodeBase64(certificate.getBytes(StandardCharsets.UTF_8)));
+        ByteArrayInputStream serverCert = new ByteArrayInputStream(cert);
+        try {
+            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            if (serverCert.available() > 0) {
+                Certificate generatedCertificate = cf.generateCertificate(serverCert);
+                X509Certificate x509Certificate = (X509Certificate) generatedCertificate;
+                return new ByteArrayInputStream(x509Certificate.getEncoded());
+            }
+        } catch (CertificateException e) {
+            throw new APIManagementException("Error while decoding the certificate", e);
+        }
+        return null;
     }
 
     /**
@@ -100,13 +133,14 @@ public class CertificateRestApiUtils {
         String paginatedNext = "";
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
-            paginatedPrevious = getCertificatesPaginatedURL(paginatedParams.get(
-                    RestApiConstants.PAGINATION_PREVIOUS_OFFSET), paginatedParams.get(
-                    RestApiConstants.PAGINATION_PREVIOUS_LIMIT), query);
+            paginatedPrevious = getCertificatesPaginatedURL(RestApiConstants.CERTS_GET_PAGINATED_URL,
+                    paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
+                    paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), query);
         }
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
-            paginatedNext = getCertificatesPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+            paginatedNext = getCertificatesPaginatedURL(RestApiConstants.CERTS_GET_PAGINATED_URL,
+                    paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
                     paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query);
         }
 
@@ -118,16 +152,73 @@ public class CertificateRestApiUtils {
     }
 
     /**
+     * To get the paginated list of client certificates.
+     *
+     * @param clientCertificateDTOList Client certificate list.
+     * @param limit                    Limit
+     * @param offset                   Offset
+     * @param query                    query
+     * @return paginated list of client certificates.
+     */
+    public static ClientCertificatesDTO getPaginatedClientCertificates(
+            List<ClientCertificateDTO> clientCertificateDTOList, int limit, int offset, String query) {
+        if (log.isDebugEnabled()) {
+            log.debug(String.format(
+                    "Filter the client certificates based on the pagination parameters, limit = %d and" + "offset = %d",
+                    limit, offset));
+        }
+
+        int certCount = clientCertificateDTOList.size();
+        List<ClientCertMetadataDTO> clientCertificateList = new ArrayList<>();
+        ClientCertificatesDTO certificatesDTO = new ClientCertificatesDTO();
+        certificatesDTO.setCount(certCount > limit ? limit : certCount);
+
+        // If the provided offset value exceeds the offset, reset the offset to default.
+        if (offset > certCount) {
+            offset = RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+        }
+
+        // Select only the set of Certificates which matches the given limit and offset values.
+        int start = offset;
+        int end = certCount > start + limit ? start + limit : certCount;
+        for (int i = start; i < end; i++) {
+            ClientCertMetadataDTO clientCertMetadataDTO = new ClientCertMetadataDTO();
+            ClientCertificateDTO clientCertificateDTO = clientCertificateDTOList.get(i);
+            clientCertMetadataDTO.setAlias(clientCertificateDTO.getAlias());
+            clientCertMetadataDTO.setApiId(clientCertificateDTO.getApiIdentifier().toString());
+            clientCertMetadataDTO.setTier(clientCertificateDTO.getTierName());
+            clientCertificateList.add(clientCertMetadataDTO);
+        }
+        Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, certCount);
+        String paginatedPrevious = "";
+        String paginatedNext = "";
+        if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
+            paginatedPrevious = getCertificatesPaginatedURL(RestApiConstants.CLIENT_CERTS_GET_PAGINATED_URL,
+                    paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
+                    paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), query);
+        }
+        if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
+            paginatedNext = getCertificatesPaginatedURL(RestApiConstants.CLIENT_CERTS_GET_PAGINATED_URL,
+                    paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+                    paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query);
+        }
+        certificatesDTO.setNext(paginatedNext);
+        certificatesDTO.setPrevious(paginatedPrevious);
+        certificatesDTO.setCount(clientCertificateList.size());
+        certificatesDTO.setCertificates(clientCertificateList);
+        return certificatesDTO;
+    }
+
+    /**
      * Get the paginated certificate urls.
      *
      * @param offset : The offset
      * @param limit  : The limit parameter.
      * @param query  : The provided query string
-     * @return :
+     * @return : Certificates paginated URL
      */
-    private static String getCertificatesPaginatedURL(Integer offset, Integer limit, String query) {
-
-        String paginatedURL = RestApiConstants.CERTS_GET_PAGINATED_URL;
+    private static String getCertificatesPaginatedURL(String paginatedURL, Integer offset, Integer limit,
+            String query) {
         paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
         paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
         paginatedURL = paginatedURL.replace(RestApiConstants.QUERY_PARAM, query);
@@ -137,19 +228,21 @@ public class CertificateRestApiUtils {
     /**
      * Generates the query string from the provided params.
      *
-     * @param alias    : The alias param.
-     * @param endpoint : The endpoint param.
+     * @param firstParamName   : Name of the first param.
+     * @param firstParamValue  : Value of the first param.
+     * @param secondParamName  : Name of the second param.
+     * @param secondParamValue : Value of the second param.
      * @return : The generated query string.
      */
-    public static String buildQueryString(String alias, String endpoint) {
-
+    public static String buildQueryString(String firstParamName, String firstParamValue,
+            String secondParamName, String secondParamValue) {
         String query = "";
-        if (StringUtils.isNotBlank(alias)) {
-            query = query + "&alias=" + alias;
+        if (StringUtils.isNotBlank(firstParamValue)) {
+            query = query + "&" + firstParamName + "=" + firstParamValue;
         }
 
-        if (StringUtils.isNotBlank(endpoint)) {
-            query = query + "&endpoint=" + endpoint;
+        if (StringUtils.isNotBlank(secondParamValue)) {
+            query = query + "&" + secondParamName + "=" + secondParamValue;
         }
         if (log.isDebugEnabled()) {
             log.debug(String.format("The query string for the api : %s", query));

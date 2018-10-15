@@ -208,6 +208,7 @@ public class APIProviderImplTest {
             Object[] args = invocation.getArguments();
             return (String) args[0];
         });
+        TestUtils.initConfigurationContextService(true);
     }
 
     @Test

@@ -122,8 +122,11 @@ public class APIExecutor implements Execution {
                         && APIConstants.PUBLISHED.equals(newStatus)) {
                     Set<Tier> tiers = api.getAvailableTiers();
                     String endPoint = api.getEndpointConfig();
+                    String apiSecurity = api.getApiSecurity();
+                    boolean isOauthProtected =
+                            apiSecurity == null || apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2);
                     if (endPoint != null && endPoint.trim().length() > 0) {
-                        if (tiers == null || tiers.size() <= 0) {
+                        if (isOauthProtected && (tiers == null || tiers.size() <= 0)) {
                                 throw new APIManagementException("Failed to publish service to API store while executing " +
                                                                  "APIExecutor. No Tiers selected");
                         }

@@ -2,6 +2,20 @@
 <% var api = outputs.api, user = outputs.user, log = new Log(); %>
 <% var domains = jagg.module("domains").getDomainMappings(jagg.getTenantDomain()).domains;%>
 <% var transports = api.transports.split(",");
+var apiSecurity = api.apiSecurity.split(",");
+var apiSecurityValue = "";
+for (var index = 0; index < apiSecurity.length; index++){
+    if (apiSecurity[index] == "oauth2") {
+        apiSecurityValue = i18n.localize("OAuth2");
+    }
+    if (apiSecurity[index] == "mutualssl") {
+        if (index > 0) {
+            apiSecurityValue += ", ";
+        }
+        apiSecurityValue += i18n.localize("Mutual SSL");
+    }
+}
+
  var tenantDomain=request_tenant;
  if(tenantDomain == null || tenantDomain == "") {
      var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -129,6 +143,7 @@
         <%=encode.forHtml(api.description)%>
     </p>
         <% } %>
+    <h4 class="add-margin-top-5x"><%=i18n.localize("Enabled API Security Protocols")%> </h4> <p><%=apiSecurityValue%>%></p>
 
     <!-- Start of Microgateways Section -->
     <% if(api.labels != null){ %>

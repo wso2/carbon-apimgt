@@ -26,7 +26,9 @@
     "Certificate exists for Alias : Endpoint combination": "Certificate exists for Alias : Endpoint combination",
     "Certificate for the endpoint": "Certificate for the endpoint",
     "The certificate was added successfully. Please note that it will be available to all users.": "The certificate was added successfully. Please note that it will be available to all users.",
+    "The certificate was added successfully." : "The certificate was added successfully.",
     "The certificate was deleted successfully. Note that the deleted certificate will not be available to all users":"The certificate was deleted successfully. Note that the deleted certificate will not be available to all users",
+    "The certificate was deleted successfully.":"The certificate was deleted successfully.",
     "Click the button below to add certificates.": "Click the button below to add certificates.",
     "Confirm Deletion": "Confirm Delete",
     "Context exists.": "Context exists.",
@@ -65,7 +67,7 @@
     "Failed to add certificate. Certificate expired": "Failed to add certificate. Certificate expired",
     "Failed to add certificate. Certificate already exists for the endpoint.": "Failed to add certificate. Certificate already exists for the endpoint.",
     "Failed to delete certificate due to an Internal Server Error.": "Failed to delete certificate due to an Internal Server Error.",
-    "Failed to delete the certificate. Certificate could not found for the given alias. Hence the entry is removed from the data base.": "Failed to delete the certificate. Certificate could not found for the given alias. Hence the entry is removed from the data base.",
+    "Failed to delete the certificate. Certificate could not be found for the given alias. Hence the entry is removed from the database.": "Failed to delete the certificate. Certificate could not be found for the given alias. Hence the entry is removed from the database.",
     "File already exists..!": "File already exists..!",
     "Invalid file format. Valid formats are .jpg, .jpeg, .bmp, .gif and .png": "Invalid file format. Valid formats are .jpg, .jpeg, .bmp, .gif and .png.",
     "FrequentTierHittingAlert_Desc": "This alert type gets triggered if at least one of the two cases below satisfied; if a particular application gets throttled out for hitting the subscribed tier limit of that application more than 10 times (by default) within a day (by default) or if a particular user of an application gets throttled out for hitting the subscribed tier limit of a particular API more than 10 times (by default) within a day (by default)",
@@ -183,5 +185,9 @@
     "tenants": "Visible to Tenants",
     "to": "to",
     "You must select a mediation policy to download": "You must select a mediation policy to download.",
-    "Error while retrieving the selected mediation policy": "Error while retrieving the selected mediation policy."
+    "Error while retrieving the selected mediation policy": "Error while retrieving the selected mediation policy.",
+    "Do you really want to delete the certificate with alias" : "Do you really want to delete the certificate with alias",
+    "Please provide a different alias name.": "Please provide a different alias name.",
+    "Delete certificate with alias" : "Delete certificate with alias",
+    "This action cannot be reversed" : "This action cannot be reversed"
 }

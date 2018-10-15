@@ -93,7 +93,7 @@ public class CertificatesApi  {
         
         @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nInvalid request or validation error.\n"),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\n * Updating certificat failed. Alias not found\n"),
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nUpdating certificate failed. Alias not found\n"),
         
         @io.swagger.annotations.ApiResponse(code = 500, message = "Internal Server Error\n") })
 
@@ -107,7 +107,7 @@ public class CertificatesApi  {
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Retrieve/ Search uploaded Certificates.", notes = "This operation can be used to retrieve and search the uploaded certificates.\n", response = CertificatesDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "Retrieve/Search uploaded certificates.", notes = "This operation can be used to retrieve and search the uploaded certificates.\n", response = CertificatesDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Successful response with the list of matching certificate information in the body.\n"),
         
