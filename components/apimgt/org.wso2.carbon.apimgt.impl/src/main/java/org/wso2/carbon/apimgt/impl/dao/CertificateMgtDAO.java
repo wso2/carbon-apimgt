@@ -762,8 +762,7 @@ public class CertificateMgtDAO {
             if (!isExist) {
                 selectCertificateForAlias = SQLConstants.CertificateConstants.SELECT_CERTIFICATE_FOR_ALIAS;
                 preparedStatement = connection.prepareStatement(selectCertificateForAlias);
-                preparedStatement.setString(1, alias);
-                preparedStatement.setInt(2, tenantId);
+                preparedStatement.setString(1, alias + "_" + tenantId);
                 resultSet = preparedStatement.executeQuery();
                 if (resultSet.next()) {
                     isExist = true;

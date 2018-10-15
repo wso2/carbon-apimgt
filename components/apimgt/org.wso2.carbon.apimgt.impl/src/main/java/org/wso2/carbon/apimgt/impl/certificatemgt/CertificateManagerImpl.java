@@ -376,7 +376,6 @@ public class CertificateManagerImpl implements CertificateManager {
     public boolean isCertificatePresent(int tenantId, String alias) throws APIManagementException {
 
         List<CertificateMetadataDTO> certificateMetadataList;
-
         if (log.isDebugEnabled()) {
             log.debug(String.format("Check whether the tenant %d has a certificate for alias %s", tenantId, alias));
         }
