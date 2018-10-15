@@ -27,8 +27,8 @@ import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 
@@ -59,11 +59,18 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 
     @Override
     public boolean handleRequestOutFlow(MessageContext messageContext) {
+        Map<String, String> tracerSpecificCarrier = new HashMap<>();
         if (Util.tracingEnabled()) {
             TracingSpan parentSpan = (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
             TracingSpan backendLatencySpan =
                     Util.startSpan(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN, parentSpan, tracer);
             messageContext.setProperty(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN, backendLatencySpan);
+            Util.inject(backendLatencySpan, tracer, tracerSpecificCarrier);
+            Map headers = (Map) org.apache.axis2.context.MessageContext.getCurrentMessageContext().getProperty(
+                    org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+            headers.putAll(tracerSpecificCarrier);
+            org.apache.axis2.context.MessageContext.getCurrentMessageContext()
+                    .setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
         }
         return true;
     }
