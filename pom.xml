@@ -1429,6 +1429,7 @@
                 <groupId>io.opentracing.contrib</groupId>
                 <artifactId>span-reporter</artifactId>
                 <version>${span.reporter.version}</version>
+                <scope>compile</scope>
             </dependency>
             <dependency>
                 <groupId>io.opentracing</groupId>
