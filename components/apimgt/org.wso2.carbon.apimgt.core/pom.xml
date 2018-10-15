@@ -432,13 +432,11 @@
                                             <MYSQL_ROOT_PASSWORD>root</MYSQL_ROOT_PASSWORD>
                                         </env>
                                         <wait>
-                                            <tcp>
-                                                <ports>
-                                                    <port>3306</port>
-                                                </ports>
-                                            </tcp>
                                             <time>60000</time>
                                         </wait>
+                                        <ports>
+                                            <port>+bind.host.name:3306:3306</port>
+                                        </ports>
                                     </run>
                                 </image>
                             </images>
@@ -468,7 +466,7 @@
                             <environmentVariables>
                                 <DATABASE_TYPE>mysql</DATABASE_TYPE>
                                 <PORT>3306</PORT>
-                                <DATABASE_HOST>${docker.container.apim-mysql.ip}</DATABASE_HOST>
+                                <!--<DATABASE_HOST>${docker.container.apim-mysql.ip}</DATABASE_HOST>-->
                             </environmentVariables>
                             <suiteXmlFiles>
                                 <suiteXmlFile>src/test/resources/testngDAO.xml</suiteXmlFile>
@@ -599,6 +597,9 @@
                                             <log>MSSQL SERVER SUCCESSFULLY STARTED</log>
                                             <time>60000</time>
                                         </wait>
+                                        <ports>
+                                            <port>+bind.host.name:1433:1433</port>
+                                        </ports>
                                     </run>
                                 </image>
                             </images>
@@ -628,7 +629,7 @@
                             <environmentVariables>
                                 <DATABASE_TYPE>mssql</DATABASE_TYPE>
                                 <PORT>1433</PORT>
-                                <DATABASE_HOST>${docker.container.apim-mssql.ip}</DATABASE_HOST>
+                                <!--<DATABASE_HOST>${docker.container.apim-mssql.ip}</DATABASE_HOST>-->
                             </environmentVariables>
                             <suiteXmlFiles>
                                 <suiteXmlFile>src/test/resources/testngDAO.xml</suiteXmlFile>
@@ -708,13 +709,11 @@
                                             <POSTGRES_DB>testamdb</POSTGRES_DB>
                                         </env>
                                         <wait>
-                                            <tcp>
-                                                <ports>
-                                                    <port>5432</port>
-                                                </ports>
-                                            </tcp>
                                             <time>60000</time>
                                         </wait>
+                                        <ports>
+                                            <port>+bind.host.name:5432:5432</port>
+                                        </ports>
                                     </run>
                                 </image>
                             </images>
@@ -744,7 +743,7 @@
                             <environmentVariables>
                                 <DATABASE_TYPE>postgres</DATABASE_TYPE>
                                 <PORT>5432</PORT>
-                                <DATABASE_HOST>${docker.container.apim-postgres.ip}</DATABASE_HOST>
+                                <!--<DATABASE_HOST>${docker.container.apim-postgres.ip}</DATABASE_HOST>-->
                             </environmentVariables>
                             <suiteXmlFiles>
                                 <suiteXmlFile>src/test/resources/testngDAO.xml</suiteXmlFile>
@@ -793,6 +792,9 @@
                                             <time>400000</time>
                                         </wait>
                                         <shmSize>2718281829</shmSize>
+                                        <ports>
+                                            <port>+bind.host.name:1521:1521</port>
+                                        </ports>
                                     </run>
                                 </image>
                             </images>
@@ -822,7 +824,7 @@
                             <environmentVariables>
                                 <DATABASE_TYPE>oracle</DATABASE_TYPE>
                                 <PORT>1521</PORT>
-                                <DATABASE_HOST>${docker.container.apim-oracle.ip}</DATABASE_HOST>
+                                <!--<DATABASE_HOST>${docker.container.apim-oracle.ip}</DATABASE_HOST>-->
                             </environmentVariables>
                             <argLine>-Duser.timezone=GMT</argLine>
                             <suiteXmlFiles>
@@ -910,6 +912,7 @@
             org.wso2.carbon.apimgt.core.*; version="${carbon.apimgt.version}",
         </export.package>
         <dynamic.import.package>*</dynamic.import.package>
+        <bind.host.name>localhost</bind.host.name>
     </properties>
 
 </project>
