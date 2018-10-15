@@ -1277,7 +1277,7 @@ public class ApiDAOImpl implements ApiDAO {
                         return constructCommentFromResultSet(rs);
                     }
                 }
-            } catch (SQLException e) {
+            } catch (SQLException | IOException e) {
                 String errorMessage =
                         "getting comment for API: " + apiId + ", Comment: " + commentId;
                 throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + errorMessage, e);
@@ -1306,11 +1306,11 @@ public class ApiDAOImpl implements ApiDAO {
      * @return
      * @throws SQLException
      */
-    private Comment constructCommentFromResultSet(ResultSet rs) throws SQLException {
+    private Comment constructCommentFromResultSet(ResultSet rs) throws SQLException, IOException {
         Comment comment = new Comment();
 
         comment.setUuid(rs.getString("UUID"));
-        comment.setCommentText(rs.getString("COMMENT_TEXT"));
+        comment.setCommentText(IOUtils.toString(rs.getBinaryStream("COMMENT_TEXT")));
         comment.setCommentedUser(rs.getString("USER_IDENTIFIER"));
         comment.setApiId(rs.getString("API_ID"));
         comment.setCategory(rs.getString("CATEGORY"));
@@ -1336,7 +1336,7 @@ public class ApiDAOImpl implements ApiDAO {
             try {
                 connection.setAutoCommit(false);
                 statement.setString(1, comment.getUuid());
-                statement.setString(2, comment.getCommentText());
+                statement.setBinaryStream(2, IOUtils.toInputStream(comment.getCommentText()));
                 statement.setString(3, comment.getCommentedUser());
                 statement.setString(4, apiId);
                 statement.setString(5, comment.getCreatedUser());
@@ -1410,7 +1410,7 @@ public class ApiDAOImpl implements ApiDAO {
              PreparedStatement statement = connection.prepareStatement(updateCommentQuery)) {
             try {
                 connection.setAutoCommit(false);
-                statement.setString(1, comment.getCommentText());
+                statement.setBinaryStream(1, IOUtils.toInputStream(comment.getCommentText()));
                 statement.setString(2, comment.getCategory());
                 statement.setString(3, comment.getUpdatedUser());
                 statement.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now()));
@@ -1449,7 +1449,7 @@ public class ApiDAOImpl implements ApiDAO {
                         commentList.add(constructCommentFromResultSet(rs));
                     }
                 }
-            } catch (SQLException e) {
+            } catch (SQLException | IOException e) {
                 connection.rollback();
                 String errorMessage = "getting all comments for API " + apiId;
                 throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + errorMessage, e);
