@@ -148,8 +148,8 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         try {
             String username = RestApiUtil.getLoggedInUsername(request);
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
-            OAuthApplicationInfo oAuthApp = apiConsumer.generateApplicationKeys(applicationId,
-                    body.getKeyType().name(), body.getCallbackUrl(), body.getGrantTypesToBeSupported());
+            OAuthApplicationInfo oAuthApp = apiConsumer.generateApplicationKeys(applicationId, body.getKeyType().name
+                    (), body.getCallbackUrl(), body.getGrantTypesToBeSupported(), body.getTokenType().toString());
             ApplicationKeysDTO appKeys = ApplicationKeyMappingUtil.fromApplicationKeysToDTO(oAuthApp);
             return Response.ok().entity(appKeys).build();
         } catch (APIManagementException e) {
@@ -236,7 +236,9 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             String username = RestApiUtil.getLoggedInUsername(request);
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
             OAuthApplicationInfo oAuthApp = apiConsumer.updateGrantTypesAndCallbackURL(applicationId, keyType,
-                    body.getSupportedGrantTypes(), body.getCallbackUrl());
+                                                                                       body.getSupportedGrantTypes(),
+                                                                                       body.getTokenType().toString()
+                    , body.getCallbackUrl());
             ApplicationKeysDTO appKeys = ApplicationKeyMappingUtil.fromApplicationKeysToDTO(oAuthApp);
             return Response.ok().entity(appKeys).build();
         } catch (APIManagementException e) {

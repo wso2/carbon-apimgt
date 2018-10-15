@@ -49,14 +49,13 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeysDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationTokenDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationTokenGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationMappingUtil;
-import org.wso2.carbon.messaging.CarbonMessage;
-import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 import org.wso2.msf4j.Request;
+import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
-import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import javax.ws.rs.core.Response;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(RestApiUtil.class)
@@ -108,7 +107,7 @@ public class ApplicationsApiServiceImplTestCase {
                 .when(apiStore).deleteApplication(applicationId);
 
         Response response = applicationsApiService.applicationsApplicationIdDelete
-                (applicationId, null, null,request);
+                (applicationId, null, null, request);
 
         Assert.assertEquals(404, response.getStatus());
     }
@@ -180,9 +179,9 @@ public class ApplicationsApiServiceImplTestCase {
         oAuthApplicationInfo.setClientId(UUID.randomUUID().toString());
         oAuthApplicationInfo.setClientSecret(UUID.randomUUID().toString());
         oAuthApplicationInfo.setGrantTypes(grantTypes);
-
+        oAuthApplicationInfo.setTokenType("OAUTH");
         Mockito.when(apiStore.generateApplicationKeys
-                (applicationId, "PRODUCTION", null, grantTypes))
+                (applicationId, "PRODUCTION", null, grantTypes, "OAUTH"))
                 .thenReturn(oAuthApplicationInfo);
 
         ApplicationKeyGenerateRequestDTO applicationKeyGenerateRequestDTO = new ApplicationKeyGenerateRequestDTO();
@@ -197,7 +196,8 @@ public class ApplicationsApiServiceImplTestCase {
     }
 
     @Test
-    public void testApplicationsApplicationIdGenerateKeysPostErrorCase() throws APIManagementException, NotFoundException {
+    public void testApplicationsApplicationIdGenerateKeysPostErrorCase() throws APIManagementException,
+            NotFoundException {
         TestUtil.printTestMethodName();
         String applicationId = UUID.randomUUID().toString();
 
@@ -219,8 +219,9 @@ public class ApplicationsApiServiceImplTestCase {
         oAuthApplicationInfo.setClientSecret(UUID.randomUUID().toString());
         oAuthApplicationInfo.setGrantTypes(grantTypes);
 
-        Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.APPLICATION_TOKEN_GENERATION_FAILED))
-                .when(apiStore).generateApplicationKeys(applicationId, "PRODUCTION", null, grantTypes);
+        Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes
+                .APPLICATION_TOKEN_GENERATION_FAILED))
+                .when(apiStore).generateApplicationKeys(applicationId, "PRODUCTION", null, grantTypes, "OAUTH");
 
         ApplicationKeyGenerateRequestDTO applicationKeyGenerateRequestDTO = new ApplicationKeyGenerateRequestDTO();
         applicationKeyGenerateRequestDTO.setKeyType(ApplicationKeyGenerateRequestDTO.KeyTypeEnum.PRODUCTION);
@@ -271,7 +272,7 @@ public class ApplicationsApiServiceImplTestCase {
         Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.APPLICATION_KEY_MAPPING_NOT_FOUND))
                 .when(apiStore).getApplicationKeys(applicationId);
 
-        Response response = applicationsApiService.applicationsApplicationIdKeysGet(applicationId,request);
+        Response response = applicationsApiService.applicationsApplicationIdKeysGet(applicationId, request);
 
         Assert.assertEquals(404, response.getStatus());
     }
@@ -299,6 +300,7 @@ public class ApplicationsApiServiceImplTestCase {
         oAuthApplicationInfo.setClientId(UUID.randomUUID().toString());
         oAuthApplicationInfo.setClientSecret(UUID.randomUUID().toString());
         oAuthApplicationInfo.setGrantTypes(grantTypes);
+        oAuthApplicationInfo.setTokenType("JWT");
 
         Mockito.when(apiStore.getApplicationKeys(applicationId, keyType)).thenReturn(oAuthApplicationInfo);
 
@@ -309,7 +311,8 @@ public class ApplicationsApiServiceImplTestCase {
     }
 
     @Test
-    public void testApplicationsApplicationIdKeysKeyTypeGetErrorCase() throws APIManagementException, NotFoundException {
+    public void testApplicationsApplicationIdKeysKeyTypeGetErrorCase() throws APIManagementException,
+            NotFoundException {
         TestUtil.printTestMethodName();
         String applicationId = UUID.randomUUID().toString();
         String keyType = "PRODUCTION";
@@ -369,8 +372,9 @@ public class ApplicationsApiServiceImplTestCase {
         oAuthApplicationInfo.setClientId(UUID.randomUUID().toString());
         oAuthApplicationInfo.setClientSecret(UUID.randomUUID().toString());
         oAuthApplicationInfo.setGrantTypes(grantTypes);
+        oAuthApplicationInfo.setTokenType("JWT");
 
-        Mockito.when(apiStore.updateGrantTypesAndCallbackURL(applicationId, keyType, grantTypes, null))
+        Mockito.when(apiStore.updateGrantTypesAndCallbackURL(applicationId, keyType, grantTypes, "OAUTH", null))
                 .thenReturn(oAuthApplicationInfo);
 
         Response response = applicationsApiService.applicationsApplicationIdKeysKeyTypePut
@@ -380,7 +384,8 @@ public class ApplicationsApiServiceImplTestCase {
     }
 
     @Test
-    public void testApplicationsApplicationIdKeysKeyTypePutErrorCase() throws APIManagementException, NotFoundException {
+    public void testApplicationsApplicationIdKeysKeyTypePutErrorCase() throws APIManagementException,
+            NotFoundException {
         TestUtil.printTestMethodName();
         String applicationId = UUID.randomUUID().toString();
         String accessToken = UUID.randomUUID().toString();
@@ -413,7 +418,8 @@ public class ApplicationsApiServiceImplTestCase {
         applicationKeysDTO.setSupportedGrantTypes(grantTypes);
 
         Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.INTERNAL_ERROR))
-                .when(apiStore).updateGrantTypesAndCallbackURL(applicationId, keyType, grantTypes, null);
+                .when(apiStore).updateGrantTypesAndCallbackURL(applicationId, keyType, grantTypes, "OAUTH",
+                                                               applicationKeysDTO.getCallbackUrl());
 
         Response response = applicationsApiService.applicationsApplicationIdKeysKeyTypePut
                 (applicationId, keyType, applicationKeysDTO, request);
@@ -460,7 +466,8 @@ public class ApplicationsApiServiceImplTestCase {
     }
 
     @Test
-    public void testApplicationsApplicationIdGenerateTokenPostErrorCase() throws APIManagementException, NotFoundException {
+    public void testApplicationsApplicationIdGenerateTokenPostErrorCase() throws APIManagementException,
+            NotFoundException {
         TestUtil.printTestMethodName();
         String applicationId = UUID.randomUUID().toString();
         String accessToken = UUID.randomUUID().toString();
@@ -482,7 +489,8 @@ public class ApplicationsApiServiceImplTestCase {
         generateRequestDTO.setScopes("SCOPE1");
         generateRequestDTO.setValidityPeriod(10000);
 
-        Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.APPLICATION_TOKEN_GENERATION_FAILED))
+        Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes
+                .APPLICATION_TOKEN_GENERATION_FAILED))
                 .when(apiStore).generateApplicationToken
                 (clientID, clientSecret, "SCOPE1", 10000, "revokeToken");
 
@@ -771,7 +779,8 @@ public class ApplicationsApiServiceImplTestCase {
         WorkflowResponse workflowResponse = new GeneralWorkflowResponse();
         workflowResponse.setWorkflowStatus(WorkflowStatus.APPROVED);
 
-        ApplicationCreationResponse creationResponse = new ApplicationCreationResponse(UUID.randomUUID().toString(), workflowResponse);
+        ApplicationCreationResponse creationResponse = new ApplicationCreationResponse(UUID.randomUUID().toString(),
+                                                                                       workflowResponse);
 
         Mockito.when(apiStore.addApplication(application)).thenReturn(creationResponse);
         Mockito.when(apiStore.getApplication(creationResponse.getApplicationUUID(), USER)).thenReturn(application);
@@ -821,7 +830,7 @@ public class ApplicationsApiServiceImplTestCase {
 
     private static void printTestMethodName() {
         logger.info("------------------ Test method: " + Thread.currentThread().getStackTrace()[2].getMethodName() +
-                " ------------------");
+                            " ------------------");
     }
 
     private Application getSampleApplication(String applicationId) {

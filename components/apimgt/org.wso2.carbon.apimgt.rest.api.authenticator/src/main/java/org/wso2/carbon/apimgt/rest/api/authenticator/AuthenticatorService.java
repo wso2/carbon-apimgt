@@ -473,8 +473,8 @@ public class AuthenticatorService {
             // Here the keyType:"Application" will be passed as a default value
             // for the oAuthAppRequest constructor argument.
             // This value is not related to DCR application creation.
-            OAuthAppRequest oAuthAppRequest = new OAuthAppRequest(clientName,
-                    callBackURL, AuthenticatorConstants.APPLICATION_KEY_TYPE, grantTypes);
+            OAuthAppRequest oAuthAppRequest = new OAuthAppRequest(clientName, callBackURL, AuthenticatorConstants
+                    .APPLICATION_KEY_TYPE, grantTypes, "OAUTH");
             if (systemApplicationDao.isConsumerKeyExistForApplication(clientName)) {
                 String consumerKey = systemApplicationDao.getConsumerKeyForApplication(clientName);
                 oAuthApplicationInfo = getKeyManager().retrieveApplication(consumerKey);

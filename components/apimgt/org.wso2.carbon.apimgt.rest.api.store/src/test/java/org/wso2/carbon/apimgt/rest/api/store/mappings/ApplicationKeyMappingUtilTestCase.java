@@ -45,11 +45,13 @@ public class ApplicationKeyMappingUtilTestCase {
         oAuthApplicationInfo.setClientId("clientID");
         oAuthApplicationInfo.setClientSecret("clientSecret");
         oAuthApplicationInfo.setGrantTypes(grantTypes);
-
+        oAuthApplicationInfo.setTokenType("JWT");
         ApplicationKeysDTO applicationKeysDTO =
                 ApplicationKeyMappingUtil.fromApplicationKeysToDTO(oAuthApplicationInfo);
 
         Assert.assertEquals(applicationKeysDTO.getKeyType().toString(), keyType);
+        Assert.assertEquals(applicationKeysDTO.getTokenType(), ApplicationKeysDTO.TokenTypeEnum.JWT);
+
     }
 
     @Test
