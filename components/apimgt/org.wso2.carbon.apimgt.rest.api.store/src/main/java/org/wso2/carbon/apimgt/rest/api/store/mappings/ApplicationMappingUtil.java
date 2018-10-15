@@ -85,9 +85,6 @@ public class ApplicationMappingUtil {
             ApplicationKeysDTO applicationKeysDTO = ApplicationKeyMappingUtil.fromApplicationKeysToDTO(applicationKeys);
             applicationKeyDTOs.add(applicationKeysDTO);
         }
-        if (application.getTokenType() != null){
-            applicationDTO.setTokenType(ApplicationDTO.TokenTypeEnum.fromValue(application.getTokenType()));
-        }
         applicationDTO.setToken(ApplicationKeyMappingUtil.fromApplicationTokenToDTO(application.getApplicationToken()));
         applicationDTO.setKeys(applicationKeyDTOs);
         return applicationDTO;
@@ -144,7 +141,6 @@ public class ApplicationMappingUtil {
         application.setId(applicationDTO.getApplicationId());
         application.setPermissionString(applicationDTO.getPermission());
         application.setStatus(applicationDTO.getLifeCycleStatus());
-        application.setTokenType(applicationDTO.getTokenType().toString());
         //groupId is not honored for now. Later we can improve by checking admin privileges of the user.
         //application.setGroupId(applicationDTO.getGroupId());
         return application;
