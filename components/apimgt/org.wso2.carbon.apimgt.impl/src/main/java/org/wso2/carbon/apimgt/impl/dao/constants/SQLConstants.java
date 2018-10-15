@@ -2878,7 +2878,7 @@ public class SQLConstants {
                 "WHERE TENANT_ID=?";
 
         public static final String SELECT_CERTIFICATE_FOR_ALIAS = "SELECT * FROM AM_CERTIFICATE_METADATA "
-                + "WHERE ALIAS=? AND TENANT_ID=?";
+                + "WHERE ALIAS=?";
     }
 
     public static class ClientCertificateConstants{
