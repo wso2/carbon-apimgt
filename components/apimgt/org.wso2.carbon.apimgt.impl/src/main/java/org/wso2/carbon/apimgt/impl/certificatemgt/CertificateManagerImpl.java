@@ -35,6 +35,8 @@ import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManageme
 import org.wso2.carbon.apimgt.impl.dao.CertificateMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
+import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.CarbonContext;
 
 import javax.xml.namespace.QName;
 import java.io.ByteArrayInputStream;
@@ -219,7 +221,11 @@ public class CertificateManagerImpl implements CertificateManager {
 
     @Override
     public boolean addCertificateToGateway(String certificate, String alias) {
-
+        // Check whether the api is invoked via the APIGatewayAdmin service.
+        int loggedInTenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        if (loggedInTenantId != MultitenantConstants.SUPER_TENANT_ID) {
+            alias = alias + "_" + loggedInTenantId;
+        }
         return addCertificateToListenerOrSenderProfile(certificate, alias, false);
     }
 
@@ -264,6 +270,11 @@ public class CertificateManagerImpl implements CertificateManager {
 
     @Override
     public boolean deleteCertificateFromGateway(String alias) {
+        // Check whether the api is invoked via the APIGatewayAdmin service.
+        int loggedInTenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        if (loggedInTenantId != MultitenantConstants.SUPER_TENANT_ID) {
+            alias = alias + "_" + loggedInTenantId;
+        }
         return deleteCertificateFromListenerAndSenderProfiles(alias, false);
     }
 
