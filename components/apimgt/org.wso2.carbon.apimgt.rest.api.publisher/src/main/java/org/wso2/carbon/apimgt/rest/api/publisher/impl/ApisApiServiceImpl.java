@@ -1134,6 +1134,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             Documentation newDocumentation = DocumentationMappingUtil.fromDTOtoDocumentation(body);
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+            newDocumentation.setFilePath(oldDocument.getFilePath());
             apiProvider.updateDocumentation(apiIdentifier, newDocumentation);
 
             //retrieve the updated documentation
