@@ -22,7 +22,6 @@ import CreateScope from './CreateScope';
 import Scopes from './Scopes';
 import { PageNotFound } from '../../../Base/Errors';
 
-
 const Scope = ({ api }) => {
     return (
         <Switch>

@@ -48,7 +48,6 @@ import LeftMenuItem from '../../Shared/LeftMenuItem';
 import { PageNotFound } from '../../Base/Errors/index';
 import APIDetailsTopMenu from './components/APIDetailsTopMenu';
 
-
 const styles = theme => ({
     LeftMenu: {
         backgroundColor: theme.palette.background.leftMenu,

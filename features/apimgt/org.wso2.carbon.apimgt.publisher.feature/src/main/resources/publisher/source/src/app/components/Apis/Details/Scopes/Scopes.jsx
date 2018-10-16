@@ -33,7 +33,6 @@ import Button from '@material-ui/core/Button';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { Link } from 'react-router-dom';
 
-
 const styles = theme => ({
     buttonProgress: {
         position: 'relative',
@@ -119,7 +118,6 @@ class Scopes extends React.Component {
         const promisedScopeAdd = api.addScope(this.props.match.params.api_uuid, scope);
         promisedScopeAdd.then((response) => {
             if (response.status !== 201) {
-                console.log(response);
                 message.error('Something went wrong while updating the ' + scope.name + ' Scope!');
                 hideMessage();
                 return;
