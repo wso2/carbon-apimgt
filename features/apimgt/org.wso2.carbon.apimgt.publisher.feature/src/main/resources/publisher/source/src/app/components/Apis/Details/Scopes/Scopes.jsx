@@ -118,6 +118,7 @@ class Scopes extends React.Component {
         const promisedScopeAdd = api.addScope(this.props.match.params.api_uuid, scope);
         promisedScopeAdd.then((response) => {
             if (response.status !== 201) {
+                console.log(response);
                 message.error('Something went wrong while updating the ' + scope.name + ' Scope!');
                 hideMessage();
                 return;
@@ -160,7 +161,6 @@ class Scopes extends React.Component {
      */
     render() {
         const { api } = this.props;
-        console.log(api);
         const { scopes } = api;
         const { classes } = this.props;
 
