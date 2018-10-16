@@ -823,7 +823,7 @@
                 <plugin>
                     <groupId>io.fabric8</groupId>
                     <artifactId>docker-maven-plugin</artifactId>
-                    <version>0.20.0</version>
+                    <version>0.26.1</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -1011,7 +1011,7 @@
         <wso2.carbon.config.version>2.1.5</wso2.carbon.config.version>
         <carbon.config.package.import.version.range>[2.0.0, 3.0.0)</carbon.config.package.import.version.range>
         <io.swagger.models.version>1.5.16</io.swagger.models.version>
-        <atlassian.commonmark.version>0.9.0</atlassian.commonmark.version> <!-- *BSD2*: used as a plugin dependency--> 
+        <atlassian.commonmark.version>0.9.0</atlassian.commonmark.version> <!-- *BSD2*: used as a plugin dependency-->
         <joda.time.version>2.9.9</joda.time.version>
         <broker.version>0.1.44</broker.version>
         <broker.package.import.version.range>[0.1.44,1.0.0)</broker.package.import.version.range>

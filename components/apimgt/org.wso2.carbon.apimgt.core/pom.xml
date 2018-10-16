@@ -397,6 +397,90 @@
             </build>
         </profile>
         <profile>
+            <id>local-all-mac</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>1.5.0</version>
+                        <executions>
+                            <execution>
+                                <id>run-mysql</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>mvn</executable>
+                                    <arguments>
+                                        <argument>verify</argument>
+                                        <argument>-P local-mysql-mac</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>run-h2</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>mvn</executable>
+                                    <arguments>
+                                        <argument>verify</argument>
+                                        <argument>-P local-h2</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>run-postgres</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>mvn</executable>
+                                    <arguments>
+                                        <argument>verify</argument>
+                                        <argument>-P local-postgres-mac</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>run-mssql</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>mvn</executable>
+                                    <arguments>
+                                        <argument>verify</argument>
+                                        <argument>-P local-mssql-mac</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>run-oracle</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>mvn</executable>
+                                    <arguments>
+                                        <argument>verify</argument>
+                                        <argument>-P local-oracle-mac</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
             <id>local-mysql</id>
             <build>
                 <plugins>
@@ -469,6 +553,86 @@
                                 <DATABASE_TYPE>mysql</DATABASE_TYPE>
                                 <PORT>3306</PORT>
                                 <DATABASE_HOST>${docker.container.apim-mysql.ip}</DATABASE_HOST>
+                            </environmentVariables>
+                            <suiteXmlFiles>
+                                <suiteXmlFile>src/test/resources/testngDAO.xml</suiteXmlFile>
+                            </suiteXmlFiles>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>local-mysql-mac</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.fabric8</groupId>
+                        <artifactId>docker-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>start-docker-for-mysql</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>start</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>stop-docker-for-mysql</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                    <goal>remove</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <images>
+                                <image>
+                                    <alias>apim-mysql</alias>
+                                    <name>mysql:5.7</name>
+                                    <run>
+                                        <namingStrategy>alias</namingStrategy>
+                                        <env>
+                                            <MYSQL_DATABASE>testamdb</MYSQL_DATABASE>
+                                            <MYSQL_ROOT_PASSWORD>root</MYSQL_ROOT_PASSWORD>
+                                        </env>
+                                        <wait>
+                                            <time>60000</time>
+                                        </wait>
+                                        <ports>
+                                            <port>+bind.host.name:3306:3306</port>
+                                        </ports>
+                                    </run>
+                                </image>
+                            </images>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>2.19.1</version>
+                        <executions>
+                            <execution>
+                                <id>integration-test-for-mysql</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>verify-for-mysql</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <environmentVariables>
+                                <DATABASE_TYPE>mysql</DATABASE_TYPE>
+                                <PORT>3306</PORT>
+                                <!--<DATABASE_HOST>${docker.container.apim-mysql.ip}</DATABASE_HOST>-->
                             </environmentVariables>
                             <suiteXmlFiles>
                                 <suiteXmlFile>src/test/resources/testngDAO.xml</suiteXmlFile>
@@ -639,6 +803,88 @@
             </build>
         </profile>
         <profile>
+            <id>local-mssql-mac</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.fabric8</groupId>
+                        <artifactId>docker-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>start-docker-for-mssql</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>start</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>stop-docker-for-mssql</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                    <goal>remove</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <images>
+                                <image>
+                                    <name>tharindu1st/mssql-server-linux:v2</name>
+                                    <alias>apim-mssql</alias>
+                                    <run>
+                                        <namingStrategy>alias</namingStrategy>
+                                        <env>
+                                            <ACCEPT_EULA>Y</ACCEPT_EULA>
+                                            <SA_PASSWORD>wso2apim123#</SA_PASSWORD>
+                                            <MSSQL_DB>testamdb</MSSQL_DB>
+                                        </env>
+                                        <wait>
+                                            <log>MSSQL SERVER SUCCESSFULLY STARTED</log>
+                                            <time>60000</time>
+                                        </wait>
+                                        <ports>
+                                            <port>+bind.host.name:1433:1433</port>
+                                        </ports>
+                                    </run>
+                                </image>
+                            </images>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>2.19.1</version>
+                        <executions>
+                            <execution>
+                                <id>integration-test-for-mssql</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>verify-for-mssql</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <environmentVariables>
+                                <DATABASE_TYPE>mssql</DATABASE_TYPE>
+                                <PORT>1433</PORT>
+                                <!--<DATABASE_HOST>${docker.container.apim-mssql.ip}</DATABASE_HOST>-->
+                            </environmentVariables>
+                            <suiteXmlFiles>
+                                <suiteXmlFile>src/test/resources/testngDAO.xml</suiteXmlFile>
+                            </suiteXmlFiles>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
             <id>local-h2</id>
             <build>
                 <plugins>
@@ -755,6 +1001,87 @@
             </build>
         </profile>
         <profile>
+            <id>local-postgres-mac</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.fabric8</groupId>
+                        <artifactId>docker-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>start-docker-for-postgres</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>start</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>stop-docker-for-postgres</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                    <goal>remove</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <images>
+                                <image>
+                                    <alias>apim-postgres</alias>
+                                    <name>postgres:9.6-alpine</name>
+                                    <run>
+                                        <namingStrategy>alias</namingStrategy>
+                                        <env>
+                                            <POSTGRES_PASSWORD>root</POSTGRES_PASSWORD>
+                                            <POSTGRES_USER>root</POSTGRES_USER>
+                                            <POSTGRES_DB>testamdb</POSTGRES_DB>
+                                        </env>
+                                        <wait>
+                                            <time>60000</time>
+                                        </wait>
+                                        <ports>
+                                            <port>+bind.host.name:5432:5432</port>
+                                        </ports>
+                                    </run>
+                                </image>
+                            </images>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>2.19.1</version>
+                        <executions>
+                            <execution>
+                                <id>integration-test-for-postgres</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>verify-for-postgres</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <environmentVariables>
+                                <DATABASE_TYPE>postgres</DATABASE_TYPE>
+                                <PORT>5432</PORT>
+                                <!--<DATABASE_HOST>${docker.container.apim-postgres.ip}</DATABASE_HOST>-->
+                            </environmentVariables>
+                            <suiteXmlFiles>
+                                <suiteXmlFile>src/test/resources/testngDAO.xml</suiteXmlFile>
+                            </suiteXmlFiles>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
             <id>local-oracle</id>
             <build>
                 <plugins>
@@ -823,6 +1150,88 @@
                                 <DATABASE_TYPE>oracle</DATABASE_TYPE>
                                 <PORT>1521</PORT>
                                 <DATABASE_HOST>${docker.container.apim-oracle.ip}</DATABASE_HOST>
+                            </environmentVariables>
+                            <argLine>-Duser.timezone=GMT</argLine>
+                            <suiteXmlFiles>
+                                <suiteXmlFile>src/test/resources/testngDAO.xml</suiteXmlFile>
+                            </suiteXmlFiles>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>local-oracle-mac</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.fabric8</groupId>
+                        <artifactId>docker-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>start-docker-for-oracle</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>start</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>stop-docker-for-oracle</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                    <goal>remove</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <images>
+                                <image>
+                                    <alias>apim-oracle</alias>
+                                    <name>tharindu1st/oracle-xe:11.2.0.2-xe</name>
+                                    <run>
+                                        <namingStrategy>alias</namingStrategy>
+                                        <env>
+                                            <DB_NAME>testamdb</DB_NAME>
+                                        </env>
+                                        <wait>
+                                            <log>DATABASE IS READY TO USE!</log>
+                                            <time>400000</time>
+                                        </wait>
+                                        <shmSize>2718281829</shmSize>
+                                        <ports>
+                                            <port>+bind.host.name:1521:1521</port>
+                                        </ports>
+                                    </run>
+                                </image>
+                            </images>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>2.19.1</version>
+                        <executions>
+                            <execution>
+                                <id>integration-test-for-postgres</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>verify-for-postgres</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <environmentVariables>
+                                <DATABASE_TYPE>oracle</DATABASE_TYPE>
+                                <PORT>1521</PORT>
+                                <!--<DATABASE_HOST>${docker.container.apim-oracle.ip}</DATABASE_HOST>-->
                             </environmentVariables>
                             <argLine>-Duser.timezone=GMT</argLine>
                             <suiteXmlFiles>
@@ -910,6 +1319,7 @@
             org.wso2.carbon.apimgt.core.*; version="${carbon.apimgt.version}",
         </export.package>
         <dynamic.import.package>*</dynamic.import.package>
+        <bind.host.name>localhost</bind.host.name>
     </properties>
 
 </project>
