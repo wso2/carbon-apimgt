@@ -6,37 +6,44 @@ import TableRow from '@material-ui/core/TableRow';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import Tooltip from '@material-ui/core/Tooltip';
+import { FormattedMessage } from 'react-intl';
 
 const rows = [
     {
         id: 'name',
         numeric: false,
         disablePadding: true,
-        label: 'Name',
+        label: <FormattedMessage id='name' defaultMessage='Name' />,
     },
     {
         id: 'version',
         numeric: true,
         disablePadding: false,
-        label: 'Version',
+        label: <FormattedMessage id='version' defaultMessage='Version' />,
     },
     {
         id: 'context',
         numeric: true,
         disablePadding: false,
-        label: 'Context',
+        label: <FormattedMessage id='context' defaultMessage='Context' />,
     },
     {
         id: 'subscriptions',
         numeric: true,
         disablePadding: false,
-        label: 'Subscriptions',
+        label: <FormattedMessage id='subscriptions' defaultMessage='Subscriptions' />,
     },
     {
         id: 'provider',
         numeric: true,
         disablePadding: false,
-        label: 'provider',
+        label: <FormattedMessage id='provider' defaultMessage='Provider' />,
+    },
+    {
+        id: 'status',
+        numeric: true,
+        disablePadding: false,
+        label: <FormattedMessage id='status' defaultMessage='Status' />,
     },
 ];
 

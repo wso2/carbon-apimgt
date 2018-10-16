@@ -124,8 +124,8 @@ class ApiCreateSwagger extends React.Component {
                 });
         } else if (inputType === 'file') {
             if (this.state.files.length === 0) {
-                Alert.error('Select a swagger file to upload.');
-                console.log('Select a swagger file to upload.');
+                Alert.error('Select a OpenAPI file to upload.');
+                console.log('Select a OpenAPI file to upload.');
                 return;
             }
             const swagger = this.state.files[0];
@@ -175,10 +175,10 @@ class ApiCreateSwagger extends React.Component {
                             <FormattedMessage id='create.new.api.swagger' defaultMessage='Create New API - ' />
                             {this.state.uploadMethod === 'file' ? (
                                 <span>
-                                    <FormattedMessage id='swagger.file.upload' defaultMessage='Swagger file upload' />
+                                    <FormattedMessage id='swagger.file.upload' defaultMessage='OpenAPI file upload' />
                                 </span>
                             ) : (
-                                <span><FormattedMessage id='by.swagger.url' defaultMessage='By swagger url' /></span>
+                                <span><FormattedMessage id='by.swagger.url' defaultMessage='By OpenAPI url' /></span>
                             )}
                         </Typography>
                         <Typography type='caption' gutterBottom align='left' className='page-title-help'>
