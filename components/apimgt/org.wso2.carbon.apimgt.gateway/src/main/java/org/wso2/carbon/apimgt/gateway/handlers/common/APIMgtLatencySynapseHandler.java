@@ -39,7 +39,6 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
                 .buildTracer(APIMgtGatewayConstants.SERVICE_NAME);
     }
 
-
     @Override
     public boolean handleRequestInFlow(MessageContext messageContext) {
         if (Util.tracingEnabled()) {
@@ -66,11 +65,14 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
                     Util.startSpan(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN, parentSpan, tracer);
             messageContext.setProperty(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN, backendLatencySpan);
             Util.inject(backendLatencySpan, tracer, tracerSpecificCarrier);
-            Map headers = (Map) org.apache.axis2.context.MessageContext.getCurrentMessageContext().getProperty(
-                    org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-            headers.putAll(tracerSpecificCarrier);
-            org.apache.axis2.context.MessageContext.getCurrentMessageContext()
-                    .setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
+
+            if (org.apache.axis2.context.MessageContext.getCurrentMessageContext() != null) {
+                Map headers = (Map) org.apache.axis2.context.MessageContext.getCurrentMessageContext().getProperty(
+                        org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+                headers.putAll(tracerSpecificCarrier);
+                org.apache.axis2.context.MessageContext.getCurrentMessageContext()
+                        .setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
+            }
         }
         return true;
     }
