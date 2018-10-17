@@ -159,7 +159,7 @@ var api = outputs.api;%>
 
   var load_swagger_ui = function(url) {
       window.swaggerUI = SwaggerUIBundle({
-          url: url,
+          url: encodeURI(url),
           dom_id: '#swagger-ui-container',
           deepLinking: true,
           presets: [
