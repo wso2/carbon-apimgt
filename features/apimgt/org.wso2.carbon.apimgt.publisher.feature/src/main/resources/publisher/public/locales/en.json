@@ -77,9 +77,11 @@
   "security": "Security",
   "define.global.endpoint": "Define Global Endpoint",
   "documents": "Documents",
+  "document": "Document",
   "docs": "Docs",
   "create.an.inline.document": "Create an inline document",
   "create.a.new.inline.document.for.api": "Create a new inline document for this api.",
   "create.a.document.from.file.or.url": "Create a document from file or URL.",
-  "create.a.document.from.file.or.url.decription": "Create a new document using a file or URL for this api."
+  "create.a.document.from.file.or.url.decription": "Create a new document using a file or URL for this api.",
+  "summary": "Summary"
 }

@@ -2,6 +2,7 @@ import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
 import Checkbox from '@material-ui/core/Checkbox';
+import { Link } from 'react-router-dom';
 
 /**
  * Row of the API Document in Doucment listing
@@ -11,9 +12,10 @@ import Checkbox from '@material-ui/core/Checkbox';
 export default class DocRow extends React.Component {
 
     render() {
-        const doc = this.props.doc;
+        const { doc, api } = this.props;
         const { documentId } = doc;
-        const {isSelected} = this.props;
+        const { isSelected } = this.props;
+        const overviewPath = `documents/${doc.documentId}/details`;
         return (
             <TableRow
                 hover
@@ -28,7 +30,7 @@ export default class DocRow extends React.Component {
                 </TableCell>
 
                 <TableCell component='th' scope='row' padding='none'>
-                    {doc.name}
+                    <Link to={overviewPath}>{doc.name}</Link>
                 </TableCell>
                 <TableCell>{doc.type}</TableCell>
                 <TableCell>{doc.lastUpdatedTime}</TableCell>
