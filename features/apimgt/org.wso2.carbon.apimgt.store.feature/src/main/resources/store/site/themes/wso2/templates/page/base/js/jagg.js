@@ -116,6 +116,7 @@ var jagg = jagg || {};
         jagg.messageDisplay({content:params.content,title:"API Store - " + type,buttons:[
             {name:"OK",cssClass:"btn btn-primary",cbk:function() {
                 $('#messageModal').modal('hide');
+                $("#messageModal div.modal-footer").html("");
                 if(params.cbk && typeof params.cbk == "function")
 	                    params.cbk();
             }}
