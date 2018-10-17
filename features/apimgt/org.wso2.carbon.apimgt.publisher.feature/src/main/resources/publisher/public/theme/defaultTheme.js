@@ -25,7 +25,10 @@ var Configurations = {
         },
         typography: {
           fontFamily: '"Open Sans", "Helvetica", "Arial", sans-serif',
-          fontSize: 12
+          fontSize: 12,
+          subtitle2: {
+            fontWeight: 600,
+          }
         },
         custom: {
           starColor: "#f2c73a",
@@ -41,6 +44,7 @@ var Configurations = {
           leftMenuIconSize: 32,
           leftMenuIconMainSize: 52,
           leftMenuTextStyle: 'uppercase',
+          resourceChipColors: {get: '#02a8f4', post: '#8ac149', put: '#ff9700', delete: '#fd5621', option: '#5f7c8a', patch: '#785446', head: '#785446'},
         },
       },
       dark: {
@@ -68,7 +72,10 @@ var Configurations = {
         },
         typography: {
           fontFamily: '"Open Sans", "Helvetica", "Arial", sans-serif',
-          fontSize: 12
+          fontSize: 12,
+          subtitle2: {
+            fontWeight: 600,
+          }
         },
         custom: {
           starColor: "#f2c73a",
@@ -84,6 +91,7 @@ var Configurations = {
           leftMenuIconSize: 32,
           leftMenuIconMainSize: 52,
           leftMenuTextStyle: 'uppercase',
+          resourceChipColors: {get: '#02a8f4', post: '#8ac149', put: '#ff9700', delete: '#fd5621', option: '#5f7c8a', patch: '#785446', head: '#785446'},
         },
       },
     },

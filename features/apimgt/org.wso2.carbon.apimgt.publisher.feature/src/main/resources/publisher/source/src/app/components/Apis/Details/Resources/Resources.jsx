@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -18,9 +18,6 @@
 
 import React from 'react';
 import Button from '@material-ui/core/Button';
-import Card from '@material-ui/core/Card';
-import CardContent  from '@material-ui/core/Card';
-import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -36,6 +33,12 @@ import Divider from '@material-ui/core/Divider';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
+import AddCircle from '@material-ui/icons/AddCircle';
+import ScopesIcon from '@material-ui/icons/VpnKey';
+import ExpansionPanel from '@material-ui/core/ExpansionPanel';
+import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
+import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
 import Api from 'AppData/api';
@@ -58,14 +61,62 @@ const styles = theme => ({
         width: 400,
     },
     mainTitle: {
-        paddingLeft: 20,
+        paddingLeft: 0,
     },
     scopes: {
         width: 400,
     },
-    divider: {
-        marginTop: 20,
-        marginBottom: 20,
+    titleWrapper: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    button: {
+        marginLeft: theme.spacing.unit*2,
+        textTransform: theme.custom.leftMenuTextStyle,
+        color: theme.palette.getContrastText(theme.palette.primary.main),
+    },
+    buttonMain: {
+        textTransform: theme.custom.leftMenuTextStyle,
+        color: theme.palette.getContrastText(theme.palette.primary.main),
+    },
+    addNewWrapper: {
+        backgroundColor: theme.palette.background.paper,
+        color: theme.palette.getContrastText(theme.palette.background.paper),
+        border: 'solid 1px ' + theme.palette.grey['300'],
+        borderRadius: theme.shape.borderRadius,
+        marginTop: theme.spacing.unit*2,
+    },
+    contentWrapper: {
+        maxWidth: theme.custom.contentAreaWidth,
+    },
+    addNewHeader: {
+        padding: theme.spacing.unit*2,
+        backgroundColor: theme.palette.grey['300'],
+        fontSize: theme.typography.h6.fontSize,
+        color: theme.typography.h6.color,
+        fontWeight: theme.typography.h6.fontWeight,
+    },
+    addNewOther: {
+        padding: theme.spacing.unit*2,
+    },
+    radioGroup: {
+        display: 'flex', 
+        flexDirection: 'row',
+        width: 300,
+    },
+    addResource: {
+        width: 600,
+        marginTop: 0,
+    },
+    buttonIcon: {
+        marginRight: 10,
+    },
+    expansionPanel: {
+        marginBottom: theme.spacing.unit,
+    },
+    expansionPanelDetails: {
+        flexDirection: 'column',
     },
 });
 
@@ -81,6 +132,8 @@ class Resources extends React.Component {
             pathDeleteList: [],
             allChecked: false,
             notFound: false,
+            showAddResource: false,
+            showScopes: false,
         };
         this.api = new Api();
         this.api_uuid = props.api.id;
@@ -338,7 +391,6 @@ class Resources extends React.Component {
         const promised_api = this.api.updateSwagger(this.api_uuid, this.state.swagger);
         promised_api
             .then((response) => {
-                console.info(response);
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') console.log(error);
@@ -413,10 +465,7 @@ class Resources extends React.Component {
             const indexesToDelete = [];
             for (let j = 0; j < this.childResources.length; j++) {
                 if (this.childResources[j]) {
-                    if (
-                        this.childResources[j].props.path === pathDeleteList[i].path &&
-                        this.childResources[j].props.method === pathDeleteList[i].method
-                    ) {
+                    if (this.childResources[j].props.path === pathDeleteList[i].path && this.childResources[j].props.method === pathDeleteList[i].method) {
                         indexesToDelete.push(j);
                     }
                 }
@@ -437,146 +486,154 @@ class Resources extends React.Component {
             }
         }
     };
-
+    toggleAddResource = () => {
+        this.setState({showAddResource: !this.state.showAddResource, showScopes: false});
+    }
+    toggleAssignScopes = () => {
+        this.setState({showScopes: !this.state.showScopes, showAddResource: false});
+    }
     render() {
-        const api = this.state.api;
+        const { api, showAddResource, apiScopes, showScopes } = this.state;
         if (this.state.notFound) {
             return <ResourceNotFound message={this.props.resourceNotFountMessage} />;
         }
         if (!api) {
             return <Progress />;
         }
-        const selectBefore = <span>/SwaggerPetstore/1.0.0</span>;
+        //const selectBefore = <span>/SwaggerPetstore/1.0.0</span>;
         const plainOptions = ['get', 'post', 'put', 'delete', 'patch', 'head', 'options'];
         const paths = this.state.paths;
         const { classes } = this.props;
-
         return (
             <div className={classes.root}>
-                <Typography variant='display1' align='left' className={classes.mainTitle}>
-                    Resources
-                </Typography>
-                <Grid container spacing={8}>
-                    <Grid item md={12} lg={12}>
-                        <Card>
-                            <CardContent>
-                                <Typography variant='headline' component='h2'>
-                                    Add New Resource
-                                </Typography>
+                <div className={classes.titleWrapper}>
+                    <Typography variant='h4' align='left' className={classes.mainTitle}>
+                        Resources
+                    </Typography>
+                    <Button size="small" className={classes.button} onClick={this.toggleAddResource}>
+                        <AddCircle className={classes.buttonIcon}/>
+                        Add New Resource
+                    </Button>
+                    <Button size="small" className={classes.button} onClick={this.toggleAssignScopes}>
+                        <ScopesIcon className={classes.buttonIcon} />
+                        Assign Global Scope for API 
+                    </Button>
+                </div>
+                <div className={classes.contentWrapper}>
+                    {showAddResource && 
+                    <React.Fragment>
+                        <div className={classes.addNewWrapper}>
+                            <Typography className={classes.addNewHeader}>
+                                Add New Resource
+                            </Typography>
+                            <Divider className={classes.divider} />
+                            <div className={classes.addNewOther}>
                                 <TextField
-                                    id='tmpResourceName'
-                                    label='URL Pattern'
-                                    className={classes.textField}
-                                    value={this.state.tmpResourceName}
-                                    onChange={this.onChangeInput('tmpResourceName')}
-                                    margin='normal'
-                                />
-                                <div style={{ marginTop: 20, display: 'flex', flexDirection: 'row' }}>
-                                    {plainOptions.map((option, index) => (
-                                        <FormGroup key={index} row>
-                                            <FormControlLabel
-                                                control={
-                                                    <Checkbox
-                                                        checked={this.state.tmpMethods.indexOf(option) > -1}
-                                                        onChange={this.handleChange(option)}
-                                                        value={option}
-                                                    />
-                                                }
-                                                label={option.toUpperCase()}
-                                            />
-                                        </FormGroup>
-                                    ))}
-                                </div>
-                                <Button  className={classes.button} onClick={this.addResources}>
+                                    required
+                                    id="outlined-required"
+                                    label="URL Pattern"
+                                    margin="normal"
+                                    variant="outlined"
+                                    id='tmpResourceName' 
+                                    className={classes.addResource}
+                                    value={this.state.tmpResourceName} 
+                                    onChange={this.onChangeInput('tmpResourceName')} 
+                                    />
+                                    <div className={classes.radioGroup}>
+                                        {plainOptions.map((option, index) => (
+                                            <FormGroup key={index} row>
+                                                <FormControlLabel control={<Checkbox checked={this.state.tmpMethods.indexOf(option) > -1} onChange={this.handleChange(option)} value={option} />} label={option.toUpperCase()} />
+                                            </FormGroup>
+                                        ))}
+                                    </div>
+                            </div>
+                            <Divider className={classes.divider} />
+                            <div className={classes.addNewOther}>
+                                <Button variant="contained" color="primary" onClick={this.addResources}>
                                     Add Resources to Path
                                 </Button>
+                                <Button className={classes.button} onClick={this.toggleAddResource}>
+                                    Cancel
+                                </Button>
+                            </div>
+                        </div>
+                    </React.Fragment>}
 
-                                {this.state.apiScopes ? (
-                                    <div>
-                                        <Divider className={classes.divider} />
-                                        <FormControl className={classes.formControl}>
-                                            <InputLabel htmlFor='select-multiple'>
-                                                Assign Global Scopes for API
-                                            </InputLabel>
-                                            <Select
-                                                multiple
-                                                value={this.state.scopes}
-                                                onChange={this.handleScopeChange}
-                                                className={classes.scopes}
+                    {(apiScopes && showScopes) &&
+                          <React.Fragment>
+                          <div className={classes.addNewWrapper}>
+                              <Typography className={classes.addNewHeader}>
+                                  Assign Global Scopes for API
+                              </Typography>
+                              <Divider className={classes.divider} />
+                              <div className={classes.addNewOther}>
+                                <FormControl className={classes.formControl}>
+                                    <InputLabel htmlFor='select-multiple'>Assign Global Scopes for API</InputLabel>
+                                    <Select multiple value={this.state.scopes} onChange={this.handleScopeChange} className={classes.scopes}>
+                                        {apiScopes.list.map(tempScope => (
+                                            <MenuItem
+                                                key={tempScope.name}
+                                                value={tempScope.name}
+                                                style={{
+                                                    fontWeight: this.state.scopes.indexOf(tempScope.name) !== -1 ? '500' : '400',
+                                                    width: 400,
+                                                }}
                                             >
-                                                {this.state.apiScopes.list.map(tempScope => (
-                                                    <MenuItem
-                                                        key={tempScope.name}
-                                                        value={tempScope.name}
-                                                        style={{
-                                                            fontWeight:
-                                                                this.state.scopes.indexOf(tempScope.name) !== -1
-                                                                    ? '500'
-                                                                    : '400',
-                                                            width: 400,
-                                                        }}
-                                                    >
-                                                        {tempScope.name}
-                                                    </MenuItem>
-                                                ))}
-                                            </Select>
-                                        </FormControl>
-                                    </div>
-                                ) : null}
-                            </CardContent>
-                        </Card>
-
-                        <List>
-                            {this.state.paths && (
-                                <ListItem>
-                                    <FormControlLabel
-                                        control={
-                                            <Checkbox
-                                                checked={this.state.allChecked}
-                                                onChange={this.handleCheckAll}
-                                                value=''
-                                            />
-                                        }
-                                        label='Check All'
-                                    />
-                                    {Object.keys(this.state.pathDeleteList).length !== 0 && (
-                                        <ListItemSecondaryAction>
-                                            <Button
-                                                className={classes.button}
-                                                color='secondary'
-                                                onClick={this.deleteSelected}
-                                            >
-                                                Delete Selected
-                                            </Button>
-                                        </ListItemSecondaryAction>
-                                    )}
-                                </ListItem>
-                            )}
-                            {Object.keys(paths).map((key) => {
-                                const path = paths[key];
-                                const that = this;
-                                return Object.keys(path).map((innerKey) => {
-                                    return (
-                                        <Resource
-                                            path={key}
-                                            method={innerKey}
-                                            methodData={path[innerKey]}
-                                            updatePath={that.updatePath}
-                                            apiScopes={this.state.apiScopes}
-                                            addRemoveToDeleteList={that.addRemoveToDeleteList}
-                                            onRef={ref => this.childResources.push(ref)}
-                                        />
-                                    );
-                                });
-                            })}
-                        </List>
-                        <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
-                            <Button  color='primary' onClick={this.updateResources} className={classes.button}>
-                                Save
-                            </Button>
-                        </ApiPermissionValidation>
-                    </Grid>
-                </Grid>
+                                                {tempScope.name}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                              </div>
+                              <Divider className={classes.divider} />
+                              <div className={classes.addNewOther}>
+                                  <Button variant="contained" color="primary" onClick={this.handleScopeChange}>
+                                      Assign global scopes for API
+                                  </Button>
+                                  <Button className={classes.button} onClick={this.toggleAssignScopes}>
+                                      Cancel
+                                  </Button>
+                              </div>
+                          </div>
+                      </React.Fragment>
+                    }
+                    
+                    <List>
+                        {this.state.paths && (
+                            <ListItem>
+                                <FormControlLabel control={<Checkbox checked={this.state.allChecked} onChange={this.handleCheckAll} value='' />} label='Check All' />
+                                {Object.keys(this.state.pathDeleteList).length !== 0 && (
+                                    <ListItemSecondaryAction>
+                                        <Button className={classes.button} color='secondary' onClick={this.deleteSelected}>
+                                            Delete Selected
+                                        </Button>
+                                    </ListItemSecondaryAction>
+                                )}
+                            </ListItem>
+                        )}
+                        {Object.keys(paths).map((key) => {
+                            const path = paths[key];
+                            const that = this;
+                            return <div>
+                                <ExpansionPanel defaultExpanded className={classes.expansionPanel}>
+                                    <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}> 
+                                    <Typography className={classes.heading} variant='h6'>{key}</Typography>
+                                    </ExpansionPanelSummary>
+                                    <ExpansionPanelDetails className={classes.expansionPanelDetails}>
+                                        {Object.keys(path).map((innerKey) => {
+                                            return <Resource path={key} method={innerKey} methodData={path[innerKey]} updatePath={that.updatePath} apiScopes={apiScopes} addRemoveToDeleteList={that.addRemoveToDeleteList} onRef={ref => this.childResources.push(ref)} />;
+                                        })}
+                                    </ExpansionPanelDetails>
+                                </ExpansionPanel>
+                            </div>
+                        })}
+                    </List>
+                    <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
+                    <Button variant="contained" color="primary" className={classes.buttonMain} onClick={this.updateResources} >
+                        Save
+                    </Button>
+                    </ApiPermissionValidation>
+                </div>
             </div>
         );
     }
