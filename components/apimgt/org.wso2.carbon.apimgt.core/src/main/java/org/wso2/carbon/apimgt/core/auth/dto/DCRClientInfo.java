@@ -165,12 +165,10 @@ public final class DCRClientInfo {
     }*/
 
     public String getTokenType() {
-
         return tokenType;
     }
 
     public void setTokenType(String tokenType) {
-
         this.tokenType = tokenType;
     }
 
