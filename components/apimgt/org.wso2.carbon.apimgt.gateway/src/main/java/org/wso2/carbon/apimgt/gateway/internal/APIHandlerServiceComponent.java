@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.gateway.throttling.util.KeyTemplateRetriever;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.tracing.TracingService;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -51,6 +52,9 @@ import java.io.File;
  * @scr.reference name="api.manager.config.service"
  * interface="org.wso2.carbon.apimgt.impl.APIManagerConfigurationService" cardinality="1..1"
  * policy="dynamic" bind="setAPIManagerConfigurationService" unbind="unsetAPIManagerConfigurationService"
+ * @scr.reference name="org.wso2.carbon.apimgt.tracing"
+ *  interface="org.wso2.carbon.apimgt.tracing.TracingService" cardinality="1..1"
+ *  policy="dynamic" bind="setTracingService" unbind="unsetTracingService"
  */
 public class APIHandlerServiceComponent {
 
@@ -183,5 +187,11 @@ public class APIHandlerServiceComponent {
         String axis2ClientXml = ServerConfiguration.getInstance().getFirstProperty("Axis2Config" +
                 ".ClientRepositoryLocation");
         return axis2ClientXml;
+    }
+    protected void setTracingService(TracingService tracingService) {
+        ServiceReferenceHolder.getInstance().setTracingService(tracingService);
+    }
+    protected void unsetTracingService(TracingService tracingService) {
+        ServiceReferenceHolder.getInstance().setTracingService(null);
     }
 }

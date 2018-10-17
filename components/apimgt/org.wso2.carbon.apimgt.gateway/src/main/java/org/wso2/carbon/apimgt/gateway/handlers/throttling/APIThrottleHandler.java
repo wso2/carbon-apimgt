@@ -61,6 +61,9 @@ import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIDescriptionGenUtil;
+import org.wso2.carbon.apimgt.tracing.TracingSpan;
+import org.wso2.carbon.apimgt.tracing.TracingTracer;
+import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
@@ -160,12 +163,28 @@ public class APIThrottleHandler extends AbstractHandler {
         Timer timer = getTimer();
         Timer.Context context = timer.start();
         long executionStartTime = System.nanoTime();
+        TracingSpan throttlingLatencySpan = null;
+        if (Util.tracingEnabled()) {
+            TracingSpan responseLatencySpan =
+                    (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+            TracingTracer tracer = Util.getGlobalTracer();
+            throttlingLatencySpan = Util.startSpan(APIMgtGatewayConstants.THROTTLE_LATENCY, responseLatencySpan, tracer);
+        }
         try {
             return doThrottle(messageContext);
+        } catch (SynapseException e) {
+            if (Util.tracingEnabled()) {
+                Util.setTag(throttlingLatencySpan, APIMgtGatewayConstants.ERROR,
+                        APIMgtGatewayConstants.API_THROTTLE_HANDLER_ERROR);
+            }
+            throw e;
         } finally {
             messageContext.setProperty(APIMgtGatewayConstants.THROTTLING_LATENCY,
                     TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - executionStartTime));
             context.stop();
+            if (Util.tracingEnabled()) {
+                Util.finishSpan(throttlingLatencySpan);
+            }
         }
     }
 

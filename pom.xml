@@ -1388,6 +1388,55 @@
                 <artifactId>siddhi-query-api</artifactId>
                 <version>${ballerina.lang.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.tracing</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jaegertracing</groupId>
+                <artifactId>jaeger-core</artifactId>
+                <version>${jaeger.core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jaegertracing</groupId>
+                <artifactId>jaeger-thrift</artifactId>
+                <version>${jaeger.thrift.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jaegertracing</groupId>
+                <artifactId>jaeger-client</artifactId>
+                <version>${jaeger.client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.zipkin.reporter2</groupId>
+                <artifactId>zipkin-sender-okhttp3</artifactId>
+                <version>${zipkin.sender.okhttp3.version}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.opentracing.brave</groupId>
+                <artifactId>brave-opentracing</artifactId>
+                <version>${brave.opentracing.version}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.opentracing</groupId>
+                <artifactId>opentracing-api</artifactId>
+                <version>${opentracing.api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentracing.contrib</groupId>
+                <artifactId>span-reporter</artifactId>
+                <version>${span.reporter.version}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.opentracing</groupId>
+                <artifactId>opentracing-mock</artifactId>
+                <version>${opentracing.mock.version}</version>
+                <scope>compile</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -1585,6 +1634,14 @@
         <maven-site-plugin.version>3.3</maven-site-plugin.version>
         <maven-project-info-reports-plugin.version>2.7</maven-project-info-reports-plugin.version>
         <swagger-codegen-maven-plugin.version>2.3.1</swagger-codegen-maven-plugin.version>
+        <jaeger.core.version>0.30.0</jaeger.core.version>
+        <jaeger.thrift.version>0.30.4</jaeger.thrift.version>
+        <jaeger.client.version>0.30.4</jaeger.client.version>
+        <zipkin.sender.okhttp3.version>2.7.7</zipkin.sender.okhttp3.version>
+        <brave.opentracing.version>0.32.0</brave.opentracing.version>
+        <opentracing.api.version>0.31.0</opentracing.api.version>
+        <span.reporter.version>0.1.0</span.reporter.version>
+        <opentracing.mock.version>0.31.0</opentracing.mock.version>
     </properties>
 </project>
 

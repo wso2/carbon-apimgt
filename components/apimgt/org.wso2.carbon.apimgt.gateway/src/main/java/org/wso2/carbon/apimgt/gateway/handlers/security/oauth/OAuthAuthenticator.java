@@ -32,6 +32,9 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.tracing.TracingSpan;
+import org.wso2.carbon.apimgt.tracing.TracingTracer;
+import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.metrics.manager.Level;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
@@ -83,6 +86,9 @@ public class OAuthAuthenticator implements Authenticator {
     public boolean authenticate(MessageContext synCtx) throws APISecurityException {
         String apiKey = null;
         boolean defaultVersionInvoked = false;
+        TracingSpan getClientDomainSpan = null;
+        TracingSpan authenticationSchemeSpan = null;
+        TracingSpan keyInfo = null;
         Map headers = (Map) ((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
 
@@ -116,7 +122,15 @@ public class OAuthAuthenticator implements Authenticator {
         String httpMethod = (String)((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(Constants.Configuration.HTTP_METHOD);
 
+        if (Util.tracingEnabled()) {
+        TracingSpan keySpan = (TracingSpan) synCtx.getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
+        TracingTracer tracer = Util.getGlobalTracer();
+            getClientDomainSpan = Util.startSpan(APIMgtGatewayConstants.GET_CLIENT_DOMAIN, keySpan, tracer);
+        }
         String clientDomain = getClientDomain(synCtx);
+        if (Util.tracingEnabled()) {
+            Util.finishSpan(getClientDomainSpan);
+        }
         if(log.isDebugEnabled() && null != clientDomain) {
             log.debug("Received Client Domain ".concat(clientDomain));
         }
@@ -124,7 +138,19 @@ public class OAuthAuthenticator implements Authenticator {
         Timer timer = getTimer(MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "GET_RESOURCE_AUTH"));
         Timer.Context context = timer.start();
+        org.apache.axis2.context.MessageContext axis2MessageCtx = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
+        org.apache.axis2.context.MessageContext.setCurrentMessageContext(axis2MessageCtx);
+
+        if (Util.tracingEnabled()) {
+            TracingSpan keySpan = (TracingSpan) synCtx.getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
+            TracingTracer tracer = Util.getGlobalTracer();
+            authenticationSchemeSpan =
+                    Util.startSpan(APIMgtGatewayConstants.GET_RESOURCE_AUTHENTICATION_SCHEME, keySpan, tracer);
+        }
         String authenticationScheme = getAPIKeyValidator().getResourceAuthenticationScheme(synCtx);
+        if (Util.tracingEnabled()) {
+            Util.finishSpan(authenticationSchemeSpan);
+        }
         context.stop();
         APIKeyValidationInfoDTO info;
         if(APIConstants.AUTH_NO_AUTHENTICATION.equals(authenticationScheme)){
@@ -196,15 +222,21 @@ public class OAuthAuthenticator implements Authenticator {
             if(log.isDebugEnabled()){
                 log.debug("Matching resource is: ".concat(matchingResource));
             }
-            org.apache.axis2.context.MessageContext axis2MessageCtx = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
-            org.apache.axis2.context.MessageContext.setCurrentMessageContext(axis2MessageCtx);
 
             timer = getTimer(MetricManager.name(
                     APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "GET_KEY_VALIDATION_INFO"));
             context = timer.start();
 
+            if (Util.tracingEnabled()) {
+                TracingSpan keySpan = (TracingSpan) synCtx.getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
+                TracingTracer tracer = Util.getGlobalTracer();
+                keyInfo = Util.startSpan(APIMgtGatewayConstants.GET_KEY_VALIDATION_INFO, keySpan, tracer);
+            }
             info = getAPIKeyValidator().getKeyValidationInfo(apiContext, apiKey, apiVersion, authenticationScheme, clientDomain,
                     matchingResource, httpMethod, defaultVersionInvoked);
+            if (Util.tracingEnabled()) {
+                Util.finishSpan(keyInfo);
+            }
             context.stop();
             synCtx.setProperty(APIMgtGatewayConstants.APPLICATION_NAME, info.getApplicationName());
             synCtx.setProperty(APIMgtGatewayConstants.END_USER_NAME, info.getEndUserName());
