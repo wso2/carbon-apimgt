@@ -3265,7 +3265,7 @@ paths:
       security:
         - OAuth2Security:
           - apim:api_create
-      summary: Update a Tier
+      summary: Update an endpoint
       description: |
         This operation can be used to update an existing endpoint.
         `PUT https://127.0.0.1:9443/api/am/publisher/v1.0/endpoints/api/Low`

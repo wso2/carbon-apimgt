@@ -242,7 +242,7 @@ class Details extends Component {
                         Icon={<DocumentsIcon />}
                     />
                     <LeftMenuItem
-                        text='subscription'
+                        text='subscriptions'
                         handleMenuSelect={this.handleMenuSelect}
                         active={active}
                         Icon={<SubscriptionsIcon />}
@@ -265,7 +265,7 @@ class Details extends Component {
                             <Route path='/apis/:api_uuid/resources' component={() => <Resources api={api} />} />
                             <Route path='/apis/:api_uuid/scopes' component={() => <Scopes api={api} />} />
                             <Route path='/apis/:api_uuid/documents' component={() => <Documents api={api} />} />
-                            <Route path='/apis/:api_uuid/subscription' component={() => <Subscriptions api={api} />} />
+                            <Route path='/apis/:api_uuid/subscriptions' component={() => <Subscriptions api={api} />} />
                             <Route path='/apis/:api_uuid/security' component={() => <Security api={api} />} />
                             <Route component={PageNotFound} />
                         </Switch>
