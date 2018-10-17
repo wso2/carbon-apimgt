@@ -18,8 +18,8 @@
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
+import Footer from './Footer/Footer';
 
 const styles = theme => ({
     appBar: {
@@ -90,9 +90,7 @@ const Base = ({ classes, children, header }) => {
 
                 <div className={classes.push} />
             </div>
-            <footer className={classes.footer}>
-                <Typography noWrap>WSO2 APIM v3.0.0 | © 2018 WSO2 Inc</Typography>
-            </footer>
+            <Footer />
         </Fragment>
     );
 };
