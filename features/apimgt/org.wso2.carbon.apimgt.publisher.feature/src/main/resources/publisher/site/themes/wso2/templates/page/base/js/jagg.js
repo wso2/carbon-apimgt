@@ -104,6 +104,7 @@ var jagg = jagg || {};
                 }},
                 {name:i18n.t("No"),cssClass:"btn",cbk:function() {
                     $('#messageModal').modal('hide');
+                    $("#messageModal div.modal-footer").html("");
                     if (typeof params.cancelCallback == "function") {
                         params.cancelCallback()
                     }
