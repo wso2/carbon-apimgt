@@ -1,21 +1,32 @@
 import React, { Component } from 'react';
-import { Table } from 'antd';
 import PropTypes from 'prop-types';
+import withStyles from '@material-ui/core/styles/withStyles';
 
 import API from 'AppData/api';
 import { Progress } from 'AppComponents/Shared';
-import ApiPermissionValidation from 'AppData/ApiPermissionValidation';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
+import SubscriptionsTable from './SubscriptionsTable';
 
+const styles = theme => ({
+    button: {
+        margin: theme.spacing.unit,
+    },
+});
+
+/**
+ * Subscriptions component
+ *
+ * @class Subscriptions
+ * @extends {Component}
+ */
 class Subscriptions extends Component {
     constructor(props) {
         super(props);
-        this.api_uuid = props.match.params.api_uuid;
+        this.api_uuid = props.api.id;
         this.state = {
-            subscriptions: null,
+            api: null,
             notFound: false,
         };
-        this.updateProductionSubscription = this.updateProductionSubscription.bind(this);
     }
 
     componentDidMount() {
@@ -34,135 +45,37 @@ class Subscriptions extends Component {
                     this.setState({ notFound: true });
                 }
             });
-        this.fetchData();
-    }
-
-    fetchData() {
-        const api = new API();
-        const promisedEndpoints = api.subscriptions(this.api_uuid);
-        /* TODO: Handle catch case , auth errors and ect ~tmkb */
-        promisedEndpoints.then((response) => {
-            this.setState({ subscriptions: response.obj.list });
-        });
-    }
-
-    updateProductionSubscription(event) {
-        const { currentState } = event.target.dataset;
-        const subscriptionId = event.target.dataset.sample;
-        const api = new API();
-        let setState = '';
-        const eventId = event.target.id;
-
-        if (eventId === 'PROD_ONLY_BLOCKED') {
-            if (event.target.checked) {
-                if (currentState === 'SANDBOX_ONLY_BLOCKED') {
-                    setState = 'BLOCKED';
-                } else {
-                    setState = 'PROD_ONLY_BLOCKED';
-                }
-            } else if (currentState === 'BLOCKED') {
-                setState = 'SANDBOX_ONLY_BLOCKED';
-            } else {
-                setState = 'ACTIVE';
-            }
-        } else if (eventId === 'SANDBOX_ONLY_BLOCKED') {
-            if (event.target.checked) {
-                if (currentState === 'PROD_ONLY_BLOCKED') {
-                    setState = 'BLOCKED';
-                } else {
-                    setState = 'SANDBOX_ONLY_BLOCKED';
-                }
-            } else if (currentState === 'BLOCKED') {
-                setState = 'PROD_ONLY_BLOCKED';
-            } else {
-                setState = 'ACTIVE';
-            }
-        }
-        const promisedSubs = api.blockSubscriptions(subscriptionId, setState);
-        promisedSubs.then(() => {
-            this.fetchData();
-        });
     }
 
     render() {
-        const { api, subscriptions } = this.state;
-        const { resourceNotFountMessage } = this.props;
+        const { api } = this.state;
+        const { resourceNotFoundMessage } = this.props;
+
         if (this.state.notFound) {
-            return <ResourceNotFound message={resourceNotFountMessage} />;
+            return <ResourceNotFound message={resourceNotFoundMessage} />;
         }
+
         if (!api) {
             return <Progress />;
         }
 
-        const columns = [
-            {
-                title: 'Application',
-                render: a => <div>{a.applicationInfo.name}</div>,
-            },
-            {
-                title: 'Access Control for',
-                render: a => (
-                    <div>
-                        <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
-                            <ApiPermissionValidation
-                                checkingPermissionType={ApiPermissionValidation.permissionType.MANAGE_SUBSCRIPTION}
-                                userPermissions={this.state.api.userPermissionsForApi}
-                            >
-                                <label htmlFor='production'>
-                                    Production
-                                    <input
-                                        type='checkbox'
-                                        checked={
-                                            a.subscriptionStatus === 'PROD_ONLY_BLOCKED' ||
-                                            a.subscriptionStatus === 'BLOCKED'
-                                        }
-                                        data-sample={a.subscriptionId}
-                                        id='PROD_ONLY_BLOCKED'
-                                        data-current={a.subscriptionStatus}
-                                        style={{ marginRight: '100px' }}
-                                        onChange={this.updateProductionSubscription}
-                                    />
-                                </label>
-                                <label htmlFor='sandbox'>
-                                    Sandbox
-                                    <input
-                                        checked={
-                                            a.subscriptionStatus === 'SANDBOX_ONLY_BLOCKED' ||
-                                            a.subscriptionStatus === 'BLOCKED'
-                                        }
-                                        type='checkbox'
-                                        id='SANDBOX_ONLY_BLOCKED'
-                                        data-sample={a.subscriptionId}
-                                        data-current={a.subscriptionStatus}
-                                        onChange={this.updateProductionSubscription}
-                                    />
-                                </label>
-                            </ApiPermissionValidation>
-                        </ApiPermissionValidation>
-                    </div>
-                ),
-            },
-        ];
         return (
             <div>
-                <h1>API Subscriptions</h1>
-
-                <Table columns={columns} dataSource={subscriptions} />
+                <SubscriptionsTable api={api} />
             </div>
         );
     }
 }
 
 Subscriptions.defaultProps = {
-    resourceNotFountMessage: 'Resource not found!',
+    resourceNotFoundMessage: 'Resource not found!',
 };
 
 Subscriptions.propTypes = {
-    match: PropTypes.shape({
-        params: PropTypes.shape({
-            api_uuid: PropTypes.string,
-        }),
+    api: PropTypes.shape({
+        id: PropTypes.string,
     }).isRequired,
-    resourceNotFountMessage: PropTypes.string,
+    resourceNotFoundMessage: PropTypes.string,
 };
-export default Subscriptions;
+
+export default withStyles(styles)(Subscriptions);
