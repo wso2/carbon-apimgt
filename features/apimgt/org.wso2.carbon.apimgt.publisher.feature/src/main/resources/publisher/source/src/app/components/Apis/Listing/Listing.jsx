@@ -21,53 +21,21 @@ import qs from 'qs';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import API from 'AppData/api.js';
-import PageContainer from 'AppComponents/Base/container/';
 import { Progress } from 'AppComponents/Shared';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
-import PageNavigation from '../APIsNavigation';
 import SampleAPI from './SampleAPI/SampleAPI';
 import CardView from './CardView/CardView';
 import TableView from './TableView/TableView';
 import TopMenu from './components/TopMenu';
 
 const styles = theme => ({
-    rightIcon: {
-        marginLeft: theme.spacing.unit,
-    },
-    button: {
-        margin: theme.spacing.unit,
-        marginBottom: 0,
-    },
-    buttonRight: {
-        alignSelf: 'flex-end',
-        display: 'flex',
-    },
-    ListingWrapper: {
-        paddingTop: 10,
-        paddingLeft: 35,
-    },
-    root: {
-        height: 70,
-        background: theme.palette.background.paper,
-        borderBottom: 'solid 1px ' + theme.palette.grey.A200,
-        display: 'flex',
-    },
-    mainIconWrapper: {
-        paddingTop: 13,
-        paddingLeft: 35,
-        paddingRight: 20,
-    },
-    mainTitle: {
-        paddingTop: 10,
-    },
-    mainTitleWrapper: {},
-    APICreateMenu: {
-        flexGrow: 1,
-        display: 'flex',
-        alignItems: 'center',
-    },
     content: {
         flexGrow: 1,
+    },
+    contentInside: {
+        maxWidth: theme.custom.contentAreaWidth,
+        paddingLeft: theme.spacing.unit * 3,
+        paddingTop: theme.spacing.unit * 2,
     },
 });
 /**
@@ -167,34 +135,39 @@ class Listing extends React.Component {
         const { classes } = this.props;
         if (notFound) {
             return (
-                <PageContainer pageNav={<PageNavigation />}>
-                    <ResourceNotFound />
-                </PageContainer>
+                <main className={classes.content}>
+                    <TopMenu setListType={this.setListType} apis={apis} />
+                    <div className={classes.contentInside}>
+                        <ResourceNotFound />
+                    </div>
+                </main>
             );
         }
         if (!apis) {
             return (
-                <PageContainer pageNav={<PageNavigation />}>
-                    <Progress />
-                </PageContainer>
+                <main className={classes.content}>
+                    <TopMenu setListType={this.setListType} apis={apis} />
+                    <div className={classes.contentInside}>
+                        <Progress />
+                    </div>
+                </main>
             );
         }
         if (apis.list.length === 0) {
             return (
-                <PageContainer pageNav={<PageNavigation />}>
-                    <SampleAPI />
-                </PageContainer>
+                <main className={classes.content}>
+                    <TopMenu setListType={this.setListType} apis={apis} />
+                    <div className={classes.contentInside}>
+                        <SampleAPI />
+                    </div>
+                </main>
             );
         }
 
         return (
             <main className={classes.content}>
                 <TopMenu setListType={this.setListType} apis={apis} />
-                {listType === 'grid' ? (
-                    <CardView updateAPIsList={this.updateAPIsList} apis={apis} />
-                ) : (
-                    <TableView updateAPIsList={this.updateAPIsList} apis={apis} />
-                )}
+                <div className={classes.contentInside}>{listType === 'grid' ? <CardView updateAPIsList={this.updateAPIsList} apis={apis} /> : <TableView updateAPIsList={this.updateAPIsList} apis={apis} />}</div>
             </main>
         );
     }

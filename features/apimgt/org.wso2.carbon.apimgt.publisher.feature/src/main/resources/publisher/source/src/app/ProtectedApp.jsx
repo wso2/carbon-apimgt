@@ -17,6 +17,7 @@ import AuthManager from 'AppData/AuthManager';
 import Header from 'AppComponents/Base/Header';
 import Avatar from 'AppComponents/Base/Header/avatar/Avatar';
 import Configurations from 'Config';
+import AppErrorBoundaryStyled from 'AppComponents/Shared/AppErrorBoundaryStyled';
 
 const themes = [];
 
@@ -126,14 +127,16 @@ export default class Protected extends Component {
         return (
             <IntlProvider locale={language} messages={this.state.messages}>
                 <MuiThemeProvider theme={themes[this.state.themeIndex % 2]}>
-                    <Base header={header}>
-                        <Switch>
-                            <Redirect exact from='/' to='/apis' />
-                            <Route path='/apis' component={Apis} />
-                            <Route path='/endpoints' component={Endpoints} />
-                            <Route component={PageNotFound} />
-                        </Switch>
-                    </Base>
+                    <AppErrorBoundaryStyled>
+                        <Base header={header}>
+                            <Switch>
+                                <Redirect exact from='/' to='/apis' />
+                                <Route path='/apis' component={Apis} />
+                                <Route path='/endpoints' component={Endpoints} />
+                                <Route component={PageNotFound} />
+                            </Switch>
+                        </Base>
+                    </AppErrorBoundaryStyled>
                 </MuiThemeProvider>
             </IntlProvider>
         );
