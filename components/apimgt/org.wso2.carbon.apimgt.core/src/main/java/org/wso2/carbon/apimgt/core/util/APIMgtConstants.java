@@ -543,7 +543,8 @@ public class APIMgtConstants {
      * Oauth2 Related Constants
      */
     public static class Oauth2Constants {
-        public static final String CODE_GRANT_TYPE = "code";
+        public static final String IMPLICIT_GRANT_TYPE = "implicit";
         public static final String AUTHORIZATION_CODE_GRANT_TYPE = "authorization_code";
+        public static final String OAUTH_TOKEN_TYPE = "OAUTH";
     }
 }

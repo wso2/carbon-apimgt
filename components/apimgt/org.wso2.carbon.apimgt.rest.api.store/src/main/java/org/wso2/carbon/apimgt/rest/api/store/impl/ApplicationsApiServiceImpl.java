@@ -235,10 +235,8 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         try {
             String username = RestApiUtil.getLoggedInUsername(request);
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
-            OAuthApplicationInfo oAuthApp = apiConsumer.updateGrantTypesAndCallbackURL(applicationId, keyType,
-                                                                                       body.getSupportedGrantTypes(),
-                                                                                       body.getTokenType().toString()
-                    , body.getCallbackUrl());
+            OAuthApplicationInfo oAuthApp = apiConsumer.updateGrantTypesAndCallbackURL(applicationId, keyType, body
+                    .getSupportedGrantTypes(), body.getTokenType().toString(), body.getCallbackUrl());
             ApplicationKeysDTO appKeys = ApplicationKeyMappingUtil.fromApplicationKeysToDTO(oAuthApp);
             return Response.ok().entity(appKeys).build();
         } catch (APIManagementException e) {

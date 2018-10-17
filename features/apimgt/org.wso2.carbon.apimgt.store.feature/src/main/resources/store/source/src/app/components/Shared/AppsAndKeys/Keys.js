@@ -15,6 +15,7 @@ import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormLabel from '@material-ui/core/FormLabel';
+import { FormattedMessage } from 'react-intl';
 
 // Styles for Grid and Paper elements
 const styles = theme => ({
@@ -173,20 +174,26 @@ class Keys extends React.Component {
                 <Grid container spacing={24} className={classes.root}>
                     <Grid item xs={12} md={6}>
                         <FormControl component="fieldset" className={classes.formControl}>
-                            <FormLabel component="legend">Token Type</FormLabel>
+                            <FormLabel component="legend">
+                                <FormattedMessage
+                                    id='token.type'
+                                    defaultMessage='Token Type'/></FormLabel>
                             <RadioGroup
                                 aria-label="Token Type"
                                 name="tokenType"
                                 className={classes.group}
                                 value={this.state.tokenType}
                                 onChange={this.handleTokenTypeChange}>
-                                <FormControlLabel value="OAUTH" control={<Radio />} label="OAUTH" />
-                                <FormControlLabel value="JWT" control={<Radio />} label="JWT" />
+                                <FormControlLabel value="OAUTH" control={<Radio/>} label="OAUTH"/>
+                                <FormControlLabel value="JWT" control={<Radio/>} label="JWT"/>
                             </RadioGroup>
                         </FormControl>
                     <FormControl className={classes.FormControl} component="fieldset">
                         <InputLabel shrink htmlFor="age-label-placeholder" className={classes.quotaHelp}>
-                            Grant Types
+                            <FormattedMessage
+                                id='grant.types'
+                                defaultMessage='Grant Types'
+                            />
                         </InputLabel>
                             <div className={classes.checkboxWrapper}>
                                 <div className={classes.checkboxWrapperColumn}>

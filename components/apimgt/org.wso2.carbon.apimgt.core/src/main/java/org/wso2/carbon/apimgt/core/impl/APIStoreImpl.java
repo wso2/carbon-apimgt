@@ -504,11 +504,11 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             throw new APIManagementException(msg, ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
         }
         if (grantTypes.contains(APIMgtConstants.Oauth2Constants.AUTHORIZATION_CODE_GRANT_TYPE) || grantTypes.contains
-                (APIMgtConstants.Oauth2Constants.CODE_GRANT_TYPE)) {
+                (APIMgtConstants.Oauth2Constants.IMPLICIT_GRANT_TYPE)) {
             if (StringUtils.isEmpty(callbackURL)) {
-                String msg = "Callback URL can't be null or empty when" + APIMgtConstants.Oauth2Constants
-                        .AUTHORIZATION_CODE_GRANT_TYPE + " or" + APIMgtConstants.Oauth2Constants.CODE_GRANT_TYPE + " " +
-                        "present in grant types";
+                String msg = "Callback URL can't be null or empty when " + APIMgtConstants.Oauth2Constants
+                        .AUTHORIZATION_CODE_GRANT_TYPE + " or " + APIMgtConstants.Oauth2Constants.IMPLICIT_GRANT_TYPE
+                        + " " + "present in grant types";
                 log.error(msg);
                 throw new APIManagementException(msg, ExceptionCodes.OAUTH2_APP_UPDATE_FAILED);
             }
@@ -518,7 +518,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             OAuthApplicationInfo appFromDB = getApplicationDAO().getApplicationKeys(applicationId, keyType);
             OAuthApplicationInfo oAuthApp = getKeyManager().retrieveApplication(appFromDB.getClientId());
             oAuthApp.setGrantTypes(grantTypes);
-            oAuthApp.setCallBackURL(callbackURL);
+            if (StringUtils.isNotEmpty(callbackURL)) {
+                oAuthApp.setCallBackURL(callbackURL);
+            }
             oAuthApp.setTokenType(tokenType);
             oAuthApp = getKeyManager().updateApplication(oAuthApp);
             if (log.isDebugEnabled()) {
