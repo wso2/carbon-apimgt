@@ -335,7 +335,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
     @Override
     public OAuthApplicationInfo generateApplicationKeys(String applicationId, String keyType,
-                                                        String callbackUrl, List<String> grantTypes)
+            String callbackUrl, List<String> grantTypes, String tokenType)
             throws APIManagementException {
         if (log.isDebugEnabled()) {
             log.debug("Generating application keys for application: " + applicationId);
@@ -344,7 +344,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         Application application = getApplicationByUuid(applicationId);
 
         OAuthAppRequest oauthAppRequest = new OAuthAppRequest(application.getName(), callbackUrl, keyType,
-                grantTypes);
+                                                              grantTypes, tokenType);
 
         OAuthApplicationInfo oauthAppInfo = getKeyManager().createApplication(oauthAppRequest);
 
@@ -439,6 +439,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 keys.setClientSecret(oAuthApp.getClientSecret());
                 keys.setGrantTypes(oAuthApp.getGrantTypes());
                 keys.setCallBackURL(oAuthApp.getCallBackURL());
+                keys.setTokenType(oAuthApp.getTokenType());
             }
             if (log.isDebugEnabled()) {
                 log.debug("Retrieved all keys of App: " + applicationId);
@@ -470,6 +471,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             keysFromDB.setClientSecret(oAuthApp.getClientSecret());
             keysFromDB.setGrantTypes(oAuthApp.getGrantTypes());
             keysFromDB.setCallBackURL(oAuthApp.getCallBackURL());
+            keysFromDB.setTokenType(oAuthApp.getTokenType());
             if (log.isDebugEnabled()) {
                 log.debug("Retrieved " + keyType + " keys of App: " + applicationId);
             }
@@ -483,10 +485,10 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
     @Override
     public OAuthApplicationInfo updateGrantTypesAndCallbackURL(String applicationId, String keyType,
-                                                               List<String> grantTypes, String callbackURL)
+            List<String> grantTypes, String tokenType, String callbackURL)
             throws APIManagementException {
         if (log.isDebugEnabled()) {
-            log.debug("Updating " + keyType + " grant type/callback of App: " + applicationId);
+            log.debug("Updating " + keyType + " grant type/callback/tokenType of App: " + applicationId);
         }
 
         if (StringUtils.isEmpty(applicationId) || StringUtils.isEmpty(keyType)) {
@@ -496,17 +498,30 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             throw new APIManagementException(msg, ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
         }
 
-        if (grantTypes == null || grantTypes.isEmpty() || StringUtils.isEmpty(callbackURL)) {
+        if (grantTypes == null || grantTypes.isEmpty()) {
             String msg = "Both Grant Types list and Callback URL can't be null or empty at once.";
             log.error(msg);
             throw new APIManagementException(msg, ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
+        }
+        if (grantTypes.contains(APIMgtConstants.Oauth2Constants.AUTHORIZATION_CODE_GRANT_TYPE) || grantTypes.contains
+                (APIMgtConstants.Oauth2Constants.IMPLICIT_GRANT_TYPE)) {
+            if (StringUtils.isEmpty(callbackURL)) {
+                String msg = "Callback URL can't be null or empty when " + APIMgtConstants.Oauth2Constants
+                        .AUTHORIZATION_CODE_GRANT_TYPE + " or " + APIMgtConstants.Oauth2Constants.IMPLICIT_GRANT_TYPE
+                        + " " + "present in grant types";
+                log.error(msg);
+                throw new APIManagementException(msg, ExceptionCodes.OAUTH2_APP_UPDATE_FAILED);
+            }
         }
 
         try {
             OAuthApplicationInfo appFromDB = getApplicationDAO().getApplicationKeys(applicationId, keyType);
             OAuthApplicationInfo oAuthApp = getKeyManager().retrieveApplication(appFromDB.getClientId());
             oAuthApp.setGrantTypes(grantTypes);
-            oAuthApp.setCallBackURL(callbackURL);
+            if (StringUtils.isNotEmpty(callbackURL)) {
+                oAuthApp.setCallBackURL(callbackURL);
+            }
+            oAuthApp.setTokenType(tokenType);
             oAuthApp = getKeyManager().updateApplication(oAuthApp);
             if (log.isDebugEnabled()) {
                 log.debug("Updated " + keyType + " grant type/callback of App: " + applicationId);

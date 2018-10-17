@@ -57,6 +57,39 @@ public class ApplicationKeysDTO   {
   @SerializedName("keyType")
   private KeyTypeEnum keyType = null;
 
+  /**
+   * Type of the access token generated for this application.  **OAUTH:** A UUID based access token which is issued by default. **JWT:** A self-contained, signed JWT based access token. **Note:** This can be only used in Microgateway environments. 
+   */
+  public enum TokenTypeEnum {
+    @SerializedName("OAUTH")
+    OAUTH("OAUTH"),
+    
+    @SerializedName("JWT")
+    JWT("JWT");
+
+    private String value;
+
+    TokenTypeEnum(String value) {
+      this.value = value;
+    }
+
+    @Override
+    public String toString() {
+      return String.valueOf(value);
+    }
+    public static TokenTypeEnum fromValue(String text) {
+      for (TokenTypeEnum b : TokenTypeEnum.values()) {
+        if (String.valueOf(b.value).equals(text)) {
+          return b;
+        }
+      }
+      return null;
+    }
+  }
+
+  @SerializedName("tokenType")
+  private TokenTypeEnum tokenType = TokenTypeEnum.OAUTH;
+
   public ApplicationKeysDTO consumerKey(String consumerKey) {
     this.consumerKey = consumerKey;
     return this;
@@ -152,6 +185,24 @@ public class ApplicationKeysDTO   {
     this.keyType = keyType;
   }
 
+  public ApplicationKeysDTO tokenType(TokenTypeEnum tokenType) {
+    this.tokenType = tokenType;
+    return this;
+  }
+
+   /**
+   * Type of the access token generated for this application.  **OAUTH:** A UUID based access token which is issued by default. **JWT:** A self-contained, signed JWT based access token. **Note:** This can be only used in Microgateway environments. 
+   * @return tokenType
+  **/
+  @ApiModelProperty(example = "OAUTH", value = "Type of the access token generated for this application.  **OAUTH:** A UUID based access token which is issued by default. **JWT:** A self-contained, signed JWT based access token. **Note:** This can be only used in Microgateway environments. ")
+  public TokenTypeEnum getTokenType() {
+    return tokenType;
+  }
+
+  public void setTokenType(TokenTypeEnum tokenType) {
+    this.tokenType = tokenType;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -166,12 +217,13 @@ public class ApplicationKeysDTO   {
         Objects.equals(this.consumerSecret, applicationKeys.consumerSecret) &&
         Objects.equals(this.supportedGrantTypes, applicationKeys.supportedGrantTypes) &&
         Objects.equals(this.callbackUrl, applicationKeys.callbackUrl) &&
-        Objects.equals(this.keyType, applicationKeys.keyType);
+        Objects.equals(this.keyType, applicationKeys.keyType) &&
+        Objects.equals(this.tokenType, applicationKeys.tokenType);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(consumerKey, consumerSecret, supportedGrantTypes, callbackUrl, keyType);
+    return Objects.hash(consumerKey, consumerSecret, supportedGrantTypes, callbackUrl, keyType, tokenType);
   }
 
   @Override
@@ -184,6 +236,7 @@ public class ApplicationKeysDTO   {
     sb.append("    supportedGrantTypes: ").append(toIndentedString(supportedGrantTypes)).append("\n");
     sb.append("    callbackUrl: ").append(toIndentedString(callbackUrl)).append("\n");
     sb.append("    keyType: ").append(toIndentedString(keyType)).append("\n");
+    sb.append("    tokenType: ").append(toIndentedString(tokenType)).append("\n");
     sb.append("}");
     return sb.toString();
   }

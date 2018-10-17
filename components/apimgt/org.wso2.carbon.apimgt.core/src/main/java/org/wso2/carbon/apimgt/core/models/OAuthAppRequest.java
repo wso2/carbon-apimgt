@@ -34,12 +34,15 @@ public final class OAuthAppRequest {
     private String keyType;
     private List<String> grantTypes;
     private Map<String, Object> parameters = new HashMap<>();
+    private String tokenType;
 
-    public OAuthAppRequest(String clientName, String callBackURL, String keyType, List<String> grantTypes) {
+    public OAuthAppRequest(String clientName, String callBackURL, String keyType, List<String> grantTypes, String
+            tokenType) {
         this.clientName = clientName;
         this.callBackURL = callBackURL;
         this.keyType = keyType;
         this.grantTypes = grantTypes;
+        this.tokenType = tokenType;
     }
 
     public String getKeyType() {
@@ -90,6 +93,14 @@ public final class OAuthAppRequest {
         this.parameters = parameters;
     }
 
+    public String getTokenType() {
+        return tokenType;
+    }
+
+    public void setTokenType(String tokenType) {
+        this.tokenType = tokenType;
+    }
+
     @Override
     public String toString() {
         return "OAuthAppRequest{" +
@@ -97,6 +108,7 @@ public final class OAuthAppRequest {
                 ", callBackURL='" + callBackURL + '\'' +
                 ", keyType='" + keyType + '\'' +
                 ", grantTypes=" + Arrays.toString(grantTypes.toArray()) +
+                ", tokenType=" + tokenType + '\'' +
                 '}';
     }
 }

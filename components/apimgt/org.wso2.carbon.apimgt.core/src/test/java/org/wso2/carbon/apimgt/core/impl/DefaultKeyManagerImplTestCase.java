@@ -62,7 +62,7 @@ public class DefaultKeyManagerImplTestCase {
         grantTypesList.add("password");
         grantTypesList.add("client-credentials");
         OAuthAppRequest oauthAppRequest = new OAuthAppRequest("app1", "https://sample.callback/url", "PRODUCTION",
-                grantTypesList);
+                                                              grantTypesList, "OAUTH");
 
         ////request object to dcr api
         DCRClientInfo dcrClientInfo = new DCRClientInfo();
@@ -147,7 +147,7 @@ public class DefaultKeyManagerImplTestCase {
         ScopeRegistration scopeRegistration = Mockito.mock
                 (ScopeRegistration.class);
         DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
-                scopeRegistration);
+                                                                 scopeRegistration);
         final String consumerKey = "xxx-xxx-xxx-xxx";
 
         //happy path - 200
@@ -243,7 +243,7 @@ public class DefaultKeyManagerImplTestCase {
         ScopeRegistration scopeRegistration = Mockito.mock
                 (ScopeRegistration.class);
         DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
-                scopeRegistration);
+                                                                 scopeRegistration);
         final String consumerKey = "xxx-xxx-xxx-xxx";
 
         //happy path - 204
@@ -262,7 +262,7 @@ public class DefaultKeyManagerImplTestCase {
             Assert.fail("Exception was expected, but wasn't thrown");
         } catch (KeyManagementException ex) {
             Assert.assertTrue(ex.getMessage().equals("Unable to delete OAuth Application. Consumer Key is null " +
-                    "or empty"));
+                                                             "or empty"));
         }
 
         //error case - empty consumer null
@@ -271,7 +271,7 @@ public class DefaultKeyManagerImplTestCase {
             Assert.fail("Exception was expected, but wasn't thrown");
         } catch (KeyManagementException ex) {
             Assert.assertTrue(ex.getMessage().equals("Unable to delete OAuth Application. Consumer Key is null " +
-                    "or empty"));
+                                                             "or empty"));
         }
 
         //error case - non-204
@@ -296,7 +296,7 @@ public class DefaultKeyManagerImplTestCase {
         ScopeRegistration scopeRegistration = Mockito.mock
                 (ScopeRegistration.class);
         DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
-                scopeRegistration);
+                                                                 scopeRegistration);
 
         //happy path - 200
         ////mocked response object from dcr api
@@ -341,7 +341,7 @@ public class DefaultKeyManagerImplTestCase {
             Assert.fail("Exception was expected, but wasn't thrown");
         } catch (KeyManagementException ex) {
             Assert.assertTrue(ex.getMessage().equals("Unable to retrieve OAuth Application. Consumer Key is null " +
-                    "or empty"));
+                                                             "or empty"));
         }
 
         //error case - empty consumer null
@@ -350,7 +350,7 @@ public class DefaultKeyManagerImplTestCase {
             Assert.fail("Exception was expected, but wasn't thrown");
         } catch (KeyManagementException ex) {
             Assert.assertTrue(ex.getMessage().equals("Unable to retrieve OAuth Application. Consumer Key is null " +
-                    "or empty"));
+                                                             "or empty"));
         }
 
         //error case - backend error
@@ -376,13 +376,14 @@ public class DefaultKeyManagerImplTestCase {
         ScopeRegistration scopeRegistration = Mockito.mock
                 (ScopeRegistration.class);
         DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
-                scopeRegistration);
+                                                                 scopeRegistration);
 
         //happy path - 200 - password grant type
         ////request to key manager
         AccessTokenRequest tokenRequest = createKeyManagerTokenRequest(consumerKey, consumerSecret,
-                KeyManagerConstants.PASSWORD_GRANT_TYPE, "user1", "pass1", "xxx-old-token-xxx", 7200L,
-                null, null, null, null);
+                                                                       KeyManagerConstants.PASSWORD_GRANT_TYPE,
+                                                                       "user1", "pass1", "xxx-old-token-xxx", 7200L,
+                                                                       null, null, null, null);
 
         ////mocked response from /token service
         OAuth2TokenInfo oAuth2TokenInfo = createTokenServiceResponse(tokenRequest);
@@ -397,8 +398,8 @@ public class DefaultKeyManagerImplTestCase {
                 .build();
         Mockito.when(oAuth2ServiceStub.getRevokeServiceStub()).thenReturn(revokeStub);
         Mockito.when(revokeStub.revokeAccessToken(tokenRequest.getTokenToRevoke(),
-                tokenRequest.getClientId(),
-                tokenRequest.getClientSecret()))
+                                                  tokenRequest.getClientId(),
+                                                  tokenRequest.getClientSecret()))
                 .thenReturn(revokeTokenResponse);
 
         Response newTokenResponse = Response.builder()
@@ -430,13 +431,14 @@ public class DefaultKeyManagerImplTestCase {
         ScopeRegistration scopeRegistration = Mockito.mock
                 (ScopeRegistration.class);
         DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
-                scopeRegistration);
+                                                                 scopeRegistration);
 
         //happy path - 200 - refresh grant type
         ////request to key manager
         AccessTokenRequest tokenRequest = createKeyManagerTokenRequest(consumerKey, consumerSecret,
-                KeyManagerConstants.REFRESH_GRANT_TYPE, null, null, null, -1L,
-                null, null, "xxx-refresh-token-xxx", null);
+                                                                       KeyManagerConstants.REFRESH_GRANT_TYPE, null,
+                                                                       null, null, -1L,
+                                                                       null, null, "xxx-refresh-token-xxx", null);
 
         ////mocked response from /token service
         OAuth2TokenInfo oAuth2TokenInfo = createTokenServiceResponse(tokenRequest);
@@ -471,12 +473,14 @@ public class DefaultKeyManagerImplTestCase {
         ScopeRegistration scopeRegistration = Mockito.mock
                 (ScopeRegistration.class);
         DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
-                scopeRegistration);
+                                                                 scopeRegistration);
 
         //happy path - 200 - client credentials grant type
         ////request to key manager
         AccessTokenRequest tokenRequest = createKeyManagerTokenRequest(consumerKey, consumerSecret,
-                KeyManagerConstants.CLIENT_CREDENTIALS_GRANT_TYPE, null, null, null, -2L, null, null, null, null);
+                                                                       KeyManagerConstants
+                                                                               .CLIENT_CREDENTIALS_GRANT_TYPE, null,
+                                                                       null, null, -2L, null, null, null, null);
 
         ////mocked response from /token service
         OAuth2TokenInfo oAuth2TokenInfo = createTokenServiceResponse(tokenRequest);
@@ -511,13 +515,16 @@ public class DefaultKeyManagerImplTestCase {
         ScopeRegistration scopeRegistration = Mockito.mock
                 (ScopeRegistration.class);
         DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
-                scopeRegistration);
+                                                                 scopeRegistration);
 
         //happy path - 200 - authorization code grant type
         ////request to key manager
         AccessTokenRequest tokenRequest = createKeyManagerTokenRequest(consumerKey, consumerSecret,
-                KeyManagerConstants.AUTHORIZATION_CODE_GRANT_TYPE, null, null, null, -2L,
-                "xxx-auth-code-xxx", "http://test.callback/url", null, null);
+                                                                       KeyManagerConstants
+                                                                               .AUTHORIZATION_CODE_GRANT_TYPE, null,
+                                                                       null, null, -2L,
+                                                                       "xxx-auth-code-xxx", "http://test" +
+                                                                               ".callback/url", null, null);
 
         ////mocked response from /token service
         OAuth2TokenInfo oAuth2TokenInfo = createTokenServiceResponse(tokenRequest);
@@ -554,13 +561,14 @@ public class DefaultKeyManagerImplTestCase {
         ScopeRegistration scopeRegistration = Mockito.mock
                 (ScopeRegistration.class);
         DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
-                scopeRegistration);
+                                                                 scopeRegistration);
 
         //happy path - 200 - JWT grant type
         ////request to key manager
         AccessTokenRequest tokenRequest = createKeyManagerTokenRequest(consumerKey, consumerSecret,
-                KeyManagerConstants.JWT_GRANT_TYPE, null, null, null, -2L,
-                null, null, null, "xxx-assertion-xxx");
+                                                                       KeyManagerConstants.JWT_GRANT_TYPE, null,
+                                                                       null, null, -2L,
+                                                                       null, null, null, "xxx-assertion-xxx");
 
         ////mocked response from /token service
         OAuth2TokenInfo oAuth2TokenInfo = createTokenServiceResponse(tokenRequest);
@@ -597,7 +605,7 @@ public class DefaultKeyManagerImplTestCase {
         ScopeRegistration scopeRegistration = Mockito.mock
                 (ScopeRegistration.class);
         DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
-                scopeRegistration);
+                                                                 scopeRegistration);
 
         //error case - tokenRequest is null
         try {
@@ -605,25 +613,26 @@ public class DefaultKeyManagerImplTestCase {
             Assert.fail("Exception was expected, but wasn't thrown");
         } catch (KeyManagementException ex) {
             Assert.assertTrue(ex.getMessage().equals("No information available to generate Token. " +
-                    "AccessTokenRequest is null"));
+                                                             "AccessTokenRequest is null"));
         }
 
         //error case - invalid grant type
         final String invalidGrantType = "invalid_grant";
         AccessTokenRequest tokenRequest = createKeyManagerTokenRequest(consumerKey, consumerSecret,
-                invalidGrantType, null, null, null, -2L, null, null, null, null);
+                                                                       invalidGrantType, null, null, null, -2L, null,
+                                                                       null, null, null);
         try {
             kmImpl.getNewAccessToken(tokenRequest);
             Assert.fail("Exception was expected, but wasn't thrown");
         } catch (KeyManagementException ex) {
             Assert.assertTrue(ex.getMessage().contains("Invalid access token request. Unsupported grant type: " +
-                    invalidGrantType));
+                                                               invalidGrantType));
         }
 
         //error case - response is null (mock condition (validity period) is different)
         tokenRequest = createKeyManagerTokenRequest(consumerKey, consumerSecret,
-                KeyManagerConstants.REFRESH_GRANT_TYPE, null, null, null, -1L,
-                null, null, "xxx-refresh-token-xxx", null);
+                                                    KeyManagerConstants.REFRESH_GRANT_TYPE, null, null, null, -1L,
+                                                    null, null, "xxx-refresh-token-xxx", null);
 
         Mockito.when(oAuth2ServiceStub.getTokenServiceStub()).thenReturn(tokenStub);
         Mockito.when(oAuth2ServiceStub.getTokenServiceStub().generateRefreshGrantAccessToken(
@@ -635,14 +644,14 @@ public class DefaultKeyManagerImplTestCase {
             Assert.fail("Exception was expected, but wasn't thrown");
         } catch (KeyManagementException ex) {
             Assert.assertTrue(ex.getMessage().equals("Error occurred while generating an access token. " +
-                    "Response is null"));
+                                                             "Response is null"));
         }
 
         //error case - token response non-200
         ////request to key manager
         tokenRequest = createKeyManagerTokenRequest(consumerKey, consumerSecret,
-                KeyManagerConstants.REFRESH_GRANT_TYPE, null, null, null, 7200L,
-                null, null, "xxx-refresh-token-xxx", null);
+                                                    KeyManagerConstants.REFRESH_GRANT_TYPE, null, null, null, 7200L,
+                                                    null, null, "xxx-refresh-token-xxx", null);
 
         final int errorCode = 500;
         Response errorResponse = Response.builder()
@@ -660,7 +669,7 @@ public class DefaultKeyManagerImplTestCase {
             Assert.fail("Exception was expected, but wasn't thrown");
         } catch (KeyManagementException ex) {
             Assert.assertTrue(ex.getMessage().startsWith("Token generation request failed. HTTP error code: "
-                    + errorCode));
+                                                                 + errorCode));
         }
     }
 
@@ -674,7 +683,7 @@ public class DefaultKeyManagerImplTestCase {
         ScopeRegistration scopeRegistration = Mockito.mock
                 (ScopeRegistration.class);
         DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
-                scopeRegistration);
+                                                                 scopeRegistration);
         final String accessToken = "aaa-aaa-aaa-aaa";
 
         //happy path - 200 - token is active
@@ -737,7 +746,7 @@ public class DefaultKeyManagerImplTestCase {
             Assert.fail("Exception was expected, but wasn't thrown");
         } catch (KeyManagementException ex) {
             Assert.assertTrue(ex.getMessage().startsWith("Error occurred while introspecting access token. " +
-                    "Response is null"));
+                                                                 "Response is null"));
         }
 
         //error case - token response non-200
@@ -754,7 +763,7 @@ public class DefaultKeyManagerImplTestCase {
             Assert.fail("Exception was expected, but wasn't thrown");
         } catch (KeyManagementException ex) {
             Assert.assertTrue(ex.getMessage().startsWith("Token introspection request failed. HTTP error code: "
-                    + errorCode));
+                                                                 + errorCode));
         }
     }
 
@@ -767,7 +776,7 @@ public class DefaultKeyManagerImplTestCase {
         ScopeRegistration scopeRegistration = Mockito.mock
                 (ScopeRegistration.class);
         DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
-                scopeRegistration);
+                                                                 scopeRegistration);
 
         //happy path - 200
         Response revokeTokenResponse = Response.builder()
@@ -793,7 +802,7 @@ public class DefaultKeyManagerImplTestCase {
             Assert.fail("Exception was expected, but wasn't thrown");
         } catch (KeyManagementException ex) {
             Assert.assertTrue(ex.getMessage().equals("Error occurred while revoking current access token. " +
-                    "Response is null"));
+                                                             "Response is null"));
         }
 
         //error case - token response non-200
@@ -836,10 +845,10 @@ public class DefaultKeyManagerImplTestCase {
     }
 
     private AccessTokenRequest createKeyManagerTokenRequest(String consumerKey, String consumerSecret,
-                                                            String grantType, String username, String password,
-                                                            String revokeToken, long validityPeriod,
-                                                            String code, String callbackUrl, String refreshToken,
-                                                            String assertion) {
+            String grantType, String username, String password,
+            String revokeToken, long validityPeriod,
+            String code, String callbackUrl, String refreshToken,
+            String assertion) {
         AccessTokenRequest tokenRequest = new AccessTokenRequest();
         tokenRequest.setClientId(consumerKey);
         tokenRequest.setClientSecret(consumerSecret);
