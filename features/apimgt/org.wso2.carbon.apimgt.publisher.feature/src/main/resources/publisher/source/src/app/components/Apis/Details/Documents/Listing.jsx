@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -16,37 +16,25 @@
  * under the License.
  */
 
-import { Button, message } from 'antd';
+import { message } from 'antd';
 
 import React, { Component, Fragment } from 'react';
 import API from 'AppData/api.js';
-import ApiPermissionValidation from 'AppData/ApiPermissionValidation';
-import { ScopeValidation, resourcePath, resourceMethod } from 'AppData/ScopeValidation';
 import { Progress } from 'AppComponents/Shared/';
-import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
-
-import DocumentsTable from './DocumentsTable';
-import NewDocDiv from './NewDocDiv';
 import DocTableView from './DocTableView';
 import DocMenu from './DocMenu';
 
 /**
  * Documents tab related React components.
- * Component hierarchy
- * -Documents
- *    -DocumentsTable
- *        -InlineEditor
- *    -NewDocDiv
- *        -NewDocInfoDiv
- *        -NewDocSourceDiv
- * @class Documents
+ * 
+ * @class Listing
  * @extends {Component}
  */
-class Documents extends Component {
+class Listing extends Component {
     /**
      * Creates an instance of Documents.
      * @param {any} props @inheritDoc
-     * @memberof Documents
+     * @memberof Listing
      */
     constructor(props) {
         super(props);
@@ -72,7 +60,7 @@ class Documents extends Component {
 
     /**
      * @inheritDoc
-     * @memberof Documents
+     * @memberof Listing
      */
     componentDidMount() {
         const api = new API();
@@ -110,7 +98,7 @@ class Documents extends Component {
                 {this.state.documentsList && this.state.documentsList.length > 0 ? (
                     <div>
                         <DocMenu api= {api}/>
-                        <DocTableView docs={this.state.documentsList}/>
+                        <DocTableView docs={this.state.documentsList} api= {api}/>
                     </div>
                 ) : (
                     <div style={{ paddingTop: 20 }}>
@@ -122,4 +110,4 @@ class Documents extends Component {
     }
 }
 
-export default Documents;
+export default Listing;

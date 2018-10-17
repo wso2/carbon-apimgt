@@ -37,7 +37,7 @@ import { Progress } from 'AppComponents/Shared';
 
 import Overview from './Overview/Overview';
 import LifeCycle from './LifeCycle/LifeCycle';
-import Documents from './Documents/Documents';
+import Documents from './Documents';
 import Resources from './Resources/Resources';
 import Endpoints from './Endpoints';
 import Subscriptions from './Subscriptions/Subscriptions';

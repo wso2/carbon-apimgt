@@ -194,7 +194,7 @@ class DocTableView extends React.Component {
      * @memberof DocTableView @inheritdoc
      */
     render() {
-        const { classes, docs } = this.props;
+        const { classes, docs, api } = this.props;
         const {
             order, orderBy, selected, rowsPerPage, page, isDeleting,
         } = this.state;
@@ -230,6 +230,7 @@ class DocTableView extends React.Component {
                                             <DocRow
                                                 hover
                                                 doc={doc}
+                                                api={api}
                                                 isSelected={isSelected}
                                                 handleSelectADoc={this.handleSelectADoc}
                                             />
@@ -266,7 +267,6 @@ class DocTableView extends React.Component {
 DocTableView.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     docs: PropTypes.shape({ list: PropTypes.array }).isRequired,
-    updateDocsList: PropTypes.func.isRequired,
 };
 
 export default withStyles(styles)(DocTableView);
