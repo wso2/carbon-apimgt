@@ -163,6 +163,7 @@ class Scopes extends React.Component {
         const { api } = this.props;
         const { scopes } = api;
         const { classes } = this.props;
+        const { scopeURL } = '/apis/' + api.id + '/scopes/create';
 
         if (!scopes) {
             return <Progress />;
@@ -190,7 +191,7 @@ class Scopes extends React.Component {
                                 </Typography>
                             </CardContent>
                             <CardActions>
-                                <Link to={'/apis/' + api.id + '/scopes/create'}>
+                                <Link to={{ scopeURL }}>
                                     <Button variant='contained' color='primary' className={classes.button}>
                                         <FormattedMessage
                                             id='create.scopes'

@@ -409,24 +409,28 @@ class Overview extends Component {
                         }}
                     />
                 </APIPropertyField>
-                <Grid item >
-                    <Typography variant='headline'> Additional Properties</Typography>
-                    <Divider />
-                </Grid>
-                { additionalProperties
-                    .map(property => (<AdditionalProperty
-                        property={property}
-                        isEditable={isEditable}
-                        onDelete={this.handleDeleteAdditionalProperties}
-                    />))
-                }
-                <IconButton
-                    id='add'
-                    aria-label='Add'
-                    onClick={this.handleAddAdditionalProperties}
-                >
-                    <AddIcon id='1' />
-                </IconButton>
+                {additionalProperties && (
+                    <React.Fragment>
+                        <Grid item >
+                            <Typography variant='headline'> Additional Properties</Typography>
+                            <Divider />
+                        </Grid>
+                        { additionalProperties
+                            .map(property => (<AdditionalProperty
+                                property={property}
+                                isEditable={isEditable}
+                                onDelete={this.handleDeleteAdditionalProperties}
+                            />))
+                        }
+                        <IconButton
+                            id='add'
+                            aria-label='Add'
+                            onClick={this.handleAddAdditionalProperties}
+                        >
+                            <AddIcon id='1' />
+                        </IconButton>
+                    </React.Fragment>
+                )}
             </Grid>
         );
     }
