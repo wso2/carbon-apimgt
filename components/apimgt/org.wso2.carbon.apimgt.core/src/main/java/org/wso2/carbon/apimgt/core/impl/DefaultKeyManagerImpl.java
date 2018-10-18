@@ -107,6 +107,7 @@ public class DefaultKeyManagerImpl implements KeyManager {
         if (StringUtils.isNotEmpty(oauthAppRequest.getCallBackURL())) {
             dcrClientInfo.addCallbackUrl(oauthAppRequest.getCallBackURL());
         }
+        dcrClientInfo.setAudiences(oauthAppRequest.getAudiences());
 
         Response response = dcrmServiceStub.registerApplication(dcrClientInfo);
         if (response == null) {

@@ -55,6 +55,9 @@ public final class DCRClientInfo {
     private String jwksUri;
     @SerializedName("token_type_extension")
     private String tokenType;
+    @SerializedName("audiences")
+    private List<String> audiences;
+
 
     // remove commented lines after fixing https://wso2.org/jira/browse/IDENTITY-6972
 /*    @SerializedName("userinfo_signed_response_alg")
@@ -164,12 +167,30 @@ public final class DCRClientInfo {
         this.userinfoSignedResponseAlg = userinfoSignedResponseAlg;
     }*/
 
+    public List<String> getAudiences() {
+        return audiences;
+    }
+
+    public void setAudiences(List<String> audiences) {
+        this.audiences = audiences;
+    }
+
     public String getTokenType() {
         return tokenType;
     }
 
     public void setTokenType(String tokenType) {
         this.tokenType = tokenType;
+    }
+
+    public void addAudiences(String audience) {
+        if (audience == null) {
+            return;
+        }
+        if (grantTypes == null) {
+            audiences = new ArrayList<>();
+        }
+        audiences.add(audience);
     }
 
     public void addGrantType(String grantType) {

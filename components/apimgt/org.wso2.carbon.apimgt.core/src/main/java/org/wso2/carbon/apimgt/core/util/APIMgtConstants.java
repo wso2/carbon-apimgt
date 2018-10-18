@@ -546,5 +546,6 @@ public class APIMgtConstants {
         public static final String IMPLICIT_GRANT_TYPE = "implicit";
         public static final String AUTHORIZATION_CODE_GRANT_TYPE = "authorization_code";
         public static final String OAUTH_TOKEN_TYPE = "OAUTH";
+        public static final String JWT_TOKEN_TYPE = "JWT";
     }
 }

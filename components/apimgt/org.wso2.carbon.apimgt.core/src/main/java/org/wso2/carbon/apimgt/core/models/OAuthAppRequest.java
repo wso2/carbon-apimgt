@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.core.models;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +36,7 @@ public final class OAuthAppRequest {
     private List<String> grantTypes;
     private Map<String, Object> parameters = new HashMap<>();
     private String tokenType;
+    private List<String> audiences = new ArrayList();
 
     public OAuthAppRequest(String clientName, String callBackURL, String keyType, List<String> grantTypes, String
             tokenType) {
@@ -99,6 +101,14 @@ public final class OAuthAppRequest {
 
     public void setTokenType(String tokenType) {
         this.tokenType = tokenType;
+    }
+
+    public List<String> getAudiences() {
+        return audiences;
+    }
+
+    public void setAudiences(List<String> audiences) {
+        this.audiences = audiences;
     }
 
     @Override
