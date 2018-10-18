@@ -423,9 +423,27 @@ class EndpointDetail extends Component {
                                 <div className={classes.container}>
                                     <Grid container>
                                         <Grid item xs={6}>
-                                            <RadioGroup aria-label='Endpoint type' name='epType' id='epType' className={classes.group} value={this.state.isInline ? 'inline' : 'global'} onChange={this.handleRadioButtonChange} disabled>
-                                                <FormControlLabel value='inline' control={<Radio />} label='Inline' disabled={this.props.readOnly} />
-                                                <FormControlLabel value='global' control={<Radio />} label='Global' disabled={this.props.readOnly} />
+                                            <RadioGroup
+                                                aria-label='Endpoint type'
+                                                name='epType'
+                                                id='epType'
+                                                className={classes.group}
+                                                value={this.state.isInline ? 'inline' : 'global'}
+                                                onChange={this.handleRadioButtonChange}
+                                                disabled
+                                            >
+                                                <FormControlLabel
+                                                    value='inline'
+                                                    control={<Radio />}
+                                                    label='Inline'
+                                                    disabled={this.props.readOnly}
+                                                />
+                                                <FormControlLabel
+                                                    value='global'
+                                                    control={<Radio />}
+                                                    label='Global'
+                                                    disabled={this.props.readOnly}
+                                                />
                                             </RadioGroup>
                                         </Grid>
                                     </Grid>
@@ -437,9 +455,17 @@ class EndpointDetail extends Component {
                                                 <Typography gutterBottom noWrap>
                                                     Global Endpoints are not defined.
                                                 </Typography>
-                                                <Button component='a' target='_blank' href='/publisher/endpoints' size='small' className={classes.viewInStoreLauncher}>
+                                                <Button
+                                                    component='a'
+                                                    target='_blank'
+                                                    href='/publisher/endpoints'
+                                                    size='small'
+                                                    className={classes.viewInStoreLauncher}>
                                                     <LaunchIcon />
-                                                    <FormattedMessage id='define.global.endpoint' defaultMessage='Define Global Endpoint' />
+                                                    <FormattedMessage
+                                                        id='define.global.endpoint'
+                                                        defaultMessage='Define Global Endpoint'
+                                                    />
                                                 </Button>
                                             </CardContent>
                                         </Card>
@@ -530,28 +556,55 @@ class EndpointDetail extends Component {
                             <div className={classes.container}>
                                 <Grid container>
                                     <Grid item xs={6}>
-                                        <RadioGroup aria-label='Endpoint type' name='epType' id='epType' className={classes.group} value={this.state.isInline ? 'inline' : 'global'} onChange={this.handleRadioButtonChange} disabled>
-                                            <FormControlLabel value='inline' control={<Radio />} label='Inline' disabled={this.props.readOnly} />
-                                            <FormControlLabel value='global' control={<Radio />} label='Global' disabled={this.props.readOnly} />
+                                        <RadioGroup
+                                            aria-label='Endpoint type'
+                                            name='epType'
+                                            id='epType'
+                                            className={classes.group}
+                                            value={this.state.isInline ? 'inline' : 'global'}
+                                            onChange={this.handleRadioButtonChange}
+                                            disabled
+                                        >
+                                            <FormControlLabel
+                                                value='inline'
+                                                control={<Radio />}
+                                                label='Inline'
+                                                disabled={this.props.readOnly}
+                                            />
+                                            <FormControlLabel
+                                                value='global'
+                                                control={<Radio />}
+                                                label='Global'
+                                                disabled={this.props.readOnly}
+                                            />
                                         </RadioGroup>
                                     </Grid>
                                 </Grid>
                                 {!this.props.readOnly && (
                                     <Typography variant='caption' gutterBottom align='center'>
-                                        <FormattedMessage id='you.can.define.endpoint.inline.or.pick.from.a.list.of.global.endpoints' defaultMessage='You can define endpoint inline or pick from a list of global endpoints' />
+                                        <FormattedMessage
+                                            id='you.can.define.endpoint.inline.or.pick.from.a.list.of.global.endpoints'
+                                            defaultMessage='You can define endpoint inline or pick from a list of global endpoints'
+                                        />
                                     </Typography>
                                 )}
                                 {!this.props.readOnly &&
                                     !this.state.isInline &&
                                     this.state.selectedGlobalEndpoint && (
                                     <Typography variant='caption' gutterBottom align='center'>
-                                        <FormattedMessage id='global.endpoints.can.be.only.edited.from.global.endpoint.page' defaultMessage='Global endpoints can be only edited from Global Endpoint Page' />
+                                        <FormattedMessage
+                                            id='global.endpoints.can.be.only.edited.from.global.endpoint.page'
+                                            defaultMessage='Global endpoints can be only edited from Global Endpoint Page'
+                                        />
                                         <Link to='/endpoints'>
                                             <Button aria-label='Back'>
                                                 <LaunchIcon />
                                             </Button>
                                         </Link>
-                                        <FormattedMessage id='here.you.can.only.attach.a.global.endpoint.to.api' defaultMessage='Here you can only attach a global endpoint to API.' />
+                                        <FormattedMessage
+                                            id='here.you.can.only.attach.a.global.endpoint.to.api'
+                                            defaultMessage='Here you can only attach a global endpoint to API.'
+                                        />
                                     </Typography>
                                 )}
                                 {!this.props.readOnly &&
@@ -559,7 +612,10 @@ class EndpointDetail extends Component {
                                     this.state.globalEndpoints && (
                                     <Grid item xs={6}>
                                         <InputLabel htmlFor='age-simple'>
-                                            <FormattedMessage id='select.a.global.endpoint' defaultMessage='Select a Global Endpoint' />
+                                            <FormattedMessage
+                                                id='select.a.global.endpoint'
+                                                defaultMessage='Select a Global Endpoint'
+                                            />
                                         </InputLabel>
                                         <Select
                                             onChange={this.handleSelectChange}
@@ -599,7 +655,11 @@ class EndpointDetail extends Component {
                                             <FormattedMessage id='endpoint.url' defaultMessage='Endpoint URL' />
                                             {!this.props.readOnly &&
                                                 this.state.isInline && (
-                                                <IconButton id={name} className={classes.button} aria-label='Add' onClick={this.handleAddAdditionalEndpoints}>
+                                                <IconButton
+                                                    id={name}
+                                                    className={classes.button}
+                                                    aria-label='Add'
+                                                    onClick={this.handleAddAdditionalEndpoints}>
                                                     <AddIcon id='1' />
                                                 </IconButton>
                                             )}
@@ -612,9 +672,27 @@ class EndpointDetail extends Component {
                                     numOfEndpoints > 1 && (
                                     <Grid container>
                                         <Grid container>
-                                            <RadioGroup aria-label='Endpoint type' name='endpointpType' id='endpointpType' className={classes.group} value={this.state.endpointType} onClick={this.handleEpTypeRadioButtonChange} disabled>
-                                                <FormControlLabel value='1' control={<Radio />} label='Load Balance' disabled={this.props.readOnly} />
-                                                <FormControlLabel value='2' control={<Radio />} label='Fail Over' disabled={this.props.readOnly} />
+                                            <RadioGroup
+                                                aria-label='Endpoint type'
+                                                name='endpointpType'
+                                                id='endpointpType'
+                                                className={classes.group}
+                                                value={this.state.endpointType}
+                                                onClick={this.handleEpTypeRadioButtonChange}
+                                                disabled
+                                            >
+                                                <FormControlLabel
+                                                    value='1'
+                                                    control={<Radio />}
+                                                    label='Load Balance'
+                                                    disabled={this.props.readOnly}
+                                                />
+                                                <FormControlLabel
+                                                    value='2'
+                                                    control={<Radio />}
+                                                    label='Fail Over'
+                                                    disabled={this.props.readOnly}
+                                                />
                                             </RadioGroup>
                                         </Grid>
                                         <Grid container>
@@ -626,17 +704,43 @@ class EndpointDetail extends Component {
                                 )}
                             </div>
                         </Paper>
-                        {!(!this.state.isInline && !this.state.selectedGlobalEndpoint) && <AdvanceEndpointDetail endpointSecurity={this.props.endpoint.endpointSecurity} endpoint={this.props.endpoint} readOnly={this.props.readOnly} isInline={this.state.isInline} />}
+                        {!(!this.state.isInline && !this.state.selectedGlobalEndpoint) &&
+                            <AdvanceEndpointDetail
+                                endpointSecurity={this.props.endpoint.endpointSecurity}
+                                endpoint={this.props.endpoint}
+                                readOnly={this.props.readOnly}
+                                isInline={this.state.isInline}
+                            />
+                        }
                     </Grid>
                     <Grid item xs={6}>
                         <Grid container>
                             {this.state.showEpConfig ? (
                                 <Grow in={this.state.showEpConfig}>
-                                    <EndpointForm selectedEndpointConfig={this.state.selectedEndpointConfig} endpoint={this.props.endpoint} isInline={this.state.isInline} readOnly={this.props.readOnly} showConfig={this.state.showEpConfig} showEpConfigSlide={this.state.showEpConfigSlide} />
+                                    <EndpointForm
+                                        selectedEndpointConfig={this.state.selectedEndpointConfig}
+                                        endpoint={this.props.endpoint}
+                                        isInline={this.state.isInline}
+                                        readOnly={this.props.readOnly}
+                                        showConfig={this.state.showEpConfig}
+                                        showEpConfigSlide={this.state.showEpConfigSlide}
+                                    />
                                 </Grow>
                             ) : (
-                                <Slide direction='up' in={this.state.showEpConfigSlide} mountOnEnter unmountOnExit>
-                                    <EndpointForm selectedEndpointConfig={this.state.selectedEndpointConfig} endpoint={this.props.endpoint} isInline={this.state.isInline} readOnly={this.props.readOnly} showConfig={this.state.showEpConfig} showEpConfigSlide={this.state.showEpConfigSlide} />
+                                <Slide
+                                    direction='up'
+                                    in={this.state.showEpConfigSlide}
+                                    mountOnEnter
+                                    unmountOnExit
+                                >
+                                    <EndpointForm
+                                        selectedEndpointConfig={this.state.selectedEndpointConfig}
+                                        endpoint={this.props.endpoint}
+                                        isInline={this.state.isInline}
+                                        readOnly={this.props.readOnly}
+                                        showConfig={this.state.showEpConfig}
+                                        showEpConfigSlide={this.state.showEpConfigSlide}
+                                    />
                                 </Slide>
                             )}
                         </Grid>
