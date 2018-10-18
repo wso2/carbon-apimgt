@@ -57,6 +57,7 @@ import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.exception.WorkflowException;
+import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
@@ -344,8 +345,11 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         Application application = getApplicationByUuid(applicationId);
 
         OAuthAppRequest oauthAppRequest = new OAuthAppRequest(application.getName(), callbackUrl, keyType,
-                                                              grantTypes, tokenType);
-
+                grantTypes, tokenType);
+        if (APIMgtConstants.Oauth2Constants.JWT_TOKEN_TYPE.equals(tokenType)) {
+            oauthAppRequest.getAudiences().add(ServiceReferenceHolder.getInstance().getAPIMConfiguration()
+                    .getKeyManagerConfigs().getAudience());
+        }
         OAuthApplicationInfo oauthAppInfo = getKeyManager().createApplication(oauthAppRequest);
 
         if (log.isDebugEnabled()) {
