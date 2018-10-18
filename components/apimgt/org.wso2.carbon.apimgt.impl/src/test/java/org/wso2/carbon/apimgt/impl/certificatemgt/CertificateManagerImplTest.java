@@ -24,6 +24,7 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -38,17 +39,20 @@ import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManageme
 import org.wso2.carbon.apimgt.impl.dao.CertificateMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.CarbonContext;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.wso2.carbon.utils.ServerConstants.CARBON_HOME;
 
 /**
  * This class contains unit tests for CertificateManagerImpl class.
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class  )
-@PrepareForTest({CertificateMgtUtils.class, CertificateMgtDAO.class})
+@PrepareForTest({CertificateMgtUtils.class, CertificateMgtDAO.class, CarbonContext.class})
 public class CertificateManagerImplTest {
 
     private static CertificateManager certificateManager;
@@ -84,6 +88,11 @@ public class CertificateManagerImplTest {
                 .toReturn(true);
         TestUtils.initConfigurationContextService(true);
         certificateManager = CertificateManagerImpl.getInstance();
+        System.setProperty(CARBON_HOME, "");
+        PowerMockito.mockStatic(CarbonContext.class);
+        CarbonContext carbonContext = Mockito.mock(CarbonContext.class);
+        PowerMockito.when(CarbonContext.getThreadLocalCarbonContext()).thenReturn(carbonContext);
+        Mockito.when(carbonContext.getTenantDomain()).thenReturn(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
     }
 
     @Test
