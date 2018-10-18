@@ -17,21 +17,36 @@
  */
 package org.wso2.carbon.apimgt.impl.soaptorest;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import io.swagger.models.ModelImpl;
+import io.swagger.models.Xml;
+import io.swagger.models.properties.ArrayProperty;
+import io.swagger.models.properties.BooleanProperty;
+import io.swagger.models.properties.DateProperty;
+import io.swagger.models.properties.DoubleProperty;
+import io.swagger.models.properties.FloatProperty;
+import io.swagger.models.properties.IntegerProperty;
+import io.swagger.models.properties.LongProperty;
+import io.swagger.models.properties.ObjectProperty;
+import io.swagger.models.properties.Property;
+import io.swagger.models.properties.RefProperty;
+import io.swagger.models.properties.StringProperty;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.soaptorest.exceptions.APIMgtWSDLException;
-import org.wso2.carbon.apimgt.impl.soaptorest.model.WSDLComplexType;
 import org.wso2.carbon.apimgt.impl.soaptorest.model.WSDLInfo;
 import org.wso2.carbon.apimgt.impl.soaptorest.model.WSDLOperation;
-import org.wso2.carbon.apimgt.impl.soaptorest.model.WSDLOperationParam;
+import org.wso2.carbon.apimgt.impl.soaptorest.model.WSDLParamDefinition;
 import org.wso2.carbon.apimgt.impl.soaptorest.model.WSDLSOAPOperation;
 import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPOperationBindingUtils;
 import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPToRESTConstants;
+import org.wso2.carbon.apimgt.impl.soaptorest.util.SwaggerFieldsExcludeStrategy;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 
 import javax.wsdl.Binding;
@@ -55,6 +70,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPToRESTConstants.COMPLEX_TYPE_NODE_NAME;
+import static org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPToRESTConstants.SIMPLE_TYPE_NODE_NAME;
+
 /**
  * Class that reads wsdl soap operations and maps with the types.
  */
@@ -71,9 +89,14 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
     private String targetNamespace;
 
     private List typeList = null;
-    private List<Node> elemList = new ArrayList<>();
+    private List<Node> complexElemList = new ArrayList<>();
+    private List<Node> simpleElemList = new ArrayList<>();
+    private List<Node> schemaNodeList = new ArrayList<>();
+    private List<WSDLParamDefinition> wsdlParamDefinitions = new ArrayList<>();
+    private Map<String, ModelImpl> parameterModelMap = new HashMap<>();
 
     private static volatile APIMWSDLReader wsdlReader;
+    private Property currentProperty;
 
     public WSDL11SOAPOperationExtractor(APIMWSDLReader wsdlReader) {
         WSDL11SOAPOperationExtractor.wsdlReader = wsdlReader;
@@ -86,20 +109,44 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
             canProcess = true;
             targetNamespace = wsdlDefinition.getTargetNamespace();
             Types types = wsdlDefinition.getTypes();
-            typeList = types.getExtensibilityElements();
-
-            for (Object ext : typeList) {
-                if (ext instanceof Schema) {
-                    Schema schema = (Schema) ext;
-                    Element schemaElement = schema.getElement();
-                    String nodeName = schemaElement.getNodeName();
-                    String nodeNS = nodeName.split(SOAPToRESTConstants.SequenceGen.NAMESPACE_SEPARATOR)[0];
-                    String complexTypeElement = nodeNS + SOAPToRESTConstants.COMPLEX_TYPE_NODE_NAME;
-                    NodeList nodeList = schemaElement.getElementsByTagName(complexTypeElement);
-                    elemList.addAll(SOAPOperationBindingUtils.list(nodeList));
+            if (types != null) {
+                typeList = types.getExtensibilityElements();
+            }
+            if (typeList != null) {
+                for (Object ext : typeList) {
+                    if (ext instanceof Schema) {
+                        Schema schema = (Schema) ext;
+                        Element schemaElement = schema.getElement();
+                        NodeList schemaNodes = schemaElement.getChildNodes();
+                        schemaNodeList.addAll(SOAPOperationBindingUtils.list(schemaNodes));
+                        if (log.isDebugEnabled()) {
+                            Gson gson = new GsonBuilder().setExclusionStrategies(new SwaggerFieldsExcludeStrategy())
+                                    .create();
+                            log.debug("swagger definition model map from the wsdl: " + gson.toJson(parameterModelMap));
+                        }
+                        if (schemaNodeList == null) {
+                            log.warn("No schemas found in the type element for target namespace:" + schema
+                                    .getDocumentBaseURI());
+                        }
+                    }
+                }
+                if (schemaNodeList != null) {
+                    for (Node node : schemaNodeList) {
+                        WSDLParamDefinition wsdlParamDefinition = new WSDLParamDefinition();
+                        ModelImpl model = new ModelImpl();
+                        Property currentProperty = null;
+                        traverseTypeElement(node, null, model, currentProperty);
+                        if (StringUtils.isNotBlank(model.getName())) {
+                            parameterModelMap.put(model.getName(), model);
+                        }
+                        if (wsdlParamDefinition.getDefinitionName() != null) {
+                            wsdlParamDefinitions.add(wsdlParamDefinition);
+                        }
+                    }
+                } else {
+                    log.info("No schema is defined in the wsdl document");
                 }
             }
-            elemList = reformComplexTypes(elemList);
             if (log.isDebugEnabled()) {
                 log.debug("Successfully initialized an instance of " + this.getClass().getSimpleName()
                         + " with a single WSDL.");
@@ -111,7 +158,348 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
         return canProcess;
     }
 
-    @Override public WSDLInfo getWsdlInfo() throws APIMgtWSDLException {
+    private void traverseTypeElement(Node element, Node prevNode, ModelImpl model, Property currentProp) {
+
+        if (log.isDebugEnabled()) {
+            if (element.hasAttributes()
+                    && element.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE) != null) {
+                log.debug(element.getNodeName() + " with name attr:" + element.getAttributes()
+                        .getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE) + " and " + prevNode);
+            } else {
+                log.debug(element.getNodeName() + " and " + prevNode);
+            }
+        }
+        if (prevNode != null) {
+            currentProperty = generateSwaggerModelForComplexType(element, model, currentProp);
+            setNamespaceDetails(model, element);
+        } else {
+            currentProperty = generateSwaggerModelForComplexType(element, model, currentProp);
+            setNamespaceDetails(model, element);
+        }
+        NodeList nodeList = element.getChildNodes();
+        if (nodeList != null) {
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                Node currentNode = nodeList.item(i);
+                if (currentNode.getNodeType() == Node.ELEMENT_NODE) {
+                    traverseTypeElement(currentNode, prevNode, model, currentProperty);
+                }
+                prevNode = element;
+            }
+        }
+    }
+
+    /**
+     * Generates swagger property for a given wsdl document node
+     *
+     * @param current     current type element node
+     * @param model       swagger model element
+     * @param currentProp current wsdl type element
+     * @return swagger property for the wsdl element
+     */
+    private Property generateSwaggerModelForComplexType(Node current, ModelImpl model, Property currentProp) {
+        if (WSDL_ELEMENT_NODE.equals(current.getLocalName())) {
+            if (StringUtils.isNotBlank(getNodeName(current))) {
+                addModelDefinition(current, model, SOAPToRESTConstants.EMPTY_STRING);
+            } else if (StringUtils.isNotBlank(getRefNodeName(current))) {
+                if (current.getParentNode() != null) {
+                    addModelDefinition(current, model, SOAPToRESTConstants.EMPTY_STRING);
+                }
+            }
+        } else if (COMPLEX_TYPE_NODE_NAME.equals(current.getLocalName())) {
+            if (StringUtils.isNotBlank(getNodeName(current))) {
+                if (current.getParentNode() != null) {
+                    addModelDefinition(current, model, SOAPToRESTConstants.EMPTY_STRING);
+                }
+            }
+        } else if (SIMPLE_TYPE_NODE_NAME.equals(current.getLocalName())) {
+            if (StringUtils.isNotBlank(getNodeName(current))) {
+                if (current.getParentNode() != null) {
+                    addModelDefinition(current, model, SOAPToRESTConstants.SIMPLE_TYPE_NODE_NAME);
+                }
+            }
+        } else if (SOAPToRESTConstants.RESTRICTION_ATTR.equals(current.getLocalName())) {
+            if (current.getParentNode() != null) {
+                addModelDefinition(current, model, SOAPToRESTConstants.RESTRICTION_ATTR);
+            }
+        }
+        return currentProp;
+    }
+
+    /**
+     * Adds swagger type definitions to swagger model
+     *
+     * @param current current wsdl node
+     * @param model   swagger model element
+     * @param type    wsdl node type{i.e: complexType, simpleType}
+     */
+    private void addModelDefinition(Node current, ModelImpl model, String type) {
+        if (current.getParentNode() != null) {
+            String xPath = getXpathFromNode(current);
+            if (log.isDebugEnabled()) {
+                log.debug("Processing current document node: " + getNodeName(current) + " with the xPath:" + xPath);
+            }
+            String[] elements = xPath.split("\\.");
+            if (getNodeName(current).equals(elements[elements.length - 1]) || getNodeName(current)
+                    .equals(elements[elements.length - 1].substring(elements[elements.length - 1].indexOf(":") + 1))
+                    || type.equals(SOAPToRESTConstants.RESTRICTION_ATTR)) {
+                if (StringUtils.isBlank(model.getName())) {
+                    model.setName(getNodeName(current));
+                    if (!SOAPToRESTConstants.SIMPLE_TYPE_NODE_NAME.equals(type)) {
+                        if (isArrayType(current)) {
+                            model.setType(ArrayProperty.TYPE);
+                        } else {
+                            model.setType(ObjectProperty.TYPE);
+                        }
+                    }
+                } else if (model.getProperties() == null) {
+                    if (SOAPToRESTConstants.RESTRICTION_ATTR.equals(type)) {
+                        Property restrictionProp = createPropertyFromNode(current);
+                        if (!(restrictionProp instanceof RefProperty || restrictionProp instanceof ObjectProperty
+                                || restrictionProp instanceof ArrayProperty)) {
+                            model.setType(restrictionProp.getType());
+                        } else {
+                            model.setType(StringProperty.TYPE);
+                        }
+                    } else {
+                        Map<String, Property> propertyMap = new HashMap<>();
+                        Property prop = createPropertyFromNode(current);
+                        propertyMap.put(getNodeName(current), prop);
+                        model.setProperties(propertyMap);
+                    }
+                } else {
+                    Property parentProp = null;
+                    int pos = 0;
+                    for (String element : elements) {
+                        if (model.getName().equals(element)) {
+                            //do nothing
+                        } else if (model.getProperties().containsKey(element)) {
+                            parentProp = model.getProperties().get(element);
+                            if (SOAPToRESTConstants.RESTRICTION_ATTR.equals(type) && pos == elements.length - 1) {
+                                model.getProperties().remove(element);
+                                parentProp = createPropertyFromNode(current);
+                                parentProp.setName(element);
+                                model.addProperty(element, parentProp);
+                            }
+                        } else {
+                            if (parentProp instanceof ArrayProperty) {
+                                if (((ArrayProperty) parentProp).getItems().getName() == null) {
+                                    Property currentProp = createPropertyFromNode(current);
+                                    if (currentProp instanceof ObjectProperty) {
+                                        ((ArrayProperty) parentProp).setItems(currentProp);
+                                    } else if (currentProp instanceof ArrayProperty) {
+                                        Map<String, Property> arrayPropMap = new HashMap();
+                                        arrayPropMap.put(getNodeName(current), currentProp);
+                                        ObjectProperty arrayObjProp = new ObjectProperty();
+                                        arrayObjProp.setProperties(arrayPropMap);
+                                        ((ArrayProperty) parentProp).setItems(arrayObjProp);
+                                    } else {
+                                        ((ArrayProperty) parentProp).setItems(currentProp);
+                                    }
+                                } else {
+                                    ((ArrayProperty) parentProp).setItems(createPropertyFromNode(current));
+                                }
+                                parentProp = ((ArrayProperty) parentProp).getItems();
+                            } else if (parentProp instanceof ObjectProperty) {
+                                if (SOAPToRESTConstants.RESTRICTION_ATTR.equals(type) && pos == elements.length - 1) {
+                                    parentProp = createPropertyFromNode(current);
+                                    parentProp.setName(element);
+                                } else {
+                                    if (((ObjectProperty) parentProp).getProperties() == null) {
+                                        Map<String, Property> propertyMap = new HashMap<>();
+                                        ((ObjectProperty) parentProp).setProperties(propertyMap);
+                                    }
+                                    Property childProp = createPropertyFromNode(current);
+                                    if (((ObjectProperty) parentProp).getProperties().get(element) == null) {
+                                        ((ObjectProperty) parentProp).getProperties()
+                                                .put(getNodeName(current), childProp);
+                                    }
+                                    if (childProp instanceof ObjectProperty) {
+                                        parentProp = ((ObjectProperty) parentProp).getProperties().get(element);
+                                    } else if (childProp instanceof ArrayProperty) {
+                                        parentProp = childProp;
+                                    }
+
+                                }
+                            } else if (parentProp == null) {
+                                if (StringUtils.isNotBlank(getNodeName(current))) {
+                                    model.addProperty(getNodeName(current), createPropertyFromNode(current));
+                                } else if (StringUtils.isNotBlank(getRefNodeName(current))) {
+                                    model.addProperty(getRefNodeName(current), createPropertyFromNode(current));
+                                }
+                            }
+                        }
+                        pos++;
+                    }
+
+                }
+            }
+        }
+    }
+
+    private String getXPath(Node node) {
+
+        if (node != null) {
+            Node parent = node.getParentNode();
+            if (parent == null && node.hasAttributes()
+                    && node.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE) != null) {
+                return "/" + node.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE).getNodeValue();
+            }
+            if (node.hasAttributes() && node.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE) != null) {
+                return getXPath(parent) + "/" + node.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE)
+                        .getNodeValue();
+            } else if (node.hasAttributes()
+                    && node.getAttributes().getNamedItem(SOAPToRESTConstants.REF_ATTRIBUTE) != null) {
+                return getXPath(parent) + "/" + node.getAttributes().getNamedItem(SOAPToRESTConstants.REF_ATTRIBUTE)
+                        .getNodeValue();
+            }
+            return getXPath(parent) + "/";
+        }
+        return SOAPToRESTConstants.EMPTY_STRING;
+    }
+
+    private String getXpathFromNode(Node node) {
+
+        if (node.getParentNode() != null) {
+            String xPath = getXPath(node);
+            xPath = xPath.replaceAll("/+", ".");
+            if (xPath.startsWith(".")) {
+                xPath = xPath.substring(1);
+                return xPath;
+            }
+        }
+        return null;
+    }
+
+    private String getNodeName(Node node) {
+
+        if (node.hasAttributes() && node.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE) != null) {
+            return node.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE).getNodeValue();
+        }
+        if (node.hasAttributes() && node.getAttributes().getNamedItem(SOAPToRESTConstants.REF_ATTRIBUTE) != null) {
+            return node.getAttributes().getNamedItem(SOAPToRESTConstants.REF_ATTRIBUTE).getNodeValue().contains(":") ?
+                    node.getAttributes().getNamedItem(SOAPToRESTConstants.REF_ATTRIBUTE).getNodeValue().split(":")[1] :
+                    node.getAttributes().getNamedItem(SOAPToRESTConstants.REF_ATTRIBUTE).getNodeValue();
+        }
+        return SOAPToRESTConstants.EMPTY_STRING;
+    }
+
+    private String getRefNodeName(Node node) {
+        if (node.hasAttributes() && node.getAttributes().getNamedItem(SOAPToRESTConstants.REF_ATTRIBUTE) != null) {
+            return node.getAttributes().getNamedItem(SOAPToRESTConstants.REF_ATTRIBUTE).getNodeValue().contains(":") ?
+                    node.getAttributes().getNamedItem(SOAPToRESTConstants.REF_ATTRIBUTE).getNodeValue().split(":")[1] :
+                    node.getAttributes().getNamedItem(SOAPToRESTConstants.REF_ATTRIBUTE).getNodeValue();
+        }
+        return SOAPToRESTConstants.EMPTY_STRING;
+    }
+
+    /**
+     * Creates a swagger property from given wsdl node.
+     *
+     * @param node wsdl node
+     * @return generated swagger property
+     */
+    private Property createPropertyFromNode(Node node) {
+
+        Property property = null;
+        if (node.hasAttributes()) {
+            if (node.getAttributes().getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE) != null) {
+                if (node.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE) != null) {
+                    String dataType = node.getAttributes().getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE)
+                            .getNodeValue().contains(":") ?
+                            node.getAttributes().getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE).getNodeValue()
+                                    .split(":")[1] :
+                            node.getAttributes().getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE).getNodeValue();
+                    property = getPropertyFromDataType(dataType);
+                    if (property instanceof RefProperty) {
+                        ((RefProperty) property).set$ref(SOAPToRESTConstants.Swagger.DEFINITIONS_ROOT + dataType);
+                    }
+                    property.setName(
+                            node.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE).getNodeValue());
+                }
+            } else if (node.getAttributes().getNamedItem(SOAPToRESTConstants.REF_ATTRIBUTE) != null) {
+                property = new RefProperty();
+                String dataType = node.getAttributes().getNamedItem(SOAPToRESTConstants.REF_ATTRIBUTE).getNodeValue()
+                        .contains(":") ?
+                        node.getAttributes().getNamedItem(SOAPToRESTConstants.REF_ATTRIBUTE).getNodeValue()
+                                .split(":")[1] :
+                        node.getAttributes().getNamedItem(SOAPToRESTConstants.REF_ATTRIBUTE).getNodeValue();
+                ((RefProperty) property).set$ref(SOAPToRESTConstants.Swagger.DEFINITIONS_ROOT + dataType);
+                property.setName(dataType);
+            } else if (node.getAttributes().getNamedItem("base") != null) {
+                String dataType = node.getAttributes().getNamedItem("base").getNodeValue().contains(":") ?
+                        node.getAttributes().getNamedItem("base").getNodeValue().split(":")[1] :
+                        node.getAttributes().getNamedItem("base").getNodeValue();
+                property = getPropertyFromDataType(dataType);
+                if (property instanceof RefProperty) {
+                    ((RefProperty) property).set$ref(SOAPToRESTConstants.Swagger.DEFINITIONS_ROOT + dataType);
+                }
+                property.setName(dataType);
+            } else if (node.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE) != null) {
+                property = new ObjectProperty();
+                property.setName(getNodeName(node));
+            }
+            if (isArrayType(node)) {
+                Property arrayProperty = new ArrayProperty();
+                ((ArrayProperty) arrayProperty).setItems(property);
+                return arrayProperty;
+            }
+        }
+        return property;
+    }
+
+    private Property getPropertyFromDataType(String dataType) {
+
+        switch (dataType) {
+        case "string":
+            return new StringProperty();
+        case "boolean":
+            return new BooleanProperty();
+        case "int":
+            return new IntegerProperty();
+        case "nonNegativeInteger":
+            return new IntegerProperty();
+        case "integer":
+            return new IntegerProperty();
+        case "positiveInteger":
+            return new IntegerProperty();
+        case "double":
+            return new DoubleProperty();
+        case "float":
+            return new FloatProperty();
+        case "long":
+            return new LongProperty();
+        case "date":
+            return new DateProperty();
+        default:
+            return new RefProperty();
+        }
+    }
+
+    private boolean isArrayType(Node node) {
+
+        return node.getAttributes().getNamedItem(SOAPToRESTConstants.MAX_OCCURS_ATTRIBUTE) != null
+                && SOAPToRESTConstants.UNBOUNDED
+                .equals(node.getAttributes().getNamedItem(SOAPToRESTConstants.MAX_OCCURS_ATTRIBUTE).getNodeValue());
+    }
+
+    private void setNamespaceDetails(ModelImpl model, Node currentNode) {
+
+        Xml xml = new Xml();
+        xml.setNamespace(currentNode.getNamespaceURI());
+        xml.setPrefix(currentNode.getPrefix());
+        model.setXml(xml);
+    }
+
+    private void setNamespaceDetails(Property property, Node currentNode) {
+
+        Xml xml = new Xml();
+        xml.setNamespace(currentNode.getNamespaceURI());
+        xml.setPrefix(currentNode.getPrefix());
+        property.setXml(xml);
+    }
+
+    @Override
+    public WSDLInfo getWsdlInfo() throws APIMgtWSDLException {
         WSDLInfo wsdlInfo = new WSDLInfo();
         if (wsdlDefinition != null) {
             Set<WSDLSOAPOperation> soapOperations = getSoapBindingOperations(wsdlDefinition);
@@ -124,6 +512,10 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
                 wsdlInfo.setHasSoapBindingOperations(false);
             }
             wsdlInfo.setHasSoapBindingOperations(hasSoapBindingOperations());
+            wsdlInfo.setHasSoap12BindingOperations(hasSoap12BindingOperations());
+            if (parameterModelMap.size() > 0) {
+                wsdlInfo.setParameterModelMap(parameterModelMap);
+            }
         } else {
             throw new APIMgtWSDLException("WSDL Definition is not initialized.");
         }
@@ -189,24 +581,23 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
                 wsdlOperation.setTargetNamespace(targetNamespace);
                 wsdlOperation.setStyle(soapOperation.getStyle());
 
-                List<WSDLOperationParam> inputParameters = getSoapInputParameters(bindingOperation);
-                wsdlOperation.setParameters(inputParameters);
-                List<WSDLOperationParam> outputParameters = getSoapOutputParameters(bindingOperation);
-                wsdlOperation.setOutputParams(outputParameters);
+                wsdlOperation.setInputParameterModel(getSoapInputParameterModel(bindingOperation));
+                wsdlOperation.setOutputParameterModel(getSoapOutputParameterModel(bindingOperation));
             }
         }
         return wsdlOperation;
     }
 
     /**
-     * Returns input parameters, given soap binding operation
+     * Gets swagger input parameter model for a given soap operation
      *
-     * @param bindingOperation {@link BindingOperation} object
-     * @return input parameters, given soap binding operation
+     * @param bindingOperation soap operation
+     * @return list of swagger models for the parameters
+     * @throws APIMgtWSDLException
      */
-    private List<WSDLOperationParam> getSoapInputParameters(BindingOperation bindingOperation)
-            throws APIMgtWSDLException {
-        List<WSDLOperationParam> params = new ArrayList<>();
+    private List<ModelImpl> getSoapInputParameterModel(BindingOperation bindingOperation) throws APIMgtWSDLException {
+
+        List<ModelImpl> inputParameterModelList = new ArrayList<>();
         Operation operation = bindingOperation.getOperation();
         if (operation != null) {
             Input input = operation.getInput();
@@ -220,31 +611,41 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
                         Map.Entry entry = (Map.Entry) obj;
                         Part part = (Part) entry.getValue();
                         if (part != null) {
-                            String partElement;
                             if (part.getElementName() != null) {
-                                partElement = part.getElementName().getLocalPart();
-                                this.getParameters(partElement, params, false);
+                                inputParameterModelList.add(parameterModelMap.get(part.getElementName()
+                                        .getLocalPart()));
                             } else {
-                                partElement = part.getTypeName().getLocalPart();
-                                this.getParameters(partElement, params, true);
+                                if (part.getTypeName() != null && parameterModelMap
+                                        .containsKey(part.getTypeName().getLocalPart())) {
+                                    inputParameterModelList
+                                            .add(parameterModelMap.get(part.getTypeName().getLocalPart()));
+                                } else {
+                                    ModelImpl model = new ModelImpl();
+                                    model.setType(ObjectProperty.TYPE);
+                                    model.setName(message.getQName().getLocalPart());
+                                    model.addProperty(part.getName(),
+                                            getPropertyFromDataType(part.getTypeName().getLocalPart()));
+                                    parameterModelMap.put(model.getName(), model);
+                                    inputParameterModelList.add(model);
+                                }
                             }
                         }
                     }
                 }
             }
         }
-        return params;
+        return inputParameterModelList;
     }
 
     /**
-     * Returns output parameters, given soap binding operation
+     * Gets swagger output parameter model for a given soap operation
      *
-     * @param bindingOperation {@link BindingOperation} object
-     * @return output parameters, given soap binding operation
+     * @param bindingOperation soap operation
+     * @return list of swagger models for the parameters
+     * @throws APIMgtWSDLException
      */
-    private List<WSDLOperationParam> getSoapOutputParameters(BindingOperation bindingOperation)
-            throws APIMgtWSDLException {
-        List<WSDLOperationParam> params = new ArrayList<>();
+    private List<ModelImpl> getSoapOutputParameterModel(BindingOperation bindingOperation) throws APIMgtWSDLException {
+        List<ModelImpl> outputParameterModelList = new ArrayList<>();
         Operation operation = bindingOperation.getOperation();
         if (operation != null) {
             Output output = operation.getOutput();
@@ -257,219 +658,77 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
                         Map.Entry entry = (Map.Entry) obj;
                         Part part = (Part) entry.getValue();
                         if (part != null) {
-                            String partElement;
                             if (part.getElementName() != null) {
-                                partElement = part.getElementName().getLocalPart();
-                                this.getParameters(partElement, params, false);
+                                outputParameterModelList.add(parameterModelMap.get(part.getElementName()
+                                        .getLocalPart()));
                             } else {
-                                partElement = part.getTypeName().getLocalPart();
-                                this.getParameters(partElement, params, true);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return params;
-    }
-
-    /**
-     * Gets parameters definitions for the given input/output soap operation
-     *
-     * @param partElement parameter element name without namespace
-     * @param params      reference parameter list to populate from the parameter nodes
-     * @throws APIMgtWSDLException
-     */
-    private void getParameters(String partElement, List<WSDLOperationParam> params, boolean isRpc) throws APIMgtWSDLException {
-        if (typeList != null) {
-            Map<String, WSDLComplexType> typeMap = this.getComplexTypeMap(elemList);
-            if (log.isDebugEnabled()) {
-                log.debug("Number of complex types of the WSDL: " + typeMap.size());
-            }
-            for (Node element : elemList) {
-                Node parentElement = element.getParentNode();
-                if (!WSDL_ELEMENT_NODE.equals(parentElement.getLocalName())) {
-                    parentElement = element;
-                }
-                if (log.isDebugEnabled()) {
-                    log.debug("Parent element of the complex type element: " + element.getNodeName() + " is "
-                            + parentElement.getNodeName());
-                }
-                if (parentElement.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE).getNodeValue()
-                        .equals(partElement) || isRpc) {
-                    if (element.getChildNodes() != null) {
-                        if (element.getChildNodes().item(1) != null) {
-                            if (element.getChildNodes().item(1).getChildNodes() != null) {
-                                NodeList childNodes = element.getChildNodes().item(1).getChildNodes();
-                                for (int j = 0; j < childNodes.getLength(); j++) {
-                                    if (childNodes.item(j).getLocalName() != null && WSDL_ELEMENT_NODE
-                                            .equals(childNodes.item(j).getLocalName())) {
-                                        WSDLOperationParam param = new WSDLOperationParam();
-                                        NamedNodeMap attributes = childNodes.item(j).getAttributes();
-                                        param.setName(attributes.getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE)
-                                                .getNodeValue());
-                                        if (attributes.getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE) != null) {
-                                            String dataType = attributes.getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE)
-                                                    .getNodeValue()
-                                                    .split(SOAPToRESTConstants.SequenceGen.NAMESPACE_SEPARATOR)[1];
-                                            Node maxOccursNode = attributes
-                                                    .getNamedItem(SOAPToRESTConstants.MAX_OCCURS_ATTRIBUTE);
-                                            if (maxOccursNode != null &&
-                                                    (maxOccursNode.getNodeValue().equals(SOAPToRESTConstants.UNBOUNDED)
-                                                            || !maxOccursNode.getNodeValue().equals("1"))) {
-                                                param.setArray(true);
-                                            }
-                                            if (!primitiveTypeList.contains(dataType)) {
-                                                WSDLComplexType complexType = typeMap.get(dataType);
-                                                if (complexType != null) {
-                                                    param.setWsdlComplexType(complexType);
-                                                }
-                                                param.setComplexType(true);
-                                            }
-                                            param.setDataType(
-                                                    attributes.getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE)
-                                                            .getNodeValue());
-                                            params.add(param);
-                                        }
-                                    }
+                                if (part.getTypeName() != null && parameterModelMap
+                                        .containsKey(part.getTypeName().getLocalPart())) {
+                                    outputParameterModelList
+                                            .add(parameterModelMap.get(part.getTypeName().getLocalPart()));
+                                } else {
+                                    ModelImpl model = new ModelImpl();
+                                    model.setType(ObjectProperty.TYPE);
+                                    model.setName(message.getQName().getLocalPart());
+                                    model.addProperty(part.getName(),
+                                            getPropertyFromDataType(part.getTypeName().getLocalPart()));
+                                    parameterModelMap.put(model.getName(), model);
+                                    outputParameterModelList.add(model);
                                 }
                             }
                         }
                     }
                 }
             }
-        } else {
-            throw new APIMgtWSDLException("Cannot find any types from the given wsdl.");
         }
-    }
-
-    /**
-     * gets complex types of the wsdl definition
-     *
-     * @param elemList complex type elements list from the schema
-     * @return map of the complex types
-     */
-    private Map<String, WSDLComplexType> getComplexTypeMap(List<Node> elemList) {
-        Map<String, WSDLComplexType> typeMap = new HashMap<>();
-
-        if (elemList.get(0).getAttributes() != null
-                && elemList.get(0).getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE) != null) {
-            for (Node element : elemList) {
-                if (element.getAttributes() != null
-                        && element.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE) != null) {
-                    List<Node> childNodes = SOAPOperationBindingUtils
-                            .list(element.getChildNodes().item(1).getChildNodes());
-                    WSDLComplexType complexType = new WSDLComplexType();
-                    for (Node childNode : childNodes) {
-                        if (childNode.getLocalName() != null && WSDL_ELEMENT_NODE.equals(childNode.getLocalName())) {
-                            WSDLOperationParam param = new WSDLOperationParam();
-                            NamedNodeMap attributes = childNode.getAttributes();
-                            param.setName(attributes.getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE).getNodeValue());
-                            String dataType = attributes.getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE).getNodeValue()
-                                    .split(SOAPToRESTConstants.SequenceGen.NAMESPACE_SEPARATOR)[1];
-                            Node maxOccursNode = attributes.getNamedItem(SOAPToRESTConstants.MAX_OCCURS_ATTRIBUTE);
-                            if (maxOccursNode != null && (
-                                    maxOccursNode.getNodeValue().equals(SOAPToRESTConstants.UNBOUNDED) || !maxOccursNode
-                                            .getNodeValue().equals("1"))) {
-                                param.setArray(true);
-                            }
-                            if (primitiveTypeList.contains(dataType)) {
-                                param.setDataType(dataType);
-                            } else {
-                                WSDLComplexType nestedComplexType = typeMap.get(dataType);
-                                param.setWsdlComplexType(nestedComplexType);
-                            }
-                            complexType.getParamList().add(param);
-                        }
-                    }
-                    typeMap.put(element.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE).getNodeValue(),
-                            complexType);
-                }
-            }
-        }
-        if (log.isDebugEnabled()) {
-            log.debug("Number of complex types of the WSDL: " + typeMap.size());
-        }
-        return typeMap;
-    }
-
-    /**
-     * reforms the types in the type reference order
-     *
-     * @param elemList complex elements list
-     * @return ordered node list
-     */
-    private List<Node> reformComplexTypes(List<Node> elemList) {
-        List<Node> clonedList = new ArrayList<>(elemList);
-        List<Node> reformedList = new ArrayList<>();
-        List<String> addedTypes = new ArrayList<>();
-        List<Node> namedElements = new ArrayList<>();
-        for (Node element : elemList) {
-            if (element.getAttributes() != null
-                    && element.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE) != null) {
-                List<Node> childNodes = SOAPOperationBindingUtils.list(element.getChildNodes().item(1).getChildNodes());
-                boolean isPrimitive = false;
-                boolean isComplex = false;
-                for (Node childNode : childNodes) {
-                    if (childNode.getLocalName() != null && WSDL_ELEMENT_NODE.equals(childNode.getLocalName())) {
-                        String dataType = childNode.getAttributes().getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE)
-                                .getNodeValue().split(SOAPToRESTConstants.SequenceGen.NAMESPACE_SEPARATOR)[1];
-                        if (primitiveTypeList.contains(dataType)) {
-                            isPrimitive = true;
-                        } else {
-                            isComplex = true;
-                            addedTypes.add(dataType);
-                        }
-                    }
-                }
-                if (isPrimitive && !isComplex) {
-                    clonedList.remove(element);
-                    reformedList.add(element);
-                }
-
-                if (isComplex) {
-                    namedElements.add(element);
-                }
-            }
-        }
-
-        for (Node node : namedElements) {
-            String nodeVal = node.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE).getNodeValue();
-            if (addedTypes.contains(nodeVal)) {
-                clonedList.remove(node);
-                reformedList.add(node);
-            }
-        }
-        reformedList.addAll(clonedList);
-        return reformedList;
-    }
-
-    /**
-     * Returns if any of the WSDLs (initialized) contains SOAP binding operations
-     *
-     * @return whether the WSDLs (initialized) contains SOAP binding operations
-     */
-    private boolean hasSoapBindingOperations() {
-        return wsdlDefinition != null && hasSoapBindingOperations(wsdlDefinition);
+        return outputParameterModelList;
     }
 
     /**
      * Returns if the provided WSDL definition contains SOAP binding operations
      *
-     * @param definition WSDL definition
      * @return whether the provided WSDL definition contains SOAP binding operations
      */
-    private boolean hasSoapBindingOperations(Definition definition) {
-        for (Object bindingObj : definition.getAllBindings().values()) {
+    private boolean hasSoapBindingOperations() {
+        if (wsdlDefinition == null) {
+            return false;
+        }
+        for (Object bindingObj : wsdlDefinition.getAllBindings().values()) {
             if (bindingObj instanceof Binding) {
                 Binding binding = (Binding) bindingObj;
                 for (Object ex : binding.getExtensibilityElements()) {
-                    if (ex instanceof SOAPBinding || ex instanceof SOAP12Binding) {
+                    if (ex instanceof SOAPBinding) {
                         return true;
                     }
                 }
             }
         }
         return false;
+    }
+
+    /**
+     * Returns if the provided WSDL definition contains SOAP 1.2 binding operations
+     *
+     * @return whether the provided WSDL definition contains SOAP 1.2 binding operations
+     */
+    private boolean hasSoap12BindingOperations() {
+        if (wsdlDefinition == null) {
+            return false;
+        }
+        for (Object bindingObj : wsdlDefinition.getAllBindings().values()) {
+            if (bindingObj instanceof Binding) {
+                Binding binding = (Binding) bindingObj;
+                for (Object ex : binding.getExtensibilityElements()) {
+                    if (ex instanceof SOAP12Binding) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public Map<String, ModelImpl> getParameterModelMap() {
+        return parameterModelMap;
     }
 }
