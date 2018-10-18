@@ -30,6 +30,7 @@ import { withRouter } from 'react-router';
 import { Link } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 
+
 const styles = theme => ({
     buttonSave: {
         marginTop: theme.spacing.unit * 10,
@@ -151,7 +152,10 @@ class CreateScope extends React.Component {
                             }}
                             id='description'
                             name='description'
-                            helperText='Short description about the scope'
+                            helperText={<FormattedMessage
+                                id='create.scope.helper.text'
+                                defaultMessage='Short description about the scope'
+                            />}
                             margin='normal'
                             type='text'
                             onChange={this.handleInputs}

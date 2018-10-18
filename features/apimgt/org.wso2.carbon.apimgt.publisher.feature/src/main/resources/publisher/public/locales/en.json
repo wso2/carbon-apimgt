@@ -94,4 +94,5 @@
   "welcome.to.wso2.api.manager": "Welcome to WSO2 API Manager",
   "wso2.api.publisher.enables.api.providers.to.publish.apis,.share.documentation,.provision.api.keys.and.gather.feedback.on.features,.quality.and.usage..to.get.started,.create.an.api.or.publish.a.sample.api..": "WSO2 API Publisher enables API providers to publish APIs, share documentation, provision API keys and gather feedback on features, quality and usage. To get started, Create an API or Publish a sample API.",
   "you.can.define.endpoint.inline.or.pick.from.a.list.of.global.endpoints": "You can define endpoint inline or pick from a list of global endpoints"
+  "create.scope.helper.text": "Short description about the scope"
 }
