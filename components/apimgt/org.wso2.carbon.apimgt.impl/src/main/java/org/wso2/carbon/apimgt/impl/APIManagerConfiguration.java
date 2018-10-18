@@ -655,6 +655,7 @@ public class APIManagerConfiguration {
                     dataPublisher.setReceiverUrlGroup(trafficManager.getReceiverUrlGroup());
                     dataPublisher.setUsername(trafficManager.getUsername());
                     dataPublisher.setPassword(trafficManager.getPassword());
+                    dataPublisher.setType(trafficManager.getType());
                 }
                 if (dataPublisher.isEnabled()) {
 

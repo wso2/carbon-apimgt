@@ -52,7 +52,7 @@ public class TiersApi  {
     @Path("/{tierLevel}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Create a Tier", notes = "This operation can be used to create a new throttling tier. The only supported tier level is `api` tiers.\n`POST https://localhost:9443/api/am/publisher/v0.13/tiers/api`\n\n**IMPORTANT:**\n* This is only effective when Advanced Throttling is disabled in the Server. If enabled, we need to use Admin REST API for throttling tiers modification related operations.\n", response = TierDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "Create a Tier", notes = "This operation can be used to create a new throttling tier. The only supported tier level is `api` tiers.\n`POST https://localhost:9443/api/am/publisher/v0.14/tiers/api`\n\n**IMPORTANT:**\n* This is only effective when Advanced Throttling is disabled in the Server. If enabled, we need to use Admin REST API for throttling tiers modification related operations.\n", response = TierDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 201, message = "Created.\nSuccessful response with the newly created object as entity in the body.\nLocation header contains URL of newly created entity.\n"),
         
@@ -70,7 +70,7 @@ public class TiersApi  {
     @Path("/{tierLevel}/{tierName}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Delete a Tier", notes = "This operation can be used to delete an existing tier. The only supported tier level is `api` tiers.\n`DELETE https://localhost:9443/api/am/publisher/v0.13/tiers/api/Low`\n\n**IMPORTANT:**\n* This is only effective when Advanced Throttling is disabled in the Server. If enabled, we need to use Admin REST API for throttling tiers modification related operations.\n", response = void.class)
+    @io.swagger.annotations.ApiOperation(value = "Delete a Tier", notes = "This operation can be used to delete an existing tier. The only supported tier level is `api` tiers.\n`DELETE https://localhost:9443/api/am/publisher/v0.14/tiers/api/Low`\n\n**IMPORTANT:**\n* This is only effective when Advanced Throttling is disabled in the Server. If enabled, we need to use Admin REST API for throttling tiers modification related operations.\n", response = void.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nResource successfully deleted.\n"),
         
@@ -111,7 +111,7 @@ public class TiersApi  {
     @Path("/{tierLevel}/{tierName}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Update a Tier", notes = "This operation can be used to update an existing tier. The only supported tier level is `api` tiers.\n`PUT https://localhost:9443/api/am/publisher/v0.13/tiers/api/Low`\n\n**IMPORTANT:**\n* This is only effective when Advanced Throttling is disabled in the Server. If enabled, we need to use Admin REST API for throttling tiers modification related operations.\n", response = TierDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "Update a Tier", notes = "This operation can be used to update an existing tier. The only supported tier level is `api` tiers.\n`PUT https://localhost:9443/api/am/publisher/v0.14/tiers/api/Low`\n\n**IMPORTANT:**\n* This is only effective when Advanced Throttling is disabled in the Server. If enabled, we need to use Admin REST API for throttling tiers modification related operations.\n", response = TierDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nSubscription updated.\n"),
         

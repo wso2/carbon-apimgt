@@ -484,6 +484,10 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         String nameIdFormat = relyingPartyObject.getSSOProperty(SSOConstants.NAME_ID_POLICY);
         log.debug("SAMLLogoutRequest is going to get session details");
         if (relyingPartyObject.getSessionInfo((String) args[1]) != null) {
+            String idpLogoutURL = relyingPartyObject.getSSOProperty(SSOConstants.IDP_LOGOUT_URL);
+            if (StringUtils.isEmpty(idpLogoutURL)) {
+                idpLogoutURL = relyingPartyObject.getSSOProperty(SSOConstants.IDP_URL);
+            }
             String sessionIndexId = relyingPartyObject.getSessionInfo((String) args[1]).getSessionIndex();
             if (sessionIndexId != null && sessionIndexId.length() > 0) {
                 if (!Boolean.parseBoolean(relyingPartyObject.getSSOProperty(SSOConstants.SIGN_REQUESTS))) {
@@ -498,7 +502,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                                     relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID),
                                     MultitenantConstants.SUPER_TENANT_ID,
                                     MultitenantConstants.SUPER_TENANT_DOMAIN_NAME,
-                                    relyingPartyObject.getSSOProperty(SSOConstants.IDP_URL), nameIdFormat));
+                                    idpLogoutURL, nameIdFormat));
                 }
             } else {
                 if (!Boolean.parseBoolean(relyingPartyObject.getSSOProperty(SSOConstants.SIGN_REQUESTS))) {
@@ -511,7 +515,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                                     relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID),
                                     MultitenantConstants.SUPER_TENANT_ID,
                                     MultitenantConstants.SUPER_TENANT_DOMAIN_NAME,
-                                    relyingPartyObject.getSSOProperty(SSOConstants.IDP_URL), nameIdFormat));
+                                    idpLogoutURL, nameIdFormat));
                 }
             }
         }

@@ -1,14 +1,15 @@
 {
     " APIs. ": " APIs. ",
-    " Show Keys ": " Show Keys ",
-    "- your session has expired due to an extended period of inactivity. You will need to re-authenticate to access the requested information. ": "- your session has expired due to an extended period of inactivity. You will need to re-authenticate to access the requested information. ",
-    "? This will cancel all the existing subscriptions and keys associated with the application. ": "? This will cancel all the existing subscriptions and keys associated with the application. ",
+    " Show keys ": " Show keys ",
+    "- Session expired due to inactivity. Please sign in again ": "- Session expired due to inactivity. Please sign in again ",
+    "? This will dissociate all the existing subscriptions and keys associated with the application. ": "? This will dissociate all the existing subscriptions and keys associated with the application. ",
     "AbnormalRefreshAlert": "Abnormal Access Token Renewal",
     "AbnormalRefreshAlert_Desc": "This alert type gets triggered if there is a change in the pattern of renewing access tokens of an application by a user. These alerts could be treated as an indication of a stolen access token.",
     "AbnormalTierUsage": "Abnormal Tier Usage",
     "AbnormalTierUsage_Desc": "This alert type gets triggered if there is a drastic reduction in API usage for a given API for a given user. These types of alerts should be treated as an indication of a failure of the application  using the altered API.",
     "Application Name: ": "Application Name: ",
     "Are you sure you want to remove the application ": "Are you sure you want to remove the application ",
+    "Are you sure you want to remove the configuration?": "Are you sure you want to remove the configuration?",
     "Are you sure you want to unsubscribe from ": "Are you sure you want to unsubscribe from ",
     "Callback URLs cannot be empty": "Callback URLs cannot be empty",
     "Cancel Subscription": "Cancel Subscription",
@@ -43,7 +44,7 @@
     "Please select at least one alert type": "Please select at least one alert type",
     "Please wait..": "Please wait..",
     "Please wait...": "Please wait...",
-    "Refer our documentation to configure API Manager Analytics correctly": "Refer our documentation to configure API Manager Analytics correctly",
+    "Refer our documentation to correctly configure API Manager Analytics ": "Refer our documentation to correctly configure API Manager Analytics ",
     "Remove": "Remove",
     "Reply cannot be empty.": "Reply cannot be empty.",
     "RequestPatternChanged": "Abnormal Resource Access",
@@ -55,7 +56,7 @@
     "Subscription Rejected": "Subscription Rejected",
     "Subscription Successful": "Subscription Successful",
     "Successfully saved": "Successfully saved",
-    "The Name contains one or more illegal characters": "The Name contains one or more illegal characters",
+    "The name contains one or more illegal characters": "The name contains one or more illegal characters",
     "The name contains white spaces.": "The name contains white spaces.",
     "The passwords you entered do not match.": "The passwords you entered do not match.",
     "The period after which the token will expire after generation. A negative value ensures that the token never expires.": "The period after which the token will expire after generation. A negative value ensures that the token never expires.",
@@ -95,5 +96,5 @@
     "retired": "RETIRED",
     "roles": "Visible to Roles",
     "tenants": "Visible to Tenants",
-    "The already generated tokens of this application will not work for this new subscription please regenerate tokens after the subscription": "The already generated tokens of this application will not work for this new subscription. Please regenerate tokens after the subscription"
+    "The tokens already generated for this application will not work for the new subscription. Please regenerate tokens after subscribing to the application": "The tokens already generated for this application will not work for the new subscription. Please regenerate tokens after subscribing to the application"
 }

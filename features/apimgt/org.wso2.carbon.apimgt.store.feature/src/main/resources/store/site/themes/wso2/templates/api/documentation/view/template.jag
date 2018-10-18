@@ -9,7 +9,7 @@
     <%if(!doc.content && doc.content==""){%>
     <%=i18n.localize("No document content has been added yet.")%>
     <%}else{%>
-    <%=doc.content%>
+    <%=jagg.validateForScript(doc.content)%>
     <%}%>
     </div>
     </div>

@@ -18,8 +18,8 @@ var log = new Log();
 
 	if (uri != null) {
 		// replacing @ signs for matcher to work with reverse proxies
-		if (callPath.indexOf("@") > -1) {
-			callPath = callPath.replace("@", "%40");
+        if (callPath.indexOf("@") > -1) {
+            callPath = callPath.replace("@", "%40");
 		}
 		var uriMatcher = new URIMatcher(callPath);
 		var providerVal, apiNameVal, apiVersionVal;
@@ -78,12 +78,20 @@ var log = new Log();
 						PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
 					}
 
-					var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
-					var apiUtil = new APIUtil();
-					var swaggerPath = apiUtil.getOpenAPIDefinitionFilePath(apiNameVal, apiVersionVal, providerVal);
-					var registry = carbon.server.osgiService('org.wso2.carbon.registry.core.service.RegistryService').getGovernanceUserRegistry(jagg.getUser(), tenantID);
-					url = swaggerPath + "swagger.json";
-					data = registry.get(url);
+                    var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+                    var apiUtil = new APIUtil();
+                    var swaggerPath = apiUtil.getOpenAPIDefinitionFilePath(apiNameVal, apiVersionVal, providerVal);
+                    var user = jagg.getUser();
+                    if (user && user.username) {
+                        var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+                        username = MultitenantUtils.getTenantAwareUsername(user.username);
+                    } else {
+                        username = "wso2.anonymous.user";
+                    }
+                    var registry = carbon.server.osgiService('org.wso2.carbon.registry.core.service.RegistryService')
+                        .getGovernanceUserRegistry(username, tenantID);
+                    url = swaggerPath + "swagger.json";
+                    data = registry.get(url);
 				} finally {
 					if (isTenantFlowStarted) {
 						PrivilegedCarbonContext.endTenantFlow();

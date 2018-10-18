@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -27,10 +28,13 @@ import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
+import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
+import org.wso2.carbon.apimgt.impl.TestUtils;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateAliasExistsException;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
-import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.EndpointForCertificateExistsException;
 import org.wso2.carbon.apimgt.impl.dao.CertificateMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.base.MultitenantConstants;
@@ -43,7 +47,7 @@ import java.util.List;
  * This class contains unit tests for CertificateManagerImpl class.
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@RunWith(PowerMockRunner.class)
+@RunWith(PowerMockRunner.class  )
 @PrepareForTest({CertificateMgtUtils.class, CertificateMgtDAO.class})
 public class CertificateManagerImplTest {
 
@@ -51,7 +55,6 @@ public class CertificateManagerImplTest {
     private static final String END_POINT = "TEST_ENDPOINT";
     private static final String ALIAS = "TEST_ALIAS";
     private static final int TENANT_ID = MultitenantConstants.SUPER_TENANT_ID;
-    private static final int TENANT_2 = 1;
     private static final String TEST_PATH = CertificateManagerImplTest.class.getClassLoader().getResource
             ("security/sslprofiles.xml").getPath();
     private static final String TEST_PATH_NOT_EXISTS = "/abx.xml";
@@ -79,7 +82,8 @@ public class CertificateManagerImplTest {
         MockitoAnnotations.initMocks(CertificateManagerImplTest.class);
         PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "deleteCertificate"))
                 .toReturn(true);
-        certificateManager = new CertificateManagerImpl();
+        TestUtils.initConfigurationContextService(true);
+        certificateManager = CertificateManagerImpl.getInstance();
     }
 
     @Test
@@ -139,15 +143,6 @@ public class CertificateManagerImplTest {
         ResponseCode responseCode = certificateManager.addCertificateToParentNode(BASE64_ENCODED_CERT, ALIAS,
                 END_POINT, TENANT_ID);
         Assert.assertEquals(ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE, responseCode);
-    }
-
-    @Test
-    public void testAddToPublisherWithExistingEndpointInDB() {
-        PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "addCertificate")).toThrow(new
-                EndpointForCertificateExistsException(""));
-        ResponseCode responseCode = certificateManager.addCertificateToParentNode(BASE64_ENCODED_CERT, ALIAS,
-                END_POINT, TENANT_ID);
-        Assert.assertEquals(ResponseCode.CERTIFICATE_FOR_ENDPOINT_EXISTS, responseCode);
     }
 
     @Test
@@ -241,7 +236,7 @@ public class CertificateManagerImplTest {
 
     @Test
     public void testEmptyCertAddToGateway() throws NoSuchFieldException, IllegalAccessException {
-        CertificateMgtUtils certificateMgtUtils = new CertificateMgtUtils();
+        CertificateMgtUtils certificateMgtUtils = CertificateMgtUtils.getInstance();
         ResponseCode responseCode = certificateMgtUtils.addCertificateToTrustStore("", "testalias");
         Assert.assertEquals(ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode(), responseCode.getResponseCode());
     }
@@ -291,22 +286,158 @@ public class CertificateManagerImplTest {
     }
 
     @Test
-    public void testGetCertificate() {
+    public void testGetCertificate() throws APIManagementException {
         CertificateMetadataDTO certificateMetadata = generateMetadata();
-        PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "getCertificate", String.class,
-                String.class, int.class)).toReturn(certificateMetadata);
-        CertificateMetadataDTO result = certificateManager.getCertificate(END_POINT, TENANT_ID);
+        List<CertificateMetadataDTO> certificateMetadataList = new ArrayList<>();
+        certificateMetadataList.add(certificateMetadata);
+        PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "getCertificates", String.class,
+                String.class, int.class)).toReturn(certificateMetadataList);
+        List<CertificateMetadataDTO> result = certificateManager.getCertificates(TENANT_ID, ALIAS, END_POINT);
         Assert.assertNotNull(result);
-        Assert.assertEquals(certificateMetadata, result);
+        Assert.assertEquals(certificateMetadataList, result);
     }
 
     @Test
     public void testGetCertificates() {
         List<CertificateMetadataDTO> certificateMetadataList = generateCertificates();
-        PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "getCertificates")).toReturn
-                (certificateMetadataList);
+        PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "getCertificates", String.class, String.class,
+        int.class)).toReturn(certificateMetadataList);
         List<CertificateMetadataDTO> resultMetadataList = certificateManager.getCertificates(TENANT_ID);
         Assert.assertNotNull(resultMetadataList);
+    }
+
+    @Test
+    public void testIsCertificatePresent() throws APIManagementException {
+        CertificateMetadataDTO certificateMetadataDTO = generateMetadata();
+        List<CertificateMetadataDTO> certificateMetadataList = new ArrayList<>();
+        certificateMetadataList.add(certificateMetadataDTO);
+
+        PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "getCertificates", String.class,
+                String.class, int.class)).toReturn(certificateMetadataList);
+
+        Boolean result = certificateManager.isCertificatePresent(TENANT_ID, ALIAS);
+        Assert.assertTrue(result);
+    }
+
+    @Test
+    public void testGetCertificateInformation() throws APIManagementException {
+        CertificateInformationDTO certificateInformation = generateCertificateInformationDTO();
+        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "getCertificateInformation", String.class))
+                .toReturn(certificateInformation);
+
+        CertificateInformationDTO certificateInformationDTO = certificateManager.getCertificateInformation(ALIAS);
+        Assert.assertNotNull(certificateInformationDTO);
+
+    }
+
+    @Test
+    public void testUpdateCertificate() throws APIManagementException {
+        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "updateCertificate", String.class, String.class))
+                .toReturn(ResponseCode.SUCCESS);
+
+        ResponseCode responseCode = certificateManager.updateCertificate(BASE64_ENCODED_CERT, ALIAS);
+        Assert.assertEquals(ResponseCode.SUCCESS.getResponseCode(), responseCode.getResponseCode());
+    }
+
+    /**
+     * This method tests the behaviour of addClientCertificate method under different conditions.
+     */
+    @Test
+    public void testAddClientCertificate() {
+        PowerMockito
+                .stub(PowerMockito.method(CertificateMgtUtils.class, "validateCertificate"))
+                .toReturn(ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE);
+        ResponseCode responseCode = certificateManager
+                .addClientCertificate(null, BASE64_ENCODED_CERT, ALIAS, null, MultitenantConstants.SUPER_TENANT_ID);
+        Assert.assertEquals("Response code was wrong while trying add a client certificate with an existing alias",
+                ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE.getResponseCode(), responseCode.getResponseCode());
+        PowerMockito
+                .stub(PowerMockito.method(CertificateMgtUtils.class, "validateCertificate"))
+                .toReturn(ResponseCode.SUCCESS);
+        PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "checkWhetherAliasExist"))
+                .toReturn(true);
+        responseCode = certificateManager
+                .addClientCertificate(null, BASE64_ENCODED_CERT, ALIAS, null, MultitenantConstants.SUPER_TENANT_ID);
+        Assert.assertEquals("Response code was wrong while trying add a client certificate with an existing alias",
+                ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE.getResponseCode(), responseCode.getResponseCode());
+        PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "checkWhetherAliasExist"))
+                .toReturn(false);
+        PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "addClientCertificate")).toReturn(true);
+        responseCode = certificateManager
+                .addClientCertificate(null, BASE64_ENCODED_CERT, ALIAS, null, MultitenantConstants.SUPER_TENANT_ID);
+        Assert.assertEquals("Response code was wrong while trying add a client certificate",
+                ResponseCode.SUCCESS.getResponseCode(), responseCode.getResponseCode());
+    }
+
+    /**
+     * This method tests the behaviour of updateClientCertificate method.
+     */
+    @Test
+    public void testUpdateClientCertificate() throws APIManagementException {
+        PowerMockito
+                .stub(PowerMockito.method(CertificateMgtUtils.class, "validateCertificate"))
+                .toReturn(ResponseCode.CERTIFICATE_EXPIRED);
+        ResponseCode responseCode = certificateManager
+                .updateClientCertificate(BASE64_ENCODED_CERT, ALIAS, null, MultitenantConstants.SUPER_TENANT_ID);
+        Assert.assertEquals("Response code was wrong while trying add a expired client certificate",
+                ResponseCode.CERTIFICATE_EXPIRED.getResponseCode(), responseCode.getResponseCode());
+        PowerMockito
+                .stub(PowerMockito.method(CertificateMgtUtils.class, "validateCertificate"))
+                .toReturn(ResponseCode.SUCCESS);
+        PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "updateClientCertificate")).toReturn(false);
+        responseCode = certificateManager
+                .updateClientCertificate(BASE64_ENCODED_CERT, ALIAS, null, MultitenantConstants.SUPER_TENANT_ID);
+        Assert.assertEquals("Response code was wrong, for a failure in update",
+                ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode(), responseCode.getResponseCode());
+    }
+
+    /**
+     * This method tests the behaviour of deleteClientCertificate method.
+     */
+    @Test
+    public void testDeleteClientCertificate() {
+        PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "deleteClientCertificate")).toReturn(false);
+        ResponseCode responseCode = certificateManager
+                .deleteClientCertificateFromParentNode(null, ALIAS, MultitenantConstants.SUPER_TENANT_ID);
+        Assert.assertEquals("Response code was wrong, for a failure in deletion",
+                ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode(), responseCode.getResponseCode());
+        PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "deleteClientCertificate")).toReturn(true);
+        responseCode = certificateManager
+                .deleteClientCertificateFromParentNode(null, ALIAS, MultitenantConstants.SUPER_TENANT_ID);
+        Assert.assertEquals("Response code was wrong, for a success in deletion",
+                ResponseCode.SUCCESS.getResponseCode(), responseCode.getResponseCode());
+    }
+
+    /**
+     * This method tests the behaviour of searchClientCertificate method
+     * @throws APIManagementException API Management Exception.
+     */
+    @Test
+    public void testSearchClientCertificate() throws APIManagementException {
+        PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "getClientCertificates"))
+                .toReturn(new ArrayList<ClientCertificateDTO>());
+        Assert.assertNotNull("Client certificate retrieval failed",
+                certificateManager.searchClientCertificates(MultitenantConstants.SUPER_TENANT_ID, ALIAS, null));
+        Assert.assertNotNull("Client certificate retrieval failed",
+                certificateManager.searchClientCertificates(MultitenantConstants.SUPER_TENANT_ID, null, null));
+    }
+
+    /**
+     * This method tests the behaviour of addClientCertificateToGateway method
+     */
+    @Test
+    public void testAddClientCertificateToGateway() throws NoSuchFieldException, IllegalAccessException {
+        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "addCertificateToTrustStore"))
+                .toReturn(ResponseCode.SUCCESS);
+        Field field = CertificateManagerImpl.class.getDeclaredField("listenerProfileFilePath");
+        field.setAccessible(true);
+        field.set(certificateManager, TEST_PATH_NOT_EXISTS);
+        boolean result = certificateManager.addClientCertificateToGateway(BASE64_ENCODED_CERT, ALIAS);
+        Assert.assertFalse("Client certificate addition to the gateway succeeded with non-existing file", result);
+
+        field.set(certificateManager, TEST_PATH);
+        result = certificateManager.addClientCertificateToGateway(BASE64_ENCODED_CERT, ALIAS);
+        Assert.assertTrue("Client certificate addition to the gateway failed", result);
     }
 
     private CertificateMetadataDTO generateMetadata() {
@@ -325,5 +456,15 @@ public class CertificateManagerImplTest {
             certificateMetadataDTOList.add(certificateMetadataDTO);
         }
         return certificateMetadataDTOList;
+    }
+
+    private CertificateInformationDTO generateCertificateInformationDTO() {
+        CertificateInformationDTO certificateInformationDTO = new CertificateInformationDTO();
+        certificateInformationDTO.setStatus("ACTIVE");
+        certificateInformationDTO.setVersion("V3");
+        certificateInformationDTO.setFrom("");
+        certificateInformationDTO.setTo("");
+        certificateInformationDTO.setSubject("");
+        return certificateInformationDTO;
     }
 }

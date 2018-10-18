@@ -32,6 +32,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
+import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -46,6 +47,7 @@ import org.wso2.carbon.apimgt.keymgt.handlers.AbstractKeyValidationHandler;
 import org.wso2.carbon.apimgt.keymgt.handlers.DefaultKeyValidationHandler;
 import org.wso2.carbon.apimgt.keymgt.handlers.KeyValidationHandler;
 import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.keymgt.token.TokenGenerator;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -54,6 +56,8 @@ import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.MetricService;
 import org.wso2.carbon.metrics.manager.Timer;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -81,6 +85,8 @@ public class APIKeyValidationServiceTest {
     private final String REFRESH_GRANT_TYPE = "refresh_token";
     private final String IMPLICIT_GRANT_TYPE = "implicit";
     private final String ACCESS_TOKEN = "ca19a540f544777860e44e75f605d927";
+    private final String TIER = "unlimited";
+    private final String JWT_TOKEN = "meta-token";
     private final String API_KEY_MANGER_VALIDATION_HANDLER_CLASS_NAME =
             "org.wso2.carbon.apimgt.keymgt.handlers.DefaultKeyValidationHandler";
     private final String REQUIRED_AUTHENTICATION_LEVEL = "level";
@@ -220,6 +226,16 @@ public class APIKeyValidationServiceTest {
         tokenInfo.setEndUserName(USER_NAME);
         PowerMockito.when(keyManager.getTokenMetaData(ACCESS_TOKEN)).thenReturn(tokenInfo);
 
+        Application application = new Application(0);
+        application.setTier(TIER);
+
+        PowerMockito.when(APIUtil.getApplicationByClientId(null)).thenReturn(application);
+
+        TokenGenerator tokenGenerator = Mockito.mock(TokenGenerator.class);
+        PowerMockito.when(APIKeyMgtDataHolder.getTokenGenerator()).thenReturn(tokenGenerator);
+
+        Mockito.when(tokenGenerator.generateToken(Mockito.any(TokenValidationContext.class))).thenReturn(JWT_TOKEN);
+
         Mockito.when(apiMgtDAO.getAPIDetailsByContext(API_CONTEXT)).thenReturn(new String[] { API_NAME, USER_NAME });
         Mockito.when(apiMgtDAO.getDefaultVersion(new APIIdentifier(USER_NAME, API_NAME, ""))).thenReturn(API_VERSION);
         APIKeyValidationInfoDTO info1 = new APIKeyValidationInfoDTO();
@@ -232,6 +248,7 @@ public class APIKeyValidationServiceTest {
         APIKeyValidationInfoDTO info = apiKeyValidationService
                 .validateKeyforHandshake(API_CONTEXT, API_VERSION, ACCESS_TOKEN);
         Assert.assertEquals(USER_NAME, info.getEndUserName());
+        Assert.assertEquals(JWT_TOKEN, info.getEndUserToken());
         MockRepository.remove(DefaultKeyValidationHandler.class);
     }
 }

@@ -4,7 +4,6 @@ var addLabel = function () {
     if (!validateInputs()) {
         return;
     }
-
     var attributes = getCustomAttributesArray();
     if (attributes != null) {
         $('#add-label-btn').buttonLoader('start');
@@ -31,10 +30,8 @@ var getCustomAttributesArray = function () {
     var hostValid = "At least one host is required";
     $('#custom-attribute-tbody tr').each(function () {
         var attributeValue = $(this).find('input[name^=attributeValue]').val();
-
         var attributeObj = {};
         attributeObj.value = attributeValue;
-
         customAttributesArray.push(attributeObj);
     });
     if (customAttributesArray.length == 0) {
@@ -62,7 +59,6 @@ function htmlEscape(str) {
 }
 
 function populateCustomerAttributes(attributesList) {
-
     var attributes = attributesList;
     var tBody = $('#custom-attribute-tbody');
     if (attributes != null) {
@@ -74,7 +70,6 @@ function populateCustomerAttributes(attributesList) {
 }
 
 function addCustomAttribute(element, count) {
-
     var elementId = element.attr('id');
     element.parent().append(
         '<tr id="attribute' + count + '">' +
@@ -87,7 +82,6 @@ function addCustomAttribute(element, count) {
 }
 
 function addCustomAttributeInitially(element, count, name, value) {
-
     var elementId = element.attr('id');
     element.parent().append(
         '<tr id="attribute' + count + '">' +
@@ -97,7 +91,6 @@ function addCustomAttributeInitially(element, count, name, value) {
         '<span class="fw-stack"> <i class="fw fw-delete fw-stack-1x"></i> <i class="fw fw-circle-outline fw-stack-2x"></i></span></td>' +
         '</tr>'
     );
-
     $('#attributeValue' + count).val(value);
 }
 
@@ -172,27 +165,19 @@ function validateInputs() {
     var labelName = $('#labelName');
     var labelNameTxt = labelName.val();
 
-
     if (!validateInput(labelNameTxt, labelName, requiredMsg)) {
         return false;
     }
-
     if (!validateInputCharactors(labelNameTxt, labelName, illegalChars)) {
         return false;
     }
-
     if (!validateForSpaces(labelNameTxt, labelName, errorHasSpacesMsg)) {
         return false;
     }
-
     var isInvalidAttribute = false;
     $('#custom-attribute-tbody tr').each(function () {
-
         var attributeValueElement = $(this).find('input[name^=attributeValue]');
-
-
         var attributeValue = attributeValueElement.val();
-
         if (!validateAttributesInput(attributeValue, attributeValueElement, requiredMsg, invalidErrorMsg)) {
             isInvalidAttribute = true;
             return false;
@@ -201,7 +186,6 @@ function validateInputs() {
     if (isInvalidAttribute) {
         return false;
     }
-
     return true;
 }
 

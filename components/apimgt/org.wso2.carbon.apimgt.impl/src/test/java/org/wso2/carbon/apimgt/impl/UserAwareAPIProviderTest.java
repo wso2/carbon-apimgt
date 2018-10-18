@@ -41,6 +41,7 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
+import org.wso2.carbon.utils.ConfigurationContextService;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ ApiMgtDAO.class, ServiceReferenceHolder.class, APIUtil.class, RegistryUtils.class,
@@ -98,6 +99,8 @@ public class UserAwareAPIProviderTest {
                 .getAPIManagerConfigurationService();
         PowerMockito.when(APIUtil.compareRoleList(Mockito.any(String[].class), Mockito.anyString()))
                 .thenCallRealMethod();
+        ConfigurationContextService configurationContextService = TestUtils.initConfigurationContextService(true);
+        PowerMockito.when(ServiceReferenceHolder.getContextService()).thenReturn(configurationContextService);
         userAwareAPIProvider = new UserAwareAPIProvider(ADMIN_ROLE_NAME);
         PrivilegedCarbonContext prcontext = Mockito.mock(PrivilegedCarbonContext.class);
         PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(prcontext);
@@ -220,7 +223,7 @@ public class UserAwareAPIProviderTest {
                     .getProperty(APIConstants.ACCESS_CONTROL);
             PowerMockito.when(APIUtil.hasPermission(ADMIN_ROLE_NAME, APIConstants.Permissions.APIM_ADMIN))
                     .thenReturn(false);
-            Mockito.doReturn(ADMIN_ROLE_NAME).when(resource).getProperty(APIConstants.PUBLISHER_ROLES);
+            Mockito.doReturn(ADMIN_ROLE_NAME).when(resource).getProperty(APIConstants.DISPLAY_PUBLISHER_ROLES);
             PowerMockito.when(APIUtil.getListOfRoles(ADMIN_ROLE_NAME))
                     .thenReturn(new String[] { "Internal/everyone" });
             userAwareAPIProvider.checkAccessControlPermission(apiIdentifier);

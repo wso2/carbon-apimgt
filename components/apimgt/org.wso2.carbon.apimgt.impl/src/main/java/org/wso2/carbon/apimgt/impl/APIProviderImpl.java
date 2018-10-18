@@ -44,7 +44,9 @@ import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.PolicyDeploymentFailureException;
 import org.wso2.carbon.apimgt.api.UnsupportedPolicyTypeException;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
+import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
+import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -98,6 +100,7 @@ import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIStoreNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
+import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.impl.utils.StatUpdateClusterMessage;
 import org.wso2.carbon.apimgt.impl.workflow.APIStateWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
@@ -140,6 +143,7 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -188,10 +192,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private static final Log log = LogFactory.getLog(APIProviderImpl.class);
 
     private final String userNameWithoutChange;
+    private CertificateManager certificateManager;
 
     public APIProviderImpl(String username) throws APIManagementException {
         super(username);
         this.userNameWithoutChange = username;
+        certificateManager = CertificateManagerImpl.getInstance();
     }
 
     protected String getUserNameWithoutChange() {
@@ -1106,6 +1112,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         //Validate Transports
         validateAndSetTransports(api);
+        validateAndSetAPISecurity(api);
         boolean transactionCommitted = false;
         try {
             registry.beginTransaction();
@@ -1195,14 +1202,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             saveAPIStatus(artifactPath, apiStatus);
             String[] visibleRoles = new String[0];
             String publisherAccessControlRoles = api.getAccessControlRoles();
-            if (publisherAccessControlRoles != null) {
-                publisherAccessControlRoles = publisherAccessControlRoles.replaceAll("\\s+", "").toLowerCase();
-            }
+
             updateRegistryResources(artifactPath, publisherAccessControlRoles, api.getAccessControl(),
                     api.getAdditionalProperties());
 
             if (updatePermissions) {
-                clearResourcePermissions(artifactPath, api.getId());
+                APIUtil.clearResourcePermissions(artifactPath, api.getId(), ((UserRegistry) registry).getTenantId());
                 String visibleRolesList = api.getVisibleRoles();
 
                 if (visibleRolesList != null) {
@@ -1744,6 +1749,46 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    /**
+     * To validate the API Security options and set it.
+     *
+     * @param api Relevant API that need to be validated.
+     */
+    private void validateAndSetAPISecurity(API api) {
+        String apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
+        if (api.getApiSecurity() != null) {
+            apiSecurity = api.getApiSecurity();
+            String[] apiSecurityLevels = apiSecurity.split(",");
+            boolean isOauth2 = false;
+            boolean isMutualSSL = false;
+            for (String apiSecurityLevel : apiSecurityLevels) {
+                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+                    isOauth2 = true;
+                }
+                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL)) {
+                    isMutualSSL = true;
+                }
+            }
+            apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
+            if (isOauth2 && isMutualSSL) {
+                apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2 + "," + APIConstants.API_SECURITY_MUTUAL_SSL;
+            } else if (isMutualSSL) {
+                apiSecurity = APIConstants.API_SECURITY_MUTUAL_SSL;
+            }
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("API " + api.getId() + " has following enabled protocols : " + apiSecurity);
+        }
+        api.setApiSecurity(apiSecurity);
+        if (!apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+            if (log.isDebugEnabled()) {
+                log.info("API " + api.getId() + " does not supports oauth2 security, hence removing all the "
+                        + "subscription tiers associated with it");
+            }
+            api.removeAllTiers();
+        }
+    }
+
     private void checkIfValidTransport(String transport) throws APIManagementException {
         if (!Constants.TRANSPORT_HTTP.equalsIgnoreCase(transport) && !Constants.TRANSPORT_HTTPS.equalsIgnoreCase(transport)) {
             handleException("Unsupported Transport [" + transport + ']');
@@ -1806,7 +1851,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             // in tenant registry
             authorizationHeader = APIUtil.getOAuthConfiguration(tenantId, APIConstants.AUTHORIZATION_HEADER);
         }
-
         if (!StringUtils.isBlank(authorizationHeader)) {
             corsProperties.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
         }
@@ -1855,9 +1899,31 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         if(!APIConstants.PROTOTYPED.equals(api.getStatus())) {
 
+            List<ClientCertificateDTO> clientCertificateDTOS = null;
+            if (isClientCertificateBasedAuthenticationConfigured()) {
+                clientCertificateDTOS = certificateManager.searchClientCertificates(tenantId, null, api.getId());
+            }
+            Map<String, String> clientCertificateObject = null;
+            CertificateMgtUtils certificateMgtUtils = CertificateMgtUtils.getInstance();
+            if (clientCertificateDTOS != null) {
+                clientCertificateObject = new HashMap<>();
+                for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOS) {
+                    clientCertificateObject.put(certificateMgtUtils
+                                    .getUniqueIdentifierOfCertificate(clientCertificateDTO.getCertificate()),
+                            clientCertificateDTO.getTierName());
+                }
+            }
+
             Map<String, String> authProperties = new HashMap<String, String>();
             if (!StringUtils.isBlank(authorizationHeader)) {
                 authProperties.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
+            }
+            String apiSecurity = api.getApiSecurity();
+            String apiLevelPolicy = api.getApiLevelPolicy();
+            authProperties.put(APIConstants.API_SECURITY, apiSecurity);
+            authProperties.put(APIConstants.API_LEVEL_POLICY, apiLevelPolicy);
+            if (clientCertificateObject != null) {
+                authProperties.put(APIConstants.CERTIFICATE_INFORMATION, clientCertificateObject.toString());
             }
             //Get RemoveHeaderFromOutMessage from tenant registry or api-manager.xml
             String removeHeaderFromOutMessage = APIUtil
@@ -2163,6 +2229,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
                 apiTargetArtifact.setProperty(APIConstants.PUBLISHER_ROLES,
                         apiSourceArtifact.getProperty(APIConstants.PUBLISHER_ROLES));
+                apiTargetArtifact.setProperty(APIConstants.DISPLAY_PUBLISHER_ROLES,
+                        apiSourceArtifact.getProperty(APIConstants.DISPLAY_PUBLISHER_ROLES));
                 apiTargetArtifact.setProperty(APIConstants.ACCESS_CONTROL,
                         apiSourceArtifact.getProperty(APIConstants.ACCESS_CONTROL));
                 registry.put(targetPath, apiTargetArtifact);
@@ -2519,7 +2587,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             GenericArtifact updateApiArtifact = APIUtil.createDocArtifactContent(artifact, apiId, documentation);
             artifactManager.updateGenericArtifact(updateApiArtifact);
-            clearResourcePermissions(docPath, apiId);
+            APIUtil.clearResourcePermissions(docPath, apiId, ((UserRegistry) registry).getTenantId());
 
             APIUtil.setResourcePermissions(api.getId().getProviderName(), visibility, authorizedRoles,
                     artifact.getPath(), registry);
@@ -2586,6 +2654,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         //Validate Transports
         validateAndSetTransports(api);
+        validateAndSetAPISecurity(api);
         boolean transactionCommitted = false;
         try {
             registry.beginTransaction();
@@ -2633,18 +2702,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
             String publisherAccessControlRoles = api.getAccessControlRoles();
-            if (publisherAccessControlRoles != null) {
-                // We are changing to lowercase, as registry search only supports lower-case characters.
-                publisherAccessControlRoles = publisherAccessControlRoles.replace("\\s+", "").toLowerCase();
-                if (publisherAccessControlRoles.isEmpty()) {
-                    publisherAccessControlRoles = null;
-                }
-            }
             APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
                     artifactPath, registry);
-            publisherAccessControlRoles = publisherAccessControlRoles == null ?
-                    APIConstants.NULL_USER_ROLE_LIST :
-                    publisherAccessControlRoles;
+
             updateRegistryResources(artifactPath, publisherAccessControlRoles, api.getAccessControl(),
                     api.getAdditionalProperties());
             registry.commitTransaction();
@@ -2674,33 +2734,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             } catch (RegistryException ex) {
                 handleException("Error while rolling back the transaction for API: " + api.getId().getApiName(), ex);
             }
-        }
-    }
-
-    /**
-     * This function is to set resource permissions based on its visibility
-     *
-     * @param artifactPath API resource path
-     * @throws APIManagementException Throwing exception
-     */
-    private void clearResourcePermissions(String artifactPath, APIIdentifier apiId) throws APIManagementException {
-        try {
-            String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                    APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
-                            RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + artifactPath);
-            String tenantDomain = MultitenantUtils
-                    .getTenantDomain(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
-            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                AuthorizationManager authManager = ServiceReferenceHolder.getInstance().getRealmService()
-                        .getTenantUserRealm(((UserRegistry) registry).getTenantId()).getAuthorizationManager();
-                authManager.clearResourceAuthorizations(resourcePath);
-            } else {
-                RegistryAuthorizationManager authorizationManager = new RegistryAuthorizationManager(
-                        ServiceReferenceHolder.getUserRealm());
-                authorizationManager.clearResourceAuthorizations(resourcePath);
-            }
-        } catch (UserStoreException e) {
-            handleException("Error while adding role permissions to API", e);
         }
     }
 
@@ -2844,6 +2877,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String environments = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             String type = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
             String context_val = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
+            String implementation = apiArtifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION);
             //Delete the dependencies associated  with the api artifact
             GovernanceArtifact[] dependenciesArray = apiArtifact.getDependencies();
 
@@ -2878,6 +2912,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             api.setAsPublishedDefaultVersion(api.getId().getVersion().equals(apiMgtDAO.getPublishedDefaultVersion(api.getId())));
             api.setType(type);
             api.setContext(context_val);
+            api.setImplementation(implementation);
             // gatewayType check is required when API Management is deployed on
             // other servers to avoid synapse
             if (gatewayExists && "Synapse".equals(gatewayType)) {
@@ -3490,6 +3525,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_INSEQUENCE_LOCATION);
                 if (inSeqCollection != null) {
                     String[] inSeqChildPaths = inSeqCollection.getChildren();
+                    Arrays.sort(inSeqChildPaths);
                     for (String inSeqChildPath : inSeqChildPaths) {
                         Resource inSequence = registry.get(inSeqChildPath);
                         try {
@@ -3509,6 +3545,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         (org.wso2.carbon.registry.api.Collection) registry.get(customInSeqFileLocation);
                 if (inSeqCollection != null) {
                     String[] inSeqChildPaths = inSeqCollection.getChildren();
+                    Arrays.sort(inSeqChildPaths);
                     for (String inSeqChildPath : inSeqChildPaths) {
                         Resource inSequence = registry.get(inSeqChildPath);
                         try {
@@ -3561,6 +3598,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION);
                 if (outSeqCollection != null) {
                     String[] outSeqChildPaths = outSeqCollection.getChildren();
+                    Arrays.sort(outSeqChildPaths);
                     for (String childPath : outSeqChildPaths) {
                         Resource outSequence = registry.get(childPath);
                         try {
@@ -3580,6 +3618,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         (org.wso2.carbon.registry.api.Collection) registry.get(customOutSeqFileLocation);
                 if (outSeqCollection != null) {
                     String[] outSeqChildPaths = outSeqCollection.getChildren();
+                    Arrays.sort(outSeqChildPaths);
                     for (String outSeqChildPath : outSeqChildPaths) {
                         Resource outSequence = registry.get(outSeqChildPath);
                         try {
@@ -3618,6 +3657,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_INSEQUENCE_LOCATION);
                 if (inSeqCollection != null) {
                     String[] inSeqChildPaths = inSeqCollection.getChildren();
+                    Arrays.sort(inSeqChildPaths);
                     for (String inSeqChildPath : inSeqChildPaths) {
                         Resource inSequence = registry.get(inSeqChildPath);
                         try {
@@ -3663,6 +3703,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION);
                 if (outSeqCollection != null) {
                     String[] outSeqChildPaths = outSeqCollection.getChildren();
+                    Arrays.sort(outSeqChildPaths);
                     for (String outSeqChildPath : outSeqChildPaths) {
                         Resource outSequence = registry.get(outSeqChildPath);
                         try {
@@ -3708,6 +3749,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_FAULTSEQUENCE_LOCATION);
                 if (faultSeqCollection != null) {
                     String[] faultSeqChildPaths = faultSeqCollection.getChildren();
+                    Arrays.sort(faultSeqChildPaths);
                     for (String faultSeqChildPath : faultSeqChildPaths) {
                         Resource outSequence = registry.get(faultSeqChildPath);
                         try {
@@ -3767,6 +3809,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 APIConstants.API_CUSTOM_FAULTSEQUENCE_LOCATION);
                 if (faultSeqCollection != null) {
                     String[] faultSeqChildPaths = faultSeqCollection.getChildren();
+                    Arrays.sort(faultSeqChildPaths);
                     for (String faultSeqChildPath : faultSeqChildPaths) {
                         Resource outSequence = registry.get(faultSeqChildPath);
                         try {
@@ -3789,6 +3832,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         (org.wso2.carbon.registry.api.Collection) registry.get(customOutSeqFileLocation);
                 if (faultSeqCollection != null) {
                     String[] faultSeqChildPaths = faultSeqCollection.getChildren();
+                    Arrays.sort(faultSeqChildPaths);
                     for (String faultSeqChildPath : faultSeqChildPaths) {
                         Resource faultSequence = registry.get(faultSeqChildPath);
                         try {
@@ -3856,6 +3900,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         .get(customInSeqFileLocation);
                 if (inSeqCollection != null) {
                     String[] inSeqChildPaths = inSeqCollection.getChildren();
+                    Arrays.sort(inSeqChildPaths);
                     for (String inSeqChildPath : inSeqChildPaths) {
                         Resource outSequence = registry.get(inSeqChildPath);
                         try {
@@ -3921,6 +3966,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         (org.wso2.carbon.registry.api.Collection) registry.get(customOutSeqFileLocation);
                 if (outSeqCollection != null) {
                     String[] outSeqChildPaths = outSeqCollection.getChildren();
+                    Arrays.sort(outSeqChildPaths);
                     for (String outSeqChildPath : outSeqChildPaths) {
                         Resource outSequence = registry.get(outSeqChildPath);
                         try {
@@ -3985,6 +4031,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         .get(customOutSeqFileLocation);
                 if (faultSeqCollection != null) {
                     String[] faultSeqChildPaths = faultSeqCollection.getChildren();
+                    Arrays.sort(faultSeqChildPaths);
                     for (String faultSeqChildPath : faultSeqChildPaths) {
                         Resource faultSequence = registry.get(faultSeqChildPath);
                         try {
@@ -4122,10 +4169,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public void saveSwagger20Definition(APIIdentifier apiId, String jsonText) throws APIManagementException {
+
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            definitionFromOpenAPISpec.saveAPIDefinition(getAPI(apiId), jsonText, registry);
+            saveSwaggerDefinition(getAPI(apiId), jsonText);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+    }
+
+    @Override
+    public void saveSwaggerDefinition(API api, String jsonText) throws APIManagementException {
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            definitionFromOpenAPISpec.saveAPIDefinition(api, jsonText, registry);
 
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
@@ -5182,10 +5241,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public int addCertificate(String userName, String certificate, String alias, String endpoint)
             throws APIManagementException {
+
         ResponseCode responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
-        CertificateManager certificateManager = new CertificateManagerImpl();
         String tenantDomain = MultitenantUtils.getTenantDomain(userName);
-        ;
+
         try {
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
@@ -5194,7 +5253,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             if (responseCode == ResponseCode.SUCCESS) {
                 //Get the gateway manager and add the certificate to gateways.
-                GatewayCertificateManager gatewayCertificateManager = new GatewayCertificateManager();
+                GatewayCertificateManager gatewayCertificateManager = GatewayCertificateManager.getInstance();
                 gatewayCertificateManager.addToGateways(certificate, alias);
             } else {
                 log.error("Adding certificate to the Publisher node is failed. No certificate changes will be " +
@@ -5207,9 +5266,28 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public int deleteCertificate(String userName, String alias, String endpoint) throws APIManagementException {
+    public int addClientCertificate(String userName, APIIdentifier apiIdentifier, String certificate, String alias,
+            String tierName) throws APIManagementException {
+
         ResponseCode responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
-        CertificateManager certificateManager = new CertificateManagerImpl();
+        String tenantDomain = MultitenantUtils.getTenantDomain(userName);
+
+        try {
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+            responseCode = certificateManager
+                    .addClientCertificate(apiIdentifier, certificate, alias, tierName, tenantId);
+        } catch (UserStoreException e) {
+            handleException("Error while reading tenant information, client certificate addition failed for the API "
+                    + apiIdentifier.toString(), e);
+        }
+        return responseCode.getResponseCode();
+    }
+
+    @Override
+    public int deleteCertificate(String userName, String alias, String endpoint) throws APIManagementException {
+
+        ResponseCode responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
         String tenantDomain = MultitenantUtils.getTenantDomain(userName);
 
         try {
@@ -5219,7 +5297,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             if (responseCode == ResponseCode.SUCCESS) {
                 //Get the gateway manager and remove the certificate from gateways.
-                GatewayCertificateManager gatewayCertificateManager = new GatewayCertificateManager();
+                GatewayCertificateManager gatewayCertificateManager = GatewayCertificateManager.getInstance();
                 gatewayCertificateManager.removeFromGateways(alias);
             } else {
                 log.error("Removing the certificate from Publisher node is failed. No certificate changes will "
@@ -5232,14 +5310,36 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
+    public int deleteClientCertificate(String userName, APIIdentifier apiIdentifier, String alias)
+            throws APIManagementException {
+
+        ResponseCode responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
+        String tenantDomain = MultitenantUtils.getTenantDomain(userName);
+
+        try {
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+            responseCode = certificateManager.deleteClientCertificateFromParentNode(apiIdentifier, alias, tenantId);
+        } catch (UserStoreException e) {
+            handleException(
+                    "Error while reading tenant information while trying to delete client certificate with alias "
+                            + alias + " for the API " + apiIdentifier.toString(), e);
+        }
+        return responseCode.getResponseCode();
+    }
+
+    @Override
     public boolean isConfigured() {
-        CertificateManager certificateManager = new CertificateManagerImpl();
         return certificateManager.isConfigured();
     }
 
     @Override
+    public boolean isClientCertificateBasedAuthenticationConfigured() {
+        return certificateManager.isClientCertificateBasedAuthenticationConfigured();
+    }
+
+    @Override
     public List<CertificateMetadataDTO> getCertificates(String userName) throws APIManagementException {
-        CertificateManager certificateManager = new CertificateManagerImpl();
         int tenantId = 0;
         try {
             tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
@@ -5248,6 +5348,77 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handleException("Error while reading tenant information", e);
         }
         return certificateManager.getCertificates(tenantId);
+    }
+
+    @Override
+    public List<CertificateMetadataDTO> searchCertificates(int tenantId, String alias, String endpoint) throws
+            APIManagementException {
+        return certificateManager.getCertificates(tenantId, alias, endpoint);
+    }
+
+    @Override
+    public List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, APIIdentifier apiIdentifier)
+            throws APIManagementException {
+        return certificateManager.searchClientCertificates(tenantId, alias, apiIdentifier);
+    }
+
+    @Override
+    public boolean isCertificatePresent(int tenantId, String alias) throws APIManagementException {
+        return certificateManager.isCertificatePresent(tenantId, alias);
+    }
+
+    @Override
+    public ClientCertificateDTO getClientCertificate(int tenantId, String alias) throws APIManagementException {
+        List<ClientCertificateDTO> clientCertificateDTOS = certificateManager
+                .searchClientCertificates(tenantId, alias, null);
+        if (clientCertificateDTOS != null && clientCertificateDTOS.size() > 0) {
+            return clientCertificateDTOS.get(0);
+        }
+        return null;
+    }
+
+    @Override
+    public CertificateInformationDTO getCertificateStatus(String alias) throws APIManagementException {
+        return certificateManager.getCertificateInformation(alias);
+    }
+
+    @Override
+    public int updateCertificate(String certificateString, String alias) throws APIManagementException {
+
+        ResponseCode responseCode = certificateManager.updateCertificate(certificateString, alias);
+
+        if (ResponseCode.SUCCESS == responseCode) {
+            GatewayCertificateManager gatewayCertificateManager = GatewayCertificateManager.getInstance();
+            gatewayCertificateManager.removeFromGateways(alias);
+            gatewayCertificateManager.addToGateways(certificateString, alias);
+        }
+        return responseCode != null ? responseCode.getResponseCode() :
+                ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode();
+    }
+
+
+    @Override
+    public int updateClientCertificate(String certificate, String alias, APIIdentifier apiIdentifier,
+            String tier, int tenantId) throws APIManagementException {
+        ResponseCode responseCode = certificateManager.updateClientCertificate(certificate, alias, tier, tenantId);
+        return responseCode != null ?
+                responseCode.getResponseCode() :
+                ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode();
+    }
+
+    @Override
+    public int getCertificateCountPerTenant(int tenantId) throws APIManagementException {
+        return certificateManager.getCertificateCount(tenantId);
+    }
+
+    @Override
+    public int getClientCertificateCount(int tenantId) throws APIManagementException {
+        return certificateManager.getClientCertificateCount(tenantId);
+    }
+
+    @Override
+    public ByteArrayInputStream getCertificateContent(String alias) throws APIManagementException {
+        return certificateManager.getCertificateContent(alias);
     }
 
     /**
@@ -5355,6 +5526,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (!registry.resourceExists(artifactPath)) {
             return;
         }
+
+        // Replace spaces
+        publisherAccessControlRoles = publisherAccessControlRoles.replaceAll("\\s+", "");
+
         Resource apiResource = registry.get(artifactPath);
         if (apiResource != null) {
             if (additionalProperties != null) {
@@ -5370,7 +5545,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
                 }
             }
-            apiResource.setProperty(APIConstants.PUBLISHER_ROLES, publisherAccessControlRoles.replaceAll("\\s+", ""));
+            // We are changing to lowercase, as registry search only supports lower-case characters.
+            apiResource.setProperty(APIConstants.PUBLISHER_ROLES, publisherAccessControlRoles.toLowerCase());
+
+            // This property will be only used for display proposes in the Publisher UI so that the original case of
+            // the roles that were specified can be maintained.
+            apiResource.setProperty(APIConstants.DISPLAY_PUBLISHER_ROLES, publisherAccessControlRoles);
             apiResource.setProperty(APIConstants.ACCESS_CONTROL, publisherAccessControl);
             apiResource.removeProperty(APIConstants.CUSTOM_API_INDEXER_PROPERTY);
             if (additionalProperties != null && additionalProperties.size() != 0) {
@@ -5482,10 +5662,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (userRoles != null) {
             for (String userRole : userRoles) {
                 rolesQuery.append(" OR ");
-                rolesQuery.append(ClientUtils.escapeQueryChars(userRole.toLowerCase()));
+                rolesQuery.append(ClientUtils.escapeQueryChars(APIUtil.sanitizeUserRole(userRole.toLowerCase())));
             }
         }
         rolesQuery.append(")");
+        if(log.isDebugEnabled()) {
+        	log.debug("User role list solr query " + APIConstants.PUBLISHER_ROLES + "=" + rolesQuery.toString());
+        }
         return APIConstants.PUBLISHER_ROLES + "=" + rolesQuery.toString();
     }
 
@@ -5714,7 +5897,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (APIUtil.hasPermission(userNameWithTenantDomain, APIConstants.Permissions.APIM_ADMIN)) {
                 return;
             }
-            String publisherAccessControlRoles = apiResource.getProperty(APIConstants.PUBLISHER_ROLES);
+            String publisherAccessControlRoles = apiResource.getProperty(APIConstants.DISPLAY_PUBLISHER_ROLES);
             if (publisherAccessControlRoles != null && !publisherAccessControlRoles.trim().isEmpty()) {
                 String[] accessControlRoleList = publisherAccessControlRoles.replaceAll("\\s+", "").split(",");
                 if (log.isDebugEnabled()) {

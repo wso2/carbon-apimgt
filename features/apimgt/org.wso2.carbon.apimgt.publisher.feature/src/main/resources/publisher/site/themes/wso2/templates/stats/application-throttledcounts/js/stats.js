@@ -20,21 +20,25 @@ $( document ).ready(function() {
 
                     //day picker
                     $('#today-btn').on('click', function () {
+                        currentDay = getDate();
                         getDateTime(currentDay, currentDay - 86400000);
                     });
 
                     //hour picker
                     $('#hour-btn').on('click', function () {
+                        currentDay = getDate();
                         getDateTime(currentDay, currentDay - 3600000);
                     });
 
                     //week picker
                     $('#week-btn').on('click', function () {
+                        currentDay = getDate();
                         getDateTime(currentDay, currentDay - 604800000);
                     });
 
                     //month picker
                     $('#month-btn').on('click', function () {
+                        currentDay = getDate();
                         getDateTime(currentDay, currentDay - (604800000 * 4));
                     });
 
@@ -44,7 +48,7 @@ $( document ).ready(function() {
 
                     //date picker
                     $('#date-range').daterangepicker({
-                        timePicker: false,
+                        timePicker: true,
                         timePickerIncrement: 30,
                         format: 'YYYY-MM-DD h:mm',
                         opens: 'left'
@@ -60,7 +64,7 @@ $( document ).ready(function() {
                         to = convertTimeString(picker.endDate);
                         var fromStr = from.split(" ");
                         var toStr = to.split(" ");
-                        var dateStr = fromStr[0] + " <b>to</b> " + toStr[0];
+                        var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
                         $("#date-range span").html(dateStr);
                         drawThrottledTimeGraph(from, to, apiFilter);
                     });
@@ -76,10 +80,7 @@ $( document ).ready(function() {
                         appName = this.value;
                         getDateTime(to, from);
                     });
-                } else if (json.usage && json.usage.length == 0 && statsEnabled) {
-                        $('.stat-page').html("");
-                        showNoDataAnalyticsMsg();
-                } else{
+                } else {
                     $('.stat-page').html("");
                     showEnableAnalyticsMsg();
                 }
@@ -101,7 +102,7 @@ var populateAppList = function() {
                 var  apps = '';
 
                 if (json.usage.length == 0) {
-                    apps = '<option data-hidden="true">' + i18n.t('No Apps Available')+ '</option>';
+                    apps = '<option data-hidden="true">' + i18n.t('No apps available')+ '</option>';
                 }
                 for ( var i=0; i < json.usage.length ; i++){
                     if ( i == 0){
@@ -141,7 +142,8 @@ var drawThrottledTimeGraph = function (fromDate, toDate) {
     if(appName == ""){
         return;
     }
-
+    fromDate = convertTimeStringUTC(fromDate);
+    toDate = convertTimeStringUTC(toDate);
     jagg.post("/site/blocks/stats/application-throttledcounts/ajax/stats.jag", { action: "getThrottleDataOfApplication", currentLocation : currentLocation, appName : appName, fromDate: fromDate, toDate: toDate, apiFilter: apiFilter },
 
         function (json) {
@@ -217,7 +219,7 @@ function getDateTime(currentDay,fromDay){
     from = convertTimeString(fromDay);
     var toDate = to.split(" ");
     var fromDate = from.split(" ");
-    var dateStr= fromDate[0] + " <b>to</b> " + toDate[0];
+    var dateStr= fromDate[0] + " <i>" + fromDate[1] + "</i> <b>to</b> " + toDate[0] + " <i>" + toDate[1] + "</i>";
     $("#date-range span").html(dateStr);
     $('#date-range').data('daterangepicker').setStartDate(from);
     $('#date-range').data('daterangepicker').setEndDate(to);

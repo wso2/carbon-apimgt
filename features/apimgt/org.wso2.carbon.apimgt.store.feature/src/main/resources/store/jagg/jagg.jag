@@ -58,8 +58,17 @@ var jagg = jagg || (function () {
         //if jaggery allow session reset
         if (typeof request.getSession == "function") {
             var groupId = session.get("groupId");
-            if (session && !session.isNew()) {
-                   session.invalidate();
+            try {
+                if (session && !session.isNew()) {
+                    session.invalidate();
+                }
+            } catch (e) {
+                var log = new Log();
+                if (e.message != null && e.message.indexOf("Session already invalidated") != -1){
+                    log.info("Session is already invalidated, continuing the flow...");
+                } else {
+                    log.error(e);
+                }
             }
             session = request.getSession(true);
             session.put("groupId", groupId);
@@ -920,6 +929,12 @@ var jagg = jagg || (function () {
         }
     }
 
+    var validateForScript = function (content) {
+        var startPattern = /<script.*?>/g;
+        var endPattern = /<\script>/g;
+        return content.replace(startPattern, "&lt;script &gt;").replace(endPattern, "&lt;\script&gt;");
+    };
+
     return {
         setUser:setUser,
         getUser:getUser,
@@ -961,7 +976,8 @@ var jagg = jagg || (function () {
         getTenantURLPrefix:getTenantURLPrefix,
         log:log,
         isMultiGroupEnabled:isMultiGroupEnabled,
-        isForgotPasswordConfigured:isForgotPasswordConfigured
+        isForgotPasswordConfigured:isForgotPasswordConfigured,
+        validateForScript:validateForScript
     };
 
 }());

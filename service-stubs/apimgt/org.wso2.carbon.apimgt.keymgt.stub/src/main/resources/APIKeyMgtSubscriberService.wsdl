@@ -249,6 +249,7 @@
                <xs:sequence>
                   <xs:element minOccurs="0" name="userName" nillable="true" type="xs:string"/>
                   <xs:element minOccurs="0" name="appName" nillable="true" type="xs:string"/>
+                  <xs:element minOccurs="0" name="appOwner" nillable="true" type="xs:string"/>
                </xs:sequence>
             </xs:complexType>
          </xs:element>

@@ -167,7 +167,15 @@ public class APIMappingUtil {
             }
             dto.setLabels(labels);
         }
+
+        //setting environment list configured with non empty endpoint URLs
+        if (model.getEnvironmentList() != null) {
+            List<String> environmentListToReturn = new ArrayList<>();
+            environmentListToReturn.addAll(model.getEnvironmentList());
+            dto.setEnvironmentList(environmentListToReturn);
+        }
         dto.setAuthorizationHeader(model.getAuthorizationHeader());
+        dto.setApiSecurity(model.getApiSecurity());
         return dto;
     }
 

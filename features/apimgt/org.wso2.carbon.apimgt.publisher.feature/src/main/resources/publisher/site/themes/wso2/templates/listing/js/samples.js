@@ -192,7 +192,7 @@ APISamples.prototype.deploySampleApiToBackend = function (gatewayURL, defaultApi
                                             if (!result.error) {
                                                 $(".modal-body").removeClass("loadingButton");
                                                 jagg.message({
-                                                    content: i18n.t("Sample PizzaShackAPI is Deployed Successfully"),
+                                                    content: i18n.t("Sample PizzaShackAPI is deployed successfully"),
                                                     type: "info",
                                                     title: i18n.t("Success"),
                                                     cbk:function(){window.location.assign(siteContext + "/site/pages/index.jag");}
@@ -204,7 +204,7 @@ APISamples.prototype.deploySampleApiToBackend = function (gatewayURL, defaultApi
                                 } else {
                                     $(".modal-body").removeClass("loadingButton");
                                     jagg.message({
-                                        content: i18n.t("Sample PizzaShackAPI is Created Successfully"),
+                                        content: i18n.t("Sample PizzaShackAPI is created successfully"),
                                         type: "info",
                                         title: i18n.t("Success"),
                                         cbk:function(){window.location.assign(siteContext + "/site/pages/index.jag");}

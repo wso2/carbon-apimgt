@@ -249,7 +249,7 @@ function APIDesigner(){
             }
         });
         if(vc==0){
-            jagg.message({content: i18n.t("You should select at least one HTTP verb."), type: "error"});
+            jagg.message({content: i18n.t("You must select at least one HTTP verb."), type: "error"});
             return;
         }
         event.data.add_resource(resource, path);
@@ -298,7 +298,7 @@ APIDesigner.prototype.load_api_base_document = function (api_doc_version) {
 
 APIDesigner.prototype.is_openapi3 = function () {
     var isOpenAPI3 = false;
-    if (this.api_doc.openapi != undefined && this.api_doc.openapi == supportedOpenAPI3Version) {
+    if (this.api_doc.openapi != undefined && this.api_doc.openapi.trim() == supportedOpenAPI3Version) {
         isOpenAPI3 = true;
     }
     return isOpenAPI3;
@@ -695,14 +695,14 @@ APIDesigner.prototype.load_api_document = function(api_document){
     this.load_swagger_editor_content();
     this.render_resources();
     this.render_scopes();
-    if (api_document != null) {
-        $("#version").val(api_document.info.version);
-        $("#name").val(api_document.info.title);
-        if (api_document.info.description) {
-            $("#description").val(api_document.info.description);
+    if (this.api_doc != null) {
+        $("#version").val(this.api_doc.info.version);
+        $("#name").val(this.api_doc.info.title);
+        if (this.api_doc.info.description) {
+            $("#description").val(this.api_doc.info.description);
         }
-        if (api_document.basePath) {
-            $("#context").val(api_document.basePath);
+        if (this.api_doc.basePath) {
+            $("#context").val(this.api_doc.basePath);
         }
     }
 };
@@ -1136,7 +1136,19 @@ APIDesigner.prototype.render_resource = function(container){
     };
 
 APIDesigner.prototype.query = function(path){
-    return JSONPath(path, this.api_doc);
+    var operation = JSONPath(path, this.api_doc);
+    // Check for $ref element in all available parameters and resolve to actual definition else return inline definition
+    if (operation[0].parameters) {
+        operation[0].parameters = operation[0].parameters.map(function (param) {
+                if (param["$ref"] !== undefined) {
+                    return this.query(param["$ref"].replace("#","$").replace(/\//g,"."), this.api_doc)[0];
+                } else {
+                    return param;
+                }
+            }.bind(this));
+    }
+
+    return operation;
 }
 
 APIDesigner.prototype.add_resource = function(resource, path){
@@ -1375,7 +1387,7 @@ $(document).ready(function(){
             jagg.message({
                 content: i18n.t("At least one resource should be specified. Do you want to add a wildcard resource (/*)?"),
                 type:"confirm",
-                title: i18n.t("Resource not specified"),
+                title: i18n.t("Resource Not Specified"),
                 anotherDialog:true,
                 okCallback:function(){
                     var designer = APIDesigner();
@@ -1456,7 +1468,7 @@ $(document).ready(function(){
 
             if(tagName.length > 30){
                 $tag.val(tagName.substring(0, 30));
-                $('.tags-error').html(i18n.t('The tag can only have a maximum of 30 characters.'));
+                $('.tags-error').html(i18n.t('A tag can have a maximum of 30 characters.'));
             }
 
         });
@@ -1629,7 +1641,7 @@ var getSoapToRestPathMap = function () {
         var designer = new APIDesigner();
         designer.load_api_document(swagger2_api_doc);
         $("#wsdl-content").hide();
-        $(".resource_create").hide();
+        $(".resource_create").show();
         $('#resource_details').show();
         $('#soap-swagger-editor').show();
         isSoapView = true;

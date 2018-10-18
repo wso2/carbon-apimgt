@@ -22,6 +22,7 @@ import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
+import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
 
@@ -34,6 +35,7 @@ public class ServiceReferenceHolder {
     public ThrottleDataHolder throttleDataHolder;
     private ThrottleProperties throttleProperties;
     private ConfigurationContext axis2ConfigurationContext;
+    private ServerConfigurationService serverConfigurationService;
 
     public ThrottleDataHolder getThrottleDataHolder() {
         return throttleDataHolder;
@@ -89,5 +91,23 @@ public class ServiceReferenceHolder {
 
     public ConfigurationContext getAxis2ConfigurationContext() {
         return axis2ConfigurationContext;
+    }
+
+    /**
+     * To get the server configuration service.
+     *
+     * @return an instance of {@link ServerConfigurationService}
+     */
+    public ServerConfigurationService getServerConfigurationService() {
+        return serverConfigurationService;
+    }
+
+    /**
+     * To set the server configuration service.
+     *
+     * @param serverConfigurationService {@link ServerConfigurationService}
+     */
+    public void setServerConfigurationService(ServerConfigurationService serverConfigurationService) {
+        this.serverConfigurationService = serverConfigurationService;
     }
 }

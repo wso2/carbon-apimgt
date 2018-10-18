@@ -40,6 +40,7 @@ function triggerSubscribe() {
                 $('#messageModal a.btn-primary').click(function() {
                     window.location.reload();
                 });
+                $('#messageModal').modal();
             } else {
                 var jsonPayload = result.status.workflowResponse.jsonPayload;
                 if(jsonPayload != null && jsonPayload != ""){
@@ -248,7 +249,7 @@ $('.rating-tooltip-manual').rating({
             var keyType = $('option:selected', this).attr('keyType');
             if (keyType == 'JWT') {
                 jagg.message({
-                    content: i18n.t('The already generated tokens of this application will not work for this new subscription please regenerate tokens after the subscription'),
+                    content: i18n.t('The tokens already generated for this application will not work for the new subscription. Please regenerate tokens after subscribing to the application'),
                     type: "info"
                 });
             }

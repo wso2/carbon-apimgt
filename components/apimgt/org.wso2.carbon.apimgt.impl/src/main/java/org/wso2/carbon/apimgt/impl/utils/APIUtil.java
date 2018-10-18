@@ -36,19 +36,28 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
+import org.apache.http.util.EntityUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.xerces.util.SecurityManager;
@@ -59,6 +68,7 @@ import org.json.simple.parser.ParseException;
 import org.w3c.dom.Document;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
 import org.wso2.carbon.apimgt.api.doc.model.APIDefinition;
@@ -107,7 +117,6 @@ import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
-import org.apache.xerces.util.SecurityManager;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
@@ -144,6 +153,7 @@ import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
 import org.wso2.carbon.registry.core.pagination.PaginationContext;
+import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
 import org.wso2.carbon.registry.core.session.UserRegistry;
@@ -251,7 +261,6 @@ public final class APIUtil {
     public static final String DEFAULT_AND_LOCALHOST = "DefaultAndLocalhost";
     public static final String HOST_NAME_VERIFIER = "httpclient.hostnameVerifier";
     public static String multiGrpAppSharing = null;
-
 
     //Need tenantIdleTime to check whether the tenant is in idle state in loadTenantConfig method
     static {
@@ -448,6 +457,7 @@ public final class APIUtil {
             api.setEnvironments(extractEnvironmentsForAPI(environments));
             api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
             api.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
+            api.setApiSecurity(artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY));
 
         } catch (GovernanceException e) {
             String msg = "Failed to get API for artifact ";
@@ -652,6 +662,7 @@ public final class APIUtil {
             api.setEnvironments(extractEnvironmentsForAPI(environments));
             api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
             api.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
+            api.setApiSecurity(artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY));
             //get labels from the artifact and set to API object
             String[] labelArray = artifact.getAttributes(APIConstants.API_LABELS_GATEWAY_LABELS);
             if (labelArray != null && labelArray.length > 0) {
@@ -675,6 +686,21 @@ public final class APIUtil {
                 api.setGatewayLabels(gatewayLabelListForAPI);
             }
 
+            //get endpoint config string from artifact, parse it as a json and set the environment list configured with
+            //non empty URLs to API object
+            try {
+                api.setEnvironmentList(extractEnvironmentListForAPI(
+                        artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG)));
+            } catch (ParseException e) {
+                String msg = "Failed to parse endpoint config JSON of API: " + apiName + " " + apiVersion;
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            } catch (ClassCastException e) {
+                String msg = "Invalid endpoint config JSON found in API: " + apiName + " " + apiVersion;
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            }
+
         } catch (GovernanceException e) {
             String msg = "Failed to get API for artifact ";
             throw new APIManagementException(msg, e);
@@ -688,6 +714,57 @@ public final class APIUtil {
         return api;
     }
 
+    /**
+     * This method used to extract environment list configured with non empty URLs.
+     *
+     * @param endpointConfigs (Eg: {"production_endpoints":{"url":"http://www.test.com/v1/xxx","config":null,
+     *                              "template_not_supported":false},"endpoint_type":"http"})
+     * @return Set<String>
+     */
+    private static Set<String> extractEnvironmentListForAPI(String endpointConfigs)
+            throws ParseException, ClassCastException {
+        Set<String> environmentList = new HashSet<String>();
+        if (endpointConfigs != null) {
+            JSONParser parser = new JSONParser();
+            JSONObject endpointConfigJson = (JSONObject) parser.parse(endpointConfigs);
+            if (endpointConfigJson.containsKey(APIConstants.API_DATA_PRODUCTION_ENDPOINTS) &&
+                    isEndpointURLNonEmpty(endpointConfigJson.get(APIConstants.API_DATA_PRODUCTION_ENDPOINTS))) {
+                environmentList.add(APIConstants.API_KEY_TYPE_PRODUCTION);
+            }
+            if (endpointConfigJson.containsKey(APIConstants.API_DATA_SANDBOX_ENDPOINTS) &&
+                    isEndpointURLNonEmpty(endpointConfigJson.get(APIConstants.API_DATA_SANDBOX_ENDPOINTS))) {
+                environmentList.add(APIConstants.API_KEY_TYPE_SANDBOX);
+            }
+        }
+        return environmentList;
+    }
+
+    /**
+     * This method used to check whether the endpoints JSON object has a non empty URL.
+     *
+     * @param endpoints (Eg: {"url":"http://www.test.com/v1/xxx","config":null,"template_not_supported":false})
+     * @return boolean
+     */
+    private static boolean isEndpointURLNonEmpty(Object endpoints) {
+        if (endpoints instanceof JSONObject) {
+            JSONObject endpointJson = (JSONObject) endpoints;
+            if (endpointJson.containsKey(APIConstants.API_DATA_URL) &&
+                    endpointJson.get(APIConstants.API_DATA_URL) != null) {
+                String url = (endpointJson.get(APIConstants.API_DATA_URL)).toString();
+                if (StringUtils.isNotBlank(url)) {
+                    return true;
+                }
+            }
+        } else if (endpoints instanceof JSONArray) {
+            JSONArray endpointsJson = (JSONArray) endpoints;
+            for (int i = 0; i < endpointsJson.size(); i++) {
+                if (isEndpointURLNonEmpty(endpointsJson.get(i))) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     public static API getAPI(GovernanceArtifact artifact)
             throws APIManagementException {
@@ -802,6 +879,22 @@ public final class APIUtil {
             api.setEnvironments(extractEnvironmentsForAPI(environments));
             api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
             api.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
+            api.setApiSecurity(artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY));
+
+            //get endpoint config string from artifact, parse it as a json and set the environment list configured with
+            //non empty URLs to API object
+            try {
+                api.setEnvironmentList(extractEnvironmentListForAPI(
+                        artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG)));
+            } catch (ParseException e) {
+                String msg = "Failed to parse endpoint config JSON of API: " + apiName + " " + apiVersion;
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            } catch (ClassCastException e) {
+                String msg = "Invalid endpoint config JSON found in API: " + apiName + " " + apiVersion;
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            }
         } catch (GovernanceException e) {
             String msg = "Failed to get API from artifact ";
             throw new APIManagementException(msg, e);
@@ -910,6 +1003,7 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_PRODUCTION_THROTTLE_MAXTPS, api.getProductionMaxTps());
             artifact.setAttribute(APIConstants.API_SANDBOX_THROTTLE_MAXTPS, api.getSandboxMaxTps());
             artifact.setAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER, api.getAuthorizationHeader());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_API_SECURITY, api.getApiSecurity());
 
             //Validate if the API has an unsupported context before setting it in the artifact
             String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
@@ -986,6 +1080,10 @@ public final class APIUtil {
             //attaching micro-gateway labels to the API
             attachLabelsToAPIArtifact(artifact, api, tenantDomain);
 
+            String apiSecurity = artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY);
+            if (apiSecurity != null && !apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+                artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, "");
+            }
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + api.getId().getApiName();
             log.error(msg, e);
@@ -3082,6 +3180,35 @@ public final class APIUtil {
         }
     }
 
+    /**
+     * This function is to set resource permissions based on its visibility
+     *
+     * @param artifactPath API resource path
+     * @throws APIManagementException Throwing exception
+     */
+    public static void clearResourcePermissions(String artifactPath, APIIdentifier apiId, int tenantId)
+            throws APIManagementException {
+        try {
+            String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+                    APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+                            RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + artifactPath);
+            String tenantDomain = MultitenantUtils
+                    .getTenantDomain(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
+            if (!org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
+                    .equals(tenantDomain)) {
+                org.wso2.carbon.user.api.AuthorizationManager authManager = ServiceReferenceHolder.getInstance()
+                        .getRealmService().getTenantUserRealm(tenantId).getAuthorizationManager();
+                authManager.clearResourceAuthorizations(resourcePath);
+            } else {
+                RegistryAuthorizationManager authorizationManager = new RegistryAuthorizationManager(
+                        ServiceReferenceHolder.getUserRealm());
+                authorizationManager.clearResourceAuthorizations(resourcePath);
+            }
+        } catch (UserStoreException e) {
+            handleException("Error while adding role permissions to API", e);
+        }
+    }
+
     public static void loadTenantAPIPolicy(String tenant, int tenantID) throws APIManagementException {
 
         String tierBasePath = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources"
@@ -3517,8 +3644,8 @@ public final class APIUtil {
 
         InputStream inSeqStream = null;
         String seqFolderLocation =
-                APIConstants.API_CUSTOM_SEQUENCES_FOLDER_LOCATION + File.separator +
-                        customSequenceType;
+                CarbonUtils.getCarbonHome() + File.separator + APIConstants.API_CUSTOM_SEQUENCES_FOLDER_LOCATION
+                        + File.separator + customSequenceType;
 
         try {
             File inSequenceDir = new File(seqFolderLocation);
@@ -4084,6 +4211,7 @@ public final class APIUtil {
             }
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             log.error("Error when getting the list of roles", e);
+            return false;
         }
         return true;
     }
@@ -4224,7 +4352,7 @@ public final class APIUtil {
     public static int getTenantIdFromTenantDomain(String tenantDomain) {
         RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
 
-        if (realmService == null) {
+        if (realmService == null || tenantDomain == null) {
             return MultitenantConstants.SUPER_TENANT_ID;
         }
 
@@ -6670,6 +6798,9 @@ public final class APIUtil {
                     tier.setRequestsPerMin(bandwidthLimit.getDataAmount());
                     tier.setRequestCount(bandwidthLimit.getDataAmount());
                 }
+                if (PolicyConstants.POLICY_LEVEL_SUB.equalsIgnoreCase(policyLevel)) {
+                    tier.setTierPlan(((SubscriptionPolicy) policy).getBillingPlan());
+                }
                 tierMap.put(policy.getPolicyName(), tier);
             } else {
                 if (APIUtil.isEnabledUnlimitedTier()) {
@@ -7144,10 +7275,25 @@ public final class APIUtil {
             }
         }
         api.setAccessControl(apiResource.getProperty(APIConstants.ACCESS_CONTROL));
-        api.setAccessControlRoles(
-                APIConstants.NULL_USER_ROLE_LIST.equals(apiResource.getProperty(APIConstants.PUBLISHER_ROLES)) ?
-                        null :
-                        apiResource.getProperty(APIConstants.PUBLISHER_ROLES));
+
+        String accessControlRoles = null;
+
+        String displayPublisherRoles = apiResource.getProperty(APIConstants.DISPLAY_PUBLISHER_ROLES);
+        if (displayPublisherRoles == null) {
+
+            String publisherRoles = apiResource.getProperty(APIConstants.PUBLISHER_ROLES);
+
+            if (publisherRoles != null) {
+                accessControlRoles = APIConstants.NULL_USER_ROLE_LIST.equals(
+                        apiResource.getProperty(APIConstants.PUBLISHER_ROLES)) ?
+                        null : apiResource.getProperty(APIConstants.PUBLISHER_ROLES);
+            }
+        } else {
+            accessControlRoles = APIConstants.NULL_USER_ROLE_LIST.equals(displayPublisherRoles) ?
+                    null : displayPublisherRoles;
+        }
+
+        api.setAccessControlRoles(accessControlRoles);
         return api;
     }
 
@@ -7417,5 +7563,107 @@ public final class APIUtil {
         if (!fileName.isEmpty() && (fileName.contains("../") || fileName.contains("..\\"))) {
             handleException("File name contains invalid path elements. " + fileName);
         }
+    }
+
+    /**
+     * Convert special characters to encoded value.
+     * 
+     * @param role
+     * @return encorded value
+     */
+    public static String sanitizeUserRole(String role) {
+        if (role.contains("&")) {
+            return role.replaceAll("&", "%26");
+        } else {
+            return role;
+        }
+    }
+
+    /**
+     * Util method to call SP rest api to invoke queries. 
+     * 
+     * @param appName SP app name that the query should run against
+     * @param query query 
+     * @return jsonObj JSONObject of the response
+     * @throws APIManagementException
+     */
+    public static JSONObject executeQueryOnStreamProcessor(String appName, String query) throws APIManagementException {
+        String spEndpoint = APIManagerAnalyticsConfiguration.getInstance().getDasServerUrl() + "/stores/query";
+        String spUserName = APIManagerAnalyticsConfiguration.getInstance().getDasServerUser();
+        String spPassword = APIManagerAnalyticsConfiguration.getInstance().getDasServerPassword();
+        byte[] encodedAuth = Base64
+                .encodeBase64((spUserName + ":" + spPassword).getBytes(Charset.forName("ISO-8859-1")));
+        String authHeader = "Basic " + new String(encodedAuth);
+        URL spURL;
+        try {
+            spURL = new URL(spEndpoint);
+
+            HttpClient httpClient = APIUtil.getHttpClient(spURL.getPort(), spURL.getProtocol());
+            HttpPost httpPost = new HttpPost(spEndpoint);
+
+            httpPost.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
+            JSONObject obj = new JSONObject();
+            obj.put("appName", appName);
+            obj.put("query", query);
+            
+            if (log.isDebugEnabled()) {
+                log.debug("Request from SP: " + obj.toJSONString());
+            }
+
+            StringEntity requestEntity = new StringEntity(obj.toJSONString(), ContentType.APPLICATION_JSON);
+
+            httpPost.setEntity(requestEntity);
+
+            HttpResponse response;
+            try {
+                response = httpClient.execute(httpPost);
+                HttpEntity entity = response.getEntity();
+                if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+                    String error = "Error while invoking SP rest api :  " + response.getStatusLine().getStatusCode()
+                            + " " + response.getStatusLine().getReasonPhrase();
+                    log.error(error);
+                    throw new APIManagementException(error);
+                }
+                String responseStr = EntityUtils.toString(entity);
+                if (log.isDebugEnabled()) {
+                    log.debug("Response from SP: " + responseStr);
+                }
+                JSONParser parser = new JSONParser();
+                return (JSONObject) parser.parse(responseStr);
+
+            } catch (ClientProtocolException e) {
+                handleException("Error while connecting to the server ", e);
+            } catch (IOException e) {
+                handleException("Error while connecting to the server ", e);
+            } catch (ParseException e) {
+                handleException("Error while parsing the response ", e);
+            } finally {
+                httpPost.reset();
+            }
+
+        } catch (MalformedURLException e) {
+            handleException("Error while parsing the stream processor url", e);
+        }
+
+        return null;
+
+    }
+
+    public static boolean isDueToAuthorizationFailure(Throwable e) {
+        Throwable rootCause = getPossibleErrorCause(e);
+        return rootCause instanceof AuthorizationFailedException
+                || rootCause instanceof APIMgtAuthorizationFailedException;
+    }
+    
+    /**
+     * Attempts to find the actual cause of the throwable 'e'
+     *
+     * @param e throwable
+     * @return the root cause of 'e' if the root cause exists, otherwise returns 'e' itself
+     */
+    private static Throwable getPossibleErrorCause (Throwable e) {
+        Throwable rootCause = ExceptionUtils.getRootCause(e);
+        rootCause = rootCause == null ? e : rootCause;
+        return rootCause;
     }
 }

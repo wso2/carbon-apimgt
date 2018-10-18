@@ -12,8 +12,8 @@ $(document).ready(function () {
     //var application = $("#application-name").val("");
 
      $.validator.addMethod('validateSpecialChars', function(value, element) {
-        return !/(["\'])/g.test(value);
-     }, i18n.t("The Name contains one or more illegal characters") + '( &nbsp;&nbsp; " &nbsp;&nbsp; \' &nbsp;&nbsp; )');
+        return /(^[a-zA-Z0-9 ._-]*$)/g.test(value);
+     }, i18n.t("The name contains one or more illegal characters") + '( &nbsp;&nbsp; " &nbsp;&nbsp; \' &nbsp;&nbsp; )');
 
     $.validator.addMethod('checkForSpaces', function(value, element) {
         return (value.length == value.trim().length);

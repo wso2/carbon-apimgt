@@ -36,6 +36,12 @@ public class ApplicationKeyGenerateRequestDTO  {
   
   
   private List<String> scopes = new ArrayList<String>();
+  
+  
+  private String clientId = null;
+  
+  
+  private String clientSecret = null;
 
   private String lastUpdatedTime = null;
 
@@ -141,6 +147,32 @@ public class ApplicationKeyGenerateRequestDTO  {
   }
 
   
+  /**
+   * Client ID for generating access token.
+   **/
+  @ApiModelProperty(value = "Client ID for generating access token.")
+  @JsonProperty("clientId")
+  public String getClientId() {
+    return clientId;
+  }
+  public void setClientId(String clientId) {
+    this.clientId = clientId;
+  }
+
+  
+  /**
+   * Client secret for generating access token. This is given together with the client Id.
+   **/
+  @ApiModelProperty(value = "Client secret for generating access token. This is given together with the client Id.")
+  @JsonProperty("clientSecret")
+  public String getClientSecret() {
+    return clientSecret;
+  }
+  public void setClientSecret(String clientSecret) {
+    this.clientSecret = clientSecret;
+  }
+
+  
 
   @Override
   public String toString()  {
@@ -153,6 +185,8 @@ public class ApplicationKeyGenerateRequestDTO  {
     sb.append("  callbackUrl: ").append(callbackUrl).append("\n");
     sb.append("  accessAllowDomains: ").append(accessAllowDomains).append("\n");
     sb.append("  scopes: ").append(scopes).append("\n");
+    sb.append("  clientId: ").append(clientId).append("\n");
+    sb.append("  clientSecret: ").append(clientSecret).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

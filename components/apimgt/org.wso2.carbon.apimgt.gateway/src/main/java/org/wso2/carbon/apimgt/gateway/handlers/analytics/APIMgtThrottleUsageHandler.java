@@ -39,7 +39,7 @@ public class APIMgtThrottleUsageHandler extends APIMgtCommonExecutionPublisher {
     }
 
     public boolean mediate(MessageContext messageContext) {
-        super.mediate(messageContext);
+        
         if (publisher == null) {
             this.initializeDataPublisher();
         }
@@ -71,24 +71,37 @@ public class APIMgtThrottleUsageHandler extends APIMgtCommonExecutionPublisher {
                 throttlePublisherDTO.setAccessToken(String.valueOf(hashCode));
                 String username = authContext.getUsername();
                 throttlePublisherDTO.setUsername(username);
-                throttlePublisherDTO.setTenantDomain(MultitenantUtils.getTenantDomain(
+                throttlePublisherDTO.setTenantDomain(MultitenantUtils.getTenantDomain(username));
+                throttlePublisherDTO.setApiCreatorTenantDomain(MultitenantUtils.getTenantDomain(
                         (String) messageContext.getProperty(APIMgtGatewayConstants.API_PUBLISHER)));
                 throttlePublisherDTO.setApiname((String) messageContext.getProperty(
                         APIMgtGatewayConstants.API));
-                throttlePublisherDTO.setVersion((String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API));
+                throttlePublisherDTO.setVersion(
+                        ((String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).split(":v")[1]);
                 throttlePublisherDTO.setContext((String) messageContext.getProperty(
                         APIMgtGatewayConstants.CONTEXT));
-                throttlePublisherDTO.setProvider((String) messageContext.getProperty(
+                throttlePublisherDTO.setApiCreator((String) messageContext.getProperty(
                         APIMgtGatewayConstants.API_PUBLISHER));
-                throttlePublisherDTO.setApplicationName((String) messageContext.getProperty(
-                        APIMgtGatewayConstants.APPLICATION_NAME));
-                throttlePublisherDTO.setApplicationId((String) messageContext.getProperty(
-                        APIMgtGatewayConstants.APPLICATION_ID));
+                String applicationName = (String) messageContext.getProperty(APIMgtGatewayConstants.APPLICATION_NAME);
+                String applicationId = (String) messageContext.getProperty(APIMgtGatewayConstants.APPLICATION_ID);
+                if (applicationName == null || "".equals(applicationName)) {
+                    applicationName = "None";
+                    applicationId = "0";
+                }
+                throttlePublisherDTO.setApplicationName(applicationName);
+                throttlePublisherDTO.setApplicationId(applicationId);
                 throttlePublisherDTO.setThrottledTime(currentTime);
                 throttlePublisherDTO.setThrottledOutReason(throttleOutReason);
-                throttlePublisherDTO.setSubscriber(authContext.getSubscriber());
+                String subscriber = authContext.getSubscriber();
+                if (subscriber == null || "".equals(subscriber)) {
+                    subscriber = "None";
+                }
+                throttlePublisherDTO.setSubscriber(subscriber);
                 throttlePublisherDTO.setKeyType(keyType);
                 throttlePublisherDTO.setCorrelationID(correlationID);
+                throttlePublisherDTO.setGatewayType(APIMgtGatewayConstants.GATEWAY_TYPE);
+                throttlePublisherDTO.setHostName(GatewayUtils.getHostName(messageContext));
+                
                 if (log.isDebugEnabled()) {
                     log.debug("Publishing throttling event from gateway to analytics for: "
                             + messageContext.getProperty(APIMgtGatewayConstants.CONTEXT) + " with ID: "

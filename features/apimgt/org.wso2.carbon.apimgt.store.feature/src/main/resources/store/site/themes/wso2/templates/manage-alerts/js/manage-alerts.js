@@ -1,6 +1,4 @@
 var saveAlertTypes = function (alertTypesIDs, emailList, checkedValues) {
-
-
     jagg.post("/site/blocks/manage-alerts/ajax/manage-alerts.jag", {
         action: "saveAlertTypes",
         checkedList: alertTypesIDs.toString(),
@@ -8,10 +6,7 @@ var saveAlertTypes = function (alertTypesIDs, emailList, checkedValues) {
         checkedValues: checkedValues.toString()
 
     }, function (result) {
-
-        //console.log(result);
         if (!result.error) {
-
             jagg.message({content: i18n.t("Successfully saved"), type: "info"});
             $("#unsubscribeBtn").show();
 
@@ -19,21 +14,15 @@ var saveAlertTypes = function (alertTypesIDs, emailList, checkedValues) {
             jagg.message({content: result.message, type: "error"});
         }
     }, "json");
-
 }
-
 
 var unSubscribeAlerts = function() {
 
     jagg.post("/site/blocks/manage-alerts/ajax/manage-alerts.jag", {
         action: "unSubscribe"
     }, function (result) {
-
-        //console.log(result);
         if (!result.error) {
-
             jagg.message({content: i18n.t("Successfully saved"), type: "info"});
-
 
             $(":checkbox").each(function () {
                 $(this).removeAttr('checked');
@@ -42,7 +31,7 @@ var unSubscribeAlerts = function() {
             $("#tokenfield").tagsinput('removeAll');
             $("#unsubscribeBtn").hide();
 
-        }else {
+        } else {
             if (result.message == "AuthenticateError") {
                 jagg.showLogin();
             } else {
@@ -51,6 +40,10 @@ var unSubscribeAlerts = function() {
         }
     }, "json");
 
+}
+
+var configureAlertType = function (alertType) {
+    location.href = jagg.url("/site/pages/configure-alert.jag?alertType=" + alertType);
 }
 
 $(document).ready(function () {

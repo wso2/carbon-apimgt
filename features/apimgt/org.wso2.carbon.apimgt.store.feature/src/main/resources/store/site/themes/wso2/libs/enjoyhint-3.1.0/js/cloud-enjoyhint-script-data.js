@@ -368,8 +368,8 @@ var api_store_api_info_page_api_console = [
         timeout : 400
     },
     {
-        selector: '#resource_default',
-        selectNextElement : '.http_method',
+        selector: '#operations-tag-default',
+        selectNextElement : '.opblock-summary-method',
         targetNext : 'INSIDE_PARENT',
         event: 'click',
         description: 'Next, click this <b class="enjoy_hint_emphasize_text" id="interactiveTutorialHTTPMethod">' + getHTTPMethod() + '</b> box to extend the API testing environment.<br/>' 

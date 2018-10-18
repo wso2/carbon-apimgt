@@ -26,15 +26,19 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.governance.lcm.util.CommonUtil;
+import org.wso2.carbon.registry.core.service.RegistryService;
 
+import static org.wso2.carbon.apimgt.impl.utils.APIUtil.loadTenantConf;
 import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({APIUtil.class, PrivilegedCarbonContext.class, ServiceReferenceHolder.class })
+@PrepareForTest({APIUtil.class, PrivilegedCarbonContext.class, ServiceReferenceHolder.class, CommonUtil.class})
 public class CommonConfigDeployerTestCase {
 
     private final int TENANT_ID = 1234;
@@ -42,6 +46,7 @@ public class CommonConfigDeployerTestCase {
 
     @Test
     public void testCreatedConfigurationContext() throws APIManagementException {
+        PowerMockito.mockStatic(CommonUtil.class);
         System.setProperty(CARBON_HOME, "");
         PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
         PowerMockito.mockStatic(PrivilegedCarbonContext.class);
@@ -60,6 +65,12 @@ public class CommonConfigDeployerTestCase {
 
         APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
         Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        ThrottleProperties throttleProperties = new ThrottleProperties();
+        RegistryService registryService = Mockito.mock(RegistryService.class);
+        Mockito.when(ServiceReferenceHolder.getInstance().getRegistryService()).thenReturn(registryService);
+        Mockito.when(apiManagerConfiguration.getThrottleProperties()).thenReturn(throttleProperties);
+        ThrottleProperties.PolicyDeployer policyDeployer = Mockito.mock(ThrottleProperties.PolicyDeployer.class);
+        throttleProperties.setPolicyDeployer(policyDeployer);
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_GATEWAY_TYPE))
                 .thenReturn(APIConstants.API_GATEWAY_TYPE_SYNAPSE);
 
@@ -74,7 +85,7 @@ public class CommonConfigDeployerTestCase {
         APIUtil.createDefaultRoles(TENANT_ID);
 
         PowerMockito.verifyStatic(APIUtil.class);
-        APIUtil.loadTenantConf(TENANT_ID);
+        loadTenantConf(TENANT_ID);
 
         //PowerMockito.verifyStatic(APIUtil.class);
         //APIUtil.addDefaultTenantAdvancedThrottlePolicies(TENANT_DOMAIN, TENANT_ID);
@@ -83,6 +94,8 @@ public class CommonConfigDeployerTestCase {
 
     @Test
     public void testExceptions() throws Exception {
+        PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.mockStatic(CommonUtil.class);
         System.setProperty(CARBON_HOME, "");
         PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
         PowerMockito.mockStatic(PrivilegedCarbonContext.class);
@@ -103,7 +116,8 @@ public class CommonConfigDeployerTestCase {
         Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_GATEWAY_TYPE))
                 .thenReturn(APIConstants.API_GATEWAY_TYPE_SYNAPSE);
-
+        RegistryService registryService = Mockito.mock(RegistryService.class);
+        Mockito.when(ServiceReferenceHolder.getInstance().getRegistryService()).thenReturn(registryService);
         ConfigurationContext configurationContext = Mockito.mock(ConfigurationContext.class);
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.isAdvanceThrottlingEnabled()).thenReturn(true);
@@ -123,7 +137,7 @@ public class CommonConfigDeployerTestCase {
         PowerMockito.doThrow(new APIManagementException("error")).when(APIUtil.class);
         APIUtil.loadTenantSelfSignUpConfigurations(TENANT_ID);
         PowerMockito.doThrow(new APIManagementException("error")).when(APIUtil.class);
-        APIUtil.loadTenantConf(TENANT_ID);
+        loadTenantConf(TENANT_ID);
         PowerMockito.doThrow(new APIManagementException("error")).when(APIUtil.class);
         APIUtil.createDefaultRoles(TENANT_ID);
 
@@ -138,6 +152,7 @@ public class CommonConfigDeployerTestCase {
     @Test
     public void testCreatedConfigurationContextRuntimeException() throws APIManagementException {
         System.setProperty(CARBON_HOME, "");
+        PowerMockito.mockStatic(CommonUtil.class);
         PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
         PowerMockito.mockStatic(PrivilegedCarbonContext.class);
         PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
@@ -147,6 +162,8 @@ public class CommonConfigDeployerTestCase {
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        RegistryService registryService = Mockito.mock(RegistryService.class);
+        Mockito.when(ServiceReferenceHolder.getInstance().getRegistryService()).thenReturn(registryService);
 
         APIManagerConfigurationService apiManagerConfigurationService = Mockito
                 .mock(APIManagerConfigurationService.class);
@@ -161,11 +178,7 @@ public class CommonConfigDeployerTestCase {
         ConfigurationContext configurationContext = Mockito.mock(ConfigurationContext.class);
         PowerMockito.mockStatic(APIUtil.class);
 
-        PowerMockito.doThrow(new RuntimeException("error")).when(APIUtil.class);
-        APIUtil.isAdvanceThrottlingEnabled();
-
-        PowerMockito.doThrow(new RuntimeException("error")).when(APIUtil.class);
-        APIUtil.loadTenantConf(TENANT_ID);
+//        Mockito.doThrow(new RuntimeException("error")).when(APIUtil.loadTenantConf(TENANT_ID));
         PowerMockito.doThrow(new RuntimeException("error")).when(APIUtil.class);
         APIUtil.createDefaultRoles(TENANT_ID);
         CommonConfigDeployer commonConfigDeployer = new CommonConfigDeployer();

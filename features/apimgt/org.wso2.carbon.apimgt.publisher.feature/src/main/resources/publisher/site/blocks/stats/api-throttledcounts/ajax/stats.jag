@@ -73,6 +73,9 @@ var log = new Log();
                     groupBy = "day";
                     timeUnitMili = 1000 * 60 * 60 * 24;
                 }
+                if (dayDiff(fromDate, toDate) == 0){
+                    groupBy = "minutes";
+                }
 
                 data.result = result.usage;
                 data.groupBy = groupBy;

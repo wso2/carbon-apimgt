@@ -48,6 +48,7 @@ $( document ).ready(function() {
       $('#mediationType').trigger('change');
     });
     $('#today-btn').on('click', function () {
+      currentDay = getDate();
       from = currentDay - 86400000;
       to = currentDay;
       renderGraph(from,to,"HOUR");
@@ -56,6 +57,7 @@ $( document ).ready(function() {
       btnActiveToggle(this);
     });
        $('#hour-btn').on('click', function () {
+        currentDay = getDate();
         from = currentDay - 3600000;
         to = currentDay;
         depth = "MINUTES";
@@ -71,6 +73,7 @@ $( document ).ready(function() {
          $('#clear-btn-wrapper').css("display", "none");
          });
        $('#week-btn').on('click', function () {
+        currentDay = getDate();
         from = currentDay - 604800000;
         to = currentDay;
         depth = "DAY";
@@ -79,6 +82,7 @@ $( document ).ready(function() {
         btnActiveToggle(this);
       });
        $('#month-btn').on('click', function () {
+        currentDay = getDate();
         from = currentDay - (604800000 * 4);
         to = currentDay;
         depth = "DAY";
@@ -97,7 +101,7 @@ $( document ).ready(function() {
         });
                    //date picker
         $('#date-range').daterangepicker({
-                        timePicker: false,
+                        timePicker: true,
                         timePickerIncrement: 30,
                         format: 'YYYY-MM-DD h:mm',
                         opens: 'left'
@@ -108,7 +112,7 @@ $( document ).ready(function() {
                         to = picker.endDate;
                         var fromStr = convertDate(from).split(" ");
                         var toStr = convertDate(to).split(" ");
-                        var dateStr = fromStr[0] + " <b>to</b> " + toStr[0];
+                        var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
                         $("#date-range span").html(dateStr);
                         if ((to-from)>(3600000*24*2)) {
                            depth = "DAY";
@@ -209,8 +213,8 @@ var populateMediations = function(data){
                     .selectpicker('refresh');
 };
 function renderGraph(fromDate,toDate,drillDown){
-    var toDateString = convertTimeString(toDate);
-    var fromDateString = convertTimeString(fromDate);
+    var toDateString = convertTimeStringUTC(toDate);
+    var fromDateString = convertTimeStringUTC(fromDate);
     getDateTime(toDate,fromDate);
     if (statsEnabled) {
         jagg.post("/site/blocks/stats/api-latencytime/ajax/stats.jag", { action : "getExecutionTimeOfAPI" , apiName : apiName , apiVersion : version , fromDate : fromDateString , toDate : toDateString,drilldown:drillDown},
@@ -228,6 +232,9 @@ function renderGraph(fromDate,toDate,drillDown){
                     var securityLatencyData = (data1["Authentication"]) ? data1["Authentication"] : [];
                     var throttlingLatencyData = (data1["Throttling"])? data1["Throttling"] : [];
                     var d = new Date(json.usage[usage1].values.year, (json.usage[usage1].values.month -1), json.usage[usage1].values.day, json.usage[usage1].values.hour,json.usage[usage1].values.minutes,json.usage[usage1].values.seconds,"00");
+                    var now = new Date()
+                    now.setTime(d.getTime() - (now.getTimezoneOffset() * 60000))
+                    d = now;
                     apiResponseTimeData.push({x:d,y:json.usage[usage1].values.apiResponseTime});
                     backendLatencyData.push({x:d,y:json.usage[usage1].values.backendLatency});
                     otherLatencyData.push({x:d,y:json.usage[usage1].values.otherLatency});
@@ -251,9 +258,7 @@ function renderGraph(fromDate,toDate,drillDown){
                     $('#noData').append('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="No Data Available"></i>'+i18n.t("No Data Available")+'</h4>'+ "<p> " + i18n.t('Generate some traffic to see statistics') + "</p>" +'</div></div>');
                     $('#chartContainer').hide();
                     $('#apiLatencyTimeNote').addClass('hide');
-
-                }
-                else{
+                } else {
                     $('.stat-page').html("");
                     $('#apiLatencyTimeNote').addClass('hide');
                     showEnableAnalyticsMsg();
@@ -273,8 +278,9 @@ function renderGraph(fromDate,toDate,drillDown){
     }
 }
 function renderCompareGraph(fromDate,toDate,drillDown,mediationName){
-   var toDateString = convertTimeString(toDate);
-    var fromDateString = convertTimeString(fromDate);
+   var toDateString = convertTimeStringUTC(toDate);
+    var fromDateString = convertTimeStringUTC(fromDate);
+
     getDateTime(toDate,fromDate);
            jagg.post("/site/blocks/stats/api-latencytime/ajax/stats.jag", { action : "getComparisonData" , apiName : apiName , fromDate : fromDateString , toDate : toDateString,drilldown:drillDown,versionArray:JSON.stringify(comparedVersion),mediationName:decodeURIComponent(mediationName)},
         function (json) {
@@ -284,7 +290,7 @@ function renderCompareGraph(fromDate,toDate,drillDown,mediationName){
         }, "json");
 }
 
-function drawGraphInArea(rdata,drilldown){
+function drawGraphInArea(rdata,drilldown) {
     $('#chartContainer').show();
     $('#chartContainer').empty();
     $('#noData').empty();
@@ -329,33 +335,62 @@ nv.addGraph(function() {
       .datum(renderdata)         //Populate the <svg> element with chart data...
       .call(chart);          //Finally, render the chart!
 
-  //Update the chart when window resizes.
-  nv.utils.windowResize(function() { chart.update() });
- d3.selectAll(".nv-point").on("click", function (e) {
-    var date = new Date(e.x);
-    if (depth == "DAY"){
-     from = new Date(e.x).setDate(date.getDate()-1);
-     to = new Date(e.x).setDate(date.getDate()+1);
-    depth = "HOUR";
-    }else if (depth == "HOUR"){
-     from = new Date(e.x).setHours(date.getHours()-1);
-     to = new Date(e.x).setHours(date.getHours()+1);
-    depth = "MINUTES";
-    }else if (depth == "MINUTES"){
-     from = new Date(e.x).setMinutes(date.getMinutes()-1);
-     to = new Date(e.x).setMinutes(date.getMinutes()+1);
-    depth = "SECONDS";
-    }else if (depth == "SECONDS"){
-    depth = "HOUR";
-     from = new Date(e.x).setHours(date.getHours()-1);
-     to = new Date(e.x).setHours(date.getHours()+1);
-    }
-    if (versionComparison) {
-       renderCompareGraph(from,to,depth,encodeURIComponent(mediationName));
-    }else{
-    renderGraph(from,to,depth);
-    }
-  });
+    //Update the chart when window resizes.
+    nv.utils.windowResize(function() { chart.update() });
+
+    d3.selectAll(".nv-point").on("click", function (e) {
+        var date = new Date(e.x);
+
+        if (depth == "DAY") {
+            from = new Date(e.x).setDate(date.getDate() - 1);
+            to = new Date(e.x).setDate(date.getDate() + 1);
+            btnActiveToggle($('#hour-btn'));
+            depth = "HOUR";
+        } else if (depth == "HOUR") {
+            from = new Date(e.x).setHours(date.getHours() - 1);
+            to = new Date(e.x).setHours(date.getHours() + 1);
+            $("#dateRangePickerContainer .btn-group").children().removeClass('active');
+            depth = "MINUTES";
+        } else if (depth == "MINUTES") {
+            var selDate = new Date(e.x);
+            var purgedDate = new Date();
+            purgedDate = purgedDate.setDate(purgedDate.getDate() - 1);
+
+            // Prevent loading seconds drill down view if
+            // requested date is older than 1 day. 1 day is the
+            // default data purge config for seconds table
+            if (selDate < purgedDate) {
+                $('#noData').html('');
+                $('#noData').append('<div class="center-wrapper">' +
+                        '<div class="col-sm-4"/>' +
+                            '<div class="col-sm-4 message message-info">' +
+                            '<h4>' +
+                                '<i class="icon fw fw-info" title="No Data Available"></i>' +
+                                i18n.t("No Data Available") +
+                            '</h4>' +
+                            '<p>' + i18n.t("Data for this selection is already purged") + '</p>' +
+                        '</div>' +
+                    '</div>');
+                $('#chartContainer').hide();
+                $('#apiLatencyTimeNote').addClass('hide');
+
+                return;
+            }
+
+            from = selDate.setMinutes(date.getMinutes() - 1);
+            to = selDate.setMinutes(date.getMinutes() + 1);
+            $("#dateRangePickerContainer .btn-group").children().removeClass('active');
+            depth = "SECONDS";
+        } else {
+            return;
+        }
+
+        if (versionComparison) {
+            renderCompareGraph(from,to,depth,encodeURIComponent(mediationName));
+        } else {
+            renderGraph(from,to,depth);
+        }
+    });
 });
 $('#chartContainer').append($('<div id="latencytTime"><svg style="height:600px;"></svg></div>'));
 $('#latencytTime svg').show();
@@ -365,7 +400,7 @@ function getDateTime(currentDay,fromDay){
     fromStr = convertTimeString(fromDay);
     var toDate = toStr.split(" ");
     var fromDate = fromStr.split(" ");
-    var dateStr= fromDate[0] + "<b>to</b> " + toDate[0];
+    var dateStr = fromDate[0] + " <i>" + fromDate[1] + "</i> <b>to</b> " + toDate[0] + " <i>" + toDate[1] + "</i>";
     $("#date-range span").html(dateStr);
     $('#date-range').data('daterangepicker').setStartDate(from);
     $('#date-range').data('daterangepicker').setEndDate(to);

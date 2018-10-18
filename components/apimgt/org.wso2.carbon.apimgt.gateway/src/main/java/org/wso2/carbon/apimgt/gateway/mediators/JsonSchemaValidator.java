@@ -63,11 +63,16 @@ public class JsonSchemaValidator extends AbstractMediator {
         Map<String, InputStream> inputStreams = null;
         org.apache.axis2.context.MessageContext axis2MC;
         Boolean validRequest = true;
-        String contentType;
         String apiContext;
         String requestMethod;
+        String contentType;
         axis2MC = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-        contentType = axis2MC.getProperty(ThreatProtectorConstants.CONTENT_TYPE).toString();
+        Object contentTypeObject = axis2MC.getProperty(ThreatProtectorConstants.CONTENT_TYPE).toString();
+        if (contentTypeObject != null) {
+            contentType = contentTypeObject.toString();
+        } else {
+            contentType = axis2MC.getProperty(ThreatProtectorConstants.SOAP_CONTENT_TYPE).toString();
+        }
         apiContext = messageContext.getProperty(ThreatProtectorConstants.API_CONTEXT).toString();
         requestMethod = axis2MC.getProperty(ThreatProtectorConstants.HTTP_REQUEST_METHOD).toString();
 

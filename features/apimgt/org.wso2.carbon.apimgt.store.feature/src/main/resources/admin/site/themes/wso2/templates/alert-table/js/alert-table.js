@@ -38,25 +38,21 @@ $( document ).ready(function() {
 
     function changeActiveTableName() {
         if(selectedOptionKey == 1){
-            tableName = "ORG_WSO2_ANALYTICS_APIM_ALLAPIMALERTSSTREAM"
+            tableName = "ApimAllAlert"
         } else if(selectedOptionKey== 2){
-            tableName = "ORG_WSO2_ANALYTICS_APIM_ALERT_UNUSUALIPACCESS";
+            tableName = "ApimIPAccessAbnormalityAlert";
         } else if(selectedOptionKey== 3){
-            tableName = "ORG_WSO2_ANALYTICS_APIM_ABNORMALREQUESTSPERMINALERTSTREAM";
+            tableName = "ApimAbnormalReqAlert";
         } else if(selectedOptionKey== 4){
-            tableName = "ORG_WSO2_ANALYTICS_APIM_ABNORMALRESPONSETIMEALERTSTREAM";
+            tableName = "ApimAbnormalResponseTimeAlert";
         } else if(selectedOptionKey== 5){
-            tableName = "ORG_WSO2_ANALYTICS_APIM_ALERT_ABNORMALTIERUSAGEALERT";
+            tableName = "ApimTierLimitHittingAlert";
         } else if(selectedOptionKey== 6){
-            tableName = "ORG_WSO2_ANALYTICS_APIM_ALERT_ABNORMALTOKENREFRESH";
+            tableName = "ApimAbnormalBackendTimeAlert";
         } else if(selectedOptionKey== 7){
-            tableName = "ORG_WSO2_ANALYTICS_APIM_TIERLIMITHITTINGALERT";
+            tableName = "ApimApiHealthMonitorAlert";
         } else if(selectedOptionKey== 8){
-            tableName = "ORG_WSO2_ANALYTICS_APIM_ABNORMALBACKENDTIMEALERTSTREAM";
-        } else if(selectedOptionKey== 9){
-            tableName = "ORG_WSO2_ANALYTICS_APIM_APIHEALTHMONITORALERTSTREAM";
-        } else if(selectedOptionKey== 10){
-            tableName = "ORG_WSO2_ANALYTICS_APIM_REQUESTPATTERNCHANGEDSTREAM";
+            tableName = "ApimRequestPatternChangedAlert";
         }
 
     }
@@ -88,16 +84,14 @@ $( document ).ready(function() {
                 $('#alertSelected').val(3).change();
             } else if(alertType == "Abnormal Response Time"){
                 $('#alertSelected').val(4).change();
-            } else if(alertType == "Abnormal API Usage"){
-                $('#alertSelected').val(5).change();
             } else if(alertType == "Tier Crossing"){
-                $('#alertSelected').val(6).change();
+                $('#alertSelected').val(5).change();
             } else if(alertType == "Abnormal Backend Time"){
-                $('#alertSelected').val(7).change();
+                $('#alertSelected').val(6).change();
             } else if(alertType == "Health Availability"){
-                $('#alertSelected').val(8).change();
+                $('#alertSelected').val(7).change();
             } else if(alertType == "Abnormal Resource Access"){
-                $('#alertSelected').val(9).change();
+                $('#alertSelected').val(8).change();
             }
         }
     }

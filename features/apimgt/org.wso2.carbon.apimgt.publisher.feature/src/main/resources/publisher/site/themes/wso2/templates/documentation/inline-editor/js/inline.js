@@ -21,7 +21,7 @@ $('#summernote').summernote({
                         }
                     } else {
                         $('#inlineError').show('fast');
-                        $('#inlineSpan').html('<strong>'+ i18n.t('The content of this document cannot be loaded.')+'</strong><br />'+result.message);
+                        $('#inlineSpan').html('<strong>'+ i18n.t('The contents of this document cannot be loaded.')+'</strong><br />'+result.message);
                     }
                 }, "json");
           }

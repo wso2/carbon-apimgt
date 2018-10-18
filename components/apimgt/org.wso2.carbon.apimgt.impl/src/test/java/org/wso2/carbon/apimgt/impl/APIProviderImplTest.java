@@ -166,7 +166,7 @@ public class APIProviderImplTest {
 
     @Before
     public void init() throws Exception {
-        System.setProperty("carbon.home", "");
+        System.setProperty("carbon.home", APIProviderImplTest.class.getResource("/").getFile());
         PowerMockito.mockStatic(ApiMgtDAO.class);
         PowerMockito.mockStatic(PrivilegedCarbonContext.class);
         PowerMockito.mockStatic(RegistryUtils.class);
@@ -208,6 +208,7 @@ public class APIProviderImplTest {
             Object[] args = invocation.getArguments();
             return (String) args[0];
         });
+        TestUtils.initConfigurationContextService(true);
     }
 
     @Test

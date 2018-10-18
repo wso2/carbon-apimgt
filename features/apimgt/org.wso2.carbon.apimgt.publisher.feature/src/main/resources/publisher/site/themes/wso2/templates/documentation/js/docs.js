@@ -29,7 +29,7 @@ $(document).ready(function() {
         if(!illegalCharsCondition) {
             //Check the doc name is duplicated
             var errorCondition = isAvailableDoc(apiName + "-" + docId.val());
-            validInput(docId, 'Duplicate Document Name.', errorCondition);
+            validInput(docId, 'Duplicate document name.', errorCondition);
         }
 
     });
@@ -248,7 +248,7 @@ var saveDoc=function(){
     if($('#saveDocBtn').val() != "Update"){
         errorCondition = isAvailableDoc(apiName + "-" + docId.val());
     }
-    if (apiName && !validInput(docId, i18n.t('Duplicate Document Name.'), errorCondition)) {
+    if (apiName && !validInput(docId, i18n.t('Duplicate document name.'), errorCondition)) {
         return;
     } else if (!validInput(summaryDiv, i18n.t('This field is required.'), isSummaryEmpty)) {
         return;

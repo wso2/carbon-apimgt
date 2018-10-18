@@ -33,6 +33,18 @@ if(jagg.isCSRFTokenValid())
             } else{
                 apiData.transports=request.getParameter("http_checked")+","+request.getParameter("https_checked");
             }
+
+            if (request.getParameter("oauth2_checked") == null && request.getParameter("mutualssl_checked") == null) {
+                apiData.apiSecurity = null;
+            } else if (request.getParameter("oauth2_checked") != null && request.getParameter("mutualssl_checked") !=
+                null) {
+                apiData.apiSecurity = request.getParameter("oauth2_checked") + "," + request.getParameter
+                ("mutualssl_checked");
+            } else if (request.getParameter("oauth2_checked") != null) {
+                apiData.apiSecurity = request.getParameter("oauth2_checked");
+            } else {
+                apiData.apiSecurity = request.getParameter("mutualssl_checked")
+            }
             apiData.endpoint = request.getParameter("endpoint");
             apiData.sandbox = request.getParameter("sandbox");
             apiData.wsdl = request.getParameter("wsdl");

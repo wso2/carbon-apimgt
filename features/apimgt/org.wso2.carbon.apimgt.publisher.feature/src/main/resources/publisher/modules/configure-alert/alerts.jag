@@ -1,0 +1,137 @@
+<%
+var agent = "publisher";
+var alertTypeMap = {
+    "AbnormalResponseTime": "thresholdResponseTime",
+    "AbnormalBackendTime": "thresholdBackendTime"
+};
+
+var getPublisherAlertConfigs  = function (type) {
+    var typeColName = alertTypeMap[type];
+    var log = new Log();
+
+    try {
+        var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+        var username = jagg.getUser().username;
+        var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+        var domainName = MultitenantUtils.getTenantDomain(username);
+
+        var appName = "APIM_ALERT_CONFIGURATION"; 
+        var query =  "from ApiCreatorAlertConfiguration on apiCreator=='" 
+                    + username + "' and apiCreatorTenantDomain=='" + domainName + "' and "
+                    + typeColName +"!=0 select apiName,apiVersion,apiCreator,apiCreatorTenantDomain, " + typeColName + "; ";
+
+        var result = APIUtil.executeQueryOnStreamProcessor(appName, query);
+        var objArr = [];
+
+        if(result != null ) {
+            var parsedDataResult = JSON.parse(result);
+
+            if(parsedDataResult.records != null) {              
+                var items = parsedDataResult.records;
+                for (var i = 0; i < items.length; i ++){
+                    var record = items[i];
+                    var obj =  {
+                        "apiName": record[0],
+                        "apiVersion" : record[1],
+                        "apiCreator" : record[2],
+                        "apiCreatorTenantDomain":record[3],
+                        "value" : record[4]
+                    };
+                    objArr.push(obj);
+                }
+            }
+        }
+
+        return objArr;
+    } catch (e) {
+        log.error(e.message);
+
+        return {
+            error:true
+        };
+    }
+};
+
+var addOrUpdatePublisherAlertConfigs  = function (apiName, apiVersion, type, value) {
+    var log = new Log();
+    var typeColName = alertTypeMap[type];
+
+    try {
+        var thresholdResponseTime = 0;
+        var thresholdBackendTime = 0;
+        var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+        var username = jagg.getUser().username;
+        var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+        var domainName = MultitenantUtils.getTenantDomain(username);
+        var appName = "APIM_ALERT_CONFIGURATION"; 
+   
+        if (typeColName == 'thresholdBackendTime') {
+            thresholdBackendTime = value;
+            conditionQuery = "set ApiCreatorAlertConfiguration.thresholdBackendTime = thresholdBackendTime " ;
+        } else {
+            thresholdResponseTime = value;
+            conditionQuery = "set ApiCreatorAlertConfiguration.thresholdResponseTime = thresholdResponseTime " ;
+        }
+
+        var query = "select '"+apiName+"' as apiName, '"+apiVersion+"' as apiVersion, '"
+            + username + "' as apiCreator, '" + domainName + "' as apiCreatorTenantDomain,"
+            + parseInt(thresholdResponseTime) + "L as thresholdResponseTime,"
+            + parseInt(thresholdBackendTime) + "L as thresholdBackendTime update or insert into ApiCreatorAlertConfiguration "
+            + conditionQuery + "on ApiCreatorAlertConfiguration.apiName == apiName "
+            + "and ApiCreatorAlertConfiguration.apiVersion == apiVersion";
+
+        var result = APIUtil.executeQueryOnStreamProcessor(appName, query);
+        var objArr = [];
+
+        if (result != null ) {
+            var parsedDataResult = JSON.parse(result);
+            objArr = parsedDataResult;
+        }
+
+        return objArr;
+    } catch (e) {
+        log.error(e.message);
+
+        return {
+            error:true
+        };
+    }
+};
+
+var deletePublisherAlertConfigs = function (apiName, apiVersion, type) {
+    var log = new Log();
+    var typeColName = alertTypeMap[type];
+
+    try {
+        var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+        var username = jagg.getUser().username;
+        var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+        var domainName = MultitenantUtils.getTenantDomain(username);
+        var appName = "APIM_ALERT_CONFIGURATION"; 
+
+        var query = "select '"+apiName+"' as apiName, '"+apiVersion+"' as apiVersion, '"
+            + username + "' as apiCreator, '" + domainName + "' as apiCreatorTenantDomain,"
+            + "0L as "+typeColName+" "
+            + "update ApiCreatorAlertConfiguration "
+            + "set ApiCreatorAlertConfiguration."+typeColName+" = "+typeColName+" " 
+            + "on ApiCreatorAlertConfiguration.apiName == apiName "
+            + "and ApiCreatorAlertConfiguration.apiVersion == apiVersion";
+
+        var result = APIUtil.executeQueryOnStreamProcessor(appName, query);
+        var objArr = [];
+
+        if (result != null ) {
+            var parsedDataResult = JSON.parse(result);
+            objArr = parsedDataResult;
+        }
+
+        return objArr;
+    } catch (e) {
+        log.error(e.message);
+
+        return {
+            error:true
+        };
+    }
+};
+%>

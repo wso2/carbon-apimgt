@@ -21,6 +21,7 @@
 package org.wso2.carbon.apimgt.impl.utils;
 
 import org.apache.axiom.om.OMElement;
+import org.apache.commons.collections.SetUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -84,6 +85,7 @@ import org.wso2.carbon.registry.core.Tag;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.api.UserRealm;
+import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
@@ -107,6 +109,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.mockito.Matchers.eq;
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.DISABLE_ROLE_VALIDATION_AT_SCOPE_CREATION;
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.getOAuthConfigurationFromAPIMConfig;
@@ -1003,7 +1006,13 @@ public class APIUtilTest {
         Mockito.when(userRealm.getUserStoreManager()).thenReturn(userStoreManager);
         Mockito.when(userStoreManager.isExistingRole(roleName)).thenReturn(true);
 
+        Mockito.when(userStoreManager.isExistingRole("NonExistingDomain/role")).thenThrow(UserStoreException.class);
+        Mockito.when(userStoreManager.isExistingRole("NonExistingDomain/")).thenThrow(UserStoreException.class);
+        
         Assert.assertTrue(APIUtil.isRoleNameExist(userName, roleName));
+        Assert.assertFalse(APIUtil.isRoleNameExist(userName, "NonExistingDomain/role"));
+        Assert.assertFalse(APIUtil.isRoleNameExist(userName, "NonExistingDomain/"));
+        Assert.assertTrue(APIUtil.isRoleNameExist(userName, ""));//allow adding empty role
     }
 
     @Test
@@ -1456,9 +1465,20 @@ public class APIUtilTest {
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN)).
                 thenReturn(corsConfiguration.getAccessControlAllowOrigins().toString());
 
+        Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG))
+                .thenReturn("{\"production_endpoints\":{\"url\":\"http://www.mocky.io/v2/5b21fe0f2e00002a00e313fe\"," +
+                        "\"config\":null,\"template_not_supported\":false}," +
+                        "\"sandbox_endpoints\":{\"url\":\"http://www.mocky.io/v2/5b21fe0f2e00002a00e313fe\"," +
+                        "\"config\":null,\"template_not_supported\":false},\"endpoint_type\":\"http\"}");
+
         API api = APIUtil.getAPIForPublishing(artifact, registry);
 
         Assert.assertNotNull(api);
+
+        Set<String> testEnvironmentList = new HashSet<String>();
+        testEnvironmentList.add("PRODUCTION");
+        testEnvironmentList.add("SANDBOX");
+        Assert.assertThat(SetUtils.isEqualSet(api.getEnvironmentList(), testEnvironmentList), is(true));
     }
 
     @Test
@@ -1969,5 +1989,12 @@ public class APIUtilTest {
         JSONObject applicationAttributes = (JSONObject) json.get(property);
         JSONObject appAttributes = APIUtil.getAppAttributeKeysFromRegistry(tenantId);
         Assert.assertEquals(applicationAttributes, appAttributes);
+    }
+
+    @Test
+    public void testSanitizeUserRole() throws Exception {
+        Assert.assertEquals("Test%26123", APIUtil.sanitizeUserRole("Test&123"));
+        Assert.assertEquals("Test%26123%26test", APIUtil.sanitizeUserRole("Test&123&test"));
+        Assert.assertEquals("Test123", APIUtil.sanitizeUserRole("Test123"));
     }
 }

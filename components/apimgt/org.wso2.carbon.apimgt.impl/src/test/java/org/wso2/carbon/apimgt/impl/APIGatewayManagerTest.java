@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.gateway.dto.stub.APIData;
 import org.wso2.carbon.apimgt.gateway.dto.stub.ResourceData;
+import org.wso2.carbon.apimgt.impl.dao.CertificateMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
@@ -44,6 +45,9 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.user.core.tenant.TenantManager;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.xml.stream.XMLStreamException;
 import java.util.HashMap;
@@ -54,8 +58,9 @@ import java.util.Set;
 /**
  * APIGatewayManager test cases
  */
-@RunWith(PowerMockRunner.class) @PrepareForTest({ APIGatewayManager.class, PrivilegedCarbonContext.class,
-        APIUtil.class }) public class APIGatewayManagerTest {
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ APIGatewayManager.class, PrivilegedCarbonContext.class, APIUtil.class, CertificateMgtDAO.class })
+public class APIGatewayManagerTest {
 
     private APIManagerConfiguration config;
     private APIGatewayManager gatewayManager;
@@ -87,7 +92,8 @@ import java.util.Set;
             + "      \"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/\",\n" + "      \"config\":null\n"
             + "   }\n" + "}";
 
-    @Before public void init() throws Exception {
+    @Before
+    public void init() throws Exception {
         System.setProperty("carbon.home", "");
         config = Mockito.mock(APIManagerConfiguration.class);
         carbonContext = Mockito.mock(PrivilegedCarbonContext.class);
@@ -95,10 +101,18 @@ import java.util.Set;
         defaultAPIdata = Mockito.mock(APIData.class);
         genericArtifact = Mockito.mock(GenericArtifact.class);
         apiGatewayAdminClient = Mockito.mock(APIGatewayAdminClient.class);
+        RealmService realmService = Mockito.mock(RealmService.class);
+        TenantManager tenantManager = Mockito.mock(TenantManager.class);
+        Mockito.doReturn(tenantManager).when(realmService).getTenantManager();
+        Mockito.doReturn(MultitenantConstants.SUPER_TENANT_ID).when(tenantManager).getTenantId(Mockito.anyString());
         APIManagerConfigurationService apiManagerConfigurationService = new APIManagerConfigurationServiceImpl(config);
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(apiManagerConfigurationService);
+        ServiceReferenceHolder.getInstance().setRealmService(realmService);
         PowerMockito.mockStatic(PrivilegedCarbonContext.class);
         PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.mockStatic(CertificateMgtDAO.class);
+        CertificateMgtDAO certificateMgtDAO = Mockito.mock(CertificateMgtDAO.class);
+        PowerMockito.when(CertificateMgtDAO.getInstance()).thenReturn(certificateMgtDAO);
         PowerMockito.when(APIUtil.isProductionEndpointsExists((API) Mockito.anyObject())).thenCallRealMethod();
         PowerMockito.when(APIUtil.isSandboxEndpointsExists((API) Mockito.anyObject())).thenCallRealMethod();
         PowerMockito.when(APIUtil.getSequenceExtensionName((API) Mockito.anyObject())).thenCallRealMethod();
@@ -131,6 +145,7 @@ import java.util.Set;
         environments.put(sandBoxEnvironmentName, sandboxEnvironment);
         Mockito.when(config.getApiGatewayEnvironments()).thenReturn(environments);
         apiIdentifier = new APIIdentifier(provider, apiName, version);
+        TestUtils.initConfigurationContextService(false);
         gatewayManager = APIGatewayManager.getInstance();
     }
 
@@ -151,7 +166,8 @@ import java.util.Set;
         Assert.assertEquals(failedEnvironmentsMap.size(), 0);
     }
 
-    @Test public void testRemovingRESTAPIWithOutSequenceFromGateway() throws AxisFault {
+    @Test
+    public void testRemovingRESTAPIWithOutSequenceFromGateway() throws AxisFault {
         API api = new API(apiIdentifier);
         api.setType("HTTP");
         api.setOutSequence(outSequenceName);
@@ -621,6 +637,7 @@ import java.util.Set;
                 .when(apiGatewayAdminClient).setSecureVaultProperty(api, tenantDomain);
         api.setEndpointSecured(true);
         Mockito.when(config.getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE)).thenReturn("true");
+        Mockito.when(config.getFirstProperty(APIConstants.ENABLE_MTLS_FOR_APIS)).thenReturn("true");
         Map<String, String> failedEnvironmentsMap2 = gatewayManager
                 .publishToGateway(api, apiTemplateBuilder, tenantDomain);
         Assert.assertEquals(failedEnvironmentsMap2.size(), 1);

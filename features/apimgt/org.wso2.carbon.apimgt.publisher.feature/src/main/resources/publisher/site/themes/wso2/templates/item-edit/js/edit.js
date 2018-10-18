@@ -336,7 +336,7 @@ var deleteResource = function (deleteButton) {
     //Check whether only one defined resource remains before delete operation
     if(count==3){
         $('#resourceTableError').show('fast');
-        $('#resourceTableError').html( i18n.t("This row cannot be deleted. At least one resource entry has to be available.")+'<br />');
+        $('#resourceTableError').html( i18n.t("This resource cannot be deleted. At least one resource entry is required.")+'<br />');
         return;
     }
     $('#resourceTableError').hide('fast');
@@ -358,10 +358,10 @@ var validateResourceTable = function(){
             }
         });
         if(foundMyVal > 1){
-            errors +=  i18n.t("URL Pattern has to be unique. ")+"<strong>" + myVal + "</strong>"+ i18n.t("has duplicated entries. ") +"<br/>";
+            errors +=  i18n.t("URL pattern has to be unique. ")+"<strong>" + myVal + "</strong>"+ i18n.t("has duplicate entries. ") +"<br/>";
         }
         if(myVal == ""){
-            errors += i18n.t("URL Pattern cannot be empty. ")+"<br />";
+            errors += i18n.t("URL pattern cannot be empty. ")+"<br />";
         }
     });
 

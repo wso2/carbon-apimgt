@@ -11,6 +11,8 @@
 	    <div id="rangeSliderWrapper" >
 	       <div id="dateRangePickerContainer" style="text-align:right">
 	           <div class="btn-group" role="group">
+	               <button id="hour-btn" type="button" class="btn btn-default date-range">Hour
+                   </button>
 	               <button id="today-btn" type="button" class="btn btn-default date-range">Day
 	               </button>
 	               <button id="week-btn" type="button" class="btn btn-default date-range">Week</button>
@@ -34,6 +36,7 @@
                             <th><%=i18n.localize("Application Name")%></th>
                             <th><%=i18n.localize("API Name")%></th>
                             <th><%=i18n.localize("Resource Usage")%></th>
+                            <th><%=i18n.localize("Resource Hit Count")%></th>
                         </tr>
                     </thead>
                  </table>

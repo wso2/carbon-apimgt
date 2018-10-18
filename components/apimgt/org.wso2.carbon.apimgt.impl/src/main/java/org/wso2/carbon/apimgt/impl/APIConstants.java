@@ -94,6 +94,10 @@ public final class APIConstants {
 
     public static final String APPLICATION_WSDL_MEDIA_TYPE = "application/wsdl";
 
+    public static final String WSDL_NAMESPACE_URI = "http://www.w3.org/2005/08/addressing";
+
+    public static final String WSDL_ELEMENT_LOCAL_NAME = "Address";
+
     public static final String API_TENANT_CONF = "tenant-conf.json";
 
     public static final String API_TENANT_CONF_LOCATION = API_APPLICATION_DATA_LOCATION + "/" + API_TENANT_CONF;
@@ -256,7 +260,11 @@ public final class APIConstants {
     public static final String API_OVERVIEW_OUTSEQUENCE = "overview_outSequence";
     public static final String API_OVERVIEW_FAULTSEQUENCE = "overview_faultSequence";
     public static final String API_OVERVIEW_AUTHORIZATION_HEADER = "overview_authorizationHeader";
+    public static final String API_OVERVIEW_API_SECURITY = "overview_apiSecurity";
     public static final String AUTHORIZATION_HEADER_BASIC = "Basic";
+    public static final String DEFAULT_API_SECURITY_OAUTH2 = "oauth2";
+    public static final String API_SECURITY_MUTUAL_SSL = "mutualssl";
+    public static final String CERTIFICATE_COMMON_NAME = "CN";
 
     public static final String API_OVERVIEW_RESPONSE_CACHING = "overview_responseCaching";
     public static final String API_OVERVIEW_CACHE_TIMEOUT = "overview_cacheTimeout";
@@ -338,6 +346,9 @@ public final class APIConstants {
 
     public static final String OAUTH_CONFIGS = "OAuthConfigurations.";
     public static final String AUTHORIZATION_HEADER = "AuthorizationHeader";
+    public static final String API_SECURITY = "APISecurity";
+    public static final String API_LEVEL_POLICY = "APILevelPolicy";
+    public static final String CERTIFICATE_INFORMATION = "CertificateInformation";
     public static final String AUTHORIZATION_HEADER_DEFAULT = "Authorization";
     public static final String REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE = "RemoveOAuthHeadersFromOutMessage";
     public static final String REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE_DEFAULT = "true";
@@ -377,6 +388,7 @@ public final class APIConstants {
     public static final String RETIRED = "RETIRED";
     public static final String BLOCKED = "BLOCKED";
     public static final String VERB_INFO_DTO = "VERB_INFO";
+    public static final String RESOURCE_AUTHENTICATION_SCHEME = "ResourceAuthenticationScheme";
 
     //Overview constants for CORS configuration
     public static final String API_OVERVIEW_CORS_CONFIGURATION = "overview_corsConfiguration";
@@ -495,6 +507,7 @@ public final class APIConstants {
     public static final String GATEWAY_TOKEN_CACHE_ENABLED = CACHE_CONFIGS + "EnableGatewayTokenCache";
     public static final String GATEWAY_RESOURCE_CACHE_ENABLED = CACHE_CONFIGS + "EnableGatewayResourceCache";
     public static final String JWT_CLAIM_CACHE_EXPIRY = CACHE_CONFIGS + "JWTClaimCacheExpiry";
+    public static final String ENABLED_JWT_CLAIM_CACHE = CACHE_CONFIGS + "EnableJWTClaimCache";
     public static final String KEY_MANAGER_TOKEN_CACHE = CACHE_CONFIGS + "EnableKeyManagerTokenCache";
     public static final String TOKEN_CACHE_EXPIRY = CACHE_CONFIGS + "TokenCacheExpiry";
     public static final String STORE_TAG_CACHE_DURATION = CACHE_CONFIGS + "TagCacheDuration";
@@ -610,6 +623,7 @@ public final class APIConstants {
     public static final String AUTH_MANAGER_URL = AUTH_MANAGER + "ServerURL";
     public static final String AUTH_MANAGER_USERNAME = AUTH_MANAGER + "Username";
     public static final String AUTH_MANAGER_PASSWORD = AUTH_MANAGER + "Password";
+    public static final String ENABLE_MTLS_FOR_APIS = "EnableMTLSForAPIs";
 
     public static final String SELF_SIGN_UP = "SelfSignUp.";
     public static final String SELF_SIGN_UP_ENABLED = SELF_SIGN_UP + "Enabled";
@@ -700,11 +714,11 @@ public final class APIConstants {
 
     public static final String API_ANALYTICS = "Analytics.";
     public static final String API_USAGE_ENABLED = API_ANALYTICS + "Enabled";
-    public static final String API_USAGE_BAM_SERVER_URL_GROUPS = API_ANALYTICS + "DASServerURL";
-    public static final String API_USAGE_BAM_SERVER_AUTH_URL_GROUPS = API_ANALYTICS + "DASAuthServerURL";
+    public static final String API_USAGE_BAM_SERVER_URL_GROUPS = API_ANALYTICS + "StreamProcessorServerURL";
+    public static final String API_USAGE_BAM_SERVER_AUTH_URL_GROUPS = API_ANALYTICS + "StreamProcessorAuthServerURL";
     public static final String API_USAGE_BUILD_MSG = API_ANALYTICS + "PublishResponseMessageSize";
-    public static final String API_USAGE_BAM_SERVER_USER = API_ANALYTICS + "DASUsername";
-    public static final String API_USAGE_BAM_SERVER_PASSWORD = API_ANALYTICS + "DASPassword";
+    public static final String API_USAGE_BAM_SERVER_USER = API_ANALYTICS + "StreamProcessorUsername";
+    public static final String API_USAGE_BAM_SERVER_PASSWORD = API_ANALYTICS + "StreamProcessorPassword";
     public static final String API_USAGE_SKIP_EVENT_RECEIVER_CONN = API_ANALYTICS + "SkipEventReceiverConnection";
     public static final String API_USAGE_PUBLISHER_CLASS = API_ANALYTICS + "PublisherClass";
     public static final String API_USAGE_DATA_SOURCE_NAME = "WSO2AM_STATS_DB";
@@ -735,9 +749,9 @@ public final class APIConstants {
     public static final String API_WF_STREAM_NAME = API_USAGE_WF_STREAM + "Name";
     public static final String API_WF_STREAM_VERSION = API_USAGE_WF_STREAM + "Version";
     //Rest API Config data in api-config.xml
-    public static final String API_USAGE_DAS_REST_API_URL = API_ANALYTICS + "DASRestApiURL";
-    public static final String API_USAGE_DAS_REST_API_USER = API_ANALYTICS + "DASRestApiUsername";
-    public static final String API_USAGE_DAS_REST_API_PASSWORD = API_ANALYTICS + "DASRestApiPassword";
+    public static final String API_USAGE_DAS_REST_API_URL = API_ANALYTICS + "StreamProcessorRestApiURL";
+    public static final String API_USAGE_DAS_REST_API_USER = API_ANALYTICS + "StreamProcessorRestApiUsername";
+    public static final String API_USAGE_DAS_REST_API_PASSWORD = API_ANALYTICS + "StreamProcessorRestApiPassword";
 
     public static final String UNLIMITED_TIER = "Unlimited";
     public static final String UNLIMITED_TIER_DESC = "Allows unlimited requests";
@@ -803,6 +817,7 @@ public final class APIConstants {
     public static final String RESOURCE_CACHE_NAME = "resourceCache";
     public static final String POLICY_CACHE_CONTEXT = "POLICY:";
     public static final String GATEWAY_KEY_CACHE_NAME = "gatewayKeyCache";
+    public static final String GATEWAY_CERTIFICATE_CACHE_NAME = "gatewayCertificateCache";
     public static final String GATEWAY_TOKEN_CACHE_NAME = "GATEWAY_TOKEN_CACHE";
     public static final String GATEWAY_INVALID_TOKEN_CACHE_NAME = "GATEWAY_INVALID_TOKEN_CACHE";
     public static final String KEY_CACHE_NAME = "keyCache";
@@ -821,6 +836,7 @@ public final class APIConstants {
     public static final Set<String> SUPPORTED_METHODS =
             Collections.unmodifiableSet(new HashSet<String>(
                     Arrays.asList(new String[]{"get", "put", "post", "delete", "patch", "head", "options"})));
+    public static final String PARAMETERS = "parameters";
     public static final String AUTH_NO_AUTHENTICATION = "None";
     public static final String AUTH_APPLICATION_LEVEL_TOKEN = "Application";
     public static final String AUTH_APPLICATION_USER_LEVEL_TOKEN = "Application_User";
@@ -1122,6 +1138,7 @@ public final class APIConstants {
     public static final String API_DATA_ISMORE = "isMore";
     public static final String API_DATA_PRODUCTION_ENDPOINTS = "production_endpoints";
     public static final String API_DATA_SANDBOX_ENDPOINTS = "sandbox_endpoints";
+    public static final String API_DATA_URL = "url";
 
     public static final String ACTIVITY_ID = "activityID";
     public static final String USER_AGENT = "User-Agent";
@@ -1146,6 +1163,8 @@ public final class APIConstants {
     }
 
     public static final String API_LC_ACTION_DEPRECATE = "Deprecate";
+    public static final String DEPRECATE_CHECK_LIST_ITEM = "Deprecate old versions after publish the API";
+    public static final String RESUBSCRIBE_CHECK_LIST_ITEM = "Requires re-subscription when publish the API";
 
     public static final String METRICS_PREFIX = "org.wso2.am";
 
@@ -1384,11 +1403,14 @@ public final class APIConstants {
     public static final String JSON_GRANT_TYPES = "grant_types";
     public static final String JSON_USERNAME = "username";
     public static final String REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA = "[~!@#;%^*()+={}|<>\"\',\\[\\]&/$\\\\]";
+    public static final String JSON_CLIENT_ID = "client_id";
+    public static final String JSON_CLIENT_SECRET = "client_secret";
 
     /**
      * Publisher Access Control related registry properties and values.
      */
     public static final String PUBLISHER_ROLES = "publisher_roles";
+    public static final String DISPLAY_PUBLISHER_ROLES = "display_publisher_roles";
     public static final String ACCESS_CONTROL = "publisher_access_control";
     public static final String NO_ACCESS_CONTROL = "all";
     public static final String NULL_USER_ROLE_LIST = "null";

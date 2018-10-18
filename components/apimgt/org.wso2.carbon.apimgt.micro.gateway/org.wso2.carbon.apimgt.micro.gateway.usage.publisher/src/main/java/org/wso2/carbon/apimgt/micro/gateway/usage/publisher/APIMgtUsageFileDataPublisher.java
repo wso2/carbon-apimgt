@@ -29,11 +29,13 @@ import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeAlertTypesPublisherD
 import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeExecutionTimePublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeFaultPublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeRequestPublisherDTO;
+import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeRequestStreamPublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeResponsePublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeThrottlePublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ExecutionTimePublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.dto.FaultPublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.dto.RequestPublisherDTO;
+import org.wso2.carbon.apimgt.usage.publisher.dto.RequestStreamDTO;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ResponsePublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ThrottlePublisherDTO;
 
@@ -170,5 +172,23 @@ public class APIMgtUsageFileDataPublisher implements APIMgtUsageDataPublisher {
             log.error("Error while publishing alert types events.", e);
             throw new APIManagementException("Error while publishing alert types events");
         }
+    }
+
+    @Override
+    public void publishEvent(RequestStreamDTO requestStreamDTO) {
+        DataBridgeRequestStreamPublisherDTO dataBridgeRequestStreamPublisherDTO =
+                new DataBridgeRequestStreamPublisherDTO(requestStreamDTO);
+        try {
+            String streamID = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getResponseStreamName() + ":"
+                    + DataPublisherUtil.getApiManagerAnalyticsConfiguration().getResponseStreamVersion();
+            //Publish Request Data
+            dataPublisher.tryPublish(streamID, System.currentTimeMillis(),
+                    (Object[]) null, null,
+                    (Object[]) dataBridgeRequestStreamPublisherDTO.createPayload());
+
+        } catch (Exception e) {
+            log.error("Error while publishing Request event", e);
+        }
+        
     }
 }

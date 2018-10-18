@@ -248,7 +248,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
      * @param connection DB connection used to get data from the database
      */
     public void closeDatabaseLinks(ResultSet resultSet, Statement statement,
-                                   Connection connection) {
+            Connection connection) {
         if (resultSet != null) {
             try {
                 resultSet.close();
@@ -478,8 +478,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                         statement.setString(index, toDate);
                         statement.setInt(3, limit);
                     }
-                }   
-                
+                }
+
                 resultSet = statement.executeQuery();
                 AppUsageDTO appUsageDTO;
                 while (resultSet.next()) {
@@ -732,7 +732,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
     private List<AppCallTypeDTO> getAPICallTypeUsageData(String tableName, String keyString, String fromDate,
-    String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
+            String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
 
         Connection connection = null;
         PreparedStatement statement = null;
@@ -750,6 +750,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                             + APIUsageStatisticsClientConstants.API_PUBLISHER + ","
                             + APIUsageStatisticsClientConstants.CONSUMERKEY + ","
                             + APIUsageStatisticsClientConstants.RESOURCE + ","
+                            + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ","
                             + APIUsageStatisticsClientConstants.CONTEXT + "," + APIUsageStatisticsClientConstants.METHOD
                             + "," + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ","
                             + APIUsageStatisticsClientConstants.HOST_NAME + "," + APIUsageStatisticsClientConstants.YEAR
@@ -774,6 +775,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                             + APIUsageStatisticsClientConstants.API_PUBLISHER + ","
                             + APIUsageStatisticsClientConstants.METHOD + ","
                             + APIUsageStatisticsClientConstants.CONSUMERKEY + ","
+                            + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ","
                             + APIUsageStatisticsClientConstants.RESOURCE + " FROM " + tableName + " WHERE "
                             + APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ") " +
                             " AND " + APIUsageStatisticsClientConstants.TIME + " BETWEEN ? AND ?  GROUP BY "
@@ -781,6 +783,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                             + APIUsageStatisticsClientConstants.API + ","
                             + APIUsageStatisticsClientConstants.API_PUBLISHER + ","
                             + APIUsageStatisticsClientConstants.METHOD + ","
+                            + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ","
                             + APIUsageStatisticsClientConstants.RESOURCE;
                 }
 
@@ -797,14 +800,17 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                     String callType = resultSet.getString(APIUsageStatisticsClientConstants.METHOD);
                     String consumerKey = resultSet.getString(APIUsageStatisticsClientConstants.CONSUMERKEY);
                     String resource = resultSet.getString(APIUsageStatisticsClientConstants.RESOURCE);
+                    int hitCount = resultSet.getInt(APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT);
                     List<String> callTypeList = new ArrayList<String>();
+                    List<Integer> hitCountList = new ArrayList<Integer>();
                     callTypeList.add(resource + " (" + callType + ")");
+                    hitCountList.add(hitCount);
                     String appName = subscriberAppsMap.get(consumerKey);
 
                     boolean found = false;
                     for (AppCallTypeDTO dto : appApiCallTypeList) {
                         if (dto.getAppName().equals(appName)) {
-                            dto.addToApiCallTypeArray(apiName, callTypeList);
+                            dto.addToApiCallTypeArray(apiName, callTypeList, hitCountList);
                             found = true;
                             break;
                         }
@@ -812,7 +818,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                     if (!found) {
                         appCallTypeDTO = new AppCallTypeDTO();
                         appCallTypeDTO.setAppName(appName);
-                        appCallTypeDTO.addToApiCallTypeArray(apiName, callTypeList);
+                        appCallTypeDTO.addToApiCallTypeArray(apiName, callTypeList, hitCountList);
                         appApiCallTypeList.add(appCallTypeDTO);
                     }
                 }
@@ -1737,7 +1743,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                             + ',' + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT
                             + ',' + APIUsageStatisticsClientConstants.RESOURCE + ','
                             + APIUsageStatisticsClientConstants.TIME + " FROM " + tableName + " WHERE "
-                    + APIUsageStatisticsClientConstants.TIME + " BETWEEN ?  AND ?";
+                            + APIUsageStatisticsClientConstants.TIME + " BETWEEN ?  AND ?";
             statement = connection.prepareStatement(query);
             statement.setString(1, fromDate);
             statement.setString(2, toDate);

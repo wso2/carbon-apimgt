@@ -94,7 +94,6 @@ var jagg = jagg || {};
             jagg.messageDisplay({content:params.content,title:params.title ,buttons:[
                 {name:i18n.t("Yes"),cssClass:"btn btn-primary",cbk:function() {
                     if(!params.anotherDialog){
-                        console.info('hiding');
                         $('#messageModal').modal('hide');
                     }
                     if (typeof params.okCallback == "function") {
@@ -230,8 +229,29 @@ var jagg = jagg || {};
          return new Date(timestamp).toLocaleString();
     };
 
-}());
+    jagg.url = function(url){
+        //append the site context
+        url = this.site.context + url;
 
+        //add tenant param
+        //check if tenant param already set
+        if (this.site.tenant) {
+            //check if url has query params
+            if (/\?/.test(url)) {
+                if (/\?.*tenant=/.test(url)) {
+                    //do nothing
+                } else {
+                    url = url + "&tenant=" + this.site.tenant;
+                }
+            } else {
+                //if url do not have query params
+                url = url + "?tenant=" + this.site.tenant;
+            }
+        }
+
+        return url;
+    };
+}());
 
 $(document).ready(function(){
     //this can go to main js
@@ -259,7 +279,7 @@ $(document).ready(function(){
             $(this).text(i18n.t("Show More Options"));
         }
         else{
-            $(this).text(i18n.t("Show Fewer Options"));
+            $(this).text(i18n.t("Show fewer options"));
         }
         div.toggle('fast');
         return false; 

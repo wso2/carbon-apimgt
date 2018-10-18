@@ -35,6 +35,8 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
+import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
@@ -132,7 +134,8 @@ public class APIManagerComponent {
     public static final String APPLICATION_ROOT_PERMISSION =  "applications";
     public static final String API_RXT =  "api.rxt";
     public static final String AUTHORIZATION_HEADER =  "Authorization Header";
-
+    public static final String LABELS =  "Labels";
+    public static final String API_SECURITY = "API Security";
 
     protected void activate(ComponentContext componentContext) throws Exception {
         if (log.isDebugEnabled()) {
@@ -257,6 +260,14 @@ public class APIManagerComponent {
             if(advancedThrottlingEnabled) {
                 addDefaultAdvancedThrottlePolicies();
             }
+
+            //Update all NULL THROTTLING_TIER values to Unlimited
+            try {
+                ApiMgtDAO.getInstance().convertNullThrottlingTiers();
+            } catch (APIManagementException e) {
+                log.error("Failed to convert NULL THROTTLING_TIERS to Unlimited");
+            }
+
             // Initialise KeyManager.
             KeyManagerHolder.initializeKeyManager(configuration);
             //Initialise sql constants
@@ -371,10 +382,17 @@ public class APIManagerComponent {
                             // check whether the resource contains a field called authorization header.
                             if(!RegistryUtils.decodeBytes((byte[]) resource.getContent()).
                                     contains(AUTHORIZATION_HEADER)) {
-                                String rxt = FileUtil.readFileToString(rxtDir + File.separator + rxtPath);
-                                resource.setContent(rxt.getBytes(Charset.defaultCharset()));
-                                resource.setMediaType(APIConstants.RXT_MEDIA_TYPE);
-                                systemRegistry.put(resourcePath, resource);
+                                updateRegistryResourceContent(resource, systemRegistry, rxtDir, rxtPath, resourcePath);
+                            }
+                            // check whether the resource contains a section called 'Labels' and add it
+                            if (!RegistryUtils.decodeBytes((byte[]) resource.getContent()).
+                                    contains(LABELS)) {
+                                updateRegistryResourceContent(resource, systemRegistry, rxtDir, rxtPath, resourcePath);
+                            }
+                            // check whether the resource contains a section called 'API Security' and add it
+                            if (!RegistryUtils.decodeBytes((byte[]) resource.getContent()).
+                                    contains(API_SECURITY)) {
+                                updateRegistryResourceContent(resource, systemRegistry, rxtDir, rxtPath, resourcePath);
                             }
                         }
                     }
@@ -393,6 +411,15 @@ public class APIManagerComponent {
                 throw new APIManagementException(msg, e);
             }
         }
+    }
+
+    private void updateRegistryResourceContent(Resource resource, UserRegistry systemRegistry, String rxtDir,
+                                               String rxtPath, String resourcePath) throws RegistryException, IOException {
+
+        String rxt = FileUtil.readFileToString(rxtDir + File.separator + rxtPath);
+        resource.setContent(rxt.getBytes(Charset.defaultCharset()));
+        resource.setMediaType(APIConstants.RXT_MEDIA_TYPE);
+        systemRegistry.put(resourcePath, resource);
     }
 
     private void setupImagePermissions() throws APIManagementException {

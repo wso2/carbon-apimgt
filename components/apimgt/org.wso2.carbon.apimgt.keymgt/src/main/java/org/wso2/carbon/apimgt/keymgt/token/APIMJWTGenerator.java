@@ -28,6 +28,8 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
+import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -40,6 +42,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public class APIMJWTGenerator extends JWTGenerator {
 
@@ -158,20 +161,18 @@ public class APIMJWTGenerator extends JWTGenerator {
         //generating expiring timestamp
         long currentTime = System.currentTimeMillis();
         // jwtTokenInfoDTO.getExpirationTime() gives the token validity time given when the token is generated.
-        long expireIn = currentTime + jwtTokenInfoDTO.getExpirationTime() * 1000;
+        long expireIn = TimeUnit.MILLISECONDS.toSeconds(currentTime) + jwtTokenInfoDTO.getExpirationTime();
 
         String endUserName = jwtTokenInfoDTO.getEndUserName();
 
         Map<String, Object> claims = new LinkedHashMap<String, Object>(20);
 
-
-        KeyManagerConfiguration configuration = KeyManagerHolder.getKeyManagerInstance().getKeyManagerConfiguration();
-        String serverURL = configuration.getParameter(APIConstants.TOKEN_URL);
+        String issuerIdentifier = OAuthServerConfiguration.getInstance().getOpenIDConnectIDTokenIssuerIdentifier();
 
 
         claims.put("sub", endUserName);
         claims.put("jti", UUID.randomUUID().toString());
-        claims.put("iss", serverURL);
+        claims.put("iss", issuerIdentifier);
         claims.put("aud", jwtTokenInfoDTO.getAudience());
         claims.put("iat", currentTime);
         claims.put("exp", expireIn);
@@ -179,6 +180,7 @@ public class APIMJWTGenerator extends JWTGenerator {
         claims.put("subscribedAPIs", jwtTokenInfoDTO.getSubscribedApiDTOList());
         claims.put("application", jwtTokenInfoDTO.getApplication());
         claims.put("keytype", jwtTokenInfoDTO.getKeyType());
+        claims.put("consumerKey" , jwtTokenInfoDTO.getConsumerKey());
 
         return claims;
     }

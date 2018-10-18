@@ -4989,8 +4989,7 @@ public class ApiMgtDAO {
             prepStmt = connection.prepareStatement(query);
             prepStmt.setString(1, workflowDTO.getStatus().toString());
             prepStmt.setString(2, workflowDTO.getWorkflowDescription());
-            prepStmt.setTimestamp(3, updatedTimeStamp);
-            prepStmt.setString(4, workflowDTO.getExternalWorkflowReference());
+            prepStmt.setString(3, workflowDTO.getExternalWorkflowReference());
 
             prepStmt.execute();
 
@@ -5214,11 +5213,14 @@ public class ApiMgtDAO {
                 prepStmt.setString(2, uriTemplate.getHTTPVerb());
                 prepStmt.setString(3, uriTemplate.getAuthType());
                 prepStmt.setString(4, uriTemplate.getUriTemplate());
-                //If API policy is available then set it for all the resources
+                //If API policy is available then set it for all the resources.
                 if (StringUtils.isEmpty(api.getApiLevelPolicy())) {
-                    prepStmt.setString(5, uriTemplate.getThrottlingTier());
+                    prepStmt.setString(5, (StringUtils.isEmpty(uriTemplate.getThrottlingTier())) ?
+                            APIConstants.UNLIMITED_TIER :
+                            uriTemplate.getThrottlingTier());
                 } else {
-                    prepStmt.setString(5, api.getApiLevelPolicy());
+                    prepStmt.setString(5,
+                            (StringUtils.isEmpty(api.getApiLevelPolicy())) ? APIConstants.UNLIMITED_TIER : api.getApiLevelPolicy());
                 }
                 InputStream is;
                 if (uriTemplate.getMediationScript() != null) {
@@ -5693,7 +5695,15 @@ public class ApiMgtDAO {
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
+        int tenantId;
         ArrayList<URITemplate> uriTemplates = new ArrayList<URITemplate>();
+
+        String apiTenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(apiContext);
+        if (apiTenantDomain != null) {
+            tenantId = APIUtil.getTenantIdFromTenantDomain(apiTenantDomain);
+        } else {
+            tenantId = MultitenantConstants.SUPER_TENANT_ID;
+        }
 
         // TODO : FILTER RESULTS ONLY FOR ACTIVE APIs
         String query = SQLConstants.ThrottleSQLConstants.GET_CONDITION_GROUPS_FOR_POLICIES_SQL;
@@ -5702,6 +5712,7 @@ public class ApiMgtDAO {
             prepStmt = connection.prepareStatement(query);
             prepStmt.setString(1, apiContext);
             prepStmt.setString(2, version);
+            prepStmt.setInt(3, tenantId);
 
             rs = prepStmt.executeQuery();
             Map<String, Set<ConditionGroupDTO>> mapByHttpVerbURLPatternToId = new HashMap<String, Set<ConditionGroupDTO>>();
@@ -7497,13 +7508,19 @@ public class ApiMgtDAO {
                 if (scopeHashMap.containsKey(scopeKey)) {
                     // scope already exists append roles.
                     scope = scopeHashMap.get(scopeKey);
-                    scope.setRoles(scope.getRoles().concat("," + resultSet.getString(4)).trim());
+                    String roles = scope.getRoles();
+                    if (StringUtils.isNotEmpty(roles)) {
+                        scope.setRoles(scope.getRoles().concat("," + resultSet.getString(4)).trim());
+                    }
                 } else {
                     scope = new Scope();
                     scope.setKey(scopeKey);
                     scope.setName(resultSet.getString(2));
                     scope.setDescription(resultSet.getString(3));
-                    scope.setRoles(resultSet.getString(4).trim());
+                    String roles = resultSet.getString(4);
+                    if (StringUtils.isNotEmpty(roles)) {
+                        scope.setRoles(resultSet.getString(4).trim());
+                    }
                 }
                 scopeHashMap.put(scopeKey, scope);
             }
@@ -10922,21 +10939,23 @@ public class ApiMgtDAO {
 
 
     /**
-     * Get a list of access tokens issued for given user under the given app. Returned object carries consumer key
-     * and secret information related to the access token
+     * Get a list of access tokens issued for given user under the given app of given owner. Returned object carries
+     * consumer key and secret information related to the access token
      *
      * @param userName end user name
      * @param appName  application name
+     * @param appOwner application owner user name
      * @return list of tokens
      * @throws SQLException in case of a DB issue
      */
-    public static List<AccessTokenInfo> getAccessTokenListForUser(String userName, String appName) throws SQLException {
-
+    public static List<AccessTokenInfo> getAccessTokenListForUser(String userName, String appName, String appOwner)
+            throws SQLException {
         List<AccessTokenInfo> accessTokens = new ArrayList<AccessTokenInfo>(5);
         Connection connection = APIMgtDBUtil.getConnection();
         PreparedStatement consumerSecretIDPS = connection.prepareStatement(SQLConstants.GET_ACCESS_TOKENS_BY_USER_SQL);
         consumerSecretIDPS.setString(1, userName);
         consumerSecretIDPS.setString(2, appName);
+        consumerSecretIDPS.setString(3, appOwner);
 
         ResultSet consumerSecretIDResult = consumerSecretIDPS.executeQuery();
 
@@ -10970,7 +10989,7 @@ public class ApiMgtDAO {
             ps.setString(1, context);
 
             rs = ps.executeQuery();
-            if (rs.first()) {
+            if (rs.next()) {
                 apiName = rs.getString("API_NAME");
                 apiProvider = rs.getString("API_PROVIDER");
             }
@@ -11416,14 +11435,13 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Get Subscribed APIs for given userId
+     * Get Subscribed APIs for an App.
      *
-     * @param userId id of the user
      * @param applicationName id of the application name
      * @return APISubscriptionInfoDTO[]
      * @throws APIManagementException if failed to get Subscribed APIs
      */
-    public APISubscriptionInfoDTO[] getSubscribedAPIsOfUserByApp(String userId, String applicationName) throws
+    public APISubscriptionInfoDTO[] getSubscribedAPIsForAnApp(String userId, String applicationName) throws
             APIManagementException {
         List<APISubscriptionInfoDTO> apiSubscriptionInfoDTOS = new ArrayList<APISubscriptionInfoDTO>();
         Connection conn = null;
@@ -11442,9 +11460,8 @@ public class ApiMgtDAO {
         try {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, userId);
-            ps.setInt(2, tenantId);
-            ps.setString(3, applicationName);
+            ps.setInt(1, tenantId);
+            ps.setString(2, applicationName);
             rs = ps.executeQuery();
             while (rs.next()) {
                 APISubscriptionInfoDTO infoDTO = new APISubscriptionInfoDTO();
@@ -11774,10 +11791,10 @@ public class ApiMgtDAO {
 
         try {
             connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
             ps = connection.prepareStatement(SQLConstants.REMOVE_APPLICATION_ATTRIBUTES_BY_ATTRIBUTE_NAME_SQL);
             ps.setString(1, attributeKey);
             ps.setInt(2, applicationId);
-
             ps.execute();
             connection.commit();
         } catch (SQLException e) {
@@ -11815,6 +11832,32 @@ public class ApiMgtDAO {
             handleException("Failed to add Application", sqlException);
         } finally {
             APIMgtDBUtil.closeAllConnections(null, connection, null);
+        }
+    }
+
+    /**
+     * Converts all null values for THROTTLING_TIER in AM_API_URL_MAPPING table, to Unlimited.
+     * This will be executed only during startup of the server.
+     *
+     * @throws APIManagementException
+     */
+    public void convertNullThrottlingTiers() throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+
+        String query = SQLConstants.FIX_NULL_THROTTLING_TIERS;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.execute();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException(
+                    "Error occurred while converting NULL throttling tiers to Unlimited in AM_API_URL_MAPPING table",
+                    e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
         }
     }
 }

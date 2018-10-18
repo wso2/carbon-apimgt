@@ -50,6 +50,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.TreeSet;
 
 /**
@@ -248,6 +249,7 @@ public class UsageClient {
             String query = select + from + where + time + groupAndOrder;
             statement = connection.prepareStatement(query);
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
             Timestamp fromTime = new java.sql.Timestamp(dateFormat.parse(fromDate).getTime());
             Timestamp toTime = new java.sql.Timestamp(dateFormat.parse(toDate).getTime());
 
@@ -360,6 +362,7 @@ public class UsageClient {
             String query = select + from + where + time + groupAndOrder;
             statement = connection.prepareStatement(query);
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
             Timestamp fromTime = new java.sql.Timestamp(dateFormat.parse(fromDate).getTime());
             Timestamp toTime = new java.sql.Timestamp(dateFormat.parse(toDate).getTime());
 
@@ -466,6 +469,7 @@ public class UsageClient {
             String query = select + from + where + time + groupAndOrder;
             statement = connection.prepareStatement(query);
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
             Timestamp fromTime = new java.sql.Timestamp(dateFormat.parse(fromDate).getTime());
             Timestamp toTime = new java.sql.Timestamp(dateFormat.parse(toDate).getTime());
 
@@ -552,6 +556,7 @@ public class UsageClient {
                 statement.setString(++cnt, apiCreator);
             }
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
             Timestamp fromTime = new java.sql.Timestamp(dateFormat.parse(fromDate).getTime());
             Timestamp toTime = new java.sql.Timestamp(dateFormat.parse(toDate).getTime());
 

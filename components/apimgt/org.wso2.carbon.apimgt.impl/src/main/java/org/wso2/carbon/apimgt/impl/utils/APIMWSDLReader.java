@@ -32,6 +32,7 @@ import org.apache.xerces.impl.Constants;
 import org.apache.xerces.util.SecurityManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -42,6 +43,7 @@ import javax.wsdl.Port;
 import javax.wsdl.Service;
 import javax.wsdl.WSDLException;
 import javax.wsdl.extensions.ExtensibilityElement;
+import javax.wsdl.extensions.UnknownExtensibilityElement;
 import javax.wsdl.factory.WSDLFactory;
 import javax.wsdl.xml.WSDLReader;
 import javax.wsdl.xml.WSDLWriter;
@@ -637,18 +639,33 @@ public class APIMWSDLReader {
 	 * @throws APIManagementException
 	 */
 	private String getAddressUrl(ExtensibilityElement exElement) throws APIManagementException {
-		if (exElement instanceof SOAP12AddressImpl) {
-			return ((SOAP12AddressImpl) exElement).getLocationURI();
-		} else if (exElement instanceof SOAPAddressImpl) {
-			return ((SOAPAddressImpl) exElement).getLocationURI();
-		} else if (exElement instanceof HTTPAddressImpl) {
-			return ((HTTPAddressImpl) exElement).getLocationURI();
-		} else {
-			String msg = "Unsupported WSDL errors!";
-			log.error(msg);
-			throw new APIManagementException(msg);
-		}
-	}
+        if (exElement instanceof SOAP12AddressImpl) {
+            return ((SOAP12AddressImpl) exElement).getLocationURI();
+        } else if (exElement instanceof SOAPAddressImpl) {
+            return ((SOAPAddressImpl) exElement).getLocationURI();
+        } else if (exElement instanceof HTTPAddressImpl) {
+            return ((HTTPAddressImpl) exElement).getLocationURI();
+        } else if (exElement instanceof UnknownExtensibilityElement) {
+            Element unknownExtensibilityElement = ((UnknownExtensibilityElement) exElement).getElement();
+            if (unknownExtensibilityElement != null) {
+                NodeList nodeList = unknownExtensibilityElement.getElementsByTagNameNS(APIConstants.WSDL_NAMESPACE_URI,
+                        APIConstants.WSDL_ELEMENT_LOCAL_NAME);
+                String url = "";
+                if (nodeList != null && nodeList.getLength() > 0) {
+                    url = nodeList.item(0).getTextContent();
+                }
+                return url;
+            } else {
+                String msg = "WSDL errors! Extensibility Element is null";
+                log.error(msg);
+                throw new APIManagementException(msg);
+            }
+        } else {
+            String msg = "Unsupported WSDL errors!";
+            log.error(msg);
+            throw new APIManagementException(msg);
+        }
+    }
 
 	/**
 	 * Get the addressURl from the Extensibility element
@@ -663,6 +680,15 @@ public class APIMWSDLReader {
             ((SOAPAddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint(transports) + api.getContext());
         } else if (exElement instanceof HTTPAddressImpl) {
             ((HTTPAddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint(transports) + api.getContext());
+        } else if (exElement instanceof UnknownExtensibilityElement) {
+            Element unknownExtensibilityElement = ((UnknownExtensibilityElement) exElement).getElement();
+            if (unknownExtensibilityElement != null) {
+                NodeList nodeList = unknownExtensibilityElement.getElementsByTagNameNS(APIConstants.WSDL_NAMESPACE_URI,
+                        APIConstants.WSDL_ELEMENT_LOCAL_NAME);
+                if (nodeList != null && nodeList.getLength() > 0) {
+                    nodeList.item(0).setTextContent(APIUtil.getGatewayendpoint(transports) + api.getContext());
+                }
+            }
         } else {
 			String msg = "Unsupported WSDL errors!";
 			log.error(msg);

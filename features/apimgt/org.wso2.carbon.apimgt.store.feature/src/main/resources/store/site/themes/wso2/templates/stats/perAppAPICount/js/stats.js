@@ -5,10 +5,8 @@ var statsEnabled = isDataPublishingEnabled();
 
     currentLocation=window.location.pathname;
     jagg.post("/site/blocks/stats/perAppAPICount/ajax/stats.jag", { action:"getFirstAccessTime",currentLocation:currentLocation  },
-        function (json) {            
-
+        function (json) {
             if (!json.error) {
-
                 if( json.usage && json.usage.length > 0){
                     var d = new Date();
                     var firstAccessDay = new Date(json.usage[0].year, json.usage[0].month, json.usage[0].day);
@@ -16,21 +14,25 @@ var statsEnabled = isDataPublishingEnabled();
 
                     //day picker
                     $('#today-btn').on('click',function(){
+                        currentDay = getDate();
                         getDateTime(currentDay,currentDay-86400000);
                     });
 
                     //hour picker
                     $('#hour-btn').on('click',function(){
+                        currentDay = getDate();
                         getDateTime(currentDay,currentDay-3600000);
                     })
 
                     //week picker
                     $('#week-btn').on('click',function(){
+                        currentDay = getDate();
                         getDateTime(currentDay,currentDay-604800000);
                     })
 
                     //month picker
                     $('#month-btn').on('click',function(){
+                        currentDay = getDate();
                         getDateTime(currentDay,currentDay-(604800000*4));
                     });
 
@@ -40,7 +42,7 @@ var statsEnabled = isDataPublishingEnabled();
 
                     //date picker
                     $('#date-range').daterangepicker({
-                          timePicker: false,
+                          timePicker: true,
                           timePickerIncrement: 30,
                           format: 'YYYY-MM-DD h:mm',
                           opens: 'left',
@@ -53,7 +55,7 @@ var statsEnabled = isDataPublishingEnabled();
                        var to = convertTimeString(picker.endDate);
                        var fromStr = from.split(" ");
                        var toStr = to.split(" ");
-                       var dateStr = fromStr[0] + " <b>" + i18n.t("to") + "</b> " + toStr[0];
+                       var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>" + i18n.t("to") + "</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
                        $("#date-range span").html(dateStr);
                        drawGraphAPIUsage(from,to);
                     });
@@ -69,14 +71,7 @@ var statsEnabled = isDataPublishingEnabled();
                         $(this).siblings().removeClass('active');
                     });
 
-                }
-
-                else if (json.usage && json.usage.length == 0 && statsEnabled) {
-                    $('.stat-page').html("");
-                    showNoDataAnalyticsMsg();
-                }
-
-                else{
+                } else {
                     $('.stat-page').html("");
                     showEnableAnalyticsMsg();
                 }
@@ -104,8 +99,8 @@ $(document).ready(function(){
 })
 
 var drawGraphAPIUsage = function(from,to){
-    var fromDate = from;
-    var toDate = to;
+    var fromDate = convertTimeStringUTC(from);
+    var toDate = convertTimeStringUTC(to);
     jagg.post("/site/blocks/stats/perAppAPICount/ajax/stats.jag", { action:"getProviderAPIUsage",currentLocation:currentLocation,fromDate:fromDate,toDate:toDate  },
         function (json) {
             $('#spinner').hide();
@@ -236,7 +231,7 @@ function getDateTime(currentDay,fromDay){
     var from = convertTimeString(fromDay);
     var toDate = to.split(" ");
     var fromDate = from.split(" ");
-    var dateStr= fromDate[0]+" <b>to</b> "+toDate[0];
+    var dateStr= fromDate[0] + " <i>" + fromDate[1] + "</i> <b>to</b> " + toDate[0] + " <i>" + toDate[1] + "</i>";
     $("#date-range span").html(dateStr);
     $('#date-range').data('daterangepicker').setStartDate(from);
     $('#date-range').data('daterangepicker').setEndDate(to);

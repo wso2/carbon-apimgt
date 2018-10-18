@@ -6,10 +6,17 @@ var tenant=request_tenant;
 var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
 var urlPrefix = jagg.getTenantURLPrefix("&");
-
+var isOAuthProtected = false;
 %>
 <%if(api!=null){
-    
+    var apiSecurity = api.apiSecurity.split(",");
+
+    for (var index = 0; index < apiSecurity.length; index++) {
+        if (apiSecurity[index] == "oauth2") {
+            isOAuthProtected = true;
+            index = apiSecurity.length;
+        }
+    }
     var displayOwner = api.provider;
     if(api.isAdvertiseOnly && api.apiOwner != null) {
     	displayOwner = api.apiOwner;
@@ -138,7 +145,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
                                     <div class="form-group">
                                         <label class="col-xs-4 col-sm-4 control-label"><strong><%=i18n.localize("By:")%></strong></label>
                                         <div class="col-xs-8 col-sm-8">
-                                            <p class="form-control-static"><%=displayOwner %></p>
+                                            <p class="form-control-static"><%=jagg.validateForScript(displayOwner)%></p>
                                         </div>
                                     </div>
                                     <div class="form-group">
@@ -184,7 +191,13 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
 
 
                     <div class="col-xs-12 col-sm-12 col-md-8 col-lg-5 col-md-height col-md-top">
-                    <%if(subsPermitted && api.status =="PUBLISHED"){%>
+                     <% if (subsPermitted && !isOAuthProtected) { %>
+                        <div class="message message-warning remove-margin-top">
+                        <h4><i class="icon fw fw-info"></i>Notice</h4>
+                        <p><%=i18n.localize("Application subscription is not permitted for this API, as it is only protected with Mutual SSL.")%></p>
+                        </div>
+                    <% }  %>
+                    <%if(isOAuthProtected && subsPermitted && api.status =="PUBLISHED"){%>
                             <form class="form-api-subscription add-padding-4x">
                                 <!-- Load Application -->
                                 <% if(user && apps) {
@@ -405,7 +418,9 @@ $(window).load(function(){
         }
     }
     else {
-        startAPIStoreInteractiveTutorial();
+        if (<%=isOAuthProtected%>) {
+            startAPIStoreInteractiveTutorial();
+        }
     }
 
 function startAPIStoreInteractiveTutorial() {
@@ -453,7 +468,7 @@ function startAPIStoreInteractiveTutorial() {
 
 function getHTTPMethod() {
     if (!localStorage.getItem("intractiveTutorialHTTPMethod")) {
-        var httpMethod = $('#default_endpoint_list').children().find('.heading').find(".http_method").find(".toggleOperation")[0].textContent;
+        var httpMethod = $('.opblock').children().find('.opblock-summary').prevObject["0"].firstChild.textContent;
         localStorage.setItem("intractiveTutorialHTTPMethod", httpMethod);
     }
 }

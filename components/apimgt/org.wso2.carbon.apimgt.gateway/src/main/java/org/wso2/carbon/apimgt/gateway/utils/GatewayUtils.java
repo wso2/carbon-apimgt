@@ -26,6 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.Pipe;
@@ -36,11 +37,14 @@ import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.threatprotection.utils.ThreatProtectorConstants;
+import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
+import org.wso2.carbon.apimgt.usage.publisher.dto.ExecutionTimeDTO;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.mediation.registry.RegistryServiceHolder;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.InputStream;
@@ -54,6 +58,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class GatewayUtils {
@@ -380,5 +385,48 @@ public class GatewayUtils {
                 axis2MC.setProperty(PassThroughConstants.BUFFERED_INPUT_STREAM, bufferedInputStreamOriginal);
             }
         }
+    }
+    
+    /**
+     * Build execution time related information using message context
+     * @param messageContext
+     * @return
+     */
+    public static ExecutionTimeDTO getExecutionTime(org.apache.synapse.MessageContext messageContext) {
+
+        Object securityLatency = messageContext.getProperty(APIMgtGatewayConstants.SECURITY_LATENCY);
+        Object throttleLatency = messageContext.getProperty(APIMgtGatewayConstants.THROTTLING_LATENCY);
+        Object reqMediationLatency = messageContext.getProperty(APIMgtGatewayConstants.REQUEST_MEDIATION_LATENCY);
+        Object resMediationLatency = messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_MEDIATION_LATENCY);
+        Object otherLatency = messageContext.getProperty(APIMgtGatewayConstants.OTHER_LATENCY);
+        Object backendLatency = messageContext.getProperty(APIMgtGatewayConstants.BACKEND_LATENCY);
+        ExecutionTimeDTO executionTime = new ExecutionTimeDTO();
+        executionTime.setBackEndLatency(backendLatency == null ? 0 : ((Number) backendLatency).longValue());
+        executionTime.setOtherLatency(otherLatency == null ? 0 : ((Number) otherLatency).longValue());
+        executionTime.setRequestMediationLatency(
+                reqMediationLatency == null ? 0 : ((Number) reqMediationLatency).longValue());
+        executionTime.setResponseMediationLatency(
+                resMediationLatency == null ? 0 : ((Number) resMediationLatency).longValue());
+        executionTime.setSecurityLatency(securityLatency == null ? 0 : ((Number) securityLatency).longValue());
+        executionTime.setThrottlingLatency(throttleLatency == null ? 0 : ((Number) throttleLatency).longValue());
+        return executionTime;
+    }
+    
+    public static String extractResource(org.apache.synapse.MessageContext mc) {
+        Pattern resourcePattern = Pattern.compile("^/.+?/.+?([/?].+)$");
+        String resource = "/";
+        Matcher matcher = resourcePattern.matcher((String) mc.getProperty(RESTConstants.REST_FULL_REQUEST_PATH));
+        if (matcher.find()) {
+            resource = matcher.group(1);
+        }
+        return resource;
+    }
+    
+    public static String getHostName(org.apache.synapse.MessageContext messageContext) {
+        String hostname = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getDatacenterId();
+        if (hostname == null) {
+            hostname = (String) messageContext.getProperty(APIMgtGatewayConstants.HOST_NAME);
+        }
+        return hostname;
     }
 }

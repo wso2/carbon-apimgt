@@ -88,6 +88,17 @@ public class APIMgtGatewayConstants {
     public static final String XML_VALIDATION = "xmlValidation";
     public static final String SCHEMA_VALIDATION = "schemaValidation";
     public static final String XSD_URL = "xsdURL";
+    public static final String UTF8 = "UTF-8";
 
+    /**
+     * Web socket header for jwt assertion.
+     * */
+    public static final String WS_JWT_TOKEN_HEADER = "websocket.custom.header.X-JWT-Assertion";
+    
+    public static final String GATEWAY_TYPE = "SYNAPSE";
+    public static final String SYNAPDE_GW_LABEL = "Synapse";
+    public static final String CLIENT_USER_AGENT = "clientUserAgent";
+    public static final String CLIENT_IP = "clientIp";
+    
 }
 
