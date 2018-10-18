@@ -16,6 +16,7 @@
 import React, { Component } from 'react';
 import { Divider } from '@material-ui/core';
 import PropTypes from 'prop-types';
+import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import SaveIcon from '@material-ui/icons/Save';
 import EditIcon from '@material-ui/icons/Edit';
@@ -27,6 +28,7 @@ import EndpointDAO from 'AppData/Endpoint';
 import Api from 'AppData/api';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import { Alert, Progress } from 'AppComponents/Shared';
+import ApiPermissionValidation from 'AppData/ApiPermissionValidation';
 
 import EndpointDetail from './EndpointDetail.jsx';
 
@@ -114,7 +116,7 @@ class Endpoint extends Component {
                 }
 
                 this.setState({
-                    api: api,
+                    api,
                     productionEndpoint: currentProdEP,
                     sandboxEndpoint: currentSandboxEP,
                     isInline: inline,
@@ -160,6 +162,11 @@ class Endpoint extends Component {
         }
     }
 
+    /**
+     * Update the endpoint related data of the API.
+     *
+     * @memberof EndpointForm
+     */
     updateEndpoints() {
         // this.setState({loading: true});
 
@@ -191,28 +198,28 @@ class Endpoint extends Component {
         }
 
         const api = new Api();
-        const { apiUUID } = this.props.match.params;
-        const promisedAPI = api.get(apiUUID);
+        const { id } = this.props.api;
+        const promisedAPI = api.get(id);
 
         const endpointArray = [];
         endpointArray.push(prodJSON);
         endpointArray.push(sandboxJSON);
 
-        promisedAPI
-            .then((response) => {
-                const apiData = JSON.parse(response.data);
-                apiData.endpoint = endpointArray;
-                const promisedUpdate = api.update(apiData);
-                promisedUpdate.then(() => {
+        promisedAPI.then((response) => {
+            const apiData = JSON.parse(response.data);
+            apiData.endpoint = endpointArray;
+            const promisedUpdate = api.update(apiData);
+            promisedUpdate
+                .then(() => {
                     Alert.info('Endpoints updated successfully');
+                })
+                .catch((error) => {
+                    if (process.env.NODE_ENV !== 'production') {
+                        console.log(error);
+                    }
+                    Alert.error('Error occurred when updating endpoints');
                 });
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-                Alert.error('Error occurred when updating endpoints');
-            });
+        });
     }
 
     makeEditable(disableSave) {
@@ -249,9 +256,7 @@ class Endpoint extends Component {
      * @memberof Endpoint
      */
     render() {
-        const {
-            api, productionEndpoint, sandboxEndpoint,
-        } = this.state;
+        const { api, productionEndpoint, sandboxEndpoint } = this.state;
         const copyOfProdEndpoint = JSON.parse(JSON.stringify(productionEndpoint));
         const copyOfSandboxEndpoint = JSON.parse(JSON.stringify(sandboxEndpoint));
         const { classes } = this.props;
@@ -264,50 +269,23 @@ class Endpoint extends Component {
         return (
             <React.Fragment>
                 {this.state.readOnly && (
-                    <IconButton
-                        className={classes.button}
-                        aria-label='Edit'
-                        color='primary'
-                        onClick={() => this.makeEditable(false)}
-                    >
+                    <IconButton className={classes.button} aria-label='Edit' color='primary' onClick={() => this.makeEditable(false)}>
                         <EditIcon />
                     </IconButton>
                 )}
                 {!this.state.readOnly && (
-                    <IconButton
-                        className={classes.button}
-                        aria-label='Cancel'
-                        onClick={() => this.makeNonEditable(true)}
-                    >
+                    <IconButton className={classes.button} aria-label='Cancel' onClick={() => this.makeNonEditable(true)}>
                         <CancelIcon />
                     </IconButton>
                 )}
-                <IconButton
-                    className={classes.button}
-                    aria-label='Save'
-                    color='primary'
-                    onClick={this.updateEndpoints}
-                    disabled={this.state.disableSave}
-                >
-                    <SaveIcon />
-                </IconButton>
-                {productionEndpoint && (
-                    <EndpointDetail
-                        type={<FormattedMessage
-                            id='production'
-                            defaultMessage='Production'
-                        />} endpoint={productionEndpoint} initialValue={copyOfProdEndpoint} isInline={productionEndpoint.inline} readOnly={this.state.readOnly} makeNonEditable={this.makeNonEditable}
-                    />
-                )}
-                {sandboxEndpoint && (
-                    <EndpointDetail
-                        type={<FormattedMessage
-                            id='sandbox'
-                            defaultMessage='Sandbox'
-                        />} endpoint={sandboxEndpoint} initialValue={copyOfSandboxEndpoint} isInline={sandboxEndpoint.inline} readOnly={this.state.readOnly} makeNonEditable={this.makeNonEditable}
-                    />
-                )}
+                {productionEndpoint && <EndpointDetail type={<FormattedMessage id='production' defaultMessage='Production' />} endpoint={productionEndpoint} initialValue={copyOfProdEndpoint} isInline={productionEndpoint.inline} readOnly={this.state.readOnly} makeNonEditable={this.makeNonEditable} />}
+                {sandboxEndpoint && <EndpointDetail type={<FormattedMessage id='sandbox' defaultMessage='Sandbox' />} endpoint={sandboxEndpoint} initialValue={copyOfSandboxEndpoint} isInline={sandboxEndpoint.inline} readOnly={this.state.readOnly} makeNonEditable={this.makeNonEditable} />}
                 <Divider />
+                <ApiPermissionValidation userPermissions={api.userPermissionsForApi}>
+                    <Button color='primary' onClick={this.updateEndpoints} disabled={this.state.disableSave} >
+                        Save
+                    </Button>
+                </ApiPermissionValidation>
             </React.Fragment>
         );
     }

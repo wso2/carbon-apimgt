@@ -98,18 +98,7 @@ const styles = theme => ({
         width: 'calc(100% - 24px)',
         flexDirection: 'row',
         transition: theme.transitions.create(['border-color', 'box-shadow']),
-        fontFamily: [
-            '-apple-system',
-            'BlinkMacSystemFont',
-            '"Segoe UI"',
-            'Roboto',
-            '"Helvetica Neue"',
-            'Arial',
-            'sans-serif',
-            '"Apple Color Emoji"',
-            '"Segoe UI Emoji"',
-            '"Segoe UI Symbol"',
-        ].join(','),
+        fontFamily: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif', '"Apple Color Emoji"', '"Segoe UI Emoji"', '"Segoe UI Symbol"'].join(','),
         '&:focus': {
             borderColor: '#80bdff',
             boxShadow: '0 0 0 0.2rem rgba(0,123,255,.25)',
@@ -119,6 +108,9 @@ const styles = theme => ({
     },
     bootstrapFormLabel: {
         fontSize: 18,
+    },
+    contentWrapper: {
+        flexDirection: 'column',
     },
 });
 
@@ -136,12 +128,7 @@ class EndpointDetail extends Component {
      */
     constructor(props) {
         super(props);
-        const epTypeNumber =
-            this.props.endpoint.endpointConfig.endpointType === 'LOAD_BALANCED'
-                ? '1'
-                : this.props.endpoint.endpointConfig.endpointType === 'FAIL_OVER'
-                    ? '2'
-                    : '1';
+        const epTypeNumber = this.props.endpoint.endpointConfig.endpointType === 'LOAD_BALANCED' ? '1' : this.props.endpoint.endpointConfig.endpointType === 'FAIL_OVER' ? '2' : '1';
         const urlList = [];
         urlList.push(this.props.endpoint.endpointConfig.list[0].url);
         this.state = {
@@ -298,7 +285,6 @@ class EndpointDetail extends Component {
         this.setState({ additonalEndpoints: true });
     }
 
-
     /**
      * Set the state value from the text field.
      *
@@ -398,7 +384,6 @@ class EndpointDetail extends Component {
         });
     }
 
-
     /**
      * Changes to back up value when switched from inline to golbal and vice versa.
      *
@@ -429,13 +414,11 @@ class EndpointDetail extends Component {
         if (!this.state.isInline && !this.state.globalEndpoints && !this.state.selectedGlobalEndpoint) {
             return (
                 <div className={classes.root}>
-                    <Grid container spacing={8}>
-                        <Grid item md={12}>
+                    <Grid container>
+                        <Grid item xs={12} className={classes.contentWrapper}>
                             <Typography variant='title' gutterBottom>
                                 {this.props.type} <FormattedMessage id='endpoint' defaultMessage='Endpoint' />
                             </Typography>
-                        </Grid>
-                        <Grid item xs={6}>
                             <Paper className={classes.paper}>
                                 <div className={classes.container}>
                                     <Grid container>
@@ -477,11 +460,12 @@ class EndpointDetail extends Component {
                                                     target='_blank'
                                                     href='/publisher/endpoints'
                                                     size='small'
-                                                    className={classes.viewInStoreLauncher}
-                                                >
+                                                    className={classes.viewInStoreLauncher}>
                                                     <LaunchIcon />
-                                                    <FormattedMessage id='define.global.endpoint'
-                                                                      defaultMessage='Define Global Endpoint' />
+                                                    <FormattedMessage
+                                                        id='define.global.endpoint'
+                                                        defaultMessage='Define Global Endpoint'
+                                                    />
                                                 </Button>
                                             </CardContent>
                                         </Card>
@@ -517,21 +501,10 @@ class EndpointDetail extends Component {
                                 disabled={this.props.readOnly || (!this.props.readOnly && !this.state.isInline)}
                                 className={classes.textField}
                             />
-                            <IconButton
-                                id={name}
-                                className={classes.button}
-                                aria-label='Settings'
-                                onClick={this.handleEpClick}
-                            >
+                            <IconButton id={name} className={classes.button} aria-label='Settings' onClick={this.handleEpClick}>
                                 <SettingsIcon />
                             </IconButton>
-                            <IconButton
-                                id={name}
-                                className={classes.button}
-                                aria-label='Remove'
-                                onClick={this.handleRemoveEndpointURL}
-                                disabled={this.props.readOnly}
-                            >
+                            <IconButton id={name} className={classes.button} aria-label='Remove' onClick={this.handleRemoveEndpointURL} disabled={this.props.readOnly}>
                                 <DeleteIcon />
                             </IconButton>
                         </Grid>
@@ -557,12 +530,7 @@ class EndpointDetail extends Component {
                                 disabled={this.props.readOnly || (!this.props.readOnly && !this.state.isInline)}
                                 className={classes.textField}
                             />
-                            <IconButton
-                                id={name}
-                                className={classes.button}
-                                aria-label='Settings'
-                                onClick={this.handleEpClick}
-                            >
+                            <IconButton id={name} className={classes.button} aria-label='Settings' onClick={this.handleEpClick}>
                                 <SettingsIcon id='1' />
                             </IconButton>
                         </Grid>
@@ -579,12 +547,11 @@ class EndpointDetail extends Component {
         return (
             <div className={classes.root}>
                 <Grid container spacing={8} justify='center'>
-                    <Grid item md={12}>
+                    <Grid item md={6}>
                         <Typography variant='title' gutterBottom>
                             {this.props.type} <FormattedMessage id='endpoint' defaultMessage='Endpoint' />
                         </Typography>
-                    </Grid>
-                    <Grid item xs={6}>
+
                         <Paper className={classes.paper}>
                             <div className={classes.container}>
                                 <Grid container>
@@ -692,8 +659,7 @@ class EndpointDetail extends Component {
                                                     id={name}
                                                     className={classes.button}
                                                     aria-label='Add'
-                                                    onClick={this.handleAddAdditionalEndpoints}
-                                                >
+                                                    onClick={this.handleAddAdditionalEndpoints}>
                                                     <AddIcon id='1' />
                                                 </IconButton>
                                             )}
@@ -731,22 +697,21 @@ class EndpointDetail extends Component {
                                         </Grid>
                                         <Grid container>
                                             <Typography variant='caption' gutterBottom align='center'>
-                                                    Select either of these to make the endpoints behave as fail over or
-                                                    load balanced.
+                                                    Select either of these to make the endpoints behave as fail over or load balanced.
                                             </Typography>
                                         </Grid>
                                     </Grid>
                                 )}
                             </div>
                         </Paper>
-                        {!(!this.state.isInline && !this.state.selectedGlobalEndpoint) && (
+                        {!(!this.state.isInline && !this.state.selectedGlobalEndpoint) &&
                             <AdvanceEndpointDetail
                                 endpointSecurity={this.props.endpoint.endpointSecurity}
                                 endpoint={this.props.endpoint}
                                 readOnly={this.props.readOnly}
                                 isInline={this.state.isInline}
                             />
-                        )}
+                        }
                     </Grid>
                     <Grid item xs={6}>
                         <Grid container>
@@ -762,7 +727,12 @@ class EndpointDetail extends Component {
                                     />
                                 </Grow>
                             ) : (
-                                <Slide direction='up' in={this.state.showEpConfigSlide} mountOnEnter unmountOnExit>
+                                <Slide
+                                    direction='up'
+                                    in={this.state.showEpConfigSlide}
+                                    mountOnEnter
+                                    unmountOnExit
+                                >
                                     <EndpointForm
                                         selectedEndpointConfig={this.state.selectedEndpointConfig}
                                         endpoint={this.props.endpoint}
