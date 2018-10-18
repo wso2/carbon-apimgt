@@ -119,7 +119,7 @@ class CreateScope extends React.Component {
 
     render() {
         const { classes } = this.props;
-        const { scopeUrl } = '/apis/' + this.props.api.id + '/scopes';
+        const url = `/apis/${this.props.api.id}/scopes`;
         return (
             <Grid container>
                 <Typography
@@ -180,7 +180,7 @@ class CreateScope extends React.Component {
                             defaultMessage='Save'
                         />
                     </Button>
-                    <Link to={{ scopeUrl }}>
+                    <Link to={url}>
                         <Button
                             variant='contained'
                             color='primary'
