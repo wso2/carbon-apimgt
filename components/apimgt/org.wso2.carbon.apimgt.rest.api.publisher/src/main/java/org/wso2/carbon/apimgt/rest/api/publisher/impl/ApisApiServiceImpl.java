@@ -53,7 +53,6 @@ import org.wso2.msf4j.formparam.FileInfo;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -62,6 +61,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import javax.net.ssl.HttpsURLConnection;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -1572,7 +1572,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                     uuid = apiPublisher.addApiFromDefinition(fileInputStream);
                 } else {
                     URL swaggerUrl = new URL(url);
-                    HttpURLConnection urlConn = (HttpURLConnection) swaggerUrl.openConnection();
+                    HttpsURLConnection urlConn = (HttpsURLConnection) swaggerUrl.openConnection();
                     uuid = apiPublisher.addApiFromDefinition(urlConn);
                 }
             } else { // WSDL type
