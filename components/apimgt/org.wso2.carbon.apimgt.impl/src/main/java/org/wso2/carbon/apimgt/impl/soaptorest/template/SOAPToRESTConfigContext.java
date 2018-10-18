@@ -31,6 +31,7 @@ import java.util.Map;
  */
 class SOAPToRESTConfigContext extends ConfigContext {
 
+    private String soapNamespace;
     private String method;
     private String soapAction;
     private String namespace;
@@ -48,11 +49,12 @@ class SOAPToRESTConfigContext extends ConfigContext {
      * @param arrayElements array type parameters mapping, if exists
      */
     SOAPToRESTConfigContext(Map<String, String> mapping, String method, String soapAction, String namespace,
-            JSONArray arrayElements) {
+            String soapNamespace, JSONArray arrayElements) {
         this.mappingObj = mapping;
         this.method = method;
         this.soapAction = soapAction;
         this.namespace = namespace;
+        this.soapNamespace = soapNamespace;
         this.arrayElements = arrayElements;
         init();
     }
@@ -76,6 +78,7 @@ class SOAPToRESTConfigContext extends ConfigContext {
         context.put(SOAPToRESTConstants.Template.HTTP_METHOD, method);
         context.put(SOAPToRESTConstants.Template.SOAP_ACTION, soapAction);
         context.put(SOAPToRESTConstants.Template.NAMESPACE, namespace);
+        context.put(SOAPToRESTConstants.Template.SOAP_NAMESPACE, soapNamespace);
         context.put(SOAPToRESTConstants.Template.RESOURCE_PATH, resourcePath);
         context.put(SOAPToRESTConstants.Template.MAPPING, mappingObj);
         context.put(SOAPToRESTConstants.Template.ARRAY_ELEMENTS, arrayElements);

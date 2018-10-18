@@ -3648,7 +3648,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException
      */
     public List<String> getCustomInSequences() throws APIManagementException {
-        List<String> sequenceList = new ArrayList<String>();
+        Set<String> sequenceList = new TreeSet<>();
         try {
             UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
                     .getGovernanceSystemRegistry(tenantId);
@@ -3683,7 +3683,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.error(e.getMessage());
             throw new APIManagementException(e.getMessage(), e);
         }
-        return sequenceList;
+        return new ArrayList<>(sequenceList);
     }
 
 
@@ -3694,7 +3694,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException
      */
     public List<String> getCustomOutSequences() throws APIManagementException {
-        List<String> sequenceList = new ArrayList<String>();
+        Set<String> sequenceList = new TreeSet<>();
         try {
             UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
                     .getGovernanceSystemRegistry(tenantId);
@@ -3729,7 +3729,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.error(e.getMessage());
             throw new APIManagementException(e.getMessage(), e);
         }
-        return sequenceList;
+        return new ArrayList<>(sequenceList);
     }
 
     /**
@@ -3740,7 +3740,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Deprecated
     public List<String> getCustomFaultSequences() throws APIManagementException {
 
-        List<String> sequenceList = new ArrayList<String>();
+        Set<String> sequenceList = new TreeSet<>();
         try {
             UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
                     .getGovernanceSystemRegistry(tenantId);
@@ -3774,7 +3774,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.error(e.getMessage());
             throw new APIManagementException(e.getMessage(), e);
         }
-        return sequenceList;
+        return new ArrayList<>(sequenceList);
     }
 
     /**
@@ -3875,7 +3875,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
 
     public List<String> getCustomApiInSequences(APIIdentifier apiIdentifier) throws APIManagementException {
-        List<String> sequenceList = new ArrayList<String>();
+        Set<String> sequenceList = new TreeSet<>();
         boolean isTenantFlowStarted = false;
         try {
             String tenantDomain = null;
@@ -3930,7 +3930,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
-        return sequenceList;
+        return new ArrayList<>(sequenceList);
     }
 
     /**
@@ -3941,7 +3941,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
 
     public List<String> getCustomApiOutSequences(APIIdentifier apiIdentifier) throws APIManagementException {
-        List<String> sequenceList = new ArrayList<String>();
+        Set<String> sequenceList = new TreeSet<>();
         boolean isTenantFlowStarted = false;
         try {
             String tenantDomain = null;
@@ -3996,7 +3996,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
-        return sequenceList;
+        return new ArrayList<>(sequenceList);
     }
 
     /**
@@ -4006,7 +4006,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException
      */
     public List<String> getCustomApiFaultSequences(APIIdentifier apiIdentifier) throws APIManagementException {
-        List<String> sequenceList = new ArrayList<String>();
+        Set<String> sequenceList = new TreeSet<>();
         boolean isTenantFlowStarted = false;
         try {
             String tenantDomain = null;
@@ -4061,7 +4061,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
-        return sequenceList;
+        return new ArrayList<>(sequenceList);
     }
 
     /**

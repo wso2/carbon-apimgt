@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl.soaptorest.model;
 
+import io.swagger.models.ModelImpl;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -30,9 +32,11 @@ public class WSDLInfo {
     private String version;
     private Map<String, String> endpoints;
     private boolean hasSoapBindingOperations;
+    private boolean hasSoap12BindingOperations;
     private boolean hasHttpBindingOperations;
     private Set<WSDLOperation> httpBindingOperations;
     private Set<WSDLSOAPOperation> soapBindingOperations;
+    private Map<String, ModelImpl> parameterModelMap;
 
     public WSDLInfo() {
         endpoints = new HashMap<>();
@@ -74,6 +78,14 @@ public class WSDLInfo {
         return hasSoapBindingOperations;
     }
 
+    public boolean isHasSoap12BindingOperations() {
+        return hasSoap12BindingOperations;
+    }
+
+    public void setHasSoap12BindingOperations(boolean hasSoap12BindingOperations) {
+        this.hasSoap12BindingOperations = hasSoap12BindingOperations;
+    }
+
     public void setHttpBindingOperations(Set<WSDLOperation> operations) {
         this.httpBindingOperations = operations;
     }
@@ -84,5 +96,13 @@ public class WSDLInfo {
 
     public void setSoapBindingOperations(Set<WSDLSOAPOperation> soapBindingOperations) {
         this.soapBindingOperations = soapBindingOperations;
+    }
+
+    public Map<String, ModelImpl> getParameterModelMap() {
+        return parameterModelMap;
+    }
+
+    public void setParameterModelMap(Map<String, ModelImpl> parameterModelMap) {
+        this.parameterModelMap = parameterModelMap;
     }
 }
