@@ -368,9 +368,9 @@
                                 <tr>
                                     <td align="center">{{this.alias}}</td>
                                     <td align="center">{{this.tier}}</td>
-                                    <% if (outputs.isCreatePermitted) { %>
                                     <td align="right">
-                                        <a class="delete-cert" data-alias="{{this.alias}}" data-apiname="<%= api.name%>"
+                                        <a class="delete-cert with-upload-perm" data-alias="{{this.alias}}"
+                                        data-apiname="<%= api.name%>"
                                         data-apiversion="<%= api.version%>" data-apiprovider="<%= api.provider%>">
                                             <span class="fw-stack" style="font-size:10px">
                                                 <i class="fw fw-delete fw-stack-1x"></i>
@@ -378,7 +378,6 @@
                                             </span>
                                         </a>
                                     </td>
-                                    <%}%>
                                 </tr>
                                 {{/each}}
                                 </tbody>
@@ -386,13 +385,12 @@
 
                             {{else}}
                             <div class="message message-info">
-                                <h4><i class="icon fw fw-info"></i><%=i18n.localize("No client certificate found for this API. Please upload a certificate")%></h4>
-                                    <p><%=i18n.localize("Click the button below to add certificates.")%></p>
+                                <h4><i class="icon fw fw-info"></i><%=i18n.localize("No client certificate found for this API. ")%>
+					        <span class="with-upload-perm"><%=i18n.localize("Please upload a certificate")%></span></h4>
+                                    <p class="with-upload-perm"><%=i18n.localize("Click the button below to add certificates.")%></p>
                             </div>
                             {{/if}}
-                            <% if (outputs.isCreatePermitted) { %>
-                            <span class="btn btn-primary add-cert-btn"><%=i18n.localize("Add New Certificate")%></span>
-                            <%}%>
+                            <span class="btn btn-primary add-cert-btn with-upload-perm"><%=i18n.localize("Add New Certificate")%></span>
                         </div>
                         </div>
                         <br/>

@@ -1626,6 +1626,10 @@ var disableForm = function() {
         });
     });
 
+    $("#manage_form").find('.with-upload-perm').each(function() {
+            $(this).hide();
+    });
+
     $('.btn-secondary').prop('disabled', true);
     $('#swaggerEditor').unbind('click');
 }
