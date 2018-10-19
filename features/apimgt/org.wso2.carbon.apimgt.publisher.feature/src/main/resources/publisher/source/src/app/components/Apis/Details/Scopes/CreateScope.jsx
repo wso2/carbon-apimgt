@@ -49,7 +49,7 @@ const styles = theme => ({
 });
 
 /**
- * Create new scoped for an API
+ * Create new scopes for an API
  * @class CreateScope
  * @extends {Component}
  */
@@ -174,14 +174,22 @@ class CreateScope extends React.Component {
                         color='primary'
                         onClick={this.addScope}
                         className={classes.buttonSave}
-                    > Save
+                    >
+                        <FormattedMessage
+                            id='save'
+                            defaultMessage='Save'
+                        />
                     </Button>
                     <Link to={url}>
                         <Button
                             variant='contained'
                             color='primary'
                             className={classes.buttonCancel}
-                        >Cancel
+                        >
+                            <FormattedMessage
+                                id='cancel.btn'
+                                defaultMessage='Cancel'
+                            />
                         </Button>
                     </Link>
                 </Grid>

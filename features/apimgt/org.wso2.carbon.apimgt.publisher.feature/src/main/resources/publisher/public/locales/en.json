@@ -30,6 +30,7 @@
   "create.new.websocket.api": "Create New WebSocket API",
   "create.scope.description": "Scopes enable fine-grained access control to API resources based on user roles. You define scopes to an API's resources. When a user invokes the API, his/her OAuth 2 bearer token cannot grant access to any API resource beyond its associated scopes.",
   "create.scopes": "Create Scopes",
+  "create.scope.helper.text": "Short description about the scope",
   "define.global.endpoint": "Define Global Endpoint",
   "deploy.sample.api": "Deploy Sample API",
   "design.a.new.rest.api": "Design a New REST API",
@@ -65,6 +66,7 @@
   "password": "Password",
   "production": "Production",
   "provider": "Provider",
+  "save": "SAVE",
   "sandbox": "Sandbox",
   "security": "Security",
   "select.a.global.endpoint": "Select a Global Endpoint",
@@ -94,5 +96,4 @@
   "welcome.to.wso2.api.manager": "Welcome to WSO2 API Manager",
   "wso2.api.publisher.enables.api.providers.to.publish.apis,.share.documentation,.provision.api.keys.and.gather.feedback.on.features,.quality.and.usage..to.get.started,.create.an.api.or.publish.a.sample.api..": "WSO2 API Publisher enables API providers to publish APIs, share documentation, provision API keys and gather feedback on features, quality and usage. To get started, Create an API or Publish a sample API.",
   "you.can.define.endpoint.inline.or.pick.from.a.list.of.global.endpoints": "You can define endpoint inline or pick from a list of global endpoints"
-  "create.scope.helper.text": "Short description about the scope"
 }
