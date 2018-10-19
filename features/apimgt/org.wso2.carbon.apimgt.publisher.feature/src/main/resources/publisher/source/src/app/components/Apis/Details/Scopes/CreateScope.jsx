@@ -25,7 +25,6 @@ import TagsInput from 'react-tagsinput';
 import Api from 'AppData/api';
 import Button from '@material-ui/core/Button';
 import PropTypes from 'prop-types';
-import { message } from 'antd/lib/index';
 import { withRouter } from 'react-router';
 import { Link } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
