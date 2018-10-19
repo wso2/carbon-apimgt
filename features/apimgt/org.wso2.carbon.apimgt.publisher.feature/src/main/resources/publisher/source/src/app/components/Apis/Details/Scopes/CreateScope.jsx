@@ -29,6 +29,7 @@ import { message } from 'antd/lib/index';
 import { withRouter } from 'react-router';
 import { Link } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
+import Alert from 'AppComponents/Shared/Alert';
 
 
 const styles = theme => ({
@@ -72,7 +73,6 @@ class CreateScope extends React.Component {
      * @memberof Scopes
      */
     addScope() {
-        const hideMessage = message.loading('Adding the Scope ...', 0);
         const api = new Api();
         const scope = this.state.apiScope;
         scope.bindings = {
@@ -82,18 +82,16 @@ class CreateScope extends React.Component {
         const promisedScopeAdd = api.addScope(this.props.match.params.api_uuid, scope);
         promisedScopeAdd.then((response) => {
             if (response.status !== 201) {
-                message.error('Something went wrong while updating the ' + scope.name + ' Scope!');
-                hideMessage();
+                Alert.info('Something went wrong while updating the scope');
                 return;
             }
-            message.success(scope.name + ' Scope added successfully!');
+            Alert.info('Scope added successfully');
             const { apiScopes } = this.state;
             this.setState({
                 apiScopes,
                 apiScope: {},
                 roles: [],
             });
-            hideMessage();
         });
     }
 
