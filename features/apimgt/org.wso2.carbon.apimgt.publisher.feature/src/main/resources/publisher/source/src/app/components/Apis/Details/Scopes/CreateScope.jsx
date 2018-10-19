@@ -174,22 +174,14 @@ class CreateScope extends React.Component {
                         color='primary'
                         onClick={this.addScope}
                         className={classes.buttonSave}
-                    >
-                        <FormattedMessage
-                            id='save'
-                            defaultMessage='Save'
-                        />
+                    > Save
                     </Button>
                     <Link to={url}>
                         <Button
                             variant='contained'
                             color='primary'
                             className={classes.buttonCancel}
-                        >
-                            <FormattedMessage
-                                id='cancel'
-                                defaultMessage='Cancel'
-                            />
+                        >Cancel
                         </Button>
                     </Link>
                 </Grid>
