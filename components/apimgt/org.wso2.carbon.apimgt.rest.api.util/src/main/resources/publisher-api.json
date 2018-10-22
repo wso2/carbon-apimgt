@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "version": "0.14.0",
+        "version": "0.13.0",
         "title": "WSO2 API Manager - Publisher API",
         "description": "This specifies a **RESTful API** for WSO2 **API Manager** - Publisher.\n\nPlease see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.1.66/components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher/src/main/resources/publisher-api.yaml) of the API which is written using [swagger 2.0](http://swagger.io/) specification.\n",
         "contact": {
@@ -108,7 +108,7 @@
                     {
                         "name": "query",
                         "in": "query",
-                        "description": "**Search condition**.\n\nYou can search in attributes by using an **\"<attribute>:\"** modifier.\n\nEg.\n\"provider:wso2\" will match an API if the provider of the API is exactly \"wso2\".\n\nAdditionally you can use wildcards.\n\nEg.\n\"provider:wso2*\" will match an API if the provider of the API starts with \"wso2\".\n\nSupported attribute modifiers are [**version, context, status,\ndescription, subcontext, doc, provider**]\n\nIf no advanced attribute modifier has been specified,  the API names containing\nthe search term will be returned as a result.\n",
+                        "description": "**Search condition**.\n\nYou can search in attributes by using an **\"<attribute>:\"** modifier.\n\nEg.\n\"provider:wso2\" will match an API if the provider of the API is exactly \"wso2\".\n\"status:PUBLISHED\" will match an API if the API is in PUBLISHED state.\n\"label:external\" will match an API if it contains a Microgateway label called \"external\".\n\nAdditionally you can use wildcards.\n\nEg.\n\"provider:wso2*\" will match an API if the provider of the API starts with \"wso2\".\n\nSupported attribute modifiers are [**version, context, status,\ndescription, subcontext, doc, provider, label**]\n\nIf no advanced attribute modifier has been specified,  the API names containing\nthe search term will be returned as a result.\n",
                         "type": "string"
                     },
                     {
@@ -2632,17 +2632,383 @@
                 }
             }
         },
+        "/clientCertificates": {
+            "get": {
+                "x-scope": "apim:api_view",
+                "produces": [
+                    "application/json"
+                ],
+                "x-wso2-curl": "curl -X GET https://localhost:9443/api/am/publisher/v0.14/clientCertificates -H 'authorization: Bearer f80b8c34-01bc-3ac2-99b6-4873e45c861c'",
+                "x-wso2-request": "GET https://localhost:9443/api/am/publisher/v0.14/clientCertificates  -H 'authorization: Bearer f80b8c34-01bc-3ac2-99b6-4873e45c861c'",
+                "x-wso2-response": "HTTP/1.1 200 OK {\"count\":1,\"next\":\"\",\"previous\":\"\",\"certificates\":[{\"alias\":\"newtest1\", \"apiId\":\"admin-mesting12da1-1.0.0\",\"tier\":\"Bronze\"}],\"pagination\":{\"total\":1, \"offset\":0,\"limit\":25}}",
+                "summary": "Retrieve/ Search uploaded Client Certificates.",
+                "description": "This operation can be used to retrieve and search the uploaded client certificates.\n",
+                "tags": [
+                    "ClientCertificates (Collection)"
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/limit"
+                    },
+                    {
+                        "$ref": "#/parameters/offset"
+                    },
+                    {
+                        "in": "query",
+                        "name": "alias",
+                        "required": false,
+                        "type": "string",
+                        "description": "Alias for the client certificate"
+                    },
+                    {
+                        "in": "query",
+                        "name": "apiId",
+                        "required": false,
+                        "type": "string",
+                        "description": "UUID of the API"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK. Successful response with the list of matching certificate information in the body.\n",
+                        "schema": {
+                            "$ref": "#/definitions/ClientCertificates"
+                        },
+                        "headers": {
+                            "Content-Type": {
+                                "description": "The content type of the body.\n",
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request.\nFailure due to not providing alias or server is not configured to support mutual SSL authentication.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "x-scope": "apim:api_create",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "x-wso2-curl": "curl -X POST https://localhost:9443/api/am/publisher/v0.14/clientCertificates -H 'authorization: Bearer f2f562bd-f6d9-3fad-b48d-72ab5702c98a' -H 'content-type: multipart/form-data' -F certificate=@test.crt -F alias=alias -F apiId=fea749dd-d548-4a8b-b308-34903b39a34b -F tier=Gold",
+                "x-wso2-request": "POST https://localhost:9443/api/am/publisher/v0.14/clientCertificates -H 'authorization: Bearer f2f562bd-f6d9-3fad-b48d-72ab5702c98a' -H 'content-type: multipart/form-data' -F certificate=@test.crt -F alias=alias -F apiId=fea749dd-d548-4a8b-b308-34903b39a34b -F tier=Gold",
+                "x-wso2-response": "HTTP/1.1 201 Created Location: https://localhost:9443/api/am/publisher/v0.14/clientCertificates?alias=newtest1 Date: Tue, 09 Oct 2018 16:18:10 GMT Content-Type: application/json Transfer-Encoding: chunked Server: WSO2 Carbon Server {\"alias\":\"alias\",\"apiId\":\"fea749dd-d548-4a8b-b308-34903b39a34b\",\"tier\":\"Gold\"}",
+                "summary": "Upload a new certificate.",
+                "description": "This operation can be used to upload a new certificate for an endpoint.\n",
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "name": "certificate",
+                        "description": "The certificate that needs to be uploaded.",
+                        "required": true,
+                        "type": "file"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "alias",
+                        "description": "Alias for the certificate",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "apiId",
+                        "description": "apiId to which the certificate should be applied.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "tier",
+                        "description": "apiId to which the certificate should be applied.",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "ClientCertificates (Individual)"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK.\nThe Certificate added successfully.\n",
+                        "headers": {
+                            "Location": {
+                                "description": "The URL of the newly created resource.\n",
+                                "type": "string"
+                            },
+                            "Content-Type": {
+                                "description": "The content type of the body.\n",
+                                "type": "string"
+                            }
+                        },
+                        "schema": {
+                            "$ref": "#/definitions/ClientCertMetadata"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request.\nFailures due to existing alias or expired certificate.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error\nFailed to add the Certificate due to an Internal Server Error\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/clientCertificates/{alias}": {
+            "put": {
+                "x-scope": "apim:api_create",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "x-wso2-curl": "curl -X PUT https://localhost:9443/api/am/publisher/v0.14/clientCertificates/newtest1 -H 'authorization: Bearer f80b8c34-01bc-3ac2-99b6-4873e45c861c' -F tier=Bronze",
+                "x-wso2-request": "PUT https://localhost:9443/api/am/publisher/v0.14/clientCertificates/newtest1 -H 'authorization: Bearer f80b8c34-01bc-3ac2-99b6-4873e45c861c' -F tier=Bronze",
+                "x-wso2-response": "HTTP/1.1 200 OK\r\n {\r\n\"alias\":\"newtest1\",\r\n\"apiId\":\"fea749dd-d548-4a8b-b308-34903b39a34b\",\r\n \"tier\":\"Gold\"\r\n}\r\n",
+                "summary": "Update a certificate.",
+                "description": "This operation can be used to update an uploaded certificate.\n",
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "name": "certificate",
+                        "description": "The certificate that needs to be uploaded.",
+                        "required": false,
+                        "type": "file"
+                    },
+                    {
+                        "in": "path",
+                        "name": "alias",
+                        "description": "Alias for the certificate",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "tier",
+                        "description": "The tier of the certificate",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "ClientCertificates (Individual)"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK.\nThe Certificate updated successfully.\n",
+                        "schema": {
+                            "$ref": "#/definitions/ClientCertMetadata"
+                        },
+                        "headers": {
+                            "Location": {
+                                "description": "The URL of the newly created resource.\n",
+                                "type": "string"
+                            },
+                            "Content-Type": {
+                                "description": "The content type of the body.\n",
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request.\nFailure due to not providing alias.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found.\nUpdating certificate failed. Alias not found or server is not configured to support mutual SSL\nauthentication.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "x-scope": "apim:api_create",
+                "x-wso2-curl": "curl -X DELETE https://localhost:9443/api/am/publisher/v0.14/clientCertificates/newtest1 -H 'authorization: Bearer f80b8c34-01bc-3ac2-99b6-4873e45c861c' ",
+                "x-wso2-request": "DELETE https://localhost:9443/api/am/publisher/v0.14/clientCertificates/newtest1 -H 'authorization: Bearer f80b8c34-01bc-3ac2-99b6-4873e45c861c'",
+                "x-wso2-response": "HTTP/1.1 200 OK",
+                "summary": "Delete a certificate.",
+                "description": "This operation can be used to delete an uploaded certificate.\n",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "alias",
+                        "description": "The alias of the certificate that should be deleted.\n",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "ClientCertificates (Individual)"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK.\nThe Certificate deleted successfully.\n",
+                        "headers": {
+                            "Content-Type": {
+                                "description": "The content type of the body.\n",
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request.\nAlias not found or server is not configured to support mutual SSL authentication.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found. |\nFailed to delete the certificate. Certificate could not found for\nthe given alias\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "get": {
+                "x-scope": "apim:api_view",
+                "produces": [
+                    "application/json"
+                ],
+                "x-wso2-curl": "curl -X GET https://localhost:9443/api/am/publisher/v0.14/clientCertificates/newtest1 -H 'authorization: Bearer f80b8c34-01bc-3ac2-99b6-4873e45c861c'",
+                "x-wso2-request": "GET https://apis.wso2.com/api/am/publisher/v0.14/clientCertificates/newtest1 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8",
+                "x-wso2-response": "HTTP/1.1 200 OK Date: Tue, 09 Oct 2018 16:25:43 GMT Content-Type: application/json Transfer-Encoding: chunked Server: WSO2 Carbon Server {\"status\":\"Active\",\"validity\":{\"from\":\"Fri Sep 14 15:46:22 IST 2018\",\"to\":\"Sat Sep 14 15:46:22 IST 2019\"},\"version\":\"3\",\"subject\":\"EMAILADDRESS=wso2@wso2.com, CN=WSO2, OU=test, O=WSO2, L=colombo, ST=Some-State, C=CA\"}",
+                "summary": "Get the certificate information.",
+                "description": "This operation can be used to get the information about a certificate.\n",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "alias",
+                        "type": "string",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "ClientCertificates (Individual)"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK.\n",
+                        "schema": {
+                            "$ref": "#/definitions/CertificateInfo"
+                        },
+                        "headers": {
+                            "Content-Type": {
+                                "description": "The content type of the body.\n",
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request.\nAlias not found or server is not configured to support mutual SSL authentication.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found.\nAlias not found\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/clientCertificates/{alias}/content": {
+            "get": {
+                "x-scope": "apim:api_view",
+                "x-wso2-curl": "curl -X GET https://localhost:9443/api/am/publisher/v0.14/clientCertificates/newtest1/content -H 'authorization: Bearer f80b8c34-01bc-3ac2-99b6-4873e45c861c'",
+                "x-wso2-request": "GET https://apis.wso2.com/api/am/publisher/v0.14/certificates/wso2carbon/content Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8",
+                "x-wso2-response": "HTTP/1.1 200 OK Content-Disposition: attachment; filename=\"newtest1.crt\" Date: Tue, 09 Oct 2018 16:21:25 GMT Content-Type: application/octet-stream Content-Length: 997 Server: WSO2 Carbon Server",
+                "summary": "Download a certificate.",
+                "description": "This operation can be used to download a certificate which matches the given alias.\n",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "alias",
+                        "type": "string",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "ClientCertificates (Individual)"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK.\n",
+                        "headers": {
+                            "Content-Type": {
+                                "description": "The content type of the body.\n",
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request.\nAlias not provided or server is not configured to support mutual SSL authentication.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found. Certificate for the Alias not found.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
         "/certificates": {
             "get": {
                 "x-scope": "apim:api_create",
                 "produces": [
                     "application/json"
                 ],
-                "x-wso2-curl": "curl -X GET -H \"Authorization: Bearer\nae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type:\napplication/json\"\n\"https://localhost:9443/api/am/publisher/v0.14/certificates\"\n",
-                "x-wso2-request": "GET\nhttps://localhost:9443/api/am/publisher/v0.14/certificates?limit=2&offset=0&alias=wso2carbon&endpoint=https://www.abc.com\n",
-                "x-wso2-response": "HTTP/1.1 200 OK {\"count\":2,\"next\":\"\",\"previous\":\"\",\"certificates\":[{\"alias\":\"wso2carbon\",\"endpoint\":\"https://www.abc.com\"}],\"pagination\":{\"total\":5,\"offset\":0,\"limit\":2}}",
-                "summary": "Retrieve/ search the uploaded Certificates.",
-                "description": "This operation can be used to retrieve and search the uploaded\ncertificates.\n",
+                "x-wso2-curl": "curl -X GET -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" \"https://localhost:9443/api/am/publisher/v0.14/certificates\"",
+                "x-wso2-request": "GET https://localhost:9443/api/am/publisher/v0.14/certificates?alias=wso2carbon&endpoint=https://www.abc.com",
+                "x-wso2-response": "HTTP/1.1 200 OK \n\n{\n  \"count\":1,\n  \"next\":\"\",\n  \"previous\":\"\",\n\"certificates\":[\n   {\n    \"alias\":\"wso2carbon\",\n    \"endpoint\":\"https://www.abc.com\"\n   }\n],\n  \"pagination\":{\n    \"total\":1,\n          \"offset\":0,\n          \"limit\":25\n   } \n}",
+                "summary": "Retrieve/Search uploaded certificates.",
+                "description": "This operation can be used to retrieve and search the uploaded certificates.\n",
                 "tags": [
                     "Certificates (Collection)"
                 ],
@@ -2706,9 +3072,9 @@
                 "consumes": [
                     "multipart/form-data"
                 ],
-                "x-wso2-curl": "curl -X POST -H \"Authorization: Bearer\nae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type:\nmultipart/form-data\"  -F 'certificate=@/home/user/wso2carbon.cert' -F\n'alias=wso2carbon' -F 'endpoint=https://www.abc.com'\n\"https://localhost:9443/api/am/publisher/v0.14/certificates/certificate\"\n",
-                "x-wso2-request": "POST\nhttps://localhost:9443/api/am/publisher/v0.14/certificates/certificate\n\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8 -F\n'certificate=/home/user/wso2carbon.cert' -F 'alias=wso2' -F\n'endpoint=https://www.abc.com'\n",
-                "x-wso2-response": "HTTP/1.1 201 Created. Location:certificates?alias=wso2\n {\"alias\":wso2carbon,\"endpoint\":\"abc.com\"}",
+                "x-wso2-curl": "curl -X POST -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: multipart/form-data\"  -F \"certificate=@/home/user/wso2carbon.cert\" -F \"alias=wso2carbon\" -F \"endpoint=https://www.abc.com\" \"https://localhost:9443/api/am/publisher/v0.14/certificates/certificate\"",
+                "x-wso2-request": "POST https://localhost:9443/api/am/publisher/v0.14/certificates/certificate \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -F \"certificate=/home/user/wso2carbon.cert\" -F \"alias=wso2carbon\" -F \"endpoint=https://www.abc.com\"",
+                "x-wso2-response": "HTTP/1.1 201 Created Location: https://localhost:9443/api/am/publisher/v0.14/clientCertificates?alias=newtest1 Date: Fri, 05 Oct 2018 09:50:48 GMT Content-Type: application/json Transfer-Encoding: chunked Server: WSO2 Carbon Server {\"alias\": \"newtest1\",\"apiId\": \"4624bdfb-6acd-465a-8454-bac9c4c94d88\",\"tier\": \"Gold\"}",
                 "summary": "Upload a new Certificate.",
                 "description": "This operation can be used to upload a new certificate for an endpoint.\n",
                 "parameters": [
@@ -2775,9 +3141,9 @@
                 "consumes": [
                     "multipart/form-data"
                 ],
-                "x-wso2-curl": "curl -X PUT -H \"Authorization: Bearer\nae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type:\nmultipart/form-data\" -F 'certificate=@/home/user/wso2carbon.cert' -F\n'alias=wso2carbon'\n\"https://localhost:9443/api/am/publisher/v0.14/certificates/wso2carbon\"\n",
-                "x-wso2-request": "PUT https://localhost:9443/api/am/publisher/v0.14/certificates/wso2carbon\n\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8 -F\n'certificate=@/home/user/wso2carbon.cert' -F 'alias=wso2carbon'\n",
-                "x-wso2-response": "HTTP/1.1 200 OK\n Content-Type:application/json\n {\"alias\":wso2carbon,\"endpoint\":\"abc.com\"}",
+                "x-wso2-curl": "curl -X PUT -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type:multipart/form-data\" -F \"certificate=@/home/user/wso2carbon.cert\" \"https://localhost:9443/api/am/publisher/v0.14/certificates/wso2carbon\"",
+                "x-wso2-request": "PUT https://localhost:9443/api/am/publisher/v0.14/certificates/wso2carbon Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8 -F  \"certificate=@/home/user/wso2carbon.cert\"",
+                "x-wso2-response": "HTTP/1.1 200 OK\r\n {\"alias\":wso2carbon,\"endpoint\":\"https://www.abc.com\"}",
                 "summary": "Update a certificate.",
                 "description": "This operation can be used to update an uploaded certificate.\n",
                 "parameters": [
@@ -2823,7 +3189,7 @@
                         }
                     },
                     "404": {
-                        "description": "Not Found.\n * Updating certificat failed. Alias not found\n",
+                        "description": "Not Found.\nUpdating certificate failed. Alias not found\n",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }
@@ -2838,8 +3204,8 @@
             },
             "delete": {
                 "x-scope": "apim:api_create",
-                "x-wso2-curl": "curl -X DELETE -H \"Authorization: Bearer\nae4eae22-3f65-387b-a171-d37eaa366fa8\"\n\"https://localhost:9443/api/am/publisher/v0.14/certificates/wso2carbon\"\n",
-                "x-wso2-request": "DELETE\nhttps://localhost:9443/api/am/publisher/v0.14/certificates/wso2carbon\n\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+                "x-wso2-curl": "curl -X DELETE -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/publisher/v0.14/certificates/wso2carbon\"",
+                "x-wso2-request": "DELETE https://localhost:9443/api/am/publisher/v0.14/certificates/wso2carbon Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8",
                 "x-wso2-response": "HTTP/1.1 200 OK",
                 "summary": "Delete a certificate.",
                 "description": "This operation can be used to delete an uploaded certificate.\n",
@@ -2890,11 +3256,11 @@
                 "produces": [
                     "application/json"
                 ],
-                "x-wso2-curl": "curl -X GET\n\"https://apis.wso2.com/api/am/publisher/v0.14/certificates/wso2carbon\"\n-H  \"accept: application/json\"\n",
-                "x-wso2-request": "GET\nhttps://apis.wso2.com/api/am/publisher/v0.14/certificates/wso2carbon\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
-                "x-wso2-response": "HTTP/1.1 200 OK \nContent-Type: application/json\n{\n\"status\":\"Active\",\n\"from\":\"Fri May 04 19:01:01 IST 2018\",\n\"to\":\"Thu Aug 02 19:01:01 IST 2018\",\n\"version\":\"3\",\n\"subject\":\"CN=foitt2.com, OU=wso2, O=wso2, L=Colombo, ST=Western, C=LK\"}\"",
+                "x-wso2-curl": "curl -X GET \"https://apis.wso2.com/api/am/publisher/v0.14/certificates/wso2carbon\" -H  \"accept: application/json\"",
+                "x-wso2-request": "GET https://apis.wso2.com/api/am/publisher/v0.14/certificates/wso2carbon Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8",
+                "x-wso2-response": "HTTP/1.1 200 OK \nContent-Type: application/json\r\n {\n  \"status\":\"Active\",\n  \"validity\":{\n    \"from\":\"Fri May 04 19:01:01 IST 2018\",\n    \"to\":\"Thu Aug 02 19:01:01 IST 2018\"\n  }\n,  \"version\":\"3\",\n  \"subject\":\"CN=wso2.com, OU=wso2, O=wso2, L=Colombo, ST=Western, C=LK\"\n}",
                 "summary": "Get the certificate information.",
-                "description": "This operation can be used to get the information about the certificate.\n",
+                "description": "This operation can be used to get the information about a certificate.\n",
                 "parameters": [
                     {
                         "in": "path",
@@ -2943,11 +3309,11 @@
         "/certificates/{alias}/content": {
             "get": {
                 "x-scope": "apim:api_create",
-                "x-wso2-curl": "curl -X GET\n\"https://apis.wso2.com/api/am/publisher/v0.14/certificates/wso2carbon/content\"\n-H  \"accept: application/json\"",
-                "x-wso2-request": "GET\nhttps://apis.wso2.com/api/am/publisher/v0.14/certificates/wso2carbon/content\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
-                "x-wso2-response": "HTTP/1.1 200 OK",
-                "summary": "Download the certificate defined by the given alias.",
-                "description": "This operation can be used to download the certificate which matches the given alias.\n",
+                "x-wso2-curl": "curl -X GET \"https://apis.wso2.com/api/am/publisher/v0.14/certificates/wso2carbon/content\" -H \"accept: application/json\"",
+                "x-wso2-request": "GET https://apis.wso2.com/api/am/publisher/v0.14/certificates/wso2carbon/content Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8",
+                "x-wso2-response": "HTTP/1.1 200 OK\r\n [content of the certificate]",
+                "summary": "Download a certificate.",
+                "description": "This operation can be used to download a certificate which matches the given alias.\n",
                 "parameters": [
                     {
                         "in": "path",
@@ -3161,7 +3527,7 @@
         "expand": {
             "name": "expand",
             "in": "query",
-            "description": "Whether the returned response should contain full details of API\n",
+            "description": "Defines whether the returned response should contain full details of API\n",
             "type": "boolean"
         }
     },
@@ -3347,7 +3713,11 @@
                         },
                         "authorizationHeader": {
                             "type": "string",
-                            "description": "Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified\nin tenant or system level will be used. \n"
+                            "description": "Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified\nin tenant or system level will be used.\n"
+                        },
+                        "apiSecurity": {
+                            "type": "string",
+                            "description": "Type of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If\nit is not set OAuth2 will be set as the security for the current API.\n"
                         },
                         "maxTps": {
                             "$ref": "#/definitions/APIMaxTps"
@@ -4233,7 +4603,7 @@
             }
         },
         "CertificateValidity": {
-            "title": "Certificate valid period",
+            "title": "Certificate Valid period",
             "properties": {
                 "from": {
                     "type": "string",
@@ -4242,6 +4612,64 @@
                 "to": {
                     "type": "string",
                     "example": "01-01-2019"
+                }
+            }
+        },
+        "ClientCertificates": {
+            "title": "Client Certificates",
+            "description": "Representation of a list of client certificates",
+            "properties": {
+                "count": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "next": {
+                    "type": "string",
+                    "example": "/certificates?limit=1&offset=2"
+                },
+                "previous": {
+                    "type": "string",
+                    "example": "/certificates?limit=1&offset=0"
+                },
+                "certificates": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ClientCertMetadata"
+                    }
+                },
+                "pagination": {
+                    "properties": {
+                        "offset": {
+                            "type": "integer",
+                            "example": 12
+                        },
+                        "limit": {
+                            "type": "integer",
+                            "example": 25
+                        },
+                        "total": {
+                            "type": "integer",
+                            "example": 1290
+                        }
+                    }
+                }
+            }
+        },
+        "ClientCertMetadata": {
+            "title": "Client certificate meta data",
+            "description": "Meta data of certificate",
+            "properties": {
+                "alias": {
+                    "type": "string",
+                    "example": "wso2carbon"
+                },
+                "apiId": {
+                    "type": "string",
+                    "example": "64eca60b-2e55-4c38-8603-e9e6bad7d809"
+                },
+                "tier": {
+                    "type": "string",
+                    "example": "Gold"
                 }
             }
         }

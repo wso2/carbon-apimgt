@@ -96,16 +96,26 @@ var inSequencesLoaded = false;
 //hack to validate tiers
 var tier_error = $("#tier_error").text();
 function validate_tiers(){
-    var selectedValues = [];
-    $("input[name='tier']:checked").each(function() {
-        selectedValues.push($(this).val());
-    });    
-    if(selectedValues && selectedValues.length > 0 ){
-        $("#tier_error").addClass("hide");
-        return true;
+    var checkedOAuth2Security = false;
+    if (document.getElementById("oauth2_checkbox")) {
+        checkedOAuth2Security = $("#oauth2_checkbox").is(":checked");
+    } else {
+        checkedOAuth2Security = true;
     }
-    $("#tier_error").removeClass("hide").show().text(tier_error);
-    return false;
+    if (checkedOAuth2Security) {
+        var selectedValues = [];
+        $("input[name='tier']:checked").each(function () {
+            selectedValues.push($(this).val());
+        });
+        if (selectedValues && selectedValues.length > 0) {
+            $("#tier_error").addClass("hide");
+            return true;
+        }
+        $("#tier_error").removeClass("hide").show().text(tier_error);
+        return false;
+    }
+    $("#tier_error").addClass("hide");
+    return true;
 }
 
 function validateGatewaysSelected(){
@@ -147,6 +157,60 @@ $(document).ready(function(){
         else{
             $(".tps_boxes").removeClass("hide");
             $(".tps_boxes").show();
+        }
+    });
+
+    $('#save_api').click(function(e){
+        if(!$("#backend_tps_specify").is(":checked")) {
+            // Setting text field values to null if check box is not selected.
+            $('#productionTps').val(null);
+            $('#sandboxTps').val(null);
+        }
+        thisID=$(this).attr('id');
+        $('#apiSaved').show();
+        setTimeout("hideMsg()", 3000);
+    });
+
+
+    $('#responseCache').change(function(){
+        var cache = $('#responseCache').find(":selected").val();
+        if(cache == "enabled"){
+            $('#cacheTimeout').show();
+        }
+        else{
+            $('#cacheTimeout').hide();
+        }
+    });
+
+    var certificate_data = [];
+    if ($('#cert-data').val() != "") {
+        certificate_data = jQuery.parseJSON($('#cert-data').val());
+    }
+    $("#cert-config").certUi({
+        config: {"cert_data": certificate_data, "ep_data": "<%=api.name%>"}
+    });
+
+    // Manage certificates
+    $("#mutualssl").change(function() {
+        $("#gatewaysecurity_error").addClass("hide");
+        if(this.checked) {
+            $("#manage-certificates").removeAttr("hidden");
+        } else {
+            $("#manage-certificates").attr("hidden", "");
+        }
+    });
+
+    // Manage authorization header and subscription tiers based on api security selection
+    $("#oauth2_checkbox").change(function () {
+        $("#gatewaysecurity_error").addClass("hide");
+        if (this.checked) {
+            $("#authConfigs").removeAttr("hidden");
+            $('#subscription-tiers input').removeAttr("disabled");
+            $("#tier_warning").addClass("hide");
+        } else {
+            $("#authConfigs").attr("hidden", "");
+            $('#subscription-tiers input').attr('disabled', true).removeAttr("checked");
+            $("#tier_warning").removeClass("hide");
         }
     });
 
@@ -320,6 +384,27 @@ function validate_Transports(){
     }
     $("#transport_error").removeClass("hide").show().text(transport_error);
     return false;
+}
+
+/**
+ * To validate whether atleast one security is being selected.
+ * @returns true if atleast one of them of the security is selected, otherwise false.
+ */
+var gatewaysecurity_error = $("#gatewaysecurity_error").text();
+function validate_APISecurity () {
+    if (document.getElementById("oauth2_checkbox")) {
+        var checkedOAuth2Security = $("#oauth2_checkbox").is(":checked");
+        var checkedMutualSSlSecurity = $("#mutualssl").is(":checked");
+
+        if (checkedOAuth2Security || checkedMutualSSlSecurity) {
+            $("#gatewaysecurity_error").addClass("hide");
+            return true;
+        }
+        $("#gatewaysecurity_error").removeClass("hide").show().text(gatewaysecurity_error);
+        return false;
+    }
+    return true;
+
 }
 
 function validateAPITier(){

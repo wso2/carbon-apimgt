@@ -36,6 +36,7 @@
                             <th><%=i18n.localize("Application Name")%></th>
                             <th><%=i18n.localize("API Name")%></th>
                             <th><%=i18n.localize("Resource Usage")%></th>
+                            <th><%=i18n.localize("Resource Hit Count")%></th>
                         </tr>
                     </thead>
                  </table>

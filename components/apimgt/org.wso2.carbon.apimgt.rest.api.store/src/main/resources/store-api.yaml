@@ -1144,30 +1144,12 @@ paths:
       x-wso2-response: |-
         HTTP/1.1 200 OK
         Content-Type: application/json
-
         {
-           "groupId": "",
-           "callbackUrl": null,
-           "subscriber": "admin",
-           "throttlingTier": "Unlimited",
-           "applicationId": "896658a0-b4ee-4535-bbfa-806c894a4015",
-           "description": null,
-           "status": "APPROVED",
-           "name": "DefaultApplication",
-           "keys": [   {
-              "consumerKey": "AVoREWiB16kY_GTIzscl40GYYZQa",
-              "consumerSecret": "KXQxmS8W3xDvvJH4AfR6xrhKIeIa",
-              "keyState": "COMPLETED",
-              "keyType": "PRODUCTION",
-              "supportedGrantTypes": null,
-              "token":       {
-                 "validityTime": 3600,
-                 "accessToken": "3887da6d111f0429c6dff47a46e87209",
-                 "tokenScopes":          [
-                    "am_application_scope",
-                    "default"
-                 ]
-              }
+           "list": [   {
+              "key":"api_scope",
+              "name":"API Scope",
+              "roles":null,
+              "description":""
            }]
         }
       summary: |
@@ -1229,36 +1211,18 @@ paths:
     get:
       x-scope: 'apim:subscribe'
       x-wso2-request: |-
-        GET https://127.0.0.1:9443/api/am/store/v0.14/applications/scopes/896658a0-b4ee-4535-bbfa-806c894a4015
+        GET https://127.0.0.1:9443/api/am/store/v0.14/applications/896658a0-b4ee-4535-bbfa-806c894a4015/scopes
         Authorization: Beareraa0ddec1ac656744234477f20fafcb0d
-      x-wso2-curl: 'curl -k -H "Authorization: Bearer aa0ddec1ac656744234477f20fafcb0d" "https://127.0.0.1:9443/api/am/store/v0.14/applications/scopes/896658a0-b4ee-4535-bbfa-806c894a4015"'
+      x-wso2-curl: 'curl -k -H "Authorization: Bearer aa0ddec1ac656744234477f20fafcb0d" "https://127.0.0.1:9443/api/am/store/v0.14/applications/896658a0-b4ee-4535-bbfa-806c894a4015/scopes"'
       x-wso2-response: |-
         HTTP/1.1 200 OK
         Content-Type: application/json
-
         {
-           "groupId": "",
-           "callbackUrl": null,
-           "subscriber": "admin",
-           "throttlingTier": "Unlimited",
-           "applicationId": "896658a0-b4ee-4535-bbfa-806c894a4015",
-           "description": null,
-           "status": "APPROVED",
-           "name": "DefaultApplication",
-           "keys": [   {
-              "consumerKey": "AVoREWiB16kY_GTIzscl40GYYZQa",
-              "consumerSecret": "KXQxmS8W3xDvvJH4AfR6xrhKIeIa",
-              "keyState": "COMPLETED",
-              "keyType": "PRODUCTION",
-              "supportedGrantTypes": null,
-              "token":       {
-                 "validityTime": 3600,
-                 "accessToken": "3887da6d111f0429c6dff47a46e87209",
-                 "tokenScopes":          [
-                    "am_application_scope",
-                    "default"
-                 ]
-              }
+           "list": [   {
+              "key":"api_scope",
+              "name":"API Scope",
+              "roles":null,
+              "description":""
            }]
         }
       summary: |
@@ -2218,7 +2182,11 @@ definitions:
         type: string
         description: |
           Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified
-          in tenant or system level will be used. 
+          in tenant or system level will be used.
+      apiSecurity :
+         type: string
+         description: |
+           Supported API security for the API ( mutualssl and/or oauth2)
       tags:
         type: array
         description: Search keywords related to the API
@@ -2368,7 +2336,7 @@ definitions:
           - JWT
         description: |
           Type of the access token generated for this application.
-          
+
           **OAUTH:** A UUID based access token which is issued by default.
           **JWT:** A self-contained, signed JWT based access token. **Note:** This can be only used in Microgateway environments.
         default: OAUTH

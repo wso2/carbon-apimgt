@@ -85,6 +85,7 @@ import org.wso2.carbon.registry.core.Tag;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.api.UserRealm;
+import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
@@ -1005,7 +1006,13 @@ public class APIUtilTest {
         Mockito.when(userRealm.getUserStoreManager()).thenReturn(userStoreManager);
         Mockito.when(userStoreManager.isExistingRole(roleName)).thenReturn(true);
 
+        Mockito.when(userStoreManager.isExistingRole("NonExistingDomain/role")).thenThrow(UserStoreException.class);
+        Mockito.when(userStoreManager.isExistingRole("NonExistingDomain/")).thenThrow(UserStoreException.class);
+        
         Assert.assertTrue(APIUtil.isRoleNameExist(userName, roleName));
+        Assert.assertFalse(APIUtil.isRoleNameExist(userName, "NonExistingDomain/role"));
+        Assert.assertFalse(APIUtil.isRoleNameExist(userName, "NonExistingDomain/"));
+        Assert.assertTrue(APIUtil.isRoleNameExist(userName, ""));//allow adding empty role
     }
 
     @Test

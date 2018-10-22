@@ -287,12 +287,65 @@ var uploadCertificate = function (certificate, alias, endpoint) {
     }
 }
 
+/**
+ * To upload a client certificate for an API.
+ * @param api Relevant API.
+ * @param certificate Certificate.
+ * @param alias Alias
+ * @param tierName Tier Name/
+ * @returns whether upload has succeeded or not.
+ */
+var uploadClientCertificate = function (api, certificate, alias, tierName) {
+    var result, log = new Log(), provider = jagg.module("manager").getAPIProviderObj(), userName = user.username;
+    try {
+        result = provider.uploadClientCertificate(userName, api.name, api.version, api.provider, alias, certificate,
+            tierName);
+        if (log.isDebugEnabled()) {
+            log.debug("Invoke upload client certificate");
+        }
+        return {
+            error: false,
+            response: result
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e
+        };
+    }
+}
+
 var deleteCertificate = function (alias, endpoint) {
     var result, log = new Log(), provider = jagg.module("manager").getAPIProviderObj(), userName = user.username;
     try {
         result = provider.deleteCertificate(userName, alias, endpoint);
         if (log.isDebugEnabled()) {
             log.debug("Invoke delete certificate");
+        }
+        return {
+            error: false,
+            response: result
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e
+        };
+    }
+}
+
+/**
+ * To delete the client certificate.
+ * @param alias Alias of the certificate.
+ * @param api API related with the certificate/
+ * @returns results on whether delete succeeded or not.
+ */
+var deleteClientCertificate = function (alias, api) {
+    var result, log = new Log(), provider = jagg.module("manager").getAPIProviderObj(), userName = user.username;
+    try {
+        result = provider.deleteClientCertificate(userName, alias, api.name, api.version, api.provider);
+        if (log.isDebugEnabled()) {
+            log.debug("Invoke delete client certificate");
         }
         return {
             error: false,
@@ -344,12 +397,61 @@ var getCertificates = function () {
     }
 }
 
+/**
+ * To get the client certificates related with an API.
+ * @param apiName Name of the API.
+ * @param apiVersion Version of the API.
+ * @param apiProvider Provider of the API
+ * @returns Client certificates.
+ */
+var getClientCertificates = function (apiName, apiVersion, apiProvider) {
+    var result, log = new Log(), provider = jagg.module("manager").getAPIProviderObj(), userName = user.username;
+    try {
+        result = provider.getClientCertificates(userName, apiName, apiProvider, apiVersion);
+        if (log.isDebugEnabled()) {
+            log.debug("Invoke get client certificates");
+        }
+        return {
+            error: false,
+            certificates: result
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e
+        };
+    }
+}
+
 var isConfigured = function () {
     var result, log = new Log(), provider = jagg.module("manager").getAPIProviderObj();
     try {
         result = provider.isConfigured();
         if (log.isDebugEnabled()) {
             log.debug("Invoked checking the table existence");
+        }
+        return {
+            error: false,
+            isConfigured: result
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error: e
+        };
+    }
+}
+
+/**
+ * To check whether client certificate based authentication is configured in the server.
+ * @returns whether mutual ssl based authentication is configured in the server.
+ */
+var isClientCertificateBasedAuthenticationConfigured = function () {
+    var result, log = new Log(), provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        result = provider.isClientCertificateBasedAuthenticationConfigured();
+        if (log.isDebugEnabled()) {
+            log.debug("Invoked checking whether client certificate based authentication is enabled");
         }
         return {
             error: false,

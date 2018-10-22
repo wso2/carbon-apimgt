@@ -17,7 +17,20 @@
  */
 package org.wso2.carbon.apimgt.impl.soaptorest.util;
 
-import com.google.gson.Gson;
+import io.swagger.models.Info;
+import io.swagger.models.ModelImpl;
+import io.swagger.models.Operation;
+import io.swagger.models.Path;
+import io.swagger.models.RefModel;
+import io.swagger.models.Response;
+import io.swagger.models.Swagger;
+import io.swagger.models.parameters.BodyParameter;
+import io.swagger.models.parameters.QueryParameter;
+import io.swagger.models.properties.ArrayProperty;
+import io.swagger.models.properties.ObjectProperty;
+import io.swagger.models.properties.Property;
+import io.swagger.models.properties.RefProperty;
+import io.swagger.util.Json;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +58,9 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.AbstractList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
@@ -69,15 +84,128 @@ public class SOAPOperationBindingUtils {
         byte[] wsdlContent = wsdlReader.getWSDL();
         WSDLSOAPOperationExtractor processor = getWSDLProcessor(wsdlContent, wsdlReader);
         Set<WSDLSOAPOperation> operations;
-        String operationMapping = "";
+        Map<String, ModelImpl> paramModelMap;
+        String swaggerStr = SOAPToRESTConstants.EMPTY_STRING;
         try {
             operations = processor.getWsdlInfo().getSoapBindingOperations();
+            paramModelMap = processor.getWsdlInfo().getParameterModelMap();
             populateSoapOperationParameters(operations);
-            operationMapping = new Gson().toJson(operations);
+            Swagger swaggerDoc = new Swagger();
+
+            for (WSDLSOAPOperation operation : operations) {
+
+                Path path = new Path();
+                Operation op = new Operation();
+                List<ModelImpl> inputParameterModel = operation.getInputParameterModel();
+                List<ModelImpl> outputParameterModel = operation.getOutputParameterModel();
+                if (HTTPConstants.HTTP_METHOD_GET.equals(operation.getHttpVerb())) {
+                    for (ModelImpl input : inputParameterModel) {
+                        if (operation.getName().equals(input.getName())) {
+                            Map<String, Property> properties = input.getProperties();
+                            if (properties != null) {
+                                QueryParameter param = new QueryParameter();
+                                param.setName(operation.getName());
+                                for (String property : properties.keySet()) {
+                                    param.setType(properties.get(property).getType());
+                                }
+                                op.addParameter(param);
+                            }
+                            inputParameterModel.remove(input);
+                            break;
+                        }
+                    }
+                } else {
+                    //adding body parameter
+                    BodyParameter param = new BodyParameter();
+                    param.setName(APIConstants.OperationParameter.PAYLOAD_PARAM_NAME);
+                    param.setIn(APIConstants.OperationParameter.PAYLOAD_PARAM_TYPE);
+                    param.setRequired(true);
+                    RefModel model = new RefModel();
+                    model.set$ref(SOAPToRESTConstants.Swagger.DEFINITIONS_ROOT + operation.getName()
+                            + SOAPToRESTConstants.Swagger.INPUT_POSTFIX);
+                    param.setSchema(model);
+                    op.addParameter(param);
+                }
+
+                //adding response
+                Response response = new Response();
+                RefProperty refProperty = new RefProperty();
+                refProperty.set$ref(SOAPToRESTConstants.Swagger.DEFINITIONS_ROOT + operation.getName()
+                        + SOAPToRESTConstants.Swagger.OUTPUT_POSTFIX);
+                response.setSchema(refProperty);
+                response.setDescription(SOAPToRESTConstants.EMPTY_STRING);
+                op.addResponse("default", response);
+
+                op.setOperationId(operation.getSoapBindingOpName());
+
+                //setting vendor extensions
+                Map<String, String> extensions = new HashMap<>();
+                extensions.put(SOAPToRESTConstants.Swagger.SOAP_ACTION, operation.getSoapAction());
+                extensions.put(SOAPToRESTConstants.Swagger.SOAP_OPERATION, operation.getSoapBindingOpName());
+                extensions.put(SOAPToRESTConstants.Swagger.NAMESPACE, operation.getTargetNamespace());
+                if (processor.getWsdlInfo().isHasSoap12BindingOperations()) {
+                    extensions.put(SOAPToRESTConstants.Swagger.SOAP_VERSION, SOAPToRESTConstants.SOAP_VERSION_12);
+                } else if (processor.getWsdlInfo().hasSoapBindingOperations()) {
+                    extensions.put(SOAPToRESTConstants.Swagger.SOAP_VERSION, SOAPToRESTConstants.SOAP_VERSION_11);
+                }
+                op.setVendorExtension(SOAPToRESTConstants.Swagger.WSO2_SOAP, extensions);
+
+                if (!HTTPConstants.HTTP_METHOD_GET.equals(operation.getHttpVerb())) {
+                    ModelImpl inputModel = new ModelImpl();
+                    inputModel.setName(operation.getName() + SOAPToRESTConstants.Swagger.INPUT_POSTFIX);
+                    inputModel.setType(ObjectProperty.TYPE);
+                    Map<String, Property> inputPropertyMap = new HashMap<>();
+                    for (ModelImpl input : inputParameterModel) {
+                        RefProperty inputRefProp = new RefProperty();
+                        if (input != null) {
+                            inputRefProp.set$ref(SOAPToRESTConstants.Swagger.DEFINITIONS_ROOT + input.getName());
+                            inputPropertyMap.put(input.getName(), inputRefProp);
+                        }
+                    }
+                    inputModel.setProperties(inputPropertyMap);
+                    swaggerDoc
+                            .addDefinition(operation.getName() + SOAPToRESTConstants.Swagger.INPUT_POSTFIX, inputModel);
+                }
+
+                ModelImpl outputModel = new ModelImpl();
+                outputModel.setName(operation.getName() + SOAPToRESTConstants.Swagger.OUTPUT_POSTFIX);
+                outputModel.setType(ObjectProperty.TYPE);
+                Map<String, Property> outputPropertyMap = new HashMap<>();
+                for (ModelImpl output : outputParameterModel) {
+                    RefProperty outputRefProp = new RefProperty();
+                    if (output != null) {
+                        outputRefProp.set$ref(SOAPToRESTConstants.Swagger.DEFINITIONS_ROOT + output.getName());
+                        outputPropertyMap.put(output.getName(), outputRefProp);
+                    }
+                }
+                outputModel.setProperties(outputPropertyMap);
+                swaggerDoc.addDefinition(operation.getName() + SOAPToRESTConstants.Swagger.OUTPUT_POSTFIX, outputModel);
+
+                path.set(operation.getHttpVerb().toLowerCase(), op);
+                swaggerDoc.path("/" + operation.getName(), path);
+                Info info = new Info();
+                info.setVersion(SOAPToRESTConstants.EMPTY_STRING);
+                info.setTitle(SOAPToRESTConstants.EMPTY_STRING);
+                swaggerDoc.info(info);
+            }
+            if (paramModelMap != null) {
+                for (String propertyName : paramModelMap.keySet()) {
+                    swaggerDoc.addDefinition(propertyName, paramModelMap.get(propertyName));
+                }
+            }
+            try {
+                swaggerStr = Json.pretty(swaggerDoc);
+            } catch (Exception e) {
+                String msg = "Error occurred while deserialize swagger model.";
+                handleException(msg, e);
+            }
+            if (log.isDebugEnabled()) {
+                log.debug(swaggerStr);
+            }
         } catch (APIMgtWSDLException e) {
             handleException("Error in soap to rest conversion for wsdl url: " + url, e);
         }
-        return operationMapping;
+        return swaggerStr;
     }
 
     /**
@@ -117,6 +245,9 @@ public class SOAPOperationBindingUtils {
                 String resourcePath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
                         provider + RegistryConstants.PATH_SEPARATOR + name + RegistryConstants.PATH_SEPARATOR + version
                         + RegistryConstants.PATH_SEPARATOR + SOAPToRESTConstants.SOAP_TO_REST_RESOURCE;
+                if (log.isDebugEnabled()) {
+                    log.debug("Resource path to the soap to rest converted sequence: " + resourcePath);
+                }
                 return registry.resourceExists(resourcePath);
             } catch (RegistryException e) {
                 handleException("Error when create registry instance", e);
@@ -137,6 +268,7 @@ public class SOAPOperationBindingUtils {
      * @param soapOperations soap binding operations
      */
     private static void populateSoapOperationParameters(Set<WSDLSOAPOperation> soapOperations) {
+
         String[] primitiveTypes = { "string", "byte", "short", "int", "long", "float", "double", "boolean" };
         List primitiveTypeList = Arrays.asList(primitiveTypes);
         if (soapOperations != null) {
@@ -144,13 +276,27 @@ public class SOAPOperationBindingUtils {
                 String resourcePath;
                 String operationName = operation.getName();
                 operation.setSoapBindingOpName(operationName);
-                if (operationName.toLowerCase().startsWith("get")) {
-                    resourcePath = operationName.substring(3, operationName.length());
-                    operation.setHttpVerb(HTTPConstants.HTTP_METHOD_GET);
-                } else {
-                    resourcePath = operationName;
-                    operation.setHttpVerb(HTTPConstants.HTTP_METHOD_POST);
+                operation.setHttpVerb(HTTPConstants.HTTP_METHOD_POST);
+                if (operationName.toLowerCase().startsWith("get") && operation.getInputParameterModel() != null
+                        && operation.getInputParameterModel().size() <= 1) {
+
+                    Map<String, Property> properties = null;
+                    if (operation.getInputParameterModel().size() > 0) {
+                        properties = operation.getInputParameterModel().get(0).getProperties();
+                    }
+                    if (properties == null) {
+                        operation.setHttpVerb(HTTPConstants.HTTP_METHOD_GET);
+                    } else if (properties.size() <= 1) {
+                        for (String property : properties.keySet()) {
+                            String type = properties.get(property).getType();
+                            if (!(type.equals(ObjectProperty.TYPE) || type.equals(ArrayProperty.TYPE) || type
+                                    .equals(RefProperty.TYPE))) {
+                                operation.setHttpVerb(HTTPConstants.HTTP_METHOD_GET);
+                            }
+                        }
+                    }
                 }
+                resourcePath = operationName;
                 resourcePath =
                         resourcePath.substring(0, 1).toLowerCase() + resourcePath.substring(1, resourcePath.length());
                 operation.setName(resourcePath);
@@ -159,10 +305,10 @@ public class SOAPOperationBindingUtils {
                 }
 
                 List<WSDLOperationParam> params = operation.getParameters();
-                if (log.isDebugEnabled()) {
+                if (log.isDebugEnabled() && params != null) {
                     log.debug("SOAP operation: " + operationName + " has " + params.size() + " parameters");
                 }
-                if(params != null) {
+                if (params != null) {
                     for (WSDLOperationParam param : params) {
                         if (param.getDataType() != null) {
                             String dataTypeWithNS = param.getDataType();
@@ -173,8 +319,6 @@ public class SOAPOperationBindingUtils {
                             }
                         }
                     }
-                } else {
-                    log.info("No parameters found for SOAP operation: " + operationName);
                 }
             }
         } else {

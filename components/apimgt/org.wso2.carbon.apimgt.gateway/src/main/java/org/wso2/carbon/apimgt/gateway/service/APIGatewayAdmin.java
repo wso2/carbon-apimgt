@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.gateway.utils.MediationSecurityAdminServiceClient;
 import org.wso2.carbon.apimgt.gateway.utils.RESTAPIAdminClient;
 import org.wso2.carbon.apimgt.gateway.utils.SequenceAdminServiceClient;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.rest.api.stub.types.carbon.APIData;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -548,8 +549,30 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
      * @param alias : The alias for the certificate.
      * */
     public boolean addCertificate(String certificate, String alias) {
-        CertificateManager certificateManager = new CertificateManagerImpl();
+        CertificateManager certificateManager = CertificateManagerImpl.getInstance();
         return certificateManager.addCertificateToGateway(certificate, alias);
+    }
+
+    /**
+     * Imports the given certificate to the trust store.
+     *
+     * @param certificate : The client certificate that needs to be added.
+     * @param alias       : The alias for the certificate.
+     */
+    public boolean addClientCertificate(String certificate, String alias) {
+        CertificateManager certificateManager = CertificateManagerImpl.getInstance();
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        /*
+        Tenant ID is appended with alias to make sure, only the admins from the same tenant, can delete the
+        certificates later.
+         */
+        if (alias.endsWith("_" + tenantId) || tenantId == MultitenantConstants.SUPER_TENANT_ID) {
+            return certificateManager.addClientCertificateToGateway(certificate, alias);
+        } else {
+            log.warn("Attempt to add an alias " + alias + " by tenant " + tenantId + " has been rejected. Please "
+                    + "make sure to provide a alias name that ends with '_" + tenantId + "' .");
+            return false;
+        }
     }
 
     /**
@@ -558,7 +581,29 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
      * @param alias : Alias of the certificate that needs to be removed.
      * */
     public boolean deleteCertificate(String alias) {
-        CertificateManager certificateManager = new CertificateManagerImpl();
+        CertificateManager certificateManager = CertificateManagerImpl.getInstance();
         return certificateManager.deleteCertificateFromGateway(alias);
+    }
+
+    /**
+     * Removes the certificate for the given alias from the trust store.
+     *
+     * @param alias : Alias of the certificate that needs to be removed.
+     */
+    public boolean deleteClientCertificate(String alias) {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        /*
+            Tenant ID is checked to make sure that tenant admins cannot delete the alias that do not belong their
+            tenant. Super tenant is special cased, as it is required to delete the certificates from different tenants.
+         */
+        if (alias.endsWith("_" + tenantId) || tenantId == MultitenantConstants.SUPER_TENANT_ID) {
+            CertificateManager certificateManager = CertificateManagerImpl.getInstance();
+            return certificateManager.deleteClientCertificateFromGateway(alias);
+        } else {
+            log.warn("Attempt to delete the alias " + alias + " by tenant " + tenantId + " has been rejected. Only "
+                    + "the client certificates that belongs to " + tenantId + " can be deleted. All the client "
+                    + "certificates belongs to " + tenantId + " have '_" + tenantId + "' suffix in alias");
+            return false;
+        }
     }
 }

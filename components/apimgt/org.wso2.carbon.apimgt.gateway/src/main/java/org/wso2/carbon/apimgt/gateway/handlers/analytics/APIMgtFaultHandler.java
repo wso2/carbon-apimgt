@@ -51,8 +51,11 @@ public class APIMgtFaultHandler extends APIMgtCommonExecutionPublisher {
             String correlationID = GatewayUtils.getAndSetCorrelationID(messageContext);
 
             FaultPublisherDTO faultPublisherDTO = new FaultPublisherDTO();
-            faultPublisherDTO.setApplicationConsumerKey((String) messageContext.getProperty(
-                    APIMgtGatewayConstants.CONSUMER_KEY));
+            String consumerKey = (String) messageContext.getProperty(APIMgtGatewayConstants.CONSUMER_KEY);
+            if (consumerKey == null || "".equals(consumerKey)) {
+                consumerKey = "None";
+            }
+            faultPublisherDTO.setApplicationConsumerKey(consumerKey);
             faultPublisherDTO.setApiContext((String) messageContext.getProperty(
                     APIMgtGatewayConstants.CONTEXT));
             faultPublisherDTO.setApiVersion(((String) messageContext.getProperty(
@@ -84,10 +87,14 @@ public class APIMgtFaultHandler extends APIMgtCommonExecutionPublisher {
             }
             faultPublisherDTO.setApiCreator(apiPublisher);
             faultPublisherDTO.setApiCreatorTenantDomain(MultitenantUtils.getTenantDomain(apiPublisher));
-            faultPublisherDTO.setApplicationName((String) messageContext.getProperty(
-                    APIMgtGatewayConstants.APPLICATION_NAME));
-            faultPublisherDTO.setApplicationId((String) messageContext.getProperty(
-                    APIMgtGatewayConstants.APPLICATION_ID));
+            String applicationName = (String) messageContext.getProperty(APIMgtGatewayConstants.APPLICATION_NAME);
+            String applicationId = (String) messageContext.getProperty(APIMgtGatewayConstants.APPLICATION_ID);
+            if (applicationName == null || "".equals(applicationName)) {
+                applicationName = "None";
+                applicationId = "0";
+            }
+            faultPublisherDTO.setApplicationName(applicationName);
+            faultPublisherDTO.setApplicationId(applicationId);
             String protocol = (String) messageContext.getProperty(
                     SynapseConstants.TRANSPORT_IN_NAME);
             faultPublisherDTO.setProtocol(protocol);

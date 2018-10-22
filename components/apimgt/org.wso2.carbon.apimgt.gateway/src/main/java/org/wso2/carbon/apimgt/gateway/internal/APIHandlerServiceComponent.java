@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.tracing.TracingService;
 import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
@@ -55,6 +56,9 @@ import java.io.File;
  * @scr.reference name="org.wso2.carbon.apimgt.tracing"
  *  interface="org.wso2.carbon.apimgt.tracing.TracingService" cardinality="1..1"
  *  policy="dynamic" bind="setTracingService" unbind="unsetTracingService"
+ * @scr.reference name="server.configuration.service"
+ * interface="org.wso2.carbon.base.api.ServerConfigurationService" cardinality="1..1"
+ * policy="dynamic" bind="setServerConfigurationService" unbind="unsetServerConfigurationService"
  */
 public class APIHandlerServiceComponent {
 
@@ -155,6 +159,31 @@ public class APIHandlerServiceComponent {
             log.debug("Configuration context service unbound from the API handlers");
         }
         ServiceReferenceHolder.getInstance().setConfigurationContextService(null);
+    }
+
+    /**
+     * This method will be called when {@link ServerConfigurationService} instance is available in OSGI environment.
+     *
+     * @param serverConfigurationService Instance of {@link ServerConfigurationService}
+     */
+    protected void setServerConfigurationService(ServerConfigurationService serverConfigurationService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Server configuration service is bound to the API handlers");
+        }
+        ServiceReferenceHolder.getInstance().setServerConfigurationService(serverConfigurationService);
+    }
+
+    /**
+     * This method will be called when {@link ServerConfigurationService} instance is being removed from OSGI
+     * environment.
+     *
+     * @param serverConfigurationService Instance of {@link ServerConfigurationService}
+     */
+    protected void unsetServerConfigurationService(ServerConfigurationService serverConfigurationService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Server configuration service is unbound from the API handlers");
+        }
+        ServiceReferenceHolder.getInstance().setServerConfigurationService(null);
     }
 
     protected void setAPIManagerConfigurationService(APIManagerConfigurationService amcService) {

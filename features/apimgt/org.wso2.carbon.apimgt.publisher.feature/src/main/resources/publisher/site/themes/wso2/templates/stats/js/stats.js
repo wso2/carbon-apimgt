@@ -59,7 +59,9 @@ function convertDateToLong(date){
     var dateSegments=allSegments[0].split("-");
     var timeSegments=allSegments[1].split(":");
     var newDate = new Date(dateSegments[0],(dateSegments[1]-1),dateSegments[2],timeSegments[0],timeSegments[1],timeSegments[2]);
-    return newDate.getTime();
+    var now = new Date()
+    now.setTime(newDate.getTime() - (now.getTimezoneOffset() * 60000))
+    return now.getTime();
 }
 
 function showEnableAnalyticsMsg() {
@@ -81,3 +83,14 @@ function showNoDataAnalyticsMsg() {
             "</div>";
     $('.stat-page').append($(msg));
 }
+
+function getDate() {
+    var date = new Date();
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes(),date.getSeconds());
+}
+
+var convertTimeStringUTC = function(date){
+    var d = new Date(date);
+    var formattedDate = d.getUTCFullYear() + "-" + formatTimeChunk((d.getUTCMonth()+1)) + "-" + formatTimeChunk(d.getUTCDate())+" "+formatTimeChunk(d.getUTCHours())+":"+formatTimeChunk(d.getUTCMinutes())+":"+formatTimeChunk(d.getUTCSeconds());
+    return formattedDate;
+};

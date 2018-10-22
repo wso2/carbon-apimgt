@@ -42,7 +42,7 @@ $( document ).ready(function() {
         } else if(selectedOptionKey== 2){
             tableName = "ApimIPAccessAbnormalityAlert";
         } else if(selectedOptionKey== 3){
-            tableName = "ApimAbnormalRequestsPerMinAlert";
+            tableName = "ApimAbnormalReqAlert";
         } else if(selectedOptionKey== 4){
             tableName = "ApimAbnormalResponseTimeAlert";
         } else if(selectedOptionKey== 5){

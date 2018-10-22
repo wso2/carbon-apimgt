@@ -177,8 +177,15 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
                 username = authContext.getUsername();
                 applicationName = authContext.getApplicationName();
                 applicationId = authContext.getApplicationId();
+                if (applicationName == null || "".equals(applicationName)) {
+                    applicationName = "None";
+                    applicationId = "0";
+                }
                 tier = authContext.getTier();
                 applicationOwner = authContext.getSubscriber();
+                if (applicationOwner == null || "".equals(applicationOwner)) {
+                    applicationOwner = "None";
+                }
             }
 
             RequestResponseStreamDTO stream = new RequestResponseStreamDTO();
@@ -192,7 +199,11 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
             stream.setApiResourceTemplate((String) mc.getProperty(APIConstants.API_ELECTED_RESOURCE));
             stream.setApiTier(tier);
             stream.setApiVersion(apiVersion);
-            stream.setApplicationConsumerKey((String) mc.getProperty(APIMgtGatewayConstants.CONSUMER_KEY));
+            consumerKey = (String) mc.getProperty(APIMgtGatewayConstants.CONSUMER_KEY);
+            if (consumerKey == null || "".equals(consumerKey)) {
+                consumerKey = "None";
+            }
+            stream.setApplicationConsumerKey(consumerKey);
             stream.setApplicationId(applicationId);
             stream.setApplicationName(applicationName);
             stream.setApplicationOwner(applicationOwner);

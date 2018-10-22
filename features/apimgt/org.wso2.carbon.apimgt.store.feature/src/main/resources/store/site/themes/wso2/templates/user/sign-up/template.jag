@@ -168,8 +168,7 @@
                                                     <a href=<%=jagg.getAbsoluteUrl("/site/pages/policy-pages/cookie-policy.jag")%> target="policy-pane">
                                                             <strong><%=i18n.localize("privacy.policy.cookies")%></strong>
                                                     </a>
-                                                    <%=i18n.localize("privacy.policy.for.more.details")%>
-                                            </div>
+                                           </div>
                                     </div>
                                     <!--End Cookie Policy-->
                                     <!--Terms/Privacy Policy-->

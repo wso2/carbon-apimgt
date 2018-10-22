@@ -80,7 +80,9 @@ public class OAuthAuthenticator implements Authenticator {
     }
 
     public void destroy() {
-        this.keyValidator.cleanup();
+        if (keyValidator != null) {
+            this.keyValidator.cleanup();
+        }
     }
 
     public boolean authenticate(MessageContext synCtx) throws APISecurityException {

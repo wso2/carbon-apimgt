@@ -5213,11 +5213,14 @@ public class ApiMgtDAO {
                 prepStmt.setString(2, uriTemplate.getHTTPVerb());
                 prepStmt.setString(3, uriTemplate.getAuthType());
                 prepStmt.setString(4, uriTemplate.getUriTemplate());
-                //If API policy is available then set it for all the resources
+                //If API policy is available then set it for all the resources.
                 if (StringUtils.isEmpty(api.getApiLevelPolicy())) {
-                    prepStmt.setString(5, uriTemplate.getThrottlingTier());
+                    prepStmt.setString(5, (StringUtils.isEmpty(uriTemplate.getThrottlingTier())) ?
+                            APIConstants.UNLIMITED_TIER :
+                            uriTemplate.getThrottlingTier());
                 } else {
-                    prepStmt.setString(5, api.getApiLevelPolicy());
+                    prepStmt.setString(5,
+                            (StringUtils.isEmpty(api.getApiLevelPolicy())) ? APIConstants.UNLIMITED_TIER : api.getApiLevelPolicy());
                 }
                 InputStream is;
                 if (uriTemplate.getMediationScript() != null) {
@@ -10986,7 +10989,7 @@ public class ApiMgtDAO {
             ps.setString(1, context);
 
             rs = ps.executeQuery();
-            if (rs.first()) {
+            if (rs.next()) {
                 apiName = rs.getString("API_NAME");
                 apiProvider = rs.getString("API_PROVIDER");
             }
@@ -11432,14 +11435,13 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Get Subscribed APIs for given userId
+     * Get Subscribed APIs for an App.
      *
-     * @param userId id of the user
      * @param applicationName id of the application name
      * @return APISubscriptionInfoDTO[]
      * @throws APIManagementException if failed to get Subscribed APIs
      */
-    public APISubscriptionInfoDTO[] getSubscribedAPIsOfUserByApp(String userId, String applicationName) throws
+    public APISubscriptionInfoDTO[] getSubscribedAPIsForAnApp(String userId, String applicationName) throws
             APIManagementException {
         List<APISubscriptionInfoDTO> apiSubscriptionInfoDTOS = new ArrayList<APISubscriptionInfoDTO>();
         Connection conn = null;
@@ -11458,9 +11460,8 @@ public class ApiMgtDAO {
         try {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, userId);
-            ps.setInt(2, tenantId);
-            ps.setString(3, applicationName);
+            ps.setInt(1, tenantId);
+            ps.setString(2, applicationName);
             rs = ps.executeQuery();
             while (rs.next()) {
                 APISubscriptionInfoDTO infoDTO = new APISubscriptionInfoDTO();
@@ -11831,6 +11832,32 @@ public class ApiMgtDAO {
             handleException("Failed to add Application", sqlException);
         } finally {
             APIMgtDBUtil.closeAllConnections(null, connection, null);
+        }
+    }
+
+    /**
+     * Converts all null values for THROTTLING_TIER in AM_API_URL_MAPPING table, to Unlimited.
+     * This will be executed only during startup of the server.
+     *
+     * @throws APIManagementException
+     */
+    public void convertNullThrottlingTiers() throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+
+        String query = SQLConstants.FIX_NULL_THROTTLING_TIERS;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.execute();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException(
+                    "Error occurred while converting NULL throttling tiers to Unlimited in AM_API_URL_MAPPING table",
+                    e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
         }
     }
 }

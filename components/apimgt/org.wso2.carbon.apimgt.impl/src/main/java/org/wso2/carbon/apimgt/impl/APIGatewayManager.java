@@ -25,9 +25,13 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.gateway.dto.stub.APIData;
 import org.wso2.carbon.apimgt.gateway.dto.stub.ResourceData;
+import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
+import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
+import org.wso2.carbon.apimgt.impl.dao.CertificateMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
@@ -39,6 +43,7 @@ import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.xml.namespace.QName;
@@ -119,6 +124,7 @@ public class APIGatewayManager {
                     }
 					setSecureVaultProperty(client, api, tenantDomain, environment);
 					undeployCustomSequences(client, api,tenantDomain, environment);
+					unDeployClientCertificates(client, api, tenantDomain);
 				} else {
 					if (debugEnabled) {
 						log.debug("API exists, updating existing API " + api.getId().getApiName() +
@@ -148,6 +154,7 @@ public class APIGatewayManager {
 
                     //Update the custom sequences of the API
 					updateCustomSequences(client, api, tenantDomain, environment);
+                    updateClientCertificates(client, api, tenantDomain);
 				}
 			} else {
 				// If the Gateway type is 'production' and a production url has
@@ -168,7 +175,7 @@ public class APIGatewayManager {
 					}
                     //Deploy the fault sequence first since it has to be available by the time the API is deployed.
                     deployAPIFaultSequence(client, api, tenantDomain, environment);
-
+                    deployClientCertificates(client, api, tenantDomain);
                     if(!APIConstants.APIType.WS.toString().equals(api.getType())) {
                         //Add the API
                         if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(api.getImplementation())) {
@@ -223,8 +230,12 @@ public class APIGatewayManager {
             } catch (EndpointAdminException ex) {
                 log.error("Error occurred when endpoint add/update operation" + environmentName, ex);
                 failedEnvironmentsMap.put(environmentName, ex.getMessage());
+            } catch (CertificateManagementException ex) {
+                log.error("Error occurred while adding/updating client certificate in " + environmentName, ex);
+                failedEnvironmentsMap.put(environmentName, ex.getMessage());
             }
         }
+        updateRemovedClientCertificates(api, tenantDomain);
         return failedEnvironmentsMap;
     }
 
@@ -248,6 +259,7 @@ public class APIGatewayManager {
                     }
 
                     APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
+                    unDeployClientCertificates(client, api, tenantDomain);
                     if(!APIConstants.APIType.WS.toString().equals(api.getType())) {
                         if (client.getApi(tenantDomain, api.getId()) != null) {
                             if (debugEnabled) {
@@ -281,6 +293,7 @@ public class APIGatewayManager {
                             client.deleteDefaultApi(tenantDomain, api.getId());
                         }
                     }
+
                 } catch (AxisFault axisFault) {
                     /*
                     didn't throw this exception to handle multiple gateway publishing
@@ -293,9 +306,12 @@ public class APIGatewayManager {
                 } catch (EndpointAdminException ex) {
                     log.error("Error occurred when deleting endpoint from gateway" + environmentName, ex);
                     failedEnvironmentsMap.put(environmentName, ex.getMessage());
+                } catch (CertificateManagementException ex) {
+                    log.error("Error occurred when deleting certificate from gateway" + environmentName, ex);
+                    failedEnvironmentsMap.put(environmentName, ex.getMessage());
                 }
             }
-
+            updateRemovedClientCertificates(api, tenantDomain);
         }
         return failedEnvironmentsMap;
     }
@@ -531,6 +547,110 @@ public class APIGatewayManager {
             }
         }
         return APIConstants.APIEndpointSecurityConstants.BASIC_AUTH;
+    }
+
+    /**
+     * To deploy client certificate in given API environment.
+     *
+     * @param client       API GatewayAdminClient .
+     * @param api          Relevant API.
+     * @param tenantDomain Tenant domain.
+     * @throws CertificateManagementException Certificate Management Exception.
+     * @throws AxisFault                      AxisFault.
+     */
+    private void deployClientCertificates(APIGatewayAdminClient client, API api, String tenantDomain)
+            throws CertificateManagementException, AxisFault {
+        if (!CertificateManagerImpl.getInstance().isClientCertificateBasedAuthenticationConfigured()) {
+            return;
+        }
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        List<ClientCertificateDTO> clientCertificateDTOList = CertificateMgtDAO.getInstance()
+                .getClientCertificates(tenantId, null, api.getId());
+        if (clientCertificateDTOList != null) {
+            for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOList) {
+                client.addClientCertificate(clientCertificateDTO.getCertificate(),
+                        clientCertificateDTO.getAlias() + "_" + tenantId);
+            }
+        }
+    }
+
+    /**
+     * To update client certificate in relevant API gateway environment.
+     *
+     * @param client       API Gateway admi client.
+     * @param api          Relevant API.
+     * @param tenantDomain Tenant domain.
+     */
+    private void updateClientCertificates(APIGatewayAdminClient client, API api, String tenantDomain)
+            throws CertificateManagementException, AxisFault {
+        if (!CertificateManagerImpl.getInstance().isClientCertificateBasedAuthenticationConfigured()) {
+            return;
+        }
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        List<String> aliasList = CertificateMgtDAO.getInstance()
+                .getDeletedClientCertificateAlias(api.getId(), tenantId);
+        for (String alias : aliasList) {
+            client.deleteClientCertificate(alias + "_" + tenantId);
+        }
+        List<ClientCertificateDTO> clientCertificateDTOList = CertificateMgtDAO.getInstance()
+                .getClientCertificates(tenantId, null, api.getId());
+        if (clientCertificateDTOList != null) {
+            for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOList) {
+                client.addClientCertificate(clientCertificateDTO.getCertificate(),
+                        clientCertificateDTO.getAlias() + "_" + tenantId);
+            }
+        }
+    }
+
+    /**
+     * To update the database instance with the successfully removed client certificates from teh gateway.
+     *
+     * @param api          Relevant API related with teh removed certificate.
+     * @param tenantDomain Tenant domain of the API.
+     */
+    private void updateRemovedClientCertificates(API api, String tenantDomain) {
+        if (!CertificateManagerImpl.getInstance().isClientCertificateBasedAuthenticationConfigured()) {
+            return;
+        }
+        try {
+            CertificateMgtDAO.getInstance().updateRemovedCertificatesFromGateways(api.getId(),
+                    APIUtil.getTenantIdFromTenantDomain(tenantDomain));
+            /* The flow does not need to be blocked, as this failure do not related with updating client certificates
+             in gateway, rather updating in database. There is no harm in database having outdated certificate
+             information.*/
+        } catch (CertificateManagementException e) {
+            log.error("Certificate Management Exception while trying to update the remove certificate from gateways "
+                    + "for the api " + api.getId() + " for the tenant domain " + tenantDomain, e);
+        }
+    }
+
+    /**
+     * To undeploy the client certificates from the gateway environment.
+     *
+     * @param client       APIGatewayAdmin Client.
+     * @param api          Relevant API particular certificate is related with.
+     * @param tenantDomain Tenant domain of the API.
+     * @throws CertificateManagementException Certificate Management Exception.
+     * @throws AxisFault                      AxisFault.
+     */
+    private void unDeployClientCertificates(APIGatewayAdminClient client, API api, String tenantDomain)
+            throws CertificateManagementException, AxisFault {
+        if (!CertificateManagerImpl.getInstance().isClientCertificateBasedAuthenticationConfigured()) {
+            return;
+        }
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        List<ClientCertificateDTO> clientCertificateDTOList = CertificateMgtDAO.getInstance()
+                .getClientCertificates(tenantId, null, api.getId());
+        if (clientCertificateDTOList != null) {
+            for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOList) {
+                client.deleteClientCertificate(clientCertificateDTO.getAlias() + "_" + tenantId);
+            }
+        }
+        List<String> aliasList = CertificateMgtDAO.getInstance()
+                .getDeletedClientCertificateAlias(api.getId(), tenantId);
+        for (String alias : aliasList) {
+            client.deleteClientCertificate(alias + "_" + tenantId);
+        }
     }
 
 	/**

@@ -44,7 +44,7 @@ public class APIDetailedDTO extends APIInfoDTO {
   private Boolean isDefaultVersion = null;
   
   public enum TypeEnum {
-     HTTP,  WS, 
+     HTTP,  WS,  SOAPTOREST, 
   };
   
   private TypeEnum type = TypeEnum.HTTP;
@@ -63,6 +63,9 @@ public class APIDetailedDTO extends APIInfoDTO {
   
   
   private String authorizationHeader = null;
+  
+  
+  private String apiSecurity = null;
   
   
   private APIMaxTpsDTO maxTps = null;
@@ -197,9 +200,9 @@ public class APIDetailedDTO extends APIInfoDTO {
 
   
   /**
-   * The transport to be set. Accepted values are HTTP, WS
+   * The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST
    **/
-  @ApiModelProperty(value = "The transport to be set. Accepted values are HTTP, WS")
+  @ApiModelProperty(value = "The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST")
   @JsonProperty("type")
   public TypeEnum getType() {
     return type;
@@ -262,15 +265,28 @@ public class APIDetailedDTO extends APIInfoDTO {
 
   
   /**
-   * Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified\nin tenant or system level will be used. \n
+   * Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified\nin tenant or system level will be used.\n
    **/
-  @ApiModelProperty(value = "Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified\nin tenant or system level will be used. \n")
+  @ApiModelProperty(value = "Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified\nin tenant or system level will be used.\n")
   @JsonProperty("authorizationHeader")
   public String getAuthorizationHeader() {
     return authorizationHeader;
   }
   public void setAuthorizationHeader(String authorizationHeader) {
     this.authorizationHeader = authorizationHeader;
+  }
+
+  
+  /**
+   * Type of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If\nit is not set OAuth2 will be set as the security for the current API.\n
+   **/
+  @ApiModelProperty(value = "Type of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If\nit is not set OAuth2 will be set as the security for the current API.\n")
+  @JsonProperty("apiSecurity")
+  public String getApiSecurity() {
+    return apiSecurity;
+  }
+  public void setApiSecurity(String apiSecurity) {
+    this.apiSecurity = apiSecurity;
   }
 
   
@@ -492,6 +508,7 @@ public class APIDetailedDTO extends APIInfoDTO {
     sb.append("  tiers: ").append(tiers).append("\n");
     sb.append("  apiLevelPolicy: ").append(apiLevelPolicy).append("\n");
     sb.append("  authorizationHeader: ").append(authorizationHeader).append("\n");
+    sb.append("  apiSecurity: ").append(apiSecurity).append("\n");
     sb.append("  maxTps: ").append(maxTps).append("\n");
     sb.append("  visibility: ").append(visibility).append("\n");
     sb.append("  visibleRoles: ").append(visibleRoles).append("\n");

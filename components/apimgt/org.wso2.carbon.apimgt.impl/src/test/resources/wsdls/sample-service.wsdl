@@ -1,0 +1,299 @@
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:ns0="http://ws.wso2.org/dataservice" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" targetNamespace="http://ws.wso2.org/dataservice">
+<wsdl:types>
+    <xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://ws.wso2.org/dataservice">
+        <complexType name="ItemSearchRequest">
+            <sequence>
+                <element name="Actor" type="string" minOccurs="0"/>
+                <xs:element ref="tns:Condition" minOccurs="0"/>
+                <xs:element name="Tracks">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="Disc" maxOccurs="unbounded">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element name="Track" maxOccurs="unbounded">
+                                            <xs:complexType>
+                                                <xs:simpleContent>
+                                                    <xs:extension base="xs:string">
+                                                        <xs:attribute name="Number" type="xs:positiveInteger" use="required"/>
+                                                    </xs:extension>
+                                                </xs:simpleContent>
+                                            </xs:complexType>
+                                        </xs:element>
+                                    </xs:sequence>
+                                    <xs:attribute name="Number" type="xs:positiveInteger" use="required"/>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+                <element name="Artist" type="string" minOccurs="0"/>
+                <element name="Availability" minOccurs="0">
+                    <simpleType>
+                        <restriction base="string">
+                            <enumeration value="Available"/>
+                        </restriction>
+                    </simpleType>
+                </element>
+            </sequence>
+        </complexType>
+                <xs:element name="Condition">
+                    <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                            <xs:enumeration value="All"/>
+                            <xs:enumeration value="New"/>
+                            <xs:enumeration value="Used"/>
+                            <xs:enumeration value="Collectible"/>
+                            <xs:enumeration value="Refurbished"/>
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:element>
+        <xs:element name="DataServiceFault">
+            <xs:complexType>
+                <xs:sequence>
+                    <xs:element name="current_params" type="xs:string"/>
+                    <xs:element name="current_request_name" type="xs:string"/>
+                    <xs:element name="nested_exception" type="xs:string"/>
+                    <xs:element name="source_data_service">
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="location" type="xs:string"/>
+                                <xs:element name="default_namespace" type="xs:string"/>
+                                <xs:element name="description" type="xs:string"/>
+                                <xs:element name="data_service_name" type="xs:string"/>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="ds_code" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+        </xs:element>
+        <xs:element name="REQUEST_STATUS" type="xs:string"/>
+        <xs:element name="DATA_SERVICE_RESPONSE">
+            <xs:complexType>
+                <xs:sequence>
+                    <xs:any minOccurs="0"/>
+                </xs:sequence>
+            </xs:complexType>
+        </xs:element>
+        <xs:element name="addPaygroundOp">
+            <xs:complexType>
+                <xs:sequence>
+                    <xs:element name="type" nillable="true" type="xs:string"/>
+                    <xs:element name="color" nillable="true" type="xs:string"/>
+                    <xs:element name="location" nillable="true" type="xs:string"/>
+                    <xs:element name="install_date" nillable="true" type="xs:date"/>
+                </xs:sequence>
+            </xs:complexType>
+        </xs:element>
+        <xs:element name="getPaygroundDataOp">
+            <xs:complexType>
+                <xs:sequence/>
+            </xs:complexType>
+        </xs:element>
+        <xs:element name="Entries" type="ns0:Entries"/>
+        <xs:complexType name="Entries">
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" minOccurs="0" name="Entry" type="ns0:Entry"/>
+            </xs:sequence>
+        </xs:complexType>
+        <xs:complexType name="Entry">
+            <xs:sequence>
+                <xs:element name="type" nillable="true" type="xs:string"/>
+                <xs:element name="color" nillable="true" type="xs:string"/>
+                <xs:element name="location" nillable="true" type="xs:string"/>
+                <xs:element name="install_date" nillable="true" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+        <xs:element name="_getgetpayground">
+            <xs:complexType>
+                <xs:sequence/>
+            </xs:complexType>
+        </xs:element>
+        <xs:element name="_postaddpayground">
+            <xs:complexType>
+                <xs:sequence>
+                    <xs:element name="type" nillable="true" type="xs:string"/>
+                    <xs:element name="color" nillable="true" type="xs:string"/>
+                    <xs:element name="location" nillable="true" type="xs:string"/>
+                    <xs:element name="install_date" nillable="true" type="xs:date"/>
+                </xs:sequence>
+            </xs:complexType>
+        </xs:element>
+    </xs:schema>
+</wsdl:types>
+<wsdl:message name="addPaygroundOpRequest">
+    <wsdl:part name="parameters" element="ns0:addPaygroundOp"/>
+</wsdl:message>
+<wsdl:message name="_getgetpaygroundRequest">
+    <wsdl:part name="parameters" element="ns0:_getgetpayground"/>
+</wsdl:message>
+<wsdl:message name="_getgetpaygroundResponse">
+    <wsdl:part name="parameters" element="ns0:Entries"/>
+</wsdl:message>
+<wsdl:message name="DataServiceFault">
+    <wsdl:part name="parameters" element="ns0:DataServiceFault"/>
+</wsdl:message>
+<wsdl:message name="getPaygroundDataOpRequest">
+    <wsdl:part name="parameters" element="ns0:getPaygroundDataOp"/>
+</wsdl:message>
+<wsdl:message name="getPaygroundDataOpResponse">
+    <wsdl:part name="parameters" element="ns0:Entries"/>
+</wsdl:message>
+<wsdl:message name="_postaddpaygroundRequest">
+    <wsdl:part name="parameters" element="ns0:_postaddpayground"/>
+</wsdl:message>
+<wsdl:portType name="Location1DataServicePortType">
+    <wsdl:operation name="addPaygroundOp">
+        <wsdl:documentation/>
+        <wsdl:input message="ns0:addPaygroundOpRequest" wsaw:Action="urn:addPaygroundOp"/>
+    </wsdl:operation>
+    <wsdl:operation name="_getgetpayground">
+        <wsdl:documentation/>
+        <wsdl:input message="ns0:_getgetpaygroundRequest" wsaw:Action="urn:_getgetpayground"/>
+        <wsdl:output message="ns0:_getgetpaygroundResponse" wsaw:Action="urn:_getgetpaygroundResponse"/>
+        <wsdl:fault message="ns0:DataServiceFault" name="DataServiceFault" wsaw:Action="urn:_getgetpaygroundDataServiceFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="getPaygroundDataOp">
+        <wsdl:documentation/>
+        <wsdl:input message="ns0:getPaygroundDataOpRequest" wsaw:Action="urn:getPaygroundDataOp"/>
+        <wsdl:output message="ns0:getPaygroundDataOpResponse" wsaw:Action="urn:getPaygroundDataOpResponse"/>
+        <wsdl:fault message="ns0:DataServiceFault" name="DataServiceFault" wsaw:Action="urn:getPaygroundDataOpDataServiceFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="_postaddpayground">
+        <wsdl:documentation/>
+        <wsdl:input message="ns0:_postaddpaygroundRequest" wsaw:Action="urn:_postaddpayground"/>
+    </wsdl:operation>
+</wsdl:portType>
+<wsdl:binding name="Location1DataServiceSOAP11Binding" type="ns0:Location1DataServicePortType">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+    <wsdl:operation name="addPaygroundOp">
+        <soap:operation soapAction="urn:addPaygroundOp" style="document"/>
+        <wsdl:input>
+            <soap:body use="literal"/>
+        </wsdl:input>
+    </wsdl:operation>
+    <wsdl:operation name="_getgetpayground">
+        <soap:operation soapAction="urn:_getgetpayground" style="document"/>
+        <wsdl:input>
+            <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+            <soap:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="DataServiceFault">
+            <soap:fault use="literal" name="DataServiceFault"/>
+        </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="getPaygroundDataOp">
+        <soap:operation soapAction="urn:getPaygroundDataOp" style="document"/>
+        <wsdl:input>
+            <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+            <soap:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="DataServiceFault">
+            <soap:fault use="literal" name="DataServiceFault"/>
+        </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="_postaddpayground">
+        <soap:operation soapAction="urn:_postaddpayground" style="document"/>
+        <wsdl:input>
+            <soap:body use="literal"/>
+        </wsdl:input>
+    </wsdl:operation>
+</wsdl:binding>
+<wsdl:binding name="Location1DataServiceSOAP12Binding" type="ns0:Location1DataServicePortType">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+    <wsdl:operation name="addPaygroundOp">
+        <soap12:operation soapAction="urn:addPaygroundOp" style="document"/>
+        <wsdl:input>
+            <soap12:body use="literal"/>
+        </wsdl:input>
+    </wsdl:operation>
+    <wsdl:operation name="_getgetpayground">
+        <soap12:operation soapAction="urn:_getgetpayground" style="document"/>
+        <wsdl:input>
+            <soap12:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+            <soap12:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="DataServiceFault">
+            <soap12:fault use="literal" name="DataServiceFault"/>
+        </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="getPaygroundDataOp">
+        <soap12:operation soapAction="urn:getPaygroundDataOp" style="document"/>
+        <wsdl:input>
+            <soap12:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+            <soap12:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="DataServiceFault">
+            <soap12:fault use="literal" name="DataServiceFault"/>
+        </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="_postaddpayground">
+        <soap12:operation soapAction="urn:_postaddpayground" style="document"/>
+        <wsdl:input>
+            <soap12:body use="literal"/>
+        </wsdl:input>
+    </wsdl:operation>
+</wsdl:binding>
+<wsdl:binding name="Location1DataServiceHttpBinding" type="ns0:Location1DataServicePortType">
+    <http:binding verb="POST"/>
+    <wsdl:operation name="addPaygroundOp">
+        <http:operation location="addPaygroundOp"/>
+        <wsdl:input>
+            <mime:content type="text/xml" part="parameters"/>
+        </wsdl:input>
+    </wsdl:operation>
+    <wsdl:operation name="_getgetpayground">
+        <http:operation location="getPayground"/>
+        <wsdl:input>
+            <mime:content type="text/xml" part="parameters"/>
+        </wsdl:input>
+        <wsdl:output>
+            <mime:content type="text/xml" part="parameters"/>
+        </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getPaygroundDataOp">
+        <http:operation location="getPaygroundDataOp"/>
+        <wsdl:input>
+            <mime:content type="text/xml" part="parameters"/>
+        </wsdl:input>
+        <wsdl:output>
+            <mime:content type="text/xml" part="parameters"/>
+        </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="_postaddpayground">
+        <http:operation location="addPayground"/>
+        <wsdl:input>
+            <mime:content type="text/xml" part="parameters"/>
+        </wsdl:input>
+    </wsdl:operation>
+</wsdl:binding>
+<wsdl:service name="Location1DataService">
+    <wsdl:port name="SecureSOAP11Endpoint" binding="ns0:Location1DataServiceSOAP11Binding">
+        <soap:address location="https://wso2123-ThinkPad-X1-Carbon-3rd:8243/services/Location1DataService.SecureSOAP11Endpoint"/>
+    </wsdl:port>
+    <wsdl:port name="SOAP11Endpoint" binding="ns0:Location1DataServiceSOAP11Binding">
+        <soap:address location="http://wso2123-ThinkPad-X1-Carbon-3rd:8280/services/Location1DataService.SOAP11Endpoint"/>
+    </wsdl:port>
+    <wsdl:port name="SecureSOAP12Endpoint" binding="ns0:Location1DataServiceSOAP12Binding">
+        <soap12:address location="https://wso2123-ThinkPad-X1-Carbon-3rd:8243/services/Location1DataService.SecureSOAP12Endpoint"/>
+    </wsdl:port>
+    <wsdl:port name="SOAP12Endpoint" binding="ns0:Location1DataServiceSOAP12Binding">
+        <soap12:address location="http://wso2123-ThinkPad-X1-Carbon-3rd:8280/services/Location1DataService.SOAP12Endpoint"/>
+    </wsdl:port>
+    <wsdl:port name="SecureHTTPEndpoint" binding="ns0:Location1DataServiceHttpBinding">
+        <http:address location="https://wso2123-ThinkPad-X1-Carbon-3rd:8243/services/Location1DataService.SecureHTTPEndpoint"/>
+    </wsdl:port>
+    <wsdl:port name="HTTPEndpoint" binding="ns0:Location1DataServiceHttpBinding">
+        <http:address location="http://wso2123-ThinkPad-X1-Carbon-3rd:8280/services/Location1DataService.HTTPEndpoint"/>
+    </wsdl:port>
+</wsdl:service>
+</wsdl:definitions>

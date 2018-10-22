@@ -72,8 +72,7 @@ public class APISecurityConstantsTestCase {
         String incorrectResourceDesc = "No matching resource found in the API for the given request. Check the API " +
                 "documentation and add a proper REST resource path to the invocation URL";
         String tokenInactiveDesc = "Access Token Inactive. Generate a new access token and try again";
-        String missingCredentialsDesc = "Missing Credentials. Make sure your API invocation call has a header: " +
-                "\"Authorization: Bearer ACCESS_TOKEN\"";
+        String missingCredentialsDesc = "Missing Credentials. Make sure your API invocation call has a header: ";
         String tokenExpiredDesc = "Access Token Expired. Renew the access token and try again";
         String invalidCredentialsDesc = "Invalid Credentials. Make sure you have given the correct access token";
 

@@ -52,7 +52,7 @@ var log = new Log();
                 var mediation = decodeURI(request.getParameter("mediationName"));
                 for(var i in versionArray){
                 var tempVersion = versionArray[i];
-                var tempResult = mod.getExecutionTimeByAPI(apiName,apiVersion,tenantDomain,fromDate,toDate,drilldown);
+                var tempResult = mod.getExecutionTimeByAPI(apiName,tempVersion,tenantDomain,fromDate,toDate,drilldown);
                if (tempResult.usage && tempResult.usage.length > 0) {
                 var tempdata = [];
                   for(var usage1 in tempResult.usage ){

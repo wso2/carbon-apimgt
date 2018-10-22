@@ -1626,6 +1626,10 @@ var disableForm = function() {
         });
     });
 
+    $("#manage_form").find('.with-upload-perm').each(function() {
+            $(this).hide();
+    });
+
     $('.btn-secondary').prop('disabled', true);
     $('#swaggerEditor').unbind('click');
 }
@@ -1641,7 +1645,7 @@ var getSoapToRestPathMap = function () {
         var designer = new APIDesigner();
         designer.load_api_document(swagger2_api_doc);
         $("#wsdl-content").hide();
-        $(".resource_create").hide();
+        $(".resource_create").show();
         $('#resource_details').show();
         $('#soap-swagger-editor').show();
         isSoapView = true;

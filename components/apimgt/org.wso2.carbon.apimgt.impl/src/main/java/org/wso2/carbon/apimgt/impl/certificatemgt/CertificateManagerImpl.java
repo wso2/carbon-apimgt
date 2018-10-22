@@ -17,16 +17,28 @@
  */
 package org.wso2.carbon.apimgt.impl.certificatemgt;
 
+import org.apache.axiom.om.OMElement;
+import org.apache.axis2.Constants;
+import org.apache.axis2.description.Parameter;
+import org.apache.axis2.description.TransportInDescription;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
+import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateAliasExistsException;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
 import org.wso2.carbon.apimgt.impl.dao.CertificateMgtDAO;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
+import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.CarbonContext;
 
+import javax.xml.namespace.QName;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.List;
@@ -43,8 +55,64 @@ public class CertificateManagerImpl implements CertificateManager {
     private static String CARBON_HOME = System.getProperty(CARBON_HOME_STRING);
     private static String SSL_PROFILE_FILE_PATH = CARBON_HOME + SEP + "repository" + SEP + "resources" + SEP
             + "security" + SEP + PROFILE_CONFIG;
+    private static String listenerProfileFilePath;
     private static CertificateMgtDAO certificateMgtDAO = CertificateMgtDAO.getInstance();
-    private CertificateMgtUtils certificateMgtUtils = new CertificateMgtUtils();
+    private CertificateMgtUtils certificateMgtUtils = CertificateMgtUtils.getInstance();
+    private static boolean isMTLSConfigured = false;
+    private static CertificateManager instance;
+
+    /**
+     * To get the instance of certificate manager.
+     *
+     * @return instance of certificate manager.
+     */
+    public static CertificateManager getInstance() {
+        if (instance == null) {
+            synchronized (CertificateManagerImpl.class) {
+                if (instance == null) {
+                    instance = new CertificateManagerImpl();
+                }
+            }
+        }
+        return instance;
+    }
+
+    /**
+     * Initializes an instance of CertificateManagerImpl.
+     */
+    private CertificateManagerImpl() {
+        String isMutualTLSConfigured = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getFirstProperty(APIConstants.ENABLE_MTLS_FOR_APIS);
+        if (StringUtils.isNotEmpty(isMutualTLSConfigured) && isMutualTLSConfigured.equalsIgnoreCase("true")) {
+            isMTLSConfigured = true;
+        }
+        if (isMTLSConfigured) {
+            if (log.isDebugEnabled()) {
+                log.debug("Mutual TLS based security is enabled for APIs. Hence APIs can be secured using mutual TLS "
+                        + "and OAuth2");
+            }
+            TransportInDescription transportInDescription = ServiceReferenceHolder.getContextService()
+                    .getServerConfigContext().getAxisConfiguration().getTransportIn(Constants.TRANSPORT_HTTPS);
+            Parameter profilePathParam = transportInDescription.getParameter("dynamicSSLProfilesConfig");
+            if (profilePathParam == null) {
+                listenerProfileFilePath = null;
+            } else {
+                OMElement pathEl = profilePathParam.getParameterElement();
+                String path = pathEl.getFirstChildWithName(new QName("filePath")).getText();
+                if (path != null) {
+                    String separator = path.startsWith(File.separator) ? "" : File.separator;
+                    listenerProfileFilePath = System.getProperty("user.dir") + separator + path;
+                }
+            }
+        }
+        if (log.isDebugEnabled()) {
+            if (isMTLSConfigured) {
+                log.debug("Mutual SSL based authentication is supported for this server.");
+            } else {
+                log.debug("Mutual SSL based authentication is not supported for this server.");
+            }
+        }
+    }
 
     @Override
     public ResponseCode addCertificateToParentNode(String certificate, String alias, String endpoint, int tenantId) {
@@ -82,6 +150,27 @@ public class CertificateManagerImpl implements CertificateManager {
     }
 
     @Override
+    public ResponseCode addClientCertificate(APIIdentifier apiIdentifier, String certificate, String alias,
+            String tierName, int tenantId) {
+        ResponseCode responseCode;
+        try {
+            responseCode = certificateMgtUtils.validateCertificate(alias, tenantId, certificate);
+            if (responseCode == ResponseCode.SUCCESS) {
+                if (certificateMgtDAO.checkWhetherAliasExist(alias, tenantId)) {
+                    responseCode = ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE;
+                } else {
+                    certificateMgtDAO.addClientCertificate(certificate, apiIdentifier, alias, tierName, tenantId, null);
+                }
+            }
+        } catch (CertificateManagementException e) {
+            log.error("Error when adding client certificate with alias " + alias + " to database for the API "
+                    + apiIdentifier.toString(), e);
+            responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
+        }
+        return responseCode;
+    }
+
+    @Override
     public ResponseCode deleteCertificateFromParentNode(String alias, String endpoint, int tenantId) {
 
         try {
@@ -112,8 +201,49 @@ public class CertificateManagerImpl implements CertificateManager {
     }
 
     @Override
-    public boolean addCertificateToGateway(String certificate, String alias) {
+    public ResponseCode deleteClientCertificateFromParentNode(APIIdentifier apiIdentifier, String alias, int tenantId) {
+        try {
+            boolean removeFromDB = certificateMgtDAO.deleteClientCertificate(apiIdentifier, alias, tenantId, null);
+            if (removeFromDB) {
+                return ResponseCode.SUCCESS;
+            } else {
+                log.error("Failed to remove certificate with alias " + alias + " from the database for the API "
+                        + apiIdentifier + "  No certificate changes will be affected.");
+                return ResponseCode.INTERNAL_SERVER_ERROR;
+            }
+        } catch (CertificateManagementException e) {
+            log.error(
+                    "Error while deleting certificate metadata of the alias " + alias + " of the API " + apiIdentifier,
+                    e);
+            return ResponseCode.INTERNAL_SERVER_ERROR;
+        }
+    }
 
+    @Override
+    public boolean addCertificateToGateway(String certificate, String alias) {
+        // Check whether the api is invoked via the APIGatewayAdmin service.
+        int loggedInTenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        if (loggedInTenantId != MultitenantConstants.SUPER_TENANT_ID) {
+            alias = alias + "_" + loggedInTenantId;
+        }
+        return addCertificateToListenerOrSenderProfile(certificate, alias, false);
+    }
+
+
+    @Override
+    public boolean addClientCertificateToGateway(String certificate, String alias) {
+        return addCertificateToListenerOrSenderProfile(certificate, alias, true);
+    }
+
+    /**
+     * To add the public certificate to the relevant listener of sender profile.
+     *
+     * @param certificate Relevant certificate that need to be added to the trust store of gateway.
+     * @param alias       Alias of the certificate.
+     * @param isListener  To indicate whether the listener profile need to be reloaded.
+     * @return true if the addition to gateway certificate addition succeeded.
+     */
+    private  boolean addCertificateToListenerOrSenderProfile(String certificate, String alias, boolean isListener) {
         boolean result;
         ResponseCode responseCode = certificateMgtUtils.addCertificateToTrustStore(certificate, alias);
         if (responseCode == ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE) {
@@ -122,10 +252,16 @@ public class CertificateManagerImpl implements CertificateManager {
         } else {
             result = responseCode != ResponseCode.INTERNAL_SERVER_ERROR;
         }
-        result = result && touchConfigFile();
+        boolean fileUpdateSucceed;
+        if (isListener) {
+            fileUpdateSucceed = touchSSLListenerConfigFile();
+        } else {
+            fileUpdateSucceed = touchSSLSenderConfigFile();
+        }
+        result = result && fileUpdateSucceed;
         if (result) {
-            log.info("The certificate with Alias '" + alias + "' is successfully added to the Gateway " +
-                    "Trust Store.");
+            log.info("The certificate with Alias '" + alias + "' is successfully added to the Gateway "
+                    + "Trust Store.");
         } else {
             log.error("Error adding the certificate with Alias '" + alias + "' to the Gateway Trust Store");
         }
@@ -134,23 +270,46 @@ public class CertificateManagerImpl implements CertificateManager {
 
     @Override
     public boolean deleteCertificateFromGateway(String alias) {
+        // Check whether the api is invoked via the APIGatewayAdmin service.
+        int loggedInTenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        if (loggedInTenantId != MultitenantConstants.SUPER_TENANT_ID) {
+            alias = alias + "_" + loggedInTenantId;
+        }
+        return deleteCertificateFromListenerAndSenderProfiles(alias, false);
+    }
 
+    @Override
+    public boolean deleteClientCertificateFromGateway(String alias) {
+        return deleteCertificateFromListenerAndSenderProfiles(alias, true);
+    }
+
+    /**
+     * To delete the certificate from http listener or sender profile.
+     *
+     * @param alias      Alias that need to be removed.
+     * @param isListener To indicate whether http listener need to be updated or sender.
+     * @return true if the the update of profile succeeded.
+     */
+    private boolean deleteCertificateFromListenerAndSenderProfiles(String alias, boolean isListener) {
         ResponseCode responseCode = certificateMgtUtils.removeCertificateFromTrustStore(alias);
         if (responseCode != ResponseCode.INTERNAL_SERVER_ERROR) {
-            log.info("The certificate with Alias '" + alias + "' is successfully removed from the Gateway " +
-                    "Trust Store.");
+            log.info("The certificate with Alias '" + alias + "' is successfully removed from the Gateway "
+                    + "Trust Store.");
         } else {
-            log.error("Error removing the certificate with Alias '" + alias + "' from the Gateway " +
-                    "Trust Store.");
+            log.error("Error removing the certificate with Alias '" + alias + "' from the Gateway " + "Trust Store.");
             return false;
         }
-        return touchConfigFile();
+        if (isListener) {
+            return touchSSLListenerConfigFile();
+        } else {
+            return touchSSLSenderConfigFile();
+        }
     }
 
     @Override
     public boolean isConfigured() {
 
-        boolean isTableExists = false;
+        boolean isTableExists;
         boolean isFilePresent = new File(SSL_PROFILE_FILE_PATH).exists();
         try {
             isTableExists = certificateMgtDAO.isTableExists();
@@ -159,6 +318,11 @@ public class CertificateManagerImpl implements CertificateManager {
             return false;
         }
         return isFilePresent && isTableExists;
+    }
+
+    @Override
+    public boolean isClientCertificateBasedAuthenticationConfigured() {
+        return isMTLSConfigured;
     }
 
     @Override
@@ -209,10 +373,20 @@ public class CertificateManagerImpl implements CertificateManager {
     }
 
     @Override
+    public List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias,
+            APIIdentifier apiIdentifier) throws APIManagementException {
+        try {
+            return CertificateMgtDAO.getInstance().getClientCertificates(tenantId, alias, apiIdentifier);
+        } catch (CertificateManagementException e) {
+            throw new APIManagementException(
+                    "Error while retrieving client certificate information for the tenant : " + tenantId, e);
+        }
+    }
+
+    @Override
     public boolean isCertificatePresent(int tenantId, String alias) throws APIManagementException {
 
         List<CertificateMetadataDTO> certificateMetadataList;
-
         if (log.isDebugEnabled()) {
             log.debug(String.format("Check whether the tenant %d has a certificate for alias %s", tenantId, alias));
         }
@@ -249,6 +423,31 @@ public class CertificateManagerImpl implements CertificateManager {
     }
 
     @Override
+    public ResponseCode updateClientCertificate(String certificate, String alias, String tier, int tenantId)
+            throws APIManagementException {
+        ResponseCode responseCode = ResponseCode.SUCCESS;
+        if (StringUtils.isNotEmpty(certificate)) {
+            responseCode = certificateMgtUtils.validateCertificate(null, tenantId, certificate);
+        }
+        try {
+            if (responseCode.getResponseCode() == ResponseCode.SUCCESS.getResponseCode()) {
+                boolean isSuccess = certificateMgtDAO.updateClientCertificate(certificate, alias, tier, tenantId);
+                if (isSuccess) {
+                    responseCode = ResponseCode.SUCCESS;
+                } else {
+                    responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
+                }
+            }
+        } catch (CertificateManagementException e) {
+            throw new APIManagementException(
+                    "Certificate management exception while trying to update the certificate of alias " + alias
+                            + " of tenant " + tenantId, e);
+        }
+        return responseCode;
+    }
+
+
+    @Override
     public int getCertificateCount(int tenantId) throws APIManagementException {
 
         if (log.isDebugEnabled()) {
@@ -258,6 +457,17 @@ public class CertificateManagerImpl implements CertificateManager {
             return certificateMgtDAO.getCertificateCount(tenantId);
         } catch (CertificateManagementException e) {
             throw new APIManagementException(e);
+        }
+    }
+
+    @Override
+    public int getClientCertificateCount(int tenantId) throws APIManagementException {
+        try {
+            return certificateMgtDAO.getClientCertificateCount(tenantId);
+        } catch (CertificateManagementException e) {
+            throw new APIManagementException(
+                    "Certificate management exception while getting count of client certificates of the tenant "
+                            + tenantId, e);
         }
     }
 
@@ -279,7 +489,7 @@ public class CertificateManagerImpl implements CertificateManager {
      *
      * @return : True if the file modification is success.
      */
-    private boolean touchConfigFile() {
+    private boolean touchSSLSenderConfigFile() {
 
         boolean success = false;
         File file = new File(SSL_PROFILE_FILE_PATH);
@@ -298,6 +508,35 @@ public class CertificateManagerImpl implements CertificateManager {
                 log.debug("sslprofiles.xml file not found.");
             }
             log.error("Could not find the file '" + PROFILE_CONFIG + "'");
+        }
+        return success;
+    }
+
+
+    /**
+     * Modify the listenerProfiles.xml file after modifying the certificate.
+     *
+     * @return : True if the file modification is success.
+     */
+    private boolean touchSSLListenerConfigFile() {
+        boolean success = false;
+        if (listenerProfileFilePath != null) {
+            File file = new File(listenerProfileFilePath);
+            if (file.exists()) {
+                success = file.setLastModified(System.currentTimeMillis());
+                if (success) {
+                    log.info("The Transport listener will be re-initialized in few minutes.");
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug(
+                                "Error when modifying listener profile config file in path " + listenerProfileFilePath);
+                    }
+                    log.error("Could not modify the file listener profile config file");
+                }
+            }
+        } else {
+            log.warn("Mutual SSL file path for listener is not configured correctly in axis2.xml. Please recheck the "
+                    + "relevant configuration under transport listener.");
         }
         return success;
     }

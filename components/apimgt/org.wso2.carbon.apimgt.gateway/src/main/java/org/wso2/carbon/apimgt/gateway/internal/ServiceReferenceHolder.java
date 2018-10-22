@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.tracing.TracingService;
+import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
 
@@ -35,7 +36,10 @@ public class ServiceReferenceHolder {
     public ThrottleDataHolder throttleDataHolder;
     private ThrottleProperties throttleProperties;
     private ConfigurationContext axis2ConfigurationContext;
+
     private TracingService tracingService;
+
+    private ServerConfigurationService serverConfigurationService;
 
     public ThrottleDataHolder getThrottleDataHolder() {
         return throttleDataHolder;
@@ -99,4 +103,23 @@ public class ServiceReferenceHolder {
     public void setTracingService(TracingService tracingService) {
         this.tracingService = tracingService;
     }
+
+    /**
+     * To get the server configuration service.
+     *
+     * @return an instance of {@link ServerConfigurationService}
+     */
+    public ServerConfigurationService getServerConfigurationService() {
+        return serverConfigurationService;
+    }
+
+    /**
+     * To set the server configuration service.
+     *
+     * @param serverConfigurationService {@link ServerConfigurationService}
+     */
+    public void setServerConfigurationService(ServerConfigurationService serverConfigurationService) {
+        this.serverConfigurationService = serverConfigurationService;
+    }
+
 }

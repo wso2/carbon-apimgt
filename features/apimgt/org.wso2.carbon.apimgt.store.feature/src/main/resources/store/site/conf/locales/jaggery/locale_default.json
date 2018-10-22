@@ -136,6 +136,7 @@
     "INACTIVE": "INACTIVE (Waiting for approval)",
     "If you already have an OAuth application registered with the IdP, you can use those keys without generating one.": "If you already have an OAuth application registered with the IdP, you can use those keys without generating one.",
     "If you already have an access token, please provide it below.": "If you already have an access token, please provide it below.",
+    "You can use either the client certificate or the access token to access this API." : "You can use either the client certificate or the access token to access this API.",
     "In a similar manner, you can generate an access token using the Client Credentials grant type with the following cURL command.": "In a similar manner, you can generate an access token using the Client Credentials grant type with the following cURL command.",
     "Info": "Info",
     "Inline Documentation": "Inline Documentation",
@@ -365,10 +366,10 @@
     "API Store walkthrough" : "API Store Walkthrough",
     "Info!": "Info!",
     "Client side SDK generation feature is currently not available for this API since the API definition is in OpenAPI 3.0 specification" : "Client side SDK generation is currently not available for this API since the API definition is in the OpenAPI 3.0 specification",
-    "privacy.policy.cookies.short.description": "After successful sign in, we use a cookie in your browser to track your session. You can refer our",
+    "privacy.policy.cookies.short.description": "We use cookies on the APIM store to improve your user experience by tracking your session after signing in. For more information about how we use cookies and how you can control the cookies, please see our",
     "privacy.policy.cookies": "Cookie Policy",
     "privacy.policy.for.more.details": "for more details.",
-    "privacy.policy.privacy.short.description": "By signing in, you agree to our",
+    "privacy.policy.privacy.short.description": "By signing in, you also agree to our",
     "privacy.policy.general": "Privacy Policy",
     "request.to.update.or.delete.user.profile": "To update other profile information or to delete your account, please contact the system administrators.",
     "have.read.and.understood": "I hereby confirm that I have read and understood the",
@@ -384,6 +385,13 @@
     "API Gateways" : "API Gateways",
     "Micro Gateways" : "Micro Gateways",
     "Gateways" : "Gateways",
-    "DEFAULT" : "OAuth"
+    "DEFAULT" : "OAuth",
+    "Resource Hit Count": "Resource Hit Count",
+    "OAuth2" : "OAuth2",
+    "Mutual SSL" : "Mutual SSL",
+    "Enabled API Security Protocols" : "Enabled API Security Protocols",
+    "This API is protected only with Mutual SSL. Use the client certificate to access the API." : "This API is protected only with Mutual SSL. Use the client certificate to access the API.",
+    "Application subscription is not permitted for this API, as it is only protected with Mutual SSL." : "Application subscription is not permitted for this API, as it is only protected with Mutual SSL."
+
 
 }

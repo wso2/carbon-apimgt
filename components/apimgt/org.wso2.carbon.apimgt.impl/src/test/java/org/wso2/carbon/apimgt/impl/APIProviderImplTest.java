@@ -166,7 +166,7 @@ public class APIProviderImplTest {
 
     @Before
     public void init() throws Exception {
-        System.setProperty("carbon.home", "");
+        System.setProperty("carbon.home", APIProviderImplTest.class.getResource("/").getFile());
         PowerMockito.mockStatic(ApiMgtDAO.class);
         PowerMockito.mockStatic(PrivilegedCarbonContext.class);
         PowerMockito.mockStatic(RegistryUtils.class);
@@ -208,6 +208,7 @@ public class APIProviderImplTest {
             Object[] args = invocation.getArguments();
             return (String) args[0];
         });
+        TestUtils.initConfigurationContextService(true);
     }
 
     @Test
@@ -443,6 +444,19 @@ public class APIProviderImplTest {
         } catch (APIManagementException e) {
             Assert.assertEquals(msg1, e.getMessage());
         }
+    }
+
+    @Test
+    public void testGetCustomInSequencesSorted() throws Exception {
+        APIIdentifier apiId = new APIIdentifier("admin", "API1", "1.0.1");
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, null, null);
+        mockSequencesMultiple(APIConstants.API_CUSTOM_INSEQUENCE_LOCATION, APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN,
+                apiId);
+        List<String> sequenceList = apiProvider.getCustomInSequences();
+        Assert.assertNotNull(sequenceList);
+        Assert.assertEquals(2, sequenceList.size());
+        Assert.assertEquals(sequenceList.get(0), "abc");
+        Assert.assertEquals(sequenceList.get(1), "pqr");
     }
 
     @Test
@@ -3835,6 +3849,36 @@ public class APIProviderImplTest {
         Mockito.when(customSequence.getContentStream()).thenReturn(responseStream1);
     }
 
+    private void mockSequencesMultiple(String seqLoc, String apiSeqLoc, APIIdentifier apiId) throws Exception {
+        ServiceReferenceHolder sh = PowerMockito.mock(ServiceReferenceHolder.class);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(sh);
+        RegistryService registryService = Mockito.mock(RegistryService.class);
+        PowerMockito.when(sh.getRegistryService()).thenReturn(registryService);
+        UserRegistry registry = Mockito.mock(UserRegistry.class);
+        PowerMockito.when(registryService.getGovernanceSystemRegistry(Matchers.anyInt())).thenReturn(registry);
+        Mockito.when(registry.resourceExists(seqLoc)).thenReturn(true);
+        Collection seqCollection = Mockito.mock(Collection.class);
+        Mockito.when(registry.get(seqLoc)).thenReturn(
+                seqCollection);
+        String[] seqChildPaths = {"path1","path2"};
+        Mockito.when(seqCollection.getChildren()).thenReturn(seqChildPaths);
+        Resource sequence = Mockito.mock(Resource.class);
+        Mockito.when(registry.get(seqChildPaths[0])).thenReturn(sequence);
+        InputStream responseStream = IOUtils.toInputStream("<sequence name=\"pqr\"></sequence>", "UTF-8");
+
+        Resource sequence2 = Mockito.mock(Resource.class);
+        Mockito.when(registry.get(seqChildPaths[1])).thenReturn(sequence2);
+        InputStream responseStream2 = IOUtils.toInputStream("<sequence name=\"abc\"></sequence>", "UTF-8");
+
+        OMElement seqElment = buildOMElement(responseStream);
+        OMElement seqElment2 = buildOMElement(responseStream2);
+        PowerMockito.when(APIUtil.buildOMElement(responseStream)).thenReturn(seqElment);
+        PowerMockito.when(APIUtil.buildOMElement(responseStream2)).thenReturn(seqElment2);
+
+        Mockito.when(sequence.getContentStream()).thenReturn(responseStream);
+        Mockito.when(sequence2.getContentStream()).thenReturn(responseStream2);
+    }
+    
     /**
      * This method can be used when invoking getAPIsByProvider()
      */

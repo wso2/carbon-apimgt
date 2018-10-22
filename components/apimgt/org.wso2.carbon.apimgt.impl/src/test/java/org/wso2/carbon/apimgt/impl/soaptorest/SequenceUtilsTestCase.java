@@ -50,8 +50,10 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.List;
 
-@RunWith(PowerMockRunner.class) @PrepareForTest({ APIManagerComponent.class, ServiceReferenceHolder.class,
-        MultitenantUtils.class, APIUtil.class, RegistryUtils.class }) public class SequenceUtilsTestCase {
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ APIManagerComponent.class, ServiceReferenceHolder.class,
+        MultitenantUtils.class, APIUtil.class, RegistryUtils.class })
+public class SequenceUtilsTestCase {
 
     private UserRegistry userRegistry;
     private ServiceReferenceHolder serviceReferenceHolder;
@@ -64,7 +66,8 @@ import java.util.List;
     private static final String SEQUENCE = "";
     private static final String HTTP_METHOD = "post";
 
-    @Before public void setup() throws UserStoreException, RegistryException {
+    @Before
+    public void setup() throws UserStoreException, RegistryException {
         userRegistry = Mockito.mock(UserRegistry.class);
         serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
         registryService = Mockito.mock(RegistryService.class);
@@ -82,7 +85,8 @@ import java.util.List;
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
     }
 
-    @Test public void testRestToSoapConvertedSequence() throws Exception {
+    @Test
+    public void testRestToSoapConvertedSequence() throws Exception {
         Resource resource = Mockito.mock(Resource.class);
         Mockito.when(userRegistry.resourceExists(RESOURCE_PATH)).thenReturn(false);
         Mockito.when(userRegistry.newResource()).thenReturn(resource);
@@ -96,7 +100,8 @@ import java.util.List;
         }
     }
 
-    @Test public void testUpdateRestToSoapConvertedSequences() throws Exception {
+    @Test
+    public void testUpdateRestToSoapConvertedSequences() throws Exception {
         String provider = "admin";
         String apiName = "test-api";
         String version = "1.0.0";
@@ -116,6 +121,7 @@ import java.util.List;
         }
     }
 
+
     public void testGetRestToSoapConvertedSequence() throws Exception {
         String provider = "admin";
         String apiName = "test-api";
@@ -129,7 +135,7 @@ import java.util.List;
         byte[] content = new byte[1];
         PowerMockito.when(MultitenantUtils.getTenantDomain(Mockito.anyString())).thenReturn("carbon.super");
         PowerMockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
-        Mockito.when((Collection)userRegistry.get(Mockito.anyString())).thenReturn(collection);
+        Mockito.when(((Collection)userRegistry.get(Mockito.anyString()))).thenReturn(collection);
         Mockito.when(collection.getChildren()).thenReturn(paths);
         Mockito.when(userRegistry.get(Mockito.anyString())).thenReturn(resource);
         Mockito.when(resource.getContent()).thenReturn(content);
@@ -143,7 +149,8 @@ import java.util.List;
         }
     }
 
-    @Test public void testGetSequenceTemplateConfigContext() throws Exception {
+    @Test
+    public void testGetSequenceTemplateConfigContext() throws Exception {
         String seqType = "in_sequences";
         String content = "<header description=\"SOAPAction\" name=\"SOAPAction\" scope=\"transport\""
                 + " value=\"http://ws.cdyne.com/PhoneVerify/query/CheckPhoneNumber\"/>";
@@ -165,7 +172,8 @@ import java.util.List;
         }
     }
 
-    @Test public void testGetResourceParametersFromSwagger() throws Exception {
+    @Test
+    public void testGetResourceParametersFromSwagger() throws Exception {
         JSONParser parser = new JSONParser();
         String swagger =
                 "{\"paths\":{\"\\/checkPhoneNumber\":{\"post\":{\"responses\":{\"200\":{\"description\":\"\"}},"

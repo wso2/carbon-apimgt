@@ -77,7 +77,7 @@ public class GatewayCertificateManagerTest {
                 (apiManagerConfigurationService);
         Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
         Mockito.when(apiManagerConfiguration.getApiGatewayEnvironments()).thenReturn(environmentMap);
-        gatewayCertificateManager = new GatewayCertificateManager();
+        gatewayCertificateManager = GatewayCertificateManager.getInstance();
     }
 
     @Test

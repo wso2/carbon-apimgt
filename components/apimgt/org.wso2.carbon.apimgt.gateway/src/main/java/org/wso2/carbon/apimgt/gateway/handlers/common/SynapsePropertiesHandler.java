@@ -15,9 +15,13 @@
  */
 package org.wso2.carbon.apimgt.gateway.handlers.common;
 
+import org.apache.axis2.Constants;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+
+import java.util.Map;
 
 public class SynapsePropertiesHandler extends AbstractHandler{
 
@@ -30,6 +34,23 @@ public class SynapsePropertiesHandler extends AbstractHandler{
         messageContext.setProperty("keyManager.port",mgtHttpsPort);
         String keyManagerHost = System.getProperty(APIConstants.KEYMANAGER_HOSTNAME);
         messageContext.setProperty("keyManager.hostname",keyManagerHost);
+
+        String httpMethod = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext().
+                getProperty(Constants.Configuration.HTTP_METHOD);
+        org.apache.axis2.context.MessageContext axis2MsgContext =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        Map headers =
+                (Map) (axis2MsgContext).getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        boolean isContentTypeNotSet = false;
+        if (headers != null) {
+            isContentTypeNotSet = headers.get("Content-Type") == null || headers.get("Content-Type").equals("");
+        }
+        if (isContentTypeNotSet && (httpMethod.equals(Constants.Configuration.HTTP_METHOD_POST) ||
+                httpMethod.equals(Constants.Configuration.HTTP_METHOD_PUT))) {
+            ((Axis2MessageContext) messageContext).getAxis2MessageContext().
+                    setProperty("ContentType", "application/x-www-form-urlencoded");
+        }
+
         return true;
     }
 
