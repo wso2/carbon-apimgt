@@ -236,7 +236,7 @@ class ApiCreateSwagger extends React.Component {
 
     createAPICallback = (response) => {
         const uuid = JSON.parse(response.data).id;
-        const redirectURL = '/apis/' + uuid + '/overview';
+        const redirectURL = '/apis/'  + uuid + '/overview';
         this.props.history.push(redirectURL);
     };
 
