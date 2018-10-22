@@ -4,6 +4,7 @@ import Typography from '@material-ui/core/Typography';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import { withStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
+import { FormattedMessage } from 'react-intl';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
 
@@ -84,9 +85,11 @@ const APIDetailsTopMenu = ({ classes, theme }) => {
                     <CustomIcon strokeColor={strokeColorMain} width={42} height={42} icon='api' />
                 </div>
                 <div className={classes.mainTitleWrapper}>
-                    <Typography variant='display1'>APIs - Create New API</Typography>
+                    <Typography variant='display1'>
+                        <FormattedMessage id='apis.create.new.api' defaultMessage='APIs - Create New API' />
+                    </Typography>
                     <Typography variant='caption' gutterBottom align='left'>
-                        Create an API with one click. You will be able to design and implement it later.
+                        <FormattedMessage id='fill.the.mandatory.fields' defaultMessage='Fill the mandatory fields (Name, Version, Context) and create the API. Configure advanced configurations later.' />
                     </Typography>
                 </div>
             </div>
