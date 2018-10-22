@@ -174,10 +174,6 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             //subscriber field of the body is not honored. It is taken from the context
             Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
 
-            //setting the proper groupId. This is not honored for now.
-            // Later we can honor it by checking admin privileges of the user.
-            String groupId = RestApiUtil.getLoggedInUserGroupId();
-            application.setGroupId(groupId);
             int applicationId = apiConsumer.addApplication(application, username);
 
             //retrieves the created application and send as the response
