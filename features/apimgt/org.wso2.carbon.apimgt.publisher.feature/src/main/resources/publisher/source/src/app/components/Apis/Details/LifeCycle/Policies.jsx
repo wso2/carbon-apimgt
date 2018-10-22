@@ -24,10 +24,18 @@ import FormControl from '@material-ui/core/FormControl';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Select from '@material-ui/core/Select';
 import { FormattedMessage } from 'react-intl';
+import { withStyles} from '@material-ui/core/styles';
+import PropTypes from 'prop-types';
 
 import API from 'AppData/api';
 
-const Option = Select.Option;
+const styles = theme => ({
+    FormControl: {
+        padding: 0,
+        width: '100%',
+        marginTop: 0,
+    },
+})
 
 /**
  *
@@ -36,7 +44,7 @@ const Option = Select.Option;
  * @class Policies
  * @extends {Component}
  */
-export default class Policies extends Component {
+class Policies extends Component {
     constructor() {
         super();
         this.state = {
@@ -86,12 +94,14 @@ export default class Policies extends Component {
         const { handleInputChange, api, policies } = this.props;
         const { classes } = this.props;
         return (
-            <div>
-                <FormControl className='policies-select'>
+            <React.Fragment>
+                <FormControl clsssName={classes.FormControl}>
                     <InputLabel htmlFor='name-multiple'>
                         <FormattedMessage id="business.plans" defaultMessage="Business Plans" />
                     </InputLabel>
                     <Select
+                        error={api.policies && api.policies.length === 0}
+                        fullWidth
                         margin='none'
                         multiple
                         name='policies'
@@ -123,7 +133,15 @@ export default class Policies extends Component {
                             defaultMessage="Select a plan for the API and enable API level throttling." />
                     </FormHelperText>
                 </FormControl>
-            </div>
+            </React.Fragment>
         );
     }
 }
+Policies.propTypes = {
+    classes: PropTypes.shape({}).isRequired,
+    api: PropTypes.shape({}).isRequired,
+    handleInputChange: PropTypes.func.isRequired,
+    policies: PropTypes.shape({}).isRequired,
+};
+
+export default withStyles(styles)(Policies);
