@@ -77,7 +77,7 @@ public enum ExceptionCodes implements ErrorHandler {
     SDK_NOT_GENERATED(900337, "Error while generating SDK", 500, "Error while generating SDK"),
     APPLICATION_EXPORT_ERROR(900338, "Application Export Error", 500, "Error while exporting the given Application"),
     APPLICATION_IMPORT_ERROR(900339, "Application Import Error", 500, "Error while importing the given Application"),
-
+    NO_READ_PERMISSIONS(900340, "No permissions to read API.", 403, "No permissions to read API."),
     // Generic codes
     JSON_PARSE_ERROR(900400, "Json parse error", 500, "JSON parse error"),
     RESOURCE_NOT_FOUND(900401, "Resource not found", 404, "Requested resource not found"),
