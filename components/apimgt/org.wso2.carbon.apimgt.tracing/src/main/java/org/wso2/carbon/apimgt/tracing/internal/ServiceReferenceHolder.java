@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.tracing.internal;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.tracing.Util;
@@ -44,7 +45,7 @@ public class ServiceReferenceHolder {
             if (remoteTracerEnabled || logTracerEnabled) {
                 Util.setTracingEnabled(true);
             }
-        } catch (Exception e) {
+        } catch (APIManagementException e) {
             log.error("Error in loading configurations", e);
         }
     }

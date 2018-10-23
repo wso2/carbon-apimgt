@@ -25,6 +25,7 @@ import io.opentracing.contrib.reporter.Reporter;
 import io.opentracing.contrib.reporter.SpanData;
 import org.apache.commons.logging.Log;
 
+import java.io.IOException;
 import java.io.StringWriter;
 import java.time.Duration;
 import java.time.Instant;
@@ -87,7 +88,14 @@ public class TracingReporter implements Reporter {
                 }
         }
     }
-    //method for stucturing the tracer log format
+
+    /**
+     * Get the structured log message format
+     *
+     * @param timeStamp timeStamp Instant
+     * @param span      opentracing SpanData
+     * @return structured log message format String
+     * */
     private String toStructuredMessage(Instant timeStamp, SpanData span) {
         try {
             StringWriter writer = new StringWriter();
@@ -115,8 +123,8 @@ public class TracingReporter implements Reporter {
             generator.close();
             writer.close();
             return writer.toString();
-        } catch (Exception e) {
-            log.error("Error in structured message");
+        } catch (IOException e) {
+            log.error("Error in structured message" , e);
             return null;
         }
     }

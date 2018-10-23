@@ -178,9 +178,6 @@ public class APIKeyValidationService extends AbstractAdmin {
         validationContext.setCacheKey(cacheKey);
         if (Util.tracingEnabled()) {
             Util.finishSpan(getAccessTokenCacheSpan);
-        }
-
-        if (Util.tracingEnabled()) {
             fetchingKeyValDTOSpan =
                     Util.startSpan(TracingConstants.FETCHING_API_KEY_VAL_INFO_DTO_FROM_CACHE, validateMainSpan, tracer);
         }

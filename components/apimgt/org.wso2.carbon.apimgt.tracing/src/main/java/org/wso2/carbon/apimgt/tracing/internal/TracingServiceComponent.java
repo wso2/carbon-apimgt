@@ -44,8 +44,8 @@ public class TracingServiceComponent {
             log.debug("Tracing Component activated");
             BundleContext bundleContext = componentContext.getBundleContext();
             registration = bundleContext.registerService(TracingService.class, TracingServiceImpl.getInstance(), null);
-        } catch (Throwable t) {
-            log.error("Error occured in tracing component activation", t);
+        } catch (Exception e) {
+            log.error("Error occured in tracing component activation", e);
         }
     }
 

@@ -34,6 +34,14 @@ import java.util.Map;
 public class Util {
     private static boolean isTraceEnabled = false;
 
+    /**
+     * Start the tracing span
+     *
+     * @param spanName
+     * @param parentSpan
+     * @param tracer      io.opentracing tracer
+     * @return a TracingSpan object
+     * */
     public static TracingSpan startSpan(String spanName, TracingSpan parentSpan, TracingTracer tracer) {
         if (parentSpan == null) {
             Span span = tracer.getTracingTracer().buildSpan(spanName).start();
@@ -50,6 +58,13 @@ public class Util {
         }
     }
 
+    /**
+     * Set tag to the span
+     *
+     * @param span
+     * @param key
+     * @param value
+     * */
     public static void setTag(TracingSpan span, String key, String value) {
         Object sp = span.getSpan();
         if (sp instanceof Span) {
@@ -71,6 +86,11 @@ public class Util {
         }
     }
 
+    /**
+     * Finish the span
+     *
+     * @param span
+     * */
     public static void finishSpan(TracingSpan span) {
         Object sp = span.getSpan();
         if (sp instanceof Span) {
@@ -78,6 +98,13 @@ public class Util {
         }
     }
 
+    /**
+     * Inject tracer specific information to tracerSpecificCarrier
+     *
+     * @param span
+     * @param tracer
+     * @param tracerSpecificCarrier
+     * */
     public static void inject(TracingSpan span, TracingTracer tracer, Map<String, String> tracerSpecificCarrier) {
         Object sp = span.getSpan();
         if (sp instanceof Span) {
@@ -89,6 +116,13 @@ public class Util {
         }
     }
 
+    /**
+     * Extract the tracer specific information from headerMap
+     *
+     * @param tracer
+     * @param headerMap
+     * @return a TracingSpan object
+     * */
     public static TracingSpan extract(TracingTracer tracer, Map<String, String> headerMap) {
         return new TracingSpan(tracer.getTracingTracer().extract(Format.Builtin.HTTP_HEADERS,
                 new TextMapExtractAdapter(headerMap)));
@@ -98,6 +132,13 @@ public class Util {
         return new TracingTracer(GlobalTracer.get());
     }
 
+    /**
+     * Set the baggage item to the span which can be passed to the distributed systems
+     *
+     * @param span
+     * @param key
+     * @param value
+     * */
     public static void baggageSet(TracingSpan span, String key, String value) {
         Object sp = span.getSpan();
         if (sp instanceof Span) {
@@ -105,6 +146,13 @@ public class Util {
         }
     }
 
+    /**
+     * Get the baggage item from the span context
+     *
+     * @param span
+     * @param key
+     * @return a baggage item String
+     * */
     public static String baggageGet(TracingSpan span, String key) {
         Object sp = span.getSpan();
         if (sp instanceof Span) {
