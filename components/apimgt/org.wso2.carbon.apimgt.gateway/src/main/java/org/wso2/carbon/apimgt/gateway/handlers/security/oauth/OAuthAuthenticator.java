@@ -125,8 +125,8 @@ public class OAuthAuthenticator implements Authenticator {
                 getProperty(Constants.Configuration.HTTP_METHOD);
 
         if (Util.tracingEnabled()) {
-        TracingSpan keySpan = (TracingSpan) synCtx.getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
-        TracingTracer tracer = Util.getGlobalTracer();
+            TracingSpan keySpan = (TracingSpan) synCtx.getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
+            TracingTracer tracer = Util.getGlobalTracer();
             getClientDomainSpan = Util.startSpan(APIMgtGatewayConstants.GET_CLIENT_DOMAIN, keySpan, tracer);
         }
         String clientDomain = getClientDomain(synCtx);

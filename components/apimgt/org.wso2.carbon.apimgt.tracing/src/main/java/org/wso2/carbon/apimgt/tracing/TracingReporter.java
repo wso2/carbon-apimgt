@@ -52,9 +52,9 @@ public class TracingReporter implements Reporter {
     public void log(Instant timeStamp, SpanData span, Map<String, ?> fields) {
         LogLevel level = LogLevel.INFO;
         try {
-            LogLevel level0 = (LogLevel) fields.get(LogLevel.FIELD_NAME);
-            if (level0 != null) {
-                level = level0;
+            LogLevel logLevel = (LogLevel) fields.get(LogLevel.FIELD_NAME);
+            if (logLevel != null) {
+                level = logLevel;
                 fields.remove(LogLevel.FIELD_NAME);
             }
         } catch (Exception exc) {

@@ -36,9 +36,7 @@ public class ServiceReferenceHolder {
     public ThrottleDataHolder throttleDataHolder;
     private ThrottleProperties throttleProperties;
     private ConfigurationContext axis2ConfigurationContext;
-
     private TracingService tracingService;
-
     private ServerConfigurationService serverConfigurationService;
 
     public ThrottleDataHolder getThrottleDataHolder() {
