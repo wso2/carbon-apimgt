@@ -247,7 +247,7 @@ public class SampleTestObjectCreator {
                 securityScheme(3).
                 threatProtectionPolicies(threatProtectionPolicies);
         Map map = new HashMap();
-        map.put(DEVELOPER_ROLE_ID, 6);
+        map.put(DEVELOPER_ROLE_ID, 1);
         map.put(ADMIN_ROLE_ID, 15);
         apiBuilder.permissionMap(map);
         return apiBuilder;

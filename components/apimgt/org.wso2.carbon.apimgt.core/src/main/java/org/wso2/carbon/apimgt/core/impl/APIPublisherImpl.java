@@ -227,7 +227,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         try {
             api = super.getAPIbyUUID(uuid);
             if (api != null) {
-                api.setUserSpecificApiPermissions(getAPIPermissionsOfLoggedInUser(getUsername(), api));
+                List<String> userSpecificPermissionList = getAPIPermissionsOfLoggedInUser(getUsername(), api);
+                api.setUserSpecificApiPermissions(userSpecificPermissionList);
+                verifyUserPermissionsToReadAPI(getUsername(), api);
                 String permissionString = api.getApiPermission();
                 if (!StringUtils.isEmpty(permissionString)) {
                     api.setApiPermission(replaceGroupIdWithName(permissionString));
@@ -782,6 +784,24 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     /**
+     * This method checks whether the currently logged in user has the "DELETE" permission for the API
+     *
+     * @param user - currently logged in user
+     * @param api  - the api to be deleted
+     * @throws APIManagementException - If the user does not have "DELETE" permission for the API
+     */
+    private void verifyUserPermissionsToReadAPI(String user, API api) throws APIManagementException {
+        List<String> userPermissions = api.getUserSpecificApiPermissions();
+        if (userPermissions.isEmpty()) {
+            String message = "The user " + user + " does not have permission to read the api " + api.getName();
+            if (log.isDebugEnabled()) {
+                log.debug(message);
+            }
+            throw new APIManagementException(message, ExceptionCodes.NO_READ_PERMISSIONS);
+        }
+    }
+
+    /**
      * This method will return map with role names and its permission values.
      *
      * @param permissionJsonString Permission json object a string
@@ -797,6 +817,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         for (Object aBaseJsonArray : baseJsonArray) {
             JSONObject jsonObject = (JSONObject) aBaseJsonArray;
             String groupId = jsonObject.get(APIMgtConstants.Permission.GROUP_ID).toString();
+            groupId = getIdentityProvider().getRoleId(groupId);
+            if (StringUtils.isEmpty(groupId)) {
+                throw new APIManagementException("Error while retrieving groupId: " + groupId, ExceptionCodes
+                        .ROLE_DOES_NOT_EXIST);
+            }
             JSONArray subJsonArray = (JSONArray) jsonObject.get(APIMgtConstants.Permission.PERMISSION);
             int totalPermissionValue = 0;
             for (Object aSubJsonArray : subJsonArray) {
