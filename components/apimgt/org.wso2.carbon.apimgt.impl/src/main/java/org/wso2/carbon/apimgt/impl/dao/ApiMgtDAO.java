@@ -5519,6 +5519,12 @@ public class ApiMgtDAO {
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 application.setTokenType(rs.getString("TOKEN_TYPE"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
+
+                if (multiGroupAppSharingEnabled) {
+                    if (application.getGroupId().isEmpty()) {
+                        application.setGroupId(getGroupId(applicationId));
+                    }
+                }
             }
             if (application != null) {
                 Map<String,String> applicationAttributes = getApplicationAttributes(connection, applicationId);
