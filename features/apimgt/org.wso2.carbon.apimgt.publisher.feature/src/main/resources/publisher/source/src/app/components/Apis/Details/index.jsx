@@ -41,7 +41,7 @@ import Documents from './Documents';
 import Resources from './Resources/Resources';
 import Endpoints from './Endpoints';
 import Subscriptions from './Subscriptions/Subscriptions';
-import Scopes from './Scopes/Scopes';
+import Scope from './Scopes';
 import Security from './Security';
 import CustomIcon from '../../Shared/CustomIcon';
 import LeftMenuItem from '../../Shared/LeftMenuItem';
@@ -263,7 +263,7 @@ class Details extends Component {
                             <Route path='/apis/:api_uuid/lifecycle' component={() => <LifeCycle api={api} />} />
                             <Route path='/apis/:api_uuid/endpoints' component={() => <Endpoints api={api} />} />
                             <Route path='/apis/:api_uuid/resources' component={() => <Resources api={api} />} />
-                            <Route path='/apis/:api_uuid/scopes' component={() => <Scopes api={api} />} />
+                            <Route path='/apis/:api_uuid/scopes' component={() => <Scope api={api} />} />
                             <Route path='/apis/:api_uuid/documents' component={() => <Documents api={api} />} />
                             <Route path='/apis/:api_uuid/subscriptions' component={() => <Subscriptions api={api} />} />
                             <Route path='/apis/:api_uuid/security' component={() => <Security api={api} />} />
