@@ -651,4 +651,18 @@
         </ClientGeneration>
     </SwaggerCodegen>
 
+    <OpenTracer>
+        <RemoteTracer>
+            <Enabled>false</Enabled>
+            <Name>zipkin</Name>
+            <Properties>
+                <HostName>localhost</HostName>
+                <Port>9411</Port>
+            </Properties>
+        </RemoteTracer>
+        <LogTracer>
+            <Enabled>false</Enabled>
+        </LogTracer>
+    </OpenTracer>
+
 </APIManager>

@@ -38,6 +38,9 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.tracing.TracingSpan;
+import org.wso2.carbon.apimgt.tracing.TracingTracer;
+import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 
@@ -114,7 +117,14 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
     public boolean handleRequest(MessageContext messageContext) {
 
         Timer.Context context = startMetricTimer();
-
+        TracingSpan CORSRequestHandlerSpan = null;
+        if (Util.tracingEnabled()) {
+            TracingSpan responseLatencySpan =
+                    (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+            TracingTracer tracer = Util.getGlobalTracer();
+            CORSRequestHandlerSpan =
+                    Util.startSpan(APIMgtGatewayConstants.CORS_REQUEST_HANDLER, responseLatencySpan, tracer);
+        }
         try {
             if (!initializeHeaderValues) {
                 initializeHeaders();
@@ -211,8 +221,17 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             }
             setCORSHeaders(messageContext, selectedResource);
             return true;
+        } catch (Exception e) {
+            if (Util.tracingEnabled() && CORSRequestHandlerSpan != null) {
+                Util.setTag(CORSRequestHandlerSpan, APIMgtGatewayConstants.ERROR,
+                        APIMgtGatewayConstants.CORS_REQUEST_HANDLER_ERROR);
+            }
+            throw e;
         } finally {
             stopMetricTimer(context);
+            if (Util.tracingEnabled()) {
+                Util.finishSpan(CORSRequestHandlerSpan);
+            }
         }
     }
 

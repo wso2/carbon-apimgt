@@ -46,6 +46,9 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.tracing.TracingSpan;
+import org.wso2.carbon.apimgt.tracing.TracingTracer;
+import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 
@@ -219,6 +222,18 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "EXS_EXCEPTION_SOFTENING_RETURN_FALSE",
             justification = "Error is sent through payload")
     public boolean handleRequest(MessageContext messageContext) {
+        TracingSpan keySpan = null;
+        if (Util.tracingEnabled()) {
+            TracingSpan responseLatencySpan =
+                    (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+            TracingTracer tracer = Util.getGlobalTracer();
+            keySpan = Util.startSpan(APIMgtGatewayConstants.KEY_VALIDATION, responseLatencySpan, tracer);
+            messageContext.setProperty(APIMgtGatewayConstants.KEY_VALIDATION, keySpan);
+            org.apache.axis2.context.MessageContext axis2MC =
+                    ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+            axis2MC.setProperty(APIMgtGatewayConstants.KEY_VALIDATION, keySpan);
+        }
+
         Timer.Context context = startMetricTimer();
         long startTime = System.nanoTime();
         long endTime;
@@ -238,6 +253,9 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             }
         } catch (APISecurityException e) {
 
+            if (Util.tracingEnabled() && keySpan != null) {
+                Util.setTag(keySpan, APIMgtGatewayConstants.ERROR, APIMgtGatewayConstants.KEY_SPAN_ERROR);
+            }
             if (log.isDebugEnabled()) {
                 // We do the calculations only if the debug logs are enabled. Otherwise this would be an overhead
                 // to all the gateway calls that is happening.
@@ -264,6 +282,9 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
             handleAuthFailure(messageContext, e);
         } finally {
+            if (Util.tracingEnabled()) {
+                Util.finishSpan(keySpan);
+            }
             messageContext.setProperty(APIMgtGatewayConstants.SECURITY_LATENCY,
                     TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime));
             stopMetricTimer(context);

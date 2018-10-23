@@ -60,6 +60,9 @@ import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
+import org.wso2.carbon.apimgt.tracing.TracingSpan;
+import org.wso2.carbon.apimgt.tracing.TracingTracer;
+import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.metrics.manager.Level;
 import org.wso2.carbon.metrics.manager.MetricManager;
@@ -490,13 +493,29 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         Timer timer3 = getTimer(MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), THROTTLE_MAIN));
         Timer.Context context3 = timer3.start();
+        TracingSpan throttleLatencySpan = null;
+        if (Util.tracingEnabled()) {
+            TracingSpan responseLatencySpan =
+                    (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+            TracingTracer tracer = Util.getGlobalTracer();
+            throttleLatencySpan = Util.startSpan(APIMgtGatewayConstants.THROTTLE_LATENCY, responseLatencySpan, tracer);
+        }
         long executionStartTime = System.currentTimeMillis();
         try {
             return doThrottle(messageContext);
+        } catch (Exception e) {
+            if (Util.tracingEnabled() && throttleLatencySpan != null) {
+                Util.setTag(throttleLatencySpan, APIMgtGatewayConstants.ERROR,
+                        APIMgtGatewayConstants.THROTTLE_HANDLER_ERROR);
+            }
+            throw e;
         } finally {
             messageContext.setProperty(APIMgtGatewayConstants.THROTTLING_LATENCY,
                     System.currentTimeMillis() - executionStartTime);
             context3.stop();
+            if (Util.tracingEnabled()) {
+                Util.finishSpan(throttleLatencySpan);
+            }
         }
     }
 

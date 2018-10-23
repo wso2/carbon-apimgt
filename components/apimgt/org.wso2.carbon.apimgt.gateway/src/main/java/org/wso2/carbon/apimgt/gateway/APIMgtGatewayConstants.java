@@ -99,6 +99,40 @@ public class APIMgtGatewayConstants {
     public static final String SYNAPDE_GW_LABEL = "Synapse";
     public static final String CLIENT_USER_AGENT = "clientUserAgent";
     public static final String CLIENT_IP = "clientIp";
-    
+
+    /**
+     * Constants for Open Tracing
+     * */
+    public static final String SERVICE_NAME = "API:Latency";
+    public static final String RESPONSE_LATENCY = "API:Response_Latency";
+    public static final String BACKEND_LATENCY_SPAN = "API:Backend_Latency";
+    public static final String KEY_VALIDATION = "API:Key_Validation_Latency";
+    public static final String REQUEST_MEDIATION = "API:Request_Mediation_Latency";
+    public static final String RESPONSE_MEDIATION = "API:Response_Mediation_Latency";
+    public static final String GET_RESOURCE_AUTHENTICATION_SCHEME = "API:Get_Resource_Authentication_Scheme()";
+    public static final String KEY_VALIDATION_FROM_GATEWAY_NODE = "API:Key_Validation_From_Gateway_Node";
+    public static final String GET_CLIENT_DOMAIN = "API:Get_Client_Domain()";
+    public static final String GET_KEY_VALIDATION_INFO = "API:Get_Key_Validation_Info()";
+    public static final String FIND_MATCHING_VERB = "API:Find_matching_verb()";
+    public static final String CORS_REQUEST_HANDLER = "API:CORS_Request_Handler";
+    public static final String THROTTLE_LATENCY = "API:Throttle_Latency";
+    public static final String DO_GET_API_INFO_DTO = "API:Do_Get_API_Info_dto()";
+    public static final String API_MGT_RESPONSE_HANDLER = "API:API_MGT_Response_Handler";
+    public static final String GOOGLE_ANALYTICS_HANDLER = "API:Google_Analytics_Handler";
+    public static final String API_MGT_USAGE_HANDLER = "API:API_Mgt_Usage_Handler";
+    public static final String GET_ALL_URI_TEMPLATES = "API:GET_ALL_URI_TEMPLATES()";
+    public static final String TRACING_ENABLED = "OpenTracer.Enabled";
+    public static final String SPAN_KIND = "span.kind";
+    public static final String SERVER = "server";
+    public static final String ERROR = "error";
+    public static final String KEY_SPAN_ERROR = "API Authentication Failure";
+    public static final String RESPONSE_MEDIATION_ERROR = "Error in Response Mediation";
+    public static final String REQUEST_MEDIATION_ERROR = "Error in Request Mediation";
+    public static final String RESOURCE_AUTH_ERROR = "Error in Resource Authentication";
+    public static final String THROTTLE_HANDLER_ERROR = "Error in Throttle Handler";
+    public static final String API_THROTTLE_HANDLER_ERROR = "Error in API Throttle Handler";
+    public static final String CORS_REQUEST_HANDLER_ERROR = "Error in CORS_Request Handler";
+    public static final String API_KEY_VALIDATOR_ERROR = "Error while accessing backend services for API key validation";
+    public static final String GOOGLE_ANALYTICS_ERROR = "Error in Google Analytics Handler";
 }
 
