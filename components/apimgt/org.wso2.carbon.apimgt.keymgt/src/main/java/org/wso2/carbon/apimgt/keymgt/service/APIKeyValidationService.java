@@ -286,7 +286,7 @@ public class APIKeyValidationService extends AbstractAdmin {
             Util.finishSpan(keyValResponseSpan);
         }
         timerContext.stop();
-        if(Util.tracingEnabled() && validateMainSpan != null) {
+        if (Util.tracingEnabled() && validateMainSpan != null) {
             Util.finishSpan(validateMainSpan);
         }
         return validationContext.getValidationInfoDTO();

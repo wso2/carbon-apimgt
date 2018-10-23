@@ -120,7 +120,7 @@ public class Util {
         return null;
     }
 
-    public static void setTracingEnabled(boolean isTraceEnabled){
+    public static void setTracingEnabled(boolean isTraceEnabled) {
         Util.isTraceEnabled = isTraceEnabled;
     }
 

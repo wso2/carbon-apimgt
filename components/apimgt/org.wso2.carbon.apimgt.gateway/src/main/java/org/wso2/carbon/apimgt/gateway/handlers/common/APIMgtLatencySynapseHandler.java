@@ -47,7 +47,6 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
             Map headersMap =
                     (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
             TracingSpan spanContext = Util.extract(tracer, headersMap);
-
             TracingSpan responseLatencySpan =
                     Util.startSpan(APIMgtGatewayConstants.RESPONSE_LATENCY, spanContext, tracer);
             Util.setTag(responseLatencySpan, APIMgtGatewayConstants.SPAN_KIND, APIMgtGatewayConstants.SERVER);
@@ -65,7 +64,6 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
                     Util.startSpan(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN, parentSpan, tracer);
             messageContext.setProperty(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN, backendLatencySpan);
             Util.inject(backendLatencySpan, tracer, tracerSpecificCarrier);
-
             if (org.apache.axis2.context.MessageContext.getCurrentMessageContext() != null) {
                 Map headers = (Map) org.apache.axis2.context.MessageContext.getCurrentMessageContext().getProperty(
                         org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
@@ -96,5 +94,4 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
         }
         return true;
     }
-
 }
