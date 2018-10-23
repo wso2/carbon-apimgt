@@ -162,7 +162,7 @@ public class ApisApiServiceImplTestCase {
     }
 
     @Test
-    public void apisApiIdCommentsPost() throws Exception {
+    public void testApisApiIdCommentsPost() throws Exception {
         printTestMethodName();
         String apiId = UUID.randomUUID().toString();
         String commentId = UUID.randomUUID().toString();

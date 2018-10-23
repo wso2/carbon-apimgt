@@ -2211,7 +2211,7 @@ public class ApisApiServiceImplTestCase {
 
 
     @Test
-    public void apisApiIdCommentsPost() throws APIManagementException, NotFoundException {
+    public void testApisApiIdCommentsPost() throws APIManagementException, NotFoundException {
         printTestMethodName();
         String apiId = UUID.randomUUID().toString();
         String commentId = UUID.randomUUID().toString();
