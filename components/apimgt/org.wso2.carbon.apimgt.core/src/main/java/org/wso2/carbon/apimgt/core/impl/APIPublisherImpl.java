@@ -2585,7 +2585,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                  /*if the delete operation is done by a user who isn't the owner of the comment
                   and with a different end point*/
                 if (!(comment.getCommentedUser().equals(username) &&
-                        comment.getEntryPoint().equals(ENTRY_POINT_PUBLISHER))) {
+                        ENTRY_POINT_PUBLISHER.equals(comment.getEntryPoint()))) {
                     checkIfUserIsAdmin(username);
                 }
                 apiDAO.deleteComment(commentId, apiId);
@@ -2613,7 +2613,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 /*if the update operation is done by a user who isn't the owner of the comment
                   and with a different end point*/
                 if (!(oldComment.getCommentedUser().equals(username) &&
-                        oldComment.getEntryPoint().equals(ENTRY_POINT_PUBLISHER))) {
+                        ENTRY_POINT_PUBLISHER.equals(oldComment.getEntryPoint()))) {
                     String errorMsg = "The user " + username + " does not have permission to update this comment";
                     log.error(errorMsg);
                     throw new APICommentException(errorMsg, ExceptionCodes.COULD_NOT_UPDATE_COMMENT);
@@ -2665,21 +2665,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         return comment;
     }
 
-    /**
-     * Check whether current user is a comment moderator
-     *
-     * @param username username of the user
-     * @throws APICommentException if user does not have comment moderator role
-     */
-    /*private void checkIfUserIsCommentModerator(String username) throws APICommentException {
-        Set<String> roles = APIUtils.getAllRolesOfUser(username);
-        if (roles.contains(getConfig().getCommentModeratorRole())) {
-            return;
-        }
-        String errorMsg = "comment moderator permission needed";
-        log.error(errorMsg);
-        throw new APICommentException(errorMsg, ExceptionCodes.NEED_COMMENT_MODERATOR_PERMISSION);
-    }*/
 
     /**
      * Check whether current user is an admin

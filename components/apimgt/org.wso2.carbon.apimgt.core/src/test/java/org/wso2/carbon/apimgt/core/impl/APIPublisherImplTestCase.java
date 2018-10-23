@@ -124,6 +124,7 @@ public class APIPublisherImplTestCase {
     private static final String ADMIN_ROLE_ID = "cfbde56e-4352-498e-b6dc-85a6f1f8b058";
     private static final String DEVELOPER_ROLE_ID = "cfdce56e-8434-498e-b6dc-85a6f2d8f035";
     private static final String TEST_UUID = "7a2298c4-c905-403f-8fac-38c73301631f";
+    private static final String API_PUBLISHER = "APIPublisher";
 
     @BeforeClass
     void init() {
@@ -4277,7 +4278,7 @@ public class APIPublisherImplTestCase {
         APIPublisher apiPublisher = getApiPublisherImpl(daoFactory);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
-        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId(), "APIPublisher");
+        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId(), API_PUBLISHER);
         apiPublisher.addComment(comment, api.getId());
         Mockito.verify(apiDAO, Mockito.times(1)).isAPIExists(api.getId());
         Mockito.verify(apiDAO, Mockito.times(1)).addComment(comment, api.getId());
@@ -4292,7 +4293,7 @@ public class APIPublisherImplTestCase {
         APIPublisher apiPublisher = getApiPublisherImpl(daoFactory);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
-        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId(), "APIPublisher");
+        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId(), API_PUBLISHER);
         Mockito.when(apiDAO.getCommentByUUID(comment.getUuid(), api.getId())).thenReturn(comment);
         apiPublisher.getCommentByUUID(comment.getUuid(), api.getId());
         Mockito.verify(apiDAO, Mockito.times(1)).isAPIExists(api.getId());
@@ -4309,8 +4310,8 @@ public class APIPublisherImplTestCase {
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
         List<Comment> commentList = new ArrayList<>();
-        Comment comment1 = SampleTestObjectCreator.createDefaultComment(api.getId(), "APIPublisher");
-        Comment comment2 = SampleTestObjectCreator.createDefaultComment(api.getId(), "APIPublisher");
+        Comment comment1 = SampleTestObjectCreator.createDefaultComment(api.getId(), API_PUBLISHER);
+        Comment comment2 = SampleTestObjectCreator.createDefaultComment(api.getId(), API_PUBLISHER);
         commentList.add(comment1);
         commentList.add(comment2);
         Mockito.when(apiDAO.getCommentsForApi(api.getId())).thenReturn(commentList);
@@ -4330,7 +4331,7 @@ public class APIPublisherImplTestCase {
         APIPublisher apiPublisher = getApiPublisherImpl(daoFactory);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
-        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId(), "APIPublisher");
+        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId(), API_PUBLISHER);
         Mockito.when(apiDAO.getCommentByUUID(comment.getUuid(), api.getId())).thenReturn(comment);
         apiPublisher.deleteComment(comment.getUuid(), api.getId(), "admin");
         Mockito.verify(apiDAO, Mockito.times(1)).isAPIExists(api.getId());
@@ -4346,7 +4347,7 @@ public class APIPublisherImplTestCase {
         APIPublisher apiPublisher = getApiPublisherImpl(daoFactory);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
-        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId(), "APIPublisher");
+        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId(), API_PUBLISHER);
         Mockito.when(apiDAO.getCommentByUUID(TEST_UUID, api.getId())).thenReturn(comment);
         apiPublisher.updateComment(comment, TEST_UUID, api.getId(), "admin");
         Mockito.verify(apiDAO, Mockito.times(1)).isAPIExists(api.getId());

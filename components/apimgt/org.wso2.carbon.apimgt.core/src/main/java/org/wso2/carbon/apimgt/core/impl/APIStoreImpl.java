@@ -129,6 +129,7 @@ import java.util.UUID;
 public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMObservable {
 
     private static final String ENTRY_POINT_STORE = "APIStore";
+    private static final String ADMIN_ROLE = "admin";
     // Map to store observers, which observe APIStore events
     private Map<String, EventObserver> eventObservers = new HashMap<>();
 
@@ -853,7 +854,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                   /*if the delete operation is done by a user who isn't the owner of the comment
                   and with a different end point*/
                 if (!(comment.getCommentedUser().equals(username) &&
-                        comment.getEntryPoint().equals(ENTRY_POINT_STORE))) {
+                        ENTRY_POINT_STORE.equals(comment.getEntryPoint()))) {
                     checkIfUserIsAdmin(username);
                 }
                 apiDAO.deleteComment(commentId, apiId);
@@ -880,7 +881,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                /*if the update operation is done by a user who isn't the owner of the comment
                   and with a different end point*/
                 if (!(oldComment.getCommentedUser().equals(username) &&
-                        oldComment.getEntryPoint().equals(ENTRY_POINT_STORE))) {
+                        ENTRY_POINT_STORE.equals(comment.getEntryPoint()))) {
                     String errorMsg = "The user " + username + " does not have permission to update this comment";
                     log.error(errorMsg);
                     throw new APICommentException(errorMsg, ExceptionCodes.COULD_NOT_UPDATE_COMMENT);
@@ -900,22 +901,6 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     }
 
     /**
-     * Check whether current user is a comment moderator
-     *
-     * @param username username of the user
-     * @throws APICommentException if user does not have comment moderator role
-     */
-    /*private void checkIfUserIsCommentModerator(String username) throws APICommentException {
-        Set<String> roles = APIUtils.getAllRolesOfUser(username);
-        if (roles.contains(getConfig().getCommentModeratorRole())) {
-            return;
-        }
-        String errorMsg = "comment moderator permission needed";
-        log.error(errorMsg);
-        throw new APICommentException(errorMsg, ExceptionCodes.NEED_COMMENT_MODERATOR_PERMISSION);
-    }*/
-
-    /**
      * Check whether current user is an admin
      *
      * @param username username of the user
@@ -923,7 +908,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
      */
     private void checkIfUserIsAdmin(String username) throws APICommentException {
         Set<String> roles = APIUtils.getAllRolesOfUser(username);
-        if (roles.contains("admin")) {
+        if (roles.contains(ADMIN_ROLE)) {
             return;
         }
         String errorMsg = "admin permission needed";
