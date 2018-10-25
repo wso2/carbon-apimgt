@@ -100,6 +100,7 @@ var jagg = jagg || {};
                 }},
                 {name:"No",cssClass:"btn",cbk:function() {
                     $('#messageModal').modal('hide');
+                    $("#messageModal div.modal-footer").html("");
                     if(typeof params.cancelCallback  == "function") {params.cancelCallback()};
                 }}
             ]
