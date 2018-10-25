@@ -459,7 +459,7 @@ class Details extends React.Component {
             }
           </Grid>
         </Grid>
-      </Grid >
+      </Grid>
     );
 
   }
