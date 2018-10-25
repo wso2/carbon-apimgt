@@ -26,14 +26,16 @@ import {PageNotFound} from '../../../Base/Errors'
 import SecurityOverview from './SecurityOverview';
 import AddPolicy from './AddPolicy';
 
-const Security = () => {
-    return (
-        <Switch>
-            <Route path={"/apis/:api_uuid/security/add-policy"} component={AddPolicy}/>
-            <Route path={"/apis/:api_uuid/security"} component={SecurityOverview}/>
-            <Route component={PageNotFound}/>
-        </Switch>
-    );
-};
+class Security extends React.Component{
+    constructor(props) {
+        super(props);
+    }
+
+    render() {
+        return (
+            <SecurityOverview id={this.props.api.id}/>
+        );
+    }
+}
 
 export default Security

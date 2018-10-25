@@ -34,8 +34,65 @@ import TableRow from '@material-ui/core/TableRow';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Button from '@material-ui/core/Button';
+import { withStyles } from '@material-ui/core/styles';
+import AddCircle from '@material-ui/icons/AddCircle';
+import Divider from '@material-ui/core/Divider';
 
-class Security extends Component {
+import AddPolicy from './AddPolicy';
+
+const styles = theme => ({
+    root: {
+        flexGrow: 1,
+        marginTop: 10,
+    },
+    titleWrapper: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    mainTitle: {
+        paddingLeft: 0,
+    },
+    button: {
+        marginLeft: theme.spacing.unit*2,
+        textTransform: theme.custom.leftMenuTextStyle,
+        color: theme.palette.getContrastText(theme.palette.primary.main),
+    },
+    buttonIcon: {
+        marginRight: 10,
+    },
+    table: {
+        '& td': {
+            fontSize: theme.typography.fontSize,
+        },
+        '& th': {
+            fontSize: theme.typography.fontSize * 1.2,
+        },
+        tableLayout: 'fixed',
+    },
+    addNewHeader: {
+        padding: theme.spacing.unit*2,
+        backgroundColor: theme.palette.grey['300'],
+        fontSize: theme.typography.h6.fontSize,
+        color: theme.typography.h6.color,
+        fontWeight: theme.typography.h6.fontWeight,
+    },
+    addNewWrapper: {
+        backgroundColor: theme.palette.background.paper,
+        color: theme.palette.getContrastText(theme.palette.background.paper),
+        border: 'solid 1px ' + theme.palette.grey['300'],
+        borderRadius: theme.shape.borderRadius,
+        marginTop: theme.spacing.unit*2,
+    },
+    contentWrapper: {
+        maxWidth: theme.custom.contentAreaWidth,
+    },
+    addJsonContent: {
+        whiteSpace: 'pre',
+    }
+});
+
+class SecurityOverview extends Component {
     constructor(props) {
         super(props);
         this.api = new Api();
@@ -43,8 +100,11 @@ class Security extends Component {
             api: {
                 name: ''
             },
-            policies: []
+            policies: [],
+            showAddPolicy: false
         };
+        this.updateData = this.updateData.bind(this);
+        this.toggleShowAddPolicy = this.toggleShowAddPolicy.bind(this);
         this.updateData = this.updateData.bind(this);
     }
 
@@ -53,7 +113,7 @@ class Security extends Component {
     }
 
     updateData() {
-        let promised_api = this.api.get(this.props.match.params.api_uuid);
+        let promised_api = this.api.get(this.props.id);
         promised_api.then(response => {
             this.setState({api: response.obj});
             this.updatePolicyData();
@@ -92,38 +152,53 @@ class Security extends Component {
         });
     }
 
+    toggleShowAddPolicy = () => {
+        this.setState({showAddPolicy: !this.state.showAddPolicy});
+    }
+
+    formatPolicy = (policy) => {
+        policy = policy.replace(":", " : ");
+        policy = policy.split(',').join(",\n");
+        return policy;
+    }
+
     render() {
         let data = [];
         if (this.state.policies) {
             data = this.state.policies;
         }
+        const {classes} = this.props;
+        const {showAddPolicy} = this.state;
 
         return (
-            <Grid container>
-                <Grid item xs={12}>
-                    <AppBar position="static" >
-                        <Toolbar style={{minHeight:'30px'}}>
-                            <Link to={"/apis/:api_uuid/security/add-policy".replace(":api_uuid",
-                                this.props.match.params.api_uuid)}>
-                                <Button color="contrast">Add Policy</Button>
-                            </Link>
-                        </Toolbar>
-                    </AppBar>
-                </Grid>
-                <Grid item xs={12}>
-                    <Paper>
-                        <Typography className="page-title" type="display2">
-                            {this.state.api.name} - <span>Threat Protection Policies</span>
+            <div className={classes.root}>
+                <div className={classes.contentWrapper}>
+                    <div className={classes.titleWrapper}>
+                        <Typography variant='h4' align='left' className={classes.mainTitle}>
+                            Threat Protection Policies
                         </Typography>
-                        <Typography type="caption" gutterBottom align="left" className="page-title-help">
-                           Add or Remove Threat Protection Policies from APIs
+                        <Button size="small" className={classes.button} onClick={this.toggleShowAddPolicy}>
+                            <AddCircle className={classes.buttonIcon}/>
+                            Add New Threat Protection Policy
+                        </Button>
+                    </div>
+                </div>
+                <div className={classes.contentWrapper}>
+                {showAddPolicy &&
+                    <AddPolicy
+                        id={this.state.api.id}
+                        toggleShowAddPolicy={this.toggleShowAddPolicy}
+                        updateData={this.updateData}/>
+                }
+                </div>
+                <br/>
+                <div className={classes.contentWrapper}>
+                    <div className={classes.addNewWrapper}>
+                        <Typography className={classes.addNewHeader}>
+                            Manage Threat Protection Policies
                         </Typography>
-
-                    </Paper>
-                </Grid>
-                <Grid item xs={12} className="page-content">
-                    <Paper>
-                        <Table>
+                        <Divider className={classes.divider} />
+                        <Table className={classes.table}>
                             <TableHead>
                                 <TableRow>
                                     <TableCell>Policy Name</TableCell>
@@ -138,23 +213,27 @@ class Security extends Component {
                                         <TableRow key={n.uuid}>
                                             <TableCell>{n.name + (n.uuid=="GLOBAL-JSON"? " (GLOBAL)": "")}</TableCell>
                                             <TableCell>{n.type}</TableCell>
-                                            <TableCell>{n.policy}</TableCell>
                                             <TableCell>
-                                              <span>
-                                                 <Button color="accent"
-                                                         onClick={() => this.deletePolicy(n.uuid)} >Delete</Button>
-                                              </span>
+                                                <div className={classes.addJsonContent}>
+                                                    {this.formatPolicy(n.policy)}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <span>
+                                                    <Button color="accent"
+                                                            onClick={() => this.deletePolicy(n.uuid)} >Delete</Button>
+                                                </span>
                                             </TableCell>
                                         </TableRow>
                                     );
                                 })}
                             </TableBody>
                         </Table>
-                    </Paper>
-                </Grid>
-            </Grid>
+                    </div>
+                </div>
+            </div>
         );
     }
 }
 
-export default Security
+export default withStyles(styles)(SecurityOverview)
