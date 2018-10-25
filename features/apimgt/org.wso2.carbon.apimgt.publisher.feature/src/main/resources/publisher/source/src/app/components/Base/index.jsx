@@ -48,7 +48,6 @@ const styles = theme => ({
     contentWrapper: {
         display: 'flex',
         flexDirection: 'row',
-        overflow: 'auto',
         position: 'relative',
         minHeight: 'calc(100vh - 114px)',
     },
