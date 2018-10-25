@@ -289,7 +289,7 @@ APIDesigner.prototype.check_if_resource_exist = function(path, method){
 }
 
 APIDesigner.prototype.load_api_base_document = function (api_doc_version) {
-    if (api_doc_version == supportedOpenAPI3Version){
+    if (this.is_supported_openapi_version(api_doc_version)){
         this.load_api_document(openapi3_api_doc);
     } else{
         this.load_api_document(swagger2_api_doc);
@@ -298,7 +298,7 @@ APIDesigner.prototype.load_api_base_document = function (api_doc_version) {
 
 APIDesigner.prototype.is_openapi3 = function () {
     var isOpenAPI3 = false;
-    if (this.api_doc.openapi != undefined && this.api_doc.openapi.trim() == supportedOpenAPI3Version) {
+    if (this.api_doc.openapi != undefined && this.is_supported_openapi_version(this.api_doc.openapi.trim())) {
         isOpenAPI3 = true;
     }
     return isOpenAPI3;
@@ -330,6 +330,11 @@ APIDesigner.prototype.add_default_resource = function(){
     $(".http_verb_select:lt(5)").attr("checked","checked");
     $("#inputResource").val("Default");
     $("#add_resource").trigger('click');
+}
+
+APIDesigner.prototype.is_supported_openapi_version = function (version) {
+    // support for 3.0.x versions
+    return /^3\.0\.\d{1,}$/.test(version);
 }
 
 APIDesigner.prototype.get_scopes = function() {
