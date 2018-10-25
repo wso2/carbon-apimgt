@@ -75,10 +75,6 @@ class AddPolicy extends Component {
         policies: []
     };
 
-    constructor(props) {
-        super(props);
-    }
-
     componentDidMount() {
         let api = new API();
         let promisedPolicies = api.getThreatProtectionPolicies();
