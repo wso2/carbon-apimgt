@@ -128,6 +128,8 @@ import java.util.UUID;
  */
 public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMObservable {
 
+    private static final String ENTRY_POINT_STORE = "APIStore";
+    private static final String ADMIN_ROLE = "admin";
     // Map to store observers, which observe APIStore events
     private Map<String, EventObserver> eventObservers = new HashMap<>();
 
@@ -829,6 +831,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         validateCommentMaxCharacterLength(comment.getCommentText());
         String generatedUuid = UUID.randomUUID().toString();
         comment.setUuid(generatedUuid);
+        comment.setEntryPoint(ENTRY_POINT_STORE);
         try {
             failIfApiNotExists(apiId);
             getApiDAO().addComment(comment, apiId);
@@ -848,9 +851,11 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             failIfApiNotExists(apiId);
             Comment comment = apiDAO.getCommentByUUID(commentId, apiId);
             if (comment != null) {
-                // if the delete operation is done by a user who isn't the owner of the comment
-                if (!comment.getCommentedUser().equals(username)) {
-                    checkIfUserIsCommentModerator(username);
+                  /*if the delete operation is done by a user who isn't the owner of the comment
+                  and with a different end point*/
+                if (!(comment.getCommentedUser().equals(username) &&
+                        ENTRY_POINT_STORE.equals(comment.getEntryPoint()))) {
+                    checkIfUserIsAdmin(username);
                 }
                 apiDAO.deleteComment(commentId, apiId);
             } else {
@@ -873,9 +878,13 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             failIfApiNotExists(apiId);
             Comment oldComment = getApiDAO().getCommentByUUID(commentId, apiId);
             if (oldComment != null) {
-                // if the update operation is done by a user who isn't the owner of the comment
-                if (!oldComment.getCommentedUser().equals(username)) {
-                    checkIfUserIsCommentModerator(username);
+               /*if the update operation is done by a user who isn't the owner of the comment
+                  and with a different end point*/
+                if (!(oldComment.getCommentedUser().equals(username) &&
+                        ENTRY_POINT_STORE.equals(comment.getEntryPoint()))) {
+                    String errorMsg = "The user " + username + " does not have permission to update this comment";
+                    log.error(errorMsg);
+                    throw new APICommentException(errorMsg, ExceptionCodes.COULD_NOT_UPDATE_COMMENT);
                 }
                 getApiDAO().updateComment(comment, commentId, apiId);
             } else {
@@ -892,19 +901,19 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     }
 
     /**
-     * Check whether current user is a comment moderator
+     * Check whether current user is an admin
      *
      * @param username username of the user
-     * @throws APICommentException if user does not have comment moderator role
+     * @throws APICommentException if user does not have admin role
      */
-    private void checkIfUserIsCommentModerator(String username) throws APICommentException {
+    private void checkIfUserIsAdmin(String username) throws APICommentException {
         Set<String> roles = APIUtils.getAllRolesOfUser(username);
-        if (roles.contains(getConfig().getCommentModeratorRole())) {
+        if (roles.contains(ADMIN_ROLE)) {
             return;
         }
-        String errorMsg = "comment moderator permission needed";
+        String errorMsg = "admin permission needed";
         log.error(errorMsg);
-        throw new APICommentException(errorMsg, ExceptionCodes.NEED_COMMENT_MODERATOR_PERMISSION);
+        throw new APICommentException(errorMsg, ExceptionCodes.NEED_ADMIN_PERMISSION);
     }
 
     /**

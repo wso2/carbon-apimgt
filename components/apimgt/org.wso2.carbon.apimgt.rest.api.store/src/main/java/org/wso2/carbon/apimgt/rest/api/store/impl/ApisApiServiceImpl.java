@@ -223,7 +223,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
 
     /**
-     * Update a comment
+     * Add a new comment
      *
      * @param apiId   API ID
      * @param body    comment body
@@ -268,6 +268,8 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     /**
+     * Update a comment
+     *
      * @param commentId         Comment ID
      * @param apiId             API ID
      * @param body              comment body
@@ -281,6 +283,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisApiIdCommentsCommentIdPut(String commentId, String apiId, CommentDTO body,
                                                   String ifMatch, String ifUnmodifiedSince, Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
+
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
             String existingFingerprint = apisApiIdCommentsCommentIdPutFingerprint(commentId, apiId, body, ifMatch,

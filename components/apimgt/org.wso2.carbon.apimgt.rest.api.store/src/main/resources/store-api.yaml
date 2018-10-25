@@ -3810,6 +3810,12 @@ definitions:
         type: string
       apiId:
         type: string
+      category:
+        type: string
+      parentCommentId:
+        type: string
+      entryPoint:
+        type: string
       username:
         type: string
         description: |

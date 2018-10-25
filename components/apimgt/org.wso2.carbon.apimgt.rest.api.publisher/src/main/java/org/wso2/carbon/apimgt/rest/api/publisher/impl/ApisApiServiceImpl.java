@@ -17,13 +17,14 @@ import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.impl.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.core.impl.WSDLProcessFactory;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.DedicatedGateway;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Scope;
+import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.core.models.WSDLInfo;
-import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.ThreatProtectionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
@@ -34,17 +35,8 @@ import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDefinitionValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.DedicatedGatewayDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.ScopeDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.ScopeListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThreatProtectionPolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.WorkflowResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
+import org.wso2.carbon.apimgt.rest.api.publisher.mappings.CommentMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.MappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
@@ -70,6 +62,264 @@ import javax.ws.rs.core.Response;
         "2016-11-01T13:47:43.416+05:30")
 public class ApisApiServiceImpl extends ApisApiService {
     private static final Logger log = LoggerFactory.getLogger(ApisApiServiceImpl.class);
+
+    /**
+     * Deletes a comment
+     *
+     * @param commentId         Comment ID
+     * @param apiId             API ID
+     * @param ifMatch           If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @param request           msf4j request object
+     * @return 200 response if the deletion was successful
+     * @throws NotFoundException if this method is not defined in ApisApiServiceImpl
+     */
+    @Override
+    public Response apisApiIdCommentsCommentIdDelete(String commentId, String apiId, String ifMatch,
+                                                     String ifUnmodifiedSince, Request request)
+            throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername(request);
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            String existingFingerprint = apisApiIdCommentsCommentIdDeleteFingerprint(commentId, apiId, ifMatch,
+                    ifUnmodifiedSince, request);
+            if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
+                    .contains(existingFingerprint)) {
+                return Response.status(Response.Status.PRECONDITION_FAILED).build();
+            }
+            apiPublisher.deleteComment(commentId, apiId, username);
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while deleting comment with commentId: " + commentId + " of apiID :" + apiId;
+            Map<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            paramList.put(APIMgtConstants.ExceptionsConstants.COMMENT_ID, commentId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+        return Response.ok().build();
+    }
+
+    /**
+     * Retrives comments for a given API ID and comment ID
+     *
+     * @param commentId       Comment ID
+     * @param apiId           API ID
+     * @param ifNoneMatch     If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @param request         msf4j request object
+     * @return CommentDTO object
+     * @throws NotFoundException if this method is not defined in ApisApiServiceImpl
+     */
+    @Override
+    public Response apisApiIdCommentsCommentIdGet(String commentId, String apiId, String ifNoneMatch,
+                                                  String ifModifiedSince, Request request)
+            throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername(request);
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            String existingFingerprint = apisApiIdCommentsCommentIdGetFingerprint(commentId, apiId, ifNoneMatch,
+                    ifModifiedSince, request);
+            if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
+                    .contains(existingFingerprint)) {
+                return Response.notModified().build();
+            }
+            Comment comment = apiPublisher.getCommentByUUID(commentId, apiId);
+            CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(comment);
+            return Response.ok().header(HttpHeaders.ETAG,
+                    "\"" + existingFingerprint + "\"").entity(commentDTO).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving comment with commentId: " + commentId + " of apiID :" + apiId;
+            Map<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            paramList.put(APIMgtConstants.ExceptionsConstants.COMMENT_ID, commentId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
+
+    /**
+     * Update a comment
+     *
+     * @param commentId         Comment ID
+     * @param apiId             API ID
+     * @param body              comment body
+     * @param ifMatch           If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @param request           msf4j request object
+     * @return comment update response
+     * @throws NotFoundException if this method is not defined in ApisApiServiceImpl
+     */
+    @Override
+    public Response apisApiIdCommentsCommentIdPut(String commentId, String apiId, CommentDTO body, String ifMatch,
+                                                  String ifUnmodifiedSince, Request request)
+            throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername(request);
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            String existingFingerprint = apisApiIdCommentsCommentIdPutFingerprint(commentId, apiId, body, ifMatch,
+                    ifUnmodifiedSince, request);
+            if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
+                    .contains(existingFingerprint)) {
+                return Response.status(Response.Status.PRECONDITION_FAILED).build();
+            }
+            Comment comment = CommentMappingUtil.fromDTOToComment(body, username);
+            apiPublisher.updateComment(comment, commentId, apiId, username);
+
+            Comment updatedComment = apiPublisher.getCommentByUUID(commentId, apiId);
+            CommentDTO updatedCommentDTO = CommentMappingUtil.fromCommentToDTO(updatedComment);
+
+            String newFingerprint = getEtag(commentId, request.getProperty("LOGGED_IN_USER").toString());
+            return Response.ok().header(HttpHeaders.ETAG,
+                    "\"" + newFingerprint + "\"").entity(updatedCommentDTO).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while updating comment : " + commentId;
+            Map<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, body.getApiId());
+            paramList.put(APIMgtConstants.ExceptionsConstants.COMMENT_ID, commentId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
+
+    /**
+     * Retrives A list of comments for a given API ID
+     *
+     * @param apiId   API ID
+     * @param limit   Max number of comments to return
+     * @param offset  Starting point of pagination
+     * @param request msf4j request object
+     * @return CommentListDTO object
+     * @throws NotFoundException if this method is not defined in ApisApiServiceImpl
+     */
+    @Override
+    public Response apisApiIdCommentsGet(String apiId, Integer limit, Integer offset, Request request)
+            throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername(request);
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            List<Comment> commentList = apiPublisher.getCommentsForApi(apiId);
+            CommentListDTO commentListDTO = CommentMappingUtil.fromCommentListToDTO(commentList, limit, offset);
+            return Response.ok().entity(commentListDTO).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving comments for api : " + apiId;
+            Map<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
+
+    /**
+     * Add a new comment
+     *
+     * @param apiId   API ID
+     * @param body    comment body
+     * @param request msf4j request object
+     * @return comment update response
+     * @throws NotFoundException if this method is not defined in ApisApiServiceImpl
+     */
+    @Override
+    public Response apisApiIdCommentsPost(String apiId, CommentDTO body, Request request) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername(request);
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            Comment comment = CommentMappingUtil.fromDTOToComment(body, username);
+            String createdCommentId = apiPublisher.addComment(comment, apiId);
+
+            Comment createdComment = apiPublisher.getCommentByUUID(createdCommentId, apiId);
+            CommentDTO createdCommentDTO = CommentMappingUtil.fromCommentToDTO(createdComment);
+            URI location = new URI(
+                    RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId + RestApiConstants.SUBRESOURCE_PATH_COMMENTS
+                            + "/" + createdCommentId);
+
+            String fingerprint = getEtag(comment.getUuid(), request.getProperty("LOGGED_IN_USER").toString());
+            return Response.status(Response.Status.CREATED).header(RestApiConstants.LOCATION_HEADER, location).header(HttpHeaders.ETAG,
+                    "\"" + fingerprint + "\"").entity(createdCommentDTO)
+                    .build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while adding comment to api : " + apiId;
+            Map<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, body.getApiId());
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while adding location header in response for comment";
+            ErrorHandler errorHandler = ExceptionCodes.LOCATION_HEADER_INCORRECT;
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorHandler);
+            log.error(errorMessage, e);
+            return Response.status(errorHandler.getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
+
+    /**
+     * Retrieves the fingerprint of a comment for commentDelete
+     *
+     * @param commentId         Comment ID
+     * @param apiId             API ID
+     * @param ifMatch           If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @param request           msf4j request object
+     * @return Fingerprint of the comment
+     */
+    public String apisApiIdCommentsCommentIdDeleteFingerprint(String commentId, String apiId, String ifMatch,
+                                                              String ifUnmodifiedSince, Request request) {
+        return getEtag(commentId, request.getProperty("LOGGED_IN_USER").toString());
+    }
+
+    /**
+     * Retrieves the fingerprint of a comment for commentGet
+     *
+     * @param commentId       Comment ID
+     * @param apiId           API ID
+     * @param ifNoneMatch     If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @param request         msf4j request object
+     * @return Fingerprint of the comment
+     */
+    public String apisApiIdCommentsCommentIdGetFingerprint(String commentId, String apiId, String ifNoneMatch,
+                                                           String ifModifiedSince, Request request) {
+        return getEtag(commentId, request.getProperty("LOGGED_IN_USER").toString());
+    }
+
+    /**
+     * Retrieves the fingerprint of a comment for commentPut
+     *
+     * @param commentId         Comment ID
+     * @param apiId             API ID
+     * @param body              body of the request
+     * @param ifMatch           If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @param request           msf4j request object
+     * @return Fingerprint of the comment
+     */
+    public String apisApiIdCommentsCommentIdPutFingerprint(String commentId, String apiId, CommentDTO body,
+                                                           String ifMatch, String ifUnmodifiedSince, Request request) {
+        return getEtag(commentId, request.getProperty("LOGGED_IN_USER").toString());
+    }
+
+    /**
+     * Retrieves last updatedtime for a comment given the comment id
+     *
+     * @param commentId    Comment ID
+     * @param loggedInUser
+     * @return Last updated time
+     */
+    private String getEtag(String commentId, String loggedInUser) {
+        String username = loggedInUser;
+        try {
+            String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username).getLastUpdatedTimeOfComment(commentId);
+            return ETagUtils.generateETag(lastUpdatedTime);
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving last updated time of comment " + commentId;
+            log.error(errorMessage, e);
+            return null;
+        }
+    }
 
     /**
      * Retrive Dedicated Gateway of an API
