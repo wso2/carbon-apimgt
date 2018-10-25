@@ -314,7 +314,6 @@ class ApiCreateSwagger extends React.Component {
                         )}
                         {uploadMethod === 'url' && (
                             <FormControl className={classes.FormControlOdd}>
-                                {valid.swaggerUrl.empty}
                                 <TextField
                                     error={valid.swaggerUrl.empty}
                                     fullWidth

@@ -21,7 +21,6 @@ import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import { withStyles } from '@material-ui/core/styles';
-import green from '@material-ui/core/colors/green';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import PropTypes from 'prop-types';
 import Alert from 'AppComponents/Shared/Alert';
@@ -38,11 +37,7 @@ const styles = theme => ({
         paddingLeft: theme.spacing.unit * 4,
         paddingTop: theme.spacing.unit * 2,
     },
-    paper: {
-        padding: theme.spacing.unit * 2,
-    },
     buttonProgress: {
-        color: green[500],
         position: 'relative',
         marginTop: theme.spacing.unit * 5,
         marginLeft: theme.spacing.unit * 6.25,
