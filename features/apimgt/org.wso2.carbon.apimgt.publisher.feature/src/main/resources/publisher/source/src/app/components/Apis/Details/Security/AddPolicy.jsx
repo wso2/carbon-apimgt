@@ -77,11 +77,6 @@ class AddPolicy extends Component {
 
     constructor(props) {
         super(props);
-        let api = new API();
-        let promisedApi = api.get(this.props.id);
-        promisedApi.then(response => {
-           this.setState({currentApi: response.obj});
-        });
     }
 
     componentDidMount() {
@@ -89,6 +84,10 @@ class AddPolicy extends Component {
         let promisedPolicies = api.getThreatProtectionPolicies();
         promisedPolicies.then(response => {
             this.setState({policies: response.obj.list});
+        });
+        let promisedApi = api.get(this.props.id);
+        promisedApi.then(response => {
+           this.setState({currentApi: response.obj});
         });
     }
 
