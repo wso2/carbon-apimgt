@@ -25,6 +25,7 @@
   "create.btn": "CREATE",
   "create.scope.description": "Scopes enable fine-grained access control to API resources based on user roles. You define scopes to an API's resources. When a user invokes the API, his/her OAuth 2 bearer token cannot grant access to any API resource beyond its associated scopes.",
   "create.scopes": "Create Scopes",
+  "create.document": "Create Document",
   "create.scope.helper.text": "Short description about the scope",
   "define.global.endpoint": "Define Global Endpoint",
   "apis.create.new.api": "APIs - Create New API",
