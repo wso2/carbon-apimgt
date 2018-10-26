@@ -67,7 +67,7 @@ function DocumentType(props) {
                     </CardContent>
                     <CardActions>
                         <Link to={url}>
-                            <Button variant='contained' color='primary' className={classes.button} onClick={activateLasers}>
+                            <Button variant='contained' color='primary' className={classes.button}>
                                 <FormattedMessage
                                     id='create.document'
                                     defaultMessage='Create Document'

@@ -16,24 +16,17 @@
  * under the License.
  */
 
-'use strict';
-
-import React from 'react'
-import {Switch, Route} from 'react-router-dom'
-
-import {PageNotFound} from '../../../Base/Errors'
+import React from 'react';
+import { Switch, Route } from 'react-router-dom';
 
 import SecurityOverview from './SecurityOverview';
-import AddPolicy from './AddPolicy';
 
 const Security = () => {
     return (
         <Switch>
-            <Route path={"/apis/:api_uuid/security/add-policy"} component={AddPolicy}/>
-            <Route path={"/apis/:api_uuid/security"} component={SecurityOverview}/>
-            <Route component={PageNotFound}/>
+            <Route path='/apis/:api_uuid/security' component={SecurityOverview} />
         </Switch>
     );
 };
 
-export default Security
+export default Security;
