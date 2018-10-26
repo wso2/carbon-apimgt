@@ -16,23 +16,18 @@
  * under the License.
  */
 
-import React, {Component} from 'react'
-import {Link} from 'react-router-dom'
+import React, { Component } from 'react';
 
-import Api from 'AppData/api'
-import Alert from 'AppComponents/Shared/Alert'
+import Api from 'AppData/api';
+import Alert from 'AppComponents/Shared/Alert';
+import PropTypes from 'prop-types';
 
 import Typography from '@material-ui/core/Typography';
-import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableHead from '@material-ui/core/TableHead';
 import TableCell from '@material-ui/core/TableCell';
-import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
 import Button from '@material-ui/core/Button';
 import { withStyles } from '@material-ui/core/styles';
 import AddCircle from '@material-ui/icons/AddCircle';
@@ -54,7 +49,7 @@ const styles = theme => ({
         paddingLeft: 0,
     },
     button: {
-        marginLeft: theme.spacing.unit*2,
+        marginLeft: theme.spacing.unit * 2,
         textTransform: theme.custom.leftMenuTextStyle,
         color: theme.palette.getContrastText(theme.palette.primary.main),
     },
@@ -71,7 +66,7 @@ const styles = theme => ({
         tableLayout: 'fixed',
     },
     addNewHeader: {
-        padding: theme.spacing.unit*2,
+        padding: theme.spacing.unit * 2,
         backgroundColor: theme.palette.grey['300'],
         fontSize: theme.typography.h6.fontSize,
         color: theme.typography.h6.color,
@@ -82,14 +77,14 @@ const styles = theme => ({
         color: theme.palette.getContrastText(theme.palette.background.paper),
         border: 'solid 1px ' + theme.palette.grey['300'],
         borderRadius: theme.shape.borderRadius,
-        marginTop: theme.spacing.unit*2,
+        marginTop: theme.spacing.unit * 2,
     },
     contentWrapper: {
         maxWidth: theme.custom.contentAreaWidth,
     },
     addJsonContent: {
         whiteSpace: 'pre',
-    }
+    },
 });
 
 class SecurityOverview extends Component {
@@ -98,10 +93,10 @@ class SecurityOverview extends Component {
         this.api = new Api();
         this.state = {
             api: {
-                name: ''
+                name: '',
             },
             policies: [],
-            showAddPolicy: false
+            showAddPolicy: false,
         };
         this.updateData = this.updateData.bind(this);
         this.toggleShowAddPolicy = this.toggleShowAddPolicy.bind(this);
@@ -113,53 +108,54 @@ class SecurityOverview extends Component {
     }
 
     updateData() {
-        let promised_api = this.api.get(this.props.id);
-        promised_api.then(response => {
-            this.setState({api: response.obj});
+        const promisedApi = this.api.get(this.props.match.params.api_uuid);
+        promisedApi.then((response) => {
+            this.setState({ api: response.obj });
             this.updatePolicyData();
         });
     }
 
     updatePolicyData() {
-        this.setState({policies: []})
-        let policyIds = this.state.api.threatProtectionPolicies.list;
-        for (var i=0; i<policyIds.length; i++) {
-            let id = policyIds[i].policyId;
-            let promisedPolicies = this.api.getThreatProtectionPolicy(id);
-            promisedPolicies.then(response => {
-                let policies = this.state.policies;
-                policies.push(response.obj);
-                this.setState({policies: policies});
+        this.setState({ policies: [] });
+        const policyIds = this.state.api.threatProtectionPolicies.list;
+        for (let i = 0; i < policyIds.length; i++) {
+            const id = policyIds[i].policyId;
+            const promisedPolicies = this.api.getThreatProtectionPolicy(id);
+            promisedPolicies.then((response) => {
+                const updatedPolicies = this.state.policies;
+                updatedPolicies.push(response.obj);
+                this.setState({ policies: updatedPolicies });
             });
         }
     }
 
     deletePolicy(id) {
-        let associatedApi = this.state.api;
-        let promisedPolicyDelete = this.api.deleteThreatProtectionPolicyFromApi(associatedApi.id, id);
-        promisedPolicyDelete.then(response => {
-           if (response.status === 200) {
-               Alert.info("Policy removed successfully.");
+        const associatedApi = this.state.api;
+        const promisedPolicyDelete = this.api.deleteThreatProtectionPolicyFromApi(associatedApi.id, id);
+        promisedPolicyDelete.then((response) => {
+            if (response.status === 200) {
+                Alert.info('Policy removed successfully.');
 
-               //remove policy from local api
-               let index = associatedApi.threatProtectionPolicies.list.indexOf({policyId: id});
-               associatedApi.threatProtectionPolicies.list.splice(index, 1);
-               this.setState({api: associatedApi});
-               this.updatePolicyData();
-           } else {
-               Alert.error("Failed to remove policy.");
-           }
+                //   remove policy from local api
+                const index = associatedApi.threatProtectionPolicies.list.indexOf({ policyId: id });
+                associatedApi.threatProtectionPolicies.list.splice(index, 1);
+                this.setState({ api: associatedApi });
+                this.updatePolicyData();
+            } else {
+                Alert.error('Failed to remove policy.');
+            }
         });
     }
 
     toggleShowAddPolicy = () => {
-        this.setState({showAddPolicy: !this.state.showAddPolicy});
+        this.setState({ showAddPolicy: !this.state.showAddPolicy });
     }
 
     formatPolicy = (policy) => {
-        policy = policy.replace(":", " : ");
-        policy = policy.split(',').join(",\n");
-        return policy;
+        let formattedPolicy = policy;
+        formattedPolicy = formattedPolicy.replace(':', ' : ');
+        formattedPolicy = formattedPolicy.split(',').join(',\n');
+        return formattedPolicy;
     }
 
     render() {
@@ -167,8 +163,8 @@ class SecurityOverview extends Component {
         if (this.state.policies) {
             data = this.state.policies;
         }
-        const {classes} = this.props;
-        const {showAddPolicy} = this.state;
+        const { classes } = this.props;
+        const { showAddPolicy } = this.state;
 
         return (
             <div className={classes.root}>
@@ -177,21 +173,22 @@ class SecurityOverview extends Component {
                         <Typography variant='h4' align='left' className={classes.mainTitle}>
                             Threat Protection Policies
                         </Typography>
-                        <Button size="small" className={classes.button} onClick={this.toggleShowAddPolicy}>
-                            <AddCircle className={classes.buttonIcon}/>
+                        <Button size='small' className={classes.button} onClick={this.toggleShowAddPolicy}>
+                            <AddCircle className={classes.buttonIcon} />
                             Add New Threat Protection Policy
                         </Button>
                     </div>
                 </div>
                 <div className={classes.contentWrapper}>
-                {showAddPolicy &&
+                    {showAddPolicy &&
                     <AddPolicy
                         id={this.state.api.id}
                         toggleShowAddPolicy={this.toggleShowAddPolicy}
-                        updateData={this.updateData}/>
-                }
+                        updateData={this.updateData}
+                    />
+                    }
                 </div>
-                <br/>
+                <br />
                 <div className={classes.contentWrapper}>
                     <div className={classes.addNewWrapper}>
                         <Typography className={classes.addNewHeader}>
@@ -204,14 +201,14 @@ class SecurityOverview extends Component {
                                     <TableCell>Policy Name</TableCell>
                                     <TableCell>Policy Type</TableCell>
                                     <TableCell>Policy</TableCell>
-                                    <TableCell></TableCell>
+                                    <TableCell />
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {data.map(n => {
+                                {data.map((n) => {
                                     return (
                                         <TableRow key={n.uuid}>
-                                            <TableCell>{n.name + (n.uuid=="GLOBAL-JSON"? " (GLOBAL)": "")}</TableCell>
+                                            <TableCell>{n.name + (n.uuid === 'GLOBAL-JSON' ? ' (GLOBAL)' : '')}</TableCell>
                                             <TableCell>{n.type}</TableCell>
                                             <TableCell>
                                                 <div className={classes.addJsonContent}>
@@ -220,8 +217,9 @@ class SecurityOverview extends Component {
                                             </TableCell>
                                             <TableCell>
                                                 <span>
-                                                    <Button color="accent"
-                                                            onClick={() => this.deletePolicy(n.uuid)} >Delete</Button>
+                                                    <Button color='accent' onClick={() => this.deletePolicy(n.uuid)} >
+                                                        Delete
+                                                    </Button>
                                                 </span>
                                             </TableCell>
                                         </TableRow>
@@ -236,4 +234,14 @@ class SecurityOverview extends Component {
     }
 }
 
-export default withStyles(styles)(SecurityOverview)
+SecurityOverview.propTypes = {
+    classes: PropTypes.shape({}).isRequired,
+    match: PropTypes.shape({
+        params: PropTypes.shape({
+            api_uuid: PropTypes.string,
+        }),
+    }).isRequired,
+};
+
+
+export default withStyles(styles)(SecurityOverview);

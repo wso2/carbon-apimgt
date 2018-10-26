@@ -17,26 +17,20 @@
  */
 
 
-import React, {Component} from 'react'
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
-import {Link} from 'react-router-dom'
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';;
-import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
-import MenuIcon from '@material-ui/icons/Menu';
 import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
-import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import { withStyles } from '@material-ui/core/styles';
 
-import API from 'AppData/api'
-import Alert from 'AppComponents/Shared/Alert'
+import API from 'AppData/api';
+import Alert from 'AppComponents/Shared/Alert';
 
 const styles = theme => ({
     addNewWrapper: {
@@ -44,20 +38,20 @@ const styles = theme => ({
         color: theme.palette.getContrastText(theme.palette.background.paper),
         border: 'solid 1px ' + theme.palette.grey['300'],
         borderRadius: theme.shape.borderRadius,
-        marginTop: theme.spacing.unit*2,
+        marginTop: theme.spacing.unit * 2,
     },
     addNewHeader: {
-        padding: theme.spacing.unit*2,
+        padding: theme.spacing.unit * 2,
         backgroundColor: theme.palette.grey['300'],
         fontSize: theme.typography.h6.fontSize,
         color: theme.typography.h6.color,
         fontWeight: theme.typography.h6.fontWeight,
     },
     addNewOther: {
-        padding: theme.spacing.unit*2,
+        padding: theme.spacing.unit * 2,
     },
     button: {
-        marginLeft: theme.spacing.unit*2,
+        marginLeft: theme.spacing.unit * 2,
         textTransform: theme.custom.leftMenuTextStyle,
         color: theme.palette.getContrastText(theme.palette.primary.main),
     },
@@ -66,66 +60,72 @@ const styles = theme => ({
     },
     addJsonContent: {
         whiteSpace: 'pre',
-    }
+    },
 });
 
 class AddPolicy extends Component {
     state = {
-        selectedPolicy : {uuid: '', name: 'Select', policy: '', type: ''},
-        policies: []
+        selectedPolicy: {
+            uuid: '',
+            name: 'Select',
+            policy: '',
+            type: '',
+        },
+        policies: [],
     };
 
     componentDidMount() {
-        let api = new API();
-        let promisedPolicies = api.getThreatProtectionPolicies();
-        promisedPolicies.then(response => {
-            this.setState({policies: response.obj.list});
+        const api = new API();
+        const promisedPolicies = api.getThreatProtectionPolicies();
+        promisedPolicies.then((response) => {
+            this.setState({ policies: response.obj.list });
         });
-        let promisedApi = api.get(this.props.id);
-        promisedApi.then(response => {
-           this.setState({currentApi: response.obj});
+        const promisedApi = api.get(this.props.id);
+        promisedApi.then((response) => {
+            this.setState({ currentApi: response.obj });
         });
     }
 
     handlePolicyAdd() {
-        let policy = this.state.selectedPolicy;
+        const policy = this.state.selectedPolicy;
         if (policy.uuid === '' || policy.name === '') {
-            Alert.error("Please select a policy");
+            Alert.error('Please select a policy');
             return;
         }
 
         if (this.state.currentApi) {
-            let currentApi = this.state.currentApi;
-            let api = new API();
-            let promisedPolicyAdd = api.addThreatProtectionPolicyToApi(currentApi.id, this.state.selectedPolicy.uuid);
-            promisedPolicyAdd.then(response => {
+            const { currentApi } = this.state;
+            const api = new API();
+            const promisedPolicyAdd = api.addThreatProtectionPolicyToApi(currentApi.id, this.state.selectedPolicy.uuid);
+            promisedPolicyAdd.then((response) => {
                 if (response.status === 200) {
-                    Alert.info("Threat protection policy added successfully.");
+                    Alert.info('Threat protection policy added successfully.');
                     this.props.updateData();
                 } else {
-                    Alert.error("Failed to add threat protection policy.");
+                    Alert.error('Failed to add threat protection policy.');
                 }
             });
         }
     }
 
-    handleChange = name => event => {
-        let policyId = event.target.value;
-        let api = new API();
-        let promisedPolicy = api.getThreatProtectionPolicy(policyId);
-        promisedPolicy.then(response => {
-            this.setState({selectedPolicy: response.obj});
+    handleChange = () => (event) => {
+        const policyId = event.target.value;
+        const api = new API();
+        const promisedPolicy = api.getThreatProtectionPolicy(policyId);
+        promisedPolicy.then((response) => {
+            this.setState({ selectedPolicy: response.obj });
         });
     }
 
     formatPolicy = (policy) => {
-        policy = policy.replace(":", " : ");
-        policy = policy.split(',').join(",\n");
-        return policy;
+        let formattedPolicy = policy;
+        formattedPolicy = formattedPolicy.replace(':', ' : ');
+        formattedPolicy = formattedPolicy.split(',').join(',\n');
+        return formattedPolicy;
     }
 
     render() {
-        const {classes} = this.props;
+        const { classes } = this.props;
         return (
             <div className={classes.contentWrapper}>
                 <div className={classes.addNewWrapper}>
@@ -134,20 +134,21 @@ class AddPolicy extends Component {
                     </Typography>
                     <Divider className={classes.divider} />
                     <div className={classes.addNewOther}>
-                        <InputLabel htmlFor="selectedPolicy">Policy</InputLabel>
+                        <InputLabel htmlFor='selectedPolicy'>Policy</InputLabel>
                         &nbsp;&nbsp;
                         <Select
                             value={this.state.selectedPolicy.uuid}
-                            onChange={this.handleChange("selectedPolicy")}
-                            input={<Input name="selectedPolicy" id="selectedPolicy" />}>
-                            {this.state.policies.map(n => {
+                            onChange={this.handleChange('selectedPolicy')}
+                            input={<Input name='selectedPolicy' id='selectedPolicy' />}
+                        >
+                            {this.state.policies.map((n) => {
                                 return (
                                     <MenuItem key={n.uuid} value={n.uuid}>{n.name}</MenuItem>
                                 );
                             })};
                         </Select>
-                        <br/>
-                        <br/>
+                        <br />
+                        <br />
                         <p>Policy Type: {this.state.selectedPolicy.type}</p>
                         <div>
                             <p>Policy: </p>
@@ -158,7 +159,7 @@ class AddPolicy extends Component {
                     </div>
                     <Divider className={classes.divider} />
                     <div className={classes.addNewOther}>
-                        <Button variant="contained" color="primary" onClick={() => this.handlePolicyAdd()}>
+                        <Button variant='contained' color='primary' onClick={() => this.handlePolicyAdd()}>
                             Add Policy to API
                         </Button>
                         <Button className={classes.button} onClick={this.props.toggleShowAddPolicy}>
@@ -171,4 +172,13 @@ class AddPolicy extends Component {
     }
 }
 
-export default withStyles(styles)(AddPolicy)
+AddPolicy.propTypes = {
+    classes: PropTypes.shape({}).isRequired,
+    toggleShowAddPolicy: PropTypes.func.isRequired,
+    id: PropTypes.string.isRequired,
+    updateData: PropTypes.func.isRequired,
+};
+
+
+export default withStyles(styles)(AddPolicy);
+
