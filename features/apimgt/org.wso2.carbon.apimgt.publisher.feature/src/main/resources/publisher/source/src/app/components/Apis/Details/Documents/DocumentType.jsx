@@ -58,11 +58,17 @@ function DocumentType(props) {
                 <Card className={classes.card}>
                     <CardContent>
                         <Typography variant="h5" component="h2">
-                            Add New Document Inline
+                            <FormattedMessage
+                                id='create.inline.document'
+                                defaultMessage='Add New Inline Document'
+                            />
                         </Typography>
                         <Divider />
                         <Typography className={classes.title} gutterBottom>
-                            Inline Doc Description
+                            <FormattedMessage
+                                id='inline.document.description'
+                                defaultMessage='This option is used to create an inline document for the API'
+                            />
                         </Typography>
                     </CardContent>
                     <CardActions>
@@ -80,11 +86,17 @@ function DocumentType(props) {
                 <Card className={classes.card}>
                     <CardContent>
                         <Typography variant="h5" component="h2">
-                            Add New Document File Or URL
+                            <FormattedMessage
+                                id='create.file.url.document'
+                                defaultMessage='Add New Document From File Or URL'
+                            />
                         </Typography>
                         <Divider />
                         <Typography className={classes.title} gutterBottom>
-                            File Or URL Doc Description
+                            <FormattedMessage
+                                id='file.document.description'
+                                defaultMessage='This option is used to create a document using a file or URL'
+                            />
                         </Typography>
                     </CardContent>
                     <CardActions>
