@@ -23,6 +23,7 @@ import API from 'AppData/api.js';
 import { Progress } from 'AppComponents/Shared/';
 import DocTableView from './DocTableView';
 import DocMenu from './DocMenu';
+import DocumentType from './DocumentType';
 
 /**
  * Documents tab related React components.
@@ -102,7 +103,7 @@ class Listing extends Component {
                     </div>
                 ) : (
                     <div style={{ paddingTop: 20 }}>
-                        <p>No documents added into the API</p>
+                        <DocumentType/>
                     </div>
                 )}
             </Fragment>
