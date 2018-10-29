@@ -23,6 +23,7 @@ import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
+import org.apache.log4j.MDC;
 import org.apache.synapse.AbstractSynapseHandler;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -85,17 +86,18 @@ public class LogsHandler extends AbstractSynapseHandler {
                 requestSize = buildRequestMessage(messageContext);
                 Map headers = LogUtils.getTransportHeaders(messageContext);
                 Set<String> key = headers.keySet();
-
                 String authHeader = LogUtils.getAuthorizationHeader(headers);
                 String orgIdHeader = LogUtils.getOrganizationIdHeader(headers);
                 String SrcIdHeader = LogUtils.getSourceIdHeader(headers);
                 String applIdHeader = LogUtils.getApplicationIdHeader(headers);
                 String uuIdHeader = LogUtils.getUuidHeader(headers);
+                String correlationIdHeader = LogUtils.getCorrelationHeader(headers);
                 messageContext.setProperty("AUTH_HEADER", authHeader);
                 messageContext.setProperty("ORG_ID_HEADER", orgIdHeader);
                 messageContext.setProperty("SRC_ID_HEADER", SrcIdHeader);
                 messageContext.setProperty("APP_ID_HEADER", applIdHeader);
                 messageContext.setProperty("UUID_HEADER", uuIdHeader);
+                messageContext.setProperty("CORRELATION_ID_HEADER", correlationIdHeader);
                 apiName = LogUtils.getAPIName(messageContext);
                 apiCTX = LogUtils.getAPICtx(messageContext);
                 apiMethod = LogUtils.getRestMethod(messageContext);
@@ -133,11 +135,14 @@ public class LogsHandler extends AbstractSynapseHandler {
                     String SrcIdHeader = (String) messageContext.getProperty("SRC_ID_HEADER");
                     String applIdHeader = (String) messageContext.getProperty("APP_ID_HEADER");
                     String uuIdHeader = (String) messageContext.getProperty("UUID_HEADER");
+                    String correlationIdHeader = (String) messageContext.getProperty("CORRELATION_ID_HEADER");
+                    MDC.put("Correlation-ID", correlationIdHeader);
                     log.info(beTotalLatency + "|HTTP|" + apiName + "|" + apiMethod + "|" + apiCTX + apiElectedRsrc + "|"
                             + apiTo + "|" + authHeader + "|" + orgIdHeader + "|" + SrcIdHeader
                             + "|" + applIdHeader + "|" + uuIdHeader + "|" + requestSize
                             + "|" + responseSize + "|" + apiResponseSC + "|"
                             + applicationName + "|" + apiConsumerKey + "|" + responseTime);
+                    MDC.remove("Correlation-ID");
                     return true;
                 } catch (Exception e) {
                     log.error("Cannot publish response event. " + e.getMessage(), e);
@@ -149,42 +154,6 @@ public class LogsHandler extends AbstractSynapseHandler {
     }
 
     public boolean handleResponseOutFlow(MessageContext messageContext) {
-        if (isEnabled()) {
-            String ep_flag = (String) messageContext.getProperty("END_POINT_FLAG");
-            if (!("true").equals(ep_flag)) {
-                apiResponseSC = LogUtils.getRestHttpResponseStatusCode(messageContext);
-                try {
-                    Map headers = LogUtils.getTransportHeaders(messageContext);
-                    Set<String> key = headers.keySet();
-
-                    String authHeader = LogUtils.getAuthorizationHeader(headers);
-                    String orgIdHeader = LogUtils.getOrganizationIdHeader(headers);
-                    String SrcIdHeader = LogUtils.getSourceIdHeader(headers);
-                    String applIdHeader = LogUtils.getApplicationIdHeader(headers);
-                    String uuIdHeader = LogUtils.getUuidHeader(headers);
-                    apiName = LogUtils.getAPIName(messageContext);
-                    apiCTX = LogUtils.getAPICtx(messageContext);
-                    apiMethod = LogUtils.getRestMethod(messageContext);
-                    apiTo = LogUtils.getTo(messageContext);
-                    apiElectedRsrc = LogUtils.getElectedResource(messageContext);
-                    apiRestReqFullPath = LogUtils.getRestReqFullPath(messageContext);
-                    apiMsgUUID = (String) messageContext.getMessageID();
-                    applicationName = LogUtils.getApplicationName(messageContext);
-                    apiConsumerKey = LogUtils.getConsumerKey(messageContext);
-                    log.info("" + "|HTTP|" + apiName + "|" + apiMethod + "|" + apiCTX + apiElectedRsrc + "|"
-                            + apiTo + "|" + authHeader + "|" + orgIdHeader + "|" + SrcIdHeader
-                            + "|" + applIdHeader + "|" + uuIdHeader + "|" + requestSize
-                            + "|" + "" + "|" + apiResponseSC + "|"
-                            + applicationName + "|" + apiConsumerKey + "|" + "");
-                    return true;
-                } catch (Exception e) {
-                    log.error("Cannot publish request event. " + e.getMessage(), e);
-                }
-            } else {
-                // log.info("Request sent to Backend.");
-                return true;
-            }
-        }
         return true;
     }
 

@@ -32,6 +32,10 @@ class LogUtils {
         return (String) headers.get("Authorization");
     }
 
+    protected static String getCorrelationHeader(Map headers) {
+        return (String) headers.get(APIMgtGatewayConstants.AM_ACTIVITY_ID);
+    }
+
     protected static String getOrganizationIdHeader(Map headers) {
         return (String) headers.get("organization-id");
     }

@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -25,7 +26,10 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.slf4j.MDC;
 import org.wso2.carbon.utils.CarbonUtils;
+
+import java.util.Map;
 
 /**
  * This class provides AspectJ configurations
@@ -114,6 +118,16 @@ public class MethodTimeLogger
         }
         stringBuilder.append("]");
         argString = stringBuilder.toString();
+        MessageContext messageContext = MessageContext.getCurrentMessageContext();
+        if (messageContext != null) {
+            Map headers = (Map) messageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+            if (headers != null) {
+                String correlationId = (String) headers.get("activityid");
+                if (correlationId != null) {
+                    MDC.put("Correlation-ID", correlationId);
+                }
+            }
+        }
         log.info((System.currentTimeMillis() - start) + "|METHOD|" + MethodSignature.class.cast(point.getSignature()).getDeclaringTypeName() +
                 "|" + MethodSignature.class.cast(point.getSignature()).getMethod().getName()+ "|" + argString);
         return result;
