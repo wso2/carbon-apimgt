@@ -4137,10 +4137,6 @@ public class ApiMgtDAO {
             ArrayList<Application> applicationsList = new ArrayList<Application>();
             Application application;
             while (rs.next()) {
-                /*subscriber = new Subscriber(rs.getString("USER_ID"));
-                subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
-                application = new Application(rs.getString("NAME"), subscriber);
-                */
                 application = new Application(Integer.parseInt(rs.getString("APPLICATION_ID")));
                 application.setName(rs.getString("NAME"));
                 application.setOwner(rs.getString("CREATED_BY"));

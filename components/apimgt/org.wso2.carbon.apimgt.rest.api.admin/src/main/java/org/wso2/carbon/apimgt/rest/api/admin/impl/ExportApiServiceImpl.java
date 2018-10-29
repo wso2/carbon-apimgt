@@ -74,7 +74,7 @@ public class ExportApiServiceImpl extends ExportApiService {
                 String errorMsg = "No application found with name " + appName + " owned by " + appOwner;
                 log.error(errorMsg);
                 return Response.status(Response.Status.NOT_FOUND).entity(errorMsg).build();
-            } else if( Boolean.getBoolean(RestApiConstants.MIGRATION_MODE)) {
+            } else if (Boolean.getBoolean(RestApiConstants.MIGRATION_MODE)) { // migration flow
                 String appTenant = MultitenantUtils.getTenantDomain(applicationDetails.getSubscriber().getName());
                 RestApiUtil.handleMigrationSpecificPermissionViolations(appTenant, username);
             } else if (!MultitenantUtils.getTenantDomain(applicationDetails.getSubscriber().getName()).equals
