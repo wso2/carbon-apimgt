@@ -1308,7 +1308,8 @@ public class RestApiUtil {
      * @param username           Logged in user name
      * @throws ForbiddenException
      */
-    public static void handleMigrationSpecificPermissionViolations(String targetTenantDomain, String username) throws ForbiddenException {
+    public static void handleMigrationSpecificPermissionViolations(String targetTenantDomain, String username) throws
+            ForbiddenException {
         boolean isCrossTenantAccess = !targetTenantDomain.equals(MultitenantUtils.getTenantDomain(username));
         if (!isCrossTenantAccess) {
             return;
@@ -1324,14 +1325,16 @@ public class RestApiUtil {
         //check whether logged in user is a super tenant user
         String superTenantDomain = null;
         try {
-            superTenantDomain = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getSuperTenantDomain();
+            superTenantDomain = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
+                    getSuperTenantDomain();
         } catch (UserStoreException e) {
             RestApiUtil.handleInternalServerError("Error in getting the super tenant domain", e, log);
         }
         boolean isSuperTenantUser = RestApiUtil.getLoggedInUserTenantDomain().equals(superTenantDomain);
         if (!isSuperTenantUser) {
             String errorMsg = "Cross Tenant resource access is not allowed for this request. User " + username +
-                    " is not allowed to access resources in " + targetTenantDomain + " as the requester is not a super tenant user";
+                    " is not allowed to access resources in " + targetTenantDomain + " as the requester is not a super " +
+                    "tenant user";
             log.error(errorMsg);
             ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_FORBIDDEN_MESSAGE_DEFAULT, 403l, errorMsg);
             throw new ForbiddenException(errorDTO);

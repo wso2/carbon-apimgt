@@ -15,6 +15,7 @@ import javax.ws.rs.core.Response;
 
 public abstract class ApplicationsApiService {
     public abstract Response applicationsApplicationIdChangeOwnerPost(String owner,String applicationId);
-    public abstract Response applicationsGet(String user,Integer limit,Integer offset,String accept,String ifNoneMatch,String tenantDomain);
+    public abstract Response applicationsGet(String user,Integer limit,Integer offset,String accept,String ifNoneMatch,
+                                             String tenantDomain);
 }
 
