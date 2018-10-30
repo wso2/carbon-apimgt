@@ -59,6 +59,9 @@ public class CommentMappingUtil {
         commentDTO.setLastUpdatedBy(comment.getUpdatedUser());
         commentDTO.setCreatedTime(comment.getCreatedTime().toString());
         commentDTO.setLastUpdatedTime(comment.getUpdatedTime().toString());
+        for (Comment commentItem : comment.getReplies()) {
+            commentDTO.addRepliesItem(fromCommentToDTO(commentItem));
+        }
 
         return commentDTO;
     }

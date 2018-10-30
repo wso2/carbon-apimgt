@@ -1308,6 +1308,7 @@ public class ApiDAOImpl implements ApiDAO {
      */
     private Comment constructCommentFromResultSet(ResultSet rs) throws SQLException, IOException {
         Comment comment = new Comment();
+        ArrayList<Comment> replies = new ArrayList<Comment>();
 
         comment.setUuid(rs.getString("UUID"));
         comment.setCommentText(IOUtils.toString(rs.getBinaryStream("COMMENT_TEXT")));
@@ -1320,6 +1321,7 @@ public class ApiDAOImpl implements ApiDAO {
         comment.setCreatedTime(rs.getTimestamp("CREATED_TIME").toInstant());
         comment.setUpdatedUser(rs.getString("UPDATED_BY"));
         comment.setUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME").toInstant());
+        comment.setReplies(replies);
 
         return comment;
     }
@@ -1435,7 +1437,8 @@ public class ApiDAOImpl implements ApiDAO {
 
     @Override
     public List<Comment> getCommentsForApi(String apiId) throws APIMgtDAOException {
-        List<Comment> commentList = new ArrayList<>();
+        List<Comment> commentList;
+        Map commentListMap = new HashMap();
         final String getCommentsQuery = "SELECT UUID, COMMENT_TEXT, USER_IDENTIFIER, API_ID, CATEGORY,"
                 + " PARENT_COMMENT_ID, ENTRY_POINT, CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME "
                 + "FROM AM_API_COMMENTS WHERE API_ID = ?";
@@ -1444,10 +1447,21 @@ public class ApiDAOImpl implements ApiDAO {
             try {
                 statement.setString(1, apiId);
                 statement.execute();
+
                 try (ResultSet rs = statement.getResultSet()) {
                     while (rs.next()) {
-                        commentList.add(constructCommentFromResultSet(rs));
+                        Comment comment = constructCommentFromResultSet(rs);
+                        String commentId = comment.getUuid();
+                        String parentCommentId = comment.getParentCommentId();
+                        if (commentListMap.containsKey(parentCommentId)) {
+                            Comment existingComment = (Comment) commentListMap.get(parentCommentId);
+                            existingComment.getReplies().add(comment);
+                            commentListMap.put(parentCommentId, existingComment);
+                        } else {
+                            commentListMap.put(commentId, comment);
+                        }
                     }
+                    commentList = new ArrayList<Comment>(commentListMap.values());
                 }
             } catch (SQLException | IOException e) {
                 connection.rollback();

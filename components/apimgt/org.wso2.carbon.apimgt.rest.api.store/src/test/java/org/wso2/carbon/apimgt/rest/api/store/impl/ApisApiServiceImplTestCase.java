@@ -240,6 +240,7 @@ public class ApisApiServiceImplTestCase {
         PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Instant time = APIUtils.getCurrentUTCTime();
+        ArrayList<Comment> comments = new ArrayList<Comment>();
         Comment comment = new Comment();
         comment.setUuid(commentId);
         comment.setApiId(apiId);
@@ -252,6 +253,7 @@ public class ApisApiServiceImplTestCase {
         comment.setUpdatedUser("updatedUser");
         comment.setCreatedTime(time);
         comment.setUpdatedTime(time);
+        comment.setReplies(comments);
 
         Mockito.when(apiStore.getCommentByUUID(commentId, apiId)).thenReturn(comment);
 
@@ -354,6 +356,7 @@ public class ApisApiServiceImplTestCase {
         commentDTO.setLastUpdatedBy("updater");
 
         Instant time = APIUtils.getCurrentUTCTime();
+        ArrayList<Comment> comments = new ArrayList<Comment>();
         Comment comment = new Comment();
         comment.setCommentedUser("commentedUser");
         comment.setCommentText("this is a comment");
@@ -364,6 +367,7 @@ public class ApisApiServiceImplTestCase {
         comment.setUpdatedUser("updatedUser");
         comment.setCreatedTime(time);
         comment.setUpdatedTime(time);
+        comment.setReplies(comments);
 
         Mockito.doNothing().doThrow(new IllegalArgumentException()).when(apiStore)
                 .updateComment(comment, commentId, apiId, USER);

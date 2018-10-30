@@ -56,6 +56,7 @@ public class CommentMappingUtilTestCase {
         String commentUUID = UUID.randomUUID().toString();
         Instant time = APIUtils.getCurrentUTCTime();
 
+        ArrayList<Comment> comments = new ArrayList<Comment>();
         Comment comment = new Comment();
         comment.setUuid(commentUUID);
         comment.setCommentedUser("commentedUser");
@@ -67,6 +68,7 @@ public class CommentMappingUtilTestCase {
         comment.setUpdatedUser("updatedUser");
         comment.setCreatedTime(time);
         comment.setUpdatedTime(time);
+        comment.setReplies(comments);
 
         CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(comment);
 
@@ -98,6 +100,7 @@ public class CommentMappingUtilTestCase {
     public void testFromCommentListToDTO() throws APIManagementException {
         Mockito.when(userNameMapper.getLoggedInUserIDFromPseudoName(Mockito.anyString())).thenReturn(Mockito.anyString());
         Instant time = APIUtils.getCurrentUTCTime();
+        ArrayList<Comment> comments = new ArrayList<Comment>();
         Comment comment1 = new Comment();
         comment1.setUuid(UUID.randomUUID().toString());
         comment1.setCommentedUser("commentedUser1");
@@ -109,6 +112,7 @@ public class CommentMappingUtilTestCase {
         comment1.setUpdatedUser("updatedUser1");
         comment1.setCreatedTime(time);
         comment1.setUpdatedTime(time);
+        comment1.setReplies(comments);
 
         time = APIUtils.getCurrentUTCTime();
         Comment comment2 = new Comment();
@@ -122,6 +126,7 @@ public class CommentMappingUtilTestCase {
         comment2.setUpdatedUser("updatedUser2");
         comment2.setCreatedTime(time);
         comment2.setUpdatedTime(time);
+        comment2.setReplies(comments);
 
         List<Comment> commentList = new ArrayList<>();
         commentList.add(comment1);

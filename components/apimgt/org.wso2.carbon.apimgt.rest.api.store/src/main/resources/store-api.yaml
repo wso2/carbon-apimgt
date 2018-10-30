@@ -3832,8 +3832,13 @@ definitions:
         example: 2017-02-20T13:57:16.229
       lastUpdatedBy:
         type: string
+      replies:
+        type: array
+        items:
+          $ref: '#/definitions/Comment'
 
-#-----------------------------------------------------
+
+  #-----------------------------------------------------
 # The Comments List resource
 #-----------------------------------------------------
   CommentList:

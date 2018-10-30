@@ -881,7 +881,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                /*if the update operation is done by a user who isn't the owner of the comment
                   and with a different end point*/
                 if (!(oldComment.getCommentedUser().equals(username) &&
-                        ENTRY_POINT_STORE.equals(comment.getEntryPoint()))) {
+                        ENTRY_POINT_STORE.equals(oldComment.getEntryPoint()))) {
                     String errorMsg = "The user " + username + " does not have permission to update this comment";
                     log.error(errorMsg);
                     throw new APICommentException(errorMsg, ExceptionCodes.COULD_NOT_UPDATE_COMMENT);

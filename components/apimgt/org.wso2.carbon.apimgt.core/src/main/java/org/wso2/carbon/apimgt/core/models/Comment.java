@@ -20,6 +20,7 @@
 package org.wso2.carbon.apimgt.core.models;
 
 import java.time.Instant;
+import java.util.ArrayList;
 
 /**
  * Represents an instance of a Comment. Comments can be associated with APIs.
@@ -37,6 +38,7 @@ public final class Comment {
     private Instant createdTime;
     private String updatedUser;
     private Instant updatedTime;
+    private ArrayList<Comment> replies;
 
     public String getApiId() {
         return apiId;
@@ -124,6 +126,14 @@ public final class Comment {
 
     public void setUpdatedTime(Instant updatedTime) {
         this.updatedTime = updatedTime;
+    }
+
+    public ArrayList<Comment> getReplies() {
+        return replies;
+    }
+
+    public void setReplies(ArrayList<Comment> replies) {
+        this.replies = replies;
     }
 
 }

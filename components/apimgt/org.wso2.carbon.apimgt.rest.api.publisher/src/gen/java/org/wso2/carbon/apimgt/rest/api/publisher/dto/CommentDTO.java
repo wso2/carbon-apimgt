@@ -4,6 +4,9 @@ package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.ArrayList;
+import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.CommentDTO;
 import java.util.Objects;
 
 /**
@@ -42,6 +45,9 @@ public class CommentDTO   {
 
   @SerializedName("lastUpdatedBy")
   private String lastUpdatedBy = null;
+
+  @SerializedName("replies")
+  private List<CommentDTO> replies = new ArrayList<CommentDTO>();
 
   public CommentDTO commentId(String commentId) {
     this.commentId = commentId;
@@ -241,6 +247,29 @@ public class CommentDTO   {
     this.lastUpdatedBy = lastUpdatedBy;
   }
 
+  public CommentDTO replies(List<CommentDTO> replies) {
+    this.replies = replies;
+    return this;
+  }
+
+  public CommentDTO addRepliesItem(CommentDTO repliesItem) {
+    this.replies.add(repliesItem);
+    return this;
+  }
+
+   /**
+   * Get replies
+   * @return replies
+  **/
+  @ApiModelProperty(value = "")
+  public List<CommentDTO> getReplies() {
+    return replies;
+  }
+
+  public void setReplies(List<CommentDTO> replies) {
+    this.replies = replies;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -261,12 +290,13 @@ public class CommentDTO   {
         Objects.equals(this.createdTime, comment.createdTime) &&
         Objects.equals(this.createdBy, comment.createdBy) &&
         Objects.equals(this.lastUpdatedTime, comment.lastUpdatedTime) &&
-        Objects.equals(this.lastUpdatedBy, comment.lastUpdatedBy);
+        Objects.equals(this.lastUpdatedBy, comment.lastUpdatedBy) &&
+        Objects.equals(this.replies, comment.replies);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(commentId, apiId, category, parentCommentId, entryPoint, username, commentText, createdTime, createdBy, lastUpdatedTime, lastUpdatedBy);
+    return Objects.hash(commentId, apiId, category, parentCommentId, entryPoint, username, commentText, createdTime, createdBy, lastUpdatedTime, lastUpdatedBy, replies);
   }
 
   @Override
@@ -285,6 +315,7 @@ public class CommentDTO   {
     sb.append("    createdBy: ").append(toIndentedString(createdBy)).append("\n");
     sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
     sb.append("    lastUpdatedBy: ").append(toIndentedString(lastUpdatedBy)).append("\n");
+    sb.append("    replies: ").append(toIndentedString(replies)).append("\n");
     sb.append("}");
     return sb.toString();
   }
